@@ -119,18 +119,18 @@ void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction,
         if (strcmp(factions[Myfaction]->factionname, "upgrades") != 0) {
             if (strcmp(factions[TheirFaction]->factionname, "neutral") != 0) {
                 if (strcmp(factions[TheirFaction]->factionname, "upgrades") != 0) {
-                    if (isPlayerFaction(TheirFaction) || game_options()->AllowNonplayerFactionChange) {
-                        if (game_options()->AllowCivilWar || Myfaction != TheirFaction) {
+                    if (isPlayerFaction(TheirFaction) || game_options()->allow_nonplayer_faction_change) {
+                        if (game_options()->allow_civil_war || Myfaction != TheirFaction) {
                             factions[Myfaction]->faction[TheirFaction].relationship += factor * rank;
                             if (factions[Myfaction]->faction[TheirFaction].relationship > 1
-                                    && game_options()->CappedFactionRating) {
+                                    && game_options()->capped_faction_rating) {
                                 factions[Myfaction]->faction[TheirFaction].relationship = 1;
                             }
                             if (factions[Myfaction]->faction[TheirFaction].relationship
                                     < vega_config::config->ai.min_relationship) {
                                 factions[Myfaction]->faction[TheirFaction].relationship = static_cast<float>(vega_config::config->ai.min_relationship);
                             }
-                            if (!game_options()->AllowNonplayerFactionChange) {
+                            if (!game_options()->allow_nonplayer_faction_change) {
                                 factions[TheirFaction]->faction[Myfaction].relationship =
                                         factions[Myfaction]->faction[TheirFaction].relationship;
                             }                                                                                     //reflect if player

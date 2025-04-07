@@ -565,7 +565,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         c = &tmp;
                         tmp.SetName("Space_Salvage");
                         tmp.SetCategory("Uncategorized_Cargo");
-                        const float spacejunk = parse_float(vs_config->getVariable("cargo", "space_junk_price", "10"));
+                        const float spacejunk = vega_config::config->cargo.space_junk_price; /* default: 10 */
                         tmp.SetPrice(spacejunk);
                         tmp.SetQuantity(1);
                         tmp.SetMass(.001);
@@ -573,18 +573,9 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         if (target->faction != upgradesfaction) {
                             tmp.SetName(target->name);
                             tmp.SetCategory("starships");
-                            const float starshipprice =
-                                    XMLSupport::parse_float(vs_config->getVariable("cargo",
-                                            "junk_starship_price",
-                                            "100000"));
-                            const float starshipmass =
-                                    XMLSupport::parse_float(vs_config->getVariable("cargo",
-                                            "junk_starship_mass",
-                                            "50"));
-                            const float starshipvolume =
-                                    XMLSupport::parse_float(vs_config->getVariable("cargo",
-                                            "junk_starship_volume",
-                                            "1500"));
+                            const float starshipprice = vega_config::config->cargo.junk_starship_price; // default: "100000"
+                            const float starshipmass = vega_config::config->cargo.junk_starship_mass; // default: "50"
+                            const float starshipvolume = vega_config::config->cargo.junk_starship_volume; // default: "1500"
                             tmp.SetPrice(starshipprice);
                             tmp.SetQuantity(1);
                             tmp.SetMass(starshipmass);
@@ -598,17 +589,14 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                             un->AddCargo(adder);
                             if (_Universe->isPlayerStarship(un)) {
                                 static int tractor_onboard =
-                                        AUDCreateSoundWAV(vs_config->getVariable("unitaudio", "player_tractor_cargo",
-                                                "tractor_onboard.wav"));
+                                        AUDCreateSoundWAV(vega_config::config->audio.unit_audio.player_tractor_cargo);
                                 AUDPlay(tractor_onboard, QVector(0, 0, 0), Vector(0, 0, 0), 1);
                             } else {
                                 Unit *tmp = _Universe->AccessCockpit()->GetParent();
                                 if (tmp && tmp->owner == un) {
                                     //Subunit of player (a turret)
                                     static int tractor_onboard_fromturret =
-                                            AUDCreateSoundWAV(vs_config->getVariable("unitaudio",
-                                                    "player_tractor_cargo_fromturret",
-                                                    "tractor_onboard.wav"));
+                                            AUDCreateSoundWAV(vega_config::config->audio.unit_audio.player_tractor_cargo_fromturret);
                                     AUDPlay(tractor_onboard_fromturret, QVector(0, 0, 0), Vector(0, 0, 0), 1);
                                 }
                             }

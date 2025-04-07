@@ -2,8 +2,7 @@
  * role_bitmask.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -34,6 +33,8 @@
 #include "src/vs_logging.h"
 #include "cmd/csv.h"
 #include "src/vs_exit.h"
+#include "configuration/configuration.h"
+
 using std::string;
 using std::pair;
 using namespace VSFileSystem;   // FIXME -- Shouldn't import an entire namespace like this, at least according to Google Style Guide
@@ -266,13 +267,11 @@ unsigned int readBitmask(const std::string &ss) {
 }
 
 unsigned int getCapitalRoles() {
-    static string defaultcapshipvalues = vs_config->getVariable("data",
-            "capship_roles",
-            "ESCORTCAP CAPITAL CARRIER BASE TROOP");
+    const std::string defaultcapshipvalues = vega_config::config->data.capship_roles; /* default: "ESCORTCAP CAPITAL CARRIER BASE TROOP" */
     unsigned int retval = 0;
     string inp = defaultcapshipvalues;
     string::size_type where;
-    while ((where = inp.find(" ")) != string::npos) {
+    while ((where = inp.find(' ')) != string::npos) {
         string tmp = inp.substr(0, where);
         unsigned char logrole = getRole(tmp);
         if (tmp == getRole(logrole)) {

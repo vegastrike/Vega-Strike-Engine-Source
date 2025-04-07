@@ -82,8 +82,8 @@ void Python::initpaths() {
      *               pwd[i]=DELIM;
      *  }
      */
-    std::string moduledir(vs_config->getVariable("data", "python_modules", "modules"));
-    std::string basesdir(vs_config->getVariable("data", "python_bases", "bases"));
+    std::string moduledir{vega_config::config->data.python_modules}; /* default: "modules" */
+    std::string basesdir{vega_config::config->data.python_bases}; /* default: "bases" */
 
     /*
      *  std::string changepath ("import sys\nprint sys.path\nsys.path = ["

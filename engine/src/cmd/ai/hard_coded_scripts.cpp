@@ -182,7 +182,7 @@ public:
         FlyByWire::Execute();
         Vector P, Q, R;
         parent->GetOrientation(P, Q, R);
-        static float ang = cos(XMLSupport::parse_float(vs_config->getVariable("AI", "evasion_angle", "45")));
+        const float ang = cos(vega_config::config->ai.evasion_angle /* default: "45" */);
         if (R.Dot(facing) < ang
                 || (desired_ang_velocity.i == 0 && desired_ang_velocity.j == 0 && desired_ang_velocity.k == 0)) {
             SetOppositeDir();

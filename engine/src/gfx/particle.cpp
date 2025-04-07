@@ -1,7 +1,7 @@
 /*
  * particle.cpp
  *
- * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (c) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -217,7 +217,10 @@ public:
     }
 };
 
-ParticleTrail::Config::Config(const std::string &prefix) {
+ParticleTrail::Config::Config(const std::string &prefix): use(false), use_points(false), pblend(false), psmooth(false),
+                                                          pgrow(0),
+                                                          ptrans(0), pfade(0),
+                                                          psize(0) {
     texture = nullptr;
     initialized = false;
     this->prefix = prefix;
@@ -235,38 +238,38 @@ void ParticleTrail::Config::init() {
         return;
     }
 
-    use = XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix, "true"));
-    use_points = XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix + "point", "false"));
-    pblend = XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix + "blend", "false"));
-    pgrow = XMLSupport::parse_floatf(vs_config->getVariable("graphics",
-            prefix + "growrate",
-            "50.0"));     //50x size when disappearing
-    ptrans = XMLSupport::parse_floatf(vs_config->getVariable("graphics",
-            prefix + "alpha",
-            "2.5"));     //NOTE: It's the base transparency, before surface attenuation, so it needn't be within the [0-1] range.
-    pfade = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "fade", "0.1"));
+    use = true; //XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix, "true"));
+    use_points = false; //XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix + "point", "false"));
+    pblend = false; //XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix + "blend", "false"));
+    pgrow = 50.0; //XMLSupport::parse_floatf(vs_config->getVariable("graphics",
+            //prefix + "growrate",
+            //"50.0"));     //50x size when disappearing
+    ptrans = 2.5; //XMLSupport::parse_floatf(vs_config->getVariable("graphics",
+            //prefix + "alpha",
+            //"2.5"));     //NOTE: It's the base transparency, before surface attenuation, so it needn't be within the [0-1] range.
+    pfade = 0.1; //XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "fade", "0.1"));
 
-    if (use_points) {
-        psize = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "size", "1.5"));
-        psmooth = XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix + "smooth", "false"));
-    } else {
-        std::string s = vs_config->getVariable("graphics", prefix + "texture", "supernova.bmp");
-        texture = new Texture(s.c_str());
-    }
+    std::string s = vega_config::config->graphics.texture; //default: "supernova.bmp"
+    texture = new Texture(s.c_str());
 
     initialized = true;
 }
 
-ParticleTrail::Config::Config() : texture(nullptr), initialized(false), prefix("") {}
+ParticleTrail::Config::Config() : texture(nullptr), initialized(false), use(false), use_points(false), pblend(false),
+                                  psmooth(false), pgrow(0),
+                                  ptrans(0), pfade(0),
+                                  psize(0),
+                                  prefix("") {
+}
 
 void ParticleEmitter::Config::init(const std::string &prefix) {
-    rate = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "scale", "8"));
-    speed = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "speed", ".5"));
-    locSpread = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "flare", ".15"));
-    spread = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "spread", ".04"));
-    absSpeed = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "absolutespeed", ".02"));
-    relSize = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "sizerelative", ".125"));
-    fixedSize = XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix + "fixedsize", "0"));
+    rate = 0.8; //XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "scale", "8"));
+    speed = 0.5; //XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "speed", ".5"));
+    locSpread = 0.15; //XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "flare", ".15"));
+    spread = 0.04; //XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "spread", ".04"));
+    absSpeed = 0.02; //XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "absolutespeed", ".02"));
+    relSize = 0.125; //XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "sizerelative", ".125"));
+    fixedSize = false; //XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix + "fixedsize", "0"));
 }
 
 void ParticleTrail::DrawAndUpdate() {

@@ -352,9 +352,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                         setEnvMap(shouldreflect((*iter).value));
                         break;
                     case MeshXML::LIGHTINGON:
-                        setLighting(XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                "ForceLighting",
-                                "true"))
+                        setLighting(vega_config::config->graphics.force_lighting
                                 || XMLSupport::parse_bool((*iter).value));
                         break;
                     case MeshXML::CULLFACE:
@@ -465,9 +463,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                     case MeshXML::SHAREVERT:
                         xml->sharevert =
                                 (XMLSupport::parse_bool((*iter).value)
-                                        && XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                "SharedVertexArrays",
-                                                "true")));
+                                        && (vega_config::config->graphics.shared_vertex_arrays /* default: "true" */));
                         break;
                     case MeshXML::POLYGONOFFSET:
                         this->polygon_offset = XMLSupport::parse_float((*iter).value);
@@ -2052,10 +2048,8 @@ void Mesh::PostProcessLoading(MeshXML *xml, const vector<string> &textureOverrid
                 (poly_offsets.size() ? &poly_offsets[0] : 0), false,
                 (ind.size() ? &ind[0] : 0));
     } else {
-        static bool usopttmp =
-                (XMLSupport::parse_bool(vs_config->getVariable("graphics", "OptimizeVertexArrays", "false")));
-        static float optvertexlimit =
-                (XMLSupport::parse_float(vs_config->getVariable("graphics", "OptimizeVertexCondition", "1.0")));
+        const bool usopttmp = vega_config::config->graphics.optimize_vertex_arrays; /* default: false */
+        const float optvertexlimit = vega_config::config->graphics.optimize_vertex_condition; /* default: 1.0 */
         bool cachunk = false;
         if (usopttmp && (vertexlist.size() > 0)) {
             int numopt = totalvertexsize;

@@ -175,7 +175,7 @@ static void UpdateTimeCompressionSounds() {
 }
 
 Unit *DockToSavedBases(int playernum, QVector &safevec) {
-    string str = game_options()->startDockedTo;
+    string str = game_options()->start_docked_to;
     Unit *plr = _Universe->AccessCockpit(playernum)->GetParent();
     if (!plr || !plr->getStarSystem()) {
         safevec = QVector(0, 0, 0);
@@ -406,8 +406,8 @@ void Universe::StartDraw() {
     UpdateTime();
     UpdateTimeCompressionSounds();
     _Universe->SetActiveCockpit(((int) (rand01() * _cockpits.size())) % _cockpits.size());
-    for (i = 0; i < star_system.size() && i < game_options()->NumRunningSystems; ++i) {
-        star_system[i]->Update((i == 0) ? 1 : game_options()->InactiveSystemTime / i, true);
+    for (i = 0; i < star_system.size() && i < game_options()->num_running_systems; ++i) {
+        star_system[i]->Update((i == 0) ? 1 : game_options()->inactive_system_time / i, true);
     }
     StarSystem::ProcessPendingJumps();
     for (i = 0; i < _cockpits.size(); ++i) {
@@ -469,7 +469,7 @@ void Universe::StartGFX() {
 void Universe::Update() {
     for (unsigned int i = 0; i < star_system.size(); ++i) {
         //Calls the update function for server
-        star_system[i]->Update((i == 0) ? 1 : game_options()->InactiveSystemTime / i);
+        star_system[i]->Update((i == 0) ? 1 : game_options()->inactive_system_time / i);
     }
 }
 

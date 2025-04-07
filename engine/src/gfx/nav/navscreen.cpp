@@ -349,7 +349,7 @@ void NavigationSystem::Setup() {
     ScreenToCoord(buttonskipby4_7[2]);
     ScreenToCoord(buttonskipby4_7[3]);
 
-//reverse = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
+//reverse = (vega_config::config->joystick.reverse_mouse_spr /* default: "true" */)?1:-1;
 
     reverse = -1;
     if ((screenskipby4[1] - screenskipby4[0]) < (screenskipby4[3] - screenskipby4[2])) {
@@ -574,8 +574,8 @@ void NavigationSystem::DrawMission() {
     size_t i = 0;
     string factionname = "factionname";
     float relation = 0.0;
-    static string disallowedFactions = vs_config->getVariable("graphics", "unprintable_factions", "");
-    static string disallowedExtension = vs_config->getVariable("graphics", "unprintable_faction_extension", "citizen");
+    const std::string disallowedFactions = vega_config::config->graphics.unprintable_factions; /* default: "" */);
+    const std::string disallowedExtension = vega_config::config->graphics.unprintable_faction_extension; /* default: "citizen" */);
     int totkills = 0;
     size_t fac_loc_before = 0, fac_loc = 0, fac_loc_after = 0;
     for (; i < numfactions; ++i) {
@@ -1022,10 +1022,8 @@ void NavigationSystem::setFocusedSystemIndex(unsigned newSystemIndex) {
 
 void NavigationSystem::setCurrentSystemIndex(unsigned newSystemIndex) {
     currentsystemindex = newSystemIndex;
-    static bool AlwaysUpdateNavMap =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                    "update_nav_after_jump",
-                    "false"));                          //causes occasional crash--only may have tracked it down
+    //causes occasional crash--only may have tracked it down
+    const bool AlwaysUpdateNavMap = vega_config::config->graphics.update_nav_after_jump; // default: "false"
     if (AlwaysUpdateNavMap) {
         pathman->updatePaths(PathManager::CURRENT);
     }

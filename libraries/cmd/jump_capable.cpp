@@ -125,8 +125,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     Unit *unit = static_cast<Unit *>(this);
     const Unit *const_unit = static_cast<const Unit *>(this);
 
-    static bool auto_valid =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "insystem_jump_or_timeless_auto-pilot", "false"));
+    const bool auto_valid = vega_config::config->physics.in_system_jump_or_timeless_auto_pilot; /* default: false */
     if (!auto_valid) {
         static std::string err = "No Insystem Jump";
         failuremessage = err;
@@ -147,13 +146,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     if (Guaranteed == Mission::AUTO_OFF) {
         return false;
     }
-    static float autopilot_term_distance =
-            vega_config::config->physics.auto_pilot_termination_distance;
-    static float atd_no_enemies =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance_no_enemies",
-                    vs_config->getVariable("physics",
-                            "auto_pilot_termination_distance",
-                            "6000")));
+    const float autopilot_term_distance = vega_config::config->physics.auto_pilot_termination_distance;
+    const float atd_no_enemies = vega_config::config->physics.auto_pilot_termination_distance_no_enemies;
     const float autopilot_no_enemies_multiplier = vega_config::config->physics.auto_pilot_no_enemies_distance_multiplier;
     if (unit->isSubUnit()) {
         static std::string err = "Return To Cockpit for Auto";
@@ -303,17 +297,15 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                 unit->Velocity = methem * unit->Velocity.Magnitude();
             }
         }
-        static string insys_jump_ani = vs_config->getVariable("graphics", "insys_jump_animation", "warp.ani");
+        const std::string insys_jump_ani = vega_config::config->graphics.in_system_jump_animation; /* default: "warp.ani" */
         if (insys_jump_ani.length()) {
             static bool docache = true;
             if (docache) {
                 UniverseUtil::cacheAnimation(insys_jump_ani);
                 docache = false;
             }
-            static float insys_jump_ani_size =
-                    vega_config::config->graphics.insys_jump_animation_size;
-            static float insys_jump_ani_growth =
-                    vega_config::config->graphics.insys_jump_animation_growth;
+            const float insys_jump_ani_size = vega_config::config->graphics.in_system_jump_animation_size;
+            const float insys_jump_ani_growth = vega_config::config->graphics.in_system_jump_animation_growth;
             UniverseUtil::playAnimationGrow(insys_jump_ani, RealPosition(unit),
                     unit->rSize() * insys_jump_ani_size, insys_jump_ani_growth);
 
@@ -321,8 +313,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             v.Normalize();
             Vector p, q, r;
             unit->GetOrientation(p, q, r);
-            static float sec =
-                    vega_config::config->graphics.insys_jump_ani_second_ahead;
+            const float sec = vega_config::config->graphics.in_system_jump_ani_second_ahead;
             UniverseUtil::playAnimationGrow(insys_jump_ani,
                     sep + unit->GetVelocity() * sec + v * unit->rSize(),
                     unit->rSize() * 8,
@@ -333,10 +324,9 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                     unit->rSize() * 16,
                     .97);
         }
-        static bool warptrail = vega_config::config->graphics.warp_trail;
+        const bool warptrail = vega_config::config->graphics.warp_trail;
         if (warptrail && (!nowhere)) {
-            static float warptrailtime =
-                    vega_config::config->graphics.warp_trail_time;
+            const float warptrailtime = vega_config::config->graphics.warp_trail_time;
             AddWarp(unit, RealPosition(unit), warptrailtime);
         }
         if (!nowhere) {
@@ -385,23 +375,20 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
         bool count_negative_warp_units) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
-    static float smallwarphack = vega_config::config->physics.minwarpeffectsize;
-    static float bigwarphack =
-            vega_config::config->physics.maxwarpeffectsize;
+    const float small_warp_hack = vega_config::config->physics.min_warp_effect_size;
+    const float big_warp_hack = vega_config::config->physics.max_warp_effect_size;
     //Boundary between multiplier regions 1&2. 2 is "high" mult
-    static double warpregion1 = vega_config::config->physics.warpregion1;
+    const double warpregion1 = vega_config::config->physics.warp_region1;
     //Boundary between multiplier regions 0&1 0 is mult=1
-    static double warpregion0 = vega_config::config->physics.warpregion0;
+    const double warpregion0 = vega_config::config->physics.warp_region0;
     //Mult at 1-2 boundary
-    static double warpcruisemult = vega_config::config->physics.warpcruisemult;
+    const double warp_cruise_mult = vega_config::config->physics.warp_cruise_mult;
     //degree of curve
-    static double curvedegree = vega_config::config->physics.warpcurvedegree;
+    const double curve_degree = vega_config::config->physics.warp_curve_degree;
     //coefficient so as to agree with above
-    static double upcurvek = warpcruisemult / pow((warpregion1 - warpregion0), curvedegree);
+    const double upcurvek = warp_cruise_mult / pow((warpregion1 - warpregion0), curve_degree);
     //inverse fractional effect of ship vs real big object
-    static float def_inv_interdiction = 1.
-            / XMLSupport::parse_float(vs_config->getVariable("physics", "default_interdiction",
-                    ".125"));
+    const float def_inv_interdiction = 1.0 / vega_config::config->physics.default_interdiction; // default: ".125"
     Unit *planet;
     Unit *testthis = NULL;
     {
@@ -437,10 +424,10 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 }
             }
             float multipliertemp = 1;
-            float minsizeeffect = (planet->rSize() > smallwarphack) ? planet->rSize() : smallwarphack;
+            float minsizeeffect = (planet->rSize() > small_warp_hack) ? planet->rSize() : small_warp_hack;
             float effectiverad = minsizeeffect * (1.0f + UniverseUtil::getPlanetRadiusPercent()) + unit->rSize();
-            if (effectiverad > bigwarphack) {
-                effectiverad = bigwarphack;
+            if (effectiverad > big_warp_hack) {
+                effectiverad = big_warp_hack;
             }
             QVector dir = unit->Position() - planet->Position();
             double udist = dir.Magnitude();
@@ -456,7 +443,7 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 }
                 dist *= shiphack;
                 if (dist > (effectiverad + warpregion0)) {
-                    multipliertemp = pow((dist - effectiverad - warpregion0), curvedegree) * upcurvek;
+                    multipliertemp = pow((dist - effectiverad - warpregion0), curve_degree) * upcurvek;
                 } else {
                     multipliertemp = 1;
                 }

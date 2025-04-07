@@ -50,8 +50,8 @@ static bool isInside() {
 }
 
 const std::string &getStringFont(bool &changed, bool force_inside = false, bool whatinside = false) {
-    static std::string whichfont = vs_config->getVariable("graphics", "font", "helvetica12");
-    static std::string whichdockedfont = vs_config->getVariable("graphics", "basefont", "helvetica12");
+    const std::string whichfont = vega_config::config->graphics.font; /* default: "helvetica12" */
+    const std::string whichdockedfont = vega_config::config->graphics.bases.font; /* default: "helvetica12" */
     bool inside = isInside();
     if (force_inside) {
         inside = whatinside;
@@ -67,8 +67,8 @@ const std::string &getStringFont(bool &changed, bool force_inside = false, bool 
 }
 
 const std::string &getStringFontForHeight(bool &changed) {
-    static std::string whichfont = vs_config->getVariable("graphics", "font", "helvetica12");
-    static std::string whichdockedfont = vs_config->getVariable("graphics", "basefont", "helvetica12");
+    const std::string whichfont = vega_config::config->graphics.font; /* default: "helvetica12" */
+    const std::string whichdockedfont = vega_config::config->graphics.bases.font; /* default: "helvetica12" */
     bool inside = isInside();
     static bool lastinside = inside;
     if (lastinside != inside) {

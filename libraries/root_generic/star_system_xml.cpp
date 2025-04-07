@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -149,6 +149,7 @@ static bool EvalCondition(const char *op, const T &left, const T &right) {
 //    return rv;
 //}
 
+// TODO: Figure out how to reimplement this!
 bool ConfigAllows(string var, float val) {
     bool invert = false;
     if (var.length() == 0) {

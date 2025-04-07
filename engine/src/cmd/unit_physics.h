@@ -38,6 +38,7 @@
 #include "cmd/unit_util.h"
 #include "src/universe_util.h"
 #include "cmd/script/mission.h"
+#include "configuration/configuration.h"
 
 extern unsigned int apply_float_to_unsigned_int(float tmp); //short fix
 
@@ -108,9 +109,7 @@ void GameUnit::Thrust(const Vector &amt1, bool afterburn) {
 
     const bool must_afterburn_to_buzz = vega_config::config->audio.buzzing_needs_afterburner;
     if (_Universe->isPlayerStarship(this) != NULL) {
-        static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
-                "player_afterburner",
-                "sfx10.wav"), true);
+        static int playerengine = AUDCreateSound(vega_config::config->audio.unit_audio.player_afterburner, true);
         const float enginegain = vega_config::config->audio.afterburner_gain;
         if (afterburn != AUDIsPlaying(playerengine)) {
             if (afterburn) {

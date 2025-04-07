@@ -515,7 +515,7 @@ void SaveGame::ReadNewsData(char *&buf, bool just_skip) {
 }
 
 void SaveGame::AddUnitToSave(const char *filename, int type, const char *faction, long address) {
-    if (game_options()->Drone.compare(filename)) {
+    if (game_options()->drone.compare(filename)) {
         RemoveUnitFromSave(address);
     }
 }

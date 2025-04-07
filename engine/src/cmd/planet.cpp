@@ -329,8 +329,7 @@ Planet::Planet(QVector x,
             }
 
             // TODO: Refactor the below section of code
-            vector<string>
-                    shines = ParseDestinations(vs_config->getVariable("graphics", "star_shine", "shine.ani"));
+            vector<string> shines = ParseDestinations(vega_config::config->graphics.star_shine);
             if (shines.empty()) {
                 shines.emplace_back("shine.ani");
             }

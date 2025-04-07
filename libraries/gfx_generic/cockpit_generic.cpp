@@ -178,8 +178,7 @@ void Cockpit::InitStatic() {
 }
 
 bool Cockpit::unitInAutoRegion(Unit *un) {
-    static float autopilot_term_distance =
-            vega_config::config->physics.auto_pilot_termination_distance;
+    const float autopilot_term_distance = vega_config::config->physics.auto_pilot_termination_distance;
     Unit *targ = autopilot_target.GetUnit();
     if (targ) {
         return UnitUtil::getSignificantDistance(un, targ)
@@ -190,8 +189,7 @@ bool Cockpit::unitInAutoRegion(Unit *un) {
 }
 
 static float getInitialZoomFactor() {
-    static float inizoom = vega_config::config->graphics.inital_zoom_factor
-    return inizoom;
+    return vega_config::config->graphics.initial_zoom_factor;
 }
 
 Cockpit::Cockpit(const char *file, Unit *parent, const std::string &pilot_name)
@@ -320,7 +318,7 @@ int Cockpit::Autopilot(Unit *target) {
                 static double averagetime = GetElapsedTime() / getTimeCompression();
                 static double numave = 1.0;
                 averagetime += GetElapsedTime() / getTimeCompression();
-                //static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
+                //const float autospeed = vega_config::config->physics.autospeed // default: .020 //10 seconds for auto to kick in;
                 numave++;
                 /*
                  *  AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
@@ -328,14 +326,11 @@ int Cockpit::Autopilot(Unit *target) {
                  *                                                     _Universe->AccessCamera()->R,
                  *                                                     averagetime*autospeed/(numave));
                  */
-                static float initialzoom =
-                        vega_config::config->graphics.inital_zoom_factor
-                zoomfactor = initialzoom;
-                static float autotime = XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "autotime",
-                        "10"));                 //10 seconds for auto to kick in;
+                const float initial_zoom = vega_config::config->graphics.initial_zoom_factor;
+                zoomfactor = initial_zoom;
+                const float auto_time = vega_config::config->physics.auto_time_in_seconds; //10 seconds for auto to kick in;
 
-                autopilot_time = autotime;
+                autopilot_time = auto_time;
                 autopilot_target.SetUnit(target);
             }
         }
@@ -592,13 +587,11 @@ bool Cockpit::Update() {
         if (switchunit[_Universe->CurrentCockpit()]) {
             parentturret.SetUnit(NULL);
 
-            static float initialzoom =
-                    vega_config::config->graphics.inital_zoom_factor
+            const float initialzoom = vega_config::config->graphics.initial_zoom_factor;
             zoomfactor = initialzoom;
             static int index = 0;
             switchunit[_Universe->CurrentCockpit()] = 0;
-            static bool switch_nonowned_units =
-                    vega_config::config->ai.switch_nonowned_units;
+            const bool switch_nonowned_units = vega_config::config->ai.switch_nonowned_units;
 //switch_nonowned_units = true;
             //const bool switch_to_fac = vega_config::config->ai.switch_to_whole_faction;
 

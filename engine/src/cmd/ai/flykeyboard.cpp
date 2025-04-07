@@ -136,7 +136,7 @@ FlyByKeyboard::FlyByKeyboard(unsigned int whichplayer) : FlyByWire(), axis_key(0
     //Initial Joystick Mode
     //NOTE: Perhaps it should be handled by FlyByJoystick, but it was cumbersome to do that
     //since it handled mainly keystrokes - Any ideas?
-    static string initialJoyMode = vs_config->getVariable("joystick", "initial_mode", "normal");
+    const std::string initialJoyMode = vega_config::config->joystick.initial_mode; /* default: "normal" */);
     joy_mode = 0;
     if (initialJoyMode == "inertialxy") {
         joy_mode = joyModeInertialXY;
@@ -158,8 +158,8 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
         Unit *t = parent->Target();
         int neu = FactionUtil::GetNeutralFaction();
         int upg = FactionUtil::GetUpgradeFaction();
-        const bool allowanyreference = vega_config::config->ai.AllowAnySpeedReference;
-        const bool onlyupgraderef = vega_config::config->ai.OnlyUpgradeSpeedReference;
+        const bool allowanyreference = vega_config::config->ai.allow_any_speed_reference;
+        const bool onlyupgraderef = vega_config::config->ai.only_upgrade_speed_reference;
         if (t) {
             if ((t->getRelation(parent) >= 0
                     && !onlyupgraderef) || t->faction == neu || t->faction == upg || allowanyreference) {
@@ -220,7 +220,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
         desired_ang_velocity = Vector(0, 0, 0);
     }
     static bool initial_inertial_mode =
-            XMLSupport::parse_bool(vs_config->getVariable("flight", "inertial::initial", "false"));
+            vega_config::config->flight.inertial.initial /* default: "false" */;
     if (SSCK.dirty) {
         //go with what's last there: no frames since last physics frame
         if (SSCK.uppress <= 0 && SSCK.downpress <= 0) {
@@ -451,7 +451,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             if (parent->jump_drive.IsDestinationSet()) {
                 static soundContainer foobar;
                 if (foobar.sound == -2) {
-                    static string str = vs_config->getVariable("cockpitaudio", "jump_engaged", "jump");
+                    const std::string str = vega_config::config->cockpit_audio.jump_engaged; /* default: "jump" */);
                     foobar.loadsound(str);
                 }
                 foobar.playsound();

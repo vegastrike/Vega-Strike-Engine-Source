@@ -4,8 +4,7 @@
  * cockpit_gfx.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -85,7 +84,7 @@ inline void DrawOneTargetBox( const QVector &Loc,
     // Still locking on
     lock_percent = std::max(0.0F, lock_percent);
     if (lock_percent < 0.99F) {
-        //eallySwitch=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switchToTargetModeOnKey","true"));
+        //eallySwitch= vega_config::config->graphics.hud; // default: "switchToTargetModeOnKey","true"
         glLineWidth(vega_config::config->graphics.hud.diamond_line_thickness);
 
         if (vega_config::config->graphics.hud.lock_center_crosshair) {
@@ -334,7 +333,7 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
                     if (rand01() > SWITCH_CONST)
                         gauge_time[i] = -cockpit_time;
                 /*else {
-                 *  static string gauge_static = vs_config->getVariable("graphics","gauge_static","static.ani");
+                 *  const std::string gauge_static = vega_config::config->graphics.gauge_static; // default: "static.ani"
                  *  static Animation vdu_ani(gauge_static.c_str(),true,.1,BILINEAR);
                  *  vdu_ani.DrawAsVSSprite(gauges[i]);
                  *  }*/
@@ -655,8 +654,7 @@ void DrawTargetBoxes(const Radar::Sensor& sensor)
             case Radar::Track::Type::Ship:
                 if (sensor.IsTracking(track))
                 {
-                    static bool draw_dock_box =
-                        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_docking_boxes", "true" ) );
+                    const bool draw_dock_box = vega_config::config->graphics.draw_docking_boxes; /* default: true */
                     if (draw_dock_box)
                         DrawDockingBoxes( player, target, CamP, CamQ, CamR );
                     DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, player->computeLockingPercent(), true );
@@ -740,10 +738,8 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
         }
         GFXDisable( SMOOTH );
     }
-    static bool draw_target_nav_symbol =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_target_nav_symbol", "true" ) );
-    static bool draw_jump_nav_symbol   =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_jump_target_nav_symbol", "true" ) );
+    const bool draw_target_nav_symbol = vega_config::config->graphics.draw_target_nav_symbol; /* default: true */
+    const bool draw_jump_nav_symbol   = vega_config::config->graphics.draw_jump_target_nav_symbol; /* default: true */
     bool nav_symbol = false;
     // FIXME: Replace with UnitUtil::isDockableUnit?
     if ( draw_target_nav_symbol
@@ -752,18 +748,18 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
             || ( target->isPlanet() && ( (Planet*) target )->isAtmospheric()
                 && ( draw_jump_nav_symbol
                      || target->GetDestinations().empty() ) ) || !sensor.InRange(track)) ) {
-        static float nav_symbol_size = XMLSupport::parse_float( vs_config->getVariable( "graphics", "nav_symbol_size", ".25" ) );
+        const float nav_symbol_size = vega_config::config->graphics.nav_symbol_size; /* default: .25 */
         GFXColor4f( 1, 1, 1, 1 );
         DrawNavigationSymbol( Loc, CamP, CamQ, Loc.Magnitude()*nav_symbol_size );
         nav_symbol = true;
     } else {
-        static bool lock_nav_symbol =
-            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "lock_significant_target_box", "true" ) );
+        const bool lock_nav_symbol =
+            vega_config::config->graphics.lock_significant_target_box; /* default: true */
         DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, locking_percent, player->TargetLocked()
                          && ( lock_nav_symbol || !UnitUtil::isSignificant( target ) ) );
     }
 
-    static bool draw_dock_box = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_docking_boxes", "true" ) );
+    const bool draw_dock_box = vega_config::config->graphics.draw_docking_boxes; /* default: true */
     if (draw_dock_box)
         DrawDockingBoxes(player, target, CamP, CamQ, CamR);
     if ( (always_itts || player->GetComputerData().itts) && !nav_symbol ) {

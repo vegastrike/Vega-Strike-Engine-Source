@@ -28,11 +28,9 @@
 //**********************************
 void NavigationSystem::DrawCursor(float x, float y, float wid, float hei, const GFXColor &col) {
     float sizex, sizey;
-    static bool modern_nav_cursor =
-            vega_config::config->graphics.nav;
+    static bool modern_nav_cursor = vega_config::config->graphics.nav.modern_mouse_cursor;
     if (modern_nav_cursor) {
-        static string
-                mouse_cursor_sprite = vs_config->getVariable("graphics", "nav", "mouse_cursor_sprite", "mouse.spr");
+        static std::string mouse_cursor_sprite = vega_config::config->graphics.nav.mouse_cursor_sprite; // default: "mouse.spr"
         static VSSprite MouseVSSprite(mouse_cursor_sprite.c_str(), BILINEAR, GFXTRUE);
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
         GFXColorf(GUI_OPAQUE_WHITE());

@@ -454,8 +454,8 @@ void Mission::UnPickle(string pickled) {
 void Mission::DirectorStart(missionNode *node) {
     VS_LOG(trace, "DIRECTOR START");
 
-    static int st_debuglevel = atoi(vs_config->getVariable("interpreter", "debuglevel", "0").c_str());
-    const bool st_start_game = vega_config::config->interpreter.startgame;
+    const int st_debuglevel = atoi(vega_config::config->interpreter.debug_level.c_str());
+    const bool st_start_game = vega_config::config->interpreter.start_game;
     const bool st_do_trace = vega_config::config->interpreter.trace;
 
     debuglevel = st_debuglevel;

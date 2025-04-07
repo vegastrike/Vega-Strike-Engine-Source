@@ -467,8 +467,7 @@ void Animation::Draw() {
         //-- well one reason is that the code change broke it :-/  Until suns display properly or we switch to ogre we should keep it as it was (problem was, flare wouldn't display--- or would display behind the sun)
         QVector R(_Universe->AccessCamera()->GetR().i, _Universe->AccessCamera()->GetR().j,
                 _Universe->AccessCamera()->GetR().k);
-        static float too_far_dist = XMLSupport::parse_float(
-                vs_config->getVariable("graphics", "anim_far_percent", ".8"));
+        const float too_far_dist = vega_config::config->graphics.anim_far_percent; // default: ".8"
         if (( /*R.Dot*/ (Position()
                 - _Universe->AccessCamera()->GetPosition()).Magnitude() + HaloOffset
                 *

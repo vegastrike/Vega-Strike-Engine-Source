@@ -606,7 +606,7 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
             mesh->setEnvMap(reflect);
             mesh->forceCullFace(cullface);
             static bool
-                    forcelight = vega_config::config->graphics.ForceLighting;
+                    forcelight = vega_config::config->graphics.force_lighting;
             mesh->setLighting(forcelight || lighting);
             xml.usenormals = usenormals;
             xml.material.ar = ar;

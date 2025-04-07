@@ -101,9 +101,9 @@ Mount::Mount(const string &filename, int am, int vol, float xyscale, float zscal
     maxfunctionality = maxfunc;
     static WeaponInfo wi(WEAPON_TYPE::BEAM);
     size = as_integer(MOUNT_SIZE::NOWEAP);
-    static float xyscalestat = vega_config::config->graphics.weapon_xyscale
+    static float xyscalestat = vega_config::config->graphics.weapon_xyscale;
 
-    static float zscalestat = vega_config::config->graphics.weapon_zscale
+    static float zscalestat = vega_config::config->graphics.weapon_zscale;
     if (xyscale == -1) {
         xyscale = xyscalestat;
     }
@@ -423,26 +423,23 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
 
                 break;
         }
-        static bool use_separate_sound =
+        const bool use_separate_sound =
                 vega_config::config->audio.high_quality_weapon;
-        static bool ai_use_separate_sound =
+        const bool ai_use_separate_sound =
                 vega_config::config->audio.ai_high_quality_weapon;
-        static bool ai_sound = vega_config::config->audio.ai_sound;
+        const bool ai_sound = vega_config::config->audio.ai_sound;
         Cockpit *cp;
         bool ips = ((cp = _Universe->isPlayerStarshipVoid(owner)) != NULL);
         double distancesqr = (tmp.position - AUDListenerLocation()).MagnitudeSquared();
-        static double maxdistancesqr =
-                XMLSupport::parse_float(vs_config->getVariable("audio", "max_range_to_hear_weapon_fire",
-                        "100000"))
-                        * XMLSupport::parse_float(vs_config->getVariable("audio",
-                                "max_range_to_hear_weapon_fire",
-                                "100000"));
-        static float weapon_gain =
-                vega_config::config->audio.weapon_gain
-        static float exterior_weapon_gain =
-                vega_config::config->audio.exterior_weapon_gain
-        static float min_weapon_sound_refire =
-                vega_config::config->audio.min_weapon_sound_refire
+        const double maxdistancesqr =
+                vega_config::config->audio.max_range_to_hear_weapon_fire /* default: "100000" */
+                        * vega_config::config->audio.max_range_to_hear_weapon_fire; // default: "100000"
+        const float weapon_gain =
+                vega_config::config->audio.weapon_gain;
+        const float exterior_weapon_gain =
+                vega_config::config->audio.exterior_weapon_gain;
+        const float min_weapon_sound_refire =
+                vega_config::config->audio.min_weapon_sound_refire;
         float curtime = realTime();
         bool tooquick = ((curtime - last_sound_refire_time) < min_weapon_sound_refire);
         if (!tooquick) {

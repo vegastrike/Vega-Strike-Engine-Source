@@ -666,7 +666,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
         return;
     }
 
-    double sparkle_accum = GetElapsedTime() * game_options()->sparklerate;
+    double sparkle_accum = GetElapsedTime() * game_options()->sparkle_rate;
     int spawn = (int) (sparkle_accum);
     sparkle_accum -= spawn;
 
@@ -937,11 +937,11 @@ void Drawable::Split(int level) {
                 locm = 1;
             }
             splitsub->ApplyForce(
-                    splitsub->meshdata[0]->rSize() * game_options()->explosionforce * 10 * splitsub->getMass() * loc
+                    splitsub->meshdata[0]->rSize() * game_options()->explosion_force * 10 * splitsub->getMass() * loc
                             / locm);
             loc.Set(rand(), rand(), rand() + .1);
             loc.Normalize();
-            splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * game_options()->explosiontorque
+            splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * game_options()->explosion_torque
                     * (1 + rand() % (int) (1 + unit->rSize())));
         }
     }

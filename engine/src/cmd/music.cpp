@@ -130,7 +130,7 @@ Music::Music(Unit *parent) : random(false), p(parent), song(-1), thread_initiali
     //Hardware volume = 1
     _SetVolume(1, true);
     //Software volume = from config
-    _SetVolume(XMLSupport::parse_float(vs_config->getVariable("audio", "music_volume", ".5")), false);
+    _SetVolume(vega_config::config->audio.music_volume /* default: ".5" */, false);
 }
 
 void Music::ChangeVolume(float inc, int layer) {
@@ -228,9 +228,8 @@ int Music::SelectTracks(int layer) {
         return 0;
     }
     const bool random = vega_config::config->audio.shuffle_songs;
-    static size_t maxrecent =
-            XMLSupport::parse_int(vs_config->getVariable("audio", "shuffle_songs.history_depth", MAX_RECENT_HISTORY));
-    static std::string dj_script = vs_config->getVariable("sound", "dj_script", "modules/dj.py");
+    const size_t maxrecent = vega_config::config->audio.shuffle_songs_section.history_depth;
+    const std::string dj_script = vega_config::config->audio.dj_script; // default: "modules/dj.py"
     if ((BaseInterface::CurrentBase || loopsleft > 0) && lastlist < (int) playlist.size() && lastlist >= 0) {
         if (loopsleft > 0) {
             loopsleft--;
@@ -257,7 +256,7 @@ int Music::SelectTracks(int layer) {
     if (_Universe && _Universe->activeStarSystem() != NULL && _Universe->numPlayers()) {
         CompileRunPython(dj_script);
     } else {
-        static std::string loading_tune = vs_config->getVariable("audio", "loading_sound", "../music/loading.ogg");
+        const std::string loading_tune = vega_config::config->audio.loading_sound;
         GotoSong(loading_tune, layer);
     }
     return 0;
@@ -299,7 +298,7 @@ readerThread(
         memcpy(songname, me->music_load_info->hashname.data(), len);
         std::map<std::string, AUDSoundProperties>::iterator wherecache = cachedSongs.find(songname);
         bool foundcache = wherecache != cachedSongs.end();
-        static std::string cachable_songs = vs_config->getVariable("audio", "cache_songs", "../music/land.ogg");
+        static std::string cachable_songs = vega_config::config->audio.cache_songs;
         bool docacheme = cachable_songs.find(songname) != std::string::npos;
         if (foundcache == false && docacheme) {
             me->music_load_info->wave = NULL;

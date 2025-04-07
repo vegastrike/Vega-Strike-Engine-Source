@@ -678,7 +678,7 @@ void bootstrap_main_loop() {
 
         if (mission->getVariable("savegame",
                 "").length() != 0
-                && game_options()->dockOnLoad) {
+                && game_options()->dock_on_load) {
             for (size_t i = 0; i < _Universe->numPlayers(); i++) {
                 QVector vec;
                 DockToSavedBases(i, vec);

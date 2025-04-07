@@ -407,8 +407,7 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                     y = (links[i]->y + (links[i]->hei / 2));                         //get the center of the location
 
                     /* draw marker */
-                    static string
-                            spritefile_marker = vs_config->getVariable("graphics", "base_locationmarker_sprite", "");
+                    const std::string spritefile_marker = vega_config::config->graphics.bases.location_marker_sprite;
                     if (spritefile_marker.length() && links[i]->text.find("XXX") != 0) {
                         static VSSprite *spr_marker = new VSSprite(spritefile_marker.c_str());
                         float wid, hei;

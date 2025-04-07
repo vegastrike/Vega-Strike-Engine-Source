@@ -112,10 +112,7 @@ void WarpToP(Unit *parent, Unit *target, bool following) {
     float dist = UnitUtil::getSignificantDistance(parent, target);
     if (DistanceWarrantsWarpTo(parent, dist, following)) {
         if (TargetWorthPursuing(parent, target)) {
-            static bool auto_valid =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics",
-                            "insystem_jump_or_timeless_auto-pilot",
-                            "false"));
+            const bool auto_valid = vega_config::config->physics.in_system_jump_or_timeless_auto_pilot; // Default: false
             if (auto_valid) {
                 std::string tmp;
                 parent->AutoPilotTo(target, false);
@@ -131,10 +128,7 @@ void WarpToP(Unit *parent, Unit *target, bool following) {
 void WarpToP(Unit *parent, const QVector &target, float radius, bool following) {
     float dist = (parent->Position() - target).Magnitude() - radius - parent->rSize();
     if (DistanceWarrantsWarpTo(parent, dist, following)) {
-        static bool auto_valid =
-                XMLSupport::parse_bool(vs_config->getVariable("physics",
-                        "insystem_jump_or_timeless_auto-pilot",
-                        "false"));
+        const bool auto_valid = vega_config::config->physics.in_system_jump_or_timeless_auto_pilot /* default: false */
         if (!auto_valid) {
             ActuallyWarpTo(parent, target, QVector(0, 0, .00001));
         }

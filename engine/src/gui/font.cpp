@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
+ * Copyright (C) 2001-2025 Daniel Horn, Mike Byron, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -24,9 +24,12 @@
 
 #include "font.h"
 
+#include "configuration/configuration.h"
+
 #include "guidefs.h"
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
+
 //For some reason, the cumulative width of GLUT strings is smaller than the
 //actual width when they are painted.  If we add this factor to the reference
 //length of every GLUT character, things work a lot better.
@@ -40,11 +43,7 @@ static const double GLUT_WIDTH_HACK = 0.6;
 static const char SPACE_CHAR = ' ';
 
 bool useStroke() {
-    static bool tmp =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font_computer",
-                    vs_config->getVariable("graphics",
-                            "high_quality_font",
-                            "false")));
+    const bool tmp = vega_config::config->graphics.high_quality_font_computer;
     return !tmp;
 }
 

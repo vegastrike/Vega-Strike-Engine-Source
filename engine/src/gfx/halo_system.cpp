@@ -83,7 +83,7 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
         bool done = false;
         Vector back = vel;
         back.Normalize();
-        back *= -game_options()->sparkleabsolutespeed;
+        back *= -game_options()->sparkle_absolute_speed;
 
         collideTrees *colTrees = mush->colTrees;
         if (colTrees) {
@@ -99,7 +99,7 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
                             vel,
                             back,
                             0,
-                            mush->rSize() * game_options()->sparkleenginesizerelativetoship,
+                            mush->rSize() * game_options()->sparkle_engine_size_relative_to_ship,
                             faction);
                     done = true;
                 }
@@ -119,7 +119,7 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
                         vel,
                         back,
                         0,
-                        mush->rSize() * game_options()->sparkleenginesizerelativetoship,
+                        mush->rSize() * game_options()->sparkle_engine_size_relative_to_ship,
                         faction);
                 done = true;
             }
@@ -188,7 +188,7 @@ void HaloSystem::Draw(const Matrix &trans,
         maxvelocity = 1;
     }
 
-    double sparkledelta = GetElapsedTime() * game_options()->halosparklerate;
+    double sparkledelta = GetElapsedTime() * game_options()->halo_sparkle_rate;
 
     for (std::vector<Halo>::iterator i = halo.begin(); i != halo.end(); ++i) {
         Vector thrustvector = TransformNormal(trans, i->trans.getR()).Normalize();
@@ -257,14 +257,14 @@ void HaloSystem::Draw(const Matrix &trans,
                     i->sparkle_accum -= 1;
 
                     float rsize = i->mesh->rSize() * scale.i * i->size.i;
-                    Vector pvelocity = thrustvector * -rsize * game_options()->halosparklespeed * vpercent;
+                    Vector pvelocity = thrustvector * -rsize * game_options()->halo_sparkle_speed * vpercent;
 
                     DoParticles(m.p,
                             hullpercent,
                             velocity,
                             pvelocity,
                             rsize,
-                            rsize * game_options()->halosparklescale,
+                            rsize * game_options()->halo_sparkle_scale,
                             faction);
                 }
             } else {

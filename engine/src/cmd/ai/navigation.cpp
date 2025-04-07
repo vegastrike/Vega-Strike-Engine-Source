@@ -592,8 +592,8 @@ void AutoLongHaul::Execute() {
     const float go_perpendicular_speed = vega_config::config->physics.warp_perpendicular;
     const float min_warp_orbit_radius = vega_config::config->physics.min_warp_orbit_radius;
     const float warp_orbit_multiplier = vega_config::config->physics.warp_orbit_multiplier;
-    static float warp_behind_angle =
-            cos(3.1415926536 * XMLSupport::parse_float(vs_config->getVariable("physics", "warp_behind_angle", "150"))
+    const float warp_behind_angle =
+            cos(M_PI * vega_config::config->physics.warp_behind_angle /* default: "150" */
                     / 180.);
     QVector myposition = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();     //get unit pos
     QVector destination = target->isSubUnit() ? target->Position() : target->LocalPosition();     //get destination
@@ -680,10 +680,8 @@ void AutoLongHaul::Execute() {
         if (speed > .01) {
             cfacing = cfacing * (1. / speed);
         }
-        static float dotLimit =
-                cos(3.1415926536 * XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "autopilot_spec_lining_up_angle",
-                        "3")) / 180.);
+        const float dotLimit =
+                cos(M_PI * vega_config::config->physics.auto_pilot_spec_lining_up_angle /* default: "3" */ / 180.);
         if (cfacing.Dot(destinationdirection) < dotLimit) {          //if wanting to face target but overshooting.
             deactivatewarp = true;
         }              //turn off drive

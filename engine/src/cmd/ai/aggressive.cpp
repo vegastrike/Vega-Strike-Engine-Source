@@ -1229,15 +1229,15 @@ static std::string insysString("Insys");
 static std::string arrowString("->");
 
 static Unit *ChooseNavPoint(Unit *parent, Unit **otherdest, float *lurk_on_arrival) {
-    static string script = vs_config->getVariable("AI", "ChooseDestinationScript", "");
+    const std::string script = vega_config::config->ai.choose_destination_script;
     *lurk_on_arrival = 0;
-    if (script.length() > 0) {
-        Unit *ret = NULL;
+    if (!script.empty()) {
+        Unit *ret = nullptr;
         UniverseUtil::setScratchUnit(parent);
         CompileRunPython(script);
         ret = UniverseUtil::getScratchUnit();
-        UniverseUtil::setScratchUnit(NULL);
-        if (ret != NULL && ret != parent) {
+        UniverseUtil::setScratchUnit(nullptr);
+        if (ret != nullptr && ret != parent) {
             return ret;
         }
     }
@@ -1474,8 +1474,8 @@ static void GoTo(AggressiveAI *ai,
 }
 
 void AggressiveAI::ExecuteNoEnemies() {
-    const float safetyspacing = vega_config::config->ai.safetyspacing;
-    const float randspacingfactor = vega_config::config->ai.randomspacingfactor;
+    const float safety_spacing = vega_config::config->ai.safety_spacing;
+    const float randspacingfactor = vega_config::config->ai.random_spacing_factor;
     if (nav.i == 0 && nav.j == 0 && nav.k == 0) {
         Unit *otherdest = NULL;
         Unit *dest = ChooseNavPoint(parent, &otherdest, &this->lurk_on_arrival);
@@ -1501,13 +1501,13 @@ void AggressiveAI::ExecuteNoEnemies() {
                     dir += randVector() * parent->rSize() * 2 * randspacingfactor;
                 } else {
                     dir *= 2;
-                    dir += (unitdir * safetyspacing);
+                    dir += (unitdir * safety_spacing);
                     dir +=
                             ((randVector() * randspacingfactor
                                     / 4.0f)
                                     + (unitdir
                                             * randspacingfactor))
-                                    * ((parent->rSize() > (safetyspacing / 5)) ? (safetyspacing / 5)
+                                    * ((parent->rSize() > (safety_spacing / 5)) ? (safety_spacing / 5)
                                             : (parent->rSize()));
                 }
             }

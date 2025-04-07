@@ -110,7 +110,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff(const float cutoff);
 ///Sets the optimal intensity given that Optimal number of lights is fulfilled
 void /*GFXDRVAPI*/ GFXSetOptimalIntensity(const float newint, const float saturatevalue);
 ///Sets number of lights graphics can handle optimally
-GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights(const int numlights);
+GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights(const int num_lights);
 
 /**
  * GFXCreateLight gets a light as a parameter.  It sets light to have the

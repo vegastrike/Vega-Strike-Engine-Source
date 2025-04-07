@@ -247,9 +247,9 @@ OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE];
 
 Texture *Mesh::TempGetTexture(MeshXML *xml, std::string filename, std::string factionname, GFXBOOL detail) const {
     static FILTER fil =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "detail_texture_trilinear", "true")) ? TRILINEAR
+            vega_config::config->graphics.detail_texture_trilinear /* default: "true" */ ? TRILINEAR
                     : MIPMAP;
-    const bool factionalize_textures = vega_config::config->graphics.faction_dependant_textures;
+    const bool factionalize_textures = vega_config::config->graphics.faction_dependent_textures;
     string faction_prefix = (factionalize_textures ? (factionname + "_") : string());
     Texture *ret = NULL;
     string facplus = faction_prefix + filename;
@@ -312,7 +312,7 @@ void Mesh::setTextureCumulativeTime(double d) {
 }
 
 Texture *Mesh::TempGetTexture(MeshXML *xml, int index, std::string factionname) const {
-    const bool factionalize_textures = vega_config::config->graphics.faction_dependant_textures;
+    const bool factionalize_textures = vega_config::config->graphics.faction_dependent_textures;
     string faction_prefix = (factionalize_textures ? (factionname + "_") : string());
     Texture *tex = NULL;
     assert(index < (int) xml->decals.size());
@@ -808,8 +808,8 @@ bool SetupSpecMapFirstPass(Texture **decal,
         bool nomultienv) {
     GFXPushBlendMode();
 
-    static bool separatespec =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "separatespecularcolor", "false")) ? GFXTRUE
+    const bool separatespec =
+            vega_config::config->graphics.separate_specular_color /* default: "false" */ ? GFXTRUE
                     : GFXFALSE;
     GFXSetSeparateSpecularColor(separatespec);
 
@@ -931,8 +931,8 @@ void SetupEnvmapPass(Texture *decal, unsigned int mat, int passno) {
 }
 
 void RestoreEnvmapState() {
-    static bool separatespec =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "separatespecularcolor", "false")) ? GFXTRUE
+    const bool separatespec =
+            vega_config::config->graphics.separate_specular_color /* default: "false" */ ? GFXTRUE
                     : GFXFALSE;
     GFXSetSeparateSpecularColor(separatespec);
     GFXEnable(LIGHTING);
@@ -1050,9 +1050,8 @@ void RestoreSpecMapState(bool envMap, bool detailMap, bool write_to_depthmap, fl
             GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
         }
     } else {
-        static bool separatespec =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "separatespecularcolor",
-                        "false")) ? GFXTRUE : GFXFALSE;
+        const bool separatespec =
+                vega_config::config->graphics.separate_specular_color /* default: "false" */ ? GFXTRUE : GFXFALSE;
         GFXSetSeparateSpecularColor(separatespec);
     }
     if (detailMap) {
@@ -2043,14 +2042,13 @@ void Mesh::initTechnique(const std::string &xmltechnique) {
         if (Decal.size() > 1 || getEnvMap()) {
             //Use shader-ified technique for multitexture or environment-mapped meshes
 #if defined(__APPLE__) && defined (__MACH__)
-            static string shader_technique = vs_config->getVariable( "graphics", "default_full_technique", "mac" );
+            const std::string shader_technique = vega_config::config->graphics.default_full_technique; /* default: "mac" */ );
 #else
-            static string shader_technique = vs_config->getVariable("graphics", "default_full_technique", "default");
+            const std::string shader_technique = vega_config::config->graphics.default_full_technique; /* default: "default" */);
 #endif
             effective = shader_technique;
         } else {
-            static string
-                    fixed_technique = vs_config->getVariable("graphics", "default_simple_technique", "fixed_simple");
+            const std::string fixed_technique = vega_config::config->graphics.default_simple_technique; /* default: "fixed_simple" */);
             effective = fixed_technique;
         }
         technique = Technique::getTechnique(effective);

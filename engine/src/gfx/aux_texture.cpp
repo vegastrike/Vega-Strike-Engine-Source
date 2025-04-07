@@ -2,9 +2,8 @@
  * aux_texture.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, Roy Falk,
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, Roy Falk,
  * and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -329,9 +328,7 @@ void Texture::Load(const char *FileName,
     VSError err2 = VSFileSystem::FileNotFound;
     if (t) {
         if (t[0] != '\0') {
-            static bool use_alphamap = parse_bool(vs_config->getVariable("graphics",
-                    "bitmap_alphamap",
-                    "true"));
+            const bool use_alphamap = vega_config::config->graphics.bitmap_alphamap; /* default: true */
             if (use_alphamap) {
                 err2 = f2.OpenReadOnly(t, TextureFile);
             }
@@ -493,10 +490,7 @@ void Texture::Load(const char *FileNameRGB,
     VSFile f1;
     VSError err1 = Unspecified;
     if (FileNameA) {
-        static bool use_alphamap =
-                parse_bool(vs_config->getVariable("graphics",
-                        "bitmap_alphamap",
-                        "true"));
+        const bool use_alphamap = vega_config::config->graphics.bitmap_alphamap; /* default: true */
         if (use_alphamap) {
             std::string tmp;
             err1 = f1.OpenReadOnly(FileNameA, TextureFile);

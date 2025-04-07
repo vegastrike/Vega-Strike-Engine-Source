@@ -92,7 +92,7 @@ public:
 
 /* Graphics Options */
     std::string jumpgate;
-    double jumpanimationshrink{};
+    double jump_animation_shrink{};
     double jumpgatesize{};
     double camera_pan_speed{};
     bool background{};
@@ -103,16 +103,16 @@ public:
     int num_near_stars{};          //maybe need to be double
     int num_far_stars{};           //maybe need to be double
     double star_spreading{};
-    bool usePlanetAtmosphere{};
-    bool usePlanetFog{};
+    bool use_planet_atmosphere{};
+    bool use_planet_fog{};
     double reflectivity{};
     bool hardware_cursor{};
     bool always_make_smooth_cam{};           //Not used Yet
     double precull_dist{};
     bool draw_near_stars_in_front_of_planets{};
-    bool starblend{};
-    float sparkleenginesizerelativetoship{};
-    float sparkleabsolutespeed{};
+    bool star_blend{};
+    float sparkle_engine_size_relative_to_ship{};
+    float sparkle_absolute_speed{};
     float engine_radii_scale{};
     float engine_length_scale{};
     bool halos_by_velocity{};
@@ -124,9 +124,9 @@ public:
     float engine_color_red{};
     float engine_color_green{};
     float engine_color_blue{};
-    float halosparklerate{};
-    float halosparklescale{};
-    float halosparklespeed{};
+    float halo_sparkle_rate{};
+    float halo_sparkle_scale{};
+    float halo_sparkle_speed{};
     int max_cubemap_size{};
     std::string default_boot_message;
     std::string initial_boot_message;
@@ -134,54 +134,54 @@ public:
     bool main_menu{};
     std::string startup_cockpit_view;
     bool detail_texture_trilinear{};
-    float lightcutoff{};
-    float lightoptimalintensity{};
-    float lightsaturation{};
-    int numlights{};
-    bool separatespecularcolor{};
-    bool LockVertexArrays{};
-    int fogdetail{};
+    float light_cutoff{};
+    float light_optimal_intensity{};
+    float light_saturation{};
+    int num_lights{};
+    bool separate_specular_color{};
+    bool lock_vertex_arrays{};
+    int fog_detail{};
     float fov{};
     float aspect{};
     float znear{};
     float zfar{};
-    float ModelDetail{};
-    bool UseTextures{};
-    bool UseShipTextures{};
-    bool UsePlanetTextures{};
-    bool UseLogos{};
-    bool UseVSSprites{};
-    bool UseAnimations{};
-    bool UseVideos{};
+    float model_detail{};
+    bool use_textures{};
+    bool use_ship_textures{};
+    bool use_planet_textures{};
+    bool use_logos{};
+    bool use_vs_sprites{};
+    bool use_animations{};
+    bool use_videos{};
     bool use_wireframe{};
     int max_texture_dimension{};
     int max_movie_dimension{};
     bool rect_textures{};
     bool pot_video_textures{};
     std::string techniquesSubPath;
-    bool SmoothShade{};
-    int mipmapdetail{};
+    bool smooth_shade{};
+    int mipmap_detail{};
     int texture_compression{};
     bool reflection{};
     bool displaylists{};
     bool s3tc{};
     bool ext_clamp_to_edge{};
     bool ext_clamp_to_border{};
-    bool ClearOnStartup{};
+    bool clear_on_startup{};
     float circle_accuracy{};
     std::string rgb_pixel_format;
     bool gl_accelerated_visual{};
     int z_pixel_format{};
     int x_resolution{};
     int y_resolution{};
-    bool fullscreen{};
-    int colordepth{};
+    bool full_screen{};
+    int color_depth{};
     bool glut_stencil{};
     std::string mac_shader_name;
     std::string shader_name;
     bool framerate_changes_shader{};
     bool draw_weapons{};
-    float sparklerate{};
+    float sparkle_rate{};
     bool only_stretch_in_warp{};
     float warp_stretch_cutoff{};
     float warp_stretch_region0_max{};
@@ -190,16 +190,16 @@ public:
     float warp_stretch_max_region0_speed{};
     float weapon_gamma{};
     bool split_dead_subunits{};
-    float explosionforce{};
-    float explosiontorque{};
+    float explosion_force{};
+    float explosion_torque{};
     std::string explosion_animation;
     bool explosion_face_player{};
     float percent_shockwave{};
     float shockwave_growth{};
     std::string shockwave_animation;
     float bolt_offset{};
-    bool BlendGuns{};
-    float StretchBolts{};
+    bool blend_guns{};
+    float stretch_bolts{};
     float bolt_pixel_size{};
 
 /* Graphics/Mesh Options */
@@ -236,28 +236,28 @@ public:
     int warp_mouse_zone{};
 
 /* AI Options */
-    bool AllowCivilWar{};
-    bool CappedFactionRating{};
-    bool AllowNonplayerFactionChange{};
+    bool allow_civil_war{};
+    bool capped_faction_rating{};
+    bool allow_nonplayer_faction_change{};
     double min_relationship{};
-    std::string startDockedTo;
-    bool dockOnLoad{};
+    std::string start_docked_to;
+    bool dock_on_load{};
 
 /* PhysicsConfig Options */
-    std::string Drone;
+    std::string drone;
     int max_missions{};
     double game_speed{};
     double runtime_compactness{};
     double autogen_compactness{};
-    double AsteroidDifficulty{};
-    double YearScale{};
+    double asteroid_difficulty{};
+    double year_scale{};
     bool game_speed_affects_autogen_systems{};
     double star_system_scale{};
     double respawn_unit_size{};
     float auto_pilot_planet_radius_percent{};
     std::string campaigns;              //WRONG SECTION ...change after 0.5
-    uint NumRunningSystems{};
-    float InactiveSystemTime{};
+    uint num_running_systems{};
+    float inactive_system_time{};
     float jump_radius_scale{};
     bool jump_disables_shields{};
     bool display_in_meters{};

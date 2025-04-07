@@ -169,7 +169,7 @@ StarVlist::StarVlist(float spread) {
 static GFXColorVertex *AllocVerticesForSystem(std::string our_system_name, float spread, int *num, int repetition) {
     const float staroverlap = vega_config::config->graphics.star_overlap;
     float xyzspread = spread * 2 * staroverlap;
-    static string allowedSectors = vs_config->getVariable("graphics", "star_allowable_sectors", "Vega Sol");
+    const std::string allowedSectors = vega_config::config->graphics.star_allowable_sectors; /* default: "Vega Sol" */
     if (our_system_name.size() > 0) {
         string lumi = _Universe->getGalaxyProperty(our_system_name, "luminosity");
         if (lumi.length() == 0 || strtod(lumi.c_str(), NULL) == 0) {
@@ -379,8 +379,7 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
                 vega_config::config->graphics.velocity_star_streak_scale;
         static float minstreak =
                 vega_config::config->graphics.velocity_star_streak_min;
-        static float fov_smoothing =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.smoothing", ".4"));
+        const float fov_smoothing = vega_config::config->warp.fov_link.smoothing; /* default: .4 */
         float fov_smoot = pow(double(fov_smoothing), GetElapsedTime());
         Vector vel(-velocity * velstreakscale);
         float speed = vel.Magnitude();
@@ -457,9 +456,8 @@ PointStarVlist::~PointStarVlist() {
 }
 
 Stars::Stars(int num, float spread) : vlist(NULL), spread(spread) {
-    static string starspritetextures = vs_config->getVariable("graphics", "near_stars_sprite_texture", "");
-    static float starspritesize =
-            vega_config::config->graphics.near_stars_sprite_size;
+    const std::string starspritetextures = vega_config::config->graphics.near_stars_sprite_texture; /* default: "" */
+    const float starspritesize = vega_config::config->graphics.near_stars_sprite_size;
     if (starspritetextures.length() == 0) {
         vlist = new PointStarVlist((num / STARnumvlist) + 1, spread, "");
     } else {
@@ -475,8 +473,7 @@ void Stars::SetBlend(bool blendit, bool fadeit) {
 }
 
 void Stars::Draw() {
-    static bool
-            stars_dont_move = vega_config::config->graphics.stars_dont_move;
+    const bool stars_dont_move = vega_config::config->graphics.stars_dont_move;
     if (stars_dont_move) {
         return;
     }

@@ -88,7 +88,7 @@ BoltDrawManager &BoltDrawManager::GetInstance() {
 void BoltDrawManager::Draw() {
     GFXDisable(LIGHTING);
     GFXDisable(CULLFACE);
-    GFXBlendMode(ONE, game_options()->BlendGuns ? ONE : ZERO);
+    GFXBlendMode(ONE, game_options()->blend_guns ? ONE : ZERO);
     GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
     GFXAlphaTest(GREATER, .1);
 

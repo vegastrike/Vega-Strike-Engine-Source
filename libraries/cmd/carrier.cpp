@@ -238,16 +238,13 @@ void Carrier::EjectCargo(unsigned int index) {
                 }
             }
             float arot = 0;
-            static float grot =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "generic_cargo_rotation_speed",
-                            "1")) * 3.1415926536 / 180;
+            const float grot =
+                    vega_config::config->graphics.generic_cargo_rotation_speed /* default: "1" */ * 3.1415926536 / 180;
             if (!cargo) {
-                static float crot =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "cargo_rotation_speed",
-                                "60")) * 3.1415926536 / 180;
-                static float erot =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "eject_rotation_speed",
-                                "0")) * 3.1415926536 / 180;
+                const float crot =
+                        vega_config::config->graphics.cargo_rotation_speed /* default: "60" */ * 3.1415926536 / 180;
+                const float erot =
+                        vega_config::config->graphics.eject_rotation_speed /* default: "0" */ * 3.1415926536 / 180;
                 if (tmpcontent == "eject") {
                     if (isplayer) {
                         Flightgroup *fg = unit->getFlightgroup();
@@ -556,7 +553,7 @@ float Carrier::PriceCargo(const std::string &s) {
         if (this != mpl) {
             return mpl->PriceCargo(s);
         } else {
-            static float spacejunk = parse_float(vs_config->getVariable("cargo", "space_junk_price", "10"));
+            const float spacejunk = vega_config::config->cargo.space_junk_price; /* default: 10 */
             return spacejunk;
         }
     }

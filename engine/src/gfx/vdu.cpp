@@ -506,7 +506,7 @@ void VDU::DrawVDUShield(Unit *parent) {
 
     double hull_percent = parent->hull.Percent();
     //static bool invert_friendly_shields =
-    //    XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "invert_friendly_shields", "false" ) );
+    //    vega_config::config->graphics.hud /* default: invert_friendly_shields", "false */ );
     //DrawShieldArmor(parent,StartArmor,x,y,w,h,invert_friendly_shields);
     GFXColor4f(1, hull_percent, hull_percent, 1);
     GFXEnable(TEXTURE0);
@@ -923,8 +923,8 @@ Unit *VDU::GetCommunicating() {
 void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
     //Unit * you = _Universe->AccessCockpit()->GetParent();
     //Unit * targ = you!=NULL?you->Target():NULL;
-    //static float game_speed = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-    //static bool  lie = XMLSupport::parse_bool( vs_config->getVariable( "physics", "game_speed_lying", "true" ) );
+    //static float game_speed = vega_config::config->physics.game_speed /* default: 1 */ );
+    //static bool  lie = vega_config::config->physics.game_speed_lying /* default: true */ );
     string nam = "none";
     if (targ) {
         nam = reformatName(targ->name);
@@ -1494,7 +1494,7 @@ void VDU::DrawWeapon(Unit *parent) {
 
 //  without fixed font we would need some sneaky tweaking to make it a table, probably with multiple TPs
 //    static int weaponcolumns =
-//        XMLSupport::parse_int( vs_config->getVariable( "graphics", "hud", "gun_list_columns", "1" ) );
+//        vega_config::config->graphics.hud /* default: gun_list_columns", "1 */ );
 //    int    count  = 0;
 //    int    mcount = 0;
     float x, y, w, h;

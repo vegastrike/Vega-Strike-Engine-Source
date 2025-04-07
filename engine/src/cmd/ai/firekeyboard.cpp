@@ -189,7 +189,7 @@ void FireKeyboard::SetShieldsOneThird(const KBData &, KBSTATE k) {
         float pow = 1. / 3;
         static soundContainer sc;
         if (sc.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "shield", "vdu_d");
+            const std::string str = vega_config::config->cockpit_audio.shield; /* default: "vdu_d" */);
             sc.loadsound(str);
         }
         sc.playsound();
@@ -206,7 +206,7 @@ void FireKeyboard::SetShieldsOff(const KBData &, KBSTATE k) {
         float pow = 0;
         static soundContainer sc;
         if (sc.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "shield", "vdu_d");
+            const std::string str = vega_config::config->cockpit_audio.shield; /* default: "vdu_d" */);
             sc.loadsound(str);
         }
         sc.playsound();
@@ -223,7 +223,7 @@ void FireKeyboard::SetShieldsTwoThird(const KBData &, KBSTATE k) {
         float pow = 2. / 3;
         static soundContainer sc;
         if (sc.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "shield", "vdu_d");
+            const std::string str = vega_config::config->cockpit_audio.shield; /* default: "vdu_d" */);
             sc.loadsound(str);
         }
         sc.playsound();
@@ -1200,14 +1200,14 @@ bool ChooseTargets(Unit *me, bool (*typeofunit)(Unit *, Unit *), bool reverse) {
                     if (reverse) {
                         static soundContainer foosound;
                         if (foosound.sound < 0) {
-                            static string str = vs_config->getVariable("cockpitaudio", "target", "vdu_b");
+                            const std::string str = vega_config::config->cockpit_audio.target; /* default: "vdu_b" */);
                             foosound.loadsound(str);
                         }
                         foosound.playsound();
                     } else {
                         static soundContainer foobersound;
                         if (foobersound.sound < 0) {
-                            static string str = vs_config->getVariable("cockpitaudio", "target_reverse", "vdu_a");
+                            const std::string str = vega_config::config->cockpit_audio.target_reverse; /* default: "vdu_a" */);
                             foobersound.loadsound(str);
                         }
                         foobersound.playsound();
@@ -1296,7 +1296,7 @@ void abletodock(int dock) {
         case 5: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "undocking_complete", "undocking_complete");
+                const std::string str = vega_config::config->cockpit_audio.undocking_complete; /* default: "undocking_complete" */);
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1305,7 +1305,7 @@ void abletodock(int dock) {
         case 4: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "undocking_failed", "undocking_failed");
+                const std::string str = vega_config::config->cockpit_audio.undocking_failed; /* default: "undocking_failed" */);
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1313,14 +1313,13 @@ void abletodock(int dock) {
         }
         case 3: {
             static soundContainer reqsound;
-            static string
-                    otherstr = vs_config->getVariable("audio", "automatic_docking_zone", "automatic_landing_zone.wav");
+            const std::string otherstr = vega_config::config->audio.automatic_docking_zone; /* default: "automatic_landing_zone.wav" */);
             if (otherstr != "" && rand() < RAND_MAX / 2) {
                 static int s = AUDCreateSoundWAV(otherstr, false);
                 AUDPlay(s, QVector(0, 0, 0), Vector(0, 0, 0), 1);
             } else {
                 if (reqsound.sound == -2) {
-                    static string str = vs_config->getVariable("cockpitaudio", "docking_complete", "docking_complete");
+                    const std::string str = vega_config::config->cockpit_audio.docking_complete; /* default: "docking_complete" */);
                     reqsound.loadsound(str);
                 }
                 reqsound.playsound();
@@ -1330,7 +1329,7 @@ void abletodock(int dock) {
         case 2: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "docking_failed", "docking_failed");
+                const std::string str = vega_config::config->cockpit_audio.docking_failed; /* default: "docking_failed" */);
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1339,7 +1338,7 @@ void abletodock(int dock) {
         case 1: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "docking_granted", "request_granted");
+                const std::string str = vega_config::config->cockpit_audio.docking_granted; /* default: "request_granted" */);
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1348,7 +1347,7 @@ void abletodock(int dock) {
         case 0: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "docking_denied", "request_denied");
+                const std::string str = vega_config::config->cockpit_audio.docking_denied; /* default: "request_denied" */);
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1423,7 +1422,7 @@ static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
             endt->graphicOptions.WarpRamping = 1;
         }
         endt->ftl_drive.Disable();
-        static float clearencetime = (XMLSupport::parse_float(vs_config->getVariable("general", "dockingtime", "20")));
+        const float clearencetime = (vega_config::config->general.docking_time /* default: "20" */);
         endt->EnqueueAIFirst(new Orders::ExecuteFor(new Orders::MatchVelocity(Vector(0, 0, 0),
                 Vector(0, 0, 0),
                 true,
@@ -1434,7 +1433,7 @@ static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
 }
 
 static void DoDockingOps(Unit *parent, Unit *targ, unsigned char playa, unsigned char gender) {
-    static int maxseverity = XMLSupport::parse_bool(vs_config->getVariable("AI", "dock_to_area", "false")) ? 2 : 1;
+    const int maxseverity = vega_config::config->ai.dock_to_area /* default: "false" */ ? 2 : 1;
     Unit *endt = targ;
     bool wasdock = vectorOfKeyboardInput[playa].doc;
     if (vectorOfKeyboardInput[playa].doc) {
@@ -1522,7 +1521,7 @@ unsigned int FireKeyboard::DoSpeechAndAni(Unit *un, Unit *parent, class Communic
 
 static void MyFunction() {
     //quit it--he's dead all ready
-    static string comm_static = vs_config->getVariable("graphics", "comm_static", "static.ani");
+    const std::string comm_static = vega_config::config->graphics.comm_static; /* default: "static.ani" */);
     //dead dead dead dead
     static Animation Statuc(comm_static.c_str());
     //yep really dead
@@ -1585,7 +1584,7 @@ extern std::set<Unit *> arrested_list_do_not_dereference;
 void Arrested(Unit *parent) {
     std::string fac = UniverseUtil::GetGalaxyFaction(UniverseUtil::getSystemFile());
     int own = FactionUtil::GetFactionIndex(fac);
-    static string po = vs_config->getVariable("galaxy", "police_faction", "homeland-security");
+    const std::string po = vega_config::config->galaxy.police_faction; /* default: "homeland-security" */);
     int police = FactionUtil::GetFactionIndex(po);
     int police2 = FactionUtil::GetFactionIndex(po + "_" + fac);
     float ownrel = UnitUtil::getRelationFromFaction(parent, own);
@@ -1623,7 +1622,7 @@ void Arrested(Unit *parent) {
         }
     }
     if (attack) {
-        static std::string prison_system = vs_config->getVariable("galaxy", "PrisonSystem", "Sol/Nu_Pheonix");
+        const std::string prison_system = vega_config::config->galaxy.prison_system; /* default: "Sol/Nu_Pheonix" */
         std::string psys = prison_system + "_" + fac;
         if (UnitUtil::getUnitSystemFile(parent) != psys) {
             UnitUtil::JumpTo(parent, psys);
@@ -2003,7 +2002,7 @@ void FireKeyboard::Execute() {
         parent->ToggleWeapon(false, forward);
         static soundContainer weapsound;
         if (weapsound.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "weapon_switch", "vdu_d");
+            const std::string str = vega_config::config->cockpit_audio.weapon_switch; /* default: "vdu_d" */);
             weapsound.loadsound(str);
         }
         weapsound.playsound();
@@ -2040,7 +2039,7 @@ void FireKeyboard::Execute() {
         parent->ToggleWeapon(true, forward);
         static soundContainer missound;
         if (missound.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "missile_switch", "vdu_d");
+            const std::string str = vega_config::config->cockpit_audio.missile_switch; /* default: "vdu_d" */);
             missound.loadsound(str);
         }
         missound.playsound();

@@ -46,21 +46,17 @@ Background::Background(const char *file,
         bool degamma_)
         : Enabled(true), degamma(degamma_), color(color_), stars(NULL) {
     string temp;
-    static string starspritetextures = vs_config->getVariable("graphics", "far_stars_sprite_texture", "");
+    const std::string starspritetextures = vega_config::config->graphics.far_stars_sprite_texture; /* default: "" */
     const float starspritesize = vega_config::config->graphics.far_stars_sprite_size;
     if (starspritetextures.length() == 0) {
         stars =
                 new PointStarVlist(numstars, 200 /*spread*/,
-                        XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                "use_star_coords",
-                                "true")) ? filename : "");
+                        vega_config::config->graphics.use_star_coords /* default: "true" */ ? filename : "");
     } else {
         stars =
                 new SpriteStarVlist(numstars,
                         200 /*spread*/,
-                        XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                "use_star_coords",
-                                "true")) ? filename : "",
+                        vega_config::config->graphics.use_star_coords /* default: "true" */ ? filename : "",
                         starspritetextures,
                         starspritesize);
     }
@@ -69,7 +65,7 @@ Background::Background(const char *file,
     SphereBackground = NULL;
 
 #ifndef NV_CUBE_MAP
-    static int max_cube_size = XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_cubemap_size", "1024" ) );
+    const int max_cube_size = vega_config::config->graphics.max_cubemap_size; /* default: 1024 */
     string     suffix = ".image";
     temp = string( file )+"_up.image";
     up   = new Texture( temp.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE, max_cube_size );

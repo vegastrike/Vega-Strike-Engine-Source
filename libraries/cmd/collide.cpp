@@ -1,8 +1,7 @@
 /*
  * collide.cpp
  *
- * Copyright (C) 2020-2021 Roy Falk, Stephen G. Tuggy and other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2025 Roy Falk, Stephen G. Tuggy and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -63,10 +62,7 @@ csOPCODECollider *collideTrees::colTree(Unit *un, const Vector &othervelocity) {
     float magsqr = un->GetVelocity().MagnitudeSquared();
     float newmagsqr = (un->GetVelocity() - othervelocity).MagnitudeSquared();
     float speedsquared = const_factor * const_factor * (magsqr > newmagsqr ? newmagsqr : magsqr);
-    static unsigned int max_collide_trees = static_cast<unsigned int>(XMLSupport::parse_int(vs_config->getVariable(
-            "physics",
-            "max_collide_trees",
-            "16384")));
+    const unsigned int max_collide_trees = static_cast<unsigned int>((vega_config::config->physics.max_collide_trees /* default: "16384" */));
     if (un->rSize() * un->rSize() > simulation_atom_var * simulation_atom_var * speedsquared
             || max_collide_trees == 1) {
         return rapidColliders[0];

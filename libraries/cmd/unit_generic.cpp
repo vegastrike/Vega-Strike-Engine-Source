@@ -1260,10 +1260,10 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         if (randnum >= .9) {
             /*static char max_shield_leak =
                 (char) std::max( 0.0,
-                             std::min( 100.0, XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_leak", "90" ) ) ) );
+                             std::min( 100.0, vega_config::config->physics.max_shield_leak ) ) );
             static char min_shield_leak =
                 (char) std::max( 0.0,
-                             std::min( 100.0, XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_leak", "0" ) ) ) );*/
+                             std::min( 100.0, vega_config::config->physics.max_shield_leak) ) );*/
             //char newleak = float_to_int( std::max( min_shield_leak, std::max( max_shield_leak, (char) ( (randnum-.9)*10.0*100.0 ) ) ) );
             // TODO: lib_damage if (shield.leak < newleak)
             //shield.leak = newleak;
@@ -1913,8 +1913,7 @@ static Transformation HoldPositionWithRespectTo(Transformation holder,
     holder.position = TransformNormal(m, holder.position);
 
     holder.position = holder.position + changenew.position;
-    static bool changeddockedorient =
-            (XMLSupport::parse_bool(vs_config->getVariable("physics", "change_docking_orientation", "false")));
+    const bool changeddockedorient = vega_config::config->physics.change_docking_orientation /* default: "false" */;
     if (!changeddockedorient) {
         holder.orientation = bak;
     }
@@ -3335,8 +3334,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
     for (unsigned int i = 0; i < numcarg; ++i) {
         Cargo c = GetUnitMasterPartList().GetCargo(i);
         if (c.GetCategory() == category) {
-            static float aveweight =
-                    fabs(XMLSupport::parse_float(vs_config->getVariable("cargo", "price_recenter_factor", "0")));
+            const float aveweight = fabs(vega_config::config->cargo.price_recenter_factor /* default: "0" */);
             c.SetQuantity(float_to_int(quantity - quantdev));
             float baseprice = c.GetPrice();
             c.SetPrice(c.GetPrice() * (price - pricedev));
@@ -3352,12 +3350,9 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                 //quantity more than zero
             else if (maxprice > minprice + .01) {
                 float renormprice = (baseprice - minprice) / (maxprice - minprice);
-                static float maxpricequantadj =
-                        vega_config::config->cargo.max_price_quant_adj
-                static float minpricequantadj =
-                        vega_config::config->cargo.min_price_quant_adj
-                static float
-                        powah = vega_config::config->cargo.price_quant_adj_power
+                const float maxpricequantadj = vega_config::config->cargo.max_price_quant_adj;
+                const float minpricequantadj = vega_config::config->cargo.min_price_quant_adj;
+                const float powah = vega_config::config->cargo.price_quant_adj_power;
                 renormprice = pow(renormprice, powah);
                 renormprice *= (maxpricequantadj - minpricequantadj);
                 renormprice += 1;
@@ -3368,7 +3363,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                     }
                 }
             }
-            static float minprice = vega_config::config->cargo.min_cargo_price
+            const float minprice = vega_config::config->cargo.min_cargo_price;
             if (c.GetPrice() < minprice) {
                 c.SetPrice(minprice);
             }
@@ -3381,7 +3376,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
 std::string Unit::massSerializer(const XMLType &input, void *mythis) {
     Unit *un = (Unit *) mythis;
     float mass = un->Mass;
-    static bool usemass = vega_config::config->physics.use_cargo_mass;
+    const bool usemass = vega_config::config->physics.use_cargo_mass;
     for (unsigned int i = 0; i < un->cargo.size(); ++i) {
         if (un->cargo[i].GetQuantity() > 0) {
             if (usemass) {
@@ -3518,8 +3513,8 @@ bool isWeapon(std::string name) {
 // TODO: move this to RepairBot
 void Unit::Repair() {
     // TODO: everything below here needs to go when we're done with lib_components
-    static float repairtime = vega_config::config->physics.RepairDroidTime
-    static float checktime = vega_config::config->physics.RepairDroidCheckTime
+    const float repairtime = vega_config::config->physics.repair_droid_time;
+    const float checktime = vega_config::config->physics.repair_droid_check_time;
     if ((repairtime <= 0) || (checktime <= 0)) {
         return;
     }
@@ -3584,12 +3579,10 @@ void Unit::Repair() {
 
     unsigned int numg = (1 + UnitImages<void>::NUMGAUGES + MAXVDUS);
     unsigned int which = vsrandom.genrand_int31() % numg;
-    static float hud_repair_quantity =
-            vega_config::config->physics.hud_repair_unit
+    const float hud_repair_quantity = vega_config::config->physics.hud_repair_unit;
 
-    if (mounts.size()) {
-        static float mount_repair_quantity =
-                vega_config::config->physics.mount_repair_unit
+    if (!mounts.empty()) {
+        const float mount_repair_quantity = vega_config::config->physics.mount_repair_unit;
         unsigned int i = vsrandom.genrand_int31() % mounts.size();
         if (mounts[i].functionality < mounts[i].maxfunctionality) {
             mounts[i].functionality += mount_repair_quantity;
@@ -3618,7 +3611,7 @@ enum Unit::tractorHow Unit::getTractorability() const {
     static bool tractorability_mask_init = false;
     static unsigned char tractorability_mask;
     if (!tractorability_mask_init) {
-        std::string stractorability_mask = vs_config->getVariable("physics", "PlayerTractorabilityMask", "p");
+        std::string stractorability_mask = vega_config::config->physics.player_tractorability_mask; /* default: "p" */
         if (!stractorability_mask.empty()) {
             tractorability_mask = tractorImmune;
             if (stractorability_mask.find_first_of("pP") != string::npos) {
@@ -3747,16 +3740,6 @@ void Unit::UpdatePhysics2(const Transformation &trans,
 
     this->AddVelocity(difficulty);
 
-#ifdef DEPRECATEDPLANETSTUFF
-                                                                                                                            if (planet) {
-        Matrix basis;
-        curr_physical_state.to_matrix( this->cumulative_transformation_matrix );
-        Vector p, q, r, c;
-        MatrixToVectors( this->cumulative_transformation_matrix, p, q, r, c );
-        planet->trans->InvTransformBasis( this->cumulative_transformation_matrix, p, q, r, c );
-        planet->cps = Transformation::from_matrix( this->cumulative_transformation_matrix );
-    }
-#endif
     this->cumulative_transformation = this->curr_physical_state;
     this->cumulative_transformation.Compose(trans, transmat);
     this->cumulative_transformation.to_matrix(this->cumulative_transformation_matrix);
@@ -3844,8 +3827,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
 
     float difficulty;
     Cockpit *player_cockpit = GetVelocityDifficultyMult(difficulty);
-    static float EXTRA_CARGO_SPACE_DRAG =
-            vega_config::config->physics.extra_space_drag_for_cargo
+    const float EXTRA_CARGO_SPACE_DRAG = vega_config::config->physics.extra_space_drag_for_cargo;
     if (EXTRA_CARGO_SPACE_DRAG > 0) {
         int upgfac = FactionUtil::GetUpgradeFaction();
         if ((this->faction == upgfac) || (this->name == "eject") || (this->name == "Pilot")) {
@@ -3881,33 +3863,28 @@ void Unit::UpdatePhysics3(const Transformation &trans,
             }
         }
     }
-    static float SPACE_DRAG = vega_config::config->physics.unit_space_drag
+    const float SPACE_DRAG = vega_config::config->physics.unit_space_drag;
 
     if (SPACE_DRAG > 0) {
         Velocity = Velocity * (1 - SPACE_DRAG);
     }
 
-    static string LockingSoundName = vs_config->getVariable("unitaudio", "locking", "locking.wav");
+    const std::string LockingSoundName = vega_config::config->audio.unit_audio.locking; /* default: "locking.wav" */
     //enables spiffy wc2 torpedo music, default to normal though
-    static string LockingSoundTorpName = vs_config->getVariable("unitaudio", "locking_torp", "locking.wav");
+    const std::string LockingSoundTorpName = vega_config::config->audio.unit_audio.locking_torp; /* default: "locking.wav" */
     static int LockingSound = AUDCreateSoundWAV(LockingSoundName, true);
     static int LockingSoundTorp = AUDCreateSoundWAV(LockingSoundTorpName, true);
 
     bool locking = false;
     bool touched = false;
     for (int i = 0; (int) i < getNumMounts(); ++i) {
-        // TODO: simplify this if
-        if (((false
-                && mounts[i].status
-                        == Mount::INACTIVE) || mounts[i].status == Mount::ACTIVE) && !cloak.Cloaked()
-                && mounts[i].ammo != 0) {
+        if ((mounts[i].status == Mount::ACTIVE) && !cloak.Cloaked() && mounts[i].ammo != 0) {
             if (player_cockpit) {
                 touched = true;
             }
             if (increase_locking && (dist_sqr_to_target < mounts[i].type->range * mounts[i].type->range)) {
                 mounts[i].time_to_lock -= simulation_atom_var;
-                static bool ai_lock_cheat =
-                        vega_config::config->physics.ai_lock_cheat;
+                const bool ai_lock_cheat = vega_config::config->physics.ai_lock_cheat;
                 if (!player_cockpit) {
                     if (ai_lock_cheat) {
                         mounts[i].time_to_lock = -1;
@@ -3916,11 +3893,11 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                     int LockingPlay = LockingSound;
 
                     //enables spiffy wc2 torpedo music, default to normal though
-                    const bool LockTrumpsMusic = vega_config::config->unitaudio.locking_trumps_music;
+                    const bool LockTrumpsMusic = vega_config::config->audio.unit_audio.locking_trumps_music;
                     //enables spiffy wc2 torpedo music, default to normal though
-                    const bool TorpLockTrumpsMusic = vega_config::config->unitaudio.locking_torp_trumps_music;
+                    const bool TorpLockTrumpsMusic = vega_config::config->audio.unit_audio.locking_torp_trumps_music;
                     if (mounts[i].type->lock_time > 0) {
-                        static string LockedSoundName = vs_config->getVariable("unitaudio", "locked", "locked.wav");
+                        static std::string LockedSoundName = vega_config::config->audio.unit_audio.locked; /* default: "locked.wav" */);
                         static int LockedSound = AUDCreateSoundWAV(LockedSoundName, false);
                         if (mounts[i].type->size == MOUNT_SIZE::SPECIALMISSILE) {
                             LockingPlay = LockingSoundTorp;
@@ -4042,12 +4019,10 @@ void Unit::UpdatePhysics3(const Transformation &trans,
             uc,
             superunit);
     //can a unit get to another system without jumping?.
-    static bool warp_is_interstellar =
-            vega_config::config->physics.warp_is_interstellar;
+    const bool warp_is_interstellar = vega_config::config->physics.warp_is_interstellar;
     if (warp_is_interstellar
             && (curr_physical_state.position.MagnitudeSquared() > howFarToJump() * howFarToJump() && !isSubUnit())) {
-        static bool direct =
-                vega_config::config->physics.direct_interstellar_journey;
+        const bool direct = vega_config::config->physics.direct_interstellar_journey;
         bool jumpDirect = false;
         if (direct) {
             Cockpit *cp = _Universe->isPlayerStarship(this);
@@ -4178,7 +4153,7 @@ extern void DealPossibleJumpDamage(Unit *un);
 extern void ActivateAnimation(Unit *);
 void WarpPursuit(Unit *un, StarSystem *sourcess, std::string destination);
 
-bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, bool dosightandsound) {
+bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, bool do_sight_and_sound) {
     bool ret = false;
     if (pendingjump[kk]->orig == this->activeStarSystem || this->activeStarSystem == NULL) {
         if (JumpCapable::TransferUnitToSystem(pendingjump[kk]->dest)) {
@@ -4268,10 +4243,9 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
                 }
             }
             DealPossibleJumpDamage(this);
-            static int
-                    jumparrive = AUDCreateSound(vs_config->getVariable("unitaudio", "jumparrive", "sfx43.wav"), false);
-            if (dosightandsound) {
-                AUDPlay(jumparrive, this->LocalPosition(), this->GetVelocity(), 1);
+            static int jump_arrive = AUDCreateSound(vega_config::config->audio.unit_audio.jump_arrive, false);
+            if (do_sight_and_sound) {
+                AUDPlay(jump_arrive, this->LocalPosition(), this->GetVelocity(), 1);
             }
         } else {
 #ifdef JUMP_DEBUG
@@ -4279,10 +4253,10 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
 #endif
         }
         if (this->docked & DOCKING_UNITS) {
-            for (unsigned int i = 0; i < this->pImage->dockedunits.size(); i++) {
+            for (auto & dockedunit : this->pImage->dockedunits) {
                 Unit *unut;
-                if (NULL != (unut = this->pImage->dockedunits[i]->uc.GetUnit())) {
-                    unut->TransferUnitToSystem(kk, savedStarSystem, dosightandsound);
+                if (nullptr != (unut = dockedunit->uc.GetUnit())) {
+                    unut->TransferUnitToSystem(kk, savedStarSystem, do_sight_and_sound);
                 }
             }
         }
@@ -4291,7 +4265,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
             if (!un) {
                 this->docked &= (~(DOCKED | DOCKED_INSIDE));
             } else {
-                Unit *targ = NULL;
+                Unit *targ = nullptr;
                 for (un_iter i = pendingjump[kk]->dest->getUnitList().createIterator();
                         (targ = (*i));
                         ++i) {
@@ -4305,7 +4279,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
             }
         }
     } else {
-        VS_LOG(warning, "Already jumped\n");
+        VS_LOG(warning, "Already jumped");
     }
     return ret;
 }

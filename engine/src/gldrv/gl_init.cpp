@@ -258,7 +258,7 @@ void init_opengl_extensions() {
 
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
     if (vsExtensionSupported("GL_EXT_compiled_vertex_array")
-            && game_options()->LockVertexArrays) {
+            && game_options()->lock_vertex_arrays) {
 #if defined(__APPLE__) && defined (__MACH__)
 #ifndef __APPLE_PANTHER_GCC33_CLI__
 #if defined (glLockArraysEXT) && defined (glUnlockArraysEXT)
@@ -440,7 +440,7 @@ void init_opengl_extensions() {
 #ifdef GL_FOG_DISTANCE_MODE_NV
     if (vsExtensionSupported("GL_NV_fog_distance")) {
         VS_LOG(trace, "OpenGL::Accurate Fog Distance supported");
-        switch (game_options()->fogdetail) {
+        switch (game_options()->fog_detail) {
             case 0:
                 glFogi(GL_FOG_DISTANCE_MODE_NV, GL_EYE_PLANE_ABSOLUTE_NV);
                 break;
@@ -561,14 +561,14 @@ static void initfov() {
     g_game.aspect = game_options()->aspect;
     g_game.znear = game_options()->znear;
     g_game.zfar = game_options()->zfar;
-    g_game.detaillevel = game_options()->ModelDetail;
-    g_game.use_textures = game_options()->UseTextures;
-    g_game.use_ship_textures = game_options()->UseShipTextures;
-    g_game.use_planet_textures = game_options()->UsePlanetTextures;
-    g_game.use_logos = game_options()->UseLogos;
-    g_game.use_sprites = game_options()->UseVSSprites;
-    g_game.use_animations = game_options()->UseAnimations;
-    g_game.use_videos = game_options()->UseVideos;
+    g_game.detaillevel = game_options()->model_detail;
+    g_game.use_textures = game_options()->use_textures;
+    g_game.use_ship_textures = game_options()->use_ship_textures;
+    g_game.use_planet_textures = game_options()->use_planet_textures;
+    g_game.use_logos = game_options()->use_logos;
+    g_game.use_sprites = game_options()->use_vs_sprites;
+    g_game.use_animations = game_options()->use_animations;
+    g_game.use_videos = game_options()->use_videos;
 
     /*
      *  FILE * fp = fopen ("glsetup.txt","r");
@@ -638,8 +638,8 @@ void GFXInit(int argc, char **argv) {
         VS_LOG(trace, "Using NPOT video textures");
     }*/
     // Removing gl_options soon
-    gl_options.smooth_shade = game_options()->SmoothShade;
-    gl_options.mipmap = game_options()->mipmapdetail;
+    gl_options.smooth_shade = game_options()->smooth_shade;
+    gl_options.mipmap = game_options()->mipmap_detail;
     gl_options.compression = game_options()->texture_compression;
     gl_options.Multitexture = game_options()->reflection;
     gl_options.smooth_lines = game_options()->smooth_lines;
@@ -737,7 +737,7 @@ void GFXInit(int argc, char **argv) {
     GFXCreateLightContext(con);
     //glutSetCursor(GLUT_CURSOR_NONE);
     /* Avoid scrambled screen on startup - Twice, for triple buffering */
-    if (game_options()->ClearOnStartup) {
+    if (game_options()->clear_on_startup) {
         glClear(GL_COLOR_BUFFER_BIT);
         winsys_swap_buffers();
         glClear(GL_COLOR_BUFFER_BIT);
@@ -766,7 +766,7 @@ void GFXShutdown() {
 
     GFXDestroyAllTextures();
     GFXDestroyAllLights();
-    if (gl_options.fullscreen) {
+    if (gl_options.full_screen) {
         winsys_shutdown();
     }
 }

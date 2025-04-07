@@ -174,7 +174,7 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
         autoLandingExcludeList_initialised = true;
         std::string excludes;
 
-        excludes = vs_config->getVariable("physics", "AutoLandingExcludeList", "");
+        excludes = vega_config::config->physics.auto_landing_exclude_list; /* default: "" */
         if (!excludes.empty()) {
             std::string::size_type pos = 0, epos = 0;
             while (epos != std::string::npos) {
@@ -183,7 +183,7 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
                 pos = epos + 1;
             }
         }
-        excludes = vs_config->getVariable("physics", "AutoLandingExcludeWarningList", "");
+        excludes = vega_config::config->physics.auto_landing_exclude_warning_list; /* default: "" */
         if (!excludes.empty()) {
             std::string::size_type pos = 0, epos = 0;
             while (epos != std::string::npos) {
@@ -229,21 +229,13 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
     } else if (dist < warnless) {
         if (lastwarned != target || !haswarned) {
             if (autoLandingExcludeWarningList.count(target->name) == 0) {
-                static string str = vs_config->getVariable("cockpitaudio", "automatic_landing_zone", "als");
-                static string str1 = vs_config->getVariable("cockpitaudio", "automatic_landing_zone1", "als");
-                static string str2 = vs_config->getVariable("cockpitaudio", "automatic_landing_zone2", "als");
-                static string autolandinga = vs_config->getVariable("graphics",
-                        "automatic_landing_zone_warning",
-                        "comm_docking.ani");
-                static string autolandinga1 = vs_config->getVariable("graphics",
-                        "automatic_landing_zone_warning1",
-                        "comm_docking.ani");
-                static string autolandinga2 = vs_config->getVariable("graphics",
-                        "automatic_landing_zone_warning2",
-                        "comm_docking.ani");
-                static string message = vs_config->getVariable("graphics",
-                        "automatic_landing_zone_warning_text",
-                        "Now Entering an \"Automatic Landing Zone\".");
+                const std::string str = vega_config::config->cockpit_audio.automatic_landing_zone; /* default: "als" */
+                const std::string str1 = vega_config::config->cockpit_audio.automatic_landing_zone1; /* default: "als" */
+                const std::string str2 = vega_config::config->cockpit_audio.automatic_landing_zone2; /* default: "als" */
+                const std::string autolandinga = vega_config::config->graphics.automatic_landing_zone_warning; /* default: "comm_docking.ani" */
+                const std::string autolandinga1 = vega_config::config->graphics.automatic_landing_zone_warning1; /* default: "comm_docking.ani" */
+                const std::string autolandinga2 = vega_config::config->graphics.automatic_landing_zone_warning2; /* default: "comm_docking.ani" */
+                const std::string message = vega_config::config->graphics.automatic_landing_zone_warning_text; /* default: "Now Entering an \"Automatic Landing Zone\"." */
                 UniverseUtil::IOmessage(0, "game", "all", message);
                 static Animation *ani0 = new Animation(autolandinga.c_str());
                 static Animation *ani1 = new Animation(autolandinga1.c_str());
@@ -378,15 +370,14 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 if (go == 0) {
                     static soundContainer ejectstopsound;
                     if (ejectstopsound.sound < 0) {
-                        static string
-                                str = vs_config->getVariable("cockpitaudio", "overload_stopped", "overload_stopped");
+                        const std::string str = vega_config::config->cockpit_audio.overload_stopped; /* default: "overload_stopped" */
                         ejectstopsound.loadsound(str);
                     }
                     ejectstopsound.playsound();
                 } else {
                     static soundContainer ejectsound;
                     if (ejectsound.sound < 0) {
-                        static string str = vs_config->getVariable("cockpitaudio", "overload", "overload");
+                        const std::string str = vega_config::config->cockpit_audio.overload; /* default: "overload" */
                         ejectsound.loadsound(str);
                     }
                     ejectsound.playsound();
@@ -515,10 +506,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::AUTOPILOT: {
             static int wasautopilot = 0;
             int abletoautopilot = 0;
-            static bool auto_valid =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics",
-                            "insystem_jump_or_timeless_auto-pilot",
-                            "false"));
+            const bool auto_valid = vega_config::config->physics.in_system_jump_or_timeless_auto_pilot; /* default: false */
             if (target) {
                 if (!auto_valid) {
                     abletoautopilot = (target->ftl_drive.Enabled());
@@ -539,18 +527,14 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 if (abletoautopilot == 0) {
                     static soundContainer autostopsound;
                     if (autostopsound.sound < 0) {
-                        static string str = vs_config->getVariable("cockpitaudio",
-                                "autopilot_available",
-                                "autopilot_available");
+                        const std::string str = vega_config::config->cockpit_audio.autopilot_available; /* default: "autopilot_available" */
                         autostopsound.loadsound(str);
                     }
                     autostopsound.playsound();
                 } else {
                     static soundContainer autosound;
                     if (autosound.sound < 0) {
-                        static string str = vs_config->getVariable("cockpitaudio",
-                                "autopilot_unavailable",
-                                "autopilot_unavailable");
+                        const std::string str = vega_config::config->cockpit_audio.autopilot_unavailable; /* default: "autopilot_unavailable" */
                         autosound.loadsound(str);
                     }
                     autosound.playsound();
@@ -1024,10 +1008,7 @@ bool GameCockpit::CanDrawNavSystem() {
 void GameCockpit::visitSystem(string systemname) {
     Cockpit::visitSystem(systemname);
     if (AccessNavSystem()) {
-        static bool AlwaysUpdateNavMap =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                        "update_nav_after_jump",
-                        "false"));                              //causes occasional crash--only may have tracked it down
+        const bool AlwaysUpdateNavMap = vega_config::config->graphics.update_nav_after_jump; // default: "false"                              //causes occasional crash--only may have tracked it down
         if (AlwaysUpdateNavMap) {
             AccessNavSystem()->pathman->updatePaths();
         }
@@ -1160,7 +1141,7 @@ int GameCockpit::Autopilot(Unit *target) {
     int retauto = 0;
     if (target) {
         if (enableautosound.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "autopilot_enabled", "autopilot");
+            const std::string str = vega_config::config->cockpit_audio.autopilot_enabled; /* default: "autopilot" */
             enableautosound.loadsound(str);
         }
         enableautosound.playsound();
@@ -1199,9 +1180,7 @@ int GameCockpit::Autopilot(Unit *target) {
                         AccessCamera(CP_FIXEDPOS)->SetOrientation(R, Q, -P);
                     }
 
-                    static float autotime = XMLSupport::parse_float(vs_config->getVariable("physics",
-                            "autotime",
-                            "10"));                    //10 seconds for auto to kick in;
+                    const float autotime = vega_config::config->physics.auto_time_in_seconds;
 
                     autopilot_time = autotime;
                     autopilot_target.SetUnit(target);
@@ -1227,9 +1206,9 @@ void GameCockpit::Shake(float amt, int dtype) {
 
 static void DrawDamageFlash(int dtype) {
     const int numtypes = 3;
-    static string shieldflash = vs_config->getVariable("graphics", "shield_flash_animation", "");
-    static string armorflash = vs_config->getVariable("graphics", "armor_flash_animation", "armorflash.ani");
-    static string hullflash = vs_config->getVariable("graphics", "hull_flash_animation", "hullflash.ani");
+    const std::string shieldflash = vega_config::config->graphics.shield_flash_animation; /* default: "" */);
+    const std::string armorflash = vega_config::config->graphics.armor_flash_animation; /* default: "armorflash.ani" */);
+    const std::string hullflash = vega_config::config->graphics.hull_flash_animation; /* default: "hullflash.ani" */);
     string flashes[numtypes];
     flashes[0] = shieldflash;
     flashes[1] = armorflash;
@@ -1583,10 +1562,8 @@ void GameCockpit::Draw() {
                 float driftmag = cockpitradial * oaccel.Magnitude();
 
                 //if (COCKPITZ_PARTITIONS>1) GFXClear(GFXFALSE,GFXFALSE,GFXTRUE);//only clear stencil buffer
-                static size_t COCKPITZ_PARTITIONS =
-                        XMLSupport::parse_int(vs_config->getVariable("graphics",
-                                "cockpit_z_partitions",
-                                "1"));                                         //Should not be needed if VERYNEAR_CONST is propperly set, but would be useful with stenciled inverse order rendering.
+                //Should not be needed if VERYNEAR_CONST is propperly set, but would be useful with stenciled inverse order rendering.
+                const size_t COCKPITZ_PARTITIONS = vega_config::config->graphics.cockpit_z_partitions; // default: "1"
                 float zrange = cockpitradial * (1 - VERYNEAR_CONST) + driftmag;
                 float zfloor = cockpitradial * VERYNEAR_CONST;
                 for (j = COCKPITZ_PARTITIONS; j > 0;
@@ -1780,11 +1757,11 @@ void GameCockpit::Draw() {
                                     }
                                 }
                                 /*else {
-                                 *  static string vdustatic=vs_config->getVariable("graphics","vdu_static","static.ani");
+                                 *  const std::string vdustatic = vega_config::config->graphics.vdu_static;
                                  *  static Animation vdu_ani(vdustatic.c_str(),true,.1,BILINEAR);
                                  *  static soundContainer ejectstopsound;
                                  *  if (ejectstopsound.sound<0) {
-                                 *  static string str=vs_config->getVariable("cockpitaudio","vdu_static","vdu_static");
+                                 *  const std::string str = vega_config::config->cockpit_audio.vdu_static;
                                  *  ejectstopsound.loadsound(str);
                                  *  }
                                  *  if (!AUDIsPlaying(ejectstopsound.sound)) {
@@ -1937,10 +1914,9 @@ void GameCockpit::Draw() {
                 }
                 GFXColor4f(1, 1, 1, 1);
 
-                static float min_die_time =
-                        vega_config::config->graphics.death_scene_time;
+                const float min_die_time = vega_config::config->graphics.death_scene_time;
                 if (dietime > min_die_time) {
-                    static std::string death_menu_script = vs_config->getVariable("graphics", "death_menu_script", "");
+                    const std::string death_menu_script = vega_config::config->graphics.death_menu_script; /* default: "" */
                     if (death_menu_script.empty()) {
                         static VSSprite DieSprite("died.sprite", BILINEAR, GFXTRUE);
                         static VSSprite DieCompatSprite("died.spr", BILINEAR, GFXTRUE);
@@ -1995,8 +1971,8 @@ void GameCockpit::Draw() {
             //GFXDisable(TEXTURE1);
             static float deadband = game_options()->mouse_deadband;
             static int revspr =
-                    XMLSupport::parse_bool(vs_config->getVariable("joystick", "reverse_mouse_spr", "true")) ? 1 : -1;
-            static string blah = vs_config->getVariable("joystick", "mouse_crosshair", "crosshairs.spr");
+                    vega_config::config->joystick.reverse_mouse_spr /* default: "true" */ ? 1 : -1;
+            const std::string blah = vega_config::config->joystick.mouse_crosshair; /* default: "crosshairs.spr" */
             static VSSprite MouseVSSprite(blah.c_str(), BILINEAR, GFXTRUE);
             float xcoord = (-1 + float(mousex) / (.5 * g_game.x_resolution));
             float ycoord = (-revspr + float(revspr * mousey) / (.5 * g_game.y_resolution));
@@ -2134,7 +2110,7 @@ void GameCockpit::UpdAutoPilot() {
         if (autopilot_time <= 0) {
             AccessCamera(CP_FIXED)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
             if (disableautosound.sound < 0) {
-                static string str = vs_config->getVariable("cockpitaudio", "autopilot_disabled", "autopilot_disabled");
+                const std::string str = vega_config::config->cockpit_audio.autopilot_disabled; /* default: "autopilot_disabled" */);
                 disableautosound.loadsound(str);
             }
             disableautosound.playsound();
@@ -2240,7 +2216,7 @@ void GameCockpit::ScrollAllVDU(int howmuch) {
 }
 
 void GameCockpit::SetStaticAnimation() {
-    static string comm_static = vs_config->getVariable("graphics", "comm_static", "static.ani");
+    const std::string comm_static = vega_config::config->graphics.comm_static; /* default: "static.ani" */);
     static Animation Statuc(comm_static.c_str());
     for (unsigned int i = 0; i < vdu.size(); i++) {
         if (vdu[i]->getMode() == VDU::COMM) {
@@ -2443,72 +2419,31 @@ void GameCockpit::SetupViewPort(bool clip) {
 
         //WARP-FOV link
         {
-            static float stable_lowarpref =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.loref", "1"));
-            static float stable_hiwarpref =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.hiref", "100000"));
-            static float stable_refexp =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.exp", "0.5"));
-            static bool stable_asymptotic =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "warp.fovlink.stable.asymptotic", "1"));
-            static float stable_offset_f =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.offset.front",
-                            "0"));
-            static float stable_offset_b =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.offset.back", "0"));
-            static float stable_offset_p =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.offset.perpendicular",
-                            "0"));
-            static float stable_multiplier_f =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.multiplier.front",
-                            "0.85"));
-            static float stable_multiplier_b =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.multiplier.back",
-                            "1.5"));
-            static float stable_multiplier_p =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.multiplier.perpendicular",
-                            "1.25"));
+            const float stable_lowarpref = vega_config::config->warp.fov_link.stable.loref; /* default: 1 */
+            const float stable_hiwarpref = vega_config::config->warp.fov_link.stable.hiref; /* default: 100000 */
+            const float stable_refexp = vega_config::config->warp.fov_link.stable.exp; /* default: 0.5 */
+            const bool stable_asymptotic = vega_config::config->warp.fov_link.stable.asymptotic; /* default: 1 */
+            const float stable_offset_f = vega_config::config->warp.fov_link.stable.offset.front; /* default: 0 */
+            const float stable_offset_b = vega_config::config->warp.fov_link.stable.offset.back; /* default: 0 */
+            const float stable_offset_p = vega_config::config->warp.fov_link.stable.offset.perpendicular; /* default: 0 */
+            const float stable_multiplier_f = vega_config::config->warp.fov_link.stable.multiplier.front; /* default: 0.85 */
+            const float stable_multiplier_b = vega_config::config->warp.fov_link.stable.multiplier.back; /* default: 1.5 */
+            const float stable_multiplier_p = vega_config::config->warp.fov_link.stable.multiplier.perpendicular; /* default: 1.25 */
 
-            static float shake_lowarpref =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.loref", "10000"));
-            static float shake_hiwarpref =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.hiref", "200000"));
-            static float shake_refexp =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.exp", "1.5"));
-            static bool shake_asymptotic =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "warp.fovlink.shake.asymptotic", "1"));
-            static float shake_speed =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.speed", "10"));
-            static float shake_offset_f =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.offset.front", "0"));
-            static float shake_offset_b =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.offset.back", "0"));
-            static float shake_offset_p =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.shake.offset.perpendicular",
-                            "0"));
-            static float shake_multiplier_f =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.shake.multiplier.front",
-                            "0"));
-            static float shake_multiplier_b =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.shake.multiplier.back",
-                            "0"));
-            static float shake_multiplier_p =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.shake.multiplier.perpendicular",
-                            "0"));
+            const float shake_lowarpref = vega_config::config->warp.fov_link.shake.loref; /* default: 10000 */
+            const float shake_hiwarpref = vega_config::config->warp.fov_link.shake.hiref; /* default: 200000 */
+            const float shake_refexp = vega_config::config->warp.fov_link.shake.exp; /* default: 1.5 */
+            const bool shake_asymptotic = vega_config::config->warp.fov_link.shake.asymptotic; /* default: 1 */
+            const float shake_speed = vega_config::config->warp.fov_link.shake.speed; /* default: 10 */
+            const float shake_offset_f = vega_config::config->warp.fov_link.shake.offset.front; /* default: 0 */
+            const float shake_offset_b = vega_config::config->warp.fov_link.shake.offset.back; /* default: 0 */
+            const float shake_offset_p = vega_config::config->warp.fov_link.shake.offset.perpendicular; /* default: 0 */
+            const float shake_multiplier_f = vega_config::config->warp.fov_link.shake.multiplier.front; /* default: 0 */
+            const float shake_multiplier_b = vega_config::config->warp.fov_link.shake.multiplier.back; /* default: 0 */
+            const float shake_multiplier_p = vega_config::config->warp.fov_link.shake.multiplier.perpendicular; /* default: 0 */
 
-            static float refkpsoverride =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.referencekps",
-                            "0"));                                       //0 means automatic
+            //0 means automatic
+            const float refkpsoverride = vega_config::config->warp.fov_link.reference_kps; /* default: 0 */
 
             static float theta = 0;
             theta += shake_speed * GetElapsedTime();
@@ -2570,8 +2505,7 @@ void GameCockpit::SetupViewPort(bool clip) {
             sh_offs *= sh_warpfieldstrength * costheta;
             st_mult = (1 - st_warpfieldstrength) + st_mult * st_warpfieldstrength;
             sh_mult *= sh_warpfieldstrength * costheta;
-            static float fov_smoothing =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.smoothing", ".4"));
+            const float fov_smoothing = vega_config::config->warp.fov_link.smoothing; /* default: .4 */
             float fov_smoot = pow(double(fov_smoothing), GetElapsedTime());
             smooth_fov =
                     min(170.0f,

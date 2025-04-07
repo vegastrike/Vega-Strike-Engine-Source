@@ -208,7 +208,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
     int bpp = 0; // Bits per pixel?
     int width, height;
-    if (gl_options.fullscreen) {
+    if (gl_options.full_screen) {
         video_flags |= SDL_WINDOW_FULLSCREEN;
     } else {
 #ifndef _WIN32
@@ -371,8 +371,8 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
 
     g_game.x_resolution = game_options()->x_resolution;
     g_game.y_resolution = game_options()->y_resolution;
-    gl_options.fullscreen = game_options()->fullscreen;
-    gl_options.color_depth = game_options()->colordepth;
+    gl_options.full_screen = game_options()->full_screen;
+    gl_options.color_depth = game_options()->color_depth;
     /*
      * Initialize SDL
      */
@@ -789,8 +789,8 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
     int glutWindow;
     g_game.x_resolution    = game_options()->x_resolution;
     g_game.y_resolution    = game_options()->y_resolution;
-    gl_options.fullscreen  = game_options()->fullscreen;
-    gl_options.color_depth = game_options()->colordepth;
+    gl_options.full_screen  = game_options()->full_screen;
+    gl_options.color_depth = game_options()->color_depth;
     glutInit( argc, argv );
     if (game_options()->glut_stencil) {
 #if defined(__APPLE__) && defined (__MACH__)
@@ -811,7 +811,7 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
                                 % glutGameModeGet(GLUT_GAME_MODE_PIXEL_DEPTH)
                                 % glutGameModeGet(GLUT_GAME_MODE_REFRESH_RATE)));
     /* Create a window */
-    if ( gl_options.fullscreen && (glutGameModeGet( GLUT_GAME_MODE_POSSIBLE ) != -1) ) {
+    if ( gl_options.full_screen && (glutGameModeGet( GLUT_GAME_MODE_POSSIBLE ) != -1) ) {
         glutInitWindowPosition( 0, 0 );
         glutEnterGameMode();
         VS_LOG(trace, (boost::format("Game Mode Params %1%x%2% at depth %3% @ %4% Hz")
@@ -843,7 +843,7 @@ void winsys_shutdown()
     static bool shutdown = false;
     if (!shutdown) {
         shutdown = true;
-        if (gl_options.fullscreen) {
+        if (gl_options.full_screen) {
             glutLeaveGameMode();
         }
     }

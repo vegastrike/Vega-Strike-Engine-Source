@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -306,9 +305,9 @@ CityLights::CityLights(float radius,
     setConvex(true);
     wrapx = zzwrapx;
     wrapy = zzwrapy;
-    FILTER filter =
-            (FILTER) XMLSupport::parse_int(vs_config->getVariable("graphics", "CityLightFilter",
-                    XMLSupport::tostring(((int) TRILINEAR))));
+    const std::string city_light_filter_string = vega_config::config->graphics.city_light_filter; // default: TRILINEAR -- 0x4
+    const int city_light_filter_int = XMLSupport::parse_int(city_light_filter_string);
+    FILTER filter = static_cast<FILTER>(city_light_filter_int);
     InitSphere(radius,
             stacks,
             slices,

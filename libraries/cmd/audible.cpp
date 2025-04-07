@@ -2,9 +2,8 @@
  * audible.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -42,12 +41,12 @@ Audible::Audible() {
         sounds[soundType] = -1;
     }
 
-    defaultSoundNames[SoundType::engine] = vs_config->getVariable("unitaudio", "afterburner", "sfx10.wav");
-    defaultSoundNames[SoundType::shield] = vs_config->getVariable("unitaudio", "shield", "sfx09.wav");
-    defaultSoundNames[SoundType::armor] = vs_config->getVariable("unitaudio", "armor", "sfx08.wav");
-    defaultSoundNames[SoundType::hull] = vs_config->getVariable("unitaudio", "armor", "sfx08.wav");
-    defaultSoundNames[SoundType::explosion] = vs_config->getVariable("unitaudio", "explode", "explosion.wav");
-    defaultSoundNames[SoundType::cloaking] = vs_config->getVariable("unitaudio", "cloak", "sfx43.wav");
+    defaultSoundNames[SoundType::engine] = vega_config::config->audio.unit_audio.afterburner; /* default: "sfx10.wav" */
+    defaultSoundNames[SoundType::shield] = vega_config::config->audio.unit_audio.shield; /* default: "sfx09.wav" */
+    defaultSoundNames[SoundType::armor] = vega_config::config->audio.unit_audio.armor; /* default: "sfx08.wav" */
+    defaultSoundNames[SoundType::hull] = vega_config::config->audio.unit_audio.armor; /* default: "sfx08.wav" */
+    defaultSoundNames[SoundType::explosion] = vega_config::config->audio.unit_audio.explode; /* default: "explosion.wav" */
+    defaultSoundNames[SoundType::cloaking] = vega_config::config->audio.unit_audio.cloak; /* default: "sfx43.wav" */
 }
 
 void Audible::addDefaultSounds() {

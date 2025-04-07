@@ -99,7 +99,7 @@ static unsigned int AddJumpAnimation(const QVector &pos, const float size, bool 
 
 void StarSystem::VolitalizeJumpAnimation(const int ani) {
     if (ani != -1) {
-        VolatileJumpAnimations.push_back(ResizeAni(JumpAnimations[ani].a, game_options()->jumpanimationshrink));
+        VolatileJumpAnimations.push_back(ResizeAni(JumpAnimations[ani].a, game_options()->jump_animation_shrink));
         JumpAnimations[ani].a = NULL;
         AnimationNulls.push_back(ani);
     }

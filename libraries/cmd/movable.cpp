@@ -744,9 +744,7 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
     static bool must_afterburn_to_buzz =
             vega_config::config->audio.buzzing_needs_afterburner;
     if (_Universe->isPlayerStarship(unit) != NULL) {
-        static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
-                "player_afterburner",
-                "sfx10.wav"), true);
+        static int playerengine = AUDCreateSound(vega_config::config->audio.unit_audio.player_afterburner /* default: "sfx10.wav" */, true);
         static float enginegain = vega_config::config->audio.afterburner_gain;
         if (afterburn != AUDIsPlaying(playerengine)) {
             if (afterburn) {

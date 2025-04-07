@@ -2693,7 +2693,7 @@ bool BaseComputer::newsPickerChangedSelection(const EventCommandId &command, Con
         desc->setText(cell->text());
     }
     //Turn on some cool music.
-    static string newssong = vs_config->getVariable("audio", "newssong", "../music/news1.ogg");
+    static string newssong = vega_config::config->audio.news_song;
     muzak->GotoSong(newssong);
     m_playingMuzak = true;
     return true;

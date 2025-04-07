@@ -168,9 +168,7 @@ MatchVelocity::~MatchVelocity() {
 }
 
 static bool getControlType() {
-    static bool control = XMLSupport::parse_bool(vs_config->getVariable("physics", "CarControl",
-            "false"
-    ));
+    const bool control = vega_config::config->physics.car_control /* default: "false" */;
     return control;
 }
 
@@ -182,10 +180,8 @@ FlyByWire::FlyByWire() : MatchVelocity(Vector(0, 0, 0), Vector(0, 0, 0), true, f
     stolen_setspeed = false;
     stolen_setspeed_value = 0;
 
-    static bool static_inertial_flight_model =
-            XMLSupport::parse_bool(vs_config->getVariable("flight", "inertial::initial", "false"));
-    static bool static_inertial_flight_enable =
-            XMLSupport::parse_bool(vs_config->getVariable("flight", "inertial::enable", "true"));
+    const bool static_inertial_flight_model = vega_config::config->flight.inertial.initial /* default: "false" */;
+    const bool static_inertial_flight_enable = vega_config::config->flight.inertial.enable /* default: "true" */;
     inertial_flight_model = static_inertial_flight_model;
     inertial_flight_enable = static_inertial_flight_enable;
 }

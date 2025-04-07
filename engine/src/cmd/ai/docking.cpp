@@ -35,13 +35,13 @@
 #include <string>
 
 static void DockedScript(Unit *docker, Unit *base) {
-    static string script = vs_config->getVariable("AI", "DockedToScript", "");
-    if (script.length() > 0) {
+    const std::string script = vega_config::config->ai.docked_to_script; /* default: "" */);
+    if (!script.empty()) {
         Unit *targ = docker->Target();
         docker->GetComputerData().target.SetUnit(base);
         UniverseUtil::setScratchUnit(docker);
         CompileRunPython(script);
-        UniverseUtil::setScratchUnit(NULL);
+        UniverseUtil::setScratchUnit(nullptr);
         docker->GetComputerData().target.SetUnit(targ);         //should be NULL;
     }
 }

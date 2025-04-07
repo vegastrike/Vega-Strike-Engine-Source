@@ -474,16 +474,10 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     static float targettimer = UniverseUtil::GetGameTime();    //timer used to determine passage of physics frames
     const float mintimetoswitch = vega_config::config->ai.targeting.min_time_to_switch_targets;
     const float minnulltimetoswitch = vega_config::config->ai.targeting.min_null_time_to_switch_targets;
-    static int minnumpollers =
-            float_to_int(XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Targetting",
-                    "MinNumberofpollersperframe",
-                    "5")));                    //maximum number of vessels allowed to search for a target in a given physics frame
-    static int maxnumpollers =
-            float_to_int(XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Targetting",
-                    "MaxNumberofpollersperframe",
-                    "49")));                    //maximum number of vessels allowed to search for a target in a given physics frame
+    //minimum number of vessels allowed to search for a target in a given physics frame
+    const int minnumpollers = vega_config::config->ai.targeting.min_number_of_pollers_per_frame /* default: 5 */;
+    //maximum number of vessels allowed to search for a target in a given physics frame
+    const int maxnumpollers = vega_config::config->ai.targeting.max_number_of_pollers_per_frame /* default: 49 */;
     static int numpollers[2] = {maxnumpollers, maxnumpollers};
 
     static int nextframenumpollers[2] = {maxnumpollers, maxnumpollers};
@@ -553,16 +547,11 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     std::sort(tbin.begin(), tbin.end());
     float efrel = 0;
     float mytargrange = FLT_MAX;
-    static float unitRad =
-            XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Targetting",
-                    "search_extra_radius",
-                    "1000"));                 //Maximum target radius that is guaranteed to be detected
+    //Maximum target radius that is guaranteed to be detected
+    const float unitRad = vega_config::config->ai.targeting.search_extra_radius; //Default: 1000.0
     const char maxrolepriority = vega_config::config->ai.targeting.search_max_role_priority;
-    static int maxtargets = XMLSupport::parse_int(vs_config->getVariable("AI",
-            "Targetting",
-            "search_max_candidates",
-            "64"));   //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
+    //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
+    const int maxtargets = vega_config::config->ai.targeting.search_max_candidates; //Default: 64
     UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->radar.GetMaxRange(), unitRad);
     StaticTuple<float, 2> maxranges{};
 
@@ -665,18 +654,12 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
         distance = dist;
     }
     const float firewhen = vega_config::config->ai.firing.in_weapon_range;
-    static float fireangle_minagg =
-            (float) cos(M_PI * XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Firing",
-                    "MaximumFiringAngle.minagg",
-                    "10"))
-                    / 180.);                                                                      //Roughly 10 degrees
-    static float fireangle_maxagg =
-            (float) cos(M_PI * XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Firing",
-                    "MaximumFiringAngle.maxagg",
-                    "18"))
-                    / 180.);                                                                      //Roughly 18 degrees
+    const float fireangle_minagg =
+            static_cast<float>(cos(M_PI * vega_config::config->ai.firing.maximum_firing_angle.minagg /* default: "10" */
+                / 180.));                                                                      //Roughly 10 degrees
+    const float fireangle_maxagg =
+            static_cast<float>(cos(M_PI * vega_config::config->ai.firing.maximum_firing_angle.maxagg /* default: "18" */
+                / 180.));                                                                      //Roughly 18 degrees
     float temp = parent->TrackingGuns(missilelock);
     bool isjumppoint = targ->isUnit() == Vega_UnitType::planet && ((Planet *) targ)->GetDestinations().empty() == false;
     float fangle = (fireangle_minagg + fireangle_maxagg * agg) / (1.0f + agg);

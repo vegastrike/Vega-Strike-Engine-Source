@@ -416,8 +416,7 @@ bool Armed::TargetLocked(const Unit *checktarget) const {
 
 bool Armed::TargetTracked(const Unit *checktarget) {
     Unit *unit = static_cast<Unit *>(this);
-    static bool must_lock_to_autotrack = XMLSupport::parse_bool(
-            vs_config->getVariable("physics", "must_lock_to_autotrack", "true"));
+    const bool must_lock_to_autotrack = vega_config::config->physics.must_lock_to_autotrack; // default: "true"
 
     bool we_do_track = unit->radar.tracking_active
             && (!_Universe->isPlayerStarship(unit) || TargetLocked() || !must_lock_to_autotrack);
