@@ -85,11 +85,10 @@ float word_length(const char *str) {
 }
 
 void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
-    static float rescale_font = vega_config::config->graphics.gui_font_scale;
-    float font_size_float = rescale_font * 5. / 100;
+    const float font_size_float = vega_config::config->graphics.gui_font_scale * 5.0F / 100.0F;
 
     int cur;
-    float font_size = size * rescale_font;
+    float font_size = size * vega_config::config->graphics.gui_font_scale;
     float width = 0;
     float cur_width = 0;
     float end = 0;
@@ -101,7 +100,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
         glEnable(GL_LINE_SMOOTH);
     }
     glLineWidth(wid);
-    float page_wid = wid / rescale_font;
+    float page_wid = wid / vega_config::config->graphics.gui_font_scale;
     glTranslatef(x, y, 0);
     glScalef(font_size, font_size, 1);
     end = no_end ? 0 : glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');

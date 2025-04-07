@@ -151,8 +151,6 @@ void Logo::ProcessDrawQueue() {
     if (!g_game.use_logos || draw_queue->empty()) {
         return;
     }
-    const float offs = vega_config::config->graphics.LogoOffset;
-    const float scl = vega_config::config->graphics.LogoOffsetScale;
 
     GFXEnable(TEXTURE0);
     GFXEnable(TEXTURE1);
@@ -160,7 +158,7 @@ void Logo::ProcessDrawQueue() {
     GFXDisable(DEPTHWRITE);
     GFXDisable(LIGHTING);
     GFXColor4f(1, 1, 1, 1);
-    GFXPolygonOffset(offs, scl);
+    GFXPolygonOffset(vega_config::config->graphics.logo_offset, vega_config::config->graphics.logo_offset_scale);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     //GFXBlendMode(ONE,ZERO);
     DrawContext c = draw_queue->back();

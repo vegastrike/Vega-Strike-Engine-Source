@@ -364,7 +364,7 @@ void Background::Draw() {
                     tex = _Universe->getLightMap();
                 }
                 const int numpasses = 1;
-                static float edge_fixup =
+                const float edge_fixup =
                         vega_config::config->graphics.background_edge_fixup;
                 const float ms = 0.f, Ms = 1.f - edge_fixup / tex->boundSizeX;
                 const float mt = 0.f, Mt = 1.f - edge_fixup / tex->boundSizeY;
@@ -479,7 +479,7 @@ void Background::Draw() {
     GFXDisable(TEXTURE1);
     GFXDisable(DEPTHWRITE);
     GFXBlendMode(ONE, ONE);
-    static float background_velocity_scale =
+    const float background_velocity_scale =
             vega_config::config->graphics.background_star_streak_velocity_scale;
     stars->DrawAll(QVector(0, 0, 0), _Universe->AccessCamera()->GetVelocity().Scale(
             background_velocity_scale), _Universe->AccessCamera()->GetAngularVelocity(), true, true);

@@ -197,10 +197,10 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
     if (autoLandingExcludeList.find(tname) != autoLandingExcludeList.end()) {
         return;
     }
-    const float lessthan = vega_config::config->physics.AutoLandingDockDistance;
-    const float warnless = vega_config::config->physics.AutoLandingWarningDistance;
-    const float AutoLandingMoveDistance = vega_config::config->physics.AutoLandingMoveDistance;
-    const float moveout = vega_config::config->physics.AutoLandingDisplaceDistance;
+    const float lessthan = vega_config::config->physics.auto_landing_dock_distance;
+    const float warnless = vega_config::config->physics.auto_landing_warning_distance;
+    const float auto_landing_move_distance = vega_config::config->physics.auto_landing_move_distance;
+    const float moveout = vega_config::config->physics.auto_landing_displace_distance;
     const float autorad = vega_config::config->physics.unit_default_autodock_radius;
     const bool adjust_unit_radius = vega_config::config->physics.use_unit_autodock_radius;
     float rsize = target->isPlanet() ? target->rSize() : (autorad + (adjust_unit_radius ? target->rSize() : 0));
@@ -213,7 +213,7 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
     static float docktime = -FLT_MAX;
     if (dist < lessthan && haswarned && lastwarned == target) {
         //CrashForceDock(target,un,true);
-        un->SetPosAndCumPos(target->Position() + diffvec.Scale(un->rSize() + rsize + AutoLandingMoveDistance));
+        un->SetPosAndCumPos(target->Position() + diffvec.Scale(un->rSize() + rsize + auto_landing_move_distance));
         FireKeyboard::DockKey(KBData(), PRESS);
         haswarned = false;
         lastwarned = target;
@@ -274,7 +274,7 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
 }
 
 void GameCockpit::AutoLanding() {
-    const bool autolanding_enable = vega_config::config->physics.AutoLandingEnable;
+    const bool autolanding_enable = vega_config::config->physics.auto_landing_enable;
     if (autolanding_enable) {
         Unit *player = GetParent();
         if (player == NULL) {
@@ -1194,8 +1194,8 @@ int GameCockpit::Autopilot(Unit *target) {
 extern void reset_time_compression(const KBData &, KBSTATE a);
 
 void GameCockpit::Shake(float amt, int dtype) {
-    static float shak = vega_config::config->graphics.cockpit_shake;
-    static float shak_max = vega_config::config->graphics.cockpit_shake_max;
+    const float shak = vega_config::config->graphics.cockpit_shake;
+    const float shak_max = vega_config::config->graphics.cockpit_shake_max;
     shakin += shak;
     if (shakin > shak_max) {
         shakin = shak_max;
@@ -1206,9 +1206,9 @@ void GameCockpit::Shake(float amt, int dtype) {
 
 static void DrawDamageFlash(int dtype) {
     const int numtypes = 3;
-    const std::string shieldflash = vega_config::config->graphics.shield_flash_animation; /* default: "" */);
-    const std::string armorflash = vega_config::config->graphics.armor_flash_animation; /* default: "armorflash.ani" */);
-    const std::string hullflash = vega_config::config->graphics.hull_flash_animation; /* default: "hullflash.ani" */);
+    const std::string shieldflash = vega_config::config->graphics.shield_flash_animation; /* default: "" */
+    const std::string armorflash = vega_config::config->graphics.armor_flash_animation; /* default: "armorflash.ani" */
+    const std::string hullflash = vega_config::config->graphics.hull_flash_animation; /* default: "hullflash.ani" */
     string flashes[numtypes];
     flashes[0] = shieldflash;
     flashes[1] = armorflash;
@@ -1237,9 +1237,7 @@ static void DrawDamageFlash(int dtype) {
         int i = dtype;
         if (aflashes[i]) {
             GFXPushBlendMode();
-            static bool damage_flash_alpha =
-                    vega_config::config->graphics.damage_flash_alpha;
-            if (damage_flash_alpha) {
+            if (vega_config::config->graphics.damage_flash_alpha) {
                 GFXBlendMode(SRCALPHA, INVSRCALPHA);
             } else {
                 GFXBlendMode(ONE, ZERO);
@@ -1433,8 +1431,8 @@ void GameCockpit::Draw() {
                     delta = delta * howFarToJump() * 1.01 - (par ? (par->Position()) : QVector(0, 0, 0));
                     destination_system_location = delta.Cast();
                     Vector P, Q, R;
-                    static float nav_symbol_size =
-                            vega_config::config->graphics.nav_symbol_size;
+                    const float nav_symbol_size =
+                            vega_config::config->graphics.nav.symbol_size;
                     AccessCamera()->GetPQR(P, Q, R);
 
                     GFXColor4f(destination_system_color.r,
@@ -1490,27 +1488,17 @@ void GameCockpit::Draw() {
                 headtrans.push_back(Matrix());
                 VectorAndPositionToMatrix(headtrans.back(), -P, Q, R, QVector(0, 0, 0));
                 static float theta = 0, wtheta = 0;
-                static float shake_speed =
-                        vega_config::config->graphics.shake_speed;
-                static float shake_reduction =
-                        vega_config::config->graphics.shake_reduction;
-                static float shake_limit =
-                        vega_config::config->graphics.shake_limit;
-                static float shake_mag =
-                        vega_config::config->graphics.shake_magnitude;
-                static float drift_limit =
-                        vega_config::config->graphics.cockpit_drift_limit;
-                static float drift_amount =
-                        vega_config::config->graphics.cockpit_drift_amount;
-                static float drift_ref_accel =
-                        vega_config::config->graphics.cockpit_drift_ref_accel;
+                const float shake_speed = vega_config::config->graphics.shake_speed;
+                const float shake_reduction = vega_config::config->graphics.shake_reduction;
+                const float shake_limit = vega_config::config->graphics.shake_limit;
+                const float shake_mag = vega_config::config->graphics.shake_magnitude;
+                const float drift_limit = vega_config::config->graphics.cockpit_drift_limit;
+                const float drift_amount = vega_config::config->graphics.cockpit_drift_amount;
+                const float drift_ref_accel = vega_config::config->graphics.cockpit_drift_ref_accel;
 
-                static float warp_shake_mag =
-                        vega_config::config->graphics.warp_shake_magnitude;
-                static float warp_shake_speed =
-                        vega_config::config->graphics.warp_shake_speed;
-                static float warp_shake_ref =
-                        vega_config::config->graphics.warp_shake_ref;
+                const float warp_shake_mag = vega_config::config->graphics.warp_shake_magnitude;
+                const float warp_shake_speed = vega_config::config->graphics.warp_shake_speed;
+                static float warp_shake_ref = vega_config::config->graphics.warp_shake_ref;
                 if (warp_shake_ref <= 0) {
                     warp_shake_ref = 1;
                 }
@@ -1595,10 +1583,8 @@ void GameCockpit::Draw() {
                 ->UpdateGFX(GFXFALSE, GFXFALSE, GFXTRUE, GFXFALSE, 0, 1000000);         //Restore normal frustrum
     }
     GFXHudMode(true);
-    static float damage_flash_length =
-            vega_config::config->graphics.damage_flash_length;
-    static bool
-            damage_flash_first = vega_config::config->graphics.flash_behind_hud;
+    const float damage_flash_length = vega_config::config->graphics.damage_flash_length;
+    const bool damage_flash_first = vega_config::config->graphics.flash_behind_hud;
     if (view < CP_CHASE && damage_flash_first && getNewTime() - shake_time < damage_flash_length) {
         DrawDamageFlash(shake_type);
     }
@@ -1633,28 +1619,28 @@ void GameCockpit::Draw() {
 
     RestoreViewPort();
 
-    static bool blend_panels = vega_config::config->graphics.blend_panels;
-    static bool blend_cockpit = vega_config::config->graphics.blend_cockpit;
-    static bool drawChaseVDU =
+    const bool blend_panels = vega_config::config->graphics.blend_panels;
+    const bool blend_cockpit = vega_config::config->graphics.blend_cockpit;
+    const bool drawChaseVDU =
             vega_config::config->graphics.draw_vdus_from_chase_cam;
-    static bool drawPanVDU =
+    const bool drawPanVDU =
             vega_config::config->graphics.draw_vdus_from_panning_cam;
-    static bool drawTgtVDU =
+    const bool drawTgtVDU =
             vega_config::config->graphics.draw_vdus_from_target_cam;
-    static bool drawPadVDU =
+    const bool drawPadVDU =
             vega_config::config->graphics.draw_vdus_from_padlock_cam;
 
-    static bool drawChasecp =
+    const bool drawChasecp =
             vega_config::config->graphics.draw_cockpit_from_chase_cam;
-    static bool drawPancp =
+    const bool drawPancp =
             vega_config::config->graphics.draw_cockpit_from_panning_cam;
-    static bool drawTgtcp =
+    const bool drawTgtcp =
             vega_config::config->graphics.draw_cockpit_from_target_cam;
-    static bool drawPadcp =
+    const bool drawPadcp =
             vega_config::config->graphics.draw_cockpit_from_padlock_cam;
 
-    static float
-            AlphaTestingCutoff = vega_config::config->graphics.AlphaTestCutoff;
+    const float
+            AlphaTestingCutoff = vega_config::config->graphics.bases.alpha_test_cutoff;
     if (blend_cockpit) {
         GFXAlphaTest(ALWAYS, 0);
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -1906,9 +1892,7 @@ void GameCockpit::Draw() {
                     text->SetPos(0 - (x * 2 * 14), 0 - (y * 2));
                 }
                 GFXColorf(textcol);
-                static bool show_died_text =
-                        vega_config::config->graphics.show_respawn_text;
-                if (show_died_text) {
+                if (vega_config::config->graphics.show_respawn_text) {
                     text->Draw(
                             "#ff5555You Have Died!\n#000000Press #8080FF;#000000 (semicolon) to respawn\nOr Press #8080FFEsc and 'q'#000000 to quit");
                 }
@@ -1952,12 +1936,12 @@ void GameCockpit::Draw() {
     //CommandInterpretor.renderconsole();
     //}
     GFXAlphaTest(ALWAYS, 0);
-    static bool mouseCursor = vega_config::config->joystick.mouse_cursor;
-    static bool mousecursor_pancam =
+    const bool mouseCursor = vega_config::config->joystick.mouse_cursor;
+    const bool mousecursor_pancam =
             vega_config::config->joystick.mouse_cursor_pancam;
-    static bool mousecursor_pantgt =
+    const bool mousecursor_pantgt =
             vega_config::config->joystick.mouse_cursor_pantgt;
-    static bool mousecursor_chasecam =
+    const bool mousecursor_chasecam =
             vega_config::config->joystick.mouse_cursor_chasecam;
     if (mouseCursor && screenshotkey == false) {
         if ((view == CP_PAN
@@ -2081,7 +2065,7 @@ string GameCockpit::getsoundfile(string sound) {
 void SetStartupView(Cockpit *);
 
 void GameCockpit::UpdAutoPilot() {
-    static bool autopan = vega_config::config->graphics.pan_on_auto;
+    const bool autopan = vega_config::config->graphics.pan_on_auto;
     if (autopilot_time != 0) {
         autopilot_time -= SIMULATION_ATOM;
         {
@@ -2089,12 +2073,9 @@ void GameCockpit::UpdAutoPilot() {
                 Vector origR = Vector(0, 0, 1);
                 Vector origP = Vector(1, 0, 0);
 
-                static float rotspd =
-                        vega_config::config->graphics.autopilot_rotation_speed;
-
                 static float curtime = 0;
                 curtime += SIMULATION_ATOM;
-                float ang = curtime * rotspd;
+                float ang = curtime * vega_config::config->graphics.autopilot_rotation_speed;
                 origR.Yaw(ang);
                 origP.Yaw(ang);
                 Vector origQ = Vector(0, 1, 0);
@@ -2102,15 +2083,13 @@ void GameCockpit::UpdAutoPilot() {
                 origQ.Normalize();
                 origR.Normalize();
                 AccessCamera(CP_FIXED)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));                 //hack
-                static float initialzoom =
-                        vega_config::config->graphics.inital_zoom_factor;
-                zoomfactor = initialzoom;
+                zoomfactor = vega_config::config->graphics.initial_zoom_factor;
             }
         }
         if (autopilot_time <= 0) {
             AccessCamera(CP_FIXED)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
             if (disableautosound.sound < 0) {
-                const std::string str = vega_config::config->cockpit_audio.autopilot_disabled; /* default: "autopilot_disabled" */);
+                const std::string str = vega_config::config->cockpit_audio.autopilot_disabled; /* default: "autopilot_disabled" */
                 disableautosound.loadsound(str);
             }
             disableautosound.playsound();
@@ -2140,9 +2119,9 @@ void SwitchUnits2(Unit *nw) {
         nw->SetTurretAI();
         nw->DisableTurretAI();
 
-        static bool LoadNewCockpit =
-                vega_config::config->graphics.UnitSwitchCockpitChange;
-        const bool DisCockpit = vega_config::config->graphics.SwitchCockpitToDefaultOnUnitSwitch;
+        const bool LoadNewCockpit =
+                vega_config::config->graphics.unit_switch_cockpit_change;
+        const bool DisCockpit = vega_config::config->graphics.switch_cockpit_to_default_on_unit_switch;
         if (nw->getCockpit().length() > 0 || DisCockpit) {
             _Universe->AccessCockpit()->Init(nw->getCockpit().c_str(), LoadNewCockpit == false);
         }
@@ -2216,7 +2195,7 @@ void GameCockpit::ScrollAllVDU(int howmuch) {
 }
 
 void GameCockpit::SetStaticAnimation() {
-    const std::string comm_static = vega_config::config->graphics.comm_static; /* default: "static.ani" */);
+    const std::string comm_static = vega_config::config->graphics.comm_static; /* default: "static.ani" */
     static Animation Statuc(comm_static.c_str());
     for (unsigned int i = 0; i < vdu.size(); i++) {
         if (vdu[i]->getMode() == VDU::COMM) {
@@ -2287,7 +2266,7 @@ static void ShoveCamBelowUnit(int cam, Unit *un, float zoomfactor) {
     QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
     Vector p, q, r;
     _Universe->AccessCamera(cam)->GetOrientation(p, q, r);
-    static float
+    const float
             ammttoshovecam = vega_config::config->graphics.shove_camera_down;
     _Universe->AccessCamera(cam)->SetPosition(
             unpos - (r - ammttoshovecam * q).Cast() * (un->rSize() + g_game.znear * 2) * zoomfactor,
@@ -2419,8 +2398,8 @@ void GameCockpit::SetupViewPort(bool clip) {
 
         //WARP-FOV link
         {
-            const float stable_lowarpref = vega_config::config->warp.fov_link.stable.loref; /* default: 1 */
-            const float stable_hiwarpref = vega_config::config->warp.fov_link.stable.hiref; /* default: 100000 */
+            const float stable_lowarpref = vega_config::config->warp.fov_link.stable.low_ref; /* default: 1 */
+            float stable_hiwarpref = vega_config::config->warp.fov_link.stable.high_ref; /* default: 100000 */
             const float stable_refexp = vega_config::config->warp.fov_link.stable.exp; /* default: 0.5 */
             const bool stable_asymptotic = vega_config::config->warp.fov_link.stable.asymptotic; /* default: 1 */
             const float stable_offset_f = vega_config::config->warp.fov_link.stable.offset.front; /* default: 0 */
@@ -2430,8 +2409,8 @@ void GameCockpit::SetupViewPort(bool clip) {
             const float stable_multiplier_b = vega_config::config->warp.fov_link.stable.multiplier.back; /* default: 1.5 */
             const float stable_multiplier_p = vega_config::config->warp.fov_link.stable.multiplier.perpendicular; /* default: 1.25 */
 
-            const float shake_lowarpref = vega_config::config->warp.fov_link.shake.loref; /* default: 10000 */
-            const float shake_hiwarpref = vega_config::config->warp.fov_link.shake.hiref; /* default: 200000 */
+            const float shake_lowarpref = vega_config::config->warp.fov_link.shake.low_ref; /* default: 10000 */
+            float shake_hiwarpref = vega_config::config->warp.fov_link.shake.high_ref; /* default: 200000 */
             const float shake_refexp = vega_config::config->warp.fov_link.shake.exp; /* default: 1.5 */
             const bool shake_asymptotic = vega_config::config->warp.fov_link.shake.asymptotic; /* default: 1 */
             const float shake_speed = vega_config::config->warp.fov_link.shake.speed; /* default: 10 */

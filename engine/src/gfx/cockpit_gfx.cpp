@@ -748,7 +748,7 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
             || ( target->isPlanet() && ( (Planet*) target )->isAtmospheric()
                 && ( draw_jump_nav_symbol
                      || target->GetDestinations().empty() ) ) || !sensor.InRange(track)) ) {
-        const float nav_symbol_size = vega_config::config->graphics.nav_symbol_size; /* default: .25 */
+        const float nav_symbol_size = vega_config::config->graphics.nav.symbol_size; /* default: .25 */
         GFXColor4f( 1, 1, 1, 1 );
         DrawNavigationSymbol( Loc, CamP, CamQ, Loc.Magnitude()*nav_symbol_size );
         nav_symbol = true;

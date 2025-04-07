@@ -292,11 +292,11 @@ string getRes(string inp) {
 }
 
 void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
-    static bool cockpit_smooth =
+    const bool cockpit_smooth =
             vega_config::config->graphics.cockpit_smooth_texture;
-    static bool panel_smooth =
+    const bool panel_smooth =
             vega_config::config->graphics.panel_smooth_texture;
-    static bool crosshair_smooth =
+    const bool crosshair_smooth =
             vega_config::config->graphics.crosshair_smooth_texture;
     AttributeList::const_iterator iter;
     Gauge::DIRECTION tmpdir = Gauge::GAUGE_UP;

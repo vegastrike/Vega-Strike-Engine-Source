@@ -232,7 +232,7 @@ bool Animation::CalculateOrientation(Matrix &result) {
     QVector pos(Position());
     float hei = height;
     float wid = width;
-    const float HaloOffset = vega_config::config->graphics.HaloOffset;
+    const float halo_offset = vega_config::config->graphics.halo_offset;
     bool retval =
             ::CalculateOrientation(pos,
                     camp,
@@ -240,7 +240,7 @@ bool Animation::CalculateOrientation(Matrix &result) {
                     camr,
                     wid,
                     hei,
-                    (options & ani_close) ? HaloOffset : 0,
+                    (options & ani_close) ? halo_offset : 0,
                     false,
                     (options & ani_up) ? NULL : &local_transformation);
 
@@ -460,7 +460,7 @@ void Animation::Draw() {
         Vector camp, camq, camr;
         QVector pos(Position());
 
-        const float HaloOffset = vega_config::config->graphics.HaloOffset;
+        const float halo_offset = vega_config::config->graphics.halo_offset;
 
         /**/
         //Why do all this if we can use ::CalculateOrientation?
@@ -469,11 +469,11 @@ void Animation::Draw() {
                 _Universe->AccessCamera()->GetR().k);
         const float too_far_dist = vega_config::config->graphics.anim_far_percent; // default: ".8"
         if (( /*R.Dot*/ (Position()
-                - _Universe->AccessCamera()->GetPosition()).Magnitude() + HaloOffset
+                - _Universe->AccessCamera()->GetPosition()).Magnitude() + halo_offset
                 *
                         (height > width ? height : width)) <
                 too_far_dist * g_game.zfar) {
-            //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {ss
+            //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?halo_offset:0,false)) {ss
             animationdrawqueue.push_back(this);
         } else {
             far_animationdrawqueue.push_back(this);

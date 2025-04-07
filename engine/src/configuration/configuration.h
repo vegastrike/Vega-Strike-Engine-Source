@@ -80,9 +80,6 @@ namespace vega_config {
     } general;
 
     struct {
-        int resolution_x = 1920;
-        int resolution_y = 1080;
-        int screen = 0;
         double afterburner_color_red = 1.0;
         double afterburner_color_green = 0.0;
         double afterburner_color_blue = 0.0;
@@ -96,13 +93,20 @@ namespace vega_config {
         std::string automatic_landing_zone_warning1 = "comm_docking.ani";
         std::string automatic_landing_zone_warning2 = "comm_docking.ani";
         std::string automatic_landing_zone_warning_text = "Now Entering an \"Automatic Landing Zone\".";
+        double autopilot_front_bias = 1.65;
+        double autopilot_rotation_speed = 0.15;
+        double autopilot_side_bias = 1.1;
         bool background = true;
+        double background_edge_fixup = 2.0;
+        double background_star_streak_velocity_scale = 0.01;
         double base_faction_color_darkness = 0.75;
         double beam_fadeout_length = 0.8;
         double beam_fadeout_hit_length = 0.95;
         double base_saturation = 1.0;
         bool bitmap_alphamap = true;
+        bool blend_cockpit = false;
         bool blend_guns = true;
+        bool blend_panels = true;
         double bolt_offset = -0.2;
         double bolt_pixel_size = 0.5;
         double camera_pan_speed = 0.0001;
@@ -116,9 +120,18 @@ namespace vega_config {
         double city_light_strength = 10.0;
         bool clear_on_startup = true;
         bool cockpit = true;
+        double cockpit_drift_amount = 0.05;
+        double cockpit_drift_limit = 1.0;
+        double cockpit_drift_ref_accel = 100.0;
+        double cockpit_shake = 3.0;
+        double cockpit_shake_max = 20.0;
+        bool cockpit_smooth_texture = false;
         int cockpit_z_partitions = 1;
         int color_depth = 32;
         std::string comm_static = "static.ani";
+        bool crosshair_smooth_texture = true;
+        bool damage_flash_alpha = true;
+        double damage_flash_length = 0.1;
         double day_city_light_strength = 0.0;
         std::string death_menu_script = "";
         double death_scene_time = 4.0;
@@ -128,6 +141,10 @@ namespace vega_config {
         bool detail_texture_trilinear = true;
         bool disabled_cockpit_allowed = true;
         bool displaylists = false;
+        bool draw_cockpit_from_chase_cam = false;
+        bool draw_cockpit_from_padlock_cam = false;
+        bool draw_cockpit_from_panning_cam = false;
+        bool draw_cockpit_from_target_cam = false;
         bool draw_docking_boxes = true;
         bool draw_heading_marker = false;
         bool draw_jump_target_nav_symbol = true;
@@ -137,6 +154,10 @@ namespace vega_config {
         bool draw_star_glow = true;
         bool draw_star_glow_halo = false;
         bool draw_target_nav_symbol = true;
+        bool draw_vdus_from_chase_cam = false;
+        bool draw_vdus_from_padlock_cam = false;
+        bool draw_vdus_from_panning_cam = false;
+        bool draw_vdus_from_target_cam = false;
         bool draw_weapons = false;
         double eject_rotation_speed = 0.0;
         double engine_color_red = 1.0;
@@ -154,8 +175,10 @@ namespace vega_config {
         bool faction_dependent_textures = true;
         double far_stars_sprite_size = 2.0;
         std::string far_stars_sprite_texture = "";
+        bool flash_behind_hud = true;
         int fog_detail = 2;
         std::string font = "helvetica12";
+        bool font_antialias = false;
         double font_point = 16.0;
         double font_width_hack = 0.925;
         bool force_lighting = true;
@@ -169,11 +192,14 @@ namespace vega_config {
         bool glow_ambient_star_light = false;
         bool glow_diffuse_star_light = false;
         bool glut_stencil = true;
+        double gui_font_scale = 0.75;
         bool halo_far_draw = false;
+        double halo_offset = 0.5;
         double halo_sparkle_rate = 20.0;
         double halo_sparkle_scale = 6.0;
         double halo_sparkle_speed = 0.5;
         bool halos_by_velocity = false;
+        int head_lag = 3;
         bool high_quality_font = true;
         bool high_quality_font_computer = true;
         std::string hull_flash_animation = "armorflash.ani";
@@ -192,6 +218,9 @@ namespace vega_config {
         double light_saturation = 0.95;
         bool lock_significant_target_box = true;
         bool lock_vertex_arrays = false;
+        double locklight_time = 1.0;
+        double logo_offset = -4.0;
+        double logo_offset_scale = -30.8;
         std::string mac_shader_name = "mac";
         bool main_menu = false;
         int max_cubemap_size = 1024;
@@ -214,6 +243,8 @@ namespace vega_config {
         bool open_picker_categories = false;
         bool optimize_vertex_arrays = false;
         double optimize_vertex_condition = 4.0;
+        bool pan_on_auto = false;
+        bool panel_smooth_texture = true;
         double percent_afterburner_color_change = 0.5;
         double percent_halo_fade_in = 0.5;
         double percent_shockwave = 0.5;
@@ -226,11 +257,18 @@ namespace vega_config {
         double reduced_vdus_height = 0.0;
         bool reflection = true;
         double reflectivity = 0.8;
+        int resolution_x = 1920;
+        int resolution_y = 1080;
         std::string rgb_pixel_format = "undefined";
+        int screen = 0;
         bool s3tc = true;
         bool separate_specular_color = false;
         bool set_raster_text_color = true;
         std::string shader_name = "default";
+        double shake_limit = 25.0;
+        double shake_magnitude = 0.3;
+        double shake_reduction = 8.0;
+        double shake_speed = 50.0;
         bool shared_vertex_arrays = true;
         int shield_detail_level = 24;
         std::string shield_flash_animation = "";
@@ -238,6 +276,8 @@ namespace vega_config {
         std::string shield_texture = "shield.bmp";
         std::string shockwave_animation = "explosion_wave.ani";
         double shockwave_growth = 1.05;
+        double shove_camera_down = 0.3;
+        bool show_respawn_text = false;
         bool show_stardate = true;
         bool smooth_lines = false;
         bool smooth_points = true;
@@ -258,11 +298,14 @@ namespace vega_config {
         bool stars_dont_move = true;
         std::string startup_cockpit_view = "front";
         double stretch_bolts = 0.5;
+        bool switch_cockpit_to_default_on_unit_switch = true;
         std::string technique_set = "6_ps4.0";
         double text_delay = 0.05;
+        bool text_display_lists = true;
         double text_speed = 0.025;
         std::string texture = "supernova.bmp";
         int texture_compression = 0;
+        bool unit_switch_cockpit_change = false;
         std::string unprintable_faction_extension = "citizen";
         std::string unprintable_factions = "";
         bool update_nav_after_jump = false;
@@ -280,6 +323,9 @@ namespace vega_config {
         bool use_vs_sprites = true;
         bool use_wireframe = false;
         bool vbo = true;
+        double warp_shake_magnitude = 0.125;
+        double warp_shake_ref = 2000.0;
+        double warp_shake_speed = 70.0;
         double warp_stretch_cutoff = 50000.0;
         double warp_stretch_max = 2.0;
         double warp_stretch_max_region0_speed = 240000.0;
@@ -429,6 +475,7 @@ namespace vega_config {
         struct {
             bool modern_mouse_cursor = true;
             std::string mouse_cursor_sprite = "mouse.spr";
+            double symbol_size = 0.25;
 
         } nav;
 
@@ -923,6 +970,10 @@ namespace vega_config {
         double joystick_exponent = 1.0;
         double mouse_blur = 0.025;
         std::string mouse_crosshair = "crosshairs.spr";
+        bool mouse_cursor = false;
+        bool mouse_cursor_chasecam = true;
+        bool mouse_cursor_pancam = false;
+        bool mouse_cursor_pantgt = false;
         double mouse_deadband = 0.025;
         double mouse_exponent = 3.0;
         double mouse_sensitivity = 50.0;
@@ -962,7 +1013,12 @@ namespace vega_config {
         double asteroid_difficulty = 0.1;
         bool asteroid_weapon_collision = false;
         double auto_docking_speed_boost = 20.0;
+        double auto_landing_displace_distance = 50.0;
+        double auto_landing_dock_distance = 50.0;
+        bool auto_landing_enable = false;
+        double auto_landing_move_distance = 50.0;
         double auto_landing_port_unclamped_seconds = 120.0;
+        double auto_landing_warning_distance = 350.0;
         bool auto_pilot_compensate_for_interdiction = false;
         double auto_pilot_no_enemies_distance_multiplier = 4.0;
         double auto_pilot_planet_radius_percent = 0.2;
@@ -1081,6 +1137,7 @@ namespace vega_config {
         double nebula_space_drag = 0.01;
         double neutral_auto_radius = 0.0;
         bool no_ai_jump_points = false;
+        double no_auto_light_below = 2000.0;
         bool no_damage_to_docked_ships = true;
         bool no_spec_jump = true;
         bool no_unit_collisions = false;
@@ -1127,9 +1184,11 @@ namespace vega_config {
         double thruster_hit_chance = 0.25;
         double un_docking_time = 10.0;
         bool undock_turn_away = true;
+        double unit_default_autodock_radius = 0.0;
         double unit_space_drag = 0.0;
         bool use_cargo_mass = true;
         bool use_hidden_cargo_space = true;
+        bool use_unit_autodock_radius = false;
         bool use_upgrade_template_maxrange = true;
         bool use_max_shield_energy_usage = false;
         double velocity_max = 10000.0;

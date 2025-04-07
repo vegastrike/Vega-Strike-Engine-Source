@@ -64,13 +64,13 @@ Halo::~Halo() {
 void Halo::Draw(const Transformation &quat, const Matrix &m, float alpha) {
     Vector p, q, r;
     QVector pos;
-    const float HaloOffset = vega_config::config->graphics.HaloOffset;
+    const float halo_offset = vega_config::config->graphics.halo_offset;
     pos = position.Transform(m);
     float wid = sizex;
     float hei = sizey;
     const bool far_shine =
             vega_config::config->graphics.draw_star_glow_halo /* default: "false" */ || vega_config::config->graphics.halo_far_draw; // default: "false"
-    CalculateOrientation(pos, p, q, r, wid, hei, HaloOffset, far_shine, NULL);
+    CalculateOrientation(pos, p, q, r, wid, hei, halo_offset, far_shine, NULL);
     p = p * wid;
     r = -r;
     q = q * hei;
