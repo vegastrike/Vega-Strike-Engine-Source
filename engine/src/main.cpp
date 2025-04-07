@@ -260,8 +260,8 @@ int main(int argc, char *argv[]) {
     std::cerr << "Legacy Mode: " << (legacy_data_dir_mode ? "TRUE" : "FALSE") << std::endl;
 
     if (legacy_data_dir_mode) {
-        VSFileSystem::datadir = boost::filesystem::current_path().string();
-        std::cerr << "Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR" << std::endl;
+        VSFileSystem::data_dir = boost::filesystem::current_path().string();
+        std::cerr << "Saving current directory (" << VSFileSystem::data_dir << ") as DATA_DIR" << std::endl;
     }
 
     if (!program_directory_path.empty())                  // Changing to an empty path does bad things
@@ -776,7 +776,7 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
         if (datatmp.empty()) {
             VS_LOG_FLUSH_EXIT(fatal, "Target-data-directory option requires an argument", EXIT_FAILURE);
         } else if (VSFileSystem::DirectoryExists(datatmp)) {
-            VSFileSystem::datadir = datatmp;
+            VSFileSystem::data_dir = datatmp;
             VS_LOG(important_info, (boost::format("Using target data directory specified on command line: '%1%'") % datatmp));
         } else {
             VS_LOG_FLUSH_EXIT(fatal, (boost::format("Specified target data directory '%1%' not found... exiting") % datatmp), EXIT_FAILURE);
@@ -859,7 +859,7 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     }
 
     if (false == legacy_data_dir_mode) {
-        if (true == VSFileSystem::datadir.empty()) {
+        if (true == VSFileSystem::data_dir.empty()) {
             VS_LOG_FLUSH_EXIT(fatal, "Data directory not specified.", EXIT_FAILURE);
         }
     }

@@ -276,42 +276,42 @@ public:
 /* Data Options */
     std::string universe_path;
     std::string sectors;
-    std::string techniquesBasePath;
+    std::string techniques_base_path;
     std::string unitCSV;
-    std::string modUnitCSV;
+    std::string mod_unit_csv;
     std::string cockpits;
     std::string animations;
     std::string movies;
     std::string sprites;
     std::string serialized_xml;
-    std::string sharedtextures;
-    std::string sharedsounds;
-    std::string sharedmeshes;
-    std::string sharedunits;
+    std::string shared_textures;
+    std::string shared_sounds;
+    std::string shared_meshes;
+    std::string shared_units;
     std::string ai_directory;
-    std::string datadir;
+    std::string data_dir;
     std::string hqtextures;
     std::string volume_format;
 
 /* Galaxy Options */
-    bool PushValuesToMean{};
-    float AmbientLightFactor{};
-    float StarRadiusScale{};
+    bool push_values_to_mean{};
+    float ambient_light_factor{};
+    float star_radius_scale{};
     std::string DefaultAtmosphereTexture;
-    float AtmosphereProbability{};
-    float RingProbability{};
-    float DoubleRingProbability{};
-    float InnerRingRadius{};
-    float OuterRingRadius{};
-    std::string DefaultRingTexture;
-    float SecondRingDifference{};
-    float MoonRelativeToPlanet{};
-    float MoonRelativeToMoon{};
-    float RockyRelativeToPrimary{};
-    float CompactnessScale{};
-    float JumpCompactnessScale{};
-    int MeanNaturalPhenomena{};
-    int MeanStarBases{};
+    float atmosphere_probability{};
+    float ring_probability{};
+    float double_ring_probability{};
+    float inner_ring_radius{};
+    float outer_ring_radius{};
+    std::string default_ring_texture;
+    float second_ring_difference{};
+    float moon_relative_to_planet{};
+    float moon_relative_to_moon{};
+    float rocky_relative_to_primary{};
+    float compactness_scale{};
+    float jump_compactness_scale{};
+    int mean_natural_phenomena{};
+    int mean_star_bases{};
 //    float    SmallUnitsMultiplier;  not used
 
 
@@ -324,7 +324,7 @@ public:
     bool chat_only_in_network{};
 
 /* Cargo Options */
-    bool news_from_cargolist{};
+    bool news_from_cargo_list{};
 
 /* Keyboard Options */
     bool enable_unicode{};

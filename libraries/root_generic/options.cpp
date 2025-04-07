@@ -87,8 +87,7 @@ void vs_options::init() {
     camera_pan_speed = vega_config::config->graphics.camera_pan_speed;
     background = vega_config::config->graphics.background;
     cockpit = vega_config::config->graphics.cockpit;
-    disabled_cockpit_allowed =
-            vega_config::config->graphics.disabled_cockpit_allowed;
+    disabled_cockpit_allowed = vega_config::config->graphics.disabled_cockpit_allowed;
     splash_screen = vega_config::config->graphics.splash_screen; /* default: "vega_splash.ani" */
     vbo = vega_config::config->graphics.vbo;
     num_near_stars = vega_config::config->graphics.num_near_stars;
@@ -100,11 +99,9 @@ void vs_options::init() {
     hardware_cursor = vega_config::config->physics.hardware_cursor;
     always_make_smooth_cam = vega_config::config->graphics.always_make_smooth_cam; // default: "false"     //Not used yet
     precull_dist = vega_config::config->graphics.precull_dist;
-    draw_near_stars_in_front_of_planets =
-            vega_config::config->graphics.draw_near_stars_in_front_of_planets;
+    draw_near_stars_in_front_of_planets = vega_config::config->graphics.draw_near_stars_in_front_of_planets;
     star_blend = vega_config::config->graphics.star_blend;
-    sparkle_engine_size_relative_to_ship =
-            vega_config::config->graphics.sparkle_engine_size_relative_to_ship;
+    sparkle_engine_size_relative_to_ship = vega_config::config->graphics.sparkle_engine_size_relative_to_ship;
     sparkle_absolute_speed = vega_config::config->graphics.sparkle_absolute_speed;
     engine_radii_scale = vega_config::config->graphics.engine_radii_scale;
     engine_length_scale = vega_config::config->graphics.engine_length_scale; // default: "1.25"
@@ -180,10 +177,8 @@ void vs_options::init() {
     warp_stretch_cutoff = vega_config::config->graphics.warp_stretch_cutoff; // default: "50000"
     warp_stretch_region0_max = vega_config::config->graphics.warp_stretch_region0_max; // default: "1"
     warp_stretch_max = vega_config::config->graphics.warp_stretch_max; // default: "4"
-    warp_stretch_max_speed =
-            vega_config::config->graphics.warp_stretch_max_speed; // default: "1000000"
-    warp_stretch_max_region0_speed =
-            vega_config::config->graphics.warp_stretch_max_region0_speed; // default: "100000"
+    warp_stretch_max_speed = vega_config::config->graphics.warp_stretch_max_speed; // default: "1000000"
+    warp_stretch_max_region0_speed = vega_config::config->graphics.warp_stretch_max_region0_speed; // default: "100000"
     weapon_gamma = vega_config::config->graphics.weapon_gamma; // default: "1.35"
     split_dead_subunits = vega_config::config->graphics.split_dead_subunits; // default: "true"
     explosion_force = vega_config::config->graphics.explosion_force; // default: ".5"
@@ -219,10 +214,8 @@ void vs_options::init() {
     /* Joystick Options */
     joystick_exponent = vega_config::config->joystick.joystick_exponent; // default: "1.0"
     polling_rate = vega_config::config->joystick.polling_rate; // default: "0"
-    force_use_of_joystick =
-            vega_config::config->joystick.force_use_of_joystick; // default: "false"
-    debug_digital_hatswitch =
-            vega_config::config->joystick.debug_digital_hatswitch; // default: "false"
+    force_use_of_joystick = vega_config::config->joystick.force_use_of_joystick; // default: "false"
+    debug_digital_hatswitch = vega_config::config->joystick.debug_digital_hatswitch; // default: "false"
     deadband = vega_config::config->joystick.deadband; // default: "0.05"
     mouse_deadband = vega_config::config->joystick.mouse_deadband; // default: "0.025"
     warp_mouse = vega_config::config->joystick.warp_mouse; // default: "false"
@@ -241,7 +234,7 @@ void vs_options::init() {
     start_docked_to = vega_config::config->ai.start_docked_to; /* default: "MiningBase" */
     dock_on_load = vega_config::config->ai.dock_on_load;
 
-    /* PhysicsConfig Options */
+    /* Physics Options */
     drone = vega_config::config->physics.drone; /* default: "drone" */
     max_missions = vega_config::config->physics.max_missions; // default: "4"
     game_speed = vega_config::config->physics.game_speed;
@@ -264,66 +257,65 @@ void vs_options::init() {
     gun_speed_adjusted_game_speed = vega_config::config->physics.gun_speed_adjusted_game_speed;
     gun_speed = vega_config::config->physics.gun_speed; // default: 1.0
     weapon_damage_efficiency = vega_config::config->physics.weapon_damage_efficiency; // default: 1.0
-    refire_difficulty_scaling = vega_config::config->physics.refire_difficutly_scaling; // default: "3.0"
-    debris_mass = vega_config::config->physics.debris_mass; // default: ".00001"
-    explosion_damage_center = vega_config::config->physics.explosion_damage_center; // default: "1"
-    explosion_damage_edge = vega_config::config->graphics.explosion_damage_edge; // default: ".125"
-    eject_cargo_on_blowup = vega_config::config->physics.eject_cargo_on_blowup; // default: "0"
+    refire_difficulty_scaling = vega_config::config->physics.refire_difficulty_scaling; // default: 3.0
+    debris_mass = vega_config::config->physics.debris_mass; // default: 0.00001
+    explosion_damage_center = vega_config::config->physics.explosion_damage_center; // default: 1.0
+    explosion_damage_edge = vega_config::config->graphics.explosion_damage_edge; // default: 0.125
+    eject_cargo_on_blowup = vega_config::config->physics.eject_cargo_on_blowup; // default: 0
 
     /* Data Options */
     universe_path = vega_config::config->data.universe_path; /* default: "universe" */
     sectors = vega_config::config->data.sectors; /* default: "sectors" */
-    techniquesBasePath = vega_config::config->data.techniques; /* default: "techniques" */
-    modUnitCSV = vega_config::config->data.ModUnitCSV; /* default: "" */
+    techniques_base_path = vega_config::config->data.techniques_base_path; /* default: "techniques" */
+    mod_unit_csv = vega_config::config->data.mod_unit_csv; /* default: "" */
     cockpits = vega_config::config->data.cockpits; /* default: "cockpits" */
     animations = vega_config::config->data.animations; /* default: "animations" */
     movies = vega_config::config->data.movies; /* default: "movies" */
     sprites = vega_config::config->data.sprites; /* default: "sprites" */
     serialized_xml = vega_config::config->data.serialized_xml; /* default: "serialized_xml" */
-    sharedtextures = vega_config::config->data.sharedtextures; /* default: "textures" */
-    sharedsounds = vega_config::config->data.sharedsounds; /* default: "sounds" */
-    sharedmeshes = vega_config::config->data.sharedmeshes; /* default: "meshes" */
-    sharedunits = vega_config::config->data.sharedunits; /* default: "units" */
+    shared_textures = vega_config::config->data.shared_textures; /* default: "textures" */
+    shared_sounds = vega_config::config->data.shared_sounds; /* default: "sounds" */
+    shared_meshes = vega_config::config->data.shared_meshes; /* default: "meshes" */
+    shared_units = vega_config::config->data.shared_units; /* default: "units" */
     ai_directory = vega_config::config->data.ai_directory; /* default: "ai" */
-    datadir = vega_config::config->data.datadir; /* default: "" */
+    data_dir = vega_config::config->data.data_dir; /* default: "" */
     hqtextures = vega_config::config->data.hqtextures; /* default: "" */
     volume_format = vega_config::config->data.volume_format; /* default: "pk3" */
 
     /* Galaxy Options */
-    PushValuesToMean = vega_config::config->galaxy.PushValuesToMean; // default: "true"
-    AmbientLightFactor = vega_config::config->galaxy.AmbientLightFactor; // default: "0"
-    StarRadiusScale = vega_config::config->galaxy.StarRadiusScale; // default: "1000"
+    push_values_to_mean = vega_config::config->galaxy.push_values_to_mean;
+    ambient_light_factor = vega_config::config->galaxy.ambient_light_factor; // default: 0.0
+    star_radius_scale = vega_config::config->galaxy.star_radius_scale;
     DefaultAtmosphereTexture = vega_config::config->galaxy.DefaultAtmosphereTexture; /* default: "sol/earthcloudmaptrans.png" */
-    AtmosphereProbability = vega_config::config->galaxy.AtmosphereProbability; // default: "0.5"
-    RingProbability = vega_config::config->galaxy.RingProbability; // default: ".1"
-    DoubleRingProbability = vega_config::config->galaxy.DoubleRingProbability; // default: ".025"
-    InnerRingRadius = vega_config::config->galaxy.InnerRingRadius; // default: "1.5"
-    OuterRingRadius = vega_config::config->galaxy.OuterRingRadius; // default: "2.5"
-    DefaultRingTexture = vega_config::config->galaxy.DefaultRingTexture; /* default: "planets/ring.pngwrapx36wrapy2" */
-    SecondRingDifference = vega_config::config->galaxy.SecondRingDifference; // default: ".4"
-    MoonRelativeToPlanet = vega_config::config->galaxy.MoonRelativeToPlanet; // default: ".4"
-    MoonRelativeToMoon = vega_config::config->galaxy.MoonRelativeToMoon; // default: ".8"
-    RockyRelativeToPrimary =
-            vega_config::config->galaxy.RockyRelativeToPrimary; // default: ".05"
-    CompactnessScale = vega_config::config->galaxy.CompactnessScale; // default: "1.5"
-    JumpCompactnessScale = vega_config::config->galaxy.JumpCompactnessScale; // default: "1.5"
-    MeanNaturalPhenomena = vega_config::config->galaxy.MeanNaturalPhenomena; // default: "1"
-    MeanStarBases = vega_config::config->galaxy.MeanStarBases; // default: "2"
+    atmosphere_probability = vega_config::config->galaxy.atmosphere_probability; // default: 0.5
+    ring_probability = vega_config::config->galaxy.ring_probability; // default: 0.1
+    double_ring_probability = vega_config::config->galaxy.double_ring_probability; // default: 0.025
+    inner_ring_radius = vega_config::config->galaxy.inner_ring_radius; // default: 1.5
+    outer_ring_radius = vega_config::config->galaxy.outer_ring_radius; // default: 2.5
+    default_ring_texture = vega_config::config->galaxy.default_ring_texture; /* default: "planets/ring.pngwrapx36wrapy2" */
+    second_ring_difference = vega_config::config->galaxy.second_ring_difference; // default: 0.4
+    moon_relative_to_planet = vega_config::config->galaxy.moon_relative_to_planet; // default: 0.4
+    moon_relative_to_moon = vega_config::config->galaxy.moon_relative_to_moon; // default: 0.8
+    rocky_relative_to_primary = vega_config::config->galaxy.rocky_relative_to_primary;
+    compactness_scale = vega_config::config->galaxy.compactness_scale;
+    jump_compactness_scale = vega_config::config->galaxy.jump_compactness_scale;
+    mean_natural_phenomena = vega_config::config->galaxy.mean_natural_phenomena; // default: 1
+    mean_star_bases = vega_config::config->galaxy.mean_star_bases; // default: 2
 //    SmallUnitsMultiplier   = vega_config::config->galaxy.SmallUnitsMultiplier /* default: 0 */ );
 
     /* Network Options */
-    force_client_connect = vega_config::config->network.force_client_connect; // default: "false"
-    use_account_server = vega_config::config->network.use_account_server; // default: "true"
-    server_ip = vega_config::config->network.server_ip; /* default: "" */
+    force_client_connect = vega_config::config->network.force_client_connect; // default: false
+    use_account_server = vega_config::config->network.use_account_server; // default: true
+    server_ip = vega_config::config->network.server_ip;
     server_port = vega_config::config->network.server_port; /* default: "6777" */
     account_server_url = vega_config::config->network.account_server_url; /* default: "http://vegastrike.sourceforge.net/cgi-bin/accountserver.py?" */
-    chat_only_in_network = vega_config::config->network.chat_only_in_network; // default: "false"
+    chat_only_in_network = vega_config::config->network.chat_only_in_network; // default: false
 
     /* Cargo Options */
-    news_from_cargolist = vega_config::config->cargo.news_from_cargolist; // default: "false"
+    news_from_cargo_list = vega_config::config->cargo.news_from_cargo_list; // default: false
 
     /* Keyboard Options */
-    enable_unicode = vega_config::config->keyboard.enable_unicode; // default: "true"
+    enable_unicode = vega_config::config->keyboard.enable_unicode; // default: true
 
     /* Player Options */
     password = vega_config::config->player.password; /* default: "" */

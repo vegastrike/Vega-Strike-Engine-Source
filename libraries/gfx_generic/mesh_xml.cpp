@@ -1168,10 +1168,10 @@ void LaunchConverter(const char *input, const char *output, const char *args = "
 #ifndef _WIN32
     int pid = fork();
     if (!pid) {
-        string soundserver_path = VSFileSystem::datadir + "/bin/mesher";
+        string soundserver_path = VSFileSystem::data_dir + "/bin/mesher";
         string firstarg = string("\"") + soundserver_path + string("\"");
         pid = execlp(soundserver_path.c_str(), soundserver_path.c_str(), input, output, args, NULL);
-        soundserver_path = VSFileSystem::datadir + "/mesher";
+        soundserver_path = VSFileSystem::data_dir + "/mesher";
         firstarg = string("\"") + soundserver_path + string("\"");
         pid = execlp(soundserver_path.c_str(), soundserver_path.c_str(), input, output, args, NULL);
         VS_LOG_AND_FLUSH(fatal, "Unable to spawn converter");
@@ -1185,11 +1185,11 @@ void LaunchConverter(const char *input, const char *output, const char *args = "
         waitpid(pid, &mystat, 0);
     }
 #else
-    string ss_path  = VSFileSystem::datadir+"\\bin\\mesher.exe";
+    string ss_path  = VSFileSystem::data_dir+"\\bin\\mesher.exe";
     string firstarg = string( "\"" )+ss_path+string( "\"" );
     int    pid = spawnl( P_WAIT, ss_path.c_str(), firstarg.c_str(), intmp.c_str(), outtmp.c_str(), args, NULL );
     if (pid == -1) {
-        ss_path  = VSFileSystem::datadir+"\\mesher.exe";
+        ss_path  = VSFileSystem::data_dir+"\\mesher.exe";
         firstarg = string( "\"" )+ss_path+string( "\"" );
         int pid = spawnl( P_WAIT, ss_path.c_str(), firstarg.c_str(), intmp.c_str(), outtmp.c_str(), args, NULL );
         if (pid == -1) {

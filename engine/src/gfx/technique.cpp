@@ -355,10 +355,10 @@ bool Pass::isCompiled(int programVersion) const {
 Technique::Technique(const string &name) :
         name(name), compiled(false), programVersion(0) {
     string root_technique_filename =
-            game_options()->techniquesBasePath + "/"
+            game_options()->techniques_base_path + "/"
                     + name + ".technique";
     string sub_technique_filename =
-            game_options()->techniquesBasePath + "/"
+            game_options()->techniques_base_path + "/"
                     + game_options()->techniquesSubPath + "/"
                     + name + ".technique";
 

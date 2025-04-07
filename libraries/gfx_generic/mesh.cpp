@@ -246,7 +246,7 @@ Mesh::Mesh(const char *filename,
         oldmesh = this->orig;
     } else {
         //This must be changed someday
-        LoadBinary(shared ? (VSFileSystem::sharedmeshes + "/" + (filename)).c_str() : filename, faction);
+        LoadBinary(shared ? (VSFileSystem::shared_meshes + "/" + (filename)).c_str() : filename, faction);
         oldmesh = new Mesh[1];
     }
     if (err <= Ok) {

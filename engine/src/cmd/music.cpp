@@ -168,7 +168,7 @@ bool Music::LoadMusic(const char *file) {
     if (!game_options()->Music) {
         return true;
     }
-    //Loads a playlist so try to open a file in datadir or homedir
+    //Loads a playlist so try to open a file in data_dir or homedir
     VSFile f;
     VSError err = f.OpenReadOnly(file, UnknownFile);
     if (err > Ok) {

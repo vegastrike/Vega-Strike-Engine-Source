@@ -238,10 +238,10 @@ std::vector<std::string>
         Directories;                                        //Directories where we should look for VSFileTypes files
 std::vector<std::string>
         Rootdir;                                                    //Root directories where we should look for VSFileTypes files
-std::string sharedtextures;
-std::string sharedunits;
-std::string sharedsounds;
-std::string sharedmeshes;
+std::string shared_textures;
+std::string shared_units;
+std::string shared_sounds;
+std::string shared_meshes;
 std::string sharedsectors;
 std::string sharedcockpits;
 std::string shareduniverse;
@@ -253,7 +253,7 @@ std::string savedunitpath;
 std::string modname;
 std::string moddir;
 std::string programdir;
-std::string datadir;
+std::string data_dir;
 std::string homedir;
 
 std::string config_file;
@@ -267,8 +267,8 @@ vector<VSFileType> current_type;
 
 //vs_path only stuff
 vector<std::string> savedpwd;
-vector<std::string> curdir;        //current dir starting from datadir
-vector<std::vector<std::string> > savedcurdir;        //current dir starting from datadir
+vector<std::string> curdir;        //current dir starting from data_dir
+vector<std::vector<std::string> > savedcurdir;        //current dir starting from data_dir
 
 vector<int> UseVolumes;
 
@@ -363,7 +363,7 @@ FILE *vs_open(const char *filename, const char *mode) {
             fp = fopen(fullpath.c_str(), mode);
         }
         if (!fp) {
-            fullpath = datadir + "/" + string(filename);
+            fullpath = data_dir + "/" + string(filename);
             output += "... NOT FOUND\n\tTry loading : " + fullpath;
             fp = fopen(fullpath.c_str(), mode);
         }
@@ -518,8 +518,8 @@ void InitDataDirectory() {
     std::vector<std::string> data_paths;
 
     /* commandline-specified paths come first */
-    if (!datadir.empty()) {
-        data_paths.push_back(datadir);
+    if (!data_dir.empty()) {
+        data_paths.push_back(data_dir);
     }
 
     if (true == legacy_data_dir_mode) {
@@ -571,33 +571,33 @@ void InitDataDirectory() {
             VS_LOG(info, (boost::format("Found data in %1%") % data_path));
             if (nullptr != getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
                 if (data_path.substr(0, 1) == ".") {
-                    datadir = string(tmppath) + "/" + data_path;
+                    data_dir = string(tmppath) + "/" + data_path;
                 } else {
-                    datadir = data_path;
+                    data_dir = data_path;
                 }
             } else {
                 VS_LOG(error, "Cannot get current path: path too long");
             }
 
-            if (chdir(datadir.c_str()) < 0) {
-                VS_LOG_AND_FLUSH(fatal, "Error changing to datadir");
+            if (chdir(data_dir.c_str()) < 0) {
+                VS_LOG_AND_FLUSH(fatal, "Error changing to data_dir");
                 VSExit(1);
             }
             if (nullptr != getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
-                datadir = string(tmppath);
+                data_dir = string(tmppath);
             } else {
                 VS_LOG(error, "Cannot get current path: path too long");
             }
 
-            VS_LOG(info, (boost::format("Using %1% as data directory") % datadir));
+            VS_LOG(info, (boost::format("Using %1% as data directory") % data_dir));
             break;
         }
     }
     data_paths.clear();
-    string versionloc = datadir + "/Version.txt";
+    string versionloc = data_dir + "/Version.txt";
     FILE *version = fopen(versionloc.c_str(), "r");
     if (!version) {
-        versionloc = datadir + "Version.txt";
+        versionloc = data_dir + "Version.txt";
         version = fopen(versionloc.c_str(), "r");
     }
     if (!version) {
@@ -619,7 +619,7 @@ void InitDataDirectory() {
         }
     }
     //Get the mods path
-    moddir = datadir + "/" + string("mods");
+    moddir = data_dir + "/" + string("mods");
     VS_LOG(info, (boost::format("Found MODDIR = %1%") % moddir));
 }
 
@@ -628,7 +628,7 @@ void InitDataDirectory() {
 void LoadConfig(string subdir) {
     bool found = false;
     bool foundweapons = false;
-    //First check if we have a config file in homedir+"/"+subdir or in datadir+"/"+subdir
+    //First check if we have a config file in homedir+"/"+subdir or in data_dir+"/"+subdir
     weapon_list = "weapons.json";
     if (!subdir.empty()) {
         modname = subdir;
@@ -665,7 +665,7 @@ void LoadConfig(string subdir) {
                 found = true;
             }
         } else {
-            VS_LOG(error, (boost::format("ERROR : couldn't find a mod named '%1%' in datadir/mods") % subdir));
+            VS_LOG(error, (boost::format("ERROR : couldn't find a mod named '%1%' in data_dir/mods") % subdir));
         }
         //}
     }
@@ -678,16 +678,16 @@ void LoadConfig(string subdir) {
             config_file = homedir + "/" + config_file;
         } else {
             VS_LOG(info, (boost::format("CONFIGFILE - No config found in home : %1%") % (homedir + "/" + config_file)));
-            if (FileExists(datadir, config_file) >= 0) {
+            if (FileExists(data_dir, config_file) >= 0) {
                 VS_LOG(info,
-                        (boost::format("CONFIGFILE - No home config file found, using datadir config file : %1%")
-                                % (datadir + "/" + config_file)));
+                        (boost::format("CONFIGFILE - No home config file found, using data_dir config file : %1%")
+                                % (data_dir + "/" + config_file)));
                 //We didn't find a config file in home_path so we load the data_path one
-                config_file = datadir + "/" + config_file;
+                config_file = data_dir + "/" + config_file;
             } else {
                 VS_LOG_AND_FLUSH(fatal,
                         (boost::format("CONFIGFILE - No config found in data dir : %1%")
-                                % (datadir + "/" + config_file)));
+                                % (data_dir + "/" + config_file)));
                 VS_LOG_AND_FLUSH(fatal, "CONFIG FILE NOT FOUND !!!");
                 VSExit(1);
             }
@@ -709,7 +709,7 @@ void LoadConfig(string subdir) {
 
     vs_config = createVegaConfig(config_file.c_str());
 
-    string universe_file = datadir + "/" \
+    string universe_file = data_dir + "/" \
  + vega_config::config->data.universe_path; /* default: "universe" */) + "/" \
  + vega_config::config->general.galaxy; /* default: "milky_way.xml" */);
     VS_LOG(debug, (boost::format("Force galaxy to %1%") % universe_file));
@@ -731,7 +731,7 @@ void InitMods() {
     //with value "hqtextures" in data section.
     if (!game_options()->hqtextures.empty()) {
         //HQ Texture dir sits alongside data dir.
-        selectcurrentdir = datadir + "/..";
+        selectcurrentdir = data_dir + "/..";
         boost::filesystem::path p(selectcurrentdir);
         for (boost::filesystem::directory_entry& entry : boost::filesystem::directory_iterator(p)) {
             const boost::filesystem::path& filename = entry.path().filename();
@@ -848,11 +848,11 @@ void InitPaths(string conf, string subdir) {
     InitHomeDirectory();
     LoadConfig(std::move(subdir));
     /*
-      Paths relative to datadir or homedir (both should have the same structure)
-      Units are in sharedunits/unitname/, sharedunits/subunits/unitname/ or sharedunits/weapons/unitname/ or in sharedunits/faction/unitname/
-      Meshes are in sharedmeshes/ or in current unit that is being loaded
-      Textures are in sharedtextures/ or in current unit dir that is being loaded or in the current animation dir that is being loaded or in the current sprite dir that is being loeded
-      Sounds are in sharedsounds/
+      Paths relative to data_dir or homedir (both should have the same structure)
+      Units are in shared_units/unitname/, shared_units/subunits/unitname/ or shared_units/weapons/unitname/ or in shared_units/faction/unitname/
+      Meshes are in shared_meshes/ or in current unit that is being loaded
+      Textures are in shared_textures/ or in current unit dir that is being loaded or in the current animation dir that is being loaded or in the current sprite dir that is being loeded
+      Sounds are in shared_sounds/
       Universes are in universe/
       Systems are in "sectors"/ config variable
       Cockpits are in cockpits/ (also a config var)
@@ -866,7 +866,7 @@ void InitPaths(string conf, string subdir) {
         SubDirectories.push_back(vec);
     }
 
-    boost::filesystem::path config_file_path{VSFileSystem::datadir + "/config.json"};
+    boost::filesystem::path config_file_path{VSFileSystem::data_dir + "/config.json"};
     vega_config::config = std::make_shared<vega_config::Config>(config_file_path);
     boost::filesystem::path config_file_path2{VSFileSystem::homedir + "/config.json"};
     vega_config::config->load_config(config_file_path2);
@@ -880,16 +880,16 @@ void InitPaths(string conf, string subdir) {
     sharedvideos = game_options()->movies;
     sharedsprites = game_options()->sprites;
     savedunitpath = game_options()->serialized_xml;
-    sharedtextures = game_options()->sharedtextures;
-    sharedsounds = game_options()->sharedsounds;
-    sharedmeshes = game_options()->sharedmeshes;
-    sharedunits = game_options()->sharedunits;
+    shared_textures = game_options()->shared_textures;
+    shared_sounds = game_options()->shared_sounds;
+    shared_meshes = game_options()->shared_meshes;
+    shared_units = game_options()->shared_units;
     aidir = game_options()->ai_directory;
     universe_name = game_options()->galaxy;
 
-    //Setup the directory lists we know about - note these are relative paths to datadir or homedir
+    //Setup the directory lists we know about - note these are relative paths to data_dir or homedir
     //----- THE Directories vector contains the resource/volume files name without extension or the main directory to files
-    Directories[UnitFile] = sharedunits;
+    Directories[UnitFile] = shared_units;
     //Have to put it in first place otherwise VS will find default unit file
     SubDirectories[UnitFile].emplace_back("subunits");
     SubDirectories[UnitFile].emplace_back("weapons");
@@ -904,11 +904,11 @@ void InitPaths(string conf, string subdir) {
 
     Directories[UnitSaveFile] = savedunitpath;
 
-    Directories[MeshFile] = sharedmeshes;
+    Directories[MeshFile] = shared_meshes;
     SubDirectories[MeshFile].emplace_back("mounts");
     SubDirectories[MeshFile].emplace_back("nav/default");
 
-    Directories[TextureFile] = sharedtextures;
+    Directories[TextureFile] = shared_textures;
     SubDirectories[TextureFile].emplace_back("mounts");
     SubDirectories[TextureFile].emplace_back("nav/default");
 
@@ -917,7 +917,7 @@ void InitPaths(string conf, string subdir) {
     SubDirectories[SystemFile].push_back(universe_name);
 
     Directories[UniverseFile] = shareduniverse;
-    Directories[SoundFile] = sharedsounds;
+    Directories[SoundFile] = shared_sounds;
     Directories[CockpitFile] = sharedcockpits;
     Directories[AnimFile] = sharedanims;
     Directories[VideoFile] = sharedvideos;
@@ -942,11 +942,11 @@ void InitPaths(string conf, string subdir) {
 
     /************************* Home directory subdirectories creation ************************/
     CreateDirectoryHome(savedunitpath);
-    CreateDirectoryHome(sharedtextures);
-    CreateDirectoryHome(sharedtextures + "/backgrounds");
+    CreateDirectoryHome(shared_textures);
+    CreateDirectoryHome(shared_textures + "/backgrounds");
     CreateDirectoryHome(sharedsectors);
     CreateDirectoryHome(sharedsectors + "/" + universe_name);
-    CreateDirectoryHome(sharedsounds);
+    CreateDirectoryHome(shared_sounds);
     CreateDirectoryHome("save");
 
     //We will be able to automatically add mods files (set of resources or even directory structure similar to the data tree)
@@ -954,7 +954,7 @@ void InitPaths(string conf, string subdir) {
     //I just have to implement that and then add all mods/ subdirs in Rootdir vector
     Rootdir.push_back(homedir);
     InitMods();
-    Rootdir.push_back(datadir);
+    Rootdir.push_back(data_dir);
 
     //NOTE : UniverseFiles cannot use volumes since some are needed by python
     //Also : Have to try with systems, not sure it would work well
@@ -967,7 +967,7 @@ void InitPaths(string conf, string subdir) {
     } else {
         q_volume_format = vfmtUNK;
     }
-    if (FileExists(datadir, "/data." + volume_format) >= 0) {
+    if (FileExists(data_dir, "/data." + volume_format) >= 0) {
         //Every kind of file will use the big volume except Unknown files and python files that needs to remain standard files
         for (i = 0; i < UnknownFile; i++) {
             UseVolumes[i] = 2;
@@ -975,52 +975,52 @@ void InitPaths(string conf, string subdir) {
         UseVolumes[PythonFile] = 0;
         UseVolumes[AccountFile] = 0;
     } else {
-        if (FileExists(datadir, "/" + sharedunits + "." + volume_format) >= 0) {
+        if (FileExists(data_dir, "/" + shared_units + "." + volume_format) >= 0) {
             UseVolumes[UnitFile] = 1;
-            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir + "/" + sharedunits) % volume_format));
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (data_dir + "/" + shared_units) % volume_format));
         }
-        if (FileExists(datadir, "/" + sharedmeshes + "." + volume_format) >= 0) {
+        if (FileExists(data_dir, "/" + shared_meshes + "." + volume_format) >= 0) {
             UseVolumes[MeshFile] = 1;
-            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir + "/" + sharedmeshes) % volume_format));
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (data_dir + "/" + shared_meshes) % volume_format));
         }
-        if (FileExists(datadir, "/" + sharedtextures + "." + volume_format) >= 0) {
+        if (FileExists(data_dir, "/" + shared_textures + "." + volume_format) >= 0) {
             UseVolumes[TextureFile] = 1;
             VS_LOG(info,
-                    (boost::format("Using volume file %1%.%2%") % (datadir + "/" + sharedtextures) % volume_format));
+                    (boost::format("Using volume file %1%.%2%") % (data_dir + "/" + shared_textures) % volume_format));
         }
-        if (FileExists(datadir, "/" + sharedsounds + "." + volume_format) >= 0) {
+        if (FileExists(data_dir, "/" + shared_sounds + "." + volume_format) >= 0) {
             UseVolumes[SoundFile] = 1;
-            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir + "/" + sharedsounds) % volume_format));
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (data_dir + "/" + shared_sounds) % volume_format));
         }
-        if (FileExists(datadir, "/" + sharedcockpits + "." + volume_format) >= 0) {
+        if (FileExists(data_dir, "/" + sharedcockpits + "." + volume_format) >= 0) {
             UseVolumes[CockpitFile] = 1;
             VS_LOG(info,
-                    (boost::format("Using volume file %1%.%2%") % (datadir + "/" + sharedcockpits) % volume_format));
+                    (boost::format("Using volume file %1%.%2%") % (data_dir + "/" + sharedcockpits) % volume_format));
         }
-        if (FileExists(datadir, "/" + sharedsprites + "." + volume_format) >= 0) {
+        if (FileExists(data_dir, "/" + sharedsprites + "." + volume_format) >= 0) {
             UseVolumes[VSSpriteFile] = 1;
             VS_LOG(info,
-                    (boost::format("Using volume file %1%.%2%") % (datadir + "/" + sharedsprites) % volume_format));
+                    (boost::format("Using volume file %1%.%2%") % (data_dir + "/" + sharedsprites) % volume_format));
         }
-        if (FileExists(datadir, "/animations." + volume_format) >= 0) {
+        if (FileExists(data_dir, "/animations." + volume_format) >= 0) {
             UseVolumes[AnimFile] = 1;
-            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir + "/animations") % volume_format));
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (data_dir + "/animations") % volume_format));
         }
-        if (FileExists(datadir, "/movies." + volume_format) >= 0) {
+        if (FileExists(data_dir, "/movies." + volume_format) >= 0) {
             UseVolumes[VideoFile] = 1;
-            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir + "/movies") % volume_format));
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (data_dir + "/movies") % volume_format));
         }
-        if (FileExists(datadir, "/communications." + volume_format) >= 0) {
+        if (FileExists(data_dir, "/communications." + volume_format) >= 0) {
             UseVolumes[CommFile] = 1;
-            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir + "/communications") % volume_format));
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (data_dir + "/communications") % volume_format));
         }
-        if (FileExists(datadir, "/mission." + volume_format) >= 0) {
+        if (FileExists(data_dir, "/mission." + volume_format) >= 0) {
             UseVolumes[MissionFile] = 1;
-            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir + "/mission") % volume_format));
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (data_dir + "/mission") % volume_format));
         }
-        if (FileExists(datadir, "/ai." + volume_format) >= 0) {
+        if (FileExists(data_dir, "/ai." + volume_format) >= 0) {
             UseVolumes[AiFile] = 1;
-            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir + "/ai") % volume_format));
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (data_dir + "/ai") % volume_format));
         }
         UseVolumes[ZoneBuffer] = 0;
     }
@@ -1055,7 +1055,7 @@ void CreateDirectoryHome(const string &filename) {
 }
 
 void CreateDirectoryData(const char *filename) {
-    CreateDirectoryAbs(datadir + "/" + string(filename));
+    CreateDirectoryAbs(data_dir + "/" + string(filename));
 }
 
 void CreateDirectoryData(const string &filename) {
@@ -1202,11 +1202,11 @@ int FileExists(const string &root, const string &filename, VSFileType type, bool
 }
 
 int FileExistsData(const char *filename, VSFileType type) {
-    return FileExists(datadir, filename, type);
+    return FileExists(data_dir, filename, type);
 }
 
 int FileExistsData(const string &filename, VSFileType type) {
-    return FileExists(datadir, filename, type);
+    return FileExists(data_dir, filename, type);
 }
 
 int FileExistsHome(const char *filename, VSFileType type) {
@@ -1538,7 +1538,7 @@ VSError VSFile::OpenReadOnly(const char *file, VSFileType type) {
         //It is a "classic file"
         if (!UseVolumes[type]) {
             if (type == UnknownFile) {
-                //We look in the current_path or for a full relative path to either homedir or datadir
+                //We look in the current_path or for a full relative path to either homedir or data_dir
                 if (!current_path.back().empty()) {
                     string filestr1 = current_directory.back()
                             + "/" + current_subdirectory.back() + "/" + string(file);
@@ -1555,7 +1555,7 @@ VSError VSFile::OpenReadOnly(const char *file, VSFileType type) {
                             failed += "\tRootdir : " + filestr + " NOT FOUND !\n";
                         }
                     }
-                    //Look for relative (to datadir) or absolute named file
+                    //Look for relative (to data_dir) or absolute named file
                     if (found < 0) {
                         filestr = file;
                         if ((found = FileExists("", filestr)) < 0) {
@@ -1681,7 +1681,7 @@ VSError VSFile::OpenCreateWrite(const char *filenam, VSFileType type) {
             return LocalPermissionDenied;
         }
     } else if (type == TextureFile) {
-        string fpath(homedir + "/" + sharedtextures + "/" + this->filename);
+        string fpath(homedir + "/" + shared_textures + "/" + this->filename);
         this->fp = fopen(fpath.c_str(), "wb");
         if (!fp) {
             return LocalPermissionDenied;
@@ -1701,7 +1701,7 @@ VSError VSFile::OpenCreateWrite(const char *filenam, VSFileType type) {
             return LocalPermissionDenied;
         }
     } else if (type == AccountFile) {
-        string fpath(datadir + "/accounts/" + this->filename);
+        string fpath(data_dir + "/accounts/" + this->filename);
         this->fp = fopen(fpath.c_str(), "wb");
         if (!fp) {
             return LocalPermissionDenied;

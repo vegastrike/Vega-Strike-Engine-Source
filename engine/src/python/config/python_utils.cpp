@@ -58,7 +58,7 @@ std::string GetPythonPath() {
 PyObject* GetClassFromPython(
     const std::string build_path,
     const std::string path_string,
-    const std::string datadir,
+    const std::string data_dir,
     const std::string module_name,
     const std::string function_name) {
     boost::filesystem::path full_path = boost::filesystem::path(path_string);
@@ -86,7 +86,7 @@ PyObject* GetClassFromPython(
     const std::string python_sitelib_path = QUOTE(Python_SITELIB);
     const std::wstring python_sitelib_path_wstring = std::wstring(python_sitelib_path.begin(), python_sitelib_path.end());
     const std::wstring build_path_w = std::wstring(build_path.begin(), build_path.end());
-    const std::wstring data_path_w = std::wstring(datadir.begin(), datadir.end());
+    const std::wstring data_path_w = std::wstring(data_dir.begin(), data_dir.end());
 
     PyWideStringList python_path_py_wide_string_list{};
     status = PyWideStringList_Append(&python_path_py_wide_string_list, python_path_w.c_str());

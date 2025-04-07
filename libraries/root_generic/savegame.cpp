@@ -1072,7 +1072,7 @@ void SaveGame::ParseSaveGame(const string &filename_p,
         if (plsave.length()) {
             err = f.OpenReadOnly(plsave, SaveFile);
             if (err > Ok) {                             //failed in SaveFile
-                //Try as an UnknownFile to get a datadir saved game, like New_Game.
+                //Try as an UnknownFile to get a data_dir saved game, like New_Game.
                 err = f.OpenReadOnly(plsave, UnknownFile);
             }
         } else if (filename.length() > 0) {

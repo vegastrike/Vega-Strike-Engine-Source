@@ -56,7 +56,7 @@ const char *datadirs[] = {
 };
 
 string getdatadir() {
-    string datadir;
+    string data_dir;
     char tmppwd[65536];
     if (NULL == getcwd(tmppwd, 32768)) {
         tmppwd[0] = '\0';
@@ -78,7 +78,7 @@ string getdatadir() {
         for (i = 0; i < (sizeof(datadirs) / sizeof(datadirs[0])); i++) {
             printf("Tried %s\n", datadirs[i]);
         }
-        datadir = tmppwd;
+        data_dir = tmppwd;
         if (chdir(tmppwd)) {
             printf("Unable to set current directory to data directory\n");
         }
@@ -86,13 +86,13 @@ string getdatadir() {
         //Set data dir
     else if (datadirs[i][0] != '/') {
         //Was a relative path
-        datadir = tmppwd;
-        datadir += '/';
-        datadir += datadirs[i];
+        data_dir = tmppwd;
+        data_dir += '/';
+        data_dir += datadirs[i];
     } else {
-        datadir = datadirs[i];
+        data_dir = datadirs[i];
     }
-    return datadir;
+    return data_dir;
 }
 
 #endif //!_WIN32

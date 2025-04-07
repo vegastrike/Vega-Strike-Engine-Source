@@ -495,7 +495,7 @@ void EnvironmentMapGeneratorMain(const char *inpt, const char *outpt, float a, f
     std::string s;
     if (err > Ok) {
         //s = VSFileSystem::GetSharedTexturePath (std::string (inpt));
-        s = VSFileSystem::sharedtextures + "/" + std::string(inpt);
+        s = VSFileSystem::shared_textures + "/" + std::string(inpt);
         InputName = (char *) malloc(sizeof(char) * (s.length() + 2));
         strcpy(InputName, s.c_str());
     } else {

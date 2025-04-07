@@ -114,9 +114,9 @@ void Python::initpaths() {
     std::string changepath("import sys\nprint(sys.path)\nsys.path = [" + modpaths + "] + sys.path\n");
     /*
      *  std::string changepath ("import sys\nprint sys.path\nsys.path = ["
-     *                       "\""+VSFileSystem::datadir+DELIMSTR"modules"DELIMSTR"builtin\""
-     *                       ",\""+VSFileSystem::datadir+DELIMSTR+moduledir+string("\"")+
-     *                       ",\""+VSFileSystem::datadir+DELIMSTR+basesdir + string("\"")+
+     *                       "\""+VSFileSystem::data_dir+DELIMSTR"modules"DELIMSTR"builtin\""
+     *                       ",\""+VSFileSystem::data_dir+DELIMSTR+moduledir+string("\"")+
+     *                       ",\""+VSFileSystem::data_dir+DELIMSTR+basesdir + string("\"")+
      *                       "]\n");
      */
     VegaPyRunString(changepath);
