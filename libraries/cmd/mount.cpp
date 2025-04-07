@@ -244,8 +244,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
     if (time_to_lock > 0) {
         target = NULL;
     }
-    static bool lock_disrupted_by_false_fire =
-            vega_config::config->physics.out_of_arc_fire_disrupts_lock;
+    const bool lock_disrupted_by_false_fire = vega_config::config->physics.out_of_arc_fire_disrupts_lock;
     if (lock_disrupted_by_false_fire) {
         time_to_lock = type->lock_time;
     }
@@ -283,9 +282,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 ammo--;
             }
         } else {
-            static bool reduce_beam_ammo =
-                    vega_config::config->physics.reduce_beam_ammo;
-            if (ammo > 0 && reduce_beam_ammo) {
+            if (ammo > 0 && vega_config::config->physics.reduce_beam_ammo) {
                 ammo--;
             }
         }
@@ -314,9 +311,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 break;
             }
             case WEAPON_TYPE::PROJECTILE:
-                static bool match_speed_with_target =
-                        vega_config::config->physics.match_speed_with_target
-                string skript = /*string("ai/script/")+*/ type->file + string(".xai");
+                std::string skript = /*string("ai/script/")+*/ type->file + std::string(".xai");
                 VSError err = LookForFile(skript, AiFile);
                 if (err <= Ok) {
                     temp = new Missile(
@@ -329,7 +324,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                             type->radius,
                             type->radial_speed,
                             type->pulse_speed /*detonation_radius*/);
-                    if (!match_speed_with_target) {
+                    if (!vega_config::config->physics.match_speed_with_target) {
                         temp->drive.speed = type->speed + velocity.Magnitude();
                         temp->afterburner.speed = type->speed + velocity.Magnitude();
                     }
@@ -382,7 +377,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                     if (err <= Ok) {
                         temp->EnqueueAI(new AIScript((type->file + ".xai").c_str()));
                         temp->EnqueueAI(new Orders::FireAllYouGot);
-                        if (match_speed_with_target) {
+                        if (vega_config::config->physics.match_speed_with_target) {
                             temp->GetComputerData().velocity_ref.SetUnit(target);
                         }
                     } else {
