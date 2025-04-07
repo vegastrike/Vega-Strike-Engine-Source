@@ -249,12 +249,10 @@ void vs_options::init() {
     autogen_compactness = vega_config::config->physics.autogen_compactness;
     asteroid_difficulty = vega_config::config->physics.asteroid_difficulty;
     year_scale = vega_config::config->physics.year_scale;
-    game_speed_affects_autogen_systems =
-            vega_config::config->physics.game_speed_affects_autogen_systems; // default: "false"
+    game_speed_affects_autogen_systems = vega_config::config->physics.game_speed_affects_autogen_systems; // default: "false"
     star_system_scale = vega_config::config->physics.star_system_scale;
     respawn_unit_size = vega_config::config->physics.respawn_unit_size;
-    auto_pilot_planet_radius_percent =
-            vega_config::config->physics.auto_pilot_planet_radius_percent; // default: ".75"
+    auto_pilot_planet_radius_percent = vega_config::config->physics.auto_pilot_planet_radius_percent; // default: ".75"
     campaigns = vega_config::config->game_start.campaigns; /* default: "privateer_campaign vegastrike_campaign" */  // Moved to correct section
     num_running_systems = vega_config::config->physics.num_running_systems; // default: "4"
     inactive_system_time = vega_config::config->physics.inactive_system_time; // default: "0.3"
@@ -262,20 +260,14 @@ void vs_options::init() {
     jump_disables_shields = vega_config::config->physics.jump_disables_shields; // default: "true"
     display_in_meters = vega_config::config->physics.display_in_meters; // default: "true"
     game_speed_lying = vega_config::config->physics.game_speed_lying; // default: "true"
-    num_times_to_simulate_new_star_system =
-            vega_config::config->physics.num_times_to_simulate_new_star_system; // default: "20"
-    gun_speed_adjusted_game_speed =
-            vega_config::config->physics.gun_speed_adjusted_game_speed; // default: "false"
-    gun_speed = vega_config::config->physics.gun_speed; // default: "1"
-    weapon_damage_efficiency =
-            vega_config::config->physics.weapon_damage_efficiency; // default: "1.0"
-    refire_difficulty_scaling =
-            vega_config::config->physics.refire_difficutly_scaling; // default: "3.0"
+    num_times_to_simulate_new_star_system = vega_config::config->physics.num_times_to_simulate_new_star_system; // default: "20"
+    gun_speed_adjusted_game_speed = vega_config::config->physics.gun_speed_adjusted_game_speed;
+    gun_speed = vega_config::config->physics.gun_speed; // default: 1.0
+    weapon_damage_efficiency = vega_config::config->physics.weapon_damage_efficiency; // default: 1.0
+    refire_difficulty_scaling = vega_config::config->physics.refire_difficutly_scaling; // default: "3.0"
     debris_mass = vega_config::config->physics.debris_mass; // default: ".00001"
-    explosion_damage_center =
-            vega_config::config->physics.explosion_damage_center; // default: "1"
-    explosion_damage_edge =
-            vega_config::config->graphics.explosion_damage_edge; // default: ".125"
+    explosion_damage_center = vega_config::config->physics.explosion_damage_center; // default: "1"
+    explosion_damage_edge = vega_config::config->graphics.explosion_damage_edge; // default: ".125"
     eject_cargo_on_blowup = vega_config::config->physics.eject_cargo_on_blowup; // default: "0"
 
     /* Data Options */
