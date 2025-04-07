@@ -599,6 +599,7 @@ namespace vega_config {
         double how_far_to_stop_navigating = 100.0;
         int hull_damage_anger = 10;
         double hull_percent_for_comm = 0.75;
+        bool independent_turrets = false;
         bool jump_cheat = true;
         bool jump_without_energy = false;
         double kill_factor = 0.2;
@@ -1045,11 +1046,13 @@ namespace vega_config {
         int num_running_systems = 4;
         int num_times_to_simulate_new_star_system = 20;
         bool only_show_best_downgrade = true;
+        double orbit_averaging = 16.0;
         bool out_of_arc_fire_disrupts_lock = false;
         double percent_missile_match_target_velocity = 1.0;
         bool persistent_on_load = true;
         double planet_dock_min_port_size = 300.0;
         double planet_dock_port_size = 1.2;
+        double planet_ejection_stophack = 100000.0;
         bool planets_always_neutral = true;
         bool planets_can_have_subunits = false;
         double player_godliness = 0.0;

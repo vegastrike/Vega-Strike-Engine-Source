@@ -81,9 +81,7 @@ void PlanetaryOrbit::Execute() {
         return;
     }
     QVector origin(targetlocation);
-    static float orbit_centroid_averaging =
-            vega_config::config->physics.orbit_averaging;
-    float averaging = (float) orbit_centroid_averaging / (float) (parent->predicted_priority + 1.0f);
+    float averaging = (float) vega_config::config->physics.orbit_averaging / (float) (parent->predicted_priority + 1.0f);
     if (averaging < 1.0f) {
         averaging = 1.0f;
     }
@@ -185,10 +183,8 @@ void PlanetaryOrbit::Execute() {
     double mag = (destination - parent->LocalPosition()).Magnitude();
     parent->Velocity = parent->cumulative_velocity =
             (((destination - parent->LocalPosition()) * (1. / simulation_atom_var)).Cast());
-    static float Unreasonable_value =
-            vega_config::config->physics.planet_ejection_stophack;
     float v2 = parent->Velocity.Dot(parent->Velocity);
-    if (v2 > Unreasonable_value * Unreasonable_value) {
+    if (v2 > vega_config::config->physics.planet_ejection_stophack * vega_config::config->physics.planet_ejection_stophack) {
         VS_LOG(debug,
                 (boost::format(
                         "void PlanetaryOrbit::Execute(): A velocity value considered unreasonable was calculated for planet %1%; zeroing it out")

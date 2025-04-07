@@ -2556,6 +2556,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 ai.hull_percent_for_comm = boost::json::value_to<double>(*hull_percent_for_comm_value_ptr);
             }
 
+            const boost::json::value * independent_turrets_value_ptr = ai_object.if_contains("independent_turrets");
+            if (independent_turrets_value_ptr != nullptr) {
+                ai.independent_turrets = boost::json::value_to<bool>(*independent_turrets_value_ptr);
+            }
+
             const boost::json::value * jump_cheat_value_ptr = ai_object.if_contains("jump_cheat");
             if (jump_cheat_value_ptr != nullptr) {
                 ai.jump_cheat = boost::json::value_to<bool>(*jump_cheat_value_ptr);
@@ -4520,6 +4525,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.only_show_best_downgrade = boost::json::value_to<bool>(*only_show_best_downgrade_value_ptr);
             }
 
+            const boost::json::value * orbit_averaging_value_ptr = physics_object.if_contains("orbit_averaging");
+            if (orbit_averaging_value_ptr != nullptr) {
+                physics.orbit_averaging = boost::json::value_to<double>(*orbit_averaging_value_ptr);
+            }
+
             const boost::json::value * out_of_arc_fire_disrupts_lock_value_ptr = physics_object.if_contains("out_of_arc_fire_disrupts_lock");
             if (out_of_arc_fire_disrupts_lock_value_ptr != nullptr) {
                 physics.out_of_arc_fire_disrupts_lock = boost::json::value_to<bool>(*out_of_arc_fire_disrupts_lock_value_ptr);
@@ -4543,6 +4553,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * planet_dock_port_size_value_ptr = physics_object.if_contains("planet_dock_port_size");
             if (planet_dock_port_size_value_ptr != nullptr) {
                 physics.planet_dock_port_size = boost::json::value_to<double>(*planet_dock_port_size_value_ptr);
+            }
+
+            const boost::json::value * planet_ejection_stophack_value_ptr = physics_object.if_contains("planet_ejection_stophack");
+            if (planet_ejection_stophack_value_ptr != nullptr) {
+                physics.planet_ejection_stophack = boost::json::value_to<double>(*planet_ejection_stophack_value_ptr);
             }
 
             const boost::json::value * planets_always_neutral_value_ptr = physics_object.if_contains("planets_always_neutral");

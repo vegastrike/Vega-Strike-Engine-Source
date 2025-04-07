@@ -264,8 +264,7 @@ void Intelligent::SetTurretAI() {
     Unit *unit = static_cast<Unit *>(this);
 
     unit->turretstatus = 2;
-    static bool talkinturrets = vega_config::config->ai.independent_turrets;
-    if (talkinturrets) {
+    if (vega_config::config->ai.independent_turrets) {
         Unit *un;
         for (un_iter iter = unit->getSubUnits(); (un = *iter); ++iter) {
             if (!CheckAccessory(un)) {
