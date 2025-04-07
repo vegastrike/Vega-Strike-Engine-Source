@@ -31,6 +31,8 @@
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "gldrv/gl_globals.h"
+#include "configuration/configuration.h"
+
 using namespace VSFileSystem;
 
 #define isspAce(chr)                                                                  \

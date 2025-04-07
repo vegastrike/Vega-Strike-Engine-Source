@@ -355,6 +355,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.beam_fadeout_hit_length = boost::json::value_to<double>(*beam_fadeout_hit_length_value_ptr);
             }
 
+            const boost::json::value * base_saturation_value_ptr = graphics_object.if_contains("base_saturation");
+            if (base_saturation_value_ptr != nullptr) {
+                graphics.base_saturation = boost::json::value_to<double>(*base_saturation_value_ptr);
+            }
+
             const boost::json::value * bitmap_alphamap_value_ptr = graphics_object.if_contains("bitmap_alphamap");
             if (bitmap_alphamap_value_ptr != nullptr) {
                 graphics.bitmap_alphamap = boost::json::value_to<bool>(*bitmap_alphamap_value_ptr);
@@ -633,6 +638,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * font_point_value_ptr = graphics_object.if_contains("font_point");
             if (font_point_value_ptr != nullptr) {
                 graphics.font_point = boost::json::value_to<double>(*font_point_value_ptr);
+            }
+
+            const boost::json::value * font_width_hack_value_ptr = graphics_object.if_contains("font_width_hack");
+            if (font_width_hack_value_ptr != nullptr) {
+                graphics.font_width_hack = boost::json::value_to<double>(*font_width_hack_value_ptr);
             }
 
             const boost::json::value * force_lighting_value_ptr = graphics_object.if_contains("force_lighting");
@@ -988,6 +998,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * separate_specular_color_value_ptr = graphics_object.if_contains("separate_specular_color");
             if (separate_specular_color_value_ptr != nullptr) {
                 graphics.separate_specular_color = boost::json::value_to<bool>(*separate_specular_color_value_ptr);
+            }
+
+            const boost::json::value * set_raster_text_color_value_ptr = graphics_object.if_contains("set_raster_text_color");
+            if (set_raster_text_color_value_ptr != nullptr) {
+                graphics.set_raster_text_color = boost::json::value_to<bool>(*set_raster_text_color_value_ptr);
             }
 
             const boost::json::value * shader_name_value_ptr = graphics_object.if_contains("shader_name");

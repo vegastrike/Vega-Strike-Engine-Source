@@ -100,6 +100,7 @@ namespace vega_config {
         double base_faction_color_darkness = 0.75;
         double beam_fadeout_length = 0.8;
         double beam_fadeout_hit_length = 0.95;
+        double base_saturation = 1.0;
         bool bitmap_alphamap = true;
         bool blend_guns = true;
         double bolt_offset = -0.2;
@@ -156,6 +157,7 @@ namespace vega_config {
         int fog_detail = 2;
         std::string font = "helvetica12";
         double font_point = 16.0;
+        double font_width_hack = 0.925;
         bool force_lighting = true;
         bool force_one_one_shield_blend = true;
         double fov = 37.5;
@@ -227,6 +229,7 @@ namespace vega_config {
         std::string rgb_pixel_format = "undefined";
         bool s3tc = true;
         bool separate_specular_color = false;
+        bool set_raster_text_color = true;
         std::string shader_name = "default";
         bool shared_vertex_arrays = true;
         int shield_detail_level = 24;

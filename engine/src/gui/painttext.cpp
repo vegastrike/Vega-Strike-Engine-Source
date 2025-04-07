@@ -203,9 +203,7 @@ static float drawChars(const string &str,
     if (useStroke()) {
         glLineWidth(font.strokeWidth());
     } else {
-        static bool setRasterPos =
-                vega_config::config->graphics.set_raster_text_color;
-        if (setRasterPos) {
+        if (vega_config::config->graphics.set_raster_text_color) {
             glRasterPos2f(inRasterPos / (g_game.x_resolution / 2), 0);
         }
     }
@@ -713,9 +711,7 @@ void PaintText::calcLayout(void) {
     m_verticalScaling = m_font.verticalScaling();
     m_horizontalScaling = m_font.horizontalScaling();
     //Max line width in character reference space.
-    static double
-            font_width_hack = vega_config::config->graphics.font_width_hack;
-    const float maxLineWidth = m_rect.size.width * font_width_hack / m_horizontalScaling;
+    const float maxLineWidth = m_rect.size.width * vega_config::config->graphics.font_width_hack / m_horizontalScaling;
     //The temporary global state for the layout operation.
     //Make sure this gets initialized at the beginning of an operation.
     m_layout = LayoutState(1.0, 1.0);
