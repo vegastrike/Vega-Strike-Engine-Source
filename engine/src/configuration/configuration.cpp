@@ -2371,6 +2371,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 ai.afterburn_to_no_enemies = boost::json::value_to<bool>(*afterburn_to_no_enemies_value_ptr);
             }
 
+            const boost::json::value * ai_cheat_dot_value_ptr = ai_object.if_contains("ai_cheat_dot");
+            if (ai_cheat_dot_value_ptr != nullptr) {
+                ai.ai_cheat_dot = boost::json::value_to<double>(*ai_cheat_dot_value_ptr);
+            }
+
             const boost::json::value * allow_any_speed_reference_value_ptr = ai_object.if_contains("allow_any_speed_reference");
             if (allow_any_speed_reference_value_ptr != nullptr) {
                 ai.allow_any_speed_reference = boost::json::value_to<bool>(*allow_any_speed_reference_value_ptr);
@@ -2399,6 +2404,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * always_obedient_value_ptr = ai_object.if_contains("always_obedient");
             if (always_obedient_value_ptr != nullptr) {
                 ai.always_obedient = boost::json::value_to<bool>(*always_obedient_value_ptr);
+            }
+
+            const boost::json::value * always_use_itts_value_ptr = ai_object.if_contains("always_use_itts");
+            if (always_use_itts_value_ptr != nullptr) {
+                ai.always_use_itts = boost::json::value_to<bool>(*always_use_itts_value_ptr);
             }
 
             const boost::json::value * anger_affects_response_value_ptr = ai_object.if_contains("anger_affects_response");
@@ -2536,6 +2546,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 ai.friend_factor = boost::json::value_to<double>(*friend_factor_value_ptr);
             }
 
+            const boost::json::value * gun_range_percent_ok_value_ptr = ai_object.if_contains("gun_range_percent_ok");
+            if (gun_range_percent_ok_value_ptr != nullptr) {
+                ai.gun_range_percent_ok = boost::json::value_to<double>(*gun_range_percent_ok_value_ptr);
+            }
+
             const boost::json::value * hostile_lurk_value_ptr = ai_object.if_contains("hostile_lurk");
             if (hostile_lurk_value_ptr != nullptr) {
                 ai.hostile_lurk = boost::json::value_to<bool>(*hostile_lurk_value_ptr);
@@ -2576,6 +2591,31 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 ai.kill_factor = boost::json::value_to<double>(*kill_factor_value_ptr);
             }
 
+            const boost::json::value * loop_around_destination_distance_value_ptr = ai_object.if_contains("loop_around_destination_distance");
+            if (loop_around_destination_distance_value_ptr != nullptr) {
+                ai.loop_around_destination_distance = boost::json::value_to<double>(*loop_around_destination_distance_value_ptr);
+            }
+
+            const boost::json::value * loop_around_destination_lateral_value_ptr = ai_object.if_contains("loop_around_destination_lateral");
+            if (loop_around_destination_lateral_value_ptr != nullptr) {
+                ai.loop_around_destination_lateral = boost::json::value_to<double>(*loop_around_destination_lateral_value_ptr);
+            }
+
+            const boost::json::value * loop_around_destination_vertical_value_ptr = ai_object.if_contains("loop_around_destination_vertical");
+            if (loop_around_destination_vertical_value_ptr != nullptr) {
+                ai.loop_around_destination_vertical = boost::json::value_to<double>(*loop_around_destination_vertical_value_ptr);
+            }
+
+            const boost::json::value * loop_around_distance_value_ptr = ai_object.if_contains("loop_around_distance");
+            if (loop_around_distance_value_ptr != nullptr) {
+                ai.loop_around_distance = boost::json::value_to<double>(*loop_around_distance_value_ptr);
+            }
+
+            const boost::json::value * loop_around_pursuit_velocity_percent_value_ptr = ai_object.if_contains("loop_around_pursuit_velocity_percent");
+            if (loop_around_pursuit_velocity_percent_value_ptr != nullptr) {
+                ai.loop_around_pursuit_velocity_percent = boost::json::value_to<double>(*loop_around_pursuit_velocity_percent_value_ptr);
+            }
+
             const boost::json::value * lurk_time_value_ptr = ai_object.if_contains("lurk_time");
             if (lurk_time_value_ptr != nullptr) {
                 ai.lurk_time = boost::json::value_to<double>(*lurk_time_value_ptr);
@@ -2601,6 +2641,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 ai.max_player_attackers = boost::json::value_to<int>(*max_player_attackers_value_ptr);
             }
 
+            const boost::json::value * min_angular_accel_cheat_value_ptr = ai_object.if_contains("min_angular_accel_cheat");
+            if (min_angular_accel_cheat_value_ptr != nullptr) {
+                ai.min_angular_accel_cheat = boost::json::value_to<double>(*min_angular_accel_cheat_value_ptr);
+            }
+
             const boost::json::value * min_relationship_value_ptr = ai_object.if_contains("min_relationship");
             if (min_relationship_value_ptr != nullptr) {
                 ai.min_relationship = boost::json::value_to<double>(*min_relationship_value_ptr);
@@ -2609,6 +2654,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * min_time_to_auto_value_ptr = ai_object.if_contains("min_time_to_auto");
             if (min_time_to_auto_value_ptr != nullptr) {
                 ai.min_time_to_auto = boost::json::value_to<double>(*min_time_to_auto_value_ptr);
+            }
+
+            const boost::json::value * min_warp_to_try_value_ptr = ai_object.if_contains("min_warp_to_try");
+            if (min_warp_to_try_value_ptr != nullptr) {
+                ai.min_warp_to_try = boost::json::value_to<double>(*min_warp_to_try_value_ptr);
             }
 
             const boost::json::value * missile_gun_delay_value_ptr = ai_object.if_contains("missile_gun_delay");
@@ -2686,6 +2736,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 ai.resistance_to_side_movement_percent = boost::json::value_to<double>(*resistance_to_side_movement_percent_value_ptr);
             }
 
+            const boost::json::value * roll_order_duration_value_ptr = ai_object.if_contains("roll_order_duration");
+            if (roll_order_duration_value_ptr != nullptr) {
+                ai.roll_order_duration = boost::json::value_to<double>(*roll_order_duration_value_ptr);
+            }
+
             const boost::json::value * safety_spacing_value_ptr = ai_object.if_contains("safety_spacing");
             if (safety_spacing_value_ptr != nullptr) {
                 ai.safety_spacing = boost::json::value_to<double>(*safety_spacing_value_ptr);
@@ -2716,6 +2771,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 ai.switch_nonowned_units = boost::json::value_to<bool>(*switch_nonowned_units_value_ptr);
             }
 
+            const boost::json::value * turn_cheat_value_ptr = ai_object.if_contains("turn_cheat");
+            if (turn_cheat_value_ptr != nullptr) {
+                ai.turn_cheat = boost::json::value_to<bool>(*turn_cheat_value_ptr);
+            }
+
             const boost::json::value * unknown_relation_enemy_value_ptr = ai_object.if_contains("unknown_relation_enemy");
             if (unknown_relation_enemy_value_ptr != nullptr) {
                 ai.unknown_relation_enemy = boost::json::value_to<double>(*unknown_relation_enemy_value_ptr);
@@ -2724,6 +2784,21 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * unknown_relation_hit_cost_value_ptr = ai_object.if_contains("unknown_relation_hit_cost");
             if (unknown_relation_hit_cost_value_ptr != nullptr) {
                 ai.unknown_relation_hit_cost = boost::json::value_to<double>(*unknown_relation_hit_cost_value_ptr);
+            }
+
+            const boost::json::value * use_afterburner_value_ptr = ai_object.if_contains("use_afterburner");
+            if (use_afterburner_value_ptr != nullptr) {
+                ai.use_afterburner = boost::json::value_to<bool>(*use_afterburner_value_ptr);
+            }
+
+            const boost::json::value * use_afterburner_to_follow_value_ptr = ai_object.if_contains("use_afterburner_to_follow");
+            if (use_afterburner_to_follow_value_ptr != nullptr) {
+                ai.use_afterburner_to_follow = boost::json::value_to<bool>(*use_afterburner_to_follow_value_ptr);
+            }
+
+            const boost::json::value * use_afterburner_to_run_value_ptr = ai_object.if_contains("use_afterburner_to_run");
+            if (use_afterburner_to_run_value_ptr != nullptr) {
+                ai.use_afterburner_to_run = boost::json::value_to<bool>(*use_afterburner_to_run_value_ptr);
             }
 
             const boost::json::value * warp_to_enemies_value_ptr = ai_object.if_contains("warp_to_enemies");
@@ -3955,6 +4030,21 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.asteroid_weapon_collision = boost::json::value_to<bool>(*asteroid_weapon_collision_value_ptr);
             }
 
+            const boost::json::value * auto_docking_speed_boost_value_ptr = physics_object.if_contains("auto_docking_speed_boost");
+            if (auto_docking_speed_boost_value_ptr != nullptr) {
+                physics.auto_docking_speed_boost = boost::json::value_to<double>(*auto_docking_speed_boost_value_ptr);
+            }
+
+            const boost::json::value * auto_landing_port_unclamped_seconds_value_ptr = physics_object.if_contains("auto_landing_port_unclamped_seconds");
+            if (auto_landing_port_unclamped_seconds_value_ptr != nullptr) {
+                physics.auto_landing_port_unclamped_seconds = boost::json::value_to<double>(*auto_landing_port_unclamped_seconds_value_ptr);
+            }
+
+            const boost::json::value * auto_pilot_compensate_for_interdiction_value_ptr = physics_object.if_contains("auto_pilot_compensate_for_interdiction");
+            if (auto_pilot_compensate_for_interdiction_value_ptr != nullptr) {
+                physics.auto_pilot_compensate_for_interdiction = boost::json::value_to<bool>(*auto_pilot_compensate_for_interdiction_value_ptr);
+            }
+
             const boost::json::value * auto_pilot_no_enemies_distance_multiplier_value_ptr = physics_object.if_contains("auto_pilot_no_enemies_distance_multiplier");
             if (auto_pilot_no_enemies_distance_multiplier_value_ptr != nullptr) {
                 physics.auto_pilot_no_enemies_distance_multiplier = boost::json::value_to<double>(*auto_pilot_no_enemies_distance_multiplier_value_ptr);
@@ -3970,14 +4060,29 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.auto_pilot_spec_lining_up_angle = boost::json::value_to<double>(*auto_pilot_spec_lining_up_angle_value_ptr);
             }
 
+            const boost::json::value * auto_pilot_terminate_value_ptr = physics_object.if_contains("auto_pilot_terminate");
+            if (auto_pilot_terminate_value_ptr != nullptr) {
+                physics.auto_pilot_terminate = boost::json::value_to<bool>(*auto_pilot_terminate_value_ptr);
+            }
+
             const boost::json::value * auto_pilot_termination_distance_value_ptr = physics_object.if_contains("auto_pilot_termination_distance");
             if (auto_pilot_termination_distance_value_ptr != nullptr) {
                 physics.auto_pilot_termination_distance = boost::json::value_to<double>(*auto_pilot_termination_distance_value_ptr);
             }
 
+            const boost::json::value * auto_pilot_termination_distance_enemy_value_ptr = physics_object.if_contains("auto_pilot_termination_distance_enemy");
+            if (auto_pilot_termination_distance_enemy_value_ptr != nullptr) {
+                physics.auto_pilot_termination_distance_enemy = boost::json::value_to<double>(*auto_pilot_termination_distance_enemy_value_ptr);
+            }
+
             const boost::json::value * auto_pilot_termination_distance_no_enemies_value_ptr = physics_object.if_contains("auto_pilot_termination_distance_no_enemies");
             if (auto_pilot_termination_distance_no_enemies_value_ptr != nullptr) {
                 physics.auto_pilot_termination_distance_no_enemies = boost::json::value_to<double>(*auto_pilot_termination_distance_no_enemies_value_ptr);
+            }
+
+            const boost::json::value * auto_pilot_ramp_warp_down_value_ptr = physics_object.if_contains("auto_pilot_ramp_warp_down");
+            if (auto_pilot_ramp_warp_down_value_ptr != nullptr) {
+                physics.auto_pilot_ramp_warp_down = boost::json::value_to<bool>(*auto_pilot_ramp_warp_down_value_ptr);
             }
 
             const boost::json::value * auto_landing_exclude_list_value_ptr = physics_object.if_contains("auto_landing_exclude_list");
@@ -4053,6 +4158,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * collidemap_sanity_check_value_ptr = physics_object.if_contains("collidemap_sanity_check");
             if (collidemap_sanity_check_value_ptr != nullptr) {
                 physics.collidemap_sanity_check = boost::json::value_to<bool>(*collidemap_sanity_check_value_ptr);
+            }
+
+            const boost::json::value * collision_inertial_time_value_ptr = physics_object.if_contains("collision_inertial_time");
+            if (collision_inertial_time_value_ptr != nullptr) {
+                physics.collision_inertial_time = boost::json::value_to<double>(*collision_inertial_time_value_ptr);
             }
 
             const boost::json::value * collision_scale_factor_value_ptr = physics_object.if_contains("collision_scale_factor");
@@ -4205,6 +4315,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.engine_energy_takes_priority = boost::json::value_to<bool>(*engine_energy_takes_priority_value_ptr);
             }
 
+            const boost::json::value * enough_warp_for_cruise_value_ptr = physics_object.if_contains("enough_warp_for_cruise");
+            if (enough_warp_for_cruise_value_ptr != nullptr) {
+                physics.enough_warp_for_cruise = boost::json::value_to<double>(*enough_warp_for_cruise_value_ptr);
+            }
+
             const boost::json::value * explosion_damage_center_value_ptr = physics_object.if_contains("explosion_damage_center");
             if (explosion_damage_center_value_ptr != nullptr) {
                 physics.explosion_damage_center = boost::json::value_to<double>(*explosion_damage_center_value_ptr);
@@ -4345,6 +4460,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.match_speed_with_target = boost::json::value_to<bool>(*match_speed_with_target_value_ptr);
             }
 
+            const boost::json::value * max_accel_for_smooth_autopilot_value_ptr = physics_object.if_contains("max_accel_for_smooth_autopilot");
+            if (max_accel_for_smooth_autopilot_value_ptr != nullptr) {
+                physics.max_accel_for_smooth_autopilot = boost::json::value_to<double>(*max_accel_for_smooth_autopilot_value_ptr);
+            }
+
             const boost::json::value * max_collide_trees_value_ptr = physics_object.if_contains("max_collide_trees");
             if (max_collide_trees_value_ptr != nullptr) {
                 physics.max_collide_trees = boost::json::value_to<int>(*max_collide_trees_value_ptr);
@@ -4383,6 +4503,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * max_non_player_rotation_rate_value_ptr = physics_object.if_contains("max_non_player_rotation_rate");
             if (max_non_player_rotation_rate_value_ptr != nullptr) {
                 physics.max_non_player_rotation_rate = boost::json::value_to<double>(*max_non_player_rotation_rate_value_ptr);
+            }
+
+            const boost::json::value * max_over_combat_speed_for_smooth_autopilot_value_ptr = physics_object.if_contains("max_over_combat_speed_for_smooth_autopilot");
+            if (max_over_combat_speed_for_smooth_autopilot_value_ptr != nullptr) {
+                physics.max_over_combat_speed_for_smooth_autopilot = boost::json::value_to<double>(*max_over_combat_speed_for_smooth_autopilot_value_ptr);
             }
 
             const boost::json::value * max_player_rotation_rate_value_ptr = physics_object.if_contains("max_player_rotation_rate");
@@ -4440,9 +4565,19 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.min_shield_speeding_discharge = boost::json::value_to<double>(*min_shield_speeding_discharge_value_ptr);
             }
 
+            const boost::json::value * min_spec_interdiction_for_jittery_autopilot_value_ptr = physics_object.if_contains("min_spec_interdiction_for_jittery_autopilot");
+            if (min_spec_interdiction_for_jittery_autopilot_value_ptr != nullptr) {
+                physics.min_spec_interdiction_for_jittery_autopilot = boost::json::value_to<double>(*min_spec_interdiction_for_jittery_autopilot_value_ptr);
+            }
+
             const boost::json::value * min_warp_effect_size_value_ptr = physics_object.if_contains("min_warp_effect_size");
             if (min_warp_effect_size_value_ptr != nullptr) {
                 physics.min_warp_effect_size = boost::json::value_to<double>(*min_warp_effect_size_value_ptr);
+            }
+
+            const boost::json::value * min_warp_orbit_radius_value_ptr = physics_object.if_contains("min_warp_orbit_radius");
+            if (min_warp_orbit_radius_value_ptr != nullptr) {
+                physics.min_warp_orbit_radius = boost::json::value_to<double>(*min_warp_orbit_radius_value_ptr);
             }
 
             const boost::json::value * minimum_mass_value_ptr = physics_object.if_contains("minimum_mass");
@@ -4610,6 +4745,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.respawn_unit_size = boost::json::value_to<double>(*respawn_unit_size_value_ptr);
             }
 
+            const boost::json::value * reverse_speed_limit_value_ptr = physics_object.if_contains("reverse_speed_limit");
+            if (reverse_speed_limit_value_ptr != nullptr) {
+                physics.reverse_speed_limit = boost::json::value_to<double>(*reverse_speed_limit_value_ptr);
+            }
+
             const boost::json::value * runtime_compactness_value_ptr = physics_object.if_contains("runtime_compactness");
             if (runtime_compactness_value_ptr != nullptr) {
                 physics.runtime_compactness = boost::json::value_to<double>(*runtime_compactness_value_ptr);
@@ -4758,6 +4898,16 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * warp_is_interstellar_value_ptr = physics_object.if_contains("warp_is_interstellar");
             if (warp_is_interstellar_value_ptr != nullptr) {
                 physics.warp_is_interstellar = boost::json::value_to<bool>(*warp_is_interstellar_value_ptr);
+            }
+
+            const boost::json::value * warp_orbit_multiplier_value_ptr = physics_object.if_contains("warp_orbit_multiplier");
+            if (warp_orbit_multiplier_value_ptr != nullptr) {
+                physics.warp_orbit_multiplier = boost::json::value_to<double>(*warp_orbit_multiplier_value_ptr);
+            }
+
+            const boost::json::value * warp_perpendicular_value_ptr = physics_object.if_contains("warp_perpendicular");
+            if (warp_perpendicular_value_ptr != nullptr) {
+                physics.warp_perpendicular = boost::json::value_to<double>(*warp_perpendicular_value_ptr);
             }
 
             const boost::json::value * warp_ramp_down_time_value_ptr = physics_object.if_contains("warp_ramp_down_time");

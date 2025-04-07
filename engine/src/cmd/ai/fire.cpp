@@ -563,9 +563,8 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     double pretable = queryTime();
     unitLocator.action.init(this, parent, gunrange, &tbin, maxranges, maxrolepriority, maxtargets);
     static int gcounter = 0;
-    const int min_rechoose_interval = vega_config::config->ai.min_rechoose_interval;
     if (curtarg) {
-        if (gcounter++ < min_rechoose_interval || rand() / 8 < RAND_MAX / 9) {
+        if (gcounter++ < vega_config::config->ai.targeting.min_rechoose_interval || rand() / 8 < RAND_MAX / 9) {
             //in this case only look at potentially *interesting* units rather than huge swaths of nearby units...including target, threat, players, and leader's target
             unitLocator.action.ShouldTargetUnit(curtarg, UnitUtil::getDistance(parent, curtarg));
             unsigned int np = _Universe->numPlayers();

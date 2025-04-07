@@ -46,18 +46,15 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 bool useAfterburner() {
-    const bool useafterburner = vega_config::config->ai.use_afterburner;
-    return useafterburner;
+    return vega_config::config->ai.use_afterburner;
 }
 
 bool useAfterburnerToRun() {
-    const bool useafterburner = vega_config::config->ai.use_afterburner_to_run;
-    return useafterburner;
+    return vega_config::config->ai.use_afterburner_to_run;
 }
 
 bool useAfterburnerToFollow() {
-    const bool useafterburner = vega_config::config->ai.use_afterburner_to_follow;
-    return useafterburner;
+    return vega_config::config->ai.use_afterburner_to_follow;
 }
 
 void AddOrd(Order *aisc, Unit *un, Order *ord) {
@@ -290,31 +287,27 @@ public:
         this->afterburn = afterburn;
         this->force_afterburn = force_afterburn;
 
-        const float loopdis = vega_config::config->ai.loop_around_distance;
-        qq = pp = 0;
-        const float loopdisd = vega_config::config->ai.loop_around_destination_distance;
-        const float loopdisv = vega_config::config->ai.loop_around_destination_vertical;
-        const float loopdisl = vega_config::config->ai.loop_around_destination_lateral;
-        rr.Set(loopdisl * vsr.uniformInc(-1, 1),
-                loopdisv * vsr.uniformInc(-1, 1),
-                1.0 + loopdisd * vsr.uniformInc(0, 1));
+        lqq = pp = 0;
+        rr.Set(vega_config::config->ai.loop_around_destination_lateral * vsr.uniformInc(-1, 1),
+               vega_config::config->ai.loop_around_destination_vertical * vsr.uniformInc(-1, 1),
+               1.0 + vega_config::config->ai.loop_around_destination_distance * vsr.uniformInc(0, 1));
         if (vsr.rand() < VS_RAND_MAX / 2) {
             qq = vsr.uniformInc(-1, 1);
             rr.j = qq;
             if (qq > 0) {
-                qq += loopdis;
+                qq += vega_config::config->ai.loop_around_distance;
             }
             if (qq < 0) {
-                qq -= loopdis;
+                qq -= vega_config::config->ai.loop_around_distance;
             }
         } else {
             pp = vsr.uniformInc(-1, 1);
             rr.i = pp;
             if (pp > 0) {
-                pp += loopdis;
+                pp += vega_config::config->ai.loop_around_distance;
             }
             if (pp < 0) {
-                pp -= loopdis;
+                pp -= vega_config::config->ai.loop_around_distance;
             }
         }
     }
@@ -333,13 +326,14 @@ public:
             float spseed, grange = 0, mrange = 0;
             parent->getAverageGunSpeed(spseed, grange, mrange);
             if (r.Dot(relloc) < 0) {
-                const float gun_range_pct = vega_config::config->ai.gun_range_percent_ok;
                 FaceTargetITTS::Execute();
                 float dist = UnitUtil::getDistance(parent, targ);
-                if (dist < grange * gun_range_pct || (grange == 0 && dist < mrange)) {
-                    const float velocity_adjustment_pct = vega_config::config->ai.loop_around_pursuit_velocity_percent;
-                    m.SetDesiredVelocity(Vector(0, 0, targ->cumulative_velocity.Magnitude() * velocity_adjustment_pct),
-                            true);
+                if (dist < grange * vega_config::config->ai.gun_range_percent_ok || (grange == 0 && dist < mrange)) {
+                    m.SetDesiredVelocity(
+                        Vector(
+                            0, 0, targ->cumulative_velocity.Magnitude() * vega_config::config->ai.
+                            loop_around_pursuit_velocity_percent),
+                        true);
                 }
                 m.SetAfterburn(afterburn && ab_needed);
                 m.Execute();
@@ -381,31 +375,27 @@ public:
         this->afterburn = afterburn;
         this->force_afterburn = force_afterburn;
         this->aggressive = aggressive;
-        const float loopdis = vega_config::config->ai.loop_around_distance;
         qq = pp = 0;
-        const float loopdisd = vega_config::config->ai.loop_around_destination_distance;
-        const float loopdisv = vega_config::config->ai.loop_around_destination_vertical;
-        const float loopdisl = vega_config::config->ai.loop_around_destination_lateral;
-        rr.Set(loopdisl * vsr.uniformInc(-1, 1),
-                loopdisv * vsr.uniformInc(-1, 1),
-                1.0 + loopdisd * vsr.uniformInc(0, 1));
+        rr.Set(vega_config::config->ai.loop_around_destination_lateral * vsr.uniformInc(-1, 1),
+               vega_config::config->ai.loop_around_destination_vertical * vsr.uniformInc(-1, 1),
+               1.0 + vega_config::config->ai.loop_around_destination_distance * vsr.uniformInc(0, 1));
         if (vsr.rand() < VS_RAND_MAX / 2) {
             qq = vsr.uniformInc(-1, 1);
             rr.j = qq;
             if (qq > 0) {
-                qq += loopdis;
+                qq += vega_config::config->ai.loop_around_distance;
             }
             if (qq < 0) {
-                qq -= loopdis;
+                qq -= vega_config::config->ai.loop_around_distance;
             }
         } else {
             pp = vsr.uniformInc(-1, 1);
             rr.i = pp;
             if (pp > 0) {
-                pp += loopdis;
+                pp += vega_config::config->ai.loop_around_distance;
             }
             if (pp < 0) {
-                pp -= loopdis;
+                pp -= vega_config::config->ai.loop_around_distance;
             }
         }
     }
@@ -477,37 +467,32 @@ public:
         this->afterburn = afterburn;
         this->force_afterburn = force_afterburn;
 
-        const float loopdis = vega_config::config->ai.loop_around_distance;
         qq = pp = 0;
-        const float loopdisd = vega_config::config->ai.loop_around_destination_distance;
-        const float loopdisv = vega_config::config->ai.loop_around_destination_vertical;
-        const float loopdisl = vega_config::config->ai.loop_around_destination_lateral;
-        rr.Set(loopdisl * vsr.uniformInc(-1, 1),
-                loopdisv * vsr.uniformInc(-1, 1),
-                1.0 + loopdisd * vsr.uniformInc(0, 1));
+        rr.Set(vega_config::config->ai.loop_around_destination_lateral * vsr.uniformInc(-1, 1),
+               vega_config::config->ai.loop_around_destination_vertical * vsr.uniformInc(-1, 1),
+               1.0 + vega_config::config->ai.loop_around_destination_distance * vsr.uniformInc(0, 1));
         if (vsr.rand() < VS_RAND_MAX / 2) {
             qq = vsr.uniformInc(-1, 1);
             rr.j = qq;
             if (qq > 0) {
-                qq += loopdis;
+                qq += vega_config::config->ai.loop_around_distance;
             }
             if (qq < 0) {
-                qq -= loopdis;
+                qq -= vega_config::config->ai.loop_around_distance;
             }
         } else {
             pp = vsr.uniformInc(-1, 1);
             rr.i = pp;
             if (pp > 0) {
-                pp += loopdis;
+                pp += vega_config::config->ai.loop_around_distance;
             }
             if (pp < 0) {
-                pp -= loopdis;
+                pp -= vega_config::config->ai.loop_around_distance;
             }
         }
     }
 
     void Execute() {
-        const float gun_range_pct = vega_config::config->ai.gun_range_percent_ok;
         Unit *targ = parent->Target();
         if (targ) {
             Vector relloc = parent->Position() - targ->Position();
@@ -523,10 +508,12 @@ public:
             if (r.Dot(relloc) < 0) {
                 FaceTargetITTS::Execute();
                 float dist = UnitUtil::getDistance(parent, targ);
-                if (dist < grange * gun_range_pct || (grange == 0 && dist < mrange)) {
-                    const float velocity_adjustment_pct = vega_config::config->ai.loop_around_pursuit_velocity_percent;
-                    m.SetDesiredVelocity(Vector(0, 0, targ->cumulative_velocity.Magnitude() * velocity_adjustment_pct),
-                            true);
+                if (dist < grange * vega_config::config->ai.gun_range_percent_ok || (grange == 0 && dist < mrange)) {
+                    m.SetDesiredVelocity(
+                        Vector(
+                            0, 0, targ->cumulative_velocity.Magnitude() * vega_config::config->ai.
+                            loop_around_pursuit_velocity_percent),
+                        true);
                 }
                 m.SetAfterburn(afterburn && ab_needed);
                 m.Execute();
@@ -578,20 +565,20 @@ void RollRight(Order *aisc, Unit *un) {
 }
 
 void RollLeftHard(Order *aisc, Unit *un) {
-    const float durvar = vega_config::config->ai.roll_order_duration;
     if (un->aistate) {
         AddOrd(un->aistate,
-                un,
-                new Orders::ExecuteFor(new Orders::MatchRoll(un->drive.max_roll_right, false), durvar));
+               un,
+               new Orders::ExecuteFor(new Orders::MatchRoll(un->drive.max_roll_right, false),
+                                      vega_config::config->ai.roll_order_duration));
     }
 }
 
 void RollRightHard(Order *aisc, Unit *un) {
-    const float durvar = vega_config::config->ai.roll_order_duration;
     if (un->aistate) {
         AddOrd(un->aistate,
-                un,
-                new Orders::ExecuteFor(new Orders::MatchRoll(-un->drive.max_roll_left, false), durvar));
+               un,
+               new Orders::ExecuteFor(new Orders::MatchRoll(-un->drive.max_roll_left, false),
+                                      vega_config::config->ai.roll_order_duration));
     }
 }
 

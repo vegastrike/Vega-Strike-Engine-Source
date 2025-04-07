@@ -35,7 +35,7 @@
 #include <string>
 
 static void DockedScript(Unit *docker, Unit *base) {
-    const std::string script = vega_config::config->ai.docked_to_script; /* default: "" */);
+    const std::string script = vega_config::config->ai.docked_to_script; /* default: "" */
     if (!script.empty()) {
         Unit *targ = docker->Target();
         docker->GetComputerData().target.SetUnit(base);

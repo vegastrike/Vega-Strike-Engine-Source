@@ -261,9 +261,8 @@ void FlyByWire::Accel(float per) {
     if (cpu->set_speed > parent->MaxSpeed()) {
         cpu->set_speed = parent->MaxSpeed();
     }
-    const float reverse_speed_limit = vega_config::config->physics.reverse_speed_limit;
-    if (cpu->set_speed < -parent->MaxSpeed() * reverse_speed_limit) {
-        cpu->set_speed = -parent->MaxSpeed() * reverse_speed_limit;
+    if (cpu->set_speed < -parent->MaxSpeed() * vega_config::config->physics.reverse_speed_limit) {
+        cpu->set_speed = -parent->MaxSpeed() * vega_config::config->physics.reverse_speed_limit;
     }
     afterburn = false;
 

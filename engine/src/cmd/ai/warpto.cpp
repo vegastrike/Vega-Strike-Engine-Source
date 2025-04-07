@@ -47,10 +47,10 @@ bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following) {
         return true;
     } else if (timetolive > (max_allowable_travel_time())) {
         float mytime = SIMULATION_ATOM * 1.5;
-        const bool rampdown = vega_config::config->physics.autopilot_ramp_warp_down;
+        const bool rampdown = vega_config::config->physics.auto_pilot_ramp_warp_down;
         if (rampdown == false) {
-            const float warprampdowntime = vega_config::config->physics.warprampdowntime;
-            mytime = warprampdowntime;
+            const float warp_ramp_down_time = vega_config::config->physics.warp_ramp_down_time;
+            mytime = warp_ramp_down_time;
         }
         if (dist - parent->GetWarpVelocity().Magnitude() * mytime < toodamnclose) {
             return false;

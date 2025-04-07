@@ -562,12 +562,14 @@ namespace vega_config {
 
     struct {
         bool afterburn_to_no_enemies = true;
+        double ai_cheat_dot = 0.99;
         bool allow_any_speed_reference = false;
         bool allow_civil_war = false;
         bool allow_nonplayer_faction_change = false;
         bool always_fire_autotrackers = false;
         bool always_have_jumpdrive_cheat = false;
         bool always_obedient = true;
+        bool always_use_itts = false;
         double anger_affects_response = 1.0;
         bool assist_friend_in_need = true;
         double attacker_switch_time = 15.0;
@@ -595,6 +597,7 @@ namespace vega_config {
         double fg_nav_select_time = 120.0;
         double force_jump_after_time = 120.0;
         double friend_factor = 0.1;
+        double gun_range_percent_ok = 0.66;
         bool hostile_lurk = true;
         double how_far_to_stop_navigating = 100.0;
         int hull_damage_anger = 10;
@@ -603,13 +606,20 @@ namespace vega_config {
         bool jump_cheat = true;
         bool jump_without_energy = false;
         double kill_factor = 0.2;
+        double loop_around_destination_distance = 20.0;
+        double loop_around_destination_lateral = 4.0;
+        double loop_around_destination_vertical = 4.0;
+        double loop_around_distance = 1.0;
+        double loop_around_pursuit_velocity_percent = 0.9;
         double lurk_time = 600.0;
         double lowest_negative_comm_choice = -1e-05;
         double lowest_positive_comm_choice = 0.0;
         double max_faction_contraband_relation = -0.05;
         int max_player_attackers = 0;
+        double min_angular_accel_cheat = 50.0;
         double min_relationship = -20.0;
         double min_time_to_auto = 25.0;
+        double min_warp_to_try = 1.5;
         double missile_gun_delay = 4.0;
         double mood_affects_response = 0.0;
         double mood_swing_level = 0.2;
@@ -625,14 +635,19 @@ namespace vega_config {
         bool resistance_to_side_movement = false;
         double resistance_to_side_force_percent = 1.0;
         double resistance_to_side_movement_percent = 0.01;
+        double roll_order_duration = 5.0;
         double safety_spacing = 2500.0;
         int shield_damage_anger = 1;
         double slow_diplomacy_for_enemies = 0.25;
         std::string start_docked_to = "Atlantis";
         double static_relationship_affects_response = 1.0;
         bool switch_nonowned_units = true;
+        bool turn_cheat = false;
         double unknown_relation_enemy = -0.05;
         double unknown_relation_hit_cost = 0.01;
+        bool use_afterburner = true;
+        bool use_afterburner_to_follow = true;
+        bool use_afterburner_to_run = true;
         bool warp_to_enemies = true;
         bool warp_to_no_enemies = true;
 
@@ -932,11 +947,17 @@ namespace vega_config {
         bool allow_special_and_normal_gun_combo = true;
         double asteroid_difficulty = 0.1;
         bool asteroid_weapon_collision = false;
+        double auto_docking_speed_boost = 20.0;
+        double auto_landing_port_unclamped_seconds = 120.0;
+        bool auto_pilot_compensate_for_interdiction = false;
         double auto_pilot_no_enemies_distance_multiplier = 4.0;
         double auto_pilot_planet_radius_percent = 0.2;
         double auto_pilot_spec_lining_up_angle = 3.0;
+        bool auto_pilot_terminate = true;
         double auto_pilot_termination_distance = 2500.0;
+        double auto_pilot_termination_distance_enemy = 24000.0;
         double auto_pilot_termination_distance_no_enemies = 6000.0;
+        bool auto_pilot_ramp_warp_down = true;
         std::string auto_landing_exclude_list = "";
         std::string auto_landing_exclude_warning_list = "";
         double auto_time_in_seconds = 10.0;
@@ -952,6 +973,7 @@ namespace vega_config {
         bool change_docking_orientation = false;
         double close_enough_to_autotrack = 4.0;
         bool collidemap_sanity_check = false;
+        double collision_inertial_time = 1.25;
         double collision_scale_factor = 1.0;
         bool component_based_upgrades = true;
         double computer_warp_ramp_up_time = 10.0;
@@ -982,6 +1004,7 @@ namespace vega_config {
         double eject_distance = 20.0;
         double eject_live_time = 0.0;
         bool engine_energy_takes_priority = true;
+        double enough_warp_for_cruise = 2000.0;
         double explosion_damage_center = 1.0;
         double explosion_damage_edge = 0.125;
         double extra_space_drag_for_cargo = 0.005;
@@ -1010,6 +1033,7 @@ namespace vega_config {
         double launch_speed = -1.0;
         double lock_cone = 0.8;
         bool match_speed_with_target = true;
+        double max_accel_for_smooth_autopilot = 10.0;
         int max_collide_trees = 16384;
         double max_damage = 0.999;
         int max_ecm = 4;
@@ -1018,6 +1042,7 @@ namespace vega_config {
         double max_lost_target_live_time = 30.0;
         int max_missions = 4;
         double max_non_player_rotation_rate = 360.0;
+        double max_over_combat_speed_for_smooth_autopilot = 2.0;
         double max_player_rotation_rate = 24.0;
         double max_radar_cone_damage = 0.9;
         double max_radar_lock_cone_damage = 0.95;
@@ -1029,7 +1054,9 @@ namespace vega_config {
         double min_damage = 0.001;
         double min_maxenergy_shot_damage = 0.2;
         double min_shield_speeding_discharge = 0.1;
+        double min_spec_interdiction_for_jittery_autopilot = 0.05;
         double min_warp_effect_size = 100.0;
+        double min_warp_orbit_radius = 100000000.0;
         double minimum_mass = 1e-06;
         double minimum_time = 0.1;
         double mount_repair_unit = 0.25;
@@ -1063,6 +1090,7 @@ namespace vega_config {
         double repair_droid_check_time = 5.0;
         double repair_droid_time = 120.0;
         double respawn_unit_size = 400.0;
+        double reverse_speed_limit = 0.1;
         double runtime_compactness = 1.0;
         double seconds_per_parsec = 10.0;
         bool separate_system_flakiness_component = false;
@@ -1093,6 +1121,8 @@ namespace vega_config {
         double warp_cruise_mult = 15000.0;
         double warp_curve_degree = 1.3;
         bool warp_is_interstellar = false;
+        double warp_orbit_multiplier = 20.0;
+        double warp_perpendicular = 80.0;
         double warp_ramp_down_time = 0.5;
         double warp_region0 = 1.0;
         double warp_region1 = 5000000.0;

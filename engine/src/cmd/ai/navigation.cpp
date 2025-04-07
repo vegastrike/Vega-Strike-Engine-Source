@@ -344,18 +344,15 @@ void ChangeHeading::Execute() {
             ((local_heading.i > 0) != (last_velocity.i > 0) || (!local_heading.i)) && last_velocity.i != 0 ? 1 : 0;
     char yswitch =
             ((local_heading.j > 0) != (last_velocity.j > 0) || (!local_heading.j)) && last_velocity.j != 0 ? 1 : 0;
-    const bool AICheat = vega_config::config->ai.turn_cheat;
     bool cheater = false;
-    const float min_for_no_oversteer = vega_config::config->ai.min_angular_accel_cheat;
-    if (AICheat && ((parent->drive.yaw + parent->drive.pitch) * 180 / (PI * parent->getMass()) > min_for_no_oversteer)
+    if (vega_config::config->ai.turn_cheat && ((parent->drive.yaw + parent->drive.pitch) * 180 / (PI * parent->getMass()) > vega_config::config->ai.min_angular_accel_cheat)
             && !parent->isSubUnit()) {
         if (xswitch || yswitch) {
             Vector P, Q, R;
             parent->GetOrientation(P, Q, R);
             Vector desiredR = (final_heading - parent->Position()).Cast();
             desiredR.Normalize();
-            const float cheatpercent = vega_config::config->ai.ai_cheat_dot;
-            if (desiredR.Dot(R) > cheatpercent) {
+            if (desiredR.Dot(R) > vega_config::config->ai.ai_cheat_dot) {
                 P = Q.Cross(desiredR);
                 Q = desiredR.Cross(P);
                 parent->SetOrientation(Q, desiredR);
@@ -430,8 +427,7 @@ FaceTargetITTS::FaceTargetITTS(bool fini, int accuracy) : ChangeHeading(QVector(
     subtype = STARGET;
     speed = float(.00001);
     useitts = true;
-    const bool alwaysuseitts = vega_config::config->ai.always_use_itts;
-    if (!alwaysuseitts) {
+    if (!vega_config::config->ai.always_use_itts) {
         if (rand() >= g_game.difficulty * RAND_MAX) {
             useitts = false;
         }
@@ -500,13 +496,12 @@ AutoLongHaul::AutoLongHaul(bool fini, int accuracy) : ChangeHeading(QVector(0, 0
 
 void AutoLongHaul::MakeLinearVelocityOrder() {
     eraseType(MOVEMENT);
-    const float combat_mode_mult = vega_config::config->auto_physics.auto_docking_speed_boost;
 
     float speed =
             parent->GetComputerData().combat_mode ? parent->drive.speed
                     : parent->afterburner.speed /*won't do insanity flight mode + spec = ludicrous speed*/;
     if (inside_landing_zone) {
-        speed *= combat_mode_mult;
+        speed *= vega_config::config->physics.auto_docking_speed_boost;
     }
     MatchLinearVelocity *temp = new MatchLinearVelocity(Vector(0, 0, speed), true, false, false);
     temp->SetParent(parent);
@@ -553,19 +548,17 @@ inline void CautiousWarpRampOn(Unit *un) {
 }
 
 bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
-    const float specInterdictionLimit = vega_config::config->physics.min_spec_interdiction_for_jittery_autopilot;
     if (target->isPlanet() == false
             && (target->graphicOptions.specInterdictionOnline == 0
-                    || fabs(target->ship_functions.Value(Function::ftl_interdiction)) < specInterdictionLimit)) {
+                    || fabs(target->ship_functions.Value(Function::ftl_interdiction)) < vega_config::config->physics.min_spec_interdiction_for_jittery_autopilot)) {
         return true;
     }
     if (parent->computer.combat_mode == false) {
         return true;
     }
     float maxspeed = parent->afterburner.speed;
-    const float accel_auto_limit = vega_config::config->physics.max_accel_for_smooth_autopilot;
     const float speed_auto_limit = vega_config::config->physics.max_over_combat_speed_for_smooth_autopilot;
-    if (minaccel < accel_auto_limit || parent->Velocity.MagnitudeSquared() > maxspeed * maxspeed * speed_auto_limit
+    if (minaccel < vega_config::config->physics.max_accel_for_smooth_autopilot || parent->Velocity.MagnitudeSquared() > maxspeed * maxspeed * speed_auto_limit
             * speed_auto_limit) {
         return true;
     }
@@ -573,10 +566,9 @@ bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
 }
 
 bool AutoLongHaul::InsideLandingPort(const Unit *obstacle) const {
-    const float landing_port_limit = vega_config::config->physics.auto_landing_port_unclamped_seconds;
     return UnitUtil::getSignificantDistance(parent,
-            obstacle)
-            < -landing_port_limit * parent->afterburner.speed;
+                                            obstacle)
+        < -vega_config::config->physics.auto_landing_port_unclamped_seconds * parent->afterburner.speed;
 }
 
 void AutoLongHaul::Execute() {
@@ -587,11 +579,6 @@ void AutoLongHaul::Execute() {
         parent->autopilotactive = false;
         return;
     }
-    const bool compensate_for_interdiction = vega_config::config->physics.autopilot_compensate_for_interdiction;
-    const float enough_warp_for_cruise = vega_config::config->physics.enough_warp_for_cruise;
-    const float go_perpendicular_speed = vega_config::config->physics.warp_perpendicular;
-    const float min_warp_orbit_radius = vega_config::config->physics.min_warp_orbit_radius;
-    const float warp_orbit_multiplier = vega_config::config->physics.warp_orbit_multiplier;
     const float warp_behind_angle =
             cos(M_PI * vega_config::config->physics.warp_behind_angle /* default: "150" */
                     / 180.);
@@ -604,13 +591,13 @@ void AutoLongHaul::Execute() {
 
     StraightToTarget = true;    // free to fly
 
-    if ((parent->graphicOptions.WarpFieldStrength < enough_warp_for_cruise)
+    if ((parent->graphicOptions.WarpFieldStrength < vega_config::config->physics.enough_warp_for_cruise)
             && (parent->graphicOptions.RampCounter == 0)) {
         //face target unless warp ramping is done and warp is less than some intolerable ammt
         Unit *obstacle = NULL;
         float maxmultiplier = parent->CalculateNearestWarpUnit(FLT_MAX,
                 &obstacle,
-                compensate_for_interdiction);         //find the unit affecting our spec
+                vega_config::config->physics.auto_pilot_compensate_for_interdiction);         //find the unit affecting our spec
         bool currently_inside_landing_zone = false;
         if (obstacle) {
             currently_inside_landing_zone = InsideLandingPort(obstacle);
@@ -642,18 +629,18 @@ void AutoLongHaul::Execute() {
                 if (renormalizedetour > .01) {
                     detourvector = detourvector * (1. / renormalizedetour);
                 }                     //normalize it
-                double finaldetourdistance = mymax(obstacle->rSize() * warp_orbit_multiplier,
-                        min_warp_orbit_radius);                //scale that direction by some multiplier of obstacle size and a constant
+                double finaldetourdistance = mymax(obstacle->rSize() * vega_config::config->physics.warp_orbit_multiplier,
+                        vega_config::config->physics.min_warp_orbit_radius);                //scale that direction by some multiplier of obstacle size and a constant
                 detourvector = detourvector
                         * finaldetourdistance;                 //we want to go perpendicular to our transit direction by that ammt
                 QVector newdestination = NewDestination(obstacle->LocalPosition() + detourvector,
                         finaldetourdistance);                 //add to our position
-                float weight = (maxmultiplier - go_perpendicular_speed) / (enough_warp_for_cruise
-                        - go_perpendicular_speed);                   //find out how close we are to our desired warp multiplier and weight our direction by that
+                float weight = (maxmultiplier - vega_config::config->physics.warp_perpendicular) / (vega_config::config->physics.enough_warp_for_cruise
+                        - vega_config::config->physics.warp_perpendicular);                   //find out how close we are to our desired warp multiplier and weight our direction by that
                 weight *= weight;                 //
-                if (maxmultiplier < go_perpendicular_speed) {
+                if (maxmultiplier < vega_config::config->physics.warp_perpendicular) {
                     QVector perpendicular = myposition + planetme * (finaldetourdistance / planetme.Magnitude());
-                    weight = (go_perpendicular_speed - maxmultiplier) / go_perpendicular_speed;
+                    weight = (vega_config::config->physics.warp_perpendicular - maxmultiplier) / vega_config::config->physics.warp_perpendicular;
                     destination = weight * perpendicular + (1 - weight) * newdestination;
                 } else {
                     QVector olddestination = myposition + destinationdirection
@@ -695,11 +682,9 @@ void AutoLongHaul::Execute() {
     double dis = UnitUtil::getSignificantDistance(parent, target);
     float time_to_destination = dis / maxspeed;
 
-    const bool rampdown = vega_config::config->physics.autopilot_ramp_warp_down;
-    const float warprampdowntime = vega_config::config->physics.warprampdowntime;
     float time_to_stop = simulation_atom_var;
-    if (rampdown) {
-        time_to_stop += warprampdowntime;
+    if (vega_config::config->physics.auto_pilot_ramp_warp_down) {
+        time_to_stop += vega_config::config->physics.warp_ramp_down_time;
     }
     if (time_to_destination <= time_to_stop) {
         deactivatewarp = true;
@@ -709,7 +694,7 @@ void AutoLongHaul::Execute() {
         \
         CautiousWarpRampOn(parent);
     } else {
-        WarpRampOff(parent, rampdown);
+        WarpRampOff(parent, vega_config::config->physics.auto_pilot_ramp_warp_down);
     }
     SetDest(destination);
     bool combat_mode = parent->GetComputerData().combat_mode;
@@ -719,9 +704,6 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    const float distance_to_stop = vega_config::config->physics.auto_pilot_termination_distance;
-    const float enemy_distance_to_stop = vega_config::config->physics.auto_pilot_termination_distance_enemy;
-    const bool do_auto_finish = vega_config::config->physics.autopilot_terminate;
     bool stopnow = false;
     maxspeed = parent->afterburner.speed;
     if (maxspeed && parent->drive.retro) {
@@ -731,10 +713,10 @@ void AutoLongHaul::Execute() {
             stopnow = true;
         }
     }
-    if (do_auto_finish
-            && (stopnow || dis < distance_to_stop || (target->Target() == parent && dis < enemy_distance_to_stop))) {
+    if (vega_config::config->physics.auto_pilot_terminate
+            && (stopnow || dis < vega_config::config->physics.auto_pilot_termination_distance || (target->Target() == parent && dis < vega_config::config->physics.auto_pilot_termination_distance_enemy))) {
         parent->autopilotactive = false;
-        WarpRampOff(parent, rampdown);
+        WarpRampOff(parent, vega_config::config->physics.auto_pilot_ramp_warp_down);
         done = true;
     }
 }
