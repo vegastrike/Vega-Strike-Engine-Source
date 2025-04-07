@@ -297,7 +297,7 @@ public:
     bool push_values_to_mean{};
     float ambient_light_factor{};
     float star_radius_scale{};
-    std::string DefaultAtmosphereTexture;
+    std::string default_atmosphere_texture;
     float atmosphere_probability{};
     float ring_probability{};
     float double_ring_probability{};

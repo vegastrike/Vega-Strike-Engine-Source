@@ -395,6 +395,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.can_target_sun = boost::json::value_to<bool>(*can_target_sun_value_ptr);
             }
 
+            const boost::json::value * cargo_rotates_at_same_speed_value_ptr = graphics_object.if_contains("cargo_rotates_at_same_speed");
+            if (cargo_rotates_at_same_speed_value_ptr != nullptr) {
+                graphics.cargo_rotates_at_same_speed = boost::json::value_to<bool>(*cargo_rotates_at_same_speed_value_ptr);
+            }
+
             const boost::json::value * cargo_rotation_speed_value_ptr = graphics_object.if_contains("cargo_rotation_speed");
             if (cargo_rotation_speed_value_ptr != nullptr) {
                 graphics.cargo_rotation_speed = boost::json::value_to<double>(*cargo_rotation_speed_value_ptr);
@@ -2198,6 +2203,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
         const boost::json::value * data_value_ptr = root_object.if_contains("data");
         if (data_value_ptr != nullptr) {
             boost::json::object data_object = data_value_ptr->get_object();
+            const boost::json::value * ai_directory_value_ptr = data_object.if_contains("ai_directory");
+            if (ai_directory_value_ptr != nullptr) {
+                data.ai_directory = boost::json::value_to<std::string>(*ai_directory_value_ptr);
+            }
+
             const boost::json::value * animations_value_ptr = data_object.if_contains("animations");
             if (animations_value_ptr != nullptr) {
                 data.animations = boost::json::value_to<std::string>(*animations_value_ptr);
@@ -2479,6 +2489,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * ease_to_appease_value_ptr = ai_object.if_contains("ease_to_appease");
             if (ease_to_appease_value_ptr != nullptr) {
                 ai.ease_to_appease = boost::json::value_to<double>(*ease_to_appease_value_ptr);
+            }
+
+            const boost::json::value * eject_attacks_value_ptr = ai_object.if_contains("eject_attacks");
+            if (eject_attacks_value_ptr != nullptr) {
+                ai.eject_attacks = boost::json::value_to<bool>(*eject_attacks_value_ptr);
             }
 
             const boost::json::value * evasion_angle_value_ptr = ai_object.if_contains("evasion_angle");
@@ -3975,6 +3990,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.car_control = boost::json::value_to<bool>(*car_control_value_ptr);
             }
 
+            const boost::json::value * cargo_live_time_value_ptr = physics_object.if_contains("cargo_live_time");
+            if (cargo_live_time_value_ptr != nullptr) {
+                physics.cargo_live_time = boost::json::value_to<double>(*cargo_live_time_value_ptr);
+            }
+
             const boost::json::value * cargo_wingmen_only_with_dockport_value_ptr = physics_object.if_contains("cargo_wingmen_only_with_dockport");
             if (cargo_wingmen_only_with_dockport_value_ptr != nullptr) {
                 physics.cargo_wingmen_only_with_dockport = boost::json::value_to<bool>(*cargo_wingmen_only_with_dockport_value_ptr);
@@ -4103,6 +4123,16 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * eject_cargo_speed_value_ptr = physics_object.if_contains("eject_cargo_speed");
             if (eject_cargo_speed_value_ptr != nullptr) {
                 physics.eject_cargo_speed = boost::json::value_to<double>(*eject_cargo_speed_value_ptr);
+            }
+
+            const boost::json::value * eject_distance_value_ptr = physics_object.if_contains("eject_distance");
+            if (eject_distance_value_ptr != nullptr) {
+                physics.eject_distance = boost::json::value_to<double>(*eject_distance_value_ptr);
+            }
+
+            const boost::json::value * eject_live_time_value_ptr = physics_object.if_contains("eject_live_time");
+            if (eject_live_time_value_ptr != nullptr) {
+                physics.eject_live_time = boost::json::value_to<double>(*eject_live_time_value_ptr);
             }
 
             const boost::json::value * engine_energy_takes_priority_value_ptr = physics_object.if_contains("engine_energy_takes_priority");

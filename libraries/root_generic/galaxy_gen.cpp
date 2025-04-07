@@ -849,7 +849,7 @@ void MakePlanet(float radius,
     if (atmosphere == "false") {
         atmosphere = "";
     } else if (atmosphere == "true") {
-        atmosphere = game_options()->DefaultAtmosphereTexture;
+        atmosphere = game_options()->default_atmosphere_texture;
     }
     string cname;
     string planetlites = _Universe->getGalaxy()->getPlanetVariable(texturename, "lights", "");

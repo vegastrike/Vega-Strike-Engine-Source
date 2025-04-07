@@ -201,7 +201,7 @@ void Carrier::EjectCargo(unsigned int index) {
         tmp->SetMass(0.01);
     }
 
-    static float cargotime = vega_config::config->physics.cargo_live_time;
+    const float cargotime = vega_config::config->physics.cargo_live_time;
     if (tmp) {
         string tmpcontent = tmp->name;
         if (tmp->GetMissionFlag()) {
@@ -265,8 +265,7 @@ void Carrier::EjectCargo(unsigned int index) {
                         cargo->owner = unit;
                     }
                     arot = erot;
-                    static bool eject_attacks =
-                            vega_config::config->ai.eject_attacks;
+                    const bool eject_attacks = vega_config::config->ai.eject_attacks;
                     if (eject_attacks) {
                         cargo->PrimeOrders();
                         //generally fraidycat AI
@@ -291,8 +290,7 @@ void Carrier::EjectCargo(unsigned int index) {
                         }
                     } else {
                         int fac = FactionUtil::GetUpgradeFaction();
-                        static float ejectcargotime =
-                                vega_config::config->physics.eject_live_time;
+                        const float ejectcargotime = vega_config::config->physics.eject_live_time;
                         if (cargotime == 0.0) {
                             cargo = new Unit("eject", false, fac, "", NULL, 0);
                         } else {
@@ -345,8 +343,7 @@ void Carrier::EjectCargo(unsigned int index) {
             Vector rotation
                     (vsrandom.uniformInc(-arot, arot), vsrandom.uniformInc(-arot, arot), vsrandom.uniformInc(-arot,
                             arot));
-            static bool all_rotate_same =
-                    vega_config::config->graphics.cargo_rotates_at_same_speed;
+            const bool all_rotate_same = vega_config::config->graphics.cargo_rotates_at_same_speed;
             if (all_rotate_same && arot != 0) {
                 float tmp = rotation.Magnitude();
                 if (tmp > .001) {
@@ -366,8 +363,7 @@ void Carrier::EjectCargo(unsigned int index) {
                 }
                 tmpvel.Normalize();
                 if ((SelectDockPort(unit, unit) > -1)) {
-                    static float eject_cargo_offset =
-                            vega_config::config->physics.eject_distance;
+                    const float eject_cargo_offset = vega_config::config->physics.eject_distance;
                     QVector loc(Transform(unit->GetTransformation(),
                             unit->DockingPortLocations()[0].GetPosition().Cast()));
                     //index is always > -1 because it's unsigned.  Lets use the correct terms, -1 in Uint is UINT_MAX
@@ -675,8 +671,7 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
 
     ///FIXME somehow mangle string
     string mangled = unit->cargo[i].name;
-    static float scramblingmanifest =
-            vega_config::config->general.PercentageSpeedChangeToFaultSearch;
+    static float scramblingmanifest = vega_config::config->general.percentage_speed_change_to_fault_search;
     {
         //Keep inside subblock, otherwice MSVC will throw an error while redefining 'i'
         bool last = true;

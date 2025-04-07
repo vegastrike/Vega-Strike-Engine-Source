@@ -710,8 +710,8 @@ void LoadConfig(string subdir) {
     vs_config = createVegaConfig(config_file.c_str());
 
     string universe_file = data_dir + "/" \
- + vega_config::config->data.universe_path; /* default: "universe" */) + "/" \
- + vega_config::config->general.galaxy; /* default: "milky_way.xml" */);
+ + vega_config::config->data.universe_path; /* default: "universe" */ + "/" \
+ + vega_config::config->game_start.galaxy; /* default: "milky_way.xml" */
     VS_LOG(debug, (boost::format("Force galaxy to %1%") % universe_file));
     try {
         Galaxy galaxy = Galaxy(universe_file);

@@ -108,6 +108,7 @@ namespace vega_config {
         bool can_target_asteroid = true;
         bool can_target_cargo = false;
         bool can_target_sun = true;
+        bool cargo_rotates_at_same_speed = true;
         double cargo_rotation_speed = 60.0;
         double circle_accuracy = 0.1;
         int city_light_filter = 4;
@@ -519,6 +520,7 @@ namespace vega_config {
     } constants;
 
     struct {
+        std::string ai_directory = "ai";
         std::string animations = "animations";
         std::string capship_roles = "ESCORTCAP CAPITAL CARRIER BASE TROOP";
         std::string cockpits = "cockpits";
@@ -584,6 +586,7 @@ namespace vega_config {
         std::string docked_to_script = "";
         double ease_to_anger = -0.5;
         double ease_to_appease = 0.5;
+        bool eject_attacks = false;
         double evasion_angle = 45.0;
         double faction_contraband_relation_adjust = -0.025;
         double fg_nav_select_time = 120.0;
@@ -936,6 +939,7 @@ namespace vega_config {
         double autogen_compactness = 1.0;
         double capship_size = 500.0;
         bool car_control = false;
+        double cargo_live_time = 600.0;
         bool cargo_wingmen_only_with_dockport = false;
         bool change_docking_orientation = false;
         double close_enough_to_autotrack = 4.0;
@@ -962,6 +966,8 @@ namespace vega_config {
         std::string drone = "beholder";
         int eject_cargo_on_blowup = 0;
         double eject_cargo_speed = 1.0;
+        double eject_distance = 20.0;
+        double eject_live_time = 0.0;
         bool engine_energy_takes_priority = true;
         double explosion_damage_center = 1.0;
         double explosion_damage_edge = 0.125;

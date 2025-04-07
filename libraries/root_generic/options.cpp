@@ -28,7 +28,7 @@ extern VegaConfig *vs_config;
 
 void vs_options::init() {
     /* General Options */
-    galaxy = vega_config::config->general.galaxy; /* default: "milky_way.xml" */
+    galaxy = vega_config::config->game_start.galaxy; /* default: "milky_way.xml" */
     command_interpretor = vega_config::config->general.command_interpreter;
     load_last_savegame = vega_config::config->general.load_last_savegame;
     debug_fs = vega_config::config->general.debug_fs;
@@ -260,7 +260,7 @@ void vs_options::init() {
     refire_difficulty_scaling = vega_config::config->physics.refire_difficulty_scaling; // default: 3.0
     debris_mass = vega_config::config->physics.debris_mass; // default: 0.00001
     explosion_damage_center = vega_config::config->physics.explosion_damage_center; // default: 1.0
-    explosion_damage_edge = vega_config::config->graphics.explosion_damage_edge; // default: 0.125
+    explosion_damage_edge = vega_config::config->physics.explosion_damage_edge; // default: 0.125
     eject_cargo_on_blowup = vega_config::config->physics.eject_cargo_on_blowup; // default: 0
 
     /* Data Options */
@@ -286,7 +286,7 @@ void vs_options::init() {
     push_values_to_mean = vega_config::config->galaxy.push_values_to_mean;
     ambient_light_factor = vega_config::config->galaxy.ambient_light_factor; // default: 0.0
     star_radius_scale = vega_config::config->galaxy.star_radius_scale;
-    DefaultAtmosphereTexture = vega_config::config->galaxy.DefaultAtmosphereTexture; /* default: "sol/earthcloudmaptrans.png" */
+    default_atmosphere_texture = vega_config::config->galaxy.default_atmosphere_texture; /* default: "sol/earthcloudmaptrans.png" */
     atmosphere_probability = vega_config::config->galaxy.atmosphere_probability; // default: 0.5
     ring_probability = vega_config::config->galaxy.ring_probability; // default: 0.1
     double_ring_probability = vega_config::config->galaxy.double_ring_probability; // default: 0.025
