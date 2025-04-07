@@ -199,36 +199,34 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     }
     bool ok = true;
 
-    static bool teleport_autopilot =
-            vega_config::config->physics.teleport_autopilot;
     bool unsafe = false;
-    if ((!teleport_autopilot) && (!nanspace)) {
+    if ((!vega_config::config->physics.teleport_autopilot) && (!nanspace)) {
         if (Guaranteed == Mission::AUTO_NORMAL && unit->cloak.Cloaked()) {
             bool ignore_friendlies = true;
             for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
-                static bool canflythruplanets =
-                        vega_config::config->physics.can_auto_through_planets;
                 if ((!(un->isUnit() == Vega_UnitType::planet
-                        && canflythruplanets)) && un->isUnit() != Vega_UnitType::nebula && (!UnitUtil::isSun(un))) {
+                        && vega_config::config->physics.can_auto_through_planets)) && un->isUnit() !=
+                    Vega_UnitType::nebula
+                    && (!UnitUtil::isSun(un))) {
                     if (un != this && un != target) {
                         float tdis = (start - un->Position()).Magnitude() - unit->rSize() - un->rSize();
                         float nedis = (end - un->Position()).Magnitude() - unit->rSize() - un->rSize();
                         float trad =
-                                getAutoRSize(unit, un, ignore_friendlies) + getAutoRSize(unit, unit, ignore_friendlies);
+                            getAutoRSize(unit, un, ignore_friendlies) + getAutoRSize(unit, unit, ignore_friendlies);
                         if (tdis <= trad) {
                             failuremessage = GenerateAutoError(unit, un);
                             return false;
                         }
                         if ((nedis < trad * autopilot_no_enemies_multiplier
-                                || tdis <= trad * autopilot_no_enemies_multiplier) && un->getRelation(unit) < 0) {
+                            || tdis <= trad * autopilot_no_enemies_multiplier) && un->getRelation(unit) < 0) {
                             unsafe = true;
                             failuremessage = GenerateAutoError(unit, un);
                         }
                         float intersection =
-                                globQueryShell(start - un->Position(), end - start, getAutoRSize(unit,
-                                        un,
-                                        ignore_friendlies)
-                                        + un->rSize());
+                            globQueryShell(start - un->Position(), end - start, getAutoRSize(unit,
+                                               un,
+                                               ignore_friendlies)
+                                           + un->rSize());
                         if (intersection > 0) {
                             unsafe = true;
                             end = start + (end - start) * intersection;
@@ -276,9 +274,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             sep = RealPosition(unit);
             nowhere = true;
         }
-        static bool auto_turn_towards =
-                vega_config::config->physics.auto_turn_towards;
-        if (auto_turn_towards) {
+        if (vega_config::config->physics.auto_turn_towards) {
             for (int i = 0; i < 3; ++i) {
                 Vector methem(RealPosition(target).Cast() - sep.Cast());
                 methem.Normalize();

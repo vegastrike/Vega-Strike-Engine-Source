@@ -135,9 +135,7 @@ public:
                 }
             }
         }
-        static bool allow_special_with_weapons =
-                vega_config::config->physics.special_and_normal_gun_combo;
-        if (allow_special_with_weapons) {
+        if (vega_config::config->physics.allow_special_and_normal_gun_combo) {
             myset.insert(allWeapons);
         }
         myset.insert(allWeaponsNoSpecial);

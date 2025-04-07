@@ -61,9 +61,7 @@ void Unit::RemoveFromSystem() {
                 VS_LOG(error, "NONFATAL NULL activeStarSystem detected...please fix");
                 activeStarSystem = _Universe->activeStarSystem();
             }
-            static bool collidemap_sanity_check =
-                    vega_config::config->physics.collidemap_sanity_check;
-            if (collidemap_sanity_check) {
+            if (vega_config::config->physics.collidemap_sanity_check) {
                 if (0) {
                     CollideMap::iterator i;
                     CollideMap::iterator j = activeStarSystem->collide_map[locind]->begin();
@@ -238,8 +236,6 @@ bool Unit::InsideCollideTree(Unit *smaller,
         }
     }
     un_iter i;
-    static float
-            rsizelim = vega_config::config->physics.smallest_subunit_to_collide;
     Vega_UnitType bigtype = bigasteroid ? Vega_UnitType::asteroid : bigger->isUnit();
     Vega_UnitType smalltype = smallasteroid ? Vega_UnitType::asteroid : smaller->isUnit();
     if (bigger->SubUnits.empty() == false
@@ -248,7 +244,7 @@ bool Unit::InsideCollideTree(Unit *smaller,
         float rad = smaller->rSize();
         for (Unit *un; (un = *i); ++i) {
             float subrad = un->rSize();
-            if ((bigtype != Vega_UnitType::asteroid) && (subrad / bigger->rSize() < rsizelim)) {
+            if ((bigtype != Vega_UnitType::asteroid) && (subrad / bigger->rSize() < vega_config::config->physics.smallest_subunit_to_collide)) {
                 break;
             }
             if ((un->Position() - smaller->Position()).Magnitude() <= subrad + rad) {
@@ -270,7 +266,7 @@ bool Unit::InsideCollideTree(Unit *smaller,
         float rad = bigger->rSize();
         for (Unit *un; (un = *i); ++i) {
             float subrad = un->rSize();
-            if ((smalltype != Vega_UnitType::asteroid) && (subrad / smaller->rSize() < rsizelim)) {
+            if ((smalltype != Vega_UnitType::asteroid) && (subrad / smaller->rSize() < vega_config::config->physics.smallest_subunit_to_collide)) {
                 break;
             }
             if ((un->Position() - bigger->Position()).Magnitude() <= subrad + rad) {
@@ -302,11 +298,9 @@ bool Unit::Collide(Unit *target) {
     }
     Vega_UnitType targetisUnit = target->isUnit();
     Vega_UnitType thisisUnit = this->isUnit();
-    static float
-            NEBULA_SPACE_DRAG = vega_config::config->physics.nebula_space_drag;
     if (targetisUnit == Vega_UnitType::nebula) {
         //why? why not?
-        this->Velocity *= (1 - NEBULA_SPACE_DRAG);
+        this->Velocity *= (1 - vega_config::config->physics.nebula_space_drag);
     }
     if (target == this
             || ((targetisUnit != Vega_UnitType::nebula
@@ -435,9 +429,8 @@ Unit *Unit::rayCollide(const QVector &start, const QVector &end, Vector &norm, f
     }
     QVector st(InvTransform(cumulative_transformation_matrix, start));
     QVector ed(InvTransform(cumulative_transformation_matrix, end));
-    static bool sphere_test = vega_config::config->physics.sphere_collision;
     distance = querySphereNoRecurse(start, end);
-    if (distance > 0.0f || (this->colTrees && this->colTrees->colTree(this, this->GetWarpVelocity()) && !sphere_test)) {
+    if (distance > 0.0f || (this->colTrees && this->colTrees->colTree(this, this->GetWarpVelocity()) && !vega_config::config->physics.sphere_collision)) {
         Vector coord;
         /* Set up points and ray to send to ray collider. */
         Opcode::Point rayOrigin(st.i, st.j, st.k);

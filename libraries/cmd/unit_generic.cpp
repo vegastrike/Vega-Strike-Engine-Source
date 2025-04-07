@@ -1279,10 +1279,8 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
             // TODO: do the above
             reactor.Damage();
         } else if (randnum >= .2) {
-            static float mindam =
-                    vega_config::config->physics.min_maxenergy_shot_damage
-            if (dam < mindam) {
-                dam = mindam;
+            if (dam < vega_config::config->physics.min_maxenergy_shot_damage) {
+                dam = vega_config::config->physics.min_maxenergy_shot_damage;
             }
             energy.DamageByPercent(dam);
         } else {
@@ -1308,11 +1306,8 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
     ClearMounts();
 
     if (docked & (DOCKING_UNITS)) {
-        static float survival =
-                vega_config::config->physics.survival_chance_on_base_death
-        const float player_survival = vega_config::config->physics.player_survival_chance_on_base_death;
-        static int i_survival = float_to_int((RAND_MAX * survival));
-        static int i_player_survival = float_to_int((RAND_MAX * player_survival));
+        const int i_survival = float_to_int((RAND_MAX * vega_config::config->physics.survival_chance_on_base_death));
+        const int i_player_survival = float_to_int((RAND_MAX * vega_config::config->physics.player_survival_chance_on_base_death));
 
         vector<Unit *> dockedun;
         unsigned int i;
@@ -1393,7 +1388,7 @@ void Unit::UnRef() {
 }
 
 float Unit::ExplosionRadius() {
-    static float expsize = vega_config::config->graphics.explosion_size
+    const float expsize = vega_config::config->graphics.explosion_size;
     return expsize * rSize();
 }
 
@@ -1473,10 +1468,7 @@ const Unit *loadUnitByCache(std::string name, int faction) {
 }
 
 bool DestroySystem(float hull_percent, float numhits) {
-    static float damage_chance = vega_config::config->physics.damage_chance
-    static float guaranteed_chance =
-            vega_config::config->physics.definite_damage_chance
-    float chance = 1 - (damage_chance * (guaranteed_chance + hull_percent));
+    float chance = 1 - (vega_config::config->physics.damage_chance * (vega_config::config->physics.definite_damage_chance + hull_percent));
     if (numhits > 1) {
         chance = pow(chance, numhits);
     }
@@ -1484,11 +1476,7 @@ bool DestroySystem(float hull_percent, float numhits) {
 }
 
 bool DestroyPlayerSystem(float hull_percent, float numhits) {
-    static float
-            damage_chance = vega_config::config->physics.damage_player_chance
-    static float guaranteed_chance =
-            vega_config::config->physics.definite_damage_chance
-    float chance = 1 - (damage_chance * (guaranteed_chance + hull_percent));
+    float chance = 1 - (vega_config::config->physics.damage_player_chance * (vega_config::config->physics.definite_damage_chance + hull_percent));
     if (numhits > 1) {
         chance = pow(chance, numhits);
     }
@@ -1521,13 +1509,12 @@ void Unit::TargetTurret(Unit *targ) {
 }
 
 void WarpPursuit(Unit *un, StarSystem *sourcess, std::string destination) {
-    static bool AINotUseJump = vega_config::config->physics.no_ai_jump_points;
-    if (AINotUseJump) {
-        static float seconds_per_parsec =
-                vega_config::config->physics.seconds_per_parsec
+    if (vega_config::config->physics.no_ai_jump_points) {
+        const float seconds_per_parsec =
+            vega_config::config->physics.seconds_per_parsec;
         float ttime =
-                (SystemLocation(sourcess->getFileName()) - SystemLocation(destination)).Magnitude()
-                        * seconds_per_parsec;
+            (SystemLocation(sourcess->getFileName()) - SystemLocation(destination)).Magnitude()
+            * seconds_per_parsec;
         un->jump_drive.SetDelay(float_to_int(ttime));
         sourcess->JumpTo(un, NULL, destination, true, true);
         un->jump_drive.SetDelay(-float_to_int(ttime));
@@ -1765,7 +1752,7 @@ bool Unit::Explode(bool drawit, float timeit) {
 }
 
 float Unit::ExplodingProgress() const {
-    static float debrisTime = vega_config::config->physics.debris_time
+    static float debrisTime = vega_config::config->physics.debris_time;
     return std::min(pImage->timeexplode / debrisTime, 1.0f);
 }
 
@@ -1969,10 +1956,10 @@ void rechargeShip(Unit *unit, unsigned int cockpit) {
     }
 
     // Refueling fee
-    static float refueling_fee = vega_config::config->general.fuel_docking_fee
+    static float refueling_fee = vega_config::config->general.fuel_docking_fee;
     _Universe->AccessCockpit(cockpit)->credits -= refueling_fee;
 
-    static float docking_fee = vega_config::config->general.docking_fee
+    static float docking_fee = vega_config::config->general.docking_fee;
     _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
 }
 
@@ -2127,15 +2114,11 @@ bool Unit::UnDock(Unit *utdw) {
             docked &= (~(DOCKED_INSIDE | DOCKED));
             pImage->DockedTo.SetUnit(NULL);
             Velocity = utdw->Velocity;
-            static float
-                    launch_speed = vega_config::config->physics.launch_speed
-            static bool auto_turn_towards =
-                    vega_config::config->physics.undock_turn_away;
 
-            if (launch_speed > 0) {
-                computer.set_speed = launch_speed;
+            if (vega_config::config->physics.launch_speed > 0) {
+                computer.set_speed = vega_config::config->physics.launch_speed;
             }
-            if (auto_turn_towards) {
+            if (vega_config::config->physics.undock_turn_away) {
                 for (int i = 0; i < 3; ++i) {
                     Vector methem(RealPosition(this) - RealPosition(utdw).Cast());
                     methem.Normalize();
@@ -2552,9 +2535,7 @@ bool Unit::Downgrade(const Unit *downgradeor,
 }
 
 double ComputeMinDowngradePercent() {
-    static float MyPercentMin =
-            vega_config::config->general.remove_downgrades_less_than_percent
-    return MyPercentMin;
+    return vega_config::config->general.remove_downgrades_less_than_percent;
 }
 
 class DoubleName {
@@ -2792,7 +2773,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
     // Old Code
     percentage = 0;
 
-    static bool
+    const bool
             csv_cell_null_check = vega_config::config->data.empty_cell_check;
     int numave = 0;
     bool cancompletefully = true;
@@ -2866,10 +2847,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
         }
     }
 
-    /*if (!csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data(upgrade_name, up->faction, "Reactor_Recharge"))
-        STDUPGRADE(recharge, up->recharge, templ->recharge, 0);*/
-    static bool unittable = vega_config::config->physics.UnitTable;
     //Uncommon fields (capacities... rates... etc...)
     if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name,
@@ -2891,9 +2868,9 @@ bool Unit::UpAndDownGrade(const Unit *up,
 
 
     //DO NOT CHANGE see unit_customize.cpp
-    static float lc = vega_config::config->physics.lock_cone
+    static float lc = vega_config::config->physics.lock_cone;
     //DO NOT CHANGE! see unit.cpp:258
-    static float tc = vega_config::config->physics.autotracking
+    static float tc = vega_config::config->physics.autotracking;
     static bool use_template_maxrange =
             vega_config::config->physics.use_upgrade_template_maxrange;
 
@@ -3044,9 +3021,7 @@ int Unit::RepairUpgrade() {
 
     damages = Damages::NO_DAMAGE;
     bool ret = success && pct > 0;
-    static bool ComponentBasedUpgrades =
-            vega_config::config->physics.component_based_upgrades;
-    if (ComponentBasedUpgrades) {
+    if (vega_config::config->physics.component_based_upgrades) {
         for (unsigned int i = 0; i < numCargo(); ++i) {
             if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
                 ++success;
@@ -3269,9 +3244,7 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
 }
 
 vector<CargoColor> &Unit::FilterUpgradeList(vector<CargoColor> &mylist) {
-    static bool filtercargoprice =
-            vega_config::config->cargo.filter_expensive_cargo;
-    if (filtercargoprice) {
+    if (vega_config::config->cargo.filter_expensive_cargo) {
         Cockpit *cp = _Universe->isPlayerStarship(this);
         if (cp) {
             for (unsigned int i = 0; i < mylist.size(); ++i) {

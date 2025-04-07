@@ -585,6 +585,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.explosion_force = boost::json::value_to<double>(*explosion_force_value_ptr);
             }
 
+            const boost::json::value * explosion_size_value_ptr = graphics_object.if_contains("explosion_size");
+            if (explosion_size_value_ptr != nullptr) {
+                graphics.explosion_size = boost::json::value_to<double>(*explosion_size_value_ptr);
+            }
+
             const boost::json::value * explosion_torque_value_ptr = graphics_object.if_contains("explosion_torque");
             if (explosion_torque_value_ptr != nullptr) {
                 graphics.explosion_torque = boost::json::value_to<double>(*explosion_torque_value_ptr);
@@ -2228,6 +2233,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 data.data_dir = boost::json::value_to<std::string>(*data_dir_value_ptr);
             }
 
+            const boost::json::value * empty_cell_check_value_ptr = data_object.if_contains("empty_cell_check");
+            if (empty_cell_check_value_ptr != nullptr) {
+                data.empty_cell_check = boost::json::value_to<bool>(*empty_cell_check_value_ptr);
+            }
+
             const boost::json::value * hqtextures_value_ptr = data_object.if_contains("hqtextures");
             if (hqtextures_value_ptr != nullptr) {
                 data.hqtextures = boost::json::value_to<std::string>(*hqtextures_value_ptr);
@@ -3233,6 +3243,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
         const boost::json::value * cargo_value_ptr = root_object.if_contains("cargo");
         if (cargo_value_ptr != nullptr) {
             boost::json::object cargo_object = cargo_value_ptr->get_object();
+            const boost::json::value * filter_expensive_cargo_value_ptr = cargo_object.if_contains("filter_expensive_cargo");
+            if (filter_expensive_cargo_value_ptr != nullptr) {
+                cargo.filter_expensive_cargo = boost::json::value_to<bool>(*filter_expensive_cargo_value_ptr);
+            }
+
             const boost::json::value * junk_starship_mass_value_ptr = cargo_object.if_contains("junk_starship_mass");
             if (junk_starship_mass_value_ptr != nullptr) {
                 cargo.junk_starship_mass = boost::json::value_to<double>(*junk_starship_mass_value_ptr);
@@ -3970,6 +3985,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.auto_time_in_seconds = boost::json::value_to<double>(*auto_time_in_seconds_value_ptr);
             }
 
+            const boost::json::value * auto_turn_towards_value_ptr = physics_object.if_contains("auto_turn_towards");
+            if (auto_turn_towards_value_ptr != nullptr) {
+                physics.auto_turn_towards = boost::json::value_to<bool>(*auto_turn_towards_value_ptr);
+            }
+
             const boost::json::value * auto_undock_value_ptr = physics_object.if_contains("auto_undock");
             if (auto_undock_value_ptr != nullptr) {
                 physics.auto_undock = boost::json::value_to<bool>(*auto_undock_value_ptr);
@@ -3978,6 +3998,16 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * autogen_compactness_value_ptr = physics_object.if_contains("autogen_compactness");
             if (autogen_compactness_value_ptr != nullptr) {
                 physics.autogen_compactness = boost::json::value_to<double>(*autogen_compactness_value_ptr);
+            }
+
+            const boost::json::value * autotracking_value_ptr = physics_object.if_contains("autotracking");
+            if (autotracking_value_ptr != nullptr) {
+                physics.autotracking = boost::json::value_to<double>(*autotracking_value_ptr);
+            }
+
+            const boost::json::value * can_auto_through_planets_value_ptr = physics_object.if_contains("can_auto_through_planets");
+            if (can_auto_through_planets_value_ptr != nullptr) {
+                physics.can_auto_through_planets = boost::json::value_to<bool>(*can_auto_through_planets_value_ptr);
             }
 
             const boost::json::value * capship_size_value_ptr = physics_object.if_contains("capship_size");
@@ -4010,9 +4040,19 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.close_enough_to_autotrack = boost::json::value_to<double>(*close_enough_to_autotrack_value_ptr);
             }
 
+            const boost::json::value * collidemap_sanity_check_value_ptr = physics_object.if_contains("collidemap_sanity_check");
+            if (collidemap_sanity_check_value_ptr != nullptr) {
+                physics.collidemap_sanity_check = boost::json::value_to<bool>(*collidemap_sanity_check_value_ptr);
+            }
+
             const boost::json::value * collision_scale_factor_value_ptr = physics_object.if_contains("collision_scale_factor");
             if (collision_scale_factor_value_ptr != nullptr) {
                 physics.collision_scale_factor = boost::json::value_to<double>(*collision_scale_factor_value_ptr);
+            }
+
+            const boost::json::value * component_based_upgrades_value_ptr = physics_object.if_contains("component_based_upgrades");
+            if (component_based_upgrades_value_ptr != nullptr) {
+                physics.component_based_upgrades = boost::json::value_to<bool>(*component_based_upgrades_value_ptr);
             }
 
             const boost::json::value * computer_warp_ramp_up_time_value_ptr = physics_object.if_contains("computer_warp_ramp_up_time");
@@ -4023,6 +4063,16 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * contraband_assist_range_value_ptr = physics_object.if_contains("contraband_assist_range");
             if (contraband_assist_range_value_ptr != nullptr) {
                 physics.contraband_assist_range = boost::json::value_to<double>(*contraband_assist_range_value_ptr);
+            }
+
+            const boost::json::value * damage_chance_value_ptr = physics_object.if_contains("damage_chance");
+            if (damage_chance_value_ptr != nullptr) {
+                physics.damage_chance = boost::json::value_to<double>(*damage_chance_value_ptr);
+            }
+
+            const boost::json::value * damage_player_chance_value_ptr = physics_object.if_contains("damage_player_chance");
+            if (damage_player_chance_value_ptr != nullptr) {
+                physics.damage_player_chance = boost::json::value_to<double>(*damage_player_chance_value_ptr);
             }
 
             const boost::json::value * debris_mass_value_ptr = physics_object.if_contains("debris_mass");
@@ -4043,6 +4093,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * default_shield_tightness_value_ptr = physics_object.if_contains("default_shield_tightness");
             if (default_shield_tightness_value_ptr != nullptr) {
                 physics.default_shield_tightness = boost::json::value_to<double>(*default_shield_tightness_value_ptr);
+            }
+
+            const boost::json::value * definite_damage_chance_value_ptr = physics_object.if_contains("definite_damage_chance");
+            if (definite_damage_chance_value_ptr != nullptr) {
+                physics.definite_damage_chance = boost::json::value_to<double>(*definite_damage_chance_value_ptr);
             }
 
             const boost::json::value * density_of_jump_point_value_ptr = physics_object.if_contains("density_of_jump_point");
@@ -4260,6 +4315,16 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.jump_weapon_collision = boost::json::value_to<bool>(*jump_weapon_collision_value_ptr);
             }
 
+            const boost::json::value * launch_speed_value_ptr = physics_object.if_contains("launch_speed");
+            if (launch_speed_value_ptr != nullptr) {
+                physics.launch_speed = boost::json::value_to<double>(*launch_speed_value_ptr);
+            }
+
+            const boost::json::value * lock_cone_value_ptr = physics_object.if_contains("lock_cone");
+            if (lock_cone_value_ptr != nullptr) {
+                physics.lock_cone = boost::json::value_to<double>(*lock_cone_value_ptr);
+            }
+
             const boost::json::value * match_speed_with_target_value_ptr = physics_object.if_contains("match_speed_with_target");
             if (match_speed_with_target_value_ptr != nullptr) {
                 physics.match_speed_with_target = boost::json::value_to<bool>(*match_speed_with_target_value_ptr);
@@ -4345,6 +4410,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.min_damage = boost::json::value_to<double>(*min_damage_value_ptr);
             }
 
+            const boost::json::value * min_maxenergy_shot_damage_value_ptr = physics_object.if_contains("min_maxenergy_shot_damage");
+            if (min_maxenergy_shot_damage_value_ptr != nullptr) {
+                physics.min_maxenergy_shot_damage = boost::json::value_to<double>(*min_maxenergy_shot_damage_value_ptr);
+            }
+
             const boost::json::value * min_shield_speeding_discharge_value_ptr = physics_object.if_contains("min_shield_speeding_discharge");
             if (min_shield_speeding_discharge_value_ptr != nullptr) {
                 physics.min_shield_speeding_discharge = boost::json::value_to<double>(*min_shield_speeding_discharge_value_ptr);
@@ -4390,9 +4460,19 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.nebula_shield_recharge = boost::json::value_to<double>(*nebula_shield_recharge_value_ptr);
             }
 
+            const boost::json::value * nebula_space_drag_value_ptr = physics_object.if_contains("nebula_space_drag");
+            if (nebula_space_drag_value_ptr != nullptr) {
+                physics.nebula_space_drag = boost::json::value_to<double>(*nebula_space_drag_value_ptr);
+            }
+
             const boost::json::value * neutral_auto_radius_value_ptr = physics_object.if_contains("neutral_auto_radius");
             if (neutral_auto_radius_value_ptr != nullptr) {
                 physics.neutral_auto_radius = boost::json::value_to<double>(*neutral_auto_radius_value_ptr);
+            }
+
+            const boost::json::value * no_ai_jump_points_value_ptr = physics_object.if_contains("no_ai_jump_points");
+            if (no_ai_jump_points_value_ptr != nullptr) {
+                physics.no_ai_jump_points = boost::json::value_to<bool>(*no_ai_jump_points_value_ptr);
             }
 
             const boost::json::value * no_damage_to_docked_ships_value_ptr = physics_object.if_contains("no_damage_to_docked_ships");
@@ -4500,6 +4580,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.runtime_compactness = boost::json::value_to<double>(*runtime_compactness_value_ptr);
             }
 
+            const boost::json::value * seconds_per_parsec_value_ptr = physics_object.if_contains("seconds_per_parsec");
+            if (seconds_per_parsec_value_ptr != nullptr) {
+                physics.seconds_per_parsec = boost::json::value_to<double>(*seconds_per_parsec_value_ptr);
+            }
+
             const boost::json::value * separate_system_flakiness_component_value_ptr = physics_object.if_contains("separate_system_flakiness_component");
             if (separate_system_flakiness_component_value_ptr != nullptr) {
                 physics.separate_system_flakiness_component = boost::json::value_to<bool>(*separate_system_flakiness_component_value_ptr);
@@ -4525,9 +4610,19 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.simulate_while_docked = boost::json::value_to<bool>(*simulate_while_docked_value_ptr);
             }
 
+            const boost::json::value * smallest_subunit_to_collide_value_ptr = physics_object.if_contains("smallest_subunit_to_collide");
+            if (smallest_subunit_to_collide_value_ptr != nullptr) {
+                physics.smallest_subunit_to_collide = boost::json::value_to<double>(*smallest_subunit_to_collide_value_ptr);
+            }
+
             const boost::json::value * speeding_discharge_value_ptr = physics_object.if_contains("speeding_discharge");
             if (speeding_discharge_value_ptr != nullptr) {
                 physics.speeding_discharge = boost::json::value_to<double>(*speeding_discharge_value_ptr);
+            }
+
+            const boost::json::value * sphere_collision_value_ptr = physics_object.if_contains("sphere_collision");
+            if (sphere_collision_value_ptr != nullptr) {
+                physics.sphere_collision = boost::json::value_to<bool>(*sphere_collision_value_ptr);
             }
 
             const boost::json::value * star_system_scale_value_ptr = physics_object.if_contains("star_system_scale");
@@ -4545,6 +4640,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.steady_itts = boost::json::value_to<bool>(*steady_itts_value_ptr);
             }
 
+            const boost::json::value * survival_chance_on_base_death_value_ptr = physics_object.if_contains("survival_chance_on_base_death");
+            if (survival_chance_on_base_death_value_ptr != nullptr) {
+                physics.survival_chance_on_base_death = boost::json::value_to<double>(*survival_chance_on_base_death_value_ptr);
+            }
+
             const boost::json::value * system_damage_on_armor_value_ptr = physics_object.if_contains("system_damage_on_armor");
             if (system_damage_on_armor_value_ptr != nullptr) {
                 physics.system_damage_on_armor = boost::json::value_to<bool>(*system_damage_on_armor_value_ptr);
@@ -4555,6 +4655,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.target_distance_to_warp_bonus = boost::json::value_to<double>(*target_distance_to_warp_bonus_value_ptr);
             }
 
+            const boost::json::value * teleport_autopilot_value_ptr = physics_object.if_contains("teleport_autopilot");
+            if (teleport_autopilot_value_ptr != nullptr) {
+                physics.teleport_autopilot = boost::json::value_to<bool>(*teleport_autopilot_value_ptr);
+            }
+
             const boost::json::value * thruster_hit_chance_value_ptr = physics_object.if_contains("thruster_hit_chance");
             if (thruster_hit_chance_value_ptr != nullptr) {
                 physics.thruster_hit_chance = boost::json::value_to<double>(*thruster_hit_chance_value_ptr);
@@ -4563,6 +4668,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * un_docking_time_value_ptr = physics_object.if_contains("un_docking_time");
             if (un_docking_time_value_ptr != nullptr) {
                 physics.un_docking_time = boost::json::value_to<double>(*un_docking_time_value_ptr);
+            }
+
+            const boost::json::value * undock_turn_away_value_ptr = physics_object.if_contains("undock_turn_away");
+            if (undock_turn_away_value_ptr != nullptr) {
+                physics.undock_turn_away = boost::json::value_to<bool>(*undock_turn_away_value_ptr);
             }
 
             const boost::json::value * unit_space_drag_value_ptr = physics_object.if_contains("unit_space_drag");
@@ -4578,6 +4688,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * use_hidden_cargo_space_value_ptr = physics_object.if_contains("use_hidden_cargo_space");
             if (use_hidden_cargo_space_value_ptr != nullptr) {
                 physics.use_hidden_cargo_space = boost::json::value_to<bool>(*use_hidden_cargo_space_value_ptr);
+            }
+
+            const boost::json::value * use_upgrade_template_maxrange_value_ptr = physics_object.if_contains("use_upgrade_template_maxrange");
+            if (use_upgrade_template_maxrange_value_ptr != nullptr) {
+                physics.use_upgrade_template_maxrange = boost::json::value_to<bool>(*use_upgrade_template_maxrange_value_ptr);
             }
 
             const boost::json::value * use_max_shield_energy_usage_value_ptr = physics_object.if_contains("use_max_shield_energy_usage");
