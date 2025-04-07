@@ -310,8 +310,7 @@ int Cockpit::Autopilot(Unit *target) {
                 //can he even start to autopilot
                 //SetView (CP_PAN);
                 un->AutoPilotTo(target, false);
-                static bool face_target_on_auto =
-                        vega_config::config->physics.face_on_auto;
+                const bool face_target_on_auto = vega_config::config->physics.face_target_on_auto;
                 if (face_target_on_auto) {
                     FaceTarget(un);
                 }
@@ -364,8 +363,7 @@ void SwitchUnits(Unit *ol, Unit *nw) {
 }
 
 static void SwitchUnitsTurret(Unit *ol, Unit *nw) {
-    static bool FlyStraightInTurret =
-            vega_config::config->physics.ai_pilot_when_in_turret;
+    const bool FlyStraightInTurret = vega_config::config->physics.ai_pilot_when_in_turret;
     if (FlyStraightInTurret) {
         SwitchUnits(ol, nw);
     } else {
@@ -554,8 +552,8 @@ bool Cockpit::Update() {
             }
         }
     }
-    static bool autoclear = vega_config::config->ai.autodock;
-    if (autoclear && par) {
+    const bool auto_clear = vega_config::config->ai.auto_dock;
+    if (auto_clear && par) {
         Unit *targ = par->Target();
         if (targ) {
             const float autopilot_term_distance = vega_config::config->physics.auto_pilot_termination_distance;
@@ -689,8 +687,7 @@ bool Cockpit::Update() {
     if (!par) {
         if (respawnunit.size() > _Universe->CurrentCockpit()) {
             if (respawnunit[_Universe->CurrentCockpit()]) {
-                static float initialzoom =
-                        vega_config::config->graphics.inital_zoom_factor
+                const float initialzoom = vega_config::config->graphics.initial_zoom_factor;
                 zoomfactor = initialzoom;
 
                 parentturret.SetUnit(NULL);
@@ -736,8 +733,7 @@ bool Cockpit::Update() {
                 savegame->SetPlayerLocation(pos);
                 CopySavedShips(savegame->GetCallsign(), whichcp, packedInfo, true);
                 bool actually_have_save = false;
-                static bool persistent_on_load =
-                        vega_config::config->physics.persistent_on_load;
+                const bool persistent_on_load = vega_config::config->physics.persistent_on_load;
                 if (savegame->GetStarSystem() != "") {
                     actually_have_save = true;
                     newsystem = savegame->GetStarSystem() + ".system";

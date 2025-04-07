@@ -465,6 +465,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.default_engine_activation = boost::json::value_to<double>(*default_engine_activation_value_ptr);
             }
 
+            const boost::json::value * detail_texture_scale_value_ptr = graphics_object.if_contains("detail_texture_scale");
+            if (detail_texture_scale_value_ptr != nullptr) {
+                graphics.detail_texture_scale = boost::json::value_to<double>(*detail_texture_scale_value_ptr);
+            }
+
             const boost::json::value * detail_texture_trilinear_value_ptr = graphics_object.if_contains("detail_texture_trilinear");
             if (detail_texture_trilinear_value_ptr != nullptr) {
                 graphics.detail_texture_trilinear = boost::json::value_to<bool>(*detail_texture_trilinear_value_ptr);
@@ -810,6 +815,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.max_texture_dimension = boost::json::value_to<int>(*max_texture_dimension_value_ptr);
             }
 
+            const boost::json::value * mesh_animation_max_frames_skipped_value_ptr = graphics_object.if_contains("mesh_animation_max_frames_skipped");
+            if (mesh_animation_max_frames_skipped_value_ptr != nullptr) {
+                graphics.mesh_animation_max_frames_skipped = boost::json::value_to<double>(*mesh_animation_max_frames_skipped_value_ptr);
+            }
+
             const boost::json::value * mesh_far_percent_value_ptr = graphics_object.if_contains("mesh_far_percent");
             if (mesh_far_percent_value_ptr != nullptr) {
                 graphics.mesh_far_percent = boost::json::value_to<double>(*mesh_far_percent_value_ptr);
@@ -903,6 +913,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * percent_shockwave_value_ptr = graphics_object.if_contains("percent_shockwave");
             if (percent_shockwave_value_ptr != nullptr) {
                 graphics.percent_shockwave = boost::json::value_to<double>(*percent_shockwave_value_ptr);
+            }
+
+            const boost::json::value * per_pixel_lighting_value_ptr = graphics_object.if_contains("per_pixel_lighting");
+            if (per_pixel_lighting_value_ptr != nullptr) {
+                graphics.per_pixel_lighting = boost::json::value_to<bool>(*per_pixel_lighting_value_ptr);
             }
 
             const boost::json::value * planet_detail_level_value_ptr = graphics_object.if_contains("planet_detail_level");
@@ -1143,6 +1158,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * use_animations_value_ptr = graphics_object.if_contains("use_animations");
             if (use_animations_value_ptr != nullptr) {
                 graphics.use_animations = boost::json::value_to<bool>(*use_animations_value_ptr);
+            }
+
+            const boost::json::value * use_detail_texture_value_ptr = graphics_object.if_contains("use_detail_texture");
+            if (use_detail_texture_value_ptr != nullptr) {
+                graphics.use_detail_texture = boost::json::value_to<bool>(*use_detail_texture_value_ptr);
             }
 
             const boost::json::value * use_faction_gui_background_color_value_ptr = graphics_object.if_contains("use_faction_gui_background_color");
@@ -2361,14 +2381,19 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 ai.anger_affects_response = boost::json::value_to<double>(*anger_affects_response_value_ptr);
             }
 
+            const boost::json::value * assist_friend_in_need_value_ptr = ai_object.if_contains("assist_friend_in_need");
+            if (assist_friend_in_need_value_ptr != nullptr) {
+                ai.assist_friend_in_need = boost::json::value_to<bool>(*assist_friend_in_need_value_ptr);
+            }
+
             const boost::json::value * attacker_switch_time_value_ptr = ai_object.if_contains("attacker_switch_time");
             if (attacker_switch_time_value_ptr != nullptr) {
                 ai.attacker_switch_time = boost::json::value_to<double>(*attacker_switch_time_value_ptr);
             }
 
-            const boost::json::value * assist_friend_in_need_value_ptr = ai_object.if_contains("assist_friend_in_need");
-            if (assist_friend_in_need_value_ptr != nullptr) {
-                ai.assist_friend_in_need = boost::json::value_to<bool>(*assist_friend_in_need_value_ptr);
+            const boost::json::value * auto_dock_value_ptr = ai_object.if_contains("auto_dock");
+            if (auto_dock_value_ptr != nullptr) {
+                ai.auto_dock = boost::json::value_to<bool>(*auto_dock_value_ptr);
             }
 
             const boost::json::value * capped_faction_rating_value_ptr = ai_object.if_contains("capped_faction_rating");
@@ -3865,6 +3890,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.ai_lock_cheat = boost::json::value_to<bool>(*ai_lock_cheat_value_ptr);
             }
 
+            const boost::json::value * ai_pilot_when_in_turret_value_ptr = physics_object.if_contains("ai_pilot_when_in_turret");
+            if (ai_pilot_when_in_turret_value_ptr != nullptr) {
+                physics.ai_pilot_when_in_turret = boost::json::value_to<bool>(*ai_pilot_when_in_turret_value_ptr);
+            }
+
             const boost::json::value * allow_mission_abort_value_ptr = physics_object.if_contains("allow_mission_abort");
             if (allow_mission_abort_value_ptr != nullptr) {
                 physics.allow_mission_abort = boost::json::value_to<bool>(*allow_mission_abort_value_ptr);
@@ -4093,6 +4123,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * extra_space_drag_for_cargo_value_ptr = physics_object.if_contains("extra_space_drag_for_cargo");
             if (extra_space_drag_for_cargo_value_ptr != nullptr) {
                 physics.extra_space_drag_for_cargo = boost::json::value_to<double>(*extra_space_drag_for_cargo_value_ptr);
+            }
+
+            const boost::json::value * face_target_on_auto_value_ptr = physics_object.if_contains("face_target_on_auto");
+            if (face_target_on_auto_value_ptr != nullptr) {
+                physics.face_target_on_auto = boost::json::value_to<bool>(*face_target_on_auto_value_ptr);
             }
 
             const boost::json::value * fire_missing_autotrackers_value_ptr = physics_object.if_contains("fire_missing_autotrackers");
@@ -4360,6 +4395,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.percent_missile_match_target_velocity = boost::json::value_to<double>(*percent_missile_match_target_velocity_value_ptr);
             }
 
+            const boost::json::value * persistent_on_load_value_ptr = physics_object.if_contains("persistent_on_load");
+            if (persistent_on_load_value_ptr != nullptr) {
+                physics.persistent_on_load = boost::json::value_to<bool>(*persistent_on_load_value_ptr);
+            }
+
             const boost::json::value * planet_dock_min_port_size_value_ptr = physics_object.if_contains("planet_dock_min_port_size");
             if (planet_dock_min_port_size_value_ptr != nullptr) {
                 physics.planet_dock_min_port_size = boost::json::value_to<double>(*planet_dock_min_port_size_value_ptr);
@@ -4378,6 +4418,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * planets_can_have_subunits_value_ptr = physics_object.if_contains("planets_can_have_subunits");
             if (planets_can_have_subunits_value_ptr != nullptr) {
                 physics.planets_can_have_subunits = boost::json::value_to<bool>(*planets_can_have_subunits_value_ptr);
+            }
+
+            const boost::json::value * player_godliness_value_ptr = physics_object.if_contains("player_godliness");
+            if (player_godliness_value_ptr != nullptr) {
+                physics.player_godliness = boost::json::value_to<double>(*player_godliness_value_ptr);
             }
 
             const boost::json::value * player_tractorability_mask_value_ptr = physics_object.if_contains("player_tractorability_mask");

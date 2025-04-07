@@ -122,6 +122,7 @@ namespace vega_config {
         double death_scene_time = 4.0;
         std::string default_boot_message = "";
         double default_engine_activation = 0.00048828125;
+        double detail_texture_scale = 1.0;
         bool detail_texture_trilinear = true;
         bool disabled_cockpit_allowed = true;
         bool displaylists = false;
@@ -191,6 +192,7 @@ namespace vega_config {
         int max_cubemap_size = 1024;
         int max_movie_dimension = 1024;
         int max_texture_dimension = 65536;
+        double mesh_animation_max_frames_skipped = 3.0;
         double mesh_far_percent = 0.8;
         int mipmap_detail = 3;
         double missile_explosion_radius_mult = 1.0;
@@ -210,6 +212,7 @@ namespace vega_config {
         double percent_afterburner_color_change = 0.5;
         double percent_halo_fade_in = 0.5;
         double percent_shockwave = 0.5;
+        bool per_pixel_lighting = true;
         int planet_detail_level = 24;
         bool pot_video_textures = false;
         double precull_dist = 500000000.0;
@@ -258,6 +261,7 @@ namespace vega_config {
         std::string unprintable_factions = "";
         bool update_nav_after_jump = false;
         bool use_animations = true;
+        bool use_detail_texture = true;
         bool use_faction_gui_background_color = true;
         bool use_logos = true;
         bool use_planet_atmosphere = true;
@@ -560,8 +564,9 @@ namespace vega_config {
         bool always_have_jumpdrive_cheat = false;
         bool always_obedient = true;
         double anger_affects_response = 1.0;
-        double attacker_switch_time = 15.0;
         bool assist_friend_in_need = true;
+        double attacker_switch_time = 15.0;
+        bool auto_dock = false;
         bool capped_faction_rating = true;
         std::string choose_destination_script = "";
         double comm_initiate_time = 300.0;
@@ -914,6 +919,7 @@ namespace vega_config {
 
     struct {
         bool ai_lock_cheat = true;
+        bool ai_pilot_when_in_turret = false;
         bool allow_mission_abort = true;
         bool allow_special_and_normal_gun_combo = true;
         double asteroid_difficulty = 0.1;
@@ -960,6 +966,7 @@ namespace vega_config {
         double explosion_damage_center = 1.0;
         double explosion_damage_edge = 0.125;
         double extra_space_drag_for_cargo = 0.005;
+        bool face_target_on_auto = false;
         bool fire_missing_autotrackers = true;
         double friendly_auto_radius = 0.0;
         double game_accel = 1.0;
@@ -1013,10 +1020,12 @@ namespace vega_config {
         int num_times_to_simulate_new_star_system = 20;
         bool only_show_best_downgrade = true;
         double percent_missile_match_target_velocity = 1.0;
+        bool persistent_on_load = true;
         double planet_dock_min_port_size = 300.0;
         double planet_dock_port_size = 1.2;
         bool planets_always_neutral = true;
         bool planets_can_have_subunits = false;
+        double player_godliness = 0.0;
         std::string player_tractorability_mask = "p";
         double refire_difficulty_scaling = 3.0;
         double repair_droid_check_time = 5.0;

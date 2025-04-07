@@ -305,9 +305,8 @@ CityLights::CityLights(float radius,
     setConvex(true);
     wrapx = zzwrapx;
     wrapy = zzwrapy;
-    const std::string city_light_filter_string = vega_config::config->graphics.city_light_filter; // default: TRILINEAR -- 0x4
-    const int city_light_filter_int = XMLSupport::parse_int(city_light_filter_string);
-    FILTER filter = static_cast<FILTER>(city_light_filter_int);
+    const int city_light_filter = vega_config::config->graphics.city_light_filter; // default: TRILINEAR -- 0x4
+    FILTER filter = static_cast<FILTER>(city_light_filter);
     InitSphere(radius,
             stacks,
             slices,

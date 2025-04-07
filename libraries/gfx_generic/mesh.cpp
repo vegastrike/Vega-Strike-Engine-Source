@@ -315,8 +315,7 @@ Mesh *Mesh::getLOD(float lod, bool bBypassDamping) {
         unsigned int which = (int) float_to_int(floor(fmod(getCurrentFrame(),
                 animFrames->size())));
         float adv = GetElapsedTime() * getFramesPerSecond();
-        static float max_frames_skipped =
-                vega_config::config->graphics.mesh_animation_max_frames_skipped
+        const float max_frames_skipped = vega_config::config->graphics.mesh_animation_max_frames_skipped;
         if (adv > max_frames_skipped) {
             adv = max_frames_skipped;
         }

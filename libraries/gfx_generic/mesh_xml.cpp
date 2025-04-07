@@ -295,8 +295,7 @@ bool shouldreflect(string r) {
 }
 
 void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &attributes) {
-    static bool use_detail_texture =
-            vega_config::config->graphics.use_detail_texture;
+    const bool use_detail_texture = vega_config::config->graphics.use_detail_texture;
     //static bool flatshadeit=false;
     AttributeList::const_iterator iter;
     float flotsize = 1;
@@ -327,8 +326,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                             break;
                     }
                 }
-                static float detailscale =
-                        vega_config::config->graphics.detail_texture_scale
+                const float detailscale = vega_config::config->graphics.detail_texture_scale;
                 if (detailPlanes.size() < 6) {
                     detailPlanes.push_back(vec * detailscale);
                 }
