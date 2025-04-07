@@ -784,8 +784,7 @@ void FormUp::Execute() {
     Unit *targ = group.GetUnit();
     if (targ) {
         MoveTo::SetDest(Transform(targ->GetTransformation(), Pos));
-        const bool can_warp_to = vega_config::config->ai.warp_to_wingmen;
-        if (rand() % 64 == 0 && (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
+        if (rand() % 64 == 0 && (vega_config::config->ai.warp_to_wingmen || _Universe->AccessCockpit()->autoInProgress())) {
             WarpToP(parent, targ, true);
         }
     }
@@ -824,8 +823,7 @@ void FormUpToOwner::Execute() {
     Unit *targ = group.GetUnit();
     if (targ) {
         MoveTo::SetDest(Transform(targ->GetTransformation(), Pos));
-        const bool can_warp_to = vega_config::config->ai.warp_to_wingmen;
-        if (rand() % 64 == 0 && (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
+        if (rand() % 64 == 0 && (vega_config::config->ai.warp_to_wingmen || _Universe->AccessCockpit()->autoInProgress())) {
             WarpToP(parent, targ, true);
         }
     }

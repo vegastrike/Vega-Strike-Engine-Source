@@ -287,7 +287,7 @@ public:
         this->afterburn = afterburn;
         this->force_afterburn = force_afterburn;
 
-        lqq = pp = 0;
+        qq = pp = 0;
         rr.Set(vega_config::config->ai.loop_around_destination_lateral * vsr.uniformInc(-1, 1),
                vega_config::config->ai.loop_around_destination_vertical * vsr.uniformInc(-1, 1),
                1.0 + vega_config::config->ai.loop_around_destination_distance * vsr.uniformInc(0, 1));

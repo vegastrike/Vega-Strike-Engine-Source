@@ -33,10 +33,9 @@
 #include "root_generic/lin_time.h"
 
 float FlyByKeyboard::clamp_axis(float v) {
-    const int axis_scale = vega_config::config->physics.slide_start;
     int as = parent->GetComputerData().slide_start;
     if (as == 0) {
-        as = axis_scale;
+        as = vega_config::config->physics.slide_start;
     }
     if (as) {
         v /= as;
@@ -51,10 +50,9 @@ float FlyByKeyboard::clamp_axis(float v) {
 }
 
 float FlyByKeyboard::reduce_axis(float v) {
-    const int axis_scale = vega_config::config->physics.slide_end;
     int as = parent->GetComputerData().slide_end;
     if (as == 0) {
-        as = axis_scale;
+        as = vega_config::config->physics.slide_end;
     }
     if (as && fabs(v) > as) {
         if (v > 0) {

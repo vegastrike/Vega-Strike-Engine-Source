@@ -37,8 +37,7 @@ using std::list;
 
 //#define ORDERDEBUG  // FIXME ?
 void Order::Execute() {
-    const float airesptime = vega_config::config->ai.CommResponseTime;
-    ProcessCommunicationMessages(airesptime, true);
+    ProcessCommunicationMessages(vega_config::config->ai.comm_response_time, true);
     int completed = 0;
     unsigned int i = 0;
     for (i = 0; i < suborders.size(); i++) {

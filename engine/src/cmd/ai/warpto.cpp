@@ -30,16 +30,13 @@
 #include "src/config_xml.h"
 
 float max_allowable_travel_time() {
-    const float mat = vega_config::config->ai.max_allowable_travel_time;
-    return mat;
+    return vega_config::config->ai.max_allowable_travel_time;
 }
 
 bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following) {
     //first let us decide whether the target is far enough to warrant using warp
     //double dist =UnitUtil::getSignificantDistance(parent,target);
-    const float tooclose = vega_config::config->ai.too_close_for_warp_tactic;
-    const float tooclosefollowing = vega_config::config->ai.too_close_for_warp_in_formation;
-    float toodamnclose = following ? tooclosefollowing : tooclose;
+    float toodamnclose = following ? vega_config::config->ai.too_close_for_warp_in_formation : vega_config::config->ai.too_close_for_warp_tactic;
     float diff = 1;
     parent->GetVelocityDifficultyMult(diff);
     float timetolive = dist / (diff * parent->drive.speed);
@@ -88,16 +85,15 @@ static void ActuallyWarpTo(Unit *parent, const QVector &tarpos, Vector tarvel, U
     dir *= -1;
     float chasedot = dir.Dot(tarvel);
     if (dirveldot > mindirveldot) {
-        const float min_energy_to_enter_warp = vega_config::config->ai.min_energy_to_enter_warp;
-        const float min_warpfield_to_enter_warp = vega_config::config->ai.min_warp_to_try;
-        if ((parent->ftl_energy.Percent() > min_energy_to_enter_warp)
-                && (parent->GetMaxWarpFieldStrength(1) > min_warpfield_to_enter_warp)) {
+        if ((parent->ftl_energy.Percent() > vega_config::config->ai.min_energy_to_enter_warp)
+            && (parent->GetMaxWarpFieldStrength(1) > vega_config::config->ai.min_warp_to_try)) {
             if (!parent->ftl_drive.Enabled()) {
-                parent->ftl_drive.Enable();                 //don't want the AI thrashing
-                parent->graphicOptions.WarpRamping = 1;                 //don't want the AI thrashing
+                parent->ftl_drive.Enable(); //don't want the AI thrashing
+                parent->graphicOptions.WarpRamping = 1; //don't want the AI thrashing
             }
         }
-    } else {
+    }
+    else {
         parent->ftl_drive.Disable();
     }
     const bool domatch = vega_config::config->ai.match_velocity_of_pursuant;
@@ -128,7 +124,7 @@ void WarpToP(Unit *parent, Unit *target, bool following) {
 void WarpToP(Unit *parent, const QVector &target, float radius, bool following) {
     float dist = (parent->Position() - target).Magnitude() - radius - parent->rSize();
     if (DistanceWarrantsWarpTo(parent, dist, following)) {
-        const bool auto_valid = vega_config::config->physics.in_system_jump_or_timeless_auto_pilot /* default: false */
+        const bool auto_valid = vega_config::config->physics.in_system_jump_or_timeless_auto_pilot; /* default: false */
         if (!auto_valid) {
             ActuallyWarpTo(parent, target, QVector(0, 0, .00001));
         }

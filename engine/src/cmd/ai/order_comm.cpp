@@ -62,10 +62,8 @@ void Order::Communicate(const CommunicationMessage &c) {
     }
     if ((un = newC->sender.GetUnit())) {
         if (un != parent) {
-            const bool talk_more_helps = vega_config::config->ai.talking_faster_helps;
-            const float talk_factor = vega_config::config->ai.talk_relation_factor;
-            if (talk_more_helps || !already_communicated) {
-                AdjustRelationTo(un, newC->getDeltaRelation() * talk_factor);
+            if (vega_config::config->ai.talking_faster_helps || !already_communicated) {
+                AdjustRelationTo(un, newC->getDeltaRelation() * vega_config::config->ai.talk_relation_factor);
             }
             messagequeue.push_back(newC);
         }

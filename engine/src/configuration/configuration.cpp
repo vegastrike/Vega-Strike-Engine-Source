@@ -2446,6 +2446,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 ai.comm_initiate_time = boost::json::value_to<double>(*comm_initiate_time_value_ptr);
             }
 
+            const boost::json::value * comm_response_time_value_ptr = ai_object.if_contains("comm_response_time");
+            if (comm_response_time_value_ptr != nullptr) {
+                ai.comm_response_time = boost::json::value_to<double>(*comm_response_time_value_ptr);
+            }
+
             const boost::json::value * comm_to_player_percent_value_ptr = ai_object.if_contains("comm_to_player_percent");
             if (comm_to_player_percent_value_ptr != nullptr) {
                 ai.comm_to_player_percent = boost::json::value_to<double>(*comm_to_player_percent_value_ptr);
@@ -2631,6 +2636,21 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 ai.lowest_positive_comm_choice = boost::json::value_to<double>(*lowest_positive_comm_choice_value_ptr);
             }
 
+            const boost::json::value * match_velocity_cone_value_ptr = ai_object.if_contains("match_velocity_cone");
+            if (match_velocity_cone_value_ptr != nullptr) {
+                ai.match_velocity_cone = boost::json::value_to<double>(*match_velocity_cone_value_ptr);
+            }
+
+            const boost::json::value * match_velocity_of_pursuant_value_ptr = ai_object.if_contains("match_velocity_of_pursuant");
+            if (match_velocity_of_pursuant_value_ptr != nullptr) {
+                ai.match_velocity_of_pursuant = boost::json::value_to<bool>(*match_velocity_of_pursuant_value_ptr);
+            }
+
+            const boost::json::value * max_allowable_travel_time_value_ptr = ai_object.if_contains("max_allowable_travel_time");
+            if (max_allowable_travel_time_value_ptr != nullptr) {
+                ai.max_allowable_travel_time = boost::json::value_to<double>(*max_allowable_travel_time_value_ptr);
+            }
+
             const boost::json::value * max_faction_contraband_relation_value_ptr = ai_object.if_contains("max_faction_contraband_relation");
             if (max_faction_contraband_relation_value_ptr != nullptr) {
                 ai.max_faction_contraband_relation = boost::json::value_to<double>(*max_faction_contraband_relation_value_ptr);
@@ -2644,6 +2664,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * min_angular_accel_cheat_value_ptr = ai_object.if_contains("min_angular_accel_cheat");
             if (min_angular_accel_cheat_value_ptr != nullptr) {
                 ai.min_angular_accel_cheat = boost::json::value_to<double>(*min_angular_accel_cheat_value_ptr);
+            }
+
+            const boost::json::value * min_energy_to_enter_warp_value_ptr = ai_object.if_contains("min_energy_to_enter_warp");
+            if (min_energy_to_enter_warp_value_ptr != nullptr) {
+                ai.min_energy_to_enter_warp = boost::json::value_to<double>(*min_energy_to_enter_warp_value_ptr);
             }
 
             const boost::json::value * min_relationship_value_ptr = ai_object.if_contains("min_relationship");
@@ -2771,6 +2796,26 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 ai.switch_nonowned_units = boost::json::value_to<bool>(*switch_nonowned_units_value_ptr);
             }
 
+            const boost::json::value * talk_relation_factor_value_ptr = ai_object.if_contains("talk_relation_factor");
+            if (talk_relation_factor_value_ptr != nullptr) {
+                ai.talk_relation_factor = boost::json::value_to<double>(*talk_relation_factor_value_ptr);
+            }
+
+            const boost::json::value * talking_faster_helps_value_ptr = ai_object.if_contains("talking_faster_helps");
+            if (talking_faster_helps_value_ptr != nullptr) {
+                ai.talking_faster_helps = boost::json::value_to<bool>(*talking_faster_helps_value_ptr);
+            }
+
+            const boost::json::value * too_close_for_warp_in_formation_value_ptr = ai_object.if_contains("too_close_for_warp_in_formation");
+            if (too_close_for_warp_in_formation_value_ptr != nullptr) {
+                ai.too_close_for_warp_in_formation = boost::json::value_to<double>(*too_close_for_warp_in_formation_value_ptr);
+            }
+
+            const boost::json::value * too_close_for_warp_tactic_value_ptr = ai_object.if_contains("too_close_for_warp_tactic");
+            if (too_close_for_warp_tactic_value_ptr != nullptr) {
+                ai.too_close_for_warp_tactic = boost::json::value_to<double>(*too_close_for_warp_tactic_value_ptr);
+            }
+
             const boost::json::value * turn_cheat_value_ptr = ai_object.if_contains("turn_cheat");
             if (turn_cheat_value_ptr != nullptr) {
                 ai.turn_cheat = boost::json::value_to<bool>(*turn_cheat_value_ptr);
@@ -2801,6 +2846,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 ai.use_afterburner_to_run = boost::json::value_to<bool>(*use_afterburner_to_run_value_ptr);
             }
 
+            const boost::json::value * warp_cone_value_ptr = ai_object.if_contains("warp_cone");
+            if (warp_cone_value_ptr != nullptr) {
+                ai.warp_cone = boost::json::value_to<double>(*warp_cone_value_ptr);
+            }
+
             const boost::json::value * warp_to_enemies_value_ptr = ai_object.if_contains("warp_to_enemies");
             if (warp_to_enemies_value_ptr != nullptr) {
                 ai.warp_to_enemies = boost::json::value_to<bool>(*warp_to_enemies_value_ptr);
@@ -2809,6 +2859,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * warp_to_no_enemies_value_ptr = ai_object.if_contains("warp_to_no_enemies");
             if (warp_to_no_enemies_value_ptr != nullptr) {
                 ai.warp_to_no_enemies = boost::json::value_to<bool>(*warp_to_no_enemies_value_ptr);
+            }
+
+            const boost::json::value * warp_to_wingmen_value_ptr = ai_object.if_contains("warp_to_wingmen");
+            if (warp_to_wingmen_value_ptr != nullptr) {
+                ai.warp_to_wingmen = boost::json::value_to<bool>(*warp_to_wingmen_value_ptr);
             }
 
         const boost::json::value * firing_value_ptr = ai_object.if_contains("firing");
@@ -4783,6 +4838,16 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * simulate_while_docked_value_ptr = physics_object.if_contains("simulate_while_docked");
             if (simulate_while_docked_value_ptr != nullptr) {
                 physics.simulate_while_docked = boost::json::value_to<bool>(*simulate_while_docked_value_ptr);
+            }
+
+            const boost::json::value * slide_end_value_ptr = physics_object.if_contains("slide_end");
+            if (slide_end_value_ptr != nullptr) {
+                physics.slide_end = boost::json::value_to<int>(*slide_end_value_ptr);
+            }
+
+            const boost::json::value * slide_start_value_ptr = physics_object.if_contains("slide_start");
+            if (slide_start_value_ptr != nullptr) {
+                physics.slide_start = boost::json::value_to<int>(*slide_start_value_ptr);
             }
 
             const boost::json::value * smallest_subunit_to_collide_value_ptr = physics_object.if_contains("smallest_subunit_to_collide");

@@ -577,6 +577,7 @@ namespace vega_config {
         bool capped_faction_rating = true;
         std::string choose_destination_script = "";
         double comm_initiate_time = 300.0;
+        double comm_response_time = 3.0;
         double comm_to_player_percent = 0.0;
         double comm_to_target_percent = 0.25;
         double contraband_initiate_time = 3000.0;
@@ -614,9 +615,13 @@ namespace vega_config {
         double lurk_time = 600.0;
         double lowest_negative_comm_choice = -1e-05;
         double lowest_positive_comm_choice = 0.0;
+        double match_velocity_cone = -0.8;
+        bool match_velocity_of_pursuant = false;
+        double max_allowable_travel_time = 10.0;
         double max_faction_contraband_relation = -0.05;
         int max_player_attackers = 0;
         double min_angular_accel_cheat = 50.0;
+        double min_energy_to_enter_warp = 0.33;
         double min_relationship = -20.0;
         double min_time_to_auto = 25.0;
         double min_warp_to_try = 1.5;
@@ -642,14 +647,20 @@ namespace vega_config {
         std::string start_docked_to = "Atlantis";
         double static_relationship_affects_response = 1.0;
         bool switch_nonowned_units = true;
+        double talk_relation_factor = 0.5;
+        bool talking_faster_helps = true;
+        double too_close_for_warp_in_formation = 1500.0;
+        double too_close_for_warp_tactic = 8000.0;
         bool turn_cheat = false;
         double unknown_relation_enemy = -0.05;
         double unknown_relation_hit_cost = 0.01;
         bool use_afterburner = true;
         bool use_afterburner_to_follow = true;
         bool use_afterburner_to_run = true;
+        double warp_cone = 0.8;
         bool warp_to_enemies = true;
         bool warp_to_no_enemies = true;
+        bool warp_to_wingmen = true;
 
         struct {
             double aggressivity = 15.0;
@@ -1098,6 +1109,8 @@ namespace vega_config {
         double shield_maintenance_charge = 0.25;
         bool shields_in_spec = false;
         bool simulate_while_docked = false;
+        int slide_end = 0;
+        int slide_start = 2;
         double smallest_subunit_to_collide = 0.2;
         double speeding_discharge = 0.25;
         bool sphere_collision = true;
