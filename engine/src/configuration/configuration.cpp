@@ -4260,6 +4260,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.jump_weapon_collision = boost::json::value_to<bool>(*jump_weapon_collision_value_ptr);
             }
 
+            const boost::json::value * match_speed_with_target_value_ptr = physics_object.if_contains("match_speed_with_target");
+            if (match_speed_with_target_value_ptr != nullptr) {
+                physics.match_speed_with_target = boost::json::value_to<bool>(*match_speed_with_target_value_ptr);
+            }
+
             const boost::json::value * max_collide_trees_value_ptr = physics_object.if_contains("max_collide_trees");
             if (max_collide_trees_value_ptr != nullptr) {
                 physics.max_collide_trees = boost::json::value_to<int>(*max_collide_trees_value_ptr);
@@ -4420,6 +4425,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.only_show_best_downgrade = boost::json::value_to<bool>(*only_show_best_downgrade_value_ptr);
             }
 
+            const boost::json::value * out_of_arc_fire_disrupts_lock_value_ptr = physics_object.if_contains("out_of_arc_fire_disrupts_lock");
+            if (out_of_arc_fire_disrupts_lock_value_ptr != nullptr) {
+                physics.out_of_arc_fire_disrupts_lock = boost::json::value_to<bool>(*out_of_arc_fire_disrupts_lock_value_ptr);
+            }
+
             const boost::json::value * percent_missile_match_target_velocity_value_ptr = physics_object.if_contains("percent_missile_match_target_velocity");
             if (percent_missile_match_target_velocity_value_ptr != nullptr) {
                 physics.percent_missile_match_target_velocity = boost::json::value_to<double>(*percent_missile_match_target_velocity_value_ptr);
@@ -4458,6 +4468,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * player_tractorability_mask_value_ptr = physics_object.if_contains("player_tractorability_mask");
             if (player_tractorability_mask_value_ptr != nullptr) {
                 physics.player_tractorability_mask = boost::json::value_to<std::string>(*player_tractorability_mask_value_ptr);
+            }
+
+            const boost::json::value * reduce_beam_ammo_value_ptr = physics_object.if_contains("reduce_beam_ammo");
+            if (reduce_beam_ammo_value_ptr != nullptr) {
+                physics.reduce_beam_ammo = boost::json::value_to<bool>(*reduce_beam_ammo_value_ptr);
             }
 
             const boost::json::value * refire_difficulty_scaling_value_ptr = physics_object.if_contains("refire_difficulty_scaling");

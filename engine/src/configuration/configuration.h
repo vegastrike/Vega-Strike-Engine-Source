@@ -993,6 +993,7 @@ namespace vega_config {
         double jump_mesh_radius_scale = 0.5;
         double jump_radius_scale = 2.0;
         bool jump_weapon_collision = false;
+        bool match_speed_with_target = true;
         int max_collide_trees = 16384;
         double max_damage = 0.999;
         int max_ecm = 4;
@@ -1025,6 +1026,7 @@ namespace vega_config {
         int num_running_systems = 4;
         int num_times_to_simulate_new_star_system = 20;
         bool only_show_best_downgrade = true;
+        bool out_of_arc_fire_disrupts_lock = false;
         double percent_missile_match_target_velocity = 1.0;
         bool persistent_on_load = true;
         double planet_dock_min_port_size = 300.0;
@@ -1033,6 +1035,7 @@ namespace vega_config {
         bool planets_can_have_subunits = false;
         double player_godliness = 0.0;
         std::string player_tractorability_mask = "p";
+        bool reduce_beam_ammo = false;
         double refire_difficulty_scaling = 3.0;
         double repair_droid_check_time = 5.0;
         double repair_droid_time = 120.0;
