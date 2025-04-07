@@ -157,6 +157,7 @@ namespace vega_config {
         std::string font = "helvetica12";
         double font_point = 16.0;
         bool force_lighting = true;
+        bool force_one_one_shield_blend = true;
         double fov = 37.5;
         bool framerate_changes_shader = false;
         bool full_screen = true;
@@ -1000,6 +1001,7 @@ namespace vega_config {
         std::string indestructible_cargo_items = "";
         double indiscriminate_system_destruction = 0.25;
         double inelastic_scale = 0.8;
+        double jump_damage_multiplier = 0.1;
         bool jump_disables_shields = true;
         double jump_mesh_radius_scale = 0.5;
         double jump_radius_scale = 2.0;
@@ -1011,6 +1013,7 @@ namespace vega_config {
         double max_damage = 0.999;
         int max_ecm = 4;
         double max_force_multiplier = 5.0;
+        double max_jump_damage = 100.0;
         double max_lost_target_live_time = 30.0;
         int max_missions = 4;
         double max_non_player_rotation_rate = 360.0;
@@ -1050,6 +1053,7 @@ namespace vega_config {
         bool planets_always_neutral = true;
         bool planets_can_have_subunits = false;
         double player_godliness = 0.0;
+        double player_survival_chance_on_base_death = 1.0;
         std::string player_tractorability_mask = "p";
         bool reduce_beam_ammo = false;
         double refire_difficulty_scaling = 3.0;

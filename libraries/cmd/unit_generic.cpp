@@ -3870,7 +3870,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                     //enables spiffy wc2 torpedo music, default to normal though
                     const bool TorpLockTrumpsMusic = vega_config::config->audio.unit_audio.locking_torp_trumps_music;
                     if (mounts[i].type->lock_time > 0) {
-                        static std::string LockedSoundName = vega_config::config->audio.unit_audio.locked; /* default: "locked.wav" */);
+                        static std::string LockedSoundName = vega_config::config->audio.unit_audio.locked; /* default: "locked.wav" */
                         static int LockedSound = AUDCreateSoundWAV(LockedSoundName, false);
                         if (mounts[i].type->size == MOUNT_SIZE::SPECIALMISSILE) {
                             LockingPlay = LockingSoundTorp;

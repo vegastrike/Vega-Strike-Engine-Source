@@ -235,10 +235,6 @@ int parseMountSizes(const char *str) {
 }
 
 void DealPossibleJumpDamage(Unit *un) {
-    static double jump_damage_multiplier =
-            vega_config::config->physics.jump_damage_multiplier;
-    static double max_damage = vega_config::config->physics.max_jump_damage
-
     // Also damage multiplier
     double chance_to_damage = randomDouble() - 0.01;
 
@@ -250,9 +246,9 @@ void DealPossibleJumpDamage(Unit *un) {
     double speed = un->GetVelocity().Magnitude();
     double mass = un->GetMass();
 
-    double jump_damage = mass * speed * chance_to_damage * jump_damage_multiplier;
+    double jump_damage = mass * speed * chance_to_damage * vega_config::config->physics.jump_damage_multiplier;
 
-    jump_damage = std::min(jump_damage, max_damage);
+    jump_damage = std::min(jump_damage, vega_config::config->physics.max_jump_damage);
 
     Damage damage;
     damage.normal_damage = jump_damage;

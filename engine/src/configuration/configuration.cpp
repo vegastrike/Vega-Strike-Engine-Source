@@ -640,6 +640,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.force_lighting = boost::json::value_to<bool>(*force_lighting_value_ptr);
             }
 
+            const boost::json::value * force_one_one_shield_blend_value_ptr = graphics_object.if_contains("force_one_one_shield_blend");
+            if (force_one_one_shield_blend_value_ptr != nullptr) {
+                graphics.force_one_one_shield_blend = boost::json::value_to<bool>(*force_one_one_shield_blend_value_ptr);
+            }
+
             const boost::json::value * fov_value_ptr = graphics_object.if_contains("fov");
             if (fov_value_ptr != nullptr) {
                 graphics.fov = boost::json::value_to<double>(*fov_value_ptr);
@@ -4295,6 +4300,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 physics.inelastic_scale = boost::json::value_to<double>(*inelastic_scale_value_ptr);
             }
 
+            const boost::json::value * jump_damage_multiplier_value_ptr = physics_object.if_contains("jump_damage_multiplier");
+            if (jump_damage_multiplier_value_ptr != nullptr) {
+                physics.jump_damage_multiplier = boost::json::value_to<double>(*jump_damage_multiplier_value_ptr);
+            }
+
             const boost::json::value * jump_disables_shields_value_ptr = physics_object.if_contains("jump_disables_shields");
             if (jump_disables_shields_value_ptr != nullptr) {
                 physics.jump_disables_shields = boost::json::value_to<bool>(*jump_disables_shields_value_ptr);
@@ -4348,6 +4358,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * max_force_multiplier_value_ptr = physics_object.if_contains("max_force_multiplier");
             if (max_force_multiplier_value_ptr != nullptr) {
                 physics.max_force_multiplier = boost::json::value_to<double>(*max_force_multiplier_value_ptr);
+            }
+
+            const boost::json::value * max_jump_damage_value_ptr = physics_object.if_contains("max_jump_damage");
+            if (max_jump_damage_value_ptr != nullptr) {
+                physics.max_jump_damage = boost::json::value_to<double>(*max_jump_damage_value_ptr);
             }
 
             const boost::json::value * max_lost_target_live_time_value_ptr = physics_object.if_contains("max_lost_target_live_time");
@@ -4543,6 +4558,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * player_godliness_value_ptr = physics_object.if_contains("player_godliness");
             if (player_godliness_value_ptr != nullptr) {
                 physics.player_godliness = boost::json::value_to<double>(*player_godliness_value_ptr);
+            }
+
+            const boost::json::value * player_survival_chance_on_base_death_value_ptr = physics_object.if_contains("player_survival_chance_on_base_death");
+            if (player_survival_chance_on_base_death_value_ptr != nullptr) {
+                physics.player_survival_chance_on_base_death = boost::json::value_to<double>(*player_survival_chance_on_base_death_value_ptr);
             }
 
             const boost::json::value * player_tractorability_mask_value_ptr = physics_object.if_contains("player_tractorability_mask");

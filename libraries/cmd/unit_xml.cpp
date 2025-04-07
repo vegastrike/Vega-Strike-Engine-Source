@@ -124,9 +124,8 @@ int GetModeFromName(const char *input_buffer) {
 extern bool CheckAccessory(Unit *);
 
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg) {
-    static bool forceit = vega_config::config->graphics.forceOneOneShieldBlend;
     xml->shieldmesh = Mesh::LoadMesh(filename, Vector(scale, scale, scale), faction, fg);
-    if (xml->shieldmesh && forceit) {
+    if (xml->shieldmesh && vega_config::config->graphics.force_one_one_shield_blend) {
         xml->shieldmesh->SetBlendMode(ONE, ONE, true);
         xml->shieldmesh->setEnvMap(false, true);
         xml->shieldmesh->setLighting(true, true);
