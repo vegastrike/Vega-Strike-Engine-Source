@@ -187,15 +187,14 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             }
         } else {
             // Use AutoDocker if docking clearance on target, otherwise use AutoPilot
-            const bool auto_dock = vega_config::config->test.autodocker;
-            Order *autoNavigator = NULL;
-            if (auto_dock) {
+            Order *autoNavigator = nullptr;
+            if (vega_config::config->test.autodocker) {
                 Unit *station = parent->Target();
                 if (Orders::AutoDocking::CanDock(parent, station)) {
                     autoNavigator = new Orders::AutoDocking(station);
                 }
             }
-            if (autoNavigator == NULL) {
+            if (autoNavigator == nullptr) {
                 autoNavigator = new Orders::AutoLongHaul();
                 autoNavigator->SetParent(parent);
             }

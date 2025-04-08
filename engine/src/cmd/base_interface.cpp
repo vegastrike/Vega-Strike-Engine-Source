@@ -173,8 +173,7 @@ void BaseInterface::Room::BaseObj::Draw(BaseInterface *base) {
 }
 
 static FILTER BlurBases() {
-    const bool blur_bases = vega_config::config->graphics.blur_bases;
-    return blur_bases ? BILINEAR : NEAREST;
+    return vega_config::config->graphics.bases.blur_bases ? BILINEAR : NEAREST;
 }
 
 BaseInterface::Room::BaseVSSprite::BaseVSSprite(const std::string &spritefile, const std::string &ind) :
@@ -395,8 +394,8 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
         const float text_offset_x = vega_config::config->graphics.bases.location_marker_text_offset_x;
         const float text_offset_y = vega_config::config->graphics.bases.location_marker_text_offset_y;
         const float text_color_r = vega_config::config->graphics.bases.location_marker_text_color_r;
-        const float text_color_g = vega_config::config->graphics.bases.locationmarker_textcolor_g;
-        const float text_color_b = vega_config::config->graphics.bases.locationmarker_textcolor_b;
+        const float text_color_g = vega_config::config->graphics.bases.location_marker_text_color_g;
+        const float text_color_b = vega_config::config->graphics.bases.location_marker_text_color_b;
         for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
             if (links[i]) {
                 if ((links[i]->alpha < 1) || (draw_always)) {
@@ -1310,7 +1309,7 @@ inline QVector randyVector(float min, float max) {
 void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
-        vega_config::config->physics.AutomaticUnDock;
+        vega_config::config->physics.automatic_undock;  // Why is this here? It doesn't do anything except evaluate the expression
         Unit *bas = base->baseun.GetUnit();
         Unit *playa = base->caller.GetUnit();
         if (playa && bas) {

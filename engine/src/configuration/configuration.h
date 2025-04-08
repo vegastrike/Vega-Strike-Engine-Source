@@ -49,6 +49,7 @@ namespace vega_config {
         int debug_fs = 0;
         bool delete_old_systems = true;
         double docking_fee = 0.0;
+        double docking_time = 20.0;
         std::string empty_mission = "internal.mission";
         bool force_anonymous_mission_names = true;
         double fuel_docking_fee = 0.0;
@@ -299,6 +300,7 @@ namespace vega_config {
         double shove_camera_down = 0.3;
         bool show_respawn_text = false;
         bool show_stardate = true;
+        bool smart_targetting_key = true;
         bool smooth_lines = false;
         bool smooth_points = true;
         bool smooth_shade = true;
@@ -330,6 +332,7 @@ namespace vega_config {
         double stretch_bolts = 0.5;
         bool switch_cockpit_to_default_on_unit_switch = true;
         bool system_map_ortho_view = false;
+        bool target_null_if_no_unit = false;
         std::string technique_set = "6_ps4.0";
         double text_delay = 0.05;
         bool text_display_lists = true;
@@ -369,6 +372,7 @@ namespace vega_config {
         double warp_stretch_max_speed = 300000000.0;
         double warp_stretch_region0_max = 1.0;
         bool warp_trail = true;
+        double warp_trail_stretch = 300.0;
         double warp_trail_time = 20.0;
         double weapon_gamma = 1.35;
         double weapon_xyscale = 1.0;
@@ -660,9 +664,11 @@ namespace vega_config {
         bool always_obedient = true;
         bool always_use_itts = false;
         double anger_affects_response = 1.0;
+        bool arrest_energy_zero = false;
         bool assist_friend_in_need = true;
         double attacker_switch_time = 15.0;
         bool auto_dock = false;
+        bool can_dock_to_enemy_base = true;
         bool capped_faction_rating = true;
         std::string choose_destination_script = "";
         double comm_initiate_time = 300.0;
@@ -710,6 +716,7 @@ namespace vega_config {
         double max_faction_contraband_relation = -0.05;
         int max_player_attackers = 0;
         double min_angular_accel_cheat = 50.0;
+        double min_docking_relationship = -0.002;
         double min_energy_to_enter_warp = 0.33;
         double min_relationship = -20.0;
         double min_time_to_auto = 25.0;
@@ -717,6 +724,7 @@ namespace vega_config {
         double missile_gun_delay = 4.0;
         double mood_affects_response = 0.0;
         double mood_swing_level = 0.2;
+        bool no_turret_ai = false;
         int num_contraband_scans_per_search = 10;
         int num_pirates_per_asteroid_field = 12;
         bool only_upgrade_speed_reference = false;
@@ -998,6 +1006,7 @@ namespace vega_config {
     } interpreter;
 
     struct {
+        bool clamp_axes = true;
         double deadband = 0.05;
         bool debug_digital_hatswitch = false;
         int double_mouse_position = 1280;
@@ -1016,6 +1025,16 @@ namespace vega_config {
         double mouse_deadband = 0.025;
         double mouse_exponent = 3.0;
         double mouse_sensitivity = 50.0;
+        double nonlinear_expamount_combat = 1.0;
+        double nonlinear_expamount_nav = 1.0;
+        double nonlinear_expfactor_combat = 6.0;
+        double nonlinear_expfactor_nav = 6.0;
+        double nonlinear_pamount_combat = 0.0;
+        double nonlinear_pamount_nav = 0.0;
+        double nonlinear_pfactor_combat = 2.0;
+        double nonlinear_pfactor_nav = 2.0;
+        bool nonlinear_throttle_combat = false;
+        bool nonlinear_throttle_nav = true;
         int polling_rate = 0;
         bool reverse_mouse_spr = true;
         bool warp_mouse = false;
@@ -1073,6 +1092,7 @@ namespace vega_config {
         bool auto_turn_towards = true;
         bool auto_undock = true;
         double autogen_compactness = 1.0;
+        bool automatic_undock = true;
         double autotracking = 0.93;
         bool can_auto_through_planets = true;
         double capship_size = 500.0;
@@ -1361,6 +1381,11 @@ namespace vega_config {
         double zscale = 1.0;
 
     } terrain;
+
+    struct {
+        bool autodocker = false;
+
+    } test;
 
     struct {
         double default_aggressivity = 2.01;

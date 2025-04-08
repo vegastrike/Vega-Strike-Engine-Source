@@ -1372,7 +1372,7 @@ static bool SuperDock(Unit *parent, Unit *target) {
 static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity) {
     const float min_docking_relationship = vega_config::config->ai.min_docking_relationship;
     const bool can_dock_to_enemy_base = vega_config::config->ai.can_dock_to_enemy_base;
-    const bool nojumpinSPEC = vega_config::config->physics.noSPECJUMP;
+    const bool nojumpinSPEC = vega_config::config->physics.no_spec_jump;
     bool SPEC_interference = targ && parent && nojumpinSPEC
             && (targ->ftl_drive.Enabled() || parent->ftl_drive.Enabled());
     unsigned char gender = 0;
@@ -1422,7 +1422,7 @@ static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
             endt->graphicOptions.WarpRamping = 1;
         }
         endt->ftl_drive.Disable();
-        const float clearencetime = (vega_config::config->general.docking_time /* default: "20" */);
+        const float clearencetime = vega_config::config->general.docking_time; /* default: 20.0 */
         endt->EnqueueAIFirst(new Orders::ExecuteFor(new Orders::MatchVelocity(Vector(0, 0, 0),
                 Vector(0, 0, 0),
                 true,
@@ -1677,7 +1677,7 @@ static void ForceChangeTarget(Unit *parent) {
     const bool force_change_only_unit = vega_config::config->graphics.target_null_if_no_unit;
     if (parent->Target() == curtarg) {
         if (force_change_only_unit) {
-            parent->Target(NULL);
+            parent->Target(nullptr);
         } else {
             ChooseTargets(parent, TargNear, false);
             if (parent->Target() == curtarg) {
@@ -1691,7 +1691,7 @@ int SelectDockPort(Unit *utdw, Unit *parent);
 
 void FireKeyboard::SetParent(Unit *parent1) {
     this->Order::SetParent(parent1);
-    const bool allow_special_with_weapons = vega_config::config->physics.special_and_normal_gun_combo;
+    const bool allow_special_with_weapons = vega_config::config->physics.allow_special_and_normal_gun_combo;
     if (!allow_special_with_weapons) {
         parent->ToggleWeapon(false, true /*reverse*/ );
         parent->ToggleWeapon(false, false /*reverse*/ );
@@ -1730,7 +1730,7 @@ void FireKeyboard::Execute() {
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if (!_Universe->AccessCockpit()->CanDrawNavSystem()) {
-            const bool allow_special_with_weapons = vega_config::config->physics.special_and_normal_gun_combo;
+            const bool allow_special_with_weapons = vega_config::config->physics.allow_special_and_normal_gun_combo;
             if (!allow_special_with_weapons) {
                 bool special = false;
                 bool normal = false;
@@ -2168,8 +2168,7 @@ void FireKeyboard::Execute() {
             cp->EjectDock();
         }              //use specialized ejectdock in the future
     }
-    const bool actually_arrest = vega_config::config->ai.arrest_energy_zero;
-    if (actually_arrest && parent->reactor.Capacity() == 0) {
+    if (vega_config::config->ai.arrest_energy_zero && parent->reactor.Capacity() == 0) {
         Arrested(parent);
     }
 }
