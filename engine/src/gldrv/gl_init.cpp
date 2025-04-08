@@ -78,7 +78,6 @@
 #  undef GL_EXT_compiled_vertex_array
 # endif
 #endif
-#if !defined (IRIX)
 //typedef void (APIENTRY * PFNGLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
 //typedef void (APIENTRY * PFNGLUNLOCKARRAYSEXTPROC) (void);
 
@@ -87,7 +86,6 @@
     # define GLX_GLXEXT_LEGACY 1
     # include <GL/glx.h>
     # include <GL/glext.h>
-#endif
 #endif
 
 #include <stdio.h>
@@ -679,9 +677,6 @@ void GFXInit(int argc, char **argv) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-#if defined (IRIX)
-    glEnable( GL_SHARED_TEXTURE_PALETTE_EXT );
-#endif
     if (vsExtensionSupported("GL_EXT_color_table") || vsExtensionSupported("GL_EXT_shared_texture_palette")) {
         gl_options.PaletteExt = 1;
         VS_LOG(trace, "OpenGL::EXTColorTable supported");
@@ -752,43 +747,6 @@ void GFXInit(int argc, char **argv) {
     winsys_show_cursor(false);
 }
 
-#if defined (IRIX)
-#include "lin_time.h"
-
-/*
-** Update the game counter, generate a redisplay request.
-*/
-void idle_loop( void )
-{
-    UpdateTime();
-    glutPostRedisplay();
-}
-
-/*
-** Install idle loop only if window is visible.
-*/
-void visible( int vis )
-{
-    glutIdleFunc( vis == GLUT_VISIBLE ? idle_loop : NULL );
-}
-
-/*
-** Install the display and visibility callback functions,
-** start the main loop.
-*/
-void GFXLoop( void (*main_loop)( void ) )
-{
-    glutDisplayFunc( main_loop );
-    glutVisibilityFunc( visible );
-    static bool are_we_looping = false;
-    ///so we can call this function multiple times
-    if (!are_we_looping) {
-        are_we_looping = true;
-        glutMainLoop();
-    }
-}
-#else
-
 void GFXLoop(void main_loop()) {
     winsys_set_display_func(main_loop);
     winsys_set_idle_func(main_loop);
@@ -802,8 +760,6 @@ void GFXLoop(void main_loop()) {
         winsys_process_events();
     }
 }
-
-#endif
 
 void GFXShutdown() {
     extern void GFXDestroyAllLights();

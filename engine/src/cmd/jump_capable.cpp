@@ -429,13 +429,14 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
             float shiphack = 1;
             if (planet->isUnit() != Vega_UnitType::planet) {
                 shiphack = def_inv_interdiction;
-                if (planet->specInterdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
-                        && (planet->specInterdiction > 0 || count_negative_warp_units)) {
-                    shiphack = 1 / fabs(planet->specInterdiction);
-                    if (unit->specInterdiction != 0 && unit->graphicOptions.specInterdictionOnline != 0) {
+                double spec_interdiction = planet->ship_functions.Value(Function::ftl_interdiction);
+                if (spec_interdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
+                        && (spec_interdiction > 0 || count_negative_warp_units)) {
+                    shiphack = 1 / fabs(spec_interdiction);
+                    if (unit->ship_functions.Value(Function::ftl_interdiction) != 0 && unit->graphicOptions.specInterdictionOnline != 0) {
                         //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or
                         // expensive ones should counter planets...this is safe now, for gameplay
-                        shiphack *= fabs(unit->specInterdiction);
+                        shiphack *= fabs(spec_interdiction);
                     }
                 }
             }

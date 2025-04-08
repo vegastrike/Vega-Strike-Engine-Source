@@ -43,9 +43,9 @@ protected:
     bool no_max_;
 public:
     Resource(const T &value = 0, const T &min_value = 0, const T &max_value = -1);
-    Resource(const std::string input, const double modifier = 1.0, const double minimum_functionality = 0.0);
+    Resource(const std::string input, const T modifier = 1.0, const T minimum_functionality = 0.0);
 
-    const std::string Serialize(const double modifier = 1.0) const;
+    const std::string Serialize(const T modifier = 1.0) const;
 
     //const T operator=(Resource<T> value) const;
     Resource<T> operator=(const T &value);

@@ -496,6 +496,10 @@ SET(LIBCOMPONENT
     src/components/drive_upgrade.cpp
     src/components/ftl_drive.cpp
     src/components/jump_drive.cpp
+    src/components/radar.cpp
+    src/components/ecm.cpp
+    src/components/repair_bot.cpp
+    src/components/ship_functions.cpp
     )
 
 SET(LIBGUI_SOURCES

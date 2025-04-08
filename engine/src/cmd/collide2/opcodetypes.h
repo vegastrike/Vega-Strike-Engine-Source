@@ -146,7 +146,11 @@ typedef intptr_t opc_ptrdiff_t;
 #if _MSC_VER >= 1300
 typedef unsigned short wint_t;
 #else
+#if defined(HAVE_WCHAR_H)
+#include <wchar.h>
+#else
 typedef wchar_t wint_t;
+#endif
 #endif
 #endif
 #define _WCTYPE_T_DEFINED
