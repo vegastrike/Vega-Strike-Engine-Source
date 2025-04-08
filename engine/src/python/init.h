@@ -34,14 +34,6 @@
 
 #if BOOST_VERSION != 102800
 
-#if defined (_MSC_VER) && _MSC_VER <= 1200
-#define Vector Vactor
-#endif //defined (_MSC_VER) && _MSC_VER <= 1200
-
-#if defined (_MSC_VER) && _MSC_VER <= 1200
-#undef Vector
-#endif // defined (_MSC_VER) && _MSC_VER <= 1200
-
 #else //defined (_MSC_VER) && _MSC_VER <= 1200
 #include <boost/python/detail/extension_class.hpp>
 #endif // defined (_MSC_VER) && _MSC_VER <= 1200
