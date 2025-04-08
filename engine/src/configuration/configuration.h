@@ -89,6 +89,8 @@ namespace vega_config {
         double aspect = 1.33;
         double atmosphere_emissive = 1.0;
         double atmosphere_diffuse = 1.0;
+        double auto_message_nav_switch_time_lim = 0.15;
+        double auto_message_time_lim = 5.0;
         std::string automatic_landing_zone_warning = "comm_docking.ani";
         std::string automatic_landing_zone_warning1 = "comm_docking.ani";
         std::string automatic_landing_zone_warning2 = "comm_docking.ani";
@@ -115,6 +117,7 @@ namespace vega_config {
         bool can_target_sun = true;
         bool cargo_rotates_at_same_speed = true;
         double cargo_rotation_speed = 60.0;
+        bool chat_text = true;
         double circle_accuracy = 0.1;
         int city_light_filter = 4;
         double city_light_strength = 10.0;
@@ -123,6 +126,8 @@ namespace vega_config {
         double cockpit_drift_amount = 0.05;
         double cockpit_drift_limit = 1.0;
         double cockpit_drift_ref_accel = 100.0;
+        double cockpit_nav_zfloor = 0.1;
+        double cockpit_nav_zrange = 10.0;
         double cockpit_shake = 3.0;
         double cockpit_shake_max = 20.0;
         bool cockpit_smooth_texture = false;
@@ -150,6 +155,7 @@ namespace vega_config {
         bool draw_docking_boxes = true;
         bool draw_heading_marker = false;
         bool draw_jump_target_nav_symbol = true;
+        bool draw_nav_button_labels = true;
         bool draw_near_stars_in_front_of_planets = false;
         bool draw_rendered_crosshairs = true;
         bool draw_star_body = true;
@@ -167,6 +173,7 @@ namespace vega_config {
         double engine_color_blue = 1.0;
         double engine_length_scale = 1.25;
         double engine_radii_scale = 0.4;
+        bool explore_for_map = true;
         std::string explosion_animation = "explosion_orange.ani";
         bool explosion_face_player = true;
         double explosion_force = 0.5;
@@ -205,6 +212,7 @@ namespace vega_config {
         int head_lag = 3;
         bool high_quality_font = true;
         bool high_quality_font_computer = true;
+        bool high_quality_sprites = true;
         std::string hull_flash_animation = "armorflash.ani";
         double in_system_jump_ani_second_ahead = 4.0;
         double in_system_jump_ani_second_ahead_end = 0.03;
@@ -216,6 +224,7 @@ namespace vega_config {
         double jump_animation_shrink = 0.95;
         std::string jump_gate = "blackclear.ani";
         double jump_gate_size = 1.75;
+        double last_message_time = 60.0;
         double light_cutoff = 0.06;
         double light_optimal_intensity = 0.06;
         double light_saturation = 0.95;
@@ -227,6 +236,7 @@ namespace vega_config {
         std::string mac_shader_name = "mac";
         bool main_menu = false;
         int max_cubemap_size = 1024;
+        int max_map_nodes = 256000;
         int max_movie_dimension = 1024;
         int max_texture_dimension = 65536;
         double mesh_animation_max_frames_skipped = 3.0;
@@ -236,13 +246,17 @@ namespace vega_config {
         bool missile_sparkle = false;
         double model_detail = 1.0;
         bool multi_texture_glow_maps = true;
+        bool near_stars_alpha = false;
+        bool near_stars_alpha_blend = false;
         double near_stars_sprite_size = 2.0;
         std::string near_stars_sprite_texture = "";
         int num_far_stars = 2000;
         int num_lights = 4;
+        int num_messages = 10;
         int num_near_stars = 1000;
         int num_times_to_draw_shine = 2;
         bool offset_sprites_by_pos = true;
+        bool only_scanner_modes_static = true;
         bool only_stretch_in_warp = true;
         bool open_picker_categories = false;
         bool optimize_vertex_arrays = false;
@@ -256,6 +270,7 @@ namespace vega_config {
         int planet_detail_level = 24;
         bool pot_video_textures = false;
         double precull_dist = 500000000.0;
+        bool print_ecm_status = true;
         bool rect_textures = false;
         double reduced_vdus_width = 0.0;
         double reduced_vdus_height = 0.0;
@@ -266,6 +281,7 @@ namespace vega_config {
         std::string rgb_pixel_format = "undefined";
         int screen = 0;
         bool s3tc = true;
+        bool sector_map_ortho_view = false;
         bool separate_specular_color = false;
         bool set_raster_text_color = true;
         std::string shader_name = "default";
@@ -295,21 +311,32 @@ namespace vega_config {
         bool split_dead_subunits = true;
         std::string star_allowable_sectors = "Vega Sol";
         bool star_blend = true;
+        double star_color_average = 0.6;
+        double star_color_cutoff = 0.1;
+        double star_color_increment = 100.0;
+        double star_color_power = 0.25;
         double star_body_radius = 0.33;
         double star_glow_radius = 1.33;
+        double star_lumin_scale = 0.001;
+        double star_minimum_color_value = 0.3;
         double star_overlap = 1.0;
         std::string star_shine = "shine.ani flare1.ani flare2.ani flare3.ani flare4.ani flare5.ani flare6.ani";
+        double star_spread_attenuation = 0.4;
         double star_spreading = 30000.0;
+        bool star_streaks = true;
+        double stars_alpha_test_cutoff = 0.2;
         bool stars_dont_move = true;
         std::string startup_cockpit_view = "front";
         double stretch_bolts = 0.5;
         bool switch_cockpit_to_default_on_unit_switch = true;
+        bool system_map_ortho_view = false;
         std::string technique_set = "6_ps4.0";
         double text_delay = 0.05;
         bool text_display_lists = true;
         double text_speed = 0.025;
         std::string texture = "supernova.bmp";
         int texture_compression = 0;
+        double torque_star_streak_scale = 1.0;
         bool unit_switch_cockpit_change = false;
         std::string unprintable_faction_extension = "citizen";
         std::string unprintable_factions = "";
@@ -328,6 +355,11 @@ namespace vega_config {
         bool use_vs_sprites = true;
         bool use_wireframe = false;
         bool vbo = true;
+        bool vdu_builtin_shields = false;
+        double velocity_star_streak_max = 5.0;
+        double velocity_star_streak_min = 1.0;
+        double velocity_star_streak_scale = 0.01;
+        bool vista_draw_stars = false;
         double warp_shake_magnitude = 0.125;
         double warp_shake_ref = 2000.0;
         double warp_shake_speed = 70.0;
@@ -341,6 +373,7 @@ namespace vega_config {
         double weapon_gamma = 1.35;
         double weapon_xyscale = 1.0;
         double weapon_zscale = 1.0;
+        double wheel_zoom_amount = 0.1;
         std::string wormhole_unit = "wormhole";
         int z_pixel_format = 24;
         double zfar = 100000.0;
@@ -478,6 +511,7 @@ namespace vega_config {
         } hud;
 
         struct {
+            int max_search_size = 16384;
             bool modern_mouse_cursor = true;
             std::string mouse_cursor_sprite = "mouse.spr";
             double symbol_size = 0.25;

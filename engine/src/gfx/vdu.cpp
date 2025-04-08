@@ -62,10 +62,8 @@ inline T mymax(T a, T b) {
 
 bool VDU::staticable() const {
     unsigned int thismode = getMode();
-    static bool only_scanner_modes_static =
-            vega_config::config->graphics.only_scanner_modes_static;
     if (thismode != COMM && thismode != TARGETMANIFEST && thismode != TARGET && thismode != NAV && thismode != VIEW
-            && thismode != WEBCAM && only_scanner_modes_static) {
+            && thismode != WEBCAM && vega_config::config->graphics.only_scanner_modes_static) {
         return false;
     }
     return (posmodes & (posmodes - 1)) != 0;       //check not power of two
@@ -213,7 +211,7 @@ static void DrawHUDSprite(VDU *thus,
         float hull,
         bool drawsprite,
         bool invertsprite) {
-    static bool HighQTargetVSSprites =
+    const bool HighQTargetVSSprites =
             vega_config::config->graphics.high_quality_sprites;
     float nw, nh;
     thus->GetPosition(sx, sy);
@@ -700,7 +698,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
             false,
             automatte);
     tp->bgcol = tpbg;
-    static float auto_message_lim =
+    const float auto_message_lim =
             vega_config::config->graphics.auto_message_time_lim;
     float delautotime = UniverseUtil::GetGameTime() - cp->autoMessageTime;
     bool draw_auto_message = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
@@ -744,9 +742,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         static float mshieldcolor[4] = {.4, .4, 1, 1};
         static float oshieldcolor[4] = {.4, .4, 1, 1};
         //code replaced by target shields defined in cockpit.cpt files, preserve for mods
-        static bool builtin_shields =
-                vega_config::config->graphics.vdu_builtin_shields;
-        if (builtin_shields) {
+        if (vega_config::config->graphics.vdu_builtin_shields) {
             DrawShield(target->shield.Percent(Shield::front),
             target->shield.Percent(Shield::right),
             target->shield.Percent(Shield::left),
@@ -787,9 +783,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
 }
 
 void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
-    static bool draw_messages = vega_config::config->graphics.chat_text;
-
-    if (draw_messages == false) {
+    if (!vega_config::config->graphics.chat_text) {
         return;
     }
 
@@ -806,9 +800,9 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
     whoNOT.push_back("news");
     whoNOT.push_back("bar");
 
-    static float oldtime = vega_config::config->graphics.last_message_time;
-    static int num_messages = vega_config::config->graphics.num_messages;
-    static bool showStardate = vega_config::config->graphics.show_stardate;
+    const float oldtime = vega_config::config->graphics.last_message_time;
+    const int num_messages = vega_config::config->graphics.num_messages;
+    const bool showStardate = vega_config::config->graphics.show_stardate;
 
     vector<std::string> message_people;     //should be "all", parent's name
     gameMessage lastmsg;
@@ -1210,8 +1204,7 @@ void VDU::DrawDamage(Unit *parent) {
     //tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);
     char ecmstatus[256];
     ecmstatus[0] = '\0';
-    static bool print_ecm = vega_config::config->graphics.print_ecm_status;
-    if (print_ecm) {
+    if (vega_config::config->graphics.print_ecm_status) {
         if (UnitUtil::getECM(parent) > 0) {
             GFXColor4f(0, 1, 0, .5);
             strcpy(ecmstatus, "ECM Active");
@@ -1735,7 +1728,7 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
         }
     }
     float delautotime = UniverseUtil::GetGameTime() - parentcp->autoMessageTime;
-    static float auto_switch_lim =
+    const float auto_switch_lim =
             vega_config::config->graphics.auto_message_nav_switch_time_lim;
     if ((delautotime < auto_switch_lim) && (parentcp->autoMessage.length() != 0)) {
         if ((thismode.back() != COMM) && ((posmodes & NAV) != 0)) {

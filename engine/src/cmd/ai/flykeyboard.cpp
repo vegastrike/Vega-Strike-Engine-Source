@@ -136,7 +136,7 @@ FlyByKeyboard::FlyByKeyboard(unsigned int whichplayer) : FlyByWire(), axis_key(0
     //Initial Joystick Mode
     //NOTE: Perhaps it should be handled by FlyByJoystick, but it was cumbersome to do that
     //since it handled mainly keystrokes - Any ideas?
-    const std::string initialJoyMode = vega_config::config->joystick.initial_mode; /* default: "normal" */);
+    const std::string initialJoyMode = vega_config::config->joystick.initial_mode; /* default: "normal" */
     joy_mode = 0;
     if (initialJoyMode == "inertialxy") {
         joy_mode = joyModeInertialXY;
@@ -451,7 +451,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             if (parent->jump_drive.IsDestinationSet()) {
                 static soundContainer foobar;
                 if (foobar.sound == -2) {
-                    const std::string str = vega_config::config->cockpit_audio.jump_engaged; /* default: "jump" */);
+                    const std::string str = vega_config::config->cockpit_audio.jump_engaged; /* default: "jump" */
                     foobar.loadsound(str);
                 }
                 foobar.playsound();

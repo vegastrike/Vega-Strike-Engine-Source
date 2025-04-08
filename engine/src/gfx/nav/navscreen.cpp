@@ -141,10 +141,8 @@ void NavigationSystem::Setup() {
     center_z = 0.0;     //updated after a pass
 
     path_view = PATH_ON;
-    static bool start_sys_ortho =
-            vega_config::config->graphics.system_map_ortho_view;
-    static bool start_sec_ortho =
-            vega_config::config->graphics.sector_map_ortho_view;
+    const bool start_sys_ortho = vega_config::config->graphics.system_map_ortho_view;
+    const bool start_sec_ortho = vega_config::config->graphics.sector_map_ortho_view;
     system_view = start_sys_ortho ? VIEW_ORTHO : VIEW_2D;
     galaxy_view = start_sec_ortho ? VIEW_ORTHO : VIEW_2D;
     system_multi_dimensional = 1;
@@ -172,7 +170,7 @@ void NavigationSystem::Setup() {
     mouse_x_previous = (-1 + float(mousex) / (.5 * g_game.x_resolution));
     mouse_y_previous = (1 + float(-1 * mousey) / (.5 * g_game.y_resolution));
 
-    static int max_map_nodes = vega_config::config->graphics.max_map_nodes;
+    const int max_map_nodes = vega_config::config->graphics.max_map_nodes;
     systemIter.init(UniverseUtil::getSystemFile(), max_map_nodes);
     sectorIter.init(systemIter);
     systemselectionindex = 0;
@@ -386,10 +384,8 @@ void NavigationSystem::Draw() {
     //DRAW THE SCREEN MODEL
     //**********************************
     Vector p, q, r;
-    static float zrange =
-            vega_config::config->graphics.cockpit_nav_zrange;
-    static float zfloor =
-            vega_config::config->graphics.cockpit_nav_zfloor;
+    const float zrange = vega_config::config->graphics.cockpit_nav_zrange;
+    const float zfloor = vega_config::config->graphics.cockpit_nav_zfloor;
     _Universe->AccessCamera()->GetOrientation(p, q, r);
     _Universe->AccessCamera()->UpdateGFX(GFXTRUE,
             GFXTRUE,
@@ -574,8 +570,8 @@ void NavigationSystem::DrawMission() {
     size_t i = 0;
     string factionname = "factionname";
     float relation = 0.0;
-    const std::string disallowedFactions = vega_config::config->graphics.unprintable_factions; /* default: "" */);
-    const std::string disallowedExtension = vega_config::config->graphics.unprintable_faction_extension; /* default: "citizen" */);
+    const std::string disallowedFactions = vega_config::config->graphics.unprintable_factions; /* default: "" */
+    const std::string disallowedExtension = vega_config::config->graphics.unprintable_faction_extension; /* default: "citizen" */
     int totkills = 0;
     size_t fac_loc_before = 0, fac_loc = 0, fac_loc_after = 0;
     for (; i < numfactions; ++i) {
@@ -1116,9 +1112,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
     float yl = (y1 + y2) / 2.0;
     a_label.SetPos((xl - offset) - (checkbit(buttonstates, button_number - 1) ? 0.006 : 0), (yl + 0.025));
     a_label.SetText(label);
-    static bool nav_button_labels =
-            vega_config::config->graphics.draw_nav_button_labels;
-    if (nav_button_labels) {
+    if (vega_config::config->graphics.draw_nav_button_labels) {
         const float background_alpha = vega_config::config->graphics.hud.text_background_alpha;
         GFXColor tpbg = a_label.bgcol;
         bool automatte = (0 == tpbg.a);
@@ -1578,7 +1572,7 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
     if (((mouse_previous_state[1] == 1)
             && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
                     mouse_y_current)) || (mouse_wentdown[3] || mouse_wentdown[4])) {
-        static float wheel_zoom_level =
+        const float wheel_zoom_level =
                 vega_config::config->graphics.wheel_zoom_amount;
         if (system_vs_galaxy) {
             if (mouse_wentdown[3]) {

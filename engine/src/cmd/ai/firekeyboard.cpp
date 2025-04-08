@@ -189,7 +189,7 @@ void FireKeyboard::SetShieldsOneThird(const KBData &, KBSTATE k) {
         float pow = 1. / 3;
         static soundContainer sc;
         if (sc.sound < 0) {
-            const std::string str = vega_config::config->cockpit_audio.shield; /* default: "vdu_d" */);
+            const std::string str = vega_config::config->cockpit_audio.shield; /* default: "vdu_d" */
             sc.loadsound(str);
         }
         sc.playsound();
@@ -206,7 +206,7 @@ void FireKeyboard::SetShieldsOff(const KBData &, KBSTATE k) {
         float pow = 0;
         static soundContainer sc;
         if (sc.sound < 0) {
-            const std::string str = vega_config::config->cockpit_audio.shield; /* default: "vdu_d" */);
+            const std::string str = vega_config::config->cockpit_audio.shield; /* default: "vdu_d" */
             sc.loadsound(str);
         }
         sc.playsound();
@@ -223,7 +223,7 @@ void FireKeyboard::SetShieldsTwoThird(const KBData &, KBSTATE k) {
         float pow = 2. / 3;
         static soundContainer sc;
         if (sc.sound < 0) {
-            const std::string str = vega_config::config->cockpit_audio.shield; /* default: "vdu_d" */);
+            const std::string str = vega_config::config->cockpit_audio.shield; /* default: "vdu_d" */
             sc.loadsound(str);
         }
         sc.playsound();
@@ -1200,14 +1200,14 @@ bool ChooseTargets(Unit *me, bool (*typeofunit)(Unit *, Unit *), bool reverse) {
                     if (reverse) {
                         static soundContainer foosound;
                         if (foosound.sound < 0) {
-                            const std::string str = vega_config::config->cockpit_audio.target; /* default: "vdu_b" */);
+                            const std::string str = vega_config::config->cockpit_audio.target; /* default: "vdu_b" */
                             foosound.loadsound(str);
                         }
                         foosound.playsound();
                     } else {
                         static soundContainer foobersound;
                         if (foobersound.sound < 0) {
-                            const std::string str = vega_config::config->cockpit_audio.target_reverse; /* default: "vdu_a" */);
+                            const std::string str = vega_config::config->cockpit_audio.target_reverse; /* default: "vdu_a" */
                             foobersound.loadsound(str);
                         }
                         foobersound.playsound();
@@ -1296,7 +1296,7 @@ void abletodock(int dock) {
         case 5: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                const std::string str = vega_config::config->cockpit_audio.undocking_complete; /* default: "undocking_complete" */);
+                const std::string str = vega_config::config->cockpit_audio.undocking_complete; /* default: "undocking_complete" */
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1305,7 +1305,7 @@ void abletodock(int dock) {
         case 4: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                const std::string str = vega_config::config->cockpit_audio.undocking_failed; /* default: "undocking_failed" */);
+                const std::string str = vega_config::config->cockpit_audio.undocking_failed; /* default: "undocking_failed" */
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1313,13 +1313,13 @@ void abletodock(int dock) {
         }
         case 3: {
             static soundContainer reqsound;
-            const std::string otherstr = vega_config::config->audio.automatic_docking_zone; /* default: "automatic_landing_zone.wav" */);
+            const std::string otherstr = vega_config::config->audio.automatic_docking_zone; /* default: "automatic_landing_zone.wav" */
             if (otherstr != "" && rand() < RAND_MAX / 2) {
                 static int s = AUDCreateSoundWAV(otherstr, false);
                 AUDPlay(s, QVector(0, 0, 0), Vector(0, 0, 0), 1);
             } else {
                 if (reqsound.sound == -2) {
-                    const std::string str = vega_config::config->cockpit_audio.docking_complete; /* default: "docking_complete" */);
+                    const std::string str = vega_config::config->cockpit_audio.docking_complete; /* default: "docking_complete" */
                     reqsound.loadsound(str);
                 }
                 reqsound.playsound();
@@ -1329,7 +1329,7 @@ void abletodock(int dock) {
         case 2: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                const std::string str = vega_config::config->cockpit_audio.docking_failed; /* default: "docking_failed" */);
+                const std::string str = vega_config::config->cockpit_audio.docking_failed; /* default: "docking_failed" */
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1338,7 +1338,7 @@ void abletodock(int dock) {
         case 1: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                const std::string str = vega_config::config->cockpit_audio.docking_granted; /* default: "request_granted" */);
+                const std::string str = vega_config::config->cockpit_audio.docking_granted; /* default: "request_granted" */
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1347,7 +1347,7 @@ void abletodock(int dock) {
         case 0: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                const std::string str = vega_config::config->cockpit_audio.docking_denied; /* default: "request_denied" */);
+                const std::string str = vega_config::config->cockpit_audio.docking_denied; /* default: "request_denied" */
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1521,7 +1521,7 @@ unsigned int FireKeyboard::DoSpeechAndAni(Unit *un, Unit *parent, class Communic
 
 static void MyFunction() {
     //quit it--he's dead all ready
-    const std::string comm_static = vega_config::config->graphics.comm_static; /* default: "static.ani" */);
+    const std::string comm_static = vega_config::config->graphics.comm_static; /* default: "static.ani" */
     //dead dead dead dead
     static Animation Statuc(comm_static.c_str());
     //yep really dead
@@ -1584,7 +1584,7 @@ extern std::set<Unit *> arrested_list_do_not_dereference;
 void Arrested(Unit *parent) {
     std::string fac = UniverseUtil::GetGalaxyFaction(UniverseUtil::getSystemFile());
     int own = FactionUtil::GetFactionIndex(fac);
-    const std::string po = vega_config::config->galaxy.police_faction; /* default: "homeland-security" */);
+    const std::string po = vega_config::config->galaxy.police_faction; /* default: "homeland-security" */
     int police = FactionUtil::GetFactionIndex(po);
     int police2 = FactionUtil::GetFactionIndex(po + "_" + fac);
     float ownrel = UnitUtil::getRelationFromFaction(parent, own);
@@ -2002,7 +2002,7 @@ void FireKeyboard::Execute() {
         parent->ToggleWeapon(false, forward);
         static soundContainer weapsound;
         if (weapsound.sound < 0) {
-            const std::string str = vega_config::config->cockpit_audio.weapon_switch; /* default: "vdu_d" */);
+            const std::string str = vega_config::config->cockpit_audio.weapon_switch; /* default: "vdu_d" */
             weapsound.loadsound(str);
         }
         weapsound.playsound();
@@ -2039,7 +2039,7 @@ void FireKeyboard::Execute() {
         parent->ToggleWeapon(true, forward);
         static soundContainer missound;
         if (missound.sound < 0) {
-            const std::string str = vega_config::config->cockpit_audio.missile_switch; /* default: "vdu_d" */);
+            const std::string str = vega_config::config->cockpit_audio.missile_switch; /* default: "vdu_d" */
             missound.loadsound(str);
         }
         missound.playsound();

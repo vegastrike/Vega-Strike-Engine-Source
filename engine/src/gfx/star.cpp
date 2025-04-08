@@ -116,8 +116,8 @@ public:
 
 //bool shouldwedraw
 static void saturate(float &r, float &g, float &b) {
-    const float conemin = vega_config::config->graphics.starmincolorval;
-    const float colorpower = vega_config::config->graphics.starcolorpower;
+    const float conemin = vega_config::config->graphics.star_minimum_color_value;
+    const float colorpower = vega_config::config->graphics.star_color_power;
     if (r < conemin) {
         r += conemin;
     }
@@ -134,9 +134,9 @@ static void saturate(float &r, float &g, float &b) {
 
 bool computeStarColor(float &r, float &g, float &b, Vector luminmax, float distance, float maxdistance) {
     saturate(r, g, b);
-    const float luminscale = vega_config::config->graphics.starluminscale;
-    const float starcoloraverage = vega_config::config->graphics.starcoloraverage;
-    const float starcolorincrement = vega_config::config->graphics.starcolorincrement;
+    const float luminscale = vega_config::config->graphics.star_lumin_scale;
+    const float starcoloraverage = vega_config::config->graphics.star_color_average;
+    const float starcolorincrement = vega_config::config->graphics.star_color_increment;
     float dissqr = distance * distance / (maxdistance * maxdistance);
     float lum = 100 * luminmax.i / (luminmax.k * dissqr);
     lum = log((double) luminmax.i * 10. / (double) luminmax.j) * luminscale / dissqr;
@@ -150,7 +150,7 @@ bool computeStarColor(float &r, float &g, float &b, Vector luminmax, float dista
     r *= lum;
     g *= lum;
     b *= lum;
-    const float starcolorcutoff = vega_config::config->graphics.starcolorcutoff;
+    const float starcolorcutoff = vega_config::config->graphics.star_color_cutoff;
     return lum > starcolorcutoff;
 }
 
@@ -370,14 +370,13 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
         bool yawpitch,
         int whichTexture) {
     UpdateGraphics();
-    const bool StarStreaks = vega_config::config->graphics.star_streaks;
     GFXColorMaterial(AMBIENT | DIFFUSE);
     bool ret = false;
-    if (StarStreaks) {
+    if (vega_config::config->graphics.star_streaks) {
         Matrix rollMatrix;
-        static float velstreakscale =
+        const float velstreakscale =
                 vega_config::config->graphics.velocity_star_streak_scale;
-        static float minstreak =
+        const float minstreak =
                 vega_config::config->graphics.velocity_star_streak_min;
         const float fov_smoothing = vega_config::config->warp.fov_link.smoothing; /* default: .4 */
         float fov_smoot = pow(double(fov_smoothing), GetElapsedTime());
@@ -390,7 +389,7 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
             if (speed < minstreak) {
                 speed = minstreak;
             }
-            static float streakcap =
+            const float streakcap =
                     vega_config::config->graphics.velocity_star_streak_max;
             if (speed > streakcap) {
                 speed = streakcap;
@@ -400,7 +399,7 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
             GFXColorVertex *v = vlist->BeginMutate(0)->colors;
             int numvertices = vlist->GetNumVertices();
 
-            static float torquestreakscale =
+            const float torquestreakscale =
                     vega_config::config->graphics.torque_star_streak_scale;
             for (int j = 0; j < numvertices - 1; j += 2) {
                 int i = j;
@@ -486,11 +485,11 @@ void Stars::Draw() {
     GFXDisable(TEXTURE0);
     GFXDisable(TEXTURE1);
     GFXEnable(DEPTHTEST);
-    static bool near_stars_alpha =
+    const bool near_stars_alpha =
             vega_config::config->graphics.near_stars_alpha;
-    static bool near_stars_alpha_blend =
+    const bool near_stars_alpha_blend =
             vega_config::config->graphics.near_stars_alpha_blend;
-    static float AlphaTestingCutoff =
+    const float AlphaTestingCutoff =
             vega_config::config->graphics.stars_alpha_test_cutoff;
     if (near_stars_alpha) {
         GFXAlphaTest(GREATER, AlphaTestingCutoff);
@@ -510,7 +509,7 @@ void Stars::Draw() {
     int ligh;
     GFXSelectMaterial(0);
     if (fade) {
-        static float star_spread_attenuation =
+        const float star_spread_attenuation =
                 vega_config::config->graphics.star_spread_attenuation;
         GFXPushGlobalEffects();
         GFXLight fadeLight(true, GFXColor(cp.i, cp.j, cp.k),
@@ -650,7 +649,7 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
         float size) : StarVlist(spread) {
     int curtexture = 0;
     vector<AnimatedTexture *> animations;
-    static bool
+    const bool
             near_stars_alpha = vega_config::config->graphics.near_stars_alpha;
     for (curtexture = 0; curtexture < NUM_ACTIVE_ANIMATIONS; ++curtexture) {
         std::string::size_type where = texturenames.find(" ");
@@ -802,8 +801,7 @@ void SpriteStarVlist::EndDrawState(bool stretch, int whichTex) {
 extern bool isVista;
 
 void SpriteStarVlist::Draw(bool strertch, int whichTexture) {
-    static bool force_draw = vega_config::config->graphics.vista_draw_stars;
-    if (force_draw || !isVista) {
+    if (vega_config::config->graphics.vista_draw_stars || !isVista) {
         vlist[whichTexture]->Draw();
     }
 }

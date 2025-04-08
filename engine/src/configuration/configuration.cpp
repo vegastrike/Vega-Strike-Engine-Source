@@ -300,6 +300,16 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.atmosphere_diffuse = boost::json::value_to<double>(*atmosphere_diffuse_value_ptr);
             }
 
+            const boost::json::value * auto_message_nav_switch_time_lim_value_ptr = graphics_object.if_contains("auto_message_nav_switch_time_lim");
+            if (auto_message_nav_switch_time_lim_value_ptr != nullptr) {
+                graphics.auto_message_nav_switch_time_lim = boost::json::value_to<double>(*auto_message_nav_switch_time_lim_value_ptr);
+            }
+
+            const boost::json::value * auto_message_time_lim_value_ptr = graphics_object.if_contains("auto_message_time_lim");
+            if (auto_message_time_lim_value_ptr != nullptr) {
+                graphics.auto_message_time_lim = boost::json::value_to<double>(*auto_message_time_lim_value_ptr);
+            }
+
             const boost::json::value * automatic_landing_zone_warning_value_ptr = graphics_object.if_contains("automatic_landing_zone_warning");
             if (automatic_landing_zone_warning_value_ptr != nullptr) {
                 graphics.automatic_landing_zone_warning = boost::json::value_to<std::string>(*automatic_landing_zone_warning_value_ptr);
@@ -430,6 +440,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.cargo_rotation_speed = boost::json::value_to<double>(*cargo_rotation_speed_value_ptr);
             }
 
+            const boost::json::value * chat_text_value_ptr = graphics_object.if_contains("chat_text");
+            if (chat_text_value_ptr != nullptr) {
+                graphics.chat_text = boost::json::value_to<bool>(*chat_text_value_ptr);
+            }
+
             const boost::json::value * circle_accuracy_value_ptr = graphics_object.if_contains("circle_accuracy");
             if (circle_accuracy_value_ptr != nullptr) {
                 graphics.circle_accuracy = boost::json::value_to<double>(*circle_accuracy_value_ptr);
@@ -468,6 +483,16 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * cockpit_drift_ref_accel_value_ptr = graphics_object.if_contains("cockpit_drift_ref_accel");
             if (cockpit_drift_ref_accel_value_ptr != nullptr) {
                 graphics.cockpit_drift_ref_accel = boost::json::value_to<double>(*cockpit_drift_ref_accel_value_ptr);
+            }
+
+            const boost::json::value * cockpit_nav_zfloor_value_ptr = graphics_object.if_contains("cockpit_nav_zfloor");
+            if (cockpit_nav_zfloor_value_ptr != nullptr) {
+                graphics.cockpit_nav_zfloor = boost::json::value_to<double>(*cockpit_nav_zfloor_value_ptr);
+            }
+
+            const boost::json::value * cockpit_nav_zrange_value_ptr = graphics_object.if_contains("cockpit_nav_zrange");
+            if (cockpit_nav_zrange_value_ptr != nullptr) {
+                graphics.cockpit_nav_zrange = boost::json::value_to<double>(*cockpit_nav_zrange_value_ptr);
             }
 
             const boost::json::value * cockpit_shake_value_ptr = graphics_object.if_contains("cockpit_shake");
@@ -605,6 +630,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.draw_jump_target_nav_symbol = boost::json::value_to<bool>(*draw_jump_target_nav_symbol_value_ptr);
             }
 
+            const boost::json::value * draw_nav_button_labels_value_ptr = graphics_object.if_contains("draw_nav_button_labels");
+            if (draw_nav_button_labels_value_ptr != nullptr) {
+                graphics.draw_nav_button_labels = boost::json::value_to<bool>(*draw_nav_button_labels_value_ptr);
+            }
+
             const boost::json::value * draw_near_stars_in_front_of_planets_value_ptr = graphics_object.if_contains("draw_near_stars_in_front_of_planets");
             if (draw_near_stars_in_front_of_planets_value_ptr != nullptr) {
                 graphics.draw_near_stars_in_front_of_planets = boost::json::value_to<bool>(*draw_near_stars_in_front_of_planets_value_ptr);
@@ -688,6 +718,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * engine_radii_scale_value_ptr = graphics_object.if_contains("engine_radii_scale");
             if (engine_radii_scale_value_ptr != nullptr) {
                 graphics.engine_radii_scale = boost::json::value_to<double>(*engine_radii_scale_value_ptr);
+            }
+
+            const boost::json::value * explore_for_map_value_ptr = graphics_object.if_contains("explore_for_map");
+            if (explore_for_map_value_ptr != nullptr) {
+                graphics.explore_for_map = boost::json::value_to<bool>(*explore_for_map_value_ptr);
             }
 
             const boost::json::value * explosion_animation_value_ptr = graphics_object.if_contains("explosion_animation");
@@ -880,6 +915,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.high_quality_font_computer = boost::json::value_to<bool>(*high_quality_font_computer_value_ptr);
             }
 
+            const boost::json::value * high_quality_sprites_value_ptr = graphics_object.if_contains("high_quality_sprites");
+            if (high_quality_sprites_value_ptr != nullptr) {
+                graphics.high_quality_sprites = boost::json::value_to<bool>(*high_quality_sprites_value_ptr);
+            }
+
             const boost::json::value * hull_flash_animation_value_ptr = graphics_object.if_contains("hull_flash_animation");
             if (hull_flash_animation_value_ptr != nullptr) {
                 graphics.hull_flash_animation = boost::json::value_to<std::string>(*hull_flash_animation_value_ptr);
@@ -933,6 +973,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * jump_gate_size_value_ptr = graphics_object.if_contains("jump_gate_size");
             if (jump_gate_size_value_ptr != nullptr) {
                 graphics.jump_gate_size = boost::json::value_to<double>(*jump_gate_size_value_ptr);
+            }
+
+            const boost::json::value * last_message_time_value_ptr = graphics_object.if_contains("last_message_time");
+            if (last_message_time_value_ptr != nullptr) {
+                graphics.last_message_time = boost::json::value_to<double>(*last_message_time_value_ptr);
             }
 
             const boost::json::value * light_cutoff_value_ptr = graphics_object.if_contains("light_cutoff");
@@ -990,6 +1035,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.max_cubemap_size = boost::json::value_to<int>(*max_cubemap_size_value_ptr);
             }
 
+            const boost::json::value * max_map_nodes_value_ptr = graphics_object.if_contains("max_map_nodes");
+            if (max_map_nodes_value_ptr != nullptr) {
+                graphics.max_map_nodes = boost::json::value_to<int>(*max_map_nodes_value_ptr);
+            }
+
             const boost::json::value * max_movie_dimension_value_ptr = graphics_object.if_contains("max_movie_dimension");
             if (max_movie_dimension_value_ptr != nullptr) {
                 graphics.max_movie_dimension = boost::json::value_to<int>(*max_movie_dimension_value_ptr);
@@ -1035,6 +1085,16 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.multi_texture_glow_maps = boost::json::value_to<bool>(*multi_texture_glow_maps_value_ptr);
             }
 
+            const boost::json::value * near_stars_alpha_value_ptr = graphics_object.if_contains("near_stars_alpha");
+            if (near_stars_alpha_value_ptr != nullptr) {
+                graphics.near_stars_alpha = boost::json::value_to<bool>(*near_stars_alpha_value_ptr);
+            }
+
+            const boost::json::value * near_stars_alpha_blend_value_ptr = graphics_object.if_contains("near_stars_alpha_blend");
+            if (near_stars_alpha_blend_value_ptr != nullptr) {
+                graphics.near_stars_alpha_blend = boost::json::value_to<bool>(*near_stars_alpha_blend_value_ptr);
+            }
+
             const boost::json::value * near_stars_sprite_size_value_ptr = graphics_object.if_contains("near_stars_sprite_size");
             if (near_stars_sprite_size_value_ptr != nullptr) {
                 graphics.near_stars_sprite_size = boost::json::value_to<double>(*near_stars_sprite_size_value_ptr);
@@ -1055,6 +1115,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.num_lights = boost::json::value_to<int>(*num_lights_value_ptr);
             }
 
+            const boost::json::value * num_messages_value_ptr = graphics_object.if_contains("num_messages");
+            if (num_messages_value_ptr != nullptr) {
+                graphics.num_messages = boost::json::value_to<int>(*num_messages_value_ptr);
+            }
+
             const boost::json::value * num_near_stars_value_ptr = graphics_object.if_contains("num_near_stars");
             if (num_near_stars_value_ptr != nullptr) {
                 graphics.num_near_stars = boost::json::value_to<int>(*num_near_stars_value_ptr);
@@ -1068,6 +1133,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * offset_sprites_by_pos_value_ptr = graphics_object.if_contains("offset_sprites_by_pos");
             if (offset_sprites_by_pos_value_ptr != nullptr) {
                 graphics.offset_sprites_by_pos = boost::json::value_to<bool>(*offset_sprites_by_pos_value_ptr);
+            }
+
+            const boost::json::value * only_scanner_modes_static_value_ptr = graphics_object.if_contains("only_scanner_modes_static");
+            if (only_scanner_modes_static_value_ptr != nullptr) {
+                graphics.only_scanner_modes_static = boost::json::value_to<bool>(*only_scanner_modes_static_value_ptr);
             }
 
             const boost::json::value * only_stretch_in_warp_value_ptr = graphics_object.if_contains("only_stretch_in_warp");
@@ -1135,6 +1205,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.precull_dist = boost::json::value_to<double>(*precull_dist_value_ptr);
             }
 
+            const boost::json::value * print_ecm_status_value_ptr = graphics_object.if_contains("print_ecm_status");
+            if (print_ecm_status_value_ptr != nullptr) {
+                graphics.print_ecm_status = boost::json::value_to<bool>(*print_ecm_status_value_ptr);
+            }
+
             const boost::json::value * rect_textures_value_ptr = graphics_object.if_contains("rect_textures");
             if (rect_textures_value_ptr != nullptr) {
                 graphics.rect_textures = boost::json::value_to<bool>(*rect_textures_value_ptr);
@@ -1183,6 +1258,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * s3tc_value_ptr = graphics_object.if_contains("s3tc");
             if (s3tc_value_ptr != nullptr) {
                 graphics.s3tc = boost::json::value_to<bool>(*s3tc_value_ptr);
+            }
+
+            const boost::json::value * sector_map_ortho_view_value_ptr = graphics_object.if_contains("sector_map_ortho_view");
+            if (sector_map_ortho_view_value_ptr != nullptr) {
+                graphics.sector_map_ortho_view = boost::json::value_to<bool>(*sector_map_ortho_view_value_ptr);
             }
 
             const boost::json::value * separate_specular_color_value_ptr = graphics_object.if_contains("separate_specular_color");
@@ -1330,6 +1410,26 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.star_blend = boost::json::value_to<bool>(*star_blend_value_ptr);
             }
 
+            const boost::json::value * star_color_average_value_ptr = graphics_object.if_contains("star_color_average");
+            if (star_color_average_value_ptr != nullptr) {
+                graphics.star_color_average = boost::json::value_to<double>(*star_color_average_value_ptr);
+            }
+
+            const boost::json::value * star_color_cutoff_value_ptr = graphics_object.if_contains("star_color_cutoff");
+            if (star_color_cutoff_value_ptr != nullptr) {
+                graphics.star_color_cutoff = boost::json::value_to<double>(*star_color_cutoff_value_ptr);
+            }
+
+            const boost::json::value * star_color_increment_value_ptr = graphics_object.if_contains("star_color_increment");
+            if (star_color_increment_value_ptr != nullptr) {
+                graphics.star_color_increment = boost::json::value_to<double>(*star_color_increment_value_ptr);
+            }
+
+            const boost::json::value * star_color_power_value_ptr = graphics_object.if_contains("star_color_power");
+            if (star_color_power_value_ptr != nullptr) {
+                graphics.star_color_power = boost::json::value_to<double>(*star_color_power_value_ptr);
+            }
+
             const boost::json::value * star_body_radius_value_ptr = graphics_object.if_contains("star_body_radius");
             if (star_body_radius_value_ptr != nullptr) {
                 graphics.star_body_radius = boost::json::value_to<double>(*star_body_radius_value_ptr);
@@ -1338,6 +1438,16 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * star_glow_radius_value_ptr = graphics_object.if_contains("star_glow_radius");
             if (star_glow_radius_value_ptr != nullptr) {
                 graphics.star_glow_radius = boost::json::value_to<double>(*star_glow_radius_value_ptr);
+            }
+
+            const boost::json::value * star_lumin_scale_value_ptr = graphics_object.if_contains("star_lumin_scale");
+            if (star_lumin_scale_value_ptr != nullptr) {
+                graphics.star_lumin_scale = boost::json::value_to<double>(*star_lumin_scale_value_ptr);
+            }
+
+            const boost::json::value * star_minimum_color_value_value_ptr = graphics_object.if_contains("star_minimum_color_value");
+            if (star_minimum_color_value_value_ptr != nullptr) {
+                graphics.star_minimum_color_value = boost::json::value_to<double>(*star_minimum_color_value_value_ptr);
             }
 
             const boost::json::value * star_overlap_value_ptr = graphics_object.if_contains("star_overlap");
@@ -1350,9 +1460,24 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.star_shine = boost::json::value_to<std::string>(*star_shine_value_ptr);
             }
 
+            const boost::json::value * star_spread_attenuation_value_ptr = graphics_object.if_contains("star_spread_attenuation");
+            if (star_spread_attenuation_value_ptr != nullptr) {
+                graphics.star_spread_attenuation = boost::json::value_to<double>(*star_spread_attenuation_value_ptr);
+            }
+
             const boost::json::value * star_spreading_value_ptr = graphics_object.if_contains("star_spreading");
             if (star_spreading_value_ptr != nullptr) {
                 graphics.star_spreading = boost::json::value_to<double>(*star_spreading_value_ptr);
+            }
+
+            const boost::json::value * star_streaks_value_ptr = graphics_object.if_contains("star_streaks");
+            if (star_streaks_value_ptr != nullptr) {
+                graphics.star_streaks = boost::json::value_to<bool>(*star_streaks_value_ptr);
+            }
+
+            const boost::json::value * stars_alpha_test_cutoff_value_ptr = graphics_object.if_contains("stars_alpha_test_cutoff");
+            if (stars_alpha_test_cutoff_value_ptr != nullptr) {
+                graphics.stars_alpha_test_cutoff = boost::json::value_to<double>(*stars_alpha_test_cutoff_value_ptr);
             }
 
             const boost::json::value * stars_dont_move_value_ptr = graphics_object.if_contains("stars_dont_move");
@@ -1373,6 +1498,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * switch_cockpit_to_default_on_unit_switch_value_ptr = graphics_object.if_contains("switch_cockpit_to_default_on_unit_switch");
             if (switch_cockpit_to_default_on_unit_switch_value_ptr != nullptr) {
                 graphics.switch_cockpit_to_default_on_unit_switch = boost::json::value_to<bool>(*switch_cockpit_to_default_on_unit_switch_value_ptr);
+            }
+
+            const boost::json::value * system_map_ortho_view_value_ptr = graphics_object.if_contains("system_map_ortho_view");
+            if (system_map_ortho_view_value_ptr != nullptr) {
+                graphics.system_map_ortho_view = boost::json::value_to<bool>(*system_map_ortho_view_value_ptr);
             }
 
             const boost::json::value * technique_set_value_ptr = graphics_object.if_contains("technique_set");
@@ -1403,6 +1533,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * texture_compression_value_ptr = graphics_object.if_contains("texture_compression");
             if (texture_compression_value_ptr != nullptr) {
                 graphics.texture_compression = boost::json::value_to<int>(*texture_compression_value_ptr);
+            }
+
+            const boost::json::value * torque_star_streak_scale_value_ptr = graphics_object.if_contains("torque_star_streak_scale");
+            if (torque_star_streak_scale_value_ptr != nullptr) {
+                graphics.torque_star_streak_scale = boost::json::value_to<double>(*torque_star_streak_scale_value_ptr);
             }
 
             const boost::json::value * unit_switch_cockpit_change_value_ptr = graphics_object.if_contains("unit_switch_cockpit_change");
@@ -1495,6 +1630,31 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.vbo = boost::json::value_to<bool>(*vbo_value_ptr);
             }
 
+            const boost::json::value * vdu_builtin_shields_value_ptr = graphics_object.if_contains("vdu_builtin_shields");
+            if (vdu_builtin_shields_value_ptr != nullptr) {
+                graphics.vdu_builtin_shields = boost::json::value_to<bool>(*vdu_builtin_shields_value_ptr);
+            }
+
+            const boost::json::value * velocity_star_streak_max_value_ptr = graphics_object.if_contains("velocity_star_streak_max");
+            if (velocity_star_streak_max_value_ptr != nullptr) {
+                graphics.velocity_star_streak_max = boost::json::value_to<double>(*velocity_star_streak_max_value_ptr);
+            }
+
+            const boost::json::value * velocity_star_streak_min_value_ptr = graphics_object.if_contains("velocity_star_streak_min");
+            if (velocity_star_streak_min_value_ptr != nullptr) {
+                graphics.velocity_star_streak_min = boost::json::value_to<double>(*velocity_star_streak_min_value_ptr);
+            }
+
+            const boost::json::value * velocity_star_streak_scale_value_ptr = graphics_object.if_contains("velocity_star_streak_scale");
+            if (velocity_star_streak_scale_value_ptr != nullptr) {
+                graphics.velocity_star_streak_scale = boost::json::value_to<double>(*velocity_star_streak_scale_value_ptr);
+            }
+
+            const boost::json::value * vista_draw_stars_value_ptr = graphics_object.if_contains("vista_draw_stars");
+            if (vista_draw_stars_value_ptr != nullptr) {
+                graphics.vista_draw_stars = boost::json::value_to<bool>(*vista_draw_stars_value_ptr);
+            }
+
             const boost::json::value * warp_shake_magnitude_value_ptr = graphics_object.if_contains("warp_shake_magnitude");
             if (warp_shake_magnitude_value_ptr != nullptr) {
                 graphics.warp_shake_magnitude = boost::json::value_to<double>(*warp_shake_magnitude_value_ptr);
@@ -1558,6 +1718,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * weapon_zscale_value_ptr = graphics_object.if_contains("weapon_zscale");
             if (weapon_zscale_value_ptr != nullptr) {
                 graphics.weapon_zscale = boost::json::value_to<double>(*weapon_zscale_value_ptr);
+            }
+
+            const boost::json::value * wheel_zoom_amount_value_ptr = graphics_object.if_contains("wheel_zoom_amount");
+            if (wheel_zoom_amount_value_ptr != nullptr) {
+                graphics.wheel_zoom_amount = boost::json::value_to<double>(*wheel_zoom_amount_value_ptr);
             }
 
             const boost::json::value * wormhole_unit_value_ptr = graphics_object.if_contains("wormhole_unit");
@@ -2196,6 +2361,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
         const boost::json::value * nav_value_ptr = graphics_object.if_contains("nav");
         if (nav_value_ptr != nullptr) {
             boost::json::object nav_object = nav_value_ptr->get_object();
+            const boost::json::value * max_search_size_value_ptr = nav_object.if_contains("max_search_size");
+            if (max_search_size_value_ptr != nullptr) {
+                graphics.nav.max_search_size = boost::json::value_to<int>(*max_search_size_value_ptr);
+            }
+
             const boost::json::value * modern_mouse_cursor_value_ptr = nav_object.if_contains("modern_mouse_cursor");
             if (modern_mouse_cursor_value_ptr != nullptr) {
                 graphics.nav.modern_mouse_cursor = boost::json::value_to<bool>(*modern_mouse_cursor_value_ptr);

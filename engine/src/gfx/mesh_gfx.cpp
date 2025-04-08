@@ -2042,7 +2042,7 @@ void Mesh::initTechnique(const std::string &xmltechnique) {
         if (Decal.size() > 1 || getEnvMap()) {
             //Use shader-ified technique for multitexture or environment-mapped meshes
 #if defined(__APPLE__) && defined (__MACH__)
-            const std::string shader_technique = vega_config::config->graphics.default_full_technique; /* default: "mac" */ );
+            const std::string shader_technique = vega_config::config->graphics.default_full_technique; /* default: "mac" */
 #else
             const std::string shader_technique = vega_config::config->graphics.default_full_technique; /* default: "default" */
 #endif
