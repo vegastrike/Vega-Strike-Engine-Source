@@ -710,7 +710,7 @@ void LoadConfig(string subdir) {
     vs_config = createVegaConfig(config_file.c_str());
 
     string universe_file = data_dir + "/" \
- + vega_config::config->data.universe_path; /* default: "universe" */ + "/" \
+ + vega_config::config->data.universe_path /* default: "universe" */ + "/" \
  + vega_config::config->game_start.galaxy; /* default: "milky_way.xml" */
     VS_LOG(debug, (boost::format("Force galaxy to %1%") % universe_file));
     try {
@@ -846,7 +846,6 @@ void InitPaths(string conf, string subdir) {
 
     InitDataDirectory();
     InitHomeDirectory();
-    LoadConfig(std::move(subdir));
     /*
       Paths relative to data_dir or homedir (both should have the same structure)
       Units are in shared_units/unitname/, shared_units/subunits/unitname/ or shared_units/weapons/unitname/ or in shared_units/faction/unitname/
@@ -870,6 +869,8 @@ void InitPaths(string conf, string subdir) {
     vega_config::config = std::make_shared<vega_config::Config>(config_file_path);
     boost::filesystem::path config_file_path2{VSFileSystem::homedir + "/config.json"};
     vega_config::config->load_config(config_file_path2);
+
+    LoadConfig(std::move(subdir));
 
     game_options()->init();
 
