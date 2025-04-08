@@ -460,14 +460,14 @@ void Animation::Draw() {
         Vector camp, camq, camr;
         QVector pos(Position());
 
-        const float halo_offset = vega_config::config->graphics.halo_offset;
+        const double halo_offset = vega_config::config->graphics.halo_offset;
 
         /**/
         //Why do all this if we can use ::CalculateOrientation?
         //-- well one reason is that the code change broke it :-/  Until suns display properly or we switch to ogre we should keep it as it was (problem was, flare wouldn't display--- or would display behind the sun)
         QVector R(_Universe->AccessCamera()->GetR().i, _Universe->AccessCamera()->GetR().j,
                 _Universe->AccessCamera()->GetR().k);
-        const float too_far_dist = vega_config::config->graphics.anim_far_percent; // default: ".8"
+        const double too_far_dist = vega_config::config->graphics.anim_far_percent; // default: 0.8
         if (( /*R.Dot*/ (Position()
                 - _Universe->AccessCamera()->GetPosition()).Magnitude() + halo_offset
                 *
