@@ -137,6 +137,8 @@ namespace vega_config {
         double death_scene_time = 4.0;
         std::string default_boot_message = "";
         double default_engine_activation = 0.00048828125;
+        std::string default_full_technique = "default";
+        std::string default_simple_technique = "fixed_simple";
         double detail_texture_scale = 1.0;
         bool detail_texture_trilinear = true;
         bool disabled_cockpit_allowed = true;
@@ -181,6 +183,7 @@ namespace vega_config {
         bool font_antialias = false;
         double font_point = 16.0;
         double font_width_hack = 0.925;
+        bool force_glowmap_restore_write_to_depthmap = true;
         bool force_lighting = true;
         bool force_one_one_shield_blend = true;
         double fov = 37.5;
@@ -232,6 +235,7 @@ namespace vega_config {
         double missile_explosion_radius_mult = 1.0;
         bool missile_sparkle = false;
         double model_detail = 1.0;
+        bool multi_texture_glow_maps = true;
         double near_stars_sprite_size = 2.0;
         std::string near_stars_sprite_texture = "";
         int num_far_stars = 2000;
@@ -285,6 +289,7 @@ namespace vega_config {
         double sparkle_absolute_speed = 0.02;
         double sparkle_engine_size_relative_to_ship = 0.1875;
         double sparkle_rate = 5.0;
+        bool specmap_with_reflection = true;
         std::string splash_audio = "";
         std::string splash_screen = "vega_splash.ani";
         bool split_dead_subunits = true;

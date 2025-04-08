@@ -813,7 +813,7 @@ bool SetupSpecMapFirstPass(Texture **decal,
                     : GFXFALSE;
     GFXSetSeparateSpecularColor(separatespec);
 
-    const bool multitex_glowpass = vega_config::config->graphics.multitexture_glowmaps;
+    const bool multitex_glowpass = vega_config::config->graphics.multi_texture_glow_maps;
     if (polygon_offset) {
         float a, b;
         GFXGetPolygonOffset(&a, &b);
@@ -2044,11 +2044,11 @@ void Mesh::initTechnique(const std::string &xmltechnique) {
 #if defined(__APPLE__) && defined (__MACH__)
             const std::string shader_technique = vega_config::config->graphics.default_full_technique; /* default: "mac" */ );
 #else
-            const std::string shader_technique = vega_config::config->graphics.default_full_technique; /* default: "default" */);
+            const std::string shader_technique = vega_config::config->graphics.default_full_technique; /* default: "default" */
 #endif
             effective = shader_technique;
         } else {
-            const std::string fixed_technique = vega_config::config->graphics.default_simple_technique; /* default: "fixed_simple" */);
+            const std::string fixed_technique = vega_config::config->graphics.default_simple_technique; /* default: "fixed_simple" */
             effective = fixed_technique;
         }
         technique = Technique::getTechnique(effective);

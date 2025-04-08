@@ -540,6 +540,16 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.default_engine_activation = boost::json::value_to<double>(*default_engine_activation_value_ptr);
             }
 
+            const boost::json::value * default_full_technique_value_ptr = graphics_object.if_contains("default_full_technique");
+            if (default_full_technique_value_ptr != nullptr) {
+                graphics.default_full_technique = boost::json::value_to<std::string>(*default_full_technique_value_ptr);
+            }
+
+            const boost::json::value * default_simple_technique_value_ptr = graphics_object.if_contains("default_simple_technique");
+            if (default_simple_technique_value_ptr != nullptr) {
+                graphics.default_simple_technique = boost::json::value_to<std::string>(*default_simple_technique_value_ptr);
+            }
+
             const boost::json::value * detail_texture_scale_value_ptr = graphics_object.if_contains("detail_texture_scale");
             if (detail_texture_scale_value_ptr != nullptr) {
                 graphics.detail_texture_scale = boost::json::value_to<double>(*detail_texture_scale_value_ptr);
@@ -758,6 +768,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * font_width_hack_value_ptr = graphics_object.if_contains("font_width_hack");
             if (font_width_hack_value_ptr != nullptr) {
                 graphics.font_width_hack = boost::json::value_to<double>(*font_width_hack_value_ptr);
+            }
+
+            const boost::json::value * force_glowmap_restore_write_to_depthmap_value_ptr = graphics_object.if_contains("force_glowmap_restore_write_to_depthmap");
+            if (force_glowmap_restore_write_to_depthmap_value_ptr != nullptr) {
+                graphics.force_glowmap_restore_write_to_depthmap = boost::json::value_to<bool>(*force_glowmap_restore_write_to_depthmap_value_ptr);
             }
 
             const boost::json::value * force_lighting_value_ptr = graphics_object.if_contains("force_lighting");
@@ -1013,6 +1028,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * model_detail_value_ptr = graphics_object.if_contains("model_detail");
             if (model_detail_value_ptr != nullptr) {
                 graphics.model_detail = boost::json::value_to<double>(*model_detail_value_ptr);
+            }
+
+            const boost::json::value * multi_texture_glow_maps_value_ptr = graphics_object.if_contains("multi_texture_glow_maps");
+            if (multi_texture_glow_maps_value_ptr != nullptr) {
+                graphics.multi_texture_glow_maps = boost::json::value_to<bool>(*multi_texture_glow_maps_value_ptr);
             }
 
             const boost::json::value * near_stars_sprite_size_value_ptr = graphics_object.if_contains("near_stars_sprite_size");
@@ -1278,6 +1298,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * sparkle_rate_value_ptr = graphics_object.if_contains("sparkle_rate");
             if (sparkle_rate_value_ptr != nullptr) {
                 graphics.sparkle_rate = boost::json::value_to<double>(*sparkle_rate_value_ptr);
+            }
+
+            const boost::json::value * specmap_with_reflection_value_ptr = graphics_object.if_contains("specmap_with_reflection");
+            if (specmap_with_reflection_value_ptr != nullptr) {
+                graphics.specmap_with_reflection = boost::json::value_to<bool>(*specmap_with_reflection_value_ptr);
             }
 
             const boost::json::value * splash_audio_value_ptr = graphics_object.if_contains("splash_audio");
