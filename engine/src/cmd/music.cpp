@@ -772,8 +772,8 @@ void Music::Mute(bool mute, int layer) {
         return;
     }
     if (muzak) {
-        const float muting_fadeout = vega_config::config->audio.music_muting_fadeout;
-        const float muting_fadein = vega_config::config->audio.music_muting_fadeout;
+        const float muting_fadeout = vega_config::config->audio.music_muting_fade_out;
+        const float muting_fadein = vega_config::config->audio.music_muting_fade_out;
         if (layer < 0) {
             for (int i = 0; i < muzak_count; i++) {
                 if (mute) {

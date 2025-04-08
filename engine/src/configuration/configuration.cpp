@@ -76,6 +76,1956 @@ void vega_config::Config::load_config(const std::string& json_text) {
 
 
 
+        const boost::json::value * advanced_value_ptr = root_object.if_contains("advanced");
+        if (advanced_value_ptr != nullptr) {
+            boost::json::object advanced_object = advanced_value_ptr->get_object();
+        }
+
+
+        const boost::json::value * ai_value_ptr = root_object.if_contains("ai");
+        if (ai_value_ptr != nullptr) {
+            boost::json::object ai_object = ai_value_ptr->get_object();
+            const boost::json::value * afterburn_to_no_enemies_value_ptr = ai_object.if_contains("afterburn_to_no_enemies");
+            if (afterburn_to_no_enemies_value_ptr != nullptr) {
+                ai.afterburn_to_no_enemies = boost::json::value_to<bool>(*afterburn_to_no_enemies_value_ptr);
+            }
+
+            const boost::json::value * ai_cheat_dot_value_ptr = ai_object.if_contains("ai_cheat_dot");
+            if (ai_cheat_dot_value_ptr != nullptr) {
+                ai.ai_cheat_dot = boost::json::value_to<double>(*ai_cheat_dot_value_ptr);
+            }
+
+            const boost::json::value * allow_any_speed_reference_value_ptr = ai_object.if_contains("allow_any_speed_reference");
+            if (allow_any_speed_reference_value_ptr != nullptr) {
+                ai.allow_any_speed_reference = boost::json::value_to<bool>(*allow_any_speed_reference_value_ptr);
+            }
+
+            const boost::json::value * allow_civil_war_value_ptr = ai_object.if_contains("allow_civil_war");
+            if (allow_civil_war_value_ptr != nullptr) {
+                ai.allow_civil_war = boost::json::value_to<bool>(*allow_civil_war_value_ptr);
+            }
+
+            const boost::json::value * allow_nonplayer_faction_change_value_ptr = ai_object.if_contains("allow_nonplayer_faction_change");
+            if (allow_nonplayer_faction_change_value_ptr != nullptr) {
+                ai.allow_nonplayer_faction_change = boost::json::value_to<bool>(*allow_nonplayer_faction_change_value_ptr);
+            }
+
+            const boost::json::value * always_fire_autotrackers_value_ptr = ai_object.if_contains("always_fire_autotrackers");
+            if (always_fire_autotrackers_value_ptr != nullptr) {
+                ai.always_fire_autotrackers = boost::json::value_to<bool>(*always_fire_autotrackers_value_ptr);
+            }
+
+            const boost::json::value * always_have_jumpdrive_cheat_value_ptr = ai_object.if_contains("always_have_jumpdrive_cheat");
+            if (always_have_jumpdrive_cheat_value_ptr != nullptr) {
+                ai.always_have_jumpdrive_cheat = boost::json::value_to<bool>(*always_have_jumpdrive_cheat_value_ptr);
+            }
+
+            const boost::json::value * always_obedient_value_ptr = ai_object.if_contains("always_obedient");
+            if (always_obedient_value_ptr != nullptr) {
+                ai.always_obedient = boost::json::value_to<bool>(*always_obedient_value_ptr);
+            }
+
+            const boost::json::value * always_use_itts_value_ptr = ai_object.if_contains("always_use_itts");
+            if (always_use_itts_value_ptr != nullptr) {
+                ai.always_use_itts = boost::json::value_to<bool>(*always_use_itts_value_ptr);
+            }
+
+            const boost::json::value * anger_affects_response_value_ptr = ai_object.if_contains("anger_affects_response");
+            if (anger_affects_response_value_ptr != nullptr) {
+                ai.anger_affects_response = boost::json::value_to<double>(*anger_affects_response_value_ptr);
+            }
+
+            const boost::json::value * arrest_energy_zero_value_ptr = ai_object.if_contains("arrest_energy_zero");
+            if (arrest_energy_zero_value_ptr != nullptr) {
+                ai.arrest_energy_zero = boost::json::value_to<bool>(*arrest_energy_zero_value_ptr);
+            }
+
+            const boost::json::value * assist_friend_in_need_value_ptr = ai_object.if_contains("assist_friend_in_need");
+            if (assist_friend_in_need_value_ptr != nullptr) {
+                ai.assist_friend_in_need = boost::json::value_to<bool>(*assist_friend_in_need_value_ptr);
+            }
+
+            const boost::json::value * attacker_switch_time_value_ptr = ai_object.if_contains("attacker_switch_time");
+            if (attacker_switch_time_value_ptr != nullptr) {
+                ai.attacker_switch_time = boost::json::value_to<double>(*attacker_switch_time_value_ptr);
+            }
+
+            const boost::json::value * auto_dock_value_ptr = ai_object.if_contains("auto_dock");
+            if (auto_dock_value_ptr != nullptr) {
+                ai.auto_dock = boost::json::value_to<bool>(*auto_dock_value_ptr);
+            }
+
+            const boost::json::value * can_dock_to_enemy_base_value_ptr = ai_object.if_contains("can_dock_to_enemy_base");
+            if (can_dock_to_enemy_base_value_ptr != nullptr) {
+                ai.can_dock_to_enemy_base = boost::json::value_to<bool>(*can_dock_to_enemy_base_value_ptr);
+            }
+
+            const boost::json::value * capped_faction_rating_value_ptr = ai_object.if_contains("capped_faction_rating");
+            if (capped_faction_rating_value_ptr != nullptr) {
+                ai.capped_faction_rating = boost::json::value_to<bool>(*capped_faction_rating_value_ptr);
+            }
+
+            const boost::json::value * choose_destination_script_value_ptr = ai_object.if_contains("choose_destination_script");
+            if (choose_destination_script_value_ptr != nullptr) {
+                ai.choose_destination_script = boost::json::value_to<std::string>(*choose_destination_script_value_ptr);
+            }
+
+            const boost::json::value * comm_initiate_time_value_ptr = ai_object.if_contains("comm_initiate_time");
+            if (comm_initiate_time_value_ptr != nullptr) {
+                ai.comm_initiate_time = boost::json::value_to<double>(*comm_initiate_time_value_ptr);
+            }
+
+            const boost::json::value * comm_response_time_value_ptr = ai_object.if_contains("comm_response_time");
+            if (comm_response_time_value_ptr != nullptr) {
+                ai.comm_response_time = boost::json::value_to<double>(*comm_response_time_value_ptr);
+            }
+
+            const boost::json::value * comm_to_player_percent_value_ptr = ai_object.if_contains("comm_to_player_percent");
+            if (comm_to_player_percent_value_ptr != nullptr) {
+                ai.comm_to_player_percent = boost::json::value_to<double>(*comm_to_player_percent_value_ptr);
+            }
+
+            const boost::json::value * comm_to_target_percent_value_ptr = ai_object.if_contains("comm_to_target_percent");
+            if (comm_to_target_percent_value_ptr != nullptr) {
+                ai.comm_to_target_percent = boost::json::value_to<double>(*comm_to_target_percent_value_ptr);
+            }
+
+            const boost::json::value * contraband_initiate_time_value_ptr = ai_object.if_contains("contraband_initiate_time");
+            if (contraband_initiate_time_value_ptr != nullptr) {
+                ai.contraband_initiate_time = boost::json::value_to<double>(*contraband_initiate_time_value_ptr);
+            }
+
+            const boost::json::value * contraband_madness_value_ptr = ai_object.if_contains("contraband_madness");
+            if (contraband_madness_value_ptr != nullptr) {
+                ai.contraband_madness = boost::json::value_to<int>(*contraband_madness_value_ptr);
+            }
+
+            const boost::json::value * contraband_to_player_percent_value_ptr = ai_object.if_contains("contraband_to_player_percent");
+            if (contraband_to_player_percent_value_ptr != nullptr) {
+                ai.contraband_to_player_percent = boost::json::value_to<double>(*contraband_to_player_percent_value_ptr);
+            }
+
+            const boost::json::value * contraband_to_target_percent_value_ptr = ai_object.if_contains("contraband_to_target_percent");
+            if (contraband_to_target_percent_value_ptr != nullptr) {
+                ai.contraband_to_target_percent = boost::json::value_to<double>(*contraband_to_target_percent_value_ptr);
+            }
+
+            const boost::json::value * contraband_update_time_value_ptr = ai_object.if_contains("contraband_update_time");
+            if (contraband_update_time_value_ptr != nullptr) {
+                ai.contraband_update_time = boost::json::value_to<double>(*contraband_update_time_value_ptr);
+            }
+
+            const boost::json::value * debug_level_value_ptr = ai_object.if_contains("debug_level");
+            if (debug_level_value_ptr != nullptr) {
+                ai.debug_level = boost::json::value_to<int>(*debug_level_value_ptr);
+            }
+
+            const boost::json::value * default_rank_value_ptr = ai_object.if_contains("default_rank");
+            if (default_rank_value_ptr != nullptr) {
+                ai.default_rank = boost::json::value_to<double>(*default_rank_value_ptr);
+            }
+
+            const boost::json::value * dock_on_load_value_ptr = ai_object.if_contains("dock_on_load");
+            if (dock_on_load_value_ptr != nullptr) {
+                ai.dock_on_load = boost::json::value_to<bool>(*dock_on_load_value_ptr);
+            }
+
+            const boost::json::value * dock_to_area_value_ptr = ai_object.if_contains("dock_to_area");
+            if (dock_to_area_value_ptr != nullptr) {
+                ai.dock_to_area = boost::json::value_to<bool>(*dock_to_area_value_ptr);
+            }
+
+            const boost::json::value * docked_to_script_value_ptr = ai_object.if_contains("docked_to_script");
+            if (docked_to_script_value_ptr != nullptr) {
+                ai.docked_to_script = boost::json::value_to<std::string>(*docked_to_script_value_ptr);
+            }
+
+            const boost::json::value * ease_to_anger_value_ptr = ai_object.if_contains("ease_to_anger");
+            if (ease_to_anger_value_ptr != nullptr) {
+                ai.ease_to_anger = boost::json::value_to<double>(*ease_to_anger_value_ptr);
+            }
+
+            const boost::json::value * ease_to_appease_value_ptr = ai_object.if_contains("ease_to_appease");
+            if (ease_to_appease_value_ptr != nullptr) {
+                ai.ease_to_appease = boost::json::value_to<double>(*ease_to_appease_value_ptr);
+            }
+
+            const boost::json::value * eject_attacks_value_ptr = ai_object.if_contains("eject_attacks");
+            if (eject_attacks_value_ptr != nullptr) {
+                ai.eject_attacks = boost::json::value_to<bool>(*eject_attacks_value_ptr);
+            }
+
+            const boost::json::value * evasion_angle_value_ptr = ai_object.if_contains("evasion_angle");
+            if (evasion_angle_value_ptr != nullptr) {
+                ai.evasion_angle = boost::json::value_to<double>(*evasion_angle_value_ptr);
+            }
+
+            const boost::json::value * faction_contraband_relation_adjust_value_ptr = ai_object.if_contains("faction_contraband_relation_adjust");
+            if (faction_contraband_relation_adjust_value_ptr != nullptr) {
+                ai.faction_contraband_relation_adjust = boost::json::value_to<double>(*faction_contraband_relation_adjust_value_ptr);
+            }
+
+            const boost::json::value * fg_nav_select_time_value_ptr = ai_object.if_contains("fg_nav_select_time");
+            if (fg_nav_select_time_value_ptr != nullptr) {
+                ai.fg_nav_select_time = boost::json::value_to<double>(*fg_nav_select_time_value_ptr);
+            }
+
+            const boost::json::value * force_jump_after_time_value_ptr = ai_object.if_contains("force_jump_after_time");
+            if (force_jump_after_time_value_ptr != nullptr) {
+                ai.force_jump_after_time = boost::json::value_to<double>(*force_jump_after_time_value_ptr);
+            }
+
+            const boost::json::value * friend_factor_value_ptr = ai_object.if_contains("friend_factor");
+            if (friend_factor_value_ptr != nullptr) {
+                ai.friend_factor = boost::json::value_to<double>(*friend_factor_value_ptr);
+            }
+
+            const boost::json::value * gun_range_percent_ok_value_ptr = ai_object.if_contains("gun_range_percent_ok");
+            if (gun_range_percent_ok_value_ptr != nullptr) {
+                ai.gun_range_percent_ok = boost::json::value_to<double>(*gun_range_percent_ok_value_ptr);
+            }
+
+            const boost::json::value * hostile_lurk_value_ptr = ai_object.if_contains("hostile_lurk");
+            if (hostile_lurk_value_ptr != nullptr) {
+                ai.hostile_lurk = boost::json::value_to<bool>(*hostile_lurk_value_ptr);
+            }
+
+            const boost::json::value * how_far_to_stop_navigating_value_ptr = ai_object.if_contains("how_far_to_stop_navigating");
+            if (how_far_to_stop_navigating_value_ptr != nullptr) {
+                ai.how_far_to_stop_navigating = boost::json::value_to<double>(*how_far_to_stop_navigating_value_ptr);
+            }
+
+            const boost::json::value * hull_damage_anger_value_ptr = ai_object.if_contains("hull_damage_anger");
+            if (hull_damage_anger_value_ptr != nullptr) {
+                ai.hull_damage_anger = boost::json::value_to<int>(*hull_damage_anger_value_ptr);
+            }
+
+            const boost::json::value * hull_percent_for_comm_value_ptr = ai_object.if_contains("hull_percent_for_comm");
+            if (hull_percent_for_comm_value_ptr != nullptr) {
+                ai.hull_percent_for_comm = boost::json::value_to<double>(*hull_percent_for_comm_value_ptr);
+            }
+
+            const boost::json::value * independent_turrets_value_ptr = ai_object.if_contains("independent_turrets");
+            if (independent_turrets_value_ptr != nullptr) {
+                ai.independent_turrets = boost::json::value_to<bool>(*independent_turrets_value_ptr);
+            }
+
+            const boost::json::value * jump_cheat_value_ptr = ai_object.if_contains("jump_cheat");
+            if (jump_cheat_value_ptr != nullptr) {
+                ai.jump_cheat = boost::json::value_to<bool>(*jump_cheat_value_ptr);
+            }
+
+            const boost::json::value * jump_without_energy_value_ptr = ai_object.if_contains("jump_without_energy");
+            if (jump_without_energy_value_ptr != nullptr) {
+                ai.jump_without_energy = boost::json::value_to<bool>(*jump_without_energy_value_ptr);
+            }
+
+            const boost::json::value * kill_factor_value_ptr = ai_object.if_contains("kill_factor");
+            if (kill_factor_value_ptr != nullptr) {
+                ai.kill_factor = boost::json::value_to<double>(*kill_factor_value_ptr);
+            }
+
+            const boost::json::value * loop_around_destination_distance_value_ptr = ai_object.if_contains("loop_around_destination_distance");
+            if (loop_around_destination_distance_value_ptr != nullptr) {
+                ai.loop_around_destination_distance = boost::json::value_to<double>(*loop_around_destination_distance_value_ptr);
+            }
+
+            const boost::json::value * loop_around_destination_lateral_value_ptr = ai_object.if_contains("loop_around_destination_lateral");
+            if (loop_around_destination_lateral_value_ptr != nullptr) {
+                ai.loop_around_destination_lateral = boost::json::value_to<double>(*loop_around_destination_lateral_value_ptr);
+            }
+
+            const boost::json::value * loop_around_destination_vertical_value_ptr = ai_object.if_contains("loop_around_destination_vertical");
+            if (loop_around_destination_vertical_value_ptr != nullptr) {
+                ai.loop_around_destination_vertical = boost::json::value_to<double>(*loop_around_destination_vertical_value_ptr);
+            }
+
+            const boost::json::value * loop_around_distance_value_ptr = ai_object.if_contains("loop_around_distance");
+            if (loop_around_distance_value_ptr != nullptr) {
+                ai.loop_around_distance = boost::json::value_to<double>(*loop_around_distance_value_ptr);
+            }
+
+            const boost::json::value * loop_around_pursuit_velocity_percent_value_ptr = ai_object.if_contains("loop_around_pursuit_velocity_percent");
+            if (loop_around_pursuit_velocity_percent_value_ptr != nullptr) {
+                ai.loop_around_pursuit_velocity_percent = boost::json::value_to<double>(*loop_around_pursuit_velocity_percent_value_ptr);
+            }
+
+            const boost::json::value * lurk_time_value_ptr = ai_object.if_contains("lurk_time");
+            if (lurk_time_value_ptr != nullptr) {
+                ai.lurk_time = boost::json::value_to<double>(*lurk_time_value_ptr);
+            }
+
+            const boost::json::value * lowest_negative_comm_choice_value_ptr = ai_object.if_contains("lowest_negative_comm_choice");
+            if (lowest_negative_comm_choice_value_ptr != nullptr) {
+                ai.lowest_negative_comm_choice = boost::json::value_to<double>(*lowest_negative_comm_choice_value_ptr);
+            }
+
+            const boost::json::value * lowest_positive_comm_choice_value_ptr = ai_object.if_contains("lowest_positive_comm_choice");
+            if (lowest_positive_comm_choice_value_ptr != nullptr) {
+                ai.lowest_positive_comm_choice = boost::json::value_to<double>(*lowest_positive_comm_choice_value_ptr);
+            }
+
+            const boost::json::value * match_velocity_cone_value_ptr = ai_object.if_contains("match_velocity_cone");
+            if (match_velocity_cone_value_ptr != nullptr) {
+                ai.match_velocity_cone = boost::json::value_to<double>(*match_velocity_cone_value_ptr);
+            }
+
+            const boost::json::value * match_velocity_of_pursuant_value_ptr = ai_object.if_contains("match_velocity_of_pursuant");
+            if (match_velocity_of_pursuant_value_ptr != nullptr) {
+                ai.match_velocity_of_pursuant = boost::json::value_to<bool>(*match_velocity_of_pursuant_value_ptr);
+            }
+
+            const boost::json::value * max_allowable_travel_time_value_ptr = ai_object.if_contains("max_allowable_travel_time");
+            if (max_allowable_travel_time_value_ptr != nullptr) {
+                ai.max_allowable_travel_time = boost::json::value_to<double>(*max_allowable_travel_time_value_ptr);
+            }
+
+            const boost::json::value * max_faction_contraband_relation_value_ptr = ai_object.if_contains("max_faction_contraband_relation");
+            if (max_faction_contraband_relation_value_ptr != nullptr) {
+                ai.max_faction_contraband_relation = boost::json::value_to<double>(*max_faction_contraband_relation_value_ptr);
+            }
+
+            const boost::json::value * max_player_attackers_value_ptr = ai_object.if_contains("max_player_attackers");
+            if (max_player_attackers_value_ptr != nullptr) {
+                ai.max_player_attackers = boost::json::value_to<int>(*max_player_attackers_value_ptr);
+            }
+
+            const boost::json::value * min_angular_accel_cheat_value_ptr = ai_object.if_contains("min_angular_accel_cheat");
+            if (min_angular_accel_cheat_value_ptr != nullptr) {
+                ai.min_angular_accel_cheat = boost::json::value_to<double>(*min_angular_accel_cheat_value_ptr);
+            }
+
+            const boost::json::value * min_docking_relationship_value_ptr = ai_object.if_contains("min_docking_relationship");
+            if (min_docking_relationship_value_ptr != nullptr) {
+                ai.min_docking_relationship = boost::json::value_to<double>(*min_docking_relationship_value_ptr);
+            }
+
+            const boost::json::value * min_energy_to_enter_warp_value_ptr = ai_object.if_contains("min_energy_to_enter_warp");
+            if (min_energy_to_enter_warp_value_ptr != nullptr) {
+                ai.min_energy_to_enter_warp = boost::json::value_to<double>(*min_energy_to_enter_warp_value_ptr);
+            }
+
+            const boost::json::value * min_relationship_value_ptr = ai_object.if_contains("min_relationship");
+            if (min_relationship_value_ptr != nullptr) {
+                ai.min_relationship = boost::json::value_to<double>(*min_relationship_value_ptr);
+            }
+
+            const boost::json::value * min_time_to_auto_value_ptr = ai_object.if_contains("min_time_to_auto");
+            if (min_time_to_auto_value_ptr != nullptr) {
+                ai.min_time_to_auto = boost::json::value_to<double>(*min_time_to_auto_value_ptr);
+            }
+
+            const boost::json::value * min_warp_to_try_value_ptr = ai_object.if_contains("min_warp_to_try");
+            if (min_warp_to_try_value_ptr != nullptr) {
+                ai.min_warp_to_try = boost::json::value_to<double>(*min_warp_to_try_value_ptr);
+            }
+
+            const boost::json::value * missile_gun_delay_value_ptr = ai_object.if_contains("missile_gun_delay");
+            if (missile_gun_delay_value_ptr != nullptr) {
+                ai.missile_gun_delay = boost::json::value_to<double>(*missile_gun_delay_value_ptr);
+            }
+
+            const boost::json::value * mood_affects_response_value_ptr = ai_object.if_contains("mood_affects_response");
+            if (mood_affects_response_value_ptr != nullptr) {
+                ai.mood_affects_response = boost::json::value_to<double>(*mood_affects_response_value_ptr);
+            }
+
+            const boost::json::value * mood_swing_level_value_ptr = ai_object.if_contains("mood_swing_level");
+            if (mood_swing_level_value_ptr != nullptr) {
+                ai.mood_swing_level = boost::json::value_to<double>(*mood_swing_level_value_ptr);
+            }
+
+            const boost::json::value * no_turret_ai_value_ptr = ai_object.if_contains("no_turret_ai");
+            if (no_turret_ai_value_ptr != nullptr) {
+                ai.no_turret_ai = boost::json::value_to<bool>(*no_turret_ai_value_ptr);
+            }
+
+            const boost::json::value * num_contraband_scans_per_search_value_ptr = ai_object.if_contains("num_contraband_scans_per_search");
+            if (num_contraband_scans_per_search_value_ptr != nullptr) {
+                ai.num_contraband_scans_per_search = boost::json::value_to<int>(*num_contraband_scans_per_search_value_ptr);
+            }
+
+            const boost::json::value * num_pirates_per_asteroid_field_value_ptr = ai_object.if_contains("num_pirates_per_asteroid_field");
+            if (num_pirates_per_asteroid_field_value_ptr != nullptr) {
+                ai.num_pirates_per_asteroid_field = boost::json::value_to<int>(*num_pirates_per_asteroid_field_value_ptr);
+            }
+
+            const boost::json::value * only_upgrade_speed_reference_value_ptr = ai_object.if_contains("only_upgrade_speed_reference");
+            if (only_upgrade_speed_reference_value_ptr != nullptr) {
+                ai.only_upgrade_speed_reference = boost::json::value_to<bool>(*only_upgrade_speed_reference_value_ptr);
+            }
+
+            const boost::json::value * percentage_speed_change_to_stop_search_value_ptr = ai_object.if_contains("percentage_speed_change_to_stop_search");
+            if (percentage_speed_change_to_stop_search_value_ptr != nullptr) {
+                ai.percentage_speed_change_to_stop_search = boost::json::value_to<double>(*percentage_speed_change_to_stop_search_value_ptr);
+            }
+
+            const boost::json::value * pirate_bonus_for_empty_hold_value_ptr = ai_object.if_contains("pirate_bonus_for_empty_hold");
+            if (pirate_bonus_for_empty_hold_value_ptr != nullptr) {
+                ai.pirate_bonus_for_empty_hold = boost::json::value_to<double>(*pirate_bonus_for_empty_hold_value_ptr);
+            }
+
+            const boost::json::value * pirate_nav_select_time_value_ptr = ai_object.if_contains("pirate_nav_select_time");
+            if (pirate_nav_select_time_value_ptr != nullptr) {
+                ai.pirate_nav_select_time = boost::json::value_to<double>(*pirate_nav_select_time_value_ptr);
+            }
+
+            const boost::json::value * random_response_range_value_ptr = ai_object.if_contains("random_response_range");
+            if (random_response_range_value_ptr != nullptr) {
+                ai.random_response_range = boost::json::value_to<double>(*random_response_range_value_ptr);
+            }
+
+            const boost::json::value * random_spacing_factor_value_ptr = ai_object.if_contains("random_spacing_factor");
+            if (random_spacing_factor_value_ptr != nullptr) {
+                ai.random_spacing_factor = boost::json::value_to<double>(*random_spacing_factor_value_ptr);
+            }
+
+            const boost::json::value * reaction_time_value_ptr = ai_object.if_contains("reaction_time");
+            if (reaction_time_value_ptr != nullptr) {
+                ai.reaction_time = boost::json::value_to<double>(*reaction_time_value_ptr);
+            }
+
+            const boost::json::value * resistance_to_side_movement_value_ptr = ai_object.if_contains("resistance_to_side_movement");
+            if (resistance_to_side_movement_value_ptr != nullptr) {
+                ai.resistance_to_side_movement = boost::json::value_to<bool>(*resistance_to_side_movement_value_ptr);
+            }
+
+            const boost::json::value * resistance_to_side_force_percent_value_ptr = ai_object.if_contains("resistance_to_side_force_percent");
+            if (resistance_to_side_force_percent_value_ptr != nullptr) {
+                ai.resistance_to_side_force_percent = boost::json::value_to<double>(*resistance_to_side_force_percent_value_ptr);
+            }
+
+            const boost::json::value * resistance_to_side_movement_percent_value_ptr = ai_object.if_contains("resistance_to_side_movement_percent");
+            if (resistance_to_side_movement_percent_value_ptr != nullptr) {
+                ai.resistance_to_side_movement_percent = boost::json::value_to<double>(*resistance_to_side_movement_percent_value_ptr);
+            }
+
+            const boost::json::value * roll_order_duration_value_ptr = ai_object.if_contains("roll_order_duration");
+            if (roll_order_duration_value_ptr != nullptr) {
+                ai.roll_order_duration = boost::json::value_to<double>(*roll_order_duration_value_ptr);
+            }
+
+            const boost::json::value * safety_spacing_value_ptr = ai_object.if_contains("safety_spacing");
+            if (safety_spacing_value_ptr != nullptr) {
+                ai.safety_spacing = boost::json::value_to<double>(*safety_spacing_value_ptr);
+            }
+
+            const boost::json::value * shield_damage_anger_value_ptr = ai_object.if_contains("shield_damage_anger");
+            if (shield_damage_anger_value_ptr != nullptr) {
+                ai.shield_damage_anger = boost::json::value_to<int>(*shield_damage_anger_value_ptr);
+            }
+
+            const boost::json::value * slow_diplomacy_for_enemies_value_ptr = ai_object.if_contains("slow_diplomacy_for_enemies");
+            if (slow_diplomacy_for_enemies_value_ptr != nullptr) {
+                ai.slow_diplomacy_for_enemies = boost::json::value_to<double>(*slow_diplomacy_for_enemies_value_ptr);
+            }
+
+            const boost::json::value * start_docked_to_value_ptr = ai_object.if_contains("start_docked_to");
+            if (start_docked_to_value_ptr != nullptr) {
+                ai.start_docked_to = boost::json::value_to<std::string>(*start_docked_to_value_ptr);
+            }
+
+            const boost::json::value * static_relationship_affects_response_value_ptr = ai_object.if_contains("static_relationship_affects_response");
+            if (static_relationship_affects_response_value_ptr != nullptr) {
+                ai.static_relationship_affects_response = boost::json::value_to<double>(*static_relationship_affects_response_value_ptr);
+            }
+
+            const boost::json::value * switch_nonowned_units_value_ptr = ai_object.if_contains("switch_nonowned_units");
+            if (switch_nonowned_units_value_ptr != nullptr) {
+                ai.switch_nonowned_units = boost::json::value_to<bool>(*switch_nonowned_units_value_ptr);
+            }
+
+            const boost::json::value * talk_relation_factor_value_ptr = ai_object.if_contains("talk_relation_factor");
+            if (talk_relation_factor_value_ptr != nullptr) {
+                ai.talk_relation_factor = boost::json::value_to<double>(*talk_relation_factor_value_ptr);
+            }
+
+            const boost::json::value * talking_faster_helps_value_ptr = ai_object.if_contains("talking_faster_helps");
+            if (talking_faster_helps_value_ptr != nullptr) {
+                ai.talking_faster_helps = boost::json::value_to<bool>(*talking_faster_helps_value_ptr);
+            }
+
+            const boost::json::value * too_close_for_warp_in_formation_value_ptr = ai_object.if_contains("too_close_for_warp_in_formation");
+            if (too_close_for_warp_in_formation_value_ptr != nullptr) {
+                ai.too_close_for_warp_in_formation = boost::json::value_to<double>(*too_close_for_warp_in_formation_value_ptr);
+            }
+
+            const boost::json::value * too_close_for_warp_tactic_value_ptr = ai_object.if_contains("too_close_for_warp_tactic");
+            if (too_close_for_warp_tactic_value_ptr != nullptr) {
+                ai.too_close_for_warp_tactic = boost::json::value_to<double>(*too_close_for_warp_tactic_value_ptr);
+            }
+
+            const boost::json::value * turn_cheat_value_ptr = ai_object.if_contains("turn_cheat");
+            if (turn_cheat_value_ptr != nullptr) {
+                ai.turn_cheat = boost::json::value_to<bool>(*turn_cheat_value_ptr);
+            }
+
+            const boost::json::value * unknown_relation_enemy_value_ptr = ai_object.if_contains("unknown_relation_enemy");
+            if (unknown_relation_enemy_value_ptr != nullptr) {
+                ai.unknown_relation_enemy = boost::json::value_to<double>(*unknown_relation_enemy_value_ptr);
+            }
+
+            const boost::json::value * unknown_relation_hit_cost_value_ptr = ai_object.if_contains("unknown_relation_hit_cost");
+            if (unknown_relation_hit_cost_value_ptr != nullptr) {
+                ai.unknown_relation_hit_cost = boost::json::value_to<double>(*unknown_relation_hit_cost_value_ptr);
+            }
+
+            const boost::json::value * use_afterburner_value_ptr = ai_object.if_contains("use_afterburner");
+            if (use_afterburner_value_ptr != nullptr) {
+                ai.use_afterburner = boost::json::value_to<bool>(*use_afterburner_value_ptr);
+            }
+
+            const boost::json::value * use_afterburner_to_follow_value_ptr = ai_object.if_contains("use_afterburner_to_follow");
+            if (use_afterburner_to_follow_value_ptr != nullptr) {
+                ai.use_afterburner_to_follow = boost::json::value_to<bool>(*use_afterburner_to_follow_value_ptr);
+            }
+
+            const boost::json::value * use_afterburner_to_run_value_ptr = ai_object.if_contains("use_afterburner_to_run");
+            if (use_afterburner_to_run_value_ptr != nullptr) {
+                ai.use_afterburner_to_run = boost::json::value_to<bool>(*use_afterburner_to_run_value_ptr);
+            }
+
+            const boost::json::value * warp_cone_value_ptr = ai_object.if_contains("warp_cone");
+            if (warp_cone_value_ptr != nullptr) {
+                ai.warp_cone = boost::json::value_to<double>(*warp_cone_value_ptr);
+            }
+
+            const boost::json::value * warp_to_enemies_value_ptr = ai_object.if_contains("warp_to_enemies");
+            if (warp_to_enemies_value_ptr != nullptr) {
+                ai.warp_to_enemies = boost::json::value_to<bool>(*warp_to_enemies_value_ptr);
+            }
+
+            const boost::json::value * warp_to_no_enemies_value_ptr = ai_object.if_contains("warp_to_no_enemies");
+            if (warp_to_no_enemies_value_ptr != nullptr) {
+                ai.warp_to_no_enemies = boost::json::value_to<bool>(*warp_to_no_enemies_value_ptr);
+            }
+
+            const boost::json::value * warp_to_wingmen_value_ptr = ai_object.if_contains("warp_to_wingmen");
+            if (warp_to_wingmen_value_ptr != nullptr) {
+                ai.warp_to_wingmen = boost::json::value_to<bool>(*warp_to_wingmen_value_ptr);
+            }
+
+        const boost::json::value * firing_value_ptr = ai_object.if_contains("firing");
+        if (firing_value_ptr != nullptr) {
+            boost::json::object firing_object = firing_value_ptr->get_object();
+            const boost::json::value * aggressivity_value_ptr = firing_object.if_contains("aggressivity");
+            if (aggressivity_value_ptr != nullptr) {
+                ai.firing.aggressivity = boost::json::value_to<double>(*aggressivity_value_ptr);
+            }
+
+            const boost::json::value * in_weapon_range_value_ptr = firing_object.if_contains("in_weapon_range");
+            if (in_weapon_range_value_ptr != nullptr) {
+                ai.firing.in_weapon_range = boost::json::value_to<double>(*in_weapon_range_value_ptr);
+            }
+
+            const boost::json::value * missile_probability_value_ptr = firing_object.if_contains("missile_probability");
+            if (missile_probability_value_ptr != nullptr) {
+                ai.firing.missile_probability = boost::json::value_to<double>(*missile_probability_value_ptr);
+            }
+
+            const boost::json::value * reaction_time_value_ptr = firing_object.if_contains("reaction_time");
+            if (reaction_time_value_ptr != nullptr) {
+                ai.firing.reaction_time = boost::json::value_to<double>(*reaction_time_value_ptr);
+            }
+
+            const boost::json::value * turret_dot_cutoff_value_ptr = firing_object.if_contains("turret_dot_cutoff");
+            if (turret_dot_cutoff_value_ptr != nullptr) {
+                ai.firing.turret_dot_cutoff = boost::json::value_to<double>(*turret_dot_cutoff_value_ptr);
+            }
+
+            const boost::json::value * turret_missile_probability_value_ptr = firing_object.if_contains("turret_missile_probability");
+            if (turret_missile_probability_value_ptr != nullptr) {
+                ai.firing.turret_missile_probability = boost::json::value_to<double>(*turret_missile_probability_value_ptr);
+            }
+
+        const boost::json::value * maximum_firing_angle_value_ptr = firing_object.if_contains("maximum_firing_angle");
+        if (maximum_firing_angle_value_ptr != nullptr) {
+            boost::json::object maximum_firing_angle_object = maximum_firing_angle_value_ptr->get_object();
+            const boost::json::value * minagg_value_ptr = maximum_firing_angle_object.if_contains("minagg");
+            if (minagg_value_ptr != nullptr) {
+                ai.firing.maximum_firing_angle.minagg = boost::json::value_to<int>(*minagg_value_ptr);
+            }
+
+            const boost::json::value * maxagg_value_ptr = maximum_firing_angle_object.if_contains("maxagg");
+            if (maxagg_value_ptr != nullptr) {
+                ai.firing.maximum_firing_angle.maxagg = boost::json::value_to<int>(*maxagg_value_ptr);
+            }
+
+        }
+
+
+        }
+
+
+        const boost::json::value * targeting_value_ptr = ai_object.if_contains("targeting");
+        if (targeting_value_ptr != nullptr) {
+            boost::json::object targeting_object = targeting_value_ptr->get_object();
+            const boost::json::value * assign_point_def_value_ptr = targeting_object.if_contains("assign_point_def");
+            if (assign_point_def_value_ptr != nullptr) {
+                ai.targeting.assign_point_def = boost::json::value_to<bool>(*assign_point_def_value_ptr);
+            }
+
+            const boost::json::value * escort_distance_value_ptr = targeting_object.if_contains("escort_distance");
+            if (escort_distance_value_ptr != nullptr) {
+                ai.targeting.escort_distance = boost::json::value_to<double>(*escort_distance_value_ptr);
+            }
+
+            const boost::json::value * mass_inertial_priority_cutoff_value_ptr = targeting_object.if_contains("mass_inertial_priority_cutoff");
+            if (mass_inertial_priority_cutoff_value_ptr != nullptr) {
+                ai.targeting.mass_inertial_priority_cutoff = boost::json::value_to<double>(*mass_inertial_priority_cutoff_value_ptr);
+            }
+
+            const boost::json::value * mass_inertial_priority_scale_value_ptr = targeting_object.if_contains("mass_inertial_priority_scale");
+            if (mass_inertial_priority_scale_value_ptr != nullptr) {
+                ai.targeting.mass_inertial_priority_scale = boost::json::value_to<double>(*mass_inertial_priority_scale_value_ptr);
+            }
+
+            const boost::json::value * max_number_of_pollers_per_frame_value_ptr = targeting_object.if_contains("max_number_of_pollers_per_frame");
+            if (max_number_of_pollers_per_frame_value_ptr != nullptr) {
+                ai.targeting.max_number_of_pollers_per_frame = boost::json::value_to<int>(*max_number_of_pollers_per_frame_value_ptr);
+            }
+
+            const boost::json::value * min_number_of_pollers_per_frame_value_ptr = targeting_object.if_contains("min_number_of_pollers_per_frame");
+            if (min_number_of_pollers_per_frame_value_ptr != nullptr) {
+                ai.targeting.min_number_of_pollers_per_frame = boost::json::value_to<int>(*min_number_of_pollers_per_frame_value_ptr);
+            }
+
+            const boost::json::value * min_rechoose_interval_value_ptr = targeting_object.if_contains("min_rechoose_interval");
+            if (min_rechoose_interval_value_ptr != nullptr) {
+                ai.targeting.min_rechoose_interval = boost::json::value_to<int>(*min_rechoose_interval_value_ptr);
+            }
+
+            const boost::json::value * min_time_to_switch_targets_value_ptr = targeting_object.if_contains("min_time_to_switch_targets");
+            if (min_time_to_switch_targets_value_ptr != nullptr) {
+                ai.targeting.min_time_to_switch_targets = boost::json::value_to<double>(*min_time_to_switch_targets_value_ptr);
+            }
+
+            const boost::json::value * min_null_time_to_switch_targets_value_ptr = targeting_object.if_contains("min_null_time_to_switch_targets");
+            if (min_null_time_to_switch_targets_value_ptr != nullptr) {
+                ai.targeting.min_null_time_to_switch_targets = boost::json::value_to<double>(*min_null_time_to_switch_targets_value_ptr);
+            }
+
+            const boost::json::value * mountless_gun_range_value_ptr = targeting_object.if_contains("mountless_gun_range");
+            if (mountless_gun_range_value_ptr != nullptr) {
+                ai.targeting.mountless_gun_range = boost::json::value_to<double>(*mountless_gun_range_value_ptr);
+            }
+
+            const boost::json::value * obedience_value_ptr = targeting_object.if_contains("obedience");
+            if (obedience_value_ptr != nullptr) {
+                ai.targeting.obedience = boost::json::value_to<double>(*obedience_value_ptr);
+            }
+
+            const boost::json::value * search_extra_radius_value_ptr = targeting_object.if_contains("search_extra_radius");
+            if (search_extra_radius_value_ptr != nullptr) {
+                ai.targeting.search_extra_radius = boost::json::value_to<double>(*search_extra_radius_value_ptr);
+            }
+
+            const boost::json::value * search_max_candidates_value_ptr = targeting_object.if_contains("search_max_candidates");
+            if (search_max_candidates_value_ptr != nullptr) {
+                ai.targeting.search_max_candidates = boost::json::value_to<int>(*search_max_candidates_value_ptr);
+            }
+
+            const boost::json::value * search_max_role_priority_value_ptr = targeting_object.if_contains("search_max_role_priority");
+            if (search_max_role_priority_value_ptr != nullptr) {
+                ai.targeting.search_max_role_priority = boost::json::value_to<int>(*search_max_role_priority_value_ptr);
+            }
+
+            const boost::json::value * threat_weight_value_ptr = targeting_object.if_contains("threat_weight");
+            if (threat_weight_value_ptr != nullptr) {
+                ai.targeting.threat_weight = boost::json::value_to<double>(*threat_weight_value_ptr);
+            }
+
+            const boost::json::value * time_to_recommand_wing_value_ptr = targeting_object.if_contains("time_to_recommand_wing");
+            if (time_to_recommand_wing_value_ptr != nullptr) {
+                ai.targeting.time_to_recommand_wing = boost::json::value_to<double>(*time_to_recommand_wing_value_ptr);
+            }
+
+            const boost::json::value * time_until_switch_value_ptr = targeting_object.if_contains("time_until_switch");
+            if (time_until_switch_value_ptr != nullptr) {
+                ai.targeting.time_until_switch = boost::json::value_to<double>(*time_until_switch_value_ptr);
+            }
+
+            const boost::json::value * turn_leader_distance_value_ptr = targeting_object.if_contains("turn_leader_distance");
+            if (turn_leader_distance_value_ptr != nullptr) {
+                ai.targeting.turn_leader_distance = boost::json::value_to<double>(*turn_leader_distance_value_ptr);
+            }
+
+        }
+
+
+        }
+
+
+        const boost::json::value * audio_value_ptr = root_object.if_contains("audio");
+        if (audio_value_ptr != nullptr) {
+            boost::json::object audio_object = audio_value_ptr->get_object();
+            const boost::json::value * afterburner_gain_value_ptr = audio_object.if_contains("afterburner_gain");
+            if (afterburner_gain_value_ptr != nullptr) {
+                audio.afterburner_gain = boost::json::value_to<double>(*afterburner_gain_value_ptr);
+            }
+
+            const boost::json::value * ai_high_quality_weapon_value_ptr = audio_object.if_contains("ai_high_quality_weapon");
+            if (ai_high_quality_weapon_value_ptr != nullptr) {
+                audio.ai_high_quality_weapon = boost::json::value_to<bool>(*ai_high_quality_weapon_value_ptr);
+            }
+
+            const boost::json::value * ai_sound_value_ptr = audio_object.if_contains("ai_sound");
+            if (ai_sound_value_ptr != nullptr) {
+                audio.ai_sound = boost::json::value_to<bool>(*ai_sound_value_ptr);
+            }
+
+            const boost::json::value * audio_max_distance_value_ptr = audio_object.if_contains("audio_max_distance");
+            if (audio_max_distance_value_ptr != nullptr) {
+                audio.audio_max_distance = boost::json::value_to<double>(*audio_max_distance_value_ptr);
+            }
+
+            const boost::json::value * audio_ref_distance_value_ptr = audio_object.if_contains("audio_ref_distance");
+            if (audio_ref_distance_value_ptr != nullptr) {
+                audio.audio_ref_distance = boost::json::value_to<double>(*audio_ref_distance_value_ptr);
+            }
+
+            const boost::json::value * automatic_docking_zone_value_ptr = audio_object.if_contains("automatic_docking_zone");
+            if (automatic_docking_zone_value_ptr != nullptr) {
+                audio.automatic_docking_zone = boost::json::value_to<std::string>(*automatic_docking_zone_value_ptr);
+            }
+
+            const boost::json::value * battle_playlist_value_ptr = audio_object.if_contains("battle_playlist");
+            if (battle_playlist_value_ptr != nullptr) {
+                audio.battle_playlist = boost::json::value_to<std::string>(*battle_playlist_value_ptr);
+            }
+
+            const boost::json::value * buzzing_distance_value_ptr = audio_object.if_contains("buzzing_distance");
+            if (buzzing_distance_value_ptr != nullptr) {
+                audio.buzzing_distance = boost::json::value_to<double>(*buzzing_distance_value_ptr);
+            }
+
+            const boost::json::value * buzzing_needs_afterburner_value_ptr = audio_object.if_contains("buzzing_needs_afterburner");
+            if (buzzing_needs_afterburner_value_ptr != nullptr) {
+                audio.buzzing_needs_afterburner = boost::json::value_to<bool>(*buzzing_needs_afterburner_value_ptr);
+            }
+
+            const boost::json::value * buzzing_time_value_ptr = audio_object.if_contains("buzzing_time");
+            if (buzzing_time_value_ptr != nullptr) {
+                audio.buzzing_time = boost::json::value_to<double>(*buzzing_time_value_ptr);
+            }
+
+            const boost::json::value * cache_songs_value_ptr = audio_object.if_contains("cache_songs");
+            if (cache_songs_value_ptr != nullptr) {
+                audio.cache_songs = boost::json::value_to<std::string>(*cache_songs_value_ptr);
+            }
+
+            const boost::json::value * cross_fade_music_value_ptr = audio_object.if_contains("cross_fade_music");
+            if (cross_fade_music_value_ptr != nullptr) {
+                audio.cross_fade_music = boost::json::value_to<bool>(*cross_fade_music_value_ptr);
+            }
+
+            const boost::json::value * dj_script_value_ptr = audio_object.if_contains("dj_script");
+            if (dj_script_value_ptr != nullptr) {
+                audio.dj_script = boost::json::value_to<std::string>(*dj_script_value_ptr);
+            }
+
+            const boost::json::value * doppler_value_ptr = audio_object.if_contains("doppler");
+            if (doppler_value_ptr != nullptr) {
+                audio.doppler = boost::json::value_to<bool>(*doppler_value_ptr);
+            }
+
+            const boost::json::value * doppler_scale_value_ptr = audio_object.if_contains("doppler_scale");
+            if (doppler_scale_value_ptr != nullptr) {
+                audio.doppler_scale = boost::json::value_to<double>(*doppler_scale_value_ptr);
+            }
+
+            const boost::json::value * every_other_mount_value_ptr = audio_object.if_contains("every_other_mount");
+            if (every_other_mount_value_ptr != nullptr) {
+                audio.every_other_mount = boost::json::value_to<bool>(*every_other_mount_value_ptr);
+            }
+
+            const boost::json::value * explosion_closeness_value_ptr = audio_object.if_contains("explosion_closeness");
+            if (explosion_closeness_value_ptr != nullptr) {
+                audio.explosion_closeness = boost::json::value_to<double>(*explosion_closeness_value_ptr);
+            }
+
+            const boost::json::value * exterior_weapon_gain_value_ptr = audio_object.if_contains("exterior_weapon_gain");
+            if (exterior_weapon_gain_value_ptr != nullptr) {
+                audio.exterior_weapon_gain = boost::json::value_to<double>(*exterior_weapon_gain_value_ptr);
+            }
+
+            const boost::json::value * frequency_value_ptr = audio_object.if_contains("frequency");
+            if (frequency_value_ptr != nullptr) {
+                audio.frequency = boost::json::value_to<int>(*frequency_value_ptr);
+            }
+
+            const boost::json::value * high_quality_weapon_value_ptr = audio_object.if_contains("high_quality_weapon");
+            if (high_quality_weapon_value_ptr != nullptr) {
+                audio.high_quality_weapon = boost::json::value_to<bool>(*high_quality_weapon_value_ptr);
+            }
+
+            const boost::json::value * loading_sound_value_ptr = audio_object.if_contains("loading_sound");
+            if (loading_sound_value_ptr != nullptr) {
+                audio.loading_sound = boost::json::value_to<std::string>(*loading_sound_value_ptr);
+            }
+
+            const boost::json::value * loss_playlist_value_ptr = audio_object.if_contains("loss_playlist");
+            if (loss_playlist_value_ptr != nullptr) {
+                audio.loss_playlist = boost::json::value_to<std::string>(*loss_playlist_value_ptr);
+            }
+
+            const boost::json::value * loss_relationship_value_ptr = audio_object.if_contains("loss_relationship");
+            if (loss_relationship_value_ptr != nullptr) {
+                audio.loss_relationship = boost::json::value_to<double>(*loss_relationship_value_ptr);
+            }
+
+            const boost::json::value * max_single_sounds_value_ptr = audio_object.if_contains("max_single_sounds");
+            if (max_single_sounds_value_ptr != nullptr) {
+                audio.max_single_sounds = boost::json::value_to<int>(*max_single_sounds_value_ptr);
+            }
+
+            const boost::json::value * max_total_sounds_value_ptr = audio_object.if_contains("max_total_sounds");
+            if (max_total_sounds_value_ptr != nullptr) {
+                audio.max_total_sounds = boost::json::value_to<int>(*max_total_sounds_value_ptr);
+            }
+
+            const boost::json::value * max_range_to_hear_weapon_fire_value_ptr = audio_object.if_contains("max_range_to_hear_weapon_fire");
+            if (max_range_to_hear_weapon_fire_value_ptr != nullptr) {
+                audio.max_range_to_hear_weapon_fire = boost::json::value_to<double>(*max_range_to_hear_weapon_fire_value_ptr);
+            }
+
+            const boost::json::value * min_weapon_sound_refire_value_ptr = audio_object.if_contains("min_weapon_sound_refire");
+            if (min_weapon_sound_refire_value_ptr != nullptr) {
+                audio.min_weapon_sound_refire = boost::json::value_to<double>(*min_weapon_sound_refire_value_ptr);
+            }
+
+            const boost::json::value * mission_victory_song_value_ptr = audio_object.if_contains("mission_victory_song");
+            if (mission_victory_song_value_ptr != nullptr) {
+                audio.mission_victory_song = boost::json::value_to<std::string>(*mission_victory_song_value_ptr);
+            }
+
+            const boost::json::value * music_value_ptr = audio_object.if_contains("music");
+            if (music_value_ptr != nullptr) {
+                audio.music = boost::json::value_to<bool>(*music_value_ptr);
+            }
+
+            const boost::json::value * music_layers_value_ptr = audio_object.if_contains("music_layers");
+            if (music_layers_value_ptr != nullptr) {
+                audio.music_layers = boost::json::value_to<int>(*music_layers_value_ptr);
+            }
+
+            const boost::json::value * music_muting_fade_in_value_ptr = audio_object.if_contains("music_muting_fade_in");
+            if (music_muting_fade_in_value_ptr != nullptr) {
+                audio.music_muting_fade_in = boost::json::value_to<double>(*music_muting_fade_in_value_ptr);
+            }
+
+            const boost::json::value * music_muting_fade_out_value_ptr = audio_object.if_contains("music_muting_fade_out");
+            if (music_muting_fade_out_value_ptr != nullptr) {
+                audio.music_muting_fade_out = boost::json::value_to<double>(*music_muting_fade_out_value_ptr);
+            }
+
+            const boost::json::value * music_volume_value_ptr = audio_object.if_contains("music_volume");
+            if (music_volume_value_ptr != nullptr) {
+                audio.music_volume = boost::json::value_to<double>(*music_volume_value_ptr);
+            }
+
+            const boost::json::value * music_volume_down_latency_value_ptr = audio_object.if_contains("music_volume_down_latency");
+            if (music_volume_down_latency_value_ptr != nullptr) {
+                audio.music_volume_down_latency = boost::json::value_to<double>(*music_volume_down_latency_value_ptr);
+            }
+
+            const boost::json::value * music_volume_up_latency_value_ptr = audio_object.if_contains("music_volume_up_latency");
+            if (music_volume_up_latency_value_ptr != nullptr) {
+                audio.music_volume_up_latency = boost::json::value_to<double>(*music_volume_up_latency_value_ptr);
+            }
+
+            const boost::json::value * news_song_value_ptr = audio_object.if_contains("news_song");
+            if (news_song_value_ptr != nullptr) {
+                audio.news_song = boost::json::value_to<std::string>(*news_song_value_ptr);
+            }
+
+            const boost::json::value * panic_playlist_value_ptr = audio_object.if_contains("panic_playlist");
+            if (panic_playlist_value_ptr != nullptr) {
+                audio.panic_playlist = boost::json::value_to<std::string>(*panic_playlist_value_ptr);
+            }
+
+            const boost::json::value * peace_playlist_value_ptr = audio_object.if_contains("peace_playlist");
+            if (peace_playlist_value_ptr != nullptr) {
+                audio.peace_playlist = boost::json::value_to<std::string>(*peace_playlist_value_ptr);
+            }
+
+            const boost::json::value * positional_value_ptr = audio_object.if_contains("positional");
+            if (positional_value_ptr != nullptr) {
+                audio.positional = boost::json::value_to<bool>(*positional_value_ptr);
+            }
+
+            const boost::json::value * shuffle_songs_value_ptr = audio_object.if_contains("shuffle_songs");
+            if (shuffle_songs_value_ptr != nullptr) {
+                audio.shuffle_songs = boost::json::value_to<bool>(*shuffle_songs_value_ptr);
+            }
+
+            const boost::json::value * sound_value_ptr = audio_object.if_contains("sound");
+            if (sound_value_ptr != nullptr) {
+                audio.sound = boost::json::value_to<bool>(*sound_value_ptr);
+            }
+
+            const boost::json::value * sound_gain_value_ptr = audio_object.if_contains("sound_gain");
+            if (sound_gain_value_ptr != nullptr) {
+                audio.sound_gain = boost::json::value_to<double>(*sound_gain_value_ptr);
+            }
+
+            const boost::json::value * thread_time_value_ptr = audio_object.if_contains("thread_time");
+            if (thread_time_value_ptr != nullptr) {
+                audio.thread_time = boost::json::value_to<int>(*thread_time_value_ptr);
+            }
+
+            const boost::json::value * time_between_music_value_ptr = audio_object.if_contains("time_between_music");
+            if (time_between_music_value_ptr != nullptr) {
+                audio.time_between_music = boost::json::value_to<double>(*time_between_music_value_ptr);
+            }
+
+            const boost::json::value * victory_playlist_value_ptr = audio_object.if_contains("victory_playlist");
+            if (victory_playlist_value_ptr != nullptr) {
+                audio.victory_playlist = boost::json::value_to<std::string>(*victory_playlist_value_ptr);
+            }
+
+            const boost::json::value * victory_relationship_value_ptr = audio_object.if_contains("victory_relationship");
+            if (victory_relationship_value_ptr != nullptr) {
+                audio.victory_relationship = boost::json::value_to<double>(*victory_relationship_value_ptr);
+            }
+
+            const boost::json::value * volume_value_ptr = audio_object.if_contains("volume");
+            if (volume_value_ptr != nullptr) {
+                audio.volume = boost::json::value_to<double>(*volume_value_ptr);
+            }
+
+            const boost::json::value * weapon_gain_value_ptr = audio_object.if_contains("weapon_gain");
+            if (weapon_gain_value_ptr != nullptr) {
+                audio.weapon_gain = boost::json::value_to<double>(*weapon_gain_value_ptr);
+            }
+
+        const boost::json::value * shuffle_songs_section_value_ptr = audio_object.if_contains("shuffle_songs_section");
+        if (shuffle_songs_section_value_ptr != nullptr) {
+            boost::json::object shuffle_songs_section_object = shuffle_songs_section_value_ptr->get_object();
+            const boost::json::value * clear_history_on_list_change_value_ptr = shuffle_songs_section_object.if_contains("clear_history_on_list_change");
+            if (clear_history_on_list_change_value_ptr != nullptr) {
+                audio.shuffle_songs_section.clear_history_on_list_change = boost::json::value_to<bool>(*clear_history_on_list_change_value_ptr);
+            }
+
+            const boost::json::value * history_depth_value_ptr = shuffle_songs_section_object.if_contains("history_depth");
+            if (history_depth_value_ptr != nullptr) {
+                audio.shuffle_songs_section.history_depth = boost::json::value_to<int>(*history_depth_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * unit_audio_value_ptr = audio_object.if_contains("unit_audio");
+        if (unit_audio_value_ptr != nullptr) {
+            boost::json::object unit_audio_object = unit_audio_value_ptr->get_object();
+            const boost::json::value * afterburner_value_ptr = unit_audio_object.if_contains("afterburner");
+            if (afterburner_value_ptr != nullptr) {
+                audio.unit_audio.afterburner = boost::json::value_to<std::string>(*afterburner_value_ptr);
+            }
+
+            const boost::json::value * armor_value_ptr = unit_audio_object.if_contains("armor");
+            if (armor_value_ptr != nullptr) {
+                audio.unit_audio.armor = boost::json::value_to<std::string>(*armor_value_ptr);
+            }
+
+            const boost::json::value * cloak_value_ptr = unit_audio_object.if_contains("cloak");
+            if (cloak_value_ptr != nullptr) {
+                audio.unit_audio.cloak = boost::json::value_to<std::string>(*cloak_value_ptr);
+            }
+
+            const boost::json::value * explode_value_ptr = unit_audio_object.if_contains("explode");
+            if (explode_value_ptr != nullptr) {
+                audio.unit_audio.explode = boost::json::value_to<std::string>(*explode_value_ptr);
+            }
+
+            const boost::json::value * hull_value_ptr = unit_audio_object.if_contains("hull");
+            if (hull_value_ptr != nullptr) {
+                audio.unit_audio.hull = boost::json::value_to<std::string>(*hull_value_ptr);
+            }
+
+            const boost::json::value * jump_arrive_value_ptr = unit_audio_object.if_contains("jump_arrive");
+            if (jump_arrive_value_ptr != nullptr) {
+                audio.unit_audio.jump_arrive = boost::json::value_to<std::string>(*jump_arrive_value_ptr);
+            }
+
+            const boost::json::value * jump_leave_value_ptr = unit_audio_object.if_contains("jump_leave");
+            if (jump_leave_value_ptr != nullptr) {
+                audio.unit_audio.jump_leave = boost::json::value_to<std::string>(*jump_leave_value_ptr);
+            }
+
+            const boost::json::value * locked_value_ptr = unit_audio_object.if_contains("locked");
+            if (locked_value_ptr != nullptr) {
+                audio.unit_audio.locked = boost::json::value_to<std::string>(*locked_value_ptr);
+            }
+
+            const boost::json::value * locking_value_ptr = unit_audio_object.if_contains("locking");
+            if (locking_value_ptr != nullptr) {
+                audio.unit_audio.locking = boost::json::value_to<std::string>(*locking_value_ptr);
+            }
+
+            const boost::json::value * locking_torp_value_ptr = unit_audio_object.if_contains("locking_torp");
+            if (locking_torp_value_ptr != nullptr) {
+                audio.unit_audio.locking_torp = boost::json::value_to<std::string>(*locking_torp_value_ptr);
+            }
+
+            const boost::json::value * locking_torp_trumps_music_value_ptr = unit_audio_object.if_contains("locking_torp_trumps_music");
+            if (locking_torp_trumps_music_value_ptr != nullptr) {
+                audio.unit_audio.locking_torp_trumps_music = boost::json::value_to<bool>(*locking_torp_trumps_music_value_ptr);
+            }
+
+            const boost::json::value * locking_trumps_music_value_ptr = unit_audio_object.if_contains("locking_trumps_music");
+            if (locking_trumps_music_value_ptr != nullptr) {
+                audio.unit_audio.locking_trumps_music = boost::json::value_to<bool>(*locking_trumps_music_value_ptr);
+            }
+
+            const boost::json::value * player_afterburner_value_ptr = unit_audio_object.if_contains("player_afterburner");
+            if (player_afterburner_value_ptr != nullptr) {
+                audio.unit_audio.player_afterburner = boost::json::value_to<std::string>(*player_afterburner_value_ptr);
+            }
+
+            const boost::json::value * player_armor_hit_value_ptr = unit_audio_object.if_contains("player_armor_hit");
+            if (player_armor_hit_value_ptr != nullptr) {
+                audio.unit_audio.player_armor_hit = boost::json::value_to<std::string>(*player_armor_hit_value_ptr);
+            }
+
+            const boost::json::value * player_hull_hit_value_ptr = unit_audio_object.if_contains("player_hull_hit");
+            if (player_hull_hit_value_ptr != nullptr) {
+                audio.unit_audio.player_hull_hit = boost::json::value_to<std::string>(*player_hull_hit_value_ptr);
+            }
+
+            const boost::json::value * player_shield_hit_value_ptr = unit_audio_object.if_contains("player_shield_hit");
+            if (player_shield_hit_value_ptr != nullptr) {
+                audio.unit_audio.player_shield_hit = boost::json::value_to<std::string>(*player_shield_hit_value_ptr);
+            }
+
+            const boost::json::value * player_tractor_cargo_value_ptr = unit_audio_object.if_contains("player_tractor_cargo");
+            if (player_tractor_cargo_value_ptr != nullptr) {
+                audio.unit_audio.player_tractor_cargo = boost::json::value_to<std::string>(*player_tractor_cargo_value_ptr);
+            }
+
+            const boost::json::value * player_tractor_cargo_fromturret_value_ptr = unit_audio_object.if_contains("player_tractor_cargo_fromturret");
+            if (player_tractor_cargo_fromturret_value_ptr != nullptr) {
+                audio.unit_audio.player_tractor_cargo_fromturret = boost::json::value_to<std::string>(*player_tractor_cargo_fromturret_value_ptr);
+            }
+
+            const boost::json::value * shield_value_ptr = unit_audio_object.if_contains("shield");
+            if (shield_value_ptr != nullptr) {
+                audio.unit_audio.shield = boost::json::value_to<std::string>(*shield_value_ptr);
+            }
+
+        }
+
+
+        }
+
+
+        const boost::json::value * cargo_value_ptr = root_object.if_contains("cargo");
+        if (cargo_value_ptr != nullptr) {
+            boost::json::object cargo_object = cargo_value_ptr->get_object();
+            const boost::json::value * filter_expensive_cargo_value_ptr = cargo_object.if_contains("filter_expensive_cargo");
+            if (filter_expensive_cargo_value_ptr != nullptr) {
+                cargo.filter_expensive_cargo = boost::json::value_to<bool>(*filter_expensive_cargo_value_ptr);
+            }
+
+            const boost::json::value * junk_starship_mass_value_ptr = cargo_object.if_contains("junk_starship_mass");
+            if (junk_starship_mass_value_ptr != nullptr) {
+                cargo.junk_starship_mass = boost::json::value_to<double>(*junk_starship_mass_value_ptr);
+            }
+
+            const boost::json::value * junk_starship_price_value_ptr = cargo_object.if_contains("junk_starship_price");
+            if (junk_starship_price_value_ptr != nullptr) {
+                cargo.junk_starship_price = boost::json::value_to<double>(*junk_starship_price_value_ptr);
+            }
+
+            const boost::json::value * junk_starship_volume_value_ptr = cargo_object.if_contains("junk_starship_volume");
+            if (junk_starship_volume_value_ptr != nullptr) {
+                cargo.junk_starship_volume = boost::json::value_to<double>(*junk_starship_volume_value_ptr);
+            }
+
+            const boost::json::value * max_price_quant_adj_value_ptr = cargo_object.if_contains("max_price_quant_adj");
+            if (max_price_quant_adj_value_ptr != nullptr) {
+                cargo.max_price_quant_adj = boost::json::value_to<double>(*max_price_quant_adj_value_ptr);
+            }
+
+            const boost::json::value * min_cargo_price_value_ptr = cargo_object.if_contains("min_cargo_price");
+            if (min_cargo_price_value_ptr != nullptr) {
+                cargo.min_cargo_price = boost::json::value_to<double>(*min_cargo_price_value_ptr);
+            }
+
+            const boost::json::value * min_price_quant_adj_value_ptr = cargo_object.if_contains("min_price_quant_adj");
+            if (min_price_quant_adj_value_ptr != nullptr) {
+                cargo.min_price_quant_adj = boost::json::value_to<double>(*min_price_quant_adj_value_ptr);
+            }
+
+            const boost::json::value * news_from_cargo_list_value_ptr = cargo_object.if_contains("news_from_cargo_list");
+            if (news_from_cargo_list_value_ptr != nullptr) {
+                cargo.news_from_cargo_list = boost::json::value_to<bool>(*news_from_cargo_list_value_ptr);
+            }
+
+            const boost::json::value * price_quant_adj_power_value_ptr = cargo_object.if_contains("price_quant_adj_power");
+            if (price_quant_adj_power_value_ptr != nullptr) {
+                cargo.price_quant_adj_power = boost::json::value_to<double>(*price_quant_adj_power_value_ptr);
+            }
+
+            const boost::json::value * price_recenter_factor_value_ptr = cargo_object.if_contains("price_recenter_factor");
+            if (price_recenter_factor_value_ptr != nullptr) {
+                cargo.price_recenter_factor = boost::json::value_to<double>(*price_recenter_factor_value_ptr);
+            }
+
+            const boost::json::value * space_junk_price_value_ptr = cargo_object.if_contains("space_junk_price");
+            if (space_junk_price_value_ptr != nullptr) {
+                cargo.space_junk_price = boost::json::value_to<double>(*space_junk_price_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * cockpit_audio_value_ptr = root_object.if_contains("cockpit_audio");
+        if (cockpit_audio_value_ptr != nullptr) {
+            boost::json::object cockpit_audio_object = cockpit_audio_value_ptr->get_object();
+            const boost::json::value * automatic_landing_zone_value_ptr = cockpit_audio_object.if_contains("automatic_landing_zone");
+            if (automatic_landing_zone_value_ptr != nullptr) {
+                cockpit_audio.automatic_landing_zone = boost::json::value_to<std::string>(*automatic_landing_zone_value_ptr);
+            }
+
+            const boost::json::value * automatic_landing_zone1_value_ptr = cockpit_audio_object.if_contains("automatic_landing_zone1");
+            if (automatic_landing_zone1_value_ptr != nullptr) {
+                cockpit_audio.automatic_landing_zone1 = boost::json::value_to<std::string>(*automatic_landing_zone1_value_ptr);
+            }
+
+            const boost::json::value * automatic_landing_zone2_value_ptr = cockpit_audio_object.if_contains("automatic_landing_zone2");
+            if (automatic_landing_zone2_value_ptr != nullptr) {
+                cockpit_audio.automatic_landing_zone2 = boost::json::value_to<std::string>(*automatic_landing_zone2_value_ptr);
+            }
+
+            const boost::json::value * autopilot_available_value_ptr = cockpit_audio_object.if_contains("autopilot_available");
+            if (autopilot_available_value_ptr != nullptr) {
+                cockpit_audio.autopilot_available = boost::json::value_to<std::string>(*autopilot_available_value_ptr);
+            }
+
+            const boost::json::value * autopilot_disabled_value_ptr = cockpit_audio_object.if_contains("autopilot_disabled");
+            if (autopilot_disabled_value_ptr != nullptr) {
+                cockpit_audio.autopilot_disabled = boost::json::value_to<std::string>(*autopilot_disabled_value_ptr);
+            }
+
+            const boost::json::value * autopilot_enabled_value_ptr = cockpit_audio_object.if_contains("autopilot_enabled");
+            if (autopilot_enabled_value_ptr != nullptr) {
+                cockpit_audio.autopilot_enabled = boost::json::value_to<std::string>(*autopilot_enabled_value_ptr);
+            }
+
+            const boost::json::value * autopilot_unavailable_value_ptr = cockpit_audio_object.if_contains("autopilot_unavailable");
+            if (autopilot_unavailable_value_ptr != nullptr) {
+                cockpit_audio.autopilot_unavailable = boost::json::value_to<std::string>(*autopilot_unavailable_value_ptr);
+            }
+
+            const boost::json::value * comm_value_ptr = cockpit_audio_object.if_contains("comm");
+            if (comm_value_ptr != nullptr) {
+                cockpit_audio.comm = boost::json::value_to<std::string>(*comm_value_ptr);
+            }
+
+            const boost::json::value * comm_preload_value_ptr = cockpit_audio_object.if_contains("comm_preload");
+            if (comm_preload_value_ptr != nullptr) {
+                cockpit_audio.comm_preload = boost::json::value_to<bool>(*comm_preload_value_ptr);
+            }
+
+            const boost::json::value * compress_change_value_ptr = cockpit_audio_object.if_contains("compress_change");
+            if (compress_change_value_ptr != nullptr) {
+                cockpit_audio.compress_change = boost::json::value_to<std::string>(*compress_change_value_ptr);
+            }
+
+            const boost::json::value * compress_interval_value_ptr = cockpit_audio_object.if_contains("compress_interval");
+            if (compress_interval_value_ptr != nullptr) {
+                cockpit_audio.compress_interval = boost::json::value_to<int>(*compress_interval_value_ptr);
+            }
+
+            const boost::json::value * compress_loop_value_ptr = cockpit_audio_object.if_contains("compress_loop");
+            if (compress_loop_value_ptr != nullptr) {
+                cockpit_audio.compress_loop = boost::json::value_to<std::string>(*compress_loop_value_ptr);
+            }
+
+            const boost::json::value * compress_max_value_ptr = cockpit_audio_object.if_contains("compress_max");
+            if (compress_max_value_ptr != nullptr) {
+                cockpit_audio.compress_max = boost::json::value_to<int>(*compress_max_value_ptr);
+            }
+
+            const boost::json::value * compress_stop_value_ptr = cockpit_audio_object.if_contains("compress_stop");
+            if (compress_stop_value_ptr != nullptr) {
+                cockpit_audio.compress_stop = boost::json::value_to<std::string>(*compress_stop_value_ptr);
+            }
+
+            const boost::json::value * docking_complete_value_ptr = cockpit_audio_object.if_contains("docking_complete");
+            if (docking_complete_value_ptr != nullptr) {
+                cockpit_audio.docking_complete = boost::json::value_to<std::string>(*docking_complete_value_ptr);
+            }
+
+            const boost::json::value * docking_denied_value_ptr = cockpit_audio_object.if_contains("docking_denied");
+            if (docking_denied_value_ptr != nullptr) {
+                cockpit_audio.docking_denied = boost::json::value_to<std::string>(*docking_denied_value_ptr);
+            }
+
+            const boost::json::value * docking_failed_value_ptr = cockpit_audio_object.if_contains("docking_failed");
+            if (docking_failed_value_ptr != nullptr) {
+                cockpit_audio.docking_failed = boost::json::value_to<std::string>(*docking_failed_value_ptr);
+            }
+
+            const boost::json::value * docking_granted_value_ptr = cockpit_audio_object.if_contains("docking_granted");
+            if (docking_granted_value_ptr != nullptr) {
+                cockpit_audio.docking_granted = boost::json::value_to<std::string>(*docking_granted_value_ptr);
+            }
+
+            const boost::json::value * examine_value_ptr = cockpit_audio_object.if_contains("examine");
+            if (examine_value_ptr != nullptr) {
+                cockpit_audio.examine = boost::json::value_to<std::string>(*examine_value_ptr);
+            }
+
+            const boost::json::value * jump_engaged_value_ptr = cockpit_audio_object.if_contains("jump_engaged");
+            if (jump_engaged_value_ptr != nullptr) {
+                cockpit_audio.jump_engaged = boost::json::value_to<std::string>(*jump_engaged_value_ptr);
+            }
+
+            const boost::json::value * manifest_value_ptr = cockpit_audio_object.if_contains("manifest");
+            if (manifest_value_ptr != nullptr) {
+                cockpit_audio.manifest = boost::json::value_to<std::string>(*manifest_value_ptr);
+            }
+
+            const boost::json::value * missile_switch_value_ptr = cockpit_audio_object.if_contains("missile_switch");
+            if (missile_switch_value_ptr != nullptr) {
+                cockpit_audio.missile_switch = boost::json::value_to<std::string>(*missile_switch_value_ptr);
+            }
+
+            const boost::json::value * objective_value_ptr = cockpit_audio_object.if_contains("objective");
+            if (objective_value_ptr != nullptr) {
+                cockpit_audio.objective = boost::json::value_to<std::string>(*objective_value_ptr);
+            }
+
+            const boost::json::value * overload_value_ptr = cockpit_audio_object.if_contains("overload");
+            if (overload_value_ptr != nullptr) {
+                cockpit_audio.overload = boost::json::value_to<std::string>(*overload_value_ptr);
+            }
+
+            const boost::json::value * overload_stopped_value_ptr = cockpit_audio_object.if_contains("overload_stopped");
+            if (overload_stopped_value_ptr != nullptr) {
+                cockpit_audio.overload_stopped = boost::json::value_to<std::string>(*overload_stopped_value_ptr);
+            }
+
+            const boost::json::value * repair_value_ptr = cockpit_audio_object.if_contains("repair");
+            if (repair_value_ptr != nullptr) {
+                cockpit_audio.repair = boost::json::value_to<std::string>(*repair_value_ptr);
+            }
+
+            const boost::json::value * scanning_value_ptr = cockpit_audio_object.if_contains("scanning");
+            if (scanning_value_ptr != nullptr) {
+                cockpit_audio.scanning = boost::json::value_to<std::string>(*scanning_value_ptr);
+            }
+
+            const boost::json::value * shield_value_ptr = cockpit_audio_object.if_contains("shield");
+            if (shield_value_ptr != nullptr) {
+                cockpit_audio.shield = boost::json::value_to<std::string>(*shield_value_ptr);
+            }
+
+            const boost::json::value * sounds_extension_1_value_ptr = cockpit_audio_object.if_contains("sounds_extension_1");
+            if (sounds_extension_1_value_ptr != nullptr) {
+                cockpit_audio.sounds_extension_1 = boost::json::value_to<std::string>(*sounds_extension_1_value_ptr);
+            }
+
+            const boost::json::value * sounds_extension_2_value_ptr = cockpit_audio_object.if_contains("sounds_extension_2");
+            if (sounds_extension_2_value_ptr != nullptr) {
+                cockpit_audio.sounds_extension_2 = boost::json::value_to<std::string>(*sounds_extension_2_value_ptr);
+            }
+
+            const boost::json::value * sounds_extension_3_value_ptr = cockpit_audio_object.if_contains("sounds_extension_3");
+            if (sounds_extension_3_value_ptr != nullptr) {
+                cockpit_audio.sounds_extension_3 = boost::json::value_to<std::string>(*sounds_extension_3_value_ptr);
+            }
+
+            const boost::json::value * sounds_extension_4_value_ptr = cockpit_audio_object.if_contains("sounds_extension_4");
+            if (sounds_extension_4_value_ptr != nullptr) {
+                cockpit_audio.sounds_extension_4 = boost::json::value_to<std::string>(*sounds_extension_4_value_ptr);
+            }
+
+            const boost::json::value * sounds_extension_5_value_ptr = cockpit_audio_object.if_contains("sounds_extension_5");
+            if (sounds_extension_5_value_ptr != nullptr) {
+                cockpit_audio.sounds_extension_5 = boost::json::value_to<std::string>(*sounds_extension_5_value_ptr);
+            }
+
+            const boost::json::value * sounds_extension_6_value_ptr = cockpit_audio_object.if_contains("sounds_extension_6");
+            if (sounds_extension_6_value_ptr != nullptr) {
+                cockpit_audio.sounds_extension_6 = boost::json::value_to<std::string>(*sounds_extension_6_value_ptr);
+            }
+
+            const boost::json::value * sounds_extension_7_value_ptr = cockpit_audio_object.if_contains("sounds_extension_7");
+            if (sounds_extension_7_value_ptr != nullptr) {
+                cockpit_audio.sounds_extension_7 = boost::json::value_to<std::string>(*sounds_extension_7_value_ptr);
+            }
+
+            const boost::json::value * sounds_extension_8_value_ptr = cockpit_audio_object.if_contains("sounds_extension_8");
+            if (sounds_extension_8_value_ptr != nullptr) {
+                cockpit_audio.sounds_extension_8 = boost::json::value_to<std::string>(*sounds_extension_8_value_ptr);
+            }
+
+            const boost::json::value * sounds_extension_9_value_ptr = cockpit_audio_object.if_contains("sounds_extension_9");
+            if (sounds_extension_9_value_ptr != nullptr) {
+                cockpit_audio.sounds_extension_9 = boost::json::value_to<std::string>(*sounds_extension_9_value_ptr);
+            }
+
+            const boost::json::value * target_value_ptr = cockpit_audio_object.if_contains("target");
+            if (target_value_ptr != nullptr) {
+                cockpit_audio.target = boost::json::value_to<std::string>(*target_value_ptr);
+            }
+
+            const boost::json::value * target_reverse_value_ptr = cockpit_audio_object.if_contains("target_reverse");
+            if (target_reverse_value_ptr != nullptr) {
+                cockpit_audio.target_reverse = boost::json::value_to<std::string>(*target_reverse_value_ptr);
+            }
+
+            const boost::json::value * undocking_complete_value_ptr = cockpit_audio_object.if_contains("undocking_complete");
+            if (undocking_complete_value_ptr != nullptr) {
+                cockpit_audio.undocking_complete = boost::json::value_to<std::string>(*undocking_complete_value_ptr);
+            }
+
+            const boost::json::value * undocking_failed_value_ptr = cockpit_audio_object.if_contains("undocking_failed");
+            if (undocking_failed_value_ptr != nullptr) {
+                cockpit_audio.undocking_failed = boost::json::value_to<std::string>(*undocking_failed_value_ptr);
+            }
+
+            const boost::json::value * vdu_static_value_ptr = cockpit_audio_object.if_contains("vdu_static");
+            if (vdu_static_value_ptr != nullptr) {
+                cockpit_audio.vdu_static = boost::json::value_to<std::string>(*vdu_static_value_ptr);
+            }
+
+            const boost::json::value * view_value_ptr = cockpit_audio_object.if_contains("view");
+            if (view_value_ptr != nullptr) {
+                cockpit_audio.view = boost::json::value_to<std::string>(*view_value_ptr);
+            }
+
+            const boost::json::value * weapon_switch_value_ptr = cockpit_audio_object.if_contains("weapon_switch");
+            if (weapon_switch_value_ptr != nullptr) {
+                cockpit_audio.weapon_switch = boost::json::value_to<std::string>(*weapon_switch_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * collision_hacks_value_ptr = root_object.if_contains("collision_hacks");
+        if (collision_hacks_value_ptr != nullptr) {
+            boost::json::object collision_hacks_object = collision_hacks_value_ptr->get_object();
+            const boost::json::value * collision_hack_distance_value_ptr = collision_hacks_object.if_contains("collision_hack_distance");
+            if (collision_hack_distance_value_ptr != nullptr) {
+                collision_hacks.collision_hack_distance = boost::json::value_to<double>(*collision_hack_distance_value_ptr);
+            }
+
+            const boost::json::value * collision_damage_to_ai_value_ptr = collision_hacks_object.if_contains("collision_damage_to_ai");
+            if (collision_damage_to_ai_value_ptr != nullptr) {
+                collision_hacks.collision_damage_to_ai = boost::json::value_to<bool>(*collision_damage_to_ai_value_ptr);
+            }
+
+            const boost::json::value * crash_dock_hangar_value_ptr = collision_hacks_object.if_contains("crash_dock_hangar");
+            if (crash_dock_hangar_value_ptr != nullptr) {
+                collision_hacks.crash_dock_hangar = boost::json::value_to<bool>(*crash_dock_hangar_value_ptr);
+            }
+
+            const boost::json::value * crash_dock_unit_value_ptr = collision_hacks_object.if_contains("crash_dock_unit");
+            if (crash_dock_unit_value_ptr != nullptr) {
+                collision_hacks.crash_dock_unit = boost::json::value_to<bool>(*crash_dock_unit_value_ptr);
+            }
+
+            const boost::json::value * front_collision_hack_angle_value_ptr = collision_hacks_object.if_contains("front_collision_hack_angle");
+            if (front_collision_hack_angle_value_ptr != nullptr) {
+                collision_hacks.front_collision_hack_angle = boost::json::value_to<double>(*front_collision_hack_angle_value_ptr);
+            }
+
+            const boost::json::value * front_collision_hack_distance_value_ptr = collision_hacks_object.if_contains("front_collision_hack_distance");
+            if (front_collision_hack_distance_value_ptr != nullptr) {
+                collision_hacks.front_collision_hack_distance = boost::json::value_to<double>(*front_collision_hack_distance_value_ptr);
+            }
+
+            const boost::json::value * cargo_deals_collide_damage_value_ptr = collision_hacks_object.if_contains("cargo_deals_collide_damage");
+            if (cargo_deals_collide_damage_value_ptr != nullptr) {
+                collision_hacks.cargo_deals_collide_damage = boost::json::value_to<bool>(*cargo_deals_collide_damage_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * components_value_ptr = root_object.if_contains("components");
+        if (components_value_ptr != nullptr) {
+            boost::json::object components_object = components_value_ptr->get_object();
+        const boost::json::value * afterburner_value_ptr = components_object.if_contains("afterburner");
+        if (afterburner_value_ptr != nullptr) {
+            boost::json::object afterburner_object = afterburner_value_ptr->get_object();
+            const boost::json::value * energy_source_value_ptr = afterburner_object.if_contains("energy_source");
+            if (energy_source_value_ptr != nullptr) {
+                components.afterburner.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * cloak_value_ptr = components_object.if_contains("cloak");
+        if (cloak_value_ptr != nullptr) {
+            boost::json::object cloak_object = cloak_value_ptr->get_object();
+            const boost::json::value * energy_source_value_ptr = cloak_object.if_contains("energy_source");
+            if (energy_source_value_ptr != nullptr) {
+                components.cloak.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * computer_value_ptr = components_object.if_contains("computer");
+        if (computer_value_ptr != nullptr) {
+            boost::json::object computer_object = computer_value_ptr->get_object();
+            const boost::json::value * default_lock_cone_value_ptr = computer_object.if_contains("default_lock_cone");
+            if (default_lock_cone_value_ptr != nullptr) {
+                components.computer.default_lock_cone = boost::json::value_to<double>(*default_lock_cone_value_ptr);
+            }
+
+            const boost::json::value * default_max_range_value_ptr = computer_object.if_contains("default_max_range");
+            if (default_max_range_value_ptr != nullptr) {
+                components.computer.default_max_range = boost::json::value_to<double>(*default_max_range_value_ptr);
+            }
+
+            const boost::json::value * default_tracking_cone_value_ptr = computer_object.if_contains("default_tracking_cone");
+            if (default_tracking_cone_value_ptr != nullptr) {
+                components.computer.default_tracking_cone = boost::json::value_to<double>(*default_tracking_cone_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * drive_value_ptr = components_object.if_contains("drive");
+        if (drive_value_ptr != nullptr) {
+            boost::json::object drive_object = drive_value_ptr->get_object();
+            const boost::json::value * energy_source_value_ptr = drive_object.if_contains("energy_source");
+            if (energy_source_value_ptr != nullptr) {
+                components.drive.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
+            }
+
+            const boost::json::value * non_combat_mode_multiplier_value_ptr = drive_object.if_contains("non_combat_mode_multiplier");
+            if (non_combat_mode_multiplier_value_ptr != nullptr) {
+                components.drive.non_combat_mode_multiplier = boost::json::value_to<int>(*non_combat_mode_multiplier_value_ptr);
+            }
+
+            const boost::json::value * minimum_drive_value_ptr = drive_object.if_contains("minimum_drive");
+            if (minimum_drive_value_ptr != nullptr) {
+                components.drive.minimum_drive = boost::json::value_to<double>(*minimum_drive_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * energy_value_ptr = components_object.if_contains("energy");
+        if (energy_value_ptr != nullptr) {
+            boost::json::object energy_object = energy_value_ptr->get_object();
+            const boost::json::value * factor_value_ptr = energy_object.if_contains("factor");
+            if (factor_value_ptr != nullptr) {
+                components.energy.factor = boost::json::value_to<int>(*factor_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * fuel_value_ptr = components_object.if_contains("fuel");
+        if (fuel_value_ptr != nullptr) {
+            boost::json::object fuel_object = fuel_value_ptr->get_object();
+            const boost::json::value * afterburner_fuel_usage_value_ptr = fuel_object.if_contains("afterburner_fuel_usage");
+            if (afterburner_fuel_usage_value_ptr != nullptr) {
+                components.fuel.afterburner_fuel_usage = boost::json::value_to<double>(*afterburner_fuel_usage_value_ptr);
+            }
+
+            const boost::json::value * deuterium_relative_efficiency_lithium_value_ptr = fuel_object.if_contains("deuterium_relative_efficiency_lithium");
+            if (deuterium_relative_efficiency_lithium_value_ptr != nullptr) {
+                components.fuel.deuterium_relative_efficiency_lithium = boost::json::value_to<double>(*deuterium_relative_efficiency_lithium_value_ptr);
+            }
+
+            const boost::json::value * ecm_energy_cost_value_ptr = fuel_object.if_contains("ecm_energy_cost");
+            if (ecm_energy_cost_value_ptr != nullptr) {
+                components.fuel.ecm_energy_cost = boost::json::value_to<double>(*ecm_energy_cost_value_ptr);
+            }
+
+            const boost::json::value * fmec_factor_value_ptr = fuel_object.if_contains("fmec_factor");
+            if (fmec_factor_value_ptr != nullptr) {
+                components.fuel.fmec_factor = boost::json::value_to<double>(*fmec_factor_value_ptr);
+            }
+
+            const boost::json::value * fuel_efficiency_value_ptr = fuel_object.if_contains("fuel_efficiency");
+            if (fuel_efficiency_value_ptr != nullptr) {
+                components.fuel.fuel_efficiency = boost::json::value_to<double>(*fuel_efficiency_value_ptr);
+            }
+
+            const boost::json::value * fuel_equals_warp_value_ptr = fuel_object.if_contains("fuel_equals_warp");
+            if (fuel_equals_warp_value_ptr != nullptr) {
+                components.fuel.fuel_equals_warp = boost::json::value_to<bool>(*fuel_equals_warp_value_ptr);
+            }
+
+            const boost::json::value * factor_value_ptr = fuel_object.if_contains("factor");
+            if (factor_value_ptr != nullptr) {
+                components.fuel.factor = boost::json::value_to<int>(*factor_value_ptr);
+            }
+
+            const boost::json::value * megajoules_factor_value_ptr = fuel_object.if_contains("megajoules_factor");
+            if (megajoules_factor_value_ptr != nullptr) {
+                components.fuel.megajoules_factor = boost::json::value_to<double>(*megajoules_factor_value_ptr);
+            }
+
+            const boost::json::value * min_reactor_efficiency_value_ptr = fuel_object.if_contains("min_reactor_efficiency");
+            if (min_reactor_efficiency_value_ptr != nullptr) {
+                components.fuel.min_reactor_efficiency = boost::json::value_to<double>(*min_reactor_efficiency_value_ptr);
+            }
+
+            const boost::json::value * no_fuel_afterburn_value_ptr = fuel_object.if_contains("no_fuel_afterburn");
+            if (no_fuel_afterburn_value_ptr != nullptr) {
+                components.fuel.no_fuel_afterburn = boost::json::value_to<double>(*no_fuel_afterburn_value_ptr);
+            }
+
+            const boost::json::value * no_fuel_thrust_value_ptr = fuel_object.if_contains("no_fuel_thrust");
+            if (no_fuel_thrust_value_ptr != nullptr) {
+                components.fuel.no_fuel_thrust = boost::json::value_to<double>(*no_fuel_thrust_value_ptr);
+            }
+
+            const boost::json::value * normal_fuel_usage_value_ptr = fuel_object.if_contains("normal_fuel_usage");
+            if (normal_fuel_usage_value_ptr != nullptr) {
+                components.fuel.normal_fuel_usage = boost::json::value_to<double>(*normal_fuel_usage_value_ptr);
+            }
+
+            const boost::json::value * reactor_idle_efficiency_value_ptr = fuel_object.if_contains("reactor_idle_efficiency");
+            if (reactor_idle_efficiency_value_ptr != nullptr) {
+                components.fuel.reactor_idle_efficiency = boost::json::value_to<double>(*reactor_idle_efficiency_value_ptr);
+            }
+
+            const boost::json::value * reactor_uses_fuel_value_ptr = fuel_object.if_contains("reactor_uses_fuel");
+            if (reactor_uses_fuel_value_ptr != nullptr) {
+                components.fuel.reactor_uses_fuel = boost::json::value_to<bool>(*reactor_uses_fuel_value_ptr);
+            }
+
+            const boost::json::value * variable_fuel_consumption_value_ptr = fuel_object.if_contains("variable_fuel_consumption");
+            if (variable_fuel_consumption_value_ptr != nullptr) {
+                components.fuel.variable_fuel_consumption = boost::json::value_to<bool>(*variable_fuel_consumption_value_ptr);
+            }
+
+            const boost::json::value * vsd_mj_yield_value_ptr = fuel_object.if_contains("vsd_mj_yield");
+            if (vsd_mj_yield_value_ptr != nullptr) {
+                components.fuel.vsd_mj_yield = boost::json::value_to<double>(*vsd_mj_yield_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * ftl_drive_value_ptr = components_object.if_contains("ftl_drive");
+        if (ftl_drive_value_ptr != nullptr) {
+            boost::json::object ftl_drive_object = ftl_drive_value_ptr->get_object();
+            const boost::json::value * energy_source_value_ptr = ftl_drive_object.if_contains("energy_source");
+            if (energy_source_value_ptr != nullptr) {
+                components.ftl_drive.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
+            }
+
+            const boost::json::value * factor_value_ptr = ftl_drive_object.if_contains("factor");
+            if (factor_value_ptr != nullptr) {
+                components.ftl_drive.factor = boost::json::value_to<double>(*factor_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * ftl_energy_value_ptr = components_object.if_contains("ftl_energy");
+        if (ftl_energy_value_ptr != nullptr) {
+            boost::json::object ftl_energy_object = ftl_energy_value_ptr->get_object();
+            const boost::json::value * factor_value_ptr = ftl_energy_object.if_contains("factor");
+            if (factor_value_ptr != nullptr) {
+                components.ftl_energy.factor = boost::json::value_to<double>(*factor_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * jump_drive_value_ptr = components_object.if_contains("jump_drive");
+        if (jump_drive_value_ptr != nullptr) {
+            boost::json::object jump_drive_object = jump_drive_value_ptr->get_object();
+            const boost::json::value * energy_source_value_ptr = jump_drive_object.if_contains("energy_source");
+            if (energy_source_value_ptr != nullptr) {
+                components.jump_drive.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
+            }
+
+            const boost::json::value * factor_value_ptr = jump_drive_object.if_contains("factor");
+            if (factor_value_ptr != nullptr) {
+                components.jump_drive.factor = boost::json::value_to<double>(*factor_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * reactor_value_ptr = components_object.if_contains("reactor");
+        if (reactor_value_ptr != nullptr) {
+            boost::json::object reactor_object = reactor_value_ptr->get_object();
+            const boost::json::value * energy_source_value_ptr = reactor_object.if_contains("energy_source");
+            if (energy_source_value_ptr != nullptr) {
+                components.reactor.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
+            }
+
+            const boost::json::value * factor_value_ptr = reactor_object.if_contains("factor");
+            if (factor_value_ptr != nullptr) {
+                components.reactor.factor = boost::json::value_to<double>(*factor_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * shield_value_ptr = components_object.if_contains("shield");
+        if (shield_value_ptr != nullptr) {
+            boost::json::object shield_object = shield_value_ptr->get_object();
+            const boost::json::value * energy_source_value_ptr = shield_object.if_contains("energy_source");
+            if (energy_source_value_ptr != nullptr) {
+                components.shield.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
+            }
+
+            const boost::json::value * maintenance_factor_value_ptr = shield_object.if_contains("maintenance_factor");
+            if (maintenance_factor_value_ptr != nullptr) {
+                components.shield.maintenance_factor = boost::json::value_to<double>(*maintenance_factor_value_ptr);
+            }
+
+            const boost::json::value * regeneration_factor_value_ptr = shield_object.if_contains("regeneration_factor");
+            if (regeneration_factor_value_ptr != nullptr) {
+                components.shield.regeneration_factor = boost::json::value_to<double>(*regeneration_factor_value_ptr);
+            }
+
+        }
+
+
+        }
+
+
+        const boost::json::value * constants_value_ptr = root_object.if_contains("constants");
+        if (constants_value_ptr != nullptr) {
+            boost::json::object constants_object = constants_value_ptr->get_object();
+            const boost::json::value * megajoules_multiplier_value_ptr = constants_object.if_contains("megajoules_multiplier");
+            if (megajoules_multiplier_value_ptr != nullptr) {
+                constants.megajoules_multiplier = boost::json::value_to<int>(*megajoules_multiplier_value_ptr);
+            }
+
+            const boost::json::value * kilo_value_ptr = constants_object.if_contains("kilo");
+            if (kilo_value_ptr != nullptr) {
+                constants.kilo = boost::json::value_to<int>(*kilo_value_ptr);
+            }
+
+            const boost::json::value * kj_per_unit_damage_value_ptr = constants_object.if_contains("kj_per_unit_damage");
+            if (kj_per_unit_damage_value_ptr != nullptr) {
+                constants.kj_per_unit_damage = boost::json::value_to<int>(*kj_per_unit_damage_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * data_value_ptr = root_object.if_contains("data");
+        if (data_value_ptr != nullptr) {
+            boost::json::object data_object = data_value_ptr->get_object();
+            const boost::json::value * ai_directory_value_ptr = data_object.if_contains("ai_directory");
+            if (ai_directory_value_ptr != nullptr) {
+                data.ai_directory = boost::json::value_to<std::string>(*ai_directory_value_ptr);
+            }
+
+            const boost::json::value * animations_value_ptr = data_object.if_contains("animations");
+            if (animations_value_ptr != nullptr) {
+                data.animations = boost::json::value_to<std::string>(*animations_value_ptr);
+            }
+
+            const boost::json::value * capship_roles_value_ptr = data_object.if_contains("capship_roles");
+            if (capship_roles_value_ptr != nullptr) {
+                data.capship_roles = boost::json::value_to<std::string>(*capship_roles_value_ptr);
+            }
+
+            const boost::json::value * cockpits_value_ptr = data_object.if_contains("cockpits");
+            if (cockpits_value_ptr != nullptr) {
+                data.cockpits = boost::json::value_to<std::string>(*cockpits_value_ptr);
+            }
+
+            const boost::json::value * data_dir_value_ptr = data_object.if_contains("data_dir");
+            if (data_dir_value_ptr != nullptr) {
+                data.data_dir = boost::json::value_to<std::string>(*data_dir_value_ptr);
+            }
+
+            const boost::json::value * empty_cell_check_value_ptr = data_object.if_contains("empty_cell_check");
+            if (empty_cell_check_value_ptr != nullptr) {
+                data.empty_cell_check = boost::json::value_to<bool>(*empty_cell_check_value_ptr);
+            }
+
+            const boost::json::value * hqtextures_value_ptr = data_object.if_contains("hqtextures");
+            if (hqtextures_value_ptr != nullptr) {
+                data.hqtextures = boost::json::value_to<std::string>(*hqtextures_value_ptr);
+            }
+
+            const boost::json::value * master_part_list_value_ptr = data_object.if_contains("master_part_list");
+            if (master_part_list_value_ptr != nullptr) {
+                data.master_part_list = boost::json::value_to<std::string>(*master_part_list_value_ptr);
+            }
+
+            const boost::json::value * mod_unit_csv_value_ptr = data_object.if_contains("mod_unit_csv");
+            if (mod_unit_csv_value_ptr != nullptr) {
+                data.mod_unit_csv = boost::json::value_to<std::string>(*mod_unit_csv_value_ptr);
+            }
+
+            const boost::json::value * movies_value_ptr = data_object.if_contains("movies");
+            if (movies_value_ptr != nullptr) {
+                data.movies = boost::json::value_to<std::string>(*movies_value_ptr);
+            }
+
+            const boost::json::value * python_bases_value_ptr = data_object.if_contains("python_bases");
+            if (python_bases_value_ptr != nullptr) {
+                data.python_bases = boost::json::value_to<std::string>(*python_bases_value_ptr);
+            }
+
+            const boost::json::value * python_modules_value_ptr = data_object.if_contains("python_modules");
+            if (python_modules_value_ptr != nullptr) {
+                data.python_modules = boost::json::value_to<std::string>(*python_modules_value_ptr);
+            }
+
+            const boost::json::value * sectors_value_ptr = data_object.if_contains("sectors");
+            if (sectors_value_ptr != nullptr) {
+                data.sectors = boost::json::value_to<std::string>(*sectors_value_ptr);
+            }
+
+            const boost::json::value * serialized_xml_value_ptr = data_object.if_contains("serialized_xml");
+            if (serialized_xml_value_ptr != nullptr) {
+                data.serialized_xml = boost::json::value_to<std::string>(*serialized_xml_value_ptr);
+            }
+
+            const boost::json::value * shared_meshes_value_ptr = data_object.if_contains("shared_meshes");
+            if (shared_meshes_value_ptr != nullptr) {
+                data.shared_meshes = boost::json::value_to<std::string>(*shared_meshes_value_ptr);
+            }
+
+            const boost::json::value * shared_sounds_value_ptr = data_object.if_contains("shared_sounds");
+            if (shared_sounds_value_ptr != nullptr) {
+                data.shared_sounds = boost::json::value_to<std::string>(*shared_sounds_value_ptr);
+            }
+
+            const boost::json::value * shared_textures_value_ptr = data_object.if_contains("shared_textures");
+            if (shared_textures_value_ptr != nullptr) {
+                data.shared_textures = boost::json::value_to<std::string>(*shared_textures_value_ptr);
+            }
+
+            const boost::json::value * shared_units_value_ptr = data_object.if_contains("shared_units");
+            if (shared_units_value_ptr != nullptr) {
+                data.shared_units = boost::json::value_to<std::string>(*shared_units_value_ptr);
+            }
+
+            const boost::json::value * sprites_value_ptr = data_object.if_contains("sprites");
+            if (sprites_value_ptr != nullptr) {
+                data.sprites = boost::json::value_to<std::string>(*sprites_value_ptr);
+            }
+
+            const boost::json::value * techniques_base_path_value_ptr = data_object.if_contains("techniques_base_path");
+            if (techniques_base_path_value_ptr != nullptr) {
+                data.techniques_base_path = boost::json::value_to<std::string>(*techniques_base_path_value_ptr);
+            }
+
+            const boost::json::value * universe_path_value_ptr = data_object.if_contains("universe_path");
+            if (universe_path_value_ptr != nullptr) {
+                data.universe_path = boost::json::value_to<std::string>(*universe_path_value_ptr);
+            }
+
+            const boost::json::value * using_templates_value_ptr = data_object.if_contains("using_templates");
+            if (using_templates_value_ptr != nullptr) {
+                data.using_templates = boost::json::value_to<bool>(*using_templates_value_ptr);
+            }
+
+            const boost::json::value * volume_format_value_ptr = data_object.if_contains("volume_format");
+            if (volume_format_value_ptr != nullptr) {
+                data.volume_format = boost::json::value_to<std::string>(*volume_format_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * economics_value_ptr = root_object.if_contains("economics");
+        if (economics_value_ptr != nullptr) {
+            boost::json::object economics_object = economics_value_ptr->get_object();
+            const boost::json::value * repair_price_value_ptr = economics_object.if_contains("repair_price");
+            if (repair_price_value_ptr != nullptr) {
+                economics.repair_price = boost::json::value_to<double>(*repair_price_value_ptr);
+            }
+
+            const boost::json::value * sellback_shipping_price_value_ptr = economics_object.if_contains("sellback_shipping_price");
+            if (sellback_shipping_price_value_ptr != nullptr) {
+                economics.sellback_shipping_price = boost::json::value_to<double>(*sellback_shipping_price_value_ptr);
+            }
+
+            const boost::json::value * ship_sellback_price_value_ptr = economics_object.if_contains("ship_sellback_price");
+            if (ship_sellback_price_value_ptr != nullptr) {
+                economics.ship_sellback_price = boost::json::value_to<double>(*ship_sellback_price_value_ptr);
+            }
+
+            const boost::json::value * shipping_price_base_value_ptr = economics_object.if_contains("shipping_price_base");
+            if (shipping_price_base_value_ptr != nullptr) {
+                economics.shipping_price_base = boost::json::value_to<double>(*shipping_price_base_value_ptr);
+            }
+
+            const boost::json::value * shipping_price_insys_value_ptr = economics_object.if_contains("shipping_price_insys");
+            if (shipping_price_insys_value_ptr != nullptr) {
+                economics.shipping_price_insys = boost::json::value_to<double>(*shipping_price_insys_value_ptr);
+            }
+
+            const boost::json::value * shipping_price_perjump_value_ptr = economics_object.if_contains("shipping_price_perjump");
+            if (shipping_price_perjump_value_ptr != nullptr) {
+                economics.shipping_price_perjump = boost::json::value_to<double>(*shipping_price_perjump_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * flight_value_ptr = root_object.if_contains("flight");
+        if (flight_value_ptr != nullptr) {
+            boost::json::object flight_object = flight_value_ptr->get_object();
+        const boost::json::value * inertial_value_ptr = flight_object.if_contains("inertial");
+        if (inertial_value_ptr != nullptr) {
+            boost::json::object inertial_object = inertial_value_ptr->get_object();
+            const boost::json::value * initial_value_ptr = inertial_object.if_contains("initial");
+            if (initial_value_ptr != nullptr) {
+                flight.inertial.initial = boost::json::value_to<bool>(*initial_value_ptr);
+            }
+
+            const boost::json::value * enable_value_ptr = inertial_object.if_contains("enable");
+            if (enable_value_ptr != nullptr) {
+                flight.inertial.enable = boost::json::value_to<bool>(*enable_value_ptr);
+            }
+
+        }
+
+
+        }
+
+
+        const boost::json::value * galaxy_value_ptr = root_object.if_contains("galaxy");
+        if (galaxy_value_ptr != nullptr) {
+            boost::json::object galaxy_object = galaxy_value_ptr->get_object();
+            const boost::json::value * ambient_light_factor_value_ptr = galaxy_object.if_contains("ambient_light_factor");
+            if (ambient_light_factor_value_ptr != nullptr) {
+                galaxy.ambient_light_factor = boost::json::value_to<double>(*ambient_light_factor_value_ptr);
+            }
+
+            const boost::json::value * atmosphere_probability_value_ptr = galaxy_object.if_contains("atmosphere_probability");
+            if (atmosphere_probability_value_ptr != nullptr) {
+                galaxy.atmosphere_probability = boost::json::value_to<double>(*atmosphere_probability_value_ptr);
+            }
+
+            const boost::json::value * compactness_scale_value_ptr = galaxy_object.if_contains("compactness_scale");
+            if (compactness_scale_value_ptr != nullptr) {
+                galaxy.compactness_scale = boost::json::value_to<double>(*compactness_scale_value_ptr);
+            }
+
+            const boost::json::value * default_atmosphere_texture_value_ptr = galaxy_object.if_contains("default_atmosphere_texture");
+            if (default_atmosphere_texture_value_ptr != nullptr) {
+                galaxy.default_atmosphere_texture = boost::json::value_to<std::string>(*default_atmosphere_texture_value_ptr);
+            }
+
+            const boost::json::value * default_ring_texture_value_ptr = galaxy_object.if_contains("default_ring_texture");
+            if (default_ring_texture_value_ptr != nullptr) {
+                galaxy.default_ring_texture = boost::json::value_to<std::string>(*default_ring_texture_value_ptr);
+            }
+
+            const boost::json::value * double_ring_probability_value_ptr = galaxy_object.if_contains("double_ring_probability");
+            if (double_ring_probability_value_ptr != nullptr) {
+                galaxy.double_ring_probability = boost::json::value_to<double>(*double_ring_probability_value_ptr);
+            }
+
+            const boost::json::value * inner_ring_radius_value_ptr = galaxy_object.if_contains("inner_ring_radius");
+            if (inner_ring_radius_value_ptr != nullptr) {
+                galaxy.inner_ring_radius = boost::json::value_to<double>(*inner_ring_radius_value_ptr);
+            }
+
+            const boost::json::value * jump_compactness_scale_value_ptr = galaxy_object.if_contains("jump_compactness_scale");
+            if (jump_compactness_scale_value_ptr != nullptr) {
+                galaxy.jump_compactness_scale = boost::json::value_to<double>(*jump_compactness_scale_value_ptr);
+            }
+
+            const boost::json::value * mean_natural_phenomena_value_ptr = galaxy_object.if_contains("mean_natural_phenomena");
+            if (mean_natural_phenomena_value_ptr != nullptr) {
+                galaxy.mean_natural_phenomena = boost::json::value_to<int>(*mean_natural_phenomena_value_ptr);
+            }
+
+            const boost::json::value * mean_star_bases_value_ptr = galaxy_object.if_contains("mean_star_bases");
+            if (mean_star_bases_value_ptr != nullptr) {
+                galaxy.mean_star_bases = boost::json::value_to<int>(*mean_star_bases_value_ptr);
+            }
+
+            const boost::json::value * moon_relative_to_moon_value_ptr = galaxy_object.if_contains("moon_relative_to_moon");
+            if (moon_relative_to_moon_value_ptr != nullptr) {
+                galaxy.moon_relative_to_moon = boost::json::value_to<double>(*moon_relative_to_moon_value_ptr);
+            }
+
+            const boost::json::value * moon_relative_to_planet_value_ptr = galaxy_object.if_contains("moon_relative_to_planet");
+            if (moon_relative_to_planet_value_ptr != nullptr) {
+                galaxy.moon_relative_to_planet = boost::json::value_to<double>(*moon_relative_to_planet_value_ptr);
+            }
+
+            const boost::json::value * outer_ring_radius_value_ptr = galaxy_object.if_contains("outer_ring_radius");
+            if (outer_ring_radius_value_ptr != nullptr) {
+                galaxy.outer_ring_radius = boost::json::value_to<double>(*outer_ring_radius_value_ptr);
+            }
+
+            const boost::json::value * police_faction_value_ptr = galaxy_object.if_contains("police_faction");
+            if (police_faction_value_ptr != nullptr) {
+                galaxy.police_faction = boost::json::value_to<std::string>(*police_faction_value_ptr);
+            }
+
+            const boost::json::value * prison_system_value_ptr = galaxy_object.if_contains("prison_system");
+            if (prison_system_value_ptr != nullptr) {
+                galaxy.prison_system = boost::json::value_to<std::string>(*prison_system_value_ptr);
+            }
+
+            const boost::json::value * push_values_to_mean_value_ptr = galaxy_object.if_contains("push_values_to_mean");
+            if (push_values_to_mean_value_ptr != nullptr) {
+                galaxy.push_values_to_mean = boost::json::value_to<bool>(*push_values_to_mean_value_ptr);
+            }
+
+            const boost::json::value * ring_probability_value_ptr = galaxy_object.if_contains("ring_probability");
+            if (ring_probability_value_ptr != nullptr) {
+                galaxy.ring_probability = boost::json::value_to<double>(*ring_probability_value_ptr);
+            }
+
+            const boost::json::value * rocky_relative_to_primary_value_ptr = galaxy_object.if_contains("rocky_relative_to_primary");
+            if (rocky_relative_to_primary_value_ptr != nullptr) {
+                galaxy.rocky_relative_to_primary = boost::json::value_to<double>(*rocky_relative_to_primary_value_ptr);
+            }
+
+            const boost::json::value * second_ring_difference_value_ptr = galaxy_object.if_contains("second_ring_difference");
+            if (second_ring_difference_value_ptr != nullptr) {
+                galaxy.second_ring_difference = boost::json::value_to<double>(*second_ring_difference_value_ptr);
+            }
+
+            const boost::json::value * star_radius_scale_value_ptr = galaxy_object.if_contains("star_radius_scale");
+            if (star_radius_scale_value_ptr != nullptr) {
+                galaxy.star_radius_scale = boost::json::value_to<double>(*star_radius_scale_value_ptr);
+            }
+
+        }
+
+
+        const boost::json::value * game_start_value_ptr = root_object.if_contains("game_start");
+        if (game_start_value_ptr != nullptr) {
+            boost::json::object game_start_object = game_start_value_ptr->get_object();
+            const boost::json::value * campaigns_value_ptr = game_start_object.if_contains("campaigns");
+            if (campaigns_value_ptr != nullptr) {
+                game_start.campaigns = boost::json::value_to<std::string>(*campaigns_value_ptr);
+            }
+
+            const boost::json::value * default_mission_value_ptr = game_start_object.if_contains("default_mission");
+            if (default_mission_value_ptr != nullptr) {
+                game_start.default_mission = boost::json::value_to<std::string>(*default_mission_value_ptr);
+            }
+
+            const boost::json::value * introduction_value_ptr = game_start_object.if_contains("introduction");
+            if (introduction_value_ptr != nullptr) {
+                game_start.introduction = boost::json::value_to<std::string>(*introduction_value_ptr);
+            }
+
+            const boost::json::value * galaxy_value_ptr = game_start_object.if_contains("galaxy");
+            if (galaxy_value_ptr != nullptr) {
+                game_start.galaxy = boost::json::value_to<std::string>(*galaxy_value_ptr);
+            }
+
+        }
+
+
         const boost::json::value * general_value_ptr = root_object.if_contains("general");
         if (general_value_ptr != nullptr) {
             boost::json::object general_object = general_value_ptr->get_object();
@@ -303,6 +2253,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::json::value * atmosphere_diffuse_value_ptr = graphics_object.if_contains("atmosphere_diffuse");
             if (atmosphere_diffuse_value_ptr != nullptr) {
                 graphics.atmosphere_diffuse = boost::json::value_to<double>(*atmosphere_diffuse_value_ptr);
+            }
+
+            const boost::json::value * atmosphere_texture_resolution_value_ptr = graphics_object.if_contains("atmosphere_texture_resolution");
+            if (atmosphere_texture_resolution_value_ptr != nullptr) {
+                graphics.atmosphere_texture_resolution = boost::json::value_to<int>(*atmosphere_texture_resolution_value_ptr);
             }
 
             const boost::json::value * auto_message_nav_switch_time_lim_value_ptr = graphics_object.if_contains("auto_message_nav_switch_time_lim");
@@ -785,9 +2740,24 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.flash_behind_hud = boost::json::value_to<bool>(*flash_behind_hud_value_ptr);
             }
 
+            const boost::json::value * fog_value_ptr = graphics_object.if_contains("fog");
+            if (fog_value_ptr != nullptr) {
+                graphics.fog = boost::json::value_to<bool>(*fog_value_ptr);
+            }
+
             const boost::json::value * fog_detail_value_ptr = graphics_object.if_contains("fog_detail");
             if (fog_detail_value_ptr != nullptr) {
                 graphics.fog_detail = boost::json::value_to<int>(*fog_detail_value_ptr);
+            }
+
+            const boost::json::value * fog_fade_in_percent_value_ptr = graphics_object.if_contains("fog_fade_in_percent");
+            if (fog_fade_in_percent_value_ptr != nullptr) {
+                graphics.fog_fade_in_percent = boost::json::value_to<double>(*fog_fade_in_percent_value_ptr);
+            }
+
+            const boost::json::value * fog_time_value_ptr = graphics_object.if_contains("fog_time");
+            if (fog_time_value_ptr != nullptr) {
+                graphics.fog_time = boost::json::value_to<double>(*fog_time_value_ptr);
             }
 
             const boost::json::value * font_value_ptr = graphics_object.if_contains("font");
@@ -2403,1956 +4373,6 @@ void vega_config::Config::load_config(const std::string& json_text) {
 
         }
 
-
-        }
-
-
-        const boost::json::value * components_value_ptr = root_object.if_contains("components");
-        if (components_value_ptr != nullptr) {
-            boost::json::object components_object = components_value_ptr->get_object();
-        const boost::json::value * afterburner_value_ptr = components_object.if_contains("afterburner");
-        if (afterburner_value_ptr != nullptr) {
-            boost::json::object afterburner_object = afterburner_value_ptr->get_object();
-            const boost::json::value * energy_source_value_ptr = afterburner_object.if_contains("energy_source");
-            if (energy_source_value_ptr != nullptr) {
-                components.afterburner.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * cloak_value_ptr = components_object.if_contains("cloak");
-        if (cloak_value_ptr != nullptr) {
-            boost::json::object cloak_object = cloak_value_ptr->get_object();
-            const boost::json::value * energy_source_value_ptr = cloak_object.if_contains("energy_source");
-            if (energy_source_value_ptr != nullptr) {
-                components.cloak.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * computer_value_ptr = components_object.if_contains("computer");
-        if (computer_value_ptr != nullptr) {
-            boost::json::object computer_object = computer_value_ptr->get_object();
-            const boost::json::value * default_lock_cone_value_ptr = computer_object.if_contains("default_lock_cone");
-            if (default_lock_cone_value_ptr != nullptr) {
-                components.computer.default_lock_cone = boost::json::value_to<double>(*default_lock_cone_value_ptr);
-            }
-
-            const boost::json::value * default_max_range_value_ptr = computer_object.if_contains("default_max_range");
-            if (default_max_range_value_ptr != nullptr) {
-                components.computer.default_max_range = boost::json::value_to<double>(*default_max_range_value_ptr);
-            }
-
-            const boost::json::value * default_tracking_cone_value_ptr = computer_object.if_contains("default_tracking_cone");
-            if (default_tracking_cone_value_ptr != nullptr) {
-                components.computer.default_tracking_cone = boost::json::value_to<double>(*default_tracking_cone_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * drive_value_ptr = components_object.if_contains("drive");
-        if (drive_value_ptr != nullptr) {
-            boost::json::object drive_object = drive_value_ptr->get_object();
-            const boost::json::value * energy_source_value_ptr = drive_object.if_contains("energy_source");
-            if (energy_source_value_ptr != nullptr) {
-                components.drive.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
-            }
-
-            const boost::json::value * non_combat_mode_multiplier_value_ptr = drive_object.if_contains("non_combat_mode_multiplier");
-            if (non_combat_mode_multiplier_value_ptr != nullptr) {
-                components.drive.non_combat_mode_multiplier = boost::json::value_to<int>(*non_combat_mode_multiplier_value_ptr);
-            }
-
-            const boost::json::value * minimum_drive_value_ptr = drive_object.if_contains("minimum_drive");
-            if (minimum_drive_value_ptr != nullptr) {
-                components.drive.minimum_drive = boost::json::value_to<double>(*minimum_drive_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * energy_value_ptr = components_object.if_contains("energy");
-        if (energy_value_ptr != nullptr) {
-            boost::json::object energy_object = energy_value_ptr->get_object();
-            const boost::json::value * factor_value_ptr = energy_object.if_contains("factor");
-            if (factor_value_ptr != nullptr) {
-                components.energy.factor = boost::json::value_to<int>(*factor_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * fuel_value_ptr = components_object.if_contains("fuel");
-        if (fuel_value_ptr != nullptr) {
-            boost::json::object fuel_object = fuel_value_ptr->get_object();
-            const boost::json::value * afterburner_fuel_usage_value_ptr = fuel_object.if_contains("afterburner_fuel_usage");
-            if (afterburner_fuel_usage_value_ptr != nullptr) {
-                components.fuel.afterburner_fuel_usage = boost::json::value_to<double>(*afterburner_fuel_usage_value_ptr);
-            }
-
-            const boost::json::value * deuterium_relative_efficiency_lithium_value_ptr = fuel_object.if_contains("deuterium_relative_efficiency_lithium");
-            if (deuterium_relative_efficiency_lithium_value_ptr != nullptr) {
-                components.fuel.deuterium_relative_efficiency_lithium = boost::json::value_to<double>(*deuterium_relative_efficiency_lithium_value_ptr);
-            }
-
-            const boost::json::value * ecm_energy_cost_value_ptr = fuel_object.if_contains("ecm_energy_cost");
-            if (ecm_energy_cost_value_ptr != nullptr) {
-                components.fuel.ecm_energy_cost = boost::json::value_to<double>(*ecm_energy_cost_value_ptr);
-            }
-
-            const boost::json::value * fmec_factor_value_ptr = fuel_object.if_contains("fmec_factor");
-            if (fmec_factor_value_ptr != nullptr) {
-                components.fuel.fmec_factor = boost::json::value_to<double>(*fmec_factor_value_ptr);
-            }
-
-            const boost::json::value * fuel_efficiency_value_ptr = fuel_object.if_contains("fuel_efficiency");
-            if (fuel_efficiency_value_ptr != nullptr) {
-                components.fuel.fuel_efficiency = boost::json::value_to<double>(*fuel_efficiency_value_ptr);
-            }
-
-            const boost::json::value * fuel_equals_warp_value_ptr = fuel_object.if_contains("fuel_equals_warp");
-            if (fuel_equals_warp_value_ptr != nullptr) {
-                components.fuel.fuel_equals_warp = boost::json::value_to<bool>(*fuel_equals_warp_value_ptr);
-            }
-
-            const boost::json::value * factor_value_ptr = fuel_object.if_contains("factor");
-            if (factor_value_ptr != nullptr) {
-                components.fuel.factor = boost::json::value_to<int>(*factor_value_ptr);
-            }
-
-            const boost::json::value * megajoules_factor_value_ptr = fuel_object.if_contains("megajoules_factor");
-            if (megajoules_factor_value_ptr != nullptr) {
-                components.fuel.megajoules_factor = boost::json::value_to<double>(*megajoules_factor_value_ptr);
-            }
-
-            const boost::json::value * min_reactor_efficiency_value_ptr = fuel_object.if_contains("min_reactor_efficiency");
-            if (min_reactor_efficiency_value_ptr != nullptr) {
-                components.fuel.min_reactor_efficiency = boost::json::value_to<double>(*min_reactor_efficiency_value_ptr);
-            }
-
-            const boost::json::value * no_fuel_afterburn_value_ptr = fuel_object.if_contains("no_fuel_afterburn");
-            if (no_fuel_afterburn_value_ptr != nullptr) {
-                components.fuel.no_fuel_afterburn = boost::json::value_to<double>(*no_fuel_afterburn_value_ptr);
-            }
-
-            const boost::json::value * no_fuel_thrust_value_ptr = fuel_object.if_contains("no_fuel_thrust");
-            if (no_fuel_thrust_value_ptr != nullptr) {
-                components.fuel.no_fuel_thrust = boost::json::value_to<double>(*no_fuel_thrust_value_ptr);
-            }
-
-            const boost::json::value * normal_fuel_usage_value_ptr = fuel_object.if_contains("normal_fuel_usage");
-            if (normal_fuel_usage_value_ptr != nullptr) {
-                components.fuel.normal_fuel_usage = boost::json::value_to<double>(*normal_fuel_usage_value_ptr);
-            }
-
-            const boost::json::value * reactor_idle_efficiency_value_ptr = fuel_object.if_contains("reactor_idle_efficiency");
-            if (reactor_idle_efficiency_value_ptr != nullptr) {
-                components.fuel.reactor_idle_efficiency = boost::json::value_to<double>(*reactor_idle_efficiency_value_ptr);
-            }
-
-            const boost::json::value * reactor_uses_fuel_value_ptr = fuel_object.if_contains("reactor_uses_fuel");
-            if (reactor_uses_fuel_value_ptr != nullptr) {
-                components.fuel.reactor_uses_fuel = boost::json::value_to<bool>(*reactor_uses_fuel_value_ptr);
-            }
-
-            const boost::json::value * variable_fuel_consumption_value_ptr = fuel_object.if_contains("variable_fuel_consumption");
-            if (variable_fuel_consumption_value_ptr != nullptr) {
-                components.fuel.variable_fuel_consumption = boost::json::value_to<bool>(*variable_fuel_consumption_value_ptr);
-            }
-
-            const boost::json::value * vsd_mj_yield_value_ptr = fuel_object.if_contains("vsd_mj_yield");
-            if (vsd_mj_yield_value_ptr != nullptr) {
-                components.fuel.vsd_mj_yield = boost::json::value_to<double>(*vsd_mj_yield_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * ftl_drive_value_ptr = components_object.if_contains("ftl_drive");
-        if (ftl_drive_value_ptr != nullptr) {
-            boost::json::object ftl_drive_object = ftl_drive_value_ptr->get_object();
-            const boost::json::value * energy_source_value_ptr = ftl_drive_object.if_contains("energy_source");
-            if (energy_source_value_ptr != nullptr) {
-                components.ftl_drive.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
-            }
-
-            const boost::json::value * factor_value_ptr = ftl_drive_object.if_contains("factor");
-            if (factor_value_ptr != nullptr) {
-                components.ftl_drive.factor = boost::json::value_to<double>(*factor_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * ftl_energy_value_ptr = components_object.if_contains("ftl_energy");
-        if (ftl_energy_value_ptr != nullptr) {
-            boost::json::object ftl_energy_object = ftl_energy_value_ptr->get_object();
-            const boost::json::value * factor_value_ptr = ftl_energy_object.if_contains("factor");
-            if (factor_value_ptr != nullptr) {
-                components.ftl_energy.factor = boost::json::value_to<double>(*factor_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * jump_drive_value_ptr = components_object.if_contains("jump_drive");
-        if (jump_drive_value_ptr != nullptr) {
-            boost::json::object jump_drive_object = jump_drive_value_ptr->get_object();
-            const boost::json::value * energy_source_value_ptr = jump_drive_object.if_contains("energy_source");
-            if (energy_source_value_ptr != nullptr) {
-                components.jump_drive.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
-            }
-
-            const boost::json::value * factor_value_ptr = jump_drive_object.if_contains("factor");
-            if (factor_value_ptr != nullptr) {
-                components.jump_drive.factor = boost::json::value_to<double>(*factor_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * reactor_value_ptr = components_object.if_contains("reactor");
-        if (reactor_value_ptr != nullptr) {
-            boost::json::object reactor_object = reactor_value_ptr->get_object();
-            const boost::json::value * energy_source_value_ptr = reactor_object.if_contains("energy_source");
-            if (energy_source_value_ptr != nullptr) {
-                components.reactor.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
-            }
-
-            const boost::json::value * factor_value_ptr = reactor_object.if_contains("factor");
-            if (factor_value_ptr != nullptr) {
-                components.reactor.factor = boost::json::value_to<double>(*factor_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * shield_value_ptr = components_object.if_contains("shield");
-        if (shield_value_ptr != nullptr) {
-            boost::json::object shield_object = shield_value_ptr->get_object();
-            const boost::json::value * energy_source_value_ptr = shield_object.if_contains("energy_source");
-            if (energy_source_value_ptr != nullptr) {
-                components.shield.energy_source = boost::json::value_to<std::string>(*energy_source_value_ptr);
-            }
-
-            const boost::json::value * maintenance_factor_value_ptr = shield_object.if_contains("maintenance_factor");
-            if (maintenance_factor_value_ptr != nullptr) {
-                components.shield.maintenance_factor = boost::json::value_to<double>(*maintenance_factor_value_ptr);
-            }
-
-            const boost::json::value * regeneration_factor_value_ptr = shield_object.if_contains("regeneration_factor");
-            if (regeneration_factor_value_ptr != nullptr) {
-                components.shield.regeneration_factor = boost::json::value_to<double>(*regeneration_factor_value_ptr);
-            }
-
-        }
-
-
-        }
-
-
-        const boost::json::value * constants_value_ptr = root_object.if_contains("constants");
-        if (constants_value_ptr != nullptr) {
-            boost::json::object constants_object = constants_value_ptr->get_object();
-            const boost::json::value * megajoules_multiplier_value_ptr = constants_object.if_contains("megajoules_multiplier");
-            if (megajoules_multiplier_value_ptr != nullptr) {
-                constants.megajoules_multiplier = boost::json::value_to<int>(*megajoules_multiplier_value_ptr);
-            }
-
-            const boost::json::value * kilo_value_ptr = constants_object.if_contains("kilo");
-            if (kilo_value_ptr != nullptr) {
-                constants.kilo = boost::json::value_to<int>(*kilo_value_ptr);
-            }
-
-            const boost::json::value * kj_per_unit_damage_value_ptr = constants_object.if_contains("kj_per_unit_damage");
-            if (kj_per_unit_damage_value_ptr != nullptr) {
-                constants.kj_per_unit_damage = boost::json::value_to<int>(*kj_per_unit_damage_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * data_value_ptr = root_object.if_contains("data");
-        if (data_value_ptr != nullptr) {
-            boost::json::object data_object = data_value_ptr->get_object();
-            const boost::json::value * ai_directory_value_ptr = data_object.if_contains("ai_directory");
-            if (ai_directory_value_ptr != nullptr) {
-                data.ai_directory = boost::json::value_to<std::string>(*ai_directory_value_ptr);
-            }
-
-            const boost::json::value * animations_value_ptr = data_object.if_contains("animations");
-            if (animations_value_ptr != nullptr) {
-                data.animations = boost::json::value_to<std::string>(*animations_value_ptr);
-            }
-
-            const boost::json::value * capship_roles_value_ptr = data_object.if_contains("capship_roles");
-            if (capship_roles_value_ptr != nullptr) {
-                data.capship_roles = boost::json::value_to<std::string>(*capship_roles_value_ptr);
-            }
-
-            const boost::json::value * cockpits_value_ptr = data_object.if_contains("cockpits");
-            if (cockpits_value_ptr != nullptr) {
-                data.cockpits = boost::json::value_to<std::string>(*cockpits_value_ptr);
-            }
-
-            const boost::json::value * data_dir_value_ptr = data_object.if_contains("data_dir");
-            if (data_dir_value_ptr != nullptr) {
-                data.data_dir = boost::json::value_to<std::string>(*data_dir_value_ptr);
-            }
-
-            const boost::json::value * empty_cell_check_value_ptr = data_object.if_contains("empty_cell_check");
-            if (empty_cell_check_value_ptr != nullptr) {
-                data.empty_cell_check = boost::json::value_to<bool>(*empty_cell_check_value_ptr);
-            }
-
-            const boost::json::value * hqtextures_value_ptr = data_object.if_contains("hqtextures");
-            if (hqtextures_value_ptr != nullptr) {
-                data.hqtextures = boost::json::value_to<std::string>(*hqtextures_value_ptr);
-            }
-
-            const boost::json::value * master_part_list_value_ptr = data_object.if_contains("master_part_list");
-            if (master_part_list_value_ptr != nullptr) {
-                data.master_part_list = boost::json::value_to<std::string>(*master_part_list_value_ptr);
-            }
-
-            const boost::json::value * mod_unit_csv_value_ptr = data_object.if_contains("mod_unit_csv");
-            if (mod_unit_csv_value_ptr != nullptr) {
-                data.mod_unit_csv = boost::json::value_to<std::string>(*mod_unit_csv_value_ptr);
-            }
-
-            const boost::json::value * movies_value_ptr = data_object.if_contains("movies");
-            if (movies_value_ptr != nullptr) {
-                data.movies = boost::json::value_to<std::string>(*movies_value_ptr);
-            }
-
-            const boost::json::value * python_bases_value_ptr = data_object.if_contains("python_bases");
-            if (python_bases_value_ptr != nullptr) {
-                data.python_bases = boost::json::value_to<std::string>(*python_bases_value_ptr);
-            }
-
-            const boost::json::value * python_modules_value_ptr = data_object.if_contains("python_modules");
-            if (python_modules_value_ptr != nullptr) {
-                data.python_modules = boost::json::value_to<std::string>(*python_modules_value_ptr);
-            }
-
-            const boost::json::value * sectors_value_ptr = data_object.if_contains("sectors");
-            if (sectors_value_ptr != nullptr) {
-                data.sectors = boost::json::value_to<std::string>(*sectors_value_ptr);
-            }
-
-            const boost::json::value * serialized_xml_value_ptr = data_object.if_contains("serialized_xml");
-            if (serialized_xml_value_ptr != nullptr) {
-                data.serialized_xml = boost::json::value_to<std::string>(*serialized_xml_value_ptr);
-            }
-
-            const boost::json::value * shared_meshes_value_ptr = data_object.if_contains("shared_meshes");
-            if (shared_meshes_value_ptr != nullptr) {
-                data.shared_meshes = boost::json::value_to<std::string>(*shared_meshes_value_ptr);
-            }
-
-            const boost::json::value * shared_sounds_value_ptr = data_object.if_contains("shared_sounds");
-            if (shared_sounds_value_ptr != nullptr) {
-                data.shared_sounds = boost::json::value_to<std::string>(*shared_sounds_value_ptr);
-            }
-
-            const boost::json::value * shared_textures_value_ptr = data_object.if_contains("shared_textures");
-            if (shared_textures_value_ptr != nullptr) {
-                data.shared_textures = boost::json::value_to<std::string>(*shared_textures_value_ptr);
-            }
-
-            const boost::json::value * shared_units_value_ptr = data_object.if_contains("shared_units");
-            if (shared_units_value_ptr != nullptr) {
-                data.shared_units = boost::json::value_to<std::string>(*shared_units_value_ptr);
-            }
-
-            const boost::json::value * sprites_value_ptr = data_object.if_contains("sprites");
-            if (sprites_value_ptr != nullptr) {
-                data.sprites = boost::json::value_to<std::string>(*sprites_value_ptr);
-            }
-
-            const boost::json::value * techniques_base_path_value_ptr = data_object.if_contains("techniques_base_path");
-            if (techniques_base_path_value_ptr != nullptr) {
-                data.techniques_base_path = boost::json::value_to<std::string>(*techniques_base_path_value_ptr);
-            }
-
-            const boost::json::value * universe_path_value_ptr = data_object.if_contains("universe_path");
-            if (universe_path_value_ptr != nullptr) {
-                data.universe_path = boost::json::value_to<std::string>(*universe_path_value_ptr);
-            }
-
-            const boost::json::value * using_templates_value_ptr = data_object.if_contains("using_templates");
-            if (using_templates_value_ptr != nullptr) {
-                data.using_templates = boost::json::value_to<bool>(*using_templates_value_ptr);
-            }
-
-            const boost::json::value * volume_format_value_ptr = data_object.if_contains("volume_format");
-            if (volume_format_value_ptr != nullptr) {
-                data.volume_format = boost::json::value_to<std::string>(*volume_format_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * game_start_value_ptr = root_object.if_contains("game_start");
-        if (game_start_value_ptr != nullptr) {
-            boost::json::object game_start_object = game_start_value_ptr->get_object();
-            const boost::json::value * campaigns_value_ptr = game_start_object.if_contains("campaigns");
-            if (campaigns_value_ptr != nullptr) {
-                game_start.campaigns = boost::json::value_to<std::string>(*campaigns_value_ptr);
-            }
-
-            const boost::json::value * default_mission_value_ptr = game_start_object.if_contains("default_mission");
-            if (default_mission_value_ptr != nullptr) {
-                game_start.default_mission = boost::json::value_to<std::string>(*default_mission_value_ptr);
-            }
-
-            const boost::json::value * introduction_value_ptr = game_start_object.if_contains("introduction");
-            if (introduction_value_ptr != nullptr) {
-                game_start.introduction = boost::json::value_to<std::string>(*introduction_value_ptr);
-            }
-
-            const boost::json::value * galaxy_value_ptr = game_start_object.if_contains("galaxy");
-            if (galaxy_value_ptr != nullptr) {
-                game_start.galaxy = boost::json::value_to<std::string>(*galaxy_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * advanced_value_ptr = root_object.if_contains("advanced");
-        if (advanced_value_ptr != nullptr) {
-            boost::json::object advanced_object = advanced_value_ptr->get_object();
-        }
-
-
-        const boost::json::value * ai_value_ptr = root_object.if_contains("ai");
-        if (ai_value_ptr != nullptr) {
-            boost::json::object ai_object = ai_value_ptr->get_object();
-            const boost::json::value * afterburn_to_no_enemies_value_ptr = ai_object.if_contains("afterburn_to_no_enemies");
-            if (afterburn_to_no_enemies_value_ptr != nullptr) {
-                ai.afterburn_to_no_enemies = boost::json::value_to<bool>(*afterburn_to_no_enemies_value_ptr);
-            }
-
-            const boost::json::value * ai_cheat_dot_value_ptr = ai_object.if_contains("ai_cheat_dot");
-            if (ai_cheat_dot_value_ptr != nullptr) {
-                ai.ai_cheat_dot = boost::json::value_to<double>(*ai_cheat_dot_value_ptr);
-            }
-
-            const boost::json::value * allow_any_speed_reference_value_ptr = ai_object.if_contains("allow_any_speed_reference");
-            if (allow_any_speed_reference_value_ptr != nullptr) {
-                ai.allow_any_speed_reference = boost::json::value_to<bool>(*allow_any_speed_reference_value_ptr);
-            }
-
-            const boost::json::value * allow_civil_war_value_ptr = ai_object.if_contains("allow_civil_war");
-            if (allow_civil_war_value_ptr != nullptr) {
-                ai.allow_civil_war = boost::json::value_to<bool>(*allow_civil_war_value_ptr);
-            }
-
-            const boost::json::value * allow_nonplayer_faction_change_value_ptr = ai_object.if_contains("allow_nonplayer_faction_change");
-            if (allow_nonplayer_faction_change_value_ptr != nullptr) {
-                ai.allow_nonplayer_faction_change = boost::json::value_to<bool>(*allow_nonplayer_faction_change_value_ptr);
-            }
-
-            const boost::json::value * always_fire_autotrackers_value_ptr = ai_object.if_contains("always_fire_autotrackers");
-            if (always_fire_autotrackers_value_ptr != nullptr) {
-                ai.always_fire_autotrackers = boost::json::value_to<bool>(*always_fire_autotrackers_value_ptr);
-            }
-
-            const boost::json::value * always_have_jumpdrive_cheat_value_ptr = ai_object.if_contains("always_have_jumpdrive_cheat");
-            if (always_have_jumpdrive_cheat_value_ptr != nullptr) {
-                ai.always_have_jumpdrive_cheat = boost::json::value_to<bool>(*always_have_jumpdrive_cheat_value_ptr);
-            }
-
-            const boost::json::value * always_obedient_value_ptr = ai_object.if_contains("always_obedient");
-            if (always_obedient_value_ptr != nullptr) {
-                ai.always_obedient = boost::json::value_to<bool>(*always_obedient_value_ptr);
-            }
-
-            const boost::json::value * always_use_itts_value_ptr = ai_object.if_contains("always_use_itts");
-            if (always_use_itts_value_ptr != nullptr) {
-                ai.always_use_itts = boost::json::value_to<bool>(*always_use_itts_value_ptr);
-            }
-
-            const boost::json::value * anger_affects_response_value_ptr = ai_object.if_contains("anger_affects_response");
-            if (anger_affects_response_value_ptr != nullptr) {
-                ai.anger_affects_response = boost::json::value_to<double>(*anger_affects_response_value_ptr);
-            }
-
-            const boost::json::value * arrest_energy_zero_value_ptr = ai_object.if_contains("arrest_energy_zero");
-            if (arrest_energy_zero_value_ptr != nullptr) {
-                ai.arrest_energy_zero = boost::json::value_to<bool>(*arrest_energy_zero_value_ptr);
-            }
-
-            const boost::json::value * assist_friend_in_need_value_ptr = ai_object.if_contains("assist_friend_in_need");
-            if (assist_friend_in_need_value_ptr != nullptr) {
-                ai.assist_friend_in_need = boost::json::value_to<bool>(*assist_friend_in_need_value_ptr);
-            }
-
-            const boost::json::value * attacker_switch_time_value_ptr = ai_object.if_contains("attacker_switch_time");
-            if (attacker_switch_time_value_ptr != nullptr) {
-                ai.attacker_switch_time = boost::json::value_to<double>(*attacker_switch_time_value_ptr);
-            }
-
-            const boost::json::value * auto_dock_value_ptr = ai_object.if_contains("auto_dock");
-            if (auto_dock_value_ptr != nullptr) {
-                ai.auto_dock = boost::json::value_to<bool>(*auto_dock_value_ptr);
-            }
-
-            const boost::json::value * can_dock_to_enemy_base_value_ptr = ai_object.if_contains("can_dock_to_enemy_base");
-            if (can_dock_to_enemy_base_value_ptr != nullptr) {
-                ai.can_dock_to_enemy_base = boost::json::value_to<bool>(*can_dock_to_enemy_base_value_ptr);
-            }
-
-            const boost::json::value * capped_faction_rating_value_ptr = ai_object.if_contains("capped_faction_rating");
-            if (capped_faction_rating_value_ptr != nullptr) {
-                ai.capped_faction_rating = boost::json::value_to<bool>(*capped_faction_rating_value_ptr);
-            }
-
-            const boost::json::value * choose_destination_script_value_ptr = ai_object.if_contains("choose_destination_script");
-            if (choose_destination_script_value_ptr != nullptr) {
-                ai.choose_destination_script = boost::json::value_to<std::string>(*choose_destination_script_value_ptr);
-            }
-
-            const boost::json::value * comm_initiate_time_value_ptr = ai_object.if_contains("comm_initiate_time");
-            if (comm_initiate_time_value_ptr != nullptr) {
-                ai.comm_initiate_time = boost::json::value_to<double>(*comm_initiate_time_value_ptr);
-            }
-
-            const boost::json::value * comm_response_time_value_ptr = ai_object.if_contains("comm_response_time");
-            if (comm_response_time_value_ptr != nullptr) {
-                ai.comm_response_time = boost::json::value_to<double>(*comm_response_time_value_ptr);
-            }
-
-            const boost::json::value * comm_to_player_percent_value_ptr = ai_object.if_contains("comm_to_player_percent");
-            if (comm_to_player_percent_value_ptr != nullptr) {
-                ai.comm_to_player_percent = boost::json::value_to<double>(*comm_to_player_percent_value_ptr);
-            }
-
-            const boost::json::value * comm_to_target_percent_value_ptr = ai_object.if_contains("comm_to_target_percent");
-            if (comm_to_target_percent_value_ptr != nullptr) {
-                ai.comm_to_target_percent = boost::json::value_to<double>(*comm_to_target_percent_value_ptr);
-            }
-
-            const boost::json::value * contraband_initiate_time_value_ptr = ai_object.if_contains("contraband_initiate_time");
-            if (contraband_initiate_time_value_ptr != nullptr) {
-                ai.contraband_initiate_time = boost::json::value_to<double>(*contraband_initiate_time_value_ptr);
-            }
-
-            const boost::json::value * contraband_madness_value_ptr = ai_object.if_contains("contraband_madness");
-            if (contraband_madness_value_ptr != nullptr) {
-                ai.contraband_madness = boost::json::value_to<int>(*contraband_madness_value_ptr);
-            }
-
-            const boost::json::value * contraband_to_player_percent_value_ptr = ai_object.if_contains("contraband_to_player_percent");
-            if (contraband_to_player_percent_value_ptr != nullptr) {
-                ai.contraband_to_player_percent = boost::json::value_to<double>(*contraband_to_player_percent_value_ptr);
-            }
-
-            const boost::json::value * contraband_to_target_percent_value_ptr = ai_object.if_contains("contraband_to_target_percent");
-            if (contraband_to_target_percent_value_ptr != nullptr) {
-                ai.contraband_to_target_percent = boost::json::value_to<double>(*contraband_to_target_percent_value_ptr);
-            }
-
-            const boost::json::value * contraband_update_time_value_ptr = ai_object.if_contains("contraband_update_time");
-            if (contraband_update_time_value_ptr != nullptr) {
-                ai.contraband_update_time = boost::json::value_to<double>(*contraband_update_time_value_ptr);
-            }
-
-            const boost::json::value * debug_level_value_ptr = ai_object.if_contains("debug_level");
-            if (debug_level_value_ptr != nullptr) {
-                ai.debug_level = boost::json::value_to<int>(*debug_level_value_ptr);
-            }
-
-            const boost::json::value * default_rank_value_ptr = ai_object.if_contains("default_rank");
-            if (default_rank_value_ptr != nullptr) {
-                ai.default_rank = boost::json::value_to<double>(*default_rank_value_ptr);
-            }
-
-            const boost::json::value * dock_on_load_value_ptr = ai_object.if_contains("dock_on_load");
-            if (dock_on_load_value_ptr != nullptr) {
-                ai.dock_on_load = boost::json::value_to<bool>(*dock_on_load_value_ptr);
-            }
-
-            const boost::json::value * dock_to_area_value_ptr = ai_object.if_contains("dock_to_area");
-            if (dock_to_area_value_ptr != nullptr) {
-                ai.dock_to_area = boost::json::value_to<bool>(*dock_to_area_value_ptr);
-            }
-
-            const boost::json::value * docked_to_script_value_ptr = ai_object.if_contains("docked_to_script");
-            if (docked_to_script_value_ptr != nullptr) {
-                ai.docked_to_script = boost::json::value_to<std::string>(*docked_to_script_value_ptr);
-            }
-
-            const boost::json::value * ease_to_anger_value_ptr = ai_object.if_contains("ease_to_anger");
-            if (ease_to_anger_value_ptr != nullptr) {
-                ai.ease_to_anger = boost::json::value_to<double>(*ease_to_anger_value_ptr);
-            }
-
-            const boost::json::value * ease_to_appease_value_ptr = ai_object.if_contains("ease_to_appease");
-            if (ease_to_appease_value_ptr != nullptr) {
-                ai.ease_to_appease = boost::json::value_to<double>(*ease_to_appease_value_ptr);
-            }
-
-            const boost::json::value * eject_attacks_value_ptr = ai_object.if_contains("eject_attacks");
-            if (eject_attacks_value_ptr != nullptr) {
-                ai.eject_attacks = boost::json::value_to<bool>(*eject_attacks_value_ptr);
-            }
-
-            const boost::json::value * evasion_angle_value_ptr = ai_object.if_contains("evasion_angle");
-            if (evasion_angle_value_ptr != nullptr) {
-                ai.evasion_angle = boost::json::value_to<double>(*evasion_angle_value_ptr);
-            }
-
-            const boost::json::value * faction_contraband_relation_adjust_value_ptr = ai_object.if_contains("faction_contraband_relation_adjust");
-            if (faction_contraband_relation_adjust_value_ptr != nullptr) {
-                ai.faction_contraband_relation_adjust = boost::json::value_to<double>(*faction_contraband_relation_adjust_value_ptr);
-            }
-
-            const boost::json::value * fg_nav_select_time_value_ptr = ai_object.if_contains("fg_nav_select_time");
-            if (fg_nav_select_time_value_ptr != nullptr) {
-                ai.fg_nav_select_time = boost::json::value_to<double>(*fg_nav_select_time_value_ptr);
-            }
-
-            const boost::json::value * force_jump_after_time_value_ptr = ai_object.if_contains("force_jump_after_time");
-            if (force_jump_after_time_value_ptr != nullptr) {
-                ai.force_jump_after_time = boost::json::value_to<double>(*force_jump_after_time_value_ptr);
-            }
-
-            const boost::json::value * friend_factor_value_ptr = ai_object.if_contains("friend_factor");
-            if (friend_factor_value_ptr != nullptr) {
-                ai.friend_factor = boost::json::value_to<double>(*friend_factor_value_ptr);
-            }
-
-            const boost::json::value * gun_range_percent_ok_value_ptr = ai_object.if_contains("gun_range_percent_ok");
-            if (gun_range_percent_ok_value_ptr != nullptr) {
-                ai.gun_range_percent_ok = boost::json::value_to<double>(*gun_range_percent_ok_value_ptr);
-            }
-
-            const boost::json::value * hostile_lurk_value_ptr = ai_object.if_contains("hostile_lurk");
-            if (hostile_lurk_value_ptr != nullptr) {
-                ai.hostile_lurk = boost::json::value_to<bool>(*hostile_lurk_value_ptr);
-            }
-
-            const boost::json::value * how_far_to_stop_navigating_value_ptr = ai_object.if_contains("how_far_to_stop_navigating");
-            if (how_far_to_stop_navigating_value_ptr != nullptr) {
-                ai.how_far_to_stop_navigating = boost::json::value_to<double>(*how_far_to_stop_navigating_value_ptr);
-            }
-
-            const boost::json::value * hull_damage_anger_value_ptr = ai_object.if_contains("hull_damage_anger");
-            if (hull_damage_anger_value_ptr != nullptr) {
-                ai.hull_damage_anger = boost::json::value_to<int>(*hull_damage_anger_value_ptr);
-            }
-
-            const boost::json::value * hull_percent_for_comm_value_ptr = ai_object.if_contains("hull_percent_for_comm");
-            if (hull_percent_for_comm_value_ptr != nullptr) {
-                ai.hull_percent_for_comm = boost::json::value_to<double>(*hull_percent_for_comm_value_ptr);
-            }
-
-            const boost::json::value * independent_turrets_value_ptr = ai_object.if_contains("independent_turrets");
-            if (independent_turrets_value_ptr != nullptr) {
-                ai.independent_turrets = boost::json::value_to<bool>(*independent_turrets_value_ptr);
-            }
-
-            const boost::json::value * jump_cheat_value_ptr = ai_object.if_contains("jump_cheat");
-            if (jump_cheat_value_ptr != nullptr) {
-                ai.jump_cheat = boost::json::value_to<bool>(*jump_cheat_value_ptr);
-            }
-
-            const boost::json::value * jump_without_energy_value_ptr = ai_object.if_contains("jump_without_energy");
-            if (jump_without_energy_value_ptr != nullptr) {
-                ai.jump_without_energy = boost::json::value_to<bool>(*jump_without_energy_value_ptr);
-            }
-
-            const boost::json::value * kill_factor_value_ptr = ai_object.if_contains("kill_factor");
-            if (kill_factor_value_ptr != nullptr) {
-                ai.kill_factor = boost::json::value_to<double>(*kill_factor_value_ptr);
-            }
-
-            const boost::json::value * loop_around_destination_distance_value_ptr = ai_object.if_contains("loop_around_destination_distance");
-            if (loop_around_destination_distance_value_ptr != nullptr) {
-                ai.loop_around_destination_distance = boost::json::value_to<double>(*loop_around_destination_distance_value_ptr);
-            }
-
-            const boost::json::value * loop_around_destination_lateral_value_ptr = ai_object.if_contains("loop_around_destination_lateral");
-            if (loop_around_destination_lateral_value_ptr != nullptr) {
-                ai.loop_around_destination_lateral = boost::json::value_to<double>(*loop_around_destination_lateral_value_ptr);
-            }
-
-            const boost::json::value * loop_around_destination_vertical_value_ptr = ai_object.if_contains("loop_around_destination_vertical");
-            if (loop_around_destination_vertical_value_ptr != nullptr) {
-                ai.loop_around_destination_vertical = boost::json::value_to<double>(*loop_around_destination_vertical_value_ptr);
-            }
-
-            const boost::json::value * loop_around_distance_value_ptr = ai_object.if_contains("loop_around_distance");
-            if (loop_around_distance_value_ptr != nullptr) {
-                ai.loop_around_distance = boost::json::value_to<double>(*loop_around_distance_value_ptr);
-            }
-
-            const boost::json::value * loop_around_pursuit_velocity_percent_value_ptr = ai_object.if_contains("loop_around_pursuit_velocity_percent");
-            if (loop_around_pursuit_velocity_percent_value_ptr != nullptr) {
-                ai.loop_around_pursuit_velocity_percent = boost::json::value_to<double>(*loop_around_pursuit_velocity_percent_value_ptr);
-            }
-
-            const boost::json::value * lurk_time_value_ptr = ai_object.if_contains("lurk_time");
-            if (lurk_time_value_ptr != nullptr) {
-                ai.lurk_time = boost::json::value_to<double>(*lurk_time_value_ptr);
-            }
-
-            const boost::json::value * lowest_negative_comm_choice_value_ptr = ai_object.if_contains("lowest_negative_comm_choice");
-            if (lowest_negative_comm_choice_value_ptr != nullptr) {
-                ai.lowest_negative_comm_choice = boost::json::value_to<double>(*lowest_negative_comm_choice_value_ptr);
-            }
-
-            const boost::json::value * lowest_positive_comm_choice_value_ptr = ai_object.if_contains("lowest_positive_comm_choice");
-            if (lowest_positive_comm_choice_value_ptr != nullptr) {
-                ai.lowest_positive_comm_choice = boost::json::value_to<double>(*lowest_positive_comm_choice_value_ptr);
-            }
-
-            const boost::json::value * match_velocity_cone_value_ptr = ai_object.if_contains("match_velocity_cone");
-            if (match_velocity_cone_value_ptr != nullptr) {
-                ai.match_velocity_cone = boost::json::value_to<double>(*match_velocity_cone_value_ptr);
-            }
-
-            const boost::json::value * match_velocity_of_pursuant_value_ptr = ai_object.if_contains("match_velocity_of_pursuant");
-            if (match_velocity_of_pursuant_value_ptr != nullptr) {
-                ai.match_velocity_of_pursuant = boost::json::value_to<bool>(*match_velocity_of_pursuant_value_ptr);
-            }
-
-            const boost::json::value * max_allowable_travel_time_value_ptr = ai_object.if_contains("max_allowable_travel_time");
-            if (max_allowable_travel_time_value_ptr != nullptr) {
-                ai.max_allowable_travel_time = boost::json::value_to<double>(*max_allowable_travel_time_value_ptr);
-            }
-
-            const boost::json::value * max_faction_contraband_relation_value_ptr = ai_object.if_contains("max_faction_contraband_relation");
-            if (max_faction_contraband_relation_value_ptr != nullptr) {
-                ai.max_faction_contraband_relation = boost::json::value_to<double>(*max_faction_contraband_relation_value_ptr);
-            }
-
-            const boost::json::value * max_player_attackers_value_ptr = ai_object.if_contains("max_player_attackers");
-            if (max_player_attackers_value_ptr != nullptr) {
-                ai.max_player_attackers = boost::json::value_to<int>(*max_player_attackers_value_ptr);
-            }
-
-            const boost::json::value * min_angular_accel_cheat_value_ptr = ai_object.if_contains("min_angular_accel_cheat");
-            if (min_angular_accel_cheat_value_ptr != nullptr) {
-                ai.min_angular_accel_cheat = boost::json::value_to<double>(*min_angular_accel_cheat_value_ptr);
-            }
-
-            const boost::json::value * min_docking_relationship_value_ptr = ai_object.if_contains("min_docking_relationship");
-            if (min_docking_relationship_value_ptr != nullptr) {
-                ai.min_docking_relationship = boost::json::value_to<double>(*min_docking_relationship_value_ptr);
-            }
-
-            const boost::json::value * min_energy_to_enter_warp_value_ptr = ai_object.if_contains("min_energy_to_enter_warp");
-            if (min_energy_to_enter_warp_value_ptr != nullptr) {
-                ai.min_energy_to_enter_warp = boost::json::value_to<double>(*min_energy_to_enter_warp_value_ptr);
-            }
-
-            const boost::json::value * min_relationship_value_ptr = ai_object.if_contains("min_relationship");
-            if (min_relationship_value_ptr != nullptr) {
-                ai.min_relationship = boost::json::value_to<double>(*min_relationship_value_ptr);
-            }
-
-            const boost::json::value * min_time_to_auto_value_ptr = ai_object.if_contains("min_time_to_auto");
-            if (min_time_to_auto_value_ptr != nullptr) {
-                ai.min_time_to_auto = boost::json::value_to<double>(*min_time_to_auto_value_ptr);
-            }
-
-            const boost::json::value * min_warp_to_try_value_ptr = ai_object.if_contains("min_warp_to_try");
-            if (min_warp_to_try_value_ptr != nullptr) {
-                ai.min_warp_to_try = boost::json::value_to<double>(*min_warp_to_try_value_ptr);
-            }
-
-            const boost::json::value * missile_gun_delay_value_ptr = ai_object.if_contains("missile_gun_delay");
-            if (missile_gun_delay_value_ptr != nullptr) {
-                ai.missile_gun_delay = boost::json::value_to<double>(*missile_gun_delay_value_ptr);
-            }
-
-            const boost::json::value * mood_affects_response_value_ptr = ai_object.if_contains("mood_affects_response");
-            if (mood_affects_response_value_ptr != nullptr) {
-                ai.mood_affects_response = boost::json::value_to<double>(*mood_affects_response_value_ptr);
-            }
-
-            const boost::json::value * mood_swing_level_value_ptr = ai_object.if_contains("mood_swing_level");
-            if (mood_swing_level_value_ptr != nullptr) {
-                ai.mood_swing_level = boost::json::value_to<double>(*mood_swing_level_value_ptr);
-            }
-
-            const boost::json::value * no_turret_ai_value_ptr = ai_object.if_contains("no_turret_ai");
-            if (no_turret_ai_value_ptr != nullptr) {
-                ai.no_turret_ai = boost::json::value_to<bool>(*no_turret_ai_value_ptr);
-            }
-
-            const boost::json::value * num_contraband_scans_per_search_value_ptr = ai_object.if_contains("num_contraband_scans_per_search");
-            if (num_contraband_scans_per_search_value_ptr != nullptr) {
-                ai.num_contraband_scans_per_search = boost::json::value_to<int>(*num_contraband_scans_per_search_value_ptr);
-            }
-
-            const boost::json::value * num_pirates_per_asteroid_field_value_ptr = ai_object.if_contains("num_pirates_per_asteroid_field");
-            if (num_pirates_per_asteroid_field_value_ptr != nullptr) {
-                ai.num_pirates_per_asteroid_field = boost::json::value_to<int>(*num_pirates_per_asteroid_field_value_ptr);
-            }
-
-            const boost::json::value * only_upgrade_speed_reference_value_ptr = ai_object.if_contains("only_upgrade_speed_reference");
-            if (only_upgrade_speed_reference_value_ptr != nullptr) {
-                ai.only_upgrade_speed_reference = boost::json::value_to<bool>(*only_upgrade_speed_reference_value_ptr);
-            }
-
-            const boost::json::value * percentage_speed_change_to_stop_search_value_ptr = ai_object.if_contains("percentage_speed_change_to_stop_search");
-            if (percentage_speed_change_to_stop_search_value_ptr != nullptr) {
-                ai.percentage_speed_change_to_stop_search = boost::json::value_to<double>(*percentage_speed_change_to_stop_search_value_ptr);
-            }
-
-            const boost::json::value * pirate_bonus_for_empty_hold_value_ptr = ai_object.if_contains("pirate_bonus_for_empty_hold");
-            if (pirate_bonus_for_empty_hold_value_ptr != nullptr) {
-                ai.pirate_bonus_for_empty_hold = boost::json::value_to<double>(*pirate_bonus_for_empty_hold_value_ptr);
-            }
-
-            const boost::json::value * pirate_nav_select_time_value_ptr = ai_object.if_contains("pirate_nav_select_time");
-            if (pirate_nav_select_time_value_ptr != nullptr) {
-                ai.pirate_nav_select_time = boost::json::value_to<double>(*pirate_nav_select_time_value_ptr);
-            }
-
-            const boost::json::value * random_response_range_value_ptr = ai_object.if_contains("random_response_range");
-            if (random_response_range_value_ptr != nullptr) {
-                ai.random_response_range = boost::json::value_to<double>(*random_response_range_value_ptr);
-            }
-
-            const boost::json::value * random_spacing_factor_value_ptr = ai_object.if_contains("random_spacing_factor");
-            if (random_spacing_factor_value_ptr != nullptr) {
-                ai.random_spacing_factor = boost::json::value_to<double>(*random_spacing_factor_value_ptr);
-            }
-
-            const boost::json::value * reaction_time_value_ptr = ai_object.if_contains("reaction_time");
-            if (reaction_time_value_ptr != nullptr) {
-                ai.reaction_time = boost::json::value_to<double>(*reaction_time_value_ptr);
-            }
-
-            const boost::json::value * resistance_to_side_movement_value_ptr = ai_object.if_contains("resistance_to_side_movement");
-            if (resistance_to_side_movement_value_ptr != nullptr) {
-                ai.resistance_to_side_movement = boost::json::value_to<bool>(*resistance_to_side_movement_value_ptr);
-            }
-
-            const boost::json::value * resistance_to_side_force_percent_value_ptr = ai_object.if_contains("resistance_to_side_force_percent");
-            if (resistance_to_side_force_percent_value_ptr != nullptr) {
-                ai.resistance_to_side_force_percent = boost::json::value_to<double>(*resistance_to_side_force_percent_value_ptr);
-            }
-
-            const boost::json::value * resistance_to_side_movement_percent_value_ptr = ai_object.if_contains("resistance_to_side_movement_percent");
-            if (resistance_to_side_movement_percent_value_ptr != nullptr) {
-                ai.resistance_to_side_movement_percent = boost::json::value_to<double>(*resistance_to_side_movement_percent_value_ptr);
-            }
-
-            const boost::json::value * roll_order_duration_value_ptr = ai_object.if_contains("roll_order_duration");
-            if (roll_order_duration_value_ptr != nullptr) {
-                ai.roll_order_duration = boost::json::value_to<double>(*roll_order_duration_value_ptr);
-            }
-
-            const boost::json::value * safety_spacing_value_ptr = ai_object.if_contains("safety_spacing");
-            if (safety_spacing_value_ptr != nullptr) {
-                ai.safety_spacing = boost::json::value_to<double>(*safety_spacing_value_ptr);
-            }
-
-            const boost::json::value * shield_damage_anger_value_ptr = ai_object.if_contains("shield_damage_anger");
-            if (shield_damage_anger_value_ptr != nullptr) {
-                ai.shield_damage_anger = boost::json::value_to<int>(*shield_damage_anger_value_ptr);
-            }
-
-            const boost::json::value * slow_diplomacy_for_enemies_value_ptr = ai_object.if_contains("slow_diplomacy_for_enemies");
-            if (slow_diplomacy_for_enemies_value_ptr != nullptr) {
-                ai.slow_diplomacy_for_enemies = boost::json::value_to<double>(*slow_diplomacy_for_enemies_value_ptr);
-            }
-
-            const boost::json::value * start_docked_to_value_ptr = ai_object.if_contains("start_docked_to");
-            if (start_docked_to_value_ptr != nullptr) {
-                ai.start_docked_to = boost::json::value_to<std::string>(*start_docked_to_value_ptr);
-            }
-
-            const boost::json::value * static_relationship_affects_response_value_ptr = ai_object.if_contains("static_relationship_affects_response");
-            if (static_relationship_affects_response_value_ptr != nullptr) {
-                ai.static_relationship_affects_response = boost::json::value_to<double>(*static_relationship_affects_response_value_ptr);
-            }
-
-            const boost::json::value * switch_nonowned_units_value_ptr = ai_object.if_contains("switch_nonowned_units");
-            if (switch_nonowned_units_value_ptr != nullptr) {
-                ai.switch_nonowned_units = boost::json::value_to<bool>(*switch_nonowned_units_value_ptr);
-            }
-
-            const boost::json::value * talk_relation_factor_value_ptr = ai_object.if_contains("talk_relation_factor");
-            if (talk_relation_factor_value_ptr != nullptr) {
-                ai.talk_relation_factor = boost::json::value_to<double>(*talk_relation_factor_value_ptr);
-            }
-
-            const boost::json::value * talking_faster_helps_value_ptr = ai_object.if_contains("talking_faster_helps");
-            if (talking_faster_helps_value_ptr != nullptr) {
-                ai.talking_faster_helps = boost::json::value_to<bool>(*talking_faster_helps_value_ptr);
-            }
-
-            const boost::json::value * too_close_for_warp_in_formation_value_ptr = ai_object.if_contains("too_close_for_warp_in_formation");
-            if (too_close_for_warp_in_formation_value_ptr != nullptr) {
-                ai.too_close_for_warp_in_formation = boost::json::value_to<double>(*too_close_for_warp_in_formation_value_ptr);
-            }
-
-            const boost::json::value * too_close_for_warp_tactic_value_ptr = ai_object.if_contains("too_close_for_warp_tactic");
-            if (too_close_for_warp_tactic_value_ptr != nullptr) {
-                ai.too_close_for_warp_tactic = boost::json::value_to<double>(*too_close_for_warp_tactic_value_ptr);
-            }
-
-            const boost::json::value * turn_cheat_value_ptr = ai_object.if_contains("turn_cheat");
-            if (turn_cheat_value_ptr != nullptr) {
-                ai.turn_cheat = boost::json::value_to<bool>(*turn_cheat_value_ptr);
-            }
-
-            const boost::json::value * unknown_relation_enemy_value_ptr = ai_object.if_contains("unknown_relation_enemy");
-            if (unknown_relation_enemy_value_ptr != nullptr) {
-                ai.unknown_relation_enemy = boost::json::value_to<double>(*unknown_relation_enemy_value_ptr);
-            }
-
-            const boost::json::value * unknown_relation_hit_cost_value_ptr = ai_object.if_contains("unknown_relation_hit_cost");
-            if (unknown_relation_hit_cost_value_ptr != nullptr) {
-                ai.unknown_relation_hit_cost = boost::json::value_to<double>(*unknown_relation_hit_cost_value_ptr);
-            }
-
-            const boost::json::value * use_afterburner_value_ptr = ai_object.if_contains("use_afterburner");
-            if (use_afterburner_value_ptr != nullptr) {
-                ai.use_afterburner = boost::json::value_to<bool>(*use_afterburner_value_ptr);
-            }
-
-            const boost::json::value * use_afterburner_to_follow_value_ptr = ai_object.if_contains("use_afterburner_to_follow");
-            if (use_afterburner_to_follow_value_ptr != nullptr) {
-                ai.use_afterburner_to_follow = boost::json::value_to<bool>(*use_afterburner_to_follow_value_ptr);
-            }
-
-            const boost::json::value * use_afterburner_to_run_value_ptr = ai_object.if_contains("use_afterburner_to_run");
-            if (use_afterburner_to_run_value_ptr != nullptr) {
-                ai.use_afterburner_to_run = boost::json::value_to<bool>(*use_afterburner_to_run_value_ptr);
-            }
-
-            const boost::json::value * warp_cone_value_ptr = ai_object.if_contains("warp_cone");
-            if (warp_cone_value_ptr != nullptr) {
-                ai.warp_cone = boost::json::value_to<double>(*warp_cone_value_ptr);
-            }
-
-            const boost::json::value * warp_to_enemies_value_ptr = ai_object.if_contains("warp_to_enemies");
-            if (warp_to_enemies_value_ptr != nullptr) {
-                ai.warp_to_enemies = boost::json::value_to<bool>(*warp_to_enemies_value_ptr);
-            }
-
-            const boost::json::value * warp_to_no_enemies_value_ptr = ai_object.if_contains("warp_to_no_enemies");
-            if (warp_to_no_enemies_value_ptr != nullptr) {
-                ai.warp_to_no_enemies = boost::json::value_to<bool>(*warp_to_no_enemies_value_ptr);
-            }
-
-            const boost::json::value * warp_to_wingmen_value_ptr = ai_object.if_contains("warp_to_wingmen");
-            if (warp_to_wingmen_value_ptr != nullptr) {
-                ai.warp_to_wingmen = boost::json::value_to<bool>(*warp_to_wingmen_value_ptr);
-            }
-
-        const boost::json::value * firing_value_ptr = ai_object.if_contains("firing");
-        if (firing_value_ptr != nullptr) {
-            boost::json::object firing_object = firing_value_ptr->get_object();
-            const boost::json::value * aggressivity_value_ptr = firing_object.if_contains("aggressivity");
-            if (aggressivity_value_ptr != nullptr) {
-                ai.firing.aggressivity = boost::json::value_to<double>(*aggressivity_value_ptr);
-            }
-
-            const boost::json::value * in_weapon_range_value_ptr = firing_object.if_contains("in_weapon_range");
-            if (in_weapon_range_value_ptr != nullptr) {
-                ai.firing.in_weapon_range = boost::json::value_to<double>(*in_weapon_range_value_ptr);
-            }
-
-            const boost::json::value * missile_probability_value_ptr = firing_object.if_contains("missile_probability");
-            if (missile_probability_value_ptr != nullptr) {
-                ai.firing.missile_probability = boost::json::value_to<double>(*missile_probability_value_ptr);
-            }
-
-            const boost::json::value * reaction_time_value_ptr = firing_object.if_contains("reaction_time");
-            if (reaction_time_value_ptr != nullptr) {
-                ai.firing.reaction_time = boost::json::value_to<double>(*reaction_time_value_ptr);
-            }
-
-            const boost::json::value * turret_dot_cutoff_value_ptr = firing_object.if_contains("turret_dot_cutoff");
-            if (turret_dot_cutoff_value_ptr != nullptr) {
-                ai.firing.turret_dot_cutoff = boost::json::value_to<double>(*turret_dot_cutoff_value_ptr);
-            }
-
-            const boost::json::value * turret_missile_probability_value_ptr = firing_object.if_contains("turret_missile_probability");
-            if (turret_missile_probability_value_ptr != nullptr) {
-                ai.firing.turret_missile_probability = boost::json::value_to<double>(*turret_missile_probability_value_ptr);
-            }
-
-        const boost::json::value * maximum_firing_angle_value_ptr = firing_object.if_contains("maximum_firing_angle");
-        if (maximum_firing_angle_value_ptr != nullptr) {
-            boost::json::object maximum_firing_angle_object = maximum_firing_angle_value_ptr->get_object();
-            const boost::json::value * minagg_value_ptr = maximum_firing_angle_object.if_contains("minagg");
-            if (minagg_value_ptr != nullptr) {
-                ai.firing.maximum_firing_angle.minagg = boost::json::value_to<int>(*minagg_value_ptr);
-            }
-
-            const boost::json::value * maxagg_value_ptr = maximum_firing_angle_object.if_contains("maxagg");
-            if (maxagg_value_ptr != nullptr) {
-                ai.firing.maximum_firing_angle.maxagg = boost::json::value_to<int>(*maxagg_value_ptr);
-            }
-
-        }
-
-
-        }
-
-
-        const boost::json::value * targeting_value_ptr = ai_object.if_contains("targeting");
-        if (targeting_value_ptr != nullptr) {
-            boost::json::object targeting_object = targeting_value_ptr->get_object();
-            const boost::json::value * assign_point_def_value_ptr = targeting_object.if_contains("assign_point_def");
-            if (assign_point_def_value_ptr != nullptr) {
-                ai.targeting.assign_point_def = boost::json::value_to<bool>(*assign_point_def_value_ptr);
-            }
-
-            const boost::json::value * escort_distance_value_ptr = targeting_object.if_contains("escort_distance");
-            if (escort_distance_value_ptr != nullptr) {
-                ai.targeting.escort_distance = boost::json::value_to<double>(*escort_distance_value_ptr);
-            }
-
-            const boost::json::value * mass_inertial_priority_cutoff_value_ptr = targeting_object.if_contains("mass_inertial_priority_cutoff");
-            if (mass_inertial_priority_cutoff_value_ptr != nullptr) {
-                ai.targeting.mass_inertial_priority_cutoff = boost::json::value_to<double>(*mass_inertial_priority_cutoff_value_ptr);
-            }
-
-            const boost::json::value * mass_inertial_priority_scale_value_ptr = targeting_object.if_contains("mass_inertial_priority_scale");
-            if (mass_inertial_priority_scale_value_ptr != nullptr) {
-                ai.targeting.mass_inertial_priority_scale = boost::json::value_to<double>(*mass_inertial_priority_scale_value_ptr);
-            }
-
-            const boost::json::value * max_number_of_pollers_per_frame_value_ptr = targeting_object.if_contains("max_number_of_pollers_per_frame");
-            if (max_number_of_pollers_per_frame_value_ptr != nullptr) {
-                ai.targeting.max_number_of_pollers_per_frame = boost::json::value_to<int>(*max_number_of_pollers_per_frame_value_ptr);
-            }
-
-            const boost::json::value * min_number_of_pollers_per_frame_value_ptr = targeting_object.if_contains("min_number_of_pollers_per_frame");
-            if (min_number_of_pollers_per_frame_value_ptr != nullptr) {
-                ai.targeting.min_number_of_pollers_per_frame = boost::json::value_to<int>(*min_number_of_pollers_per_frame_value_ptr);
-            }
-
-            const boost::json::value * min_rechoose_interval_value_ptr = targeting_object.if_contains("min_rechoose_interval");
-            if (min_rechoose_interval_value_ptr != nullptr) {
-                ai.targeting.min_rechoose_interval = boost::json::value_to<int>(*min_rechoose_interval_value_ptr);
-            }
-
-            const boost::json::value * min_time_to_switch_targets_value_ptr = targeting_object.if_contains("min_time_to_switch_targets");
-            if (min_time_to_switch_targets_value_ptr != nullptr) {
-                ai.targeting.min_time_to_switch_targets = boost::json::value_to<double>(*min_time_to_switch_targets_value_ptr);
-            }
-
-            const boost::json::value * min_null_time_to_switch_targets_value_ptr = targeting_object.if_contains("min_null_time_to_switch_targets");
-            if (min_null_time_to_switch_targets_value_ptr != nullptr) {
-                ai.targeting.min_null_time_to_switch_targets = boost::json::value_to<double>(*min_null_time_to_switch_targets_value_ptr);
-            }
-
-            const boost::json::value * mountless_gun_range_value_ptr = targeting_object.if_contains("mountless_gun_range");
-            if (mountless_gun_range_value_ptr != nullptr) {
-                ai.targeting.mountless_gun_range = boost::json::value_to<double>(*mountless_gun_range_value_ptr);
-            }
-
-            const boost::json::value * obedience_value_ptr = targeting_object.if_contains("obedience");
-            if (obedience_value_ptr != nullptr) {
-                ai.targeting.obedience = boost::json::value_to<double>(*obedience_value_ptr);
-            }
-
-            const boost::json::value * search_extra_radius_value_ptr = targeting_object.if_contains("search_extra_radius");
-            if (search_extra_radius_value_ptr != nullptr) {
-                ai.targeting.search_extra_radius = boost::json::value_to<double>(*search_extra_radius_value_ptr);
-            }
-
-            const boost::json::value * search_max_candidates_value_ptr = targeting_object.if_contains("search_max_candidates");
-            if (search_max_candidates_value_ptr != nullptr) {
-                ai.targeting.search_max_candidates = boost::json::value_to<int>(*search_max_candidates_value_ptr);
-            }
-
-            const boost::json::value * search_max_role_priority_value_ptr = targeting_object.if_contains("search_max_role_priority");
-            if (search_max_role_priority_value_ptr != nullptr) {
-                ai.targeting.search_max_role_priority = boost::json::value_to<int>(*search_max_role_priority_value_ptr);
-            }
-
-            const boost::json::value * threat_weight_value_ptr = targeting_object.if_contains("threat_weight");
-            if (threat_weight_value_ptr != nullptr) {
-                ai.targeting.threat_weight = boost::json::value_to<double>(*threat_weight_value_ptr);
-            }
-
-            const boost::json::value * time_to_recommand_wing_value_ptr = targeting_object.if_contains("time_to_recommand_wing");
-            if (time_to_recommand_wing_value_ptr != nullptr) {
-                ai.targeting.time_to_recommand_wing = boost::json::value_to<double>(*time_to_recommand_wing_value_ptr);
-            }
-
-            const boost::json::value * time_until_switch_value_ptr = targeting_object.if_contains("time_until_switch");
-            if (time_until_switch_value_ptr != nullptr) {
-                ai.targeting.time_until_switch = boost::json::value_to<double>(*time_until_switch_value_ptr);
-            }
-
-            const boost::json::value * turn_leader_distance_value_ptr = targeting_object.if_contains("turn_leader_distance");
-            if (turn_leader_distance_value_ptr != nullptr) {
-                ai.targeting.turn_leader_distance = boost::json::value_to<double>(*turn_leader_distance_value_ptr);
-            }
-
-        }
-
-
-        }
-
-
-        const boost::json::value * audio_value_ptr = root_object.if_contains("audio");
-        if (audio_value_ptr != nullptr) {
-            boost::json::object audio_object = audio_value_ptr->get_object();
-            const boost::json::value * afterburner_gain_value_ptr = audio_object.if_contains("afterburner_gain");
-            if (afterburner_gain_value_ptr != nullptr) {
-                audio.afterburner_gain = boost::json::value_to<double>(*afterburner_gain_value_ptr);
-            }
-
-            const boost::json::value * ai_high_quality_weapon_value_ptr = audio_object.if_contains("ai_high_quality_weapon");
-            if (ai_high_quality_weapon_value_ptr != nullptr) {
-                audio.ai_high_quality_weapon = boost::json::value_to<bool>(*ai_high_quality_weapon_value_ptr);
-            }
-
-            const boost::json::value * ai_sound_value_ptr = audio_object.if_contains("ai_sound");
-            if (ai_sound_value_ptr != nullptr) {
-                audio.ai_sound = boost::json::value_to<bool>(*ai_sound_value_ptr);
-            }
-
-            const boost::json::value * audio_max_distance_value_ptr = audio_object.if_contains("audio_max_distance");
-            if (audio_max_distance_value_ptr != nullptr) {
-                audio.audio_max_distance = boost::json::value_to<double>(*audio_max_distance_value_ptr);
-            }
-
-            const boost::json::value * audio_ref_distance_value_ptr = audio_object.if_contains("audio_ref_distance");
-            if (audio_ref_distance_value_ptr != nullptr) {
-                audio.audio_ref_distance = boost::json::value_to<double>(*audio_ref_distance_value_ptr);
-            }
-
-            const boost::json::value * automatic_docking_zone_value_ptr = audio_object.if_contains("automatic_docking_zone");
-            if (automatic_docking_zone_value_ptr != nullptr) {
-                audio.automatic_docking_zone = boost::json::value_to<std::string>(*automatic_docking_zone_value_ptr);
-            }
-
-            const boost::json::value * battle_playlist_value_ptr = audio_object.if_contains("battle_playlist");
-            if (battle_playlist_value_ptr != nullptr) {
-                audio.battle_playlist = boost::json::value_to<std::string>(*battle_playlist_value_ptr);
-            }
-
-            const boost::json::value * buzzing_distance_value_ptr = audio_object.if_contains("buzzing_distance");
-            if (buzzing_distance_value_ptr != nullptr) {
-                audio.buzzing_distance = boost::json::value_to<double>(*buzzing_distance_value_ptr);
-            }
-
-            const boost::json::value * buzzing_needs_afterburner_value_ptr = audio_object.if_contains("buzzing_needs_afterburner");
-            if (buzzing_needs_afterburner_value_ptr != nullptr) {
-                audio.buzzing_needs_afterburner = boost::json::value_to<bool>(*buzzing_needs_afterburner_value_ptr);
-            }
-
-            const boost::json::value * buzzing_time_value_ptr = audio_object.if_contains("buzzing_time");
-            if (buzzing_time_value_ptr != nullptr) {
-                audio.buzzing_time = boost::json::value_to<double>(*buzzing_time_value_ptr);
-            }
-
-            const boost::json::value * cache_songs_value_ptr = audio_object.if_contains("cache_songs");
-            if (cache_songs_value_ptr != nullptr) {
-                audio.cache_songs = boost::json::value_to<std::string>(*cache_songs_value_ptr);
-            }
-
-            const boost::json::value * cross_fade_music_value_ptr = audio_object.if_contains("cross_fade_music");
-            if (cross_fade_music_value_ptr != nullptr) {
-                audio.cross_fade_music = boost::json::value_to<bool>(*cross_fade_music_value_ptr);
-            }
-
-            const boost::json::value * dj_script_value_ptr = audio_object.if_contains("dj_script");
-            if (dj_script_value_ptr != nullptr) {
-                audio.dj_script = boost::json::value_to<std::string>(*dj_script_value_ptr);
-            }
-
-            const boost::json::value * doppler_value_ptr = audio_object.if_contains("doppler");
-            if (doppler_value_ptr != nullptr) {
-                audio.doppler = boost::json::value_to<bool>(*doppler_value_ptr);
-            }
-
-            const boost::json::value * doppler_scale_value_ptr = audio_object.if_contains("doppler_scale");
-            if (doppler_scale_value_ptr != nullptr) {
-                audio.doppler_scale = boost::json::value_to<double>(*doppler_scale_value_ptr);
-            }
-
-            const boost::json::value * every_other_mount_value_ptr = audio_object.if_contains("every_other_mount");
-            if (every_other_mount_value_ptr != nullptr) {
-                audio.every_other_mount = boost::json::value_to<bool>(*every_other_mount_value_ptr);
-            }
-
-            const boost::json::value * explosion_closeness_value_ptr = audio_object.if_contains("explosion_closeness");
-            if (explosion_closeness_value_ptr != nullptr) {
-                audio.explosion_closeness = boost::json::value_to<double>(*explosion_closeness_value_ptr);
-            }
-
-            const boost::json::value * exterior_weapon_gain_value_ptr = audio_object.if_contains("exterior_weapon_gain");
-            if (exterior_weapon_gain_value_ptr != nullptr) {
-                audio.exterior_weapon_gain = boost::json::value_to<double>(*exterior_weapon_gain_value_ptr);
-            }
-
-            const boost::json::value * frequency_value_ptr = audio_object.if_contains("frequency");
-            if (frequency_value_ptr != nullptr) {
-                audio.frequency = boost::json::value_to<int>(*frequency_value_ptr);
-            }
-
-            const boost::json::value * high_quality_weapon_value_ptr = audio_object.if_contains("high_quality_weapon");
-            if (high_quality_weapon_value_ptr != nullptr) {
-                audio.high_quality_weapon = boost::json::value_to<bool>(*high_quality_weapon_value_ptr);
-            }
-
-            const boost::json::value * loading_sound_value_ptr = audio_object.if_contains("loading_sound");
-            if (loading_sound_value_ptr != nullptr) {
-                audio.loading_sound = boost::json::value_to<std::string>(*loading_sound_value_ptr);
-            }
-
-            const boost::json::value * loss_playlist_value_ptr = audio_object.if_contains("loss_playlist");
-            if (loss_playlist_value_ptr != nullptr) {
-                audio.loss_playlist = boost::json::value_to<std::string>(*loss_playlist_value_ptr);
-            }
-
-            const boost::json::value * loss_relationship_value_ptr = audio_object.if_contains("loss_relationship");
-            if (loss_relationship_value_ptr != nullptr) {
-                audio.loss_relationship = boost::json::value_to<double>(*loss_relationship_value_ptr);
-            }
-
-            const boost::json::value * max_single_sounds_value_ptr = audio_object.if_contains("max_single_sounds");
-            if (max_single_sounds_value_ptr != nullptr) {
-                audio.max_single_sounds = boost::json::value_to<int>(*max_single_sounds_value_ptr);
-            }
-
-            const boost::json::value * max_total_sounds_value_ptr = audio_object.if_contains("max_total_sounds");
-            if (max_total_sounds_value_ptr != nullptr) {
-                audio.max_total_sounds = boost::json::value_to<int>(*max_total_sounds_value_ptr);
-            }
-
-            const boost::json::value * max_range_to_hear_weapon_fire_value_ptr = audio_object.if_contains("max_range_to_hear_weapon_fire");
-            if (max_range_to_hear_weapon_fire_value_ptr != nullptr) {
-                audio.max_range_to_hear_weapon_fire = boost::json::value_to<double>(*max_range_to_hear_weapon_fire_value_ptr);
-            }
-
-            const boost::json::value * min_weapon_sound_refire_value_ptr = audio_object.if_contains("min_weapon_sound_refire");
-            if (min_weapon_sound_refire_value_ptr != nullptr) {
-                audio.min_weapon_sound_refire = boost::json::value_to<double>(*min_weapon_sound_refire_value_ptr);
-            }
-
-            const boost::json::value * mission_victory_song_value_ptr = audio_object.if_contains("mission_victory_song");
-            if (mission_victory_song_value_ptr != nullptr) {
-                audio.mission_victory_song = boost::json::value_to<std::string>(*mission_victory_song_value_ptr);
-            }
-
-            const boost::json::value * music_value_ptr = audio_object.if_contains("music");
-            if (music_value_ptr != nullptr) {
-                audio.music = boost::json::value_to<bool>(*music_value_ptr);
-            }
-
-            const boost::json::value * music_layers_value_ptr = audio_object.if_contains("music_layers");
-            if (music_layers_value_ptr != nullptr) {
-                audio.music_layers = boost::json::value_to<int>(*music_layers_value_ptr);
-            }
-
-            const boost::json::value * music_muting_fade_in_value_ptr = audio_object.if_contains("music_muting_fade_in");
-            if (music_muting_fade_in_value_ptr != nullptr) {
-                audio.music_muting_fade_in = boost::json::value_to<double>(*music_muting_fade_in_value_ptr);
-            }
-
-            const boost::json::value * music_muting_fade_out_value_ptr = audio_object.if_contains("music_muting_fade_out");
-            if (music_muting_fade_out_value_ptr != nullptr) {
-                audio.music_muting_fade_out = boost::json::value_to<double>(*music_muting_fade_out_value_ptr);
-            }
-
-            const boost::json::value * music_volume_value_ptr = audio_object.if_contains("music_volume");
-            if (music_volume_value_ptr != nullptr) {
-                audio.music_volume = boost::json::value_to<double>(*music_volume_value_ptr);
-            }
-
-            const boost::json::value * music_volume_down_latency_value_ptr = audio_object.if_contains("music_volume_down_latency");
-            if (music_volume_down_latency_value_ptr != nullptr) {
-                audio.music_volume_down_latency = boost::json::value_to<double>(*music_volume_down_latency_value_ptr);
-            }
-
-            const boost::json::value * music_volume_up_latency_value_ptr = audio_object.if_contains("music_volume_up_latency");
-            if (music_volume_up_latency_value_ptr != nullptr) {
-                audio.music_volume_up_latency = boost::json::value_to<double>(*music_volume_up_latency_value_ptr);
-            }
-
-            const boost::json::value * news_song_value_ptr = audio_object.if_contains("news_song");
-            if (news_song_value_ptr != nullptr) {
-                audio.news_song = boost::json::value_to<std::string>(*news_song_value_ptr);
-            }
-
-            const boost::json::value * panic_playlist_value_ptr = audio_object.if_contains("panic_playlist");
-            if (panic_playlist_value_ptr != nullptr) {
-                audio.panic_playlist = boost::json::value_to<std::string>(*panic_playlist_value_ptr);
-            }
-
-            const boost::json::value * peace_playlist_value_ptr = audio_object.if_contains("peace_playlist");
-            if (peace_playlist_value_ptr != nullptr) {
-                audio.peace_playlist = boost::json::value_to<std::string>(*peace_playlist_value_ptr);
-            }
-
-            const boost::json::value * positional_value_ptr = audio_object.if_contains("positional");
-            if (positional_value_ptr != nullptr) {
-                audio.positional = boost::json::value_to<bool>(*positional_value_ptr);
-            }
-
-            const boost::json::value * shuffle_songs_value_ptr = audio_object.if_contains("shuffle_songs");
-            if (shuffle_songs_value_ptr != nullptr) {
-                audio.shuffle_songs = boost::json::value_to<bool>(*shuffle_songs_value_ptr);
-            }
-
-            const boost::json::value * sound_value_ptr = audio_object.if_contains("sound");
-            if (sound_value_ptr != nullptr) {
-                audio.sound = boost::json::value_to<bool>(*sound_value_ptr);
-            }
-
-            const boost::json::value * sound_gain_value_ptr = audio_object.if_contains("sound_gain");
-            if (sound_gain_value_ptr != nullptr) {
-                audio.sound_gain = boost::json::value_to<double>(*sound_gain_value_ptr);
-            }
-
-            const boost::json::value * thread_time_value_ptr = audio_object.if_contains("thread_time");
-            if (thread_time_value_ptr != nullptr) {
-                audio.thread_time = boost::json::value_to<int>(*thread_time_value_ptr);
-            }
-
-            const boost::json::value * time_between_music_value_ptr = audio_object.if_contains("time_between_music");
-            if (time_between_music_value_ptr != nullptr) {
-                audio.time_between_music = boost::json::value_to<double>(*time_between_music_value_ptr);
-            }
-
-            const boost::json::value * victory_playlist_value_ptr = audio_object.if_contains("victory_playlist");
-            if (victory_playlist_value_ptr != nullptr) {
-                audio.victory_playlist = boost::json::value_to<std::string>(*victory_playlist_value_ptr);
-            }
-
-            const boost::json::value * victory_relationship_value_ptr = audio_object.if_contains("victory_relationship");
-            if (victory_relationship_value_ptr != nullptr) {
-                audio.victory_relationship = boost::json::value_to<double>(*victory_relationship_value_ptr);
-            }
-
-            const boost::json::value * volume_value_ptr = audio_object.if_contains("volume");
-            if (volume_value_ptr != nullptr) {
-                audio.volume = boost::json::value_to<double>(*volume_value_ptr);
-            }
-
-            const boost::json::value * weapon_gain_value_ptr = audio_object.if_contains("weapon_gain");
-            if (weapon_gain_value_ptr != nullptr) {
-                audio.weapon_gain = boost::json::value_to<double>(*weapon_gain_value_ptr);
-            }
-
-        const boost::json::value * shuffle_songs_section_value_ptr = audio_object.if_contains("shuffle_songs_section");
-        if (shuffle_songs_section_value_ptr != nullptr) {
-            boost::json::object shuffle_songs_section_object = shuffle_songs_section_value_ptr->get_object();
-            const boost::json::value * clear_history_on_list_change_value_ptr = shuffle_songs_section_object.if_contains("clear_history_on_list_change");
-            if (clear_history_on_list_change_value_ptr != nullptr) {
-                audio.shuffle_songs_section.clear_history_on_list_change = boost::json::value_to<bool>(*clear_history_on_list_change_value_ptr);
-            }
-
-            const boost::json::value * history_depth_value_ptr = shuffle_songs_section_object.if_contains("history_depth");
-            if (history_depth_value_ptr != nullptr) {
-                audio.shuffle_songs_section.history_depth = boost::json::value_to<int>(*history_depth_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * unit_audio_value_ptr = audio_object.if_contains("unit_audio");
-        if (unit_audio_value_ptr != nullptr) {
-            boost::json::object unit_audio_object = unit_audio_value_ptr->get_object();
-            const boost::json::value * afterburner_value_ptr = unit_audio_object.if_contains("afterburner");
-            if (afterburner_value_ptr != nullptr) {
-                audio.unit_audio.afterburner = boost::json::value_to<std::string>(*afterburner_value_ptr);
-            }
-
-            const boost::json::value * armor_value_ptr = unit_audio_object.if_contains("armor");
-            if (armor_value_ptr != nullptr) {
-                audio.unit_audio.armor = boost::json::value_to<std::string>(*armor_value_ptr);
-            }
-
-            const boost::json::value * cloak_value_ptr = unit_audio_object.if_contains("cloak");
-            if (cloak_value_ptr != nullptr) {
-                audio.unit_audio.cloak = boost::json::value_to<std::string>(*cloak_value_ptr);
-            }
-
-            const boost::json::value * explode_value_ptr = unit_audio_object.if_contains("explode");
-            if (explode_value_ptr != nullptr) {
-                audio.unit_audio.explode = boost::json::value_to<std::string>(*explode_value_ptr);
-            }
-
-            const boost::json::value * hull_value_ptr = unit_audio_object.if_contains("hull");
-            if (hull_value_ptr != nullptr) {
-                audio.unit_audio.hull = boost::json::value_to<std::string>(*hull_value_ptr);
-            }
-
-            const boost::json::value * jump_arrive_value_ptr = unit_audio_object.if_contains("jump_arrive");
-            if (jump_arrive_value_ptr != nullptr) {
-                audio.unit_audio.jump_arrive = boost::json::value_to<std::string>(*jump_arrive_value_ptr);
-            }
-
-            const boost::json::value * jump_leave_value_ptr = unit_audio_object.if_contains("jump_leave");
-            if (jump_leave_value_ptr != nullptr) {
-                audio.unit_audio.jump_leave = boost::json::value_to<std::string>(*jump_leave_value_ptr);
-            }
-
-            const boost::json::value * locked_value_ptr = unit_audio_object.if_contains("locked");
-            if (locked_value_ptr != nullptr) {
-                audio.unit_audio.locked = boost::json::value_to<std::string>(*locked_value_ptr);
-            }
-
-            const boost::json::value * locking_value_ptr = unit_audio_object.if_contains("locking");
-            if (locking_value_ptr != nullptr) {
-                audio.unit_audio.locking = boost::json::value_to<std::string>(*locking_value_ptr);
-            }
-
-            const boost::json::value * locking_torp_value_ptr = unit_audio_object.if_contains("locking_torp");
-            if (locking_torp_value_ptr != nullptr) {
-                audio.unit_audio.locking_torp = boost::json::value_to<std::string>(*locking_torp_value_ptr);
-            }
-
-            const boost::json::value * locking_torp_trumps_music_value_ptr = unit_audio_object.if_contains("locking_torp_trumps_music");
-            if (locking_torp_trumps_music_value_ptr != nullptr) {
-                audio.unit_audio.locking_torp_trumps_music = boost::json::value_to<bool>(*locking_torp_trumps_music_value_ptr);
-            }
-
-            const boost::json::value * locking_trumps_music_value_ptr = unit_audio_object.if_contains("locking_trumps_music");
-            if (locking_trumps_music_value_ptr != nullptr) {
-                audio.unit_audio.locking_trumps_music = boost::json::value_to<bool>(*locking_trumps_music_value_ptr);
-            }
-
-            const boost::json::value * player_afterburner_value_ptr = unit_audio_object.if_contains("player_afterburner");
-            if (player_afterburner_value_ptr != nullptr) {
-                audio.unit_audio.player_afterburner = boost::json::value_to<std::string>(*player_afterburner_value_ptr);
-            }
-
-            const boost::json::value * player_armor_hit_value_ptr = unit_audio_object.if_contains("player_armor_hit");
-            if (player_armor_hit_value_ptr != nullptr) {
-                audio.unit_audio.player_armor_hit = boost::json::value_to<std::string>(*player_armor_hit_value_ptr);
-            }
-
-            const boost::json::value * player_hull_hit_value_ptr = unit_audio_object.if_contains("player_hull_hit");
-            if (player_hull_hit_value_ptr != nullptr) {
-                audio.unit_audio.player_hull_hit = boost::json::value_to<std::string>(*player_hull_hit_value_ptr);
-            }
-
-            const boost::json::value * player_shield_hit_value_ptr = unit_audio_object.if_contains("player_shield_hit");
-            if (player_shield_hit_value_ptr != nullptr) {
-                audio.unit_audio.player_shield_hit = boost::json::value_to<std::string>(*player_shield_hit_value_ptr);
-            }
-
-            const boost::json::value * player_tractor_cargo_value_ptr = unit_audio_object.if_contains("player_tractor_cargo");
-            if (player_tractor_cargo_value_ptr != nullptr) {
-                audio.unit_audio.player_tractor_cargo = boost::json::value_to<std::string>(*player_tractor_cargo_value_ptr);
-            }
-
-            const boost::json::value * player_tractor_cargo_fromturret_value_ptr = unit_audio_object.if_contains("player_tractor_cargo_fromturret");
-            if (player_tractor_cargo_fromturret_value_ptr != nullptr) {
-                audio.unit_audio.player_tractor_cargo_fromturret = boost::json::value_to<std::string>(*player_tractor_cargo_fromturret_value_ptr);
-            }
-
-            const boost::json::value * shield_value_ptr = unit_audio_object.if_contains("shield");
-            if (shield_value_ptr != nullptr) {
-                audio.unit_audio.shield = boost::json::value_to<std::string>(*shield_value_ptr);
-            }
-
-        }
-
-
-        }
-
-
-        const boost::json::value * cargo_value_ptr = root_object.if_contains("cargo");
-        if (cargo_value_ptr != nullptr) {
-            boost::json::object cargo_object = cargo_value_ptr->get_object();
-            const boost::json::value * filter_expensive_cargo_value_ptr = cargo_object.if_contains("filter_expensive_cargo");
-            if (filter_expensive_cargo_value_ptr != nullptr) {
-                cargo.filter_expensive_cargo = boost::json::value_to<bool>(*filter_expensive_cargo_value_ptr);
-            }
-
-            const boost::json::value * junk_starship_mass_value_ptr = cargo_object.if_contains("junk_starship_mass");
-            if (junk_starship_mass_value_ptr != nullptr) {
-                cargo.junk_starship_mass = boost::json::value_to<double>(*junk_starship_mass_value_ptr);
-            }
-
-            const boost::json::value * junk_starship_price_value_ptr = cargo_object.if_contains("junk_starship_price");
-            if (junk_starship_price_value_ptr != nullptr) {
-                cargo.junk_starship_price = boost::json::value_to<double>(*junk_starship_price_value_ptr);
-            }
-
-            const boost::json::value * junk_starship_volume_value_ptr = cargo_object.if_contains("junk_starship_volume");
-            if (junk_starship_volume_value_ptr != nullptr) {
-                cargo.junk_starship_volume = boost::json::value_to<double>(*junk_starship_volume_value_ptr);
-            }
-
-            const boost::json::value * max_price_quant_adj_value_ptr = cargo_object.if_contains("max_price_quant_adj");
-            if (max_price_quant_adj_value_ptr != nullptr) {
-                cargo.max_price_quant_adj = boost::json::value_to<double>(*max_price_quant_adj_value_ptr);
-            }
-
-            const boost::json::value * min_cargo_price_value_ptr = cargo_object.if_contains("min_cargo_price");
-            if (min_cargo_price_value_ptr != nullptr) {
-                cargo.min_cargo_price = boost::json::value_to<double>(*min_cargo_price_value_ptr);
-            }
-
-            const boost::json::value * min_price_quant_adj_value_ptr = cargo_object.if_contains("min_price_quant_adj");
-            if (min_price_quant_adj_value_ptr != nullptr) {
-                cargo.min_price_quant_adj = boost::json::value_to<double>(*min_price_quant_adj_value_ptr);
-            }
-
-            const boost::json::value * news_from_cargo_list_value_ptr = cargo_object.if_contains("news_from_cargo_list");
-            if (news_from_cargo_list_value_ptr != nullptr) {
-                cargo.news_from_cargo_list = boost::json::value_to<bool>(*news_from_cargo_list_value_ptr);
-            }
-
-            const boost::json::value * price_quant_adj_power_value_ptr = cargo_object.if_contains("price_quant_adj_power");
-            if (price_quant_adj_power_value_ptr != nullptr) {
-                cargo.price_quant_adj_power = boost::json::value_to<double>(*price_quant_adj_power_value_ptr);
-            }
-
-            const boost::json::value * price_recenter_factor_value_ptr = cargo_object.if_contains("price_recenter_factor");
-            if (price_recenter_factor_value_ptr != nullptr) {
-                cargo.price_recenter_factor = boost::json::value_to<double>(*price_recenter_factor_value_ptr);
-            }
-
-            const boost::json::value * space_junk_price_value_ptr = cargo_object.if_contains("space_junk_price");
-            if (space_junk_price_value_ptr != nullptr) {
-                cargo.space_junk_price = boost::json::value_to<double>(*space_junk_price_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * cockpit_audio_value_ptr = root_object.if_contains("cockpit_audio");
-        if (cockpit_audio_value_ptr != nullptr) {
-            boost::json::object cockpit_audio_object = cockpit_audio_value_ptr->get_object();
-            const boost::json::value * automatic_landing_zone_value_ptr = cockpit_audio_object.if_contains("automatic_landing_zone");
-            if (automatic_landing_zone_value_ptr != nullptr) {
-                cockpit_audio.automatic_landing_zone = boost::json::value_to<std::string>(*automatic_landing_zone_value_ptr);
-            }
-
-            const boost::json::value * automatic_landing_zone1_value_ptr = cockpit_audio_object.if_contains("automatic_landing_zone1");
-            if (automatic_landing_zone1_value_ptr != nullptr) {
-                cockpit_audio.automatic_landing_zone1 = boost::json::value_to<std::string>(*automatic_landing_zone1_value_ptr);
-            }
-
-            const boost::json::value * automatic_landing_zone2_value_ptr = cockpit_audio_object.if_contains("automatic_landing_zone2");
-            if (automatic_landing_zone2_value_ptr != nullptr) {
-                cockpit_audio.automatic_landing_zone2 = boost::json::value_to<std::string>(*automatic_landing_zone2_value_ptr);
-            }
-
-            const boost::json::value * autopilot_available_value_ptr = cockpit_audio_object.if_contains("autopilot_available");
-            if (autopilot_available_value_ptr != nullptr) {
-                cockpit_audio.autopilot_available = boost::json::value_to<std::string>(*autopilot_available_value_ptr);
-            }
-
-            const boost::json::value * autopilot_disabled_value_ptr = cockpit_audio_object.if_contains("autopilot_disabled");
-            if (autopilot_disabled_value_ptr != nullptr) {
-                cockpit_audio.autopilot_disabled = boost::json::value_to<std::string>(*autopilot_disabled_value_ptr);
-            }
-
-            const boost::json::value * autopilot_enabled_value_ptr = cockpit_audio_object.if_contains("autopilot_enabled");
-            if (autopilot_enabled_value_ptr != nullptr) {
-                cockpit_audio.autopilot_enabled = boost::json::value_to<std::string>(*autopilot_enabled_value_ptr);
-            }
-
-            const boost::json::value * autopilot_unavailable_value_ptr = cockpit_audio_object.if_contains("autopilot_unavailable");
-            if (autopilot_unavailable_value_ptr != nullptr) {
-                cockpit_audio.autopilot_unavailable = boost::json::value_to<std::string>(*autopilot_unavailable_value_ptr);
-            }
-
-            const boost::json::value * comm_value_ptr = cockpit_audio_object.if_contains("comm");
-            if (comm_value_ptr != nullptr) {
-                cockpit_audio.comm = boost::json::value_to<std::string>(*comm_value_ptr);
-            }
-
-            const boost::json::value * comm_preload_value_ptr = cockpit_audio_object.if_contains("comm_preload");
-            if (comm_preload_value_ptr != nullptr) {
-                cockpit_audio.comm_preload = boost::json::value_to<bool>(*comm_preload_value_ptr);
-            }
-
-            const boost::json::value * compress_change_value_ptr = cockpit_audio_object.if_contains("compress_change");
-            if (compress_change_value_ptr != nullptr) {
-                cockpit_audio.compress_change = boost::json::value_to<std::string>(*compress_change_value_ptr);
-            }
-
-            const boost::json::value * compress_interval_value_ptr = cockpit_audio_object.if_contains("compress_interval");
-            if (compress_interval_value_ptr != nullptr) {
-                cockpit_audio.compress_interval = boost::json::value_to<int>(*compress_interval_value_ptr);
-            }
-
-            const boost::json::value * compress_loop_value_ptr = cockpit_audio_object.if_contains("compress_loop");
-            if (compress_loop_value_ptr != nullptr) {
-                cockpit_audio.compress_loop = boost::json::value_to<std::string>(*compress_loop_value_ptr);
-            }
-
-            const boost::json::value * compress_max_value_ptr = cockpit_audio_object.if_contains("compress_max");
-            if (compress_max_value_ptr != nullptr) {
-                cockpit_audio.compress_max = boost::json::value_to<int>(*compress_max_value_ptr);
-            }
-
-            const boost::json::value * compress_stop_value_ptr = cockpit_audio_object.if_contains("compress_stop");
-            if (compress_stop_value_ptr != nullptr) {
-                cockpit_audio.compress_stop = boost::json::value_to<std::string>(*compress_stop_value_ptr);
-            }
-
-            const boost::json::value * docking_complete_value_ptr = cockpit_audio_object.if_contains("docking_complete");
-            if (docking_complete_value_ptr != nullptr) {
-                cockpit_audio.docking_complete = boost::json::value_to<std::string>(*docking_complete_value_ptr);
-            }
-
-            const boost::json::value * docking_denied_value_ptr = cockpit_audio_object.if_contains("docking_denied");
-            if (docking_denied_value_ptr != nullptr) {
-                cockpit_audio.docking_denied = boost::json::value_to<std::string>(*docking_denied_value_ptr);
-            }
-
-            const boost::json::value * docking_failed_value_ptr = cockpit_audio_object.if_contains("docking_failed");
-            if (docking_failed_value_ptr != nullptr) {
-                cockpit_audio.docking_failed = boost::json::value_to<std::string>(*docking_failed_value_ptr);
-            }
-
-            const boost::json::value * docking_granted_value_ptr = cockpit_audio_object.if_contains("docking_granted");
-            if (docking_granted_value_ptr != nullptr) {
-                cockpit_audio.docking_granted = boost::json::value_to<std::string>(*docking_granted_value_ptr);
-            }
-
-            const boost::json::value * examine_value_ptr = cockpit_audio_object.if_contains("examine");
-            if (examine_value_ptr != nullptr) {
-                cockpit_audio.examine = boost::json::value_to<std::string>(*examine_value_ptr);
-            }
-
-            const boost::json::value * jump_engaged_value_ptr = cockpit_audio_object.if_contains("jump_engaged");
-            if (jump_engaged_value_ptr != nullptr) {
-                cockpit_audio.jump_engaged = boost::json::value_to<std::string>(*jump_engaged_value_ptr);
-            }
-
-            const boost::json::value * manifest_value_ptr = cockpit_audio_object.if_contains("manifest");
-            if (manifest_value_ptr != nullptr) {
-                cockpit_audio.manifest = boost::json::value_to<std::string>(*manifest_value_ptr);
-            }
-
-            const boost::json::value * missile_switch_value_ptr = cockpit_audio_object.if_contains("missile_switch");
-            if (missile_switch_value_ptr != nullptr) {
-                cockpit_audio.missile_switch = boost::json::value_to<std::string>(*missile_switch_value_ptr);
-            }
-
-            const boost::json::value * objective_value_ptr = cockpit_audio_object.if_contains("objective");
-            if (objective_value_ptr != nullptr) {
-                cockpit_audio.objective = boost::json::value_to<std::string>(*objective_value_ptr);
-            }
-
-            const boost::json::value * overload_value_ptr = cockpit_audio_object.if_contains("overload");
-            if (overload_value_ptr != nullptr) {
-                cockpit_audio.overload = boost::json::value_to<std::string>(*overload_value_ptr);
-            }
-
-            const boost::json::value * overload_stopped_value_ptr = cockpit_audio_object.if_contains("overload_stopped");
-            if (overload_stopped_value_ptr != nullptr) {
-                cockpit_audio.overload_stopped = boost::json::value_to<std::string>(*overload_stopped_value_ptr);
-            }
-
-            const boost::json::value * repair_value_ptr = cockpit_audio_object.if_contains("repair");
-            if (repair_value_ptr != nullptr) {
-                cockpit_audio.repair = boost::json::value_to<std::string>(*repair_value_ptr);
-            }
-
-            const boost::json::value * scanning_value_ptr = cockpit_audio_object.if_contains("scanning");
-            if (scanning_value_ptr != nullptr) {
-                cockpit_audio.scanning = boost::json::value_to<std::string>(*scanning_value_ptr);
-            }
-
-            const boost::json::value * shield_value_ptr = cockpit_audio_object.if_contains("shield");
-            if (shield_value_ptr != nullptr) {
-                cockpit_audio.shield = boost::json::value_to<std::string>(*shield_value_ptr);
-            }
-
-            const boost::json::value * sounds_extension_1_value_ptr = cockpit_audio_object.if_contains("sounds_extension_1");
-            if (sounds_extension_1_value_ptr != nullptr) {
-                cockpit_audio.sounds_extension_1 = boost::json::value_to<std::string>(*sounds_extension_1_value_ptr);
-            }
-
-            const boost::json::value * sounds_extension_2_value_ptr = cockpit_audio_object.if_contains("sounds_extension_2");
-            if (sounds_extension_2_value_ptr != nullptr) {
-                cockpit_audio.sounds_extension_2 = boost::json::value_to<std::string>(*sounds_extension_2_value_ptr);
-            }
-
-            const boost::json::value * sounds_extension_3_value_ptr = cockpit_audio_object.if_contains("sounds_extension_3");
-            if (sounds_extension_3_value_ptr != nullptr) {
-                cockpit_audio.sounds_extension_3 = boost::json::value_to<std::string>(*sounds_extension_3_value_ptr);
-            }
-
-            const boost::json::value * sounds_extension_4_value_ptr = cockpit_audio_object.if_contains("sounds_extension_4");
-            if (sounds_extension_4_value_ptr != nullptr) {
-                cockpit_audio.sounds_extension_4 = boost::json::value_to<std::string>(*sounds_extension_4_value_ptr);
-            }
-
-            const boost::json::value * sounds_extension_5_value_ptr = cockpit_audio_object.if_contains("sounds_extension_5");
-            if (sounds_extension_5_value_ptr != nullptr) {
-                cockpit_audio.sounds_extension_5 = boost::json::value_to<std::string>(*sounds_extension_5_value_ptr);
-            }
-
-            const boost::json::value * sounds_extension_6_value_ptr = cockpit_audio_object.if_contains("sounds_extension_6");
-            if (sounds_extension_6_value_ptr != nullptr) {
-                cockpit_audio.sounds_extension_6 = boost::json::value_to<std::string>(*sounds_extension_6_value_ptr);
-            }
-
-            const boost::json::value * sounds_extension_7_value_ptr = cockpit_audio_object.if_contains("sounds_extension_7");
-            if (sounds_extension_7_value_ptr != nullptr) {
-                cockpit_audio.sounds_extension_7 = boost::json::value_to<std::string>(*sounds_extension_7_value_ptr);
-            }
-
-            const boost::json::value * sounds_extension_8_value_ptr = cockpit_audio_object.if_contains("sounds_extension_8");
-            if (sounds_extension_8_value_ptr != nullptr) {
-                cockpit_audio.sounds_extension_8 = boost::json::value_to<std::string>(*sounds_extension_8_value_ptr);
-            }
-
-            const boost::json::value * sounds_extension_9_value_ptr = cockpit_audio_object.if_contains("sounds_extension_9");
-            if (sounds_extension_9_value_ptr != nullptr) {
-                cockpit_audio.sounds_extension_9 = boost::json::value_to<std::string>(*sounds_extension_9_value_ptr);
-            }
-
-            const boost::json::value * target_value_ptr = cockpit_audio_object.if_contains("target");
-            if (target_value_ptr != nullptr) {
-                cockpit_audio.target = boost::json::value_to<std::string>(*target_value_ptr);
-            }
-
-            const boost::json::value * target_reverse_value_ptr = cockpit_audio_object.if_contains("target_reverse");
-            if (target_reverse_value_ptr != nullptr) {
-                cockpit_audio.target_reverse = boost::json::value_to<std::string>(*target_reverse_value_ptr);
-            }
-
-            const boost::json::value * undocking_complete_value_ptr = cockpit_audio_object.if_contains("undocking_complete");
-            if (undocking_complete_value_ptr != nullptr) {
-                cockpit_audio.undocking_complete = boost::json::value_to<std::string>(*undocking_complete_value_ptr);
-            }
-
-            const boost::json::value * undocking_failed_value_ptr = cockpit_audio_object.if_contains("undocking_failed");
-            if (undocking_failed_value_ptr != nullptr) {
-                cockpit_audio.undocking_failed = boost::json::value_to<std::string>(*undocking_failed_value_ptr);
-            }
-
-            const boost::json::value * vdu_static_value_ptr = cockpit_audio_object.if_contains("vdu_static");
-            if (vdu_static_value_ptr != nullptr) {
-                cockpit_audio.vdu_static = boost::json::value_to<std::string>(*vdu_static_value_ptr);
-            }
-
-            const boost::json::value * view_value_ptr = cockpit_audio_object.if_contains("view");
-            if (view_value_ptr != nullptr) {
-                cockpit_audio.view = boost::json::value_to<std::string>(*view_value_ptr);
-            }
-
-            const boost::json::value * weapon_switch_value_ptr = cockpit_audio_object.if_contains("weapon_switch");
-            if (weapon_switch_value_ptr != nullptr) {
-                cockpit_audio.weapon_switch = boost::json::value_to<std::string>(*weapon_switch_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * collision_hacks_value_ptr = root_object.if_contains("collision_hacks");
-        if (collision_hacks_value_ptr != nullptr) {
-            boost::json::object collision_hacks_object = collision_hacks_value_ptr->get_object();
-            const boost::json::value * collision_hack_distance_value_ptr = collision_hacks_object.if_contains("collision_hack_distance");
-            if (collision_hack_distance_value_ptr != nullptr) {
-                collision_hacks.collision_hack_distance = boost::json::value_to<double>(*collision_hack_distance_value_ptr);
-            }
-
-            const boost::json::value * collision_damage_to_ai_value_ptr = collision_hacks_object.if_contains("collision_damage_to_ai");
-            if (collision_damage_to_ai_value_ptr != nullptr) {
-                collision_hacks.collision_damage_to_ai = boost::json::value_to<bool>(*collision_damage_to_ai_value_ptr);
-            }
-
-            const boost::json::value * crash_dock_hangar_value_ptr = collision_hacks_object.if_contains("crash_dock_hangar");
-            if (crash_dock_hangar_value_ptr != nullptr) {
-                collision_hacks.crash_dock_hangar = boost::json::value_to<bool>(*crash_dock_hangar_value_ptr);
-            }
-
-            const boost::json::value * crash_dock_unit_value_ptr = collision_hacks_object.if_contains("crash_dock_unit");
-            if (crash_dock_unit_value_ptr != nullptr) {
-                collision_hacks.crash_dock_unit = boost::json::value_to<bool>(*crash_dock_unit_value_ptr);
-            }
-
-            const boost::json::value * front_collision_hack_angle_value_ptr = collision_hacks_object.if_contains("front_collision_hack_angle");
-            if (front_collision_hack_angle_value_ptr != nullptr) {
-                collision_hacks.front_collision_hack_angle = boost::json::value_to<double>(*front_collision_hack_angle_value_ptr);
-            }
-
-            const boost::json::value * front_collision_hack_distance_value_ptr = collision_hacks_object.if_contains("front_collision_hack_distance");
-            if (front_collision_hack_distance_value_ptr != nullptr) {
-                collision_hacks.front_collision_hack_distance = boost::json::value_to<double>(*front_collision_hack_distance_value_ptr);
-            }
-
-            const boost::json::value * cargo_deals_collide_damage_value_ptr = collision_hacks_object.if_contains("cargo_deals_collide_damage");
-            if (cargo_deals_collide_damage_value_ptr != nullptr) {
-                collision_hacks.cargo_deals_collide_damage = boost::json::value_to<bool>(*cargo_deals_collide_damage_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * economics_value_ptr = root_object.if_contains("economics");
-        if (economics_value_ptr != nullptr) {
-            boost::json::object economics_object = economics_value_ptr->get_object();
-            const boost::json::value * repair_price_value_ptr = economics_object.if_contains("repair_price");
-            if (repair_price_value_ptr != nullptr) {
-                economics.repair_price = boost::json::value_to<double>(*repair_price_value_ptr);
-            }
-
-            const boost::json::value * sellback_shipping_price_value_ptr = economics_object.if_contains("sellback_shipping_price");
-            if (sellback_shipping_price_value_ptr != nullptr) {
-                economics.sellback_shipping_price = boost::json::value_to<double>(*sellback_shipping_price_value_ptr);
-            }
-
-            const boost::json::value * ship_sellback_price_value_ptr = economics_object.if_contains("ship_sellback_price");
-            if (ship_sellback_price_value_ptr != nullptr) {
-                economics.ship_sellback_price = boost::json::value_to<double>(*ship_sellback_price_value_ptr);
-            }
-
-            const boost::json::value * shipping_price_base_value_ptr = economics_object.if_contains("shipping_price_base");
-            if (shipping_price_base_value_ptr != nullptr) {
-                economics.shipping_price_base = boost::json::value_to<double>(*shipping_price_base_value_ptr);
-            }
-
-            const boost::json::value * shipping_price_insys_value_ptr = economics_object.if_contains("shipping_price_insys");
-            if (shipping_price_insys_value_ptr != nullptr) {
-                economics.shipping_price_insys = boost::json::value_to<double>(*shipping_price_insys_value_ptr);
-            }
-
-            const boost::json::value * shipping_price_perjump_value_ptr = economics_object.if_contains("shipping_price_perjump");
-            if (shipping_price_perjump_value_ptr != nullptr) {
-                economics.shipping_price_perjump = boost::json::value_to<double>(*shipping_price_perjump_value_ptr);
-            }
-
-        }
-
-
-        const boost::json::value * flight_value_ptr = root_object.if_contains("flight");
-        if (flight_value_ptr != nullptr) {
-            boost::json::object flight_object = flight_value_ptr->get_object();
-        const boost::json::value * inertial_value_ptr = flight_object.if_contains("inertial");
-        if (inertial_value_ptr != nullptr) {
-            boost::json::object inertial_object = inertial_value_ptr->get_object();
-            const boost::json::value * initial_value_ptr = inertial_object.if_contains("initial");
-            if (initial_value_ptr != nullptr) {
-                flight.inertial.initial = boost::json::value_to<bool>(*initial_value_ptr);
-            }
-
-            const boost::json::value * enable_value_ptr = inertial_object.if_contains("enable");
-            if (enable_value_ptr != nullptr) {
-                flight.inertial.enable = boost::json::value_to<bool>(*enable_value_ptr);
-            }
-
-        }
-
-
-        }
-
-
-        const boost::json::value * galaxy_value_ptr = root_object.if_contains("galaxy");
-        if (galaxy_value_ptr != nullptr) {
-            boost::json::object galaxy_object = galaxy_value_ptr->get_object();
-            const boost::json::value * ambient_light_factor_value_ptr = galaxy_object.if_contains("ambient_light_factor");
-            if (ambient_light_factor_value_ptr != nullptr) {
-                galaxy.ambient_light_factor = boost::json::value_to<double>(*ambient_light_factor_value_ptr);
-            }
-
-            const boost::json::value * atmosphere_probability_value_ptr = galaxy_object.if_contains("atmosphere_probability");
-            if (atmosphere_probability_value_ptr != nullptr) {
-                galaxy.atmosphere_probability = boost::json::value_to<double>(*atmosphere_probability_value_ptr);
-            }
-
-            const boost::json::value * compactness_scale_value_ptr = galaxy_object.if_contains("compactness_scale");
-            if (compactness_scale_value_ptr != nullptr) {
-                galaxy.compactness_scale = boost::json::value_to<double>(*compactness_scale_value_ptr);
-            }
-
-            const boost::json::value * default_atmosphere_texture_value_ptr = galaxy_object.if_contains("default_atmosphere_texture");
-            if (default_atmosphere_texture_value_ptr != nullptr) {
-                galaxy.default_atmosphere_texture = boost::json::value_to<std::string>(*default_atmosphere_texture_value_ptr);
-            }
-
-            const boost::json::value * default_ring_texture_value_ptr = galaxy_object.if_contains("default_ring_texture");
-            if (default_ring_texture_value_ptr != nullptr) {
-                galaxy.default_ring_texture = boost::json::value_to<std::string>(*default_ring_texture_value_ptr);
-            }
-
-            const boost::json::value * double_ring_probability_value_ptr = galaxy_object.if_contains("double_ring_probability");
-            if (double_ring_probability_value_ptr != nullptr) {
-                galaxy.double_ring_probability = boost::json::value_to<double>(*double_ring_probability_value_ptr);
-            }
-
-            const boost::json::value * inner_ring_radius_value_ptr = galaxy_object.if_contains("inner_ring_radius");
-            if (inner_ring_radius_value_ptr != nullptr) {
-                galaxy.inner_ring_radius = boost::json::value_to<double>(*inner_ring_radius_value_ptr);
-            }
-
-            const boost::json::value * jump_compactness_scale_value_ptr = galaxy_object.if_contains("jump_compactness_scale");
-            if (jump_compactness_scale_value_ptr != nullptr) {
-                galaxy.jump_compactness_scale = boost::json::value_to<double>(*jump_compactness_scale_value_ptr);
-            }
-
-            const boost::json::value * mean_natural_phenomena_value_ptr = galaxy_object.if_contains("mean_natural_phenomena");
-            if (mean_natural_phenomena_value_ptr != nullptr) {
-                galaxy.mean_natural_phenomena = boost::json::value_to<int>(*mean_natural_phenomena_value_ptr);
-            }
-
-            const boost::json::value * mean_star_bases_value_ptr = galaxy_object.if_contains("mean_star_bases");
-            if (mean_star_bases_value_ptr != nullptr) {
-                galaxy.mean_star_bases = boost::json::value_to<int>(*mean_star_bases_value_ptr);
-            }
-
-            const boost::json::value * moon_relative_to_moon_value_ptr = galaxy_object.if_contains("moon_relative_to_moon");
-            if (moon_relative_to_moon_value_ptr != nullptr) {
-                galaxy.moon_relative_to_moon = boost::json::value_to<double>(*moon_relative_to_moon_value_ptr);
-            }
-
-            const boost::json::value * moon_relative_to_planet_value_ptr = galaxy_object.if_contains("moon_relative_to_planet");
-            if (moon_relative_to_planet_value_ptr != nullptr) {
-                galaxy.moon_relative_to_planet = boost::json::value_to<double>(*moon_relative_to_planet_value_ptr);
-            }
-
-            const boost::json::value * outer_ring_radius_value_ptr = galaxy_object.if_contains("outer_ring_radius");
-            if (outer_ring_radius_value_ptr != nullptr) {
-                galaxy.outer_ring_radius = boost::json::value_to<double>(*outer_ring_radius_value_ptr);
-            }
-
-            const boost::json::value * police_faction_value_ptr = galaxy_object.if_contains("police_faction");
-            if (police_faction_value_ptr != nullptr) {
-                galaxy.police_faction = boost::json::value_to<std::string>(*police_faction_value_ptr);
-            }
-
-            const boost::json::value * prison_system_value_ptr = galaxy_object.if_contains("prison_system");
-            if (prison_system_value_ptr != nullptr) {
-                galaxy.prison_system = boost::json::value_to<std::string>(*prison_system_value_ptr);
-            }
-
-            const boost::json::value * push_values_to_mean_value_ptr = galaxy_object.if_contains("push_values_to_mean");
-            if (push_values_to_mean_value_ptr != nullptr) {
-                galaxy.push_values_to_mean = boost::json::value_to<bool>(*push_values_to_mean_value_ptr);
-            }
-
-            const boost::json::value * ring_probability_value_ptr = galaxy_object.if_contains("ring_probability");
-            if (ring_probability_value_ptr != nullptr) {
-                galaxy.ring_probability = boost::json::value_to<double>(*ring_probability_value_ptr);
-            }
-
-            const boost::json::value * rocky_relative_to_primary_value_ptr = galaxy_object.if_contains("rocky_relative_to_primary");
-            if (rocky_relative_to_primary_value_ptr != nullptr) {
-                galaxy.rocky_relative_to_primary = boost::json::value_to<double>(*rocky_relative_to_primary_value_ptr);
-            }
-
-            const boost::json::value * second_ring_difference_value_ptr = galaxy_object.if_contains("second_ring_difference");
-            if (second_ring_difference_value_ptr != nullptr) {
-                galaxy.second_ring_difference = boost::json::value_to<double>(*second_ring_difference_value_ptr);
-            }
-
-            const boost::json::value * star_radius_scale_value_ptr = galaxy_object.if_contains("star_radius_scale");
-            if (star_radius_scale_value_ptr != nullptr) {
-                galaxy.star_radius_scale = boost::json::value_to<double>(*star_radius_scale_value_ptr);
-            }
 
         }
 

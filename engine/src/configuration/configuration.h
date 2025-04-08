@@ -42,6 +42,480 @@ namespace vega_config {
 
 
     struct {
+
+    } advanced;
+
+    struct {
+        bool afterburn_to_no_enemies = true;
+        double ai_cheat_dot = 0.99;
+        bool allow_any_speed_reference = false;
+        bool allow_civil_war = false;
+        bool allow_nonplayer_faction_change = false;
+        bool always_fire_autotrackers = false;
+        bool always_have_jumpdrive_cheat = false;
+        bool always_obedient = true;
+        bool always_use_itts = false;
+        double anger_affects_response = 1.0;
+        bool arrest_energy_zero = false;
+        bool assist_friend_in_need = true;
+        double attacker_switch_time = 15.0;
+        bool auto_dock = false;
+        bool can_dock_to_enemy_base = true;
+        bool capped_faction_rating = true;
+        std::string choose_destination_script = "";
+        double comm_initiate_time = 300.0;
+        double comm_response_time = 3.0;
+        double comm_to_player_percent = 0.0;
+        double comm_to_target_percent = 0.25;
+        double contraband_initiate_time = 3000.0;
+        int contraband_madness = 5;
+        double contraband_to_player_percent = 0.0;
+        double contraband_to_target_percent = 0.01;
+        double contraband_update_time = 1.0;
+        int debug_level = 0;
+        double default_rank = 0.01;
+        bool dock_on_load = true;
+        bool dock_to_area = false;
+        std::string docked_to_script = "";
+        double ease_to_anger = -0.5;
+        double ease_to_appease = 0.5;
+        bool eject_attacks = false;
+        double evasion_angle = 45.0;
+        double faction_contraband_relation_adjust = -0.025;
+        double fg_nav_select_time = 120.0;
+        double force_jump_after_time = 120.0;
+        double friend_factor = 0.1;
+        double gun_range_percent_ok = 0.66;
+        bool hostile_lurk = true;
+        double how_far_to_stop_navigating = 100.0;
+        int hull_damage_anger = 10;
+        double hull_percent_for_comm = 0.75;
+        bool independent_turrets = false;
+        bool jump_cheat = true;
+        bool jump_without_energy = false;
+        double kill_factor = 0.2;
+        double loop_around_destination_distance = 20.0;
+        double loop_around_destination_lateral = 4.0;
+        double loop_around_destination_vertical = 4.0;
+        double loop_around_distance = 1.0;
+        double loop_around_pursuit_velocity_percent = 0.9;
+        double lurk_time = 600.0;
+        double lowest_negative_comm_choice = -1e-05;
+        double lowest_positive_comm_choice = 0.0;
+        double match_velocity_cone = -0.8;
+        bool match_velocity_of_pursuant = false;
+        double max_allowable_travel_time = 10.0;
+        double max_faction_contraband_relation = -0.05;
+        int max_player_attackers = 0;
+        double min_angular_accel_cheat = 50.0;
+        double min_docking_relationship = -0.002;
+        double min_energy_to_enter_warp = 0.33;
+        double min_relationship = -20.0;
+        double min_time_to_auto = 25.0;
+        double min_warp_to_try = 1.5;
+        double missile_gun_delay = 4.0;
+        double mood_affects_response = 0.0;
+        double mood_swing_level = 0.2;
+        bool no_turret_ai = false;
+        int num_contraband_scans_per_search = 10;
+        int num_pirates_per_asteroid_field = 12;
+        bool only_upgrade_speed_reference = false;
+        double percentage_speed_change_to_stop_search = 1.0;
+        double pirate_bonus_for_empty_hold = 0.75;
+        double pirate_nav_select_time = 400.0;
+        double random_response_range = 0.8;
+        double random_spacing_factor = 4.0;
+        double reaction_time = 0.2;
+        bool resistance_to_side_movement = false;
+        double resistance_to_side_force_percent = 1.0;
+        double resistance_to_side_movement_percent = 0.01;
+        double roll_order_duration = 5.0;
+        double safety_spacing = 2500.0;
+        int shield_damage_anger = 1;
+        double slow_diplomacy_for_enemies = 0.25;
+        std::string start_docked_to = "Atlantis";
+        double static_relationship_affects_response = 1.0;
+        bool switch_nonowned_units = true;
+        double talk_relation_factor = 0.5;
+        bool talking_faster_helps = true;
+        double too_close_for_warp_in_formation = 1500.0;
+        double too_close_for_warp_tactic = 8000.0;
+        bool turn_cheat = false;
+        double unknown_relation_enemy = -0.05;
+        double unknown_relation_hit_cost = 0.01;
+        bool use_afterburner = true;
+        bool use_afterburner_to_follow = true;
+        bool use_afterburner_to_run = true;
+        double warp_cone = 0.8;
+        bool warp_to_enemies = true;
+        bool warp_to_no_enemies = true;
+        bool warp_to_wingmen = true;
+
+        struct {
+            double aggressivity = 15.0;
+            double in_weapon_range = 1.2;
+            double missile_probability = 0.04;
+            double reaction_time = 0.2;
+            double turret_dot_cutoff = 0.4;
+            double turret_missile_probability = 0.01;
+
+            struct {
+                int minagg = 10;
+                int maxagg = 18;
+
+            } maximum_firing_angle;
+
+        } firing;
+
+        struct {
+            bool assign_point_def = true;
+            double escort_distance = 10.0;
+            double mass_inertial_priority_cutoff = 5000.0;
+            double mass_inertial_priority_scale = 1e-07;
+            int max_number_of_pollers_per_frame = 49;
+            int min_number_of_pollers_per_frame = 5;
+            int min_rechoose_interval = 128;
+            double min_time_to_switch_targets = 3.0;
+            double min_null_time_to_switch_targets = 5.0;
+            double mountless_gun_range = 300000000.0;
+            double obedience = 0.99;
+            double search_extra_radius = 1000.0;
+            int search_max_candidates = 64;
+            int search_max_role_priority = 16;
+            double threat_weight = 0.5;
+            double time_to_recommand_wing = 100.0;
+            double time_until_switch = 20.0;
+            double turn_leader_distance = 5.0;
+
+        } targeting;
+
+    } ai;
+
+    struct {
+        double afterburner_gain = 0.5;
+        bool ai_high_quality_weapon = false;
+        bool ai_sound = true;
+        double audio_max_distance = 1000000.0;
+        double audio_ref_distance = 4000.0;
+        std::string automatic_docking_zone = "automatic_landing_zone.wav";
+        std::string battle_playlist = "battle.m3u";
+        double buzzing_distance = 5.0;
+        bool buzzing_needs_afterburner = false;
+        double buzzing_time = 5.0;
+        std::string cache_songs = "../music/land.ogg";
+        bool cross_fade_music = true;
+        std::string dj_script = "modules/dj.py";
+        bool doppler = false;
+        double doppler_scale = 1.0;
+        bool every_other_mount = false;
+        double explosion_closeness = 0.8;
+        double exterior_weapon_gain = 0.35;
+        int frequency = 48000;
+        bool high_quality_weapon = true;
+        std::string loading_sound = "../music/loading.ogg";
+        std::string loss_playlist = "loss.m3u";
+        double loss_relationship = -0.1;
+        int max_single_sounds = 8;
+        int max_total_sounds = 20;
+        double max_range_to_hear_weapon_fire = 100000.0;
+        double min_weapon_sound_refire = 0.2;
+        std::string mission_victory_song = "../music/victory.ogg";
+        bool music = true;
+        int music_layers = 1;
+        double music_muting_fade_in = 0.5;
+        double music_muting_fade_out = 0.2;
+        double music_volume = 0.5;
+        double music_volume_down_latency = 2.0;
+        double music_volume_up_latency = 15.0;
+        std::string news_song = "../music/news1.ogg";
+        std::string panic_playlist = "panic.m3u";
+        std::string peace_playlist = "peace.m3u";
+        bool positional = true;
+        bool shuffle_songs = true;
+        bool sound = true;
+        double sound_gain = 0.5;
+        int thread_time = 1;
+        double time_between_music = 180.0;
+        std::string victory_playlist = "victory.m3u";
+        double victory_relationship = 0.5;
+        double volume = 100.0;
+        double weapon_gain = 0.25;
+
+        struct {
+            bool clear_history_on_list_change = true;
+            int history_depth = 5;
+
+        } shuffle_songs_section;
+
+        struct {
+            std::string afterburner = "engine_5.wav";
+            std::string armor = "armorhit2m.wav";
+            std::string cloak = "cloak.wav";
+            std::string explode = "explosion.wav";
+            std::string hull = "armorhit.wav";
+            std::string jump_arrive = "sfx43.wav";
+            std::string jump_leave = "sfx43.wav";
+            std::string locked = "locked.wav";
+            std::string locking = "locking.wav";
+            std::string locking_torp = "locking.wav";
+            bool locking_torp_trumps_music = false;
+            bool locking_trumps_music = false;
+            std::string player_afterburner = "sfx10.wav";
+            std::string player_armor_hit = "armorhit2.wav";
+            std::string player_hull_hit = "armorhit.wav";
+            std::string player_shield_hit = "shieldhit4short.wav";
+            std::string player_tractor_cargo = "tractor_onboard.wav";
+            std::string player_tractor_cargo_fromturret = "tractor_onboard.wav";
+            std::string shield = "shieldhit3short.wav";
+
+        } unit_audio;
+
+    } audio;
+
+    struct {
+        bool filter_expensive_cargo = false;
+        double junk_starship_mass = 50.0;
+        double junk_starship_price = 100000.0;
+        double junk_starship_volume = 1500.0;
+        double max_price_quant_adj = 5.0;
+        double min_cargo_price = 0.01;
+        double min_price_quant_adj = 1.0;
+        bool news_from_cargo_list = false;
+        double price_quant_adj_power = 1.0;
+        double price_recenter_factor = 0.75;
+        double space_junk_price = 10.0;
+
+    } cargo;
+
+    struct {
+        std::string automatic_landing_zone = "als";
+        std::string automatic_landing_zone1 = "als";
+        std::string automatic_landing_zone2 = "als";
+        std::string autopilot_available = "autopilot_available";
+        std::string autopilot_disabled = "autopilot_disabled";
+        std::string autopilot_enabled = "autopilot";
+        std::string autopilot_unavailable = "autopilot_unavailable";
+        std::string comm = "vdu_c";
+        bool comm_preload = false;
+        std::string compress_change = "compress_burst";
+        int compress_interval = 3;
+        std::string compress_loop = "compress_loop";
+        int compress_max = 3;
+        std::string compress_stop = "compress_end";
+        std::string docking_complete = "docking_complete";
+        std::string docking_denied = "request_denied";
+        std::string docking_failed = "docking_failed";
+        std::string docking_granted = "request_granted";
+        std::string examine = "vdu_b";
+        std::string jump_engaged = "jump";
+        std::string manifest = "vdu_a";
+        std::string missile_switch = "vdu_d";
+        std::string objective = "vdu_c";
+        std::string overload = "overload";
+        std::string overload_stopped = "overload_stopped";
+        std::string repair = "vdu_a";
+        std::string scanning = "vdu_c";
+        std::string shield = "vdu_d";
+        std::string sounds_extension_1 = "\n";
+        std::string sounds_extension_2 = "\n";
+        std::string sounds_extension_3 = "\n";
+        std::string sounds_extension_4 = "\n";
+        std::string sounds_extension_5 = "\n";
+        std::string sounds_extension_6 = "\n";
+        std::string sounds_extension_7 = "\n";
+        std::string sounds_extension_8 = "\n";
+        std::string sounds_extension_9 = "\n";
+        std::string target = "vdu_b";
+        std::string target_reverse = "vdu_a";
+        std::string undocking_complete = "undocking_complete";
+        std::string undocking_failed = "undocking_failed";
+        std::string vdu_static = "vdu_static";
+        std::string view = "vdu_b";
+        std::string weapon_switch = "vdu_d";
+
+    } cockpit_audio;
+
+    struct {
+        double collision_hack_distance = 10000.0;
+        bool collision_damage_to_ai = false;
+        bool crash_dock_hangar = false;
+        bool crash_dock_unit = false;
+        double front_collision_hack_angle = 0.9999257675004788;
+        double front_collision_hack_distance = 200000.0;
+        bool cargo_deals_collide_damage = false;
+
+    } collision_hacks;
+
+    struct {
+
+        struct {
+            std::string energy_source = "fuel";
+
+        } afterburner;
+
+        struct {
+            std::string energy_source = "energy";
+
+        } cloak;
+
+        struct {
+            double default_lock_cone = 0.8;
+            double default_max_range = 20000.0;
+            double default_tracking_cone = 0.93;
+
+        } computer;
+
+        struct {
+            std::string energy_source = "energy";
+            int non_combat_mode_multiplier = 1000;
+            double minimum_drive = 0.15;
+
+        } drive;
+
+        struct {
+            int factor = 1;
+
+        } energy;
+
+        struct {
+            double afterburner_fuel_usage = 4.0;
+            double deuterium_relative_efficiency_lithium = 1.0;
+            double ecm_energy_cost = 0.05;
+            double fmec_factor = 8e-09;
+            double fuel_efficiency = 1.0;
+            bool fuel_equals_warp = false;
+            int factor = 600;
+            double megajoules_factor = 100.0;
+            double min_reactor_efficiency = 1e-05;
+            double no_fuel_afterburn = 0.1;
+            double no_fuel_thrust = 0.4;
+            double normal_fuel_usage = 1.0;
+            double reactor_idle_efficiency = 0.98;
+            bool reactor_uses_fuel = false;
+            bool variable_fuel_consumption = false;
+            double vsd_mj_yield = 5.4;
+
+        } fuel;
+
+        struct {
+            std::string energy_source = "ftl_energy";
+            double factor = 0.1;
+
+        } ftl_drive;
+
+        struct {
+            double factor = 1.0;
+
+        } ftl_energy;
+
+        struct {
+            std::string energy_source = "ftl_energy";
+            double factor = 1.0;
+
+        } jump_drive;
+
+        struct {
+            std::string energy_source = "fuel";
+            double factor = 1.0;
+
+        } reactor;
+
+        struct {
+            std::string energy_source = "energy";
+            double maintenance_factor = 0.1;
+            double regeneration_factor = 0.1;
+
+        } shield;
+
+    } components;
+
+    struct {
+        int megajoules_multiplier = 100;
+        int kilo = 1000;
+        int kj_per_unit_damage = 5400;
+
+    } constants;
+
+    struct {
+        std::string ai_directory = "ai";
+        std::string animations = "animations";
+        std::string capship_roles = "ESCORTCAP CAPITAL CARRIER BASE TROOP";
+        std::string cockpits = "cockpits";
+        std::string data_dir = "";
+        bool empty_cell_check = true;
+        std::string hqtextures = "hqtextures";
+        std::string master_part_list = "master_part_list";
+        std::string mod_unit_csv = "";
+        std::string movies = "movies";
+        std::string python_bases = "bases";
+        std::string python_modules = "modules";
+        std::string sectors = "sectors";
+        std::string serialized_xml = "serialized_xml";
+        std::string shared_meshes = "meshes";
+        std::string shared_sounds = "sounds";
+        std::string shared_textures = "textures";
+        std::string shared_units = "units";
+        std::string sprites = "sprites";
+        std::string techniques_base_path = "techniques";
+        std::string universe_path = "universe";
+        bool using_templates = true;
+        std::string volume_format = "pk3";
+
+    } data;
+
+    struct {
+        double repair_price = 5000.0;
+        double sellback_shipping_price = 6000.0;
+        double ship_sellback_price = 0.5;
+        double shipping_price_base = 0.0;
+        double shipping_price_insys = 1000.0;
+        double shipping_price_perjump = 25000.0;
+
+    } economics;
+
+    struct {
+
+        struct {
+            bool initial = false;
+            bool enable = true;
+
+        } inertial;
+
+    } flight;
+
+    struct {
+        double ambient_light_factor = 0.0;
+        double atmosphere_probability = 0.5;
+        double compactness_scale = 27.0;
+        std::string default_atmosphere_texture = "sol/earthcloudmaptrans.png";
+        std::string default_ring_texture = "planets/ring.pngwrapx36wrapy2";
+        double double_ring_probability = 0.025;
+        double inner_ring_radius = 1.5;
+        double jump_compactness_scale = 54.0;
+        int mean_natural_phenomena = 1;
+        int mean_star_bases = 2;
+        double moon_relative_to_moon = 0.8;
+        double moon_relative_to_planet = 0.4;
+        double outer_ring_radius = 2.5;
+        std::string police_faction = "homeland-security";
+        std::string prison_system = "Sol/Nu_Pheonix";
+        bool push_values_to_mean = false;
+        double ring_probability = 0.1;
+        double rocky_relative_to_primary = 0.009;
+        double second_ring_difference = 0.4;
+        double star_radius_scale = 50000.0;
+
+    } galaxy;
+
+    struct {
+        std::string campaigns = "privateer_campaign vegastrike_campaign";
+        std::string default_mission = "main_menu.mission";
+        std::string introduction = "Welcome to Vega Strike!\nUse #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control),\n#8080FFarrows#000000 to steer.\nThe #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 activates the SPEC drive.\nTo go to another star system, buy a jump drive for about 10000 credits,\nfly to a wireframe jump-point and press #8080FFj#000000 to warp to a near star.\nTarget a base or planet;\nWhen you get close a green box will appear. Inside the box, #8080FFd#000000 will land.";
+        std::string galaxy = "milky_way.xml";
+
+    } game_start;
+
+    struct {
         double audio_atom = 0.05555555556;
         bool command_interpreter = false;
         std::string custom_python = "import custom;custom.processMessage";
@@ -90,6 +564,7 @@ namespace vega_config {
         double aspect = 1.33;
         double atmosphere_emissive = 1.0;
         double atmosphere_diffuse = 1.0;
+        int atmosphere_texture_resolution = 512;
         double auto_message_nav_switch_time_lim = 0.15;
         double auto_message_time_lim = 5.0;
         std::string automatic_landing_zone_warning = "comm_docking.ani";
@@ -186,7 +661,10 @@ namespace vega_config {
         double far_stars_sprite_size = 2.0;
         std::string far_stars_sprite_texture = "";
         bool flash_behind_hud = true;
+        bool fog = false;
         int fog_detail = 2;
+        double fog_fade_in_percent = 0.5;
+        double fog_time = 0.01;
         std::string font = "helvetica12";
         bool font_antialias = false;
         double font_point = 16.0;
@@ -523,480 +1001,6 @@ namespace vega_config {
         } nav;
 
     } graphics;
-
-    struct {
-
-        struct {
-            std::string energy_source = "fuel";
-
-        } afterburner;
-
-        struct {
-            std::string energy_source = "energy";
-
-        } cloak;
-
-        struct {
-            double default_lock_cone = 0.8;
-            double default_max_range = 20000.0;
-            double default_tracking_cone = 0.93;
-
-        } computer;
-
-        struct {
-            std::string energy_source = "energy";
-            int non_combat_mode_multiplier = 1000;
-            double minimum_drive = 0.15;
-
-        } drive;
-
-        struct {
-            int factor = 1;
-
-        } energy;
-
-        struct {
-            double afterburner_fuel_usage = 4.0;
-            double deuterium_relative_efficiency_lithium = 1.0;
-            double ecm_energy_cost = 0.05;
-            double fmec_factor = 8e-09;
-            double fuel_efficiency = 1.0;
-            bool fuel_equals_warp = false;
-            int factor = 600;
-            double megajoules_factor = 100.0;
-            double min_reactor_efficiency = 1e-05;
-            double no_fuel_afterburn = 0.1;
-            double no_fuel_thrust = 0.4;
-            double normal_fuel_usage = 1.0;
-            double reactor_idle_efficiency = 0.98;
-            bool reactor_uses_fuel = false;
-            bool variable_fuel_consumption = false;
-            double vsd_mj_yield = 5.4;
-
-        } fuel;
-
-        struct {
-            std::string energy_source = "ftl_energy";
-            double factor = 0.1;
-
-        } ftl_drive;
-
-        struct {
-            double factor = 1.0;
-
-        } ftl_energy;
-
-        struct {
-            std::string energy_source = "ftl_energy";
-            double factor = 1.0;
-
-        } jump_drive;
-
-        struct {
-            std::string energy_source = "fuel";
-            double factor = 1.0;
-
-        } reactor;
-
-        struct {
-            std::string energy_source = "energy";
-            double maintenance_factor = 0.1;
-            double regeneration_factor = 0.1;
-
-        } shield;
-
-    } components;
-
-    struct {
-        int megajoules_multiplier = 100;
-        int kilo = 1000;
-        int kj_per_unit_damage = 5400;
-
-    } constants;
-
-    struct {
-        std::string ai_directory = "ai";
-        std::string animations = "animations";
-        std::string capship_roles = "ESCORTCAP CAPITAL CARRIER BASE TROOP";
-        std::string cockpits = "cockpits";
-        std::string data_dir = "";
-        bool empty_cell_check = true;
-        std::string hqtextures = "hqtextures";
-        std::string master_part_list = "master_part_list";
-        std::string mod_unit_csv = "";
-        std::string movies = "movies";
-        std::string python_bases = "bases";
-        std::string python_modules = "modules";
-        std::string sectors = "sectors";
-        std::string serialized_xml = "serialized_xml";
-        std::string shared_meshes = "meshes";
-        std::string shared_sounds = "sounds";
-        std::string shared_textures = "textures";
-        std::string shared_units = "units";
-        std::string sprites = "sprites";
-        std::string techniques_base_path = "techniques";
-        std::string universe_path = "universe";
-        bool using_templates = true;
-        std::string volume_format = "pk3";
-
-    } data;
-
-    struct {
-        std::string campaigns = "privateer_campaign vegastrike_campaign";
-        std::string default_mission = "main_menu.mission";
-        std::string introduction = "Welcome to Vega Strike!\nUse #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control),\n#8080FFarrows#000000 to steer.\nThe #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 activates the SPEC drive.\nTo go to another star system, buy a jump drive for about 10000 credits,\nfly to a wireframe jump-point and press #8080FFj#000000 to warp to a near star.\nTarget a base or planet;\nWhen you get close a green box will appear. Inside the box, #8080FFd#000000 will land.";
-        std::string galaxy = "milky_way.xml";
-
-    } game_start;
-
-    struct {
-
-    } advanced;
-
-    struct {
-        bool afterburn_to_no_enemies = true;
-        double ai_cheat_dot = 0.99;
-        bool allow_any_speed_reference = false;
-        bool allow_civil_war = false;
-        bool allow_nonplayer_faction_change = false;
-        bool always_fire_autotrackers = false;
-        bool always_have_jumpdrive_cheat = false;
-        bool always_obedient = true;
-        bool always_use_itts = false;
-        double anger_affects_response = 1.0;
-        bool arrest_energy_zero = false;
-        bool assist_friend_in_need = true;
-        double attacker_switch_time = 15.0;
-        bool auto_dock = false;
-        bool can_dock_to_enemy_base = true;
-        bool capped_faction_rating = true;
-        std::string choose_destination_script = "";
-        double comm_initiate_time = 300.0;
-        double comm_response_time = 3.0;
-        double comm_to_player_percent = 0.0;
-        double comm_to_target_percent = 0.25;
-        double contraband_initiate_time = 3000.0;
-        int contraband_madness = 5;
-        double contraband_to_player_percent = 0.0;
-        double contraband_to_target_percent = 0.01;
-        double contraband_update_time = 1.0;
-        int debug_level = 0;
-        double default_rank = 0.01;
-        bool dock_on_load = true;
-        bool dock_to_area = false;
-        std::string docked_to_script = "";
-        double ease_to_anger = -0.5;
-        double ease_to_appease = 0.5;
-        bool eject_attacks = false;
-        double evasion_angle = 45.0;
-        double faction_contraband_relation_adjust = -0.025;
-        double fg_nav_select_time = 120.0;
-        double force_jump_after_time = 120.0;
-        double friend_factor = 0.1;
-        double gun_range_percent_ok = 0.66;
-        bool hostile_lurk = true;
-        double how_far_to_stop_navigating = 100.0;
-        int hull_damage_anger = 10;
-        double hull_percent_for_comm = 0.75;
-        bool independent_turrets = false;
-        bool jump_cheat = true;
-        bool jump_without_energy = false;
-        double kill_factor = 0.2;
-        double loop_around_destination_distance = 20.0;
-        double loop_around_destination_lateral = 4.0;
-        double loop_around_destination_vertical = 4.0;
-        double loop_around_distance = 1.0;
-        double loop_around_pursuit_velocity_percent = 0.9;
-        double lurk_time = 600.0;
-        double lowest_negative_comm_choice = -1e-05;
-        double lowest_positive_comm_choice = 0.0;
-        double match_velocity_cone = -0.8;
-        bool match_velocity_of_pursuant = false;
-        double max_allowable_travel_time = 10.0;
-        double max_faction_contraband_relation = -0.05;
-        int max_player_attackers = 0;
-        double min_angular_accel_cheat = 50.0;
-        double min_docking_relationship = -0.002;
-        double min_energy_to_enter_warp = 0.33;
-        double min_relationship = -20.0;
-        double min_time_to_auto = 25.0;
-        double min_warp_to_try = 1.5;
-        double missile_gun_delay = 4.0;
-        double mood_affects_response = 0.0;
-        double mood_swing_level = 0.2;
-        bool no_turret_ai = false;
-        int num_contraband_scans_per_search = 10;
-        int num_pirates_per_asteroid_field = 12;
-        bool only_upgrade_speed_reference = false;
-        double percentage_speed_change_to_stop_search = 1.0;
-        double pirate_bonus_for_empty_hold = 0.75;
-        double pirate_nav_select_time = 400.0;
-        double random_response_range = 0.8;
-        double random_spacing_factor = 4.0;
-        double reaction_time = 0.2;
-        bool resistance_to_side_movement = false;
-        double resistance_to_side_force_percent = 1.0;
-        double resistance_to_side_movement_percent = 0.01;
-        double roll_order_duration = 5.0;
-        double safety_spacing = 2500.0;
-        int shield_damage_anger = 1;
-        double slow_diplomacy_for_enemies = 0.25;
-        std::string start_docked_to = "Atlantis";
-        double static_relationship_affects_response = 1.0;
-        bool switch_nonowned_units = true;
-        double talk_relation_factor = 0.5;
-        bool talking_faster_helps = true;
-        double too_close_for_warp_in_formation = 1500.0;
-        double too_close_for_warp_tactic = 8000.0;
-        bool turn_cheat = false;
-        double unknown_relation_enemy = -0.05;
-        double unknown_relation_hit_cost = 0.01;
-        bool use_afterburner = true;
-        bool use_afterburner_to_follow = true;
-        bool use_afterburner_to_run = true;
-        double warp_cone = 0.8;
-        bool warp_to_enemies = true;
-        bool warp_to_no_enemies = true;
-        bool warp_to_wingmen = true;
-
-        struct {
-            double aggressivity = 15.0;
-            double in_weapon_range = 1.2;
-            double missile_probability = 0.04;
-            double reaction_time = 0.2;
-            double turret_dot_cutoff = 0.4;
-            double turret_missile_probability = 0.01;
-
-            struct {
-                int minagg = 10;
-                int maxagg = 18;
-
-            } maximum_firing_angle;
-
-        } firing;
-
-        struct {
-            bool assign_point_def = true;
-            double escort_distance = 10.0;
-            double mass_inertial_priority_cutoff = 5000.0;
-            double mass_inertial_priority_scale = 1e-07;
-            int max_number_of_pollers_per_frame = 49;
-            int min_number_of_pollers_per_frame = 5;
-            int min_rechoose_interval = 128;
-            double min_time_to_switch_targets = 3.0;
-            double min_null_time_to_switch_targets = 5.0;
-            double mountless_gun_range = 300000000.0;
-            double obedience = 0.99;
-            double search_extra_radius = 1000.0;
-            int search_max_candidates = 64;
-            int search_max_role_priority = 16;
-            double threat_weight = 0.5;
-            double time_to_recommand_wing = 100.0;
-            double time_until_switch = 20.0;
-            double turn_leader_distance = 5.0;
-
-        } targeting;
-
-    } ai;
-
-    struct {
-        double afterburner_gain = 0.5;
-        bool ai_high_quality_weapon = false;
-        bool ai_sound = true;
-        double audio_max_distance = 1000000.0;
-        double audio_ref_distance = 4000.0;
-        std::string automatic_docking_zone = "automatic_landing_zone.wav";
-        std::string battle_playlist = "battle.m3u";
-        double buzzing_distance = 5.0;
-        bool buzzing_needs_afterburner = false;
-        double buzzing_time = 5.0;
-        std::string cache_songs = "../music/land.ogg";
-        bool cross_fade_music = true;
-        std::string dj_script = "modules/dj.py";
-        bool doppler = false;
-        double doppler_scale = 1.0;
-        bool every_other_mount = false;
-        double explosion_closeness = 0.8;
-        double exterior_weapon_gain = 0.35;
-        int frequency = 48000;
-        bool high_quality_weapon = true;
-        std::string loading_sound = "../music/loading.ogg";
-        std::string loss_playlist = "loss.m3u";
-        double loss_relationship = -0.1;
-        int max_single_sounds = 8;
-        int max_total_sounds = 20;
-        double max_range_to_hear_weapon_fire = 100000.0;
-        double min_weapon_sound_refire = 0.2;
-        std::string mission_victory_song = "../music/victory.ogg";
-        bool music = true;
-        int music_layers = 1;
-        double music_muting_fade_in = 0.5;
-        double music_muting_fade_out = 0.2;
-        double music_volume = 0.5;
-        double music_volume_down_latency = 2.0;
-        double music_volume_up_latency = 15.0;
-        std::string news_song = "../music/news1.ogg";
-        std::string panic_playlist = "panic.m3u";
-        std::string peace_playlist = "peace.m3u";
-        bool positional = true;
-        bool shuffle_songs = true;
-        bool sound = true;
-        double sound_gain = 0.5;
-        int thread_time = 1;
-        double time_between_music = 180.0;
-        std::string victory_playlist = "victory.m3u";
-        double victory_relationship = 0.5;
-        double volume = 100.0;
-        double weapon_gain = 0.25;
-
-        struct {
-            bool clear_history_on_list_change = true;
-            int history_depth = 5;
-
-        } shuffle_songs_section;
-
-        struct {
-            std::string afterburner = "engine_5.wav";
-            std::string armor = "armorhit2m.wav";
-            std::string cloak = "cloak.wav";
-            std::string explode = "explosion.wav";
-            std::string hull = "armorhit.wav";
-            std::string jump_arrive = "sfx43.wav";
-            std::string jump_leave = "sfx43.wav";
-            std::string locked = "locked.wav";
-            std::string locking = "locking.wav";
-            std::string locking_torp = "locking.wav";
-            bool locking_torp_trumps_music = false;
-            bool locking_trumps_music = false;
-            std::string player_afterburner = "sfx10.wav";
-            std::string player_armor_hit = "armorhit2.wav";
-            std::string player_hull_hit = "armorhit.wav";
-            std::string player_shield_hit = "shieldhit4short.wav";
-            std::string player_tractor_cargo = "tractor_onboard.wav";
-            std::string player_tractor_cargo_fromturret = "tractor_onboard.wav";
-            std::string shield = "shieldhit3short.wav";
-
-        } unit_audio;
-
-    } audio;
-
-    struct {
-        bool filter_expensive_cargo = false;
-        double junk_starship_mass = 50.0;
-        double junk_starship_price = 100000.0;
-        double junk_starship_volume = 1500.0;
-        double max_price_quant_adj = 5.0;
-        double min_cargo_price = 0.01;
-        double min_price_quant_adj = 1.0;
-        bool news_from_cargo_list = false;
-        double price_quant_adj_power = 1.0;
-        double price_recenter_factor = 0.75;
-        double space_junk_price = 10.0;
-
-    } cargo;
-
-    struct {
-        std::string automatic_landing_zone = "als";
-        std::string automatic_landing_zone1 = "als";
-        std::string automatic_landing_zone2 = "als";
-        std::string autopilot_available = "autopilot_available";
-        std::string autopilot_disabled = "autopilot_disabled";
-        std::string autopilot_enabled = "autopilot";
-        std::string autopilot_unavailable = "autopilot_unavailable";
-        std::string comm = "vdu_c";
-        bool comm_preload = false;
-        std::string compress_change = "compress_burst";
-        int compress_interval = 3;
-        std::string compress_loop = "compress_loop";
-        int compress_max = 3;
-        std::string compress_stop = "compress_end";
-        std::string docking_complete = "docking_complete";
-        std::string docking_denied = "request_denied";
-        std::string docking_failed = "docking_failed";
-        std::string docking_granted = "request_granted";
-        std::string examine = "vdu_b";
-        std::string jump_engaged = "jump";
-        std::string manifest = "vdu_a";
-        std::string missile_switch = "vdu_d";
-        std::string objective = "vdu_c";
-        std::string overload = "overload";
-        std::string overload_stopped = "overload_stopped";
-        std::string repair = "vdu_a";
-        std::string scanning = "vdu_c";
-        std::string shield = "vdu_d";
-        std::string sounds_extension_1 = "\n";
-        std::string sounds_extension_2 = "\n";
-        std::string sounds_extension_3 = "\n";
-        std::string sounds_extension_4 = "\n";
-        std::string sounds_extension_5 = "\n";
-        std::string sounds_extension_6 = "\n";
-        std::string sounds_extension_7 = "\n";
-        std::string sounds_extension_8 = "\n";
-        std::string sounds_extension_9 = "\n";
-        std::string target = "vdu_b";
-        std::string target_reverse = "vdu_a";
-        std::string undocking_complete = "undocking_complete";
-        std::string undocking_failed = "undocking_failed";
-        std::string vdu_static = "vdu_static";
-        std::string view = "vdu_b";
-        std::string weapon_switch = "vdu_d";
-
-    } cockpit_audio;
-
-    struct {
-        double collision_hack_distance = 10000.0;
-        bool collision_damage_to_ai = false;
-        bool crash_dock_hangar = false;
-        bool crash_dock_unit = false;
-        double front_collision_hack_angle = 0.9999257675004788;
-        double front_collision_hack_distance = 200000.0;
-        bool cargo_deals_collide_damage = false;
-
-    } collision_hacks;
-
-    struct {
-        double repair_price = 5000.0;
-        double sellback_shipping_price = 6000.0;
-        double ship_sellback_price = 0.5;
-        double shipping_price_base = 0.0;
-        double shipping_price_insys = 1000.0;
-        double shipping_price_perjump = 25000.0;
-
-    } economics;
-
-    struct {
-
-        struct {
-            bool initial = false;
-            bool enable = true;
-
-        } inertial;
-
-    } flight;
-
-    struct {
-        double ambient_light_factor = 0.0;
-        double atmosphere_probability = 0.5;
-        double compactness_scale = 27.0;
-        std::string default_atmosphere_texture = "sol/earthcloudmaptrans.png";
-        std::string default_ring_texture = "planets/ring.pngwrapx36wrapy2";
-        double double_ring_probability = 0.025;
-        double inner_ring_radius = 1.5;
-        double jump_compactness_scale = 54.0;
-        int mean_natural_phenomena = 1;
-        int mean_star_bases = 2;
-        double moon_relative_to_moon = 0.8;
-        double moon_relative_to_planet = 0.4;
-        double outer_ring_radius = 2.5;
-        std::string police_faction = "homeland-security";
-        std::string prison_system = "Sol/Nu_Pheonix";
-        bool push_values_to_mean = false;
-        double ring_probability = 0.1;
-        double rocky_relative_to_primary = 0.009;
-        double second_ring_difference = 0.4;
-        double star_radius_scale = 50000.0;
-
-    } galaxy;
 
     struct {
         int debug_level = 0;

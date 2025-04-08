@@ -3955,7 +3955,7 @@ public:
 void trackPrice(int whichplayer, const Cargo &item, float price, const string &systemName, const string &baseName,
         /*out*/ vector<string> &highest, /*out*/ vector<string> &lowest) {
     static size_t toprank = (size_t)
-            vega_config::config->general.trade_interface_tracks_prices_toprank;
+            vega_config::config->general.trade_interface_tracks_prices_top_rank;
 
     VS_LOG(info, (boost::format("Ranking item %1%/%2% at %3%/%4%")
             % item.GetCategory() % item.GetName() % systemName % baseName));

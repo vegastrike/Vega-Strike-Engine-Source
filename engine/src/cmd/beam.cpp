@@ -472,7 +472,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
     const float c_ors_m = vega_config::config->physics.tractor.cargo.distance_own_rsize;
     const float c_trs_m = vega_config::config->physics.tractor.cargo.distance_tgt_rsize;
     const float c_o = vega_config::config->physics.tractor.cargo.distance;
-    const float u_ors_m = vega_config::config->physics.tractor.ugprade.distance_own_rsize;
+    const float u_ors_m = vega_config::config->physics.tractor.upgrade.distance_own_rsize;
     const float u_trs_m = vega_config::config->physics.tractor.upgrade.distance_tgt_rsize;
     const float u_o = vega_config::config->physics.tractor.upgrade.distance;
     const float f_ors_m = vega_config::config->physics.tractor.faction.distance_own_rsize;

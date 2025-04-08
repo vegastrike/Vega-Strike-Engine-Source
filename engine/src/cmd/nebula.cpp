@@ -148,8 +148,7 @@ static void Nebula_endElement(void *Userdata, const XML_Char *) {
 void Nebula::LoadXML(const char *filename) {
     VSFile f;
     VSError err = f.OpenReadOnly(filename, UnitFile);
-    const bool usefog = vega_config::config->graphics.fog;
-    if (err > Ok || !usefog) {
+    if (err > Ok || !vega_config::config->graphics.fog) {
         if (err <= Ok) {
             f.Close();
         } else {
