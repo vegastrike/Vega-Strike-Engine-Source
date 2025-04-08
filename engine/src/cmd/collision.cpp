@@ -110,6 +110,11 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
 
             // Units (ships) should calculate actual damage
         case Vega_UnitType::unit:
+            // Handle the "Nav 8" case
+            if (other_unit->getFullname().find("invisible") != std::string::npos) {
+                VS_LOG(debug, "Found a Nav_8-type object");
+                return;
+            }
             apply_force = true;
             deal_damage = true;
             return;
