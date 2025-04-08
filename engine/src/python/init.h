@@ -26,20 +26,11 @@
 #define VEGA_STRIKE_ENGINE_PYTHON_INIT_H
 
 #define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include "gfx_generic/vec.h"
 #include <boost/version.hpp>
 
 #if BOOST_VERSION != 102800
-
-#if defined (_MSC_VER) && _MSC_VER <= 1200
-#define Vector Vactor
-#endif //defined (_MSC_VER) && _MSC_VER <= 1200
-
-#include <boost/python.hpp>
-
-#if defined (_MSC_VER) && _MSC_VER <= 1200
-#undef Vector
-#endif // defined (_MSC_VER) && _MSC_VER <= 1200
 
 #else //BOOST_VERSION != 102800
 #include <boost/python/detail/extension_class.hpp>
