@@ -3520,6 +3520,10 @@ bool isWeapon(std::string name) {
 // This is called every cycle - repair in flight by droids
 // TODO: move this to RepairBot
 void Unit::Repair() {
+    if(isUnit() == Vega_UnitType::planet) {
+        return;
+    }
+
     // TODO: everything below here needs to go when we're done with lib_components
     static float repairtime = XMLSupport::parse_float(vs_config->getVariable("physics", "RepairDroidTime", "180"));
     static float checktime = XMLSupport::parse_float(vs_config->getVariable("physics", "RepairDroidCheckTime", "5"));

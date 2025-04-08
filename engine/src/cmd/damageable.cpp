@@ -456,8 +456,6 @@ void Damageable::Destroy() {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     VS_LOG_AND_FLUSH(trace, "Damageable::Destroy() " + unit->name);
-    std::cout << "Damageable::Destroy unit " << unit->name << std::endl;
-
     unit->hull.Destroy();
 
     if (!unit->killed) {
