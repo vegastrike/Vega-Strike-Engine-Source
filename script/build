@@ -36,7 +36,7 @@
 set -e
 
 echo "--------------------------"
-echo "--- build | 2025-01-10 ---"
+echo "--- build | 2025-04-08 ---"
 echo "--------------------------"
 
 #----------------------------------
@@ -57,7 +57,7 @@ mkdir -pv "${BUILD_DIR}" && cd "${BUILD_DIR}"
 # configure libraries and prepare for the Debug build having -Werror set,
 # thus gating VS commits on being warning-free at some point in the near
 # future -- see https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/50
-cmake $@ "${SRC_DIR}"
+cmake $@ -DINSTALL_GTEST=${INSTALL_GTEST:-ON} -DUSE_GTEST=${USE_GTEST:-ON} "${SRC_DIR}"
 
 # for a clean build only
 # mut we can do it manually
