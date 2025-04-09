@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Roy Falk, ministerofinformation,
+ * Copyright (C) 2020-2025 Roy Falk, ministerofinformation,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -786,14 +786,14 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
 
 // If in Travel mode (non-combat), speed is limited to x100
 double Movable::MaxSpeed() const {
-    static const double combat_mode_multiplier = configuration()->physics_config.combat_mode_multiplier;
+    const double combat_mode_multiplier = configuration()->physics_config.combat_mode_multiplier;
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     return (unit->computer.combat_mode) ? unit->drive.speed.AdjustedValue() : combat_mode_multiplier * unit->drive.speed.AdjustedValue();
 }
 
 // Same as comment above. It makes less sense to limit travel speed with afterburners to afterburner speed x 100.
 double Movable::MaxAfterburnerSpeed() const {
-    static const double combat_mode_multiplier = configuration()->physics_config.combat_mode_multiplier;
+    const double combat_mode_multiplier = configuration()->physics_config.combat_mode_multiplier;
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
     //same capped big speed as combat...else different

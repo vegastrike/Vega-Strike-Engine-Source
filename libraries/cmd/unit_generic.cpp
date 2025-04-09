@@ -80,6 +80,7 @@
 #include "cmd/unit_json_factory.h"
 #include "root_generic/savegame.h"
 #include "resource/manifest.h"
+#include "cmd/dock_utils.h"
 
 #include <math.h>
 #include <list>
@@ -201,22 +202,22 @@ void Unit::Ref() {
 }
 
 #define INVERSEFORCEDISTANCE 5400
-extern void abletodock(int dock);
+extern void PlayDockingSound(int dock);
 
-bool CrashForceDock(Unit *thus, Unit *dockingUn, bool force) {
+/*bool CrashForceDock(Unit *thus, Unit *dockingUn, bool force) {
     Unit *un = dockingUn;
     int whichdockport = thus->CanDockWithMe(un, force);
     if (whichdockport != -1) {
         QVector place = UniverseUtil::SafeEntrancePoint(un->Position(), un->rSize() * 1.5);
         un->SetPosAndCumPos(place);
         if (un->ForceDock(thus, whichdockport) > 0) {
-            abletodock(3);
+            PlayDockingSound(3);
             un->UpgradeInterface(thus);
             return true;
         }
     }
     return false;
-}
+}*/
 
 float rand01() {
     return (float) rand() / (float) RAND_MAX;
@@ -2031,7 +2032,7 @@ int Unit::Dock(Unit *utdw) {
     if ((lookcleared = std::find(utdw->pImage->clearedunits.begin(),
             utdw->pImage->clearedunits.end(), this)) != utdw->pImage->clearedunits.end()) {
         int whichdockport;
-        if ((whichdockport = utdw->CanDockWithMe(this)) != -1) {
+        if ((whichdockport = CanDock(utdw, this)) != -1) {
             utdw->pImage->clearedunits.erase(lookcleared);
             return ForceDock(utdw, whichdockport);
         }
@@ -2046,42 +2047,7 @@ inline bool insideDock(const DockingPorts &dock, const QVector &pos, float radiu
     return IsShorterThan(pos - dock.GetPosition(), double(radius + dock.GetRadius()));
 }
 
-int Unit::CanDockWithMe(Unit *un, bool force) {
-    //don't need to check relation: already cleared.
 
-    // If your unit has docking ports then we check if any of our docking
-    // ports overlap with any of the station's docking ports.
-    // Otherwise we simply check if our unit overlaps with any of the
-    // station's docking ports.
-    for (unsigned int i = 0; i < pImage->dockingports.size(); ++i) {
-        if (!un->pImage->dockingports.empty()) {
-            for (unsigned int j = 0; j < un->pImage->dockingports.size(); ++j) {
-                if (insideDock(pImage->dockingports[i],
-                        InvTransform(GetTransformation(),
-                                Transform(un->GetTransformation(),
-                                        un->pImage->dockingports[j].GetPosition().Cast())),
-                        un->pImage->dockingports[j].GetRadius())) {
-                    // We cannot dock if we are already docked
-                    if (((un->docked & (DOCKED_INSIDE | DOCKED)) == 0) && (!(docked & DOCKED_INSIDE))) {
-                        return i;
-                    }
-                }
-            }
-        } else if (insideDock(pImage->dockingports[i],
-                InvTransform(GetTransformation(), un->Position()),
-                un->rSize())) {
-            return i;
-        }
-    }
-    if (force) {
-        for (unsigned int i = 0; i < pImage->dockingports.size(); ++i) {
-            if (!pImage->dockingports[i].IsOccupied()) {
-                return i;
-            }
-        }
-    }
-    return -1;
-}
 
 bool Unit::IsCleared(const Unit *DockingUnit) const {
     return std::find(pImage->clearedunits.begin(), pImage->clearedunits.end(), DockingUnit)

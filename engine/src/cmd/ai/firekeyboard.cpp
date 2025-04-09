@@ -1293,7 +1293,7 @@ static bool UnDockNow(Unit *me, Unit *targ) {
 
 void Enslave(Unit *, bool);
 
-void abletodock(int dock) {
+void PlayDockingSound(int dock) {
     switch (dock) {
         case 5: {
             static soundContainer reqsound;
@@ -1397,7 +1397,7 @@ static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity)
         if (hasDock) {
             isDone = true;
             c.SetCurrentState(c.fsm->GetDockNode(), anim, gender);
-            abletodock(3);
+            PlayDockingSound(3);
             if (parent->getAIState()) {
                 parent->getAIState()->Communicate(c);
             }
@@ -1408,7 +1408,7 @@ static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity)
             if (parent->getAIState()) {
                 parent->getAIState()->Communicate(c);
             }
-            abletodock(5);
+            PlayDockingSound(5);
         }
     } else if (parent->GetComputerData().target == targ) {
         CommunicationMessage c(targ, parent, anim, gender);
@@ -1481,7 +1481,7 @@ static void DoDockingOps(Unit *parent, Unit *targ, unsigned char playa, unsigned
             if (endt) {
                 ExecuteRequestClearenceKey(parent, endt);
             }
-            abletodock(0);
+            PlayDockingSound(0);
         }
         vectorOfKeyboardInput[playa].doc = false;
     }
@@ -1491,10 +1491,10 @@ static void DoDockingOps(Unit *parent, Unit *targ, unsigned char playa, unsigned
             mission->msgcenter->add("game",
                     "all",
                     "[Computer] Cannot dock with insubstantial object, target another object and retry.");
-            abletodock(0);
+            PlayDockingSound(0);
             return;
         } else if (!wasdock) {
-            abletodock(1);
+            PlayDockingSound(1);
         }
         vectorOfKeyboardInput[playa].req = false;
     }
@@ -1502,10 +1502,10 @@ static void DoDockingOps(Unit *parent, Unit *targ, unsigned char playa, unsigned
         CommunicationMessage c(endt, parent, NULL, 0);
         if (UnDockNow(parent, endt)) {
             c.SetCurrentState(c.fsm->GetUnDockNode(), NULL, 0);
-            abletodock(5);
+            PlayDockingSound(5);
         } else {
             c.SetCurrentState(c.fsm->GetFailDockNode(), NULL, 0);
-            abletodock(4);
+            PlayDockingSound(4);
         }
         parent->getAIState()->Communicate(c);
         vectorOfKeyboardInput[playa].und = 0;

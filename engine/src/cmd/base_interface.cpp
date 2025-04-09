@@ -1283,7 +1283,7 @@ void BaseInterface::Terminate() {
     }
 }
 
-extern void abletodock(int dock);
+extern void PlayDockingSound(int dock);
 
 void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
@@ -1307,7 +1307,7 @@ void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, i
             if (playa->getAIState()) {
                 playa->getAIState()->Communicate(c);
             }
-            abletodock(5);
+            PlayDockingSound(5);
             if (playa->name == "return_to_cockpit") {
                 if (playa->faction == bas->faction) {
                     playa->owner = bas;
@@ -1359,7 +1359,7 @@ void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, in
             if (playa->getAIState()) {
                 playa->getAIState()->Communicate(c);
             }
-            abletodock(5);
+            PlayDockingSound(5);
             playa->EjectCargo((unsigned int) -1);
             if ((playa->name == "return_to_cockpit") || (playa->name == "ejecting") || (playa->name == "eject")
                     || (playa->name == "Eject") || (playa->name == "Pilot") || (playa->name == "pilot")) {
