@@ -659,6 +659,7 @@ void LoopAroundSlow(Order *aisc, Unit *un) {
 }
 
 void SelfDestruct(Order *aisc, Unit *un) {
+    VS_LOG_AND_FLUSH(trace, "hard_coded_scripts::SelfDestruct " + un->name);
     un->Destroy();
     un->Split(rand() % 3 + 1);
     un->Explode(true, 0);     //displays explosion, unit continues

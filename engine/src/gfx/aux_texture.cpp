@@ -541,7 +541,7 @@ void Texture::Load(const char *FileNameRGB,
 }
 
 Texture::~Texture() {
-    if (original == NULL) {
+    if (original == nullptr) {
         /**DEPRECATED
          *     if(data != NULL)
          *     {
@@ -551,14 +551,15 @@ Texture::~Texture() {
          *     }
          */
         UnBind();
-        if (palette != NULL) {
+        if (palette != nullptr) {
             free(palette);
-            palette = NULL;
+            palette = nullptr;
         }
     } else {
         original->refcount--;
         if (original->refcount == 0) {
             delete original;
+            original = nullptr;
         }
     }
 }

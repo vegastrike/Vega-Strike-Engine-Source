@@ -91,11 +91,7 @@ public:
     int axis_axis[MAX_AXES];
     float joy_axis[MAX_AXES];
     JoyStick();
-#if defined (IRIX)        //could be POSIX type uchar_t?
-    uchar_t digital_hat[MAX_DIGITAL_HATSWITCHES];
-#else //defined (IRIX)
     unsigned char digital_hat[MAX_DIGITAL_HATSWITCHES];
-#endif //defined (IRIX)
 
     bool debug_digital_hatswitch;
 

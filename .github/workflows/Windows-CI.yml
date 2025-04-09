@@ -23,10 +23,12 @@ jobs:
             cmake-generator: VS2019Win64
             enable-pie:      1
             build-type:      Release
+            is-release:      0
           - os:              windows-2022
             cmake-generator: VS2022Win64
             enable-pie:      1
             build-type:      Debug
+            is-release:      0
 
     env:
       # Indicates the location of vcpkg
@@ -62,9 +64,9 @@ jobs:
         shell: bash
 
       - name: install-cmake
-        uses: lukka/get-cmake@acb35cf920333f4dc3fc4f424f1b30d5e7d561b4 #v3.31.4
+        uses: lukka/get-cmake@56d043d188c3612951d8755da8f4b709ec951ad6 #v3.31.6
         with:
-          cmakeVersion: 3.31.4
+          cmakeVersion: 3.31.6
           ninjaVersion: 1.11.1
 
       # Restore vcpkg from the GitHub Action cache service. Note that packages are restored by vcpkg's binary caching
@@ -93,7 +95,7 @@ jobs:
 
       - name: run-build-script
         working-directory: ${{ github.workspace }}
-        run: .\script\build.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }}
+        run: .\script\build.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }} -IsRelease ${{ matrix.is-release }}
 
       - name: Test
         working-directory: ${{ github.workspace }}

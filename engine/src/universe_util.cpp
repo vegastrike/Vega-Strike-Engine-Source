@@ -57,8 +57,6 @@ extern Animation *GetSplashScreen();
 extern const vector<string> &ParseDestinations(const string &value);
 
 using std::string;
-//less to write
-#define activeSys _Universe->activeStarSystem()
 
 void ClientServerSetLightContext(int lightcontext) {
     GFXSetLightContext(lightcontext);
@@ -222,6 +220,3 @@ void sendCustom(int cp, string cmd, string args, string id) {
     receivedCustom(cp, true, cmd, args, id);
 }
 }
-
-#undef activeSys
-

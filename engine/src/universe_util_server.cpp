@@ -38,9 +38,6 @@ void SetStarSystemLoading(bool value) {
 
 using std::string;
 
-//less to write
-#define activeSys _Universe->activeStarSystem()
-
 void ClientServerSetLightContext(int lc) {
 }
 
@@ -162,6 +159,3 @@ void sendCustom(int cp, string cmd, string args, string id) {
     VSServer->sendCustom(cp, cmd, args, id);
 }
 }
-
-#undef activeSys
-
