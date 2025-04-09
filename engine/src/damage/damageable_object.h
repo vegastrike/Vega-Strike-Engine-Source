@@ -34,6 +34,7 @@
 struct DamageableObject {
     int number_of_layers;
     std::vector<DamageableLayer*> layers;        // Typically shield/armor/hull
+    bool invulnerable;
 
     DamageableObject();
     DamageableObject(std::vector<DamageableLayer*> layers);
@@ -43,6 +44,8 @@ struct DamageableObject {
 
     void Destroy();
     bool Destroyed();
+
+    void SetInvulnerable(bool invulnerable);
 
     // Callbacks
     void (*explosion)(DamageableObject object);

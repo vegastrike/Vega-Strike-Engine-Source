@@ -454,6 +454,11 @@ void SetHull(Unit *my_unit, float newhull) {
         return;
     }
 
+    // Don't set hull to 0 (kill) when invulnerable
+    if(my_unit->invulnerable && newhull <=0) {
+        return;
+    }
+
     my_unit->hull.Set(newhull);
 }
 

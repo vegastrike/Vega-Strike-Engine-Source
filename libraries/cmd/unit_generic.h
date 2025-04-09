@@ -994,6 +994,11 @@ public:
 
 //Is this class a unit
     virtual enum Vega_UnitType isUnit() const {
+        if(boost::algorithm::ends_with(unit_key, "__planets")) {
+            return Vega_UnitType::planet;
+        }
+
+
         return Vega_UnitType::unit;
     }
 
