@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Roy Falk, ministerofinformation,
+ * Copyright (C) 2020-2025 Roy Falk, ministerofinformation,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -563,16 +563,16 @@ Vector Movable::ClampVelocity(const Vector &velocity, const bool afterburn) {
     double magnitude = velocity.Magnitude();
 
     // If we're using afterburn and have enough energy
-    // TODO: Need to make sure somewhere that damage to Afterburner.speed does not 
+    // TODO: Need to make sure somewhere that damage to Afterburner.speed does not
     // reduce it below Drive.speed
     if(afterburn && (unit->afterburner.CanConsume() || configuration()->fuel.no_fuel_afterburn)) {
-        max_speed = unit->MaxAfterburnerSpeed(); 
+        max_speed = unit->MaxAfterburnerSpeed();
     } else if(unit->drive.CanConsume() ) { //|| configuration()->fuel.no_fuel_thrust) {
         max_speed = unit->MaxSpeed();
     } else {
         max_speed = 0;
     }
-    
+
     if(magnitude > max_speed) {
         return velocity * (max_speed / magnitude);
     }
@@ -627,13 +627,13 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     const bool finegrainedFuelEfficiency = configuration()->fuel.variable_fuel_consumption;
-    
+
 
     if(!unit->afterburner.CanConsume()) {
         afterburn = false;
     }
-    
-    
+
+
     Vector Res = amt1;
 
     float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
@@ -654,11 +654,11 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     if (amt1.k < -unit->drive.retro) {
         Res.k = -unit->drive.retro;
     }
-   
+
     if (afterburn) {
         unit->afterburner.Consume();
     }
-    
+
     return Res;
 }
 
@@ -734,7 +734,7 @@ void Movable::RollTorque(float amt) {
 void Movable::Thrust(const Vector &amt1, bool afterburn) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     afterburn = afterburn && unit->afterburner.CanConsume();
-    
+
     //Unit::Thrust( amt1, afterburn );
     {
         Vector amt = ClampThrust(amt1, afterburn);
@@ -786,14 +786,14 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
 
 // If in Travel mode (non-combat), speed is limited to x100
 double Movable::MaxSpeed() const {
-    static const double combat_mode_multiplier = configuration()->physics_config.combat_mode_multiplier;
+    const double combat_mode_multiplier = configuration()->physics_config.combat_mode_multiplier;
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     return (unit->computer.combat_mode) ? unit->drive.speed.AdjustedValue() : combat_mode_multiplier * unit->drive.speed.AdjustedValue();
 }
 
 // Same as comment above. It makes less sense to limit travel speed with afterburners to afterburner speed x 100.
 double Movable::MaxAfterburnerSpeed() const {
-    static const double combat_mode_multiplier = configuration()->physics_config.combat_mode_multiplier;
+    const double combat_mode_multiplier = configuration()->physics_config.combat_mode_multiplier;
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
     //same capped big speed as combat...else different
