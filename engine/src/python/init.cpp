@@ -25,7 +25,6 @@
 
 #ifdef HAVE_PYTHON
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #define Vector Vactor
 #endif
@@ -131,8 +130,6 @@ void Python::reseterrors() {
     }
 }
 
-#if BOOST_VERSION != 102800
-
 static void *Vector_convertible(PyObject * p) {
     return PyTuple_Check(p) ? p : 0;
 }
@@ -158,8 +155,6 @@ static void QVector_construct(PyObject * source, boost::python::converter::rvalu
     PyArg_ParseTuple(source, ddd, &vec->i, &vec->j, &vec->k);
     data->convertible = storage;
 }
-
-#endif
 
 void Python::init() {
     static bool isinit = false;
@@ -208,12 +203,10 @@ void Python::init() {
 
     initpaths();
 
-#if BOOST_VERSION != 102800
     boost::python::converter::registry::insert(Vector_convertible,
             QVector_construct,
             boost::python::type_id<QVector>());
     boost::python::converter::registry::insert(Vector_convertible, Vector_construct, boost::python::type_id<Vector>());
-#endif
 #if (PY_VERSION_HEX < 0x03000000)
     InitBriefing2();
     InitVS2();

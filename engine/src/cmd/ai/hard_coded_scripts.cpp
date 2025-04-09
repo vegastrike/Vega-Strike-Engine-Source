@@ -24,7 +24,6 @@
 
 
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #include <boost/python.hpp>
 #include "python/python_class.h"
 #include "script.h"

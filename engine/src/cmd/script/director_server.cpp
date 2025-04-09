@@ -26,7 +26,6 @@
  */
 #define PY_SSIZE_T_CLEAN
 #include "python/python_class.h"
-#include <boost/version.hpp>
 #include <boost/python.hpp>
 #include <boost/python/class.hpp>
 #ifdef HAVE_PYTHON
