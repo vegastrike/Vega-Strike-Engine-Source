@@ -208,7 +208,7 @@ CONFIGURE_FILE(cmake-config.h.in config.h)
 #end config.h generation
 
 ADD_COMPILE_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-include>"
-                    "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:${Vega_Root_BINARY_DIR}/engine/config.h>")
+                    "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:${Vega_Strike_BINARY_DIR}/engine/config.h>")
 ADD_LINK_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Bsymbolic>")
 
 # Now the source files are listed starting here!
@@ -578,16 +578,16 @@ ENDIF()
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         # VS engine headers
-        ${Vega_Root_SOURCE_DIR}
-        ${Vega_Root_SOURCE_DIR}/engine
-        ${Vega_Root_SOURCE_DIR}/engine/src
+        ${Vega_Strike_SOURCE_DIR}
+        ${Vega_Strike_SOURCE_DIR}/engine
+        ${Vega_Strike_SOURCE_DIR}/engine/src
         # Library Headers
-        ${Vega_Root_SOURCE_DIR}/libraries
+        ${Vega_Strike_SOURCE_DIR}/libraries
         # CMake Artifacts
-        ${Vega_Root_BINARY_DIR}
-        ${Vega_Root_BINARY_DIR}/src
-        ${Vega_Root_BINARY_DIR}/engine
-        ${Vega_Root_BINARY_DIR}/engine/src
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+        ${Vega_Strike_BINARY_DIR}/engine
+        ${Vega_Strike_BINARY_DIR}/engine/src
 )
 
 IF (NEED_LINKING_AGAINST_LIBM)
@@ -695,16 +695,16 @@ IF (NOT DISABLE_CLIENT)
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine PRIVATE
             # VS engine headers
-            ${Vega_Root_SOURCE_DIR}
-            ${Vega_Root_SOURCE_DIR}/engine
-            ${Vega_Root_SOURCE_DIR}/engine/src
+            ${Vega_Strike_SOURCE_DIR}
+            ${Vega_Strike_SOURCE_DIR}/engine
+            ${Vega_Strike_SOURCE_DIR}/engine/src
             # Library Headers
-            ${Vega_Root_SOURCE_DIR}/libraries
+            ${Vega_Strike_SOURCE_DIR}/libraries
             # CMake Artifacts
-            ${Vega_Root_BINARY_DIR}
-            ${Vega_Root_BINARY_DIR}/src
-            ${Vega_Root_BINARY_DIR}/engine
-            ${Vega_Root_BINARY_DIR}/engine/src
+            ${Vega_Strike_BINARY_DIR}
+            ${Vega_Strike_BINARY_DIR}/src
+            ${Vega_Strike_BINARY_DIR}/engine
+            ${Vega_Strike_BINARY_DIR}/engine/src
     )
 
     IF (NEED_LINKING_AGAINST_LIBM)
@@ -804,9 +804,9 @@ INSTALL(TARGETS vegastrike-engine DESTINATION bin)
 # it's easy enough to mimic such behavior via CMake by installing
 # the executable a second time using a different name.
 IF (WIN32)
-    INSTALL(PROGRAMS "${Vega_Root_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
+    INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
 ELSE (WIN32)
-    INSTALL(PROGRAMS "${Vega_Root_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
+    INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
 ENDIF (WIN32)
 
 
@@ -1172,18 +1172,18 @@ IF (USE_GTEST)
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PRIVATE
             # VS engine headers
-            ${Vega_Root_SOURCE_DIR}
-            ${Vega_Root_SOURCE_DIR}/engine
-            ${Vega_Root_SOURCE_DIR}/engine/src
+            ${Vega_Strike_SOURCE_DIR}
+            ${Vega_Strike_SOURCE_DIR}/engine
+            ${Vega_Strike_SOURCE_DIR}/engine/src
             # Library Headers
-            ${Vega_Root_SOURCE_DIR}/libraries
+            ${Vega_Strike_SOURCE_DIR}/libraries
             # CMake Artifacts
-            ${Vega_Root_BINARY_DIR}
-            ${Vega_Root_BINARY_DIR}/src
-            ${Vega_Root_BINARY_DIR}/engine
-            ${Vega_Root_BINARY_DIR}/engine/src
+            ${Vega_Strike_BINARY_DIR}
+            ${Vega_Strike_BINARY_DIR}/src
+            ${Vega_Strike_BINARY_DIR}/engine
+            ${Vega_Strike_BINARY_DIR}/engine/src
     )
-    SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${Vega_Root_BINARY_DIR}/)
+    SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${Vega_Strike_BINARY_DIR}/)
 
     #TARGET_COMPILE_FEATURES(${TEST_NAME} PUBLIC cxx_std_11)
     SET_PROPERTY(TARGET ${TEST_NAME} PROPERTY CXX_STANDARD 14)
@@ -1203,16 +1203,16 @@ IF (USE_GTEST)
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing PRIVATE
             # VS engine headers
-            ${Vega_Root_SOURCE_DIR}
-            ${Vega_Root_SOURCE_DIR}/engine
-            ${Vega_Root_SOURCE_DIR}/engine/src
+            ${Vega_Strike_SOURCE_DIR}
+            ${Vega_Strike_SOURCE_DIR}/engine
+            ${Vega_Strike_SOURCE_DIR}/engine/src
             # Library Headers
-            ${Vega_Root_SOURCE_DIR}/libraries
+            ${Vega_Strike_SOURCE_DIR}/libraries
             # CMake Artifacts
-            ${Vega_Root_BINARY_DIR}
-            ${Vega_Root_BINARY_DIR}/src
-            ${Vega_Root_BINARY_DIR}/engine
-            ${Vega_Root_BINARY_DIR}/engine/src
+            ${Vega_Strike_BINARY_DIR}
+            ${Vega_Strike_BINARY_DIR}/src
+            ${Vega_Strike_BINARY_DIR}/engine
+            ${Vega_Strike_BINARY_DIR}/engine/src
     )
     TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
     SET_PROPERTY(TARGET vegastrike-testing PROPERTY CXX_STANDARD 14)

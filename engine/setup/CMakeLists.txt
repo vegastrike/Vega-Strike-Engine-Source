@@ -41,16 +41,16 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
     TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegasettings PRIVATE
             # VS engine headers
-            ${Vega_Root_SOURCE_DIR}
-            ${Vega_Root_SOURCE_DIR}/engine
-            ${Vega_Root_SOURCE_DIR}/engine/src
+            ${Vega_Strike_SOURCE_DIR}
+            ${Vega_Strike_SOURCE_DIR}/engine
+            ${Vega_Strike_SOURCE_DIR}/engine/src
             # Library Headers
-            ${Vega_Root_SOURCE_DIR}/libraries
+            ${Vega_Strike_SOURCE_DIR}/libraries
             # CMake Artifacts
-            ${Vega_Root_BINARY_DIR}
-            ${Vega_Root_BINARY_DIR}/src
-            ${Vega_Root_BINARY_DIR}/engine
-            ${Vega_Root_BINARY_DIR}/engine/src
+            ${Vega_Strike_BINARY_DIR}
+            ${Vega_Strike_BINARY_DIR}/src
+            ${Vega_Strike_BINARY_DIR}/engine
+            ${Vega_Strike_BINARY_DIR}/engine/src
     )
 	SET_TARGET_PROPERTIES(vegasettings PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
     SET_PROPERTY(TARGET vegasettings PROPERTY CXX_STANDARD 14)
@@ -72,9 +72,9 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 	FIND_PACKAGE(Boost COMPONENTS program_options REQUIRED)
 
 	INCLUDE_DIRECTORIES(
-        ${Vega_Root_SOURCE_DIR}/setup/src/include
-        ${Vega_Root_SOURCE_DIR}/src/common
-        ${Vega_Root_BINARY_DIR}
+        ${Vega_Strike_SOURCE_DIR}/setup/src/include
+        ${Vega_Strike_SOURCE_DIR}/src/common
+        ${Vega_Strike_BINARY_DIR}
         ${GTK3_INCLUDE_DIRS}
 		${Boost_INCLUDE_DIRS}
     )
@@ -99,16 +99,16 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegasettings PRIVATE
             # VS engine headers
-            ${Vega_Root_SOURCE_DIR}
-            ${Vega_Root_SOURCE_DIR}/engine
-            ${Vega_Root_SOURCE_DIR}/engine/src
+            ${Vega_Strike_SOURCE_DIR}
+            ${Vega_Strike_SOURCE_DIR}/engine
+            ${Vega_Strike_SOURCE_DIR}/engine/src
             # Library Headers
-            ${Vega_Root_SOURCE_DIR}/libraries
+            ${Vega_Strike_SOURCE_DIR}/libraries
             # CMake Artifacts
-            ${Vega_Root_BINARY_DIR}
-            ${Vega_Root_BINARY_DIR}/src
-            ${Vega_Root_BINARY_DIR}/engine
-            ${Vega_Root_BINARY_DIR}/engine/src
+            ${Vega_Strike_BINARY_DIR}
+            ${Vega_Strike_BINARY_DIR}/src
+            ${Vega_Strike_BINARY_DIR}/engine
+            ${Vega_Strike_BINARY_DIR}/engine/src
     )
 	SET_TARGET_PROPERTIES(vegasettings PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
     SET_PROPERTY(TARGET vegasettings PROPERTY CXX_STANDARD 14)
@@ -132,8 +132,8 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 	INCLUDE_DIRECTORIES(
 			${Vega_Strike_SOURCE_DIR}/setup/src/include
 			${Vega_Strike_SOURCE_DIR}/src/common
-			${Vega_Root_BINARY_DIR}
-			${Vega_Root_BINARY_DIR}/setup/src/include
+			${Vega_Strike_BINARY_DIR}
+			${Vega_Strike_SOURCE_DIR}/setup/src/include
 			${GTK3_INCLUDE_DIRS}
 			${Boost_INCLUDE_DIRS}
 			${GTK3_GLIBCONFIG_INCLUDE_DIR}

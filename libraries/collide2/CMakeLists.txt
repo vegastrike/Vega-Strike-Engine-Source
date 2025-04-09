@@ -149,16 +149,16 @@ ENDIF()
 TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide PRIVATE
         # VS engine headers
-        ${Vega_Root_SOURCE_DIR}
-        ${Vega_Root_SOURCE_DIR}/engine
-        ${Vega_Root_SOURCE_DIR}/engine/src
+        ${Vega_Strike_SOURCE_DIR}
+        ${Vega_Strike_SOURCE_DIR}/engine
+        ${Vega_Strike_SOURCE_DIR}/engine/src
         # Library Headers
-        ${Vega_Root_SOURCE_DIR}/libraries
+        ${Vega_Strike_SOURCE_DIR}/libraries
         # CMake Artifacts
-        ${Vega_Root_BINARY_DIR}
-        ${Vega_Root_BINARY_DIR}/src
-        ${Vega_Root_BINARY_DIR}/engine
-        ${Vega_Root_BINARY_DIR}/engine/src
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+        ${Vega_Strike_BINARY_DIR}/engine
+        ${Vega_Strike_BINARY_DIR}/engine/src
 )
 
 IF (NEED_LINKING_AGAINST_LIBM)

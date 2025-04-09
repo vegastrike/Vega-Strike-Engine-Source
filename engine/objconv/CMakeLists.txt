@@ -30,16 +30,16 @@ ADD_EXECUTABLE(vs-buildenv-trisort ${TRISORT_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort PRIVATE
         # VS engine headers
-        ${Vega_Root_SOURCE_DIR}
-        ${Vega_Root_SOURCE_DIR}/engine
-        ${Vega_Root_SOURCE_DIR}/engine/src
+        ${Vega_Strike_SOURCE_DIR}
+        ${Vega_Strike_SOURCE_DIR}/engine
+        ${Vega_Strike_SOURCE_DIR}/engine/src
         # Library Headers
-        ${Vega_Root_SOURCE_DIR}/libraries
+        ${Vega_Strike_SOURCE_DIR}/libraries
         # CMake Artifacts
-        ${Vega_Root_BINARY_DIR}
-        ${Vega_Root_BINARY_DIR}/src
-        ${Vega_Root_BINARY_DIR}/engine
-        ${Vega_Root_BINARY_DIR}/engine/src
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+        ${Vega_Strike_BINARY_DIR}/engine
+        ${Vega_Strike_BINARY_DIR}/engine/src
 )
 
 SET_TARGET_PROPERTIES(vs-buildenv-trisort PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -60,16 +60,16 @@ ADD_EXECUTABLE(vs-buildenv-asteroidgen ${ASTEROID_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen PRIVATE
         # VS engine headers
-        ${Vega_Root_SOURCE_DIR}
-        ${Vega_Root_SOURCE_DIR}/engine
-        ${Vega_Root_SOURCE_DIR}/engine/src
+        ${Vega_Strike_SOURCE_DIR}
+        ${Vega_Strike_SOURCE_DIR}/engine
+        ${Vega_Strike_SOURCE_DIR}/engine/src
         # Library Headers
-        ${Vega_Root_SOURCE_DIR}/libraries
+        ${Vega_Strike_SOURCE_DIR}/libraries
         # CMake Artifacts
-        ${Vega_Root_BINARY_DIR}
-        ${Vega_Root_BINARY_DIR}/src
-        ${Vega_Root_BINARY_DIR}/engine
-        ${Vega_Root_BINARY_DIR}/engine/src
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+        ${Vega_Strike_BINARY_DIR}/engine
+        ${Vega_Strike_BINARY_DIR}/engine/src
 )
 
 SET_TARGET_PROPERTIES(vs-buildenv-asteroidgen PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -91,16 +91,16 @@ ADD_EXECUTABLE(vs-buildenv-replace ${REPLACE_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace PRIVATE
         # VS engine headers
-        ${Vega_Root_SOURCE_DIR}
-        ${Vega_Root_SOURCE_DIR}/engine
-        ${Vega_Root_SOURCE_DIR}/engine/src
+        ${Vega_Strike_SOURCE_DIR}
+        ${Vega_Strike_SOURCE_DIR}/engine
+        ${Vega_Strike_SOURCE_DIR}/engine/src
         # Library Headers
-        ${Vega_Root_SOURCE_DIR}/libraries
+        ${Vega_Strike_SOURCE_DIR}/libraries
         # CMake Artifacts
-        ${Vega_Root_BINARY_DIR}
-        ${Vega_Root_BINARY_DIR}/src
-        ${Vega_Root_BINARY_DIR}/engine
-        ${Vega_Root_BINARY_DIR}/engine/src
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+        ${Vega_Strike_BINARY_DIR}/engine
+        ${Vega_Strike_BINARY_DIR}/engine/src
 )
 
 SET_TARGET_PROPERTIES(vs-buildenv-replace PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -151,7 +151,7 @@ SET(MESHER_SOURCES
     mesher/Modules/XMesh_to_BFXM.cpp
     mesher/Modules/XMesh_to_Ogre.cpp
     mesher/Modules/Wavefront_to_BFXM.cpp
-    ${Vega_Root_SOURCE_DIR}/libraries/root_generic/xml_support.cpp
+    ${Vega_Strike_SOURCE_DIR}/libraries/root_generic/xml_support.cpp
 )
 
 INCLUDE_DIRECTORIES(${MSH_INCLUDES} mesher)
@@ -159,16 +159,16 @@ ADD_EXECUTABLE(vega-meshtool ${MESHER_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(vega-meshtool SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vega-meshtool PRIVATE
         # VS engine headers
-        ${Vega_Root_SOURCE_DIR}
-        ${Vega_Root_SOURCE_DIR}/engine
-        ${Vega_Root_SOURCE_DIR}/engine/src
+        ${Vega_Strike_SOURCE_DIR}
+        ${Vega_Strike_SOURCE_DIR}/engine
+        ${Vega_Strike_SOURCE_DIR}/engine/src
         # Library Headers
-        ${Vega_Root_SOURCE_DIR}/libraries
+        ${Vega_Strike_SOURCE_DIR}/libraries
         # CMake Artifacts
-        ${Vega_Root_BINARY_DIR}
-        ${Vega_Root_BINARY_DIR}/src
-        ${Vega_Root_BINARY_DIR}/engine
-        ${Vega_Root_BINARY_DIR}/engine/src
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+        ${Vega_Strike_BINARY_DIR}/engine
+        ${Vega_Strike_BINARY_DIR}/engine/src
 )
 
 SET_TARGET_PROPERTIES(vega-meshtool PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

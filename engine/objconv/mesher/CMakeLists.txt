@@ -41,8 +41,8 @@ IF (EXPAT_FOUND)
         Modules/XMesh_to_Ogre.cpp
         Modules/Wavefront_to_BFXM.cpp
         PrecompiledHeaders/Converter.cpp
-        ${Vega_Root_SOURCE_DIR}/engine/src/hashtable.cpp
-        ${Vega_Root_SOURCE_DIR}/engine/src/xml_support.cpp
+        ${Vega_Strike_SOURCE_DIR}/engine/src/hashtable.cpp
+        ${Vega_Strike_SOURCE_DIR}/engine/src/xml_support.cpp
     )
 
     # Still need to add CEGUI and OGRE find packages
@@ -52,16 +52,16 @@ IF (EXPAT_FOUND)
     TARGET_INCLUDE_DIRECTORIES(mesher SYSTEM PRIVATE ${TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(mesher PRIVATE
             # VS engine headers
-            ${Vega_Root_SOURCE_DIR}
-            ${Vega_Root_SOURCE_DIR}/engine
-            ${Vega_Root_SOURCE_DIR}/engine/src
+            ${Vega_Strike_SOURCE_DIR}
+            ${Vega_Strike_SOURCE_DIR}/engine
+            ${Vega_Strike_SOURCE_DIR}/engine/src
             # Library Headers
-            ${Vega_Root_SOURCE_DIR}/libraries
+            ${Vega_Strike_SOURCE_DIR}/libraries
             # CMake Artifacts
-            ${Vega_Root_BINARY_DIR}
-            ${Vega_Root_BINARY_DIR}/src
-            ${Vega_Root_BINARY_DIR}/engine
-            ${Vega_Root_BINARY_DIR}/engine/src
+            ${Vega_Strike_BINARY_DIR}
+            ${Vega_Strike_BINARY_DIR}/src
+            ${Vega_Strike_BINARY_DIR}/engine
+            ${Vega_Strike_BINARY_DIR}/engine/src
     )
 
     SET_TARGET_PROPERTIES(mesher PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
