@@ -34,6 +34,8 @@ ADD_LIBRARY(vegastrike_cmd STATIC
         container.h
         csv.cpp
         csv.h
+        dock_utils.cpp
+        dock_utils.h
         mount.cpp
         mount.h
         armed.cpp
