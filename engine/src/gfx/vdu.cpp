@@ -49,6 +49,7 @@
 #include "weapon_info.h"
 #include "configuration/configuration.h"
 #include "components/ship_functions.h"
+#include "dock_utils.h"
 
 template<typename T>
 inline T mymin(T a, T b) {
@@ -549,49 +550,6 @@ VSSprite *getNavImage() {
     RETURN_STATIC_SPRITE("nav-hud");
 }
 
-double DistanceTwoTargets(Unit *parent, Unit *target) {
-    double tmp =
-            ((parent->Position() - target->Position()).Magnitude()
-                    - ((target->isUnit() == Vega_UnitType::planet) ? target->rSize() : 0));
-    if (tmp < 0) {
-        return 0;
-    }
-    return tmp;
-}
-
-struct retString128 {
-    char str[128];
-};
-
-retString128 PrettyDistanceString(double distance) {
-    //OVERRUN
-    struct retString128 qr;
-    static float game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1"));
-    static bool lie = XMLSupport::parse_bool(vs_config->getVariable("physics", "game_speed_lying", "true"));
-    if (lie) {
-        sprintf(qr.str, "%.2lf", distance / game_speed);
-    } else {
-        if (distance < 20000) {                                   //use meters up to 20,000 m
-            sprintf(qr.str, "%.0lf meters", distance);
-        } else if (distance < 100000) {                             //use kilometers with two decimals up to 100 km
-            sprintf(qr.str, "%.2lf kilometers", distance / 1000);
-        } else if (distance
-                < 299792458) {                          //use kilometers without decimals up to 299792.458 km
-            sprintf(qr.str, "%.0lf kilometers", distance / 1000);
-        } else if (distance < (120 * 299792458.)) {                 //use light seconds up to 120
-            sprintf(qr.str, "%.2lf light seconds", distance / 299792458);
-        } else if (distance < (120 * 60 * 299792458.)) {              //use light minutes up to 120
-            sprintf(qr.str, "%.2lf light minutes", distance / (60 * 299792458.));
-        } else if (distance < (48 * 3600 * 299792458.)) {             //use light hours up to 48
-            sprintf(qr.str, "%.2lf light hours", distance / (3600 * 299792458.));
-        } else if (distance < (365 * 24 * 3600 * 299792458.)) {          //use light days up to 365
-            sprintf(qr.str, "%.2lf light days", distance / (24 * 3600 * 299792458.));
-        } else {                                                    //use light years
-            sprintf(qr.str, "%.2lf lightyears", distance / (365 * 24 * 3600 * 299792458.));
-        }
-    }
-    return qr;
-}
 
 static float OneOfFour(float a, float b, float c, float d) {
     int aa = a != 0 ? 1 : 0;
@@ -713,17 +671,9 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
             newst += cp->autoMessage + "\n";
         }
         newst += '\n';
-        double dist = DistanceTwoTargets(parent, target);
-        double actual_range = dist;
-        if ((target->isUnit() == Vega_UnitType::planet) && (target->CanDockWithMe(parent, 1) != -1)) {
-            dist -= target->rSize() * UniverseUtil::getPlanetRadiusPercent();
-            if (dist < 0) {
-                newst += string("Docking: Ready");
-            } else if (dist < target->rSize()) {
-                newst += string("Docking: ") + string(PrettyDistanceString(dist).str);
-            }
-        }
-        newst += string("\nRange: ") + string(PrettyDistanceString(actual_range).str);
+        double actual_range = DistanceTwoTargets(parent, target);
+        newst += GetDockingText(parent, target, actual_range);
+        newst += string("\nRange: ") + PrettyDistanceString(actual_range);
         const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
         GFXColor tpbg = tp->bgcol;
         bool automatte = (0 == tpbg.a);
@@ -934,10 +884,7 @@ void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
                     + FactionUtil::GetFactionName(faction)
                     + ")\n\n#ff0000Target:\n  #ffff00" + (targ ? getUnitNameAndFgNoBase(targ) : std::string("Nothing"))
                     + "\n\n#ff0000Range: #ffff00"
-                    + std::string(PrettyDistanceString(((you && targ) ? DistanceTwoTargets(you,
-                            targ) : 0.0))
-                            .
-                                    str);
+                    + PrettyDistanceString(((you && targ) ? DistanceTwoTargets(you, targ) : 0.0));
     static float auto_message_lim =
             XMLSupport::parse_float(vs_config->getVariable("graphics", "auto_message_time_lim", "5"));
     float delautotime = UniverseUtil::GetGameTime() - cp->autoMessageTime;
@@ -1402,9 +1349,9 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
             st[i] = '\n';
         }
         st[i] = '\0';
-        struct retString128 qr = PrettyDistanceString(DistanceTwoTargets(parent, target));
+        std::string qr = PrettyDistanceString(DistanceTwoTargets(parent, target));
         strcat(st, "Range: ");
-        strcat(st, qr.str);
+        strcat(st, qr.c_str());
 //        GFXColor tpbg = tp->bgcol;
 //        bool automatte = (0 == tpbg.a);
         if (automatte) {

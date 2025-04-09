@@ -380,6 +380,7 @@ struct PhysicsConfig {
     float max_lost_target_live_time{30.0F};
     float percent_missile_match_target_velocity{1.0F};
     double game_speed{1.0};
+    bool game_speed_lying{false};
     double game_accel{1.0};
     double combat_mode_multiplier{100.0};
     float velocity_max{10000.0F};
@@ -408,8 +409,6 @@ struct PhysicsConfig {
     bool engine_energy_takes_priority{true};
     float density_of_rock{3.0F};
     float density_of_jump_point{100000.0F};
-    float planet_dock_port_size{1.2F};
-    float planet_dock_port_min_size{300.0F};
     float jump_mesh_radius_scale{0.5F};
     bool planets_can_have_subunits{false};
     bool planets_always_neutral{true};
@@ -465,6 +464,18 @@ struct GameStart {
     GameStart(boost::json::object object);
 };
 
+struct Dock {
+    float planet_dock_port_size{1.2F};
+    float planet_dock_port_min_size{300.0F};
+    double dock_planet_radius_percent{1.5};
+    bool simple_dock{false};
+    double count_to_dock_range{100000};
+    double simple_dock_range{5000};
+
+    Dock() {}
+    Dock(boost::json::object object);
+};
+
 }
 
 // not using namespace vega_config, because ComputerConfig would be ambiguous
@@ -490,6 +501,7 @@ public:
     vega_config::WarpConfig warp_config;
     vega_config::WeaponsConfig weapons;
     vega_config::GameStart game_start;
+    vega_config::Dock dock;
 };
 
 extern std::shared_ptr<Configuration> configuration();

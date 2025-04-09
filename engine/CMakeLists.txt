@@ -653,6 +653,7 @@ SET(LIBCMD_SOURCES
     src/cmd/collide.cpp
     src/cmd/container.cpp
     src/cmd/csv.cpp
+    src/cmd/dock_utils.cpp
     src/cmd/mount.cpp
     src/cmd/armed.cpp
     src/cmd/audible.cpp
