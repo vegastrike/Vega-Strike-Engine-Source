@@ -320,16 +320,6 @@ int main(int argc, char *argv[]) {
         // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
     }
 
-    std::ifstream file("config.json");
-    std::string str;
-    std::string file_contents;
-    while (std::getline(file, str)) {
-        file_contents += str;
-        file_contents.push_back('\n');
-    }
-
-    // vega_config::config = std::make_shared<vega_config::Configuration>(file_contents);
-
     // If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0') {
         g_game.vsdebug = configuration()->logging.vsdebug;
