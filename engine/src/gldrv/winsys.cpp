@@ -208,12 +208,10 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
     int bpp = 0; // Bits per pixel?
     int width, height;
-    if (gl_options.fullscreen) {
+    if (configuration()->graphics.full_screen) {
         video_flags |= SDL_WINDOW_FULLSCREEN;
     } else {
-#ifndef _WIN32
         video_flags |= SDL_WINDOW_RESIZABLE;
-#endif
     }
     bpp = gl_options.color_depth;
 
@@ -247,7 +245,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     }
-    if (game_options()->gl_accelerated_visual) {
+    if (configuration()->graphics.gl_accelerated_visual) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
     width = configuration()->graphics.resolution_x;
@@ -361,6 +359,8 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 
 void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title) {
     keepRunning = true;
+
+    SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
 
     //SDL_INIT_AUDIO|
 #if defined(NO_SDL_JOYSTICK)
