@@ -269,7 +269,7 @@ void Intelligent::SetTurretAI() {
         Unit *un;
         for (un_iter iter = unit->getSubUnits(); (un = *iter); ++iter) {
             if (!CheckAccessory(un)) {
-                un->EnqueueAIFirst(new Orders::FireAt(configuration()->ai.firing_config.aggressivity));
+                un->EnqueueAIFirst(new Orders::FireAt(configuration()->ai.firing.aggressivity));
                 un->EnqueueAIFirst(new Orders::FaceTarget(false, 3));
             }
             un->SetTurretAI();

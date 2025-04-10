@@ -540,7 +540,7 @@ Vector Movable::ClampTorque(const Vector &amt1) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     Vector Res = amt1;
 
-    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->components.fuel.no_fuel_thrust : 1;
     if (fabs(amt1.i) > fuelclamp * unit->drive.pitch) {
         Res.i = copysign(fuelclamp * unit->drive.pitch, amt1.i);
     }
@@ -565,9 +565,9 @@ Vector Movable::ClampVelocity(const Vector &velocity, const bool afterburn) {
     // If we're using afterburn and have enough energy
     // TODO: Need to make sure somewhere that damage to Afterburner.speed does not
     // reduce it below Drive.speed
-    if(afterburn && (unit->afterburner.CanConsume() || configuration()->fuel.no_fuel_afterburn)) {
+    if(afterburn && (unit->afterburner.CanConsume() || configuration()->components.fuel.no_fuel_afterburn)) {
         max_speed = unit->MaxAfterburnerSpeed();
-    } else if(unit->drive.CanConsume() ) { //|| configuration()->fuel.no_fuel_thrust) {
+    } else if(unit->drive.CanConsume() ) { //|| configuration()->components.fuel.no_fuel_thrust) {
         max_speed = unit->MaxSpeed();
     } else {
         max_speed = 0;
@@ -626,7 +626,7 @@ Vector Movable::MaxThrust(const Vector &amt1) {
 Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    const bool finegrainedFuelEfficiency = configuration()->fuel.variable_fuel_consumption;
+    const bool finegrainedFuelEfficiency = configuration()->components.fuel.variable_fuel_consumption;
 
 
     if(!unit->afterburner.CanConsume()) {
@@ -636,8 +636,8 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
 
     Vector Res = amt1;
 
-    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    float abfuelclamp = (unit->fuel.Level() <= 0) ? configuration()->fuel.no_fuel_afterburn : 1;
+    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->components.fuel.no_fuel_thrust : 1;
+    float abfuelclamp = (unit->fuel.Level() <= 0) ? configuration()->components.fuel.no_fuel_afterburn : 1;
     if (fabs(amt1.i) > fabs(fuelclamp * unit->drive.lateral)) {
         Res.i = copysign(fuelclamp * unit->drive.lateral, amt1.i);
     }

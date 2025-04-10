@@ -38,6 +38,10 @@
 #include "cmd/role_bitmask.h"
 #include "cmd/unit_csv.h"
 #include <algorithm>
+#include <boost/json/array.hpp>
+#include <boost/json/value_from.hpp>
+#include <boost/json/serialize.hpp>
+
 #include "root_generic/lin_time.h"
 #include "cmd/unit_const_cache.h"
 #include "src/vs_math.h"

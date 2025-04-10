@@ -67,13 +67,13 @@ void FtlDrive::Load(std::string unit_key) {
 
     // Consumer
     double energy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
-    SetConsumption(energy * configuration()->fuel.ftl_drive_factor);
+    SetConsumption(energy * configuration()->components.ftl_drive.factor);
 
     // FTL Drive
 }
 
 void FtlDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    unit["Warp_Usage_Cost"] = std::to_string(consumption  / configuration()->fuel.ftl_drive_factor);
+    unit["Warp_Usage_Cost"] = std::to_string(consumption  / configuration()->components.ftl_drive.factor);
 }
 
 // FTL drive is integrated and so cannot be upgraded/downgraded
