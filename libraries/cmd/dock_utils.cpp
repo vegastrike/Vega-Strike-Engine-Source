@@ -61,12 +61,12 @@ double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
  */
 int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy) {
     // Nowhere to dock. Exit
-    if(dock->pImage->dockingports.size() == 0) {
+    if(dock->pImage->dockingports.empty()) {
         return -1;
     }
 
     // Jump point. Exit
-    if(dock->pImage->destination.size() > 0) {
+    if(!dock->pImage->destination.empty()) {
         return -1;
     }
 
@@ -87,7 +87,7 @@ int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy) {
     if(configuration()->dock.simple_dock) {
         range = DistanceTwoTargets(dock, ship);
 
-        if (range < 5000) {
+        if (range < configuration()->dock.simple_dock_range) {
             return 0;
         } else {
             return -1;
