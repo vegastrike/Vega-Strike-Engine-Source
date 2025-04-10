@@ -27,6 +27,7 @@
 #define VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H
 
 #include <string>
+#include <memory>
 #include <boost/filesystem/path.hpp>
 
 #include "components/energy_consumer.h"
