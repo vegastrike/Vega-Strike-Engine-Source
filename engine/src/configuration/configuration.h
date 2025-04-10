@@ -464,6 +464,16 @@ namespace vega_config {
     } data;
 
     struct {
+        int count_to_dock_range = 100000;
+        double dock_planet_radius_percent = 1.5;
+        double planet_dock_port_min_size = 300.0;
+        double planet_dock_port_size = 1.2;
+        bool simple_dock = false;
+        double simple_dock_range = 5000.0;
+
+    } dock;
+
+    struct {
         double repair_price = 5000.0;
         double sellback_shipping_price = 6000.0;
         double ship_sellback_price = 0.5;

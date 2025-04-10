@@ -1837,6 +1837,42 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         }
 
 
+        const boost::json::value * dock_value_ptr = root_object.if_contains("dock");
+        if (dock_value_ptr != nullptr) {
+            boost::json::object dock_object = dock_value_ptr->get_object();
+            const boost::json::value * count_to_dock_range_value_ptr = dock_object.if_contains("count_to_dock_range");
+            if (count_to_dock_range_value_ptr != nullptr) {
+                dock.count_to_dock_range = boost::json::value_to<int>(*count_to_dock_range_value_ptr);
+            }
+
+            const boost::json::value * dock_planet_radius_percent_value_ptr = dock_object.if_contains("dock_planet_radius_percent");
+            if (dock_planet_radius_percent_value_ptr != nullptr) {
+                dock.dock_planet_radius_percent = boost::json::value_to<double>(*dock_planet_radius_percent_value_ptr);
+            }
+
+            const boost::json::value * planet_dock_port_min_size_value_ptr = dock_object.if_contains("planet_dock_port_min_size");
+            if (planet_dock_port_min_size_value_ptr != nullptr) {
+                dock.planet_dock_port_min_size = boost::json::value_to<double>(*planet_dock_port_min_size_value_ptr);
+            }
+
+            const boost::json::value * planet_dock_port_size_value_ptr = dock_object.if_contains("planet_dock_port_size");
+            if (planet_dock_port_size_value_ptr != nullptr) {
+                dock.planet_dock_port_size = boost::json::value_to<double>(*planet_dock_port_size_value_ptr);
+            }
+
+            const boost::json::value * simple_dock_value_ptr = dock_object.if_contains("simple_dock");
+            if (simple_dock_value_ptr != nullptr) {
+                dock.simple_dock = boost::json::value_to<bool>(*simple_dock_value_ptr);
+            }
+
+            const boost::json::value * simple_dock_range_value_ptr = dock_object.if_contains("simple_dock_range");
+            if (simple_dock_range_value_ptr != nullptr) {
+                dock.simple_dock_range = boost::json::value_to<double>(*simple_dock_range_value_ptr);
+            }
+
+        }
+
+
         const boost::json::value * economics_value_ptr = root_object.if_contains("economics");
         if (economics_value_ptr != nullptr) {
             boost::json::object economics_object = economics_value_ptr->get_object();
@@ -6328,4 +6364,3 @@ std::shared_ptr<vega_config::Configuration> configuration() {
     static const std::shared_ptr<vega_config::Configuration> kConfiguration = std::make_shared<vega_config::Configuration>();
     return kConfiguration;
 }
-
