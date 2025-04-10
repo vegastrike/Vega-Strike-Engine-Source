@@ -92,8 +92,6 @@ Universe *_Universe;
 TextPlane *bs_tp = nullptr;
 char SERVER = 0;
 
-static std::shared_ptr<vega_config::Configuration> vega_config::config = nullptr;
-
 //false if command line option --net is given to start without network
 static bool ignore_network = true;
 // legacy_data_dir_mode determines whether the application should require the data directory to be specified on the command-line or not

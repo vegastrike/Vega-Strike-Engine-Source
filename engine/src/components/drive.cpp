@@ -56,13 +56,13 @@ void Drive::Load(std::string unit_key) {
     static const double game_accel_speed = game_speed * game_accel;
 
     // Minimum drive capability for limp home (in %)
-    static const double minimal_drive_functionality = configuration()->components.fuel.minimum_drive;
+    static const double minimal_drive_functionality = configuration()->components.drive.minimum_drive;
 
     Component::Load(unit_key);
 
     // Consumer
     // We do not support all options here.
-    if(configuration()->components.drive.energy_source == EnergyConsumerSource::Fuel) {
+    if(configuration()->components.drive.energy_source == "fuel") {
         SetConsumption(1.0);
     } else {
         SetConsumption(1.0);
