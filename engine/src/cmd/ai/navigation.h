@@ -27,8 +27,8 @@
 #define VEGA_STRIKE_ENGINE_CMD_AI_NAVIGATION_ORDERS_H
 
 #include "order.h"
-#include "vegastrike.h"
-#include "vs_globals.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
 
 #include <string>
 

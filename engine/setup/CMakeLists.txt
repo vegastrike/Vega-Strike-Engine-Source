@@ -38,9 +38,25 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 		)
 
 	ADD_EXECUTABLE(vegasettings ${VEGASETTINGS_SOURCES})
-	TARGET_INCLUDE_DIRECTORIES(vegasettings PUBLIC ${VS_INCLUDE_DIRS})
+    TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
+    TARGET_INCLUDE_DIRECTORIES(vegasettings PRIVATE
+            # VS engine headers
+            ${Vega_Strike_SOURCE_DIR}
+            ${Vega_Strike_SOURCE_DIR}/engine
+            ${Vega_Strike_SOURCE_DIR}/engine/src
+            # Library Headers
+            ${Vega_Strike_SOURCE_DIR}/libraries
+            # CMake Artifacts
+            ${Vega_Strike_BINARY_DIR}
+            ${Vega_Strike_BINARY_DIR}/src
+            ${Vega_Strike_BINARY_DIR}/engine
+            ${Vega_Strike_BINARY_DIR}/engine/src
+    )
 	SET_TARGET_PROPERTIES(vegasettings PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-	TARGET_COMPILE_DEFINITIONS(vegasettings PUBLIC "BOOST_ALL_DYN_LINK")
+    SET_PROPERTY(TARGET vegasettings PROPERTY CXX_STANDARD 14)
+    SET_PROPERTY(TARGET vegasettings PROPERTY CXX_STANDARD_REQUIRED TRUE)
+    SET_PROPERTY(TARGET vegasettings PROPERTY CXX_EXTENSIONS ON)
+    TARGET_COMPILE_DEFINITIONS(vegasettings PUBLIC "BOOST_ALL_DYN_LINK")
 
 	#find GTK3
 	FIND_PACKAGE(GTK3 3.0 REQUIRED gtk)
@@ -80,9 +96,25 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 	)
 
 	ADD_EXECUTABLE(vegasettings MACOSX_BUNDLE ${VEGASETTINGS_SOURCES})
-	TARGET_INCLUDE_DIRECTORIES(vegasettings PUBLIC ${VS_INCLUDE_DIRS})
+    TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
+    TARGET_INCLUDE_DIRECTORIES(vegasettings PRIVATE
+            # VS engine headers
+            ${Vega_Strike_SOURCE_DIR}
+            ${Vega_Strike_SOURCE_DIR}/engine
+            ${Vega_Strike_SOURCE_DIR}/engine/src
+            # Library Headers
+            ${Vega_Strike_SOURCE_DIR}/libraries
+            # CMake Artifacts
+            ${Vega_Strike_BINARY_DIR}
+            ${Vega_Strike_BINARY_DIR}/src
+            ${Vega_Strike_BINARY_DIR}/engine
+            ${Vega_Strike_BINARY_DIR}/engine/src
+    )
 	SET_TARGET_PROPERTIES(vegasettings PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-	TARGET_COMPILE_DEFINITIONS(vegasettings PUBLIC "BOOST_ALL_DYN_LINK")
+    SET_PROPERTY(TARGET vegasettings PROPERTY CXX_STANDARD 14)
+    SET_PROPERTY(TARGET vegasettings PROPERTY CXX_STANDARD_REQUIRED TRUE)
+    SET_PROPERTY(TARGET vegasettings PROPERTY CXX_EXTENSIONS ON)
+    TARGET_COMPILE_DEFINITIONS(vegasettings PUBLIC "BOOST_ALL_DYN_LINK")
 
 	#find GTK3
 	FIND_PACKAGE(GTK3 3.0 REQUIRED gtk)
@@ -101,7 +133,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 			${Vega_Strike_SOURCE_DIR}/setup/src/include
 			${Vega_Strike_SOURCE_DIR}/src/common
 			${Vega_Strike_BINARY_DIR}
-			${Vega_Strike_BINARY_DIR}/setup/src/include
+			${Vega_Strike_SOURCE_DIR}/setup/src/include
 			${GTK3_INCLUDE_DIRS}
 			${Boost_INCLUDE_DIRS}
 			${GTK3_GLIBCONFIG_INCLUDE_DIR}

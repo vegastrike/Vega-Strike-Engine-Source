@@ -32,7 +32,7 @@
 #include <vector>
 #include <stack>
 #include <map>
-#include "xml_support.h"
+#include "mission/include/xml_support.h"
 #include "vs_logging.h"
 
 // FIXME: Shouldn't have these in a header file

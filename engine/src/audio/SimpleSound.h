@@ -36,7 +36,7 @@
 #include "Sound.h"
 #include "SoundBuffer.h"
 
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 
 namespace Audio {
 

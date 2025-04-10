@@ -29,7 +29,7 @@
 #include "gl_light.h"
 
 #include <math.h>
-#include "gfx/matrix.h"
+#include "gfx_generic/matrix.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338328
 #endif

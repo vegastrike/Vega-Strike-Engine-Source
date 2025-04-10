@@ -23,7 +23,7 @@
 #define VEGA_STRIKE_ENGINE_LINECOLLIDE_H
 
 #include <stdlib.h>
-#include "gfx/vec.h"
+#include "gfx_generic/vec.h"
 
 /**
  * Line Collide provides a complete container for a unit that is put in a collide hashtable

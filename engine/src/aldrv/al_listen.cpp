@@ -32,12 +32,12 @@
 #endif
 #include <stdio.h>
 #include <vector>
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "al_globals.h"
-#include "vs_globals.h"
-#include "vs_logging.h"
-#include "config_xml.h"
-#include "options.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_logging.h"
+#include "src/config_xml.h"
+#include "root_generic/options.h"
 
 using std::vector;
 

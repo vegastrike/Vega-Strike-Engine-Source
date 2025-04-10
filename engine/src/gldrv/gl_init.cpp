@@ -30,13 +30,13 @@
 #include "gl_globals.h"
 #undef GL_INIT_CPP
 #include "gl_include.h"
-#include "vs_globals.h"
-#include "xml_support.h"
-#include "config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
 #include "winsys.h"
-#include "gfxlib.h"
-#include "options.h"
-#include "vs_logging.h"
+#include "src/gfxlib.h"
+#include "root_generic/options.h"
+#include "src/vs_logging.h"
 
 #if !defined (_WIN32) && !defined (__CYGWIN__)
 
@@ -93,7 +93,7 @@
 #define WINDOW_TITLE "Vega Strike " VERSION
 
 #if defined (CG_SUPPORT)
-#include "cg_global.h"
+#include "src/cg_global.h"
 #endif
 
 PFNGLBINDBUFFERARBPROC glBindBufferARB_p = nullptr;

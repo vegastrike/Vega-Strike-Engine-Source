@@ -25,9 +25,9 @@
  */
 
 
-#include "turret.h"
+#include "cmd/turret.h"
 
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 enum class TURRET_SIZE {
     SMALL = 0x0,

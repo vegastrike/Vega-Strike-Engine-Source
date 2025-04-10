@@ -25,7 +25,7 @@
 #endif
 
 using std::string;
-#include "common.h"
+#include "common/common.h"
 
 #ifndef _WIN32
 

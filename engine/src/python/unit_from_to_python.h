@@ -32,7 +32,7 @@
 #if BOOST_VERSION != 102800
 //#include <boost/python/converter/arg_from_python.hpp>
 
-#include "init.h"
+#include "src/python/init.h"
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE BOOST_PYTHON_TO_PYTHON_BY_VALUE(Unit*,
         ::boost::python::to_python_value<UnitWrapper>()(
                 UnitWrapper(x)));

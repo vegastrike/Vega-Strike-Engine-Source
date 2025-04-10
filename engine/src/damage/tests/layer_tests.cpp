@@ -25,8 +25,8 @@
 
 #include <gtest/gtest.h>
 
-#include "damageable_layer.h"
-#include "core_vector.h"
+#include "damage/damageable_layer.h"
+#include "damage/core_vector.h"
 
 // Demonstrate some basic assertions.
 TEST(Layer, Sanity) {

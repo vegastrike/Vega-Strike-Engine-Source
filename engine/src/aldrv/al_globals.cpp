@@ -25,9 +25,9 @@
  */
 
 
-#include "gfx/vec.h"
+#include "gfx_generic/vec.h"
 #include "al_globals.h"
-#include "hashtable.h"
+#include "src/hashtable.h"
 #ifdef HAVE_AL
 Hashtable<std::string, ALuint, 127> soundHash;
 unsigned int maxallowedsingle = 10;

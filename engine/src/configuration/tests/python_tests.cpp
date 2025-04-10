@@ -24,12 +24,15 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
+#define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
+#include <Python.h>
+#include <boost/version.hpp>
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
 #include <iostream>
 
-#include "python/config/python_utils.h"
+#include "src/python/config/python_utils.h"
 
 using namespace boost::python;
 
@@ -125,8 +128,8 @@ TEST(Python, Call_Function) {
     } else {
         std::cout << "PyObject_GetAttrString is not null\n" << std::flush;
     }
-    
-    PyObject* args = PyTuple_Pack(2, 
+
+    PyObject* args = PyTuple_Pack(2,
                                   PyUnicode_FromString("Hello "),
                                   PyUnicode_FromString("World\n"));
     std::cout << "PyTuple_Pack did not crash\n" << std::flush;
@@ -138,7 +141,7 @@ TEST(Python, Call_Function) {
     } else {
         std::cout << "PyTuple_Pack is not null\n" << std::flush;
     }
-    
+
     PyObject* pyResult = PyObject_CallObject(function, args);
     std::cout << "PyObject_CallObject\n";
     std::string result = PyUnicode_AsUTF8(pyResult);
@@ -148,5 +151,5 @@ TEST(Python, Call_Function) {
     EXPECT_EQ(result, hello_world);
 
     // Uncomment to see prints
-    //EXPECT_FALSE(true); 
+    //EXPECT_FALSE(true);
 }

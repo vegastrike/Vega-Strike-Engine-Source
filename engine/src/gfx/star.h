@@ -25,9 +25,9 @@
  */
 #ifndef VEGA_STRIKE_ENGINE_GFX_STAR_H
 #define VEGA_STRIKE_ENGINE_GFX_STAR_H
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 
-#include "gfxlib_struct.h"
+#include "src/gfxlib_struct.h"
 const int STARnumvlist = 27;
 #include <string>
 

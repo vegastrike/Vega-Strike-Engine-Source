@@ -27,9 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_COCKPIT_H
 #define VEGA_STRIKE_ENGINE_GFX_COCKPIT_H
 
-#include "gfx/cockpit_generic.h"
-#include "gfxlib.h"
-#include "gfxlib_struct.h"
+#include "gfx_generic/cockpit_generic.h"
+#include "src/gfxlib.h"
+#include "src/gfxlib_struct.h"
 #include <vector>
 #include <list>
 
@@ -38,11 +38,11 @@ class VSSprite;
 class Gauge;
 class Unit;
 class NavigationSystem;
-#include "radar/radar.h"
+#include "gfx/radar/radar.h"
 #include "radar/sensor.h"
-#include "vdu.h"
-#include "camera.h"
-#include "physics.h"
+#include "gfx/vdu.h"
+#include "gfx/camera.h"
+#include "src/physics.h"
 #include "nav/navscreen.h"
 using namespace XMLSupport;   // DONT PUT THIS ABOVE HEADERS
 #define NUM_CAM CP_NUMVIEWS
@@ -187,7 +187,7 @@ public:
     void RestoreViewPort();
     GameCockpit(const char *file, Unit *parent, const std::string &pilotname);
     ~GameCockpit();
-    
+
     ///Looks up a particular Gauge stat on unit
     float LookupUnitStat(int stat, Unit *target);
     ///Loads cockpit info...just as constructor

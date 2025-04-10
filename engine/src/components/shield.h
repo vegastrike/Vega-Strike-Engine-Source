@@ -26,7 +26,7 @@
 #define VEGA_STRIKE_ENGINE_COMPONENTS_SHIELD_H
 
 #include "component.h"
-#include "energy_consumer.h"
+#include "components/energy_consumer.h"
 #include "damage/damageable_layer.h"
 
 class FtlDrive;
@@ -45,9 +45,10 @@ public:
     static int right;
 
     Shield(EnergyContainer *source, FtlDrive *ftl_drive, Cloak *cloak, FacetConfiguration configuration = FacetConfiguration::four);
+    ~Shield() override;
 
     // Component Methods
-    void Load(std::string unit_key) override;      
+    void Load(std::string unit_key) override;
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;
@@ -62,7 +63,7 @@ public:
     void DamageByPercent(double percent);
     void Repair() override;
     bool Damaged() const override;
-    
+
     void Regenerate(const bool player_ship);
 
     // Manipulate shield strength
@@ -70,6 +71,9 @@ public:
     void FullyCharge();
     void Decrease();
     void Zero();
+
+    // EnergyConsumer method(s)
+    double Consume() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_SHIELD_H

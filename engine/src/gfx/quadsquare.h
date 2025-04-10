@@ -33,8 +33,8 @@
  * Rewritten and adapted to Vegastrike by Daniel Horn
  */
 
-#include "vec.h"
-#include "gfxlib.h"
+#include "gfx_generic/vec.h"
+#include "src/gfxlib.h"
 #include <vector>
 #include "resizable.h"
 #include "nonlinear_transform.h"

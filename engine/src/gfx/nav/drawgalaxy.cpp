@@ -30,38 +30,38 @@
 
 #include <algorithm>
 #include <cmath>
-#include "vs_globals.h"
-#include "vegastrike.h"
+#include "root_generic/vs_globals.h"
+#include "src/vegastrike.h"
 #include "gfx/gauge.h"
 #include "gfx/cockpit.h"
-#include "universe.h"
-#include "star_system.h"
+#include "src/universe.h"
+#include "src/star_system.h"
 #include "cmd/unit_generic.h"
 #include "cmd/collection.h"
 #include "gfx/hud.h"
 #include "gfx/vdu.h"
-#include "lin_time.h" //for fps
-#include "config_xml.h"
-#include "lin_time.h"
+#include "root_generic/lin_time.h" //for fps
+#include "src/config_xml.h"
+#include "root_generic/lin_time.h"
 #include "cmd/images.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/msgcenter.h"
 #include "cmd/ai/flyjoystick.h"
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/aggressive.h"
-#include "main_loop.h"
+#include "src/main_loop.h"
 #include <assert.h>     //needed for assert() calls
-#include "savegame.h"
+#include "root_generic/savegame.h"
 #include "gfx/animation.h"
-#include "gfx/mesh.h"
-#include "universe_util.h"
-#include "in_mouse.h"
+#include "gfx_generic/mesh.h"
+#include "src/universe_util.h"
+#include "src/in_mouse.h"
 #include "gui/glut_support.h"
 #include "cmd/unit_util.h"
-#include "hashtable.h"
-#include "navscreen.h"
+#include "src/hashtable.h"
+#include "gfx/nav/navscreen.h"
 #include "gfx/masks.h"
-#include "navscreenoccupied.h"
+#include "gfx/nav/navscreenoccupied.h"
 
 using std::string;
 using std::vector;

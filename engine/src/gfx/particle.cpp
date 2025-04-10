@@ -24,21 +24,21 @@
 
 
 #include "particle.h"
-#include "gfxlib.h"
-#include "lin_time.h"
-#include "vs_globals.h"
+#include "src/gfxlib.h"
+#include "root_generic/lin_time.h"
+#include "root_generic/vs_globals.h"
 #include "cmd/unit_generic.h"
-#include "config_xml.h"
-#include "camera.h"
-#include "aux_texture.h"
+#include "src/config_xml.h"
+#include "gfx/camera.h"
+#include "gfx/aux_texture.h"
 #include "gldrv/gl_globals.h"
-#include "universe.h"
+#include "src/universe.h"
 
 #include <iterator>
 #include <limits>
 
 #include "aligned.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 ParticleTrail particleTrail("sparkle", 500, SRCALPHA, ONE, 0.05f, false, true);
 ParticleTrail smokeTrail("smoke", 500, SRCALPHA, INVSRCALPHA);

@@ -23,12 +23,12 @@
 
 #include "gl_globals.h"
 
-#include "gfxlib.h"
-#include "vegastrike.h"
-#include "vs_globals.h"
+#include "src/gfxlib.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
 #include <stdio.h>
-// #include "vsfilesystem.h"   // Is this still needed? -- stephengtuggy 2021-09-06
-#include "vs_logging.h"
+// #include "root_generic/vsfilesystem.h"   // Is this still needed? -- stephengtuggy 2021-09-06
+#include "src/vs_logging.h"
 
 GFXQuadList::GFXQuadList(GFXBOOL color) : numVertices(0), numQuads(0) {
     data.vertices = NULL;

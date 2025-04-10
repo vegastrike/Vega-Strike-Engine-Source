@@ -22,12 +22,12 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "jump_drive.h"
+#include "components/jump_drive.h"
 
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
-JumpDrive::JumpDrive() : 
+JumpDrive::JumpDrive() :
     Component(),
     EnergyConsumer(nullptr, false, 0),
     destination(-1),
@@ -42,6 +42,9 @@ JumpDrive::JumpDrive(EnergyContainer *source):
     type = ComponentType::JumpDrive;
 }
 
+JumpDrive::~JumpDrive()
+= default;
+
 
 int JumpDrive::Destination() const {
     return destination;
@@ -53,7 +56,7 @@ bool JumpDrive::IsDestinationSet() const {
 
 void JumpDrive::SetDestination(int destination) {
     if(!Destroyed()) {
-        this->destination = destination; 
+        this->destination = destination;
     }
 }
 
@@ -86,7 +89,7 @@ void JumpDrive::Load(std::string unit_key) {
     // Jump Drive
     installed = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false);
     delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
-}      
+}
 
 void JumpDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Jump_Drive_Present"] = std::to_string(Installed());
@@ -119,6 +122,12 @@ bool JumpDrive::Upgrade(const std::string upgrade_key) {
 
     Component::Upgrade(upgrade_key);
     return true;
+}
+
+double JumpDrive::Consume()
+{
+    return 0.0;
+    // return EnergyConsumer::Consume();
 }
 
 

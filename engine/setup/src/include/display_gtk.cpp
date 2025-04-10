@@ -22,7 +22,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "display.h"
+#include "setup/src/include/display.h"
 #ifdef GTK
 void AddCats(GtkWidget *vbox, char *group, char *def);
 void ClickButton(GtkWidget *w, struct catagory *CUR);

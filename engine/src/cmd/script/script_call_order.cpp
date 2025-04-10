@@ -36,9 +36,9 @@
 #endif
 
 #include <expat.h>
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #include "cmd/collection.h"
 #include "cmd/unit_generic.h"
 #include "cmd/ai/order.h"
@@ -47,13 +47,12 @@
 #include "cmd/ai/flybywire.h"
 #include "cmd/ai/tactics.h"
 #include "cmd/ai/missionscript.h"
-#include "gfx/cockpit_generic.h"
+#include "gfx_generic/cockpit_generic.h"
 #include "mission.h"
-#include "easydom.h"
-#include "universe.h"
+#include "root_generic/easydom.h"
+#include "src/universe.h"
 
-#include "vs_globals.h"
-#include "configxml.h"
+#include "root_generic/vs_globals.h"
 
 /* *********************************************************** */
 

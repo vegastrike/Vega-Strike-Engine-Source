@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_AI_EVENT_XML_H
 #define VEGA_STRIKE_ENGINE_CMD_AI_EVENT_XML_H
 
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 #include <string>
 #include <vector>
 #include <list>

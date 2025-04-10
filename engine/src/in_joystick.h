@@ -25,16 +25,16 @@
 /*
  *  Joystick support written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
-#include "in_kb_data.h"
+#include "src/in_kb_data.h"
 
 #if defined (HAVE_SDL)
 #include <SDL2/SDL.h>
 #endif //defined (HAVE_SDL)
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 //#include "glob.h"
 //#include "dbg.h"
-#include "in_kb.h"
+#include "src/in_kb.h"
 #define NUMJBUTTONS 32
 
 class JoyStick;

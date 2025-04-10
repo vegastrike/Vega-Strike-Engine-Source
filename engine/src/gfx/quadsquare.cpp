@@ -37,8 +37,8 @@
 #include <math.h>
 #include <assert.h>
 #include "quadsquare.h"
-#include "gfxlib.h"
-#include "aux_texture.h"
+#include "src/gfxlib.h"
+#include "gfx/aux_texture.h"
 using std::vector;
 
 unsigned int *quadsquare::VertexAllocated;

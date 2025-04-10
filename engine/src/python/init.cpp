@@ -23,7 +23,6 @@
  */
 
 
-#ifdef HAVE_PYTHON
 #define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 #if defined (_MSC_VER) && _MSC_VER <= 1200
@@ -34,6 +33,7 @@
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector
 #endif
+
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
@@ -44,19 +44,19 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "configxml.h"
-#include "vs_globals.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "init.h"
-#include "python_compile.h"
-#include "python_class.h"
+#include "root_generic/configxml.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "src/python/init.h"
+#include "src/python/python_compile.h"
+#include "src/python/python_class.h"
 #include "cmd/unit_generic.h"
-#include "python/config/python_utils.h"
+#include "src/python/config/python_utils.h"
+#include "cmd/vega_py_run.h"
 
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #include <direct.h>
-#include <vega_py_run.h>
 #endif
 class Unit;
 //FROM_PYTHON_SMART_POINTER(Unit)
@@ -277,5 +277,3 @@ void Python::test() {
 //VSFileSystem::vs_fprintf(stdout, "output %s\n", PythonIOString::buffer.str());
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogs();
 }
-
-#endif

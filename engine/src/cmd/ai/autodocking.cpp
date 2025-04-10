@@ -36,8 +36,8 @@
 #include "autodocking.h"
 
 #include "flykeyboard.h"
-#include "in.h"
-#include "in_kb_data.h"
+#include "src/in.h"
+#include "src/in_kb_data.h"
 
 namespace {
 

@@ -20,7 +20,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "picker.h"
 
@@ -28,9 +28,9 @@
 #include "scroller.h"
 #include "painttext.h"
 
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "xml_support.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_support.h"
 
 #include <list>
 

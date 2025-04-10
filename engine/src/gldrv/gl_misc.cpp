@@ -25,12 +25,12 @@
 #define GL_MISC_CPP
 #include "gl_globals.h"
 #undef GL_MISC_CPP
-#include "vegastrike.h"
-#include "gfxlib.h"
-#include "vs_globals.h"
+#include "src/vegastrike.h"
+#include "src/gfxlib.h"
+#include "root_generic/vs_globals.h"
 #include "gl_light.h"
 #include "winsys.h"
-#include "options.h"
+#include "root_generic/options.h"
 
 
 

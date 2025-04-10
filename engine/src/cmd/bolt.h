@@ -26,12 +26,12 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_BOLT_H
 #define VEGA_STRIKE_ENGINE_CMD_BOLT_H
 
-#include "gfxlib.h"
-#include "gfxlib_struct.h"
-#include "weapon_info.h"
-#include "gfx/matrix.h"
-#include "gfx/quaternion.h"
-#include "collide_map.h"
+#include "src/gfxlib.h"
+#include "src/gfxlib_struct.h"
+#include "cmd/weapon_info.h"
+#include "gfx_generic/matrix.h"
+#include "gfx_generic/quaternion.h"
+#include "cmd/collide_map.h"
 #include "gfx/animation.h"
 
 class Unit;

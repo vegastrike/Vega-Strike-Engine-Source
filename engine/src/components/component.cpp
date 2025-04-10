@@ -26,7 +26,7 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "component.h"
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 #include "resource/cargo.h"
 #include "resource/manifest.h"
 
@@ -35,6 +35,9 @@
 const std::string NAME = "Name";
 const std::string MASS = "Mass";
 const std::string VOLUME = "Volume";
+
+Component::~Component()
+= default;
 
 Component::Component(double mass, double volume, bool installed, bool integral):
                      upgrade_name(""),
@@ -85,13 +88,13 @@ bool Component::CanWillUpDowngrade(const std::string upgrade_key,
         } else {
             return CanDowngrade();
         }
-    }                                        
+    }
 }
 
 bool Component::Downgrade() {
     upgrade_name = std::string();
     upgrade_key = std::string();
-    
+
     mass = 0.0;
     volume = 0.0;
     installed = false;
@@ -101,7 +104,7 @@ bool Component::Downgrade() {
 bool Component::Upgrade(const std::string upgrade_key) {
     this->upgrade_key = upgrade_key;
     upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, NAME, std::string());
-    
+
     mass = UnitCSVFactory::GetVariable(upgrade_key, MASS, 0.0);
     // TODO: volume currently not in units.json. need to merge with items list
     volume = UnitCSVFactory::GetVariable(upgrade_key, VOLUME, 0.0);

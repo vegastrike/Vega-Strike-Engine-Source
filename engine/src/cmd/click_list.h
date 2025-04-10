@@ -26,10 +26,10 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_GFX_CLICK_LIST_H
 #define VEGA_STRIKE_ENGINE_CMD_GFX_CLICK_LIST_H
 
-//#include "vegastrike.h"
-#include "gfx/matrix.h"
-#include "collection.h"
-#include "star_system.h"
+//#include "src/vegastrike.h"
+#include "gfx_generic/matrix.h"
+#include "cmd/collection.h"
+#include "src/star_system.h"
 Vector MouseCoordinate(int x, int y); //FIXME
 
 class ClickList {

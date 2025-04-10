@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_DAMAGE_FACET_CONFIGURATION_H
 #define VEGA_STRIKE_ENGINE_DAMAGE_FACET_CONFIGURATION_H
 
-#include "core_vector.h"
+#include "damage/core_vector.h"
 #include <float.h>
 #include <string>
 
@@ -30,7 +30,7 @@
  * @brief The FacetConfiguration enum represents how many facets a layer has and it what configuration.
  * @details The use of enum class enforces the correctness of the parameter without checking.
  * You can't pass 17 for example.
- * The game originally supported 8 facets. 
+ * The game originally supported 8 facets.
  * However, I disabled all facets except 1,2 and 4 due to complexity.
  */
 enum class FacetConfiguration {

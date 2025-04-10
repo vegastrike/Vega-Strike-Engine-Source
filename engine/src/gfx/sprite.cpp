@@ -26,20 +26,20 @@
 
 #include <stdlib.h>
 #include <iostream>
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 #include "cmd/unit_generic.h"
-#include "aux_texture.h"
-#include "ani_texture.h"
-#include "sprite.h"
-#include "matrix.h"
-#include "gfxlib.h"
-#include "vegastrike.h"
-#include "vs_globals.h"
-#include "../gldrv/gl_globals.h"
+#include "gfx/aux_texture.h"
+#include "gfx/ani_texture.h"
+#include "gfx/sprite.h"
+#include "gfx_generic/matrix.h"
+#include "src/gfxlib.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
+#include "gldrv/gl_globals.h"
 #include <assert.h>
 #include <math.h>
-#include "gnuhash.h"
+#include "src/gnuhash.h"
 
 #ifdef _WIN32
 #include <direct.h>

@@ -21,13 +21,13 @@
  */
 
 #include "cmd/unit_generic.h"
-#include "config_xml.h"
-#include "xml_support.h"
-#include "vs_globals.h"
-#include "universe_util.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_support.h"
+#include "root_generic/vs_globals.h"
+#include "src/universe_util.h"
 #include "gldrv/winsys.h"
-#include "options.h"
-#include "computer.h"
+#include "root_generic/options.h"
+#include "cmd/computer.h"
 
 #include <math.h>
 

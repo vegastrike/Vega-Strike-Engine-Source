@@ -30,12 +30,12 @@
 
 #include "script.h"
 #include "navigation.h"
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 #include "flybywire.h"
 #include <stdio.h>
 #include <vector>
 #include <stack>
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 #include "tactics.h"
 #include "cmd/unit_generic.h"
 

@@ -25,22 +25,22 @@
 
 
 #include "navigation.h"
-#include "macosx_math.h"
+#include "root_generic/macosx_math.h"
 #include <math.h>
 #ifndef _WIN32
 #include <assert.h>
 #endif
 #include "cmd/unit_generic.h"
-#include "lin_time.h"
+#include "root_generic/lin_time.h"
 #include "cmd/script/flightgroup.h"
-#include "config_xml.h"
-#include "vs_globals.h"
-#include "vs_logging.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_logging.h"
 #include "warpto.h"
 #include "flybywire.h"
 #include "cmd/unit_util.h"
-#include "star_system.h"
-#include "universe.h"
+#include "src/star_system.h"
+#include "src/universe.h"
 
 using namespace Orders;
 

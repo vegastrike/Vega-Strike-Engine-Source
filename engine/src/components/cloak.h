@@ -28,7 +28,7 @@
 #include <string>
 #include <map>
 
-#include "energy_consumer.h"
+#include "components/energy_consumer.h"
 
 // TODO: remove dependency on unit
 class EnergyContainer;
@@ -63,6 +63,7 @@ class Cloak : public Component, public EnergyConsumer
 
 public:
     Cloak();
+    ~Cloak() override;
 
 // Component Methods
     void Load(std::string unit_key) override;
@@ -116,7 +117,7 @@ public:
         return glass;
     }
 
-    
+
 
     // Is the ship visible
     bool Visible() const {
@@ -145,9 +146,13 @@ public:
     void Activate();
     void Deactivate();
 
+    // EnergyConsumer methods
+
+    double Consume() override;
+
 private:
-    void _Downgrade();
-    void _Upgrade(const std::string upgrade_key);
+    void downgrade_private();
+    void upgrade_private(const std::string upgrade_key);
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_CLOAK_H

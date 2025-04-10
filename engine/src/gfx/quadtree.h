@@ -27,8 +27,8 @@
 #define VEGA_STRIKE_ENGINE_GFX_QUADTREE_H
 
 #include "quadsquare.h"
-#include "xml_support.h"
-#include "matrix.h"
+#include "root_generic/xml_support.h"
+#include "gfx_generic/matrix.h"
 
 class Texture;
 struct TerraXML;

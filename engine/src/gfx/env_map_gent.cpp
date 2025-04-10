@@ -24,17 +24,17 @@
  */
 
 
-#include "endianness.h"
+#include "src/endianness.h"
 #include <float.h>
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "vsimage.h"
-#include "aux_texture.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "gfx/vsimage.h"
+#include "gfx/aux_texture.h"
 #include "gldrv/sdds.h"
 #ifndef WIN32
 #else

@@ -26,7 +26,7 @@
 
 
 #include <string>
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 VSSprite *createVSSprite(const char *file) {
     return NULL;

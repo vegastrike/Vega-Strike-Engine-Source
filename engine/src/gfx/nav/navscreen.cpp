@@ -22,45 +22,45 @@
 
 
 #include <set>
-#include "vs_logging.h"
-#include "vs_globals.h"
-#include "vegastrike.h"
+#include "src/vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "src/vegastrike.h"
 #include "gfx/gauge.h"
 #include "gfx/cockpit.h"
-#include "universe.h"
-#include "star_system.h"
+#include "src/universe.h"
+#include "src/star_system.h"
 #include "cmd/unit_generic.h"
 #include "cmd/collection.h"
 #include "gfx/hud.h"
 #include "gfx/vdu.h"
-#include "lin_time.h" //for fps
-#include "config_xml.h"
-#include "lin_time.h"
+#include "root_generic/lin_time.h" //for fps
+#include "src/config_xml.h"
+#include "root_generic/lin_time.h"
 #include "cmd/images.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/msgcenter.h"
 #include "cmd/ai/flyjoystick.h"
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/aggressive.h"
-#include "main_loop.h"
+#include "src/main_loop.h"
 #include <assert.h>     //needed for assert() calls
-#include "savegame.h"
+#include "root_generic/savegame.h"
 #include "gfx/animation.h"
-#include "gfx/mesh.h"
-#include "universe_util.h"
-#include "in_mouse.h"
+#include "gfx_generic/mesh.h"
+#include "src/universe_util.h"
+#include "src/in_mouse.h"
 #include "gui/glut_support.h"
 #include "cmd/unit_util.h"
 #include "math.h"
-#include "save_util.h"
+#include "src/save_util.h"
 #include "gfx/vdu.h"
-#include "navscreen.h"
+#include "gfx/nav/navscreen.h"
 #include "gfx/masks.h"
-#include "navgetxmldata.h"
-#include "navitemstodraw.h"
-#include "navparse.h"
-#include "navcomputer.h"
-#include "navpath.h"
+#include "gfx/nav/navgetxmldata.h"
+#include "gfx/nav/navitemstodraw.h"
+#include "gfx/nav/navparse.h"
+#include "gfx/nav/navcomputer.h"
+#include "gfx/nav/navpath.h"
 
 //This sets up the items in the navscreen
 //**********************************
@@ -973,22 +973,22 @@ QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_) 
  *         }
  */
     if (x_ != 0) {
-        float distance_yz = sqrt((vector.j * vector.j) + (vector.k * vector.k));
-        float current_angle = atan2(vector.k, vector.j);
+        double distance_yz = sqrt((vector.j * vector.j) + (vector.k * vector.k));
+        double current_angle = atan2(vector.k, vector.j);
         current_angle += x_;
         vector.j = cos(current_angle) * distance_yz;
         vector.k = sin(current_angle) * distance_yz;
     }
     if (y_ != 0) {
-        float distance_xz = sqrt((vector.i * vector.i) + (vector.k * vector.k));
-        float current_angle = atan2(vector.k, vector.i);
+        double distance_xz = sqrt((vector.i * vector.i) + (vector.k * vector.k));
+        double current_angle = atan2(vector.k, vector.i);
         current_angle += y_;
         vector.i = cos(current_angle) * distance_xz;
         vector.k = sin(current_angle) * distance_xz;
     }
     if (z_ != 0) {
-        float distance_xy = sqrt((vector.i * vector.i) + (vector.j * vector.j));
-        float current_angle = atan2(vector.j, vector.i);
+        double distance_xy = sqrt((vector.i * vector.i) + (vector.j * vector.j));
+        double current_angle = atan2(vector.j, vector.i);
         current_angle += z_;
         vector.i = cos(current_angle) * distance_xy;
         vector.j = sin(current_angle) * distance_xy;
@@ -1854,15 +1854,17 @@ float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale,
     double real_zoom_flat = 0.0;
 //float _l2 = log(2.0f);
     if (system_not_galaxy) {
-        real_zoom = zoom_s * zoom_s * zscale;
-        real_zoom_flat = zoom_s * zoom_s * zscale_flat;
+        const double zoom_s_tmp = zoom_s;
+        real_zoom = zoom_s_tmp * zoom_s_tmp * zscale;
+        real_zoom_flat = zoom_s_tmp * zoom_s_tmp * zscale_flat;
 //real_zoom = zoom_s*zscale;
 //real_zoom_flat = zoom_s*zscale_flat;
 ///		real_zoom = (log(zoom_s)/_l2)*zscale;
 ///		real_zoom_flat = (log(zoom_s)/_l2)*zscale_flat;
     } else {
-        real_zoom = zoom * zoom * zscale;
-        real_zoom_flat = zoom * zoom * zscale_flat;
+        const double zoom_tmp = zoom;
+        real_zoom = zoom_tmp * zoom_tmp * zscale;
+        real_zoom_flat = zoom_tmp * zoom_tmp * zscale_flat;
 //real_zoom = (log(zoom)/_l2)*zscale;
 //real_zoom_flat = (log(zoom)/_l2)*zscale_flat;
     }

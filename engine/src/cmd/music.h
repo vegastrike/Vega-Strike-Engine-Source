@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_MUSIC_H
 #define VEGA_STRIKE_ENGINE_CMD_MUSIC_H
 
-#include "container.h"
+#include "cmd/container.h"
 #include <vector>
 #include <string>
 #include <list>

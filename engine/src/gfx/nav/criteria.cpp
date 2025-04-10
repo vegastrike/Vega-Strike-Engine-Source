@@ -25,7 +25,7 @@
  */
 
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
 //For WIN32 debugging.
 #include <crtdbg.h>
@@ -34,12 +34,12 @@
 #include <assert.h>
 
 #include "criteria.h"
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 #include "gfx/cockpit.h"
-#include "galaxy_xml.h"
-#include "savegame.h"
-#include "universe_util.h"
-#include "universe.h"
+#include "root_generic/galaxy_xml.h"
+#include "root_generic/savegame.h"
+#include "src/universe_util.h"
+#include "src/universe.h"
 
 using std::string;
 using std::set;

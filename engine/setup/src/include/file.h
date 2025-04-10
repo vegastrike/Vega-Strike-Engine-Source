@@ -19,7 +19,7 @@
 #ifndef VEGA_STRIKE_ENGINE_SETUP_FILE_H
 #define VEGA_STRIKE_ENGINE_SETUP_FILE_H
 
-#include "central.h"
+#include "setup/src/include/central.h"
 
 void LoadMainConfig(void);
 void LoadConfig(void);

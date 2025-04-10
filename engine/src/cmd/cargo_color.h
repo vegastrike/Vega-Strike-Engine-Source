@@ -26,8 +26,8 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_CARGO_COLOR_H
 #define VEGA_STRIKE_ENGINE_CMD_CARGO_COLOR_H
 
-#include "gfxlib_struct.h"
-#include "cargo.h"
+#include "src/gfxlib_struct.h"
+#include "resource/cargo.h"
 
 // TODO: remove this. That's what std::pair is for.
 // A stupid struct that is only for grouping 2 different types of variables together in one return value

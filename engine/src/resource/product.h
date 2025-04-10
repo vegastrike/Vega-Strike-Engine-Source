@@ -24,7 +24,7 @@
 
 #include <string>
 
-#include "resource.h"
+#include "resource/resource.h"
 
 class Product
 {

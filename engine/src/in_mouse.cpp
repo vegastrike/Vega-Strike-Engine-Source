@@ -20,16 +20,16 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vegastrike.h"
-#include "in_handler.h"
-#include "in_mouse.h"
+#include "src/vegastrike.h"
+#include "src/in_handler.h"
+#include "src/in_mouse.h"
 #include <deque>
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "in_joystick.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "src/in_joystick.h"
 #include "gldrv/winsys.h"
-#include "options.h"
-#include "universe.h"
+#include "root_generic/options.h"
+#include "src/universe.h"
 
 using std::deque;
 #define NUM_BUTTONS 15

@@ -27,8 +27,8 @@
 
 using std::vector;
 using std::string;
-#include "xml_support.h"
-#include "hashtable.h"
+#include "root_generic/xml_support.h"
+#include "src/hashtable.h"
 using namespace XMLSupport;
 struct GFXVertex {
     float x, y, z;

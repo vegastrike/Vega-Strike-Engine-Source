@@ -24,17 +24,17 @@
 
 
 #include "star.h"
-#include "ani_texture.h"
+#include "gfx/ani_texture.h"
 #include <assert.h>
-#include "vegastrike.h"
-#include "vs_globals.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
 #include "gfx/camera.h"
 #include "gfx/cockpit.h"
-#include "config_xml.h"
-#include "lin_time.h"
-#include "galaxy_xml.h"
-#include "universe.h"
-#include "vs_logging.h"
+#include "src/config_xml.h"
+#include "root_generic/lin_time.h"
+#include "root_generic/galaxy_xml.h"
+#include "src/universe.h"
+#include "src/vs_logging.h"
 
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #if defined(__APPLE__) && defined (__MACH__)
@@ -606,7 +606,8 @@ void Stars::ResetPosition(const QVector &cent) {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             for (int k = 0; k < 3; k++) {
-                pos[i * 9 + j * 3 + k].Set((i - 1) * spread, (j - 1) * spread, (k - 1) * spread);
+                const double spread_temp = spread;
+                pos[i * 9 + j * 3 + k].Set((i - 1) * spread_temp, (j - 1) * spread_temp, (k - 1) * spread_temp);
                 pos[i * 9 + j * 3 + k] += cent;
             }
         }

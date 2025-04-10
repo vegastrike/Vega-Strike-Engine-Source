@@ -22,16 +22,16 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "afterburner_upgrade.h"
+#include "components/afterburner_upgrade.h"
 
-#include "afterburner.h"
-#include "unit_csv_factory.h"
+#include "components/afterburner.h"
+#include "cmd/unit_csv_factory.h"
 
 #include <boost/format.hpp>
 
 
-AfterburnerUpgrade::AfterburnerUpgrade(Afterburner *afterburner): 
-    Component(), afterburner(afterburner), thrust(1.0), 
+AfterburnerUpgrade::AfterburnerUpgrade(Afterburner *afterburner):
+    Component(), afterburner(afterburner), thrust(1.0),
     speed(1.0), consumption(1.0) {
     type = ComponentType::AfterburnerUpgrade;
 }
@@ -42,7 +42,7 @@ void AfterburnerUpgrade::Load(std::string unit_key) {
     // Not supported with the current file format
     // Instead, we save the modified Afterburner stats and load the upgrade above.
     // Then, if we sell the upgrade, we get the original.
-}      
+}
 
 void AfterburnerUpgrade::SaveToCSV(std::map<std::string, std::string>& unit) const {
     // Not supported with the current file format
@@ -64,7 +64,7 @@ bool AfterburnerUpgrade::Downgrade() {
 
     // Component
     Component::Downgrade();
-    
+
     // Remove effects of upgrade on afterburner
     afterburner->thrust.SetMaxValue(afterburner->thrust.MaxValue() / thrust);
     afterburner->speed.SetMaxValue(afterburner->speed.MaxValue() / speed);
@@ -84,10 +84,10 @@ bool AfterburnerUpgrade::Upgrade(const std::string upgrade_key) {
     if(!CanUpgrade(upgrade_key)) {
         return false;
     }
-    
+
     // Component
     Component::Upgrade(upgrade_key);
-    
+
     // Load modifiers
     thrust = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Accel", 1.0);
     speed = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Speed_Governor", 1.0);

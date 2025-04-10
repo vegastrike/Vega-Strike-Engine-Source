@@ -29,8 +29,8 @@
 //
 
 #include "vid_file.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 #include "ffmpeg_init.h"
 
 #include <string.h>

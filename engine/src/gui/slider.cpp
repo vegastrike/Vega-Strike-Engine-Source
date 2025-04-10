@@ -20,15 +20,15 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "slider.h"
 
 #include "eventmanager.h"
 
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "xml_support.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_support.h"
 
 //The Slider class controls the setting for a simple integer range.
 

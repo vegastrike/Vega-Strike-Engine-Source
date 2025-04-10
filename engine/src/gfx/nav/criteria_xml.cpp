@@ -25,7 +25,7 @@
  */
 
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
 //For WIN32 debugging.
 #include <crtdbg.h>
@@ -37,9 +37,9 @@
 #include <expat.h>
 
 #include "criteria.h"
-#include "xml_support.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "root_generic/xml_support.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 
 using XMLSupport::AttributeList;
 using namespace VSFileSystem;   // FIXME -- Shouldn't include entire namespace

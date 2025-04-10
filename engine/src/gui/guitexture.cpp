@@ -21,7 +21,7 @@
  */
 
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "guitexture.h"
 
@@ -29,7 +29,7 @@
 
 #include <string>
 #include <png.h>
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 #include "gfx/vsimage.h"
 #include "gldrv/gl_globals.h"
 #include "gfx/aux_texture.h"

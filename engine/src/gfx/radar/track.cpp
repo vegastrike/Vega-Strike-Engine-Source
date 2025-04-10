@@ -28,7 +28,7 @@
 
 
 #include <algorithm>
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 #include "cmd/unit_generic.h"
 #include "cmd/planet.h"
 #include "cmd/unit_util.h"

@@ -25,10 +25,10 @@
  */
 // NO HEADER GUARD
 
-#include "gfx/vec.h"
-#include "gfxlib_struct.h"
-#include "gfx/matrix.h"
-#include "gfx/mesh.h"
+#include "gfx_generic/vec.h"
+#include "src/gfxlib_struct.h"
+#include "gfx_generic/matrix.h"
+#include "gfx_generic/mesh.h"
 #include <vector>
 
 class Atmosphere {

@@ -24,9 +24,9 @@
 #ifndef VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_OBJECT_H
 #define VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_OBJECT_H
 
-#include "damage.h"
-#include "damageable_layer.h"
-#include "core_vector.h"
+#include "damage/damage.h"
+#include "damage/damageable_layer.h"
+#include "damage/core_vector.h"
 
 /**
  * @brief The DamageableObject class represents an overall game object - ship, space station, missile, etc.
@@ -38,7 +38,7 @@ struct DamageableObject {
 
     DamageableObject();
     DamageableObject(std::vector<DamageableLayer*> layers);
-    
+
     void AddLayer(DamageableLayer* layer);
     InflictedDamage DealDamage(const CoreVector &attack_vector, Damage &damage);
 

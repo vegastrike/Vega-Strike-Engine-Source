@@ -1,7 +1,7 @@
 /*
  * init.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -22,21 +22,19 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_PYTHON
-
 #ifndef VEGA_STRIKE_ENGINE_PYTHON_INIT_H
 #define VEGA_STRIKE_ENGINE_PYTHON_INIT_H
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include "gfx/vec.h"
+#include "gfx_generic/vec.h"
 #include <boost/version.hpp>
 
 #if BOOST_VERSION != 102800
 
-#else //defined (_MSC_VER) && _MSC_VER <= 1200
+#else //BOOST_VERSION != 102800
 #include <boost/python/detail/extension_class.hpp>
-#endif // defined (_MSC_VER) && _MSC_VER <= 1200
+#endif //BOOST_VERSION != 102800
 
 class Python {
 public:
@@ -156,5 +154,3 @@ void InitBase();
 void InitBase2();
 
 #endif //VEGA_STRIKE_ENGINE_PYTHON_INIT_H
-
-#endif //HAVE_PYTHON

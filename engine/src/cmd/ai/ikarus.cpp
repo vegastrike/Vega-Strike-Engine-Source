@@ -30,17 +30,17 @@
 #include "script.h"
 #include <list>
 #include <vector>
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "xml_support.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_support.h"
 #include "cmd/unit_generic.h"
 #include "communication.h"
 #include "cmd/script/flightgroup.h"
 #include "flybywire.h"
 #include "hard_coded_scripts.h"
 #include "cmd/script/mission.h"
-#include "universe_util.h"
-#include "gfx/cockpit_generic.h"
+#include "src/universe_util.h"
+#include "gfx_generic/cockpit_generic.h"
 #include "ikarus.h"
 using namespace Orders;
 
@@ -113,7 +113,7 @@ void Ikarus::Execute() {
     DecideTarget();
     if (!ProcessCurrentFgDirective(fg)) {
         Unit *target = parent->Target();
-        bool isjumpable = target ? ((!target->GetDestinations().empty()) && 
+        bool isjumpable = target ? ((!target->GetDestinations().empty()) &&
             parent->jump_drive.IsDestinationSet()) : false;
         if (isjumpable) {
             AfterburnTurnTowards(this, parent);

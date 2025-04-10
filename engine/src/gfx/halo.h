@@ -26,9 +26,9 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_HALO_H
 #define VEGA_STRIKE_ENGINE_GFX_HALO_H
 
-#include "gfxlib.h"
-#include "vec.h"
-#include "quaternion.h"
+#include "src/gfxlib.h"
+#include "gfx_generic/vec.h"
+#include "gfx_generic/quaternion.h"
 
 #define TranslucentWhite ( GFXColor( 1, 1, 1, .5 ) )
 #define ZeroQvector ( QVector( 0, 0, 0 ) )

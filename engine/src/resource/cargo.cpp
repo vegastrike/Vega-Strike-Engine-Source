@@ -25,7 +25,7 @@
  */
 
 
-#include "cargo.h"
+#include "resource/cargo.h"
 
 
 Cargo::Cargo(): Product() {

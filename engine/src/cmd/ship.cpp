@@ -24,7 +24,7 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "ship.h"
+#include "cmd/ship.h"
 
 Ship::Ship()
 {

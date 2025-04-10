@@ -27,36 +27,95 @@
 INCLUDE_DIRECTORIES("..")
 SET(TRISORT_SOURCES trisort.cpp)
 ADD_EXECUTABLE(vs-buildenv-trisort ${TRISORT_SOURCES})
-TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort PUBLIC ${VS_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort SYSTEM PRIVATE ${VSE_TST_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort PRIVATE
+        # VS engine headers
+        ${Vega_Strike_SOURCE_DIR}
+        ${Vega_Strike_SOURCE_DIR}/engine
+        ${Vega_Strike_SOURCE_DIR}/engine/src
+        # Library Headers
+        ${Vega_Strike_SOURCE_DIR}/libraries
+        # CMake Artifacts
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+        ${Vega_Strike_BINARY_DIR}/engine
+        ${Vega_Strike_BINARY_DIR}/engine/src
+)
+
 SET_TARGET_PROPERTIES(vs-buildenv-trisort PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-TARGET_COMPILE_DEFINITIONS(vs-buildenv-trisort PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+SET_PROPERTY(TARGET vs-buildenv-trisort PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vs-buildenv-trisort PROPERTY CXX_STANDARD_REQUIRED TRUE)
+SET_PROPERTY(TARGET vs-buildenv-trisort PROPERTY CXX_EXTENSIONS ON)
+
+TARGET_COMPILE_DEFINITIONS(vs-buildenv-trisort PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vs-buildenv-trisort PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
     TARGET_COMPILE_DEFINITIONS(vs-buildenv-trisort PUBLIC _WIN32_WINNT=0x0A00)
     TARGET_COMPILE_DEFINITIONS(vs-buildenv-trisort PUBLIC WINVER=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vs-buildenv-trisort PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
 
 SET(ASTEROID_SOURCES asteroidgen.cpp)
 ADD_EXECUTABLE(vs-buildenv-asteroidgen ${ASTEROID_SOURCES})
-TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen PUBLIC ${VS_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen SYSTEM PRIVATE ${VSE_TST_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen PRIVATE
+        # VS engine headers
+        ${Vega_Strike_SOURCE_DIR}
+        ${Vega_Strike_SOURCE_DIR}/engine
+        ${Vega_Strike_SOURCE_DIR}/engine/src
+        # Library Headers
+        ${Vega_Strike_SOURCE_DIR}/libraries
+        # CMake Artifacts
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+        ${Vega_Strike_BINARY_DIR}/engine
+        ${Vega_Strike_BINARY_DIR}/engine/src
+)
+
 SET_TARGET_PROPERTIES(vs-buildenv-asteroidgen PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-TARGET_COMPILE_DEFINITIONS(vs-buildenv-asteroidgen PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+SET_PROPERTY(TARGET vs-buildenv-asteroidgen PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vs-buildenv-asteroidgen PROPERTY CXX_STANDARD_REQUIRED TRUE)
+SET_PROPERTY(TARGET vs-buildenv-asteroidgen PROPERTY CXX_EXTENSIONS ON)
+
+TARGET_COMPILE_DEFINITIONS(vs-buildenv-asteroidgen PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vs-buildenv-asteroidgen PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
     TARGET_COMPILE_DEFINITIONS(vs-buildenv-asteroidgen PUBLIC _WIN32_WINNT=0x0A00)
     TARGET_COMPILE_DEFINITIONS(vs-buildenv-asteroidgen PUBLIC WINVER=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vs-buildenv-asteroidgen PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
+
 
 SET(REPLACE_SOURCES replace.cpp)
 ADD_EXECUTABLE(vs-buildenv-replace ${REPLACE_SOURCES})
-TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace PUBLIC ${VS_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace SYSTEM PRIVATE ${VSE_TST_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace PRIVATE
+        # VS engine headers
+        ${Vega_Strike_SOURCE_DIR}
+        ${Vega_Strike_SOURCE_DIR}/engine
+        ${Vega_Strike_SOURCE_DIR}/engine/src
+        # Library Headers
+        ${Vega_Strike_SOURCE_DIR}/libraries
+        # CMake Artifacts
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+        ${Vega_Strike_BINARY_DIR}/engine
+        ${Vega_Strike_BINARY_DIR}/engine/src
+)
+
 SET_TARGET_PROPERTIES(vs-buildenv-replace PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-TARGET_COMPILE_DEFINITIONS(vs-buildenv-replace PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+SET_PROPERTY(TARGET vs-buildenv-replace PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vs-buildenv-replace PROPERTY CXX_STANDARD_REQUIRED TRUE)
+SET_PROPERTY(TARGET vs-buildenv-replace PROPERTY CXX_EXTENSIONS ON)
+
+TARGET_COMPILE_DEFINITIONS(vs-buildenv-replace PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vs-buildenv-replace PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
     TARGET_COMPILE_DEFINITIONS(vs-buildenv-replace PUBLIC _WIN32_WINNT=0x0A00)
     TARGET_COMPILE_DEFINITIONS(vs-buildenv-replace PUBLIC WINVER=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vs-buildenv-replace PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
+
 
 #find Expat
 FIND_PACKAGE(EXPAT REQUIRED)
@@ -92,18 +151,37 @@ SET(MESHER_SOURCES
     mesher/Modules/XMesh_to_BFXM.cpp
     mesher/Modules/XMesh_to_Ogre.cpp
     mesher/Modules/Wavefront_to_BFXM.cpp
-    ${Vega_Strike_SOURCE_DIR}/engine/src/xml_support.cpp
+    ${Vega_Strike_SOURCE_DIR}/libraries/root_generic/xml_support.cpp
 )
 
 INCLUDE_DIRECTORIES(${MSH_INCLUDES} mesher)
 ADD_EXECUTABLE(vega-meshtool ${MESHER_SOURCES})
-TARGET_INCLUDE_DIRECTORIES(vega-meshtool PUBLIC ${VS_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(vega-meshtool SYSTEM PRIVATE ${VSE_TST_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vega-meshtool PRIVATE
+        # VS engine headers
+        ${Vega_Strike_SOURCE_DIR}
+        ${Vega_Strike_SOURCE_DIR}/engine
+        ${Vega_Strike_SOURCE_DIR}/engine/src
+        # Library Headers
+        ${Vega_Strike_SOURCE_DIR}/libraries
+        # CMake Artifacts
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+        ${Vega_Strike_BINARY_DIR}/engine
+        ${Vega_Strike_BINARY_DIR}/engine/src
+)
+
 SET_TARGET_PROPERTIES(vega-meshtool PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-TARGET_COMPILE_DEFINITIONS(vega-meshtool PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+SET_PROPERTY(TARGET vega-meshtool PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vega-meshtool PROPERTY CXX_STANDARD_REQUIRED TRUE)
+SET_PROPERTY(TARGET vega-meshtool PROPERTY CXX_EXTENSIONS ON)
+
+TARGET_COMPILE_DEFINITIONS(vega-meshtool PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vega-meshtool PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
     TARGET_COMPILE_DEFINITIONS(vega-meshtool PUBLIC _WIN32_WINNT=0x0A00)
     TARGET_COMPILE_DEFINITIONS(vega-meshtool PUBLIC WINVER=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vega-meshtool PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
 
 # OGRE already looked for by parent

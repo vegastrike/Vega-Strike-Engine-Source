@@ -25,19 +25,19 @@
  */
 
 
-#include "terrain.h"
-#include "config_xml.h"
-#include "vs_globals.h"
-#include "xml_support.h"
-#include "star_system.h"
-#include "unit_generic.h"
-#include "gfx/vec.h"
-#include "vegastrike.h"
-#include "universe.h"
+#include "cmd/terrain.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/star_system.h"
+#include "cmd/unit_generic.h"
+#include "gfx_generic/vec.h"
+#include "src/vegastrike.h"
+#include "src/universe.h"
 #include <vector>
-#include "collection.h"
-#include "building.h"
-#include "damageable.h"
+#include "cmd/collection.h"
+#include "cmd/building.h"
+#include "cmd/damageable.h"
 
 static std::vector<Terrain *> allterrains;
 

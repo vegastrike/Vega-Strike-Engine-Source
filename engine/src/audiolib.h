@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_AUDIO_LIB_H
 #define VEGA_STRIKE_ENGINE_AUDIO_LIB_H
 
-#include "gfx/vec.h"
+#include "gfx_generic/vec.h"
 #include <string>
 bool AUDInit();
 void AUDDestroy();

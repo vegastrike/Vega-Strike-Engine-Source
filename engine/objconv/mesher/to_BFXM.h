@@ -25,13 +25,10 @@
 #include <string>
 #include <vector>
 ///Stores all the load-time vertex info in the XML struct FIXME light calculations
-#include <expat.h>
-#include "endianness.h"
 using std::vector;
 using std::string;
-#include "xml_support.h"
-#include "hashtable.h"
-#include "mesh_io.h"
+#include "root_generic/xml_support.h"
+#include "objconv/mesher/mesh_io.h"
 using namespace XMLSupport;
 struct GFXMaterial /// ambient rgba, if you don't like these things, ask me to rename them
 {

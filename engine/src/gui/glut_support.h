@@ -27,7 +27,7 @@
  */
 #include <stdio.h>
 #include <vector>
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 using std::vector;
 
 enum MousePointerStyle {

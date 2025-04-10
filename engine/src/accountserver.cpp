@@ -31,7 +31,7 @@
 #include <string>
 using std::string;
 #include "networking/acctserver.h"
-#include "lin_time.h"
+#include "root_generic/lin_time.h"
 
 bool STATIC_VARS_DESTROYED = false;
 

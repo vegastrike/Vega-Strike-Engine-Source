@@ -26,8 +26,8 @@
 
 #include <cstdlib>
 
-#include "vs_exit.h"
-#include "vs_logging.h"
+#include "src/vs_exit.h"
+#include "src/vs_logging.h"
 
 bool STATIC_VARS_DESTROYED = false;
 

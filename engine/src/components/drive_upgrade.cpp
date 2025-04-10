@@ -22,14 +22,14 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "drive_upgrade.h"
+#include "components/drive_upgrade.h"
 
-#include "drive.h"
+#include "components/drive.h"
 #include "component_utils.h"
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 
 
-DriveUpgrade::DriveUpgrade(Drive *drive) : 
+DriveUpgrade::DriveUpgrade(Drive *drive) :
     Component(),
     drive(drive),
     yaw(1.0), pitch(1.0), roll(1.0), lateral(1.0),
@@ -37,7 +37,7 @@ DriveUpgrade::DriveUpgrade(Drive *drive) :
     speed(1.0), max_yaw_left(1.0),
     max_yaw_right(1.0), max_pitch_down(1.0), max_pitch_up(1.0),
     max_roll_left(1.0), max_roll_right(1.0), fuel_consumption(1.0) {
-    type = ComponentType::DriveUpgrade;    
+    type = ComponentType::DriveUpgrade;
 }
 
 
@@ -67,7 +67,7 @@ void DriveUpgrade::Load(std::string unit_key) {
             UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 1.0));
 
     speed = UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", 1.0);
-}      
+}
 
 
 void DriveUpgrade::SaveToCSV(std::map<std::string, std::string>& unit) const {
@@ -105,7 +105,7 @@ bool DriveUpgrade::Downgrade() {
     drive->yaw.SetMaxValue(drive->yaw.MaxValue() / yaw);
     drive->pitch.SetMaxValue(drive->pitch.MaxValue() / pitch);
     drive->roll.SetMaxValue(drive->roll.MaxValue() / roll);
-    
+
     drive->lateral.SetMaxValue(drive->lateral.MaxValue() / lateral);
     drive->vertical.SetMaxValue(drive->vertical.MaxValue() / vertical);
     drive->forward.SetMaxValue(drive->forward.MaxValue() / forward);
@@ -123,7 +123,7 @@ bool DriveUpgrade::Downgrade() {
     drive->SetConsumption(drive->GetConsumption() / fuel_consumption);
 
     yaw = pitch = roll = lateral = vertical = forward = retro = speed = fuel_consumption = 1.0;
-    max_yaw_left = max_yaw_right = max_pitch_up = max_pitch_down = max_roll_left = max_roll_right = 1.0; 
+    max_yaw_left = max_yaw_right = max_pitch_up = max_pitch_down = max_roll_left = max_roll_right = 1.0;
 
     return true;
 }
@@ -147,7 +147,7 @@ bool DriveUpgrade::Upgrade(const std::string upgrade_key) {
     drive->yaw.SetMaxValue(drive->yaw.MaxValue() * yaw);
     drive->pitch.SetMaxValue(drive->pitch.MaxValue() * pitch);
     drive->roll.SetMaxValue(drive->roll.MaxValue() * roll);
-    
+
     drive->lateral.SetMaxValue(drive->lateral.MaxValue() * lateral);
     drive->vertical.SetMaxValue(drive->vertical.MaxValue() * vertical);
     drive->forward.SetMaxValue(drive->forward.MaxValue() * forward);

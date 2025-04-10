@@ -23,7 +23,7 @@
 #if defined(_WIN32) && _MSC_VER > 1300
 #define __restrict
 #endif
-#include "central.h"
+#include "mission/include/central.h"
 #ifdef _WIN32
 #include <windows.h>
 #include <process.h>

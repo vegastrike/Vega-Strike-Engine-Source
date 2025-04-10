@@ -25,20 +25,20 @@
  */
 
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
 //For WIN32 debugging.
 #include <crtdbg.h>
 #endif
 
-#include "navscreen.h"
-#include "navpath.h"
-#include "in_kb.h"
-#include "in_kb_data.h"
-#include "in_mouse.h"
+#include "gfx/nav/navscreen.h"
+#include "gfx/nav/navpath.h"
+#include "src/in_kb.h"
+#include "src/in_kb_data.h"
+#include "src/in_mouse.h"
 #include "gfx/cockpit.h"
-#include "main_loop.h"
-#include "lin_time.h"
+#include "src/main_loop.h"
+#include "root_generic/lin_time.h"
 #include "gui/modaldialog.h"
 #include "gui/eventmanager.h"
 #include "gui/newbutton.h"

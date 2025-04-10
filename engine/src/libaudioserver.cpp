@@ -21,8 +21,8 @@
  */
 
 #include <string>
-#include "audiolib.h"
-#include "gfx/cockpit_generic.h"
+#include "src/audiolib.h"
+#include "gfx_generic/cockpit_generic.h"
 
 void AUDAdjustSound(int i, QVector const &qv, Vector const &vv) {
 }

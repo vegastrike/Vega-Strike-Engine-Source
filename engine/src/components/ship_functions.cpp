@@ -23,10 +23,10 @@
  */
 
 #include "ship_functions.h"
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 
-ShipFunctions::ShipFunctions() : 
-    Component(), 
+ShipFunctions::ShipFunctions() :
+    Component(),
     cockpit(Resource<double>(1,0,1)),
     communications(Resource<double>(1,0,1)),
     fire_control(Resource<double>(1,0,1)),
@@ -50,9 +50,9 @@ void ShipFunctions::Load(std::string unit_key) {
             attribute_ptrs[i] = Resource<double>(value, 1.0);
         }
     }
-    
+
     ftl_interdiction = UnitCSVFactory::GetVariable(unit_key, "ftl_interdiction", 0.0);
-}      
+}
 
 void ShipFunctions::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["cockpit"] = cockpit.Serialize();

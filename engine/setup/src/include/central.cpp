@@ -20,7 +20,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "central.h"
+#include "setup/src/include/central.h"
 struct catagory CATS;
 struct group GROUPS;
 struct global_settings CONFIG;

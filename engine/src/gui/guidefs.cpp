@@ -20,10 +20,10 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vegastrike.h"
-#include "xml_support.h"
-#include "vs_globals.h"
-#include "config_xml.h"
+#include "src/vegastrike.h"
+#include "root_generic/xml_support.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
 #include "guidefs.h"
 
 GFXColor SaturatedColor(float r, float g, float b, float a) {

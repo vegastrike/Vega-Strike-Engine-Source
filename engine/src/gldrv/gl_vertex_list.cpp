@@ -23,10 +23,10 @@
  */
 
 
-#include "gfxlib_struct.h"
-#include "vegastrike.h"
-#include "vs_globals.h"
-#include "vs_logging.h"
+#include "src/gfxlib_struct.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_logging.h"
 #include <assert.h>
 #ifndef NO_GFX //Server cannot depend on GL, but still needs a mesh library.
 #include "gl_globals.h"
@@ -39,7 +39,7 @@
 #define GFX_SCALE 1./1024.
 #endif
 
-#include "gnuhash.h"
+#include "src/gnuhash.h"
 
 GFXVertexList *next;
 

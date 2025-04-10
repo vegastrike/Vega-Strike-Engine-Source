@@ -25,24 +25,24 @@
  */
 
 
-#include "cont_terrain.h"
-#include "universe.h"
-#include "star_system.h"
-#include "gfx/matrix.h"
-#include "vegastrike.h"
-#include "gfx/mesh.h"
-#include "unit_generic.h"
+#include "cmd/cont_terrain.h"
+#include "src/universe.h"
+#include "src/star_system.h"
+#include "gfx_generic/matrix.h"
+#include "src/vegastrike.h"
+#include "gfx_generic/mesh.h"
+#include "cmd/unit_generic.h"
 #include "collide2/Opcode.h"
 #include "collide2/CSopcodecollider.h"
 #include "collide2/csgeom2/optransfrm.h"
 #include "collide2/basecollider.h"
-#include "damageable.h"
+#include "cmd/damageable.h"
 
-#include "unit_collide.h"
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "cmd/unit_collide.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 
 ContinuousTerrain::ContinuousTerrain(const char *filename, const Vector &Scales, const float mass) {
     float tmass;

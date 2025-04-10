@@ -28,7 +28,7 @@
 #include <vector>
 #include <string>
 
-#include "cargo.h"
+#include "resource/cargo.h"
 
 /**
  * A manifest is a list of items in a cargo hold.
@@ -36,7 +36,7 @@
  * in the game. It is read only (const). Its short is MPL.
  **/
 class Manifest {
-    std::vector<Cargo> _items; 
+    std::vector<Cargo> _items;
 
     Manifest(int dummy); // Create the MPL singleton.
 public:

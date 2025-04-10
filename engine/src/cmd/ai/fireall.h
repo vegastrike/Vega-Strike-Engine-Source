@@ -23,14 +23,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
+
+#ifndef VEGA_STRIKE_ENGINE_SRC_CMD_AI_FIREALL_H
+#define VEGA_STRIKE_ENGINE_SRC_CMD_AI_FIREALL_H
 
 #include "order.h"
 namespace Orders {
 class FireAllYouGot : public Order {
 public:
+    ~FireAllYouGot() override;
     FireAllYouGot();
-    void Execute();
+    void Execute() override;
+    void Destructor() override;
 };
 }
 
+#endif // VEGA_STRIKE_ENGINE_SRC_CMD_AI_FIREALL_H

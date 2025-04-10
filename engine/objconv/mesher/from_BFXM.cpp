@@ -21,8 +21,8 @@
  */
 
 #include "PrecompiledHeaders/Converter.h"
-#include "mesh_io.h"
-#include "from_BFXM.h"
+#include "objconv/mesher/mesh_io.h"
+#include "objconv/mesher/from_BFXM.h"
 
 string inverseblend[16] = {
         "ZERO", "ZERO", "ONE", "SRCCOLOR", "INVSRCCOLOR", "SRCALPHA", "INVSRCALPHA",

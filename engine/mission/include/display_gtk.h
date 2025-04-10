@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_MISSION_DISPLAY_GTK_H
 #define VEGA_STRIKE_ENGINE_MISSION_DISPLAY_GTK_H
 
-#include "central.h"
+#include "mission/include/central.h"
 
 void InitGraphics();
 void ShowMain(int run_vegastrike);

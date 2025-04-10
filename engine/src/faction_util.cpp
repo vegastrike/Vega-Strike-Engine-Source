@@ -23,10 +23,10 @@
 
 #include <assert.h>
 
-#include "vs_globals.h"
-#include "vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_logging.h"
 #include "cmd/unit_generic.h"
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 #include "gfx/aux_texture.h"
 #include "cmd/unit_util.h"
 #include "cmd/unit_generic.h"

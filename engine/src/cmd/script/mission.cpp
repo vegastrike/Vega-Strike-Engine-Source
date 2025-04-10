@@ -28,6 +28,7 @@
  */
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
+
 #include <Python.h>
 #include <math.h>
 #include <stdlib.h>
@@ -45,11 +46,11 @@
 #include "mission.h"
 #include "flightgroup.h"
 
-#include "python/python_class.h"
-#include "savegame.h"
-#include "universe.h"
-#include "vs_logging.h"
-#include "vs_exit.h"
+#include "src/python/python_class.h"
+#include "root_generic/savegame.h"
+#include "src/universe.h"
+#include "src/vs_logging.h"
+#include "src/vs_exit.h"
 
 /* *********************************************************** */
 Mission::~Mission() {

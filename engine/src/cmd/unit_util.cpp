@@ -26,16 +26,16 @@
 
 
 #include <string>
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "gfx/cockpit.h"
-#include "planet.h"
+#include "cmd/planet.h"
 #include "gfx/animation.h"
-#include "config_xml.h"
-#include "unit_util.h"
-#include "config_xml.h"
-#include "vs_globals.h"
-#include "pilot.h"
-#include "universe.h"
+#include "src/config_xml.h"
+#include "cmd/unit_util.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "cmd/pilot.h"
+#include "src/universe.h"
 
 using std::string;
 namespace UnitUtil {

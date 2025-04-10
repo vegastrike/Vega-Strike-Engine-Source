@@ -22,27 +22,26 @@
 
 
 #define PY_SSIZE_T_CLEAN
-#ifdef HAVE_PYTHON
 #include <boost/version.hpp>
 #include <boost/python.hpp>
 #include <boost/python/class.hpp>
+
 #include <Python.h>
-#endif
 
 #include "cmd/unit_generic.h"
 #include "cmd/ai/order.h"
 
-#include "configxml.h"
-#include "gfx/cockpit_generic.h"
+#include "root_generic/configxml.h"
+#include "gfx_generic/cockpit_generic.h"
 
-#include "python/python_class.h"
+#include "src/python/python_class.h"
 
 #include "pythonmission.h"
 #include "mission.h"
-#include "savegame.h"
-#include "gnuhash.h"
-#include "universe.h"
-#include "vs_logging.h"
+#include "root_generic/savegame.h"
+#include "src/gnuhash.h"
+#include "src/universe.h"
+#include "src/vs_logging.h"
 
 PYTHON_INIT_INHERIT_GLOBALS(Director, PythonMissionBaseClass);
 

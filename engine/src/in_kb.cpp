@@ -22,13 +22,13 @@
 
 #include <queue>
 #include <list>
-#include "vegastrike.h"
-#include "vs_globals.h"
-#include "in_kb.h"
-#include "in_handler.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
+#include "src/in_kb.h"
+#include "src/in_handler.h"
 #include "gldrv/winsys.h"
-#include "in_kb_data.h"
-#include "universe.h"
+#include "src/in_kb_data.h"
+#include "src/universe.h"
 
 
 std::map<std::string, HandlerCall> keyBindings;

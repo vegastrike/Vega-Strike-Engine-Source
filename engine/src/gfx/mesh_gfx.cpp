@@ -29,24 +29,24 @@
 //====================================
 
 #include <algorithm>
-#include "mesh.h"
-#include "aux_texture.h"
-#include "aux_logo.h"
-#include "lin_time.h"
-#include "configxml.h"
-#include "vs_globals.h"
+#include "gfx_generic/mesh.h"
+#include "gfx/aux_texture.h"
+#include "gfx/aux_logo.h"
+#include "root_generic/lin_time.h"
+#include "root_generic/configxml.h"
+#include "root_generic/vs_globals.h"
 #include "cmd/nebula.h"
 #include "gfx/camera.h"
 #include "gfx/animation.h"
 #include "gfx/technique.h"
-#include "mesh_xml.h"
+#include "gfx_generic/mesh_xml.h"
 #include "gldrv/gl_globals.h"
 #include "gldrv/gl_light.h"
 #if defined (CG_SUPPORT)
-#include "cg_global.h"
+#include "src/cg_global.h"
 #endif
-#include "universe_util.h"
-#include "universe.h"
+#include "src/universe_util.h"
+#include "src/universe.h"
 #include <utility>
 #ifdef _WIN32
 // What do we need from unistd? - let's find out :)
@@ -67,7 +67,7 @@ extern vector<Logo *> undrawn_logos;
 #undef max
 #endif
 
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 class Exception : public std::exception {
 private:

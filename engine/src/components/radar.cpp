@@ -25,9 +25,9 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "radar.h"
+#include "components/radar.h"
 #include "configuration/configuration.h"
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 #include "components/component.h"
 
 #define _USE_MATH_DEFINES
@@ -50,6 +50,9 @@ CRadar::CRadar():
     tracking_cone = configuration()->computer_config.default_tracking_cone;
     lock_cone = configuration()->computer_config.default_lock_cone;
 }
+
+CRadar::~CRadar()
+= default;
 
 // Component Methods
 void CRadar::Load(std::string unit_key) {
@@ -112,7 +115,7 @@ void CRadar::Load(std::string unit_key) {
     lock_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0) * M_PI / 180);
     operational = max_range.Percent();
     installed = max_range > 0;
-}      
+}
 
 void CRadar::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Can_Lock"] = std::to_string(can_lock);
@@ -241,34 +244,39 @@ bool CRadar::UseThreatAssessment() const {
     return (capabilities & RadarCapabilities::THREAT_ASSESSMENT);
 }
 
-float CRadar::GetMaxRange() const { 
-    return max_range.Value(); 
+float CRadar::GetMaxRange() const {
+    return max_range.Value();
 }
 
-float CRadar::GetMaxCone() const { 
-    return max_cone; 
+float CRadar::GetMaxCone() const {
+    return max_cone;
 }
 
-float CRadar::GetLockCone() const { 
-    return lock_cone; 
+float CRadar::GetLockCone() const {
+    return lock_cone;
 }
 
-float CRadar::GetTrackingCone() const { 
-    return tracking_cone; 
+float CRadar::GetTrackingCone() const {
+    return tracking_cone;
 }
 
-float CRadar::GetMinTargetSize() const { 
-    return min_target_size; 
+float CRadar::GetMinTargetSize() const {
+    return min_target_size;
 }
 
-bool CRadar::Locked() const { 
-    return locked; 
+bool CRadar::Locked() const {
+    return locked;
 }
 
-bool CRadar::CanLock() const { 
-    return can_lock; 
+bool CRadar::CanLock() const {
+    return can_lock;
 }
 
-bool CRadar::Tracking() const { 
-    return tracking_active; 
+bool CRadar::Tracking() const {
+    return tracking_active;
+}
+
+double CRadar::Consume()
+{
+    return EnergyConsumer::Consume();
 }

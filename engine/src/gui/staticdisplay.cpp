@@ -20,16 +20,16 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "staticdisplay.h"
 
 #include "guidefs.h"
 #include "scroller.h"
 
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "xml_support.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_support.h"
 
 //The StaticDisplay class is used to show something on a window.
 //Right now, it only supports text, but could be expanded to support

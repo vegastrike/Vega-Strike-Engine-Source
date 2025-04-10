@@ -24,7 +24,7 @@
 
 #include <gtest/gtest.h>
 
-#include "resource.h"
+#include "resource/resource.h"
 
 
 TEST(Resource, Operators) {
@@ -68,7 +68,7 @@ TEST(Resource, Operators) {
     resource--;
     EXPECT_EQ(resource, 9.0);
 
-    // --Operator 
+    // --Operator
     --resource;
     EXPECT_EQ(resource, 8.0);
 
@@ -162,7 +162,7 @@ TEST(Resource, Damage_Repair) {
     EXPECT_GE(resource.AdjustedValue(), 0.0);
     EXPECT_GE(resource.Value(), 0.0);
 
-    // Repair 
+    // Repair
     // Can't repair a destroyed resource. Need to re-init
     resource = Resource<double>(10.0, 0.0, 10.0);
     resource.DamageByValue(9.0);
