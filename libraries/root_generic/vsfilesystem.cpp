@@ -29,6 +29,7 @@
 #include <cassert>
 #include <cstdarg>
 #include <exception>
+#include <configuration/configuration.h>
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #include <Shlobj.h>
 #include <direct.h>
@@ -845,7 +846,6 @@ void InitPaths(string conf, string subdir) {
 
     InitDataDirectory();
     InitHomeDirectory();
-    LoadConfig(std::move(subdir));
     /*
       Paths relative to datadir or homedir (both should have the same structure)
       Units are in sharedunits/unitname/, sharedunits/subunits/unitname/ or sharedunits/weapons/unitname/ or in sharedunits/faction/unitname/
@@ -864,6 +864,13 @@ void InitPaths(string conf, string subdir) {
         Directories.emplace_back("");
         SubDirectories.push_back(vec);
     }
+
+    boost::filesystem::path config_file_path{datadir + "/config.json"};
+    configuration()->load_config(config_file_path);
+    boost::filesystem::path config_file_path2{homedir + "/config.json"};
+    configuration()->load_config(config_file_path2);
+
+    LoadConfig(std::move(subdir));
 
     game_options()->init();
 

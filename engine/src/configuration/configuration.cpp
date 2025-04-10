@@ -34,12 +34,22 @@
 #define _USE_MATH_DEFINES
 #endif
 #include <math.h>
+#include <vs_logging.h>
+#include <boost/format/format_fwd.hpp>
+#include <boost/program_options/errors.hpp>
 
-vega_config::Config::Config(const std::string& json_text) {
+vega_config::Configuration::Configuration()
+= default;
+
+vega_config::Configuration::Configuration(const std::string& json_text) {
     load_config(json_text);
 }
 
-void vega_config::Config::load_config(const boost::filesystem::path& config_file_path) {
+vega_config::Configuration::Configuration(const boost::filesystem::path& config_file_path) {
+    load_config(config_file_path);
+}
+
+void vega_config::Configuration::load_config(const boost::filesystem::path& config_file_path) {
     try {
         std::ifstream config_file(config_file_path.string());
         std::string str;
@@ -54,7 +64,7 @@ void vega_config::Config::load_config(const boost::filesystem::path& config_file
     }
 }
 
-void vega_config::Config::load_config(const std::string& json_text) {
+void vega_config::Configuration::load_config(const std::string& json_text) {
     try {
         if (json_text.empty()) {
             return;
@@ -2273,4 +2283,9 @@ void vega_config::Config::load_config(const std::string& json_text) {
     {
         std::cerr << e.what() << std::endl;
     }
+}
+
+std::shared_ptr<vega_config::Configuration> configuration() {
+    static const std::shared_ptr<vega_config::Configuration> kConfiguration = std::make_shared<vega_config::Configuration>();
+    return kConfiguration;
 }

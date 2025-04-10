@@ -92,7 +92,7 @@ Universe *_Universe;
 TextPlane *bs_tp = nullptr;
 char SERVER = 0;
 
-static std::shared_ptr<vega_config::Config> vega_config::config = nullptr;
+static std::shared_ptr<vega_config::Configuration> vega_config::config = nullptr;
 
 //false if command line option --net is given to start without network
 static bool ignore_network = true;
@@ -305,9 +305,7 @@ int main(int argc, char *argv[]) {
     // Usually loaded from config.json
     std::string mission_name;
 
-    //this sets up the vegastrike config variable
-    setup_game_data();
-    //loads the configuration file .vegastrike/vegastrike.config from home dir if such exists
+    setup_game_data();  // TODO: Combine with vega_config::config settings object
     {
         std::pair<std::string, std::string> pair = ParseCommandLine(argc, argv);
         std::string subdir = pair.first;
@@ -317,6 +315,7 @@ int main(int argc, char *argv[]) {
         if (CONFIGFILE == nullptr) {
             CONFIGFILE = new char[42];
             snprintf(CONFIGFILE, 41, "vegastrike.config");
+            CONFIGFILE[41] = '\0';
         }
         //Specify the config file and the possible mod subdir to play
         VSFileSystem::InitPaths(CONFIGFILE, subdir);
@@ -331,9 +330,7 @@ int main(int argc, char *argv[]) {
         file_contents.push_back('\n');
     }
 
-    vega_config::config = std::make_shared<vega_config::Config>(file_contents);
-    // now that the user config file has been loaded from disk, update the global configuration struct values
-    configuration()->OverrideDefaultsWithUserConfiguration();
+    // vega_config::config = std::make_shared<vega_config::Configuration>(file_contents);
 
     // If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0') {
