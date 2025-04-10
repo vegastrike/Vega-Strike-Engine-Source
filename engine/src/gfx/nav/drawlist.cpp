@@ -205,7 +205,7 @@ void drawdescription(string text,
         displayname.SetText(text);
         displayname.SetCharSize(size_x, size_y);
     }
-    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+    const float background_alpha = configuration()->graphics.hud.text_background_alpha;
     GFXColor tpbg = displayname.bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {

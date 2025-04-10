@@ -167,7 +167,7 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
         VS_LOG(info,
                 (boost::format("damage=%1% fraction=%2% left=%3%")
                         % damage % damage_fraction % damage_left));
-        
+
         Damage damage(this->damage * damage_fraction * damage_left,
                 phasedamage * damage_fraction * damage_left);
         parent->ApplyDamage(pos.Cast(), norm, damage, un, GFXColor(1, 1, 1, 1),
@@ -215,7 +215,7 @@ void Missile::Discharge() {
 }
 
 float Missile::ExplosionRadius() {
-    return radial_effect * (configuration()->graphics_config.missile_explosion_radius_mult);
+    return radial_effect * (configuration()->graphics.missile_explosion_radius_mult);
 }
 
 void Missile::Kill(bool erase) {
@@ -326,7 +326,7 @@ bool Missile::proximityFuse(Unit *target) {
 
         //spiritplumber assumes that the missile is hitting a much larger object than itself
         // It seems spiritplumber is a former dev of the project.
-        Velocity += configuration()->physics_config.percent_missile_match_target_velocity * (target->Velocity - Velocity);
+        Velocity += configuration()->physics.percent_missile_match_target_velocity * (target->Velocity - Velocity);
 
         Discharge();
         time = -1;
@@ -341,7 +341,7 @@ bool Missile::useFuel(Unit *target, bool had_target) {
     // If we had a target but it's now gone, limit the missile's fuel
     // If we didn't have a target (dumbfire?), keep original fuel
     if (had_target && target == nullptr) {
-        time = std::min(time, configuration()->physics_config.max_lost_target_live_time);
+        time = std::min(static_cast<double>(time), configuration()->physics.max_lost_target_live_time);
     }
 
     // Reduce missile TTL/Fuel by tick

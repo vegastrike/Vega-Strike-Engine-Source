@@ -127,7 +127,7 @@ bool ECM::BreakLock(void* missile) const {
     // Second check
     uintmax_t missile_hash = reinterpret_cast<uintmax_t>(missile) / 16383ULL;
 
-    if (static_cast<int>(missile_hash % configuration()->physics_config.max_ecm) < ecm) {
+    if (static_cast<int>(missile_hash % configuration()->physics.max_ecm) < ecm) {
         return true;
     }
 
