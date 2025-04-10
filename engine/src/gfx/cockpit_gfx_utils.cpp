@@ -192,10 +192,10 @@ VertexBuilder<> GetAnimatedLockingIcon(const QVector &location, const Vector& ca
                             const Vector& cam_q, const Vector& cam_r,
                             const float& r_size, const float& lock_percent) {
     const float lock_line = configuration()->graphics.hud.lock_confirm_line_length;
-    const float diamond_size = configuration()->graphics.hud.diamond_size;
+    const double diamond_size = configuration()->graphics.hud.diamond_size;
     const float theta_speed = configuration()->graphics.hud.diamond_rotation_speed;
 
-    const float max = diamond_size * r_size * 0.75f * configuration()->graphics.hud.min_missile_bracket_size;
+    const float max = diamond_size * r_size * 0.75 * configuration()->graphics.hud.min_missile_bracket_size;
     const float coord = configuration()->graphics.hud.min_missile_bracket_size + (configuration()->graphics.hud.max_missile_bracket_size - configuration()->graphics.hud.min_missile_bracket_size) * lock_percent;
     const double rtot = 1.0 / sqrtf(2.0);
 
