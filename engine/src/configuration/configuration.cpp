@@ -1842,7 +1842,7 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
             boost::json::object dock_object = dock_value_ptr->get_object();
             const boost::json::value * count_to_dock_range_value_ptr = dock_object.if_contains("count_to_dock_range");
             if (count_to_dock_range_value_ptr != nullptr) {
-                dock.count_to_dock_range = boost::json::value_to<int>(*count_to_dock_range_value_ptr);
+                dock.count_to_dock_range = boost::json::value_to<double>(*count_to_dock_range_value_ptr);
             }
 
             const boost::json::value * dock_planet_radius_percent_value_ptr = dock_object.if_contains("dock_planet_radius_percent");

@@ -464,7 +464,7 @@ namespace vega_config {
     } data;
 
     struct {
-        int count_to_dock_range = 100000;
+        double count_to_dock_range = 100000.0;
         double dock_planet_radius_percent = 1.5;
         double planet_dock_port_min_size = 300.0;
         double planet_dock_port_size = 1.2;
