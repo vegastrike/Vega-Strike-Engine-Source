@@ -2040,7 +2040,7 @@ int Unit::Dock(Unit *utdw) {
     return 0;
 }
 
-inline bool insideDock(const DockingPorts &dock, const QVector &pos, float radius) {
+inline bool insideDock(const DockingPorts &dock, const QVector &pos, float radius, bool ignore_occupancy) {
     if (dock.IsOccupied()) {
         return false;
     }
