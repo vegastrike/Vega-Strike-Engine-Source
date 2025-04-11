@@ -554,7 +554,7 @@ namespace vega_config {
         double roll = 0.0;
         int screen = 0;
         double simulation_atom = 0.03;
-        int times_to_show_help_screen = 3;
+        int times_to_show_help_screen = 0;
         bool trade_interface_tracks_prices = true;
         int trade_interface_tracks_prices_top_rank = 10;
         int verbose_output = 0;
