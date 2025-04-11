@@ -2,8 +2,8 @@
  * cockpit_generic.h
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -118,10 +118,10 @@ public:
         /// Jump triggered yet not ready
         JUMP_FAILED,
 
-        /// WeaponsConfig lock warning active
+        /// Weapon lock warning active
         LOCK_WARNING,
 
-        /// Missile lock warning acgive
+        /// Missile lock warning active
         MISSILELOCK_WARNING,
 
         /// Eject light

@@ -95,8 +95,8 @@ void Damageable::ApplyDamage(const Vector &pnt,
     InflictedDamage inflicted_damage(3);
 
     //We also do the following lock on client side in order not to display shield hits
-    const bool no_dock_damage = configuration()->physics_config.no_damage_to_docked_ships;
-    const bool apply_difficulty_enemy_damage = configuration()->physics_config.difficulty_based_enemy_damage;
+    const bool no_dock_damage = configuration()->physics.no_damage_to_docked_ships;
+    const bool apply_difficulty_enemy_damage = configuration()->physics.difficulty_based_enemy_damage;
 
     // Stop processing if the affected unit isn't this unit
     // How could this happen? Why even have two parameters (this and affected_unit)???
@@ -191,8 +191,8 @@ void Damageable::ApplyDamage(const Vector &pnt,
         }
 
         // Eject cargo
-        const float cargo_eject_percent = configuration()->eject_config.eject_cargo_percent;
-        const uint32_t max_dump_cargo = configuration()->eject_config.max_dumped_cargo;
+        const float cargo_eject_percent = configuration()->physics.ejection.eject_cargo_percent;
+        const uint32_t max_dump_cargo = configuration()->physics.ejection.max_dumped_cargo;
         uint32_t dumped_cargo = 0;
 
         for (unsigned int i = 0; i < unit->numCargo(); ++i) {
@@ -205,9 +205,9 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
         // Eject Pilot
         // Can't use this as we can't reach negative hull damage
-//        const float hull_dam_to_eject = configuration()->eject_config.hull_damage_to_eject;
-        const float auto_eject_percent = configuration()->eject_config.auto_eject_percent;
-        const bool player_autoeject = configuration()->eject_config.player_auto_eject;
+//        const float hull_dam_to_eject = configuration()->physics.ejection.hull_damage_to_eject;
+        const float auto_eject_percent = configuration()->physics.ejection.auto_eject_percent;
+        const bool player_autoeject = configuration()->physics.ejection.player_auto_eject;
 
         if (shot_at_is_player) {
             if (player_autoeject
@@ -350,7 +350,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
 
     // It's actually easier to read this condition than the equivalent form
-    if (!(hull_damage || (configuration()->physics_config.system_damage_on_armor && armor_damage))) {
+    if (!(hull_damage || (configuration()->physics.system_damage_on_armor && armor_damage))) {
         return;
     }
 
@@ -370,7 +370,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     // indiscriminate is a fraction (25% by default).
     // Damage is calculated as 0.25 * rand + 0.75 * (hull_damage)/(current_hull)
     // Therefore,
-    double indiscriminate_system_destruction = configuration()->physics_config.indiscriminate_system_destruction;
+    double indiscriminate_system_destruction = configuration()->physics.indiscriminate_system_destruction;
     double random_damage_factor = indiscriminate_system_destruction * rand01();
     double hull_damage_modifier = 1 - indiscriminate_system_destruction;
     double hull_damage_factor = hull_damage_modifier * (1 - hull_damage / unit->hull.Get());
@@ -397,7 +397,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
 
     // TODO: Same condition as DamageRandomSystem - move up and merge
-    if (!(hull_damage || (configuration()->physics_config.system_damage_on_armor && armor_damage))) {
+    if (!(hull_damage || (configuration()->physics.system_damage_on_armor && armor_damage))) {
         return;
     }
 
@@ -433,7 +433,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     cargo.SetCategory("upgrades/Damaged/" + cargo_category.substr(prefix_length));
 
     // TODO: find a better name for whatever this is. Right now it's not not downgrade
-    if (configuration()->physics_config.separate_system_flakiness_component) {
+    if (configuration()->physics.separate_system_flakiness_component) {
         return;
     }
 
@@ -490,13 +490,13 @@ bool Damageable::flickerDamage() {
     static double counter = getNewTime();
 
     float diff = getNewTime() - counter;
-    if (diff > configuration()->graphics_config.glow_flicker.flicker_time) {
+    if (diff > configuration()->graphics.glow_flicker.flicker_time) {
         counter = getNewTime();
         diff = 0;
     }
-    float tmpflicker = configuration()->graphics_config.glow_flicker.flicker_time * damagelevel;
-    if (tmpflicker < configuration()->graphics_config.glow_flicker.min_flicker_cycle) {
-        tmpflicker = configuration()->graphics_config.glow_flicker.min_flicker_cycle;
+    float tmpflicker = configuration()->graphics.glow_flicker.flicker_time * damagelevel;
+    if (tmpflicker < configuration()->graphics.glow_flicker.min_flicker_cycle) {
+        tmpflicker = configuration()->graphics.glow_flicker.min_flicker_cycle;
     }
     diff = fmod(diff, tmpflicker);
     //we know counter is somewhere between 0 and damage level
@@ -504,9 +504,9 @@ bool Damageable::flickerDamage() {
     unsigned int thus = ((unsigned int) (size_t) this) >> 2;
     thus = thus % ((unsigned int) tmpflicker);
     diff = fmod(diff + thus, tmpflicker);
-    if (configuration()->graphics_config.glow_flicker.flicker_off_time > diff) {
-        if (damagelevel > configuration()->graphics_config.glow_flicker.hull_for_total_dark) {
-            return rand() > RAND_MAX * GetElapsedTime() * configuration()->graphics_config.glow_flicker.num_times_per_second_on;
+    if (configuration()->graphics.glow_flicker.flicker_off_time > diff) {
+        if (damagelevel > configuration()->graphics.glow_flicker.hull_for_total_dark) {
+            return rand() > RAND_MAX * GetElapsedTime() * configuration()->graphics.glow_flicker.num_times_per_second_on;
         } else {
             return true;
         }
