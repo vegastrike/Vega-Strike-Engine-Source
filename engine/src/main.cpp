@@ -547,9 +547,10 @@ void bootstrap_first_loop() {
 }
 
 void SetStartupView(Cockpit *cp) {
-    cp->SetView(game_options()->startup_cockpit_view
-            == "view_target" ? CP_TARGET : (game_options()->startup_cockpit_view
-            == "back" ? CP_BACK : (game_options()->startup_cockpit_view
+    VS_LOG(debug, (boost::format("%1%: Setting cockpit startup view to: %2%") % __FUNCTION__ % configuration()->graphics.startup_cockpit_view));
+    cp->SetView(configuration()->graphics.startup_cockpit_view
+            == "view_target" ? CP_TARGET : (configuration()->graphics.startup_cockpit_view
+            == "back" ? CP_BACK : (configuration()->graphics.startup_cockpit_view
             == "chase" ? CP_CHASE
             : CP_FRONT)));
 }

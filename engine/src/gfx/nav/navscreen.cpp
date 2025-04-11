@@ -141,10 +141,8 @@ void NavigationSystem::Setup() {
     center_z = 0.0;     //updated after a pass
 
     path_view = PATH_ON;
-    static bool start_sys_ortho =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "system_map_ortho_view", "false"));
-    static bool start_sec_ortho =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "sector_map_ortho_view", "false"));
+    const bool start_sys_ortho = configuration()->graphics.system_map_ortho_view;
+    const bool start_sec_ortho = configuration()->graphics.sector_map_ortho_view;
     system_view = start_sys_ortho ? VIEW_ORTHO : VIEW_2D;
     galaxy_view = start_sec_ortho ? VIEW_ORTHO : VIEW_2D;
     system_multi_dimensional = 1;
