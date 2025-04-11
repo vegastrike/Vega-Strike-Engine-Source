@@ -218,7 +218,7 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
         unsigned int index = counter;
         Mount *i = &mounts[index];
         if (i->status != Mount::ACTIVE) {
-            VS_LOG(debug, (boost::format("%1%: mount %2% is inactive") % __FUNCTION__ % counter));
+            VS_LOG(trace, (boost::format("%1%: mount %2% is inactive") % __FUNCTION__ % counter));
             continue;
         }
         if (i->bank == true) {

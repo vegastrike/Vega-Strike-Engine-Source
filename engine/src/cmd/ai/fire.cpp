@@ -759,17 +759,17 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
         VS_LOG(debug, (boost::format("%1%: delay < pilot reaction time") % __FUNCTION__));
         return;
     } else if (!shouldfire) {
-        VS_LOG(debug, (boost::format("%1%: shouldfire is false") % __FUNCTION__));
+        VS_LOG(trace, (boost::format("%1%: shouldfire is false") % __FUNCTION__));
         delay = 0;
     }
     if (fire_missile) {
         VS_LOG(debug, (boost::format("%1%: fire_missile is true; setting lastmissiletime") % __FUNCTION__));
         lastmissiletime = UniverseUtil::GetGameTime();
     } else if (UniverseUtil::GetGameTime() - lastmissiletime < missiledelay && !fire_missile) {
-        VS_LOG(debug, (boost::format("%1%: missiledelay hasn't passed yet and fire_missile is false") % __FUNCTION__));
+        VS_LOG(trace, (boost::format("%1%: missiledelay hasn't passed yet and fire_missile is false") % __FUNCTION__));
         return;
     }
-    VS_LOG(debug, (boost::format("%1%: Calling parent->Fire(...)") % __FUNCTION__));
+    VS_LOG(trace, (boost::format("%1%: Calling parent->Fire(...)") % __FUNCTION__));
     parent->Fire(FireBitmask(parent, shouldfire, fire_missile), true);
 }
 
