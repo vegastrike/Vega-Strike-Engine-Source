@@ -198,10 +198,14 @@ void Armed::ActivateGuns(const WeaponInfo *sz, bool ms) {
 }
 
 void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    if ((unit->cloak.Active() && !configuration()->weapons.can_fire_in_cloak) ||
-            (unit->ftl_drive.Enabled() && !configuration()->weapons.can_fire_in_spec)) {
+    if (unit->cloak.Active() && !configuration()->weapons.can_fire_in_cloak) {
+        VS_LOG(debug, (boost::format("%1%: can't fire while cloaked") % __FUNCTION__));
+        UnFire();
+        return;
+    } else if (unit->ftl_drive.Enabled() && !configuration()->weapons.can_fire_in_spec) {
+        VS_LOG(debug, (boost::format("%1%: can't fire while in SPEC flight") % __FUNCTION__));
         UnFire();
         return;
     }
@@ -214,13 +218,16 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
         unsigned int index = counter;
         Mount *i = &mounts[index];
         if (i->status != Mount::ACTIVE) {
+            VS_LOG(debug, (boost::format("%1%: mount %2% is inactive") % __FUNCTION__ % counter));
             continue;
         }
         if (i->bank == true) {
+            VS_LOG(debug, (boost::format("%1%: bank is true for mount %2%") % __FUNCTION__ % counter));
             unsigned int best = index;
             unsigned int j;
             for (j = index + 1; j < mountssize; ++j) {
                 if (i->NextMountCloser(&mounts[j], unit)) {
+                    VS_LOG(debug, (boost::format("%1%: mount %2%: next mount (%3%) is closer") % __FUNCTION__ % counter % j));
                     best = j;
 
                     i->UnFire();
@@ -245,15 +252,15 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
         const bool missile_and_want_to_fire_missiles = (mis && (weapon_type_bitmask & ROLES::FIRE_MISSILES));
         const bool gun_and_want_to_fire_guns = ((!mis) && (weapon_type_bitmask & ROLES::FIRE_GUNS));
         if (configuration()->logging.verbose_debug && missile_and_want_to_fire_missiles && locked_missile) {
-            VSFileSystem::vs_fprintf(stderr, "\n about to fire locked missile \n");
+            VS_LOG(important_info, (boost::format("%1%: about to fire locked missile %2%") % __FUNCTION__ % counter));
         }
         bool want_to_fire = (fire_non_autotrackers || autotracking_gun || locked_missile) &&
                 //&& ( (ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits) || i->type->role_bits == 0 )
                 ((locked_on && missile_and_want_to_fire_missiles) || gun_and_want_to_fire_guns);
-        if ((*i).type->type == WEAPON_TYPE::BEAM) {
-            if ((*i).type->energy_rate * static_cast<double>(simulation_atom_var) > unit->energy.Level()) {
+        if (i->type->type == WEAPON_TYPE::BEAM) {
+            if (i->type->energy_rate * static_cast<double>(simulation_atom_var) > unit->energy.Level()) {
                 //NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
-                (*i).UnFire();
+                i->UnFire();
                 continue;
             }
         } else
@@ -270,7 +277,7 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
 
 
             //If we are on server or if the weapon has been accepted for fire we fire
-            if (i->Fire(unit, unit->owner == NULL ? this : unit->owner, mis, listen_to_owner)) {
+            if (i->Fire(unit, unit->owner == nullptr ? this : unit->owner, mis, listen_to_owner)) {
                 //We could only refresh energy on server side or in non-networking mode, on client side it is done with
                 //info the server sends with ack for fire
                 //FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE

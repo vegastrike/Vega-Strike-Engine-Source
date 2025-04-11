@@ -665,6 +665,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
 bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
     float dist;
     if (!targ) {
+        VS_LOG(debug, (boost::format("%1%: target = false") % __FUNCTION__));
         return false;
 
         static int test = 0;
@@ -680,19 +681,13 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
     if (targ == parent->Target()) {
         distance = dist;
     }
-    static float firewhen = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "InWeaponRange", "1.2"));
-    static float fireangle_minagg =
-            (float) cos(M_PI * XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Firing",
-                    "MaximumFiringAngle.minagg",
-                    "10"))
-                    / 180.);                                                                      //Roughly 10 degrees
-    static float fireangle_maxagg =
-            (float) cos(M_PI * XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Firing",
-                    "MaximumFiringAngle.maxagg",
-                    "18"))
-                    / 180.);                                                                      //Roughly 18 degrees
+    const float firewhen = configuration()->ai.firing.in_weapon_range;
+    const float fireangle_minagg =
+            (float) cos(M_PI * configuration()->ai.firing.maximum_firing_angle.minagg
+                    / 180.0);                                                                      //Roughly 10 degrees
+    const float fireangle_maxagg =
+            (float) cos(M_PI * configuration()->ai.firing.maximum_firing_angle.maxagg
+                    / 180.0);                                                                      //Roughly 18 degrees
     float temp = parent->TrackingGuns(missilelock);
     bool isjumppoint = targ->isUnit() == Vega_UnitType::planet && ((Planet *) targ)->GetDestinations().empty() == false;
     float fangle = (fireangle_minagg + fireangle_maxagg * agg) / (1.0f + agg);
@@ -700,21 +695,24 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
             ((dist < firewhen)
                     && ((angle > fangle) || (temp && (angle > temp)) || (missilelock && (angle > 0)))) && !isjumppoint;
     if (retval) {
+        VS_LOG(debug, (boost::format("%1%: retval = true") % __FUNCTION__));
         if (Cockpit::tooManyAttackers()) {
+            VS_LOG(debug, (boost::format("%1%: too many attackers") % __FUNCTION__));
             Cockpit *player = _Universe->isPlayerStarship(targ);
             if (player) {
-                static int max_attackers =
-                        XMLSupport::parse_int(vs_config->getVariable("AI", "max_player_attackers", "0"));
+                VS_LOG(debug, (boost::format("%1%: player is not null") % __FUNCTION__));
+                const int max_attackers = configuration()->ai.max_player_attackers;
                 int attackers = player->number_of_attackers;
                 if (attackers > max_attackers && max_attackers > 0) {
-                    static float attacker_switch_time =
-                            XMLSupport::parse_float(vs_config->getVariable("AI", "attacker_switch_time", "15"));
+                    VS_LOG(debug, (boost::format("%1%: attackers > max_attackers && max_attackers > 0") % __FUNCTION__));
+                    const float attacker_switch_time = configuration()->ai.attacker_switch_time;
                     int curtime =
                             (int) fmod(floor(UniverseUtil::GetGameTime() / attacker_switch_time), (float) (1 << 24));
                     int seed = ((((size_t) parent) & 0xffffffff) ^ curtime);
                     static VSRandom decide(seed);
                     decide.init_genrand(seed);
                     if (decide.genrand_int31() % attackers >= max_attackers) {
+                        VS_LOG(debug, (boost::format("%1%: randomly decided to return false") % __FUNCTION__));
                         return false;
                     }
                 }
@@ -753,20 +751,25 @@ unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile) {
 }
 
 void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
-    static float missiledelay = XMLSupport::parse_float(vs_config->getVariable("AI", "MissileGunDelay", "4"));
+    const float missiledelay = configuration()->ai.missile_gun_delay;
     //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
     bool fire_missile = lockmissile && rand() < RAND_MAX * missileprobability * SIMULATION_ATOM;
     delay += SIMULATION_ATOM; //simulation_atom_var?
     if (shouldfire && delay < parent->pilot->getReactionTime()) {
+        VS_LOG(debug, (boost::format("%1%: delay < pilot reaction time") % __FUNCTION__));
         return;
     } else if (!shouldfire) {
+        VS_LOG(debug, (boost::format("%1%: shouldfire is false") % __FUNCTION__));
         delay = 0;
     }
     if (fire_missile) {
+        VS_LOG(debug, (boost::format("%1%: fire_missile is true; setting lastmissiletime") % __FUNCTION__));
         lastmissiletime = UniverseUtil::GetGameTime();
     } else if (UniverseUtil::GetGameTime() - lastmissiletime < missiledelay && !fire_missile) {
+        VS_LOG(debug, (boost::format("%1%: missiledelay hasn't passed yet and fire_missile is false") % __FUNCTION__));
         return;
     }
+    VS_LOG(debug, (boost::format("%1%: Calling parent->Fire(...)") % __FUNCTION__));
     parent->Fire(FireBitmask(parent, shouldfire, fire_missile), true);
 }
 
