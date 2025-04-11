@@ -92,9 +92,9 @@ int Bolt::AddAnimation(BoltDrawManager *q, std::string file, QVector cur_positio
 
 void Bolt::DrawAllBolts() {
     BoltDrawManager &bolt_draw_manager = BoltDrawManager::GetInstance();
-    GFXVertexList *qmesh = bolt_draw_manager.boltmesh;
+    GFXVertexList *qmesh = BoltDrawManager::boltmesh;
 
-    if (!qmesh || bolt_draw_manager.bolts.size() == 0) {
+    if (!qmesh || bolt_draw_manager.bolts.empty()) {
         return;
     }
 
@@ -102,7 +102,7 @@ void Bolt::DrawAllBolts() {
     GFXDisable(DEPTHWRITE);
     GFXDisable(TEXTURE1);
     GFXEnable(TEXTURE0);
-    GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
+    GFXTextureCoordGenMode(0, NO_GEN, nullptr, nullptr);
 
     BLENDFUNC bsrc, bdst;
     if (game_options()->BlendGuns == true) {
@@ -117,7 +117,7 @@ void Bolt::DrawAllBolts() {
 
     // Iterate over specific types of bolts (with same texture)
     for (auto &&bolt_types : bolt_draw_manager.bolts) {
-        if (bolt_types.size() == 0) {
+        if (bolt_types.empty()) {
             continue;
         }
 
@@ -134,8 +134,8 @@ void Bolt::DrawAllBolts() {
             if (texture->SetupPass(0, bsrc, bdst)) {
                 texture->MakeActive();
                 GFXToggleTexture(true, 0);
-                for (auto &&bolt : bolt_types) {
-                    bolt.DrawBolt(qmesh);
+                for (auto &&each_bolt : bolt_types) {
+                    each_bolt.DrawBolt(qmesh);
                 }
             }
         }
