@@ -176,7 +176,7 @@ static void SwitchVDUTo(VDU::VDU_MODE v) {
 
 void ExamineWhenTargetKey() {
     //if (game_options()->switchToTargetModeOnKey) {
-    if (configuration()->graphics_config.hud.switch_to_target_mode_on_key) {
+    if (configuration()->graphics.hud.switch_to_target_mode_on_key) {
         int view = 0;
         int examine = 0;
         for (; view < 2; ++view) {
@@ -262,7 +262,7 @@ void TextMessageKey(const KBData &, KBSTATE newState) {
 void QuitNow() {
     if (!cleanexit) {
         cleanexit = true;
-        if (configuration()->general_config.write_savegame_on_exit) {
+        if (configuration()->general.write_savegame_on_exit) {
             _Universe->WriteSaveGame(true);              //gotta do important stuff first
         }
         for (size_t i = 0; i < active_missions.size(); ++i) {
@@ -774,7 +774,7 @@ void IncrementStartupVariable() {
         var = getSaveData(0, "436457r1K3574r7uP71m35", 0);
         putSaveData(0, "436457r1K3574r7uP71m35", 0, var + 1);
     }
-    if (var <= configuration()->general_config.times_to_show_help_screen) {
+    if (var <= configuration()->general.times_to_show_help_screen) {
         GameCockpit::NavScreen(KBData(), PRESS);
     }          //HELP FIXME
 }

@@ -96,11 +96,11 @@ string getUnitNameAndFgNoBase(Unit *target) {
         if (fg) {
             int fgsnumber = target->getFgSubnumber();
             string fgnstring = XMLSupport::tostring(fgsnumber);
-            const bool print_fg_sub_id = configuration()->graphics_config.hud.print_fg_sub_id;
+            const bool print_fg_sub_id = configuration()->graphics.hud.print_fg_sub_id;
             string fgname;
             if (fg->name != "Base" && fg->name != "Asteroid" && fg->name != "Nebula") {
-                const bool print_ship_type = configuration()->graphics_config.hud.print_ship_type;
-                if (configuration()->graphics_config.hud.print_fg_name) {
+                const bool print_ship_type = configuration()->graphics.hud.print_ship_type;
+                if (configuration()->graphics.hud.print_fg_name) {
                     fgname += fg->name
                             + (print_ship_type ? ((print_fg_sub_id && (!fgnstring.empty())) ? " =" : " : ") : "");
                 }
@@ -112,7 +112,7 @@ string getUnitNameAndFgNoBase(Unit *target) {
                 }
                 return fgname;
             } else if (fg->name == "Base") {
-                if (configuration()->graphics_config.hud.basename_colon_basename == false || reformatName(target->name) == (reformatName(target->getFullname()))) {
+                if (configuration()->graphics.hud.basename_colon_basename == false || reformatName(target->name) == (reformatName(target->getFullname()))) {
                     std::string retval(reformatName(target->getFullname()));
                     if (print_fg_sub_id && ("" != fgnstring)) {
                         retval += " : " + fgnstring;
@@ -244,8 +244,8 @@ static void DrawHUDSprite(VDU *thus,
         s->SetSize(w, invertsprite ? -h : h);
         Texture *spritetex = s->getTexture();
         if (drawsprite && spritetex) {
-            const float middle_point = configuration()->graphics_config.hud.armor_hull_size;
-            const bool top_view = configuration()->graphics_config.hud.top_view;
+            const float middle_point = configuration()->graphics.hud.armor_hull_size;
+            const bool top_view = configuration()->graphics.hud.top_view;
             const float middle_point_small = 1.0F - middle_point;
             Vector ll, lr, ur, ul, mll, mlr, mur, mul;
             spritetex->MakeActive();
@@ -363,10 +363,14 @@ static void DrawShield(float fs,
             {innershield, middleshield, outershield},
             {innershield, middleshield, outershield}
     };
-    float shthresh[3] = { configuration()->graphics_config.hud.shield_vdu_thresh[0], configuration()->graphics_config.hud.shield_vdu_thresh[1], configuration()->graphics_config.hud.shield_vdu_thresh[2] };
+    float shthresh[3] = {
+        static_cast<float>(configuration()->graphics.hud.shield_vdu_thresh0),
+        static_cast<float>(configuration()->graphics.hud.shield_vdu_thresh1),
+        static_cast<float>(configuration()->graphics.hud.shield_vdu_thresh2),
+    };
 
     float shtrans[3] = {1.0f, 1.0f, 1.0f};
-    if (configuration()->graphics_config.hud.shield_vdu_fade) {
+    if (configuration()->graphics.hud.shield_vdu_fade) {
         shcolor[0][0].a *= mymax(0.0f, mymin(1.0f, (fs - shthresh[0]) / (shthresh[1] - shthresh[0]) * shtrans[0]));
         shcolor[0][1].a *= mymax(0.0f, mymin(1.0f, (fs - shthresh[1]) / (shthresh[2] - shthresh[1]) * shtrans[1]));
         shcolor[0][2].a *= mymax(0.0f, mymin(1.0f, (fs - shthresh[2]) / (1.0f - shthresh[2]) * shtrans[2]));
@@ -495,8 +499,8 @@ void VDU::DrawVDUShield(Unit *parent) {
     GetPosition(x, y);
     GetSize(w, h);
     //Use margins specified from config file
-    w = w - configuration()->graphics_config.reduced_vdus_width;
-    h = h + configuration()->graphics_config.reduced_vdus_height;
+    w = w - configuration()->graphics.reduced_vdus_width;
+    h = h + configuration()->graphics.reduced_vdus_height;
 
     h = fabs(h * .6);
     w = fabs(w * .6);
@@ -508,7 +512,7 @@ void VDU::DrawVDUShield(Unit *parent) {
     GFXColor4f(1, hull_percent, hull_percent, 1);
     GFXEnable(TEXTURE0);
     GFXColor4f(1, hull_percent, hull_percent, 1);
-    const bool invert_friendly_sprite = configuration()->graphics_config.hud.invert_friendly_sprite;
+    const bool invert_friendly_sprite = configuration()->graphics.hud.invert_friendly_sprite;
     DrawHUDSprite(this, parent->getHudImage(), .25, x, y, w, h, hull_percent,
             hull_percent, hull_percent, hull_percent,
             hull_percent, true, invert_friendly_sprite);
@@ -592,7 +596,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     float x, y, w, h;
 
     GFXEnable(TEXTURE0);
-    const bool invert_target_sprite = configuration()->graphics_config.hud.invert_target_sprite;
+    const bool invert_target_sprite = configuration()->graphics.hud.invert_target_sprite;
 
     float armor_up = target->armor.Percent(Armor::front);
     float armor_down = target->armor.Percent(Armor::back);
@@ -628,21 +632,21 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
     double mm = 0;
     string unitandfg = getUnitNameAndFgNoBase(target).c_str();
-    const bool out_of_cone_information = configuration()->graphics_config.hud.out_of_cone_distance;
+    const bool out_of_cone_information = configuration()->graphics.hud.out_of_cone_distance;
     bool inrange = parent->InRange(target, mm, out_of_cone_information == false && !UnitUtil::isSignificant(
             target), false, false);
     if (inrange) {
         static int neut = FactionUtil::GetFactionIndex("neutral");
         static int upgr = FactionUtil::GetFactionIndex("upgrades");
         if (target->faction != neut && target->faction != upgr) {
-            if (configuration()->graphics_config.hud.print_faction) {
+            if (configuration()->graphics.hud.print_faction) {
                 unitandfg += std::string("\n") + FactionUtil::GetFaction(target->faction);
             }
         }
     }
     unitandfg += std::string("\n");
     unitandfg += cp->getTargetLabel();
-    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+    const float background_alpha = configuration()->graphics.hud.text_background_alpha;
     GFXColor tpbg = tp->bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
@@ -674,7 +678,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         double actual_range = DistanceTwoTargets(parent, target);
         newst += GetDockingText(parent, target, actual_range);
         newst += string("\nRange: ") + PrettyDistanceString(actual_range);
-        const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+        const float background_alpha = configuration()->graphics.hud.text_background_alpha;
         GFXColor tpbg = tp->bgcol;
         bool automatte = (0 == tpbg.a);
         if (automatte) {
@@ -711,7 +715,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
  *  }*/
         GFXColor4f(1, 1, 1, 1);
     } else {
-        const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+        const float background_alpha = configuration()->graphics.hud.text_background_alpha;
         GFXColor tpbg = tp->bgcol;
         bool automatte = (0 == tpbg.a);
         if (automatte) {
@@ -817,9 +821,9 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
         fullstr += textMessage;
         fullstr += newline;
     }
-    const std::string message_prefix = configuration()->graphics_config.hud.message_prefix;
+    const std::string message_prefix = configuration()->graphics.hud.message_prefix;
     fullstr = targetstr + fullstr;
-    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+    const float background_alpha = configuration()->graphics.hud.text_background_alpha;
     GFXColor tpbg = tp->bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
@@ -896,7 +900,7 @@ void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
         where = msg.find("#");
     }
     msg = std::string("\n\n#ffff00     ") + msg;
-    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+    const float background_alpha = configuration()->graphics.hud.text_background_alpha;
     GFXColor tpbg = tp->bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
@@ -920,7 +924,7 @@ void VDU::DrawComm() {
         comm_ani->DrawAsVSSprite(this);
         if (comm_ani->Done()) {
             if (thismode.size() > 1) {
-                if (configuration()->graphics_config.hud.switch_back_from_comms) {
+                if (configuration()->graphics.hud.switch_back_from_comms) {
                     thismode.pop_back();
                 } else {
                     unsigned int blah = thismode.back();
@@ -933,8 +937,8 @@ void VDU::DrawComm() {
         }
         GFXDisable(TEXTURE0);
     } else {
-        const string message_prefix = configuration()->graphics_config.hud.message_prefix;
-        const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+        const string message_prefix = configuration()->graphics.hud.message_prefix;
+        const float background_alpha = configuration()->graphics.hud.text_background_alpha;
         GFXColor tpbg = tp->bgcol;
         bool automatte = (0 == tpbg.a);
         if (automatte) {
@@ -950,8 +954,8 @@ void VDU::DrawComm() {
 
 void VDU::DrawManifest(Unit *parent, Unit *target) {
     //zadeVDUmanifest
-    const std::string manifest_heading = configuration()->graphics_config.hud.manifest_heading;
-    const bool simple_manifest = configuration()->graphics_config.hud.simple_manifest;
+    const std::string manifest_heading = configuration()->graphics.hud.manifest_heading;
+    const bool simple_manifest = configuration()->graphics.hud.simple_manifest;
     std::string retval(manifest_heading);
     if (target != parent && simple_manifest == false) {
         retval += string("Tgt: ") + reformatName(target->name) + string("\n");
@@ -1002,7 +1006,7 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
         retval += string("--------\nLoad: ") + tostring(load) + string("t ")
                 + tostring(vol) + string("m3 ") + tostring(cred) + string("Cr.\n");
     }
-    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+    const float background_alpha = configuration()->graphics.hud.text_background_alpha;
     GFXColor tpbg = tp->bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
@@ -1138,7 +1142,7 @@ void VDU::DrawDamage(Unit *parent) {
     double hull_percent = parent->hull.Percent();
     GFXColor4f(1, hull_percent, hull_percent, 1);
     GFXEnable(TEXTURE0);
-    const bool draw_damage_sprite = configuration()->graphics_config.hud.draw_damage_sprite;
+    const bool draw_damage_sprite = configuration()->graphics.hud.draw_damage_sprite;
     DrawHUDSprite(this, draw_damage_sprite ? parent->getHudImage() : nullptr, .6, x, y, w, h,
             parent->armor.Percent(Armor::front),
             parent->armor.Percent(Armor::right),
@@ -1192,13 +1196,13 @@ void VDU::DrawDamage(Unit *parent) {
             GFXColor(.2, .2, .2, 1));
 
     RGBstring fpstring = colToString(cfullpower);
-    const std::string damage_report_heading = configuration()->graphics_config.hud.damage_report_heading;
+    const std::string damage_report_heading = configuration()->graphics.hud.damage_report_heading;
     std::string retval(damage_report_heading);
     retval += fpstring.str;
     unsigned int numCargo = parent->numCargo();
     double percent_working = 0.88;
-    const std::string non_repair_screen_cargo = configuration()->graphics_config.hud.not_included_in_damage_report;
-    const bool print_percent_working = configuration()->graphics_config.hud.print_damage_percent;
+    const std::string non_repair_screen_cargo = configuration()->graphics.hud.not_included_in_damage_report;
+    const bool print_percent_working = configuration()->graphics.hud.print_damage_percent;
 
 // TODO: make into function
 #define REPORTITEM(percent_working, max_functionality, print_percent_working, component_string) \
@@ -1278,7 +1282,7 @@ void VDU::DrawDamage(Unit *parent) {
     }
 
     retval += ecmstatus;
-    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+    const float background_alpha = configuration()->graphics.hud.text_background_alpha;
     GFXColor tpbg = tp->bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
@@ -1330,11 +1334,11 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
         double mm = 0;
         std::string blah(getUnitNameAndFgNoBase(target));
         sprintf(buf, "%s\n", blah.c_str());
-        const bool out_of_cone_information = configuration()->graphics_config.hud.out_of_cone_distance;
+        const bool out_of_cone_information = configuration()->graphics.hud.out_of_cone_distance;
         inrange =
                 parent->InRange(target, mm, out_of_cone_information || !UnitUtil::isSignificant(target), false, false);
     }
-    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+    const float background_alpha = configuration()->graphics.hud.text_background_alpha;
     GFXColor tpbg = tp->bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
@@ -1362,7 +1366,7 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
         GFXColor4f(.4, .4, 1, 1);
         GetPosition(x, y);
         GetSize(w, h);
-        if (target && configuration()->graphics_config.hud.draw_vdu_view_shields) {
+        if (target && configuration()->graphics.hud.draw_vdu_view_shields) {
             if (viewStyle == CP_PANTARGET) {
                 DrawHUDSprite(this, getSunImage(), 1, x, y, w, h, 1, 1, 1, 1, 1, false, false);
                 h = fabs(h * .6);
@@ -1431,8 +1435,8 @@ GFXColor MountColor(Mount *mnt) {
 }
 
 void VDU::DrawWeapon(Unit *parent) {
-    const bool draw_weapon_sprite = configuration()->graphics_config.hud.draw_weapon_sprite;
-    const std::string list_empty_mounts_as = configuration()->graphics_config.hud.mounts_list_empty;
+    const bool draw_weapon_sprite = configuration()->graphics.hud.draw_weapon_sprite;
+    const std::string list_empty_mounts_as = configuration()->graphics.hud.mounts_list_empty;
     const bool do_list_empty_mounts = (list_empty_mounts_as.length() != 0);
 
 //  without fixed font we would need some sneaky tweaking to make it a table, probably with multiple TPs
@@ -1500,7 +1504,7 @@ void VDU::DrawWeapon(Unit *parent) {
     if (mbuf.length() != mlen) {
         buf += mbuf;
     }
-    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+    const float background_alpha = configuration()->graphics.hud.text_background_alpha;
     GFXColor tpbg = tp->bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
@@ -1568,8 +1572,8 @@ void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent) {
     for (unsigned int i = 0; i < active_missions.size(); ++i) {
         if (!active_missions[i]->objectives.empty()) {
             rez += "#FFFFFF";
-            const bool force_anonymous_missions = configuration()->general_config.force_anonymous_mission_names;
-            const bool completed_objectives_last = configuration()->graphics_config.hud.completed_objectives_last;
+            const bool force_anonymous_missions = configuration()->general.force_anonymous_mission_names;
+            const bool completed_objectives_last = configuration()->graphics.hud.completed_objectives_last;
             if (active_missions[i]->mission_name.empty() || force_anonymous_missions) {
                 rez += "Mission " + XMLSupport::tostring((int) i) + "\n";
             } else {
@@ -1596,7 +1600,7 @@ void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent) {
             rez += '\n';
         }
     }
-    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+    const float background_alpha = configuration()->graphics.hud.text_background_alpha;
     GFXColor tpbg = tp->bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {

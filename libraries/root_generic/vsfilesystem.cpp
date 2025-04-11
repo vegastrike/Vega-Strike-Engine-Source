@@ -29,6 +29,7 @@
 #include <cassert>
 #include <cstdarg>
 #include <exception>
+#include <configuration/configuration.h>
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #include <Shlobj.h>
 #include <direct.h>
@@ -603,16 +604,16 @@ void InitDataDirectory() {
         version = fopen("Version.txt", "r");
     }
     if (version) {
-        string hsd;
+        std::string hsd;
         int c;
         while ((c = fgetc(version)) != EOF) {
             if (isspace(c)) {
                 break;
             }
-            hsd += (char) c;
+            hsd += static_cast<char>(c);
         }
         fclose(version);
-        if (hsd.length()) {
+        if (!hsd.empty()) {
             HOMESUBDIR = hsd;
             VS_LOG(info, (boost::format("Using %1% as the home directory") % hsd));
         }
@@ -843,12 +844,8 @@ void InitPaths(string conf, string subdir) {
     }
     /************************** Data and home directory settings *************************/
 
-    // Need to be first for win32. stephengtuggy 2021-09-10: O RLY? Let's try it the other way
     InitDataDirectory();
-    // #ifndef WIN32
     InitHomeDirectory();
-    // #endif
-    LoadConfig(std::move(subdir));
     /*
       Paths relative to datadir or homedir (both should have the same structure)
       Units are in sharedunits/unitname/, sharedunits/subunits/unitname/ or sharedunits/weapons/unitname/ or in sharedunits/faction/unitname/
@@ -867,6 +864,13 @@ void InitPaths(string conf, string subdir) {
         Directories.emplace_back("");
         SubDirectories.push_back(vec);
     }
+
+    boost::filesystem::path config_file_path{datadir + "/config.json"};
+    configuration()->load_config(config_file_path);
+    boost::filesystem::path config_file_path2{homedir + "/config.json"};
+    configuration()->load_config(config_file_path2);
+
+    LoadConfig(std::move(subdir));
 
     game_options()->init();
 

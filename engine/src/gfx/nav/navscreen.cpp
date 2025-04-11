@@ -141,10 +141,8 @@ void NavigationSystem::Setup() {
     center_z = 0.0;     //updated after a pass
 
     path_view = PATH_ON;
-    static bool start_sys_ortho =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "system_map_ortho_view", "false"));
-    static bool start_sec_ortho =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "sector_map_ortho_view", "false"));
+    const bool start_sys_ortho = configuration()->graphics.system_map_ortho_view;
+    const bool start_sec_ortho = configuration()->graphics.sector_map_ortho_view;
     system_view = start_sys_ortho ? VIEW_ORTHO : VIEW_2D;
     galaxy_view = start_sec_ortho ? VIEW_ORTHO : VIEW_2D;
     system_multi_dimensional = 1;
@@ -700,7 +698,7 @@ void NavigationSystem::DrawShip() {
     displayname.SetPos(originx - (.1 * deltax), originy /*+(1*deltay)*/ );
     displayname.SetText(writethis);
     displayname.SetCharSize(1, 1);
-    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+    const float background_alpha = configuration()->graphics.hud.text_background_alpha;
     GFXColor tpbg = displayname.bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
@@ -1121,7 +1119,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
     static bool nav_button_labels =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_nav_button_labels", "true"));
     if (nav_button_labels) {
-        const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+        const float background_alpha = configuration()->graphics.hud.text_background_alpha;
         GFXColor tpbg = a_label.bgcol;
         bool automatte = (0 == tpbg.a);
         if (automatte) {

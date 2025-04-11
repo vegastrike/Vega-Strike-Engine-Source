@@ -781,7 +781,7 @@ namespace UniverseUtil {
         securepythonstr(cmd);
         securepythonstr(args);
         securepythonstr(id);
-        string pythonCode = configuration()->general_config.custom_python + "(" + (trusted ? "True" : "False")
+        string pythonCode = configuration()->general.custom_python + "(" + (trusted ? "True" : "False")
                             + ", r\'" + cmd + "\', r\'" + args + "\', r\'" + id + "\')\n";
         VS_LOG(info, "Executing python command: ");
         VS_LOG(info, (boost::format("    %1%") % pythonCode));
@@ -919,7 +919,7 @@ namespace UniverseUtil {
                                "",
                                true,
                                false,
-                               configuration()->general_config.quick_savegame_summaries,
+                               configuration()->general.quick_savegame_summaries,
                                true,
                                true,
                                campaign_score_vars);
@@ -970,7 +970,7 @@ namespace UniverseUtil {
                 }
             }
         }
-        if (!configuration()->general_config.quick_savegame_summaries) {
+        if (!configuration()->general.quick_savegame_summaries) {
             bool hit = false;
             for (set<string>::const_iterator it = campaign_score_vars.begin(); it != campaign_score_vars.end(); ++it) {
                 string var = *it;

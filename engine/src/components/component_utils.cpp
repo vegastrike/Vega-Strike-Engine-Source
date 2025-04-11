@@ -98,24 +98,26 @@ const ComponentType GetComponentTypeFromName(const std::string name) {
 EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel,
                            EnergyContainer* energy, EnergyContainer* ftl_energy) {
     switch(component_type) {
-        case ComponentType::Shield: return energy;
+        case ComponentType::Shield:
+            return GetSourceFromConfiguration(configuration()->components.shield.energy_source, fuel, energy, ftl_energy);;
 
-        case ComponentType::FtlDrive: return ftl_energy;
+        case ComponentType::FtlDrive:
+            return GetSourceFromConfiguration(configuration()->components.ftl_drive.energy_source, fuel, energy, ftl_energy);
 
         case ComponentType::Reactor:
-            return GetSourceFromConfiguration(configuration()->fuel.reactor_source,
+            return GetSourceFromConfiguration(configuration()->components.reactor.energy_source,
                                               fuel, energy, ftl_energy);
         case ComponentType::Drive:
-            return GetSourceFromConfiguration(configuration()->fuel.drive_source,
+            return GetSourceFromConfiguration(configuration()->components.drive.energy_source,
                                               fuel, energy, ftl_energy);
         case ComponentType::Afterburner:
-            return GetSourceFromConfiguration(configuration()->fuel.afterburner_source,
+            return GetSourceFromConfiguration(configuration()->components.afterburner.energy_source,
                                               fuel, energy, ftl_energy);
         case ComponentType::JumpDrive:
-            return GetSourceFromConfiguration(configuration()->fuel.jump_drive_source,
+            return GetSourceFromConfiguration(configuration()->components.jump_drive.energy_source,
                                               fuel, energy, ftl_energy);
         case ComponentType::Cloak:
-            return GetSourceFromConfiguration(configuration()->fuel.cloak_source,
+            return GetSourceFromConfiguration(configuration()->components.cloak.energy_source,
                                               fuel, energy, ftl_energy);
 
         default:
@@ -135,6 +137,23 @@ EnergyContainer* GetSourceFromConfiguration(const EnergyConsumerSource source, E
     }
 }
 
+EnergyContainer* GetSourceFromConfiguration(const std::string& energy_source, EnergyContainer* fuel,
+    EnergyContainer* energy, EnergyContainer* ftl_energy)
+{
+    if (energy_source == "Infinite" || energy_source == "infinite") {
+        return nullptr;
+    }
+    if (energy_source == "Fuel" || energy_source == "fuel") {
+        return fuel;
+    }
+    if (energy_source == "Energy" || energy_source == "energy") {
+        return energy;
+    }
+    if (energy_source == "FTLEnergy" || energy_source == "ftl_energy") {
+        return ftl_energy;
+    }
+    return nullptr;
+}
 
 // For Drive and DriveUpgrade
 const std::string yaw_governor[] = {"Yaw_Governor", "Yaw_Governor_Right", "Yaw_Governor_Left"};

@@ -269,8 +269,6 @@ int main(int argc, char *argv[]) {
         boost::filesystem::current_path(program_directory_path);
     }
 
-//    VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart1();
-
     CONFIGFILE = nullptr;
     {
         char pwd[8192] = "";
@@ -305,26 +303,22 @@ int main(int argc, char *argv[]) {
     // Usually loaded from config.json
     std::string mission_name;
 
-    //this sets up the vegastrike config variable
-    setup_game_data();
-    //loads the configuration file .vegastrike/vegastrike.config from home dir if such exists
+    setup_game_data();  // TODO: Combine with vega_config::config settings object
     {
         std::pair<std::string, std::string> pair = ParseCommandLine(argc, argv);
         std::string subdir = pair.first;
         mission_name = pair.second;
 
         VS_LOG(info, (boost::format("GOT SUBDIR ARG = %1%") % subdir));
-        if (CONFIGFILE == 0) {
+        if (CONFIGFILE == nullptr) {
             CONFIGFILE = new char[42];
-            sprintf(CONFIGFILE, "vegastrike.config");
+            snprintf(CONFIGFILE, 41, "vegastrike.config");
+            CONFIGFILE[41] = '\0';
         }
         //Specify the config file and the possible mod subdir to play
         VSFileSystem::InitPaths(CONFIGFILE, subdir);
         // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
     }
-
-    // now that the user config file has been loaded from disk, update the global configuration struct values
-    configuration()->OverrideDefaultsWithUserConfiguration();
 
     // If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0') {
@@ -553,9 +547,10 @@ void bootstrap_first_loop() {
 }
 
 void SetStartupView(Cockpit *cp) {
-    cp->SetView(game_options()->startup_cockpit_view
-            == "view_target" ? CP_TARGET : (game_options()->startup_cockpit_view
-            == "back" ? CP_BACK : (game_options()->startup_cockpit_view
+    VS_LOG(debug, (boost::format("%1%: Setting cockpit startup view to: %2%") % __FUNCTION__ % configuration()->graphics.startup_cockpit_view));
+    cp->SetView(configuration()->graphics.startup_cockpit_view
+            == "view_target" ? CP_TARGET : (configuration()->graphics.startup_cockpit_view
+            == "back" ? CP_BACK : (configuration()->graphics.startup_cockpit_view
             == "chase" ? CP_CHASE
             : CP_FRONT)));
 }
