@@ -334,7 +334,7 @@ FIND_PACKAGE(LinuxDistro REQUIRED)
 SET(PythonInstalledVia "" CACHE STRING "How Python was installed, such as via Homebrew or MacPorts")
 
 IF (PythonInstalledVia STREQUAL "Homebrew")
-    FIND_PACKAGE(Python3 3.13.1 EXACT REQUIRED COMPONENTS Development Interpreter)
+    FIND_PACKAGE(Python3 3.13.2 EXACT REQUIRED COMPONENTS Development Interpreter)
 ELSEIF (PythonInstalledVia STREQUAL "MacPorts")
     FIND_PACKAGE(Python3 3.12.8 EXACT REQUIRED COMPONENTS Development Interpreter)
 ELSE ()

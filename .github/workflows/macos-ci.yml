@@ -27,7 +27,7 @@ jobs:
           #- macos-14
         python-version:
           #- 3.12.8
-          - 3.13.1
+          - 3.13.2
         compiler:
           - AppleClang
           #- clang
