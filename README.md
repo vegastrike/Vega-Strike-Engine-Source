@@ -55,7 +55,7 @@ Either install Vega Strike from the binary installer for your platform, if avail
 
 ### Please Note
 
-If you install Vega Strike version 0.9.x on Windows, you also need to install Python 3.11.8, separately, for the game to work. This exact version of Python is required. Without it, the game will exit silently as soon as it starts up.
+If you install Vega Strike version 0.9.x on Windows, you also need to install Python 3.11.8, separately, for the game to work. This exact version of Python is required. Without it, the game will exit silently as soon as it starts up. See <https://www.python.org/downloads/release/python-3118/> for the download.
 
 (At some future point, we may figure out a better way to handle the Python dependency.)
 
