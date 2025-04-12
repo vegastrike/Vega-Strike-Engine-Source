@@ -1264,5 +1264,5 @@ IF (USE_GTEST)
     )
 
     INCLUDE(GoogleTest)
-    gtest_discover_tests(${TEST_NAME})
+    gtest_discover_tests(${TEST_NAME} PROPERTIES DISCOVERY_TIMEOUT 30)
 ENDIF (USE_GTEST)
