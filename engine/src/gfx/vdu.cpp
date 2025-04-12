@@ -1306,8 +1306,8 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
     GFXEnable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
     VIEWSTYLE which = viewStyle;
-    float tmpaspect = g_game.aspect;
-    g_game.aspect = w / h;
+    float tmpaspect = configuration()->graphics.aspect;
+    configuration()->graphics.aspect = w / h;
     _Universe->AccessCamera(which)->SetSubwindow(x, y, w, h);
     _Universe->SelectCamera(which);
     VIEWSTYLE tmp = _Universe->AccessCockpit()->GetView();
@@ -1317,7 +1317,7 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
     GFXClear(GFXFALSE);
     GFXColor4f(1, 1, 1, 1);
     _Universe->activeStarSystem()->Draw(false);
-    g_game.aspect = tmpaspect;
+    configuration()->graphics.aspect = tmpaspect;
     _Universe->AccessCamera(which)->SetSubwindow(0, 0, 1, 1);
     _Universe->AccessCockpit()->SetView(tmp);
     _Universe->AccessCockpit()->SelectProperCamera();

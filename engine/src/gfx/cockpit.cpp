@@ -861,7 +861,7 @@ void GameCockpit::TriggerEvents(Unit *un) {
 
 
 void GameCockpit::Init(const char *file) {
-    smooth_fov = g_game.fov;
+    smooth_fov = configuration()->graphics.fov;
     editingTextMessage = false;
     Cockpit::Init(file);
     if (Panel.size() > 0) {
@@ -979,9 +979,9 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
     projection_limit_y = limit_y;
     //The angle between the center of the screen and the border is half the fov.
     projection_limit_y = tan(projection_limit_y * M_PI / (180 * 2));
-    projection_limit_x = projection_limit_y * g_game.aspect;
+    projection_limit_x = projection_limit_y * configuration()->graphics.aspect;
     //Precompute this division... performance.
-    inv_screen_aspect_ratio = 1 / g_game.aspect;
+    inv_screen_aspect_ratio = 1 / configuration()->graphics.aspect;
 
     oaccel = Vector(0, 0, 0);
 
@@ -1364,7 +1364,7 @@ static void DrawHeadingMarker(Cockpit &cp, const GFXColor &col) {
     cam->GetPQR(p, q, r);
 
     // znear offset
-    float offset = 2 * g_game.znear / cos(cam->GetFov() * M_PI / 180.0);
+    float offset = 2 * configuration()->graphics.znear / cos(cam->GetFov() * M_PI / 180.0);
     v *= offset;
     d *= offset;
 
@@ -1507,7 +1507,7 @@ void GameCockpit::Draw() {
             if (par) {
                 //cockpit is unaffected by FOV WARP-Link
                 float oldfov = AccessCamera()->GetFov();
-                AccessCamera()->SetFov(g_game.fov);
+                AccessCamera()->SetFov(configuration()->graphics.fov);
 
                 GFXLoadIdentity(MODEL);
 
@@ -2048,7 +2048,7 @@ void GameCockpit::Draw() {
     {
         //again, NAV computer is unaffected by FOV WARP-Link
         float oldfov = AccessCamera()->GetFov();
-        AccessCamera()->SetFov(g_game.fov);
+        AccessCamera()->SetFov(configuration()->graphics.fov);
         AccessCamera()->UpdateGFXAgain();
         DrawNavSystem(&ThisNav, AccessCamera(), cockpit_offset);
         AccessCamera()->SetFov(oldfov);
@@ -2326,7 +2326,7 @@ static void ShoveCamBehindUnit(int cam, Unit *un, float zoomfactor) {
     //commented out by chuck_starchaser; --never used
     QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
     _Universe->AccessCamera(cam)->SetPosition(
-            unpos - _Universe->AccessCamera()->GetR().Cast() * (un->rSize() + g_game.znear * 2) * zoomfactor,
+            unpos - _Universe->AccessCamera()->GetR().Cast() * (un->rSize() + configuration()->graphics.znear * 2) * zoomfactor,
             un->GetWarpVelocity(), un->GetAngularVelocity(), un->GetAcceleration());
 }
 
@@ -2338,7 +2338,7 @@ static void ShoveCamBelowUnit(int cam, Unit *un, float zoomfactor) {
     static float
             ammttoshovecam = XMLSupport::parse_float(vs_config->getVariable("graphics", "shove_camera_down", ".3"));
     _Universe->AccessCamera(cam)->SetPosition(
-            unpos - (r - ammttoshovecam * q).Cast() * (un->rSize() + g_game.znear * 2) * zoomfactor,
+            unpos - (r - ammttoshovecam * q).Cast() * (un->rSize() + configuration()->graphics.znear * 2) * zoomfactor,
             un->GetWarpVelocity(),
             un->GetAngularVelocity(),
             un->GetAcceleration());
@@ -2598,10 +2598,10 @@ void GameCockpit::SetupViewPort(bool clip) {
                     XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.smoothing", ".4"));
             float fov_smoot = pow(double(fov_smoothing), GetElapsedTime());
             smooth_fov =
-                    min(170.0f,
-                            max(5.0f,
+                    min(170.0,
+                            max(5.0,
                                     (1 - fov_smoot) * smooth_fov
-                                            + fov_smoot * (g_game.fov * (st_mult + sh_mult) + st_offs + sh_offs)));
+                                            + fov_smoot * (configuration()->graphics.fov * (st_mult + sh_mult) + st_offs + sh_offs)));
             _Universe->AccessCamera()->SetFov(smooth_fov);
         }
     }

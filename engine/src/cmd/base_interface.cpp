@@ -310,9 +310,9 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
     Unit *un = base->caller.GetUnit();
     if (un) {
         GFXHudMode(GFXFALSE);
-        float tmp = g_game.fov;
-        static float standard_fov = XMLSupport::parse_float(vs_config->getVariable("graphics", "base_fov", "90"));
-        g_game.fov = standard_fov;
+        float tmp = configuration()->graphics.fov;
+        const float standard_fov = configuration()->graphics.bases.fov;
+        configuration()->graphics.fov = standard_fov;
         float tmp1 = _Universe->AccessCamera()->GetFov();
         _Universe->AccessCamera()->SetFov(standard_fov);
         Vector p, q, r;
@@ -325,7 +325,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         Matrix final;
         Matrix newmat = mat;
         newmat.p.k *= un->rSize();
-        newmat.p += QVector(0, 0, g_game.znear);
+        newmat.p += QVector(0, 0, configuration()->graphics.znear);
         newmat.p.i *= newmat.p.k;
         newmat.p.j *= newmat.p.k;
         MultMatrix(final, cam, newmat);
@@ -358,7 +358,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         _Universe->AccessCamera()->UpdateGFX();
         SetupViewport();
         GFXHudMode(GFXTRUE);
-        g_game.fov = tmp;
+        configuration()->graphics.fov = tmp;
         _Universe->AccessCamera()->SetFov(tmp1);
     }
 }

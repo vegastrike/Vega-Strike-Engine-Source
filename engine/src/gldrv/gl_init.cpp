@@ -549,10 +549,6 @@ void init_opengl_extensions() {
 }
 
 static void initfov() {
-    g_game.fov = game_options()->fov;
-    g_game.aspect = game_options()->aspect;
-    g_game.znear = game_options()->znear;
-    g_game.zfar = game_options()->zfar;
     g_game.detaillevel = game_options()->ModelDetail;
     g_game.use_textures = game_options()->UseTextures;
     g_game.use_ship_textures = game_options()->UseShipTextures;
@@ -565,10 +561,10 @@ static void initfov() {
     /*
      *  FILE * fp = fopen ("glsetup.txt","r");
      *  if (fp) {
-     *  VSFileSystem::Fscanf (fp,"fov %f\n",&g_game.fov);
+     *  VSFileSystem::Fscanf (fp,"fov %f\n",&configuration()->graphics.fov);
      *  VSFileSystem::Fscanf (fp,"aspect %f\n",&g_game.aspect);
-     *  VSFileSystem::Fscanf (fp,"znear %f\n",&g_game.znear);
-     *  VSFileSystem::Fscanf (fp,"zfar %f\n",&g_game.zfar);
+     *  VSFileSystem::Fscanf (fp,"znear %f\n",&configuration()->graphics.znear);
+     *  VSFileSystem::Fscanf (fp,"zfar %f\n",&configuration()->graphics.zfar);
      *  VSFileSystem::Close (fp);
      *  }
      */

@@ -92,7 +92,7 @@ void BoltDrawManager::Draw() {
     GFXAlphaTest(GREATER, .1);
 
     float pixel_angle = 2
-            * sin(g_game.fov * M_PI / 180.0
+            * sin(configuration()->graphics.fov * M_PI / 180.0
                     / (configuration()->graphics.resolution_y
                             > configuration()->graphics.resolution_x ? configuration()->graphics.resolution_y : configuration()->graphics.resolution_x))
             * game_options()->bolt_pixel_size;

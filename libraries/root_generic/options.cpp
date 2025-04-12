@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -143,10 +143,10 @@ void vs_options::init() {
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "separatespecularcolor", "false"));
     LockVertexArrays = XMLSupport::parse_bool(vs_config->getVariable("graphics", "LockVertexArrays", "true"));
     fogdetail = XMLSupport::parse_int(vs_config->getVariable("graphics", "fogdetail", "0"));
-    fov = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "fov", "78"));
-    aspect = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "aspect", "1.33"));
-    znear = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "znear", "1"));
-    zfar = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "zfar", "100000"));
+    // fov = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "fov", "78"));
+    // aspect = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "aspect", "1.33"));
+    // znear = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "znear", "1"));
+    // zfar = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "zfar", "100000"));
     ModelDetail = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "ModelDetail", "1"));
     UseTextures = XMLSupport::parse_bool(vs_config->getVariable("graphics", "UseTextures", "true"));
     UseShipTextures = XMLSupport::parse_bool(vs_config->getVariable("graphics", "UseShipTextures", "false"));

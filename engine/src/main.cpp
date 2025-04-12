@@ -123,7 +123,6 @@ void setup_game_data() {
     g_game.music_volume = 1;
     g_game.warning_level = 20;
     g_game.capture_mouse = GFXFALSE;
-    g_game.fov = 78;
     g_game.MouseSensitivityX = 2;
     g_game.MouseSensitivityY = 4;
 }

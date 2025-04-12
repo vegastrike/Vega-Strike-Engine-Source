@@ -490,7 +490,7 @@ void Mesh::Draw(float lod,
         c.SpecialFX = &LocalFX;
         c.damage = hulldamage;
 
-        c.mesh_seq = ((toofar + rSize()) > g_game.zfar) ? NUM_ZBUF_SEQ : draw_sequence;
+        c.mesh_seq = ((toofar + rSize()) > configuration()->graphics.zfar) ? NUM_ZBUF_SEQ : draw_sequence;
 
         // Cloaking and Nebula
         c.cloaked = MeshDrawContext::NONE;
@@ -611,7 +611,7 @@ void Mesh::ProcessZFarMeshes(bool nocamerasetup) {
 
         static float far_margin = XMLSupport::parse_float(vs_config->getVariable("graphics", "mesh_far_percent", ".8"));
         if (!nocamerasetup) {
-            _Universe->AccessCamera()->UpdateGFXFrustum(GFXTRUE, g_game.zfar * far_margin, 0);
+            _Universe->AccessCamera()->UpdateGFXFrustum(GFXTRUE, configuration()->graphics.zfar * far_margin, 0);
         }
 
         std::sort(undrawn_meshes[a].begin(), undrawn_meshes[a].end());
@@ -667,7 +667,7 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects, bool nocamerasetup) {
             // The bug was introduced in (svn r13722)
             //} else if (!nocamerasetup) {
         } else { // less correct (svn r13721) but working on nav computer
-            _Universe->AccessCamera()->UpdateGFXFrustum(GFXTRUE, g_game.znear, g_game.zfar);
+            _Universe->AccessCamera()->UpdateGFXFrustum(GFXTRUE, configuration()->graphics.znear, configuration()->graphics.zfar);
         }
         std::sort(undrawn_meshes[a].begin(), undrawn_meshes[a].end());
         for (OrigMeshVector::iterator it = undrawn_meshes[a].begin(); it < undrawn_meshes[a].end(); ++it) {
