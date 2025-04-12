@@ -665,7 +665,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
 bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
     float dist;
     if (!targ) {
-        VS_LOG(debug, (boost::format("%1%: target = false") % __FUNCTION__));
+        VS_LOG(trace, (boost::format("%1%: target = false") % __FUNCTION__));
         return false;
 
         static int test = 0;
@@ -695,16 +695,16 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
             ((dist < firewhen)
                     && ((angle > fangle) || (temp && (angle > temp)) || (missilelock && (angle > 0)))) && !isjumppoint;
     if (retval) {
-        VS_LOG(debug, (boost::format("%1%: retval = true") % __FUNCTION__));
+        VS_LOG(trace, (boost::format("%1%: retval = true") % __FUNCTION__));
         if (Cockpit::tooManyAttackers()) {
-            VS_LOG(debug, (boost::format("%1%: too many attackers") % __FUNCTION__));
+            VS_LOG(trace, (boost::format("%1%: too many attackers") % __FUNCTION__));
             Cockpit *player = _Universe->isPlayerStarship(targ);
             if (player) {
-                VS_LOG(debug, (boost::format("%1%: player is not null") % __FUNCTION__));
+                VS_LOG(trace, (boost::format("%1%: player is not null") % __FUNCTION__));
                 const int max_attackers = configuration()->ai.max_player_attackers;
                 int attackers = player->number_of_attackers;
                 if (attackers > max_attackers && max_attackers > 0) {
-                    VS_LOG(debug, (boost::format("%1%: attackers > max_attackers && max_attackers > 0") % __FUNCTION__));
+                    VS_LOG(trace, (boost::format("%1%: attackers > max_attackers && max_attackers > 0") % __FUNCTION__));
                     const float attacker_switch_time = configuration()->ai.attacker_switch_time;
                     int curtime =
                             (int) fmod(floor(UniverseUtil::GetGameTime() / attacker_switch_time), (float) (1 << 24));
@@ -712,7 +712,7 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
                     static VSRandom decide(seed);
                     decide.init_genrand(seed);
                     if (decide.genrand_int31() % attackers >= max_attackers) {
-                        VS_LOG(debug, (boost::format("%1%: randomly decided to return false") % __FUNCTION__));
+                        VS_LOG(trace, (boost::format("%1%: randomly decided to return false") % __FUNCTION__));
                         return false;
                     }
                 }
@@ -756,14 +756,14 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     bool fire_missile = lockmissile && rand() < RAND_MAX * missileprobability * SIMULATION_ATOM;
     delay += SIMULATION_ATOM; //simulation_atom_var?
     if (shouldfire && delay < parent->pilot->getReactionTime()) {
-        VS_LOG(debug, (boost::format("%1%: delay < pilot reaction time") % __FUNCTION__));
+        VS_LOG(trace, (boost::format("%1%: delay < pilot reaction time") % __FUNCTION__));
         return;
     } else if (!shouldfire) {
         VS_LOG(trace, (boost::format("%1%: shouldfire is false") % __FUNCTION__));
         delay = 0;
     }
     if (fire_missile) {
-        VS_LOG(debug, (boost::format("%1%: fire_missile is true; setting lastmissiletime") % __FUNCTION__));
+        VS_LOG(trace, (boost::format("%1%: fire_missile is true; setting lastmissiletime") % __FUNCTION__));
         lastmissiletime = UniverseUtil::GetGameTime();
     } else if (UniverseUtil::GetGameTime() - lastmissiletime < missiledelay && !fire_missile) {
         VS_LOG(trace, (boost::format("%1%: missiledelay hasn't passed yet and fire_missile is false") % __FUNCTION__));
