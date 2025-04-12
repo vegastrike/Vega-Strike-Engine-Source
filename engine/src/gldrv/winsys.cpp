@@ -251,7 +251,10 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     const int screen_number = configuration()->graphics.screen;
     SDL_Window *window = nullptr;
     if(screen_number == 0) {
-        window = SDL_CreateWindow("Vega Strike", 0, 0, width, height, video_flags);
+        window = SDL_CreateWindow("Vega Strike",
+                SDL_WINDOWPOS_UNDEFINED,
+                SDL_WINDOWPOS_UNDEFINED,
+                width, height, video_flags);
     } else {
         window = SDL_CreateWindow("Vega Strike",
                                 SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number),
