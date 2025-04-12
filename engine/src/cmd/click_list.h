@@ -3,8 +3,8 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, Benjamen R. Meyer,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -39,7 +39,7 @@ private:
     UnitCollection *lastCollection;
     Unit *lastSelected;
 public:
-//gets passed in unnormalized mouse values btw 0 and g_game.x_resolution&& g_game.y_resolution
+//gets passed in unnormalized mouse values btw 0 and configuration()->graphics.resolution_x&& configuration()->graphics.resolution_y
     bool queryShip(int mouseX, int mouseY, Unit *); //returns if the ship's in iterator utilizes
     ClickList(StarSystem *parSystem, UnitCollection *parentIter);
 

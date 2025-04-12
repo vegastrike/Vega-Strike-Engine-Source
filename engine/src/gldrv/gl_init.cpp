@@ -40,16 +40,6 @@
 
 #if !defined (_WIN32) && !defined (__CYGWIN__)
 
-//#if !(defined(__APPLE__) || defined(MACOSX))
-//#define GL_GLEXT_PROTOTYPES 1
-//#define GLX_GLXEXT_PROTOTYPES 1
-//#define GLX_GLXEXT_LEGACY 1
-
-//#   include <GL/glxext.h>
-//#   include <GL/glx.h>
-//#   include <GL/glxext.h>
-//#endif
-
 #include <stdlib.h>
 
 #else
@@ -90,6 +80,8 @@
 
 #include <stdio.h>
 #include "gl_init.h"
+
+#include "configuration/configuration.h"
 #define WINDOW_TITLE "Vega Strike " VERSION
 
 #if defined (CG_SUPPORT)
@@ -583,8 +575,8 @@ static void initfov() {
 }
 
 static void Reshape(int x, int y) {
-    g_game.x_resolution = x;
-    g_game.y_resolution = y;
+    configuration()->graphics.resolution_x = x;
+    configuration()->graphics.resolution_y = y;
     VS_LOG(trace, (boost::format("Reshaping %1% %2%") % x % y));
 }
 
@@ -596,7 +588,7 @@ void GFXInit(int argc, char **argv) {
     winsys_init(&argc, argv, &vsname[0], &vsicon[0]);
 
 
-    glViewport(0, 0, g_game.x_resolution, g_game.y_resolution);
+    glViewport(0, 0, configuration()->graphics.resolution_x, configuration()->graphics.resolution_y);
     static GFXColor clearcol = vs_config->getColor("space_background");;
     gl_options.wireframe = game_options()->use_wireframe;
     gl_options.max_texture_dimension = game_options()->max_texture_dimension;

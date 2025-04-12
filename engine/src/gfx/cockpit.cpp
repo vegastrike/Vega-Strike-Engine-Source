@@ -2015,13 +2015,12 @@ void GameCockpit::Draw() {
             GFXEnable(TEXTURE0);
             //GFXDisable (DEPTHTEST);
             //GFXDisable(TEXTURE1);
-            static float deadband = game_options()->mouse_deadband;
-            static int revspr =
-                    XMLSupport::parse_bool(vs_config->getVariable("joystick", "reverse_mouse_spr", "true")) ? 1 : -1;
-            static string blah = vs_config->getVariable("joystick", "mouse_crosshair", "crosshairs.spr");
-            static VSSprite MouseVSSprite(blah.c_str(), BILINEAR, GFXTRUE);
-            float xcoord = (-1 + float(mousex) / (.5 * g_game.x_resolution));
-            float ycoord = (-revspr + float(revspr * mousey) / (.5 * g_game.y_resolution));
+            const float deadband = configuration()->joystick.mouse_deadband;
+            const int reverse_spr = configuration()->joystick.reverse_mouse_spr;
+            const string blah = configuration()->joystick.mouse_crosshair;
+            VSSprite MouseVSSprite(blah.c_str(), BILINEAR, GFXTRUE);
+            float xcoord = (-1.0F + float(mousex) / (0.5 * configuration()->graphics.resolution_x));
+            float ycoord = (-reverse_spr + float(reverse_spr * mousey) / (.5 * configuration()->graphics.resolution_y));
             MouseVSSprite.SetPosition(xcoord * (1 - fabs(crosscenx)) + crosscenx,
                     ycoord * (1 - fabs(crossceny)) + crossceny);
             float xs, ys;
@@ -2372,9 +2371,9 @@ static void translate_as(Vector &p,
 void GameCockpit::SetupViewPort(bool clip) {
     _Universe->AccessCamera()->RestoreViewPort(0, (view == CP_FRONT ? viewport_offset : 0));
     GFXViewPort(0,
-            (int) ((view == CP_FRONT ? viewport_offset : 0) * g_game.y_resolution),
-            g_game.x_resolution,
-            g_game.y_resolution);
+            (int) ((view == CP_FRONT ? viewport_offset : 0) * configuration()->graphics.resolution_y),
+            configuration()->graphics.resolution_x,
+            configuration()->graphics.resolution_y);
     _Universe->AccessCamera()->setCockpitOffset(view < CP_CHASE ? cockpit_offset : 0);
     Unit *un, *tgt;
     if ((un = parent.GetUnit())) {

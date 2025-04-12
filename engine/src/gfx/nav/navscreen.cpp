@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 hellcatv, ace123, surfdargent, klaussfreire,
+ * Copyright (C) 2001-2025 hellcatv, ace123, surfdargent, klaussfreire,
  * jacks, pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -167,8 +167,8 @@ void NavigationSystem::Setup() {
     mouse_wentdown[2] = 0;
     mouse_wentdown[3] = 0;
     mouse_wentdown[4] = 0;
-    mouse_x_previous = (-1 + float(mousex) / (.5 * g_game.x_resolution));
-    mouse_y_previous = (1 + float(-1 * mousey) / (.5 * g_game.y_resolution));
+    mouse_x_previous = (-1 + float(mousex) / (.5 * configuration()->graphics.resolution_x));
+    mouse_y_previous = (1 + float(-1 * mousey) / (.5 * configuration()->graphics.resolution_y));
 
     static int max_map_nodes = XMLSupport::parse_int(vs_config->getVariable("graphics", "max_map_nodes", "256000"));
     systemIter.init(UniverseUtil::getSystemFile(), max_map_nodes);
@@ -447,8 +447,8 @@ void NavigationSystem::Draw() {
 
     //Save current mouse location
     //**********************************
-    mouse_x_current = (-1 + float(mousex) / (.5 * g_game.x_resolution));
-    mouse_y_current = (1 + float(-1 * mousey) / (.5 * g_game.y_resolution));
+    mouse_x_current = (-1 + float(mousex) / (.5 * configuration()->graphics.resolution_x));
+    mouse_y_current = (1 + float(-1 * mousey) / (.5 * configuration()->graphics.resolution_y));
     //**********************************
 
     //Set Mouse
@@ -528,8 +528,8 @@ void NavigationSystem::Draw() {
 
     //Save current mouse location as previous for next cycle
     //**********************************
-    mouse_x_previous = (-1 + float(mousex) / (.5 * g_game.x_resolution));
-    mouse_y_previous = (1 + float(-1 * mousey) / (.5 * g_game.y_resolution));
+    mouse_x_previous = (-1 + float(mousex) / (.5 * configuration()->graphics.resolution_x));
+    mouse_y_previous = (1 + float(-1 * mousey) / (.5 * configuration()->graphics.resolution_y));
     //**********************************
 
     GFXEnable(TEXTURE0);

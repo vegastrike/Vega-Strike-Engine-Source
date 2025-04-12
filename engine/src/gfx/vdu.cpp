@@ -1,7 +1,7 @@
 /*
  * vdu.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -1024,8 +1024,8 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
 static void DrawGun(Vector pos, float w, float h, MOUNT_SIZE sz) {
     w = fabs(w);
     h = fabs(h);
-    float oox = 1. / g_game.x_resolution;
-    float ooy = 1. / g_game.y_resolution;
+    float oox = 1. / configuration()->graphics.resolution_x;
+    float ooy = 1. / configuration()->graphics.resolution_y;
     pos.j -= h / 3.8;
     if (sz == MOUNT_SIZE::NOWEAP) {
         GFXPointSize(4);

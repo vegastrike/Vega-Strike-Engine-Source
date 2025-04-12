@@ -52,7 +52,7 @@ std::string Drawable::root;
 // TODO: remove duplication
 inline static float perspectiveFactor(float d) {
     if (d > 0) {
-        return g_game.x_resolution * GFXGetZPerspective(d);
+        return configuration()->graphics.resolution_x * GFXGetZPerspective(d);
     } else {
         return 1.0f;
     }
