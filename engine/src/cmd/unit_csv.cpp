@@ -1,8 +1,12 @@
 /*
  * unit_csv.cpp
  *
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
@@ -632,16 +636,16 @@ void YawPitchRollParser(std::string unit_key,
 void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_game) {
     Unit::XML xml;
     xml.unitModifications = modification.c_str();
-    xml.randomstartframe = ((float) rand()) / RAND_MAX;
+    xml.randomstartframe = static_cast<float>(rand()) / RAND_MAX;
     xml.randomstartseconds = 0;
     xml.calculated_role = false;
     xml.damageiterator = 0;
-    xml.shieldmesh = NULL;
-    xml.rapidmesh = NULL;
+    xml.shieldmesh = nullptr;
+    xml.rapidmesh = nullptr;
     xml.hasColTree = true;
     xml.unitlevel = 0;
     xml.unitscale = 1;
-    xml.data = xml.shieldmesh = xml.rapidmesh = NULL;     //was uninitialized memory
+    xml.data = xml.shieldmesh = xml.rapidmesh = nullptr;     //was uninitialized memory
     string tmpstr;
     csvRow = unit_identifier;
 
@@ -1399,11 +1403,7 @@ string Unit::WriteUnitString() {
         }
         unit["Tractorability"] = trac;
     }
+    unit["Unit_Role"] = getUnitRole();
 
     return writeCSV(unit);
 }
-
-
-
-
-

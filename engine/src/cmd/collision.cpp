@@ -1,8 +1,12 @@
 /*
  * collision.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy and
- * other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -106,6 +110,12 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
 
             // Units (ships) should calculate actual damage
         case Vega_UnitType::unit:
+            // Handle the "Nav 8" case
+            if ((other_unit->invisible & Unit::INVISUNIT)
+                    || other_unit->getFullname().find("invisible") != std::string::npos) {
+                VS_LOG(debug, "Can't collide with an invisible object");
+                return;
+            }
             apply_force = true;
             deal_damage = true;
             return;

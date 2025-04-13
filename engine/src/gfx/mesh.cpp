@@ -1,9 +1,12 @@
 /*
  * mesh.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -83,17 +86,17 @@ void Mesh::InitUnit() {
     numlods = 1;
     alphatest = 0;
     lodsize = FLT_MAX;
-    forcelogos = NULL;
-    squadlogos = NULL;
+    forcelogos = nullptr;
+    squadlogos = nullptr;
     local_pos = Vector(0, 0, 0);
     blendSrc = ONE;
     blendDst = ZERO;
-    vlist = NULL;
+    vlist = nullptr;
     mn = Vector(0, 0, 0);
     mx = Vector(0, 0, 0);
     radialSize = 0;
     if (Decal.empty()) {
-        Decal.push_back(NULL);
+        Decal.push_back(nullptr);
     }
 
     //texturename[0] = -1;
@@ -101,13 +104,13 @@ void Mesh::InitUnit() {
     myMatNum = 0;     //default material!
     //scale = Vector(1.0,1.0,1.0);
     refcount = 1;     //FIXME VEGASTRIKE  THIS _WAS_ zero...NOW ONE
-    orig = NULL;
+    orig = nullptr;
 
     envMapAndLit = 0x3;
     setEnvMap(GFXTRUE);
     setLighting(GFXTRUE);
-    detailTexture = NULL;
-    draw_queue = NULL;
+    detailTexture = nullptr;
+    draw_queue = nullptr;
     will_be_drawn = GFXFALSE;
     draw_sequence = 0;
 
@@ -119,7 +122,12 @@ Mesh::Mesh() {
 }
 
 bool Mesh::LoadExistant(Mesh *oldmesh) {
-    *this = *oldmesh;
+    try {
+        *this = *oldmesh;
+    } catch (std::exception& ex) {
+        VS_LOG(error, (boost::format("Error in %1%: '%2%'") % __FUNCTION__ % ex.what()));
+        return false;
+    }
     oldmesh->refcount++;
     orig = oldmesh;
     return true;
@@ -128,14 +136,19 @@ bool Mesh::LoadExistant(Mesh *oldmesh) {
 bool Mesh::LoadExistant(const string filehash, const Vector &scale, int faction) {
     Mesh *oldmesh;
 
-    hash_name = VSFileSystem::GetHashName(filehash, scale, faction);
-    oldmesh = meshHashTable.Get(hash_name);
-    if (oldmesh == 0) {
-        hash_name = VSFileSystem::GetSharedMeshHashName(filehash, scale, faction);
+    try {
+        hash_name = VSFileSystem::GetHashName(filehash, scale, faction);
         oldmesh = meshHashTable.Get(hash_name);
-    }
-    if (0 != oldmesh) {
-        return LoadExistant(oldmesh);
+        if (oldmesh == nullptr) {
+            hash_name = VSFileSystem::GetSharedMeshHashName(filehash, scale, faction);
+            oldmesh = meshHashTable.Get(hash_name);
+        }
+        if (nullptr != oldmesh) {
+            return LoadExistant(oldmesh);
+        }
+    } catch (std::exception& ex) {
+        VS_LOG(error, (boost::format("Error in %1%: '%2%'") % __FUNCTION__ % ex.what()));
+        return false;
     }
     return false;
 }

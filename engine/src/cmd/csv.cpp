@@ -1,8 +1,12 @@
 /*
  * csv.cpp
  *
- * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -30,6 +34,8 @@
 #include "unit_csv_factory.h"
 #include "unit_json_factory.h"
 #include "vs_exit.h"
+
+#include <boost/algorithm/string.hpp>
 
 using std::string;
 
@@ -115,10 +121,18 @@ string writeCSV(const std::map<std::string, std::string> &unit, string delim) {
     std::string first_line;
     std::string second_line;
     for (auto const& pair : unit) {
-        first_line += addQuote(pair.first, delim);
+        std::string pair_first = pair.first;
+        std::string pair_second = pair.second;
+
+        // Replaces standard comma with turned comma (U+2E32)
+        // Prevents CSV corruption on load.
+        boost::replace_all(pair_first, ",", "⸲");
+        boost::replace_all(pair_second, ",", "⸲");
+
+        first_line += addQuote(pair_first, delim);
         first_line += delim[0];
 
-        second_line += addQuote(pair.second, delim);
+        second_line += addQuote(pair_second, delim);
         second_line += delim[0];
     }
 

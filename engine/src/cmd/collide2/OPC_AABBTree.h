@@ -1,25 +1,20 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
- *	OPCODE - Optimized Collision Detection
- *	Copyright (C) 2001 Pierre Terdiman
- *	Homepage: http://www.codercorner.com/Opcode.htm
+ *  OPCODE - Optimized Collision Detection
+ *  Copyright (C) 2001 Pierre Terdiman
+ *  Copyright (C) 2021, 2022, 2025 Stephen G. Tuggy
+ *  Copyright (C) 2023 Benjamen R. Meyer
+ *  Public Domain
+ *  Homepage: http://www.codercorner.com/Opcode.htm
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- *	Contains code for a versatile AABB tree.
- *	\file		OPC_AABBTree.h
- *	\author		Pierre Terdiman
- *	\date		March, 20, 2001
- */
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * Updated by Stephen G. Tuggy 2021-07-03
- * Updated by Stephen G. Tuggy 2022-01-06
- * Updated by Benjamen R. Meyer 2023-05-27
+/*
+ *  Contains code for a versatile AABB tree.
+ *  \file		OPC_AABBTree.h
+ *  \author		Pierre Terdiman
+ *  \date		March, 20, 2001
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -54,31 +49,31 @@
                 uintptr_t            mPos;        /* "Positive" & "Negative" children */
 #else
 //! TO BE DOCUMENTED
-	#define IMPLEMENT_TREE(base_class, volume)																			    \
-		public:																											    \
-		/* Constructor / Destructor */																					    \
-									base_class();																		    \
-									~base_class();																		    \
+    #define IMPLEMENT_TREE(base_class, volume)																			    \
+        public:																											    \
+        /* Constructor / Destructor */																					    \
+                                    base_class();																		    \
+                                    ~base_class();																		    \
 
-		/* Data access */																								    \
-		inline_	const volume*		Get##volume()	const	{ return &mBV;							}					    \
-		/* Clear the last bit */																						    \
-		inline_	const base_class*	GetPos()		const	{ return (const base_class*)(mPos&~1);	}					    \
-		inline_	const base_class*	GetNeg()		const	{ return (const base_class*)(mNeg&~1);	}					    \
-																														    \
+        /* Data access */																								    \
+        inline_	const volume*		Get##volume()	const	{ return &mBV;							}					    \
+        /* Clear the last bit */																						    \
+        inline_	const base_class*	GetPos()		const	{ return (const base_class*)(mPos&~1);	}					    \
+        inline_	const base_class*	GetNeg()		const	{ return (const base_class*)(mNeg&~1);	}					    \
+																															\
 /*		inline_	bool				IsLeaf()		const	{ return (!GetPos() && !GetNeg());	}	*/					    \
-		/* We don't need to test both nodes since we can't have one without the other	*/								    \
-		inline_	bool				IsLeaf()		const	{ return !GetPos();						}					    \
-																														    \
-		/* Stats */																										    \
-		inline_	size_t				GetNodeSize()	const	{ return SIZEOFOBJECT;					}					    \
-		protected:																										    \
-		/* Tree-independent data */																						    \
-		/* Following data always belong to the BV-tree, regardless of what the tree actually contains.*/				    \
-		/* Whatever happens we need the two children and the enclosing volume.*/										    \
-				volume				mBV;		/* Global bounding-volume enclosing all the node-related primitives */	    \
-				uintptr_t			mPos;		/* "Positive" child */													    \
-				uintptr_t			mNeg;		/* "Negative" child */
+        /* We don't need to test both nodes since we can't have one without the other	*/								    \
+        inline_	bool				IsLeaf()		const	{ return !GetPos();						}					    \
+        																													\
+        /* Stats */																										    \
+        inline_	size_t				GetNodeSize()	const	{ return SIZEOFOBJECT;					}					    \
+        protected:																										    \
+        /* Tree-independent data */																						    \
+        /* Following data always belong to the BV-tree, regardless of what the tree actually contains.*/				    \
+        /* Whatever happens we need the two children and the enclosing volume.*/										    \
+                volume				mBV;		/* Global bounding-volume enclosing all the node-related primitives */	    \
+                uintptr_t			mPos;		/* "Positive" child */													    \
+                uintptr_t			mNeg;		/* "Negative" child */
 #endif
 
 typedef void
@@ -109,11 +104,11 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- *	User-callback, called for each node by the walking code.
- *	\param		current		[in] current node
- *	\param		depth		[in] current node's depth
- *	\param		user_data	[in] user-defined data
- *	\return		true to recurse through children, else false to bypass them
+ *  User-callback, called for each node by the walking code.
+ *  \param		current		[in] current node
+ *  \param		depth		[in] current node's depth
+ *  \param		user_data	[in] user-defined data
+ *  \return		true to recurse through children, else false to bypass them
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef bool                (*WalkingCallback)(const AABBTreeNode *current, uint32_t depth, void *user_data);

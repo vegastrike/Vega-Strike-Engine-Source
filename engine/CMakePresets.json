@@ -279,7 +279,8 @@
       },
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "/usr/local",
-        "CMAKE_FIND_FRAMEWORK": "LAST"
+        "CMAKE_FIND_FRAMEWORK": "LAST",
+        "PythonInstalledVia": "Homebrew"
       }
     },
     {
@@ -382,7 +383,8 @@
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "/opt/local",
         "Boost_INCLUDE_DIR": "/opt/local/libexec/boost/1.81/include",
-        "CMAKE_FIND_FRAMEWORK": "LAST"
+        "CMAKE_FIND_FRAMEWORK": "LAST",
+        "PythonInstalledVia": "MacPorts"
       }
     },
     {

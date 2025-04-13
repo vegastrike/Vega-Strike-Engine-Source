@@ -5,7 +5,8 @@
  *	\author		Pierre Terdiman
  *	\date		April, 4, 2000
  *
- *  Updated by Stephen G. Tuggy 2022-01-06
+ *  Copyright (C) 2000-2025 Pierre Terdiman, Stephen G. Tuggy
+ *  Public Domain
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -196,4 +197,3 @@ Point &Point::InvTransform(const Point &r, const Matrix3x3 &rotpos, const Point 
     z = sx * rotpos.m[0][2] + sy * rotpos.m[1][2] + sz * rotpos.m[2][2];
     return *this;
 }
-

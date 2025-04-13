@@ -1,10 +1,12 @@
-/**
+/*
  * soundcontainer.h
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -21,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_H
 #define VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_H
@@ -43,11 +45,11 @@ class GameSoundContainer : public SoundContainer {
 
 public:
     /**
-     * Create a refernece to an optionally-looping sound file.
+     * Create a reference to an optionally-looping sound file.
      */
-    GameSoundContainer(const SoundContainer &other);
+    explicit GameSoundContainer(const SoundContainer &other);
 
-    virtual ~GameSoundContainer();
+    ~GameSoundContainer() override;
 
     /**
      * Forced loading of the resource. It's not necessary to call it,
@@ -75,12 +77,12 @@ public:
     void stop();
 
     /**
-     * Return whether or not the sound is really playing now.
+     * Return whether the sound is really playing now.
      */
     bool isPlaying() const;
 
     /**
-     * Return whether or not the sound was triggered with play().
+     * Return whether the sound was triggered with play().
      * Will return true after play(), false after stop() and right
      * after creation.
      */
@@ -94,7 +96,7 @@ protected:
     virtual void unloadImpl() = 0;
 
     /**
-     * Start playing. Needs not account for loopgin vs non-looping,
+     * Start playing. Needs not account for looping vs non-looping,
      * just start playing the sound.
      */
     virtual void playImpl() = 0;
@@ -102,7 +104,7 @@ protected:
     virtual void stopImpl() = 0;
 
     /**
-     * Return whether or not the sound is really playing now.
+     * Return whether the sound is really playing now.
      */
     virtual bool isPlayingImpl() const = 0;
 

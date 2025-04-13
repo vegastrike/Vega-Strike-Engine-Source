@@ -1,10 +1,19 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * Updated by Stephen G. Tuggy 2021-07-03
- * Updated by Stephen G. Tuggy 2022-01-06
- * Updated by Benjamen R. Meyer 2023-05-27
+/*
+ * OPC_TriBoxOverlap.h
+ *
+ * Copyright (C) 2001-2025 Pierre Terdiman, Daniel Horn, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
+ *
+ * This file is part of OPCODE - Optimized Collision Detection
+ * (http://www.codercorner.com/Opcode.htm) and has been
+ * incorporated into Vega Strike
+ * (https://github.com/vegastrike/Vega-Strike-Engine-Source).
+ *
+ * Public Domain
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // NO HEADER GUARD
 
 //! This macro quickly finds the min & max values among 3 variables

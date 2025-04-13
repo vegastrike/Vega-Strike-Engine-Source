@@ -1,9 +1,19 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * Updated by Stephen G. Tuggy 2021-07-03
- * Updated by Stephen G. Tuggy 2022-01-06
- * Updated by Benjamen R. Meyer 2023-05-27
+ * OPC_PlanesTriOverlap.h
+ *
+ * Copyright (C) 2001 Pierre Terdiman
+ * Copyright (C) 2021, 2022, 2025 Stephen G. Tuggy
+ * Copyright (C) 2023 Benjamen R. Meyer
+ *
+ * This file is part of OPCODE - Optimized Collision Detection
+ * (http://www.codercorner.com/Opcode.htm) and has been
+ * incorporated into Vega Strike
+ * (https://github.com/vegastrike/Vega-Strike-Engine-Source).
+ *
+ * Public Domain
  */
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // NO HEADER GUARD
 
@@ -36,13 +46,13 @@ inline_ bool PlanesCollider::PlanesTriOverlap(uint32_t in_clip_mask) {
         p++;
     }
 /*
-	for(uint32_t i=0;i<6;i++)
-	{
-		float d0 = p[i].Distance(mLeafVerts[0]);
-		float d1 = p[i].Distance(mLeafVerts[1]);
-		float d2 = p[i].Distance(mLeafVerts[2]);
-		if(d0>0.0f && d1>0.0f && d2>0.0f)	return false;
-	}
+    for(uint32_t i=0;i<6;i++)
+    {
+        float d0 = p[i].Distance(mLeafVerts[0]);
+        float d1 = p[i].Distance(mLeafVerts[1]);
+        float d2 = p[i].Distance(mLeafVerts[2]);
+        if(d0>0.0f && d1>0.0f && d2>0.0f)	return false;
+    }
 */
     return TRUE;
 }

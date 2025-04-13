@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * sdds.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <stdlib.h>
@@ -153,13 +159,15 @@ void ddsDecompress(unsigned char *&RESTRICT buffer,
         TEXTUREFORMAT internformat,
         int height,
         int width) {
-    unsigned char *pos_out = NULL, *pos_in = NULL;
+    unsigned char *pos_out = nullptr, *pos_in = nullptr;
     int bpp = 4;
     unsigned int sx, sy;
 
     sx = (width < 4) ? width : 4;
     sy = (height < 4) ? width : 4;
-    data = (unsigned char *) malloc(height * width * bpp);
+    data = static_cast<unsigned char*>(malloc(static_cast<size_t>(height)
+                                                * static_cast<size_t>(width)
+                                                * static_cast<size_t>(bpp)));
     pos_out = data;
     pos_in = buffer;
     for (int y = 0; y < height; y += 4) {
@@ -179,4 +187,3 @@ void ddsDecompress(unsigned char *&RESTRICT buffer,
 }
 
 /*  END of software decompression for DDS helper functions */
-

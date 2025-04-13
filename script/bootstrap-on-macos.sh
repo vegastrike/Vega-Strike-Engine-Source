@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
-#
+##
 # bootstrap-on-macos.sh
 #
-# Copyright (C) 2023-2024 Stephen G. Tuggy and other
-# Vega Strike contributors
+# Vega Strike - Space Simulation, Combat and Trading
+# Copyright (C) 2001-2025 The Vega Strike Contributors:
+# Project creator: Daniel Horn
+# Original development team: As listed in the AUTHORS file
+# Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
 #
-# This script may not need root privileges. You should be able to run
-# it as follows:
 #
-# ./script/bootstrap-on-macos.sh
-#
-# Note that this is the Homebrew version of the bootstrap script. The
-# MacPorts version is called bootstrap-on-macOS-using-MacPorts.sh
+# https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
 # This file is part of Vega Strike.
 #
@@ -22,11 +20,12 @@
 #
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+#
 
 set -e
 
@@ -52,6 +51,10 @@ do
     export PATH="$PACKAGE_INSTALLED_BIN:$PATH"
     export CMAKE_PREFIX_PATH="$PACKAGE_INSTALLED_PREFIX:$CMAKE_PREFIX_PATH"
 done
+
+# Keep these lines! Otherwise you will likely get PFNGL... not found errors.
+ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/OpenGL"
+ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/GLUT"
 
 OPENALDIR="$(brew --prefix openal-soft)"
 export OPENALDIR

@@ -1,12 +1,12 @@
 /*
  * mesh.h
  *
- * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
- * Copyright (C) 2002-2019 Daniel Horn, klaussfreire, pheonixstorm, safemode, dan_w,
- *  ace123, jacks, and other Vega Strike contributors
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, Roy Falk,
- *  and other Vega Strike contributors
- * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically:
+ *  Alan Shieh, klaussfreire, pheonixstorm, safemode, dan_w, ace123, jacks
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -14,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -189,49 +189,49 @@ protected:
     static Hashtable<std::string, Mesh, MESH_HASTHABLE_SIZE> meshHashTable;
     static Hashtable<std::string, std::vector<int>, MESH_HASTHABLE_SIZE> animationSequences;
 ///The refcount:: how many meshes are referencing the appropriate original
-    int refcount;
+    int refcount{1};
 ///bounding box
     Vector mx;
     Vector mn;
 ///The radial size of this mesh
-    float radialSize;
+    float radialSize{};
 ///num lods contained in the array of Mesh "orig"
-    int numlods;
-    float framespersecond; //for animation
-    Mesh *orig;
+    int numlods{};
+    float framespersecond{}; //for animation
+    Mesh *orig{};
 ///The size that this LOD (if original) comes into effect
-    float lodsize;
+    float lodsize{FLT_MAX};
 ///The number of force logos on this mesh (original)
-    Logo *forcelogos;
-    int numforcelogo;
+    Logo *forcelogos{};
+    int numforcelogo{};
 ///The number of squad logos on this mesh (original)
-    Logo *squadlogos;
-    int numsquadlogo;
+    Logo *squadlogos{};
+    int numsquadlogo{};
 ///tri,quad,line, strips, etc
-    GFXVertexList *vlist;
+    GFXVertexList *vlist{};
 ///The number of the appropriate material for this mesh (default 0)
-    unsigned int myMatNum;
+    unsigned int myMatNum{};
 ///The technique used to render this mesh
     TechniquePtr technique;
 ///The decal relevant to this mesh
     vector<Texture *> Decal;
-    Texture *detailTexture;
+    Texture *detailTexture{};
     vector<Vector> detailPlanes;
-    float polygon_offset;
+    float polygon_offset{};
 ///whether this should be environment mapped 0x1 and 0x2 for if it should be lit (ored together)
-    char envMapAndLit;
+    char envMapAndLit{0x3};
 ///Whether this original will be drawn this frame
-    GFXBOOL will_be_drawn;
+    GFXBOOL will_be_drawn{};
 ///The blend functions
-    bool convex;
-    unsigned char alphatest;
-    enum BLENDFUNC blendSrc;
-    enum BLENDFUNC blendDst;
+    bool convex{};
+    unsigned char alphatest{};
+    enum BLENDFUNC blendSrc{ONE};
+    enum BLENDFUNC blendDst{ZERO};
 
 /// Support for reorganized rendering
-    vector<MeshDrawContext> *draw_queue;
+    vector<MeshDrawContext> *draw_queue{};
 /// How transparent this mesh is (in what order should it be rendered in
-    int draw_sequence;
+    int draw_sequence{};
 ///The name of this unit
     string hash_name;
 ///Setting all values to defaults (good for mesh copying and stuff)

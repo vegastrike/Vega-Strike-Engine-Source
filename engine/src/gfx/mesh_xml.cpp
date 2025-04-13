@@ -1,8 +1,12 @@
 /*
  * mesh_xml.cpp
  *
- * Copyright (C) 2001-2024 Daniel Horn, chuck_starchaser, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file; chuck_starchaser specifically
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -1319,17 +1323,23 @@ vector<Mesh *> Mesh::LoadMeshes(const char *filename,
      *  }*/
     string hash_name = VSFileSystem::GetHashName(filename, scale, faction);
     vector<Mesh *> *oldmesh = bfxmHashTable.Get(hash_name);
-    if (oldmesh == 0) {
+    if (oldmesh == nullptr) {
         hash_name = VSFileSystem::GetSharedMeshHashName(filename, scale, faction);
         oldmesh = bfxmHashTable.Get(hash_name);
     }
-    if (oldmesh && !oldmesh->empty() && oldmesh->size() < UINT32_MAX) {
-        vector<Mesh *> ret;
-        for (auto m : *oldmesh) {
-            ret.push_back(new Mesh());
-            ret.back()->LoadExistant(m->orig ? m->orig : m);
+    if (oldmesh) {
+        if (oldmesh->size() > 0 && oldmesh->size() < UINT32_MAX) {
+            vector<Mesh *> ret;
+            for (auto m : *oldmesh) {
+                ret.push_back(new Mesh());
+                ret.back()->LoadExistant(m->orig ? m->orig : m);
+            }
+            return ret;
+        } else {
+            VS_LOG_FLUSH_EXIT(fatal,
+                             (boost::format("Fatal error in %1%: oldmesh->size() out of range!") % __FUNCTION__),
+                             -25);
         }
-        return ret;
     }
     VSFile f;
     VSError err = f.OpenReadOnly(filename, MeshFile);
@@ -2097,4 +2107,3 @@ void Mesh::PostProcessLoading(MeshXML *xml, const vector<string> &textureOverrid
     }
     GFXSetMaterial(myMatNum, xml->material);
 }
-

@@ -4,7 +4,8 @@
 *    begin                : Wed Jun 26 2002
 *    copyright            : (C) 2002 by jhunt
 *    email                : jhunt@jaja
-*    copyright            : (C) 2023 by Stephen G. Tuggy, Benjamen R. Meyer
+*    copyright            : (C) 2023 by Benjamen R. Meyer
+*    copyright            : (C) 2023, 2025 by Stephen G. Tuggy
 ***************************************************************************/
 
 /***************************************************************************
@@ -15,6 +16,7 @@
 *   (at your option) any later version.                                   *
 *                                                                         *
 ***************************************************************************/
+
 // NO HEADER GUARD
 
 

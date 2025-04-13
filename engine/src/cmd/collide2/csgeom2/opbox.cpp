@@ -1,7 +1,7 @@
 /*
     Copyright (C) 1998 by Jorrit Tyberghein
     Largely rewritten by Ivan Avramovic <ivan@avramovic.com>
-    Copyright (C) 2022 Stephen G. Tuggy
+    Copyright (C) 2022, 2025 Stephen G. Tuggy
   
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public

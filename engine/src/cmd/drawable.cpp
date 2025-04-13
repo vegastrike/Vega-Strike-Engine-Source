@@ -1,8 +1,12 @@
 /*
  * drawable.cpp
  *
- * Copyright (C) 2020-2025 Daniel Horn, Roy Falk, Stephen G. Tuggy and other
- * Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 //#include <cassert>
@@ -58,17 +62,17 @@ inline static float perspectiveFactor(float d) {
     }
 }
 
-Drawable::Drawable() :
-        halos(new HaloSystem()),
-        animatedMesh(true),
-        activeAnimation(0),
-        timeperframe(3.0),
-        done(true),
-        activeMesh(0),
-        nextactiveMesh(1),
-        infiniteLoop(true),
-        loopCount(0),
-        curtime(0.0) {
+Drawable::Drawable() : halos(new HaloSystem()),
+                       animatedMesh(true),
+                       activeAnimation(0),
+                       timeperframe(3.0),
+                       done(true),
+                       activeMesh(0),
+                       nextactiveMesh(1),
+                       infiniteLoop(true),
+                       loopCount(0),
+                       num_chunks(0),
+                       curtime(0.0) {
 }
 
 Drawable::~Drawable() {

@@ -1,8 +1,12 @@
-/**
+/*
  * energetic.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy, and
- * other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -48,7 +52,7 @@ Energetic::Energetic() : energy(0, 0),
         afterburnenergy(0),
         afterburntype(0) {
     jump.warpDriveRating = 0;
-    jump.energy = 100;
+    jump.energy = 0.1;
     jump.insysenergy = configuration()->warp_config.insystem_jump_cost * jump.energy;
     jump.drive = -2;
     jump.delay = 5;

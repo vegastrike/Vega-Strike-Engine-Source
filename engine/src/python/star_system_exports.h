@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors.
+ * star_system_exports.h
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,8 +23,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 /// Exports functions for python modules
@@ -137,4 +144,3 @@ voidEXPORT_UTIL(showSplashMessage)
 voidEXPORT_UTIL(showSplashProgress)
 voidEXPORT_UTIL(hideSplashScreen)
 EXPORT_UTIL(isSplashScreenShowing, true)
-

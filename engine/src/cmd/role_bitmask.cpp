@@ -1,8 +1,12 @@
 /*
  * role_bitmask.cpp
  *
- * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -67,9 +71,9 @@ static vsUMap<string, int> rolemap;
 static vsUMap<int, string> irolemap;
 
 unsigned char InternalGetRole(const std::string &s) {
-    vsUMap<string, int>::const_iterator i = rolemap.find(strtoupper(s));
+    const vsUMap<string, int>::const_iterator i = rolemap.find(strtoupper(s));
     if (i != rolemap.end()) {
-        return (*i).second;
+        return i->second;
     }
     return 0;
 }
@@ -77,11 +81,11 @@ unsigned char InternalGetRole(const std::string &s) {
 const std::string &InternalGetStrRole(unsigned char c) {
     static const std::string empty;
 
-    vsUMap<int, string>::const_iterator i = irolemap.find(c);
+    const vsUMap<int, string>::const_iterator i = irolemap.find(c);
     if (i != irolemap.end()) {
-        return (*i).second;
+        return i->second;
     }
-    return rolemap.size() ? rolemap.begin()->first : empty;
+    return !rolemap.empty() ? rolemap.begin()->first : empty;
 }
 
 std::vector<std::vector<std::string> > buildscripts() {
@@ -286,4 +290,3 @@ unsigned int getCapitalRoles() {
     return retval;
 }
 }
-

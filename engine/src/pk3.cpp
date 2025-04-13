@@ -2,6 +2,10 @@
  *  pk3.cpp
  *
  *  Copyright 2002-2003 LibPK3, Inc. All rights reserved.
+ *  Copyright 2001-2025 The Vega Strike Contributors:
+ *  Project creator: Daniel Horn
+ *  Original development team: As listed in the AUTHORS file
+ *  Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
@@ -501,4 +505,3 @@ bool CPK3::ReadFile(int i, void *pBuf) {
     delete[] pcData;
     return ret;
 }
-

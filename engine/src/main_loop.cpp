@@ -1,8 +1,12 @@
 /*
  * main_loop.cpp
  *
- * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -851,9 +855,10 @@ void createObjects(std::vector<std::string> &fighter0name,
             numf++;
             QVector pox(1000 + 150 * a, 100 * a, 100);
 
-            pox.i = fg->pos.i + s * fg_radius * 3;
-            pox.j = fg->pos.j + s * fg_radius * 3;
-            pox.k = fg->pos.k + s * fg_radius * 3;
+            const double tmp = static_cast<double>(s) * static_cast<double>(fg_radius) * 3.0;
+            pox.i = fg->pos.i + tmp;
+            pox.j = fg->pos.j + tmp;
+            pox.k = fg->pos.k + tmp;
             if (pox.i == pox.j && pox.j == pox.k && pox.k == 0) {
                 pox.i = rand() * 10000. / RAND_MAX - 5000;
                 pox.j = rand() * 10000. / RAND_MAX - 5000;
