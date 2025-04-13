@@ -86,7 +86,7 @@ IF (NOT DISABLE_CLIENT) ##########
         LIST(APPEND VSE_TST_LIBS ${OPENAL_LIBRARY})
         SET(HAVE_AL 1)
     ELSE (OPENAL_FOUND)
-        MESSAGE(FATAL_ERROR "We aint got no sound")
+        MESSAGE(FATAL_ERROR "Failed to find required library OpenAL for sound functionality")
     ENDIF (OPENAL_FOUND)
 
     IF (NOT BEOS)
@@ -99,7 +99,7 @@ IF (NOT DISABLE_CLIENT) ##########
             SET(HAVE_SDL 1)
             SET(SDL_WINDOWING 1)
         ELSE (SDL2_FOUND)
-            MESSAGE(FATAL_ERROR "How will we render to OpenGL without SDL2?")
+            MESSAGE(FATAL_ERROR "Failed to find required library SDL2")
         ENDIF (SDL2_FOUND)
     ENDIF (NOT BEOS)
 

@@ -218,7 +218,7 @@ IF (ZLIB_FOUND)
     LIST(APPEND TST_INCLUDES ${ZLIB_INCLUDE_DIR})
     LIST(APPEND TST_LIBS ${ZLIB_LIBRARIES})
 ELSE (ZLIB_FOUND)
-    MESSAGE(FATAL_ERROR "For the love of god, no zlib here")
+    MESSAGE(FATAL_ERROR "Failed to find required library zlib")
 ENDIF (ZLIB_FOUND)
 
 #find Expat
@@ -227,7 +227,7 @@ IF (EXPAT_FOUND)
     LIST(APPEND TST_INCLUDES ${EXPAT_INCLUDE_DIRS})
     LIST(APPEND TST_LIBS ${EXPAT_LIBRARIES})
 ELSE (EXPAT_FOUND)
-    MESSAGE(FATAL_ERROR "We can't find expat for XML crap")
+    MESSAGE(FATAL_ERROR "Failed to find required library expat for XML parsing")
 ENDIF (EXPAT_FOUND)
 
 #Find FFMpeg
