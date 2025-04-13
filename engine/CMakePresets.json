@@ -382,9 +382,12 @@
       },
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "/opt/local",
-        "Boost_INCLUDE_DIR": "/opt/local/libexec/boost/1.81/include",
+        "Boost_INCLUDE_DIR": "/opt/local/libexec/boost/1.87/include",
+        "Boost_DIR": "/opt/local/libexec/boost/1.87/lib/cmake/Boost-1.87.0",
         "CMAKE_FIND_FRAMEWORK": "LAST",
-        "PythonInstalledVia": "MacPorts"
+        "PythonInstalledVia": "MacPorts",
+        "INSTALL_GTEST": "OFF",
+        "USE_GTEST": "OFF"
       }
     },
     {
