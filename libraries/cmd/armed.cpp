@@ -201,11 +201,11 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (unit->cloak.Active() && !configuration()->weapons.can_fire_in_cloak) {
-        VS_LOG(debug, (boost::format("%1%: can't fire while cloaked") % __FUNCTION__));
+        VS_LOG(trace, (boost::format("%1%: can't fire while cloaked") % __FUNCTION__));
         UnFire();
         return;
     } else if (unit->ftl_drive.Enabled() && !configuration()->weapons.can_fire_in_spec) {
-        VS_LOG(debug, (boost::format("%1%: can't fire while in SPEC flight") % __FUNCTION__));
+        VS_LOG(trace, (boost::format("%1%: can't fire while in SPEC flight") % __FUNCTION__));
         UnFire();
         return;
     }
@@ -222,12 +222,12 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
             continue;
         }
         if (i->bank == true) {
-            VS_LOG(debug, (boost::format("%1%: bank is true for mount %2%") % __FUNCTION__ % counter));
+            VS_LOG(trace, (boost::format("%1%: bank is true for mount %2%") % __FUNCTION__ % counter));
             unsigned int best = index;
             unsigned int j;
             for (j = index + 1; j < mountssize; ++j) {
                 if (i->NextMountCloser(&mounts[j], unit)) {
-                    VS_LOG(debug, (boost::format("%1%: mount %2%: next mount (%3%) is closer") % __FUNCTION__ % counter % j));
+                    VS_LOG(trace, (boost::format("%1%: mount %2%: next mount (%3%) is closer") % __FUNCTION__ % counter % j));
                     best = j;
 
                     i->UnFire();
