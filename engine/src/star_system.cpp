@@ -529,7 +529,7 @@ void StarSystem::createBackground(Star_XML *xml) {
     background = new Background(
             xml->backgroundname.c_str(),
             xml->numstars,
-            g_game.zfar * .9,
+            configuration()->graphics.zfar * .9,
             filename,
             xml->backgroundColor,
             xml->backgroundDegamma);

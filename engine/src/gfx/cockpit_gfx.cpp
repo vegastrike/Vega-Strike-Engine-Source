@@ -4,8 +4,7 @@
  * cockpit_gfx.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -271,10 +270,10 @@ void DrawArrowToTarget(const Radar::Sensor& sensor, Vector localcoord,
     p2.i  = p_n.i*TARGET_ARROW_COS_THETA-p_n.j*(-TARGET_ARROW_SIN_THETA);       //p2 = p.rot(-THETA)
     p2.j  = p_n.j*TARGET_ARROW_COS_THETA+p_n.i*(-TARGET_ARROW_SIN_THETA);
     p1.i += s;
-    p1.j *= g_game.aspect;
+    p1.j *= configuration()->graphics.aspect;
     p1.j += t;
     p2.i += s;
-    p2.j *= g_game.aspect;
+    p2.j *= configuration()->graphics.aspect;
     p2.j += t;
     p2.k  = p1.k = 0;
 

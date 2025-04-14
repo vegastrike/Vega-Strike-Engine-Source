@@ -43,7 +43,7 @@ class Unit;
 
 // TODO: add complete list
 enum class ComponentType {
-    None,
+    NoComponent,
     Dummy,
 
     Hull,
@@ -88,7 +88,7 @@ protected:
     bool integral = false; // Part of the ship. Can't be upgraded/downgraded
 public:
     virtual ~Component();
-    ComponentType type = ComponentType::None;
+    ComponentType type = ComponentType::NoComponent;
 
     Component(double mass = 0,
               double volume = 0,

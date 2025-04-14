@@ -52,7 +52,7 @@ const ComponentType GetComponentTypeFromName(const std::string name) {
 
     const std::string upgrade_category = UnitCSVFactory::GetVariable(upgrade_key, "Upgrade_Type", std::string());
     if(upgrade_category == "None") {
-        return ComponentType::None;
+        return ComponentType::NoComponent;
     } else if(upgrade_category == "Dummy") {
         return ComponentType::Dummy;
     } else if(upgrade_category == "Hull") {
@@ -90,7 +90,7 @@ const ComponentType GetComponentTypeFromName(const std::string name) {
     } else if(upgrade_category == "Repair_Bot") {
         return ComponentType::RepairBot;
     } else {
-        return ComponentType::None;
+        return ComponentType::NoComponent;
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
+ * Copyright (C) 2001-2025 Daniel Horn, ace123, surfdargent, klaussfreire,
  * jacks, dan_w, pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -473,7 +473,7 @@ void Animation::Draw() {
                 - _Universe->AccessCamera()->GetPosition()).Magnitude() + HaloOffset
                 *
                         (height > width ? height : width)) <
-                too_far_dist * g_game.zfar) {
+                too_far_dist * configuration()->graphics.zfar) {
             //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {ss
             animationdrawqueue.push_back(this);
         } else {

@@ -5,8 +5,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -493,8 +492,8 @@ void PlaneDisplay::DrawTargetMarker(const Vector &head,
 
     // Diamond
     float size = 6.0 * std::max(trackSize, 1.0f);
-    float xsize = size / g_game.x_resolution;
-    float ysize = size / g_game.y_resolution;
+    float xsize = size / configuration()->graphics.resolution_x;
+    float ysize = size / configuration()->graphics.resolution_y;
 
 
     // Don't overflow the index type

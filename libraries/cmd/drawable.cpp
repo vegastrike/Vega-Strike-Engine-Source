@@ -52,7 +52,7 @@ std::string Drawable::root;
 // TODO: remove duplication
 inline static float perspectiveFactor(float d) {
     if (d > 0) {
-        return g_game.x_resolution * GFXGetZPerspective(d);
+        return configuration()->graphics.resolution_x * GFXGetZPerspective(d);
     } else {
         return 1.0f;
     }
@@ -251,7 +251,7 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
                 double d = (TransformedPosition - camerapos).Magnitude();
                 double rd = d - mSize;
                 float pixradius = Apparent_Size = mSize * perspectiveFactor(
-                        (rd < g_game.znear) ? g_game.znear : rd);
+                        (rd < configuration()->graphics.znear) ? configuration()->graphics.znear : rd);
                 float lod = pixradius * g_game.detaillevel;
                 if (meshdata[i]->getBlendDst() == ZERO) {
                     if (unit->isUnit() == Vega_UnitType::planet && pixradius > 10) {
@@ -456,7 +456,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
                     if (GFXSphereInFrustum(mountLocation.position, gun->rSize() * vlpqrScaleFactor) > 0) {
                         float d = (mountLocation.position - _Universe->AccessCamera()->GetPosition()).Magnitude();
                         float lod = gun->rSize() * g_game.detaillevel * perspectiveFactor(
-                                (d - gun->rSize() < g_game.znear) ? g_game.znear : d - gun->rSize());
+                                (d - gun->rSize() < configuration()->graphics.znear) ? configuration()->graphics.znear : d - gun->rSize());
                         ScaleMatrix(mmat, Vector(mahnt->xyscale, mahnt->xyscale, mahnt->zscale));
                         gun->setCurrentFrame(unit->mounts[i].ComputeAnimatedFrame(gun));
                         gun->Draw(lod, mmat, d, unit->cloak, (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != NULL) ? -1
@@ -794,7 +794,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float aver
         if (GFXSphereInFrustum(mountLocation.position, gun->rSize() * average_scale) > 0) {
             float d = (mountLocation.position - _Universe->AccessCamera()->GetPosition()).Magnitude();
             float pixradius = gun->rSize() * perspectiveFactor(
-                    (d - gun->rSize() < g_game.znear) ? g_game.znear : d - gun->rSize());
+                    (d - gun->rSize() < configuration()->graphics.znear) ? configuration()->graphics.znear : d - gun->rSize());
             float lod = pixradius * g_game.detaillevel;
             if (lod > 0.5 && pixradius > 2.5) {
                 ScaleMatrix(mat, Vector(mount->xyscale, mount->xyscale, mount->zscale));
@@ -805,7 +805,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float aver
             }
             if (mount->type->gun1) {
                 pixradius = gun->rSize() * perspectiveFactor(
-                        (d - gun->rSize() < g_game.znear) ? g_game.znear : d - gun->rSize());
+                        (d - gun->rSize() < configuration()->graphics.znear) ? configuration()->graphics.znear : d - gun->rSize());
                 lod = pixradius * g_game.detaillevel;
                 if (lod > 0.5 && pixradius > 2.5) {
                     gun = mount->type->gun1;

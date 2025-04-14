@@ -5,8 +5,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -282,8 +281,8 @@ void BubbleDisplay::DrawTrack(const Sensor &sensor,
 void BubbleDisplay::DrawTargetMarker(const Vector &position, const GFXColor &color, float trackSize) {
     // Split octagon
     float size = 3.0 * std::max(trackSize, 3.0f);
-    float xsize = size / g_game.x_resolution;
-    float ysize = size / g_game.y_resolution;
+    float xsize = size / configuration()->graphics.resolution_x;
+    float ysize = size / configuration()->graphics.resolution_y;
 
     Impl::LineElements::value_type base_index = Impl::LineElements::value_type(impl->lines.size());
 
@@ -321,8 +320,8 @@ void BubbleDisplay::DrawBackground(const ViewArea &radarView, float trackSize) {
 
     // Split octagon
     float size = 3.0 * std::max(trackSize, 3.0f);
-    float xground = size / g_game.x_resolution;
-    float yground = size / g_game.y_resolution;
+    float xground = size / configuration()->graphics.resolution_x;
+    float yground = size / configuration()->graphics.resolution_y;
     Vector center = radarView.Scale(Vector(0.0, 0.0, 0.0));
 
     Impl::LineElements::value_type base_index = Impl::LineElements::value_type(impl->lines.size());

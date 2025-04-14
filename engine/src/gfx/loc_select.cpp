@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2025 Stephen G. Tuggy and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -201,20 +201,20 @@ void LocationSelect::Draw() {
                 zvalueXY = -1000;
             }
             LocalPosition.i = fabs(zvalueXY)
-                    * (((2.0 * DeltaPosition.i / g_game.x_resolution
+                    * (((2.0 * DeltaPosition.i / configuration()->graphics.resolution_x
                             - 1.0) * g_game.MouseSensitivityX * GFXGetXInvPerspective()
                             * tP.i)
                             - (1.0
                                     - (2.0 * DeltaPosition.j
-                                            / g_game.y_resolution) * g_game.MouseSensitivityY * GFXGetYInvPerspective()
+                                            / configuration()->graphics.resolution_y) * g_game.MouseSensitivityY * GFXGetYInvPerspective()
                                             * tP.j));
             LocalPosition.j = fabs(zvalueXY)
-                    * (((2.0 * DeltaPosition.i / g_game.x_resolution
+                    * (((2.0 * DeltaPosition.i / configuration()->graphics.resolution_x
                             - 1.0) * g_game.MouseSensitivityX * GFXGetXInvPerspective()
                             * tQ.i)
                             - (1.0
                                     - (2.0 * DeltaPosition.j
-                                            / g_game.y_resolution) * tQ.j * g_game.MouseSensitivityY
+                                            / configuration()->graphics.resolution_y) * tQ.j * g_game.MouseSensitivityY
                                             * GFXGetYInvPerspective()));
             DeltaPosition = Vector(0, 0, 0);
             //Vector TransPQR (t[0]*i+t[4]*LocalPosition.j+t[8]*LocalPosition.k+t[12],t[1]*LocalPosition.i+t[5]*LocalPosition.j+t[9]*LocalPosition.k+t[13],t[2]*LocalPosition.i+t[6]*LocalPosition.j+t[10]*LocalPosition.k+t[14]);
@@ -228,10 +228,10 @@ void LocationSelect::Draw() {
             if (zvalueXY < -1000)
                 zvalueXY = -1000;
             LocalPosition.k = fabs( zvalueXY )
-                              *( ( (2*DeltaPosition.i/g_game.x_resolution
+                              *( ( (2*DeltaPosition.i/configuration()->graphics.resolution_x
                                     -1)*g_game.MouseSensitivityX*GFXGetXInvPerspective()
                                   *tR.i )
-                                -( (2*DeltaPosition.j/g_game.y_resolution
+                                -( (2*DeltaPosition.j/configuration()->graphics.resolution_y
                                     -1)*g_game.MouseSensitivityY*GFXGetYInvPerspective()*tR.j ) );
             if (DeltaPosition.k) {
                 LocalPosition.k = 0;

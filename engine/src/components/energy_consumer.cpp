@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2023 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -35,7 +35,7 @@ EnergyConsumerSource GetSource(const int source) {
         case 1: return EnergyConsumerSource::Fuel;
         case 2: return EnergyConsumerSource::Energy;
         case 3: return EnergyConsumerSource::FTLEnergy;
-        default: return EnergyConsumerSource::None;
+        default: return EnergyConsumerSource::NoSource;
     }
 }
 

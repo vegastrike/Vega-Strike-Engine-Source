@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2025 Stephen G. Tuggy and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -53,8 +53,8 @@ void CoordinateSelect::MouseMoveHandle(KBSTATE, int x, int y, int, int, int) {
 CoordinateSelect::CoordinateSelect(QVector start) : LocSelAni("locationselect.ani", true, .5, MIPMAP, true),
         LocalPosition(start) {
     CrosshairSize = 2;
-    CoordinateSelectmousex = g_game.x_resolution / 2;
-    CoordinateSelectmousey = g_game.y_resolution / 2;
+    CoordinateSelectmousex = configuration()->graphics.resolution_x / 2;
+    CoordinateSelectmousey = configuration()->graphics.resolution_y / 2;
     CoordinateSelectChange = 1;
 }
 
@@ -88,7 +88,7 @@ void CoordinateSelect::UpdateMouse() {
         LocalPosition = LocalPosition - CamPos;
         float distance = sqrt(CamR.Dot(LocalPosition));         //distance out into z...straight line...
         //make it a ratio btw top and bottom.... for near and far;
-        float ratio = float(g_game.y_resolution - CoordinateSelectmousey) / g_game.y_resolution;
+        float ratio = float(configuration()->graphics.resolution_y - CoordinateSelectmousey) / configuration()->graphics.resolution_y;
         float tmp, n, f;
         GFXGetFrustumVars(true, &tmp, &tmp, &tmp, &tmp, &n, &f);         ///unkind call :-D
         tmp = n + ratio * ratio * ratio * (f - n);           //how far n^3 law

@@ -5,7 +5,8 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2022-2025 Stephen G. Tuggy, Benjamen R. Meyer,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -157,7 +158,7 @@ class GameCockpit : public Cockpit {
 
     /// Used to display the arrow pointing to the currently selected target.
     float projection_limit_x, projection_limit_y;
-    float inv_screen_aspect_ratio; //Precomputed division 1 / g_game.aspect.
+    float inv_screen_aspect_ratio; //Precomputed division 1 / configuration()->graphics.aspect.
     virtual void SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc);
     void LoadXML(const char *file);
     void LoadXML(VSFileSystem::VSFile &f);

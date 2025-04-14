@@ -46,7 +46,7 @@ EnergyContainer::EnergyContainer(ComponentType type):
         break;
 
         default:
-        this->type = ComponentType::None;
+        this->type = ComponentType::NoComponent;
         break;
     }
 }

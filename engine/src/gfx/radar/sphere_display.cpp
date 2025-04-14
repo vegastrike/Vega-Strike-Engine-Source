@@ -5,8 +5,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -206,8 +205,8 @@ void SphereDisplay::DrawTrack(const Sensor &sensor,
 void SphereDisplay::DrawTargetMarker(const Vector &position, const GFXColor &color, float trackSize) {
     // Crosshair
     const float crossSize = 8.0;
-    const float xcross = crossSize / g_game.x_resolution;
-    const float ycross = crossSize / g_game.y_resolution;
+    const float xcross = crossSize / configuration()->graphics.resolution_x;
+    const float ycross = crossSize / configuration()->graphics.resolution_y;
 
     // The crosshair wiggles as it moves around. The wiggling is less noticable
     // when the crosshair is drawn with the smooth option.
@@ -233,8 +232,8 @@ void SphereDisplay::DrawBackground(const Sensor &sensor, const ViewArea &radarVi
         logvelocity = std::log10(velocity);
     }
     const float size = 3.0 * logvelocity; // [9; 31]
-    const float xground = size / g_game.x_resolution;
-    const float yground = size / g_game.y_resolution;
+    const float xground = size / configuration()->graphics.resolution_x;
+    const float yground = size / configuration()->graphics.resolution_y;
     Vector center = radarView.Scale(Vector(0.0, 0.0, 0.0));
 
     impl->thinlines.insert(center.x - 2.0 * xground, center.y, center.z, groundColor);
