@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -205,7 +205,6 @@ void vs_options::init() {
     shockwave_growth = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "shockwave_growth", "1.05"));
     shockwave_animation = vs_config->getVariable("graphics", "shockwave_animation", "explosion_wave.ani");
     bolt_offset = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "bolt_offset", "-.2"));
-    BlendGuns = XMLSupport::parse_bool(vs_config->getVariable("graphics", "BlendGuns", "true"));
     StretchBolts = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "StretchBolts", "0"));
     bolt_pixel_size = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "bolt_pixel_size", ".5"));
 

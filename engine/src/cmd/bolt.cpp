@@ -2,7 +2,7 @@
  * bolt.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2025 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -105,7 +105,7 @@ void Bolt::DrawAllBolts() {
     GFXTextureCoordGenMode(0, NO_GEN, nullptr, nullptr);
 
     BLENDFUNC bsrc, bdst;
-    if (game_options()->BlendGuns == true) {
+    if (configuration()->graphics.blend_guns) {
         GFXBlendMode(bsrc = ONE, bdst = ONE);
     } else {
         GFXBlendMode(bsrc = ONE, bdst = ZERO);
