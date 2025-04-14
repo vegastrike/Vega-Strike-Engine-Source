@@ -2040,11 +2040,11 @@ int Unit::Dock(Unit *utdw) {
     return 0;
 }
 
-inline bool insideDock(const DockingPorts &dock, const QVector &pos, float radius, bool ignore_occupancy) {
-    if (dock.IsOccupied()) {
+inline bool insideDock(const DockingPorts &dock, const QVector &pos, const float radius, const bool ignore_occupancy) {
+    if (!ignore_occupancy && dock.IsOccupied()) {
         return false;
     }
-    return IsShorterThan(pos - dock.GetPosition(), double(radius + dock.GetRadius()));
+    return IsShorterThan(pos - dock.GetPosition(), static_cast<double>(radius + dock.GetRadius()));
 }
 
 

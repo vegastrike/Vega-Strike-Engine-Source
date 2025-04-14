@@ -33,13 +33,13 @@
 
 #include <boost/format.hpp>
 
-bool insideDock(const DockingPorts &dock, const QVector &pos, float radius, bool ignore_occupancy) {
-    // if (!ignore_occupancy && dock.IsOccupied()) {
-    //     return false;
-    // }
+bool insideDock(const DockingPorts &dock, const QVector &pos, float radius, const bool ignore_occupancy) {
+    if (!ignore_occupancy && dock.IsOccupied()) {
+        return false;
+    }
     VS_LOG(trace, (boost::format("%1%: distance between pos and dock.GetPosition() = %2%, radius parameter = %3%, dock radius = %4%")
             % __FUNCTION__ % (pos - dock.GetPosition()).Magnitude() % radius % dock.GetRadius()));
-    return IsShorterThan(pos - dock.GetPosition(), static_cast<double>(dock.GetRadius()));
+    return IsShorterThan(pos - dock.GetPosition(), static_cast<double>(radius + dock.GetRadius()));
 }
 
 double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
@@ -63,7 +63,7 @@ double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
  * @param ignore_occupancy - don't check if dock is already occupied
  * @returns the dock number or -1 for fail
  */
-int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy) {
+int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
     // Nowhere to dock. Exit
     if(dock->pImage->dockingports.empty()) {
         return -1;
@@ -74,7 +74,7 @@ int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy) {
         return -1;
     }
 
-    bool is_player_starship = _Universe->isPlayerStarship(ship);
+    const bool is_player_starship = _Universe->isPlayerStarship(ship);
 
     double range = DistanceTwoTargets(dock, ship);
 
@@ -116,9 +116,30 @@ int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy) {
 
     //don't need to check relation: already cleared.
 
+    // If your unit has docking ports then we check if any of our docking
+    // ports overlap with any of the station's docking ports.
+    // Otherwise, we simply check if our unit overlaps with any of the
+    // station's docking ports.
     for (unsigned int i = 0; i < dock->pImage->dockingports.size(); ++i) {
-        if (insideDock(dock->pImage->dockingports[i], ship->Position(), dock->pImage->dockingports[i].GetRadius(), ignore_occupancy)
-                && (ignore_occupancy || !dock->pImage->dockingports[i].IsOccupied())) {
+        if (!dock->pImage->dockingports.empty()) {
+            for (unsigned int j = 0; j < dock->pImage->dockingports.size(); ++j) {
+                if (insideDock(dock->pImage->dockingports[i],
+                        InvTransform(dock->GetTransformation(),
+                                Transform(dock->GetTransformation(),
+                                        dock->pImage->dockingports[j].GetPosition().Cast())),
+                        dock->pImage->dockingports[j].GetRadius(), ignore_occupancy)) {
+                    // We cannot dock if we are already docked
+                    if (((dock->docked & (Unit::DOCKED_INSIDE | Unit::DOCKED)) == 0) && (!(dock->docked & Unit::DOCKED_INSIDE))) {
+                        if (is_player_starship) {
+                            VS_LOG(trace, (boost::format("CanDock: innermost return statement: returning %1%") % i));
+                        }
+                        return i;
+                    }
+                }
+            }
+        } else if (insideDock(dock->pImage->dockingports[i],
+                InvTransform(dock->GetTransformation(), dock->Position()),
+                dock->rSize(), ignore_occupancy)) {
             if (is_player_starship) {
                 VS_LOG(trace, (boost::format("CanDock: second to last return statement: returning %1%") % i));
             }
