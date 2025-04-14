@@ -133,14 +133,14 @@ void Message(std::string text);
 void EnqueueMessage(std::string text);
 void RunScript(int room, std::string ind, std::string pythonfile, float time);
 void TextBox(int room,
-        std::string ind,
-        std::string text,
-        float x,
-        float y,
-        Vector widheimult,
-        Vector backcol,
-        float backalp,
-        Vector forecol);
+             std::string ind,
+             std::string text,
+             float x,
+             float y,
+             Vector widheimult,
+             GFXColor backcol,
+             float backalp,
+             GFXColor forecol);
 void SetTextBoxText(int room, std::string ind, std::string text);
 void SetLinkArea(int room, std::string index, float x, float y, float wid, float hei);
 void SetLinkText(int room, std::string index, std::string text);

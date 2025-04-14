@@ -160,7 +160,7 @@ struct GFXVertex {
     }
 };
 
-//Stores a color (or any 4 valued vector)
+//Stores a color
 struct GFXColor {
     float r = 0;
     float g = 0;
@@ -168,13 +168,6 @@ struct GFXColor {
     float a = 0;
 
     GFXColor() {
-    }
-
-    explicit GFXColor(const Vector &v, float a = 1.0) {
-        this->r = v.i;
-        this->g = v.j;
-        this->b = v.k;
-        this->a = a;
     }
 
     GFXColor(float r, float g, float b) {
@@ -782,6 +775,7 @@ public:
     };
 
     void SetProperties(enum LIGHT_TARGET, const GFXColor &color);
+    void SetProperties(enum LIGHT_TARGET light_target, const Vector &vector);
     GFXColor GetProperties(enum LIGHT_TARGET) const;
 
     void setSize(float size_) {
