@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -688,7 +688,7 @@ void Beam::ProcessDrawQueue() {
     GFXDisable(CULLFACE);     //don't want lighting on this baby
     GFXDisable(DEPTHWRITE);
     GFXPushBlendMode();
-    static bool blendbeams = XMLSupport::parse_bool(vs_config->getVariable("graphics", "BlendGuns", "true"));
+    const bool blendbeams = configuration()->graphics.blend_guns;
     GFXBlendMode(ONE, blendbeams ? ONE : ZERO);
 
     GFXEnable(TEXTURE0);
