@@ -42,7 +42,7 @@ public:
 protected:
     // Method
     static void beginElement(void *Userdata, const XML_Char *name, const XML_Char **atts);
-    Vector color;
+    GFXColor color;
     float Density;
     float fognear;
     float fogfar;

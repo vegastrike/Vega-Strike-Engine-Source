@@ -1097,6 +1097,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
 }
 
 void /*GFXDRVAPI*/ GFXDeleteTexture(int handle) {
+    // if (STATIC_VARS_DESTROYED) {
+    //     return;
+    // }
     if (handle < 0) {
         VS_LOG(error, (boost::format("GFXDeleteTexture(int handle) called with invalid, negative handle value %1%") % handle));
         return;

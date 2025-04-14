@@ -406,20 +406,37 @@ void RunScript(int room, std::string ind, std::string pythonfile, float time) {
 }
 
 void TextBox(int room,
-        std::string ind,
-        std::string text,
-        float x,
-        float y,
-        Vector widheimult,
-        Vector backcol,
-        float backalp,
-        Vector forecol) {
+            std::string ind,
+            std::string text,
+            float x,
+            float y,
+            Vector widheimult,
+            Vector backcol,
+            float backalp,
+            Vector forecol) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
     }
     newroom->objs.push_back(new BaseInterface::Room::BaseText(text, x, y, widheimult.i, widheimult.j, widheimult.k,
-            GFXColor(backcol, backalp), GFXColor(forecol), ind));
+            GFXColor(backcol.i, backcol.j, backcol.k, backalp), GFXColor(forecol.i, forecol.j, forecol.k), ind));
+}
+
+void TextBox(int room,
+             std::string ind,
+             std::string text,
+             float x,
+             float y,
+             Vector widheimult,
+             GFXColor backcol,
+             float backalp,
+             GFXColor forecol) {
+    BaseInterface::Room *newroom = CheckRoom(room);
+    if (!newroom) {
+        return;
+    }
+    newroom->objs.push_back(new BaseInterface::Room::BaseText(text, x, y, widheimult.i, widheimult.j, widheimult.k,
+            GFXColor(backcol.r, backcol.g, backcol.b, backalp), forecol, ind));
 }
 
 void SetTextBoxText(int room, std::string index, std::string text) {

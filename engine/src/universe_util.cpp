@@ -159,7 +159,7 @@ unsigned int maxMissions() {
     return vs_options::instance().max_missions;
 }
 
-void addParticle(QVector loc, Vector velocity, Vector color, float size) {
+void addParticle(QVector loc, Vector velocity, GFXColor color, float size) {
     ParticlePoint p;
     p.loc = loc;
     p.col = color;

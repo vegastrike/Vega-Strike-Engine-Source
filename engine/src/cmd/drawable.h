@@ -68,7 +68,7 @@ protected:
 
     string uniqueUnitName;
 
-    unsigned int num_chunks;
+    unsigned int num_chunks{};
 public:
     static std::string root;
 
@@ -79,12 +79,12 @@ public:
     static std::map<string, Unit *> Units;
 
     Drawable();
-    ~Drawable();
+    virtual ~Drawable();
 
     bool DrawableInit(const char *filename,
             int faction,
-            Flightgroup *flightgrp = NULL,
-            const char *animationExt = NULL);
+            Flightgroup *flightgrp = nullptr,
+            const char *animationExt = nullptr);
 
     static void UpdateFrames();
 
@@ -92,13 +92,9 @@ public:
 
     void clear();
 
-protected:
-    // forbidden
     Drawable(const Drawable &) = delete;
-    // forbidden
     Drawable &operator=(const Drawable &) = delete;
 
-public:
     string getAnimationName(unsigned int animationNumber) const;
 
     unsigned int getAnimationNumber(const char *name) const;
@@ -116,7 +112,7 @@ public:
 
     bool animationRuns() const;
 
-    unsigned int numAnimations();
+    unsigned int numAnimations() const;
 
     bool isContinuousLoop() const;
 
@@ -138,7 +134,7 @@ public:
     virtual void DrawNow(const Matrix &m = identity_matrix, float lod = 1000000000);
     virtual std::string drawableGetName() = 0;
 
-    void Sparkle(bool on_screen, Matrix *ctm);
+    void Sparkle(bool on_screen, const Matrix *ctm);
     void DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak cloak);
     void DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float average_scale, unsigned char char_damage);
 

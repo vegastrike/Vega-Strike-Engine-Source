@@ -117,13 +117,17 @@ void Nebula::beginElem(const std::string &name, const AttributeList &atts) {
             for (iter = atts.begin(); iter != atts.end(); iter++) {
                 switch (attribute_map.lookup((*iter).name)) {
                     case RED:
-                        color.i = parse_float((*iter).value);
+                        color.r = parse_float((*iter).value);
                         break;
                     case GREEN:
-                        color.j = parse_float((*iter).value);
+                        color.g = parse_float((*iter).value);
                         break;
                     case BLUE:
-                        color.k = parse_float((*iter).value);
+                        color.b = parse_float((*iter).value);
+                        break;
+                    default:
+                        VS_LOG(warning, (boost::format("%1%: Unrecognized color component in switch statement: %2%")
+                                % __FUNCTION__ % attribute_map.lookup((*iter).name)));
                         break;
                 }
             }
@@ -174,7 +178,7 @@ void Nebula::SetFogState() {
     GFXFogMode(fogmode);
     GFXFogDensity(Density * thisfadein);
     GFXFogLimits(fognear, fogfar * thisfadein);
-    GFXFogColor(GFXColor(color.i, color.j, color.k, 1));
+    GFXFogColor(color);
     GFXFogIndex(index);
 }
 

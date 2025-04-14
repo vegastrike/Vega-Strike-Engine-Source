@@ -292,7 +292,7 @@ void init_opengl_extensions() {
         VS_LOG(debug, "OpenGL::GL_EXT_compiled_vertex_array unsupported");
     }
 #endif
-#if defined (__MACOSX__)
+#if defined(__APPLE__) && defined (__MACH__)
     if (vsExtensionSupported("GL_EXT_multi_draw_arrays")) {
         glMultiDrawArrays_p = (PFNGLMULTIDRAWARRAYSEXTPROC)
                 GET_GL_PROC((GET_GL_PTR_TYP) "glMultiDrawArraysEXT");

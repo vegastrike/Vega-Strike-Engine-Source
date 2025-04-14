@@ -72,13 +72,13 @@ struct soundArray {
     soundContainer *ptr;
 
     soundArray() {
-        ptr = NULL;
+        ptr = nullptr;
     }
 
     void deallocate() {
-        if (ptr != NULL) {
+        if (ptr != nullptr) {
             delete[] ptr;
-            ptr = NULL;
+            ptr = nullptr;
         }
     }
 
@@ -162,13 +162,13 @@ class GameCockpit : public Cockpit {
     /// Used to display the arrow pointing to the currently selected target.
     float projection_limit_x, projection_limit_y;
     float inv_screen_aspect_ratio; //Precomputed division 1 / g_game.aspect.
-    virtual void SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc);
-    void LoadXML(const char *file);
-    void LoadXML(VSFileSystem::VSFile &f);
-    void beginElement(const string &name, const AttributeList &attributes);
-    void endElement(const string &name);
+    void SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc) override;
+    void LoadXML(const char *file) override;
+    void LoadXML(VSFileSystem::VSFile &f) override;
+    void beginElement(const string &name, const AttributeList &attributes) override;
+    void endElement(const string &name) override;
     ///Destructs cockpit info for new loading
-    void Delete();
+    void Delete() override;
     ///Trigger scripted events
     void TriggerEvents(Unit *un);
     NavigationSystem ThisNav;
@@ -178,97 +178,101 @@ public:
     bool editingTextMessage;
     std::string autoMessage;
     float autoMessageTime;
-    virtual void setTargetLabel(const string &msg);
-    virtual string getTargetLabel();
-    void ReceivedTargetInfo();
+    void setTargetLabel(const string &msg) override;
+    string getTargetLabel() override;
+    void ReceivedTargetInfo() override;
     static void NavScreen(const KBData &, KBSTATE k); //scheherazade
     static string getsoundending(int which = 0);
     static string getsoundfile(string filename);
-    void InitStatic();
-    void Shake(float amt, int level /*0= shield 1=armor 2=hull*/ );
-    int Autopilot(Unit *target);
+    void InitStatic() override;
+    void Shake(float amt, int level /*0= shield 1=armor 2=hull*/ ) override;
+    int Autopilot(Unit *target) override;
     ///Restores the view from the IDentity Matrix needed to draw sprites
-    void RestoreViewPort();
+    void RestoreViewPort() override;
     GameCockpit(const char *file, Unit *parent, const std::string &pilotname);
-    ~GameCockpit();
+    ~GameCockpit() override;
     ///Looks up a particular Gauge stat on target unit
-    float LookupTargetStat(int stat, Unit *target);
+    float LookupTargetStat(int stat, Unit *target) override;
     ///Looks up a particular Gauge stat on unit
     float LookupUnitStat(int stat, Unit *target);
     ///Loads cockpit info...just as constructor
     void Init(const char *file);
     ///Draws Cockpit then restores viewport
-    void Draw();
+    void Draw() override;
     //void Update();//respawns and the like.
-    void UpdAutoPilot();
+    void UpdAutoPilot() override;
     ///Sets up the world for rendering...call before draw
-    void SetupViewPort(bool clip = true);
-    int getVDUMode(int vdunum);
-    void VDUSwitch(int vdunum);
-    void ScrollVDU(int vdunum, int howmuch);
-    void ScrollAllVDU(int howmuch);
-    int getScrollOffset(unsigned int whichtype);
-    void SelectProperCamera();
-    void Eject();
-    void EjectDock();
+    void SetupViewPort(bool clip = true) override;
+    int getVDUMode(int vdunum) override;
+    void VDUSwitch(int vdunum) override;
+    void ScrollVDU(int vdunum, int howmuch) override;
+    void ScrollAllVDU(int howmuch) override;
+    int getScrollOffset(unsigned int whichtype) override;
+    void SelectProperCamera() override;
+    void Eject() override;
+    void EjectDock() override;
     static void Respawn(const KBData &, KBSTATE);
     static void SwitchControl(const KBData &, KBSTATE);
     static void ForceSwitchControl(const KBData &, KBSTATE);
     static void TurretControl(const KBData &, KBSTATE);
     void SetSoundFile(std::string sound);
 
-    int GetSoundFile() {
+    int GetSoundFile() const {
         return soundfile;
     }
 
-    void SetCommAnimation(Animation *ani, Unit *un);
-    void SetStaticAnimation();
+    void SetCommAnimation(Animation *ani, Unit *un) override;
+    void SetStaticAnimation() override;
 
     ///Accesses the current navigationsystem
-    NavigationSystem *AccessNavSystem() {
+    NavigationSystem *AccessNavSystem() override {
         return &ThisNav;
     }
 
-    virtual std::string GetNavSelectedSystem();
+    std::string GetNavSelectedSystem() override;
 
     ///Accesses the current camera
-    Camera *AccessCamera() {
+    Camera *AccessCamera() override {
         return &cam[currentcamera];
     }
 
     ///Returns the passed in cam
-    Camera *AccessCamera(int);
+    Camera *AccessCamera(int) override;
     ///Changes current camera to selected camera
-    void SelectCamera(int);
+    void SelectCamera(int) override;
 
     ///GFXLoadMatrix proper camera
-    void SetViewport() {
+    void SetViewport() override {
         cam[currentcamera].UpdateGFX();
     }
 
-    virtual bool SetDrawNavSystem(bool);
-    virtual bool CanDrawNavSystem();
-    virtual bool CheckCommAnimation(Unit *un);
-    virtual void visitSystem(std::string systemName);
+    bool SetDrawNavSystem(bool) override;
+
+    bool CanDrawNavSystem() override;
+
+    bool CheckCommAnimation(Unit *un) override;
+
+    void visitSystem(std::string systemName) override;
     void AutoLanding();
     void DoAutoLanding(Unit *, Unit *);
 
-    virtual void SetInsidePanYawSpeed(float speed);
-    virtual void SetInsidePanPitchSpeed(float speed);
+    void SetInsidePanYawSpeed(float speed) override;
+
+    void SetInsidePanPitchSpeed(float speed) override;
 
     bool IsPaused() const;
     // Game is paused
-    void OnPauseBegin();
-    void OnPauseEnd();
+    void OnPauseBegin() override;
+    void OnPauseEnd() override;
     // Ship has undocked from station
-    void OnDockEnd(Unit *station, Unit *unit);
+    void OnDockEnd(Unit *station, Unit *unit) override;
     // Ship is jumping
-    void OnJumpBegin(Unit *unit);
-    void OnJumpEnd(Unit *unit);
+    void OnJumpBegin(Unit *unit) override;
+    void OnJumpEnd(Unit *unit) override;
 
 protected:
     /// Override to use a specific kind of sound implementation
-    SoundContainer *soundImpl(const SoundContainer &specs);
+    SoundContainer *soundImpl(const SoundContainer &specs) override;
 };
 
 #endif //VEGA_STRIKE_ENGINE_GFX_COCKPIT_H

@@ -35,7 +35,7 @@
 #elif !defined (WIN32)
 #define UNIX 1
 
-#endif //defined (__APPLE__) || defined (MACOSX)
+#endif
 
 #include "gldrv/gl_globals.h"
 
