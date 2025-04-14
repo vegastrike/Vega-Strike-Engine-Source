@@ -118,8 +118,8 @@ PYTHON_BEGIN_MODULE(Base)
     PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::EraseObj, "EraseObj");
     PYTHON_DEFINE_GLOBAL(Base, &::GetRandomBarMessage, "GetRandomBarMessage");
     PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::RunScript, "RunScript");
-    boost::python::def("TextBox", static_cast<void (BaseUtil::*)(int, std::string, std::string, float, float, Vector, GFXColor, float, GFXColor)>(&BaseUtil::TextBox));
-    boost::python::def("TextBox", static_cast<void (BaseUtil::*)(int, std::string, std::string, float, float, Vector, Vector, float, Vector)>(&BaseUtil::TextBox));
+    boost::python::def("TextBox", static_cast<void (*)(int, std::string, std::string, float, float, Vector, GFXColor, float, GFXColor)>(&BaseUtil::TextBox));
+    boost::python::def("TextBox", static_cast<void (*)(int, std::string, std::string, float, float, Vector, Vector, float, Vector)>(&BaseUtil::TextBox));
     PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetTextBoxText, "SetTextBoxText");
     PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::GlobalKeyPython, "GlobalKeyPython");
     PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetLinkArea, "SetLinkArea");
