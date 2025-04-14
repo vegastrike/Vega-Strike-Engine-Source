@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -198,7 +198,6 @@ public:
     float shockwave_growth{};
     std::string shockwave_animation;
     float bolt_offset{};
-    bool BlendGuns{};
     float StretchBolts{};
     float bolt_pixel_size{};
 
