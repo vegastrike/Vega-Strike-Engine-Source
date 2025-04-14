@@ -37,8 +37,8 @@ bool insideDock(const DockingPorts &dock, const QVector &pos, float radius, cons
     if (!ignore_occupancy && dock.IsOccupied()) {
         return false;
     }
-    VS_LOG(trace, (boost::format("%1%: distance between pos and dock.GetPosition() = %2%, radius parameter = %3%, dock radius = %4%")
-            % __FUNCTION__ % (pos - dock.GetPosition()).Magnitude() % radius % dock.GetRadius()));
+    VS_LOG(trace, (boost::format("%1%: pos.Magnitude() = %2%, dock.GetPosition().Magnitude() = %3%, distance between pos and dock.GetPosition() = %4%, radius parameter = %5%, dock radius = %6%")
+            % __FUNCTION__ % pos.Magnitude() % dock.GetPosition().Magnitude() % (pos - dock.GetPosition()).Magnitude() % radius % dock.GetRadius()));
     return IsShorterThan(pos - dock.GetPosition(), static_cast<double>(radius + dock.GetRadius()));
 }
 
@@ -74,7 +74,7 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
         return -1;
     }
 
-    const bool is_player_starship = _Universe->isPlayerStarship(ship);
+    const bool is_player_starship = _Universe->isPlayerStarship(ship) || _Universe->isPlayerStarship(dock);
 
     double range = DistanceTwoTargets(dock, ship);
 
@@ -121,15 +121,15 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
     // Otherwise, we simply check if our unit overlaps with any of the
     // station's docking ports.
     for (unsigned int i = 0; i < dock->pImage->dockingports.size(); ++i) {
-        if (!dock->pImage->dockingports.empty()) {
-            for (unsigned int j = 0; j < dock->pImage->dockingports.size(); ++j) {
+        if (!ship->pImage->dockingports.empty()) {
+            for (unsigned int j = 0; j < ship->pImage->dockingports.size(); ++j) {
                 if (insideDock(dock->pImage->dockingports[i],
                         InvTransform(dock->GetTransformation(),
-                                Transform(dock->GetTransformation(),
-                                        dock->pImage->dockingports[j].GetPosition().Cast())),
-                        dock->pImage->dockingports[j].GetRadius(), ignore_occupancy)) {
+                                Transform(ship->GetTransformation(),
+                                        ship->pImage->dockingports[j].GetPosition().Cast())),
+                        ship->pImage->dockingports[j].GetRadius(), ignore_occupancy)) {
                     // We cannot dock if we are already docked
-                    if (((dock->docked & (Unit::DOCKED_INSIDE | Unit::DOCKED)) == 0) && (!(dock->docked & Unit::DOCKED_INSIDE))) {
+                    if (((ship->docked & (Unit::DOCKED_INSIDE | Unit::DOCKED)) == 0) && (!(dock->docked & Unit::DOCKED_INSIDE))) {
                         if (is_player_starship) {
                             VS_LOG(trace, (boost::format("CanDock: innermost return statement: returning %1%") % i));
                         }
@@ -137,9 +137,10 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
                     }
                 }
             }
-        } else if (insideDock(dock->pImage->dockingports[i],
-                InvTransform(dock->GetTransformation(), dock->Position()),
-                dock->rSize(), ignore_occupancy)) {
+        }
+        if (insideDock(dock->pImage->dockingports[i],
+                ship->Position(),
+                dock->pImage->dockingports[i].GetRadius(), ignore_occupancy)) {
             if (is_player_starship) {
                 VS_LOG(trace, (boost::format("CanDock: second to last return statement: returning %1%") % i));
             }
@@ -155,17 +156,17 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
 
 std::string GetDockingText(Unit *unit, Unit *target, double range) {
     //If I can dock, don't bother displaying distance
-    if (CanDock(target, unit, false) != -1) {
+    if (CanDock(unit, target, false) != -1) {
         return std::string("Docking: Ready");
     }
 
     // Nowhere to dock. Exit
-    if(target->pImage->dockingports.size() == 0) {
+    if (target->pImage->dockingports.empty()) {
         return std::string();
     }
 
     // Jump point. Exit
-    if(target->pImage->destination.size() > 0) {
+    if (!target->pImage->destination.empty()) {
         return std::string();
     }
 
