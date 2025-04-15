@@ -24,8 +24,6 @@
 
 #include "dock_utils.h"
 
-#include "universe.h"
-
 #include "unit_generic.h"
 #include "universe_util.h"
 #include "configuration/configuration.h"

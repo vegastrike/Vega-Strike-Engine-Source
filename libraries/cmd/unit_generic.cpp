@@ -2040,14 +2040,6 @@ int Unit::Dock(Unit *utdw) {
     return 0;
 }
 
-inline bool insideDock(const DockingPorts &dock, const QVector &pos, const float radius, const bool ignore_occupancy) {
-    if (!ignore_occupancy && dock.IsOccupied()) {
-        return false;
-    }
-    return IsShorterThan(pos - dock.GetPosition(), static_cast<double>(radius + dock.GetRadius()));
-}
-
-
 
 bool Unit::IsCleared(const Unit *DockingUnit) const {
     return std::find(pImage->clearedunits.begin(), pImage->clearedunits.end(), DockingUnit)
