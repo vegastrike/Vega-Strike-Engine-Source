@@ -37,8 +37,6 @@ bool insideDock(const DockingPorts &dock, const QVector &pos, const float radius
     if (!ignore_occupancy && dock.IsOccupied()) {
         return false;
     }
-    VS_LOG(trace, (boost::format("%1%: pos.Magnitude() = %2%, dock's position magnitude = %3%, distance between pos and dock's position = %4%, radius parameter = %5%, dock radius = %6%")
-            % __FUNCTION__ % pos.Magnitude() % dock.GetPosition().Cast().Magnitude() % (pos - dock.GetPosition().Cast()).Magnitude() % radius % dock.GetRadius()));
     return IsShorterThan(pos - dock.GetPosition().Cast(), static_cast<double>(radius + dock.GetRadius()));
 }
 
@@ -82,14 +80,8 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
     if (dock->isUnit() == Vega_UnitType::planet) {
         range -= dock->rSize() * (configuration()->dock.dock_planet_radius_percent - 1);
         if (range < 0) {
-            if (is_player_starship) {
-                VS_LOG(trace, "Planet. Within range. CanDock = 0");
-            }
             return 0;
         } else {
-            if (is_player_starship) {
-                VS_LOG(trace, "Planet. Out of range. CanDock = -1");
-            }
             return -1;
         }
     }
@@ -97,19 +89,10 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
 
     if(configuration()->dock.simple_dock) {
         range = DistanceTwoTargets(dock, ship);
-        if (is_player_starship) {
-            VS_LOG(trace, (boost::format("CanDock: simple_dock is true. range = %1%") % range));
-        }
 
         if (range < configuration()->dock.simple_dock_range) {
-            if (is_player_starship) {
-                VS_LOG(trace, "simple_dock is true. Within range. CanDock = 0");
-            }
             return 0;
         } else {
-            if (is_player_starship) {
-                VS_LOG(trace, "simple_dock is true. Out of range. CanDock = -1");
-            }
             return -1;
         }
     }
@@ -130,9 +113,6 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
                         ship->pImage->dockingports[j].GetRadius(), ignore_occupancy)) {
                     // We cannot dock if we are already docked
                     if (((ship->docked & (Unit::DOCKED_INSIDE | Unit::DOCKED)) == 0) && (!(dock->docked & Unit::DOCKED_INSIDE))) {
-                        if (is_player_starship) {
-                            VS_LOG(trace, (boost::format("CanDock: innermost return statement: returning %1%") % i));
-                        }
                         return i;
                     }
                 }
@@ -140,16 +120,10 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
         }
         if (insideDock(dock->pImage->dockingports[i],
                 InvTransform(dock->GetTransformation(), ship->Position()), ship->rSize(), ignore_occupancy)) {
-            if (is_player_starship) {
-                VS_LOG(trace, (boost::format("CanDock: second to last return statement: returning %1%") % i));
-            }
             return i;
         }
     }
 
-    if (is_player_starship) {
-        VS_LOG(trace, "CanDock fell through to the end. Returning -1");
-    }
     return -1;
 }
 
