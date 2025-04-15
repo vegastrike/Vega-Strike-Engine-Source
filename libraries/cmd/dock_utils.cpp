@@ -72,8 +72,6 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
         return -1;
     }
 
-    const bool is_player_starship = _Universe->isPlayerStarship(ship) || _Universe->isPlayerStarship(dock);
-
     double range = DistanceTwoTargets(dock, ship);
 
     // Planet Code
