@@ -82,9 +82,6 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
         } else {
             return -1;
         }
-    } else if (range > kDefinitelyTooFar) {
-        // Definitely too far. Short-circuit the rest of the tests.
-        return -1;
     }
 
     if (configuration()->dock.simple_dock) {
@@ -93,6 +90,11 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
         } else {
             return -1;
         }
+    }
+
+    if (range > kDefinitelyTooFar) {
+        // Definitely too far. Short-circuit the rest of the tests.
+        return -1;
     }
 
     //don't need to check relation: already cleared.
