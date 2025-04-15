@@ -72,6 +72,11 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
 
     double range = DistanceTwoTargets(dock, ship);
 
+    // Definitely too far. Short-circuit the rest of the tests.
+    if (range > 20000.0) {
+        return -1;
+    }
+
     // Planet Code
     if (dock->isUnit() == Vega_UnitType::planet) {
         range -= dock->rSize() * (configuration()->dock.dock_planet_radius_percent - 1);
@@ -83,9 +88,7 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
     }
 
 
-    if(configuration()->dock.simple_dock) {
-        range = DistanceTwoTargets(dock, ship);
-
+    if (configuration()->dock.simple_dock) {
         if (range < configuration()->dock.simple_dock_range) {
             return 0;
         } else {
@@ -124,11 +127,6 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
 }
 
 std::string GetDockingText(Unit *unit, Unit *target, double range) {
-    //If I can dock, don't bother displaying distance
-    if (CanDock(unit, target, false) != -1) {
-        return std::string("Docking: Ready");
-    }
-
     // Nowhere to dock. Exit
     if (target->pImage->dockingports.empty()) {
         return std::string();
