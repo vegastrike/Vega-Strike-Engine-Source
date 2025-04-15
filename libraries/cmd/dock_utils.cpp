@@ -60,6 +60,8 @@ double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
  * @returns the dock number or -1 for fail
  */
 int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
+    constexpr double kDefinitelyTooFar = 20000.0;
+
     // Nowhere to dock. Exit
     if(dock->pImage->dockingports.empty()) {
         return -1;
@@ -72,11 +74,6 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
 
     double range = DistanceTwoTargets(dock, ship);
 
-    // Definitely too far. Short-circuit the rest of the tests.
-    if (range > 20000.0) {
-        return -1;
-    }
-
     // Planet Code
     if (dock->isUnit() == Vega_UnitType::planet) {
         range -= dock->rSize() * (configuration()->dock.dock_planet_radius_percent - 1);
@@ -85,8 +82,10 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
         } else {
             return -1;
         }
+    } else if (range > kDefinitelyTooFar) {
+        // Definitely too far. Short-circuit the rest of the tests.
+        return -1;
     }
-
 
     if (configuration()->dock.simple_dock) {
         if (range < configuration()->dock.simple_dock_range) {
