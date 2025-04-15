@@ -2032,7 +2032,7 @@ int Unit::Dock(Unit *utdw) {
     if ((lookcleared = std::find(utdw->pImage->clearedunits.begin(),
             utdw->pImage->clearedunits.end(), this)) != utdw->pImage->clearedunits.end()) {
         int whichdockport;
-        if ((whichdockport = CanDock(this, utdw)) != -1) {
+        if ((whichdockport = CanDock(utdw, this)) != -1) {
             utdw->pImage->clearedunits.erase(lookcleared);
             return ForceDock(utdw, whichdockport);
         }

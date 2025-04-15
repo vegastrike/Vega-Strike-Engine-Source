@@ -33,13 +33,13 @@
 
 #include <boost/format.hpp>
 
-bool insideDock(const DockingPorts &dock, const QVector &pos, float radius, const bool ignore_occupancy) {
+bool insideDock(const DockingPorts &dock, const QVector &pos, const float radius, const bool ignore_occupancy) {
     if (!ignore_occupancy && dock.IsOccupied()) {
         return false;
     }
-    VS_LOG(trace, (boost::format("%1%: pos.Magnitude() = %2%, dock.GetPosition().Magnitude() = %3%, distance between pos and dock.GetPosition() = %4%, radius parameter = %5%, dock radius = %6%")
-            % __FUNCTION__ % pos.Magnitude() % dock.GetPosition().Magnitude() % (pos - dock.GetPosition()).Magnitude() % radius % dock.GetRadius()));
-    return IsShorterThan(pos - dock.GetPosition(), static_cast<double>(radius + dock.GetRadius()));
+    VS_LOG(trace, (boost::format("%1%: pos.Magnitude() = %2%, dock's position magnitude = %3%, distance between pos and dock's position = %4%, radius parameter = %5%, dock radius = %6%")
+            % __FUNCTION__ % pos.Magnitude() % dock.GetPosition().Cast().Magnitude() % (pos - dock.GetPosition().Cast()).Magnitude() % radius % dock.GetRadius()));
+    return IsShorterThan(pos - dock.GetPosition().Cast(), static_cast<double>(radius + dock.GetRadius()));
 }
 
 double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
@@ -139,8 +139,7 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
             }
         }
         if (insideDock(dock->pImage->dockingports[i],
-                ship->Position(),
-                dock->pImage->dockingports[i].GetRadius(), ignore_occupancy)) {
+                InvTransform(dock->GetTransformation(), ship->Position()), ship->rSize(), ignore_occupancy)) {
             if (is_player_starship) {
                 VS_LOG(trace, (boost::format("CanDock: second to last return statement: returning %1%") % i));
             }
@@ -174,21 +173,27 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
     // Planets/non-planets calculate differently
     if (target->isUnit() == Vega_UnitType::planet) {
         // TODO: move from here. We shouldn't have kill and land logic here.
-        if(range <= 0) {
+        if (range < 0) {
             unit->hull.Destroy();
         }
 
         range -= target->rSize() * (configuration()->dock.dock_planet_radius_percent - 1);
-        if (range > 0 && range < target->rSize()) {
+        if (range < 0) {
+            return std::string("Docking: Ready");
+        } else if (range > 0 && range < target->rSize()) {
             return std::string("Docking: ") + string(PrettyDistanceString(range));
         }
-    } else {
-        if(configuration()->dock.simple_dock && target->pImage->dockingports.size() != 0 &&
-            range < configuration()->dock.count_to_dock_range) {
-            if (range > configuration()->dock.simple_dock_range) {
-                return std::string("Docking: ") + string(PrettyDistanceString(range-5000));
-            }
+    } else if (configuration()->dock.simple_dock && !target->pImage->dockingports.empty() &&
+        range < configuration()->dock.count_to_dock_range) {
+        if (range <= configuration()->dock.simple_dock_range) {
+            return std::string("Docking: Ready");
+        } else {
+            return std::string("Docking: ") + string(PrettyDistanceString(range-5000));
         }
+    } else if (CanDock(target, unit, false) >= 0) {
+        return std::string("Docking: Ready");
+    } else if (CanDock(target, unit, true) >= 0) {
+        return std::string("Docking: Auto Ready");
     }
 
     return std::string();
