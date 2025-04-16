@@ -157,7 +157,7 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
         if (range <= configuration()->dock.simple_dock_range) {
             return std::string("Docking: Ready");
         } else {
-            return std::string("Docking: ") + string(PrettyDistanceString(range-5000));
+            return std::string("Docking: ") + string(PrettyDistanceString(range - configuration()->dock.simple_dock_range));
         }
     } else if (CanDock(target, unit, false) >= 0) {
         return std::string("Docking: Ready");
