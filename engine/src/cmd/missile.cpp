@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -22,6 +22,9 @@
 
 
 #include "cmd/missile.h"
+
+#include <cmath>
+
 #include "cmd/damageable.h"
 
 #include "cmd/mount_size.h"
@@ -102,6 +105,11 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
     }
 
     if(damage == 0.0f && phasedamage == 0.0f) {
+        return;
+    }
+
+    if (!std::isfinite(damage) || !std::isfinite(phasedamage) || !std::isfinite(damage_fraction)) {
+        VS_LOG(warning, (boost::format("%1%: called with non-finite damage amount") % __FUNCTION__));
         return;
     }
 

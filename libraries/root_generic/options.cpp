@@ -32,8 +32,6 @@ void vs_options::init() {
     command_interpretor = XMLSupport::parse_bool(vs_config->getVariable("general", "command_interpretor", "false"));
     load_last_savegame = XMLSupport::parse_bool(vs_config->getVariable("general", "load_last_savegame", "false"));
     debug_fs = XMLSupport::parse_int(vs_config->getVariable("general", "debug_fs", "0"));
-    simulation_atom = XMLSupport::parse_floatf(vs_config->getVariable("general", "simulation_atom", "0.1"));
-    audio_atom = XMLSupport::parse_floatf(vs_config->getVariable("general", "audio_atom", "0.05555555556"));
 
 
     /* Audio Options */
@@ -264,11 +262,9 @@ void vs_options::init() {
             XMLSupport::parse_bool(vs_config->getVariable("physics", "game_speed_affects_autogen_systems", "false"));
     star_system_scale = XMLSupport::parse_float(vs_config->getVariable("physics", "star_system_scale", "1.0"));
     respawn_unit_size = XMLSupport::parse_float(vs_config->getVariable("physics", "respawn_unit_size", "400.0"));
-    auto_pilot_planet_radius_percent =
-            XMLSupport::parse_floatf(vs_config->getVariable("physics", "auto_pilot_planet_radius_percent", ".75"));
     campaigns = vs_config->getVariable("physics",
-            "campaigns",
-            "privateer_campaign vegastrike_campaign");     //WRONG SECTION   change after 0.5
+                                       "campaigns",
+                                       "privateer_campaign vegastrike_campaign");     //WRONG SECTION   change after 0.5
     NumRunningSystems = XMLSupport::parse_int(vs_config->getVariable("physics", "NumRunningSystems", "4"));
     InactiveSystemTime = XMLSupport::parse_floatf(vs_config->getVariable("physics", "InactiveSystemTime", "0.3"));
     jump_radius_scale = XMLSupport::parse_floatf(vs_config->getVariable("physics", "jump_radius_scale", "2"));

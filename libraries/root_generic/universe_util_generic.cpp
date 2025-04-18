@@ -1,7 +1,7 @@
 /*
  * universe_util_generic.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -804,7 +804,7 @@ namespace UniverseUtil {
     }
 
     float getPlanetRadiusPercent() {
-        return game_options()->auto_pilot_planet_radius_percent;
+        return configuration()->physics.auto_pilot_planet_radius_percent;
     }
 
     std::string getVariable(std::string section, std::string name, std::string def) {

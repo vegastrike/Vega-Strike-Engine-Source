@@ -1,7 +1,7 @@
 /*
  * dock_utils.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -31,11 +31,11 @@
 
 #include <boost/format.hpp>
 
-bool insideDock(const DockingPorts &dock, const QVector &pos, float radius) {
-    if (dock.IsOccupied()) {
+bool inside_usable_dock(const DockingPorts &dock, const QVector &pos, const float radius, const bool ignore_occupancy) {
+    if (!ignore_occupancy && dock.IsOccupied()) {
         return false;
     }
-    return IsShorterThan(pos - dock.GetPosition(), double(radius + dock.GetRadius()));
+    return IsShorterThan(pos - dock.GetPosition(), static_cast<double>(radius + dock.GetRadius()));
 }
 
 double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
@@ -59,7 +59,9 @@ double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
  * @param ignore_occupancy - don't check if dock is already occupied
  * @returns the dock number or -1 for fail
  */
-int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy) {
+int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
+    constexpr double kDefinitelyTooFar = 20000.0;
+
     // Nowhere to dock. Exit
     if(dock->pImage->dockingports.empty()) {
         return -1;
@@ -69,7 +71,6 @@ int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy) {
     if(!dock->pImage->destination.empty()) {
         return -1;
     }
-
 
     double range = DistanceTwoTargets(dock, ship);
 
@@ -83,10 +84,7 @@ int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy) {
         }
     }
 
-
-    if(configuration()->dock.simple_dock) {
-        range = DistanceTwoTargets(dock, ship);
-
+    if (configuration()->dock.simple_dock) {
         if (range < configuration()->dock.simple_dock_range) {
             return 0;
         } else {
@@ -94,37 +92,34 @@ int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy) {
         }
     }
 
-    if (ignore_occupancy) {
-        for (unsigned int i = 0; i < dock->pImage->dockingports.size(); ++i) {
-            if (!dock->pImage->dockingports[i].IsOccupied()) {
-                return i;
-            }
-        }
+    if (range > kDefinitelyTooFar) {
+        // Definitely too far. Short-circuit the rest of the tests.
+        return -1;
     }
 
     //don't need to check relation: already cleared.
 
     // If your unit has docking ports then we check if any of our docking
     // ports overlap with any of the station's docking ports.
-    // Otherwise we simply check if our unit overlaps with any of the
+    // Otherwise, we simply check if our unit overlaps with any of the
     // station's docking ports.
     for (unsigned int i = 0; i < dock->pImage->dockingports.size(); ++i) {
-        if (!dock->pImage->dockingports.empty()) {
-            for (unsigned int j = 0; j < dock->pImage->dockingports.size(); ++j) {
-                if (insideDock(dock->pImage->dockingports[i],
+        if (!ship->pImage->dockingports.empty()) {
+            for (unsigned int j = 0; j < ship->pImage->dockingports.size(); ++j) {
+                if (inside_usable_dock(dock->pImage->dockingports[i],
                         InvTransform(dock->GetTransformation(),
-                                Transform(dock->GetTransformation(),
-                                        dock->pImage->dockingports[j].GetPosition().Cast())),
-                        dock->pImage->dockingports[j].GetRadius())) {
+                                Transform(ship->GetTransformation(),
+                                        ship->pImage->dockingports[j].GetPosition().Cast())),
+                        ship->pImage->dockingports[j].GetRadius(), ignore_occupancy)) {
                     // We cannot dock if we are already docked
-                    if (((dock->docked & (dock->DOCKED_INSIDE | dock->DOCKED)) == 0) && (!(dock->docked & dock->DOCKED_INSIDE))) {
+                    if (((ship->docked & (Unit::DOCKED_INSIDE | Unit::DOCKED)) == 0) && (!(dock->docked & Unit::DOCKED_INSIDE))) {
                         return i;
                     }
                 }
             }
-        } else if (insideDock(dock->pImage->dockingports[i],
-                InvTransform(dock->GetTransformation(), dock->Position()),
-                dock->rSize())) {
+        }
+        if (inside_usable_dock(dock->pImage->dockingports[i],
+                InvTransform(dock->GetTransformation(), ship->Position()), ship->rSize(), ignore_occupancy)) {
             return i;
         }
     }
@@ -133,18 +128,13 @@ int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy) {
 }
 
 std::string GetDockingText(Unit *unit, Unit *target, double range) {
-    //If I can dock, don't bother displaying distance
-    if (CanDock(target, unit, false) != -1) {
-        return std::string("Docking: Ready");
-    }
-
     // Nowhere to dock. Exit
-    if(target->pImage->dockingports.size() == 0) {
+    if (target->pImage->dockingports.empty()) {
         return std::string();
     }
 
     // Jump point. Exit
-    if(target->pImage->destination.size() > 0) {
+    if (!target->pImage->destination.empty()) {
         return std::string();
     }
 
@@ -152,21 +142,27 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
     // Planets/non-planets calculate differently
     if (target->isUnit() == Vega_UnitType::planet) {
         // TODO: move from here. We shouldn't have kill and land logic here.
-        if(range <= 0) {
+        if (range < 0) {
             unit->hull.Destroy();
         }
 
         range -= target->rSize() * (configuration()->dock.dock_planet_radius_percent - 1);
-        if (range > 0 && range < target->rSize()) {
-            return std::string("Docking: ") + string(PrettyDistanceString(range));
+        if (range < 0) {
+            return std::string("Docking: Ready");
+        } else if (range < target->rSize()) {
+            return std::string("Docking: ") + PrettyDistanceString(range);
         }
-    } else {
-        if(configuration()->dock.simple_dock && target->pImage->dockingports.size() != 0 &&
-            range < configuration()->dock.count_to_dock_range) {
-            if (range > configuration()->dock.simple_dock_range) {
-                return std::string("Docking: ") + string(PrettyDistanceString(range-5000));
-            }
+    } else if (configuration()->dock.simple_dock && !target->pImage->dockingports.empty() &&
+        range < configuration()->dock.count_to_dock_range) {
+        if (range <= configuration()->dock.simple_dock_range) {
+            return std::string("Docking: Ready");
+        } else {
+            return std::string("Docking: ") + PrettyDistanceString(range - configuration()->dock.simple_dock_range);
         }
+    } else if (CanDock(target, unit, false) >= 0) {
+        return std::string("Docking: Ready");
+    } else if (CanDock(target, unit, true) >= 0) {
+        return std::string("Docking: Auto Ready");
     }
 
     return std::string();

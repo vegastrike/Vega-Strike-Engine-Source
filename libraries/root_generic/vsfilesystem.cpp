@@ -935,9 +935,9 @@ void InitPaths(string conf, string subdir) {
     Directories[PythonFile] = "bases";
     Directories[AccountFile] = "accounts";
 
-    SIMULATION_ATOM = game_options()->simulation_atom;
+    SIMULATION_ATOM = configuration()->general.simulation_atom;
     simulation_atom_var = SIMULATION_ATOM;
-    AUDIO_ATOM = game_options()->audio_atom;
+    AUDIO_ATOM = configuration()->general.audio_atom;
     audio_atom_var = AUDIO_ATOM;
     VS_LOG(info, (boost::format("SIMULATION_ATOM: %1%") % SIMULATION_ATOM));
 
