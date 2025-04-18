@@ -31,11 +31,11 @@
 
 #include <boost/format.hpp>
 
-bool insideDock(const DockingPorts &dock, const QVector &pos, const float radius, const bool ignore_occupancy) {
+bool inside_usable_dock(const DockingPorts &dock, const QVector &pos, const float radius, const bool ignore_occupancy) {
     if (!ignore_occupancy && dock.IsOccupied()) {
         return false;
     }
-    return IsShorterThan(pos - dock.GetPosition().Cast(), static_cast<double>(radius + dock.GetRadius()));
+    return IsShorterThan(pos - dock.GetPosition(), static_cast<double>(radius + dock.GetRadius()));
 }
 
 double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
@@ -106,7 +106,7 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
     for (unsigned int i = 0; i < dock->pImage->dockingports.size(); ++i) {
         if (!ship->pImage->dockingports.empty()) {
             for (unsigned int j = 0; j < ship->pImage->dockingports.size(); ++j) {
-                if (insideDock(dock->pImage->dockingports[i],
+                if (inside_usable_dock(dock->pImage->dockingports[i],
                         InvTransform(dock->GetTransformation(),
                                 Transform(ship->GetTransformation(),
                                         ship->pImage->dockingports[j].GetPosition().Cast())),
@@ -118,7 +118,7 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
                 }
             }
         }
-        if (insideDock(dock->pImage->dockingports[i],
+        if (inside_usable_dock(dock->pImage->dockingports[i],
                 InvTransform(dock->GetTransformation(), ship->Position()), ship->rSize(), ignore_occupancy)) {
             return i;
         }
@@ -149,15 +149,15 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
         range -= target->rSize() * (configuration()->dock.dock_planet_radius_percent - 1);
         if (range < 0) {
             return std::string("Docking: Ready");
-        } else if (range > 0 && range < target->rSize()) {
-            return std::string("Docking: ") + string(PrettyDistanceString(range));
+        } else if (range < target->rSize()) {
+            return std::string("Docking: ") + PrettyDistanceString(range);
         }
     } else if (configuration()->dock.simple_dock && !target->pImage->dockingports.empty() &&
         range < configuration()->dock.count_to_dock_range) {
         if (range <= configuration()->dock.simple_dock_range) {
             return std::string("Docking: Ready");
         } else {
-            return std::string("Docking: ") + string(PrettyDistanceString(range - configuration()->dock.simple_dock_range));
+            return std::string("Docking: ") + PrettyDistanceString(range - configuration()->dock.simple_dock_range);
         }
     } else if (CanDock(target, unit, false) >= 0) {
         return std::string("Docking: Ready");
