@@ -35,6 +35,8 @@
 
 #include <typeinfo>
 // #include <boost/log/trivial.hpp>
+#include "vega_cast_utils.h"
+#include "cmd/planet.h"
 #include "src/vs_logging.h"
 
 // TODO: convert all float to double and all Vector to QVector.
@@ -60,13 +62,15 @@ Vega_UnitType::asteroid,
 Vega_UnitType::enhancement,
 Vega_UnitType::missile*/
 void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
+    Vega_UnitType other_units_type = other_unit->isUnit();
+
     // Collision with a nebula does nothing
-    if (other_unit->isUnit() == Vega_UnitType::nebula) {
+    if (other_units_type == Vega_UnitType::nebula) {
         return;
     }
 
     // Collision with a enhancement improves your shield apparently
-    if (other_unit->isUnit() == Vega_UnitType::enhancement) {
+    if (other_units_type == Vega_UnitType::enhancement) {
         apply_force = true;
         return;
     }
@@ -105,12 +109,14 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
             return;
 
             // Units (ships) should calculate actual damage
-        case Vega_UnitType::unit:
+    case Vega_UnitType::unit:
             // Handle the "Nav 8" case
-            if ((other_unit->invisible & Unit::INVISUNIT)
-                    || other_unit->getFullname().find("invisible") != std::string::npos) {
-                VS_LOG(debug, "Can't collide with an invisible object");
-                return;
+            if (other_units_type == Vega_UnitType::planet) {
+                const auto* as_planet = vega_dynamic_const_cast_ptr<const Planet>(other_unit);
+                if (as_planet->is_nav_point()) {
+                    return;
+                    VS_LOG(debug, "Can't collide with a Nav Point");
+                }
             }
             apply_force = true;
             deal_damage = true;
@@ -120,8 +126,8 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
             // TODO: refactor this.
         case Vega_UnitType::enhancement:
             // We can't enhance rocks
-            if (other_unit->isUnit() == Vega_UnitType::asteroid ||
-                    other_unit->isUnit() == Vega_UnitType::planet) {
+            if (other_units_type == Vega_UnitType::asteroid ||
+                    other_units_type == Vega_UnitType::planet) {
                 apply_force = true;
                 return;
             }

@@ -1,7 +1,7 @@
 /*
  * script_call_unit_generic.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Copyright (C) 2001-2025 Daniel Horn, Alexander Rawass, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -990,7 +990,7 @@ Unit *Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &d
             my_unit = new Planet(QVector(0, 0, 0), QVector(0, 0, 0), 0, Vector(0, 0, 0),
                     0, 0, radius, tex, "", "", s,
                     d, ParseDestinations(destinations),
-                    QVector(0, 0, 0), NULL, mat,
+                    QVector(0, 0, 0), nullptr, mat,
                     vector<GFXLightLocal>(), faction_nr, nam);
             free(bsrc);
             free(bdst);

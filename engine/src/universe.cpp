@@ -377,51 +377,89 @@ void Universe::StartDraw() {
 #ifndef WIN32
     RESETTIME();
 #endif
+    const double gfx_begin_scene_start_time = realTime();
     GFXBeginScene();
+    const double gfx_begin_scene_end_time = realTime();
+    VS_LOG(trace, (boost::format("%1%: Time taken by GFXBeginScene(): %2%") % __FUNCTION__ % (gfx_begin_scene_end_time - gfx_begin_scene_start_time)));
     size_t i;
-    StarSystem *lastStarSystem = NULL;
+    StarSystem *lastStarSystem = nullptr;
     for (i = 0; i < _cockpits.size(); ++i) {
+        const double set_active_cockpit_start_time = realTime();
         SetActiveCockpit(i);
+        const double set_active_cockpit_end_time = realTime();
+        VS_LOG(trace, (boost::format("%1%: Time taken by SetActiveCockpit(i): %2%") % __FUNCTION__ % (set_active_cockpit_end_time - set_active_cockpit_start_time)));
         float x{};
         float y{};
         float w{};
         float h{};
         CalculateCoords(i, _cockpits.size(), x, y, w, h);
+        const double calculate_coords_end_time = realTime();
+        VS_LOG(trace, (boost::format("%1%: Time taken by CalculateCoords(...): %2%") % __FUNCTION__ % (calculate_coords_end_time - set_active_cockpit_end_time)));
         AccessCamera()->SetSubwindow(x, y, w, h);
+        const double set_subwindow_end_time = realTime();
+        VS_LOG(trace, (boost::format("%1%: Time taken by AccessCamera()->SetSubwindow(...): %2%") % __FUNCTION__ % (set_subwindow_end_time - calculate_coords_end_time)));
         if (_cockpits.size() > 1 && AccessCockpit(i)->activeStarSystem != lastStarSystem) {
             _active_star_systems[0]->SwapOut();
             lastStarSystem = AccessCockpit()->activeStarSystem;
             _active_star_systems[0] = lastStarSystem;
             lastStarSystem->SwapIn();
         }
+        const double select_proper_camera_start_time = realTime();
         AccessCockpit()->SelectProperCamera();
+        const double select_proper_camera_end_time = realTime();
+        VS_LOG(trace, (boost::format("%1%: Time taken by AccessCockpit()->SelectProperCamera(): %2%") % __FUNCTION__ % (select_proper_camera_end_time - select_proper_camera_start_time)));
         if (!_cockpits.empty()) {
             AccessCamera()->UpdateGFX();
         }
+        const double update_gfx_end_time = realTime();
+        VS_LOG(trace, (boost::format("%1%: Time taken by AccessCamera()->UpdateGFX(): %2%") % __FUNCTION__ % (update_gfx_end_time - select_proper_camera_end_time)));
         if (!RefreshGUI() && !UniverseUtil::isSplashScreenShowing()) {
             activeStarSystem()->Draw();
         }
+        const double draw_active_star_system_end_time = realTime();
+        VS_LOG(trace, (boost::format("%1%: Time taken by activeStarSystem()->Draw(): %2%") % __FUNCTION__ % (draw_active_star_system_end_time - update_gfx_end_time)));
         AccessCamera()->SetSubwindow(0, 0, 1, 1);
+        const double access_camera_set_subwindow_end_time = realTime();
+        VS_LOG(trace, (boost::format("%1%: Time taken by AccessCamera()->SetSubwindow(...): %2%") % __FUNCTION__ % (access_camera_set_subwindow_end_time - draw_active_star_system_end_time)));
     }
+    const double update_time_start_time = realTime();
     UpdateTime();
+    const double update_time_end_time = realTime();
+    VS_LOG(trace, (boost::format("%1%: Time taken by UpdateTime(): %2%") % __FUNCTION__ % (update_time_end_time - update_time_start_time)));
     UpdateTimeCompressionSounds();
+    const double update_time_compression_sounds_end_time = realTime();
+    VS_LOG(trace, (boost::format("%1%: Time taken by UpdateTimeCompressionSounds(): %2%") % __FUNCTION__ % (update_time_compression_sounds_end_time - update_time_end_time)));
     _Universe->SetActiveCockpit(((int) (rand01() * _cockpits.size())) % _cockpits.size());
+    const double universe_set_active_cockpit_end_time = realTime();
+    VS_LOG(trace, (boost::format("%1%: Time taken by _Universe->SetActiveCockpit(...): %2%") % __FUNCTION__ % (universe_set_active_cockpit_end_time - update_time_compression_sounds_end_time)));
     for (i = 0; i < star_system.size() && i < game_options()->NumRunningSystems; ++i) {
+        const double update_star_system_start_time = realTime();
         star_system[i]->Update((i == 0) ? 1 : game_options()->InactiveSystemTime / i, true);
+        const double update_star_system_end_time = realTime();
+        VS_LOG(trace, (boost::format("%1%: Time taken by star_system[i]->Update(...): %2%") % __FUNCTION__ % (update_star_system_end_time - update_star_system_start_time)));
     }
+    const double star_system_process_pending_jumps_start_time = realTime();
     StarSystem::ProcessPendingJumps();
+    const double star_system_process_pending_jumps_end_time = realTime();
+    VS_LOG(trace, (boost::format("%1%: Time taken by StarSystem::ProcessPendingJumps(): %2%") % __FUNCTION__ % (star_system_process_pending_jumps_end_time - star_system_process_pending_jumps_start_time)));
     for (i = 0; i < _cockpits.size(); ++i) {
+        const double process_input_start_time = realTime();
         SetActiveCockpit(i);
         pushActiveStarSystem(AccessCockpit(i)->activeStarSystem);
         ProcessInput(i);                       //input neesd to be taken care of;
         popActiveStarSystem();
+        const double process_input_end_time = realTime();
+        VS_LOG(trace, (boost::format("%1%: Time taken by ProcessInput(i) and surrounding for loop iteration: %2%") % __FUNCTION__ % (process_input_end_time - process_input_start_time)));
     }
     if (screenshotkey) {
         KBData b;
         Screenshot(b, PRESS);
         screenshotkey = false;
     }
+    const double gfx_end_scene_start_time = realTime();
     GFXEndScene();
+    const double gfx_end_scene_end_time = realTime();
+    VS_LOG(trace, (boost::format("%1%: Time taken by GFXEndScene(): %2%") % __FUNCTION__ % (gfx_end_scene_end_time - gfx_end_scene_start_time)));
     //so we don't starve the audio thread
     micro_sleep(getmicrosleep());
 
