@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -61,6 +61,7 @@
 #include <string>
 #include <vector>
 
+#include "resource/random_utils.h"
 #include "root_generic/options.h"
 
 // Using
@@ -429,12 +430,12 @@ void Universe::StartDraw() {
     UpdateTimeCompressionSounds();
     const double update_time_compression_sounds_end_time = realTime();
     VS_LOG(trace, (boost::format("%1%: Time taken by UpdateTimeCompressionSounds(): %2%") % __FUNCTION__ % (update_time_compression_sounds_end_time - update_time_end_time)));
-    _Universe->SetActiveCockpit(((int) (rand01() * _cockpits.size())) % _cockpits.size());
+    _Universe->SetActiveCockpit(randomInt(_cockpits.size(), 0));
     const double universe_set_active_cockpit_end_time = realTime();
     VS_LOG(trace, (boost::format("%1%: Time taken by _Universe->SetActiveCockpit(...): %2%") % __FUNCTION__ % (universe_set_active_cockpit_end_time - update_time_compression_sounds_end_time)));
-    for (i = 0; i < star_system.size() && i < game_options()->NumRunningSystems; ++i) {
+    for (i = 0; i < star_system.size() && i < configuration()->physics.num_running_systems; ++i) {
         const double update_star_system_start_time = realTime();
-        star_system[i]->Update((i == 0) ? 1 : game_options()->InactiveSystemTime / i, true);
+        star_system[i]->Update((i == 0) ? 1 : configuration()->physics.inactive_system_time / i, true);
         const double update_star_system_end_time = realTime();
         VS_LOG(trace, (boost::format("%1%: Time taken by star_system[i]->Update(...): %2%") % __FUNCTION__ % (update_star_system_end_time - update_star_system_start_time)));
     }
