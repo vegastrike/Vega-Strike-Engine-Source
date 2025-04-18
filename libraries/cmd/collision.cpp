@@ -112,11 +112,16 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
     case Vega_UnitType::unit:
             // Handle the "Nav 8" case
             if (other_units_type == Vega_UnitType::planet) {
+                const double nav_8_start_time = realTime();
                 const auto* as_planet = vega_dynamic_const_cast_ptr<const Planet>(other_unit);
                 if (as_planet->is_nav_point()) {
-                    return;
                     VS_LOG(debug, "Can't collide with a Nav Point");
+                    const double nav_8_end_time = realTime();
+                    VS_LOG(trace, (boost::format("%1%: Time taken by handling Nav 8 case: %2%") % __FUNCTION__ % (nav_8_end_time - nav_8_start_time)));
+                    return;
                 }
+                const double nav_8_end_time = realTime();
+                VS_LOG(trace, (boost::format("%1%: Time taken by handling Nav 8 case: %2%") % __FUNCTION__ % (nav_8_end_time - nav_8_start_time)));
             }
             apply_force = true;
             deal_damage = true;

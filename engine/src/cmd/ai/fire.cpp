@@ -809,28 +809,21 @@ void FireAt::Execute() {
     done = tmp;
     Unit *targ;
     if (parent->isUnit() == Vega_UnitType::unit) {
-        static float
-                cont_update_time = XMLSupport::parse_float(vs_config->getVariable("AI", "ContrabandUpdateTime", "1"));
+        const float cont_update_time = configuration()->ai.contraband_update_time;
         //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
         if (rand() < RAND_MAX * SIMULATION_ATOM / cont_update_time) {
             UpdateContrabandSearch();
         }
-        static float
-                cont_initiate_time = XMLSupport::parse_float(vs_config->getVariable("AI", "CommInitiateTime", "300"));
+        const float cont_initiate_time = configuration()->ai.comm_initiate_time;
         //Or here?
-        if ((float) rand() < ((float) RAND_MAX * (SIMULATION_ATOM / cont_initiate_time))) {
-            static float contraband_initiate_time =
-                    XMLSupport::parse_float(vs_config->getVariable("AI", "ContrabandInitiateTime", "3000"));
-            static float comm_to_player =
-                    XMLSupport::parse_float(vs_config->getVariable("AI", "CommToPlayerPercent", ".05"));
-            static float comm_to_target =
-                    XMLSupport::parse_float(vs_config->getVariable("AI", "CommToTargetPercent", ".25"));
-            static float contraband_to_player =
-                    XMLSupport::parse_float(vs_config->getVariable("AI", "ContrabandToPlayerPercent", ".98"));
-            static float contraband_to_target =
-                    XMLSupport::parse_float(vs_config->getVariable("AI", "ContrabandToTargetPercent", "0.001"));
+        if (static_cast<float>(rand()) < (static_cast<float>(RAND_MAX) * (SIMULATION_ATOM / cont_initiate_time))) {
+            const float contraband_initiate_time = configuration()->ai.contraband_initiate_time;
+            const float comm_to_player = configuration()->ai.comm_to_player_percent;
+            const float comm_to_target = configuration()->ai.comm_to_target_percent;
+            const float contraband_to_player = configuration()->ai.contraband_to_player_percent;
+            const float contraband_to_target = configuration()->ai.contraband_to_target_percent;
 
-            unsigned int modulo = ((unsigned int) (contraband_initiate_time / cont_initiate_time));
+            unsigned int modulo = static_cast<unsigned int>(contraband_initiate_time / cont_initiate_time);
             if (modulo < 1) {
                 modulo = 1;
             }
