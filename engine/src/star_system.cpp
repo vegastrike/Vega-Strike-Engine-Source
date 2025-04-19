@@ -1108,7 +1108,9 @@ void StarSystem::Update(float priority, bool executeDirector) {
     ///just be sure to restore this at the end
     time += GetElapsedTime();
     _Universe->pushActiveStarSystem(this);
+#if defined(LOG_TIME_TAKEN_DETAILS)
     double bolttime = 0.0;
+#endif
     if (time > simulation_atom_var) {
         if (time > simulation_atom_var * 2) {
             VS_LOG(trace,
@@ -1117,6 +1119,7 @@ void StarSystem::Update(float priority, bool executeDirector) {
                             % __FILE__ % __LINE__ % time % simulation_atom_var));
         }
 
+#if defined(LOG_TIME_TAKEN_DETAILS)
         double missionSimulationTimeSubtotal = 0.0;
         double processUnitTimeSubtotal = 0.0;
 
@@ -1124,13 +1127,16 @@ void StarSystem::Update(float priority, bool executeDirector) {
         double updateMissilesTimeSubtotal = 0.0;
         double collideTableUpdateTimeSubtotal = 0.0;
         double updateCameraSoundsTimeSubtotal = 0.0;
+#endif
 
         //Chew up all sim_atoms that have elapsed since last update
         // ** stephengtuggy 2020-07-23: We definitely need this block of code! **
         while (time > simulation_atom_var) {
             VS_LOG(trace, "void StarSystem::Update( float priority, bool executeDirector ): Chewing up a sim atom");
             if (current_stage == MISSION_SIMULATION) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
                 double missionSimulationStageStartTime = realTime();
+#endif
                 TerrainCollide();
                 UpdateAnimatedTexture();
                 Unit::ProcessDeleteQueue();
@@ -1150,36 +1156,49 @@ void StarSystem::Update(float priority, bool executeDirector) {
                     //waste of frakkin time
                     active_missions[i]->BriefingUpdate();
                 }
+#if defined(LOG_TIME_TAKEN_DETAILS)
                 double missionSimulationStageEndTime = realTime();
                 missionSimulationTimeSubtotal += (missionSimulationStageEndTime - missionSimulationStageStartTime);
                 VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Time taken by MISSION_SIMULATION stage: %1%") % (missionSimulationStageEndTime - missionSimulationStageStartTime)));
+#endif
                 current_stage = PROCESS_UNIT;
             } else if (current_stage == PROCESS_UNIT) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
                 double processUnitStageStartTime = realTime();
+#endif
                 UpdateUnitsPhysics(firstframe);
+#if defined(LOG_TIME_TAKEN_DETAILS)
                 double updateUnitsPhysicsDoneTime = realTime();
                 updateUnitsPhysicsTimeSubtotal += (updateUnitsPhysicsDoneTime - processUnitStageStartTime);
+#endif
                 UpdateMissiles(); //do explosions
+#if defined(LOG_TIME_TAKEN_DETAILS)
                 double updateMissilesDoneTime = realTime();
                 updateMissilesTimeSubtotal += (updateMissilesDoneTime - updateUnitsPhysicsDoneTime);
+#endif
                 collide_table->Update();
+#if defined(LOG_TIME_TAKEN_DETAILS)
                 double collideTableUpdateDoneTime = realTime();
                 collideTableUpdateTimeSubtotal += (collideTableUpdateDoneTime - updateMissilesDoneTime);
+#endif
                 if (this == _Universe->getActiveStarSystem(0)) {
                     UpdateCameraSnds();
                 }
+#if defined(LOG_TIME_TAKEN_DETAILS)
                 bolttime = realTime();
                 bolttime = realTime() - bolttime;
                 double processUnitStageEndTime = realTime();
                 processUnitTimeSubtotal += (processUnitStageEndTime - processUnitStageStartTime);
                 updateCameraSoundsTimeSubtotal += (processUnitStageEndTime - collideTableUpdateDoneTime);
                 VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Time taken by PROCESS_UNIT stage: %1%") % (processUnitStageEndTime - processUnitStageStartTime)));
+#endif
                 current_stage = MISSION_SIMULATION;
                 firstframe = false;
             }
             time -= simulation_atom_var;
         }
 
+#if defined(LOG_TIME_TAKEN_DETAILS)
         VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by MISSION_SIMULATION: %3%") % __FILE__ % __LINE__ % missionSimulationTimeSubtotal));
         VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by PROCESS_UNIT: %3%") % __FILE__ % __LINE__ % processUnitTimeSubtotal));
 
@@ -1189,6 +1208,8 @@ void StarSystem::Update(float priority, bool executeDirector) {
         VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating camera sounds: %3%") % __FILE__ % __LINE__ % updateCameraSoundsTimeSubtotal));
 
         double cycleThroughPlayersStartTime = realTime();
+#endif
+
         unsigned int i = _Universe->CurrentCockpit();
         for (unsigned int j = 0; j < _Universe->numPlayers(); ++j) {
             if (_Universe->AccessCockpit(j)->activeStarSystem == this) {
@@ -1204,8 +1225,10 @@ void StarSystem::Update(float priority, bool executeDirector) {
             }
         }
         _Universe->SetActiveCockpit(i);
+#if defined(LOG_TIME_TAKEN_DETAILS)
         double cycleThroughPlayersEndTime = realTime();
         VS_LOG(trace, (boost::format("%1% %2%: Time taken by cycling through active players / cockpits: %3%") % __FILE__ % __LINE__ % (cycleThroughPlayersEndTime - cycleThroughPlayersStartTime)));
+#endif
     }
     if (sigIter.isDone()) {
         sigIter = draw_list.createIterator();
