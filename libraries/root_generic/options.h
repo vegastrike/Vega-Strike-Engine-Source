@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -44,8 +44,6 @@ public:
     bool command_interpretor{};
     bool load_last_savegame{};
     bool debug_fs{};
-    float simulation_atom{};
-    float audio_atom{};
 
 /* Audio Options */
     int threadtime{};

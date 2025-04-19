@@ -1108,7 +1108,7 @@ void StarSystem::Update(float priority, bool executeDirector) {
     ///just be sure to restore this at the end
     time += GetElapsedTime();
     _Universe->pushActiveStarSystem(this);
-    double bolttime = 0;
+    double bolttime = 0.0;
     if (time > simulation_atom_var) {
         if (time > simulation_atom_var * 2) {
             VS_LOG(trace,

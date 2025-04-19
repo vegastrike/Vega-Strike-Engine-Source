@@ -430,7 +430,7 @@ void Universe::StartDraw() {
     UpdateTimeCompressionSounds();
     const double update_time_compression_sounds_end_time = realTime();
     VS_LOG(trace, (boost::format("%1%: Time taken by UpdateTimeCompressionSounds(): %2%") % __FUNCTION__ % (update_time_compression_sounds_end_time - update_time_end_time)));
-    _Universe->SetActiveCockpit(randomInt(_cockpits.size(), 0));
+    _Universe->SetActiveCockpit(randomInt(_cockpits.size() - 1, 0));
     const double universe_set_active_cockpit_end_time = realTime();
     VS_LOG(trace, (boost::format("%1%: Time taken by _Universe->SetActiveCockpit(...): %2%") % __FUNCTION__ % (universe_set_active_cockpit_end_time - update_time_compression_sounds_end_time)));
     for (i = 0; i < star_system.size() && i < configuration()->physics.num_running_systems; ++i) {
