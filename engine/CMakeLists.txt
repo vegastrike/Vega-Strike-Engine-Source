@@ -692,6 +692,11 @@ IF (NOT DISABLE_CLIENT)
         TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
+    OPTION (LOG_TIME_TAKEN_DETAILS "Whether to log timing details in the main loop" OFF)
+    IF (LOG_TIME_TAKEN_DETAILS)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC LOG_TIME_TAKEN_DETAILS)
+    ENDIF ()
+
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine PRIVATE
             # VS engine headers
@@ -1264,5 +1269,5 @@ IF (USE_GTEST)
     )
 
     INCLUDE(GoogleTest)
-    gtest_discover_tests(${TEST_NAME})
+    gtest_discover_tests(${TEST_NAME} PROPERTIES DISCOVERY_TIMEOUT 30)
 ENDIF (USE_GTEST)

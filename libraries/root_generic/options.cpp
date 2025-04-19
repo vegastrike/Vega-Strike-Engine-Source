@@ -32,8 +32,6 @@ void vs_options::init() {
     command_interpretor = XMLSupport::parse_bool(vs_config->getVariable("general", "command_interpretor", "false"));
     load_last_savegame = XMLSupport::parse_bool(vs_config->getVariable("general", "load_last_savegame", "false"));
     debug_fs = XMLSupport::parse_int(vs_config->getVariable("general", "debug_fs", "0"));
-    simulation_atom = XMLSupport::parse_floatf(vs_config->getVariable("general", "simulation_atom", "0.1"));
-    audio_atom = XMLSupport::parse_floatf(vs_config->getVariable("general", "audio_atom", "0.05555555556"));
 
 
     /* Audio Options */

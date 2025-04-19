@@ -44,8 +44,6 @@ public:
     bool command_interpretor{};
     bool load_last_savegame{};
     bool debug_fs{};
-    float simulation_atom{};
-    float audio_atom{};
 
 /* Audio Options */
     int threadtime{};
