@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Contains code for homogeneous points.
- *	\file		IceHPoint.cpp
- *	\author		Pierre Terdiman
- *	\date		April, 4, 2000
+ *  \file		IceHPoint.cpp
+ *  \author		Pierre Terdiman
+ *  \date		April, 4, 2000
  *
- *  Updated by Stephen G. Tuggy 2022-01-06
- *  Updated by Benjamen R. Meyer 2025-01-14
+ *  Copyright (C) 2000-2025 Pierre Terdiman, Stephen G. Tuggy, Benjamen R. Meyer
+ *  Public Domain
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -19,11 +19,11 @@
  *	- to differentiate between points (w=1) and vectors (w=0).
  *	- in some cases you can also use it instead of Point for padding reasons.
  *
- *	\class		HPoint
- *	\author		Pierre Terdiman
- *	\version	1.0
- *	\warning	No cross-product in 4D.
- *	\warning	HPoint *= Matrix3x3 doesn't exist, the matrix is first casted to a 4x4
+ *  \class		HPoint
+ *  \author		Pierre Terdiman
+ *  \version	1.0
+ *  \warning	No cross-product in 4D.
+ *  \warning	HPoint *= Matrix3x3 doesn't exist, the matrix is first casted to a 4x4
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "collide2/Opcode.h"
