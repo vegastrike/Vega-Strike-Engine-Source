@@ -2,9 +2,8 @@
  * planet.cpp
  *
  * Copyright (C) 2001-2019 Daniel Horn and other Vega Strike contributors
- * Copyright (C) 2020-2021 pyramid3d, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2020-2025 pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -44,6 +43,7 @@
 #include "gfx/planetary_transform.h"
 #endif
 
+#include "vega_cast_utils.h"
 #include "collide2/CSopcodecollider.h"
 #include "cmd/images.h"
 #include "gfx/halo.h"
@@ -221,7 +221,8 @@ Planet::Planet(QVector x,
         const std::vector<GFXLightLocal> &ligh,
         int faction,
         string fgid,
-        bool inside_out) :
+        bool inside_out,
+        float days) :
         Unit(0) {
     atmosphere = nullptr;
     atmospheric = false;
@@ -359,7 +360,8 @@ Planet::Planet(QVector x,
             orbitcent, parent,
             faction, fgid,
             inside_out,
-            nlights);
+            nlights,
+            days);
 }
 
 Planet::~Planet() {
@@ -387,22 +389,23 @@ Planet::~Planet() {
 }
 
 void Planet::InitPlanet(QVector x,
-        QVector y,
-        float vely,
-        const Vector &rotvel,
-        float pos,
-        float gravity,
-        float radius,
-        const string &filename,
-        const string &technique,
-        const string &unitname,
-        const vector<string> &dest,
-        const QVector &orbitcent,
-        Unit *parent,
-        int faction,
-        string fullname,
-        bool inside_out,
-        unsigned int lights_num) {
+                        QVector y,
+                        float vely,
+                        const Vector &rotvel,
+                        float pos,
+                        float gravity,
+                        float radius,
+                        const string &filename,
+                        const string &technique,
+                        const string &unitname,
+                        const vector<string> &dest,
+                        const QVector &orbitcent,
+                        Unit *parent,
+                        int faction,
+                        string fullname,
+                        bool inside_out,
+                        unsigned int lights_num,
+                        const float days) {
     const float bodyradius = configuration()->graphics.star_body_radius;
 
     if (lights_num) {
@@ -415,8 +418,8 @@ void Planet::InitPlanet(QVector x,
     //this->faction = neutralfaction;
     killed = false;
     bool notJumppoint = dest.empty();
-    for (unsigned int i = 0; i < dest.size(); ++i) {
-        AddDestination(dest[i]);
+    for (const auto & each_destination : dest) {
+        AddDestination(each_destination);
     }
     //name = "Planet - ";
     //name += textname;
@@ -424,6 +427,7 @@ void Planet::InitPlanet(QVector x,
     this->fullname = name;
     this->radius = radius;
     this->gravity = gravity;
+    this->days = days;
     const float densityOfRock = configuration()->physics.density_of_rock;
     const float densityOfJumpPoint = configuration()->physics.density_of_jump_point;
     //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
@@ -449,7 +453,7 @@ void Planet::InitPlanet(QVector x,
     setFullname(tempname);
 
     int tmpfac = faction;
-    if (UniverseUtil::LookupUnitStat(tempname, FactionUtil::GetFactionName(faction), "Cargo_Import").length() == 0) {
+    if (UniverseUtil::LookupUnitStat(tempname, FactionUtil::GetFactionName(faction), "Cargo_Import").empty()) {
         tmpfac = FactionUtil::GetPlanetFaction();
     }
     Unit *un = new Unit(tempname.c_str(), true, tmpfac);
@@ -765,41 +769,42 @@ void Planet::DrawTerrain() {
 ///////////////////////////////////////////////////////////////////////
 
 Unit *Planet::beginElement(QVector x,
-        QVector y,
-        float vely,
-        const Vector &rotvel,
-        float pos,
-        float gravity,
-        float radius,
-        const string &filename,
-        const string &technique,
-        const string &unitname,
-        BLENDFUNC blendSrc,
-        BLENDFUNC blendDst,
-        const vector<string> &dest,
-        int level,
-        const GFXMaterial &ourmat,
-        const vector<GFXLightLocal> &ligh,
-        bool isunit,
-        int faction,
-        string fullname,
-        bool inside_out) {
+                           QVector y,
+                           float vely,
+                           const Vector &rotvel,
+                           float pos,
+                           float gravity,
+                           float radius,
+                           const string &filename,
+                           const string &technique,
+                           const string &unitname,
+                           BLENDFUNC blendSrc,
+                           BLENDFUNC blendDst,
+                           const vector<string> &dest,
+                           int level,
+                           const GFXMaterial &ourmat,
+                           const vector<GFXLightLocal> &ligh,
+                           bool isunit,
+                           int faction,
+                           string fullname,
+                           bool inside_out,
+                           const float days) {
     //this function is OBSOLETE
     Unit *un = nullptr;
     if (level > 2) {
         un_iter satiterator = satellites.createIterator();
         assert(*satiterator);
         if ((*satiterator)->isUnit() == Vega_UnitType::planet) {
-            un = ((Planet *) (*satiterator))->beginElement(x, y, vely, rotvel, pos,
-                    gravity, radius,
-                    filename, technique, unitname,
-                    blendSrc, blendDst,
-                    dest,
-                    level - 1,
-                    ourmat, ligh,
-                    isunit,
-                    faction, fullname,
-                    inside_out);
+            un = vega_dynamic_cast_ptr<Planet>(*satiterator)->beginElement(x, y, vely, rotvel, pos,
+                                                                  gravity, radius,
+                                                                  filename, technique, unitname,
+                                                                  blendSrc, blendDst,
+                                                                  dest,
+                                                                  level - 1,
+                                                                  ourmat, ligh,
+                                                                  isunit,
+                                                                  faction, fullname,
+                                                                  inside_out, days);
         } else {
             VS_LOG(error, "Planets are unable to orbit around units");
         }
@@ -834,7 +839,7 @@ Unit *Planet::beginElement(QVector x,
             satellites.prepend(p = new Planet(x, y, vely, rotvel, pos, gravity, radius,
                     filename, technique, unitname,
                     blendSrc, blendDst, dest,
-                    QVector(0, 0, 0), this, ourmat, ligh, faction, fullname, inside_out));
+                    QVector(0, 0, 0), this, ourmat, ligh, faction, fullname, inside_out, days));
             un = p;
             p->SetOwner(this);
             VS_LOG(trace,

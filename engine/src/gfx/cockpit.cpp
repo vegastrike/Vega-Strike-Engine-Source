@@ -386,15 +386,14 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 if (go == 0) {
                     static soundContainer ejectstopsound;
                     if (ejectstopsound.sound < 0) {
-                        static string
-                                str = vs_config->getVariable("cockpitaudio", "overload_stopped", "overload_stopped");
+                        const std::string str = configuration()->cockpit_audio.overload_stopped;
                         ejectstopsound.loadsound(str);
                     }
                     ejectstopsound.playsound();
                 } else {
                     static soundContainer ejectsound;
                     if (ejectsound.sound < 0) {
-                        static string str = vs_config->getVariable("cockpitaudio", "overload", "overload");
+                        const std::string str = configuration()->cockpit_audio.overload;
                         ejectsound.loadsound(str);
                     }
                     ejectsound.playsound();
@@ -405,8 +404,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         }
         case UnitImages<void>::LOCK: {
             float distance;
-            static float
-                    locklight_time = XMLSupport::parse_float(vs_config->getVariable("graphics", "locklight_time", "1"));
+            const float locklight_time = configuration()->graphics.locklight_time;
             bool res = false;
             if ((tmpunit = target->GetComputerData().threat.GetUnit())) {
                 res = tmpunit->cosAngleTo(target, distance, FLT_MAX, FLT_MAX) > .95;
@@ -417,17 +415,15 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return (res || ((UniverseUtil::GetGameTime() - last_locktime) < locklight_time)) ? 1.0f : 0.0f;
         }
         case UnitImages<void>::MISSILELOCK: {
-            static float
-                    locklight_time = XMLSupport::parse_float(vs_config->getVariable("graphics", "locklight_time", "1"));
-            bool res = target->graphicOptions.missilelock;
+            const float locklight_time = configuration()->graphics.locklight_time;
+            const bool res = target->graphicOptions.missilelock;
             if (res) {
                 last_mlocktime = UniverseUtil::GetGameTime();
             }
             return (res || ((UniverseUtil::GetGameTime() - last_mlocktime) < locklight_time)) ? 1.0f : 0.0f;
         }
         case UnitImages<void>::COLLISION: {
-            static double collidepanic =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "collision_inertial_time", "1.25"));
+            const double collidepanic = configuration()->physics.collision_inertial_time;
             return (getNewTime() - TimeOfLastCollision) < collidepanic;
         }
         case UnitImages<void>::ECM:
@@ -526,17 +522,13 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::AUTOPILOT: {
             static int wasautopilot = 0;
             int abletoautopilot = 0;
-            static bool auto_valid =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics",
-                            "insystem_jump_or_timeless_auto-pilot",
-                            "false"));
+            const bool auto_valid = configuration()->physics.in_system_jump_or_timeless_auto_pilot;
             if (target) {
                 if (!auto_valid) {
                     abletoautopilot = (target->ftl_drive.Enabled());
                 } else {
                     abletoautopilot = (target->AutoPilotTo(target, false) ? 1 : 0);
-                    static float no_auto_light_below =
-                            XMLSupport::parse_float(vs_config->getVariable("physics", "no_auto_light_below", "2000"));
+                    const float no_auto_light_below = configuration()->physics.no_auto_light_below;
                     Unit *targtarg = target->Target();
                     if (targtarg) {
                         if ((target->Position() - targtarg->Position()).Magnitude() - targtarg->rSize()
@@ -551,18 +543,14 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 if (abletoautopilot == 0) {
                     static soundContainer autostopsound;
                     if (autostopsound.sound < 0) {
-                        static string str = vs_config->getVariable("cockpitaudio",
-                                "autopilot_available",
-                                "autopilot_available");
+                        const std::string str = configuration()->cockpit_audio.autopilot_available;
                         autostopsound.loadsound(str);
                     }
                     autostopsound.playsound();
                 } else {
                     static soundContainer autosound;
                     if (autosound.sound < 0) {
-                        static string str = vs_config->getVariable("cockpitaudio",
-                                "autopilot_unavailable",
-                                "autopilot_unavailable");
+                        const std::string str = configuration()->cockpit_audio.autopilot_unavailable;
                         autosound.loadsound(str);
                     }
                     autosound.playsound();
@@ -573,131 +561,133 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         }
         case UnitImages<void>::COCKPIT_FPS:
             if (fpsval >= 0 && fpsval < .5 * FLT_MAX) {
-                numtimes -= .1 + fpsval;
+                numtimes -= 0.1F + fpsval;
             }
             if (numtimes <= 0) {
                 numtimes = fpsmax;
                 fpsval = GetElapsedTime();
             }
             if (fpsval) {
-                return 1. / fpsval;
+                return 1.0F / fpsval;
             }
         case UnitImages<void>::AUTOPILOT_MODAL:
             if (target->autopilotactive) {
-                return (float) UnitImages<void>::ACTIVE;
+                return static_cast<float>(UnitImages<void>::ACTIVE);
             } else {
-                return (float) UnitImages<void>::OFF;
+                return static_cast<float>(UnitImages<void>::OFF);
             }
         case UnitImages<void>::SPEC_MODAL:
             if (target->graphicOptions.WarpRamping) {
-                return (float) UnitImages<void>::SWITCHING;
+                return static_cast<float>(UnitImages<void>::SWITCHING);
             } else if (target->ftl_drive.Enabled()) {
-                return (float) UnitImages<void>::ACTIVE;
+                return static_cast<float>(UnitImages<void>::ACTIVE);
             } else {
-                return (float) UnitImages<void>::OFF;
+                return static_cast<float>(UnitImages<void>::OFF);
             }
         case UnitImages<void>::FLIGHTCOMPUTER_MODAL:
             if (target->inertialmode) {
-                return (float) UnitImages<void>::OFF;
+                return static_cast<float>(UnitImages<void>::OFF);
             } else {
-                return (float) UnitImages<void>::ON;
+                return static_cast<float>(UnitImages<void>::ON);
             }
         case UnitImages<void>::TURRETCONTROL_MODAL:
             if (0 == target->turretstatus) {
-                return (float) UnitImages<void>::NOTAPPLICABLE;
+                return static_cast<float>(UnitImages<void>::NOTAPPLICABLE);
             } else if (2 == target->turretstatus) {          //FIXME -- need to check if turrets are active
-                return (float) UnitImages<void>::ACTIVE;
+                return static_cast<float>(UnitImages<void>::ACTIVE);
             } else if (3 == target->turretstatus) {          //FIXME -- need to check if turrets are in FireAtWill state
-                return (float) UnitImages<void>::FAW;
+                return static_cast<float>(UnitImages<void>::FAW);
             } else {
-                return (float) UnitImages<void>::OFF;
+                return static_cast<float>(UnitImages<void>::OFF);
             }
         case UnitImages<void>::ECM_MODAL:
             if (target->ecm.Get() > 0) {
-                return (target->ecm.Active() ? (float) UnitImages<void>::ACTIVE
-                        : (float) UnitImages<void>::READY);
+                return (target->ecm.Active() ? static_cast<float>(UnitImages<void>::ACTIVE)
+                        : static_cast<float>(UnitImages<void>::READY));
             } else {
-                return (float) UnitImages<void>::NOTAPPLICABLE;
+                return static_cast<float>(UnitImages<void>::NOTAPPLICABLE);
             }
         case UnitImages<void>::CLOAK_MODAL:
             if (!target->cloak.Capable() || target->cloak.Damaged()) {
-                return (float) UnitImages<void>::NOTAPPLICABLE;
+                return static_cast<float>(UnitImages<void>::NOTAPPLICABLE);
             } else if (target->cloak.Ready()) {
-                return (float) UnitImages<void>::READY;
+                return static_cast<float>(UnitImages<void>::READY);
             } else if (target->cloak.Cloaked()) {
-                return (float) UnitImages<void>::ACTIVE;
+                return static_cast<float>(UnitImages<void>::ACTIVE);
             } else {
-                return (float) UnitImages<void>::SWITCHING;
+                return static_cast<float>(UnitImages<void>::SWITCHING);
             }
         case UnitImages<void>::TRAVELMODE_MODAL:
             if (target->CombatMode()) {
-                return (float) UnitImages<void>::MANEUVER;
+                return static_cast<float>(UnitImages<void>::MANEUVER);
             } else {
-                return (float) UnitImages<void>::TRAVEL;
+                return static_cast<float>(UnitImages<void>::TRAVEL);
             }
         case UnitImages<void>::RECIEVINGFIRE_MODAL:
             if (!target) {          //FIXME
-                return (float) UnitImages<void>::WARNING;
+                return static_cast<float>(UnitImages<void>::WARNING);
             } else {
-                return (float) UnitImages<void>::NOMINAL;
+                return static_cast<float>(UnitImages<void>::NOMINAL);
             }
         case UnitImages<void>::RECEIVINGMISSILES_MODAL:
             if (!target) {          //FIXME
-                return (float) UnitImages<void>::WARNING;
+                return static_cast<float>(UnitImages<void>::WARNING);
             } else {
-                return (float) UnitImages<void>::NOMINAL;
+                return static_cast<float>(UnitImages<void>::NOMINAL);
             }
         case UnitImages<void>::RECEIVINGMISSILELOCK_MODAL:
             if (!target) {          //FIXME
-                return (float) UnitImages<void>::WARNING;
+                return static_cast<float>(UnitImages<void>::WARNING);
             } else {
-                return (float) UnitImages<void>::NOMINAL;
+                return static_cast<float>(UnitImages<void>::NOMINAL);
             }
         case UnitImages<void>::RECEIVINGTARGETLOCK_MODAL:
             if (!target) {          //FIXME
-                return (float) UnitImages<void>::WARNING;
+                return static_cast<float>(UnitImages<void>::WARNING);
             } else {
-                return (float) UnitImages<void>::NOMINAL;
+                return static_cast<float>(UnitImages<void>::NOMINAL);
             }
         case UnitImages<void>::COLLISIONWARNING_MODAL:
             if (!target) {          //FIXME
-                return (float) UnitImages<void>::WARNING;
+                return static_cast<float>(UnitImages<void>::WARNING);
             } else {
-                return (float) UnitImages<void>::NOMINAL;
+                return static_cast<float>(UnitImages<void>::NOMINAL);
             }
         case UnitImages<void>::CANJUMP_MODAL:
             if (!target->jump_drive.Installed() || !target->jump_drive.Operational()) {
-                return (float) UnitImages<void>::NODRIVE;
+                return static_cast<float>(UnitImages<void>::NODRIVE);
             } else if (!target->jump_drive.CanConsume()) {
-                return (float) UnitImages<void>::NOTENOUGHENERGY;
+                return static_cast<float>(UnitImages<void>::NOTENOUGHENERGY);
             } else if (target->ftl_drive.Enabled()) {          //FIXME
-                return (float) UnitImages<void>::OFF;
+                return static_cast<float>(UnitImages<void>::OFF);
             } else if (jumpok) {
-                return (float) UnitImages<void>::READY;
+                return static_cast<float>(UnitImages<void>::READY);
             } else {
-                return (float) UnitImages<void>::TOOFAR;
+                return static_cast<float>(UnitImages<void>::TOOFAR);
             }
         case UnitImages<void>::CANDOCK_MODAL: {
             Unit *station = target->Target();
             if (station) {
                 if(target->isUnit() != Vega_UnitType::planet ) {
-                    return (float) UnitImages<void>::NOMINAL;
+                    return static_cast<float>(UnitImages<void>::NOMINAL);
                 }
 
                 if (CanDock(station, target, true) != -1) {
                     if (CanDock(station, target, false) != -1) {
-                        return (float) UnitImages<void>::READY;
+                        return static_cast<float>(UnitImages<void>::READY);
                     }
                     if (Orders::AutoDocking::CanDock(target, station)) {
-                        return (float) UnitImages<void>::AUTOREADY;
+                        return static_cast<float>(UnitImages<void>::AUTOREADY);
                     }
-                    return (float) UnitImages<void>::TOOFAR;
+                    return static_cast<float>(UnitImages<void>::TOOFAR);
                 }
             }
-            return (float) UnitImages<void>::NOMINAL;
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         }
+        default:
+            return 1.0F;
     }
-    return 1.0f;
+    return 1.0F;
 }
 
 

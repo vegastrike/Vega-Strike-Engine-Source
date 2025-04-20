@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -266,6 +266,7 @@ Planet *SystemFactory::processPlanet(Star_XML *xml, Object &object, Planet *owne
     float radius = getFloatAttribute(object, "radius", 0.0f);
     float position = getFloatAttribute(object, "position", 0.0f);
     float rotational_velocity = getFloatAttribute(object, "day", 0.0f);
+    float days = rotational_velocity;
     int faction = 0;
     bool isDestination = false;
     bool insideout = getBoolAttribute(object, "InsideOut", false);
@@ -399,7 +400,7 @@ Planet *SystemFactory::processPlanet(Star_XML *xml, Object &object, Planet *owne
             filename, technique, unitname,
             blend_source, blend_destination, destination,
             orbit_center, owner, ourmat, curlights, faction,
-            fullname, insideout);
+            fullname, insideout, days);
 
     if (owner == nullptr) {
         // The sun or another body orbiting the center of the system

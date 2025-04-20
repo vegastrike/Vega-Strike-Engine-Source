@@ -2,8 +2,7 @@
  * jump_capable.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2021 Roy Falk and Stephen G. Tuggy
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2025 Roy Falk and Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -103,14 +102,14 @@ JumpCapable::JumpCapable() : activeStarSystem(nullptr) {
 };
 
 void JumpCapable::ActivateJumpDrive(int destination) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     if (((unit->docked & (unit->DOCKED | unit->DOCKED_INSIDE)) == 0) && unit->jump_drive.Installed()) {
         unit->jump_drive.SetDestination(destination);
     }
 }
 
 void JumpCapable::AddDestination(const std::string &dest) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     unit->pImage->destination.push_back(dest);
 }
 
@@ -123,11 +122,10 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         bool ignore_energy_requirements,
         std::string &failuremessage,
         int recursive_level) {
-    Unit *unit = static_cast<Unit *>(this);
-    const Unit *const_unit = static_cast<const Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+    const Unit *const_unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
-    static bool auto_valid =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "insystem_jump_or_timeless_auto-pilot", "false"));
+    const bool auto_valid = configuration()->physics.in_system_jump_or_timeless_auto_pilot;
     if (!auto_valid) {
         static std::string err = "No Insystem Jump";
         failuremessage = err;
@@ -148,27 +146,19 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     if (Guaranteed == Mission::AUTO_OFF) {
         return false;
     }
-    static float autopilot_term_distance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance", "6000"));
-    static float atd_no_enemies =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance_no_enemies",
-                    vs_config->getVariable("physics",
-                            "auto_pilot_termination_distance",
-                            "6000")));
-    static float autopilot_no_enemies_multiplier =
-            XMLSupport::parse_float(vs_config->getVariable("physics",
-                    "auto_pilot_no_enemies_distance_multiplier",
-                    "4"));
+    const float autopilot_term_distance = configuration()->physics.auto_pilot_termination_distance;
+    const float atd_no_enemies = configuration()->physics.auto_pilot_termination_distance_no_enemies;
+    const float autopilot_no_enemies_multiplier = configuration()->physics.auto_pilot_no_enemies_distance_multiplier;
     if (unit->isSubUnit()) {
         static std::string err = "Return To Cockpit for Auto";
         failuremessage = err;
         return false;                            //we can't auto here;
     }
     StarSystem *ss = activeStarSystem;
-    if (ss == NULL) {
+    if (ss == nullptr) {
         ss = _Universe->activeStarSystem();
     }
-    Unit *un = NULL;
+    Unit *un = nullptr;
     QVector start(unit->Position());
     QVector end(RealPosition(target));
     float totallength = (start - end).Magnitude();
@@ -209,15 +199,13 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     }
     bool ok = true;
 
-    static bool teleport_autopilot =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "teleport_autopilot", "true"));
+    const bool teleport_autopilot = configuration()->physics.teleport_autopilot;
     bool unsafe = false;
     if ((!teleport_autopilot) && (!nanspace)) {
         if (Guaranteed == Mission::AUTO_NORMAL && unit->cloak.Cloaked()) {
             bool ignore_friendlies = true;
-            for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
-                static bool canflythruplanets =
-                        XMLSupport::parse_bool(vs_config->getVariable("physics", "can_auto_through_planets", "true"));
+            for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != nullptr; ++i) {
+                const bool canflythruplanets = configuration()->physics.can_auto_through_planets;
                 if ((!(un->isUnit() == Vega_UnitType::planet
                         && canflythruplanets)) && un->isUnit() != Vega_UnitType::nebula && (!UnitUtil::isSun(un))) {
                     if (un != this && un != target) {
@@ -253,10 +241,9 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     } else if (!nanspace) {
         //just make sure we aren't in an asteroid field
         Unit *un;
-        for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
+        for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != nullptr; ++i) {
             if (UnitUtil::isAsteroid(un)) {
-                static float minasteroiddistance =
-                        XMLSupport::parse_float(vs_config->getVariable("physics", "min_asteroid_distance", "-100"));
+                const float minasteroiddistance = configuration()->physics.min_asteroid_distance;
                 if (UnitUtil::getDistance(unit, un) < minasteroiddistance) {
                     failuremessage = GenerateAutoError(unit, un);
                     return false;                     //no auto in roid field
@@ -286,8 +273,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             sep = RealPosition(unit);
             nowhere = true;
         }
-        static bool auto_turn_towards =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "auto_turn_towards", "true"));
+        const bool auto_turn_towards = configuration()->physics.auto_turn_towards;
         if (auto_turn_towards) {
             for (int i = 0; i < 3; ++i) {
                 Vector methem(RealPosition(target).Cast() - sep.Cast());
@@ -307,17 +293,15 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                 unit->Velocity = methem * unit->Velocity.Magnitude();
             }
         }
-        static string insys_jump_ani = vs_config->getVariable("graphics", "insys_jump_animation", "warp.ani");
-        if (insys_jump_ani.length()) {
+        const std::string insys_jump_ani = configuration()->graphics.in_system_jump_animation;
+        if (!insys_jump_ani.empty()) {
             static bool docache = true;
             if (docache) {
                 UniverseUtil::cacheAnimation(insys_jump_ani);
                 docache = false;
             }
-            static float insys_jump_ani_size =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "insys_jump_animation_size", "4"));
-            static float insys_jump_ani_growth =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "insys_jump_animation_growth", ".99"));
+            const float insys_jump_ani_size = configuration()->graphics.in_system_jump_animation_size;
+            const float insys_jump_ani_growth = configuration()->graphics.in_system_jump_animation_growth;
             UniverseUtil::playAnimationGrow(insys_jump_ani, RealPosition(unit),
                     unit->rSize() * insys_jump_ani_size, insys_jump_ani_growth);
 
@@ -325,8 +309,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             v.Normalize();
             Vector p, q, r;
             unit->GetOrientation(p, q, r);
-            static float sec =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "insys_jump_ani_second_ahead", "4"));
+            const float sec = configuration()->graphics.in_system_jump_ani_second_ahead;
             UniverseUtil::playAnimationGrow(insys_jump_ani,
                     sep + unit->GetVelocity() * sec + v * unit->rSize(),
                     unit->rSize() * 8,
@@ -337,22 +320,21 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                     unit->rSize() * 16,
                     .97);
         }
-        static bool warptrail = XMLSupport::parse_bool(vs_config->getVariable("graphics", "warp_trail", "true"));
+        const bool warptrail = configuration()->graphics.warp_trail;
         if (warptrail && (!nowhere)) {
-            static float warptrailtime =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp_trail_time", "20"));
+            const float warptrailtime = configuration()->graphics.warp_trail_time;
             AddWarp(unit, RealPosition(unit), warptrailtime);
         }
         if (!nowhere) {
             unit->SetCurPosition(sep);
         }
         Cockpit *cp;
-        if ((cp = _Universe->isPlayerStarship(const_unit)) != NULL) {
+        if ((cp = _Universe->isPlayerStarship(const_unit)) != nullptr) {
             std::string followermessage;
-            if (unit->getFlightgroup() != NULL) {
-                Unit *other = NULL;
+            if (unit->getFlightgroup() != nullptr) {
+                Unit *other = nullptr;
                 if (recursive_level > 0) {
-                    for (un_iter ui = ss->getUnitList().createIterator(); NULL != (other = *ui); ++ui) {
+                    for (un_iter ui = ss->getUnitList().createIterator(); nullptr != (other = *ui); ++ui) {
                         Flightgroup *ff = other->getFlightgroup();
                         bool leadah = (ff == unit->getFlightgroup());
                         if (ff) {
@@ -368,7 +350,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                                         followermessage,
                                         recursive_level - 1);
                                 if (leadah) {
-                                    if (NULL == _Universe->isPlayerStarship(other)) {
+                                    if (nullptr == _Universe->isPlayerStarship(other)) {
                                         other->SetPosition(AutoSafeEntrancePoint(unit->LocalPosition(),
                                                 other->rSize() * 1.5,
                                                 other));

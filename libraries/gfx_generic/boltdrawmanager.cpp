@@ -29,6 +29,7 @@
 
 #include "gfx_generic/boltdrawmanager.h"
 
+#include "matrix.h"
 #include "gfx/animation.h"
 
 #include "root_generic/lin_time.h"
@@ -90,7 +91,7 @@ BoltDrawManager &BoltDrawManager::GetInstance() {
 void BoltDrawManager::Draw() {
     GFXDisable(LIGHTING);
     GFXDisable(CULLFACE);
-    GFXBlendMode(ONE, game_options()->BlendGuns ? ONE : ZERO);
+    GFXBlendMode(ONE, configuration()->graphics.blend_guns ? ONE : ZERO);
     GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
     GFXAlphaTest(GREATER, .1);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -44,10 +44,8 @@ public:
     bool command_interpretor{};
     bool load_last_savegame{};
     bool debug_fs{};
-    float simulation_atom{};
-    float audio_atom{};
 
-/* Audio Options */
+    /* Audio Options */
     int threadtime{};
     std::string missionvictorysong;
     bool Music{};
@@ -194,7 +192,6 @@ public:
     float shockwave_growth{};
     std::string shockwave_animation;
     float bolt_offset{};
-    bool BlendGuns{};
     float StretchBolts{};
     float bolt_pixel_size{};
 
@@ -250,7 +247,6 @@ public:
     bool game_speed_affects_autogen_systems{};
     double star_system_scale{};
     double respawn_unit_size{};
-    float auto_pilot_planet_radius_percent{};
     std::string campaigns;              //WRONG SECTION ...change after 0.5
     uint NumRunningSystems{};
     float InactiveSystemTime{};
