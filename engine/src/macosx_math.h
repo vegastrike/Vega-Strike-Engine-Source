@@ -39,7 +39,7 @@ extern float sinf( float v );
 extern float tanf( float v );
 extern float powf( float v, float p );
 
-#endif //defined (__APPLE__) || defined (MACOSX)
+#endif
 
 #endif //VEGA_STRIKE_ENGINE_MACOSX_MATH
 

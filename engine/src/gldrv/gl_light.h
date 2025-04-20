@@ -112,9 +112,15 @@ public:
 
     /** sets properties, making minimum GL state changes for global,
      *  for local lights, removes it from table, trashes it from GLlights,
-     *  if enabled, puts it bakc in table.
+     *  if enabled, puts it back in table.
      */
-    void ResetProperties(const enum LIGHT_TARGET, const GFXColor &color);
+    void ResetProperties(const enum LIGHT_TARGET light_targ, const GFXColor &color);
+
+    /** sets properties, making minimum GL state changes for global,
+     *  for local lights, removes it from table, trashes it from GLlights,
+     *  if enabled, puts it back in table.
+     */
+    void ResetProperties(const enum LIGHT_TARGET light_target, const Vector &vector);
 
     ///Adds this light to table (assume local)
     void AddToTable();

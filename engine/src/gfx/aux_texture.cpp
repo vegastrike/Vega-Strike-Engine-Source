@@ -543,7 +543,7 @@ void Texture::Load(const char *FileNameRGB,
 }
 
 Texture::~Texture() {
-    if (original == NULL) {
+    if (original == nullptr) {
         /**DEPRECATED
          *     if(data != NULL)
          *     {
@@ -553,9 +553,9 @@ Texture::~Texture() {
          *     }
          */
         UnBind();
-        if (palette != NULL) {
+        if (palette != nullptr) {
             free(palette);
-            palette = NULL;
+            palette = nullptr;
         }
     } else {
         original->refcount--;
@@ -569,6 +569,9 @@ Texture::~Texture() {
 }
 
 void Texture::UnBind() {
+    if (STATIC_VARS_DESTROYED) {
+        return;
+    }
     if (name != -1) {
         texHashTable.Delete(texfilename);
         GFXDeleteTexture(name);
