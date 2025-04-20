@@ -21,11 +21,11 @@
  *	- CPU comparisons used when appropriate
  *	- lazy evaluation sometimes saves some work in case of early exits (unlike SOLID)
  *
- *	\param		ea	[in] extents from box A
- *	\param		ca	[in] center from box A
- *	\param		eb	[in] extents from box B
- *	\param		cb	[in] center from box B
- *	\return		true if boxes overlap
+ *  \param		ea	[in] extents from box A
+ *  \param		ca	[in] center from box A
+ *  \param		eb	[in] extents from box B
+ *  \param		cb	[in] center from box B
+ *  \return		true if boxes overlap
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ bool AABBTreeCollider::BoxBoxOverlap(const Point &ea, const Point &ca, const Point &eb, const Point &cb) {

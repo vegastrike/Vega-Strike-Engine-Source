@@ -14,9 +14,9 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Contains code for OPCODE models.
- *	\file		OPC_Model.cpp
- *	\author		Pierre Terdiman
- *	\date		March, 20, 2001
+ *  \file		OPC_Model.cpp
+ *  \author		Pierre Terdiman
+ *  \date		March, 20, 2001
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@
  *
  *	2) Build a Model using a creation structure:
  *
- *	\code
+ *  \code
  *		Model Sample;
  *
  *		OPCODECREATE OPCC;
@@ -46,21 +46,21 @@
  *		OPCC.Quantized		= ...;
  *		OPCC.KeepOriginal	= ...;
  *		bool Status = Sample.Build(OPCC);
- *	\endcode
+ *  \endcode
  *
  *	3) Create a tree collider and set it up:
  *
- *	\code
+ *  \code
  *		AABBTreeCollider TC;
  *		TC.SetFirstContact(...);
  *		TC.SetFullBoxBoxTest(...);
  *		TC.SetFullPrimBoxTest(...);
  *		TC.SetTemporalCoherence(...);
- *	\endcode
+ *  \endcode
  *
  *	4) Perform a collision query
  *
- *	\code
+ *  \code
  *		// Setup cache
  *		static BVTCache ColCache;
  *		ColCache.Model0 = &Model0;
@@ -75,21 +75,21 @@
  *		// Number of colliding pairs and list of pairs
  *		uint32_t NbPairs = TC.GetNbPairs();
  *		const Pair* p = TC.GetPairs()
- *	\endcode
+ *  \endcode
  *
  *	5) Stats
  *
- *	\code
+ *  \code
  *		Model0.GetUsedBytes()	= number of bytes used for this collision tree
  *		TC.GetNbBVBVTests()		= number of BV-BV overlap tests performed during last query
  *		TC.GetNbPrimPrimTests()	= number of Triangle-Triangle overlap tests performed during last query
  *		TC.GetNbBVPrimTests()	= number of Triangle-BV overlap tests performed during last query
- *	\endcode
+ *  \endcode
  *
- *	\class		Model
- *	\author		Pierre Terdiman
- *	\version	1.3
- *	\date		March, 20, 2001
+ *  \class		Model
+ *  \author		Pierre Terdiman
+ *  \version	1.3
+ *  \date		March, 20, 2001
 */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -132,8 +132,8 @@ void Model::Release() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Builds a collision model.
- *	\param		create		[in] model creation structure
- *	\return		true if success
+ *  \param		create		[in] model creation structure
+ *  \return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Model::Build(const OPCODECREATE &create) {
@@ -221,7 +221,7 @@ bool Model::Build(const OPCODECREATE &create) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Gets the number of bytes used by the tree.
- *	\return		amount of bytes used
+ *  \return		amount of bytes used
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 size_t Model::GetUsedBytes() const {

@@ -23,10 +23,10 @@
  *	It's been optimized a bit with integer code, and modified to return a non-intersection if distance from
  *	ray origin to triangle is negative.
  *
- *	\param		vert0	[in] triangle vertex
- *	\param		vert1	[in] triangle vertex
- *	\param		vert2	[in] triangle vertex
- *	\return		true on overlap. mStabbedFace is filled with relevant info.
+ *  \param		vert0	[in] triangle vertex
+ *  \param		vert1	[in] triangle vertex
+ *  \param		vert2	[in] triangle vertex
+ *  \return		true on overlap. mStabbedFace is filled with relevant info.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ bool RayCollider::RayTriOverlap(const Point &vert0, const Point &vert1, const Point &vert2) {

@@ -18,9 +18,9 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Contains code for tree builders.
- *	\file		OPC_TreeBuilders.cpp
- *	\author		Pierre Terdiman
- *	\date		March, 20, 2001
+ *  \file		OPC_TreeBuilders.cpp
+ *  \author		Pierre Terdiman
+ *  \date		March, 20, 2001
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -28,10 +28,10 @@
 /**
  *	A builder for AABB-trees of vertices.
  *
- *	\class		AABBTreeOfVerticesBuilder
- *	\author		Pierre Terdiman
- *	\version	1.3
- *	\date		March, 20, 2001
+ *  \class		AABBTreeOfVerticesBuilder
+ *  \author		Pierre Terdiman
+ *  \version	1.3
+ *  \date		March, 20, 2001
 */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,10 +39,10 @@
 /**
  *	A builder for AABB-trees of AABBs.
  *
- *	\class		AABBTreeOfAABBsBuilder
- *	\author		Pierre Terdiman
- *	\version	1.3
- *	\date		March, 20, 2001
+ *  \class		AABBTreeOfAABBsBuilder
+ *  \author		Pierre Terdiman
+ *  \version	1.3
+ *  \date		March, 20, 2001
 */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -50,10 +50,10 @@
 /**
  *	A builder for AABB-trees of triangles.
  *
- *	\class		AABBTreeOfTrianglesBuilder
- *	\author		Pierre Terdiman
- *	\version	1.3
- *	\date		March, 20, 2001
+ *  \class		AABBTreeOfTrianglesBuilder
+ *  \author		Pierre Terdiman
+ *  \version	1.3
+ *  \date		March, 20, 2001
 */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -64,10 +64,10 @@ using namespace Opcode;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Computes the AABB of a set of primitives.
- *	\param		primitives		[in] list of indices of primitives
- *	\param		nb_prims		[in] number of indices
- *	\param		global_box		[out] global AABB enclosing the set of input primitives
- *	\return		true if success
+ *  \param		primitives		[in] list of indices of primitives
+ *  \param		nb_prims		[in] number of indices
+ *  \param		global_box		[out] global AABB enclosing the set of input primitives
+ *  \return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AABBTreeOfAABBsBuilder::ComputeGlobalBox(const uint32_t *primitives, uint32_t nb_prims, AABB &global_box) const {
@@ -90,9 +90,9 @@ bool AABBTreeOfAABBsBuilder::ComputeGlobalBox(const uint32_t *primitives, uint32
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Computes the splitting value along a given axis for a given primitive.
- *	\param		index		[in] index of the primitive to split
- *	\param		axis		[in] axis index (0,1,2)
- *	\return		splitting value
+ *  \param		index		[in] index of the primitive to split
+ *  \param		axis		[in] axis index (0,1,2)
+ *  \return		splitting value
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float AABBTreeOfAABBsBuilder::GetSplittingValue(uint32_t index, uint32_t axis) const {
@@ -104,10 +104,10 @@ float AABBTreeOfAABBsBuilder::GetSplittingValue(uint32_t index, uint32_t axis) c
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Computes the AABB of a set of primitives.
- *	\param		primitives		[in] list of indices of primitives
- *	\param		nb_prims		[in] number of indices
- *	\param		global_box		[out] global AABB enclosing the set of input primitives
- *	\return		true if success
+ *  \param		primitives		[in] list of indices of primitives
+ *  \param		nb_prims		[in] number of indices
+ *  \param		global_box		[out] global AABB enclosing the set of input primitives
+ *  \return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AABBTreeOfTrianglesBuilder::ComputeGlobalBox(const uint32_t *primitives,
@@ -138,9 +138,9 @@ bool AABBTreeOfTrianglesBuilder::ComputeGlobalBox(const uint32_t *primitives,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Computes the splitting value along a given axis for a given primitive.
- *	\param		index		[in] index of the primitive to split
- *	\param		axis		[in] axis index (0,1,2)
- *	\return		splitting value
+ *  \param		index		[in] index of the primitive to split
+ *  \param		axis		[in] axis index (0,1,2)
+ *  \return		splitting value
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float AABBTreeOfTrianglesBuilder::GetSplittingValue(uint32_t index, uint32_t axis) const {
@@ -167,11 +167,11 @@ float AABBTreeOfTrianglesBuilder::GetSplittingValue(uint32_t index, uint32_t axi
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Computes the splitting value along a given axis for a given node.
- *	\param		primitives		[in] list of indices of primitives
- *	\param		nb_prims		[in] number of indices
- *	\param		global_box		[in] global AABB enclosing the set of input primitives
- *	\param		axis			[in] axis index (0,1,2)
- *	\return		splitting value
+ *  \param		primitives		[in] list of indices of primitives
+ *  \param		nb_prims		[in] number of indices
+ *  \param		global_box		[in] global AABB enclosing the set of input primitives
+ *  \param		axis			[in] axis index (0,1,2)
+ *  \return		splitting value
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float AABBTreeOfTrianglesBuilder::GetSplittingValue(const uint32_t *primitives,
@@ -199,10 +199,10 @@ float AABBTreeOfTrianglesBuilder::GetSplittingValue(const uint32_t *primitives,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Computes the AABB of a set of primitives.
- *	\param		primitives		[in] list of indices of primitives
- *	\param		nb_prims		[in] number of indices
- *	\param		global_box		[out] global AABB enclosing the set of input primitives
- *	\return		true if success
+ *  \param		primitives		[in] list of indices of primitives
+ *  \param		nb_prims		[in] number of indices
+ *  \param		global_box		[out] global AABB enclosing the set of input primitives
+ *  \return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AABBTreeOfVerticesBuilder::ComputeGlobalBox(const uint32_t *primitives,
@@ -227,9 +227,9 @@ bool AABBTreeOfVerticesBuilder::ComputeGlobalBox(const uint32_t *primitives,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Computes the splitting value along a given axis for a given primitive.
- *	\param		index		[in] index of the primitive to split
- *	\param		axis		[in] axis index (0,1,2)
- *	\return		splitting value
+ *  \param		index		[in] index of the primitive to split
+ *  \param		axis		[in] axis index (0,1,2)
+ *  \return		splitting value
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float AABBTreeOfVerticesBuilder::GetSplittingValue(uint32_t index, uint32_t axis) const {
@@ -240,11 +240,11 @@ float AABBTreeOfVerticesBuilder::GetSplittingValue(uint32_t index, uint32_t axis
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Computes the splitting value along a given axis for a given node.
- *	\param		primitives		[in] list of indices of primitives
- *	\param		nb_prims		[in] number of indices
- *	\param		global_box		[in] global AABB enclosing the set of input primitives
- *	\param		axis			[in] axis index (0,1,2)
- *	\return		splitting value
+ *  \param		primitives		[in] list of indices of primitives
+ *  \param		nb_prims		[in] number of indices
+ *  \param		global_box		[in] global AABB enclosing the set of input primitives
+ *  \param		axis			[in] axis index (0,1,2)
+ *  \return		splitting value
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float AABBTreeOfVerticesBuilder::GetSplittingValue(const uint32_t *primitives,

@@ -14,9 +14,9 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Contains a mesh interface.
- *	\file		OPC_MeshInterface.cpp
- *	\author		Pierre Terdiman
- *	\date		November, 27, 2002
+ *  \file		OPC_MeshInterface.cpp
+ *  \author		Pierre Terdiman
+ *  \date		November, 27, 2002
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -26,10 +26,10 @@
  *	to return 3 vertices to OPCODE (36 bytes) but only 3 pointers (12 bytes). It seems better but I never profiled
  *	the alternative.
  *
- *	\class		VertexPointers
- *	\author		Pierre Terdiman
- *	\version	1.3
- *	\date		March, 20, 2001
+ *  \class		VertexPointers
+ *  \author		Pierre Terdiman
+ *  \version	1.3
+ *  \date		March, 20, 2001
 */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -59,7 +59,7 @@
  *
  *	Ex:
  *
- *	\code
+ *  \code
  *		static void ColCallback(uint32_t triangle_index, VertexPointers& triangle, uint32_t user_data)
  *		{
  *			// Get back Mesh0 or Mesh1 (you also can use 2 different callbacks)
@@ -75,7 +75,7 @@
  *		// Setup callbacks
  *		MeshInterface0->SetCallback(ColCallback, uint32_t(Mesh0));
  *		MeshInterface1->SetCallback(ColCallback, uint32_t(Mesh1));
- *	\endcode
+ *  \endcode
  *
  *	Of course, you should make this callback as fast as possible. And you're also not supposed
  *	to modify the geometry *after* the collision trees have been built. The alternative was to
@@ -94,11 +94,11 @@
  *
  *	Ex:
  *
- *	\code
+ *  \code
  *		// Setup pointers
  *		MeshInterface0->SetPointers(Mesh0->GetFaces(), Mesh0->GetVerts());
  *		MeshInterface1->SetPointers(Mesh1->GetFaces(), Mesh1->GetVerts());
- *	\endcode
+ *  \endcode
  *
  *
  *	STRIDES:
@@ -112,10 +112,10 @@
  *	In any case, compilation flags are here to select callbacks/pointers/strides at compile time, so
  *	choose what's best for your application. All of this has been wrapped into this MeshInterface.
  *
- *	\class		MeshInterface
- *	\author		Pierre Terdiman
- *	\version	1.3
- *	\date		November, 27, 2002
+ *  \class		MeshInterface
+ *  \author		Pierre Terdiman
+ *  \version	1.3
+ *  \date		November, 27, 2002
 */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -155,7 +155,7 @@ MeshInterface::~MeshInterface() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Checks the mesh interface is valid, i.e. things have been setup correctly.
- *	\return		true if valid
+ *  \return		true if valid
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool MeshInterface::IsValid() const {
@@ -176,7 +176,7 @@ bool MeshInterface::IsValid() const {
 /**
  *	Checks the mesh itself is valid.
  *	Currently we only look for degenerate faces.
- *	\return		number of degenerate faces
+ *  \return		number of degenerate faces
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 uint32_t MeshInterface::CheckTopology() const {
@@ -207,9 +207,9 @@ uint32_t MeshInterface::CheckTopology() const {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Callback control: setups object callback. Must provide triangle-vertices for a given triangle index.
- *	\param		callback	[in] user-defined callback
- *	\param		user_data	[in] user-defined data
- *	\return		true if success
+ *  \param		callback	[in] user-defined callback
+ *  \param		user_data	[in] user-defined data
+ *  \return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool MeshInterface::SetCallback(RequestCallback callback, void *user_data) {
@@ -226,9 +226,9 @@ bool MeshInterface::SetCallback(RequestCallback callback, void *user_data) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Pointers control: setups object pointers. Must provide access to faces and vertices for a given object.
- *	\param		tris	[in] pointer to triangles
- *	\param		verts	[in] pointer to vertices
- *	\return		true if success
+ *  \param		tris	[in] pointer to triangles
+ *  \param		verts	[in] pointer to vertices
+ *  \return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool MeshInterface::SetPointers(const IndexedTriangle* tris, const Point* verts)
@@ -244,9 +244,9 @@ bool MeshInterface::SetPointers(const IndexedTriangle* tris, const Point* verts)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Strides control
- *	\param		tri_stride		[in] size of a triangle in bytes. The first sizeof(IndexedTriangle) bytes are used to get vertex indices.
- *	\param		vertex_stride	[in] size of a vertex in bytes. The first sizeof(Point) bytes are used to get vertex position.
- *	\return		true if success
+ *  \param		tri_stride		[in] size of a triangle in bytes. The first sizeof(IndexedTriangle) bytes are used to get vertex indices.
+ *  \param		vertex_stride	[in] size of a vertex in bytes. The first sizeof(Point) bytes are used to get vertex position.
+ *  \return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool MeshInterface::SetStrides(uint32_t tri_stride, uint32_t vertex_stride)
@@ -264,9 +264,9 @@ bool MeshInterface::SetStrides(uint32_t tri_stride, uint32_t vertex_stride)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Remaps client's mesh according to a permutation.
- *	\param		nb_indices	[in] number of indices in the permutation (will be checked against number of triangles)
- *	\param		permutation	[in] list of triangle indices
- *	\return		true if success
+ *  \param		nb_indices	[in] number of indices in the permutation (will be checked against number of triangles)
+ *  \param		permutation	[in] list of triangle indices
+ *  \return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool MeshInterface::RemapClient(uint32_t nb_indices, const uint32_t *permutation) const {

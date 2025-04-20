@@ -179,13 +179,13 @@ bool CoplanarTriTri(const Point &n,
  *	int NoDivTriTriIsect(float V0[3],float V1[3],float V2[3],
  *                      float U0[3],float U1[3],float U2[3])
  *
- *	\param		V0		[in] triangle 0, vertex 0
- *	\param		V1		[in] triangle 0, vertex 1
- *	\param		V2		[in] triangle 0, vertex 2
- *	\param		U0		[in] triangle 1, vertex 0
- *	\param		U1		[in] triangle 1, vertex 1
- *	\param		U2		[in] triangle 1, vertex 2
- *	\return		true if triangles overlap
+ *  \param		V0		[in] triangle 0, vertex 0
+ *  \param		V1		[in] triangle 0, vertex 1
+ *  \param		V2		[in] triangle 0, vertex 2
+ *  \param		U0		[in] triangle 1, vertex 0
+ *  \param		U1		[in] triangle 1, vertex 1
+ *  \param		U2		[in] triangle 1, vertex 2
+ *  \return		true if triangles overlap
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ bool AABBTreeCollider::TriTriOverlap(const Point &V0,

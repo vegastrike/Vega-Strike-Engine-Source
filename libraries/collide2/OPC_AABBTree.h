@@ -107,10 +107,10 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	User-callback, called for each node by the walking code.
- *	\param		current		[in] current node
- *	\param		depth		[in] current node's depth
- *	\param		user_data	[in] user-defined data
- *	\return		true to recurse through children, else false to bypass them
+ *  \param		current		[in] current node
+ *  \param		depth		[in] current node's depth
+ *  \param		user_data	[in] user-defined data
+ *  \return		true to recurse through children, else false to bypass them
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef bool                (*WalkingCallback)(const AABBTreeNode *current, uint32_t depth, void *user_data);

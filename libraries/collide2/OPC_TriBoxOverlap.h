@@ -133,9 +133,9 @@ inline_ bool planeBoxOverlap(const Point &normal, const float d, const Point &ma
  *	- with "SAT-lite" applied if needed
  *	- and perhaps with some more minor modifs...
  *
- *	\param		center		[in] box center
- *	\param		extents		[in] box extents
- *	\return		true if triangle & box overlap
+ *  \param		center		[in] box center
+ *  \param		extents		[in] box extents
+ *  \return		true if triangle & box overlap
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ bool AABBTreeCollider::TriBoxOverlap(const Point &center, const Point &extents) {

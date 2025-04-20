@@ -90,13 +90,13 @@ void ReleasePruningSorters() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Bipartite box pruning. Returns a list of overlapping pairs of boxes, each box of the pair belongs to a different set.
- *	\param		nb0		[in] number of boxes in the first set
- *	\param		array0	[in] array of boxes for the first set
- *	\param		nb1		[in] number of boxes in the second set
- *	\param		array1	[in] array of boxes for the second set
- *	\param		pairs	[out] array of overlapping pairs
- *	\param		axes	[in] projection order (0,2,1 is often best)
- *	\return		true if success.
+ *  \param		nb0		[in] number of boxes in the first set
+ *  \param		array0	[in] array of boxes for the first set
+ *  \param		nb1		[in] number of boxes in the second set
+ *  \param		array1	[in] array of boxes for the second set
+ *  \param		pairs	[out] array of overlapping pairs
+ *  \param		axes	[in] projection order (0,2,1 is often best)
+ *  \return		true if success.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Opcode::BipartiteBoxPruning(uint32_t nb0,
@@ -195,11 +195,11 @@ bool Opcode::BipartiteBoxPruning(uint32_t nb0,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Complete box pruning. Returns a list of overlapping pairs of boxes, each box of the pair belongs to the same set.
- *	\param		nb		[in] number of boxes
- *	\param		array	[in] array of boxes
- *	\param		pairs	[out] array of overlapping pairs
- *	\param		axes	[in] projection order (0,2,1 is often best)
- *	\return		true if success.
+ *  \param		nb		[in] number of boxes
+ *  \param		array	[in] array of boxes
+ *  \param		pairs	[out] array of overlapping pairs
+ *  \param		axes	[in] projection order (0,2,1 is often best)
+ *  \return		true if success.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Opcode::CompleteBoxPruning(uint32_t nb, const AABB **array, Pairs &pairs, const Axes &axes) {
@@ -333,12 +333,12 @@ bool Opcode::CompleteBoxPruning(uint32_t nb, const AABB **array, Pairs &pairs, c
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Brute-force bipartite box pruning. Returns a list of overlapping pairs of boxes, each box of the pair belongs to a different set.
- *	\param		nb0		[in] number of boxes in the first set
- *	\param		array0	[in] array of boxes for the first set
- *	\param		nb1		[in] number of boxes in the second set
- *	\param		array1	[in] array of boxes for the second set
- *	\param		pairs	[out] array of overlapping pairs
- *	\return		true if success.
+ *  \param		nb0		[in] number of boxes in the first set
+ *  \param		array0	[in] array of boxes for the first set
+ *  \param		nb1		[in] number of boxes in the second set
+ *  \param		array1	[in] array of boxes for the second set
+ *  \param		pairs	[out] array of overlapping pairs
+ *  \return		true if success.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Opcode::BruteForceBipartiteBoxTest(uint32_t nb0,
@@ -365,10 +365,10 @@ bool Opcode::BruteForceBipartiteBoxTest(uint32_t nb0,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Complete box pruning. Returns a list of overlapping pairs of boxes, each box of the pair belongs to the same set.
- *	\param		nb		[in] number of boxes
- *	\param		array	[in] array of boxes
- *	\param		pairs	[out] array of overlapping pairs
- *	\return		true if success.
+ *  \param		nb		[in] number of boxes
+ *  \param		array	[in] array of boxes
+ *  \param		pairs	[out] array of overlapping pairs
+ *  \return		true if success.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Opcode::BruteForceCompleteBoxTest(uint32_t nb, const AABB **array, Pairs &pairs) {

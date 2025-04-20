@@ -5,7 +5,7 @@
  *  \author		Pierre Terdiman
  *  \date		April, 4, 2000
  *
- * Copyright (C) 2000-2025 Pierre Terdiman, pyramid3d, LifWirser,
+ * Copyright (C) 1998-2025 Pierre Terdiman, pyramid3d, LifWirser,
  * Benjamen Meyer, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * Public Domain
