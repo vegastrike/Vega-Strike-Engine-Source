@@ -1,7 +1,7 @@
 /*
  * collision.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy and
+ * Copyright (C) 2020-2025 Daniel Horn, Roy Falk, Stephen G. Tuggy and
  * other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -35,6 +35,8 @@
 
 #include <typeinfo>
 // #include <boost/log/trivial.hpp>
+#include "vega_cast_utils.h"
+#include "cmd/planet.h"
 #include "src/vs_logging.h"
 
 // TODO: convert all float to double and all Vector to QVector.
@@ -60,13 +62,15 @@ Vega_UnitType::asteroid,
 Vega_UnitType::enhancement,
 Vega_UnitType::missile*/
 void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
+    Vega_UnitType other_units_type = other_unit->isUnit();
+
     // Collision with a nebula does nothing
-    if (other_unit->isUnit() == Vega_UnitType::nebula) {
+    if (other_units_type == Vega_UnitType::nebula) {
         return;
     }
 
     // Collision with a enhancement improves your shield apparently
-    if (other_unit->isUnit() == Vega_UnitType::enhancement) {
+    if (other_units_type == Vega_UnitType::enhancement) {
         apply_force = true;
         return;
     }
@@ -105,7 +109,26 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
             return;
 
             // Units (ships) should calculate actual damage
-        case Vega_UnitType::unit:
+    case Vega_UnitType::unit:
+            // Handle the "Nav 8" case
+            if (other_units_type == Vega_UnitType::planet) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+                const double nav_8_start_time = realTime();
+#endif
+                const auto* as_planet = vega_dynamic_const_cast_ptr<const Planet>(other_unit);
+                if (as_planet->is_nav_point()) {
+                    VS_LOG(debug, "Can't collide with a Nav Point");
+#if defined(LOG_TIME_TAKEN_DETAILS)
+                    const double nav_8_end_time = realTime();
+                    VS_LOG(trace, (boost::format("%1%: Time taken by handling Nav 8 case: %2%") % __FUNCTION__ % (nav_8_end_time - nav_8_start_time)));
+#endif
+                    return;
+                }
+#if defined(LOG_TIME_TAKEN_DETAILS)
+                const double nav_8_end_time = realTime();
+                VS_LOG(trace, (boost::format("%1%: Time taken by handling Nav 8 case: %2%") % __FUNCTION__ % (nav_8_end_time - nav_8_start_time)));
+#endif
+            }
             apply_force = true;
             deal_damage = true;
             return;
@@ -114,8 +137,8 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
             // TODO: refactor this.
         case Vega_UnitType::enhancement:
             // We can't enhance rocks
-            if (other_unit->isUnit() == Vega_UnitType::asteroid ||
-                    other_unit->isUnit() == Vega_UnitType::planet) {
+            if (other_units_type == Vega_UnitType::asteroid ||
+                    other_units_type == Vega_UnitType::planet) {
                 apply_force = true;
                 return;
             }
