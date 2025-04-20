@@ -170,7 +170,7 @@ public:
             bool inside_out);
 
     void DisableLights();
-    virtual void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix);
+    void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix) override;
     void DrawTerrain();
     void EnableLights();
     void endElement();
