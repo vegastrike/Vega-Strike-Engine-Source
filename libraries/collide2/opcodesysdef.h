@@ -1,11 +1,13 @@
 /**
  * opcodesysdef.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
- * Copyright (C) 2021-2025 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2001-2025 Pierre Terdiman, Daniel Horn, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
- * This file is part of Vega Strike.
+ * This file is part of OPCODE - Optimized Collision Detection
+ * (http://www.codercorner.com/Opcode.htm) and has been
+ * incorporated into Vega Strike
+ * (https://github.com/vegastrike/Vega-Strike-Engine-Source).
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2CS_COMPAT_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2CS_COMPAT_H
 

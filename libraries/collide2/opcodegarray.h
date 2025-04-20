@@ -1,8 +1,10 @@
 /*
+    opcodegarray.h
+
     Crystal Space utility library: vector class interface
     Copyright (C) 1998,1999,2000 by Andrew Zabolotny <bit@eltech.ru>
     Copyright (C) 2020 pyramid3d
-    Copyright (C) 2020 Stephen G. Tuggy
+    Copyright (C) 2020, 2025 Stephen G. Tuggy
     Copyright (C) 2023 Benjamen R. Meyer
 
     This library is free software; you can redistribute it and/or
