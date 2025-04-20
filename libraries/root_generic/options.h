@@ -44,10 +44,8 @@ public:
     bool command_interpretor{};
     bool load_last_savegame{};
     bool debug_fs{};
-    float simulation_atom{};
-    float audio_atom{};
 
-/* Audio Options */
+    /* Audio Options */
     int threadtime{};
     std::string missionvictorysong;
     bool Music{};
@@ -253,7 +251,6 @@ public:
     bool game_speed_affects_autogen_systems{};
     double star_system_scale{};
     double respawn_unit_size{};
-    float auto_pilot_planet_radius_percent{};
     std::string campaigns;              //WRONG SECTION ...change after 0.5
     uint NumRunningSystems{};
     float InactiveSystemTime{};
