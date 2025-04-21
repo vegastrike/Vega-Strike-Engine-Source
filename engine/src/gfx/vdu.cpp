@@ -1037,8 +1037,8 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
 static void DrawGun(Vector pos, float w, float h, MOUNT_SIZE sz) {
     w = fabs(w);
     h = fabs(h);
-    float oox = 1. / g_game.x_resolution;
-    float ooy = 1. / g_game.y_resolution;
+    float oox = 1. / configuration()->graphics.resolution_x;
+    float ooy = 1. / configuration()->graphics.resolution_y;
     pos.j -= h / 3.8;
     if (sz == MOUNT_SIZE::NOWEAP) {
         GFXPointSize(4);
@@ -1319,8 +1319,8 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
     GFXEnable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
     VIEWSTYLE which = viewStyle;
-    float tmpaspect = g_game.aspect;
-    g_game.aspect = w / h;
+    float tmpaspect = configuration()->graphics.aspect;
+    configuration()->graphics.aspect = w / h;
     _Universe->AccessCamera(which)->SetSubwindow(x, y, w, h);
     _Universe->SelectCamera(which);
     VIEWSTYLE tmp = _Universe->AccessCockpit()->GetView();
@@ -1330,7 +1330,7 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
     GFXClear(GFXFALSE);
     GFXColor4f(1, 1, 1, 1);
     _Universe->activeStarSystem()->Draw(false);
-    g_game.aspect = tmpaspect;
+    configuration()->graphics.aspect = tmpaspect;
     _Universe->AccessCamera(which)->SetSubwindow(0, 0, 1, 1);
     _Universe->AccessCockpit()->SetView(tmp);
     _Universe->AccessCockpit()->SelectProperCamera();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Copyright (C) 2001-2025 Daniel Horn, Alexander Rawass, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -42,7 +42,8 @@
 #endif
 
 #include "root_generic/options.h"
-#include "SDL2/SDL_joystick.h"
+#include <SDL2/SDL_joystick.h>
+#include "configuration/configuration.h"
 
 
 //Used for storing the max and min values of the tree Joystick Axes - Okona
@@ -299,9 +300,9 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     GetMouseXY(_mx, _my);
     GetMouseDelta(_dx, _dy);
     if (!game_options()->warp_mouse) {
-        fdx = (float) (_dx = _mx - g_game.x_resolution / 2.0f);
+        fdx = (float) (_dx = _mx - configuration()->graphics.resolution_x / 2.0f);
         def_mouse_sens = 25;
-        fdy = (float) (_dy = _my - g_game.y_resolution / 2.0f);
+        fdy = (float) (_dy = _my - configuration()->graphics.resolution_y / 2.0f);
     } else {
         static std::list<mouseData> md;
         std::list<mouseData>::iterator i = md.begin();
@@ -343,8 +344,8 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
         fdx = float(valx) / game_options()->mouse_blur;
         fdy = float(valy) / game_options()->mouse_blur;
     }
-    joy_axis[0] = fdx / (g_game.x_resolution * def_mouse_sens / game_options()->mouse_sensitivity);
-    joy_axis[1] = fdy / (g_game.y_resolution * def_mouse_sens / game_options()->mouse_sensitivity);
+    joy_axis[0] = fdx / (configuration()->graphics.resolution_x * def_mouse_sens / game_options()->mouse_sensitivity);
+    joy_axis[1] = fdy / (configuration()->graphics.resolution_y * def_mouse_sens / game_options()->mouse_sensitivity);
     if (!game_options()->warp_mouse) {
         modifyDeadZone(this);
     }

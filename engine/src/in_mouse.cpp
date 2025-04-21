@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -92,11 +92,11 @@ void DealWithWarp(int x, int y) {
     if (game_options()->warp_mouse) {
         if (joystick[MOUSE_JOYSTICK]->player < _Universe->numPlayers()) {
             if (x < game_options()->warp_mouse_zone || y < game_options()->warp_mouse_zone
-                    || x > g_game.x_resolution - game_options()->warp_mouse_zone || y
-                    > g_game.y_resolution - game_options()->warp_mouse_zone) {
+                    || x > configuration()->graphics.resolution_x - game_options()->warp_mouse_zone || y
+                    > configuration()->graphics.resolution_y - game_options()->warp_mouse_zone) {
 
-                int delx = -x + g_game.x_resolution / 2;
-                int dely = -y + g_game.y_resolution / 2;
+                int delx = -x + configuration()->graphics.resolution_x / 2;
+                int dely = -y + configuration()->graphics.resolution_y / 2;
                 mousex += delx;
                 mousey += dely;
                 deque<MouseEvent>::iterator i;
@@ -105,7 +105,7 @@ void DealWithWarp(int x, int y) {
                     i->y += dely;
                 }
                 if (warpallowage-- >= 0) {
-                    winsys_warp_pointer(g_game.x_resolution / 2, g_game.y_resolution / 2);
+                    winsys_warp_pointer(configuration()->graphics.resolution_x / 2, configuration()->graphics.resolution_y / 2);
                 }
             }
         }

@@ -1,7 +1,7 @@
 /*
  * base_interface.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -68,13 +68,13 @@ static unsigned int &getMouseButtonMask() {
 }
 
 static void biModifyMouseSensitivity(int &x, int &y, bool invert) {
-    int xrez = g_game.x_resolution;
+    int xrez = configuration()->graphics.resolution_x;
     static int
             whentodouble = XMLSupport::parse_int(vs_config->getVariable("joystick", "double_mouse_position", "1280"));
     static float factor = XMLSupport::parse_float(vs_config->getVariable("joystick", "double_mouse_factor", "2"));
     if (xrez >= whentodouble) {
-        x -= g_game.x_resolution / 2;
-        y -= g_game.y_resolution / 2;
+        x -= configuration()->graphics.resolution_x / 2;
+        y -= configuration()->graphics.resolution_y / 2;
         if (invert) {
             x = int(x / factor);
             y = int(y / factor);
@@ -82,13 +82,13 @@ static void biModifyMouseSensitivity(int &x, int &y, bool invert) {
             x = int(x * factor);
             y = int(y * factor);
         }
-        x += g_game.x_resolution / 2;
-        y += g_game.y_resolution / 2;
-        if (x > g_game.x_resolution) {
-            x = g_game.x_resolution;
+        x += configuration()->graphics.resolution_x / 2;
+        y += configuration()->graphics.resolution_y / 2;
+        if (x > configuration()->graphics.resolution_x) {
+            x = configuration()->graphics.resolution_x;
         }
-        if (y > g_game.y_resolution) {
-            y = g_game.y_resolution;
+        if (y > configuration()->graphics.resolution_y) {
+            y = configuration()->graphics.resolution_y;
         }
         if (x < 0) {
             x = 0;
@@ -130,8 +130,8 @@ using namespace VSFileSystem;
 std::vector<unsigned int> base_keyboard_queue;
 
 static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float *y) {
-    (*x) = (((float) (xbeforecalc * 2)) / g_game.x_resolution) - 1;
-    (*y) = -(((float) (ybeforecalc * 2)) / g_game.y_resolution) + 1;
+    (*x) = (((float) (xbeforecalc * 2)) / configuration()->graphics.resolution_x) - 1;
+    (*y) = -(((float) (ybeforecalc * 2)) / configuration()->graphics.resolution_y) + 1;
 }
 
 #define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
@@ -140,10 +140,10 @@ static void SetupViewport() {
     static int base_max_width = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_width", "0"));
     static int base_max_height = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_height", "0"));
     if (base_max_width && base_max_height) {
-        int xrez = mymin(g_game.x_resolution, base_max_width);
-        int yrez = mymin(g_game.y_resolution, base_max_height);
-        int offsetx = (g_game.x_resolution - xrez) / 2;
-        int offsety = (g_game.y_resolution - yrez) / 2;
+        int xrez = mymin(configuration()->graphics.resolution_x, base_max_width);
+        int yrez = mymin(configuration()->graphics.resolution_y, base_max_height);
+        int offsetx = (configuration()->graphics.resolution_x - xrez) / 2;
+        int offsety = (configuration()->graphics.resolution_y - yrez) / 2;
         glViewport(offsetx, offsety, xrez, yrez);
     }
 }
@@ -310,9 +310,9 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
     Unit *un = base->caller.GetUnit();
     if (un) {
         GFXHudMode(GFXFALSE);
-        float tmp = g_game.fov;
-        static float standard_fov = XMLSupport::parse_float(vs_config->getVariable("graphics", "base_fov", "90"));
-        g_game.fov = standard_fov;
+        float tmp = configuration()->graphics.fov;
+        const float standard_fov = configuration()->graphics.bases.fov;
+        configuration()->graphics.fov = standard_fov;
         float tmp1 = _Universe->AccessCamera()->GetFov();
         _Universe->AccessCamera()->SetFov(standard_fov);
         Vector p, q, r;
@@ -325,7 +325,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         Matrix final;
         Matrix newmat = mat;
         newmat.p.k *= un->rSize();
-        newmat.p += QVector(0, 0, g_game.znear);
+        newmat.p += QVector(0, 0, configuration()->graphics.znear);
         newmat.p.i *= newmat.p.k;
         newmat.p.j *= newmat.p.k;
         MultMatrix(final, cam, newmat);
@@ -358,7 +358,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         _Universe->AccessCamera()->UpdateGFX();
         SetupViewport();
         GFXHudMode(GFXTRUE);
-        g_game.fov = tmp;
+        configuration()->graphics.fov = tmp;
         _Universe->AccessCamera()->SetFov(tmp1);
     }
 }
@@ -574,20 +574,19 @@ BaseInterface::Room::BaseTalk::BaseTalk(const std::string &msg, const std::strin
 }
 
 void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
-    int tmpx = g_game.x_resolution;
-    int tmpy = g_game.y_resolution;
-    static int base_max_width = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_width", "0"));
-    static int base_max_height = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_height", "0"));
+    int tmpx = configuration()->graphics.resolution_x;
+    int tmpy = configuration()->graphics.resolution_y;
+    const int base_max_width = configuration()->graphics.bases.max_width;
+    const int base_max_height = configuration()->graphics.bases.max_height;
     if (base_max_width && base_max_height) {
         if (base_max_width < tmpx) {
-            g_game.x_resolution = base_max_width;
+            configuration()->graphics.resolution_x = base_max_width;
         }
         if (base_max_height < tmpy) {
-            g_game.y_resolution = base_max_height;
+            configuration()->graphics.resolution_y = base_max_height;
         }
     }
-    static float base_text_background_alpha =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "base_text_background_alpha", "0.0625"));
+    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha;
     GFXColor tmpbg = text.bgcol;
     bool automatte = (0 == tmpbg.a);
     if (automatte) {
@@ -610,8 +609,8 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         text.Draw(text.GetText(), 0, true, false, automatte);
     }
     text.bgcol = tmpbg;
-    g_game.x_resolution = tmpx;
-    g_game.y_resolution = tmpy;
+    configuration()->graphics.resolution_x = tmpx;
+    configuration()->graphics.resolution_y = tmpy;
 }
 
 void RunPython(const char *filnam) {
@@ -847,8 +846,8 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
             while (count++ < links.size()) {
                 Link *curlink = links[base->curlinkindex++ % links.size()];
                 if (curlink) {
-                    int x = int((((curlink->x + (curlink->wid / 2)) + 1) / 2) * g_game.x_resolution);
-                    int y = -int((((curlink->y + (curlink->hei / 2)) - 1) / 2) * g_game.y_resolution);
+                    int x = int((((curlink->x + (curlink->wid / 2)) + 1) / 2) * configuration()->graphics.resolution_x);
+                    int y = -int((((curlink->y + (curlink->hei / 2)) - 1) / 2) * configuration()->graphics.resolution_y);
                     biModifyMouseSensitivity(x, y, true);
                     winsys_warp_pointer(x, y);
                     PassiveMouseOverWin(x, y);
@@ -1512,7 +1511,7 @@ void BaseInterface::Draw() {
     AnimationDraw();
 
     float x, y;
-    glViewport(0, 0, g_game.x_resolution, g_game.y_resolution);
+    glViewport(0, 0, configuration()->graphics.resolution_x, configuration()->graphics.resolution_y);
     static float base_text_background_alpha =
             XMLSupport::parse_float(vs_config->getVariable("graphics", "base_text_background_alpha", "0.0625"));
 
@@ -1541,7 +1540,7 @@ void BaseInterface::Draw() {
     }
     SetupViewport();
     EndGUIFrame(mousePointerStyle);
-    glViewport(0, 0, g_game.x_resolution, g_game.y_resolution);
+    glViewport(0, 0, configuration()->graphics.resolution_x, configuration()->graphics.resolution_y);
     Unit *un = caller.GetUnit();
     Unit *base = baseun.GetUnit();
     if (un && (!base)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
+ * Copyright (C) 2001-2025 Daniel Horn, Mike Byron, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -213,7 +213,7 @@ static float MouseXTo2dX(int x) {
     //Multiply by 2 first to reduce division error in the multiply.
     //Do everything in double to minimize calc error and because it's faster.
     //Result in float to round-off at the end.  Gets prettier numbers. :-)
-    return (2.0 * ((double) x + 0.5)) / g_game.x_resolution - 1.0;
+    return (2.0 * ((double) x + 0.5)) / configuration()->graphics.resolution_x - 1.0;
 }
 
 static float MouseYTo2dY(int y) {
@@ -221,7 +221,7 @@ static float MouseYTo2dY(int y) {
     //This is a bit different from x because the mouse coords increase top-
     //to-bottom, and the drawing surface y increases bottom-to-top.
     //So we need to reflect the mouse coords around the y origin.
-    return 1.0 - (2.0 * ((double) y + 0.5)) / g_game.y_resolution;
+    return 1.0 - (2.0 * ((double) y + 0.5)) / configuration()->graphics.resolution_y;
 }
 
 void EventManager::ProcessMouseClick(int button, int state, int x, int y) {
