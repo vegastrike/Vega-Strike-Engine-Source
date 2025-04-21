@@ -96,9 +96,9 @@ void BoltDrawManager::Draw() {
     GFXAlphaTest(GREATER, .1);
 
     float pixel_angle = 2
-            * sin(g_game.fov * M_PI / 180.0
-                    / (g_game.y_resolution
-                            > g_game.x_resolution ? g_game.y_resolution : g_game.x_resolution))
+            * sin(configuration()->graphics.fov * M_PI / 180.0
+                    / (configuration()->graphics.resolution_y
+                            > configuration()->graphics.resolution_x ? configuration()->graphics.resolution_y : configuration()->graphics.resolution_x))
             * game_options()->bolt_pixel_size;
     pixel_angle *= pixel_angle;
     camera_position = _Universe->AccessCamera()->GetPosition();

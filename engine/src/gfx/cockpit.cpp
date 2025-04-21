@@ -851,7 +851,7 @@ void GameCockpit::TriggerEvents(Unit *un) {
 
 
 void GameCockpit::Init(const char *file) {
-    smooth_fov = g_game.fov;
+    smooth_fov = configuration()->graphics.fov;
     editingTextMessage = false;
     Cockpit::Init(file);
     if (Panel.size() > 0) {
@@ -969,9 +969,9 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
     projection_limit_y = limit_y;
     //The angle between the center of the screen and the border is half the fov.
     projection_limit_y = tan(projection_limit_y * M_PI / (180 * 2));
-    projection_limit_x = projection_limit_y * g_game.aspect;
+    projection_limit_x = projection_limit_y * configuration()->graphics.aspect;
     //Precompute this division... performance.
-    inv_screen_aspect_ratio = 1 / g_game.aspect;
+    inv_screen_aspect_ratio = 1 / configuration()->graphics.aspect;
 
     oaccel = Vector(0, 0, 0);
 
@@ -1354,7 +1354,7 @@ static void DrawHeadingMarker(Cockpit &cp, const GFXColor &col) {
     cam->GetPQR(p, q, r);
 
     // znear offset
-    float offset = 2 * g_game.znear / cos(cam->GetFov() * M_PI / 180.0);
+    float offset = 2 * configuration()->graphics.znear / cos(cam->GetFov() * M_PI / 180.0);
     v *= offset;
     d *= offset;
 
@@ -1497,7 +1497,7 @@ void GameCockpit::Draw() {
             if (par) {
                 //cockpit is unaffected by FOV WARP-Link
                 float oldfov = AccessCamera()->GetFov();
-                AccessCamera()->SetFov(g_game.fov);
+                AccessCamera()->SetFov(configuration()->graphics.fov);
 
                 GFXLoadIdentity(MODEL);
 
@@ -2005,13 +2005,12 @@ void GameCockpit::Draw() {
             GFXEnable(TEXTURE0);
             //GFXDisable (DEPTHTEST);
             //GFXDisable(TEXTURE1);
-            static float deadband = game_options()->mouse_deadband;
-            static int revspr =
-                    XMLSupport::parse_bool(vs_config->getVariable("joystick", "reverse_mouse_spr", "true")) ? 1 : -1;
-            static string blah = vs_config->getVariable("joystick", "mouse_crosshair", "crosshairs.spr");
-            static VSSprite MouseVSSprite(blah.c_str(), BILINEAR, GFXTRUE);
-            float xcoord = (-1 + float(mousex) / (.5 * g_game.x_resolution));
-            float ycoord = (-revspr + float(revspr * mousey) / (.5 * g_game.y_resolution));
+            const float deadband = configuration()->joystick.mouse_deadband;
+            const int reverse_spr = configuration()->joystick.reverse_mouse_spr;
+            const string blah = configuration()->joystick.mouse_crosshair;
+            VSSprite MouseVSSprite(blah.c_str(), BILINEAR, GFXTRUE);
+            float xcoord = (-1.0F + float(mousex) / (0.5 * configuration()->graphics.resolution_x));
+            float ycoord = (-reverse_spr + float(reverse_spr * mousey) / (.5 * configuration()->graphics.resolution_y));
             MouseVSSprite.SetPosition(xcoord * (1 - fabs(crosscenx)) + crosscenx,
                     ycoord * (1 - fabs(crossceny)) + crossceny);
             float xs, ys;
@@ -2039,7 +2038,7 @@ void GameCockpit::Draw() {
     {
         //again, NAV computer is unaffected by FOV WARP-Link
         float oldfov = AccessCamera()->GetFov();
-        AccessCamera()->SetFov(g_game.fov);
+        AccessCamera()->SetFov(configuration()->graphics.fov);
         AccessCamera()->UpdateGFXAgain();
         DrawNavSystem(&ThisNav, AccessCamera(), cockpit_offset);
         AccessCamera()->SetFov(oldfov);
@@ -2317,7 +2316,7 @@ static void ShoveCamBehindUnit(int cam, Unit *un, float zoomfactor) {
     //commented out by chuck_starchaser; --never used
     QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
     _Universe->AccessCamera(cam)->SetPosition(
-            unpos - _Universe->AccessCamera()->GetR().Cast() * (un->rSize() + g_game.znear * 2) * zoomfactor,
+            unpos - _Universe->AccessCamera()->GetR().Cast() * (un->rSize() + configuration()->graphics.znear * 2) * zoomfactor,
             un->GetWarpVelocity(), un->GetAngularVelocity(), un->GetAcceleration());
 }
 
@@ -2329,7 +2328,7 @@ static void ShoveCamBelowUnit(int cam, Unit *un, float zoomfactor) {
     static float
             ammttoshovecam = XMLSupport::parse_float(vs_config->getVariable("graphics", "shove_camera_down", ".3"));
     _Universe->AccessCamera(cam)->SetPosition(
-            unpos - (r - ammttoshovecam * q).Cast() * (un->rSize() + g_game.znear * 2) * zoomfactor,
+            unpos - (r - ammttoshovecam * q).Cast() * (un->rSize() + configuration()->graphics.znear * 2) * zoomfactor,
             un->GetWarpVelocity(),
             un->GetAngularVelocity(),
             un->GetAcceleration());
@@ -2362,9 +2361,9 @@ static void translate_as(Vector &p,
 void GameCockpit::SetupViewPort(bool clip) {
     _Universe->AccessCamera()->RestoreViewPort(0, (view == CP_FRONT ? viewport_offset : 0));
     GFXViewPort(0,
-            (int) ((view == CP_FRONT ? viewport_offset : 0) * g_game.y_resolution),
-            g_game.x_resolution,
-            g_game.y_resolution);
+            (int) ((view == CP_FRONT ? viewport_offset : 0) * configuration()->graphics.resolution_y),
+            configuration()->graphics.resolution_x,
+            configuration()->graphics.resolution_y);
     _Universe->AccessCamera()->setCockpitOffset(view < CP_CHASE ? cockpit_offset : 0);
     Unit *un, *tgt;
     if ((un = parent.GetUnit())) {
@@ -2589,10 +2588,10 @@ void GameCockpit::SetupViewPort(bool clip) {
                     XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.smoothing", ".4"));
             float fov_smoot = pow(double(fov_smoothing), GetElapsedTime());
             smooth_fov =
-                    min(170.0f,
-                            max(5.0f,
+                    min(170.0,
+                            max(5.0,
                                     (1 - fov_smoot) * smooth_fov
-                                            + fov_smoot * (g_game.fov * (st_mult + sh_mult) + st_offs + sh_offs)));
+                                            + fov_smoot * (configuration()->graphics.fov * (st_mult + sh_mult) + st_offs + sh_offs)));
             _Universe->AccessCamera()->SetFov(smooth_fov);
         }
     }

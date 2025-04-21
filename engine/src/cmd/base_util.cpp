@@ -870,7 +870,7 @@ float GetTextHeight(std::string text, Vector widheimult) {
     static bool use_bit = force_highquality
             || XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font", "false"));
     static float font_point = XMLSupport::parse_float(vs_config->getVariable("graphics", "font_point", "16"));
-    return use_bit ? getFontHeight() : (font_point * 2 / g_game.y_resolution);
+    return use_bit ? getFontHeight() : (font_point * 2 / configuration()->graphics.resolution_y);
 }
 
 float GetTextWidth(std::string text, Vector widheimult) {

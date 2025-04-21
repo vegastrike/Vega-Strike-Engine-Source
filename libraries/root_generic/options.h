@@ -139,10 +139,6 @@ public:
     bool separatespecularcolor{};
     bool LockVertexArrays{};
     int fogdetail{};
-    float fov{};
-    float aspect{};
-    float znear{};
-    float zfar{};
     float ModelDetail{};
     bool UseTextures{};
     bool UseShipTextures{};

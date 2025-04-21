@@ -40,16 +40,6 @@
 
 #if !defined (_WIN32) && !defined (__CYGWIN__)
 
-//#if !(defined(__APPLE__) || defined(MACOSX))
-//#define GL_GLEXT_PROTOTYPES 1
-//#define GLX_GLXEXT_PROTOTYPES 1
-//#define GLX_GLXEXT_LEGACY 1
-
-//#   include <GL/glxext.h>
-//#   include <GL/glx.h>
-//#   include <GL/glxext.h>
-//#endif
-
 #include <stdlib.h>
 
 #else
@@ -90,6 +80,8 @@
 
 #include <stdio.h>
 #include "gl_init.h"
+
+#include "configuration/configuration.h"
 #define WINDOW_TITLE "Vega Strike " VERSION
 
 #if defined (CG_SUPPORT)
@@ -557,10 +549,6 @@ void init_opengl_extensions() {
 }
 
 static void initfov() {
-    g_game.fov = game_options()->fov;
-    g_game.aspect = game_options()->aspect;
-    g_game.znear = game_options()->znear;
-    g_game.zfar = game_options()->zfar;
     g_game.detaillevel = game_options()->ModelDetail;
     g_game.use_textures = game_options()->UseTextures;
     g_game.use_ship_textures = game_options()->UseShipTextures;
@@ -573,18 +561,18 @@ static void initfov() {
     /*
      *  FILE * fp = fopen ("glsetup.txt","r");
      *  if (fp) {
-     *  VSFileSystem::Fscanf (fp,"fov %f\n",&g_game.fov);
+     *  VSFileSystem::Fscanf (fp,"fov %f\n",&configuration()->graphics.fov);
      *  VSFileSystem::Fscanf (fp,"aspect %f\n",&g_game.aspect);
-     *  VSFileSystem::Fscanf (fp,"znear %f\n",&g_game.znear);
-     *  VSFileSystem::Fscanf (fp,"zfar %f\n",&g_game.zfar);
+     *  VSFileSystem::Fscanf (fp,"znear %f\n",&configuration()->graphics.znear);
+     *  VSFileSystem::Fscanf (fp,"zfar %f\n",&configuration()->graphics.zfar);
      *  VSFileSystem::Close (fp);
      *  }
      */
 }
 
 static void Reshape(int x, int y) {
-    g_game.x_resolution = x;
-    g_game.y_resolution = y;
+    configuration()->graphics.resolution_x = x;
+    configuration()->graphics.resolution_y = y;
     VS_LOG(trace, (boost::format("Reshaping %1% %2%") % x % y));
 }
 
@@ -596,7 +584,7 @@ void GFXInit(int argc, char **argv) {
     winsys_init(&argc, argv, &vsname[0], &vsicon[0]);
 
 
-    glViewport(0, 0, g_game.x_resolution, g_game.y_resolution);
+    glViewport(0, 0, configuration()->graphics.resolution_x, configuration()->graphics.resolution_y);
     static GFXColor clearcol = vs_config->getColor("space_background");;
     gl_options.wireframe = game_options()->use_wireframe;
     gl_options.max_texture_dimension = game_options()->max_texture_dimension;

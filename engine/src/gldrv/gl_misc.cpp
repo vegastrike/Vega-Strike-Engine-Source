@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
+ * Copyright (C) 2001-2025 Daniel Horn, Alan Shieh, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -31,7 +31,7 @@
 #include "gl_light.h"
 #include "winsys.h"
 #include "root_generic/options.h"
-
+#include "configuration/configuration.h"
 
 
 // disable clientside draw for debugging purposes
@@ -47,10 +47,10 @@ bool GFXMultiTexAvailable() {
 
 void GFXCircle(float x, float y, float wid, float hei) {
     float segmag =
-            (Vector(wid * g_game.x_resolution, 0,
+            (Vector(wid * configuration()->graphics.resolution_x, 0,
                     0)
-                    - Vector(static_cast<double>(wid) * g_game.x_resolution * cos(2.0 * M_PI / 360.0),
-                            static_cast<double>(hei) * g_game.y_resolution * sin(2.0 * M_PI / 360.0),
+                    - Vector(static_cast<double>(wid) * configuration()->graphics.resolution_x * cos(2.0 * M_PI / 360.0),
+                            static_cast<double>(hei) * configuration()->graphics.resolution_y * sin(2.0 * M_PI / 360.0),
                             0)).Magnitude();
     int accuracy = (int) (360.0f * game_options()->circle_accuracy * (1.0f < segmag ? 1.0 : segmag));
     if (accuracy < 4) {
@@ -355,7 +355,7 @@ void GFXDeleteList(int list) {
 void GFXSubwindow(int x, int y, int xsize, int ysize) {
     glViewport(x, y, xsize, ysize);
     glScissor(x, y, xsize, ysize);
-    if (x == 0 && y == 0 && xsize == g_game.x_resolution && ysize == g_game.y_resolution) {
+    if (x == 0 && y == 0 && xsize == configuration()->graphics.resolution_x && ysize == configuration()->graphics.resolution_y) {
         glDisable(GL_SCISSOR_TEST);
     } else {
         glEnable(GL_SCISSOR_TEST);
@@ -363,15 +363,15 @@ void GFXSubwindow(int x, int y, int xsize, int ysize) {
 }
 
 void GFXSubwindow(float x, float y, float xsize, float ysize) {
-    GFXSubwindow(int(x * g_game.x_resolution), int(y * g_game.y_resolution), int(xsize * g_game.x_resolution),
-            int(ysize * g_game.y_resolution));
+    GFXSubwindow(int(x * configuration()->graphics.resolution_x), int(y * configuration()->graphics.resolution_y), int(xsize * configuration()->graphics.resolution_x),
+            int(ysize * configuration()->graphics.resolution_y));
 }
 
 Vector GFXDeviceToEye(int x, int y) {
     float l, r, b, t, n, f;
     GFXGetFrustumVars(true, &l, &r, &b, &t, &n, &f);
-    return Vector((l + (r - l) * float(x) / g_game.x_resolution),
-            (t + (b - t) * float(y) / g_game.y_resolution),
+    return Vector((l + (r - l) * float(x) / configuration()->graphics.resolution_x),
+            (t + (b - t) * float(y) / configuration()->graphics.resolution_y),
             n);
 }
 

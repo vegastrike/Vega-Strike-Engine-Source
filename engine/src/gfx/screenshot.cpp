@@ -27,6 +27,7 @@
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
 #include "gfx/vsimage.h"
+#include "configuration/configuration.h"
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #include <glut.h>
 
@@ -35,8 +36,8 @@ using namespace VSFileSystem;
 void Screenshot(const KBData &, KBSTATE state) {
     if (state == PRESS) {
         GLint xywh[4] = {0, 0, 0, 0};
-        xywh[2] = g_game.x_resolution;
-        xywh[3] = g_game.y_resolution;
+        xywh[2] = configuration()->graphics.resolution_x;
+        xywh[3] = configuration()->graphics.resolution_y;
         glGetIntegerv(GL_VIEWPORT, xywh);
         unsigned char *tmp = static_cast<unsigned char *>(malloc(
             static_cast<size_t>(xywh[2]) * static_cast<size_t>(xywh[3]) * 4 * sizeof(unsigned char)));

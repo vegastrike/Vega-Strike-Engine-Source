@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 David Ranger, Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 David Ranger, Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -31,6 +31,8 @@
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "gldrv/gl_globals.h"
+#include "configuration/configuration.h"
+
 using namespace VSFileSystem;
 
 #define isspAce(chr)                                                                  \
@@ -157,7 +159,7 @@ void SetSoftwareMousePosition(int x, int y) {
  */
 void StartGUIFrame(GFXBOOL clr) {
     //glutSetCursor(GLUT_CURSOR_INHERIT);
-    //GFXViewPort (0,0,g_game.x_resolution,g_game.y_resolution);
+    //GFXViewPort (0,0,configuration()->graphics.resolution_x,configuration()->graphics.resolution_y);
     GFXHudMode(true);
     GFXColor4f(1, 1, 1, 1);
 
@@ -184,7 +186,7 @@ void DrawGlutMouse(int mousex, int mousey, VSSprite *spr) {
     float tempx = 0, tempy = 0;
     spr->GetPosition(tempx, tempy);
     spr->SetPosition(tempx + -1 + .5 * sizex + float(mousex)
-            / (.5 * g_game.x_resolution), tempy + 1 + .5 * sizey - float(mousey) / (.5 * g_game.y_resolution));
+            / (.5 * configuration()->graphics.resolution_x), tempy + 1 + .5 * sizey - float(mousey) / (.5 * configuration()->graphics.resolution_y));
     spr->Draw();
     GFXDisable(TEXTURE0);
     GFXEnable(TEXTURE0);

@@ -109,7 +109,7 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
             return;
 
             // Units (ships) should calculate actual damage
-    case Vega_UnitType::unit:
+        case Vega_UnitType::unit:
             // Handle the "Nav 8" case
             if (other_units_type == Vega_UnitType::planet) {
 #if defined(LOG_TIME_TAKEN_DETAILS)

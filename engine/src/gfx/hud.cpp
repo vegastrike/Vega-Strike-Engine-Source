@@ -4,9 +4,8 @@
  * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
  * Copyright (C) 2002-2019 pyramid3d, ace123, dan_w, jacks, klaussfreire,
  *  and other Vega Strike Contributors
- * Copyright (C) 2019-2021 Stephen G. Tuggy, Roy Falk,
+ * Copyright (C) 2019-2025 Stephen G. Tuggy, Roy Falk,
  *  and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -132,7 +131,7 @@ float getFontHeight() {
             point = 26;
         }
     }
-    return point / g_game.y_resolution;
+    return point / configuration()->graphics.resolution_y;
 }
 
 TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol) {
@@ -253,8 +252,8 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
         myFontMetrics.i = glutBitmapWidth(fnt, 'W');
     }
     myFontMetrics.j = font_point;
-    myFontMetrics.i /= .5 * g_game.x_resolution;
-    myFontMetrics.j /= .5 * g_game.y_resolution;
+    myFontMetrics.i /= .5 * configuration()->graphics.resolution_x;
+    myFontMetrics.j /= .5 * configuration()->graphics.resolution_y;
     float tmp, row, col;
     float origcol;
     GetPos(row, col);
@@ -320,11 +319,11 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
         }
         float shadowlen = 0;
         if (myc == '\t') {
-            shadowlen = glutBitmapWidth(fnt, ' ') * 5. / (.5 * g_game.x_resolution);
+            shadowlen = glutBitmapWidth(fnt, ' ') * 5. / (.5 * configuration()->graphics.resolution_x);
         } else {
             if (use_bit) {
                 shadowlen = glutBitmapWidth(fnt, myc) / (float) (.5
-                        * g_game.x_resolution);                    //need to use myc -- could have transformed '_' to ' '
+                        * configuration()->graphics.resolution_x);                    //need to use myc -- could have transformed '_' to ' '
             } else {
                 shadowlen = myFontMetrics.i * glutStrokeWidth(GLUT_STROKE_ROMAN, myc) / std_wid;
             }
@@ -380,7 +379,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
             if (automatte) {
                 GFXColorf(this->bgcol);
                 DrawSquare(col - origcol,
-                        col - origcol + shadowlen * 5 / (.5 * g_game.x_resolution),
+                        col - origcol + shadowlen * 5 / (.5 * configuration()->graphics.resolution_x),
                         -rowheight * .25 / scaley,
                         rowheight * .75 / scaley);
                 GFXColorf(currentCol);
