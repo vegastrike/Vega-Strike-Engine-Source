@@ -1,24 +1,17 @@
 /*
- * Copyright (C) 2001-2023 Pierre Terdiman, Daniel Horn, pyramid3d,
+ * OPC_TriTriOverlap.h
+ *
+ * Copyright (C) 2001-2025 Pierre Terdiman, Daniel Horn, pyramid3d,
  * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
- * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ * This file is part of OPCODE - Optimized Collision Detection
+ * (http://www.codercorner.com/Opcode.htm) and has been
+ * incorporated into Vega Strike
+ * (https://github.com/vegastrike/Vega-Strike-Engine-Source).
  *
- * This file is part of Vega Strike.
- *
- * Vega Strike is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vega Strike is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * Public Domain
  */
+
 // NO HEADER GUARD
 
 //! if OPC_TRITRI_EPSILON_TEST is true then we do a check (if |dv|<EPSILON then dv=0.0;) else no check is done (which is less robust, but faster)
@@ -181,18 +174,18 @@ bool CoplanarTriTri(const Point &n,
  *	Journal of Graphics Tools, 2(2), 1997
  *
  *	Updated June 1999: removed the divisions -- a little faster now!
- *	Updated October 1999: added {} to CROSS and SUB macros 
+ *	Updated October 1999: added {} to CROSS and SUB macros
  *
  *	int NoDivTriTriIsect(float V0[3],float V1[3],float V2[3],
  *                      float U0[3],float U1[3],float U2[3])
  *
- *	\param		V0		[in] triangle 0, vertex 0
- *	\param		V1		[in] triangle 0, vertex 1
- *	\param		V2		[in] triangle 0, vertex 2
- *	\param		U0		[in] triangle 1, vertex 0
- *	\param		U1		[in] triangle 1, vertex 1
- *	\param		U2		[in] triangle 1, vertex 2
- *	\return		true if triangles overlap
+ *  \param		V0		[in] triangle 0, vertex 0
+ *  \param		V1		[in] triangle 0, vertex 1
+ *  \param		V2		[in] triangle 0, vertex 2
+ *  \param		U0		[in] triangle 1, vertex 0
+ *  \param		U1		[in] triangle 1, vertex 1
+ *  \param		U2		[in] triangle 1, vertex 2
+ *  \return		true if triangles overlap
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ bool AABBTreeCollider::TriTriOverlap(const Point &V0,

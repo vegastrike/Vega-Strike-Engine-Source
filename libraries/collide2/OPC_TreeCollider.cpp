@@ -1,17 +1,25 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
- *	OPCODE - Optimized Collision Detection
- *	Copyright (C) 2001 Pierre Terdiman
- *	Homepage: http://www.codercorner.com/Opcode.htm
+/**
+ * OPC_TreeCollider.cpp
+ *
+ * Copyright (C) 2001-2025 Pierre Terdiman, Daniel Horn, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
+ *
+ * This file is part of OPCODE - Optimized Collision Detection
+ * (http://www.codercorner.com/Opcode.htm) and has been
+ * incorporated into Vega Strike
+ * (https://github.com/vegastrike/Vega-Strike-Engine-Source).
+ *
+ * Public Domain
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Contains code for a tree collider.
- *	\file		OPC_TreeCollider.cpp
- *	\author		Pierre Terdiman
- *	\date		March, 20, 2001
+ *  \file		OPC_TreeCollider.cpp
+ *  \author		Pierre Terdiman
+ *  \date		March, 20, 2001
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -20,19 +28,11 @@
  *	Contains an AABB tree collider.
  *	This class performs a collision test between two AABB trees.
  *
- *	\class		AABBTreeCollider
- *	\author		Pierre Terdiman
- *	\version	1.3
- *	\date		March, 20, 2001
+ *  \class		AABBTreeCollider
+ *  \author		Pierre Terdiman
+ *  \version	1.3
+ *  \date		March, 20, 2001
 */
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * Updated by Stephen G. Tuggy 2021-07-03
- * Updated by Stephen G. Tuggy 2022-01-06
- * Updated by Benjamen R. Meyer 2025-01-14
- */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "collide2/Opcode.h"
@@ -69,7 +69,7 @@ AABBTreeCollider::~AABBTreeCollider() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Validates current settings. You should call this method after all the settings and callbacks have been defined.
- *	\return		nullptr if everything is ok, else a string describing the problem
+ *  \return		nullptr if everything is ok, else a string describing the problem
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const char *AABBTreeCollider::ValidateSettings() {
@@ -86,11 +86,11 @@ const char *AABBTreeCollider::ValidateSettings() {
  *	- GetNbPairs()
  *	- GetPairs()
  *
- *	\param		cache			[in] collision cache for model pointers and a colliding pair of primitives
- *	\param		world0			[in] world matrix for first object
- *	\param		world1			[in] world matrix for second object
- *	\return		true if success
- *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
+ *  \param		cache			[in] collision cache for model pointers and a colliding pair of primitives
+ *  \param		world0			[in] world matrix for first object
+ *  \param		world1			[in] world matrix for second object
+ *  \return		true if success
+ *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AABBTreeCollider::Collide(BVTCache &cache, const Matrix4x4 *world0, const Matrix4x4 *world1) {
@@ -230,9 +230,9 @@ bool AABBTreeCollider::Collide(BVTCache &cache, const Matrix4x4 *world0, const M
  *	- reset stats & contact status
  *	- setup matrices
  *
- *	\param		world0			[in] world matrix for first object
- *	\param		world1			[in] world matrix for second object
- *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
+ *  \param		world0			[in] world matrix for first object
+ *  \param		world1			[in] world matrix for second object
+ *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void AABBTreeCollider::InitQuery(const Matrix4x4 *world0, const Matrix4x4 *world1) {
@@ -277,9 +277,9 @@ void AABBTreeCollider::InitQuery(const Matrix4x4 *world0, const Matrix4x4 *world
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Takes advantage of temporal coherence.
- *	\param		cache	[in] cache for a pair of previously colliding primitives
- *	\return		true if we can return immediately
- *	\warning	only works for "First Contact" mode
+ *  \param		cache	[in] cache for a pair of previously colliding primitives
+ *  \return		true if we can return immediately
+ *  \warning	only works for "First Contact" mode
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AABBTreeCollider::CheckTemporalCoherence(Pair *cache) {
@@ -308,13 +308,13 @@ bool AABBTreeCollider::CheckTemporalCoherence(Pair *cache) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Collision query for normal AABB trees.
- *	\param		tree0			[in] AABB tree from first object
- *	\param		tree1			[in] AABB tree from second object
- *	\param		world0			[in] world matrix for first object
- *	\param		world1			[in] world matrix for second object
- *	\param		cache			[in/out] cache for a pair of previously colliding primitives
- *	\return		true if success
- *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
+ *  \param		tree0			[in] AABB tree from first object
+ *  \param		tree1			[in] AABB tree from second object
+ *  \param		world0			[in] world matrix for first object
+ *  \param		world1			[in] world matrix for second object
+ *  \param		cache			[in/out] cache for a pair of previously colliding primitives
+ *  \return		true if success
+ *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AABBTreeCollider::Collide(const AABBCollisionTree *tree0,
@@ -341,13 +341,13 @@ bool AABBTreeCollider::Collide(const AABBCollisionTree *tree0,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Collision query for no-leaf AABB trees.
- *	\param		tree0			[in] AABB tree from first object
- *	\param		tree1			[in] AABB tree from second object
- *	\param		world0			[in] world matrix for first object
- *	\param		world1			[in] world matrix for second object
- *	\param		cache			[in/out] cache for a pair of previously colliding primitives
- *	\return		true if success
- *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
+ *  \param		tree0			[in] AABB tree from first object
+ *  \param		tree1			[in] AABB tree from second object
+ *  \param		world0			[in] world matrix for first object
+ *  \param		world1			[in] world matrix for second object
+ *  \param		cache			[in/out] cache for a pair of previously colliding primitives
+ *  \return		true if success
+ *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AABBTreeCollider::Collide(const AABBNoLeafTree *tree0,
@@ -374,13 +374,13 @@ bool AABBTreeCollider::Collide(const AABBNoLeafTree *tree0,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Collision query for quantized AABB trees.
- *	\param		tree0			[in] AABB tree from first object
- *	\param		tree1			[in] AABB tree from second object
- *	\param		world0			[in] world matrix for first object
- *	\param		world1			[in] world matrix for second object
- *	\param		cache			[in/out] cache for a pair of previously colliding primitives
- *	\return		true if success
- *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
+ *  \param		tree0			[in] AABB tree from first object
+ *  \param		tree1			[in] AABB tree from second object
+ *  \param		world0			[in] world matrix for first object
+ *  \param		world1			[in] world matrix for second object
+ *  \param		cache			[in/out] cache for a pair of previously colliding primitives
+ *  \return		true if success
+ *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AABBTreeCollider::Collide(const AABBQuantizedTree *tree0,
@@ -430,13 +430,13 @@ bool AABBTreeCollider::Collide(const AABBQuantizedTree *tree0,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Collision query for quantized no-leaf AABB trees.
- *	\param		tree0			[in] AABB tree from first object
- *	\param		tree1			[in] AABB tree from second object
- *	\param		world0			[in] world matrix for first object
- *	\param		world1			[in] world matrix for second object
- *	\param		cache			[in/out] cache for a pair of previously colliding primitives
- *	\return		true if success
- *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
+ *  \param		tree0			[in] AABB tree from first object
+ *  \param		tree1			[in] AABB tree from second object
+ *  \param		world0			[in] world matrix for first object
+ *  \param		world1			[in] world matrix for second object
+ *  \param		cache			[in/out] cache for a pair of previously colliding primitives
+ *  \return		true if success
+ *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AABBTreeCollider::Collide(const AABBQuantizedNoLeafTree *tree0,
@@ -478,8 +478,8 @@ bool AABBTreeCollider::Collide(const AABBQuantizedNoLeafTree *tree0,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Recursive collision query for normal AABB trees.
- *	\param		b0		[in] collision node from first tree
- *	\param		b1		[in] collision node from second tree
+ *  \param		b0		[in] collision node from first tree
+ *  \param		b1		[in] collision node from second tree
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void AABBTreeCollider::_Collide(const AABBCollisionNode* b0, const AABBCollisionNode* b1)
@@ -508,8 +508,8 @@ void AABBTreeCollider::_Collide(const AABBCollisionNode* b0, const AABBCollision
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Recursive collision query for normal AABB trees.
- *	\param		b0		[in] collision node from first tree
- *	\param		b1		[in] collision node from second tree
+ *  \param		b0		[in] collision node from first tree
+ *  \param		b1		[in] collision node from second tree
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void AABBTreeCollider::_Collide(const AABBCollisionNode *b0, const AABBCollisionNode *b1) {
@@ -560,8 +560,8 @@ void AABBTreeCollider::_Collide(const AABBCollisionNode *b0, const AABBCollision
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Leaf-leaf test for two primitive indices.
- *	\param		id0		[in] index from first leaf-triangle
- *	\param		id1		[in] index from second leaf-triangle
+ *  \param		id0		[in] index from first leaf-triangle
+ *  \param		id1		[in] index from second leaf-triangle
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void AABBTreeCollider::PrimTest(uint32_t id0, uint32_t id1) {
@@ -589,7 +589,7 @@ void AABBTreeCollider::PrimTest(uint32_t id0, uint32_t id1) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Leaf-leaf test for a previously fetched triangle from tree A (in B's space) and a new leaf from B.
- *	\param		id1		[in] leaf-triangle index from tree B
+ *  \param		id1		[in] leaf-triangle index from tree B
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ void AABBTreeCollider::PrimTestTriIndex(uint32_t id1) {
@@ -609,7 +609,7 @@ inline_ void AABBTreeCollider::PrimTestTriIndex(uint32_t id1) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Leaf-leaf test for a previously fetched triangle from tree B (in A's space) and a new leaf from A.
- *	\param		id0		[in] leaf-triangle index from tree A
+ *  \param		id0		[in] leaf-triangle index from tree A
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ void AABBTreeCollider::PrimTestIndexTri(uint32_t id0) {
@@ -629,7 +629,7 @@ inline_ void AABBTreeCollider::PrimTestIndexTri(uint32_t id0) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Recursive collision of a leaf node from A and a branch from B.
- *	\param		b		[in] collision node from second tree
+ *  \param		b		[in] collision node from second tree
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void AABBTreeCollider::_CollideTriBox(const AABBNoLeafNode *b) {
@@ -660,7 +660,7 @@ void AABBTreeCollider::_CollideTriBox(const AABBNoLeafNode *b) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Recursive collision of a leaf node from B and a branch from A.
- *	\param		b		[in] collision node from first tree
+ *  \param		b		[in] collision node from first tree
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void AABBTreeCollider::_CollideBoxTri(const AABBNoLeafNode *b) {
@@ -701,8 +701,8 @@ void AABBTreeCollider::_CollideBoxTri(const AABBNoLeafNode *b) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Recursive collision query for no-leaf AABB trees.
- *	\param		a	[in] collision node from first tree
- *	\param		b	[in] collision node from second tree
+ *  \param		a	[in] collision node from first tree
+ *  \param		b	[in] collision node from second tree
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void AABBTreeCollider::_Collide(const AABBNoLeafNode *a, const AABBNoLeafNode *b) {
@@ -809,12 +809,12 @@ void AABBTreeCollider::_Collide(const AABBNoLeafNode *a, const AABBNoLeafNode *b
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Recursive collision query for quantized AABB trees.
- *	\param		b0		[in] collision node from first tree
- *	\param		b1		[in] collision node from second tree
- *	\param		a		[in] extent from box A
- *	\param		Pa		[in] center from box A
- *	\param		b		[in] extent from box B
- *	\param		Pb		[in] center from box B
+ *  \param		b0		[in] collision node from first tree
+ *  \param		b1		[in] collision node from second tree
+ *  \param		a		[in] extent from box A
+ *  \param		Pa		[in] center from box A
+ *  \param		b		[in] extent from box B
+ *  \param		Pb		[in] center from box B
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void AABBTreeCollider::_Collide(const AABBQuantizedNode *b0,
@@ -891,8 +891,8 @@ void AABBTreeCollider::_Collide(const AABBQuantizedNode *b0,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Recursive collision of a leaf node from A and a quantized branch from B.
- *	\param		leaf	[in] leaf triangle from first tree
- *	\param		b		[in] collision node from second tree
+ *  \param		leaf	[in] leaf triangle from first tree
+ *  \param		b		[in] collision node from second tree
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void AABBTreeCollider::_CollideTriBox(const AABBQuantizedNoLeafNode *b) {
@@ -930,8 +930,8 @@ void AABBTreeCollider::_CollideTriBox(const AABBQuantizedNoLeafNode *b) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Recursive collision of a leaf node from B and a quantized branch from A.
- *	\param		b		[in] collision node from first tree
- *	\param		leaf	[in] leaf triangle from second tree
+ *  \param		b		[in] collision node from first tree
+ *  \param		leaf	[in] leaf triangle from second tree
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void AABBTreeCollider::_CollideBoxTri(const AABBQuantizedNoLeafNode *b) {
@@ -969,8 +969,8 @@ void AABBTreeCollider::_CollideBoxTri(const AABBQuantizedNoLeafNode *b) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Recursive collision query for quantized no-leaf AABB trees.
- *	\param		a	[in] collision node from first tree
- *	\param		b	[in] collision node from second tree
+ *  \param		a	[in] collision node from first tree
+ *  \param		b	[in] collision node from second tree
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void AABBTreeCollider::_Collide(const AABBQuantizedNoLeafNode *a, const AABBQuantizedNoLeafNode *b) {

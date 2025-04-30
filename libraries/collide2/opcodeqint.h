@@ -1,6 +1,9 @@
-/*
+/**
+    opcodeqint.h
+
     Copyright (C) 1998-2000 by Andrew Zabolotny
     Copyright (C) 2023 Benjamen R. Meyer
+    Copyright (C) 2025 Stephen G. Tuggy
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public

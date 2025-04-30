@@ -1,8 +1,9 @@
 /*
+    opmatrix3.cpp
+
     Copyright (C) 1998,1999,2000 by Jorrit Tyberghein
     Largely rewritten by Ivan Avramovic <ivan@avramovic.com>
-    Copyright (C) 2022 Stephen G. Tuggy
-    Copyright (C) 2025 Benjamen R. Meyer
+    Copyright (C) 2022-2025 Benjamen R. Meyer and Stephen G. Tuggy
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public

@@ -1,3 +1,11 @@
+/*
+ * OPC_IceHook.h
+ *
+ * Copyright (C) 2023 Benjamen R. Meyer
+ * Copyright (C) 2025 Stephen G. Tuggy
+ * Public Domain
+ */
+
 // NO HEADER GUARD
 
 // Should be included by Opcode.h if needed

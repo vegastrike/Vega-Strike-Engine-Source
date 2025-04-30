@@ -1,6 +1,9 @@
 /*
+    opcodeextern.h
+
     Copyright (C) 2004 by Jorrit Tyberghein
     Copyright (C) 2023 by Benjamen R. Meyer
+    Copyright (C) 2025 by Stephen G. Tuggy
     Written by John Harger <jharger AT users.sourceforge.net>
 
     This library is free software; you can redistribute it and/or
