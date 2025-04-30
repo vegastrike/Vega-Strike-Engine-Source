@@ -5,7 +5,7 @@
  *	\author		Pierre Terdiman
  *	\date		January, 17, 2000
  *
- *  Copyright (C) 2000-2025 Pierre Terdiman, Stephen G. Tuggy
+ *  Copyright (C) 1998-2025 Pierre Terdiman, Stephen G. Tuggy
  *  Public Domain
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -179,14 +179,14 @@ void Triangle::ComputeMoment(Moment& m)
 	Point& r = mVerts[2];
 	if(m.mArea==0.0f)
 	{
-		// This triangle has zero area. The second order components would be eliminated with the usual formula, so, for the 
+		// This triangle has zero area. The second order components would be eliminated with the usual formula, so, for the
 		// sake of robustness we use an alternative form. These are the centroid and second-order components of the triangle's vertices.
 		m.mCovariance.m[0][0] = (p.x*p.x + q.x*q.x + r.x*r.x);
 		m.mCovariance.m[0][1] = (p.x*p.y + q.x*q.y + r.x*r.y);
 		m.mCovariance.m[0][2] = (p.x*p.z + q.x*q.z + r.x*r.z);
 		m.mCovariance.m[1][1] = (p.y*p.y + q.y*q.y + r.y*r.y);
 		m.mCovariance.m[1][2] = (p.y*p.z + q.y*q.z + r.y*r.z);
-		m.mCovariance.m[2][2] = (p.z*p.z + q.z*q.z + r.z*r.z);      
+		m.mCovariance.m[2][2] = (p.z*p.z + q.z*q.z + r.z*r.z);
 		m.mCovariance.m[2][1] = m.mCovariance.m[1][2];
 		m.mCovariance.m[1][0] = m.mCovariance.m[0][1];
 		m.mCovariance.m[2][0] = m.mCovariance.m[0][2];

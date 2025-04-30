@@ -1,4 +1,4 @@
-/**
+/*
  * OPC_SphereTriOverlap.h
  *
  * Copyright (C) 2001 Pierre Terdiman
