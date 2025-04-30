@@ -482,8 +482,7 @@
       "description": "Default build for Windows",
       "environment": {
         "VCPKG_TARGET_TRIPLET": "x64-windows-win10",
-        "VCPKG_HOST_TRIPLET": "x64-windows-win10",
-        "X_VCPKG_APPLOCAL_DEPS_INSTALL": "ON"
+        "VCPKG_HOST_TRIPLET": "x64-windows-win10"
       },
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": {
