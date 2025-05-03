@@ -273,9 +273,9 @@ public:
         if (parenttarget == unit || (parenttarget && parenttarget->isSubUnit() && parenttarget->owner == unit)) {
             parenttarget = nullptr;
         }
-        float backup = simulation_atom_var;
+        const float backup = simulation_atom_var;
         //VS_LOG(trace, (boost::format("UnitDrawer::draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var));
-        unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+        const unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         interpolation_blend_factor = calc_blend_factor(saved_interpolation_blend_factor, unit->sim_atom_multiplier,
                 unit->cur_sim_queue_slot,
                 cur_sim_frame);
@@ -335,8 +335,8 @@ void StarSystem::Draw(bool DrawCockpit) {
         }
         //Array containing the two interesting units, so as not to have to copy-paste code
         Unit *camunits[2] = {saveparent, targ};
-        float backup = simulation_atom_var;
-        unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+        const float backup = simulation_atom_var;
+        const unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         //VS_LOG(trace, (boost::format("StarSystem::Draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var));
         for (int i = 0; i < 2; ++i) {
             Unit *unit = camunits[i];
@@ -977,7 +977,7 @@ void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit) {
         priority  = 1+( ( (unsigned int) vsrandom.genrand_int32() )%priority );
 #endif
     }
-    float backup = simulation_atom_var;
+    const float backup = simulation_atom_var;
     //VS_LOG(trace, (boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg A: simulation_atom_var as backed up:  %1%") % simulation_atom_var));
     try {
         theunitcounter = theunitcounter + 1;
@@ -1062,7 +1062,7 @@ void StarSystem::Update(float priority) {
     Unit *unit;
     bool firstframe = true;
     //No time compression here
-    float normal_simulation_atom = SIMULATION_ATOM;
+    const float normal_simulation_atom = SIMULATION_ATOM;
     time += GetElapsedTime();
     _Universe->pushActiveStarSystem(this);
     if (time > SIMULATION_ATOM * 2) {

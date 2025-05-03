@@ -100,8 +100,6 @@ void /*GFXDRVAPI*/ GFXGlobalLights(vector<int> &lights, const Vector &center, co
 ///loads "lights" with all enabled global lights
 void /*GFXDRVAPI*/ GFXGlobalLights(vector<int> &lights);
 ///Sets light position offset, use when centering the camera off-origin
-void /*GFXDRVAPI*/ GFXSetLightOffset(const QVector &offset);
-///Sets light position offset, use when centering the camera off-origin
 QVector /*GFXDRVAPI*/ GFXGetLightOffset();
 ///Sets the light model to have separate specular color (if available)
 GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(const GFXBOOL spec);
@@ -130,8 +128,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(const int light);
 ///Deactivates an active light.
 GFXBOOL /*GFXDRVAPI*/ GFXDisableLight(const int light);
 
-///Modifies the parameters of the given light
+///Modifies the parameters of the given light, taking a GFXColor as input
 GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, const enum LIGHT_TARGET, const GFXColor &color);
+
+///Modifies the parameters of the given light, taking a Vector as input
+GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, const enum LIGHT_TARGET, const Vector &vector);
 
 ///Retrieves the parameters of the given light
 const GFXLight & /*GFXDRVAPI*/ GFXGetLight(const int light);

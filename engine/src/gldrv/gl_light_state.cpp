@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * gl_light_state.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -455,6 +457,60 @@ void gfx_light::ResetProperties(const enum LIGHT_TARGET light_targ, const GFXCol
             glLightf(GL_LIGHT0 + target, GL_LINEAR_ATTENUATION, attenuate[1] * atten1scale);
             glLightf(GL_LIGHT0 + target, GL_QUADRATIC_ATTENUATION, attenuate[2] * atten2scale);
             break;
+    }
+}
+
+void gfx_light::ResetProperties(const enum LIGHT_TARGET light_target, const Vector& vector) {
+    bool changed = false;
+    if (LocalLight())
+    {
+        GFXLight t;
+        t = *this;
+        t.SetProperties(light_target, vector);
+        changed = RemoveFromTable(false, t);
+        *this = t;
+        if (changed)
+        {
+            AddToTable();
+        }
+        if (target >= 0)
+        {
+            TrashFromGLLights();
+        }
+        return;
+    }
+
+    switch (light_target)
+    {
+    case DIFFUSE:
+    case SPECULAR:
+    case AMBIENT:
+        VS_LOG(error, (boost::format("%1%: Called the wrong overload, with a Vector instead of a GFXColor")
+                % __FUNCTION__));
+        break;
+    case POSITION:
+        vect[0] = vector.i;
+        vect[1] = vector.j;
+        vect[2] = vector.k;
+        if (target < 0) {
+            break;
+        }
+        SendGLPosition(GL_LIGHT0 + target);
+        break;
+    case ATTENUATE:
+    default:
+        attenuate[0] = vector.i;
+        attenuate[1] = vector.j;
+        attenuate[2] = vector.k;
+        apply_attenuate(attenuated());
+        if (target < 0) {
+            break;
+        }
+        SendGLPosition(GL_LIGHT0 + target);
+        glLightf(GL_LIGHT0 + target, GL_CONSTANT_ATTENUATION, attenuate[0] * atten0scale);
+        glLightf(GL_LIGHT0 + target, GL_LINEAR_ATTENUATION, attenuate[1] * atten1scale);
+        glLightf(GL_LIGHT0 + target, GL_QUADRATIC_ATTENUATION, attenuate[2] * atten2scale);
+        break;
     }
 }
 

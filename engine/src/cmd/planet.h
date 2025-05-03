@@ -1,4 +1,6 @@
 /*
+ * planet.h
+ *
  * Copyright (C) 2001-2025 Daniel Horn, Roy Falk, pyramid3d,
  * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
@@ -108,11 +110,11 @@ public:
                     unsigned int lights_num,
                     float days = 0.0F);
 
-    virtual ~Planet();
+    ~Planet() override;
 
     friend class PlanetaryOrbit;
 
-    enum Vega_UnitType isUnit() const {
+    enum Vega_UnitType isUnit() const override {
         return Vega_UnitType::planet;
     }
 
@@ -167,7 +169,7 @@ public:
                        bool inside_out, float days);
 
     void DisableLights();
-    virtual void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix);
+    void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix) override;
     void DrawTerrain();
     void EnableLights();
     void endElement();

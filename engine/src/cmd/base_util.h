@@ -1,7 +1,7 @@
 /*
  * base_util.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * Benjamen R. Meyer, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -129,6 +129,15 @@ void TextBox(int room,
         Vector backcol,
         float backalp,
         Vector forecol);
+    void TextBox(int room,
+         std::string ind,
+         std::string text,
+         float x,
+         float y,
+         Vector widheimult,
+         GFXColor backcol,
+         float backalp,
+         GFXColor forecol);
 void SetTextBoxText(int room, std::string ind, std::string text);
 void SetLinkArea(int room, std::string index, float x, float y, float wid, float hei);
 void SetLinkText(int room, std::string index, std::string text);

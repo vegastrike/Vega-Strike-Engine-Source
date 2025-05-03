@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * universe_util.h
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -419,7 +421,7 @@ double asin(double);
 double atan(double);
 double tan(double);
 void micro_sleep(int n);
-void addParticle(QVector loc, Vector velocity, Vector color, float size);
+void addParticle(QVector loc, Vector velocity, GFXColor color, float size);
 
 std::string getSaveDir();
 std::string getSaveInfo(const std::string &filename, bool formatForTextbox);

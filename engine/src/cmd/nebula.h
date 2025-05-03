@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Roy Falk,
+ * nebula.h
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Roy Falk,
  * David Wales, Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -37,7 +39,7 @@ public:
 protected:
     // Method
     static void beginElement(void *Userdata, const XML_Char *name, const XML_Char **atts);
-    Vector color;
+    GFXColor color;
     float Density;
     float fognear;
     float fogfar;
@@ -70,7 +72,7 @@ public:
             bool ResolveLast,
             UnitCollection *uc = NULL);
 
-    void SetFogState();
+    void SetFogState() const;
 
 protected:
     /// default constructor forbidden
