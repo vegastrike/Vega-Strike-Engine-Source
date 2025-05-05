@@ -2,9 +2,8 @@
  * aux_texture.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, Roy Falk,
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, Roy Falk,
  * and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -565,6 +564,9 @@ Texture::~Texture() {
 }
 
 void Texture::UnBind() {
+    if (STATIC_VARS_DESTROYED) {
+        return;
+    }
     if (name != -1) {
         texHashTable.Delete(texfilename);
         GFXDeleteTexture(name);

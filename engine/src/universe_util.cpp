@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * universe_util.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -151,7 +153,7 @@ unsigned int maxMissions() {
     return game_options()->max_missions;
 }
 
-void addParticle(QVector loc, Vector velocity, Vector color, float size) {
+void addParticle(QVector loc, Vector velocity, GFXColor color, float size) {
     ParticlePoint p;
     p.loc = loc;
     p.col = color;

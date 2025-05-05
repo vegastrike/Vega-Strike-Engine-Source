@@ -710,7 +710,7 @@ void Planet::Draw(const Transformation &quat, const Matrix &m) {
     }
     GFXLoadIdentity(MODEL);
     for (unsigned int i = 0; i < lights.size(); i++) {
-        GFXSetLight(lights[i], POSITION, GFXColor(cumulative_transformation.position.Cast()));
+        GFXSetLight(lights[i], POSITION, cumulative_transformation.position.Cast());
     }
     if (inside && terrain) {
         PlanetTerrainDrawQueue.push_back(new UnitContainer(this));

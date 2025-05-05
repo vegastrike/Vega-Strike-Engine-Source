@@ -1,4 +1,6 @@
 /*
+ * system_factory.cpp
+ *
  * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -321,7 +323,7 @@ Planet *SystemFactory::processPlanet(Star_XML *xml, Object &object, Planet *owne
         stream >> index >> local;
 
         Light light = lights[index];
-        GFXLight gfx_light(true, Vector(0, 0, 0));
+        GFXLight gfx_light(true, GFXColor(0, 0, 0, 1));
         gfx_light.SetProperties(AMBIENT, light.ambient);
         gfx_light.SetProperties(DIFFUSE, light.diffuse);
         gfx_light.SetProperties(SPECULAR, light.specular);

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
+ * gl_light.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, Alan Shieh, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -172,6 +174,31 @@ void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GF
     apply_attenuate(attenuated());
 }
 
+void /*GFXDRVAPI*/ GFXLight::SetProperties(const enum LIGHT_TARGET light_target, const Vector& vector) {
+    switch (light_target) {
+        case DIFFUSE:
+        case SPECULAR:
+        case AMBIENT:
+            VS_LOG(error, (boost::format("%1%: Called wrong overload for this property, with Vector& instead of GFXColor&")
+                    % __FUNCTION__));
+            break;
+        case POSITION:
+            vect[0] = vector.i;
+            vect[1] = vector.j;
+            vect[2] = vector.k;
+            break;
+        case ATTENUATE:
+            attenuate[0] = vector.i;
+            attenuate[1] = vector.j;
+            attenuate[2] = vector.k;
+            break;
+        case EMISSION:
+        default:
+            break;
+    }
+    apply_attenuate(attenuated());
+}
+
 GFXColor /*GFXDRVAPI*/ GFXLight::GetProperties(enum LIGHT_TARGET lighttarg) const {
     switch (lighttarg) {
         case SPECULAR:
@@ -284,6 +311,15 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, const enum LIGHT_TARGET lt, c
         return GFXFALSE;
     }
     (*_llights)[light].ResetProperties(lt, color);
+
+    return GFXTRUE;
+}
+
+GFXBOOL /*GFXDRVAPI*/  GFXSetLight(const int light, const enum LIGHT_TARGET lt, const Vector& vector) {
+    if ((*_llights)[light].Target() == -2) {
+        return GFXFALSE;
+    }
+    (*_llights)[light].ResetProperties(lt, vector);
 
     return GFXTRUE;
 }

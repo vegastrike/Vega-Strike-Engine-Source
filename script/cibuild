@@ -8,7 +8,7 @@
 ##
 # cibuild
 #
-# Copyright (c) 2020-2022 Stephen G. Tuggy and other Vega Strike Contributors
+# Copyright (c) 2020-2025 Stephen G. Tuggy and other Vega Strike Contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -40,6 +40,15 @@ then
     export CXX=clang++
 fi
 
+if [ $IS_RELEASE -eq 1 ]
+then
+    export INSTALL_GTEST=OFF
+    export USE_GTEST=OFF
+else
+    export INSTALL_GTEST=ON
+    export USE_GTEST=ON
+fi
+
 if [ "$MY_OS_NAME" == "linux" ]
 then
     SRC_DOCKER_IMG_NAME="vegastrike/vega-strike-build-env:$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
@@ -48,13 +57,14 @@ then
     echo "Building docker image for $FROM / $COMPILER"
     docker build --build-arg from=$SRC_DOCKER_IMG_NAME -t $DST_DOCKER_IMG_NAME .
     echo "Running docker image for $FROM / $COMPILER"
-    docker run --env CC=$CC --env CXX=$CXX --env IS_RELEASE=$IS_RELEASE --env TAG_NAME=$TAG_NAME --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA=$SHORT_SHA --env FLAGS="$FLAGS" --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME
+    docker run --env CC=$CC --env CXX=$CXX --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env TAG_NAME=$TAG_NAME --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA=$SHORT_SHA --env FLAGS="$FLAGS" --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME
     docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/bin .
     if [ $IS_RELEASE -eq 1 ]
     then
         docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/packages .
+    else
+        docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/build/test-results .
     fi
-    docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/build/test-results .
     docker rm $DOCKER_CONTAINER_NAME
 elif [ "$MY_OS_NAME" == "macos" ]
 then

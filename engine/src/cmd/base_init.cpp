@@ -1,7 +1,7 @@
 /*
  * base_init.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -114,7 +114,8 @@ BOOST_PYTHON_MODULE(Base) {
     boost::python::def("EraseObj", &BaseUtil::EraseObj);
     boost::python::def("GetRandomBarMessage", &::GetRandomBarMessage);
     boost::python::def("RunScript", &BaseUtil::RunScript);
-    boost::python::def("TextBox", &BaseUtil::TextBox);
+    boost::python::def("TextBox", static_cast<void (*)(int, std::string, std::string, float, float, Vector, GFXColor, float, GFXColor)>(&BaseUtil::TextBox));
+    boost::python::def("TextBox", static_cast<void (*)(int, std::string, std::string, float, float, Vector, Vector, float, Vector)>(&BaseUtil::TextBox));
     boost::python::def("SetTextBoxText", &BaseUtil::SetTextBoxText);
     boost::python::def("GlobalKeyPython", &BaseUtil::GlobalKeyPython);
     boost::python::def("SetLinkArea", &BaseUtil::SetLinkArea);
