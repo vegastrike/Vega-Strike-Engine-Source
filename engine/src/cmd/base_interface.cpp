@@ -907,7 +907,7 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
         for (i = 0; i < static_cast<int>(rooms[curroom]->links.size()); i++) {
             cx = (rooms[curroom]->links[i]->x + (rooms[curroom]->links[i]->wid / 2)); //get the x center of the location
             cy = (rooms[curroom]->links[i]->y + (rooms[curroom]->links[i]->hei / 2)); //get the y center of the location
-            dist_cur2link = sqrt(pow((cx - x), 2) + pow((cy - y), 2));
+            dist_cur2link = sqrt(std::pow((cx - x), 2) + std::pow((cy - y), 2));
             if (dist_cur2link < defined_distance) {
                 rooms[curroom]->links[i]->alpha = (1 - (dist_cur2link / defined_distance));
             } else {

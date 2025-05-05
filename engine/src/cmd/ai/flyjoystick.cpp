@@ -226,12 +226,12 @@ void FlyByJoystick::Execute() {
                         static float norm = float(exp(expfactorn) - 1);
                         axis_value =
                                 float(expamountn * (exp(expfactorn * axis_value) - 1) / norm
-                                        + pamountn * pow(axis_value, pfactorn));
+                                        + pamountn * std::pow(axis_value, pfactorn));
                     } else if (nonlinear_throttle_combat && cpu->combat_mode) {
                         static float norm = float(exp(expfactorc) - 1);
                         axis_value =
                                 float(expamountc * (exp(expfactorc * axis_value) - 1) / norm
-                                        + pamountc * pow(axis_value, pfactorc));
+                                        + pamountc * std::pow(axis_value, pfactorc));
                     }
                     cpu->set_speed = axis_value * parent->MaxSpeed();
                     desired_velocity = Vector(0, 0, cpu->set_speed);

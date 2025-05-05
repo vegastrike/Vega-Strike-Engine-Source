@@ -411,9 +411,9 @@ static void Spherize(CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid]
             unsigned int gg = (unsigned int) g;
             unsigned int bb = (unsigned int) b;
             if (affine != 0 || multiplicitive != 1 || power != 1) {
-                rr = (unsigned int) (affine + ((pow((float) r, power)) * multiplicitive));
-                gg = (unsigned int) (affine + ((pow((float) g, power)) * multiplicitive));
-                bb = (unsigned int) (affine + ((pow((float) b, power)) * multiplicitive));
+                rr = (unsigned int) (affine + ((std::pow((float) r, power)) * multiplicitive));
+                gg = (unsigned int) (affine + ((std::pow((float) g, power)) * multiplicitive));
+                bb = (unsigned int) (affine + ((std::pow((float) b, power)) * multiplicitive));
             }
             if (rr > 255) {
                 rr = 255;
