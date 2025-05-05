@@ -1,7 +1,9 @@
 /*
+  opmath.h
+
   Copyright (C) 2005 by Marten Svanfeldt
   Copyright (C) 2022-2025 Stephen G. Tuggy, Benjamen R. Meyer
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Library General Public
   License as published by the Free Software Foundation; either
@@ -30,7 +32,7 @@ inline bool isfinitef (float x) {return((x) >= -FLT_MAX && (x) <= FLT_MAX);}
 
 inline float isfinite (float f) {  return (sizeof(f) == sizeof(float) ? isfinitef(f) : isfinited(f));}
 */
-/**\file 
+/**\file
  * Generic mathematic utility functions.
  */
 /**
@@ -91,7 +93,7 @@ T csClamp(const T &a, T max, T min) {
 
 /**
  * Performs a smooth interpolation of a on range min to max.
- * \return Smooth interporlated value if \a min \< \a a \< \a max, 
+ * \return Smooth interporlated value if \a min \< \a a \< \a max,
  *  and 0 resp. 1 if \a a is smaller than \a min resp. larger than \a max.
  */
 template<class T>

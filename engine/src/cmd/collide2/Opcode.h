@@ -1,8 +1,8 @@
-/*
+/**
  * Opcode.h
  *
  * Copyright (C) 2001-2025 Pierre Terdiman, Daniel Horn, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * This file is part of OPCODE - Optimized Collision Detection
  * (http://www.codercorner.com/Opcode.htm) and has been
@@ -21,9 +21,6 @@
  *  \file		Opcode.h
  *  \author		Pierre Terdiman
  *  \date		March, 20, 2001
- *
- *  Updated by Stephen G. Tuggy 2022-01-06
- *  Updated by Benjamen R. Meyer 2023-05-27
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

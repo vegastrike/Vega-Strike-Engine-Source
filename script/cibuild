@@ -60,8 +60,9 @@ then
     if [ $IS_RELEASE -eq 1 ]
     then
         docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/packages .
+    else
+        docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/build/test-results .
     fi
-    docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/build/test-results .
     docker rm $DOCKER_CONTAINER_NAME
 elif [ "$MY_OS_NAME" == "macos" ]
 then

@@ -1,4 +1,6 @@
 /*
+    opvector3.h
+
     Copyright (C) 1998,1999,2000 by Jorrit Tyberghein
     Largely rewritten by Ivan Avramovic <ivan@avramovic.com>
     Copyright (C) 2022-2025 Stephen G. Tuggy, Benjamen R. Meyer
