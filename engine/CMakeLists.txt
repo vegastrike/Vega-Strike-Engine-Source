@@ -32,6 +32,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
 IF (POLICY CMP0087)
     cmake_policy(SET CMP0087 NEW)
 ENDIF ()
+SET(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
 
 IF (POLICY CMP0167)
     CMAKE_POLICY (SET CMP0167 OLD)
@@ -1278,19 +1279,6 @@ ADD_SUBDIRECTORY("../doc" "./doc")
 # As per https://braintrekking.wordpress.com/2013/04/27/dll-hell-how-to-include-microsoft-redistributable-runtime-libraries-in-your-cmakecpack-project/
 INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT system_libraries)
 
-IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
-    FILE(GLOB_RECURSE OurDependencies FOLLOW_SYMLINKS LIST_DIRECTORIES false
-            ${CMAKE_SOURCE_DIR}/../*.dll
-            ${CMAKE_SOURCE_DIR}/../bin/*.dll
-            ${CMAKE_SOURCE_DIR}/*.dll
-            ${CMAKE_SOURCE_DIR}/bin/*.dll
-            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/*.dll
-            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/*.dll
-            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/${CPACK_BUILD_CONFIG}/*.dll
-            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/${CPACK_BUILD_CONFIG}/bin/*.dll)
-    INSTALL(FILES ${OurDependencies} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT system_libraries)
-ENDIF ()
-
 IF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     SET(CPACK_COMPONENTS_ALL vegastrike_engine system_libraries objconv docs man vegasettings)
     SET(CPACK_COMPONENT_VEGASTRIKE_ENGINE_DISPLAY_NAME "The Vega Strike Game Engine")
@@ -1356,7 +1344,7 @@ IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
     SET(CPACK_NSIS_MODIFY_PATH ON)
 
     # NSIS, Wix, and compressed archives (7z, Zip)
-    SET(CPACK_GENERATOR "NSIS")
+    SET(CPACK_GENERATOR "NSIS64")
     SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../packages")
     SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_v${VEGASTRIKE_PKG_VERSION_STR}_Windows_${CMAKE_SYSTEM_VERSION}_${CMAKE_SYSTEM_PROCESSOR}")
     SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "vegastrike-engine.exe")
