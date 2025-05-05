@@ -152,7 +152,11 @@ typedef unsigned short wint_t;
 #if defined(HAVE_WCHAR_H)
 #include <wchar.h>
 #else
+#if defined(HAVE_WCHAR_H)
+#include <wchar.h>
+#else
 typedef wchar_t wint_t;
+#endif
 #endif
 #endif
 #endif
