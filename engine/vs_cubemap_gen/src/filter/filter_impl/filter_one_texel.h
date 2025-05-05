@@ -26,7 +26,7 @@
 * This class is a functor that is created for each texel of the target texture. It's operator()() takes a ray
 * as input and returns a color. Computing this color is not trivial, however: It must iterate trough the source
 * texels within a given angular radius of the ray, and accumulate light and "weights". The weight for each
-* source texel is a product of its filter angle based weight --Phong: weight = pow( cos(angle), shininess )--,
+* source texel is a product of its filter angle based weight --Phong: weight = std::pow( cos(angle), shininess )--,
 * and the solid angle of that source texel, as perceived from the center of the cube.
 */
 

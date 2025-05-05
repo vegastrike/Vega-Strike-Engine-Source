@@ -383,7 +383,7 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
     //degree of curve
     static double curvedegree = XMLSupport::parse_float(vs_config->getVariable("physics", "warpcurvedegree", "1.5"));
     //coefficient so as to agree with above
-    static double upcurvek = warpcruisemult / pow((warpregion1 - warpregion0), curvedegree);
+    static double upcurvek = warpcruisemult / std::pow((warpregion1 - warpregion0), curvedegree);
     //inverse fractional effect of ship vs real big object
     static float def_inv_interdiction = 1.
             / XMLSupport::parse_float(vs_config->getVariable("physics", "default_interdiction",
@@ -442,7 +442,7 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 }
                 dist *= shiphack;
                 if (dist > (effectiverad + warpregion0)) {
-                    multipliertemp = pow((dist - effectiverad - warpregion0), curvedegree) * upcurvek;
+                    multipliertemp = std::pow((dist - effectiverad - warpregion0), curvedegree) * upcurvek;
                 } else {
                     multipliertemp = 1;
                 }

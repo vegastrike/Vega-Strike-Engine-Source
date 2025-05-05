@@ -127,9 +127,9 @@ static void saturate(float &r, float &g, float &b) {
     if (b < conemin) {
         b += conemin;
     }
-    r = pow(r, colorpower);
-    g = pow(g, colorpower);
-    b = pow(b, colorpower);
+    r = std::pow(r, colorpower);
+    g = std::pow(g, colorpower);
+    b = std::pow(b, colorpower);
 }
 
 bool computeStarColor(float &r, float &g, float &b, Vector luminmax, float distance, float maxdistance) {
@@ -383,7 +383,7 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
                 XMLSupport::parse_float(vs_config->getVariable("graphics", "velocity_star_streak_min", "1"));
         static float fov_smoothing =
                 XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.smoothing", ".4"));
-        float fov_smoot = pow(double(fov_smoothing), GetElapsedTime());
+        float fov_smoot = std::pow(double(fov_smoothing), GetElapsedTime());
         Vector vel(-velocity * velstreakscale);
         float speed = vel.Magnitude();
         if ((smoothstreak >= minstreak || vel.MagnitudeSquared() >= minstreak * minstreak) && (speed > 1.0e-7)) {

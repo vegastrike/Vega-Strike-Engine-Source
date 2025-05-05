@@ -1589,7 +1589,7 @@ void GameCockpit::Draw() {
                 } else {
                     caccel = Vector(0, 0, 0);
                 }
-                float driftphase = pow(0.25, GetElapsedTime());
+                float driftphase = std::pow(0.25, GetElapsedTime());
                 oaccel = (1 - driftphase) * caccel + driftphase * oaccel;
                 headtrans.back().p += -cockpitradial * oaccel;
                 float driftmag = cockpitradial * oaccel.Magnitude();
@@ -2424,7 +2424,7 @@ void GameCockpit::SetupViewPort(bool clip) {
                 un->UpdateHudMatrix(CP_VIEWTARGET);
                 bool fixzone = (rr.Dot(p_r) >= padlock_view_lag_fix_cos) && (qq.Dot(p_q) >= padlock_view_lag_fix_cos);
                 float vtphase =
-                        1.0f - (float) pow(0.1, GetElapsedTime() * padlock_view_lag_inv * (fixzone ? 0.1f : 1.0f));
+                        1.0f - (float) std::pow(0.1, GetElapsedTime() * padlock_view_lag_inv * (fixzone ? 0.1f : 1.0f));
 
                 //Apply correction
                 _Universe->AccessCamera(CP_VIEWTARGET)->SetOrientation(
@@ -2537,12 +2537,12 @@ void GameCockpit::SetupViewPort(bool clip) {
                     un);               //This one is stable, as opposed to SETKPS - for full stability, use the override (user override of governor settings will create weird behaviour if done under SPEC)
             float kps = LookupUnitStat(UnitImages<void>::KPS, un);
             float st_warpfieldstrength =
-                    pow((max(stable_lowarpref,
+                    std::pow((max(stable_lowarpref,
                                     min(stable_asymptotic ? FLT_MAX : stable_hiwarpref,
                                             warpfieldstrength)) - stable_lowarpref) / (stable_hiwarpref - stable_lowarpref),
                             stable_refexp);
             float sh_warpfieldstrength =
-                    pow((max(shake_lowarpref, min(shake_asymptotic ? FLT_MAX : shake_hiwarpref,
+                    std::pow((max(shake_lowarpref, min(shake_asymptotic ? FLT_MAX : shake_hiwarpref,
                                     warpfieldstrength)) - shake_lowarpref)
                                     / (shake_hiwarpref - shake_lowarpref),
                             shake_refexp);
@@ -2586,7 +2586,7 @@ void GameCockpit::SetupViewPort(bool clip) {
             sh_mult *= sh_warpfieldstrength * costheta;
             static float fov_smoothing =
                     XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.smoothing", ".4"));
-            float fov_smoot = pow(double(fov_smoothing), GetElapsedTime());
+            float fov_smoot = std::pow(double(fov_smoothing), GetElapsedTime());
             smooth_fov =
                     min(170.0,
                             max(5.0,

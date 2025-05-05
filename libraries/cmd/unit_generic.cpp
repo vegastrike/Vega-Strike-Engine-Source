@@ -1068,7 +1068,7 @@ Cockpit *Unit::GetVelocityDifficultyMult(float &difficulty) const {
     difficulty = 1;
     Cockpit *player_cockpit = _Universe->isPlayerStarship(this);
     if ((player_cockpit) == nullptr) {
-        difficulty = pow(g_game.difficulty, configuration()->physics.difficulty_speed_exponent);
+        difficulty = std::pow(g_game.difficulty, configuration()->physics.difficulty_speed_exponent);
     }
     return player_cockpit;
 }
@@ -1481,7 +1481,7 @@ bool DestroySystem(float hull_percent, float numhits) {
             XMLSupport::parse_float(vs_config->getVariable("physics", "definite_damage_chance", ".1"));
     float chance = 1 - (damage_chance * (guaranteed_chance + hull_percent));
     if (numhits > 1) {
-        chance = pow(chance, numhits);
+        chance = std::pow(chance, numhits);
     }
     return randomDouble() > chance;
 }
@@ -1493,7 +1493,7 @@ bool DestroyPlayerSystem(float hull_percent, float numhits) {
             XMLSupport::parse_float(vs_config->getVariable("physics", "definite_damage_chance", ".1"));
     float chance = 1 - (damage_chance * (guaranteed_chance + hull_percent));
     if (numhits > 1) {
-        chance = pow(chance, numhits);
+        chance = std::pow(chance, numhits);
     }
     bool ret = (randomDouble() > chance);
     if (ret) {
@@ -3318,7 +3318,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                         XMLSupport::parse_float(vs_config->getVariable("cargo", "min_price_quant_adj", "1"));
                 static float
                         powah = XMLSupport::parse_float(vs_config->getVariable("cargo", "price_quant_adj_power", "1"));
-                renormprice = pow(renormprice, powah);
+                renormprice = std::pow(renormprice, powah);
                 renormprice *= (maxpricequantadj - minpricequantadj);
                 renormprice += 1;
                 if (renormprice > .001) {
