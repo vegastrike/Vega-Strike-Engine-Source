@@ -32,6 +32,7 @@
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_exit.h"
 #include "src/vega_cast_utils.h"
+#include "root_generic/configxml.h"
 
 // TODO: once implementation is refactored, deal with this too
 extern QVector RealPosition(const Unit *un);
@@ -517,7 +518,7 @@ Vector JumpCapable::GetWarpRefVelocity() const {
     //Velocity
     Vector VelocityRef(0, 0, 0);
     {
-        const Unit *vr = unit->computer.velocity_ref.GetConstUnit();
+        const Unit *vr = unit->VelocityReference();
         if (vr) {
             VelocityRef = vr->cumulative_velocity;
         }
@@ -540,7 +541,7 @@ Vector JumpCapable::GetWarpVelocity() const {
     } else {
         Vector VelocityRef(0, 0, 0);
         {
-            Unit *vr = const_cast< UnitContainer * > (&unit->computer.velocity_ref)->GetUnit();
+            const Unit *vr = unit->VelocityReference();
             if (vr) {
                 VelocityRef = vr->cumulative_velocity;
             }

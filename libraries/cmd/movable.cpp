@@ -32,6 +32,7 @@
 #include "src/vs_logging.h"
 #include "src/audiolib.h"
 #include "cmd/audible.h"
+#include "root_generic/configxml.h"
 
 
 #include <iostream>

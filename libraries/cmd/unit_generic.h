@@ -4,7 +4,7 @@
 // Q: Why 2 header guards???
 
 /*
- * unit_generic.cpp
+ * unit_generic.h
  *
  * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Roy Falk, Benjamen R. Meyer,
  * and other Vega Strike contributors
@@ -37,7 +37,6 @@
 #include "cmd/damageable.h"
 #include "cmd/drawable.h"
 #include "cmd/movable.h"
-#include "cmd/computer.h"
 #include "cmd/intelligent.h"
 #include "cmd/energetic.h"
 #include "cmd/carrier.h"
@@ -83,24 +82,7 @@ void UncheckUnit( class Unit*un );
 #include "configuration/game_config.h"
 
 #include "cmd/cargo_color.h"
-
-// Components
-#include "components/afterburner.h"
-#include "components/afterburner_upgrade.h"
-#include "components/cloak.h"
-#include "components/energy_container.h"
-#include "components/reactor.h"
-#include "components/drive.h"
-#include "components/drive_upgrade.h"
-#include "components/ftl_drive.h"
-#include "components/jump_drive.h"
-#include "components/armor.h"
-#include "components/hull.h"
-#include "components/shield.h"
-#include "components/radar.h"
-#include "components/ecm.h"
-#include "components/repair_bot.h"
-#include "components/ship_functions.h"
+#include "components/components_manager.h"
 
 extern char *GetUnitDir(const char *filename);
 
@@ -155,7 +137,7 @@ struct PlanetaryOrbitData;
  */
 
 // TODO: move Armed to subclasses
-class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
+class Unit : public ComponentsManager, public Armed, public Audible, public Drawable, public Damageable, public Energetic,
         public Intelligent, public Movable, public JumpCapable, public Carrier, public UpgradeableUnit {
     // We store relevant textual description here.
     // We stop relying on manifest and units data once we create the unit.
@@ -527,21 +509,11 @@ public:
             StarSystem *&previouslyActiveStarSystem,
             bool DoSightAndSound) override;
 
-    Computer computer;
     void SwitchCombatFlightMode();
     bool CombatMode();
 
     Pilot *pilot;
     bool selected = false;
-
-    Computer &GetComputerData() {
-        return computer;
-    }
-
-    const Computer &ViewComputerData() const {
-        return computer;
-    }
-
 
 /*
  **************************************************************************************
@@ -767,9 +739,19 @@ public:
  **** TARGETTING STUFF                                                              ***
  **************************************************************************************
  */
+public:
+    Vector GetNavPoint();
+    Unit *Target();
+    const Unit *Target() const;
+    void SetTarget(Unit *target);
+    Unit *Threat();
+    const Unit *Threat() const;
+    void SetThreat(Unit *target);
+    Unit *VelocityReference();
+    const Unit *VelocityReference() const;
+    void VelocityReference(Unit *target);
 
 public:
-    Unit *Threat();
 //not used yet
     StringPool::Reference target_fgid[3];
 
@@ -779,13 +761,9 @@ public:
     }
 
     bool InRange(const Unit *target, double &mm, bool cone, bool cap, bool lock) const;
-    Unit *Target();
-    const Unit *Target() const;
-    Unit *VelocityReference();
-    const Unit *VelocityReference() const;
+    
 
 //Uses Universe stuff so only in Unit class
-    void VelocityReference(Unit *targ);
     void TargetTurret(Unit *targ);
 //Threatens this unit with "targ" as aggressor. Danger should be cos angle to target
     void Threaten(Unit *targ, float danger);

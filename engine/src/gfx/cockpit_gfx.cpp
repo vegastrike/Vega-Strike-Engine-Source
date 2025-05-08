@@ -39,6 +39,8 @@
 #include "nav/navcomputer.h"
 #include "gfx/gauge.h"
 #include "gfx/cockpit_gfx_utils.h"
+#include "resource/random_utils.h"
+#include "root_generic/configxml.h"
 
 #include <algorithm>
 
@@ -697,8 +699,9 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     GFXDisable( LIGHTING );
     if (configuration()->graphics.hud.draw_nav_symbol) {
-        DrawNavigationSymbol(player->GetComputerData().NavPoint, CamP, CamQ,
-                             CamR.Cast().Dot( (player->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition() ) );
+        const Vector nav_point = player->GetNavPoint();
+        DrawNavigationSymbol(nav_point, CamP, CamQ,
+                             CamR.Cast().Dot( (nav_point).Cast()-_Universe->AccessCamera()->GetPosition() ) );
     }
     Radar::Track track = sensor.CreateTrack(target, Loc);
     GFXColor trackcolor=sensor.GetColor(track);
@@ -765,7 +768,7 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
     static bool draw_dock_box = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_docking_boxes", "true" ) );
     if (draw_dock_box)
         DrawDockingBoxes(player, target, CamP, CamQ, CamR);
-    if ( (always_itts || player->GetComputerData().itts) && !nav_symbol ) {
+    if ( (always_itts || player->computer.itts) && !nav_symbol ) {
         float   mrange;
         float   err  =  .01*( 1 - player->CloakVisible() );
         float   scatter  = .25*player->rSize();
@@ -846,8 +849,9 @@ void DrawTurretTargetBoxes(const Radar::Sensor& sensor)
         Radar::Track track = sensor.CreateTrack(target, Loc);
         if (configuration()->graphics.hud.draw_nav_symbol) {
             GFXColor4f( 1, 1, 1, 1 );
-            DrawNavigationSymbol( subunit->GetComputerData().NavPoint, CamP, CamQ,
-                                 CamR.Cast().Dot( (subunit->GetComputerData().NavPoint).Cast()
+            Vector nav_point = subunit->GetNavPoint();
+            DrawNavigationSymbol( nav_point, CamP, CamQ,
+                                 CamR.Cast().Dot( (nav_point).Cast()
                                                  -_Universe->AccessCamera()->GetPosition() ) );
         }
         GFXColorf(sensor.GetColor(track));

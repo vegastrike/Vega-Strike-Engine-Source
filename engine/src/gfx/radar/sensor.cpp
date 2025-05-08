@@ -33,6 +33,7 @@
 #include "cmd/unit_find.h"
 #include "sensor.h"
 #include "src/universe.h"
+#include "root_generic/configxml.h"
 
 extern Unit *getTopLevelOwner(); // located in star_system.cpp
 

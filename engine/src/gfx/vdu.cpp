@@ -52,6 +52,7 @@
 #include "configuration/configuration.h"
 #include "components/ship_functions.h"
 #include "cmd/dock_utils.h"
+#include "root_generic/configxml.h"
 
 template<typename T>
 inline T mymin(T a, T b) {
@@ -1163,8 +1164,7 @@ void VDU::DrawDamage(Unit *parent) {
             parent->armor.Percent(Armor::back),
             hull_percent, true, false);
     GFXDisable(TEXTURE0);
-    //Unit *thr = parent->Threat();
-    parent->Threat();
+    
     std::string fullname(getUnitNameAndFgNoBase(parent));
     //sprintf (st,"%s\nHull: %.3f",blah.c_str(),parent->GetHull());
     //tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);
@@ -1687,7 +1687,7 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
     w = fabs(w / 2);
     tp->SetPos(x - w, y + h);
     tp->SetSize(x + w, y - h - .5 * fabs(w / cols));
-    targ = parent->GetComputerData().target.GetUnit();
+    targ = parent->Target();
     if (thismode.back() != COMM && comm_ani != NULL) {
         if (comm_ani->Done()) {
             comm_ani = NULL;
@@ -1703,6 +1703,8 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
             parentcp->autoMessageTime -= auto_switch_lim * 1.125;
         }
     }
+
+    Vector nav_point = parent->GetNavPoint();
     switch (thismode.back()) {
         case NETWORK:
             break;
@@ -1740,7 +1742,7 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
             DrawNav(parentcp,
                     parent,
                     targ,
-                    parent->ToLocalCoordinates(parent->GetComputerData().NavPoint - parent->Position().Cast()));
+                    parent->ToLocalCoordinates(nav_point - parent->Position().Cast()));
             break;
         case MSG:
             DrawMessages(parentcp, targ);

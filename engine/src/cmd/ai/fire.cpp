@@ -675,7 +675,7 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
     }
     float gunspeed, gunrange, missilerange;
     parent->getAverageGunSpeed(gunspeed, gunrange, missilerange);
-    float angle = parent->cosAngleTo(targ, dist, parent->GetComputerData().itts ? gunspeed : FLT_MAX, gunrange, false);
+    float angle = parent->cosAngleTo(targ, dist, parent->computer.itts ? gunspeed : FLT_MAX, gunrange, false);
     missilelock = false;
     targ->Threaten(parent, angle / (dist < .8 ? .8 : dist));
     if (targ == parent->Target()) {
@@ -792,7 +792,7 @@ void FireAt::PossiblySwitchTarget(bool unused) {
         Flightgroup *fg;
         if ((fg = parent->getFlightgroup())) {
             if (fg->directive.find(".") != string::npos) {
-                ct = (parent->Target() == NULL);
+                ct = (parent->Target() == nullptr);
             }
         }
         if (ct) {

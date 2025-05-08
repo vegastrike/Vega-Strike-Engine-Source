@@ -34,6 +34,7 @@
 #include "cmd/building.h"
 #include "cmd/planetary_orbit.h"
 #include "root_generic/atmospheric_fog_mesh.h"
+#include "root_generic/configxml.h"
 
 
 #include "cmd/cont_terrain.h"
