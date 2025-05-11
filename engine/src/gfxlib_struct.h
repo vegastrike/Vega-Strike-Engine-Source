@@ -1,7 +1,7 @@
 /*
  * gfxlib_struct.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -77,22 +77,22 @@ struct GFXVertex {
     float tz;
     float tw;
 
-    GFXVertex() {
+    GFXVertex(): s(0), t(0), i(0), j(0), k(0), x(0), y(0), z(0), tx(0), ty(0), tz(0), tw(0) {
     }
 
-    GFXVertex(const QVector &vert, const Vector &norm, float s, float t) {
+    GFXVertex(const QVector &vert, const Vector &norm, float s, float t): tx(0), ty(0), tz(0), tw(0) {
         SetVertex(vert.Cast());
         SetNormal(norm);
         SetTexCoord(s, t);
     }
 
-    GFXVertex(const Vector &vert, const Vector &norm, float s, float t) {
+    GFXVertex(const Vector &vert, const Vector &norm, float s, float t): tx(0), ty(0), tz(0), tw(0) {
         SetVertex(vert);
         SetNormal(norm);
         SetTexCoord(s, t);
     }
 
-    GFXVertex(float x, float y, float z, float i, float j, float k, float s, float t) {
+    GFXVertex(float x, float y, float z, float i, float j, float k, float s, float t): tx(0), ty(0), tz(0), tw(0) {
         this->x = x;
         this->y = y;
         this->z = z;
@@ -156,7 +156,7 @@ struct GFXVertex {
     }
 };
 
-//Stores a color (or any 4 valued vector)
+///Stores a color
 struct GFXColor {
     float r = 0;
     float g = 0;
@@ -164,13 +164,6 @@ struct GFXColor {
     float a = 0;
 
     GFXColor() {
-    }
-
-    GFXColor(const Vector &v, float a = 1.0) {
-        this->r = v.i;
-        this->g = v.j;
-        this->b = v.k;
-        this->a = a;
     }
 
     GFXColor(float r, float g, float b) {
@@ -279,20 +272,20 @@ struct GFXColorVertex {
         this->tw = 1.f;
     }
 
-    GFXColorVertex(const Vector &vert, const Vector &norm, const GFXColor &rgba, float s, float t) {
+    GFXColorVertex(const Vector &vert, const Vector &norm, const GFXColor &rgba, float s, float t): tx(0), ty(0), tz(0), tw(0) {
         SetVertex(vert);
         SetNormal(norm);
         SetColor(rgba);
         SetTexCoord(s, t);
     }
 
-    GFXColorVertex(const Vector &vert, const GFXColor &rgba, float s, float t) {
+    GFXColorVertex(const Vector &vert, const GFXColor &rgba, float s, float t): tx(0), ty(0), tz(0), tw(0) {
         SetVertex(vert);
         SetColor(rgba);
         SetTexCoord(s, t);
     }
 
-    GFXColorVertex(const Vector &vert, const GFXColor &rgba) {
+    GFXColorVertex(const Vector &vert, const GFXColor &rgba): tx(0), ty(0), tz(0), tw(0) {
         SetVertex(vert);
         SetColor(rgba);
     }
@@ -308,7 +301,7 @@ struct GFXColorVertex {
             float b,
             float a,
             float s,
-            float t) {
+            float t): tx(0), ty(0), tz(0), tw(0) {
         this->x = x;
         this->y = y;
         this->z = z;
@@ -776,7 +769,8 @@ public:
         options = other.options;
     };
 
-    void SetProperties(enum LIGHT_TARGET, const GFXColor &color);
+    void SetProperties(enum LIGHT_TARGET light_target, const GFXColor &color);
+    void SetProperties(enum LIGHT_TARGET light_target, const Vector &vector);
     GFXColor GetProperties(enum LIGHT_TARGET) const;
 
     void setSize(float size_) {
@@ -861,17 +855,17 @@ class /*GFXDRVAPI*/ GFXQuadList {
 ///number of "dirty" quads, hence gaps in quadassignments that must be assigned before more are allocated
     int Dirty;
 public:
-///Creates an initial Quad List
-    GFXQuadList(GFXBOOL color = GFXFALSE);
-///Trashes given quad list
+    ///Creates an initial Quad List
+    explicit GFXQuadList(GFXBOOL color = GFXFALSE);
+    ///Trashes given quad list
     ~GFXQuadList();
-///Draws all quads contained in quad list
+    ///Draws all quads contained in quad list
     void Draw();
-///Adds quad to quad list, an integer indicating number that should be used to henceforth Mod it or delete it
-    int AddQuad(const GFXVertex *vertices, const GFXColorVertex *colors = 0);
-///Removes quad from Quad list
+    ///Adds quad to quad list, an integer indicating number that should be used to henceforth Mod it or delete it
+    int AddQuad(const GFXVertex *vertices, const GFXColorVertex *colors = nullptr);
+    ///Removes quad from Quad list
     void DelQuad(int which);
-///modifies quad in quad list to contain new vertices and color information
+    ///modifies quad in quad list to contain new vertices and color information
     void ModQuad(int which, const GFXVertex *vertices, float alpha = -1);
     void ModQuad(int which, const GFXColorVertex *vertices);
 };
@@ -895,7 +889,7 @@ protected:
         ///Or has color data
         GFXColorVertex *colors;
 
-        VDAT() : vertices(0) {
+        VDAT() : vertices(nullptr) {
         };
     }
             data;
@@ -903,7 +897,7 @@ protected:
         unsigned char *b; //stride 1
         unsigned short *s; //stride 2
         unsigned int *i; //stride 4
-        INDEX() : i(0) {
+        INDEX() : i(nullptr) {
         };
     }
             index;
@@ -965,8 +959,8 @@ public:
             int numlists,
             int *offsets,
             bool Mutable = false,
-            unsigned int *index = 0) {
-        Init(poly, numVertices, vertices, 0, numlists, offsets, Mutable, index);
+            unsigned int *index = nullptr) {
+        Init(poly, numVertices, vertices, nullptr, numlists, offsets, Mutable, index);
     }
 
 ///Creates a vertex list with 1 poly type and color information to boot
@@ -975,8 +969,8 @@ public:
             const GFXColorVertex *colors,
             int numindices,
             bool Mutable = false,
-            unsigned int *index = 0) {
-        Init(&poly, numVertices, 0, colors, 1, &numindices, Mutable, index);
+            unsigned int *index = nullptr) {
+        Init(&poly, numVertices, nullptr, colors, 1, &numindices, Mutable, index);
     }
 
 ///Creates a vertex list with an arbitrary number of poly types and color
@@ -986,8 +980,8 @@ public:
             int numlists,
             int *offsets,
             bool Mutable = false,
-            unsigned int *index = 0) {
-        Init(poly, numVertices, 0, colors, numlists, offsets, Mutable, index);
+            unsigned int *index = nullptr) {
+        Init(poly, numVertices, nullptr, colors, numlists, offsets, Mutable, index);
     }
 
     virtual ~GFXVertexList();

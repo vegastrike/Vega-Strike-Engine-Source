@@ -41,10 +41,10 @@
 #include "gfx/cockpit_gfx_utils.h"
 #include "resource/random_utils.h"
 #include "root_generic/configxml.h"
+#include "resource/random_utils.h"
 
 #include <algorithm>
 
-extern float rand01();
 #define SWITCH_CONST (.9)
 
 // got to move this to some more generic place
@@ -332,7 +332,7 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
                 un->ship_functions.Value(Function::cockpit);
             if (gauge_time[i] >= 0) {
                 if ( damage > .0001 && ( cockpit_time > ( gauge_time[i]+(1-damage) ) ) )
-                    if (rand01() > SWITCH_CONST)
+                    if (randomDouble() > SWITCH_CONST)
                         gauge_time[i] = -cockpit_time;
                 /*else {
                  *  static string gauge_static = vs_config->getVariable("graphics","gauge_static","static.ani");
@@ -340,7 +340,7 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
                  *  vdu_ani.DrawAsVSSprite(gauges[i]);
                  *  }*/
             } else if ( cockpit_time > ( ( ( 1-(-gauge_time[i]) )+damage ) ) ) {
-                if (rand01() > SWITCH_CONST)
+                if (randomDouble() > SWITCH_CONST)
                     gauge_time[i] = cockpit_time;
             }
         }
@@ -555,7 +555,7 @@ void DrawRadar(const Radar::Sensor& sensor, float  cockpit_time, float radar_tim
         if (damage < .985) {
             if (radar_time >= 0) {
                 if ( damage > .001 && ( cockpit_time > radar_time+(1-damage) ) ) {
-                    if (rand01() > SWITCH_CONST)
+                    if (randomDouble() > SWITCH_CONST)
                         radar_time = -cockpit_time;
                 } else {
                     static Animation radar_ani( "static_round.ani", true, .1, BILINEAR );
@@ -563,7 +563,7 @@ void DrawRadar(const Radar::Sensor& sensor, float  cockpit_time, float radar_tim
                     radar_ani.DrawAsVSSprite( radarSprites[1] );
                 }
             } else if ( cockpit_time > ( ( 1-(-radar_time) )+damage ) ) {
-                if (rand01() > SWITCH_CONST)
+                if (randomDouble() > SWITCH_CONST)
                     radar_time = cockpit_time;
             }
         }

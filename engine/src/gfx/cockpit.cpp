@@ -91,13 +91,14 @@
 #include "cmd/dock_utils.h"
 #include "vega_cast_utils.h"
 #include "resource/random_utils.h"
+#include "resource/random_utils.h"
+
 #include <cstddef>
 #include <cfloat>
 
 using std::min;
 using std::max;
 
-extern float rand01();
 using VSFileSystem::SoundFile;
 #define SWITCH_CONST (.9)
 /* The smaller VERYNEAR_CONST is, the worse Z-Buffer precision will be. So keep this above 0.004) */
@@ -1777,7 +1778,7 @@ void GameCockpit::Draw() {
                         if (damage < .985) {
                             if (vdu_time[vd] >= 0) {
                                 if (damage > .001 && (cockpit_time > (vdu_time[vd] + (1 - damage)))) {
-                                    if (rand01() > SWITCH_CONST) {
+                                    if (randomDouble() > SWITCH_CONST) {
                                         vdu_time[vd] = -cockpit_time;
                                     }
                                 }
@@ -1798,7 +1799,7 @@ void GameCockpit::Draw() {
                                  *
                                  *  }*/
                             } else if (cockpit_time > ((1 - (-vdu_time[vd])) + (damage))) {
-                                if (rand01() > SWITCH_CONST) {
+                                if (randomDouble() > SWITCH_CONST) {
                                     vdu_time[vd] = cockpit_time;
                                 }
                             }

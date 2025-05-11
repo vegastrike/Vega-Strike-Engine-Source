@@ -77,7 +77,6 @@ extern void CacheJumpStar(bool);
 extern void SortStarSystems(vector<StarSystem *> &ss, StarSystem *drawn);
 extern void bootstrap_first_loop();
 extern bool RefreshGUI();
-extern float rand01();
 extern int timecount;
 extern StarSystem *GetLoadedStarSystem(const char *system);
 extern bool screenshotkey;

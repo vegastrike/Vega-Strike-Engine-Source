@@ -40,6 +40,7 @@
 #include "cmd/ai/comm_ai.h"
 #include "gfx_generic/mesh.h"
 #include "src/vega_cast_utils.h"
+#include "resource/random_utils.h"
 
 #include <algorithm>
 #include "configuration/configuration.h"
@@ -335,7 +336,6 @@ void Damageable::ApplyDamage(const Vector &pnt,
 // TODO: get rid of extern
 extern bool DestroySystem(float hull_percent, float numhits);
 extern bool DestroyPlayerSystem(float hull_percent, float numhits);
-extern float rand01();
 extern const Unit *loadUnitByCache(std::string name, int faction);
 
 void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector) {
@@ -371,7 +371,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     // Damage is calculated as 0.25 * rand + 0.75 * (hull_damage)/(current_hull)
     // Therefore,
     double indiscriminate_system_destruction = configuration()->physics.indiscriminate_system_destruction;
-    double random_damage_factor = indiscriminate_system_destruction * rand01();
+    double random_damage_factor = indiscriminate_system_destruction * randomDouble();
     double hull_damage_modifier = 1 - indiscriminate_system_destruction;
     double hull_damage_factor = hull_damage_modifier * (1 - hull_damage / unit->hull.Get());
     unit->DamageRandSys(random_damage_factor + hull_damage_factor, attack_vector);

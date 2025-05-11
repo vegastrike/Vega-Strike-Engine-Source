@@ -1,5 +1,19 @@
-// Following code from Magic-Software (http://www.magic-software.com/)
-// A bit modified for Opcode
+/*
+ * OPC_LSSTriOverlap.h
+ *
+ * Copyright (C) 2001 Pierre Terdiman
+ * Copyright (C) 2021, 2022, 2025 Stephen G. Tuggy
+ * Copyright (C) 2023 Benjamen R. Meyer
+ *
+ * Following code from Magic-Software (http://www.magic-software.com/)
+ * A bit modified for OPCODE - Optimized Collision Detection
+ * (http://www.codercorner.com/Opcode.htm) and then
+ * incorporated into Vega Strike
+ * (https://github.com/vegastrike/Vega-Strike-Engine-Source).
+ *
+ * Public Domain
+ */
+
 // NO HEADER GUARD
 
 static const float gs_fTolerance = 1e-05f;

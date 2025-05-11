@@ -2,9 +2,8 @@
  * nebula.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, Roy Falk,
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, Roy Falk,
  * and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -115,13 +114,17 @@ void Nebula::beginElem(const std::string &name, const AttributeList &atts) {
             for (iter = atts.begin(); iter != atts.end(); iter++) {
                 switch (attribute_map.lookup((*iter).name)) {
                     case RED:
-                        color.i = parse_float((*iter).value);
+                        color.r = parse_float((*iter).value);
                         break;
                     case GREEN:
-                        color.j = parse_float((*iter).value);
+                        color.g = parse_float((*iter).value);
                         break;
                     case BLUE:
-                        color.k = parse_float((*iter).value);
+                        color.b = parse_float((*iter).value);
+                        break;
+                    default:
+                        VS_LOG(warning, (boost::format("%1%: Unrecognized color component in switch statement: %2%")
+                                % __FUNCTION__ % attribute_map.lookup((*iter).name)));
                         break;
                 }
             }
@@ -167,12 +170,12 @@ void Nebula::LoadXML(const char *filename) {
     f.Close();
 }
 
-void Nebula::SetFogState() {
+void Nebula::SetFogState() const {
     float thisfadein = (lastfadein * (1 - interpolation_blend_factor) + (fadeinvalue) * interpolation_blend_factor);
     GFXFogMode(fogmode);
     GFXFogDensity(Density * thisfadein);
     GFXFogLimits(fognear, fogfar * thisfadein);
-    GFXFogColor(GFXColor(color.i, color.j, color.k, 1));
+    GFXFogColor( color);
     GFXFogIndex(index);
 }
 

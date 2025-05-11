@@ -6,7 +6,7 @@
 /*
  * unit_generic.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Roy Falk, Benjamen R. Meyer,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy, Roy Falk, Benjamen R. Meyer,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -465,7 +465,7 @@ public:
 /* Updates the collide Queue with any possible change in sectors
  *  Split this mesh with into 2^level submeshes at arbitrary planes
  *  Uses Mesh so only in Unit and maybe in NetUnit */
-    virtual void Split(int level) {
+    void Split(int level) override {
     }
 
     virtual void addHalo(const char *filename,

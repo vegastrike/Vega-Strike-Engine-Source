@@ -130,8 +130,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(const int light);
 ///Deactivates an active light.
 GFXBOOL /*GFXDRVAPI*/ GFXDisableLight(const int light);
 
-///Modifies the parameters of the given light
+///Modifies the parameters of the given light, taking a GFXColor as input
 GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, const enum LIGHT_TARGET, const GFXColor &color);
+
+///Modifies the parameters of the given light, taking a Vector as input
+GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, const enum LIGHT_TARGET, const Vector &vector);
 
 ///Retrieves the parameters of the given light
 const GFXLight & /*GFXDRVAPI*/ GFXGetLight(const int light);

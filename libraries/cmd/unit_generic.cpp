@@ -82,6 +82,7 @@
 #include "resource/manifest.h"
 #include "cmd/dock_utils.h"
 #include "vega_cast_utils.h"
+#include "resource/random_utils.h"
 
 #include <math.h>
 #include <list>
@@ -179,14 +180,14 @@ Unit* CheckNullAndCastToUnit(ComponentsManager* manager) {
     if (manager == nullptr) {
         return nullptr;
     }
-    return vega_dynamic_cast_ptr<Unit>(manager);
+    return dynamic_cast<Unit*>(manager);
 }
 
 const Unit* CheckNullAndConstCastToUnit(const ComponentsManager* manager)  {
     if (manager == nullptr) {
         return nullptr;
     }
-    return vega_dynamic_const_cast_ptr<const Unit>(manager);
+    return dynamic_cast<const Unit*>(manager);
 }
 
 Vector Unit::GetNavPoint() {
@@ -262,9 +263,6 @@ extern void PlayDockingSound(int dock);
     return false;
 }*/
 
-float rand01() {
-    return (float) rand() / (float) RAND_MAX;
-}
 
 static list<Unit *> Unitdeletequeue;
 static Hashtable<uintmax_t, Unit, 2095> deletedUn;
@@ -1165,7 +1163,7 @@ Unit *findUnitInStarsystem(const void *unitDoNotDereference) {
 void Unit::DamageRandSys(float dam, const Vector &vec) {
     // TODO: take actual damage into account when damaging components.
     float deg = fabs(180 * atan2(vec.i, vec.k) / M_PI);
-    float randnum = rand01();
+    float randnum = randomDouble();
     const float inv_min_dam = 1.0F - configuration()->physics.min_damage;
     const float inv_max_dam = 1.0F - configuration()->physics.max_damage;
     if (dam < inv_max_dam) {
@@ -1203,7 +1201,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         damages |= Damages::COMPUTER_DAMAGED;
         return;
     }
-    if (rand01() < configuration()->physics.thruster_hit_chance) {
+    if (randomDouble() < configuration()->physics.thruster_hit_chance) {
         // This is fairly severe. One or two hits can disable the engine.
         // Note that retro can be damaged by both this and above.
         // Drive can also be damaged by code below - really computer.
@@ -1514,7 +1512,7 @@ bool DestroySystem(float hull_percent, float numhits) {
     if (numhits > 1) {
         chance = pow(chance, numhits);
     }
-    return rand01() > chance;
+    return randomDouble() > chance;
 }
 
 bool DestroyPlayerSystem(float hull_percent, float numhits) {
@@ -1526,7 +1524,7 @@ bool DestroyPlayerSystem(float hull_percent, float numhits) {
     if (numhits > 1) {
         chance = pow(chance, numhits);
     }
-    bool ret = (rand01() > chance);
+    bool ret = (randomDouble() > chance);
     if (ret) {
         //VS_LOG(warning, "DAAAAAAMAGED!!!!");
     }
@@ -3474,7 +3472,6 @@ using std::string;
  *** UNIT_REPAIR STUFF                                                               **
  **************************************************************************************
  */
-extern float rand01();
 
 bool isWeapon(std::string name) {
     if (name.find("Weapon") != std::string::npos) {
