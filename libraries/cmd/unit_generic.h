@@ -165,6 +165,7 @@ class Unit : public Armed, public Audible, public Drawable, public Damageable, p
     // - model (stock) - should be variant, but only if actually different without upgrades
     // TODO: name is duplicated down below in some memory saving measure (StringPool::Reference)
     std::string unit_key;
+    bool is_planet{};
     std::string unit_name;
     std::string unit_description;
 
@@ -990,13 +991,23 @@ public:
         return filename.get();
     }
 
-//Is this class a unit
+private:
+    void setUnitKey(const std::string& key) {
+        unit_key = key;
+        // Cache this calculation so that we don't have to compare the strings over and over again
+        is_planet = boost::algorithm::ends_with(unit_key, "__planets");
+    }
+
+    const std::string &getUnitKey() const {
+        return unit_key;
+    }
+
+public:
+    // Is this class a unit? If so, what type?
     virtual enum Vega_UnitType isUnit() const {
-        if(boost::algorithm::ends_with(unit_key, "__planets")) {
+        if (is_planet) {
             return Vega_UnitType::planet;
         }
-
-
         return Vega_UnitType::unit;
     }
 
