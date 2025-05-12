@@ -43,6 +43,7 @@
 #include "cmd/weapon_info.h"
 #include "resource/resource.h"
 #include "gfx_generic/boltdrawmanager.h"
+#include "root_generic/configxml.h"
 
 extern char SERVER;
 
@@ -383,7 +384,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                         temp->EnqueueAI(new AIScript((type->file + ".xai").c_str()));
                         temp->EnqueueAI(new Orders::FireAllYouGot);
                         if (match_speed_with_target) {
-                            temp->GetComputerData().velocity_ref.SetUnit(target);
+                            temp->VelocityReference(target);
                         }
                     } else {
                         temp->EnqueueAI(new Orders::AggressiveAI("default.agg.xml"));

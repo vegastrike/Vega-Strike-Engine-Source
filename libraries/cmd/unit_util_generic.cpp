@@ -844,7 +844,7 @@ int isPlayerStarship(const Unit *un) {
 
 void setSpeed(Unit *my_unit, float speed) {
     if (my_unit) {
-        my_unit->GetComputerData().set_speed = speed;
+        my_unit->computer.set_speed = speed;
     }
 }
 

@@ -27,7 +27,6 @@
 #include "src/universe_util.h"
 #include "gldrv/winsys.h"
 #include "root_generic/options.h"
-#include "cmd/computer.h"
 
 #include <math.h>
 
@@ -149,7 +148,7 @@ void ShipCommands::setkps(const char *in) {
         } else {
             kps /= game_options()->display_in_meters ? 1.0f : 3.6f;
         }
-        player->GetComputerData().set_speed = fmin(player->MaxSpeed(), kps);
+        player->computer.set_speed = fmin(player->MaxSpeed(), kps);
     }
 }
 

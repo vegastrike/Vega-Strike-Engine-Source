@@ -330,7 +330,7 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             break;
         }
         case THREAT:
-            value = parent->GetComputerData().threatlevel;
+            value = parent->computer.threatlevel;
             break;
         case FSHIELD:
             value = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::front);

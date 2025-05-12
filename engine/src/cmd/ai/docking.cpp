@@ -38,11 +38,11 @@ static void DockedScript(Unit *docker, Unit *base) {
     static string script = vs_config->getVariable("AI", "DockedToScript", "");
     if (script.length() > 0) {
         Unit *targ = docker->Target();
-        docker->GetComputerData().target.SetUnit(base);
+        docker->Target(base);
         UniverseUtil::setScratchUnit(docker);
         CompileRunPython(script);
         UniverseUtil::setScratchUnit(NULL);
-        docker->GetComputerData().target.SetUnit(targ);         //should be NULL;
+        docker->Target(targ);         //should be NULL;
     }
 }
 

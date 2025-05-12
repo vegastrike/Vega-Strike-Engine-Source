@@ -708,7 +708,7 @@ void AIScript::endElement(const string &name) {
             break;
         case FACETARGET:
             xml->unitlevel--;
-            if (xml->itts || parent->GetComputerData().itts) {
+            if (xml->itts || parent->computer.itts) {
                 xml->orders.push_back(new Orders::FaceTargetITTS(xml->terminate,
                         (bool) xml->acc));
             } else {
@@ -807,7 +807,7 @@ void AIScript::LoadXML() {
                     % mission->getGametime()
                     % filename
                     % parent->name
-                    % parent->GetComputerData().threatlevel));
+                    % parent->computer.threatlevel));
         }
         if (_Universe->isPlayerStarship(parent->Target())) {
             double value;
@@ -832,7 +832,7 @@ void AIScript::LoadXML() {
             if (aidebug > 0) {
                 UniverseUtil::IOmessage(0, parent->name, "all", string("using script ") + string(
                         filename) + " threat " + XMLSupport::tostring(
-                        parent->GetComputerData().threatlevel) + " dis "
+                        parent->computer.threatlevel) + " dis "
                         + std::to_string(value));
             }
         }
@@ -842,7 +842,7 @@ void AIScript::LoadXML() {
             VS_LOG(debug, (boost::format("using soft coded script %1%") % filename));
         if (aidebug > 0) {
             UniverseUtil::IOmessage(0, parent->name, "all", string("FAILED(or missile) script ") + string(
-                    filename) + " threat " + XMLSupport::tostring(parent->GetComputerData().threatlevel));
+                    filename) + " threat " + XMLSupport::tostring(parent->computer.threatlevel));
         }
     }
 #ifdef AIDBG

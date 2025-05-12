@@ -1410,7 +1410,7 @@ static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity)
             }
             PlayDockingSound(5);
         }
-    } else if (parent->GetComputerData().target == targ) {
+    } else if (parent->Target() == targ) {
         CommunicationMessage c(targ, parent, anim, gender);
         c.SetCurrentState(c.fsm->GetNoNode(), anim, gender);
         if (parent->getAIState()) {

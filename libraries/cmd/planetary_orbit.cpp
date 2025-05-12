@@ -28,6 +28,7 @@
 
 #include "cmd/unit_generic.h"
 #include "src/vs_logging.h"
+#include "root_generic/configxml.h"
 
 PlanetaryOrbit::PlanetaryOrbit(Unit *p,
         double velocity,

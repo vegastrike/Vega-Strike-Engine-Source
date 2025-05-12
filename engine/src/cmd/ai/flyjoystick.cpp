@@ -210,7 +210,7 @@ void FlyByJoystick::Execute() {
                     if (inverse) {
                         axis_value = -axis_value;
                     }
-                    Computer *cpu = &parent->GetComputerData();
+                    Computer *cpu = &parent->computer;
                     if (axis_value > 1) {
                         axis_value = 1;
                     }

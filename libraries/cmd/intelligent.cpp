@@ -44,6 +44,7 @@
 #include "cmd/ai/turretai.h"
 #include "collide2/CSopcodecollider.h"
 #include "src/vega_cast_utils.h"
+#include "root_generic/configxml.h"
 
 #include <string>
 

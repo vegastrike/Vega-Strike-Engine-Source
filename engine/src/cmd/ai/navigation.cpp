@@ -506,7 +506,7 @@ void AutoLongHaul::MakeLinearVelocityOrder() {
             XMLSupport::parse_float(vs_config->getVariable("auto_physics", "auto_docking_speed_boost", "20"));
 
     float speed =
-            parent->GetComputerData().combat_mode ? parent->drive.speed
+            parent->computer.combat_mode ? parent->drive.speed
                     : parent->afterburner.speed /*won't do insanity flight mode + spec = ludicrous speed*/;
     if (inside_landing_zone) {
         speed *= combat_mode_mult;
@@ -733,10 +733,10 @@ void AutoLongHaul::Execute() {
         WarpRampOff(parent, rampdown);
     }
     SetDest(destination);
-    bool combat_mode = parent->GetComputerData().combat_mode;
-    parent->GetComputerData().combat_mode = !inside_landing_zone;     //turn off limits in landing zone
+    bool combat_mode = parent->computer.combat_mode;
+    parent->computer.combat_mode = !inside_landing_zone;     //turn off limits in landing zone
     ChangeHeading::Execute();
-    parent->GetComputerData().combat_mode = combat_mode;
+    parent->computer.combat_mode = combat_mode;
     if (!finish) {
         ResetDone();
     }

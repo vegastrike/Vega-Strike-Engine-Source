@@ -25,6 +25,8 @@
 
 #include "cmd/carrier.h"
 
+#include "root_generic/configxml.h"
+
 #include "cmd/unit_generic.h"
 #include "cmd/ship.h"
 #include "src/universe.h"
