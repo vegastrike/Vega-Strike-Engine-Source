@@ -21,8 +21,6 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <SDL2/SDL.h>
-
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #if defined(__APPLE__) && defined(__MACH__)
 #   include <gl.h>
@@ -49,6 +47,8 @@
 #include "vs_logging.h"
 #include "options.h"
 #include "vs_exit.h"
+
+#include "SDL2/SDL_video.h"
 
 /*
  * Windowing System Abstraction Layer
@@ -208,7 +208,7 @@ static bool setup_sdl_video_mode() {
     if (gl_options.fullscreen) {
         video_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     }
-    else 
+    else
     {
 #ifndef _WIN32
         video_flags |= SDL_WINDOW_RESIZABLE;
@@ -355,6 +355,15 @@ static bool setup_sdl_video_mode() {
 
 void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title) {
     keepRunning = true;
+
+#if defined(WIN32)
+    if (SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2")) {
+        VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, ...) succeeded");
+    } else {
+        VS_LOG_AND_FLUSH(warning, "SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, ...) failed");
+        SDL_ClearError();
+    }
+#endif
 
     Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
     g_game.x_resolution = vs_options::instance().x_resolution;
