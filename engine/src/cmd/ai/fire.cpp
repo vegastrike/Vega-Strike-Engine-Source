@@ -40,6 +40,7 @@
 #include "cmd/pilot.h"
 #include "src/universe.h"
 #include "cmd/unit_util.h"
+#include "resource/random_utils.h"
 
 extern int numprocessed;
 extern double targetpick;
@@ -753,23 +754,18 @@ unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile) {
 void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     const float missiledelay = configuration()->ai.missile_gun_delay;
     //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
-    bool fire_missile = lockmissile && rand() < RAND_MAX * missileprobability * SIMULATION_ATOM;
+    bool fire_missile = lockmissile && randomInt(RAND_MAX) < RAND_MAX * missileprobability * SIMULATION_ATOM;
     delay += SIMULATION_ATOM; //simulation_atom_var?
     if (shouldfire && delay < parent->pilot->getReactionTime()) {
-        VS_LOG(trace, (boost::format("%1%: delay < pilot reaction time") % __FUNCTION__));
         return;
     } else if (!shouldfire) {
-        VS_LOG(trace, (boost::format("%1%: shouldfire is false") % __FUNCTION__));
         delay = 0;
     }
     if (fire_missile) {
-        VS_LOG(trace, (boost::format("%1%: fire_missile is true; setting lastmissiletime") % __FUNCTION__));
         lastmissiletime = UniverseUtil::GetGameTime();
     } else if (UniverseUtil::GetGameTime() - lastmissiletime < missiledelay && !fire_missile) {
-        VS_LOG(trace, (boost::format("%1%: missiledelay hasn't passed yet and fire_missile is false") % __FUNCTION__));
         return;
     }
-    VS_LOG(trace, (boost::format("%1%: Calling parent->Fire(...)") % __FUNCTION__));
     parent->Fire(FireBitmask(parent, shouldfire, fire_missile), true);
 }
 
