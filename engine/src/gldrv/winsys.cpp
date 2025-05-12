@@ -208,7 +208,7 @@ static bool setup_sdl_video_mode() {
     if (gl_options.fullscreen) {
         video_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     }
-    else 
+    else
     {
 #ifndef _WIN32
         video_flags |= SDL_WINDOW_RESIZABLE;
@@ -355,6 +355,13 @@ static bool setup_sdl_video_mode() {
 
 void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title) {
     keepRunning = true;
+
+    if (SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2")) {
+        VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, ...) succeeded");
+    } else {
+        VS_LOG_AND_FLUSH(warning, "SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, ...) failed");
+        SDL_ClearError();
+    }
 
     Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
     g_game.x_resolution = vs_options::instance().x_resolution;
