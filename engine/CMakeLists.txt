@@ -1343,7 +1343,7 @@ IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
     SET(CPACK_NSIS_CONTACT "maintainers@vega-strike.org")
     SET(CPACK_NSIS_MODIFY_PATH ON)
 
-    # NSIS, Wix, and compressed archives (7z, Zip)
+    # Windows installer format(s) to output
     SET(CPACK_GENERATOR "NSIS64")
     SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../packages")
     SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_v${VEGASTRIKE_PKG_VERSION_STR}_Windows_${CMAKE_SYSTEM_VERSION}_${CMAKE_SYSTEM_PROCESSOR}")
