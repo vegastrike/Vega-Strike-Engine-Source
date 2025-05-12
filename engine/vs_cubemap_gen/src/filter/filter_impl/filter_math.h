@@ -42,7 +42,7 @@ dRadians ambient_flt_radius() {
 }
 
 double angle_scaling_factor(dRadians filter_radius_ratio, size_t LOD_steps) {
-    return ::pow(flt_radius_ratio_, 1.0 / double(lod_steps_)); // 770.034092456 ^ (1/7) = 2.584393052
+    return std::pow(flt_radius_ratio_, 1.0 / double(lod_steps_)); // 770.034092456 ^ (1/7) = 2.584393052
 }
 
 dSteradians solid_angle_from_radius(dRadians radius) {

@@ -139,20 +139,20 @@ int get_alpha(int _query,
     if (query <= half) {
         double _t0 = _t;
 //xt = x0 +	(vx0 * _t0)
-//+	( ((3*(x1-x0)) - ((2*vx0) + vx1) ) * pow(_t0,2) )
-//+	( ((2*(x0-x1))+(vx0+vx1) ) * pow(_t0,3));
+//+	( ((3*(x1-x0)) - ((2*vx0) + vx1) ) * std::pow(_t0,2) )
+//+	( ((2*(x0-x1))+(vx0+vx1) ) * std::pow(_t0,3));
 
         yt = int(y0 + (vy0 * _t0)
-                + (((3 * (y1 - y0)) - ((2 * vy0) + vy1)) * pow(_t0, 2))
-                + (((2 * (y0 - y1)) + (vy0 + vy1)) * pow(_t0, 3)));
+                + (((3 * (y1 - y0)) - ((2 * vy0) + vy1)) * std::pow(_t0, 2))
+                + (((2 * (y0 - y1)) + (vy0 + vy1)) * std::pow(_t0, 3)));
     } else {
         double _t1 = _t;
 //xt = x1	+	(vx1 * _t1)
-//+	(( (3*(x2-x1)) - ((2*vx1) + vx2) ) * pow(_t1,2))
-//+	(( (2*(x1-x2))+(vx1+vx2) ) * pow(_t1,3));
+//+	(( (3*(x2-x1)) - ((2*vx1) + vx2) ) * std::pow(_t1,2))
+//+	(( (2*(x1-x2))+(vx1+vx2) ) * std::pow(_t1,3));
         yt = int(y1 + (vy1 * _t1)
-                + (((3 * (y2 - y1)) - ((2 * vy1) + vy2)) * pow(_t1, 2))
-                + (((2 * (y1 - y2)) + (vy1 + vy2)) * pow(_t1, 3)));
+                + (((3 * (y2 - y1)) - ((2 * vy1) + vy2)) * std::pow(_t1, 2))
+                + (((2 * (y1 - y2)) + (vy1 + vy2)) * std::pow(_t1, 3)));
     }
     int return_alpha = yt;
     if (return_alpha < min) {

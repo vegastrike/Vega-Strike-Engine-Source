@@ -212,7 +212,7 @@ float tanf( float v )
 
 float powf( float v, float p )
 {
-    return (float) pow( (double) v, (double) p );
+    return (float) std::pow( (double) v, (double) p );
 }
 long long atoll( const char *a )
 {

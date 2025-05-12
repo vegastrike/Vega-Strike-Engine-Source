@@ -22,7 +22,11 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_ALPHA_CURVE_H
 #define VEGA_STRIKE_ENGINE_CMD_ALPHA_CURVE_H
 
+#if defined(_WIN32) || defined(__APPLE__) || defined(MACOSX)
+#include <cmath>
+#else
 #include <math.h>
+#endif
 
 //query = requested pixel alpha					any
 //maxrez x = width of the image in pixels				any
