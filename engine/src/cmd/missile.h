@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -77,33 +76,35 @@ public:
 public:
     virtual void Kill(bool erase = true);
     void Discharge();
-    float ExplosionRadius();
+    float ExplosionRadius() override;
 
-    enum Vega_UnitType isUnit() const {
+    enum Vega_UnitType isUnit() const override {
         return Vega_UnitType::missile;
     }
 
-    virtual void UpdatePhysics2(const Transformation &trans,
+    Vega_UnitType getUnitType() const override {
+        return Vega_UnitType::missile;
+    }
+
+    void UpdatePhysics2(const Transformation &trans,
             const Transformation &old_physical_state,
             const Vector &accel,
             float difficulty,
             const Matrix &transmat,
             const Vector &CumulativeVelocity,
             bool ResolveLast,
-            UnitCollection *uc = NULL);
+            UnitCollection *uc = NULL) override;
 
     Unit *breakECMLock(Unit *target);
     bool proximityFuse(Unit *target);
     bool useFuel(Unit *target, bool had_target);
 
-private:
-    // TODO: consider if this is really necessary and if so, use = delete
-/// default constructor forbidden
-    Missile();
-/// copy constructor forbidden
-    Missile(const Missile &);
-/// assignment operator forbidden
-    Missile &operator=(const Missile &);
+    /// default constructor forbidden
+    Missile() = delete;
+    /// copy constructor forbidden
+    Missile(const Missile &) = delete;
+    /// assignment operator forbidden
+    Missile &operator=(const Missile &) = delete;
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_MISSILE_H

@@ -668,7 +668,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::CANDOCK_MODAL: {
             Unit *station = target->Target();
             if (station) {
-                if(target->isUnit() != Vega_UnitType::planet ) {
+                if(target->getUnitType() != Vega_UnitType::planet ) {
                     return static_cast<float>(UnitImages<void>::NOMINAL);
                 }
 

@@ -747,7 +747,7 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
     // FIXME: Replace with UnitUtil::isDockableUnit?
     if ( draw_target_nav_symbol
         && ( (target->faction == neutral
-              && target->isUnit() == Vega_UnitType::unit) || target->isUnit() == Vega_UnitType::asteroid
+              && target->getUnitType() == Vega_UnitType::unit) || target->getUnitType() == Vega_UnitType::asteroid
             || ( target->isPlanet() && ( (Planet*) target )->isAtmospheric()
                 && ( draw_jump_nav_symbol
                      || target->GetDestinations().empty() ) ) || !sensor.InRange(track)) ) {

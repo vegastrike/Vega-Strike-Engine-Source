@@ -1402,7 +1402,7 @@ static Unit *ChooseNearNavPoint(Unit *parent, Unit *suggestion, QVector location
 bool CloseEnoughToNavOrDest(Unit *parent, Unit *navUnit, QVector nav) {
     static float how_far_to_stop_moving =
             XMLSupport::parse_float(vs_config->getVariable("AI", "how_far_to_stop_navigating", "100"));
-    if (navUnit && navUnit->isUnit() != Vega_UnitType::planet) {
+    if (navUnit && navUnit->getUnitType() != Vega_UnitType::planet) {
         float dist = UnitUtil::getDistance(navUnit, parent);
         if (dist < SIMULATION_ATOM /*simulation_atom_var?*/ * parent->Velocity.Magnitude() * parent->predicted_priority
                 * how_far_to_stop_moving) {
@@ -1499,7 +1499,7 @@ void AggressiveAI::ExecuteNoEnemies() {
             if (!otherdest) {
                 navDestination = dest;
                 dir = unitdir * (dest->rSize() + parent->rSize());
-                if (dest->isUnit() == Vega_UnitType::planet) {
+                if (dest->getUnitType() == Vega_UnitType::planet) {
                     float planetpct = UniverseUtil::getPlanetRadiusPercent();
                     dir *= (planetpct + 1.0f);
                     dir += randVector() * parent->rSize() * 2 * randspacingfactor;

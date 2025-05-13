@@ -41,11 +41,11 @@ bool inside_usable_dock(const DockingPorts &dock, const QVector &pos, const floa
 double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
     double distance = (first_unit->Position() - second_unit->Position()).Magnitude();
 
-    if(first_unit->isUnit() == Vega_UnitType::planet) {
+    if(first_unit->getUnitType() == Vega_UnitType::planet) {
         distance -= first_unit->rSize();
     }
 
-    if(second_unit->isUnit() == Vega_UnitType::planet) {
+    if(second_unit->getUnitType() == Vega_UnitType::planet) {
         distance -= second_unit->rSize();
     }
 
@@ -75,7 +75,7 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
     double range = DistanceTwoTargets(dock, ship);
 
     // Planet Code
-    if (dock->isUnit() == Vega_UnitType::planet) {
+    if (dock->getUnitType() == Vega_UnitType::planet) {
         range -= dock->rSize() * (configuration()->dock.dock_planet_radius_percent - 1);
         if (range < 0) {
             return 0;
@@ -140,7 +140,7 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
 
 
     // Planets/non-planets calculate differently
-    if (target->isUnit() == Vega_UnitType::planet) {
+    if (target->getUnitType() == Vega_UnitType::planet) {
         // TODO: move from here. We shouldn't have kill and land logic here.
         if (range < 0) {
             unit->hull.Destroy();
