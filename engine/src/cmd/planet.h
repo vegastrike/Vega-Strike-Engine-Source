@@ -294,7 +294,9 @@ public:
 
     /// assignment operator forbidden
     Planet &operator=(const Planet &) = delete;
-    friend bool operator==(const Planet &lhs, const Planet &rhs) = delete;
+
+private:
+    friend bool operator==(const Planet &lhs, const Planet &rhs);
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_PLANET_H
