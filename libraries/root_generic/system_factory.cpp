@@ -219,7 +219,7 @@ void SystemFactory::processRing(Star_XML *xml, Object &object, Planet *owner) {
     if (owner == nullptr) {
         return;
     }
-    if (unit->isUnit() != Vega_UnitType::planet) {
+    if (unit->getUnitType() != Vega_UnitType::planet) {
         return;
     }
 
@@ -433,7 +433,7 @@ void SystemFactory::processSpaceElevator(Object &object, Planet *owner) {
 
     Unit *unit = static_cast<Unit *>(owner);
 
-    if (owner == nullptr || unit->isUnit() != Vega_UnitType::planet) {
+    if (owner == nullptr || unit->getUnitType() != Vega_UnitType::planet) {
         return;
     }
 

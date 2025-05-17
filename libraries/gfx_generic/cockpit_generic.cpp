@@ -571,23 +571,23 @@ bool Cockpit::Update() {
                             "auto_pilot_termination_distance",
                             "6000"));
             float doubled = dockingdistance(targ, par);
-            if (((targ->isUnit() != Vega_UnitType::planet
+            if (((targ->getUnitType() != Vega_UnitType::planet
                     && doubled < autopilot_term_distance)
                     || (UnitUtil::getSignificantDistance(targ,
                             par) <= 0))
                     && (!(par->IsCleared(targ) || targ->IsCleared(par) || par->isDocked(targ)
                             || targ->isDocked(par))) && (par->getRelation(targ) >= 0)
                     && (targ->getRelation(par) >= 0)) {
-                if (targ->isUnit() != Vega_UnitType::planet || targ->GetDestinations().empty()) {
+                if (targ->getUnitType() != Vega_UnitType::planet || targ->GetDestinations().empty()) {
                     RequestClearence(par, targ, 0);
                 }                      //sex is always 0... don't know how to	 get it.
             } else if ((par->IsCleared(targ)
                     || targ->IsCleared(par)) && (!(par->isDocked(targ)) || targ->isDocked(par))
-                    && ((targ->isUnit() == Vega_UnitType::planet && UnitUtil::getSignificantDistance(par, targ) > 0)
-                            || ((targ->isUnit() != Vega_UnitType::planet
+                    && ((targ->getUnitType() == Vega_UnitType::planet && UnitUtil::getSignificantDistance(par, targ) > 0)
+                            || ((targ->getUnitType() != Vega_UnitType::planet
                                     && UnitUtil::getSignificantDistance(par, targ) > (targ->rSize() + par->rSize()))
                                     && (doubled >= autopilot_term_distance)))) {
-                if (targ->isUnit() != Vega_UnitType::planet || targ->GetDestinations().empty()) {
+                if (targ->getUnitType() != Vega_UnitType::planet || targ->GetDestinations().empty()) {
                     par->EndRequestClearance(targ);
                     targ->EndRequestClearance(par);
                 }
@@ -629,7 +629,7 @@ bool Cockpit::Update() {
                                             && un->owner == par)
                                     || (par == NULL
                                             && un->owner)) && (un->name != "eject") && (un->name != "Pilot")
-                            && (un->isUnit() != Vega_UnitType::missile)) {
+                            && (un->getUnitType() != Vega_UnitType::missile)) {
                         found = true;
                         ++index;
                         Unit *k = GetParent();

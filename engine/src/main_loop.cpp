@@ -890,7 +890,7 @@ void createObjects(std::vector<std::string> &fighter0name,
                                                                 grav->rSize() / 4),
                                                         vsrandom.uniformExc(-grav->rSize() / 4,
                                                                 grav->rSize() / 4));
-                                        if (grav->isUnit() != Vega_UnitType::planet) {
+                                        if (grav->getUnitType() != Vega_UnitType::planet) {
                                             newpos = UniverseUtil::SafeEntrancePoint(newpos);
                                         }
                                         cp->savegame->SetPlayerLocation(newpos);

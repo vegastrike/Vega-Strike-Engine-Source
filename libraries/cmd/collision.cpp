@@ -44,7 +44,7 @@
 Collision::Collision(Unit *unit, const QVector &location, const Vector &normal) :
         unit(unit), location(location), normal(normal) {
     cockpit = _Universe->isPlayerStarship(unit); // smcp/thcp
-    unit_type = unit->isUnit();
+    unit_type = unit->getUnitType();
     is_player_ship = _Universe->isPlayerStarship(unit);
     mass = std::max(unit->getMass(), static_cast<float>(configuration()->physics.minimum_mass));
     position = unit->Position();
@@ -62,7 +62,7 @@ Vega_UnitType::asteroid,
 Vega_UnitType::enhancement,
 Vega_UnitType::missile*/
 void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
-    Vega_UnitType other_units_type = other_unit->isUnit();
+    Vega_UnitType other_units_type = other_unit->getUnitType();
 
     // Collision with a nebula does nothing
     if (other_units_type == Vega_UnitType::nebula) {

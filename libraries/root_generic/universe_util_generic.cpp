@@ -686,7 +686,7 @@ namespace UniverseUtil {
             {
                 //fixme, make me faster, use collide map
                 for (un_iter i = sts->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
-                    if (UnitUtil::isAsteroid(un) || un->isUnit() == Vega_UnitType::nebula) {
+                    if (UnitUtil::isAsteroid(un) || un->getUnitType() == Vega_UnitType::nebula) {
                         continue;
                     }
                     double dist = (pos - un->LocalPosition()).Magnitude() - un->rSize() -/*def_un_size-*/ radial_size;

@@ -34,12 +34,15 @@
 #include "cmd/ai/communication.h"
 #include "src/universe_util.h"
 #include <algorithm>
+
+#include "vega_cast_utils.h"
 #include "cmd/unit_find.h"
 #include "src/vs_random.h"
 #include "root_generic/lin_time.h" //DEBUG ONLY
 #include "cmd/pilot.h"
 #include "src/universe.h"
 #include "cmd/unit_util.h"
+#include "resource/random_utils.h"
 
 extern int numprocessed;
 extern double targetpick;
@@ -58,7 +61,7 @@ Unit *getAtmospheric(Unit *targ) {
         for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
                 (un = *i) != NULL;
                 ++i) {
-            if (un->isUnit() == Vega_UnitType::planet) {
+            if (un->getUnitType() == Vega_UnitType::planet) {
                 if ((targ->Position() - un->Position()).Magnitude() < targ->rSize() * .5) {
                     if (!(((Planet *) un)->isAtmospheric())) {
                         return un;
@@ -75,8 +78,8 @@ bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex) {
         return false;
     }
 
-    if (targ->isUnit() == Vega_UnitType::planet) {
-        if (((Planet *) targ)->isAtmospheric() && NoDockWithClear()) {
+    if (targ->getUnitType() == Vega_UnitType::planet) {
+        if (vega_dynamic_cast_ptr<Planet>(targ)->isAtmospheric() && NoDockWithClear()) {
             targ = getAtmospheric(targ);
             if (!targ) {
                 return false;
@@ -689,7 +692,7 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
             (float) cos(M_PI * configuration()->ai.firing.maximum_firing_angle.maxagg
                     / 180.0);                                                                      //Roughly 18 degrees
     float temp = parent->TrackingGuns(missilelock);
-    bool isjumppoint = targ->isUnit() == Vega_UnitType::planet && ((Planet *) targ)->GetDestinations().empty() == false;
+    bool isjumppoint = targ->getUnitType() == Vega_UnitType::planet && ((Planet *) targ)->GetDestinations().empty() == false;
     float fangle = (fireangle_minagg + fireangle_maxagg * agg) / (1.0f + agg);
     bool retval =
             ((dist < firewhen)
@@ -753,28 +756,23 @@ unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile) {
 void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     const float missiledelay = configuration()->ai.missile_gun_delay;
     //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
-    bool fire_missile = lockmissile && rand() < RAND_MAX * missileprobability * SIMULATION_ATOM;
+    bool fire_missile = lockmissile && randomInt(RAND_MAX) < RAND_MAX * missileprobability * SIMULATION_ATOM;
     delay += SIMULATION_ATOM; //simulation_atom_var?
     if (shouldfire && delay < parent->pilot->getReactionTime()) {
-        VS_LOG(trace, (boost::format("%1%: delay < pilot reaction time") % __FUNCTION__));
         return;
     } else if (!shouldfire) {
-        VS_LOG(trace, (boost::format("%1%: shouldfire is false") % __FUNCTION__));
         delay = 0;
     }
     if (fire_missile) {
-        VS_LOG(trace, (boost::format("%1%: fire_missile is true; setting lastmissiletime") % __FUNCTION__));
         lastmissiletime = UniverseUtil::GetGameTime();
     } else if (UniverseUtil::GetGameTime() - lastmissiletime < missiledelay && !fire_missile) {
-        VS_LOG(trace, (boost::format("%1%: missiledelay hasn't passed yet and fire_missile is false") % __FUNCTION__));
         return;
     }
-    VS_LOG(trace, (boost::format("%1%: Calling parent->Fire(...)") % __FUNCTION__));
     parent->Fire(FireBitmask(parent, shouldfire, fire_missile), true);
 }
 
 bool FireAt::isJumpablePlanet(Unit *targ) {
-    bool istargetjumpableplanet = targ->isUnit() == Vega_UnitType::planet;
+    bool istargetjumpableplanet = targ->getUnitType() == Vega_UnitType::planet;
     if (istargetjumpableplanet) {
         istargetjumpableplanet =
                 (!((Planet *) targ)->GetDestinations().empty()) && (parent->jump_drive.IsDestinationSet());
@@ -808,7 +806,7 @@ void FireAt::Execute() {
     Order::Execute();
     done = tmp;
     Unit *targ;
-    if (parent->isUnit() == Vega_UnitType::unit) {
+    if (parent->getUnitType() == Vega_UnitType::unit) {
         const float cont_update_time = configuration()->ai.contraband_update_time;
         //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
         if (rand() < RAND_MAX * SIMULATION_ATOM / cont_update_time) {
