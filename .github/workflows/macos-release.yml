@@ -67,7 +67,7 @@ jobs:
           update-environment: true # false
 
       - name: Install dependencies using homebrew
-        run: brew install boost-python3 gtk+3 gtkglext sdl libvorbis
+        run: brew install boost-python3 gtk+3 gtkglext sdl libvorbis libarchive
 
       # The following Apple-provided libraries are deprecated:
       # * OpenGL as of macOS 10.14
