@@ -61,7 +61,8 @@ brew install \
     libpng \
     gtk+3 \
     gtkglext \
-    sdl2
+    sdl2 \
+    libarchive
 
 # The following Apple-provided libraries are deprecated:
 # * OpenGL as of macOS 10.14
