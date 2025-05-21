@@ -2008,6 +2008,7 @@ void GameCockpit::Draw() {
             const float deadband = configuration()->joystick.mouse_deadband;
             const int reverse_spr = configuration()->joystick.reverse_mouse_spr;
             const string blah = configuration()->joystick.mouse_crosshair;
+            // Needs to be static for performance reasons
             static VSSprite MouseVSSprite(blah.c_str(), BILINEAR, GFXTRUE);
             float xcoord = (-1.0F + float(mousex) / (0.5 * configuration()->graphics.resolution_x));
             float ycoord = (-reverse_spr + float(reverse_spr * mousey) / (.5 * configuration()->graphics.resolution_y));
