@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -35,27 +34,33 @@
 
 class Asteroid : public Unit {
 private:
-    unsigned int asteroid_physics_offset;
+    unsigned int asteroid_physics_offset{};
 
 public:
-    Asteroid(const char *filename, int faction, Flightgroup *fg = NULL, int fg_snumber = 0, float difficulty = .01);
+    Asteroid(const char *filename, int faction, Flightgroup *fg = nullptr, int fg_snumber = 0, float difficulty = .01);
 
-    enum Vega_UnitType isUnit() const {
+    enum Vega_UnitType isUnit() const override {
+        return Vega_UnitType::asteroid;
+    }
+
+    Vega_UnitType getUnitType() const override {
         return Vega_UnitType::asteroid;
     }
 
 private:
-/// default constructor forbidden
-    Asteroid();
 
     Asteroid(std::vector<Mesh *> m, bool b, int i) : Unit(m, b, i) {
     }
 
-/// copy constructor forbidden
-    Asteroid(const Asteroid &);
+public:
+    /// default constructor forbidden
+    Asteroid() = delete;
 
-/// assignment operator forbidden
-    Asteroid &operator=(const Asteroid &);
+    /// copy constructor forbidden
+    Asteroid(const Asteroid &) = delete;
+
+    /// assignment operator forbidden
+    Asteroid &operator=(const Asteroid &) = delete;
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_ASTEROID_H

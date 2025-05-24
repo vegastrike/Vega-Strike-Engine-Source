@@ -448,7 +448,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
 
     QVector direction(this->direction.Cast());
     QVector end(center + direction.Scale(curlength));
-    enum Vega_UnitType type = target->isUnit();
+    enum Vega_UnitType type = target->getUnitType();
     if (target == owner || type == Vega_UnitType::nebula || type == Vega_UnitType::asteroid) {
         static bool collideroids =
                 XMLSupport::parse_bool(vs_config->getVariable("physics", "AsteroidWeaponCollision", "false"));

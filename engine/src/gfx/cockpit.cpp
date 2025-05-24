@@ -668,7 +668,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::CANDOCK_MODAL: {
             Unit *station = target->Target();
             if (station) {
-                if(target->isUnit() != Vega_UnitType::planet ) {
+                if(target->getUnitType() != Vega_UnitType::planet ) {
                     return static_cast<float>(UnitImages<void>::NOMINAL);
                 }
 
@@ -2008,7 +2008,8 @@ void GameCockpit::Draw() {
             const float deadband = configuration()->joystick.mouse_deadband;
             const int reverse_spr = configuration()->joystick.reverse_mouse_spr;
             const string blah = configuration()->joystick.mouse_crosshair;
-            VSSprite MouseVSSprite(blah.c_str(), BILINEAR, GFXTRUE);
+            // Needs to be static for performance reasons
+            static VSSprite MouseVSSprite(blah.c_str(), BILINEAR, GFXTRUE);
             float xcoord = (-1.0F + float(mousex) / (0.5 * configuration()->graphics.resolution_x));
             float ycoord = (-reverse_spr + float(reverse_spr * mousey) / (.5 * configuration()->graphics.resolution_y));
             MouseVSSprite.SetPosition(xcoord * (1 - fabs(crosscenx)) + crosscenx,

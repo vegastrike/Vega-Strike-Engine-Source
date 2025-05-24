@@ -118,6 +118,10 @@ public:
         return Vega_UnitType::planet;
     }
 
+    Vega_UnitType getUnitType() const override {
+        return Vega_UnitType::planet;
+    }
+
     // Methods
     void AddAtmosphere(const std::string &texture,
             float radius,
@@ -238,7 +242,7 @@ public:
         void advance() {
             if (current() != NULL) {
                 Unit *cur = *pos;
-                if (cur->isUnit() == Vega_UnitType::planet) {
+                if (cur->getUnitType() == Vega_UnitType::planet) {
                     for (un_iter tmp(((Planet *) cur)->satellites.createIterator()); !tmp.isDone(); ++tmp) {
                         localCollection.append((*tmp));
                     }
@@ -285,13 +289,13 @@ public:
         return 0.0f;
     }
 
+    /// copy constructor forbidden
+    Planet(const Planet &) = delete;
+
+    /// assignment operator forbidden
+    Planet &operator=(const Planet &) = delete;
+
 private:
-
-/// copy constructor forbidden
-    Planet(const Planet &);
-
-/// assignment operator forbidden
-    Planet &operator=(const Planet &);
     friend bool operator==(const Planet &lhs, const Planet &rhs);
 };
 

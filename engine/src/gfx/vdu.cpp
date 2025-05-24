@@ -89,12 +89,12 @@ string reformatName(string nam) {
 
 string getUnitNameAndFgNoBase(Unit *target) {
     Flightgroup *fg = target->getFlightgroup();
-    if (target->isUnit() == Vega_UnitType::planet) {
+    if (target->getUnitType() == Vega_UnitType::planet) {
         string hr = ((Planet *) target)->getHumanReadablePlanetType();
         if (!hr.empty()) {
             return hr + string(":") + reformatName(target->name);
         }
-    } else if (target->isUnit() == Vega_UnitType::unit) {
+    } else if (target->getUnitType() == Vega_UnitType::unit) {
         if (fg) {
             int fgsnumber = target->getFgSubnumber();
             string fgnstring = XMLSupport::tostring(fgsnumber);
@@ -604,13 +604,13 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     float armor_down = target->armor.Percent(Armor::back);
     float armor_left = target->armor.Percent(Armor::right);
     float armor_right = target->armor.Percent(Armor::left);
-    if (target->isUnit() == Vega_UnitType::planet) {
+    if (target->getUnitType() == Vega_UnitType::planet) {
         armor_up = armor_down = armor_left = armor_right = target->hull.Percent();
     }
 
     VSSprite* vs_sprite;
     VSSprite* hud_image = target->getHudImage();
-    Vega_UnitType unit_type = target->isUnit();
+    Vega_UnitType unit_type = target->getUnitType();
     if (hud_image) {
         vs_sprite = hud_image;
     } else if (!target->GetDestinations().empty()) {

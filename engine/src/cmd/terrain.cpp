@@ -82,7 +82,7 @@ void Terrain::ApplyForce(Unit *un, const Vector &normal, float dist) {
 
 void Terrain::Collide(Unit *un, const Matrix &t) {
     Vector norm;
-    if (un->isUnit() == Vega_UnitType::building) {
+    if (un->getUnitType() == Vega_UnitType::building) {
         return;
     }
     float dist = GetHeight(un->Position().Cast(), norm, t, TotalSizeX, TotalSizeZ) - un->rSize();

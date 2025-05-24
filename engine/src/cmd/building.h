@@ -61,32 +61,33 @@ public:
             const std::string &unitModifications = std::string(""),
             Flightgroup *fg = NULL);
 
-public:
-
-    enum Vega_UnitType isUnit() const {
+    enum Vega_UnitType isUnit() const override {
         return Vega_UnitType::building;
     }
 
-    virtual void UpdatePhysics2(const Transformation &trans,
-            const Transformation &old_physical_state,
-            const Vector &accel,
-            float difficulty,
-            const Matrix &transmat,
-            const Vector &CumulativeVelocity,
-            bool ResolveLast,
-            UnitCollection *uc = NULL);
+    Vega_UnitType getUnitType() const override {
+        return Vega_UnitType::building;
+    }
+
+    void UpdatePhysics2(const Transformation &trans,
+                        const Transformation &old_physical_state,
+                        const Vector &accel,
+                        float difficulty,
+                        const Matrix &transmat,
+                        const Vector &CumulativeVelocity,
+                        bool ResolveLast,
+                        UnitCollection *uc = NULL) override;
 
     bool ownz(void *parent) {
         return this->parent.terrain == (Terrain *) parent;
     }
 
-protected:
-/// default constructor forbidden
-    Building();
-/// copy constructor forbidden
-    Building(const Building &);
-/// assignment operator forbidden
-    Building &operator=(const Building &);
+    /// default constructor forbidden
+    Building() = delete;
+    /// copy constructor forbidden
+    Building(const Building &) = delete;
+    /// assignment operator forbidden
+    Building &operator=(const Building &) = delete;
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_BUILDING_H

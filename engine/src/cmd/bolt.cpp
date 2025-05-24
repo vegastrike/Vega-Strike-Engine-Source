@@ -385,7 +385,7 @@ bool Bolt::Collide(Unit *target) {
         if (target == owner) {
             return false;
         }
-        enum Vega_UnitType type = target->isUnit();
+        enum Vega_UnitType type = target->getUnitType();
         if (type == Vega_UnitType::nebula || type == Vega_UnitType::asteroid) {
             static bool collideroids =
                     XMLSupport::parse_bool(vs_config->getVariable("physics", "AsteroidWeaponCollision", "false"));
