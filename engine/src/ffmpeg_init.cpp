@@ -24,7 +24,7 @@
 //C++ Implementation: vid_file
 //
 
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "ffmpeg_init.h"
 
 #include <string.h>

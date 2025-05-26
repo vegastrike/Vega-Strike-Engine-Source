@@ -32,7 +32,7 @@
 #include "cmd/container.h"
 #include <vector>
 #include "gfx_generic/vec.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 //using namespace XMLSupport;  DONT DO THIS IN HEADERS
 enum VIEWSTYLE {
     CP_FRONT,

@@ -34,7 +34,7 @@
 #include "../Format.h"
 #include <vorbis/vorbisfile.h>
 
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 
 namespace Audio {
 

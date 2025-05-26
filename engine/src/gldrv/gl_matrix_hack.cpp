@@ -40,7 +40,7 @@
 #include "gl_matrix.h"
 
 #include "root_generic/vs_globals.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 
 //#include <GL/glu.h>

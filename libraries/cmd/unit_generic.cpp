@@ -37,7 +37,7 @@
 #include "cmd/beam.h"
 #include "root_generic/lin_time.h"
 #include "root_generic/xml_serializer.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "src/file_main.h"
 #include "src/universe_util.h"

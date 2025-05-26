@@ -36,7 +36,7 @@
 #include "src/universe.h"
 #include "src/hashtable.h"
 #include "root_generic/load_mission.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "cmd/drawable.h"
 #include "root_generic/options.h"

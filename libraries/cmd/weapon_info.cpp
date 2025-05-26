@@ -28,7 +28,7 @@
 #include "cmd/unit_const_cache.h"
 
 // TODO: this should not be here
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "gfx_generic/mesh.h"
 
 #include <boost/algorithm/string.hpp>

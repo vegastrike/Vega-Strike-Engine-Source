@@ -46,7 +46,7 @@
 #include "cmd/unit_const_cache.h"
 #include "src/vs_math.h"
 #include "src/universe.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "cmd/mount_size.h"
 #include "cmd/weapon_info.h"

@@ -31,7 +31,7 @@
 #include "root_generic/xml_support.h"
 #include "cmd/planet.h"
 #include "root_generic/vs_globals.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "root_generic/configxml.h"
 #include "src/vegastrike.h"
 #include <assert.h>                              /// needed for assert() calls.

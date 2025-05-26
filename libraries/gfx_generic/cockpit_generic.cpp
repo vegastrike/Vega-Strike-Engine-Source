@@ -28,7 +28,7 @@
 
 
 #include "src/in.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 #include "src/vegastrike.h"
 #include "gfx_generic/cockpit_generic.h"

@@ -29,7 +29,7 @@
 
 #include <string>
 #include <png.h>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "gfx/vsimage.h"
 #include "gldrv/gl_globals.h"
 #include "gfx/aux_texture.h"

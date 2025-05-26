@@ -31,6 +31,8 @@ MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 ADD_LIBRARY(vegastrike_vegadisk STATIC
     diskobject.h
     diskobject.cpp
+    vsfilesystem.cpp
+    vsfilesystem.h
 )
 
 #TARGET_COMPILE_FEATURES(vegastrike_gfx_generic PUBLIC cxx_std_11)

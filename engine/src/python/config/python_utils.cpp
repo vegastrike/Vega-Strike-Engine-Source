@@ -30,7 +30,7 @@
 #include <boost/python.hpp>
 #include <boost/filesystem.hpp>
 
-//#include "root_generic/vsfilesystem.h"
+//#include "vegadisk/vsfilesystem.h"
 //#include "src/vs_logging.h"
 
 using namespace boost::python;

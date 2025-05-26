@@ -25,7 +25,7 @@
 
 #include "src/audiolib.h"
 #include "src/hashtable.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include <string>
 #include "al_globals.h"

@@ -27,7 +27,7 @@
 #include "gfx/camera.h"
 #include "root_generic/lin_time.h"
 #include <stack>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 #include "point_to_cam.h"
 #include "src/config_xml.h"

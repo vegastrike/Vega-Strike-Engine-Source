@@ -33,7 +33,7 @@
 #include "cmd/script/mission.h"
 #include "cmd/script/pythonmission.h"
 #include "root_generic/vs_globals.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "cmd/unit_generic.h"
 #include "gfx_generic/cockpit_generic.h"

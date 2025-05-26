@@ -28,7 +28,7 @@
  */
 
 
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 
 #include <cstdio>
 #include <cassert>

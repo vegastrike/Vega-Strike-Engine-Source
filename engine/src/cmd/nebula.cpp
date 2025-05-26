@@ -26,7 +26,7 @@
 
 #include "nebula.h"
 #include "src/vegastrike.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include <assert.h>
 #include "src/config_xml.h"

@@ -25,7 +25,7 @@
 //#include <cassert>
 
 #include "cmd/drawable.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "gfx_generic/mesh.h"
 #include "gfx_generic/quaternion.h"

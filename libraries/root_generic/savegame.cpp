@@ -33,7 +33,7 @@
 #include <Python.h>
 #include "cmd/unit_generic.h"
 #include <float.h>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include <vector>
 #include <string>

@@ -26,7 +26,7 @@
 
 #include <string>
 
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 
 class UnitJSONFactory {
     static std::string DEFAULT_ERROR_VALUE;

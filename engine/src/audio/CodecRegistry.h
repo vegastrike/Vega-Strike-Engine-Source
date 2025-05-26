@@ -36,7 +36,7 @@
 #include "Exceptions.h"
 #include "Singleton.h"
 
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 
 namespace Audio {
 
