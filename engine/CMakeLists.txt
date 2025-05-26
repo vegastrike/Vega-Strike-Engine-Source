@@ -562,7 +562,7 @@ ADD_LIBRARY(vegastrike-engine_com OBJECT
 SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_STANDARD 14)
 SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_STANDARD_REQUIRED TRUE)
 SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_EXTENSIONS ON)
-set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
 TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
@@ -723,6 +723,8 @@ IF (NOT DISABLE_CLIENT)
             $<TARGET_OBJECTS:vegastrike-engine_com>
             vegastrike_gfx_generic
             vegastrike_root_generic
+            vegastrike_vegadisk
+            vegastrike_posh
             vegastrike_cmd
             vegastrike-OPcollide
     )

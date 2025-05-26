@@ -26,7 +26,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "diskobject/diskobject.h"
+#include "vegadisk/diskobject.h"
 
 #include "src/vs_logging.h"
 
@@ -37,7 +37,7 @@
 #include <archive.h>
 #include <archive_entry.h>
 
-using namespace vegastrike::diskobject;
+using namespace vega_disk;
 
 bool DiskObject::record_archive_error(int archive_error, struct archive* archive_file) {
     if (archive_error != ARCHIVE_OK) {

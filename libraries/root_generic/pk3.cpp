@@ -55,7 +55,7 @@
 #include "root_generic/pk3.h"
 #include <cstdlib>
 #include <iostream>
-#include "root_generic/posh.h"
+#include "posh/posh.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"

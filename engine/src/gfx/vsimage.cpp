@@ -36,7 +36,7 @@
 #include "root_generic/vs_globals.h"
 #include <string.h>
 #include <png.h>
-#include "root_generic/posh.h"
+#include "posh/posh.h"
 
 #ifndef png_jmpbuf
 #   define png_jmpbuf( png_ptr ) ( (png_ptr)->jmpbuf )
