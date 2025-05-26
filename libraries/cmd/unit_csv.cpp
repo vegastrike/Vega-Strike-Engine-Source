@@ -555,9 +555,11 @@ static void AddCarg(Unit *thus, const string &cargos) {
             bool mission = nextElementBool(cargos, elemstart, elemend, false);
             bool installed = nextElementBool(cargos, elemstart, elemend,
                     category.find("upgrades/") == 0);
+            bool integral = nextElementBool(cargos, elemstart, elemend,
+                    category.find("upgrades/integral") == 0);
 
             Cargo carg(name, category, price, quantity, mass, volume, functionality,
-                       max_functionality, mission, installed);
+                       max_functionality, mission, installed, integral);
 
 
 
@@ -872,7 +874,18 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     // Add integral components
     // Make this a factor of unit price
-    if(!saved_game) {
+    if(saved_game) {
+        // If we are loading a saved game, we assume the integral components are already installed.
+        // However, we still need to set them as integral and ensure quantity is 1 for each.
+        // Note: In the future, we may want to support multiple integral components.
+        for(Cargo& cargo : this->cargo) {
+            if(cargo.GetCategory().find("upgrades/integral") == 0) {
+                cargo.SetQuantity(1);
+                cargo.SetInstalled(true);
+                cargo.SetIntegral(true);
+            }
+        }
+    } else {
         const std::string integral_components =
         "{hull;upgrades/integral;12000;1;0.1;0.1;1;1;@cargo/hull_patches.image@The ship's hull.;0;1}\
         {afterburner;upgrades/integral;2000;1;0.1;0.1;1;1;@upgrades/afterburner_generic.image@Engine overdrive. Increases thrust at the expense of decreased fuel efficiency.;0;1}\

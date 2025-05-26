@@ -485,7 +485,20 @@ void Carrier::AddCargo(const Cargo &carg, bool sort) {
     if (usemass) {
         unit->setMass(unit->getMass() + carg.quantity.Value() * carg.GetMass());
     }
-    unit->cargo.push_back(carg);
+
+    bool found = false;
+
+    for(Cargo c: this->cargo) {
+        if(c.GetName() == carg.GetName() && c.GetCategory() == carg.GetCategory()) {
+            found = true;
+            c.Add(carg.GetQuantity());
+        }
+    }
+
+    if(!found) {
+        unit->cargo.push_back(carg);
+    }
+    
     if (sort) {
         SortCargo();
     }

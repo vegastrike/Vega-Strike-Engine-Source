@@ -2911,12 +2911,6 @@ bool Unit::ReduceToTemplate() {
     vector<Cargo> savedCargo;
     savedCargo.swap(cargo);
 
-    // Remove integral components, because they become duplicates
-    savedCargo.erase(std::remove_if(savedCargo.begin(),
-                                    savedCargo.end(),
-                                    [](const Cargo& c) { return c.GetCategory().find("upgrades/integral") == 0; }),
-                                    savedCargo.end());
-
     vector<Mount> savedWeap;
     savedWeap.swap(mounts);
     const Unit *temprate = makeFinalBlankUpgrade(name, faction);
