@@ -180,14 +180,14 @@ Unit* CheckNullAndCastToUnit(ComponentsManager* manager) {
     if (manager == nullptr) {
         return nullptr;
     }
-    return dynamic_cast<Unit*>(manager);
+    return vega_dynamic_cast_ptr<Unit>(manager);
 }
 
 const Unit* CheckNullAndConstCastToUnit(const ComponentsManager* manager)  {
     if (manager == nullptr) {
         return nullptr;
     }
-    return dynamic_cast<const Unit*>(manager);
+    return vega_dynamic_const_cast_ptr<const Unit>(manager);
 }
 
 Vector Unit::GetNavPoint() {
