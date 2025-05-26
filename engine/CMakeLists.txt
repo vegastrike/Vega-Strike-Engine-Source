@@ -848,7 +848,8 @@ IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
     SET(CPACK_NSIS_HELP_LINK "https://vega-strike.org")
     SET(CPACK_NSIS_URL_INFO_ABOUT "https://vega-strike.org/about")
     SET(CPACK_NSIS_CONTACT "maintainers@vega-strike.org")
-    SET(CPACK_NSIS_MODIFY_PATH ON)
+    SET(CPACK_NSIS_MODIFY_PATH OFF)
+    SET(CPACK_NSIS_MENU_LINKS "")
 
     # Windows installer format(s) to output
     SET(CPACK_GENERATOR "NSIS64")
