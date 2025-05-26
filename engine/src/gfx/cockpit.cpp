@@ -89,6 +89,8 @@
 #include "cmd/weapon_info.h"
 #include "gfx/cockpit_gfx.h"
 #include "cmd/dock_utils.h"
+#include "vega_cast_utils.h"
+#include "resource/random_utils.h"
 #include "resource/random_utils.h"
 
 #include <cstddef>
@@ -406,7 +408,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             float distance;
             const float locklight_time = configuration()->graphics.locklight_time;
             bool res = false;
-            if ((tmpunit = target->GetComputerData().threat.GetUnit())) {
+            if (tmpunit = target->Threat()) {
                 res = tmpunit->cosAngleTo(target, distance, FLT_MAX, FLT_MAX) > .95;
                 if (res) {
                     last_locktime = UniverseUtil::GetGameTime();
@@ -444,45 +446,34 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::MAXCOMBATKPS:
         case UnitImages<void>::MAXCOMBATABKPS: {
             const bool use_relative_velocity = configuration()->graphics.hud.display_relative_velocity;
+            Unit *velocity_reference_unit = target->VelocityReference();
             float value;
             switch (stat) {
                 case UnitImages<void>::KPS:
                     if (target->graphicOptions.WarpFieldStrength != 1.0) {
-                        if (use_relative_velocity && target->computer.velocity_ref.GetUnit()) {
-                            if (target->computer.velocity_ref.GetUnit()->graphicOptions.WarpFieldStrength != 1.0) {
+                        if (use_relative_velocity && target->VelocityReference()) {
+                            if (velocity_reference_unit->graphicOptions.WarpFieldStrength != 1.0) {
                                 value =
                                         (target->GetWarpVelocity()
-                                                - target->computer
-                                                        .velocity_ref
-                                                        .GetUnit()
-                                                        ->GetWarpVelocity()).Magnitude();
+                                                - velocity_reference_unit->GetWarpVelocity()).Magnitude();
                             } else {
                                 value =
                                         (target->GetWarpVelocity()
-                                                - target->computer
-                                                        .velocity_ref
-                                                        .GetUnit()
-                                                        ->cumulative_velocity).Magnitude();
+                                                - velocity_reference_unit->cumulative_velocity).Magnitude();
                             }
                         } else {
                             value = target->GetWarpVelocity().Magnitude();
                         }
                     } else {
-                        if (use_relative_velocity && target->computer.velocity_ref.GetUnit()) {
-                            if (target->computer.velocity_ref.GetUnit()->graphicOptions.WarpFieldStrength != 1.0) {
+                        if (use_relative_velocity && target->VelocityReference()) {
+                            if (velocity_reference_unit->graphicOptions.WarpFieldStrength != 1.0) {
                                 value =
                                         (target->cumulative_velocity
-                                                - target->computer
-                                                        .velocity_ref
-                                                        .GetUnit()
-                                                        ->GetWarpVelocity()).Magnitude();
+                                                - velocity_reference_unit->GetWarpVelocity()).Magnitude();
                             } else {
                                 value =
                                         (target->cumulative_velocity
-                                                - target->computer
-                                                        .velocity_ref
-                                                        .GetUnit()
-                                                        ->cumulative_velocity).Magnitude();
+                                                - velocity_reference_unit->cumulative_velocity).Magnitude();
                             }
                         } else {
                             value = target->cumulative_velocity.Magnitude();
@@ -490,7 +481,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                     }
                     break;
                 case UnitImages<void>::SETKPS:
-                    value = target->GetComputerData().set_speed;
+                    value = target->computer.set_speed;
                     break;
                 case UnitImages<void>::MAXKPS:
                     value = target->MaxSpeed();
@@ -1831,7 +1822,7 @@ void GameCockpit::Draw() {
                             % you->Velocity.j
                             % you->Velocity.k
                             % getNewTime()).str();
-                    Unit *yourtarg = you->computer.target.GetUnit();
+                    Unit *yourtarg = you->Target();
                     if (yourtarg) {
                         str += (boost::format("Target Position: (%1%,%2%,%3%); Velocity: (%4%,%5%,%6%); Now: %7%\n")
                                 % yourtarg->curr_physical_state.position.i
@@ -1853,11 +1844,11 @@ void GameCockpit::Draw() {
         if (!un->Destroyed()) {
             die = false;
         }
-        if (un->Threat() != NULL) {
+        if (un->Threat() != nullptr) {
             if (0 && getTimeCompression() > 1) {
                 reset_time_compression(std::string(), PRESS);
             }
-            un->Threaten(NULL, 0);
+            un->Threaten(nullptr, 0);
         }
         if (_Universe->CurrentCockpit() < univmap.size()) {
             univmap[_Universe->CurrentCockpit()].Draw();

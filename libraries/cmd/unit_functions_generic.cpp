@@ -37,6 +37,7 @@
 #include "cmd/mount_size.h"
 #include "cmd/damageable.h"
 #include "resource/random_utils.h"
+#include "root_generic/configxml.h"
 
 //Various functions that were used in .cpp files that are now included because of
 //the temple GameUnit class

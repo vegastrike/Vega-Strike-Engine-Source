@@ -240,6 +240,7 @@ SET(LIBPYTHON
 
 SET(LIBCOMPONENT
     src/components/component.cpp
+    src/components/components_manager.cpp
 
     src/components/dummy_component.cpp
     src/components/component_utils.cpp
@@ -253,6 +254,7 @@ SET(LIBCOMPONENT
 
     src/components/afterburner.cpp
     src/components/afterburner_upgrade.cpp
+    src/components/computer.cpp
     src/components/cloak.cpp
     src/components/drive.cpp
     src/components/drive_upgrade.cpp

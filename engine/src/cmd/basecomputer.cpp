@@ -64,6 +64,7 @@ using VSFileSystem::SaveFile;
 #include "src/vs_logging.h"
 #include "controls_factory.h"
 #include "src/python/infra/get_string.h"
+#include "root_generic/configxml.h"
 
 #include <boost/python.hpp>
 #include "configuration/configuration.h"
