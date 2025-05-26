@@ -32,6 +32,7 @@
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_exit.h"
 #include "src/vega_cast_utils.h"
+#include "root_generic/configxml.h"
 
 // TODO: once implementation is refactored, deal with this too
 extern QVector RealPosition(const Unit *un);
@@ -131,7 +132,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         failuremessage = err;
         return false;
     }
-    if (target->isUnit() == Vega_UnitType::planet) {
+    if (target->getUnitType() == Vega_UnitType::planet) {
         const Unit *targ = *(target->viewSubUnits());
         if (targ && 0 == targ->graphicOptions.FaceCamera) {
             return AutoPilotToErrorMessage(targ, ignore_energy_requirements, failuremessage, recursive_level);
@@ -177,10 +178,10 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     float totpercent = 1;
     if (totallength > 1) {
         float apt =
-                (target->isUnit() == Vega_UnitType::planet) ? (autopilot_term_distance + target->rSize()
+                (target->getUnitType() == Vega_UnitType::planet) ? (autopilot_term_distance + target->rSize()
                         * UniverseUtil::getPlanetRadiusPercent()) : autopilot_term_distance;
         float aptne =
-                (target->isUnit() == Vega_UnitType::planet) ? (atd_no_enemies + target->rSize()
+                (target->getUnitType() == Vega_UnitType::planet) ? (atd_no_enemies + target->rSize()
                         * UniverseUtil::getPlanetRadiusPercent()) : atd_no_enemies;
         float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
         float percentne = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
@@ -206,8 +207,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             bool ignore_friendlies = true;
             for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != nullptr; ++i) {
                 const bool canflythruplanets = configuration()->physics.can_auto_through_planets;
-                if ((!(un->isUnit() == Vega_UnitType::planet
-                        && canflythruplanets)) && un->isUnit() != Vega_UnitType::nebula && (!UnitUtil::isSun(un))) {
+                if ((!(un->getUnitType() == Vega_UnitType::planet
+                        && canflythruplanets)) && un->getUnitType() != Vega_UnitType::nebula && (!UnitUtil::isSun(un))) {
                     if (un != this && un != target) {
                         float tdis = (start - un->Position()).Magnitude() - unit->rSize() - un->rSize();
                         float nedis = (end - un->Position()).Magnitude() - unit->rSize() - un->rSize();
@@ -409,7 +410,7 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 continue;
             }
             float shiphack = 1;
-            if (planet->isUnit() != Vega_UnitType::planet) {
+            if (planet->getUnitType() != Vega_UnitType::planet) {
                 shiphack = def_inv_interdiction;
                 double spec_interdiction = planet->ship_functions.Value(Function::ftl_interdiction);
                 if (spec_interdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
@@ -517,7 +518,7 @@ Vector JumpCapable::GetWarpRefVelocity() const {
     //Velocity
     Vector VelocityRef(0, 0, 0);
     {
-        const Unit *vr = unit->computer.velocity_ref.GetConstUnit();
+        const Unit *vr = unit->VelocityReference();
         if (vr) {
             VelocityRef = vr->cumulative_velocity;
         }
@@ -540,7 +541,7 @@ Vector JumpCapable::GetWarpVelocity() const {
     } else {
         Vector VelocityRef(0, 0, 0);
         {
-            Unit *vr = const_cast< UnitContainer * > (&unit->computer.velocity_ref)->GetUnit();
+            const Unit *vr = unit->VelocityReference();
             if (vr) {
                 VelocityRef = vr->cumulative_velocity;
             }

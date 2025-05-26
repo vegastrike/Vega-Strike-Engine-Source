@@ -79,8 +79,6 @@ ADD_LIBRARY(vegastrike_cmd STATIC
         drawable.h
         movable.cpp
         movable.h
-        computer.cpp
-        computer.h
 
         intelligent.cpp
         intelligent.h

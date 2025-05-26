@@ -1,7 +1,7 @@
 /*
  * aligned.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, klaussfreire, pyramid3d,
+ * Copyright (C) 2001-2025 Daniel Horn, klaussfreire, pyramid3d,
  * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <cstddef>
+#include <cstdint>
 
 #if defined(__cpp_lib_assume_aligned)
     #define __alpn(x,a) std::assume_aligned<a>(x)

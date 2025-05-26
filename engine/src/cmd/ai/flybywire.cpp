@@ -194,7 +194,7 @@ FlyByWire::FlyByWire() : MatchVelocity(Vector(0, 0, 0), Vector(0, 0, 0), true, f
 void FlyByWire::Stop(float per) {
     SetDesiredVelocity(Vector(0, 0, per * parent->MaxSpeed()), true);
 
-    parent->GetComputerData().set_speed = per * parent->MaxSpeed();
+    parent->computer.set_speed = per * parent->MaxSpeed();
 }
 
 void FlyByWire::Right(float per) {
@@ -231,7 +231,7 @@ void FlyByWire::RollRight(float per) {
 }
 
 void FlyByWire::Afterburn(float per) {
-    Computer *cpu = &parent->GetComputerData();
+    Computer *cpu = &parent->computer;
 
     afterburn = (per > .1);
     if (!sheltonslide && !inertial_flight_model) {
@@ -251,7 +251,7 @@ void FlyByWire::SheltonSlide(bool onoff) {
 }
 
 void FlyByWire::MatchSpeed(const Vector &vec) {
-    Computer *cpu = &parent->GetComputerData();
+    Computer *cpu = &parent->computer;
 
     cpu->set_speed = (vec).Magnitude();
     if (cpu->set_speed > parent->MaxSpeed()) {
@@ -260,7 +260,7 @@ void FlyByWire::MatchSpeed(const Vector &vec) {
 }
 
 void FlyByWire::Accel(float per) {
-    Computer *cpu = &parent->GetComputerData();
+    Computer *cpu = &parent->computer;
 
     cpu->set_speed += per * parent->MaxSpeed() * simulation_atom_var; //SIMULATION_ATOM?
     if (cpu->set_speed > parent->MaxSpeed()) {
@@ -337,20 +337,20 @@ void FlyByWire::Execute() {
     if (DesiredShiftVelocity.i || DesiredShiftVelocity.j || DesiredShiftVelocity.k) {
         if (!stolen_setspeed) {
             stolen_setspeed = true;
-            stolen_setspeed_value = parent->GetComputerData().set_speed;
+            stolen_setspeed_value = parent->computer.set_speed;
         }
         desired_velocity = Vector(0, 0, stolen_setspeed_value) + DesiredShiftVelocity;
-        parent->GetComputerData().set_speed = desired_velocity.Magnitude();
+        parent->computer.set_speed = desired_velocity.Magnitude();
 
         desireThrust = true;
         if (!controltype) {
             if (desired_velocity.k < 0) {
                 desired_velocity.k = 0;
-                parent->GetComputerData().set_speed = 0;
+                parent->computer.set_speed = 0;
             }
         }
     } else if (stolen_setspeed) {
-        parent->GetComputerData().set_speed = stolen_setspeed_value;
+        parent->computer.set_speed = stolen_setspeed_value;
         stolen_setspeed = false;
     }
     static double collidepanic =

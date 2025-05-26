@@ -90,7 +90,7 @@ bool isAsteroid(const Unit *my_unit) {
     if (!my_unit) {
         return false;
     }
-    return my_unit->isUnit() == Vega_UnitType::asteroid || nameIsAsteroid(my_unit->name);
+    return my_unit->getUnitType() == Vega_UnitType::asteroid || nameIsAsteroid(my_unit->name);
 }
 
 bool isCapitalShip(const Unit *my_unit) {
@@ -124,7 +124,7 @@ int getPhysicsPriority(Unit *un) {
             vs_config->getVariable("physics", "priorities", "dockable", "1"));
 
     float rad = un->rSize();
-    Vega_UnitType untype = un->isUnit();
+    Vega_UnitType untype = un->getUnitType();
     float cpdist = FLT_MAX;
     float tooclose = 0;
     unsigned int np = _Universe->numPlayers();
@@ -360,7 +360,7 @@ void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVec
                 center,
                 orbitee));
         if (orbitee) {
-            if (orbitee->isUnit() == Vega_UnitType::planet) {
+            if (orbitee->getUnitType() == Vega_UnitType::planet) {
                 ((Planet *) orbitee)->AddSatellite(my_unit);
             }
         }
@@ -777,7 +777,7 @@ bool isDockableUnit(const Unit *my_unit) {
                             && isSignificant(my_unit)
                             && !my_unit->isJumppoint()
             )
-                    || (my_unit->isUnit() == Vega_UnitType::unit)
+                    || (my_unit->getUnitType() == Vega_UnitType::unit)
                     || (getFlightgroupName(my_unit) == "Base")
     )
             && (my_unit->DockingPortLocations().size() > 0);
@@ -787,7 +787,7 @@ bool isCloseEnoughToDock(const Unit *my_unit, const Unit *un) {
     static bool
             superdock = XMLSupport::parse_bool(vs_config->getVariable("physics", "dock_within_base_shield", "false"));
     float dis =
-            (un->isUnit() == Vega_UnitType::planet || superdock) ? UnitUtil::getSignificantDistance(my_unit, un)
+            (un->getUnitType() == Vega_UnitType::planet || superdock) ? UnitUtil::getSignificantDistance(my_unit, un)
                     : UnitUtil::getDistance(
                     my_unit,
                     un);
@@ -832,7 +832,7 @@ bool isSignificant(const Unit *my_unit) {
         return false;
     }
     bool res = false;
-    Vega_UnitType typ = my_unit->isUnit();
+    Vega_UnitType typ = my_unit->getUnitType();
     const string &s = getFlightgroupNameCR(my_unit);
     res = (typ == Vega_UnitType::planet || typ == Vega_UnitType::asteroid || typ == Vega_UnitType::nebula || s == "Base");
     return res && !isSun(my_unit);
@@ -844,7 +844,7 @@ int isPlayerStarship(const Unit *un) {
 
 void setSpeed(Unit *my_unit, float speed) {
     if (my_unit) {
-        my_unit->GetComputerData().set_speed = speed;
+        my_unit->computer.set_speed = speed;
     }
 }
 

@@ -1031,7 +1031,7 @@ bool TargSig(Unit *me, Unit *target) {
                     me,
                     target);
     if (can_target_asteroid == false) {
-        if (target->isUnit() == Vega_UnitType::asteroid || target->name.get().find("Asteroid") == 0) {
+        if (target->getUnitType() == Vega_UnitType::asteroid || target->name.get().find("Asteroid") == 0) {
             ret = false;
         }
     }
@@ -1046,13 +1046,13 @@ bool TargUn(Unit *me, Unit *target) {
     int up = FactionUtil::GetUpgradeFaction();
     return me->InRange(target, true,
             false)
-            && (target->isUnit() == Vega_UnitType::unit
-                    || target->isUnit() == Vega_UnitType::enhancement) && getTopLevelOwner() != target->owner
+            && (target->getUnitType() == Vega_UnitType::unit
+                    || target->getUnitType() == Vega_UnitType::enhancement) && getTopLevelOwner() != target->owner
             && (can_target_cargo || target->faction != up) && isNotTurretOwner(me, target);
 }
 
 bool TargMissile(Unit *me, Unit *target) {
-    return me->InRange(target, true, false) && (target->isUnit() == Vega_UnitType::missile) && isNotTurretOwner(me, target);
+    return me->InRange(target, true, false) && (target->getUnitType() == Vega_UnitType::missile) && isNotTurretOwner(me, target);
 }
 
 bool TargIncomingMissile(Unit *me, Unit *target) {
@@ -1080,7 +1080,7 @@ bool TargThreat(Unit *me, Unit *target) {
     if (!TargAll(me, target)) {
         return false;
     }
-    if (target->isUnit() == Vega_UnitType::missile) {
+    if (target->getUnitType() == Vega_UnitType::missile) {
         return false;
     }
     if (target->Target() == me) {
@@ -1099,7 +1099,7 @@ bool TargNear(Unit *me, Unit *target) {
                     target)
             || target->getRelation(me) < 0)
             && TargAll(me,
-                    target) && target->isUnit() != Vega_UnitType::missile
+                    target) && target->getUnitType() != Vega_UnitType::missile
             && (can_target_sun || !UnitUtil::isSun(target)) && isNotTurretOwner(me,
             target);
 }
@@ -1129,18 +1129,18 @@ bool getNearestTargetUnit(Unit *me, int iType) {
             continue;
         }
         if ((iType == 0)
-                && ((un->isUnit() != Vega_UnitType::unit)
+                && ((un->getUnitType() != Vega_UnitType::unit)
                         || !me->isEnemy(un))) {
             continue;
         }
         if ((iType == 1)
-                && ((un->isUnit() != Vega_UnitType::unit)
+                && ((un->getUnitType() != Vega_UnitType::unit)
                         || (!me->isEnemy(un)
                                 && (un->Target() != me)))) {
             continue;
         }
         if ((iType == 2)
-                && ((un->isUnit() != Vega_UnitType::unit)
+                && ((un->getUnitType() != Vega_UnitType::unit)
                         || me->isEnemy(un)
                         || (UnitUtil::getFlightgroupName(un) == "Base"))) {
             continue;
@@ -1410,7 +1410,7 @@ static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity)
             }
             PlayDockingSound(5);
         }
-    } else if (parent->GetComputerData().target == targ) {
+    } else if (parent->Target() == targ) {
         CommunicationMessage c(targ, parent, anim, gender);
         c.SetCurrentState(c.fsm->GetNoNode(), anim, gender);
         if (parent->getAIState()) {

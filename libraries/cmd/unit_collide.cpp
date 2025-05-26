@@ -241,8 +241,8 @@ bool Unit::InsideCollideTree(Unit *smaller,
     un_iter i;
     static float
             rsizelim = XMLSupport::parse_float(vs_config->getVariable("physics", "smallest_subunit_to_collide", ".2"));
-    Vega_UnitType bigtype = bigasteroid ? Vega_UnitType::asteroid : bigger->isUnit();
-    Vega_UnitType smalltype = smallasteroid ? Vega_UnitType::asteroid : smaller->isUnit();
+    Vega_UnitType bigtype = bigasteroid ? Vega_UnitType::asteroid : bigger->getUnitType();
+    Vega_UnitType smalltype = smallasteroid ? Vega_UnitType::asteroid : smaller->getUnitType();
     if (bigger->SubUnits.empty() == false
             && (bigger->graphicOptions.RecurseIntoSubUnitsOnCollision == true || bigtype == Vega_UnitType::asteroid)) {
         i = bigger->getSubUnits();
@@ -561,7 +561,7 @@ float Unit::querySphereNoRecurse(const QVector &start, const QVector &end, float
         if ((meshdata[i]->Position().Magnitude() > this->rSize()) || (meshdata[i]->rSize() > 30 + this->rSize())) {
             continue;
         }
-        if (isUnit() == Vega_UnitType::planet && i > 0) {
+        if (getUnitType() == Vega_UnitType::planet && i > 0) {
             break;
         }
         double a, b, c;

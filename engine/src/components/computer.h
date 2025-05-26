@@ -1,10 +1,8 @@
-/**
+/*
  * computer.h
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2001-2025 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -23,48 +21,83 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef VEGA_STRIKE_ENGINE_CMD_COMPUTER_H
-#define VEGA_STRIKE_ENGINE_CMD_COMPUTER_H
 
-#include "cmd/container.h"
-#include "config.h"
-#include "root_generic/vs_globals.h"
-#include "root_generic/configxml.h"
+
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_COMPUTER_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_COMPUTER_H
+
+#include "component.h"
+#include "damage/core_vector.h"
+
+class Unit;
+
+// A stand-in for Unit
+class ComponentsManager; 
 
 /**
- * The computer holds all data in the navigation computer of the current unit
- * It is outside modifyable with GetComputerData() and holds only volatile
- * Information inside containers so that destruction of containers will not
- * result in segfaults.
+ * The computer holds all data in the navigation computer of the current unit.
  * Maximum speeds and turning restrictions are merely facts of the computer
  * and have nothing to do with the limitations of the physical nature
  * of space combat
  */
-class Computer {
-public:
+class Computer : public Component {
+    friend class Unit;
+
+    // These are private as they require a getter that can cast them to
+    // the "correct" "subclass". This is Unit for ComponentsManager and
+    // Vector for CoreVector.
+
     //The nav point the unit may be heading for
-    Vector NavPoint;
+    CoreVector nav_point;
+
     //The target that the unit has in computer
-    UnitContainer target;
+    ComponentsManager* target;
     //Any target that may be attacking and has set this threat
-    UnitContainer threat;
+
+    ComponentsManager* threat;
+
     //Unit that it should match velocity with (not speed) if null, matches velocity with universe frame (star)
-    UnitContainer velocity_ref;
+    ComponentsManager* velocity_reference;
+
+    public: 
     bool force_velocity_ref;
+
     //The threat level that was calculated from attacking unit's threat
     float threatlevel;
+
     //The speed the flybywire system attempts to maintain
     float set_speed;
 
     //Whether or not an 'lead' indicator appears in front of target
     unsigned char slide_start;
     unsigned char slide_end;
+
+    // TODO: implement a better damage model, where stuff like target and NavPoint
+    // can be disabled.
+
+    bool original_itts;
     bool itts;
 
     // In hud - Maneuver (true) Travel (false)
     bool combat_mode;
 
+
+public:
     Computer();
+
+    // Component Methods
+    void Load(std::string unit_key) override;      
+    
+    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+
+    bool CanDowngrade() const override;
+    bool Downgrade() override;
+    bool CanUpgrade(const std::string upgrade_key) const override;
+    bool Upgrade(const std::string upgrade_key) override;
+
+    void Damage() override;
+    void DamageByPercent(double percent) override;
+    void Repair() override;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COMPUTER_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPUTER_H

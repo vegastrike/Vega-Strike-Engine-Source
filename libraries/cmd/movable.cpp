@@ -32,6 +32,7 @@
 #include "src/vs_logging.h"
 #include "src/audiolib.h"
 #include "cmd/audible.h"
+#include "root_generic/configxml.h"
 
 
 #include <iostream>
@@ -784,16 +785,16 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
     }
 }
 
-// If in Travel mode (non-combat), speed is limited to x1000
+// If in Travel mode (non-combat), speed limit is multiplied by a power of 10.
 double Movable::MaxSpeed() const {
-    const double combat_mode_multiplier = configuration()->components.drive.non_combat_mode_multiplier;
+    const double combat_mode_multiplier = configuration()->components.drive.non_combat_mode_multiplier; // configuration()->physics.combat_mode_multiplier
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     return (unit->computer.combat_mode) ? unit->drive.speed.AdjustedValue() : combat_mode_multiplier * unit->drive.speed.AdjustedValue();
 }
 
-// Same as comment above. It makes less sense to limit travel speed with afterburners to afterburner speed x 100.
+// Same as comment above. It makes less sense to limit travel speed with afterburners to afterburner speed multiplied by a power of 10.
 double Movable::MaxAfterburnerSpeed() const {
-    const double combat_mode_multiplier = configuration()->components.drive.non_combat_mode_multiplier;
+    const double combat_mode_multiplier = configuration()->components.drive.non_combat_mode_multiplier; // configuration()->physics.combat_mode_multiplier
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
     //same capped big speed as combat...else different

@@ -64,6 +64,7 @@ using VSFileSystem::SaveFile;
 #include "src/vs_logging.h"
 #include "controls_factory.h"
 #include "src/python/infra/get_string.h"
+#include "root_generic/configxml.h"
 
 #include <boost/python.hpp>
 #include "configuration/configuration.h"
@@ -1397,7 +1398,7 @@ void BaseComputer::recalcTitle() {
     Unit *baseUnit = m_base.GetUnit();
     string baseName;
     if (baseUnit) {
-        if (baseUnit->isUnit() == Vega_UnitType::planet) {
+        if (baseUnit->getUnitType() == Vega_UnitType::planet) {
             string temp = ((Planet *) baseUnit)->getHumanReadablePlanetType() + " Planet";
             // think "<planet type> <name of planet>"
             baseName = temp + " " + baseUnit->name;
@@ -4183,7 +4184,7 @@ string buildCargoDescription(const Cargo &item, BaseComputer &computer, float pr
         int cp = _Universe->whichPlayerStarship(computer.m_player.GetUnit());
         vector<string> highest, lowest;
 
-        const string &baseName = (computer.m_base.GetUnit()->isUnit() == Vega_UnitType::planet) ?
+        const string &baseName = (computer.m_base.GetUnit()->getUnitType() == Vega_UnitType::planet) ?
                 computer.m_base.GetUnit()->name.get()
                 : computer.m_base
                         .GetUnit()

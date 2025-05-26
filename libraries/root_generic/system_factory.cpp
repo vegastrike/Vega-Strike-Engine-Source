@@ -40,6 +40,7 @@
 #include "cmd/building.h"
 #include "cmd/planetary_orbit.h"
 #include "root_generic/atmospheric_fog_mesh.h"
+#include "root_generic/configxml.h"
 
 
 #include "cmd/cont_terrain.h"
@@ -219,7 +220,7 @@ void SystemFactory::processRing(Star_XML *xml, Object &object, Planet *owner) {
     if (owner == nullptr) {
         return;
     }
-    if (unit->isUnit() != Vega_UnitType::planet) {
+    if (unit->getUnitType() != Vega_UnitType::planet) {
         return;
     }
 
@@ -433,7 +434,7 @@ void SystemFactory::processSpaceElevator(Object &object, Planet *owner) {
 
     Unit *unit = static_cast<Unit *>(owner);
 
-    if (owner == nullptr || unit->isUnit() != Vega_UnitType::planet) {
+    if (owner == nullptr || unit->getUnitType() != Vega_UnitType::planet) {
         return;
     }
 
