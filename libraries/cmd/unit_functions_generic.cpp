@@ -91,7 +91,7 @@ Unit *CreateGameTurret(std::string tur, int faction) {
 
 //un scored a faction kill
 void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
-    if (un->isUnit() != Vega_UnitType::unit || killedUnit->isUnit() != Vega_UnitType::unit) {
+    if (un->getUnitType() != Vega_UnitType::unit || killedUnit->getUnitType() != Vega_UnitType::unit) {
         return;
     }
     int killedCp = _Universe->whichPlayerStarship(killedUnit);
@@ -156,10 +156,10 @@ float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false) {
     const float hostile_autodist = configuration()->physics.hostile_auto_radius;
     int upgradefaction = FactionUtil::GetUpgradeFaction();
     int neutral = FactionUtil::GetNeutralFaction();
-    if (un->isUnit() == Vega_UnitType::asteroid) {
+    if (un->getUnitType() == Vega_UnitType::asteroid) {
         return configuration()->physics.min_asteroid_distance;
     }
-    if (un->isUnit() == Vega_UnitType::planet
+    if (un->getUnitType() == Vega_UnitType::planet
             || (un->getFlightgroup() == orig->getFlightgroup() && orig->getFlightgroup())) {
         //same flightgroup
         return orig->rSize();

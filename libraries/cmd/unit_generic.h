@@ -165,6 +165,7 @@ class Unit : public Armed, public Audible, public Drawable, public Damageable, p
     // - model (stock) - should be variant, but only if actually different without upgrades
     // TODO: name is duplicated down below in some memory saving measure (StringPool::Reference)
     std::string unit_key;
+    Vega_UnitType unit_type;
     std::string unit_name;
     std::string unit_description;
 
@@ -990,14 +991,29 @@ public:
         return filename.get();
     }
 
-//Is this class a unit
-    virtual enum Vega_UnitType isUnit() const {
-        if(boost::algorithm::ends_with(unit_key, "__planets")) {
-            return Vega_UnitType::planet;
+private:
+    void setUnitKey(const std::string& key) {
+        unit_key = key;
+        // Cache this calculation so that we don't have to compare the strings over and over again
+        if (boost::algorithm::ends_with(unit_key, "__planets")) {
+            unit_type = Vega_UnitType::planet;
+        } else {
+            unit_type = Vega_UnitType::unit;
         }
+    }
 
+    const std::string &getUnitKey() const {
+        return unit_key;
+    }
 
-        return Vega_UnitType::unit;
+public:
+    // Is this class a unit? If so, what type?
+    virtual enum Vega_UnitType isUnit() const {
+        return unit_type;
+    }
+
+    virtual Vega_UnitType getUnitType() const {
+        return unit_type;
     }
 
     void Ref();
@@ -1010,15 +1026,15 @@ public:
 
 //sets the full name/fgid for planets
     bool isStarShip() const {
-        return isUnit() == Vega_UnitType::unit;
+        return getUnitType() == Vega_UnitType::unit;
     }
 
     bool isPlanet() const {
-        return isUnit() == Vega_UnitType::planet;
+        return getUnitType() == Vega_UnitType::planet;
     }
 
     bool isJumppoint() const {
-        return GetDestinations().size() != 0;
+        return !GetDestinations().empty();
     }
 
     void TurretFAW();

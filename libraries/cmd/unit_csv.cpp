@@ -609,7 +609,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     csvRow = unit_identifier;
 
     // Textual Descriptions
-    this->unit_key = unit_identifier;
+    this->setUnitKey(unit_identifier);
     this->unit_name = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
     this->unit_description = Manifest::MPL().GetShipDescription(unit_identifier);
 

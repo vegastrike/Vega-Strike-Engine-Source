@@ -32,7 +32,11 @@ public:
     // Constructors
     Nebula(const char *unitfile, bool SubU, int faction, Flightgroup *fg = NULL, int fg_snumber = 0);
 
-    enum Vega_UnitType isUnit() const {
+    enum Vega_UnitType isUnit() const override {
+        return Vega_UnitType::nebula;
+    }
+
+    Vega_UnitType getUnitType() const override {
         return Vega_UnitType::nebula;
     }
 
@@ -59,28 +63,25 @@ public:
 
     void PutInsideCam(int);
 
-public:
     void InitNebula(const char *unitfile, bool SubU, int faction, Flightgroup *fg, int fg_snumber);
 
-public:
-    virtual void UpdatePhysics2(const Transformation &trans,
+    void UpdatePhysics2(const Transformation &trans,
             const Transformation &old_physical_state,
             const Vector &accel,
             float difficulty,
             const Matrix &transmat,
             const Vector &CumulativeVelocity,
             bool ResolveLast,
-            UnitCollection *uc = NULL);
+            UnitCollection *uc = NULL) override;
 
     void SetFogState() const;
 
-protected:
     /// default constructor forbidden
-    Nebula();
+    Nebula() = delete;
     /// copy constructor forbidden
-    Nebula(const Nebula &);
+    Nebula(const Nebula &) = delete;
     /// assignment operator forbidden
-    Nebula &operator=(const Nebula &);
+    Nebula &operator=(const Nebula &) = delete;
 };
 
 namespace NebulaXML {
