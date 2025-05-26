@@ -41,7 +41,7 @@
 #include "cmd/script/mission.h"
 #include "cmd/ai/aggressive.h"
 #include <assert.h>     //needed for assert() calls
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/universe_util.h"
 #include "cmd/ai/fire.h"
 #include "gfx/background.h"

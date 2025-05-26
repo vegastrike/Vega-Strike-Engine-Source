@@ -53,8 +53,6 @@ ADD_LIBRARY(vegastrike_root_generic STATIC
         load_mission.h
         pk3.cpp
         pk3.h
-        savegame.cpp
-        savegame.h
         system_factory.cpp
         system_factory.h
         star_system_xml.cpp

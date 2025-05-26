@@ -31,6 +31,8 @@ MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 ADD_LIBRARY(vegastrike_vegadisk STATIC
     diskobject.h
     diskobject.cpp
+    savegame.cpp
+    savegame.h
     vsfilesystem.cpp
     vsfilesystem.h
 )

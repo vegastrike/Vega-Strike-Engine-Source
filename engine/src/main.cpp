@@ -53,7 +53,7 @@
 #include "gfx/animation.h"
 #include "gfx/cockpit.h"
 #include "src/python/init.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/force_feedback.h"
 #include "gfx/hud.h"
 #include "gldrv/winsys.h"

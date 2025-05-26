@@ -78,7 +78,7 @@
 #include "cmd/base_util.h"
 #include "cmd/unit_csv_factory.h"
 #include "cmd/unit_json_factory.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "resource/manifest.h"
 #include "cmd/dock_utils.h"
 #include "resource/random_utils.h"

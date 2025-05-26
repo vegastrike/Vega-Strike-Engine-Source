@@ -26,7 +26,7 @@
 
 #include "cmd/unit_generic.h"
 #include "cmd/csv.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "root_generic/xml_serializer.h"
 #include "gfx_generic/sphere.h"
 #include "cmd/unit_collide.h"

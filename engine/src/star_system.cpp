@@ -42,7 +42,7 @@
 #include "root_generic/options.h"
 #include "root_generic/configxml.h"
 #include "src/vs_random.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/universe_util.h" //get galaxy faction, dude
 
 #include "cmd/planet.h"

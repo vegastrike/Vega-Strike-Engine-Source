@@ -38,7 +38,7 @@
 
 #include "pythonmission.h"
 #include "mission.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/gnuhash.h"
 #include "src/universe.h"
 #include "src/vs_logging.h"

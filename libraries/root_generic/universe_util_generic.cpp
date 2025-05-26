@@ -40,7 +40,7 @@
 #include "cmd/collection.h"
 #include <string>
 #include <set>
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/save_util.h"
 #include "cmd/unit_csv.h"
 #include "gfx_generic/cockpit_generic.h"
