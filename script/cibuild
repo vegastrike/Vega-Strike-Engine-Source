@@ -103,6 +103,7 @@ then
     echo "                   CFlags: ${CFLAGS}"
     echo "                  LDFlags: ${LDFLAGS}"
 
+    export PKG_CONFIG_PATH="$(brew --prefix libarchive)/lib/pkgconfig:${PKG_CONFIG_PATH}" 
     script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo $@
     # On macOS, the following is done by the calling CI workflow
     # ctest -V
