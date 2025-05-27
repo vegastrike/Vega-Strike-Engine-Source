@@ -1,9 +1,12 @@
 /*
  * csv.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2025 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
