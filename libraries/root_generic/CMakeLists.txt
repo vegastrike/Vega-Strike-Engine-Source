@@ -51,8 +51,6 @@ ADD_LIBRARY(vegastrike_root_generic STATIC
         lin_time.h
         load_mission.cpp
         load_mission.h
-        pk3.cpp
-        pk3.h
         system_factory.cpp
         system_factory.h
         star_system_xml.cpp

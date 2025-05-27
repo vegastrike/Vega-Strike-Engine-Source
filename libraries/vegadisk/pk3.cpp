@@ -52,7 +52,7 @@
  * - Use VS_LOG or VS_LOG_AND_FLUSH instead of BOOST_LOG_TRIVIAL
  */
 
-#include "root_generic/pk3.h"
+#include "vegadisk/pk3.h"
 #include <cstdlib>
 #include <iostream>
 #include "posh/posh.h"
