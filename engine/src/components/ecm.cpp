@@ -177,4 +177,5 @@ void ECM::_upgrade(const std::string key) {
     }
 
     ecm = Resource<int>(current_ecm, 0, max_ecm);
+    installed = true;
 }

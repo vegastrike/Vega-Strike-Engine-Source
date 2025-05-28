@@ -1148,6 +1148,32 @@ static void DrawGun(Vector pos, float w, float h, MOUNT_SIZE sz) {
 
 extern const char *DamagedCategory;
 
+/** This function changes the item listing color according to damage */
+std::string getDamageColor(double percent) {
+    static GFXColor color_undamaged = vs_config->getColor("default", "hud_repair_repaired",
+            GFXColor(1, 1, 1, 1));
+    static GFXColor color_half_damaged = vs_config->getColor("default", "hud_repair_half_damaged",
+            GFXColor(1, 1, 0, 1));
+    static GFXColor color_damaged = vs_config->getColor("default", "hud_repair_damaged",
+            GFXColor(1, 0, 0, 1));
+    static GFXColor color_destroyed = vs_config->getColor("default", "hud_repair_destroyed",
+            GFXColor(.2, .2, .2, 1));
+    
+    GFXColor color = colLerp(color_damaged, color_half_damaged, percent);
+
+    if(percent < 0.01) {
+        return colToString(color_destroyed).str;
+    } else if(percent < 1.0) {
+        return colToString(color).str;
+    } 
+
+    // Return an empty string - no damage.
+    return colToString(color_undamaged).str;
+}
+
+
+
+
 void VDU::DrawDamage(Unit *parent) {
     //VDUdamage
     float x, y, w, h;
@@ -1185,122 +1211,14 @@ void VDU::DrawDamage(Unit *parent) {
     }
     GFXColor4f(1, 1, 1, 1);
 
-/*
- *
- *  Cargo & GetCargo (unsigned int i);
- *  void GetCargoCat (const std::string &category, vector <Cargo> &cat);
- *  ///below function returns NULL if not found
- *  Cargo * GetCargo (const std::string &s, unsigned int &i);
- *
- */
-
-    //*******************************************************zade
-
-    //char hullval[128];
-    //sprintf (hullval,"%.3f",parent->GetHull());
-    //string retval (fullname+"\nHull: "+hullval+"\n");
-    static GFXColor cfullpower = vs_config->getColor("default", "hud_repair_repaired",
-            GFXColor(1, 1, 1, 1));
-    static GFXColor chdamaged = vs_config->getColor("default", "hud_repair_half_damaged",
-            GFXColor(1, 1, 0, 1));
-    static GFXColor cdamaged = vs_config->getColor("default", "hud_repair_damaged",
-            GFXColor(1, 0, 0, 1));
-    static GFXColor cdestroyed = vs_config->getColor("default", "hud_repair_destroyed",
-            GFXColor(.2, .2, .2, 1));
-
-    RGBstring fpstring = colToString(cfullpower);
-    const std::string damage_report_heading = configuration()->graphics.hud.damage_report_heading;
-    std::string retval(damage_report_heading);
-    retval += fpstring.str;
-    unsigned int numCargo = parent->numCargo();
-    double percent_working = 0.88;
-    const std::string non_repair_screen_cargo = configuration()->graphics.hud.not_included_in_damage_report;
-    const bool print_percent_working = configuration()->graphics.hud.print_damage_percent;
-
-// TODO: make into function
-#define REPORTITEM(percent_working, max_functionality, print_percent_working, component_string) \
-    do { \
-        GFXColor final_color = colLerp( cdamaged, chdamaged, percent_working ); \
-        if ((percent_working) == 0.0) \
-            final_color = cdestroyed; /*dead = grey*/ \
-        std::string trailer; \
-        if ((percent_working) < (max_functionality)) \
-            retval += colToString( final_color ).str; \
-        else \
-            retval += fpstring.str; \
-        trailer = fpstring.str; \
-        retval += (component_string); \
-        if (print_percent_working) \
-            retval += string( " (" )+tostring( int((percent_working)*100) )+string( "%)" ); \
-        retval += trailer+std::string( "\n" ); \
-    } while(0)
-
-// TODO: make into function
-#define REPORTINTEGRATED(which, which_key, which_name_default) \
-    do { \
-        const string name = vs_config->getVariable( "graphics", "hud", which_key, which_name_default ); \
-        if (!name.empty()) { \
-            REPORTITEM( parent->which##Functionality, parent->which##FunctionalityMax, \
-                print_percent_working, \
-                name \
-            ); \
-        } \
-    } while(0)
-
-// TODO: make into function
-#define REPORTINTEGRATEDFLAG(which, which_key, which_name_default) \
-    do { \
-        const string name = vs_config->getVariable( "graphics", "hud", which_key, which_name_default ); \
-        if (!name.empty()) { \
-            REPORTITEM( ((parent->damages & (which)) ? 0.1 : 1.0), 1.0, \
-                false, \
-                name \
-            ); \
-        } \
-    } while(0)
-
-    for (unsigned int i = 0; i < numCargo; i++) {
-        percent_working = 0.88;         //cargo.damage
-        Cargo &the_cargo = parent->GetCargo(i);
-        bool damaged = the_cargo.GetCategory().find(DamagedCategory) == 0;
-        if (damaged
-                || (the_cargo.GetCategory().find("upgrades/") == 0
-                        && the_cargo.GetInstalled()
-                        && the_cargo.GetName().find("mult_") != 0
-                        && the_cargo.GetName().find("add_") != 0
-                        && non_repair_screen_cargo.find(the_cargo.GetName())
-                                == std::string::npos)) {
-            percent_working = UnitUtil::PercentOperational(parent, the_cargo.GetName(), the_cargo.GetCategory(), false);
-            //retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.category+"\n");
-            REPORTITEM(percent_working,
-                    1.0,
-                    print_percent_working,
-                    parent->GetManifest(i, parent, parent->GetVelocity()));
-        }
-    }
-    if (parent->pImage != nullptr) {
-        // Integrated systems with percent working values
-        // TODO: get labels from config
-        REPORTITEM( parent->ship_functions.Percent(Function::life_support), 1.0, print_percent_working, "Life Support");
-        REPORTITEM( parent->ship_functions.Percent(Function::fire_control), 1.0, print_percent_working, "Fire Control");
-        REPORTITEM( parent->ftl_drive.PercentOperational(), 1.0, print_percent_working, "SPEC Drive");
-        REPORTITEM( parent->ship_functions.Percent(Function::communications), 1.0, print_percent_working, "Comm");
-
-        // Integrated system with boolean damage flags
-        REPORTINTEGRATEDFLAG(Unit::LIMITS_DAMAGED, "damage.names.limits_name", "Thrusters");
-        REPORTINTEGRATEDFLAG(Unit::SHIELD_DAMAGED, "damage.names.shield_name", ""); // default invisible, is an upgrade
-        REPORTINTEGRATEDFLAG(Unit::COMPUTER_DAMAGED, "damage.names.computer_name", "Targetting Computer");
-        REPORTINTEGRATEDFLAG(Unit::JUMP_DAMAGED, "damage.names.jump_name", ""); // default invisible, is an upgrade
-        REPORTINTEGRATEDFLAG(Unit::CLOAK_DAMAGED, "damage.names.cloak_name", ""); // default invisible, is an upgrade
-    }
-
-    retval += ecmstatus;
     const float background_alpha = configuration()->graphics.hud.text_background_alpha;
     GFXColor tpbg = tp->bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
         tp->bgcol = GFXColor(0, 0, 0, background_alpha);
     }
+
+    std::string retval = parent->GetHudText();
     tp->Draw(MangleString(retval,
                     _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
             scrolloffset,

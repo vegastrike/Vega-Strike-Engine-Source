@@ -26,7 +26,11 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "components_manager.h"
+#include "component_utils.h"
 #include "resource/random_utils.h"
+#include "configuration/configuration.h"
+
+
 
 void ComponentsManager::DamageRandomSystem() {
     double percent = 1 - hull.Percent();
@@ -43,6 +47,8 @@ void ComponentsManager::DamageRandomSystem() {
         }
     }
     
+    // TODO: GenerateHudText();
+
     /*
         Things not handled at the moment:
         1. Mounts
@@ -100,4 +106,66 @@ void ComponentsManager::DamageRandomSystem() {
                 cargo[cargorand].SetQuantity(cargo[cargorand].GetQuantity() * float_to_int(dam));
             }
     }*/
+}
+
+/** A convenience struct to hold the data used below */
+struct HudText {
+    const Component *component;
+    const std::string name;
+    const bool damageable;
+
+    HudText(Component *component, std::string name, bool damageable):
+        component(component), name(name), damageable(damageable) {}
+};
+
+/* This function is run when:
+    1. A player ship is created
+    2. A player ship is loaded from a saved game
+    3. An upgrade/downgrade has occured
+    4. DamageRandomSystem above is called
+*/
+
+void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
+    std::string report;
+
+    report += configuration()->graphics.hud.damage_report_heading + "\n\n";
+
+    // TODO: this should be taken from assets so "FTL Drive" would be "SPEC Drive"
+    const HudText hud_texts[] = {
+        HudText(&hull, "Hull", true),
+        HudText(&armor, "Armor", true),
+        HudText(&shield, "Shield", true),
+        HudText(&reactor, "Reactor", true),
+        HudText(&fuel, "Fuel", true),
+        HudText(&energy, "Capacitor", true),
+        HudText(&ftl_energy, "FTL capacitor", true),
+        HudText(&drive, "Drive", true),
+        HudText(&ftl_drive, "FTL Drive", false),
+        HudText(&jump_drive, "Jump Drive", false),
+        HudText(&afterburner, "Afterburner", true),
+        HudText(&computer, "Computer", true),
+        HudText(&radar, "Radar", true),
+        HudText(&ecm, "ECM", true),
+        HudText(&cloak, "Cloak", true),
+        HudText(&repair_bot, "Repair System", false)
+    };
+    
+    
+    for(const HudText& text : hud_texts) {
+        if(text.component->Installed()) {
+            std::string new_hud_text = PrintFormattedComponentInHud(
+                text.component->PercentOperational(),
+                text.name, text.damageable, getDamageColor);
+            report += new_hud_text;
+        }
+    }
+
+    // Ship Functions
+    report += ship_functions.GetHudText(getDamageColor);
+
+    hud_text = report;
+}
+
+std::string ComponentsManager::GetHudText() {
+    return hud_text;
 }

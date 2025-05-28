@@ -157,32 +157,6 @@ protected:
     StringPool::Reference csvRow;
 
 public:
-    // Components
-    EnergyContainer fuel = EnergyContainer(ComponentType::Fuel);
-    EnergyContainer energy = EnergyContainer(ComponentType::Capacitor);
-    EnergyContainer ftl_energy = EnergyContainer(ComponentType::FtlCapacitor);
-
-    // TODO: move this to a single constructor?!
-    Reactor reactor = Reactor(&fuel, &energy, &ftl_energy);
-
-    Afterburner afterburner;
-    AfterburnerUpgrade afterburner_upgrade = AfterburnerUpgrade(&afterburner);
-    Cloak cloak = Cloak();
-    Drive drive;
-    DriveUpgrade drive_upgrade = DriveUpgrade(&drive);
-    FtlDrive ftl_drive = FtlDrive(&ftl_energy);
-    JumpDrive jump_drive = JumpDrive(&ftl_energy);
-    CRadar radar;
-
-    Armor armor;
-    Hull hull;
-    Shield shield = Shield(&energy, &ftl_drive, &cloak);
-
-
-    ECM ecm;
-    RepairBot repair_bot;
-    ShipFunctions ship_functions;
-
     /// Repair
     float next_repair_time;
     unsigned int next_repair_cargo;    //(~0 : select randomly)
@@ -259,20 +233,8 @@ public:
     bool GettingDestroyed() const;
 
 
-    // TODO: implement enum class as type safe bitmask...
-    // http://blog.bitwigglers.org/using-enum-classes-as-type-safe-bitmasks/
-    enum Damages {
-        NO_DAMAGE = 0x0,
-        SHIELD_DAMAGED = 0x1,
-        COMPUTER_DAMAGED = 0x2,
-        MOUNT_DAMAGED = 0x4,
-        CARGOFUEL_DAMAGED = 0x8,
-        JUMP_DAMAGED = 0x10,
-        CLOAK_DAMAGED = 0x20,
-        LIMITS_DAMAGED = 0x40,
-        ARMOR_DAMAGED = 0x80
-    };
-    unsigned int damages = Damages::NO_DAMAGE;
+   
+    
 
 /*
  **************************************************************************************

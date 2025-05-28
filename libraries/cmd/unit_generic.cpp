@@ -85,6 +85,7 @@
 #include "resource/random_utils.h"
 
 #include <math.h>
+#include <cmath>
 #include <list>
 #include <cstdint>
 #include <boost/format.hpp>
@@ -618,25 +619,21 @@ void Unit::SetFg(Flightgroup *fg, int fg_subnumber) {
     flightgroup_subnumber = fg_subnumber;
 }
 
-static float tmpsqr(float x) {
-    return x * x;
-}
 
-float CloseEnoughCone(Unit *me) {
-    return configuration()->physics.near_autotrack_cone;
-}
+
+
 
 bool CloseEnoughToAutotrack(Unit *me, Unit *targ, float &cone) {
     if (targ) {
         const float close_enough_to_autotrack =
-                tmpsqr(configuration()->physics.close_enough_to_autotrack);
+                std::pow(configuration()->physics.close_enough_to_autotrack,2);
         float dissqr = (me->curr_physical_state.position.Cast()
                 - targ->curr_physical_state.position.Cast()).MagnitudeSquared();
         float movesqr = close_enough_to_autotrack
                 * (me->prev_physical_state.position.Cast()
                         - me->curr_physical_state.position.Cast()).MagnitudeSquared();
         if (dissqr < movesqr && movesqr > 0) {
-            cone = CloseEnoughCone(me) * (movesqr - dissqr) / movesqr + 1 * dissqr / movesqr;
+            cone = configuration()->physics.near_autotrack_cone * (movesqr - dissqr) / movesqr + 1 * dissqr / movesqr;
             return true;
         }
     }
@@ -839,10 +836,6 @@ void Unit::ReTargetFg(int which_target) {
 
 extern signed char ComputeAutoGuarantee(Unit *un);
 extern float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false);
-
-double howFarToJump() {
-    return configuration()->physics.distance_to_warp;
-}
 
 QVector SystemLocation(std::string system) {
     string xyz = _Universe->getGalaxyProperty(system, "xyz");
@@ -1159,6 +1152,8 @@ Unit *findUnitInStarsystem(const void *unitDoNotDereference) {
     return NULL;
 }
 
+extern std::string getDamageColor(double);
+
 //NUMGAUGES has been moved to pImages.h in UnitImages<void>
 void Unit::DamageRandSys(float dam, const Vector &vec) {
     // TODO: take actual damage into account when damaging components.
@@ -1198,7 +1193,8 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
             // Duplicate of above
             ship_functions.Damage(Function::cockpit);
         }
-        damages |= Damages::COMPUTER_DAMAGED;
+
+        GenerateHudText(getDamageColor);
         return;
     }
     if (randomDouble() < configuration()->physics.thruster_hit_chance) {
@@ -1209,7 +1205,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         // the shots are coming from.
         drive.Damage();
         afterburner.Damage();
-        damages |= Damages::LIMITS_DAMAGED;
+        GenerateHudText(getDamageColor);
         return;
     }
     if (degrees >= 20 && degrees < 35) {
@@ -1230,7 +1226,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
                 mounts[whichmount].maxfunctionality *= dam;
             }
         }
-        damages |= Damages::MOUNT_DAMAGED;
+        GenerateHudText(getDamageColor);
         return;
     }
     if (degrees >= 35 && degrees < 60) {
@@ -1268,19 +1264,18 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
                 // No damage
         }
 
-        damages |= Damages::CARGOFUEL_DAMAGED;
+        GenerateHudText(getDamageColor);
         return;
     }
     if (degrees >= 90 && degrees < 120) {
         if (randnum >= .7) {
             this->cloak.Damage();
-            damages |= Damages::CLOAK_DAMAGED;
         }
 
         // TODO: lib_damage reenable
         shield.Damage();
 
-        damages |= Damages::SHIELD_DAMAGED;
+        GenerateHudText(getDamageColor);
         return;
     }
     if (degrees >= 120 && degrees < 150) {
@@ -1317,13 +1312,14 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         } else {
             repair_bot.Damage();
         }
-        damages |= Damages::JUMP_DAMAGED;
+
+        GenerateHudText(getDamageColor);
         return;
     }
     if (degrees >= 150 && degrees <= 180) {
         //DAMAGE ENGINES
         drive.Damage();
-        damages |= Damages::LIMITS_DAMAGED;
+        GenerateHudText(getDamageColor);
         return;
     }
 }
@@ -3027,7 +3023,6 @@ int Unit::RepairUpgrade() {
     UnitImages<void> *im = &GetImageInformation();
 
 
-    damages = Damages::NO_DAMAGE;
     bool ret = success && pct > 0;
     static bool ComponentBasedUpgrades =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "component_based_upgrades", "false"));
@@ -4038,7 +4033,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     static bool warp_is_interstellar =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "warp_is_interstellar", "false"));
     if (warp_is_interstellar
-            && (curr_physical_state.position.MagnitudeSquared() > howFarToJump() * howFarToJump() && !isSubUnit())) {
+            && (curr_physical_state.position.MagnitudeSquared() > std::pow(configuration()->physics.distance_to_warp, 2) && !isSubUnit())) {
         static bool direct =
                 XMLSupport::parse_bool(vs_config->getVariable("physics", "direct_interstellar_journey", "true"));
         bool jumpDirect = false;

@@ -67,6 +67,7 @@ public:
     void Damage(Function function);
     void Repair(Function function);
     
+    std::string GetHudText(std::string getDamageColor(double));
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_SHIP_FUNCTIONS_H

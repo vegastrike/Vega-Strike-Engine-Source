@@ -1405,7 +1405,6 @@ static void DrawCrosshairs(float x, float y, float wid, float hei, const GFXColo
 extern bool QuitAllow;
 extern bool screenshotkey;
 QVector SystemLocation(std::string system);
-double howFarToJump();
 
 void GameCockpit::Draw() {
     const bool draw_heading_marker = configuration()->graphics.draw_heading_marker;
@@ -1454,7 +1453,7 @@ void GameCockpit::Draw() {
                 if (delta.i != 0 || dest.j != 0 || dest.k != 0) {
                     delta.Normalize();
                     Unit *par = GetParent();
-                    delta = delta * howFarToJump() * 1.01 - (par ? (par->Position()) : QVector(0, 0, 0));
+                    delta = delta * configuration()->physics.distance_to_warp * 1.01 - (par ? (par->Position()) : QVector(0, 0, 0));
                     destination_system_location = delta.Cast();
                     Vector P, Q, R;
                     static float nav_symbol_size =

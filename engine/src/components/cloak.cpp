@@ -31,7 +31,7 @@ Cloak::Cloak() :
     EnergyConsumer(nullptr, false, 0)
 {
     type = ComponentType::Cloak;
-    downgrade_private();
+    Downgrade();
 }
 
 Cloak::~Cloak()
@@ -40,11 +40,8 @@ Cloak::~Cloak()
 
 // Component Overrides
 void Cloak::Load(std::string unit_key) {
-    // Energy Consumer
-    SetConsumption(UnitCSVFactory::GetVariable(unit_key, "Cloak_Energy", 0.0));
-
-    // Cloak
-    upgrade_private(unit_key);
+    // Same code so reusing it
+    Upgrade(unit_key);
 }
 
 
@@ -80,7 +77,22 @@ bool Cloak::CanUpgrade(const std::string upgrade_key) const {
 }
 
 bool Cloak::Upgrade(const std::string upgrade_key) {
-    upgrade_private(upgrade_key);
+    Component::Upgrade(upgrade_key);
+
+    SetConsumption(UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Energy", 0.0));
+
+    if(UnitCSVFactory::GetVariable(upgrade_key, "Can_Cloak", false)) {
+        status = CloakingStatus::ready;
+    } else {
+        status = CloakingStatus::disabled;
+    }
+
+    glass = UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Glass", false);
+    rate = UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Rate", 0.0);
+    minimum = UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Min", 0.0);
+    minimum = std::min(1.0, std::max(0.0, minimum));
+    current = 0;
+    installed = true;
 
     return true;
 }
@@ -205,36 +217,4 @@ double Cloak::Consume()
         return 0.0;
     }
     return EnergyConsumer::Consume();
-}
-
-void Cloak::downgrade_private() {
-    Component::Downgrade();
-    SetConsumption(0);
-
-    status = CloakingStatus::disabled;
-
-    rate = 100;
-    glass = false;
-    current = 0;
-    minimum = 0;
-
-
-}
-
-void Cloak::upgrade_private(const std::string upgrade_key) {
-    Component::Upgrade(upgrade_key);
-
-    SetConsumption(UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Energy", 0.0));
-
-    if(UnitCSVFactory::GetVariable(upgrade_key, "Can_Cloak", false)) {
-        status = CloakingStatus::ready;
-    } else {
-        status = CloakingStatus::disabled;
-    }
-
-    glass = UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Glass", false);
-    rate = UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Rate", 0.0);
-    minimum = UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Min", 0.0);
-    minimum = std::min(1.0, std::max(0.0, minimum));
-    current = 0;
 }

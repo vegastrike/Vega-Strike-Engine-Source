@@ -161,6 +161,4 @@ const double Component::GetPrice() const { return price; }
 const double Component::GetMass() const { return mass; }
 const double Component::GetVolume() const { return volume; }
 
-const double Component::GetOperational() const { return operational.Value(); }
-
 const bool Component::Integral() const { return integral; }

@@ -23,6 +23,7 @@
  */
 
 #include "ship_functions.h"
+#include "component_utils.h"
 #include "cmd/unit_csv_factory.h"
 
 ShipFunctions::ShipFunctions() :
@@ -128,3 +129,11 @@ void ShipFunctions::Damage(Function function) {
     }
 }
 
+std::string ShipFunctions::GetHudText(std::string getDamageColor(double)) {
+    std::string report;
+    report += PrintFormattedComponentInHud(cockpit.Percent(), "Cockpit", true, getDamageColor);
+    report += PrintFormattedComponentInHud(communications.Percent(), "Communications", true, getDamageColor);
+    report += PrintFormattedComponentInHud(fire_control.Percent(), "Fire Control", true, getDamageColor);
+    report += PrintFormattedComponentInHud(life_support.Percent(), "Life Support", true, getDamageColor);
+    return report;
+}

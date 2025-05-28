@@ -103,6 +103,10 @@ void Armor::Load(std::string unit_key) {
             }
         }
     }
+
+    if(TotalMaxLayerValue() > 0) {
+        installed = true;
+    }
 }
 
 void Armor::SaveToCSV(std::map<std::string, std::string>& unit) const {

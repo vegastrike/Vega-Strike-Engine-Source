@@ -24,6 +24,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <boost/format.hpp>
 
 #include "component_utils.h"
 
@@ -187,4 +188,27 @@ void ResourceYawPitchRollParser(std::string unit_key, const YPR ypr,
     right *= M_PI / 180.0;
     right_value = Resource<double>(right,right * minimum_functionality,right);
     left_value = Resource<double>(left,right * minimum_functionality,left);
+}
+
+
+/* This function is used by vdu.cpp to print the component
+    with the color showing damage */
+std::string PrintFormattedComponentInHud(double percent, std::string component_name,
+                                         bool damageable,
+                                         std::string GetDamageColor(double)) {
+    const bool print_percent_working = configuration()->graphics.hud.print_damage_percent;
+
+    const std::string damage_color = GetDamageColor(percent);
+    const int int_percent = percent * 100;
+    static const std::string white_color = GetDamageColor(1.0);
+
+    // Note we reset color to white/undamaged at the end of each line
+    if(print_percent_working && damageable) {
+        return (boost::format("%1%%2% (%3%%%)%4%\n") %
+            damage_color % component_name % int_percent % 
+            white_color).str();
+    } else {
+        return (boost::format("%1%%2%%3%\n") %
+            damage_color % component_name % white_color).str();
+    }
 }

@@ -43,6 +43,8 @@ Drive::Drive(EnergyContainer *source):
     max_yaw_right(1,0,1), max_pitch_down(1,0,1), max_pitch_up(1,0,1),
     max_roll_left(1,0,1), max_roll_right(1,0,1) {
     type = ComponentType::Drive;
+    upgrade_name = "Drive";
+    installed = true;
 }
 
 Drive::~Drive()

@@ -590,7 +590,7 @@ void LoadCockpit(Unit *thus, const string &cockpit) {
 
 const std::string EMPTY_STRING("");
 
-
+extern std::string getDamageColor(double);
 
 void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_game) {
     Unit::XML xml;
@@ -882,6 +882,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
         AddCarg(this, integral_components);
     }
 
+    GenerateHudText(getDamageColor);
 }
 
 void Unit::WriteUnit(const char *modifications) {
