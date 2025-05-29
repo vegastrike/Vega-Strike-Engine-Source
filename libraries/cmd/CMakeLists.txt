@@ -88,6 +88,9 @@ ADD_LIBRARY(vegastrike_cmd STATIC
         planetary_orbit.cpp
         planetary_orbit.h
 
+        unit_type.h
+        unit_type.cpp
+
         weapon_factory.cpp
         weapon_factory.h
         weapon_info.cpp
