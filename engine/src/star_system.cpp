@@ -1388,7 +1388,7 @@ static bool isJumping(const vector<unorigdest *> &pending, Unit *un) {
 }
 
 QVector SystemLocation(std::string system);
-double howFarToJump();
+
 
 QVector ComputeJumpPointArrival(QVector pos, std::string origin, std::string destination) {
     QVector finish = SystemLocation(destination);
@@ -1402,7 +1402,7 @@ QVector ComputeJumpPointArrival(QVector pos, std::string origin, std::string des
         if (pos.MagnitudeSquared()) {
             pos.Normalize();
         }
-        return (dir * .5 + pos * .125) * howFarToJump();
+        return (dir * .5 + pos * .125) * configuration()->physics.distance_to_warp;
     }
     return QVector(0, 0, 0);
 }

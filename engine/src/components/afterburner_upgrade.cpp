@@ -101,5 +101,3 @@ bool AfterburnerUpgrade::Upgrade(const std::string upgrade_key) {
     return true;
 }
 
-
-// TODO: deal with damage somehow

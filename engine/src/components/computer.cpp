@@ -38,6 +38,8 @@ Computer::Computer() :
         original_itts(false),
         itts(false),
         combat_mode(true) {
+    upgrade_name = "Computer";
+    installed = true;
 }
 
 

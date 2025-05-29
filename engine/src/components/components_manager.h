@@ -52,6 +52,11 @@
 
 
 class ComponentsManager {
+    bool player_ship = false;
+    
+    // Here we store hud text so we won't have to generate it every cycle
+    // Instead we only do this when something changes
+    std::string hud_text;
 public:
     virtual ~ComponentsManager() = default;
 // Components
@@ -80,7 +85,10 @@ public:
     RepairBot repair_bot;
     ShipFunctions ship_functions;
 
+    
     void DamageRandomSystem();
+    void GenerateHudText(std::string getDamageColor(double));
+    std::string GetHudText();
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_MANAGER_COMPONENT_H

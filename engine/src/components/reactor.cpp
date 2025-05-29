@@ -62,6 +62,10 @@ void Reactor::Load(std::string unit_key) {
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
     operational = capacity.Percent();
+    
+    if(capacity.MaxValue() > 0) {
+        installed = true;
+    }
 }
 
 void Reactor::SaveToCSV(std::map<std::string, std::string>& unit) const {

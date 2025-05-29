@@ -149,10 +149,6 @@ public:
     // EnergyConsumer methods
 
     double Consume() override;
-
-private:
-    void downgrade_private();
-    void upgrade_private(const std::string upgrade_key);
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_CLOAK_H
