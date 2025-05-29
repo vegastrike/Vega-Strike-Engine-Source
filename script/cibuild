@@ -106,11 +106,14 @@ then
 
     echo " ========================================================================"
     echo " LIBARCHIVE DIAGNOSTIC"
+    echo " LIBARCHIVE path prefix: ${HOMEBREW_LIBARCHIVE_PREFIX}"
+    ls ${HOMEBREW_LIBARCHIVE_PREFIX}
+
     echo " LIBARCHIVE include: ${HOMEBREW_LIBARCHIVE_PREFIX}/include contents:"
-    ls "${HOMEBREW_LIBARCHIVE_PREFIX}/include/*"
+    ls ${HOMEBREW_LIBARCHIVE_PREFIX}/include
 
     echo " LIBARCHIVE lib: ${HOMEBREW_LIBARCHIVE_PREFIX}/lib contents:"
-    ls "${HOMEBREW_LIBARCHIVE_PREFIX}/lib/*"
+    ls ${HOMEBREW_LIBARCHIVE_PREFIX}/lib
     echo " ========================================================================"
 
 
