@@ -106,8 +106,8 @@ then
 
 
     # Homebrew needs certain flags set so its installation parts are found
-    export CFLAGS="-I${HOMEBREW_PREFIX}/include ${HOMEBREW_PYTHON3_CFLAGS} ${CFLAGS} ${HOMEBREW_LIBARCHIVE_CFLAGS}"
-    export LDFLAGS="-L${HOMEBREW_PREFIX}/lib ${HOMEBREW_PYTHON3_LDFLAGS} ${LDFLAGS} ${HOMEBREW_LIBARCHIVE_LDFLAGS}"
+    export CFLAGS="-I${HOMEBREW_PREFIX}/include ${HOMEBREW_PYTHON3_CFLAGS} ${HOMEBREW_LIBARCHIVE_CFLAGS} ${CFLAGS}"
+    export LDFLAGS="-L${HOMEBREW_PREFIX}/lib ${HOMEBREW_PYTHON3_LDFLAGS} ${HOMEBREW_LIBARCHIVE_LDFLAGS} ${LDFLAGS}"
     echo "                   CFlags: ${CFLAGS}"
     echo "                  LDFlags: ${LDFLAGS}"
 
