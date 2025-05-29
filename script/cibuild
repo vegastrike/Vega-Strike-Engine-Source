@@ -104,6 +104,15 @@ then
     echo "   Homebrew LibArchive CFlags: ${HOMEBREW_LIBARCHIVE_CFLAGS}"
     echo "  Homebrew LibArchive LDFlags: ${HOMEBREW_LIBARCHIVE_LDFLAGS}"
 
+    echo " ========================================================================"
+    echo " LIBARCHIVE DIAGNOSTIC"
+    echo " LIBARCHIVE include: ${HOMEBREW_LIBARCHIVE_PREFIX}/include contents:"
+    ls "${HOMEBREW_LIBARCHIVE_PREFIX}/include/*"
+
+    echo " LIBARCHIVE lib: ${HOMEBREW_LIBARCHIVE_PREFIX}/lib contents:"
+    ls "${HOMEBREW_LIBARCHIVE_PREFIX}/lib/*"
+    echo " ========================================================================"
+
 
     # Homebrew needs certain flags set so its installation parts are found
     export CFLAGS="-I${HOMEBREW_PREFIX}/include ${HOMEBREW_PYTHON3_CFLAGS} ${HOMEBREW_LIBARCHIVE_CFLAGS} ${CFLAGS}"
