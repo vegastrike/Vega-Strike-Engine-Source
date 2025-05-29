@@ -64,7 +64,10 @@ brew install \
     libpng \
     gtk+3 \
     gtkglext \
-    sdl2 \
+    sdl2
+
+# Reinstall some key items because it might be problematic otherwise
+brew reinstall \
     libarchive
 
 # The following Apple-provided libraries are deprecated:
