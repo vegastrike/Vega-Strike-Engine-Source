@@ -8,7 +8,4 @@ SET(INSTALL_GTEST CACHE "OFF")
 SET(USE_GTEST CACHE "OFF")
 
 # Is this correct?
-SET(MacPortsLibArchivePrefix "/opt/local/")
-
-SET(Boost_INCLUDE_DIR "/opt/local/libexec/boost/1.87/include")
-SET(Boost_DIR "/opt/local/libexec/boost/1.87/lib/cmake/Boost-1.87.0")
+SET(MacPortsLibArchivePrefix CACHE "/opt/local/")

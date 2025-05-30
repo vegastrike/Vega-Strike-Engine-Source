@@ -91,14 +91,16 @@ jobs:
           pythonLocation: ${{ matrix.vega-py-setup.outputs.python-path }}
           PYTHONHOME: ""
           PYTHONPATH: ""
-        run: script/cibuild $FLAGS
+        run: |
+          cmake --preset macos-pie-enabled-RelWithDebInfo
+          cmake --build --preset build-macos-pie-enabled-RelWithDebInfo
 
       - name: Test
         working-directory: ${{github.workspace}}/build
         env:
           GTEST_OUTPUT: xml
           GTEST_COLOR: 1
-        run: ctest -V
+        run: ctest -V --preset test-macos-pie-enabled-RelWithDebInfo
 
       - name: Upload test results
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
