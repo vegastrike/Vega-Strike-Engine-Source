@@ -2,8 +2,8 @@ EXECUTE_PROCESS(COMMAND brew --prefix
                 OUTPUT_VARIABLE HomebrewPrefixOut
                 ERROR_VARIABLE HomebrewPrefixErr)
 SET(CMAKE_PREFIX_PATH $HomebrewPrefixOut)
-SET(CMAKE_FIND_FRAMEWORK CACHE "LAST")
-SET(PythonInstalledVia CACHE "Homebrew")
+SET(CMAKE_FIND_FRAMEWORK "LAST")
+SET(PythonInstalledVia "Homebrew" CACHE STRING "How Python was installed, such as via Homebrew or MacPorts")
 
 EXECUTE_PROCESS(COMMAND homebrew --prefix libarchive
                 OUTPUT_VARIABLE HOMEBREW_LIBARCHIVE_PREFIX
