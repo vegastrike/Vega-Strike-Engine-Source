@@ -30,7 +30,7 @@
 #include <string>
 #include "src/endianness.h"
 #include "src/hashtable.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "gfx/vsimage.h"
 #include "root_generic/vs_globals.h"
 #include "src/in_kb.h"

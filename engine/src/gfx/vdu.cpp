@@ -44,7 +44,7 @@
 #include "gfx/animation.h"
 #include "root_generic/galaxy_gen.h"
 #include "src/universe_util.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "cmd/ai/communication.h"
 #include "src/universe.h"
 #include "cmd/mount_size.h"

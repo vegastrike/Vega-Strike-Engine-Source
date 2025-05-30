@@ -338,6 +338,15 @@ LIST(APPEND TST_INCLUDES ${Python3_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 MESSAGE("** Boost_LIBRARIES: ${Boost_LIBRARIES}")
 LIST(APPEND TST_LIBS ${Boost_LIBRARIES})
 
+# MacOS has some issues with detecting LibArchive by CMake
+# so it needs to be added to the LDFLAGS and CFLAGS explicitly (see `script/cibuild)
+# All other platforms can use the CMake functionality
+IF (NOT APPLE)
+    FIND_PACKAGE(LibArchive REQUIRED)
+    LIST(APPEND TST_INCLUDES ${LibArchive_INCLUDE_DIRS})
+    LIST(APPEND TST_LIBS ${LibArchive_LIBRARIES})
+ENDIF (NOT APPLE)
+
 # Set the default build type
 IF (NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )

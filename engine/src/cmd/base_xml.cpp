@@ -39,7 +39,7 @@
 #include "src/python/python_class.h"
 #include "cmd/base.h"
 #include "cmd/base_util.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 
 static FILE *withAndWithout(std::string filename, std::string time_of_day_hint) {
     string with(filename + "_" + time_of_day_hint + BASE_EXTENSION);

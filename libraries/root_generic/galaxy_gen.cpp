@@ -57,7 +57,7 @@
 #ifndef M_PI
 #define M_PI 3.1415926536
 #endif
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 
 using namespace VSFileSystem;
 using std::string;

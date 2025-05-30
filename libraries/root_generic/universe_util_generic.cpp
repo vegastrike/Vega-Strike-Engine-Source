@@ -40,7 +40,7 @@
 #include "cmd/collection.h"
 #include <string>
 #include <set>
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/save_util.h"
 #include "cmd/unit_csv.h"
 #include "gfx_generic/cockpit_generic.h"
@@ -48,7 +48,7 @@
 #include "root_generic/load_mission.h"
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "cmd/unit_util.h"
 #include "cmd/csv.h"

@@ -31,7 +31,7 @@
 
 #include <vector>
 #include <string>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 
 using std::string;
 using std::vector;

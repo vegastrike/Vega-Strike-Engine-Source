@@ -51,6 +51,9 @@ echo "Detected Mac OS X ${DETECT_MAC_OS_VERSION} - ${MAC_OS_NAME}"
 # some changes between versions of MacOS on which are provided by default; so
 # aside from the two above we should just go ahead an install everything ourselves.
 
+# Ensure we're using the latest formula
+brew update
+
 # Install the stuff we know needs to get installed all the time
 brew install \
     gcc \
@@ -62,6 +65,10 @@ brew install \
     gtk+3 \
     gtkglext \
     sdl2
+
+# Reinstall some key items because it might be problematic otherwise
+brew reinstall \
+    libarchive
 
 # The following Apple-provided libraries are deprecated:
 # * OpenGL as of macOS 10.14
