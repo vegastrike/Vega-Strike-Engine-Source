@@ -53,7 +53,7 @@ jobs:
           update-environment: false
 
       - name: Install dependencies using homebrew
-        run: brew install boost-python3 gtk+3 gtkglext sdl libvorbis libarchive
+        run: brew install boost-python3 gtk+3 gtkglext sdl2 libvorbis libarchive
 
       # The following dependencies are already present within macos-* images:
       # MacOS has a Developers Tools package from Apple that gets installed which
