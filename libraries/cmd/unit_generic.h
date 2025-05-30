@@ -1,13 +1,13 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
-#define VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
-// Q: Why 2 header guards???
-
 /*
  * unit_generic.h
  *
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy, Roy Falk, Benjamen R. Meyer,
- * and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,7 +15,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -26,6 +26,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
+// Q: Why 2 header guards???
 
 /***** Unit is the Unit class without GFX/Sound with AI *****/
 
@@ -724,7 +727,7 @@ public:
     }
 
     bool InRange(const Unit *target, double &mm, bool cone, bool cap, bool lock) const;
-    
+
 
 //Uses Universe stuff so only in Unit class
     void TargetTurret(Unit *targ);
