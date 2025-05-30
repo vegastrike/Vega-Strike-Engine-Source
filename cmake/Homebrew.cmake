@@ -2,7 +2,8 @@ EXECUTE_PROCESS(COMMAND brew --prefix
                 OUTPUT_VARIABLE HomebrewPrefixOut
                 ERROR_VARIABLE HomebrewPrefixErr)
 SET(CMAKE_PREFIX_PATH $HomebrewPrefixOut)
-SET(CMAKE_FIND_FRAMEWORK "LAST")
+SET(CMAKE_FIND_FRAMEWORK "NEVER")
+SET(CMAKE_FIND_APPBUNDLE "NEVER")
 SET(PythonInstalledVia "Homebrew" CACHE STRING "How Python was installed, such as via Homebrew or MacPorts")
 
 EXECUTE_PROCESS(COMMAND homebrew --prefix libarchive
@@ -12,3 +13,6 @@ SET(PKG_CONFIG_PATH "${HOMEBREW_LIBARCHIVE_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PA
 
 SET(LibArchive_INCLUDE_DIR "${HOMEBREW_LIBARCHIVE_PREFIX}/include")
 SET(LibArchive_LIB_DIR "${HOMEBREW_LIBARCHIVE_PREFIX}/lib")
+
+SET(CMAKE_FIND_FRAMEWORK "LAST")
+SET(CMAKE_FIND_APPBUNDLE "")
