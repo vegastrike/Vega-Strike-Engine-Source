@@ -65,6 +65,8 @@
 #include "src/universe.h"
 #include "cmd/vega_py_run.h"
 #include "src/vs_exit.h"
+#include "cmd/unit_type.h"
+
 
 #include <boost/filesystem.hpp>
 #include <boost/chrono/time_point.hpp>
@@ -177,14 +179,8 @@ namespace UniverseUtil {
                           QVector pos,
                           string squadlogo,
                           string destinations) {
-        int clstype = Vega_UnitType::unit;
-        if (unittype_string == "planet") {
-            clstype = Vega_UnitType::planet;
-        } else if (unittype_string == "asteroid") {
-            clstype = Vega_UnitType::asteroid;
-        } else if (unittype_string == "nebula") {
-            clstype = Vega_UnitType::nebula;
-        }
+        Vega_UnitType clstype = DeserializeUnitType(unittype_string);
+        
         CreateFlightgroup cf;
         cf.fg = Flightgroup::newFlightgroup(name_string,
                                             type_string,

@@ -163,7 +163,7 @@ public:
             if (target->rSize() > min_radar_blip_size) {
                 collection->push_back(sensor->CreateTrack(target));
             }
-            if (target->isPlanet() == Vega_UnitType::planet && target->radial_size > 0) {
+            if (target->isPlanet() && target->radial_size > 0) {
                 const Unit *sub = NULL;
                 for (un_kiter i = target->viewSubUnits(); (sub = *i) != NULL; ++i) {
                     if (target->rSize() > min_radar_blip_size) {
