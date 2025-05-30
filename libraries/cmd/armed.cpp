@@ -1,8 +1,12 @@
 /*
  * armed.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy, and
- * other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -38,6 +42,8 @@
 #include "src/vs_logging.h"
 #include "resource/resource.h"
 #include "src/vega_cast_utils.h"
+#include "components/components_manager.h"
+#include "root_generic/configxml.h"
 
 #include <vector>
 
@@ -418,7 +424,7 @@ bool Armed::TargetLocked(const Unit *checktarget) const {
     if (!unit->radar.locked) {
         return false;
     }
-    return (checktarget == NULL) || (unit->computer.target == checktarget);
+    return (checktarget == NULL) || (unit->Target() == checktarget);
 }
 
 bool Armed::TargetTracked(const Unit *checktarget) {
@@ -436,12 +442,12 @@ bool Armed::TargetTracked(const Unit *checktarget) {
         return true;
     }
 
-    if (unit->computer.target != checktarget) {
+    if (unit->Target() != checktarget) {
         return false;
     }
 
     float mycone = unit->radar.tracking_cone;
-    we_do_track = CloseEnoughToAutotrack(unit, unit->computer.target.GetUnit(), mycone);
+    we_do_track = CloseEnoughToAutotrack(unit, unit->Target(), mycone);
 
     return we_do_track;
 }

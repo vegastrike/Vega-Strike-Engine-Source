@@ -108,9 +108,9 @@ static void ActuallyWarpTo(Unit *parent, const QVector &tarpos, Vector tarvel, U
     }
     static bool domatch = XMLSupport::parse_bool(vs_config->getVariable("AI", "match_velocity_of_pursuant", "false"));
     if (chasedot > mintarveldot || !domatch) {
-        parent->computer.velocity_ref.SetUnit(NULL);
+        parent->VelocityReference(nullptr);
     } else {
-        parent->computer.velocity_ref.SetUnit(MatchSpeed);
+        parent->VelocityReference(MatchSpeed);
     }
 }
 

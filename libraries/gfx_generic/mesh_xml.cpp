@@ -33,6 +33,8 @@
 #include "gfx/aux_texture.h"
 #include "gfx/aux_logo.h"
 #include "src/vegastrike.h"
+#include "root_generic/configxml.h"
+
 #include <iostream>
 #include <expat.h>
 #include <cfloat>

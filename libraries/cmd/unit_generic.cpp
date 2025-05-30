@@ -1,8 +1,12 @@
 /*
  * unit_generic.cpp
  *
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,7 +19,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -81,9 +85,11 @@
 #include "vegadisk/savegame.h"
 #include "resource/manifest.h"
 #include "cmd/dock_utils.h"
+#include "vega_cast_utils.h"
 #include "resource/random_utils.h"
 
 #include <math.h>
+#include <cmath>
 #include <list>
 #include <cstdint>
 #include <boost/format.hpp>
@@ -139,6 +145,7 @@ void Unit::SetNebula(Nebula *neb) {
     }
 }
 
+// Move to radar
 bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool lock) const {
     const float capship_size = configuration()->physics.capship_size;
 
@@ -165,30 +172,71 @@ bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool loc
             || target->rSize() < radar.GetMinTargetSize()) {
         Flightgroup *fg = target->getFlightgroup();
         if ((target->rSize() < capship_size || (!cap)) && (fg == NULL ? true : fg->name != "Base")) {
-            return target->isUnit() == Vega_UnitType::planet;
+            return target->getUnitType() == Vega_UnitType::planet;
         }
     }
     return true;
 }
 
+
+
+// two convenience functions
+Unit* CheckNullAndCastToUnit(ComponentsManager* manager) {
+    if (manager == nullptr) {
+        return nullptr;
+    }
+    return vega_dynamic_cast_ptr<Unit>(manager);
+}
+
+const Unit* CheckNullAndConstCastToUnit(const ComponentsManager* manager)  {
+    if (manager == nullptr) {
+        return nullptr;
+    }
+    return vega_dynamic_const_cast_ptr<const Unit>(manager);
+}
+
+Vector Unit::GetNavPoint() {
+    return Vector(computer.nav_point.i,
+                  computer.nav_point.j,
+                  computer.nav_point.k);
+}
+
 Unit *Unit::Target() {
-    return computer.target.GetUnit();
+    return CheckNullAndCastToUnit(computer.target);
 }
 
 const Unit *Unit::Target() const {
-    return computer.target.GetConstUnit();
+    return CheckNullAndConstCastToUnit(computer.target);
+}
+
+void Unit::SetTarget(Unit *target) {
+    computer.target = target;
+}
+
+
+ Unit *Unit::Threat() {
+    return CheckNullAndCastToUnit(computer.threat);
+ }
+    
+const Unit *Unit::Threat() const {
+    return CheckNullAndConstCastToUnit(computer.threat);
+}
+
+void Unit::SetThreat(Unit *target) {
+    computer.threat = target;
 }
 
 Unit *Unit::VelocityReference() {
-    return computer.velocity_ref.GetUnit();
+    return CheckNullAndCastToUnit(computer.velocity_reference);
 }
 
 const Unit *Unit::VelocityReference() const {
-    return computer.velocity_ref.GetConstUnit();
+    return CheckNullAndConstCastToUnit(computer.velocity_reference);
 }
 
-Unit *Unit::Threat() {
-    return computer.threat.GetUnit();
+void Unit::VelocityReference(Unit *target) {
+    computer.force_velocity_ref = !!target;
+    computer.velocity_reference = target;
 }
 
 void Unit::RestoreGodliness() {
@@ -220,20 +268,6 @@ extern void PlayDockingSound(int dock);
     return false;
 }*/
 
-
-
-/* UGLYNESS short fix */
-unsigned int apply_float_to_unsigned_int(float tmp) {
-    static unsigned long int seed = 2531011;
-    seed += 214013;
-    seed %= 4294967295u;
-    unsigned int ans = (unsigned int) tmp;
-    tmp -= ans;                                         //now we have decimal;
-    if (seed < (unsigned long int) (4294967295u * tmp)) {
-        ans += 1;
-    }
-    return ans;
-}
 
 static list<Unit *> Unitdeletequeue;
 static Hashtable<uintmax_t, Unit, 2095> deletedUn;
@@ -562,7 +596,7 @@ void Unit::calculate_extent(bool update_collide_queue) {
     if (!isSubUnit() && update_collide_queue && (!Destroyed())) {
         //only do it in Unit::CollideAll UpdateCollideQueue();
     }
-    if (isUnit() == Vega_UnitType::planet) {
+    if (getUnitType() == Vega_UnitType::planet) {
         radial_size = tmpmax(tmpmax(corner_max.i, corner_max.j), corner_max.k);
     }
 }
@@ -589,25 +623,21 @@ void Unit::SetFg(Flightgroup *fg, int fg_subnumber) {
     flightgroup_subnumber = fg_subnumber;
 }
 
-static float tmpsqr(float x) {
-    return x * x;
-}
 
-float CloseEnoughCone(Unit *me) {
-    return configuration()->physics.near_autotrack_cone;
-}
+
+
 
 bool CloseEnoughToAutotrack(Unit *me, Unit *targ, float &cone) {
     if (targ) {
         const float close_enough_to_autotrack =
-                tmpsqr(configuration()->physics.close_enough_to_autotrack);
+                std::pow(configuration()->physics.close_enough_to_autotrack,2);
         float dissqr = (me->curr_physical_state.position.Cast()
                 - targ->curr_physical_state.position.Cast()).MagnitudeSquared();
         float movesqr = close_enough_to_autotrack
                 * (me->prev_physical_state.position.Cast()
                         - me->curr_physical_state.position.Cast()).MagnitudeSquared();
         if (dissqr < movesqr && movesqr > 0) {
-            cone = CloseEnoughCone(me) * (movesqr - dissqr) / movesqr + 1 * dissqr / movesqr;
+            cone = configuration()->physics.near_autotrack_cone * (movesqr - dissqr) / movesqr + 1 * dissqr / movesqr;
             return true;
         }
     }
@@ -700,9 +730,9 @@ float Unit::cosAngleFromMountTo(Unit *targ, float &dist) const {
 void Unit::Threaten(Unit *targ, float danger) {
     if (!targ) {
         computer.threatlevel = danger;
-        computer.threat.SetUnit(NULL);
+        computer.threat = nullptr;
     } else if (targ->owner != this && this->owner != targ && danger > PARANOIA && danger > computer.threatlevel) {
-        computer.threat.SetUnit(targ);
+        computer.threat = targ;
         computer.threatlevel = danger;
     }
 }
@@ -810,10 +840,6 @@ void Unit::ReTargetFg(int which_target) {
 
 extern signed char ComputeAutoGuarantee(Unit *un);
 extern float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false);
-
-double howFarToJump() {
-    return configuration()->physics.distance_to_warp;
-}
 
 QVector SystemLocation(std::string system) {
     string xyz = _Universe->getGalaxyProperty(system, "xyz");
@@ -1130,6 +1156,8 @@ Unit *findUnitInStarsystem(const void *unitDoNotDereference) {
     return NULL;
 }
 
+extern std::string getDamageColor(double);
+
 //NUMGAUGES has been moved to pImages.h in UnitImages<void>
 void Unit::DamageRandSys(float dam, const Vector &vec) {
     // TODO: take actual damage into account when damaging components.
@@ -1169,7 +1197,8 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
             // Duplicate of above
             ship_functions.Damage(Function::cockpit);
         }
-        damages |= Damages::COMPUTER_DAMAGED;
+
+        GenerateHudText(getDamageColor);
         return;
     }
     if (randomDouble() < configuration()->physics.thruster_hit_chance) {
@@ -1180,7 +1209,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         // the shots are coming from.
         drive.Damage();
         afterburner.Damage();
-        damages |= Damages::LIMITS_DAMAGED;
+        GenerateHudText(getDamageColor);
         return;
     }
     if (degrees >= 20 && degrees < 35) {
@@ -1201,7 +1230,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
                 mounts[whichmount].maxfunctionality *= dam;
             }
         }
-        damages |= Damages::MOUNT_DAMAGED;
+        GenerateHudText(getDamageColor);
         return;
     }
     if (degrees >= 35 && degrees < 60) {
@@ -1239,19 +1268,18 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
                 // No damage
         }
 
-        damages |= Damages::CARGOFUEL_DAMAGED;
+        GenerateHudText(getDamageColor);
         return;
     }
     if (degrees >= 90 && degrees < 120) {
         if (randnum >= .7) {
             this->cloak.Damage();
-            damages |= Damages::CLOAK_DAMAGED;
         }
 
         // TODO: lib_damage reenable
         shield.Damage();
 
-        damages |= Damages::SHIELD_DAMAGED;
+        GenerateHudText(getDamageColor);
         return;
     }
     if (degrees >= 120 && degrees < 150) {
@@ -1288,13 +1316,14 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         } else {
             repair_bot.Damage();
         }
-        damages |= Damages::JUMP_DAMAGED;
+
+        GenerateHudText(getDamageColor);
         return;
     }
     if (degrees >= 150 && degrees <= 180) {
         //DAMAGE ENGINES
         drive.Damage();
-        damages |= Damages::LIMITS_DAMAGED;
+        GenerateHudText(getDamageColor);
         return;
     }
 }
@@ -1339,11 +1368,11 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
     if (!isSubUnit()) {
         RemoveFromSystem();
     }
-    computer.target.SetUnit(NULL);
+    computer.target = nullptr;
 
     //God I can't believe this next line cost me 1 GIG of memory until I added it
-    computer.threat.SetUnit(NULL);
-    computer.velocity_ref.SetUnit(NULL);
+    computer.threat = nullptr;
+    computer.velocity_reference = nullptr;
     computer.force_velocity_ref = true;
     if (aistate) {
         aistate->ClearMessages();
@@ -1358,7 +1387,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
         un->Kill();
     }
 
-    //if (isUnit() != Vega_UnitType::missile) {
+    //if (getUnitType() != Vega_UnitType::missile) {
     //    VS_LOG(info, (boost::format("UNIT HAS DIED: %1% %2% (file %3%)") % name.get() % fullname % filename.get()));
     //}
 
@@ -1549,17 +1578,17 @@ void Unit::Target(Unit *targ) {
     }
 
     if (!(activeStarSystem == NULL || activeStarSystem == _Universe->activeStarSystem())) {
-        computer.target.SetUnit(NULL);
+        computer.target = nullptr;
         return;
     }
     if (targ) {
         if (targ->activeStarSystem == _Universe->activeStarSystem() || targ->activeStarSystem == NULL) {
-            if (targ != Unit::Target()) {
+            if (targ != Target()) {
                 for (int i = 0; i < getNumMounts(); ++i) {
                     mounts[i].time_to_lock = mounts[i].type->lock_time;
                 }
 
-                computer.target.SetUnit(targ);
+                computer.target = targ;
                 radar.Unlock();
             }
         } else {
@@ -1582,17 +1611,12 @@ void Unit::Target(Unit *targ) {
                     WarpPursuit(this, _Universe->activeStarSystem(), targ->getStarSystem()->getFileName());
                 }
             } else {
-                computer.target.SetUnit(NULL);
+                computer.target = nullptr;
             }
         }
     } else {
-        computer.target.SetUnit(NULL);
+        computer.target = nullptr;
     }
-}
-
-void Unit::VelocityReference(Unit *targ) {
-    computer.force_velocity_ref = !!targ;
-    computer.velocity_ref.SetUnit(targ);
 }
 
 void Unit::SetOwner(Unit *target) {
@@ -1651,7 +1675,7 @@ bool Unit::Explode(bool drawit, float timeit) {
         Vector p, q, r;
         this->GetOrientation(p, q, r);
         this->pImage->pExplosion->SetOrientation(p, q, r);
-        if (this->isUnit() != Vega_UnitType::missile) {
+        if (this->getUnitType() != Vega_UnitType::missile) {
             _Universe->activeStarSystem()->AddMissileToQueue(new MissileEffect(this->Position(),
                     this->shield.AverageMaxLayerValue(),
                     0,
@@ -1676,7 +1700,7 @@ bool Unit::Explode(bool drawit, float timeit) {
 
         if (!sub) {
             un = _Universe->AccessCockpit()->GetParent();
-            if (this->isUnit() == Vega_UnitType::unit) {
+            if (this->getUnitType() == Vega_UnitType::unit) {
                 if (rand() < RAND_MAX * game_options()->percent_shockwave && (!this->isSubUnit())) {
                     static string shockani(game_options()->shockwave_animation);
                     static Animation *__shock__ani = new Animation(shockani.c_str(), true, .1, MIPMAP, false);
@@ -1711,7 +1735,7 @@ bool Unit::Explode(bool drawit, float timeit) {
                         static float lasttime = 0;
                         float newtime = getNewTime();
                         if (newtime - lasttime > game_options()->time_between_music
-                                || (_Universe->isPlayerStarship(this) && this->isUnit() != Vega_UnitType::missile
+                                || (_Universe->isPlayerStarship(this) && this->getUnitType() != Vega_UnitType::missile
                                         && this->faction
                                                 != upgradesfaction)) {
                             //No victory for missiles or spawned explosions
@@ -1729,7 +1753,7 @@ bool Unit::Explode(bool drawit, float timeit) {
         }
     }
     bool timealldone =
-            (this->pImage->timeexplode > game_options()->debris_time || this->isUnit() == Vega_UnitType::missile
+            (this->pImage->timeexplode > game_options()->debris_time || this->getUnitType() == Vega_UnitType::missile
                     || _Universe->AccessCockpit()->GetParent() == this || this->SubUnits.empty());
     if (this->pImage->pExplosion) {
         this->pImage->timeexplode += timeit;
@@ -2911,12 +2935,6 @@ bool Unit::ReduceToTemplate() {
     vector<Cargo> savedCargo;
     savedCargo.swap(cargo);
 
-    // Remove integral components, because they become duplicates
-    savedCargo.erase(std::remove_if(savedCargo.begin(),
-                                    savedCargo.end(),
-                                    [](const Cargo& c) { return c.GetCategory().find("upgrades/integral") == 0; }),
-                                    savedCargo.end());
-
     vector<Mount> savedWeap;
     savedWeap.swap(mounts);
     const Unit *temprate = makeFinalBlankUpgrade(name, faction);
@@ -3003,7 +3021,6 @@ int Unit::RepairUpgrade() {
     UnitImages<void> *im = &GetImageInformation();
 
 
-    damages = Damages::NO_DAMAGE;
     bool ret = success && pct > 0;
     static bool ComponentBasedUpgrades =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "component_based_upgrades", "false"));
@@ -3476,7 +3493,7 @@ bool isWeapon(std::string name) {
 // This is called every cycle - repair in flight by droids
 // TODO: move this to RepairBot
 void Unit::Repair() {
-    if(isUnit() == Vega_UnitType::planet) {
+    if(getUnitType() == Vega_UnitType::planet) {
         return;
     }
 
@@ -3817,10 +3834,10 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     }
 
     float dist_sqr_to_target = FLT_MAX;
-    Unit *target = Unit::Target();
+    Unit *target = Target();
     bool increase_locking = false;
     if (target && !cloak.Cloaked()) {
-        if (target->isUnit() != Vega_UnitType::planet) {
+        if (target->getUnitType() != Vega_UnitType::planet) {
             Vector TargetPos(InvTransform(cumulative_transformation_matrix, (target->Position())).Cast());
             dist_sqr_to_target = TargetPos.MagnitudeSquared();
             TargetPos.Normalize();
@@ -3832,14 +3849,14 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         if (!computer.force_velocity_ref && activeStarSystem) {
             Unit *nextVelRef = activeStarSystem->nextSignificantUnit();
             if (nextVelRef) {
-                if (computer.velocity_ref.GetUnit()) {
-                    double dist = UnitUtil::getSignificantDistance(this, computer.velocity_ref.GetUnit());
+                if (computer.velocity_reference) {
+                    double dist = UnitUtil::getSignificantDistance(this, VelocityReference());
                     double next_dist = UnitUtil::getSignificantDistance(this, nextVelRef);
                     if (next_dist < dist) {
-                        computer.velocity_ref = nextVelRef;
+                        computer.velocity_reference = nextVelRef;
                     }
                 } else {
-                    computer.velocity_ref = nextVelRef;
+                    computer.velocity_reference = nextVelRef;
                 }
             }
         }
@@ -4014,7 +4031,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     static bool warp_is_interstellar =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "warp_is_interstellar", "false"));
     if (warp_is_interstellar
-            && (curr_physical_state.position.MagnitudeSquared() > howFarToJump() * howFarToJump() && !isSubUnit())) {
+            && (curr_physical_state.position.MagnitudeSquared() > std::pow(configuration()->physics.distance_to_warp, 2) && !isSubUnit())) {
         static bool direct =
                 XMLSupport::parse_bool(vs_config->getVariable("physics", "direct_interstellar_journey", "true"));
         bool jumpDirect = false;
@@ -4115,7 +4132,7 @@ extern string getCargoUnitName(const char *name);
 
 void Unit::UpgradeInterface(Unit *baseun) {
     string basename = (::getCargoUnitName(baseun->getFullname().c_str()));
-    if (baseun->isUnit() != Vega_UnitType::planet) {
+    if (baseun->getUnitType() != Vega_UnitType::planet) {
         basename = baseun->name;
     }
     BaseUtil::LoadBaseInterfaceAtDock(basename, baseun, this);
@@ -4157,10 +4174,10 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
             Unit *unit;
             for (un_iter iter = pendingjump[kk]->orig->getUnitList().createIterator(); (unit = *iter); ++iter) {
                 if (unit->Threat() == this) {
-                    unit->Threaten(NULL, 0);
+                    unit->Threaten(nullptr, 0);
                 }
                 if (unit->VelocityReference() == this) {
-                    unit->VelocityReference(NULL);
+                    unit->VelocityReference(nullptr);
                 }
                 if (unit->Target() == this) {
                     if (pendingjump[kk]->jumppoint.GetUnit()) {
@@ -4210,7 +4227,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
 
                 this->SetCurPosition(pos);
                 ActivateAnimation(jumpnode);
-                if (jumpnode->isUnit() == Vega_UnitType::unit) {
+                if (jumpnode->getUnitType() == Vega_UnitType::unit) {
                     QVector Offset(pos.i < 0 ? 1 : -1,
                             pos.j < 0 ? 1 : -1,
                             pos.k < 0 ? 1 : -1);
@@ -4227,7 +4244,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
             for (unsigned int jjj = 0; jjj < 2; ++jjj) {
                 for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
                         (tester = *i) != NULL; ++i) {
-                    if (tester->isUnit() == Vega_UnitType::unit && tester != this) {
+                    if (tester->getUnitType() == Vega_UnitType::unit && tester != this) {
                         if ((this->LocalPosition() - tester->LocalPosition()).Magnitude()
                                 < this->rSize() + tester->rSize()) {
                             this->SetCurPosition(this->LocalPosition() + this->cumulative_transformation_matrix.getR()

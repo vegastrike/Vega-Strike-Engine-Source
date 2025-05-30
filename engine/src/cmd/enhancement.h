@@ -45,17 +45,21 @@ public:
 protected:
     std::string filename;
 
-    enum Vega_UnitType isUnit() const {
+public:
+    enum Vega_UnitType isUnit() const override {
         return Vega_UnitType::enhancement;
     }
 
-protected:
-/// default constructor forbidden
-    Enhancement();
-/// copy constructor forbidden
-    Enhancement(const Enhancement &);
-/// assignment operator forbidden
-    Enhancement &operator=(const Enhancement &);
+    Vega_UnitType getUnitType() const override {
+        return Vega_UnitType::enhancement;
+    }
+
+    /// default constructor forbidden
+    Enhancement() = delete;
+    /// copy constructor forbidden
+    Enhancement(const Enhancement &) = delete;
+    /// assignment operator forbidden
+    Enhancement &operator=(const Enhancement &) = delete;
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_ENHANCER_H

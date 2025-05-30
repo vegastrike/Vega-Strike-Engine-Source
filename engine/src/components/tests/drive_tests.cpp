@@ -204,7 +204,7 @@ TEST(Drive, UpgradeDowngrade) {
     // Drive
     upgrade.Downgrade();
 
-    EXPECT_EQ(drive.GetUpgradeName(), "");
+    EXPECT_EQ(drive.GetUpgradeName(), "Drive");
     EXPECT_EQ(drive.GetMass(), 0.0);
 
     DriveExpectEq(drive, 10.0);

@@ -1,10 +1,12 @@
-/**
+/*
  * audible.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -32,6 +34,7 @@
 #include "src/universe.h"
 #include "src/audiolib.h"
 #include "root_generic/options.h"
+#include "root_generic/configxml.h"
 
 static const SoundType typesArray[] = {SoundType::engine, SoundType::shield, SoundType::armor,
         SoundType::hull, SoundType::explosion, SoundType::cloaking,

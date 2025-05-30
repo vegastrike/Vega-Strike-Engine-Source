@@ -136,8 +136,6 @@ public:
     const double GetMass() const;
     const double GetVolume() const;
 
-    const double GetOperational() const;
-
     const bool Integral() const;
 };
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H

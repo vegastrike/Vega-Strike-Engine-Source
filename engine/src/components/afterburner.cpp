@@ -34,6 +34,8 @@ Afterburner::~Afterburner()
 Afterburner::Afterburner(EnergyContainer *source) :
     Component(0.0, 0.0, true, true), EnergyConsumer(source, false), thrust(1,0,1), speed(1,0,1) {
     type = ComponentType::Afterburner;
+    upgrade_name = "Afterburner";
+    installed = true;
 }
 
 

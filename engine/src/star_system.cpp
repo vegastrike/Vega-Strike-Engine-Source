@@ -626,7 +626,7 @@ void StarSystem::AddUnit(Unit *unit) {
     if (stats.system_faction == FactionUtil::GetNeutralFaction()) {
         stats.CheckVitals(this);
     }
-    if (unit->isPlanet() || unit->isJumppoint() || unit->isUnit() == Vega_UnitType::asteroid) {
+    if (unit->isPlanet() || unit->isJumppoint() || unit->getUnitType() == Vega_UnitType::asteroid) {
         if (!gravitationalUnits().contains(unit)) {
             gravitationalUnits().prepend(unit);
         }
@@ -1388,7 +1388,7 @@ static bool isJumping(const vector<unorigdest *> &pending, Unit *un) {
 }
 
 QVector SystemLocation(std::string system);
-double howFarToJump();
+
 
 QVector ComputeJumpPointArrival(QVector pos, std::string origin, std::string destination) {
     QVector finish = SystemLocation(destination);
@@ -1402,7 +1402,7 @@ QVector ComputeJumpPointArrival(QVector pos, std::string origin, std::string des
         if (pos.MagnitudeSquared()) {
             pos.Normalize();
         }
-        return (dir * .5 + pos * .125) * howFarToJump();
+        return (dir * .5 + pos * .125) * configuration()->physics.distance_to_warp;
     }
     return QVector(0, 0, 0);
 }
@@ -1492,7 +1492,7 @@ void StarSystem::UpdateMissiles() {
             for (un_iter ui = getUnitList().createIterator();
                     NULL != (un = (*ui));
                     ++ui) {
-                enum Vega_UnitType type = un->isUnit();
+                enum Vega_UnitType type = un->getUnitType();
                 if (collideroids || type
                         != Vega_UnitType::asteroid) {           // could check for more, unless someone wants planet-killer missiles, but what it would change?
                     discharged_missiles.back()->ApplyDamage(un);

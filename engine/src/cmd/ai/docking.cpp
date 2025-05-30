@@ -38,11 +38,11 @@ static void DockedScript(Unit *docker, Unit *base) {
     static string script = vs_config->getVariable("AI", "DockedToScript", "");
     if (script.length() > 0) {
         Unit *targ = docker->Target();
-        docker->GetComputerData().target.SetUnit(base);
+        docker->Target(base);
         UniverseUtil::setScratchUnit(docker);
         CompileRunPython(script);
         UniverseUtil::setScratchUnit(NULL);
-        docker->GetComputerData().target.SetUnit(targ);         //should be NULL;
+        docker->Target(targ);         //should be NULL;
     }
 }
 
@@ -197,7 +197,7 @@ bool DockingOps::DockToTarget(Unit *utdw) {
     QVector loc = Movement(utdw);
     float rad = utdw->DockingPortLocations()[port].GetRadius() + parent->rSize();
     float diss = (parent->Position() - loc).MagnitudeSquared() - .1;
-    bool isplanet = utdw->isUnit() == Vega_UnitType::planet;
+    bool isplanet = utdw->getUnitType() == Vega_UnitType::planet;
 
     if (diss <= (isplanet ? rad * rad : parent->rSize() * parent->rSize())) {
         DockedScript(parent, utdw);
@@ -224,7 +224,7 @@ bool DockingOps::DockToTarget(Unit *utdw) {
 
 bool DockingOps::PerformDockingOperations(Unit *utdw) {
     timer -= SIMULATION_ATOM;
-    bool isplanet = utdw->isUnit() == Vega_UnitType::planet;
+    bool isplanet = utdw->getUnitType() == Vega_UnitType::planet;
     if (timer < 0) {
         static float tmp = XMLSupport::parse_float(vs_config->getVariable("physics", "un_docking_time", "180"));
         timer = tmp;
