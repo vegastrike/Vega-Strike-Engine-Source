@@ -10,5 +10,5 @@ SET(USE_GTEST CACHE "OFF")
 # Is this correct?
 SET(MacPortsLibArchivePrefix CACHE "/opt/local/")
 
-SET(LIBARCHIVE_INCLUDE_DIR "${MacPortsLibArchivePrefix}/include")
-SET(LIBARCHIVE_LIB_DIR "${MacPortsLibArchivePrefix}/lib")
+SET(LibArchive_INCLUDE_DIR "${MacPortsLibArchivePrefix}/include")
+SET(LibArchive_LIB_DIR "${MacPortsLibArchivePrefix}/lib")
