@@ -7,7 +7,7 @@ SET(CMAKE_FIND_FRAMEWORK "LAST")
 SET(CMAKE_FIND_APPBUNDLE "LAST")
 SET(PythonInstalledVia "Homebrew" CACHE STRING "How Python was installed, such as via Homebrew or MacPorts")
 
-#EXECUTE_PROCESS(COMMAND homebrew --prefix libarchive
+#EXECUTE_PROCESS(COMMAND brew --prefix libarchive
 #                OUTPUT_VARIABLE LIBARCHIVE_PREFIX
 #                ERROR_VARIABLE LIBARCHIVE_PREFIX_ERR
 #                OUTPUT_STRIP_TRAILING_WHITESPACE)
