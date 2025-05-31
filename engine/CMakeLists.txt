@@ -719,6 +719,7 @@ IF (NOT DISABLE_CLIENT)
             OpenGL::GL
             OpenGL::GLU
             GLUT::GLUT
+            LibArchive::LibArchive
             ${VSE_TST_LIBS}
             ${Boost_LIBRARIES}
             ${Python3_LIBRARIES}
