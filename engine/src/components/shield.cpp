@@ -401,7 +401,7 @@ void Shield::FullyCharge() {
 
 void Shield::Decrease() {
     for(auto& facet : facets) {
-        facet--;
+        facet -= regeneration.MaxValue();
     }
 }
 
