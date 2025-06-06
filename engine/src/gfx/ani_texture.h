@@ -27,7 +27,7 @@
 #define VEGA_STRIKE_ENGINE_GFX_ANI_TEXTURE_H
 
 #include "gfx/aux_texture.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "vid_file.h"
 
 #include <stdio.h>

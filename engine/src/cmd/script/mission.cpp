@@ -47,7 +47,7 @@
 #include "flightgroup.h"
 
 #include "src/python/python_class.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/universe.h"
 #include "src/vs_logging.h"
 #include "src/vs_exit.h"

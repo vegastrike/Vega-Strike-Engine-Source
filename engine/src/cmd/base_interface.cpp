@@ -31,7 +31,7 @@
 #include "cmd/vega_py_run.h"
 #include "cmd/base.h"
 #include "gldrv/winsys.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "root_generic/lin_time.h"
 #include "src/audiolib.h"

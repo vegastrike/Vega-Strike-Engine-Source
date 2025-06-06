@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_ENHANCER_H
 #define VEGA_STRIKE_ENGINE_CMD_ENHANCER_H
 
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/universe.h"
 #include "cmd/unit_generic.h"
 

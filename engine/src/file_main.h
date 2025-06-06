@@ -26,7 +26,7 @@
 #include <string.h>
 //#include "gfxlib.h"
 #include "src/endianness.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 using VSFileSystem::VSFile;
 //using namespace VSFileSystem;
 extern VSFile fpread;

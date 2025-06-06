@@ -46,7 +46,7 @@
 
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "src/python/init.h"
 #include "src/python/python_compile.h"
