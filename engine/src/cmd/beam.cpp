@@ -756,6 +756,7 @@ void Beam::UpdatePhysics(const Transformation &trans,
         if (AUDIsPlaying(sound) && refiretime >= simulation_atom_var) {
             AUDStopPlaying(sound);
         }
+        refiretime += simulation_atom_var;
         return;
     }
     if (stability && numframes * simulation_atom_var > stability) {
