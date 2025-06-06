@@ -38,16 +38,17 @@
 #include <set>
 #include <vector>
 #include "src/SharedPool.h"
+#include "cmd/unit_type.h"
 
 struct SavedUnits {
     StringPool::Reference filename;
-    int type;
+    Vega_UnitType type;
     StringPool::Reference faction;
 
     SavedUnits(const char *filen, int typ, const char *fact) {
         faction = std::string(fact);
         filename = std::string(filen);
-        type = typ;
+        type = DeserializeUnitType(typ);
     }
 };
 class MissionFloatDat;
