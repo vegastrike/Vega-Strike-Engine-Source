@@ -74,8 +74,8 @@ jobs:
         if: github.event.pull_request
         run: git checkout HEAD^2
 
-      - name: Bootstrap MacOS
-        run: script/bootstrap-mac.sh
+      #- name: Bootstrap MacOS
+      #  run: script/bootstrap-mac.sh
 
       # Note: it might be good to use a step to detect where OpenAL-Soft is
       # installed and set it to a GHA variable that can be consumed below
