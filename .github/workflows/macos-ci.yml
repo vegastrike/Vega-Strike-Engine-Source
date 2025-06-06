@@ -52,9 +52,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           update-environment: false
 
-      - name: Install dependencies using homebrew
-        run: brew install boost-python3 gtk+3 gtkglext sdl2 libvorbis libarchive
-
       # The following dependencies are already present within macos-* images:
       # MacOS has a Developers Tools package from Apple that gets installed which
       # provides some minimal functionality:
@@ -69,8 +66,8 @@ jobs:
           fetch-depth: 2
           submodules: false
 
-      #- name: Bootstrap MacOS
-      #  run: script/bootstrap-mac.sh
+      - name: Bootstrap MacOS
+        run: script/bootstrap-mac.sh
 
       # Note: it might be good to use a step to detect where OpenAL-Soft is
       # installed and set it to a GHA variable that can be consumed below
