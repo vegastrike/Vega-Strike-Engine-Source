@@ -29,7 +29,7 @@
 
 #include "cmd/csv.h"
 #include "root_generic/vs_globals.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "cmd/unit_csv_factory.h"
 #include "cmd/unit_json_factory.h"

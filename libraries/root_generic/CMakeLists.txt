@@ -51,12 +51,6 @@ ADD_LIBRARY(vegastrike_root_generic STATIC
         lin_time.h
         load_mission.cpp
         load_mission.h
-        pk3.cpp
-        pk3.h
-        posh.cpp
-        posh.h
-        savegame.cpp
-        savegame.h
         system_factory.cpp
         system_factory.h
         star_system_xml.cpp
@@ -67,8 +61,6 @@ ADD_LIBRARY(vegastrike_root_generic STATIC
         universe_util_generic.cpp
         vs_globals.cpp
         vs_globals.h
-        vsfilesystem.cpp
-        vsfilesystem.h
         xml_serializer.cpp
         xml_serializer.h
         xml_support.cpp

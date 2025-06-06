@@ -29,7 +29,7 @@
 //
 
 #include "vid_file.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "ffmpeg_init.h"
 

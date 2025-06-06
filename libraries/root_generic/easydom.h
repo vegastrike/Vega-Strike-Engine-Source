@@ -38,7 +38,7 @@
 #include <stack>
 #include <gnuhash.h>
 #include <stdlib.h>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
 #include "src/vs_logging.h"

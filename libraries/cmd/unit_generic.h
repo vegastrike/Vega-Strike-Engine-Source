@@ -72,7 +72,7 @@ void UncheckUnit( class Unit*un );
 #include "cmd/script/flightgroup.h"
 #include "root_generic/faction_generic.h"
 #include "gfx_generic/cockpit_generic.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "cmd/collide_map.h"
 #include "src/SharedPool.h"
 #include "cmd/role_bitmask.h"
