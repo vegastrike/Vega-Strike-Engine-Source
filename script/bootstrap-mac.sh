@@ -71,7 +71,7 @@ brew reinstall \
     libarchive
 
 # SGT TEMP
-ls -alG "$(brew --prefix)/libarchive/lib"
+ls -alG "$(brew --prefix libarchive)/lib"
 
 # The following Apple-provided libraries are deprecated:
 # * OpenGL as of macOS 10.14
