@@ -13,7 +13,7 @@ SET(PythonInstalledVia "Homebrew" CACHE STRING "How Python was installed, such a
 #                OUTPUT_STRIP_TRAILING_WHITESPACE)
 #SET(PKG_CONFIG_PATH "${LIBARCHIVE_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}")
 #SET(LibArchive_INCLUDE_DIR "${LIBARCHIVE_PREFIX}/include")
-#SET(LibArchive_LIBRARY "${LIBARCHIVE_PREFIX}/lib")
+#SET(LibArchive_LIBRARY_DIR "${LIBARCHIVE_PREFIX}/lib")
 #
 #FIND_PACKAGE(LibArchive REQUIRED)
 #
