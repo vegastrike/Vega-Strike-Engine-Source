@@ -87,7 +87,7 @@ jobs:
           cmake --build --preset build-macos-pie-enabled-RelWithDebInfo
 
       - name: Test
-        working-directory: ${{github.workspace}}/build
+        working-directory: ${{github.workspace}}
         env:
           GTEST_OUTPUT: xml
           GTEST_COLOR: 1
