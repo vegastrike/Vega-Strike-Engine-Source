@@ -715,7 +715,8 @@ IF (NOT DISABLE_CLIENT)
         TARGET_LINK_LIBRARIES(vegastrike-engine m)
     ENDIF()
 
-    TARGET_LINK_DIRECTORIES(vegastrike-engine ${LibArchive_LIBRARY})
+    TARGET_LINK_DIRECTORIES(vegastrike-engine BEFORE
+            PRIVATE ${LibArchive_LIBRARY})
 
     TARGET_LINK_LIBRARIES(vegastrike-engine
             OpenGL::GL
