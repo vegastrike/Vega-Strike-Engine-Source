@@ -48,7 +48,7 @@
 #include "root_generic/vs_globals.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "cmd/images.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "cmd/nebula.h"
 #include "src/gfxlib.h"
 #include "cmd/pilot.h"

@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <vector>
 #include <stack>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "tactics.h"
 #include "cmd/unit_generic.h"

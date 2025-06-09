@@ -40,7 +40,7 @@
 #include <stdlib.h>
 
 #include <vorbis/vorbisfile.h>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 
 #ifndef OGG_BUFFER_SIZE
 #define OGG_BUFFER_SIZE 4096*2*2

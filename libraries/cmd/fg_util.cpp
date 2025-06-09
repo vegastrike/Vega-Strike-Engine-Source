@@ -27,7 +27,7 @@
  */
 
 
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "fg_util.h"
 #include "root_generic/faction_generic.h"
 #include <algorithm>

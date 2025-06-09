@@ -39,7 +39,7 @@
 #include <list>
 #include <string>
 #include <fstream>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "root_generic/lin_time.h"
 #include "src/gfxlib.h"

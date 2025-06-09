@@ -44,7 +44,7 @@
 #include "cmd/ai/aggressive.h"
 #include "src/main_loop.h"
 #include <assert.h>     //needed for assert() calls
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "gfx/animation.h"
 #include "gfx_generic/mesh.h"
 #include "src/universe_util.h"
