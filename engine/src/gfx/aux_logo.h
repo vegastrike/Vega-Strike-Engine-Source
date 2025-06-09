@@ -1,7 +1,13 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, ace123, surfdargent, klaussfreire,
- * jacks, dan_w, ashieh, griwodz, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors.
+ * aux_logo.h
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically:
+ * ace123, surfdargent, klaussfreire, jacks, dan_w, ashieh, griwodz, pyramid3d
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -18,7 +24,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_GFX_LOGO_H
 #define VEGA_STRIKE_ENGINE_GFX_LOGO_H
