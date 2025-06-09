@@ -1,8 +1,12 @@
 /*
  * jump_capable.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2021-2025 Roy Falk and Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -32,6 +36,7 @@
 #include "vegadisk/vsfilesystem.h"
 #include "src/vs_exit.h"
 #include "src/vega_cast_utils.h"
+#include "root_generic/configxml.h"
 
 // TODO: once implementation is refactored, deal with this too
 extern QVector RealPosition(const Unit *un);
@@ -131,7 +136,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         failuremessage = err;
         return false;
     }
-    if (target->isUnit() == Vega_UnitType::planet) {
+    if (target->getUnitType() == Vega_UnitType::planet) {
         const Unit *targ = *(target->viewSubUnits());
         if (targ && 0 == targ->graphicOptions.FaceCamera) {
             return AutoPilotToErrorMessage(targ, ignore_energy_requirements, failuremessage, recursive_level);
@@ -177,10 +182,10 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     float totpercent = 1;
     if (totallength > 1) {
         float apt =
-                (target->isUnit() == Vega_UnitType::planet) ? (autopilot_term_distance + target->rSize()
+                (target->getUnitType() == Vega_UnitType::planet) ? (autopilot_term_distance + target->rSize()
                         * UniverseUtil::getPlanetRadiusPercent()) : autopilot_term_distance;
         float aptne =
-                (target->isUnit() == Vega_UnitType::planet) ? (atd_no_enemies + target->rSize()
+                (target->getUnitType() == Vega_UnitType::planet) ? (atd_no_enemies + target->rSize()
                         * UniverseUtil::getPlanetRadiusPercent()) : atd_no_enemies;
         float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
         float percentne = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
@@ -206,8 +211,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             bool ignore_friendlies = true;
             for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != nullptr; ++i) {
                 const bool canflythruplanets = configuration()->physics.can_auto_through_planets;
-                if ((!(un->isUnit() == Vega_UnitType::planet
-                        && canflythruplanets)) && un->isUnit() != Vega_UnitType::nebula && (!UnitUtil::isSun(un))) {
+                if ((!(un->getUnitType() == Vega_UnitType::planet
+                        && canflythruplanets)) && un->getUnitType() != Vega_UnitType::nebula && (!UnitUtil::isSun(un))) {
                     if (un != this && un != target) {
                         float tdis = (start - un->Position()).Magnitude() - unit->rSize() - un->rSize();
                         float nedis = (end - un->Position()).Magnitude() - unit->rSize() - un->rSize();
@@ -409,7 +414,7 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 continue;
             }
             float shiphack = 1;
-            if (planet->isUnit() != Vega_UnitType::planet) {
+            if (planet->getUnitType() != Vega_UnitType::planet) {
                 shiphack = def_inv_interdiction;
                 double spec_interdiction = planet->ship_functions.Value(Function::ftl_interdiction);
                 if (spec_interdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
@@ -517,7 +522,7 @@ Vector JumpCapable::GetWarpRefVelocity() const {
     //Velocity
     Vector VelocityRef(0, 0, 0);
     {
-        const Unit *vr = unit->computer.velocity_ref.GetConstUnit();
+        const Unit *vr = unit->VelocityReference();
         if (vr) {
             VelocityRef = vr->cumulative_velocity;
         }
@@ -540,7 +545,7 @@ Vector JumpCapable::GetWarpVelocity() const {
     } else {
         Vector VelocityRef(0, 0, 0);
         {
-            Unit *vr = const_cast< UnitContainer * > (&unit->computer.velocity_ref)->GetUnit();
+            const Unit *vr = unit->VelocityReference();
             if (vr) {
                 VelocityRef = vr->cumulative_velocity;
             }

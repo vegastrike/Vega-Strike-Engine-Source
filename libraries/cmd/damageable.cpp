@@ -1,8 +1,12 @@
 /*
  * damageable.cpp
  *
- * Copyright (C) 2020-2025 Daniel Horn, Roy Falk, Stephen G. Tuggy and
- * other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -219,7 +223,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
                 VS_LOG(debug, "Not auto ejecting player");
             }
         } else {
-            if (unit->isUnit() == Vega_UnitType::unit
+            if (unit->getUnitType() == Vega_UnitType::unit
                     && rand() < (RAND_MAX * auto_eject_percent)) {
                 VS_LOG(debug, "Auto ejecting NPC");
                 unit->EjectCargo((unsigned int) -1);
@@ -289,8 +293,8 @@ void Damageable::ApplyDamage(const Vector &pnt,
         if (computer_ai && player) {
             Order *computer_ai_state = computer_ai->getAIState();
             Order *player_ai_state = player->getAIState();
-            bool ai_is_unit = computer_ai->isUnit() == Vega_UnitType::unit;
-            bool player_is_unit = player->isUnit() == Vega_UnitType::unit;
+            bool ai_is_unit = computer_ai->getUnitType() == Vega_UnitType::unit;
+            bool player_is_unit = player->getUnitType() == Vega_UnitType::unit;
             if (computer_ai_state != nullptr && player_ai_state &&
                     ai_is_unit && player_is_unit) {
                 unsigned char gender;

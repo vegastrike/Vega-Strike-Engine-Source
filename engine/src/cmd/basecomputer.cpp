@@ -64,6 +64,7 @@ using VSFileSystem::SaveFile;
 #include "src/vs_logging.h"
 #include "controls_factory.h"
 #include "src/python/infra/get_string.h"
+#include "root_generic/configxml.h"
 
 #include <boost/python.hpp>
 #include "configuration/configuration.h"
@@ -1397,7 +1398,7 @@ void BaseComputer::recalcTitle() {
     Unit *baseUnit = m_base.GetUnit();
     string baseName;
     if (baseUnit) {
-        if (baseUnit->isUnit() == Vega_UnitType::planet) {
+        if (baseUnit->getUnitType() == Vega_UnitType::planet) {
             string temp = ((Planet *) baseUnit)->getHumanReadablePlanetType() + " Planet";
             // think "<planet type> <name of planet>"
             baseName = temp + " " + baseUnit->name;
@@ -2330,6 +2331,7 @@ void BaseComputer::loadListPicker(TransactionList &tlist,
     SimplePickerCell *parentCell = NULL;                //Place to add new items.  NULL = Add to picker.
     for (size_t i = 0; i < tlist.masterList.size(); i++) {
         Cargo &item = tlist.masterList.at(i).cargo;
+
         std::string icategory = getDisplayCategory(item);
         if (icategory != currentCategory) {
             //Create new cell(s) for the new category.
@@ -3065,6 +3067,13 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     repair.cargo.SetPrice(basicRepairPrice() * playerUnit->RepairCost());
     repair.cargo.SetDescription(BASIC_REPAIR_DESC);
     tlist.masterList.push_back(repair);
+
+    // Filter integral from masterlist
+    auto integral_items = std::remove_if(tlist.masterList.begin(), tlist.masterList.end(),
+                        [](CargoColor cc) {
+                          return cc.cargo.GetIntegral();
+                        });
+    tlist.masterList.erase(integral_items, tlist.masterList.end());
 
     //Load the upgrade picker from the master tlist.
     SimplePicker *basePicker = static_cast< SimplePicker * > ( window()->findControlById("BaseUpgrades"));
@@ -4183,7 +4192,7 @@ string buildCargoDescription(const Cargo &item, BaseComputer &computer, float pr
         int cp = _Universe->whichPlayerStarship(computer.m_player.GetUnit());
         vector<string> highest, lowest;
 
-        const string &baseName = (computer.m_base.GetUnit()->isUnit() == Vega_UnitType::planet) ?
+        const string &baseName = (computer.m_base.GetUnit()->getUnitType() == Vega_UnitType::planet) ?
                 computer.m_base.GetUnit()->name.get()
                 : computer.m_base
                         .GetUnit()

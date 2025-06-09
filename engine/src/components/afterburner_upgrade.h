@@ -34,6 +34,7 @@ class Afterburner;
  *  The game previously supported both additive and multiplicative upgrades.
  *  I've removed the additive one for simplicity's sake. 
  *  The default value is 1.0 (no change).
+ *  The upgrade can't be damaged. Instead, the afterburner itself can be damaged.
  */
 class AfterburnerUpgrade : public Component {
     Afterburner *afterburner;

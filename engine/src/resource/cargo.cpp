@@ -38,7 +38,7 @@ Cargo::Cargo(): Product() {
 
 Cargo::Cargo(std::string name, std::string category, float price, int quantity,
              float mass, float volume, float functionality, float max_functionality,
-             bool mission, bool installed) :
+             bool mission, bool installed, bool integral) :
         Product(name, quantity, price), category(category) {
     this->mass = mass;
     this->volume = volume;
@@ -48,6 +48,7 @@ Cargo::Cargo(std::string name, std::string category, float price, int quantity,
     this->max_functionality = max_functionality;
     this->mission = mission;
     this->installed = installed;
+    this->integral = integral;
 }
 
 float Cargo::GetFunctionality() {
@@ -68,6 +69,10 @@ void Cargo::SetFunctionality(float func) {
 
 void Cargo::SetInstalled(bool installed) {
     this->installed = installed;
+}
+
+void Cargo::SetIntegral(bool installed) {
+    this->integral = installed;
 }
 
 void Cargo::SetMaxFunctionality(float func) {
@@ -110,6 +115,9 @@ bool Cargo::GetInstalled() const {
     return this->installed;
 }
 
+bool Cargo::GetIntegral() const {
+    return this->integral;
+}
 
 const std::string &Cargo::GetCategory() const {
     return category;
@@ -165,3 +173,6 @@ bool Cargo::operator<(const Cargo &other) const {
 }
 
 
+void Cargo::Add(int quantity) {
+    this->quantity += quantity;
+}

@@ -69,7 +69,7 @@ then
 elif [ "$MY_OS_NAME" == "macos" ]
 then
     # setup the environment for Homebrew
-    BUILD_WITH_PYTHON_VERSION="3.12"
+    BUILD_WITH_PYTHON_VERSION="3.13"
 
     HOMEBREW_PREFIX="$(brew --prefix)"
     HOMEBREW_BIN="${HOMEBREW_PREFIX}/bin"

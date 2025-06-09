@@ -126,7 +126,7 @@ bool Track::HasWeaponLock() const {
 Track::Type::Value Track::IdentifyType() const {
     assert(target);
 
-    switch (target->isUnit()) {
+    switch (target->getUnitType()) {
         case Vega_UnitType::nebula:
             return Type::Nebula;
 

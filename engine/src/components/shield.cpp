@@ -98,6 +98,7 @@ void Shield::Load(std::string unit_key) {
                 facet_strength);
 
             CalculatePercentOperational();
+            installed = true;
             return;
         } catch (std::invalid_argument const& ex) {
             VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_strength_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_strength_string));
@@ -138,6 +139,7 @@ void Shield::Load(std::string unit_key) {
 
         facets = shield_values;
         CalculatePercentOperational();
+        installed = true;
         return;
     }
 
@@ -165,6 +167,7 @@ void Shield::Load(std::string unit_key) {
             number_of_facets = shield_count;
             facets = shield_values;
             CalculatePercentOperational();
+            installed = true;
             return;
         }
     } catch (std::exception const& ex) {
@@ -398,7 +401,7 @@ void Shield::FullyCharge() {
 
 void Shield::Decrease() {
     for(auto& facet : facets) {
-        facet--;
+        facet -= regeneration.MaxValue();
     }
 }
 

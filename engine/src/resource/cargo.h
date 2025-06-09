@@ -39,6 +39,7 @@ protected:
     float volume;
     bool mission;
     bool installed; // TODO: move down to ShipModule
+    bool integral;
     float functionality;
     float max_functionality;
 
@@ -46,13 +47,15 @@ protected:
 public:
     Cargo();
     Cargo(std::string name, std::string category, float price, int quantity, float mass, float volume,
-          float functionality = 1.0f, float max_functionality= 1.0f, bool mission = false, bool installed = false);
+          float functionality = 1.0f, float max_functionality= 1.0f, bool mission = false, 
+          bool installed = false, bool integral = false);
 
     float GetFunctionality();
     float GetMaxFunctionality();
     void SetDescription(const std::string &description);
     void SetFunctionality(float func);
     void SetInstalled(bool installed);
+    void SetIntegral(bool installed);
     void SetMaxFunctionality(float func);
     void SetMissionFlag(bool flag);
     void SetPrice(float price);
@@ -64,6 +67,7 @@ public:
 
     bool GetMissionFlag() const;
     bool GetInstalled() const;
+    bool GetIntegral() const;
     const std::string &GetCategory() const;
     const std::string &GetContent() const;
     const std::string &GetDescription() const;
@@ -76,6 +80,7 @@ public:
     float GetPrice() const;
     bool operator==(const Cargo &other) const;
     bool operator<(const Cargo &other) const;
+    void Add(int quantity);
 
     // Only for enslave
     // TODO: replace this hack

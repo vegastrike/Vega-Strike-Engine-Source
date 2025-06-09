@@ -28,10 +28,12 @@
 #include "configuration/configuration.h"
 
 FtlDrive::FtlDrive() :
-    Component(),
+    Component(0.0, 0.0, true, true),
     EnergyConsumer(nullptr, false, 0),
     enabled(false) {
     type = ComponentType::FtlDrive;
+    upgrade_name = "FTL Drive";
+    installed = true;
 }
 
 FtlDrive::FtlDrive(EnergyContainer *source):
@@ -39,6 +41,8 @@ FtlDrive::FtlDrive(EnergyContainer *source):
     EnergyConsumer(source, false),
     enabled(false) {
     type = ComponentType::FtlDrive;
+    upgrade_name = "FTL Drive";
+    installed = true;
 }
 
 FtlDrive::~FtlDrive()

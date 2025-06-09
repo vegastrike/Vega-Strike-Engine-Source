@@ -131,6 +131,9 @@ void EnergyContainer::Load(std::string unit_key) {
     }
 
     operational = level.AdjustedValue() / level.MaxValue();
+    if(level.MaxValue() > 0) {
+        installed = true;
+    }
 }
 
 void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const {
