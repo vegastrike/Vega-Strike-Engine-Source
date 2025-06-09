@@ -1,6 +1,13 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, Konstantinos Arvanitis,
- * pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
+ * common.h
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically:
+ * Konstantinos Arvanitis
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +24,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_TOOLS_COMMON_H
 #define VEGA_STRIKE_ENGINE_TOOLS_COMMON_H
