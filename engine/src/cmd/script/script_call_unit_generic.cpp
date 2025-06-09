@@ -950,7 +950,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
 
 extern BLENDFUNC parse_alpha(const char *);
 
-Unit *Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &destinations) {
+Unit *Mission::call_unit_launch(CreateFlightgroup *fg, Vega_UnitType type, const string &destinations) {
     int faction_nr = FactionUtil::GetFactionIndex(fg->fg->faction);
     Unit **units = new Unit *[fg->nr_ships];
     int u;
