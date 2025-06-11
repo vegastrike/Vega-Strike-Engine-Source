@@ -79,6 +79,8 @@ struct dirent
 // from main.cpp
 extern bool legacy_data_dir_mode;
 
+static std::shared_ptr<vega_config::Configuration> vega_config::config{};
+
 using VSFileSystem::VSVolumeType;
 using VSFileSystem::VSFSNone;
 using std::cout;
@@ -714,9 +716,9 @@ void LoadConfig(string subdir) {
 
     vs_config = createVegaConfig(config_file.c_str());
 
-    string universe_file = datadir + "/" \
- + vs_config->getVariable("data", "universe_path", "universe") + "/" \
- + vs_config->getVariable("general", "galaxy", "milky_way.xml");
+    std::string universe_file = datadir + "/" \
+            + configuration()->data.universe_path + "/" \
+            + configuration()->game_start.galaxy;
     VS_LOG(debug, (boost::format("Force galaxy to %1%") % universe_file));
     try {
         Galaxy galaxy = Galaxy(universe_file);
@@ -870,9 +872,10 @@ void InitPaths(string conf, string subdir) {
         SubDirectories.push_back(vec);
     }
 
-    boost::filesystem::path config_file_path{datadir + "/config.json"};
+    vega_config::config = configuration();
+    const boost::filesystem::path config_file_path{datadir + "/config.json"};
     configuration()->load_config(config_file_path);
-    boost::filesystem::path config_file_path2{homedir + "/config.json"};
+    const boost::filesystem::path config_file_path2{homedir + "/config.json"};
     configuration()->load_config(config_file_path2);
 
     LoadConfig(std::move(subdir));
