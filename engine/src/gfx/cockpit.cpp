@@ -2382,72 +2382,31 @@ void GameCockpit::SetupViewPort(bool clip) {
 
         //WARP-FOV link
         {
-            static float stable_lowarpref =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.loref", "1"));
-            static float stable_hiwarpref =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.hiref", "100000"));
-            static float stable_refexp =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.exp", "0.5"));
-            static bool stable_asymptotic =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "warp.fovlink.stable.asymptotic", "1"));
-            static float stable_offset_f =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.offset.front",
-                            "0"));
-            static float stable_offset_b =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.offset.back", "0"));
-            static float stable_offset_p =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.offset.perpendicular",
-                            "0"));
-            static float stable_multiplier_f =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.multiplier.front",
-                            "0.85"));
-            static float stable_multiplier_b =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.multiplier.back",
-                            "1.5"));
-            static float stable_multiplier_p =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.multiplier.perpendicular",
-                            "1.25"));
+            const float stable_lowarpref = configuration()->warp.fov_link.stable.low_ref; /* default: 1 */
+            float stable_hiwarpref = configuration()->warp.fov_link.stable.high_ref; /* default: 100000 */
+            const float stable_refexp = configuration()->warp.fov_link.stable.exp; /* default: 0.5 */
+            const bool stable_asymptotic = configuration()->warp.fov_link.stable.asymptotic; /* default: 1 */
+            const float stable_offset_f = configuration()->warp.fov_link.stable.offset.front; /* default: 0 */
+            const float stable_offset_b = configuration()->warp.fov_link.stable.offset.back; /* default: 0 */
+            const float stable_offset_p = configuration()->warp.fov_link.stable.offset.perpendicular; /* default: 0 */
+            const float stable_multiplier_f = configuration()->warp.fov_link.stable.multiplier.front; /* default: 0.85 */
+            const float stable_multiplier_b = configuration()->warp.fov_link.stable.multiplier.back; /* default: 1.5 */
+            const float stable_multiplier_p = configuration()->warp.fov_link.stable.multiplier.perpendicular; /* default: 1.25 */
 
-            static float shake_lowarpref =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.loref", "10000"));
-            static float shake_hiwarpref =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.hiref", "200000"));
-            static float shake_refexp =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.exp", "1.5"));
-            static bool shake_asymptotic =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "warp.fovlink.shake.asymptotic", "1"));
-            static float shake_speed =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.speed", "10"));
-            static float shake_offset_f =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.offset.front", "0"));
-            static float shake_offset_b =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.offset.back", "0"));
-            static float shake_offset_p =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.shake.offset.perpendicular",
-                            "0"));
-            static float shake_multiplier_f =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.shake.multiplier.front",
-                            "0"));
-            static float shake_multiplier_b =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.shake.multiplier.back",
-                            "0"));
-            static float shake_multiplier_p =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.shake.multiplier.perpendicular",
-                            "0"));
+            const float shake_lowarpref = configuration()->warp.fov_link.shake.low_ref; /* default: 10000 */
+            float shake_hiwarpref = configuration()->warp.fov_link.shake.high_ref; /* default: 200000 */
+            const float shake_refexp = configuration()->warp.fov_link.shake.exp; /* default: 1.5 */
+            const bool shake_asymptotic = configuration()->warp.fov_link.shake.asymptotic; /* default: 1 */
+            const float shake_speed = configuration()->warp.fov_link.shake.speed; /* default: 10 */
+            const float shake_offset_f = configuration()->warp.fov_link.shake.offset.front; /* default: 0 */
+            const float shake_offset_b = configuration()->warp.fov_link.shake.offset.back; /* default: 0 */
+            const float shake_offset_p = configuration()->warp.fov_link.shake.offset.perpendicular; /* default: 0 */
+            const float shake_multiplier_f = configuration()->warp.fov_link.shake.multiplier.front; /* default: 0 */
+            const float shake_multiplier_b = configuration()->warp.fov_link.shake.multiplier.back; /* default: 0 */
+            const float shake_multiplier_p = configuration()->warp.fov_link.shake.multiplier.perpendicular; /* default: 0 */
 
-            static float refkpsoverride =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.referencekps",
-                            "0"));                                       //0 means automatic
+            //0 means automatic
+            const float refkpsoverride = configuration()->warp.fov_link.reference_kps; /* default: 0 */
 
             static float theta = 0;
             theta += shake_speed * GetElapsedTime();
@@ -2509,8 +2468,7 @@ void GameCockpit::SetupViewPort(bool clip) {
             sh_offs *= sh_warpfieldstrength * costheta;
             st_mult = (1 - st_warpfieldstrength) + st_mult * st_warpfieldstrength;
             sh_mult *= sh_warpfieldstrength * costheta;
-            static float fov_smoothing =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.smoothing", ".4"));
+            const float fov_smoothing = configuration()->warp.fov_link.smoothing;
             float fov_smoot = std::pow(double(fov_smoothing), GetElapsedTime());
             smooth_fov =
                     min(170.0,

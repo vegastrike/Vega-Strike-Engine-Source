@@ -373,8 +373,7 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
         Matrix rollMatrix;
         const float velstreakscale = configuration()->graphics.velocity_star_streak_scale;
         const float minstreak = configuration()->graphics.velocity_star_streak_min;
-        static float fov_smoothing =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.smoothing", ".4"));
+        const float fov_smoothing = configuration()->warp.fov_link.smoothing;
         float fov_smoot = std::pow(double(fov_smoothing), GetElapsedTime());
         Vector vel(-velocity * velstreakscale);
         float speed = vel.Magnitude();
