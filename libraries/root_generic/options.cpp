@@ -85,132 +85,120 @@ void vs_options::init() {
 
 
     /* Graphics Options */
-    jumpgate = vs_config->getVariable("graphics", "jumpgate", "warp.ani");
-    jumpanimationshrink = XMLSupport::parse_float(vs_config->getVariable("graphics", "jumpanimationshrink", ".95"));
-    jumpgatesize = XMLSupport::parse_float(vs_config->getVariable("graphics", "jumpgatesize", "1.75"));
-    camera_pan_speed = XMLSupport::parse_float(vs_config->getVariable("graphics", "camera_pan_speed", "0.0001"));
-    background = XMLSupport::parse_bool(vs_config->getVariable("graphics", "background", "true"));
-    cockpit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "cockpit", "true"));
-    disabled_cockpit_allowed =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "disabled_cockpit_allowed", "true"));
-    splash_screen = vs_config->getVariable("graphics", "splash_screen", "vega_splash.ani");
-    vbo = XMLSupport::parse_bool(vs_config->getVariable("graphics", "vbo", "false"));
-    num_near_stars = XMLSupport::parse_int(vs_config->getVariable("graphics", "num_near_stars", "1000"));
-    num_far_stars = XMLSupport::parse_int(vs_config->getVariable("graphics", "num_far_stars", "2000"));
-    star_spreading = XMLSupport::parse_float(vs_config->getVariable("graphics", "star_spreading", "30000"));
-    usePlanetAtmosphere = XMLSupport::parse_bool(vs_config->getVariable("graphics", "usePlanetAtmosphere", "true"));
-    usePlanetFog = XMLSupport::parse_bool(vs_config->getVariable("graphics", "usePlanetFog", "true"));
-    reflectivity = XMLSupport::parse_float(vs_config->getVariable("graphics", "reflectivity", ".2"));
-    hardware_cursor = XMLSupport::parse_bool(vs_config->getVariable("physics", "hardware_cursor", "false"));
-    always_make_smooth_cam = XMLSupport::parse_bool(vs_config->getVariable("graphics",
-            "always_make_smooth_cam",
-            "false"));     //Not used yet
-    precull_dist = XMLSupport::parse_float(vs_config->getVariable("graphics", "precull_dist", "500000000"));
-    draw_near_stars_in_front_of_planets =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_near_stars_in_front_of_planets", "false"));
-    starblend = XMLSupport::parse_bool(vs_config->getVariable("graphics", "starblend", "true"));
-    sparkleenginesizerelativetoship =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "sparkleenginesizerelativetoship", "0.1875"));
-    sparkleabsolutespeed = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "sparkleabsolutespeed", ".02"));
-    engine_radii_scale = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "engine_radii_scale", ".4"));
-    engine_length_scale = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "engine_length_scale", "1.25"));
-    halos_by_velocity = XMLSupport::parse_bool(vs_config->getVariable("graphics", "halos_by_velocity", "false"));
-    percent_afterburner_color_change =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "percent_afterburner_color_change", ".5"));
-    percent_halo_fade_in = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "percent_halo_fade_in", ".5"));
-    afterburner_color_red =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "afterburner_color_red", "1.0"));
-    afterburner_color_green =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "afterburner_color_green", "0.0"));
-    afterburner_color_blue =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "afterburner_color_blue", "0.0"));
-    engine_color_red = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "engine_color_red", "1.0"));
-    engine_color_green = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "engine_color_green", "1.0"));
-    engine_color_blue = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "engine_color_blue", "1.0"));
-    halosparklerate = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "halosparklerate", "20"));
-    halosparklescale = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "halosparklescale", "6"));
-    halosparklespeed = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "halosparklespeed", "0.5"));
-    max_cubemap_size = XMLSupport::parse_int(vs_config->getVariable("graphics", "max_cubemap_size", "1024"));
-    default_boot_message = vs_config->getVariable("graphics", "default_boot_message", "");
-    initial_boot_message = vs_config->getVariable("graphics", "initial_boot_message", "Loading...");
-    splash_audio = vs_config->getVariable("graphics", "splash_audio", "");
-    main_menu = XMLSupport::parse_bool(vs_config->getVariable("graphics", "main_menu", "false"));
-    startup_cockpit_view = vs_config->getVariable("graphics", "startup_cockpit_view", "front");
-    detail_texture_trilinear =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "detail_texture_trilinear", "true"));
-    lightcutoff = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "lightcutoff", ".06"));
-    lightoptimalintensity =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "lightoptimalintensity", ".06"));
-    lightsaturation = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "lightsaturation", ".95"));
-    numlights = XMLSupport::parse_int(vs_config->getVariable("graphics", "numlights", "4"));
-    separatespecularcolor =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "separatespecularcolor", "false"));
-    LockVertexArrays = XMLSupport::parse_bool(vs_config->getVariable("graphics", "LockVertexArrays", "true"));
-    fogdetail = XMLSupport::parse_int(vs_config->getVariable("graphics", "fogdetail", "0"));
-    ModelDetail = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "ModelDetail", "1"));
-    UseTextures = XMLSupport::parse_bool(vs_config->getVariable("graphics", "UseTextures", "true"));
-    UseShipTextures = XMLSupport::parse_bool(vs_config->getVariable("graphics", "UseShipTextures", "false"));
-    UsePlanetTextures = XMLSupport::parse_bool(vs_config->getVariable("graphics", "UsePlanetTextures", "false"));
-    UseLogos = XMLSupport::parse_bool(vs_config->getVariable("graphics", "UseLogos", "true"));
-    UseVSSprites = XMLSupport::parse_bool(vs_config->getVariable("graphics", "UseVSSprites", "true"));
-    UseAnimations = XMLSupport::parse_bool(vs_config->getVariable("graphics", "UseAnimations", "true"));
-    UseVideos = XMLSupport::parse_bool(vs_config->getVariable("graphics", "UseVideos", "true"));
-    use_wireframe = XMLSupport::parse_bool(vs_config->getVariable("graphics", "use_wireframe", "false"));
-    max_texture_dimension = XMLSupport::parse_int(vs_config->getVariable("graphics", "max_texture_dimension", "65536"));
-    max_movie_dimension = XMLSupport::parse_int(vs_config->getVariable("graphics", "max_movie_dimension", "65536"));
-    rect_textures = XMLSupport::parse_bool(vs_config->getVariable("graphics", "rect_textures", "false"));
-    pot_video_textures = XMLSupport::parse_bool(vs_config->getVariable("graphics", "pot_video_textures", "false"));
-    techniquesSubPath = vs_config->getVariable("graphics", "technique_set", ".");
-    SmoothShade = XMLSupport::parse_bool(vs_config->getVariable("graphics", "SmoothShade", "true"));
-    mipmapdetail = XMLSupport::parse_int(vs_config->getVariable("graphics", "mipmapdetail", "2"));
-    texture_compression = XMLSupport::parse_int(vs_config->getVariable("graphics", "texture_compression", "0"));
-    reflection = XMLSupport::parse_bool(vs_config->getVariable("graphics", "reflection", "true"));
-    displaylists = XMLSupport::parse_bool(vs_config->getVariable("graphics", "displaylists", "false"));
-    s3tc = XMLSupport::parse_bool(vs_config->getVariable("graphics", "s3tc", "true"));
-    ext_clamp_to_edge = XMLSupport::parse_bool(vs_config->getVariable("graphics", "ext_clamp_to_edge", "true"));
-    ext_clamp_to_border = XMLSupport::parse_bool(vs_config->getVariable("graphics", "ext_clamp_to_border", "true"));
-    ClearOnStartup = XMLSupport::parse_bool(vs_config->getVariable("graphics", "ClearOnStartup", "true"));
-    circle_accuracy = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "circle_accuracy", "0.1"));
-    rgb_pixel_format = vs_config->getVariable("graphics", "rgb_pixel_format", "undefined");
-    gl_accelerated_visual = XMLSupport::parse_bool(vs_config->getVariable("graphics", "gl_accelerated_visual", "true"));
-    z_pixel_format = XMLSupport::parse_int(vs_config->getVariable("graphics", "z_pixel_format", "24"));
+    jumpgate = configuration()->graphics.jump_gate;
+    jumpanimationshrink = configuration()->graphics.jump_animation_shrink;
+    jumpgatesize = configuration()->graphics.jump_gate_size;
+    camera_pan_speed = configuration()->graphics.camera_pan_speed;
+    background = configuration()->graphics.background;
+    cockpit = configuration()->graphics.cockpit;
+    disabled_cockpit_allowed = configuration()->graphics.disabled_cockpit_allowed;
+    splash_screen = configuration()->graphics.splash_screen;
+    vbo = configuration()->graphics.vbo;
+    num_near_stars = configuration()->graphics.num_near_stars;
+    num_far_stars = configuration()->graphics.num_far_stars;
+    star_spreading = configuration()->graphics.star_spreading;
+    usePlanetAtmosphere = configuration()->graphics.use_planet_atmosphere;
+    usePlanetFog = configuration()->graphics.use_planet_fog;
+    reflectivity = configuration()->graphics.reflectivity;
+    hardware_cursor = configuration()->physics.hardware_cursor;
+    always_make_smooth_cam =  configuration()->graphics.always_make_smooth_cam;     //Not used yet
+    precull_dist = configuration()->graphics.precull_dist;
+    draw_near_stars_in_front_of_planets = configuration()->graphics.draw_near_stars_in_front_of_planets;
+    starblend = configuration()->graphics.star_blend;
+    sparkleenginesizerelativetoship = configuration()->graphics.sparkle_engine_size_relative_to_ship;
+    sparkleabsolutespeed = configuration()->graphics.sparkle_absolute_speed;
+    engine_radii_scale = configuration()->graphics.engine_radii_scale;
+    engine_length_scale = configuration()->graphics.engine_length_scale;
+    halos_by_velocity = configuration()->graphics.halos_by_velocity;
+    percent_afterburner_color_change = configuration()->graphics.percent_afterburner_color_change;
+    percent_halo_fade_in = configuration()->graphics.percent_halo_fade_in;
+    afterburner_color_red = configuration()->graphics.afterburner_color_red;
+    afterburner_color_green = configuration()->graphics.afterburner_color_green;
+    afterburner_color_blue = configuration()->graphics.afterburner_color_blue;
+    engine_color_red = configuration()->graphics.engine_color_red;
+    engine_color_green = configuration()->graphics.engine_color_green;
+    engine_color_blue = configuration()->graphics.engine_color_blue;
+    halosparklerate = configuration()->graphics.halo_sparkle_rate;
+    halosparklescale = configuration()->graphics.halo_sparkle_scale;
+    halosparklespeed = configuration()->graphics.halo_sparkle_speed;
+    max_cubemap_size = configuration()->graphics.max_cubemap_size;
+    default_boot_message = configuration()->graphics.default_boot_message;
+    initial_boot_message = configuration()->graphics.initial_boot_message;
+    splash_audio = configuration()->graphics.splash_audio;
+    main_menu = configuration()->graphics.main_menu;
+    startup_cockpit_view = configuration()->graphics.startup_cockpit_view;
+    detail_texture_trilinear = configuration()->graphics.detail_texture_trilinear;
+    lightcutoff = configuration()->graphics.light_cutoff;
+    lightoptimalintensity = configuration()->graphics.light_optimal_intensity;
+    lightsaturation = configuration()->graphics.light_saturation;
+    numlights = configuration()->graphics.num_lights;
+    separate_specular_color = configuration()->graphics.separate_specular_color;
+    LockVertexArrays = configuration()->graphics.lock_vertex_arrays;
+    fogdetail = configuration()->graphics.fog_detail;
+    ModelDetail = configuration()->graphics.model_detail;
+    UseTextures = configuration()->graphics.use_textures;
+    UseShipTextures = configuration()->graphics.use_ship_textures;
+    UsePlanetTextures = configuration()->graphics.use_planet_textures;
+    UseLogos = configuration()->graphics.use_logos;
+    UseVSSprites = configuration()->graphics.use_vs_sprites;
+    UseAnimations = configuration()->graphics.use_animations;
+    UseVideos = configuration()->graphics.use_videos;
+    use_wireframe = configuration()->graphics.use_wireframe;
+    max_texture_dimension = configuration()->graphics.max_texture_dimension;
+    max_movie_dimension = configuration()->graphics.max_movie_dimension;
+    rect_textures = configuration()->graphics.rect_textures;
+    pot_video_textures = configuration()->graphics.pot_video_textures;
+    techniquesSubPath = configuration()->graphics.technique_set;
+    SmoothShade = configuration()->graphics.smooth_shade;
+    mipmapdetail = configuration()->graphics.mipmap_detail;
+    texture_compression = configuration()->graphics.texture_compression;
+    reflection = configuration()->graphics.reflection;
+    displaylists = configuration()->graphics.displaylists;
+    s3tc = configuration()->graphics.s3tc;
+    ext_clamp_to_edge = configuration()->graphics.ext_clamp_to_edge;
+    ext_clamp_to_border = configuration()->graphics.ext_clamp_to_border;
+    ClearOnStartup = configuration()->graphics.clear_on_startup;
+    circle_accuracy = configuration()->graphics.circle_accuracy;
+    rgb_pixel_format = configuration()->graphics.rgb_pixel_format;
+    gl_accelerated_visual = configuration()->graphics.gl_accelerated_visual;
+    z_pixel_format = configuration()->graphics.z_pixel_format;
     x_resolution = configuration()->graphics.resolution_x;
     y_resolution = configuration()->graphics.resolution_y;
-    fullscreen = XMLSupport::parse_bool(vs_config->getVariable("graphics", "fullscreen", "false"));
-    colordepth = XMLSupport::parse_int(vs_config->getVariable("graphics", "colordepth", "32"));
-    glut_stencil = XMLSupport::parse_bool(vs_config->getVariable("graphics", "glut_stencil", "true"));
+    fullscreen = configuration()->graphics.full_screen;
+    colordepth = configuration()->graphics.color_depth;
+    glut_stencil = configuration()->graphics.glut_stencil;
     // The Following makes no sense.   Why differentiate mac and pc shaders if they have unique names anyway?
-    mac_shader_name = vs_config->getVariable("graphics", "mac_shader_name", "mac");
-    shader_name = vs_config->getVariable("graphics", "shader_name", "default");
+    mac_shader_name = configuration()->graphics.mac_shader_name;
+    shader_name = configuration()->graphics.shader_name;
     framerate_changes_shader =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "framerate_changes_shader", "false"));
-    draw_weapons = XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_weapons", "false"));
-    sparklerate = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "sparklerate", "5.0"));
-    only_stretch_in_warp = XMLSupport::parse_bool(vs_config->getVariable("graphics", "only_stretch_in_warp", "true"));
-    warp_stretch_cutoff = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "warp_stretch_cutoff", "50000"));
+            configuration()->graphics.framerate_changes_shader;
+    draw_weapons = configuration()->graphics.draw_weapons;
+    sparklerate = configuration()->graphics.sparkle_rate;
+    only_stretch_in_warp = configuration()->graphics.only_stretch_in_warp;
+    warp_stretch_cutoff = configuration()->graphics.warp_stretch_cutoff;
     warp_stretch_region0_max =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "warp_stretch_region0_max", "1"));
-    warp_stretch_max = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "warp_stretch_max", "4"));
+            configuration()->graphics.warp_stretch_region0_max;
+    warp_stretch_max = configuration()->graphics.warp_stretch_max;
     warp_stretch_max_speed =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "warp_stretch_max_speed", "1000000"));
+            configuration()->graphics.warp_stretch_max_speed;
     warp_stretch_max_region0_speed =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "warp_stretch_max_region0_speed", "100000"));
-    weapon_gamma = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "weapon_gamma", "1.35"));
-    split_dead_subunits = XMLSupport::parse_bool(vs_config->getVariable("graphics", "split_dead_subunits", "true"));
-    explosionforce = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "explosionforce", ".5"));
-    explosiontorque = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "explosiontorque", ".001"));
-    explosion_animation = vs_config->getVariable("graphics", "explosion_animation", "explosion_orange.ani");
-    explosion_face_player = XMLSupport::parse_bool(vs_config->getVariable("graphics", "explosion_face_player", "true"));
-    percent_shockwave = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "percent_shockwave", ".5"));
-    shockwave_growth = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "shockwave_growth", "1.05"));
-    shockwave_animation = vs_config->getVariable("graphics", "shockwave_animation", "explosion_wave.ani");
-    bolt_offset = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "bolt_offset", "-.2"));
-    StretchBolts = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "StretchBolts", "0"));
-    bolt_pixel_size = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "bolt_pixel_size", ".5"));
+            configuration()->graphics.warp_stretch_max_region0_speed;
+    weapon_gamma = configuration()->graphics.weapon_gamma;
+    split_dead_subunits = configuration()->graphics.split_dead_subunits;
+    explosionforce = configuration()->graphics.explosion_force;
+    explosiontorque = configuration()->graphics.explosion_torque;
+    explosion_animation = configuration()->graphics.explosion_animation;
+    explosion_face_player = configuration()->graphics.explosion_face_player;
+    percent_shockwave = configuration()->graphics.percent_shockwave;
+    shockwave_growth = configuration()->graphics.shockwave_growth;
+    shockwave_animation = configuration()->graphics.shockwave_animation;
+    bolt_offset = configuration()->graphics.bolt_offset;
+    StretchBolts = configuration()->graphics.stretch_bolts;
+    bolt_pixel_size = configuration()->graphics.bolt_pixel_size;
 
     /* Graphics/Mesh Options */
-    smooth_lines = XMLSupport::parse_bool(vs_config->getVariable("graphics/mesh", "smooth_lines", "true"));
-    smooth_points = XMLSupport::parse_bool(vs_config->getVariable("graphics/mesh", "smooth_points", "true"));
+    smooth_lines = configuration()->graphics.smooth_lines;
+    smooth_points = configuration()->graphics.smooth_points;
 
 
     /* Splash Options */
@@ -285,8 +273,7 @@ void vs_options::init() {
     debris_mass = XMLSupport::parse_floatf(vs_config->getVariable("physics", "debris_mass", ".00001"));
     explosion_damage_center =
             XMLSupport::parse_floatf(vs_config->getVariable("physics", "explosion_damage_center", "1"));
-    explosion_damage_edge =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "explosion_damage_edge", ".125"));
+    explosion_damage_edge = configuration()->physics.explosion_damage_edge;
     eject_cargo_on_blowup = XMLSupport::parse_int(vs_config->getVariable("physics", "eject_cargo_on_blowup", "0"));
 
     /* Data Options */

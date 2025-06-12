@@ -94,9 +94,8 @@ static bool beamCheckCollision(QVector pos, float len, const Collidable &un) {
 
 void Beam::RecalculateVertices(const Matrix &trans) {
     GFXColorVertex *beam = (vlist->BeginMutate(0))->colors;
-    static float fadelocation = XMLSupport::parse_float(vs_config->getVariable("graphics", "BeamFadeoutLength", ".8"));
-    static float hitfadelocation =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "BeamFadeoutHitLength", ".95"));
+    const float fadelocation = configuration()->graphics.beam_fadeout_length;
+    const float hitfadelocation = configuration()->graphics.beam_fadeout_hit_length;
     static float scoopangle =
             //In radians - the /2 is because of the way in which we check against the cone.
             XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.scoop_fov", "0.5")) / 2;

@@ -193,7 +193,7 @@ bool Cockpit::unitInAutoRegion(Unit *un) {
 }
 
 static float getInitialZoomFactor() {
-    static float inizoom = XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+    const float inizoom = configuration()->graphics.initial_zoom_factor;
     return inizoom;
 }
 
@@ -204,54 +204,18 @@ Cockpit::Cockpit(const char *file, Unit *parent, const std::string &pilot_name)
         viewport_offset(0),
         zoomfactor(getInitialZoomFactor()),
         savegame(new SaveGame(pilot_name)) {
-    //static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
-    //int i;
     partial_number_of_attackers = -1;
     number_of_attackers = 0;
     fg = NULL;
     jumpok = 0;
     TimeOfLastCollision = -200;
-    /*
-     *  for (i=0;i<headlag;i++) {
-     *  headtrans.push_back (Matrix());
-     *  Identity(headtrans.back());
-     *  }
-     *  for (i=0;i<UnitImages::NUMGAUGES;i++) {
-     *  gauges[i]=NULL;
-     *  }
-     */
     activeStarSystem = NULL;
     InitStatic();
     //mesh=NULL;
     ejecting = false;
     currentcamera = 0;
     going_to_dock_screen = false;
-    //Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
     RestoreGodliness();
-
-    /*
-     *  draw_all_boxes=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAllTargetBoxes","false"));
-     *  draw_line_to_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTarget","false"));
-     *  draw_line_to_targets_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTargetsTarget","false"));
-     *  draw_line_to_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToITTS","false"));
-     *  always_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAlwaysITTS","false"));
-     *  radar_type=vs_config->getVariable("graphics","hud","radarType","WC");
-     *
-     *  friendly=GFXColor(-1,-1,-1,-1);
-     *  enemy=GFXColor(-1,-1,-1,-1);
-     *  neutral=GFXColor(-1,-1,-1,-1);
-     *  targeted=GFXColor(-1,-1,-1,-1);
-     *  targetting=GFXColor(-1,-1,-1,-1);
-     *  planet=GFXColor(-1,-1,-1,-1);
-     *  if (friendly.r==-1) {
-     *  vs_config->getColor ("enemy",&enemy.r);
-     *  vs_config->getColor ("friend",&friendly.r);
-     *  vs_config->getColor ("neutral",&neutral.r);
-     *  vs_config->getColor("target",&targeted.r);
-     *  vs_config->getColor("targetting_ship",&targetting.r);
-     *  vs_config->getColor("planet",&planet.r);
-     *  }
-     */
 
     Init(file);
 }
@@ -331,8 +295,7 @@ int Cockpit::Autopilot(Unit *target) {
                  *                                                     _Universe->AccessCamera()->R,
                  *                                                     averagetime*autospeed/(numave));
                  */
-                static float initialzoom =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+                const float initialzoom = configuration()->graphics.initial_zoom_factor;
                 zoomfactor = initialzoom;
                 static float autotime = XMLSupport::parse_float(vs_config->getVariable("physics",
                         "autotime",
@@ -598,8 +561,7 @@ bool Cockpit::Update() {
         if (switchunit[_Universe->CurrentCockpit()]) {
             parentturret.SetUnit(NULL);
 
-            static float initialzoom =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+            const float initialzoom = configuration()->graphics.initial_zoom_factor;
             zoomfactor = initialzoom;
             static int index = 0;
             switchunit[_Universe->CurrentCockpit()] = 0;
@@ -702,8 +664,7 @@ bool Cockpit::Update() {
     if (!par) {
         if (respawnunit.size() > _Universe->CurrentCockpit()) {
             if (respawnunit[_Universe->CurrentCockpit()]) {
-                static float initialzoom =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+                const float initialzoom = configuration()->graphics.initial_zoom_factor;
                 zoomfactor = initialzoom;
 
                 parentturret.SetUnit(NULL);

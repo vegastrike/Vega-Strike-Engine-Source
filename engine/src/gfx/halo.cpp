@@ -68,10 +68,8 @@ void Halo::Draw(const Transformation &quat, const Matrix &m, float alpha) {
     pos = position.Transform(m);
     float wid = sizex;
     float hei = sizey;
-    static bool far_shine =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_star_glow_halo",
-                    "false")) || XMLSupport::parse_bool(
-                    vs_config->getVariable("graphics", "HaloFarDraw", "false"));
+    const bool far_shine =
+            configuration()->graphics.draw_star_glow_halo || configuration()->graphics.halo_far_draw;
     CalculateOrientation(pos, p, q, r, wid, hei, HaloOffset, far_shine, NULL);
     p = p * wid;
     r = -r;

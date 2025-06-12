@@ -137,8 +137,8 @@ static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float
 #define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
 
 static void SetupViewport() {
-    static int base_max_width = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_width", "0"));
-    static int base_max_height = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_height", "0"));
+    const int base_max_width = configuration()->graphics.bases.max_width;
+    const int base_max_height = configuration()->graphics.bases.max_height;
     if (base_max_width && base_max_height) {
         int xrez = mymin(configuration()->graphics.resolution_x, base_max_width);
         int yrez = mymin(configuration()->graphics.resolution_y, base_max_height);
@@ -174,7 +174,7 @@ void BaseInterface::Room::BaseObj::Draw(BaseInterface *base) {
 }
 
 static FILTER BlurBases() {
-    static bool blur_bases = XMLSupport::parse_bool(vs_config->getVariable("graphics", "blur_bases", "true"));
+    const bool blur_bases = configuration()->graphics.bases.blur_bases;
     return blur_bases ? BILINEAR : NEAREST;
 }
 
@@ -252,8 +252,7 @@ void BaseInterface::Room::BaseVSMovie::SetTime(float t) {
 }
 
 void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base) {
-    static float AlphaTestingCutoff =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "base_alpha_test_cutoff", "0"));
+    const float AlphaTestingCutoff = configuration()->graphics.bases.alpha_test_cutoff;
     GFXAlphaTest(GREATER, AlphaTestingCutoff);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXEnable(TEXTURE0);
@@ -385,29 +384,20 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
     //<var name="base_locationmarker_textcolor_g" value="1.0"/>
     //<var name="base_locationmarker_textcolor_b" value="1.0"/>
     //<var name="base_drawlocationborders" value="false"/>
-    static bool enable_markers =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "base_enable_locationmarkers", "false"));
-    static bool
-            draw_text = XMLSupport::parse_bool(vs_config->getVariable("graphics", "base_draw_locationtext", "false"));
-    static bool draw_always =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "base_locationmarker_drawalways", "false"));
+    const bool enable_markers = configuration()->graphics.bases.enable_location_markers;
+    const bool draw_text = configuration()->graphics.bases.draw_location_text;
+    const bool draw_always = configuration()->graphics.bases.location_marker_draw_always;
     static float y_lower =
-            -0.9;           //shows the offset on the lower edge of the screen (for the textline there) -> Should be defined globally somewhere
-    static float base_text_background_alpha =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "base_text_background_alpha", "0.0625"));
+            -0.9;           //shows the offset on the lower edge of the screen (for the textline there) -> TODO: Should be defined globally somewhere
+    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha;
     if (enable_markers) {
         float x, y, text_wid, text_hei;
         //get offset from config;
-        static float text_offset_x =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textoffset_x", "0"));
-        static float text_offset_y =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textoffset_y", "0"));
-        static float text_color_r =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textcolor_r", "1"));
-        static float text_color_g =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textcolor_g", "1"));
-        static float text_color_b =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textcolor_b", "1"));
+        const float text_offset_x = configuration()->graphics.bases.location_marker_text_offset_x;
+        const float text_offset_y = configuration()->graphics.bases.location_marker_text_offset_y;
+        const float text_color_r = configuration()->graphics.bases.location_marker_text_color_r;
+        const float text_color_g = configuration()->graphics.bases.location_marker_text_color_g;
+        const float text_color_b = configuration()->graphics.bases.location_marker_text_color_b;
         for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
             if (links[i]) {
                 if ((links[i]->alpha < 1) || (draw_always)) {
@@ -418,9 +408,8 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                     y = (links[i]->y + (links[i]->hei / 2));                         //get the center of the location
 
                     /* draw marker */
-                    static string
-                            spritefile_marker = vs_config->getVariable("graphics", "base_locationmarker_sprite", "");
-                    if (spritefile_marker.length() && links[i]->text.find("XXX") != 0) {
+                    const std::string spritefile_marker = configuration()->graphics.bases.location_marker_sprite;
+                    if (!spritefile_marker.empty() && links[i]->text.find("XXX") != 0) {
                         static VSSprite *spr_marker = new VSSprite(spritefile_marker.c_str());
                         float wid, hei;
                         spr_marker->GetSize(wid, hei);
@@ -487,17 +476,13 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
         //for i
     }     //enable_markers
 
-    static bool draw_borders =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "base_drawlocationborders", "false"));
-    static bool debug_markers =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "base_enable_debugmarkers", "false"));
+    const bool draw_borders = configuration()->graphics.bases.draw_location_borders;
+    const bool debug_markers = configuration()->graphics.bases.enable_debug_markers;
     if (draw_borders || debug_markers) {
         float x, y, text_wid, text_hei;
         //get offset from config;
-        static float text_offset_x =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textoffset_x", "0"));
-        static float text_offset_y =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textoffset_y", "0"));
+        const float text_offset_x = configuration()->graphics.bases.location_marker_text_offset_x;
+        const float text_offset_y = configuration()->graphics.bases.location_marker_text_offset_y;
         for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
             if (links[i]) {
                 //Debug marker
@@ -649,7 +634,7 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
         return;
     }
     curtime += GetElapsedTime() / getTimeCompression();
-    static float delay = XMLSupport::parse_float(vs_config->getVariable("graphics", "text_delay", ".05"));
+    const float delay = configuration()->graphics.text_delay;
     if ((std::find(active_talks.begin(), active_talks.end(),
             this) == active_talks.end())
             || (curchar >= message.size() && curtime > ((delay * message.size()) + 2))) {
@@ -669,7 +654,7 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
         return;         //do not do ANYTHING with 'this' after the previous statement...
     }
     if (curchar < message.size()) {
-        static float inbetween = XMLSupport::parse_float(vs_config->getVariable("graphics", "text_speed", ".025"));
+        const float inbetween = configuration()->graphics.text_speed;
         if (curtime > inbetween) {
             base->othtext.SetText(message.substr(0, ++curchar));
             curtime = 0;
@@ -897,10 +882,8 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
         curtext.col = GFXColor(inactivecolor[0], inactivecolor[1], inactivecolor[2], inactivecolor[3]);
         mousePointerStyle = MOUSE_POINTER_NORMAL;
     }
-    static bool draw_always =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "base_locationmarker_drawalways", "false"));
-    static float defined_distance =
-            fabs(XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_distance", "0.5")));
+    const bool draw_always = configuration()->graphics.bases.location_marker_draw_always;
+    const float defined_distance = configuration()->graphics.bases.location_marker_distance;
     if (!draw_always) {
         float cx, cy;
         float dist_cur2link;
@@ -1512,8 +1495,7 @@ void BaseInterface::Draw() {
 
     float x, y;
     glViewport(0, 0, configuration()->graphics.resolution_x, configuration()->graphics.resolution_y);
-    static float base_text_background_alpha =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "base_text_background_alpha", "0.0625"));
+    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha;
 
     curtext.GetCharSize(x, y);
     curtext.SetPos(-.99, -1 + (y * 1.5));
