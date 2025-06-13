@@ -1484,8 +1484,6 @@ namespace vega_config {
     } weapons;
 
     };
-
-    extern std::shared_ptr<Configuration> config;
 }
 
 extern std::shared_ptr<vega_config::Configuration> configuration();

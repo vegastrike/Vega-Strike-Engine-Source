@@ -79,8 +79,6 @@ struct dirent
 // from main.cpp
 extern bool legacy_data_dir_mode;
 
-static std::shared_ptr<vega_config::Configuration> vega_config::config{};
-
 using VSFileSystem::VSVolumeType;
 using VSFileSystem::VSFSNone;
 using std::cout;
