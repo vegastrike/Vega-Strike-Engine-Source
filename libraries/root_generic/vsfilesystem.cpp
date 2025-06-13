@@ -870,7 +870,6 @@ void InitPaths(string conf, string subdir) {
         SubDirectories.push_back(vec);
     }
 
-    vega_config::config = configuration();
     const boost::filesystem::path config_file_path{datadir + "/config.json"};
     configuration()->load_config(config_file_path);
     const boost::filesystem::path config_file_path2{homedir + "/config.json"};
