@@ -493,7 +493,8 @@
           "type": "FILEPATH"
         },
         "VCPKG_TARGET_TRIPLET": "x64-windows-win10",
-        "VCPKG_HOST_TRIPLET": "x64-windows-win10"
+        "VCPKG_HOST_TRIPLET": "x64-windows-win10",
+        "VCPKG_INSTALL_OPTIONS": "--x-buildtrees-root=C:\\Projects\\vbuild"
       },
       "debug": {
         "output": true,
