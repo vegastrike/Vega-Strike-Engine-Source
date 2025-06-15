@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -65,14 +64,12 @@ Halo::~Halo() {
 void Halo::Draw(const Transformation &quat, const Matrix &m, float alpha) {
     Vector p, q, r;
     QVector pos;
-    static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable("graphics", "HaloOffset", ".1"));
+    const double HaloOffset = configuration()->graphics.halo_offset;
     pos = position.Transform(m);
     float wid = sizex;
     float hei = sizey;
-    static bool far_shine =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_star_glow_halo",
-                    "false")) || XMLSupport::parse_bool(
-                    vs_config->getVariable("graphics", "HaloFarDraw", "false"));
+    const bool far_shine =
+            configuration()->graphics.draw_star_glow_halo || configuration()->graphics.halo_far_draw;
     CalculateOrientation(pos, p, q, r, wid, hei, HaloOffset, far_shine, NULL);
     p = p * wid;
     r = -r;

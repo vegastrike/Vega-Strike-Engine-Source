@@ -50,8 +50,8 @@ static bool isInside() {
 }
 
 const std::string &getStringFont(bool &changed, bool force_inside = false, bool whatinside = false) {
-    static std::string whichfont = vs_config->getVariable("graphics", "font", "helvetica12");
-    static std::string whichdockedfont = vs_config->getVariable("graphics", "basefont", "helvetica12");
+    const std::string whichfont = configuration()->graphics.font;
+    const std::string whichdockedfont = configuration()->graphics.bases.font;
     bool inside = isInside();
     if (force_inside) {
         inside = whatinside;
@@ -67,8 +67,8 @@ const std::string &getStringFont(bool &changed, bool force_inside = false, bool 
 }
 
 const std::string &getStringFontForHeight(bool &changed) {
-    static std::string whichfont = vs_config->getVariable("graphics", "font", "helvetica12");
-    static std::string whichdockedfont = vs_config->getVariable("graphics", "basefont", "helvetica12");
+    const std::string whichfont = configuration()->graphics.font;
+    const std::string whichdockedfont = configuration()->graphics.bases.font;
     bool inside = isInside();
     static bool lastinside = inside;
     if (lastinside != inside) {
@@ -154,9 +154,8 @@ static unsigned int *CreateLists() {
     static unsigned int lists[256] = {0};
     void *fnt0 = getFont(true, false);
     void *fnt1 = getFont(true, true);
-    static bool use_bit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font", "false"));
-    static bool use_display_lists =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "text_display_lists", "true"));
+    const bool use_bit = configuration()->graphics.high_quality_font;
+    const bool use_display_lists = configuration()->graphics.text_display_lists;
     if (use_display_lists) {
         for (unsigned int i = 32; i < 256; i++) {
             if ((i < 128) || (i >= 128 + 32)) {
@@ -209,7 +208,7 @@ void DrawSquare(float left, float right, float top, float bot) {
 }
 
 float charWidth(char c, float myFontMetrics) {
-    static bool use_bit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font", "false"));
+    const bool use_bit = configuration()->graphics.high_quality_font;
     void *fnt = use_bit ? getFont() : GLUT_STROKE_ROMAN;
     float charwid = use_bit ? glutBitmapWidth(fnt, c) : glutStrokeWidth(fnt, c);
     float dubyawid = use_bit ? glutBitmapWidth(fnt, 'W') : glutStrokeWidth(fnt, 'W');
@@ -241,10 +240,9 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
     static unsigned int *display_lists = CreateLists();
     //some stuff to draw the text stuff
     string::const_iterator text_it = newText.begin();
-    static bool use_bit = force_highquality
-            || XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font", "false"));
-    static float font_point = XMLSupport::parse_float(vs_config->getVariable("graphics", "font_point", "16"));
-    static bool font_antialias = XMLSupport::parse_bool(vs_config->getVariable("graphics", "font_antialias", "true"));
+    const bool use_bit = force_highquality || configuration()->graphics.high_quality_font;
+    const float font_point = configuration()->graphics.font_point;
+    const bool font_antialias = configuration()->graphics.font_antialias;
     void *fnt = getFont();
     static float std_wid = glutStrokeWidth(GLUT_STROKE_ROMAN, 'W');
     myFontMetrics.i = font_point * std_wid / (119.05 + 33.33);
@@ -340,8 +338,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
                     currentCol = GFXColor(r, g, b, this->col.a);
                 }
                 GFXColorf(currentCol);
-                static bool setRasterPos =
-                        XMLSupport::parse_bool(vs_config->getVariable("graphics", "set_raster_text_color", "true"));
+                const bool setRasterPos = configuration()->graphics.set_raster_text_color;
                 if (use_bit && setRasterPos) {
                     glRasterPos2f(col - origcol, 0);
                 }

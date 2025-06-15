@@ -611,8 +611,7 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
             bxmfprintf(Outputfile, "</Material>\n");
             mesh->setEnvMap(reflect);
             mesh->forceCullFace(cullface);
-            static bool
-                    forcelight = XMLSupport::parse_bool(vs_config->getVariable("graphics", "ForceLighting", "true"));
+            const bool forcelight = configuration()->graphics.force_lighting;
             mesh->setLighting(forcelight || lighting);
             xml.usenormals = usenormals;
             xml.material.ar = ar;

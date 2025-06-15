@@ -66,8 +66,7 @@ inline T mymax(T a, T b) {
 
 bool VDU::staticable() const {
     unsigned int thismode = getMode();
-    static bool only_scanner_modes_static =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "only_scanner_modes_static", "true"));
+    const bool only_scanner_modes_static = configuration()->graphics.only_scanner_modes_static;
     if (thismode != COMM && thismode != TARGETMANIFEST && thismode != TARGET && thismode != NAV && thismode != VIEW
             && thismode != WEBCAM && only_scanner_modes_static) {
         return false;
@@ -217,16 +216,14 @@ static void DrawHUDSprite(VDU *thus,
         float hull,
         bool drawsprite,
         bool invertsprite) {
-    static bool HighQTargetVSSprites =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_sprites", "false"));
+    const bool HighQTargetVSSprites = configuration()->graphics.high_quality_sprites;
     float nw, nh;
     thus->GetPosition(sx, sy);
     thus->GetSize(w, h);
 
     //Use margins specified from config file
-    static float width_factor = XMLSupport::parse_float(vs_config->getVariable("graphics", "reduced_vdus_width", "0"));
-    static float
-            height_factor = XMLSupport::parse_float(vs_config->getVariable("graphics", "reduced_vdus_height", "0"));
+    const float width_factor = configuration()->graphics.reduced_vdus_width;
+    const float height_factor = configuration()->graphics.reduced_vdus_height;
     w = w - width_factor;
     h = h + height_factor;
 
@@ -509,9 +506,6 @@ void VDU::DrawVDUShield(Unit *parent) {
     w = fabs(w * .6);
 
     double hull_percent = parent->hull.Percent();
-    //static bool invert_friendly_shields =
-    //    XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "invert_friendly_shields", "false" ) );
-    //DrawShieldArmor(parent,StartArmor,x,y,w,h,invert_friendly_shields);
     GFXColor4f(1, hull_percent, hull_percent, 1);
     GFXEnable(TEXTURE0);
     GFXColor4f(1, hull_percent, hull_percent, 1);
@@ -708,8 +702,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         static float mshieldcolor[4] = {.4, .4, 1, 1};
         static float oshieldcolor[4] = {.4, .4, 1, 1};
         //code replaced by target shields defined in cockpit.cpt files, preserve for mods
-        static bool builtin_shields =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "vdu_builtin_shields", "false"));
+        const bool builtin_shields = configuration()->graphics.vdu_builtin_shields;
         if (builtin_shields) {
             DrawShield(target->shield.Percent(Shield::front),
             target->shield.Percent(Shield::right),
@@ -751,7 +744,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
 }
 
 void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
-    static bool draw_messages = XMLSupport::parse_bool(vs_config->getVariable("graphics", "chat_text", "true"));
+    const bool draw_messages = configuration()->graphics.chat_text;
 
     if (draw_messages == false) {
         return;
@@ -770,9 +763,9 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
     whoNOT.push_back("news");
     whoNOT.push_back("bar");
 
-    static float oldtime = XMLSupport::parse_float(vs_config->getVariable("graphics", "last_message_time", "5"));
-    static int num_messages = XMLSupport::parse_int(vs_config->getVariable("graphics", "num_messages", "2"));
-    static bool showStardate = XMLSupport::parse_bool(vs_config->getVariable("graphics", "show_stardate", "true"));
+    const float oldtime = configuration()->graphics.last_message_time;
+    const int num_messages = configuration()->graphics.num_messages;
+    const bool showStardate = configuration()->graphics.show_stardate;
 
     vector<std::string> message_people;     //should be "all", parent's name
     gameMessage lastmsg;
@@ -903,8 +896,7 @@ void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
                     + ")\n\n#ff0000Target:\n  #ffff00" + (targ ? getUnitNameAndFgNoBase(targ) : std::string("Nothing"))
                     + "\n\n#ff0000Range: #ffff00"
                     + PrettyDistanceString(((you && targ) ? DistanceTwoTargets(you, targ) : 0.0));
-    static float auto_message_lim =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "auto_message_time_lim", "5"));
+    const float auto_message_lim = configuration()->graphics.auto_message_time_lim;
     float delautotime = UniverseUtil::GetGameTime() - cp->autoMessageTime;
     bool draw_auto_message = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
     std::string msg = cp->autoMessage;
@@ -1158,14 +1150,14 @@ std::string getDamageColor(double percent) {
             GFXColor(1, 0, 0, 1));
     static GFXColor color_destroyed = vs_config->getColor("default", "hud_repair_destroyed",
             GFXColor(.2, .2, .2, 1));
-    
+
     GFXColor color = colLerp(color_damaged, color_half_damaged, percent);
 
     if(percent < 0.01) {
         return colToString(color_destroyed).str;
     } else if(percent < 1.0) {
         return colToString(color).str;
-    } 
+    }
 
     // Return an empty string - no damage.
     return colToString(color_undamaged).str;
@@ -1190,13 +1182,13 @@ void VDU::DrawDamage(Unit *parent) {
             parent->armor.Percent(Armor::back),
             hull_percent, true, false);
     GFXDisable(TEXTURE0);
-    
+
     std::string fullname(getUnitNameAndFgNoBase(parent));
     //sprintf (st,"%s\nHull: %.3f",blah.c_str(),parent->GetHull());
     //tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);
     char ecmstatus[256];
     ecmstatus[0] = '\0';
-    static bool print_ecm = XMLSupport::parse_bool(vs_config->getVariable("graphics", "print_ecm_status", "true"));
+    const bool print_ecm = configuration()->graphics.print_ecm_status;
     if (print_ecm) {
         if (UnitUtil::getECM(parent) > 0) {
             GFXColor4f(0, 1, 0, .5);
@@ -1371,10 +1363,6 @@ void VDU::DrawWeapon(Unit *parent) {
     const bool do_list_empty_mounts = (list_empty_mounts_as.length() != 0);
 
 //  without fixed font we would need some sneaky tweaking to make it a table, probably with multiple TPs
-//    static int weaponcolumns =
-//        XMLSupport::parse_int( vs_config->getVariable( "graphics", "hud", "gun_list_columns", "1" ) );
-//    int    count  = 0;
-//    int    mcount = 0;
     float x, y, w, h;
     const float percent = .6;
     string buf("#00ff00WEAPONS\n\n#ffffffGuns:#000000");
@@ -1581,9 +1569,8 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
     float h, w;
     GetSize(w, h);
 
-    static float width_factor = XMLSupport::parse_float(vs_config->getVariable("graphics", "reduced_vdus_width", "0"));
-    static float
-            height_factor = XMLSupport::parse_float(vs_config->getVariable("graphics", "reduced_vdus_height", "0"));
+    const float width_factor = configuration()->graphics.reduced_vdus_width;
+    const float height_factor = configuration()->graphics.reduced_vdus_height;
     w = w - width_factor;
     h = h + height_factor;
 
@@ -1613,8 +1600,7 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
         }
     }
     float delautotime = UniverseUtil::GetGameTime() - parentcp->autoMessageTime;
-    static float auto_switch_lim =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "auto_message_nav_switch_time_lim", ".15"));
+    const float auto_switch_lim = configuration()->graphics.auto_message_nav_switch_time_lim;
     if ((delautotime < auto_switch_lim) && (parentcp->autoMessage.length() != 0)) {
         if ((thismode.back() != COMM) && ((posmodes & NAV) != 0)) {
             thismode.back() = NAV;

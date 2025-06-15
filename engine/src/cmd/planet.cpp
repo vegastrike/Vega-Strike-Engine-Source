@@ -126,8 +126,7 @@ Mesh *MakeFogMesh(const AtmosphericFogMesh &f, float radius) {
     string nam = f.meshname + XMLSupport::tostring(count) + ".png";
     if (f.min_alpha != 0 || f.max_alpha != 255 || f.concavity != 0 || f.focus != .5 || f.tail_mode_start != -1
             || f.tail_mode_end != -1) {
-        const int
-                rez = XMLSupport::parse_int(vs_config->getVariable("graphics", "atmosphere_texture_resolution", "512"));
+        const int rez = configuration()->graphics.atmosphere_texture_resolution;
         unsigned char *tex = (unsigned char *) malloc(sizeof(char) * rez * 4);
         for (int i = 0; i < rez; ++i) {
             tex[i * 4] = 255;
@@ -332,7 +331,7 @@ Planet::Planet(QVector x,
 
             // TODO: Refactor the below section of code
             vector<string>
-                    shines = ParseDestinations(vs_config->getVariable("graphics", "star_shine", "shine.ani"));
+                    shines = ParseDestinations(configuration()->graphics.star_shine);
             if (shines.empty()) {
                 shines.emplace_back("shine.ani");
             }

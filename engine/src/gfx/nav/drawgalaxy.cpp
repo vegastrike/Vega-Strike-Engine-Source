@@ -304,8 +304,8 @@ NavigationSystem::SystemIterator &NavigationSystem::SystemIterator::next() {
 }
 
 bool checkedVisited(const std::string &n) {
-    static bool dontbothervisiting =
-            !XMLSupport::parse_bool(vs_config->getVariable("graphics", "explore_for_map", "false"));
+    const bool dontbothervisiting =
+            !configuration()->graphics.explore_for_map;
     if (dontbothervisiting) {
         return true;
     } else {

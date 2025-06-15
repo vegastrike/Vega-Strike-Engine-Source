@@ -47,22 +47,17 @@ Background::Background(const char *file,
         bool degamma_)
         : Enabled(true), degamma(degamma_), color(color_), stars(NULL) {
     string temp;
-    static string starspritetextures = vs_config->getVariable("graphics", "far_stars_sprite_texture", "");
-    static float starspritesize =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "far_stars_sprite_size", "2"));
+    const string starspritetextures = configuration()->graphics.far_stars_sprite_texture;
+    const float starspritesize = configuration()->graphics.far_stars_sprite_size;
     if (starspritetextures.length() == 0) {
         stars =
                 new PointStarVlist(numstars, 200 /*spread*/,
-                        XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                "use_star_coords",
-                                "true")) ? filename : "");
+                        configuration()->graphics.use_star_coords ? filename : "");
     } else {
         stars =
                 new SpriteStarVlist(numstars,
                         200 /*spread*/,
-                        XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                "use_star_coords",
-                                "true")) ? filename : "",
+                        configuration()->graphics.use_star_coords ? filename : "",
                         starspritetextures,
                         starspritesize);
     }
@@ -71,7 +66,7 @@ Background::Background(const char *file,
     SphereBackground = NULL;
 
 #ifndef NV_CUBE_MAP
-    static int max_cube_size = XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_cubemap_size", "1024" ) );
+    static int max_cube_size = configuration()->graphics.max_cubemap_size;
     string     suffix = ".image";
     temp = string( file )+"_up.image";
     up   = new Texture( temp.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE, max_cube_size );
@@ -370,8 +365,7 @@ void Background::Draw() {
                     tex = _Universe->getLightMap();
                 }
                 const int numpasses = 1;
-                static float edge_fixup =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "background_edge_fixup", "0"));
+                const float edge_fixup = configuration()->graphics.background_edge_fixup;
                 const float ms = 0.f, Ms = 1.f - edge_fixup / tex->boundSizeX;
                 const float mt = 0.f, Mt = 1.f - edge_fixup / tex->boundSizeY;
                 const float _stca[] = {-1.f, -Ms, ms, Ms, +1.f}, _ttca[] = {-1.f, -Mt, mt, Mt, +1.f};
@@ -485,8 +479,7 @@ void Background::Draw() {
     GFXDisable(TEXTURE1);
     GFXDisable(DEPTHWRITE);
     GFXBlendMode(ONE, ONE);
-    static float background_velocity_scale =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "background_star_streak_velocity_scale", "0"));
+    const float background_velocity_scale = configuration()->graphics.background_star_streak_velocity_scale;
     stars->DrawAll(QVector(0, 0, 0), _Universe->AccessCamera()->GetVelocity().Scale(
             background_velocity_scale), _Universe->AccessCamera()->GetAngularVelocity(), true, true);
     GFXBlendMode(ONE, ZERO);

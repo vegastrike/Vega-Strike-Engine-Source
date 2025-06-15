@@ -142,7 +142,7 @@ public:
     float lightoptimalintensity{};
     float lightsaturation{};
     int numlights{};
-    bool separatespecularcolor{};
+    bool separate_specular_color{};
     bool LockVertexArrays{};
     int fogdetail{};
     float ModelDetail{};

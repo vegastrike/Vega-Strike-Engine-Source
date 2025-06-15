@@ -86,7 +86,6 @@ inline void DrawOneTargetBox( const QVector &Loc,
     // Still locking on
     lock_percent = std::max(0.0F, lock_percent);
     if (lock_percent < 0.99F) {
-        //eallySwitch=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switchToTargetModeOnKey","true"));
         glLineWidth(configuration()->graphics.hud.diamond_line_thickness);
 
         if (configuration()->graphics.hud.lock_center_crosshair) {
@@ -334,11 +333,6 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
                 if ( damage > .0001 && ( cockpit_time > ( gauge_time[i]+(1-damage) ) ) )
                     if (randomDouble() > SWITCH_CONST)
                         gauge_time[i] = -cockpit_time;
-                /*else {
-                 *  static string gauge_static = vs_config->getVariable("graphics","gauge_static","static.ani");
-                 *  static Animation vdu_ani(gauge_static.c_str(),true,.1,BILINEAR);
-                 *  vdu_ani.DrawAsVSSprite(gauges[i]);
-                 *  }*/
             } else if ( cockpit_time > ( ( ( 1-(-gauge_time[i]) )+damage ) ) ) {
                 if (randomDouble() > SWITCH_CONST)
                     gauge_time[i] = cockpit_time;
@@ -657,7 +651,7 @@ void DrawTargetBoxes(const Radar::Sensor& sensor)
                 if (sensor.IsTracking(track))
                 {
                     static bool draw_dock_box =
-                        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_docking_boxes", "true" ) );
+                        configuration()->graphics.draw_docking_boxes;
                     if (draw_dock_box)
                         DrawDockingBoxes( player, target, CamP, CamQ, CamR );
                     DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, player->computeLockingPercent(), true );
@@ -743,9 +737,9 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
         GFXDisable( SMOOTH );
     }
     static bool draw_target_nav_symbol =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_target_nav_symbol", "true" ) );
+        configuration()->graphics.draw_target_nav_symbol;
     static bool draw_jump_nav_symbol   =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_jump_target_nav_symbol", "true" ) );
+        configuration()->graphics.draw_jump_target_nav_symbol;
     bool nav_symbol = false;
     // FIXME: Replace with UnitUtil::isDockableUnit?
     if ( draw_target_nav_symbol
@@ -754,18 +748,17 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
             || ( target->isPlanet() && ( (Planet*) target )->isAtmospheric()
                 && ( draw_jump_nav_symbol
                      || target->GetDestinations().empty() ) ) || !sensor.InRange(track)) ) {
-        static float nav_symbol_size = XMLSupport::parse_float( vs_config->getVariable( "graphics", "nav_symbol_size", ".25" ) );
+        const float nav_symbol_size = configuration()->graphics.nav.symbol_size;
         GFXColor4f( 1, 1, 1, 1 );
         DrawNavigationSymbol( Loc, CamP, CamQ, Loc.Magnitude()*nav_symbol_size );
         nav_symbol = true;
     } else {
-        static bool lock_nav_symbol =
-            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "lock_significant_target_box", "true" ) );
+        const bool lock_nav_symbol = configuration()->graphics.lock_significant_target_box;
         DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, locking_percent, player->TargetLocked()
                          && ( lock_nav_symbol || !UnitUtil::isSignificant( target ) ) );
     }
 
-    static bool draw_dock_box = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_docking_boxes", "true" ) );
+    const bool draw_dock_box = configuration()->graphics.draw_docking_boxes;
     if (draw_dock_box)
         DrawDockingBoxes(player, target, CamP, CamQ, CamR);
     if ( (always_itts || player->computer.itts) && !nav_symbol ) {

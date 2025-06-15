@@ -123,38 +123,6 @@ static bool EvalCondition(const char *op, const T &left, const T &right) {
     }
 }
 
-// Commented out 2020-08, issue #239
-//static bool ConfigCondition( const string &cond )
-//{
-//    if ( cond.empty() )
-//        return true;
-//    char varname[64];
-//    char op[3];
-//    char varval[64];
-//    bool ok = 3 == sscanf( cond.c_str(), "%63[-a-zA-Z_0-9] %2[<>=!] %63[-0-9.Ee]",
-//                           varname,
-//                           op,
-//                           varval );
-//    if (!ok)
-//        return false;
-//    //finalize character strings, for security
-//    varname[sizeof (varname)/sizeof (*varname)-1] = 0;
-//    op[sizeof (op)/sizeof (*op)-1] = 0;
-//    varval[sizeof (varval)/sizeof (*varval)-1]    = 0;
-//    //try to parse varval - if not parseable as float, assume it's a string
-//    char *endptr = 0;
-//    bool  rv;
-//    if (endptr == varval) {
-//        string sval = vs_config->getVariable( "graphics", varname, "0.0" );
-//        rv = EvalCondition< string > ( op, sval, varval );
-//    } else {
-//        float fval = XMLSupport::parse_floatf( vs_config->getVariable( "graphics", varname, "0.0" ) );
-//        float fref = XMLSupport::parse_floatf( varval );
-//        rv = EvalCondition< float > ( op, fval, fref );
-//    }
-//    return rv;
-//}
-
 bool ConfigAllows(string var, float val) {
     bool invert = false;
     if (var.length() == 0) {

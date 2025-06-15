@@ -244,16 +244,13 @@ void Carrier::EjectCargo(unsigned int index) {
                 }
             }
             float arot = 0;
-            static float grot =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "generic_cargo_rotation_speed",
-                            "1")) * 3.1415926536 / 180;
+            const float grot =
+                    configuration()->graphics.generic_cargo_rotation_speed * 3.1415926536 / 180;
             if (!cargo) {
-                static float crot =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "cargo_rotation_speed",
-                                "60")) * 3.1415926536 / 180;
-                static float erot =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "eject_rotation_speed",
-                                "0")) * 3.1415926536 / 180;
+                const float crot =
+                        configuration()->graphics.cargo_rotation_speed * 3.1415926536 / 180;
+                const float erot =
+                        configuration()->graphics.eject_rotation_speed * 3.1415926536 / 180;
                 if (tmpcontent == "eject") {
                     if (isplayer) {
                         Flightgroup *fg = unit->getFlightgroup();
@@ -354,8 +351,7 @@ void Carrier::EjectCargo(unsigned int index) {
             Vector rotation
                     (vsrandom.uniformInc(-arot, arot), vsrandom.uniformInc(-arot, arot), vsrandom.uniformInc(-arot,
                             arot));
-            static bool all_rotate_same =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "cargo_rotates_at_same_speed", "true"));
+            const bool all_rotate_same = configuration()->graphics.cargo_rotates_at_same_speed;
             if (all_rotate_same && arot != 0) {
                 float tmp = rotation.Magnitude();
                 if (tmp > .001) {
@@ -504,7 +500,7 @@ void Carrier::AddCargo(const Cargo &carg, bool sort) {
     if(!found) {
         unit->cargo.push_back(carg);
     }
-    
+
     if (sort) {
         SortCargo();
     }
