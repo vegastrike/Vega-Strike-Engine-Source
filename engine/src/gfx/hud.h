@@ -34,7 +34,7 @@ class TextPlane {
 //Texture *myFont;
     Vector myFontMetrics;     //i = width, j = height
     Vector myDims;
-    int numlet;
+    int numlet{};
 /*
  *  struct GlyphPosition {
  *       float left, right, top, bottom;

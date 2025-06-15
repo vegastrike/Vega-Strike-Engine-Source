@@ -30,12 +30,9 @@
 #include "src/gfxlib.h"
 #include "cmd/unit_generic.h"
 #include "gfx/hud.h"
-#include "root_generic/lin_time.h"
 #include "src/file_main.h"
-#include "gfx/aux_texture.h"
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
-#include "root_generic/xml_support.h"
 #include "cmd/base.h"
 //#include "glut.h"
 #include "src/universe.h"
@@ -50,8 +47,6 @@ static bool isInside() {
 }
 
 const std::string &getStringFont(bool &changed, bool force_inside = false, bool whatinside = false) {
-    const std::string whichfont = configuration()->graphics.font;
-    const std::string whichdockedfont = configuration()->graphics.bases.font;
     bool inside = isInside();
     if (force_inside) {
         inside = whatinside;
@@ -63,13 +58,11 @@ const std::string &getStringFont(bool &changed, bool force_inside = false, bool 
     } else {
         changed = false;
     }
-    return inside ? whichdockedfont : whichfont;
+    return inside ? configuration()->graphics.bases.font : configuration()->graphics.font;
 }
 
 const std::string &getStringFontForHeight(bool &changed) {
-    const std::string whichfont = configuration()->graphics.font;
-    const std::string whichdockedfont = configuration()->graphics.bases.font;
-    bool inside = isInside();
+    const bool inside = isInside();
     static bool lastinside = inside;
     if (lastinside != inside) {
         changed = true;
@@ -77,17 +70,17 @@ const std::string &getStringFontForHeight(bool &changed) {
     } else {
         changed = false;
     }
-    return inside ? whichdockedfont : whichfont;
+    return inside ? configuration()->graphics.bases.font : configuration()->graphics.font;
 }
 
 void *getFont(bool forceinside = false, bool whichinside = false) {
     bool changed = false;
     std::string whichfont = getStringFont(changed, forceinside, whichinside);
-    static void *retval = NULL;
+    static void *retval = nullptr;
     if (changed) {
-        retval = NULL;
+        retval = nullptr;
     }
-    if (retval == NULL) {
+    if (retval == nullptr) {
         if (whichfont == "helvetica10") {
             retval = GLUT_BITMAP_HELVETICA_10;
         } else if (whichfont == "helvetica18") {
@@ -143,8 +136,7 @@ TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol) {
     SetPos(0, 0);
 }
 
-TextPlane::~TextPlane() {
-}
+TextPlane::~TextPlane() = default;
 
 int TextPlane::Draw(int offset) {
     return Draw(myText, offset, true, false, true);
