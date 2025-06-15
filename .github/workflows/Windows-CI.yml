@@ -33,7 +33,7 @@ jobs:
             cmake-generator: VS2022Win64
             enable-pie:      1
             build-type:      Debug
-            python-version:  3.13.3
+            python-version:  3.13.4
             is-release:      0
           - os:              windows-2025
             triplet:         x64-win10
@@ -41,7 +41,7 @@ jobs:
             cmake-generator: VS2022Win64
             enable-pie:      1
             build-type:      RelWithDebInfo
-            python-version:  3.13.3
+            python-version:  3.13.4
             is-release:      0
 
     env:
