@@ -46,7 +46,7 @@ public:
     virtual Texture *Original();
     PipelinedTexture();
     PipelinedTexture(unsigned int width, unsigned int height, unsigned char *current, unsigned char *last);
-    ~PipelinedTexture();
+    ~PipelinedTexture() override;
     unsigned char *beginMutate();
     void Swap();
     void endMutate(int xoffset, int yoffset, int width, int height);

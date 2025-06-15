@@ -18,16 +18,6 @@ jobs:
         include:
           - FROM:     'ubuntu:noble'
             COMPILER: 'gcc'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'OFF'
-            allow_failure: false
-          - FROM:     'ubuntu:noble'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'OFF'
-            allow_failure: false
-          - FROM:     'ubuntu:noble'
-            COMPILER: 'gcc'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'OFF'
             allow_failure: false
@@ -48,24 +38,14 @@ jobs:
             allow_failure: false
           #- FROM:     'opensuse/leap:15.6'
           #  COMPILER: 'clang'
-          #  OpenGL_GL_PREFERENCE: 'LEGACY'
+          #  OpenGL_GL_PREFERENCE: 'GLVND'
           #  ENABLE_PIE: 'ON'
           #  allow_failure: true
-          - FROM:     'fedora:41'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'ON'
-            allow_failure: true
           - FROM:     'fedora:41'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: true
-          - FROM:     'fedora:40'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'ON'
-            allow_failure: false
           - FROM:     'fedora:40'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
@@ -84,17 +64,7 @@ jobs:
           #  allow_failure: false
           #- FROM:     'manjarolinux/base'
           #  COMPILER: 'clang'
-          #  OpenGL_GL_PREFERENCE: 'LEGACY'
-          #  ENABLE_PIE: 'ON'
-          #  allow_failure: true
-          #- FROM:     'manjarolinux/base'
-          #  COMPILER: 'clang'
           #  OpenGL_GL_PREFERENCE: 'GLVND'
-          #  ENABLE_PIE: 'ON'
-          #  allow_failure: true
-          #- FROM:     'funtoo/stage3-generic_64'
-          #  COMPILER: 'gcc'
-          #  OpenGL_GL_PREFERENCE: 'LEGACY'
           #  ENABLE_PIE: 'ON'
           #  allow_failure: true
           #- FROM:     'funtoo/stage3-generic_64'

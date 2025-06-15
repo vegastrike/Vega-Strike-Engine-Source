@@ -62,7 +62,7 @@ public:
             bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1,
             1));
 
-    ~Animation();
+    ~Animation() override;
 
     void Draw();
 

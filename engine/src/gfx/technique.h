@@ -59,10 +59,10 @@ public:
     void parseTechniqueXML(pt::ptree tree);
 
     /** Create a technique by loading and parsing the definition in [name].technique */
-    Technique(const string &name);
+    explicit Technique(const string &name);
 
     /** Create a technique by copying another technique */
-    explicit Technique(const Technique &src);
+    Technique(const Technique &src);
 
     ~Technique();
 

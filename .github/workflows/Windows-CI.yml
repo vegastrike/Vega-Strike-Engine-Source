@@ -20,7 +20,7 @@ jobs:
       matrix:
         include:
           - os:              windows-2019
-            triplet:         x64-windows-win10
+            triplet:         x64-win10
             preset-name:     VS2019Win64-pie-enabled-release
             cmake-generator: VS2019Win64
             enable-pie:      1
@@ -28,12 +28,20 @@ jobs:
             python-version:  3.12.10
             is-release:      0
           - os:              windows-2022
-            triplet:         x64-windows-win10
+            triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-debug
             cmake-generator: VS2022Win64
             enable-pie:      1
             build-type:      Debug
-            python-version:  3.13.3
+            python-version:  3.13.4
+            is-release:      0
+          - os:              windows-2025
+            triplet:         x64-win10
+            preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
+            cmake-generator: VS2022Win64
+            enable-pie:      1
+            build-type:      RelWithDebInfo
+            python-version:  3.13.4
             is-release:      0
 
     env:
