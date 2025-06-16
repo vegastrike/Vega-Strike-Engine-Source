@@ -33,7 +33,7 @@ class StreamTexture : public Texture {
     int handle;
 public:
     StreamTexture(int width, int height, enum FILTER filtertype, unsigned char *origdata);
-    ~StreamTexture();
+    ~StreamTexture() override;
     unsigned char *Map();
     void UnMap(bool changed = true);
     void MakeActive(int stage);

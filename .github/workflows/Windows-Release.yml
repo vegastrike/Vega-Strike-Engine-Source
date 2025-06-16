@@ -22,30 +22,35 @@ jobs:
       matrix:
         include:
           - os:              windows-2019
+            triplet:         x64-win10
+            preset-name:     VS2019Win64-pie-enabled-release
             cmake-generator: VS2019Win64
             enable-pie:      1
             build-type:      RelWithDebInfo
             python-version:  3.12.10
             is-release:      1
           - os:              windows-2022
+            triplet:         x64-win10
+            preset-name:     VS2022Win64-pie-enabled-debug
             cmake-generator: VS2022Win64
             enable-pie:      1
             build-type:      RelWithDebInfo
-            python-version:  3.13.3
+            python-version:  3.13.4
+            is-release:      1
+          - os:              windows-2025
+            triplet:         x64-win10
+            preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
+            cmake-generator: VS2022Win64
+            enable-pie:      1
+            build-type:      RelWithDebInfo
+            python-version:  3.13.4
             is-release:      1
 
     env:
-      # Indicates the location of vcpkg
-      VCPKG_ROOT: '${{ github.workspace }}/v'
-      # Tells vcpkg where binary packages are stored.
-      VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vbincache'
-      # Let's use GitHub Action cache as storage for the vcpkg Binary Caching feature.
-      VCPKG_BINARY_SOURCES: 'x-gha,readwrite'
-      VCPKG_DEFAULT_TRIPLET: x64-windows
-      VCPKG_DEFAULT_HOST_TRIPLET: x64-windows
-      TAG_NAME: '${{ github.ref_name }}'
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
+      VCPKG_DEFAULT_HOST_TRIPLET: ${{ matrix.triplet }}
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Set env vars needed for vcpkg to leverage the GitHub Action cache as a storage
       # for Binary Caching.
@@ -54,8 +59,6 @@ jobs:
         with:
           script: |
             const git_sha = context.sha.substring(0, 7)
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
             core.exportVariable('SHORT_SHA', git_sha);
 
       - name: Test tag name and short SHA
@@ -67,6 +70,13 @@ jobs:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+      - name: Restore vcpkg cache
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ${{ github.workspace }}/vcpkg_cache
+          key: vcpkg-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-${{ matrix.os }}-${{ matrix.triplet }}-
+
       - name: Setup Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         id: vega-py-setup
@@ -74,67 +84,44 @@ jobs:
           python-version: ${{ matrix.python-version }}
           update-environment: false
 
-      - name: "Create directory '${{ env.VCPKG_DEFAULT_BINARY_CACHE }}'"
-        run: mkdir -p $VCPKG_DEFAULT_BINARY_CACHE
-        shell: bash
-
       - name: install-cmake
         uses: lukka/get-cmake@ea004816823209b8d1211e47b216185caee12cc5 #v4.0.2
         with:
           cmakeVersion: 4.0.2
           ninjaVersion: 1.12.1
 
-      # Restore vcpkg from the GitHub Action cache service. Note that packages are restored by vcpkg's binary caching
-      # when it is being run afterward by CMake.
-      - name: restore-vcpkg
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  #v4.2.3
-        with:
-          # The first path is the location of vcpkg: it contains the vcpkg executable and data files, as long as the
-          # built package archives (aka binary cache) which are located by VCPKG_DEFAULT_BINARY_CACHE env var.
-          # The other paths starting with '!' are exclusions: they contain temporary files generated during the build of the installed packages.
-          path: |
-            ${{ env.VCPKG_ROOT }}
-            !${{ env.VCPKG_ROOT }}/buildtrees
-            !${{ env.VCPKG_ROOT }}/packages
-            !${{ env.VCPKG_ROOT }}/downloads
-            !${{ env.VCPKG_ROOT }}/installed
-          # The key is composed in a way that it gets properly invalidated whenever a different version of vcpkg is being used.
-          key: |
-            ${{ matrix.os }}-${{ hashFiles( './engine/vcpkg.json' )}}
-
-      - name: install-vcpkg
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          git clone https://github.com/Microsoft/vcpkg.git ${{ env.VCPKG_ROOT }}
-          ${{ env.VCPKG_ROOT }}\bootstrap-vcpkg.bat -disableMetrics
-
-      - name: run-build-script
-        working-directory: ${{ github.workspace }}
+      - name: run-vcpkg
+        uses: lukka/run-vcpkg@5e0cab206a5ea620130caf672fce3e4a6b5666a1 # v11.5
         env:
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
           PYTHONHOME: ""
           PYTHONPATH: ""
-        run: .\script\build.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }} -IsRelease  ${{ matrix.is-release }} -GitTag ${{ env.TAG_NAME }} -GitSha ${{ env.SHORT_SHA }}
 
-      - name: Test
-        working-directory: ${{ github.workspace }}
+      - name: run-cmake
+        uses: lukka/run-cmake@af1be47fd7c933593f687731bc6fdbee024d3ff4 # v10.8
         env:
-          GTEST_OUTPUT: xml
-          GTEST_COLOR: 1
-        run: .\script\test.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }}
-
-      - name: Upload test results
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
-        if: failure()
+          Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
+          Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
+          pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
+          PYTHONHOME: ""
+          PYTHONPATH: ""
         with:
-          name: test_results_xml
-          path: ${{github.workspace}}/build/test-results/**/*.xml
+          configurePreset: ${{ matrix.preset-name }}
+          buildPreset: "build-${{ matrix.preset-name }}"
+          testPreset: "test-${{ matrix.preset-name }}"
+
+      - name: Save vcpkg cache
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ${{ github.workspace }}/vcpkg_cache
+          key: vcpkg-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
 
       - name: Package the installer(s)
         working-directory: ${{ github.workspace }}
-        run: .\script\package.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }} -GitTag ${{ env.TAG_NAME }} -GitSha ${{ env.SHORT_SHA }}
+        run: |
+          cpack -V --preset "package-${{ matrix.preset-name }}"
 
       - name: Upload the artifacts
         uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
