@@ -38,7 +38,6 @@
 #endif
 #ifdef _WIN32
 #include <direct.h>
-#include <process.h>
 #endif
 #include "src/gfxlib.h"
 #include "src/in_kb.h"
@@ -47,7 +46,6 @@
 #include "src/config_xml.h"
 #include "cmd/script/mission.h"
 #include "src/audiolib.h"
-#include "src/config_xml.h"
 #include "root_generic/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 #include "gfx/animation.h"
@@ -60,10 +58,8 @@
 #include "src/universe_util.h"
 #include "src/universe.h"
 #include "src/save_util.h"
-#include "gfx/masks.h"
 #include "cmd/music.h"
 #include "src/ship_commands.h"
-#include "src/gamemenu.h"
 #include "audio/SceneManager.h"
 #include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
 #include "configuration/configuration.h"
@@ -133,7 +129,7 @@ VegaConfig *createVegaConfig(const char *file) {
 
 std::pair<std::string, std::string> ParseCommandLine(int argc, char **CmdLine);
 /**
- * Returns an exit code >= 0 if the game is supposed to exit rightaway
+ * Returns an exit code >= 0 if the game is supposed to exit right away
  * Returns an exit code < 0 if the game can continue loading.
  */
 int readCommandLineOptions(int argc, char **argv);
@@ -194,7 +190,7 @@ void initSceneManager() {
     VS_LOG(info, "Creating scene manager...");
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
-    if (Audio::SceneManager::getSingleton() == 0) {
+    if (Audio::SceneManager::getSingleton() == nullptr) {
         throw Audio::Exception("Singleton null after SceneManager instantiation");
     }
 
@@ -397,7 +393,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-static Animation *SplashScreen = NULL;
+static Animation *SplashScreen = nullptr;
 static bool BootstrapMyStarSystemLoading = true;
 
 void SetStarSystemLoading(bool value) {
@@ -417,20 +413,20 @@ Animation *GetSplashScreen() {
 }
 
 void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
-    static Animation *ani = NULL;
+    static Animation *ani = nullptr;
     static bool reentryWatchdog = false;
     if (!BootstrapMyStarSystemLoading || reentryWatchdog) {
         return;
     }
     Music::MuzakCycle();     //Allow for loading music...
-    if (SplashScreen == NULL && newSplashScreen == NULL) {
+    if (SplashScreen == nullptr && newSplashScreen == nullptr) {
         //if there's no splashscreen, we don't draw on it
         //this happens, when the splash screens texture is loaded
         return;
     }
 
     reentryWatchdog = true;
-    if (newSplashScreen != NULL) {
+    if (newSplashScreen != nullptr) {
         ani = newSplashScreen;
     }
     UpdateTime();
@@ -653,7 +649,7 @@ void bootstrap_main_loop() {
         SetStarSystemLoading(true);
         InitializeInput();
 
-        vs_config->bindKeys();         //gotta do this before we do ai
+        vs_config->bindKeys();         //gotta do this before we do AI
 
         createObjects(playersaveunit, ss, playerNloc, savefiles);
         while (!savedun.empty()) {

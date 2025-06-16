@@ -193,7 +193,7 @@ public:
     //Texture (Texture *t);
 
     ///Destructor for texture
-    virtual ~Texture();
+    ~Texture() override;
 
     virtual unsigned int numFrames() const {
         return 1;

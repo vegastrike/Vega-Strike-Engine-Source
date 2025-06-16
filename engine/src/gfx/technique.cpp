@@ -57,44 +57,42 @@ class Exception : public std::exception {
 private:
     std::string _message;
 public:
-    virtual ~Exception() {
-    }
+    ~Exception() override = default;
 
-    Exception() {
-    }
+    Exception() = default;
 
-    Exception(const Exception &other) : _message(other._message) {
-    }
+    Exception(const Exception &other);
 
     explicit Exception(const std::string &message) : _message(message) {
     }
 
-    virtual const char *what() const noexcept {
+    const char *what() const noexcept override {
         return _message.c_str();
     }
 };
 
+Exception::Exception(const Exception& other): std::exception(other), _message(other._message) {
+}
+
 class InvalidParameters : public Exception {
 public:
-    InvalidParameters() {
-    }
+    InvalidParameters() = default;
 
-    InvalidParameters(const string &msg) : Exception(msg) {
+    explicit InvalidParameters(const string &msg) : Exception(msg) {
     }
 };
 
 class ProgramCompileError : public Exception {
 public:
-    ProgramCompileError() {
-    }
+    ProgramCompileError() = default;
 
-    ProgramCompileError(const string &msg) : Exception(msg) {
+    explicit ProgramCompileError(const string &msg) : Exception(msg) {
     }
 };
 
 template<typename T>
 static T parseEnum(const string &s, const map<string, T> &enumMap) {
-    typename map<string, T>::const_iterator it = enumMap.find(s);
+    auto it = enumMap.find(s);
     if (it != enumMap.end()) {
         return it->second;
     } else {
@@ -104,7 +102,7 @@ static T parseEnum(const string &s, const map<string, T> &enumMap) {
 
 template<typename T>
 static T parseEnum(const string &s, const map<string, T> &enumMap, T deflt) {
-    typename map<string, T>::const_iterator it = enumMap.find(s);
+    auto it = enumMap.find(s);
     if (it != enumMap.end()) {
         return it->second;
     } else {
@@ -373,7 +371,13 @@ Technique::Technique(const string &name) :
     }
 
     pt::ptree tree;
-    pt::read_xml(filename, tree);
+    try {
+        pt::read_xml(filename, tree);
+    } catch (boost::property_tree::ptree_error &e) {
+        VS_LOG(error, (boost::format("Error building technique '%1%': '%2%'") % filename % e.what()));
+    } catch (boost::property_tree::xml_parser_error &e) {
+        VS_LOG(error, (boost::format("Error building technique '%1%': '%2%'") % filename % e.what()));
+    }
 
     for (const auto &iterator : tree) {
         parseTechniqueXML(iterator.second);
