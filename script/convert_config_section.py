@@ -94,17 +94,17 @@ trailing_comment_parse_key_2.leave_as_is = r'\2'
 # parse_keys.append(trailing_comment_parse_key_2)
 
 setting_declaration_namespaced_parse_key = ParseKey()
-setting_declaration_namespaced_parse_key.pattern = re.compile(r'^(?P<initial_space> *)(?:(?:static|const)\s*)?('
+setting_declaration_namespaced_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?:(?:static|const)\s*)?('
                                                               r'?P<type>[a-z0-9_]+::[a-z0-9_]+)\s+(?P<name>[a-z0-9_]+)(?P<init_braces>\{'
                                                               r'})?\s*; *$', regex_flags_multiline)
-setting_declaration_namespaced_parse_key.substitution = r'\g<initial_space>\g<type> \g<name>\g<init_braces>;'
+setting_declaration_namespaced_parse_key.substitution = r'\g<initial_space>const \g<type> \g<name>\g<init_braces>;'
 setting_declaration_namespaced_parse_key.leave_as_is = ''
 parse_keys.append(setting_declaration_namespaced_parse_key)
 setting_declaration_simple_parse_key = ParseKey()
-setting_declaration_simple_parse_key.pattern = re.compile(r'^(?P<initial_space> *)(?:(?:static|const)\s*)?('
+setting_declaration_simple_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?:(?:static|const)\s*)?('
                                                           r'?P<type>[a-z0-9_]+)\s+(?P<name>[a-z0-9_]+)(?P<init_braces>\{})?\s*; '
                                                           r'*$', regex_flags_multiline)
-setting_declaration_simple_parse_key.substitution = r'\g<initial_space>\g<type> \g<name>\g<init_braces>;'
+setting_declaration_simple_parse_key.substitution = r'\g<initial_space>const \g<type> \g<name>\g<init_braces>;'
 setting_declaration_simple_parse_key.leave_as_is = ''
 parse_keys.append(setting_declaration_simple_parse_key)
 
@@ -127,14 +127,14 @@ parse_keys.append(equals_configuration_parse_key_2)
 def build_parse_keys(section_name: str) -> list[ParseKey]:
     parse_key_1 = ParseKey()
     parse_key_1.pattern = re.compile(
-        r'^(?P<initial_space> *)static\s+(?P<type>[a-z0-9_]+(?:::[a-z0-9_]+)?)\s+(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
+        r'^(?P<initial_space> {4})static\s+(?P<type>[a-z0-9_]+(?:::[a-z0-9_]+)?)\s+(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
         regex_flags_multiline)
     parse_key_1.substitution = r'\g<initial_space>const \g<type> \g<name> = configuration()->' + section_name + r'.\g<subsection>.\g<name2>;'
     parse_key_1.leave_as_is = ''
     parse_keys.append(parse_key_1)
     parse_key_1a = ParseKey()
     parse_key_1a.pattern = re.compile(
-        r'^(?P<initial_space> *)static\s+(?P<type>[a-z0-9_]+(?:::[a-z0-9_]+)?)\s+(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
+        r'^(?P<initial_space> {4})static\s+(?P<type>[a-z0-9_]+(?:::[a-z0-9_]+)?)\s+(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
         regex_flags_multiline)
     parse_key_1a.substitution = r'\g<initial_space>const \g<type> \g<name> = configuration()->' + section_name + r'.\g<subsection>.\g<name2>'
     parse_key_1a.leave_as_is = ''
@@ -434,7 +434,7 @@ def read_parse_write_misc_file(file_path: Path, config_items: dict[str, Setting]
     this_file_rewritten: str = this_file_as_read
     for each_parse_key in parse_keys:
         this_file_rewritten = process_a_transform_pass(this_file_rewritten, each_parse_key)
-    with file_path.open(mode='w', encoding='utf-8', newline='\n') as file_write:
+    with file_path.open(mode='w', encoding='utf-8', newline=None) as file_write:
         file_write.write(this_file_rewritten)
 
     return None
@@ -476,12 +476,12 @@ def main() -> int:
     my_parse_keys: list[ParseKey] = build_parse_keys(section_name_parsed)
     configuration_items: dict[str, Setting]
     configuration_items = read_options_h(section_name_parsed)
-    # with options_h_path.open(mode='w', encoding='utf-8', newline='\n') as options_h_writer:
+    # with options_h_path.open(mode='w', encoding='utf-8', newline=None) as options_h_writer:
     #     options_h_writer.write(options_h_output)
 
     # preprocess_a(options_cpp_path)
     read_options_cpp(configuration_items, my_parse_keys)
-    # with options_cpp_path.open(mode='w', encoding='utf-8', newline='\n') as options_cpp_writer:
+    # with options_cpp_path.open(mode='w', encoding='utf-8', newline=None) as options_cpp_writer:
     #     options_cpp_writer.write(options_cpp_output)
 
     file_list: list[Path] = list_files_recursive()
