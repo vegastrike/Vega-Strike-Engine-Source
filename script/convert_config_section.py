@@ -94,17 +94,17 @@ trailing_comment_parse_key_2.leave_as_is = r'\2'
 # parse_keys.append(trailing_comment_parse_key_2)
 
 setting_declaration_namespaced_parse_key = ParseKey()
-setting_declaration_namespaced_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?:static|const)\s*('
+setting_declaration_namespaced_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*('
                                                               r'?P<type>[a-z0-9_]+::[a-z0-9_]+)\s+(?P<name>[a-z0-9_]+)(?P<init_braces>\{'
                                                               r'})?\s*; *$', regex_flags_multiline)
-setting_declaration_namespaced_parse_key.substitution = r'\g<initial_space>const \g<type> \g<name>\g<init_braces>;'
+setting_declaration_namespaced_parse_key.substitution = r'\g<initial_space>\g<static_or_const> \g<type> \g<name>\g<init_braces>;'
 setting_declaration_namespaced_parse_key.leave_as_is = ''
 parse_keys.append(setting_declaration_namespaced_parse_key)
 setting_declaration_simple_parse_key = ParseKey()
-setting_declaration_simple_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?:static|const)\s*('
+setting_declaration_simple_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*('
                                                           r'?P<type>[a-z0-9_]+)\s+(?P<name>[a-z0-9_]+)(?P<init_braces>\{})?\s*; '
                                                           r'*$', regex_flags_multiline)
-setting_declaration_simple_parse_key.substitution = r'\g<initial_space>const \g<type> \g<name>\g<init_braces>;'
+setting_declaration_simple_parse_key.substitution = r'\g<initial_space>\g<static_or_const> \g<type> \g<name>\g<init_braces>;'
 setting_declaration_simple_parse_key.leave_as_is = ''
 parse_keys.append(setting_declaration_simple_parse_key)
 
