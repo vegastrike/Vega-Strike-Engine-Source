@@ -72,12 +72,12 @@ options_section_header_parse_key_2.leave_as_is = r'\0'
 parse_keys.append(options_section_header_parse_key_2)
 
 comment_parse_key_1 = ParseKey()
-comment_parse_key_1.pattern = re.compile(r'^\s*/\*.*?\*/\s*$', regex_flags_multiline)
+comment_parse_key_1.pattern = re.compile(r'^\s*/\*.*?\*/ *$', regex_flags_multiline)
 comment_parse_key_1.substitution = ''
 comment_parse_key_1.leave_as_is = r'\0'
 parse_keys.append(comment_parse_key_1)
 comment_parse_key_2 = ParseKey()
-comment_parse_key_2.pattern = re.compile(r'^\s*/{2}[^/]*/{2}\s*$', regex_flags_single_line)
+comment_parse_key_2.pattern = re.compile(r'^\s*/{2}[^/]*/{2} *$', regex_flags_single_line)
 comment_parse_key_2.substitution = ''
 comment_parse_key_2.leave_as_is = r'\0'
 parse_keys.append(comment_parse_key_2)
@@ -94,12 +94,12 @@ trailing_comment_parse_key_2.leave_as_is = r'\2'
 # parse_keys.append(trailing_comment_parse_key_2)
 
 setting_declaration_namespaced_parse_key = ParseKey()
-setting_declaration_namespaced_parse_key.pattern = re.compile(r'^(?P<initial_space> *)(?:(?:static|const)\s*)?(?P<type>\w+::\w+)\s+(?P<name>\w+)(?P<init_braces>\{})?\s*;\s*$', regex_flags_multiline)
+setting_declaration_namespaced_parse_key.pattern = re.compile(r'^(?P<initial_space> *)(?:(?:static|const)\s*)?(?P<type>\w+::\w+)\s+(?P<name>\w+)(?P<init_braces>\{})?\s*; *$', regex_flags_multiline)
 setting_declaration_namespaced_parse_key.substitution = r'\g<initial_space>\g<type> \g<name>\g<init_braces>;'
 setting_declaration_namespaced_parse_key.leave_as_is = ''
 parse_keys.append(setting_declaration_namespaced_parse_key)
 setting_declaration_simple_parse_key = ParseKey()
-setting_declaration_simple_parse_key.pattern = re.compile(r'^(?P<initial_space> *)(?:(?:static|const)\s*)?(?P<type>\w+)\s+(?P<name>\w+)(?P<init_braces>\{})?\s*;\s*$', regex_flags_multiline)
+setting_declaration_simple_parse_key.pattern = re.compile(r'^(?P<initial_space> *)(?:(?:static|const)\s*)?(?P<type>\w+)\s+(?P<name>\w+)(?P<init_braces>\{})?\s*; *$', regex_flags_multiline)
 setting_declaration_simple_parse_key.substitution = r'\g<initial_space>\g<type> \g<name>\g<init_braces>;'
 setting_declaration_simple_parse_key.leave_as_is = ''
 parse_keys.append(setting_declaration_simple_parse_key)
