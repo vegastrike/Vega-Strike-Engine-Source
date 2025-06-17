@@ -28,8 +28,8 @@
 #include "component.h"
 #include "damage/damageable_layer.h"
 
-/** Armor component 
- * 
+/** Armor component
+ *
  * Always present and always implemented as a 4 facet DL.
  * If no armor, each facet is 0.
 */
@@ -43,8 +43,8 @@ public:
     Armor();
 
     // Component Methods
-    void Load(std::string unit_key) override;      
-    
+    void Load(std::string unit_key) override;
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;

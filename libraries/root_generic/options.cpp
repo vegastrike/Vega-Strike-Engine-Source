@@ -170,19 +170,15 @@ void vs_options::init() {
     // The Following makes no sense.   Why differentiate mac and pc shaders if they have unique names anyway?
     mac_shader_name = configuration()->graphics.mac_shader_name;
     shader_name = configuration()->graphics.shader_name;
-    framerate_changes_shader =
-            configuration()->graphics.framerate_changes_shader;
+    framerate_changes_shader = configuration()->graphics.framerate_changes_shader;
     draw_weapons = configuration()->graphics.draw_weapons;
     sparklerate = configuration()->graphics.sparkle_rate;
     only_stretch_in_warp = configuration()->graphics.only_stretch_in_warp;
     warp_stretch_cutoff = configuration()->graphics.warp_stretch_cutoff;
-    warp_stretch_region0_max =
-            configuration()->graphics.warp_stretch_region0_max;
+    warp_stretch_region0_max = configuration()->graphics.warp_stretch_region0_max;
     warp_stretch_max = configuration()->graphics.warp_stretch_max;
-    warp_stretch_max_speed =
-            configuration()->graphics.warp_stretch_max_speed;
-    warp_stretch_max_region0_speed =
-            configuration()->graphics.warp_stretch_max_region0_speed;
+    warp_stretch_max_speed = configuration()->graphics.warp_stretch_max_speed;
+    warp_stretch_max_region0_speed = configuration()->graphics.warp_stretch_max_region0_speed;
     weapon_gamma = configuration()->graphics.weapon_gamma;
     split_dead_subunits = configuration()->graphics.split_dead_subunits;
     explosionforce = configuration()->graphics.explosion_force;
