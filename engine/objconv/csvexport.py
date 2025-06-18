@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-
 ##
 # csvexport.py
 #
-# Copyright (c) 2001-2002 Daniel Horn
-# Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-# Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+# Vega Strike - Space Simulation, Combat and Trading
+# Copyright (C) 2001-2025 The Vega Strike Contributors:
+# Project creator: Daniel Horn
+# Original development team: As listed in the AUTHORS file. Specifically: geoscope
+# Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+#
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -13,7 +15,7 @@
 #
 # Vega Strike is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 2 of the License, or
+# the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # Vega Strike is distributed in the hope that it will be useful,
@@ -22,7 +24,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 #
 
 # csvexport.py
@@ -67,13 +69,13 @@ def CsvExport(path, args):
 	    showunits=1
 	if (i=="-toscreen"):
 	    ToScreen=1
-    
+
     workfile = file(path, "r")
     KeyList = csv.semiColonSeparatedList(workfile.readline().strip())
     GuideList = csv.semiColonSeparatedList(workfile.readline().strip())
     Lines = workfile.readlines()
     workfile.close()
-    
+
     KeyLL = len(KeyList)
     GuideLL = len(GuideList)
     numLine = 2		# we already read 2 lines from the file
@@ -113,7 +115,7 @@ def CsvExport(path, args):
 	                else:
 	                    outfile.write(csv.writeList([makeName(KeyList[i],GuideList[i]), row[i]]))
     #print
-    #print "Number of Keys:", KeyLL, "\tNumber of Guides:", GuideLL 
+    #print "Number of Keys:", KeyLL, "\tNumber of Guides:", GuideLL
     #print """By strickest definition of CSV, Every record should have the same number
     #of Columns (commas) as above. units.csv does not. The old csvexport.py would have
     #failed most of these records."""
@@ -151,7 +153,7 @@ def ProcessStruct (guide,struc):
 		for i in range(guide.count(";")):
 			struc+=";"
 	l=struc.split(';')
-	g=guide.split(';')	
+	g=guide.split(';')
 	return interleave(g,l," ",'=');
 
 def ProcessList(guide,row):
@@ -168,7 +170,7 @@ def ProcessList(guide,row):
 		if (_or==-1 or _cr==-1):
 			break;
 		ret+=['{']
-		ret+=ProcessStruct(guide,row[_or+1:_cr])		
+		ret+=ProcessStruct(guide,row[_or+1:_cr])
 		row=row[_cr+1:]
 		ret+=['}']
 	ret+=['{']
@@ -185,4 +187,4 @@ if __name__ == "__main__":
         CsvExport(units, unitList)
     else:
         usageError(sys.argv[0])
-    
+

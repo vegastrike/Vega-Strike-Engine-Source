@@ -893,7 +893,7 @@ void SaveGame::LoadSavedMissions() {
 }
 
 string SaveGame::WriteSavedUnit(SavedUnits *su) {
-    return string("\n") + XMLSupport::tostring(su->type) + string(" ") + su->filename + " " + su->faction;
+    return string("\n") + std::to_string(SerializeUnitType(su->type)) + string(" ") + su->filename + " " + su->faction;
 }
 
 extern bool STATIC_VARS_DESTROYED;

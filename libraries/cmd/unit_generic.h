@@ -78,7 +78,7 @@ void UncheckUnit( class Unit*un );
 #include "cmd/role_bitmask.h"
 #include "cmd/upgradeable_unit.h"
 #include "components/cloak.h"
-
+#include "cmd/unit_type.h"
 
 
 #include "configuration/configuration.h"
@@ -113,15 +113,6 @@ class AsteroidGeneric;
  * Needed by star system to determine whether current unit
  * is orbitable
  */
-enum Vega_UnitType {
-    unit,
-    planet,
-    building,
-    nebula,
-    asteroid,
-    enhancement,
-    missile
-};
 
 class VDU;
 //template
