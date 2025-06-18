@@ -45,6 +45,7 @@
 #include "root_generic/vs_globals.h"
 #include "msgcenter.h"
 #include "cmd/container.h"
+#include "cmd/unit_type.h"
 class Unit;
 class Order;
 class MessageCenter;
@@ -451,7 +452,7 @@ public:
     static double gametime;
     std::string mission_name;
     void terminateMission();
-    Unit *call_unit_launch(class CreateFlightgroup *fg, int type /*Vega_UnitType type*/, const std::string &destinations);
+    Unit *call_unit_launch(class CreateFlightgroup *fg, Vega_UnitType type /*Vega_UnitType type*/, const std::string &destinations);
 
     Mission(const char *configfile, bool loadscripts = true);
     Mission(const char *filename, const std::string &pythonscript, bool loadscripts = true);

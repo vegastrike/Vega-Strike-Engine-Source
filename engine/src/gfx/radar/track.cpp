@@ -179,7 +179,6 @@ Track::Type::Value Track::IdentifyType() const {
             return Type::Missile;
 
         default:
-            assert(false);
             return Type::Unknown;
     }
 }
