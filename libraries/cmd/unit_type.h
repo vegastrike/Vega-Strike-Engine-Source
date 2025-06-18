@@ -25,12 +25,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_TYPE_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_TYPE_H
 
+#include <string>
+
 // UnitType is already taken
 // TODO: rename to expected
-enum class UnitTypeEnum {
+enum class Vega_UnitType {
     asteroid,
     building,
     enhancement,
@@ -39,5 +42,9 @@ enum class UnitTypeEnum {
     planet,
     unit
 };
+
+int SerializeUnitType(Vega_UnitType type);
+Vega_UnitType DeserializeUnitType(int type);
+Vega_UnitType DeserializeUnitType(std::string type);
 
 #endif //VEGA_STRIKE_ENGINE_CMD_UNIT_TYPE_H
