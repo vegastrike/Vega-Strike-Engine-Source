@@ -1,11 +1,13 @@
 #!/usr/bin/python
-
 ##
 # cinemut-nm-decode.py
 #
-# Copyright (c) 2001-2002 Daniel Horn
-# Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-# Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+# Vega Strike - Space Simulation, Combat and Trading
+# Copyright (C) 2001-2025 The Vega Strike Contributors:
+# Project creator: Daniel Horn
+# Original development team: As listed in the AUTHORS file
+# Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+#
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -13,7 +15,7 @@
 #
 # Vega Strike is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 2 of the License, or
+# the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # Vega Strike is distributed in the hope that it will be useful,
@@ -22,7 +24,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 #
 
 from __future__ import print_function
@@ -46,32 +48,32 @@ try:
         atan = numpy.arctan
         tan = numpy.tan
         e = 2.0
-        
+
         u  = numpy.array(r.getdata(), dtype=numpy.float32)
         u += numpy.array(g.getdata(), dtype=numpy.float32)
         u += numpy.array(b.getdata(), dtype=numpy.float32)
         v  = numpy.array(a.getdata(), dtype=numpy.float32)
-        
+
         u *= 1.0/(3*255)
         u -= 0.5
-        
+
         v *= 1.0/255
         v -= 0.5
-        
+
         z  = 1.0/numpy.sqrt(0.25*0.25 + u*u + v*v)
         u *= z
         v *= z
         z *= 0.25
-        
+
         u *= 0.5
         v *= 0.5
         u += 0.5
         v += 0.5
-        
+
         u *= 255
         v *= 255
         z *= 255
-        
+
         r.putdata(u)
         g.putdata(v)
         b.putdata(z)
