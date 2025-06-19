@@ -310,7 +310,7 @@ bool NavPath::checkForCycles() const {
 bool NavPath::evaluate() {
     NavigationSystem::CachedSystemIterator &systemIter = _Universe->AccessCockpit()->AccessNavSystem()->systemIter;
     path.clear();
-    static size_t max_size = XMLSupport::parse_int(vs_config->getVariable("graphics", "nav_max_search_size", "16384"));
+    const size_t max_size = configuration()->graphics.nav.max_search_size;
     if (!isComplete()) {
         return false;
     }

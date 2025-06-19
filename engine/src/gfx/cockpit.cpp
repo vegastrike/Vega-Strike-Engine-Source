@@ -243,18 +243,10 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
                 static string str = vs_config->getVariable("cockpitaudio", "automatic_landing_zone", "als");
                 static string str1 = vs_config->getVariable("cockpitaudio", "automatic_landing_zone1", "als");
                 static string str2 = vs_config->getVariable("cockpitaudio", "automatic_landing_zone2", "als");
-                static string autolandinga = vs_config->getVariable("graphics",
-                        "automatic_landing_zone_warning",
-                        "comm_docking.ani");
-                static string autolandinga1 = vs_config->getVariable("graphics",
-                        "automatic_landing_zone_warning1",
-                        "comm_docking.ani");
-                static string autolandinga2 = vs_config->getVariable("graphics",
-                        "automatic_landing_zone_warning2",
-                        "comm_docking.ani");
-                static string message = vs_config->getVariable("graphics",
-                        "automatic_landing_zone_warning_text",
-                        "Now Entering an \"Automatic Landing Zone\".");
+                const string autolandinga = configuration()->graphics.automatic_landing_zone_warning;
+                const string autolandinga1 = configuration()->graphics.automatic_landing_zone_warning1;
+                const string autolandinga2 = configuration()->graphics.automatic_landing_zone_warning2;
+                static string message = configuration()->graphics.automatic_landing_zone_warning_text;
                 UniverseUtil::IOmessage(0, "game", "all", message);
                 static Animation *ani0 = new Animation(autolandinga.c_str());
                 static Animation *ani1 = new Animation(autolandinga1.c_str());
@@ -936,7 +928,7 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
         text(NULL) {
     autoMessageTime = 0;
     editingTextMessage = false;
-    static int headlag = XMLSupport::parse_int(vs_config->getVariable("graphics", "head_lag", "10"));
+    const int headlag = configuration()->graphics.head_lag;
     int i;
     for (i = 0; i < headlag; i++) {
         headtrans.push_back(Matrix());
@@ -1024,10 +1016,8 @@ bool GameCockpit::CanDrawNavSystem() {
 void GameCockpit::visitSystem(string systemname) {
     Cockpit::visitSystem(systemname);
     if (AccessNavSystem()) {
-        static bool AlwaysUpdateNavMap =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                        "update_nav_after_jump",
-                        "false"));                              //causes occasional crash--only may have tracked it down
+        //causes occasional crash--only may have tracked it down
+        const bool AlwaysUpdateNavMap = configuration()->graphics.update_nav_after_jump;
         if (AlwaysUpdateNavMap) {
             AccessNavSystem()->pathman->updatePaths();
         }
@@ -1156,7 +1146,7 @@ void GameCockpit::Respawn(const KBData &, KBSTATE k) {
 
 //SAME AS IN COCKPIT BUT ADDS SETVIEW and ACCESSCAMERA -> ~ DUPLICATE CODE
 int GameCockpit::Autopilot(Unit *target) {
-    static bool autopan = XMLSupport::parse_bool(vs_config->getVariable("graphics", "pan_on_auto", "true"));
+    const bool autopan = configuration()->graphics.pan_on_auto;
     int retauto = 0;
     if (target) {
         if (enableautosound.sound < 0) {
@@ -1184,14 +1174,8 @@ int GameCockpit::Autopilot(Unit *target) {
                         Vector P(1, 0, 0), Q(0, 1, 0), R(0, 0, 1);
                         Vector uP, uQ, uR;
                         un->GetOrientation(uP, uQ, uR);
-                        static float auto_side_bias =
-                                XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                        "autopilot_side_bias",
-                                        "1.1"));
-                        static float auto_front_bias =
-                                XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                        "autopilot_front_bias",
-                                        "1.65"));
+                        const float auto_side_bias = configuration()->graphics.autopilot_side_bias;
+                        const float auto_front_bias = configuration()->graphics.autopilot_front_bias;
                         P += uP * auto_side_bias + uR * auto_front_bias;
                         P.Normalize();
                         R = P.Cross(Q);
@@ -1221,8 +1205,8 @@ int GameCockpit::Autopilot(Unit *target) {
 extern void reset_time_compression(const KBData &, KBSTATE a);
 
 void GameCockpit::Shake(float amt, int dtype) {
-    static float shak = XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_shake", "3"));
-    static float shak_max = XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_shake_max", "20"));
+    const float shak = configuration()->graphics.cockpit_shake;
+    const float shak_max = configuration()->graphics.cockpit_shake_max;
     shakin += shak;
     if (shakin > shak_max) {
         shakin = shak_max;
@@ -1233,9 +1217,9 @@ void GameCockpit::Shake(float amt, int dtype) {
 
 static void DrawDamageFlash(int dtype) {
     const int numtypes = 3;
-    static string shieldflash = vs_config->getVariable("graphics", "shield_flash_animation", "");
-    static string armorflash = vs_config->getVariable("graphics", "armor_flash_animation", "armorflash.ani");
-    static string hullflash = vs_config->getVariable("graphics", "hull_flash_animation", "hullflash.ani");
+    const string shieldflash = configuration()->graphics.shield_flash_animation;
+    const string armorflash = configuration()->graphics.armor_flash_animation;
+    const string hullflash = configuration()->graphics.hull_flash_animation;
     string flashes[numtypes];
     flashes[0] = shieldflash;
     flashes[1] = armorflash;
@@ -1264,8 +1248,7 @@ static void DrawDamageFlash(int dtype) {
         int i = dtype;
         if (aflashes[i]) {
             GFXPushBlendMode();
-            static bool damage_flash_alpha =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "damage_flash_alpha", "true"));
+            const bool damage_flash_alpha = configuration()->graphics.damage_flash_alpha;
             if (damage_flash_alpha) {
                 GFXBlendMode(SRCALPHA, INVSRCALPHA);
             } else {
@@ -1459,8 +1442,7 @@ void GameCockpit::Draw() {
                     delta = delta * configuration()->physics.distance_to_warp * 1.01 - (par ? (par->Position()) : QVector(0, 0, 0));
                     destination_system_location = delta.Cast();
                     Vector P, Q, R;
-                    static float nav_symbol_size =
-                            XMLSupport::parse_float(vs_config->getVariable("graphics", "nav_symbol_size", ".25"));
+                    const float nav_symbol_size = configuration()->graphics.nav.symbol_size;
                     AccessCamera()->GetPQR(P, Q, R);
 
                     GFXColor4f(destination_system_color.r,
@@ -1516,27 +1498,17 @@ void GameCockpit::Draw() {
                 headtrans.push_back(Matrix());
                 VectorAndPositionToMatrix(headtrans.back(), -P, Q, R, QVector(0, 0, 0));
                 static float theta = 0, wtheta = 0;
-                static float shake_speed =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "shake_speed", "50"));
-                static float shake_reduction =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "shake_reduction", "8"));
-                static float shake_limit =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "shake_limit", "25"));
-                static float shake_mag =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "shake_magnitude", "0.3"));
-                static float drift_limit =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_drift_limit", "1.00"));
-                static float drift_amount =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_drift_amount", "0.15"));
-                static float drift_ref_accel =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_drift_ref_accel", "100"));
+                const float shake_speed = configuration()->graphics.shake_speed;
+                const float shake_reduction = configuration()->graphics.shake_reduction;
+                const float shake_limit = configuration()->graphics.shake_limit;
+                const float shake_mag = configuration()->graphics.shake_magnitude;
+                const float drift_limit = configuration()->graphics.cockpit_drift_limit;
+                const float drift_amount = configuration()->graphics.cockpit_drift_amount;
+                const float drift_ref_accel = configuration()->graphics.cockpit_drift_ref_accel;
 
-                static float warp_shake_mag =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "warp_shake_magnitude", "0.125"));
-                static float warp_shake_speed =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "warp_shake_speed", "70"));
-                static float warp_shake_ref =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "warp_shake_ref", "2000"));
+                const float warp_shake_mag = configuration()->graphics.warp_shake_magnitude;
+                const float warp_shake_speed = configuration()->graphics.warp_shake_speed;
+                float warp_shake_ref = configuration()->graphics.warp_shake_ref;
                 if (warp_shake_ref <= 0) {
                     warp_shake_ref = 1;
                 }
@@ -1588,10 +1560,8 @@ void GameCockpit::Draw() {
                 float driftmag = cockpitradial * oaccel.Magnitude();
 
                 //if (COCKPITZ_PARTITIONS>1) GFXClear(GFXFALSE,GFXFALSE,GFXTRUE);//only clear stencil buffer
-                static size_t COCKPITZ_PARTITIONS =
-                        XMLSupport::parse_int(vs_config->getVariable("graphics",
-                                "cockpit_z_partitions",
-                                "1"));                                         //Should not be needed if VERYNEAR_CONST is propperly set, but would be useful with stenciled inverse order rendering.
+                //Should not be needed if VERYNEAR_CONST is propperly set, but would be useful with stenciled inverse order rendering.
+                const size_t COCKPITZ_PARTITIONS = configuration()->graphics.cockpit_z_partitions;
                 float zrange = cockpitradial * (1 - VERYNEAR_CONST) + driftmag;
                 float zfloor = cockpitradial * VERYNEAR_CONST;
                 for (j = COCKPITZ_PARTITIONS; j > 0;
@@ -1623,10 +1593,8 @@ void GameCockpit::Draw() {
                 ->UpdateGFX(GFXFALSE, GFXFALSE, GFXTRUE, GFXFALSE, 0, 1000000);         //Restore normal frustrum
     }
     GFXHudMode(true);
-    static float damage_flash_length =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "damage_flash_length", ".1"));
-    static bool
-            damage_flash_first = XMLSupport::parse_bool(vs_config->getVariable("graphics", "flash_behind_hud", "true"));
+    const float damage_flash_length = configuration()->graphics.damage_flash_length;
+    const bool damage_flash_first = configuration()->graphics.flash_behind_hud;
     if (view < CP_CHASE && damage_flash_first && getNewTime() - shake_time < damage_flash_length) {
         DrawDamageFlash(shake_type);
     }
@@ -1661,28 +1629,19 @@ void GameCockpit::Draw() {
 
     RestoreViewPort();
 
-    static bool blend_panels = XMLSupport::parse_bool(vs_config->getVariable("graphics", "blend_panels", "false"));
-    static bool blend_cockpit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "blend_cockpit", "false"));
-    static bool drawChaseVDU =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_vdus_from_chase_cam", "false"));
-    static bool drawPanVDU =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_vdus_from_panning_cam", "false"));
-    static bool drawTgtVDU =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_vdus_from_target_cam", "false"));
-    static bool drawPadVDU =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_vdus_from_padlock_cam", "false"));
+    const bool blend_panels = configuration()->graphics.blend_panels;
+    const bool blend_cockpit = configuration()->graphics.blend_cockpit;
+    const bool drawChaseVDU = configuration()->graphics.draw_vdus_from_chase_cam;
+    const bool drawPanVDU = configuration()->graphics.draw_vdus_from_panning_cam;
+    const bool drawTgtVDU = configuration()->graphics.draw_vdus_from_target_cam;
+    const bool drawPadVDU = configuration()->graphics.draw_vdus_from_padlock_cam;
 
-    static bool drawChasecp =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_cockpit_from_chase_cam", "false"));
-    static bool drawPancp =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_cockpit_from_panning_cam", "false"));
-    static bool drawTgtcp =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_cockpit_from_target_cam", "false"));
-    static bool drawPadcp =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_cockpit_from_padlock_cam", "false"));
+    const bool drawChasecp = configuration()->graphics.draw_cockpit_from_chase_cam;
+    const bool drawPancp = configuration()->graphics.draw_cockpit_from_panning_cam;
+    const bool drawTgtcp = configuration()->graphics.draw_cockpit_from_target_cam;
+    const bool drawPadcp = configuration()->graphics.draw_cockpit_from_padlock_cam;
 
-    static float
-            AlphaTestingCutoff = XMLSupport::parse_float(vs_config->getVariable("graphics", "AlphaTestCutoff", ".8"));
+    const float AlphaTestingCutoff = configuration()->graphics.stars_alpha_test_cutoff;
     if (blend_cockpit) {
         GFXAlphaTest(ALWAYS, 0);
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -1784,22 +1743,6 @@ void GameCockpit::Draw() {
                                         vdu_time[vd] = -cockpit_time;
                                     }
                                 }
-                                /*else {
-                                 *  static string vdustatic=vs_config->getVariable("graphics","vdu_static","static.ani");
-                                 *  static Animation vdu_ani(vdustatic.c_str(),true,.1,BILINEAR);
-                                 *  static soundContainer ejectstopsound;
-                                 *  if (ejectstopsound.sound<0) {
-                                 *  static string str=vs_config->getVariable("cockpitaudio","vdu_static","vdu_static");
-                                 *  ejectstopsound.loadsound(str);
-                                 *  }
-                                 *  if (!AUDIsPlaying(ejectstopsound.sound)) {
-                                 *  ejectstopsound.playsound();
-                                 *  }
-                                 *
-                                 *  GFXEnable(TEXTURE0);
-                                 *  vdu_ani.DrawAsVSSprite(vdu[vd]);
-                                 *
-                                 *  }*/
                             } else if (cockpit_time > ((1 - (-vdu_time[vd])) + (damage))) {
                                 if (randomDouble() > SWITCH_CONST) {
                                     vdu_time[vd] = cockpit_time;
@@ -1934,18 +1877,16 @@ void GameCockpit::Draw() {
                     text->SetPos(0 - (x * 2 * 14), 0 - (y * 2));
                 }
                 GFXColorf(textcol);
-                static bool show_died_text =
-                        XMLSupport::parse_bool(vs_config->getVariable("graphics", "show_respawn_text", "false"));
+                const bool show_died_text = configuration()->graphics.show_respawn_text;
                 if (show_died_text) {
                     text->Draw(
                             "#ff5555You Have Died!\n#000000Press #8080FF;#000000 (semicolon) to respawn\nOr Press #8080FFEsc and 'q'#000000 to quit");
                 }
                 GFXColor4f(1, 1, 1, 1);
 
-                static float min_die_time =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "death_scene_time", "4"));
+                const float min_die_time = configuration()->graphics.death_scene_time;
                 if (dietime > min_die_time) {
-                    static std::string death_menu_script = vs_config->getVariable("graphics", "death_menu_script", "");
+                    static std::string death_menu_script = configuration()->graphics.death_menu_script;
                     if (death_menu_script.empty()) {
                         static VSSprite DieSprite("died.sprite", BILINEAR, GFXTRUE);
                         static VSSprite DieCompatSprite("died.spr", BILINEAR, GFXTRUE);
@@ -2110,7 +2051,7 @@ string GameCockpit::getsoundfile(string sound) {
 void SetStartupView(Cockpit *);
 
 void GameCockpit::UpdAutoPilot() {
-    static bool autopan = XMLSupport::parse_bool(vs_config->getVariable("graphics", "pan_on_auto", "true"));
+    const bool autopan = configuration()->graphics.pan_on_auto;
     if (autopilot_time != 0) {
         autopilot_time -= SIMULATION_ATOM;
         {
@@ -2118,8 +2059,7 @@ void GameCockpit::UpdAutoPilot() {
                 Vector origR = Vector(0, 0, 1);
                 Vector origP = Vector(1, 0, 0);
 
-                static float rotspd =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "autopilot_rotation_speed", ".15"));
+                const float rotspd = configuration()->graphics.autopilot_rotation_speed;
 
                 static float curtime = 0;
                 curtime += SIMULATION_ATOM;
@@ -2131,8 +2071,7 @@ void GameCockpit::UpdAutoPilot() {
                 origQ.Normalize();
                 origR.Normalize();
                 AccessCamera(CP_FIXED)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));                 //hack
-                static float initialzoom =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+                const float initialzoom = configuration()->graphics.initial_zoom_factor;
                 zoomfactor = initialzoom;
             }
         }
@@ -2169,12 +2108,8 @@ void SwitchUnits2(Unit *nw) {
         nw->SetTurretAI();
         nw->DisableTurretAI();
 
-        static bool LoadNewCockpit =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "UnitSwitchCockpitChange", "false"));
-        static bool DisCockpit =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                        "SwitchCockpitToDefaultOnUnitSwitch",
-                        "false"));
+        const bool LoadNewCockpit = configuration()->graphics.unit_switch_cockpit_change;
+        const bool DisCockpit = configuration()->graphics.switch_cockpit_to_default_on_unit_switch;
         if (nw->getCockpit().length() > 0 || DisCockpit) {
             _Universe->AccessCockpit()->Init(nw->getCockpit().c_str(), LoadNewCockpit == false);
         }
@@ -2248,7 +2183,7 @@ void GameCockpit::ScrollAllVDU(int howmuch) {
 }
 
 void GameCockpit::SetStaticAnimation() {
-    static string comm_static = vs_config->getVariable("graphics", "comm_static", "static.ani");
+    const string comm_static = configuration()->graphics.comm_static;
     static Animation Statuc(comm_static.c_str());
     for (unsigned int i = 0; i < vdu.size(); i++) {
         if (vdu[i]->getMode() == VDU::COMM) {
@@ -2319,8 +2254,7 @@ static void ShoveCamBelowUnit(int cam, Unit *un, float zoomfactor) {
     QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
     Vector p, q, r;
     _Universe->AccessCamera(cam)->GetOrientation(p, q, r);
-    static float
-            ammttoshovecam = XMLSupport::parse_float(vs_config->getVariable("graphics", "shove_camera_down", ".3"));
+    const float ammttoshovecam = configuration()->graphics.shove_camera_down;
     _Universe->AccessCamera(cam)->SetPosition(
             unpos - (r - ammttoshovecam * q).Cast() * (un->rSize() + configuration()->graphics.znear * 2) * zoomfactor,
             un->GetWarpVelocity(),
@@ -2451,72 +2385,31 @@ void GameCockpit::SetupViewPort(bool clip) {
 
         //WARP-FOV link
         {
-            static float stable_lowarpref =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.loref", "1"));
-            static float stable_hiwarpref =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.hiref", "100000"));
-            static float stable_refexp =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.exp", "0.5"));
-            static bool stable_asymptotic =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "warp.fovlink.stable.asymptotic", "1"));
-            static float stable_offset_f =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.offset.front",
-                            "0"));
-            static float stable_offset_b =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.offset.back", "0"));
-            static float stable_offset_p =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.offset.perpendicular",
-                            "0"));
-            static float stable_multiplier_f =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.multiplier.front",
-                            "0.85"));
-            static float stable_multiplier_b =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.multiplier.back",
-                            "1.5"));
-            static float stable_multiplier_p =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.stable.multiplier.perpendicular",
-                            "1.25"));
+            const float stable_lowarpref = configuration()->warp.fov_link.stable.low_ref; /* default: 1 */
+            float stable_hiwarpref = configuration()->warp.fov_link.stable.high_ref; /* default: 100000 */
+            const float stable_refexp = configuration()->warp.fov_link.stable.exp; /* default: 0.5 */
+            const bool stable_asymptotic = configuration()->warp.fov_link.stable.asymptotic; /* default: 1 */
+            const float stable_offset_f = configuration()->warp.fov_link.stable.offset.front; /* default: 0 */
+            const float stable_offset_b = configuration()->warp.fov_link.stable.offset.back; /* default: 0 */
+            const float stable_offset_p = configuration()->warp.fov_link.stable.offset.perpendicular; /* default: 0 */
+            const float stable_multiplier_f = configuration()->warp.fov_link.stable.multiplier.front; /* default: 0.85 */
+            const float stable_multiplier_b = configuration()->warp.fov_link.stable.multiplier.back; /* default: 1.5 */
+            const float stable_multiplier_p = configuration()->warp.fov_link.stable.multiplier.perpendicular; /* default: 1.25 */
 
-            static float shake_lowarpref =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.loref", "10000"));
-            static float shake_hiwarpref =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.hiref", "200000"));
-            static float shake_refexp =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.exp", "1.5"));
-            static bool shake_asymptotic =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "warp.fovlink.shake.asymptotic", "1"));
-            static float shake_speed =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.speed", "10"));
-            static float shake_offset_f =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.offset.front", "0"));
-            static float shake_offset_b =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.offset.back", "0"));
-            static float shake_offset_p =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.shake.offset.perpendicular",
-                            "0"));
-            static float shake_multiplier_f =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.shake.multiplier.front",
-                            "0"));
-            static float shake_multiplier_b =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.shake.multiplier.back",
-                            "0"));
-            static float shake_multiplier_p =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.shake.multiplier.perpendicular",
-                            "0"));
+            const float shake_lowarpref = configuration()->warp.fov_link.shake.low_ref; /* default: 10000 */
+            float shake_hiwarpref = configuration()->warp.fov_link.shake.high_ref; /* default: 200000 */
+            const float shake_refexp = configuration()->warp.fov_link.shake.exp; /* default: 1.5 */
+            const bool shake_asymptotic = configuration()->warp.fov_link.shake.asymptotic; /* default: 1 */
+            const float shake_speed = configuration()->warp.fov_link.shake.speed; /* default: 10 */
+            const float shake_offset_f = configuration()->warp.fov_link.shake.offset.front; /* default: 0 */
+            const float shake_offset_b = configuration()->warp.fov_link.shake.offset.back; /* default: 0 */
+            const float shake_offset_p = configuration()->warp.fov_link.shake.offset.perpendicular; /* default: 0 */
+            const float shake_multiplier_f = configuration()->warp.fov_link.shake.multiplier.front; /* default: 0 */
+            const float shake_multiplier_b = configuration()->warp.fov_link.shake.multiplier.back; /* default: 0 */
+            const float shake_multiplier_p = configuration()->warp.fov_link.shake.multiplier.perpendicular; /* default: 0 */
 
-            static float refkpsoverride =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics",
-                            "warp.fovlink.referencekps",
-                            "0"));                                       //0 means automatic
+            //0 means automatic
+            const float refkpsoverride = configuration()->warp.fov_link.reference_kps; /* default: 0 */
 
             static float theta = 0;
             theta += shake_speed * GetElapsedTime();
@@ -2578,8 +2471,7 @@ void GameCockpit::SetupViewPort(bool clip) {
             sh_offs *= sh_warpfieldstrength * costheta;
             st_mult = (1 - st_warpfieldstrength) + st_mult * st_warpfieldstrength;
             sh_mult *= sh_warpfieldstrength * costheta;
-            static float fov_smoothing =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.smoothing", ".4"));
+            const float fov_smoothing = configuration()->warp.fov_link.smoothing;
             float fov_smoot = std::pow(double(fov_smoothing), GetElapsedTime());
             smooth_fov =
                     min(170.0,

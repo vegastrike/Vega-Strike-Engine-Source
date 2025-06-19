@@ -298,12 +298,9 @@ string getRes(string inp) {
 }
 
 void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
-    static bool cockpit_smooth =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "cockpit_smooth_texture", "false"));
-    static bool panel_smooth =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "panel_smooth_texture", "true"));
-    static bool crosshair_smooth =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "crosshair_smooth_texture", "true"));
+    const bool cockpit_smooth = configuration()->graphics.cockpit_smooth_texture;
+    const bool panel_smooth = configuration()->graphics.panel_smooth_texture;
+    const bool crosshair_smooth = configuration()->graphics.crosshair_smooth_texture;
     AttributeList::const_iterator iter;
     Gauge::DIRECTION tmpdir = Gauge::GAUGE_UP;
     VSSprite **newsprite = NULL;

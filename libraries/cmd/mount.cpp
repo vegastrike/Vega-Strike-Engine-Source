@@ -65,9 +65,9 @@ Mount::Mount() {
     processed = Mount::PROCESSED;
     sound = -1;
     last_sound_refire_time = 0.0;
-    static float xyscalestat = XMLSupport::parse_float(vs_config->getVariable("graphics", "weapon_xyscale", "1"));
+    const float xyscalestat = configuration()->graphics.weapon_xyscale;
 
-    static float zscalestat = XMLSupport::parse_float(vs_config->getVariable("graphics", "weapon_zscale", "1"));
+    const float zscalestat = configuration()->graphics.weapon_zscale;
     xyscale = xyscalestat;
     zscale = zscalestat;
 }
@@ -108,9 +108,9 @@ Mount::Mount(const string &filename, int am, int vol, float xyscale, float zscal
     maxfunctionality = maxfunc;
     static WeaponInfo wi(WEAPON_TYPE::BEAM);
     size = as_integer(MOUNT_SIZE::NOWEAP);
-    static float xyscalestat = XMLSupport::parse_float(vs_config->getVariable("graphics", "weapon_xyscale", "1"));
+    const float xyscalestat = configuration()->graphics.weapon_xyscale;
 
-    static float zscalestat = XMLSupport::parse_float(vs_config->getVariable("graphics", "weapon_zscale", "1"));
+    const float zscalestat = configuration()->graphics.weapon_zscale;
     if (xyscale == -1) {
         xyscale = xyscalestat;
     }

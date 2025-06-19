@@ -217,7 +217,7 @@ void Unit::SetTarget(Unit *target) {
  Unit *Unit::Threat() {
     return CheckNullAndCastToUnit(computer.threat);
  }
-    
+
 const Unit *Unit::Threat() const {
     return CheckNullAndConstCastToUnit(computer.threat);
 }
@@ -1425,7 +1425,7 @@ void Unit::UnRef() {
 }
 
 float Unit::ExplosionRadius() {
-    static float expsize = XMLSupport::parse_float(vs_config->getVariable("graphics", "explosion_size", "3"));
+    const float expsize = configuration()->graphics.explosion_size;
     return expsize * rSize();
 }
 

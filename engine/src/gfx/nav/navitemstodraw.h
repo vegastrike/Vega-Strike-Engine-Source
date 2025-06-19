@@ -31,11 +31,9 @@
 //**********************************
 void NavigationSystem::DrawCursor(float x, float y, float wid, float hei, const GFXColor &col) {
     float sizex, sizey;
-    static bool modern_nav_cursor =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "nav", "modern_mouse_cursor", "true"));
+    const bool modern_nav_cursor = configuration()->graphics.nav.modern_mouse_cursor;
     if (modern_nav_cursor) {
-        static string
-                mouse_cursor_sprite = vs_config->getVariable("graphics", "nav", "mouse_cursor_sprite", "mouse.spr");
+        const std::string mouse_cursor_sprite = configuration()->graphics.nav.mouse_cursor_sprite;
         static VSSprite MouseVSSprite(mouse_cursor_sprite.c_str(), BILINEAR, GFXTRUE);
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
         GFXColorf(GUI_OPAQUE_WHITE());

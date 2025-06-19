@@ -96,7 +96,7 @@ struct WarpTrail {
         Vector p, q, r;
         r = (end - start).Cast();
         r.Normalize();
-        static double stretch = XMLSupport::parse_float(vs_config->getVariable("graphics", "warp_trail_stretch", "300"));
+        const double stretch = configuration()->graphics.warp_trail_stretch;
         r *= un->rSize() * stretch;
         q = Vector(0, 1, 0);
         p = r.Cross(q);

@@ -319,8 +319,7 @@ Mesh *Mesh::getLOD(float lod, bool bBypassDamping) {
         unsigned int which = (int) float_to_int(floor(fmod(getCurrentFrame(),
                 animFrames->size())));
         float adv = GetElapsedTime() * getFramesPerSecond();
-        static float max_frames_skipped =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "mesh_animation_max_frames_skipped", "3"));
+        const float max_frames_skipped = configuration()->graphics.mesh_animation_max_frames_skipped;
         if (adv > max_frames_skipped) {
             adv = max_frames_skipped;
         }

@@ -177,7 +177,7 @@ void NavigationSystem::Setup() {
     mouse_x_previous = (-1 + float(mousex) / (.5 * configuration()->graphics.resolution_x));
     mouse_y_previous = (1 + float(-1 * mousey) / (.5 * configuration()->graphics.resolution_y));
 
-    static int max_map_nodes = XMLSupport::parse_int(vs_config->getVariable("graphics", "max_map_nodes", "256000"));
+    const int max_map_nodes = configuration()->graphics.max_map_nodes;
     systemIter.init(UniverseUtil::getSystemFile(), max_map_nodes);
     sectorIter.init(systemIter);
     systemselectionindex = 0;
@@ -391,10 +391,8 @@ void NavigationSystem::Draw() {
     //DRAW THE SCREEN MODEL
     //**********************************
     Vector p, q, r;
-    static float zrange =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_nav_zrange", "10"));
-    static float zfloor =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_nav_zfloor", "0.1"));
+    const float zrange = configuration()->graphics.cockpit_nav_zrange;
+    const float zfloor = configuration()->graphics.cockpit_nav_zfloor;
     _Universe->AccessCamera()->GetOrientation(p, q, r);
     _Universe->AccessCamera()->UpdateGFX(GFXTRUE,
             GFXTRUE,
@@ -579,8 +577,8 @@ void NavigationSystem::DrawMission() {
     size_t i = 0;
     string factionname = "factionname";
     float relation = 0.0;
-    static string disallowedFactions = vs_config->getVariable("graphics", "unprintable_factions", "");
-    static string disallowedExtension = vs_config->getVariable("graphics", "unprintable_faction_extension", "citizen");
+    const string disallowedFactions = configuration()->graphics.unprintable_factions;
+    const string disallowedExtension = configuration()->graphics.unprintable_faction_extension;
     int totkills = 0;
     size_t fac_loc_before = 0, fac_loc = 0, fac_loc_after = 0;
     for (; i < numfactions; ++i) {
@@ -1027,10 +1025,8 @@ void NavigationSystem::setFocusedSystemIndex(unsigned newSystemIndex) {
 
 void NavigationSystem::setCurrentSystemIndex(unsigned newSystemIndex) {
     currentsystemindex = newSystemIndex;
-    static bool AlwaysUpdateNavMap =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                    "update_nav_after_jump",
-                    "false"));                          //causes occasional crash--only may have tracked it down
+    //causes occasional crash--only may have tracked it down
+    const bool AlwaysUpdateNavMap = configuration()->graphics.update_nav_after_jump;
     if (AlwaysUpdateNavMap) {
         pathman->updatePaths(PathManager::CURRENT);
     }
@@ -1123,8 +1119,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
     float yl = (y1 + y2) / 2.0;
     a_label.SetPos((xl - offset) - (checkbit(buttonstates, button_number - 1) ? 0.006 : 0), (yl + 0.025));
     a_label.SetText(label);
-    static bool nav_button_labels =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_nav_button_labels", "true"));
+    const bool nav_button_labels = configuration()->graphics.draw_nav_button_labels;
     if (nav_button_labels) {
         const float background_alpha = configuration()->graphics.hud.text_background_alpha;
         GFXColor tpbg = a_label.bgcol;
@@ -1585,8 +1580,7 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
     if (((mouse_previous_state[1] == 1)
             && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
                     mouse_y_current)) || (mouse_wentdown[3] || mouse_wentdown[4])) {
-        static float wheel_zoom_level =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "wheel_zoom_amount", "0.1"));
+        const float wheel_zoom_level = configuration()->graphics.wheel_zoom_amount;
         if (system_vs_galaxy) {
             if (mouse_wentdown[3]) {
                 zoom_s += wheel_zoom_level;
@@ -1595,9 +1589,6 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
             } else {
                 zoom_s = zoom_s + ( /*1.0 +*/ 8 * (mouse_y_current - mouse_y_previous));
             }
-            //if(zoom < 1.0)
-            //zoom = 1.0;
-//static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));
             if (zoom_s < 1.2) {
                 zoom_s = 1.2;
             }
@@ -1612,9 +1603,6 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
             } else {
                 zoom = zoom + ( /*1.0 +*/ 8 * (mouse_y_current - mouse_y_previous));
             }
-            //if(zoom < 1.0)
-            //zoom = 1.0;
-//static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));
             if (zoom < .5) {
                 zoom = .5;
             }

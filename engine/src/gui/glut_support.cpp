@@ -91,7 +91,7 @@ float word_length(const char *str) {
 }
 
 void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
-    static float rescale_font = XMLSupport::parse_float(vs_config->getVariable("graphics", "gui_font_scale", ".75"));
+    const float rescale_font = configuration()->graphics.gui_font_scale;
     float font_size_float = rescale_font * 5. / 100;
 
     int cur;

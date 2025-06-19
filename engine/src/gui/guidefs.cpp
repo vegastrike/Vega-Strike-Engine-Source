@@ -32,8 +32,10 @@
 #include "src/config_xml.h"
 #include "guidefs.h"
 
+#include "configuration/configuration.h"
+
 GFXColor SaturatedColor(float r, float g, float b, float a) {
-    static float Saturation = XMLSupport::parse_float(vs_config->getVariable("graphics", "base_saturation", "1.0"));
+    const float Saturation = configuration()->graphics.base_saturation;
 
     return GFXColor((r * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3,
             (g * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3,

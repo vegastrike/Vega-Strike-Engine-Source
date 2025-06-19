@@ -209,8 +209,7 @@ static float drawChars(const string &str,
     if (useStroke()) {
         glLineWidth(font.strokeWidth());
     } else {
-        static bool setRasterPos =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "set_raster_text_color", "true"));
+        const bool setRasterPos = configuration()->graphics.set_raster_text_color;
         if (setRasterPos) {
             glRasterPos2f(inRasterPos / (configuration()->graphics.resolution_x / 2), 0);
         }
@@ -719,8 +718,7 @@ void PaintText::calcLayout(void) {
     m_verticalScaling = m_font.verticalScaling();
     m_horizontalScaling = m_font.horizontalScaling();
     //Max line width in character reference space.
-    static double
-            font_width_hack = XMLSupport::parse_float(vs_config->getVariable("graphics", "font_width_hack", "0.925"));
+    const double font_width_hack = configuration()->graphics.font_width_hack;
     const float maxLineWidth = m_rect.size.width * font_width_hack / m_horizontalScaling;
     //The temporary global state for the layout operation.
     //Make sure this gets initialized at the beginning of an operation.

@@ -478,10 +478,8 @@ BaseComputer::~BaseComputer(void) {
 }
 
 GFXColor BaseComputer::getColorForGroup(std::string id) {
-    static bool use_faction_background =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "use_faction_gui_background_color", "true"));
-    static float faction_color_darkness =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "base_faction_color_darkness", ".75"));
+    const bool use_faction_background = configuration()->graphics.use_faction_gui_background_color;
+    const float faction_color_darkness = configuration()->graphics.base_faction_color_darkness;
     if (use_faction_background) {
         int fac = m_base.GetUnit()->faction;
         if (FactionUtil::GetFactionName(fac) == "neutral") {
@@ -1414,8 +1412,7 @@ void BaseComputer::recalcTitle() {
     }
     // at this point, baseName will be e.g. "Agricultural planet Helen" or "mining_base Achilles"
     baseTitle += emergency_downgrade_mode;
-    static bool includebasename =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "include_base_name_on_dock", "true"));
+    const bool includebasename = configuration()->graphics.bases.include_base_name_on_dock;
     if (includebasename) {
         baseTitle += baseName;
 
@@ -1433,8 +1430,7 @@ void BaseComputer::recalcTitle() {
     //Generic player title for display
     std::string playerTitle = "";
 
-    static bool showStardate =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "show_stardate", "true"));
+    const bool showStardate = configuration()->graphics.show_stardate;
 
     //Credits the player has.
     const float playerCredits = _Universe->AccessCockpit()->credits;
@@ -1956,10 +1952,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 } else {
                     PRETTY_ADDN("", baseUnit->PriceCargo(item.GetName()), 2);
                     tempString = (boost::format("Price: #b#%1%#-b#n#") % text).str();
-                    static bool printvolume =
-                            XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                    "base_print_cargo_volume",
-                                    "true"));
+                    const bool printvolume = configuration()->graphics.bases.print_cargo_volume;
                     if (printvolume) {
                         descString += tempString;
                         tempString = (boost::format("Vessel volume: %1$.2f cubic meters;  "
@@ -2297,8 +2290,7 @@ SimplePickerCell *BaseComputer::createCategoryCell(SimplePickerCells &cells,
     }
     SimplePickerCell
             *parentCell = static_cast< SimplePickerCell * > ( cells.cellAt(cells.count() - 1));     //Last cell in list.
-    static bool
-            showDefault = XMLSupport::parse_bool(vs_config->getVariable("graphics", "open_picker_categories", "false"));
+    const bool showDefault = configuration()->graphics.open_picker_categories;
     parentCell->setHideChildren(!showDefault);
     if (loc == string::npos) {
         //This is a simple category -- we are done.

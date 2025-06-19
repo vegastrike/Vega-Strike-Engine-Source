@@ -179,8 +179,7 @@ int Room(std::string text) {
         p_base_vs_sprite->texfile = file;
 #endif
         float tx = 0, ty = 0;
-        static bool
-                addspritepos = XMLSupport::parse_bool(vs_config->getVariable("graphics", "offset_sprites_by_pos", "true"));
+        const bool addspritepos = configuration()->graphics.offset_sprites_by_pos;
         if (addspritepos) {
             p_base_vs_sprite->spr.GetPosition(tx, ty);
         }
@@ -887,10 +886,9 @@ const Dictionary &GetEventData() {
 }
 
 float GetTextHeight(std::string text, Vector widheimult) {
-    static bool force_highquality = true;
-    static bool use_bit = force_highquality
-            || XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font", "false"));
-    static float font_point = XMLSupport::parse_float(vs_config->getVariable("graphics", "font_point", "16"));
+    static constexpr bool force_highquality = true;
+    constexpr bool use_bit = force_highquality ||  configuration()->graphics.high_quality_font;
+    const float font_point = configuration()->graphics.font_point;
     return use_bit ? getFontHeight() : (font_point * 2 / configuration()->graphics.resolution_y);
 }
 
