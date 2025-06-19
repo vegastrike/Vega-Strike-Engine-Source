@@ -456,7 +456,7 @@ def process_a_transform_pass(starting_file_contents: str, parse_key: ParseKey) -
     return starting_file_contents
 
 
-def read_options_cpp(config_items: dict[str, Setting], our_parse_keys: list[ParseKey]) -> None:
+def read_options_cpp(config_items: dict[str, Setting]) -> None:
     print('** Starting to read options.cpp file')
 
     with options_cpp_path.open(mode='r', encoding='utf-8', newline=None) as options_cpp_reader:
@@ -472,13 +472,13 @@ def read_options_cpp(config_items: dict[str, Setting], our_parse_keys: list[Pars
             current_match = equals_configuration_parse_key_1.pattern.search(options_cpp_content, current_match.end())
 
 
-def read_parse_write_misc_file(file_path: Path, config_items: dict[str, Setting], section_name: str, parse_keys: list[ParseKey]) -> None:
+def read_parse_write_misc_file(file_path: Path, my_parse_keys: list[ParseKey]) -> None:
     print('*** Starting to process file ' + file_path.__fspath__())
     this_file_as_read: str
     with file_path.open(mode='r', encoding='utf-8', newline=None) as file_read:
         this_file_as_read = file_read.read()
     this_file_rewritten: str = this_file_as_read
-    for each_parse_key in parse_keys:
+    for each_parse_key in my_parse_keys:
         this_file_rewritten = process_a_transform_pass(this_file_rewritten, each_parse_key)
     with file_path.open(mode='w', encoding='utf-8', newline=None) as file_write:
         file_write.write(this_file_rewritten)
@@ -526,13 +526,13 @@ def main() -> int:
     #     options_h_writer.write(options_h_output)
 
     # preprocess_a(options_cpp_path)
-    read_options_cpp(configuration_items, my_parse_keys)
+    read_options_cpp(configuration_items)
     # with options_cpp_path.open(mode='w', encoding='utf-8', newline=None) as options_cpp_writer:
     #     options_cpp_writer.write(options_cpp_output)
 
     file_list: list[Path] = list_files_recursive()
     for file in file_list:
-        read_parse_write_misc_file(file, configuration_items, section_name_parsed, my_parse_keys)
+        read_parse_write_misc_file(file, my_parse_keys)
 
     inline_options(configuration_items)
 
