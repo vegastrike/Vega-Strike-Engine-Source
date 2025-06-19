@@ -95,14 +95,14 @@ trailing_comment_parse_key_2.leave_as_is = r'\2'
 
 setting_declaration_namespaced_parse_key = ParseKey()
 setting_declaration_namespaced_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*('
-                                                              r'?P<type>[a-z0-9_]+::[a-z0-9_]+)\s+(?P<name>[a-z0-9_]+)(?P<init_braces>\{'
+                                                              r'?P<type>std::string)\s+(?P<name>[a-z0-9_]+)(?P<init_braces>\{'
                                                               r'})?\s*; *$', regex_flags_multiline)
 setting_declaration_namespaced_parse_key.substitution = r'\g<initial_space>\g<static_or_const> \g<type> \g<name>\g<init_braces>;'
 setting_declaration_namespaced_parse_key.leave_as_is = ''
 parse_keys.append(setting_declaration_namespaced_parse_key)
 setting_declaration_simple_parse_key = ParseKey()
 setting_declaration_simple_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*('
-                                                          r'?P<type>[a-z0-9_]+)\s+(?P<name>[a-z0-9_]+)(?P<init_braces>\{})?\s*; '
+                                                          r'?P<type>bool|double|float|int)\s+(?P<name>[a-z0-9_]+)(?P<init_braces>\{})?\s*; '
                                                           r'*$', regex_flags_multiline)
 setting_declaration_simple_parse_key.substitution = r'\g<initial_space>\g<static_or_const> \g<type> \g<name>\g<init_braces>;'
 setting_declaration_simple_parse_key.leave_as_is = ''
@@ -127,154 +127,200 @@ parse_keys.append(equals_configuration_parse_key_2)
 def build_parse_keys(section_name: str) -> list[ParseKey]:
     parse_key_1 = ParseKey()
     parse_key_1.pattern = re.compile(
-        r'^(?P<initial_space> {4})static\s+(?P<type>[a-z0-9_]+(?:::[a-z0-9_]+)?)\s+(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
+        r'^(?P<initial_space> {4})static\s+(?P<type>bool|double|float|int|std::string)\s+(?P<name>['
+        r'a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name +
+        r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
         regex_flags_multiline)
     parse_key_1.substitution = r'\g<initial_space>const \g<type> \g<name> = configuration()->' + section_name + r'.\g<subsection>.\g<name2>;'
     parse_key_1.leave_as_is = ''
     parse_keys.append(parse_key_1)
     parse_key_1a = ParseKey()
     parse_key_1a.pattern = re.compile(
-        r'^(?P<initial_space> {4})static\s+(?P<type>[a-z0-9_]+(?:::[a-z0-9_]+)?)\s+(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
+        r'^(?P<initial_space> {4})static\s+(?P<type>bool|double|float|int|std::string)\s+(?P<name>['
+        r'a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name +
+        r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
         regex_flags_multiline)
     parse_key_1a.substitution = r'\g<initial_space>const \g<type> \g<name> = configuration()->' + section_name + r'.\g<subsection>.\g<name2>'
     parse_key_1a.leave_as_is = ''
     parse_keys.append(parse_key_1a)
     parse_key_2 = ParseKey()
     parse_key_2.pattern = re.compile(
-        r'^(?P<initial_space> *)(?P<type>[a-z0-9_]+(?:::[a-z0-9_]+)?)\s+=(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
+        r'^(?P<initial_space> *)(?P<type>bool|double|float|int|std::string)\s+=(?P<name>['
+        r'a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name +
+        r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
         regex_flags_multiline)
     parse_key_2.substitution = r'\g<initial_space>const \g<type> \g<name> = configuration()->' + section_name + r'.\g<subsection>.\g<name2>;'
     parse_key_2.leave_as_is = ''
     parse_keys.append(parse_key_2)
     parse_key_2a = ParseKey()
     parse_key_2a.pattern = re.compile(
-        r'^(?P<initial_space> *)(?P<type>[a-z0-9_]+(?:::[a-z0-9_]+)?)\s+=(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
+        r'^(?P<initial_space> *)(?P<type>bool|double|float|int|std::string)\s+=(?P<name>['
+        r'a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name +
+        r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
         regex_flags_multiline)
     parse_key_2a.substitution = r'\g<initial_space>const \g<type> \g<name> = configuration()->' + section_name + r'.\g<subsection>.\g<name2>'
     parse_key_2a.leave_as_is = ''
     parse_keys.append(parse_key_2a)
     parse_key_3 = ParseKey()
     parse_key_3.pattern = re.compile(
-        r'^(?P<initial_space> *)(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>w+)"s*,s*"(?P<name2>w+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
+        r'^(?P<initial_space> *)(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\('
+        r'\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>w+)"s*,s*"(?P<name2>w+)"\s*,'
+                                                               r'\s*"[^"]*"\s*\)\s*\)\s*;$',
         regex_flags_multiline)
     parse_key_3.substitution = r'\g<initial_space>\g<name> = configuration()->' + section_name + r'.\g<subsection>.\g<name2>;'
     parse_key_3.leave_as_is = ''
     parse_keys.append(parse_key_3)
     parse_key_3a = ParseKey()
     parse_key_3a.pattern = re.compile(
-        r'^(?P<initial_space> *)(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>w+)"s*,s*"(?P<name2>w+)"\s*,\s*"[^"]*"\s*\)\s*\)',
+        r'^(?P<initial_space> *)(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\('
+        r'\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>w+)"s*,s*"(?P<name2>w+)"\s*,'
+                                                               r'\s*"[^"]*"\s*\)\s*\)',
         regex_flags_multiline)
     parse_key_3a.substitution = r'\g<initial_space>\g<name> = configuration()->' + section_name + r'.\g<subsection>.\g<name2>'
     parse_key_3a.leave_as_is = ''
     parse_keys.append(parse_key_3a)
     parse_key_4 = ParseKey()
     parse_key_4.pattern = re.compile(
-        r'\bXMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>w+)"s*,s*"(?P<name2>w+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
+        r'\bXMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"('
+                                                                                                  r'?P<subsection>w+)"s*,s*"(?P<name2>w+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
         regex_flags_multiline)
     parse_key_4.substitution = r'configuration()->' + section_name + r'.\g<subsection>.\g<name2>;'
     parse_key_4.leave_as_is = ''
     parse_keys.append(parse_key_4)
     parse_key_4a = ParseKey()
     parse_key_4a.pattern = re.compile(
-        r'\bXMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>w+)"s*,s*"(?P<name2>w+)"\s*,\s*"[^"]*"\s*\)\s*\)',
+        r'\bXMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"('
+                                                                                                  r'?P<subsection>w+)"s*,s*"(?P<name2>w+)"\s*,\s*"[^"]*"\s*\)\s*\)',
         regex_flags_multiline)
     parse_key_4a.substitution = r'configuration()->' + section_name + r'.\g<subsection>.\g<name2>'
     parse_key_4a.leave_as_is = ''
     parse_keys.append(parse_key_4a)
     parse_key_5 = ParseKey()
     parse_key_5.pattern = re.compile(
-        r'\bparse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*\)\s*\)\s*;$',
+        r'\bparse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>['
+                                                                                      r'a-z0-9_]+)"\s*,'
+                                                                                      r'\s*"(?P<name2>['
+                                                                                      r'a-z0-9_]+)"\s*\)\s*\)\s*;$',
         regex_flags_multiline)
     parse_key_5.substitution = r'configuration()->' + section_name + r'.\g<subsection>.\g<name2>;'
     parse_key_5.leave_as_is = ''
     parse_keys.append(parse_key_5)
     parse_key_5a = ParseKey()
     parse_key_5a.pattern = re.compile(
-        r'\bparse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>[a-z0-9_]+)"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*\)\s*\)',
+        r'\bparse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>['
+                                                                                      r'a-z0-9_]+)"\s*,'
+                                                                                      r'\s*"(?P<name2>['
+                                                                                      r'a-z0-9_]+)"\s*\)\s*\)',
         regex_flags_multiline)
     parse_key_5a.substitution = r'configuration()->' + section_name + r'.\g<subsection>.\g<name2>;'
     parse_key_5a.leave_as_is = ''
     parse_keys.append(parse_key_5a)
     parse_key_6 = ParseKey()
     parse_key_6.pattern = re.compile(
-        r'\bvs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>w+)"s*,s*"(?P<name2>w+)"\s*,\s*"[^"]*"\s*\)\s*;$',
+        r'\bvs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>w+)"s*,s*"(?P<name2>w+)"\s*,'
+                                                              r'\s*"[^"]*"\s*\)\s*;$',
         regex_flags_multiline)
     parse_key_6.substitution = r'configuration()->' + section_name + r'.\g<subsection>.\g<name2>;'
     parse_key_6.leave_as_is = ''
     parse_keys.append(parse_key_6)
     parse_key_6a = ParseKey()
     parse_key_6a.pattern = re.compile(
-        r'\bvs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>w+)"s*,s*"(?P<name2>w+)"\s*,\s*"[^"]*"\s*\)',
+        r'\bvs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<subsection>w+)"s*,s*"(?P<name2>w+)"\s*,'
+                                                              r'\s*"[^"]*"\s*\)',
         regex_flags_multiline)
     parse_key_6a.substitution = r'configuration()->' + section_name + r'.\g<subsection>.\g<name2>'
     parse_key_6a.leave_as_is = ''
     parse_keys.append(parse_key_6a)
     parse_key_7 = ParseKey()
     parse_key_7.pattern = re.compile(
-        r'^(?P<initial_space> *)static\s+(?P<type>[a-z0-9_]+(?:::[a-z0-9_]+)?)\s+(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
+        r'^(?P<initial_space> *)static\s+(?P<type>bool|double|float|int|std::string)\s+(?P<name>['
+        r'a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name +
+        r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
         regex_flags_multiline)
     parse_key_7.substitution = r'\g<initial_space>const \g<type> \g<name> = configuration()->' + section_name + r'.\g<name2>;'
     parse_key_7.leave_as_is = ''
     parse_keys.append(parse_key_7)
     parse_key_7a = ParseKey()
     parse_key_7a.pattern = re.compile(
-        r'^(?P<initial_space> *)static\s+(?P<type>[a-z0-9_]+(?:::[a-z0-9_]+)?)\s+(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
+        r'^(?P<initial_space> *)static\s+(?P<type>bool|double|float|int|std::string)\s+(?P<name>['
+        r'a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name +
+        r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
         regex_flags_multiline)
     parse_key_7a.substitution = r'\g<initial_space>const \g<type> \g<name> = configuration()->' + section_name + r'.\g<name2>'
     parse_key_7a.leave_as_is = ''
     parse_keys.append(parse_key_7a)
     parse_key_8 = ParseKey()
     parse_key_8.pattern = re.compile(
-        r'^(?P<initial_space> *)(?P<type>[a-z0-9_]+(?:::[a-z0-9_]+)?)\s+=(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
+        r'^(?P<initial_space> *)(?P<type>bool|double|float|int|std::string)\s+=(?P<name>['
+        r'a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name +
+        r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
         regex_flags_multiline)
     parse_key_8.substitution = r'\g<initial_space>const \g<type> \g<name> = configuration()->' + section_name + r'.\g<name2>;'
     parse_key_8.leave_as_is = ''
     parse_keys.append(parse_key_8)
     parse_key_8a = ParseKey()
     parse_key_8a.pattern = re.compile(
-        r'^(?P<initial_space> *)(?P<type>[a-z0-9_]+(?:::[a-z0-9_]+)?)\s+=(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
+        r'^(?P<initial_space> *)(?P<type>bool|double|float|int|std::string)\s+=(?P<name>['
+        r'a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name +
+        r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
         regex_flags_multiline)
     parse_key_8a.substitution = r'\g<initial_space>const \g<type> \g<name> = configuration()->' + section_name + r'.\g<name2>'
     parse_key_8a.leave_as_is = ''
     parse_keys.append(parse_key_8a)
     parse_key_9 = ParseKey()
     parse_key_9.pattern = re.compile(
-        r'^(?P<initial_space> *)(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
+        r'^(?P<initial_space> *)(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\('
+        r'\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,'
+                                                               r'\s*"[^"]*"\s*\)\s*\)\s*;$',
         regex_flags_multiline)
     parse_key_9.substitution = r'\g<initial_space>\g<name> = configuration()->' + section_name + r'\g<name2>;'
     parse_key_9.leave_as_is = ''
     parse_keys.append(parse_key_9)
     parse_key_9a = ParseKey()
     parse_key_9a.pattern = re.compile(
-        r'^(?P<initial_space> *)(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
+        r'^(?P<initial_space> *)(?P<name>[a-z0-9_]+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\('
+        r'\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,'
+                                                               r'\s*"[^"]*"\s*\)\s*\)',
         regex_flags_multiline)
     parse_key_9a.substitution = r'\g<initial_space>\g<name> = configuration()->' + section_name + r'\g<name2>'
     parse_key_9a.leave_as_is = ''
     parse_keys.append(parse_key_9a)
     parse_key_10 = ParseKey()
     parse_key_10.pattern = re.compile(
-        r'\bXMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
+        r'\bXMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"('
+                                                                                                  r'?P<name2>['
+                                                                                                  r'a-z0-9_]+)"\s*,'
+                                                                                                  r'\s*"['
+                                                                                                  r'^"]*"\s*\)\s*\)\s*;$',
         regex_flags_multiline)
     parse_key_10.substitution = r'configuration()->' + section_name + r'.\g<name2>;'
     parse_key_10.leave_as_is = ''
     parse_keys.append(parse_key_10)
     parse_key_10a = ParseKey()
     parse_key_10a.pattern = re.compile(
-        r'\bXMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
+        r'\bXMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"('
+                                                                                                  r'?P<name2>['
+                                                                                                  r'a-z0-9_]+)"\s*,'
+                                                                                                  r'\s*"['
+                                                                                                  r'^"]*"\s*\)\s*\)',
         regex_flags_multiline)
     parse_key_10a.substitution = r'configuration()->' + section_name + r'.\g<name2>'
     parse_key_10a.leave_as_is = ''
     parse_keys.append(parse_key_10a)
     parse_key_11 = ParseKey()
     parse_key_11.pattern = re.compile(
-        r'\bparse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;$',
+        r'\bparse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>['
+                                                                                      r'a-z0-9_]+)"\s*,'
+                                                                                      r'\s*"[^"]*"\s*\)\s*\)\s*;$',
         regex_flags_multiline)
     parse_key_11.substitution = r'configuration()->' + section_name + r'.\g<name2>;'
     parse_key_11.leave_as_is = ''
     parse_keys.append(parse_key_11)
     parse_key_11a = ParseKey()
     parse_key_11a.pattern = re.compile(
-        r'\bparse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>[a-z0-9_]+)"\s*,\s*"[^"]*"\s*\)\s*\)',
+        r'\bparse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>['
+                                                                                      r'a-z0-9_]+)"\s*,'
+                                                                                      r'\s*"[^"]*"\s*\)\s*\)',
         regex_flags_multiline)
     parse_key_11a.substitution = r'configuration()->' + section_name + r'.\g<name2>'
     parse_key_11a.leave_as_is = ''
