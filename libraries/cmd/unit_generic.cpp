@@ -1997,10 +1997,10 @@ void rechargeShip(Unit *unit, unsigned int cockpit) {
     }
 
     // Refueling fee
-    static float refueling_fee = XMLSupport::parse_float(vs_config->getVariable("general", "fuel_docking_fee", "0"));
+    const float refueling_fee = configuration()->general.fuel_docking_fee;
     _Universe->AccessCockpit(cockpit)->credits -= refueling_fee;
 
-    static float docking_fee = XMLSupport::parse_float(vs_config->getVariable("general", "docking_fee", "0"));
+    const float docking_fee = configuration()->general.docking_fee;
     _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
 }
 
@@ -2537,8 +2537,7 @@ bool Unit::Downgrade(const Unit *downgradeor,
 }
 
 double ComputeMinDowngradePercent() {
-    static float MyPercentMin =
-            XMLSupport::parse_float(vs_config->getVariable("general", "remove_downgrades_less_than_percent", ".9"));
+    const float MyPercentMin = configuration()->general.remove_downgrades_less_than_percent;
     return MyPercentMin;
 }
 
@@ -3155,8 +3154,7 @@ extern double ComputeMinDowngradePercent();
 vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool downgrade) {
     const Unit *templ = NULL;
     const Unit *downgradelimit = NULL;
-    static bool staticrem =
-            XMLSupport::parse_bool(vs_config->getVariable("general", "remove_impossible_downgrades", "true"));
+    const bool staticrem = configuration()->general.remove_impossible_downgrades;
     static float MyPercentMin = ComputeMinDowngradePercent();
     int upgrfac = FactionUtil::GetUpgradeFaction();
     for (unsigned int i = 0; i < mylist.size(); ++i) {

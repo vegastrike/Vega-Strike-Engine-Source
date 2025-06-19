@@ -3980,8 +3980,7 @@ public:
 
 void trackPrice(int whichplayer, const Cargo &item, float price, const string &systemName, const string &baseName,
         /*out*/ vector<string> &highest, /*out*/ vector<string> &lowest) {
-    static size_t toprank = (size_t)
-            XMLSupport::parse_int(vs_config->getVariable("general", "trade_interface_tracks_prices_toprank", "10"));
+    const size_t toprank = static_cast<size_t>(configuration()->general.trade_interface_tracks_prices_top_rank);
 
     VS_LOG(info, (boost::format("Ranking item %1%/%2% at %3%/%4%")
             % item.GetCategory() % item.GetName() % systemName % baseName));
@@ -4179,8 +4178,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
 }
 
 string buildCargoDescription(const Cargo &item, BaseComputer &computer, float price) {
-    static bool trackBestPrices =
-            XMLSupport::parse_bool(vs_config->getVariable("general", "trade_interface_tracks_prices", "true"));
+    const bool trackBestPrices = configuration()->general.trade_interface_tracks_prices;
 
     string desc;
 
@@ -4404,10 +4402,7 @@ bool buyShip(Unit *baseUnit,
                     if (bcomputer) {
                         bcomputer->m_player.SetUnit(newPart);
                     }
-                    static bool persistent_missions_across_ship_switch =
-                            XMLSupport::parse_bool(vs_config->getVariable("general",
-                                    "persistent_mission_across_ship_switch",
-                                    "true"));
+                    const bool persistent_missions_across_ship_switch = configuration()->general.persistent_mission_across_ship_switch;
                     if (persistent_missions_across_ship_switch) {
                         _Universe->AccessCockpit()->savegame->LoadSavedMissions();
                     }

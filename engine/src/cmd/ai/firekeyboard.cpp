@@ -1429,7 +1429,7 @@ static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
             endt->graphicOptions.WarpRamping = 1;
         }
         endt->ftl_drive.Disable();
-        static float clearencetime = (XMLSupport::parse_float(vs_config->getVariable("general", "dockingtime", "20")));
+        const float clearencetime = configuration()->general.docking_time;
         endt->EnqueueAIFirst(new Orders::ExecuteFor(new Orders::MatchVelocity(Vector(0, 0, 0),
                 Vector(0, 0, 0),
                 true,

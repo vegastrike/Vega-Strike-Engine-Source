@@ -34,10 +34,10 @@ extern VegaConfig *vs_config;
 
 void vs_options::init() {
     /* General Options */
-    galaxy = vs_config->getVariable("general", "galaxy", "milky_way.xml");
-    command_interpretor = XMLSupport::parse_bool(vs_config->getVariable("general", "command_interpretor", "false"));
-    load_last_savegame = XMLSupport::parse_bool(vs_config->getVariable("general", "load_last_savegame", "false"));
-    debug_fs = XMLSupport::parse_int(vs_config->getVariable("general", "debug_fs", "0"));
+    galaxy = configuration()->game_start.galaxy;;
+    command_interpretor = configuration()->general.command_interpreter;
+    load_last_savegame = configuration()->general.load_last_savegame;
+    debug_fs = configuration()->general.debug_fs;
 
 
     /* Audio Options */

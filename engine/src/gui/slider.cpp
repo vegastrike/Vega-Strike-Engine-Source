@@ -31,6 +31,7 @@
 #include "slider.h"
 
 #include "eventmanager.h"
+#include "configuration/configuration.h"
 
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
@@ -182,7 +183,7 @@ void Slider::draw(void) {
 }
 
 bool Slider::processMouseDown(const InputEvent &event) {
-    static int zoominc = XMLSupport::parse_int(vs_config->getVariable("general", "wheel_increment_lines", "3"));
+    const int zoominc = configuration()->general.wheel_increment_lines;
     if (event.code == LEFT_MOUSE_BUTTON && m_thumbLength != NO_THUMB_LENGTH && hitTest(event.loc)) {
         if (m_vertical) {
             if (event.loc.y < m_thumbRect.origin.y) {
