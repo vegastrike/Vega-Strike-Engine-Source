@@ -4264,8 +4264,7 @@ bool sellShip(Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseComput
                     xtra += shipping_price;
                 }
                 cockpit->RemoveUnit(i);
-                static float shipSellback =
-                        XMLSupport::parse_float(vs_config->getVariable("economics", "ship_sellback_price", ".5"));
+                const float shipSellback = configuration()->economics.ship_sellback_price;
                 cockpit->credits += shipSellback * shipCargo->GetPrice();                 //sellback cost
                 cockpit->credits -= xtra;                 //transportation cost
                 break;
