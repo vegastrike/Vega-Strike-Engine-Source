@@ -198,7 +198,7 @@ void vs_options::init() {
 
 
     /* Splash Options */
-    auto_hide = XMLSupport::parse_bool(vs_config->getVariable("splash", "auto_hide", "true"));
+    auto_hide = configuration()->splash.auto_hide;
 
 
     /* Terrain Options */

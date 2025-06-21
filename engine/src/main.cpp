@@ -694,7 +694,7 @@ void bootstrap_main_loop() {
         }
         _Universe->Loop(main_loop);
         ///return to idle func which now should call main_loop mohahahah
-        if (game_options()->auto_hide) {
+        if (configuration()->splash.auto_hide) {
             UniverseUtil::hideSplashScreen();
         }
     }
