@@ -193,8 +193,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             }
         } else {
             // Use AutoDocker if docking clearance on target, otherwise use AutoPilot
-            static bool autodock =
-                    XMLSupport::parse_bool(vs_config->getVariable("test", "autodocker", "false"));
+            const bool autodock = configuration()->test.autodocker;
             Order *autoNavigator = NULL;
             if (autodock) {
                 Unit *station = parent->Target();
