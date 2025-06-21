@@ -461,9 +461,9 @@ void Mission::UnPickle(string pickled) {
 void Mission::DirectorStart(missionNode *node) {
     VS_LOG(trace, "DIRECTOR START");
 
-    static int st_debuglevel = atoi(vs_config->getVariable("interpreter", "debuglevel", "0").c_str());
-    static bool st_start_game = XMLSupport::parse_bool(vs_config->getVariable("interpreter", "startgame", "true"));
-    static bool st_do_trace = XMLSupport::parse_bool(vs_config->getVariable("interpreter", "trace", "false"));
+    const int st_debuglevel = configuration()->interpreter.debug_level;
+    const bool st_start_game = configuration()->interpreter.start_game;
+    const bool st_do_trace = configuration()->interpreter.trace;
 
     debuglevel = st_debuglevel;
     start_game = st_start_game;

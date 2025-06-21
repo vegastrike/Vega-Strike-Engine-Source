@@ -40,6 +40,8 @@
 
 #include <list>
 
+#include "configuration/configuration.h"
+
 //Calculation for indenting children.  Use a factor times total cell height.
 static const float CHILD_INDENT_FACTOR = 0.6;
 
@@ -357,7 +359,7 @@ bool Picker::processCommand(const EventCommandId &command, Control *control) {
 
 //Mouse clicked down.
 bool Picker::processMouseDown(const InputEvent &event) {
-    static int zoominc = XMLSupport::parse_int(vs_config->getVariable("general", "wheel_increment_lines", "3"));
+    const int zoominc = configuration()->general.wheel_increment_lines;
     if (event.code == LEFT_MOUSE_BUTTON) {
         PickerCell *cell = cellForMouse(event.loc);
         if (cell != NULL) {

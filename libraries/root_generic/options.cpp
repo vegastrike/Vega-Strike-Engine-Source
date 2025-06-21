@@ -34,10 +34,10 @@ extern VegaConfig *vs_config;
 
 void vs_options::init() {
     /* General Options */
-    galaxy = vs_config->getVariable("general", "galaxy", "milky_way.xml");
-    command_interpretor = XMLSupport::parse_bool(vs_config->getVariable("general", "command_interpretor", "false"));
-    load_last_savegame = XMLSupport::parse_bool(vs_config->getVariable("general", "load_last_savegame", "false"));
-    debug_fs = XMLSupport::parse_int(vs_config->getVariable("general", "debug_fs", "0"));
+    galaxy = configuration()->game_start.galaxy;;
+    command_interpretor = configuration()->general.command_interpreter;
+    load_last_savegame = configuration()->general.load_last_savegame;
+    debug_fs = configuration()->general.debug_fs;
 
 
     /* Audio Options */
@@ -198,15 +198,15 @@ void vs_options::init() {
 
 
     /* Splash Options */
-    auto_hide = XMLSupport::parse_bool(vs_config->getVariable("splash", "auto_hide", "true"));
+    auto_hide = configuration()->splash.auto_hide;
 
 
     /* Terrain Options */
-    xscale = XMLSupport::parse_float(vs_config->getVariable("terrain", "xscale", "1.0"));
-    yscale = XMLSupport::parse_float(vs_config->getVariable("terrain", "yscale", "1.0"));
-    zscale = XMLSupport::parse_float(vs_config->getVariable("terrain", "zscale", "1.0"));
-    mass = XMLSupport::parse_float(vs_config->getVariable("terrain", "mass", "100.0"));
-    radius = XMLSupport::parse_float(vs_config->getVariable("terrain", "radius", "10000.0"));
+    xscale = configuration()->terrain.xscale;
+    yscale = configuration()->terrain.yscale;
+    zscale = configuration()->terrain.zscale;
+    mass = configuration()->terrain.mass;
+    radius = configuration()->terrain.radius;
 
     /* Player Options */
 
@@ -325,7 +325,7 @@ void vs_options::init() {
     chat_only_in_network = XMLSupport::parse_bool(vs_config->getVariable("network", "chat_only_in_network", "false"));
 
     /* Cargo Options */
-    news_from_cargolist = XMLSupport::parse_bool(vs_config->getVariable("cargo", "news_from_cargolist", "false"));
+    news_from_cargolist = configuration()->cargo.news_from_cargo_list;
 
     /* Keyboard Options */
     enable_unicode = XMLSupport::parse_bool(vs_config->getVariable("keyboard", "enable_unicode", "true"));
