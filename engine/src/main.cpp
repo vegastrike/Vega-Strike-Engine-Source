@@ -375,7 +375,7 @@ int main(int argc, char *argv[]) {
 
     //Register commands
     //COmmand Interpretor Seems to break VC8, so I'm leaving disabled for now - Patrick, Dec 24
-    if (game_options()->command_interpretor) {
+    if (configuration()->general.command_interpreter) {
         CommandInterpretor = new commandI;
         InitShipCommands();
     }
@@ -623,7 +623,7 @@ void bootstrap_main_loop() {
         vector<SavedUnits> saved;
         vector<string> packedInfo;
 
-        if (game_options()->load_last_savegame) {
+        if (configuration()->general.load_last_savegame) {
             _Universe->AccessCockpit(k)->savegame->ParseSaveGame(savegamefile,
                     mysystem,
                     mysystem,
@@ -682,7 +682,7 @@ void bootstrap_main_loop() {
             }
         }
 
-        if (game_options()->load_last_savegame) {
+        if (configuration()->general.load_last_savegame) {
             //Don't write if we didn't load...
             for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
                 WriteSaveGame(_Universe->AccessCockpit(i), false);
