@@ -202,11 +202,11 @@ void vs_options::init() {
 
 
     /* Terrain Options */
-    xscale = XMLSupport::parse_float(vs_config->getVariable("terrain", "xscale", "1.0"));
-    yscale = XMLSupport::parse_float(vs_config->getVariable("terrain", "yscale", "1.0"));
-    zscale = XMLSupport::parse_float(vs_config->getVariable("terrain", "zscale", "1.0"));
-    mass = XMLSupport::parse_float(vs_config->getVariable("terrain", "mass", "100.0"));
-    radius = XMLSupport::parse_float(vs_config->getVariable("terrain", "radius", "10000.0"));
+    xscale = configuration()->terrain.xscale;
+    yscale = configuration()->terrain.yscale;
+    zscale = configuration()->terrain.zscale;
+    mass = configuration()->terrain.mass;
+    radius = configuration()->terrain.radius;
 
     /* Player Options */
 
