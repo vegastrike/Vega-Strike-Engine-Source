@@ -2744,8 +2744,7 @@ void BaseComputer::loadNewsControls(void) {
     picker->clear();
 
     //Load the picker.
-    static bool newsFromCargolist =
-            XMLSupport::parse_bool(vs_config->getVariable("cargo", "news_from_cargolist", "false"));
+    const bool newsFromCargolist = configuration()->cargo.news_from_cargo_list;
     if (newsFromCargolist) {
         gameMessage last;
         int i = 0;

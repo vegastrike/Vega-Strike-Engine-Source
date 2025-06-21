@@ -325,7 +325,7 @@ void vs_options::init() {
     chat_only_in_network = XMLSupport::parse_bool(vs_config->getVariable("network", "chat_only_in_network", "false"));
 
     /* Cargo Options */
-    news_from_cargolist = XMLSupport::parse_bool(vs_config->getVariable("cargo", "news_from_cargolist", "false"));
+    news_from_cargolist = configuration()->cargo.news_from_cargo_list;
 
     /* Keyboard Options */
     enable_unicode = XMLSupport::parse_bool(vs_config->getVariable("keyboard", "enable_unicode", "true"));

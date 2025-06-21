@@ -574,7 +574,7 @@ float Carrier::PriceCargo(const std::string &s) {
         if (this != mpl) {
             return mpl->PriceCargo(s);
         } else {
-            static float spacejunk = parse_float(vs_config->getVariable("cargo", "space_junk_price", "10"));
+            const float spacejunk = configuration()->cargo.space_junk_price;
             return spacejunk;
         }
     }

@@ -590,7 +590,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         c = &tmp;
                         tmp.SetName("Space_Salvage");
                         tmp.SetCategory("Uncategorized_Cargo");
-                        static float spacejunk = parse_float(vs_config->getVariable("cargo", "space_junk_price", "10"));
+                        const float spacejunk = configuration()->cargo.space_junk_price;
                         tmp.SetPrice(spacejunk);
                         tmp.SetQuantity(1);
                         tmp.SetMass(.001);
@@ -598,18 +598,9 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         if (target->faction != upgradesfaction) {
                             tmp.SetName(target->name);
                             tmp.SetCategory("starships");
-                            static float starshipprice =
-                                    XMLSupport::parse_float(vs_config->getVariable("cargo",
-                                            "junk_starship_price",
-                                            "100000"));
-                            static float starshipmass =
-                                    XMLSupport::parse_float(vs_config->getVariable("cargo",
-                                            "junk_starship_mass",
-                                            "50"));
-                            static float starshipvolume =
-                                    XMLSupport::parse_float(vs_config->getVariable("cargo",
-                                            "junk_starship_volume",
-                                            "1500"));
+                            const float starshipprice = configuration()->cargo.junk_starship_price;
+                            const float starshipmass = configuration()->cargo.junk_starship_mass;
+                            const float starshipvolume = configuration()->cargo.junk_starship_volume;
                             tmp.SetPrice(starshipprice);
                             tmp.SetQuantity(1);
                             tmp.SetMass(starshipmass);

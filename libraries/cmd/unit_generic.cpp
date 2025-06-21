@@ -3245,8 +3245,7 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
 }
 
 vector<CargoColor> &Unit::FilterUpgradeList(vector<CargoColor> &mylist) {
-    static bool filtercargoprice =
-            XMLSupport::parse_bool(vs_config->getVariable("cargo", "filter_expensive_cargo", "false"));
+    const bool filtercargoprice = configuration()->cargo.filter_expensive_cargo;
     if (filtercargoprice) {
         Cockpit *cp = _Universe->isPlayerStarship(this);
         if (cp) {
@@ -3310,8 +3309,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
     for (unsigned int i = 0; i < numcarg; ++i) {
         Cargo c = GetUnitMasterPartList().GetCargo(i);
         if (c.GetCategory() == category) {
-            static float aveweight =
-                    fabs(XMLSupport::parse_float(vs_config->getVariable("cargo", "price_recenter_factor", "0")));
+            const float aveweight = fabs(configuration()->cargo.price_recenter_factor);
             c.SetQuantity(float_to_int(quantity - quantdev));
             float baseprice = c.GetPrice();
             c.SetPrice(c.GetPrice() * (price - pricedev));
@@ -3327,12 +3325,9 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                 //quantity more than zero
             else if (maxprice > minprice + .01) {
                 float renormprice = (baseprice - minprice) / (maxprice - minprice);
-                static float maxpricequantadj =
-                        XMLSupport::parse_float(vs_config->getVariable("cargo", "max_price_quant_adj", "5"));
-                static float minpricequantadj =
-                        XMLSupport::parse_float(vs_config->getVariable("cargo", "min_price_quant_adj", "1"));
-                static float
-                        powah = XMLSupport::parse_float(vs_config->getVariable("cargo", "price_quant_adj_power", "1"));
+                static float maxpricequantadj = configuration()->cargo.max_price_quant_adj;
+                static float minpricequantadj = configuration()->cargo.min_price_quant_adj;
+                const float powah = configuration()->cargo.price_quant_adj_power;
                 renormprice = std::pow(renormprice, powah);
                 renormprice *= (maxpricequantadj - minpricequantadj);
                 renormprice += 1;
@@ -3343,7 +3338,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                     }
                 }
             }
-            static float minprice = XMLSupport::parse_float(vs_config->getVariable("cargo", "min_cargo_price", "0.01"));
+            const float minprice = configuration()->cargo.min_cargo_price;
             if (c.GetPrice() < minprice) {
                 c.SetPrice(minprice);
             }
