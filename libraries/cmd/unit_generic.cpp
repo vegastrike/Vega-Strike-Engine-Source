@@ -3155,7 +3155,7 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
     const Unit *templ = NULL;
     const Unit *downgradelimit = NULL;
     const bool staticrem = configuration()->general.remove_impossible_downgrades;
-    static float MyPercentMin = ComputeMinDowngradePercent();
+    const float MyPercentMin = ComputeMinDowngradePercent();
     int upgrfac = FactionUtil::GetUpgradeFaction();
     for (unsigned int i = 0; i < mylist.size(); ++i) {
         bool removethis = true /*staticrem*/;
