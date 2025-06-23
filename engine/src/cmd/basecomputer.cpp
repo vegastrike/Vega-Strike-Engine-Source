@@ -3052,10 +3052,17 @@ void BaseComputer::loadBuyUpgradeControls(void) {
 
     //Mark all the upgrades that we can't do.
     //cargo.mission == true means we can't upgrade this.
-    vector<CargoColor>::iterator iter;
-    for (iter = tlist.masterList.begin(); iter != tlist.masterList.end(); iter++) {
+    for (auto iter = tlist.masterList.begin(); iter != tlist.masterList.end(); ++iter) {
         iter->cargo.SetMissionFlag((!equalColors(iter->color, DEFAULT_UPGRADE_COLOR())));
     }
+
+    // Filter integral from masterList
+    auto integral_items = std::stable_partition(tlist.masterList.begin(), tlist.masterList.end(),
+                        [](const CargoColor& cc) {
+                          return !cc.cargo.GetIntegral();
+                        });
+    tlist.masterList.erase(integral_items, tlist.masterList.end());
+
     //Add Basic Repair.
     CargoColor repair;
     repair.cargo.SetName(BASIC_REPAIR_NAME);
@@ -3063,21 +3070,14 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     repair.cargo.SetDescription(BASIC_REPAIR_DESC);
     tlist.masterList.push_back(repair);
 
-    // Filter integral from masterlist
-    auto integral_items = std::remove_if(tlist.masterList.begin(), tlist.masterList.end(),
-                        [](CargoColor cc) {
-                          return cc.cargo.GetIntegral();
-                        });
-    tlist.masterList.erase(integral_items, tlist.masterList.end());
-
     //Load the upgrade picker from the master tlist.
-    SimplePicker *basePicker = static_cast< SimplePicker * > ( window()->findControlById("BaseUpgrades"));
-    assert(basePicker != NULL);
+    SimplePicker *basePicker = vega_dynamic_cast_ptr<SimplePicker> ( window()->findControlById("BaseUpgrades"));
+    assert(basePicker != nullptr);
     loadListPicker(tlist, *basePicker, BUY_UPGRADE, true);
 
     //Fix the Basic Repair color.
-    SimplePickerCells *baseCells = static_cast< SimplePickerCells * > ( basePicker->cells());
-    SimplePickerCell *repairCell = static_cast< SimplePickerCell * > ( baseCells->cellAt(baseCells->count() - 1));
+    SimplePickerCells *baseCells = vega_dynamic_cast_ptr<SimplePickerCells> ( basePicker->cells());
+    SimplePickerCell *repairCell = vega_dynamic_cast_ptr<SimplePickerCell> ( baseCells->cellAt(baseCells->count() - 1));
     assert(repairCell->text() == BASIC_REPAIR_NAME);
     if (isClear(repairCell->textColor())) {
         //Have repair cell, and its color is normal.
