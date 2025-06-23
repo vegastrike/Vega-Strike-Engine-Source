@@ -1,0 +1,32 @@
+Vegastrike setup base valgrind suite
+
+1  In a user directory a ".valgrindrc" file, Create if not found
+2  A directory search tool (I used updatedb & locate from locate pkg on debian)
+3 locate *.supp 
+   For example on my Debian My output looks like this 
+        
+        /usr/lib/valgrind/debian.supp
+        /usr/lib/valgrind/ncurses.supp
+        /usr/lib/valgrind/python.supp
+        /usr/lib/valgrind/python2.supp
+        /usr/lib/valgrind/python3.supp
+        /usr/lib/x86_64-linux-gnu/valgrind/aisleriot.supp
+        /usr/lib/x86_64-linux-gnu/valgrind/default.supp
+        /usr/share/glib-2.0/valgrind/glib.supp
+        /usr/share/openmpi/openmpi-valgrind.supp
+        /usr/share/pmix/pmix-valgrind.supp
+
+       If you need to create a ".valgrindrc" the command "locate *.supp > ,/.valgrindrc will get you started
+
+4 edit ".valgrindrc" and comment out (with "#") the "python,python2" lines.
+     On my system python and python .supp files are the same. so not taking chances I comment them out ,Also the
+      lines of openmpi-valgrind.supp and pmix/pmix-valgrind.supp are not used in vegastrike last time I checked ,
+     so they can be commented or given suppression tag as you see fit.
+     Also insert "--suppressions=" before all other lines. DON'T FORGET TO SAVE
+5 run valgrind simular to "valgrind --tool=callgrind ./vegastrike-engine -d../../Assets-Production"
+    in this example callgrind will be run - many other options
+
+I found there is a "gdb server option" but for now this will be a start
+
+$ ./gprof2dot.py --format=callgrind --output=out.dot /path/to/callgrind.out
+$ dot -Tpng out.dot -o graph.png
