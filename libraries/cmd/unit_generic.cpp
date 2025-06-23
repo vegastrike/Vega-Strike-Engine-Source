@@ -3319,8 +3319,8 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                 //quantity more than zero
             else if (maxprice > minprice + .01) {
                 float renormprice = (baseprice - minprice) / (maxprice - minprice);
-                static float maxpricequantadj = configuration()->cargo.max_price_quant_adj;
-                static float minpricequantadj = configuration()->cargo.min_price_quant_adj;
+                const float maxpricequantadj = configuration()->cargo.max_price_quant_adj;
+                const float minpricequantadj = configuration()->cargo.min_price_quant_adj;
                 const float powah = configuration()->cargo.price_quant_adj_power;
                 renormprice = std::pow(renormprice, powah);
                 renormprice *= (maxpricequantadj - minpricequantadj);
