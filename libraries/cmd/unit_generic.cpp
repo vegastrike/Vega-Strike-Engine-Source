@@ -2536,11 +2536,6 @@ bool Unit::Downgrade(const Unit *downgradeor,
             gen_downgrade_list);
 }
 
-double ComputeMinDowngradePercent() {
-    const float MyPercentMin = configuration()->general.remove_downgrades_less_than_percent;
-    return MyPercentMin;
-}
-
 class DoubleName {
 public:
     string s;
@@ -2916,7 +2911,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
         }
     }
     if (gen_downgrade_list) {
-        float MyPercentMin = ComputeMinDowngradePercent();
+        const float MyPercentMin = configuration()->general.remove_downgrades_less_than_percent;
         if (downgrade && percentage > MyPercentMin) {
             for (vsUMap<int, DoubleName>::iterator i = tempdownmap.begin(); i != tempdownmap.end(); ++i) {
                 downgrademap[(*i).first] = (*i).second;
@@ -3149,13 +3144,12 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
 
 static const GFXColor disable(1, 0, 0, 1);
 extern int GetModeFromName(const char *);
-extern double ComputeMinDowngradePercent();
 
 vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool downgrade) {
     const Unit *templ = NULL;
     const Unit *downgradelimit = NULL;
     const bool staticrem = configuration()->general.remove_impossible_downgrades;
-    const float MyPercentMin = ComputeMinDowngradePercent();
+    const float MyPercentMin = configuration()->general.remove_downgrades_less_than_percent;
     int upgrfac = FactionUtil::GetUpgradeFaction();
     for (unsigned int i = 0; i < mylist.size(); ++i) {
         bool removethis = true /*staticrem*/;
