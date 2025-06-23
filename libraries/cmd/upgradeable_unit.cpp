@@ -376,7 +376,8 @@ bool UpgradeableUnit::UpgradeMounts(const Unit *up,
 
     // All weapons come with one mount at least
     if(num_up_mounts == 0) {
-        return true;
+        VS_LOG(debug, "num_up_mounts is zero");
+        return false;
     }
 
     // there needs to be some mounts to be able to mount to

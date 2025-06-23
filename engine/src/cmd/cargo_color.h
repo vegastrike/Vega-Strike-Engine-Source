@@ -40,6 +40,10 @@ public:
 
     CargoColor() : cargo(), color(1, 1, 1, 1) {
     }
+
+    CargoColor(const CargoColor& other) = default;
+    CargoColor(CargoColor&& other) = default;
+    CargoColor& operator=(CargoColor&& other) = default;
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_CARGO_COLOR_H

@@ -1997,10 +1997,10 @@ void rechargeShip(Unit *unit, unsigned int cockpit) {
     }
 
     // Refueling fee
-    static float refueling_fee = XMLSupport::parse_float(vs_config->getVariable("general", "fuel_docking_fee", "0"));
+    const float refueling_fee = configuration()->general.fuel_docking_fee;
     _Universe->AccessCockpit(cockpit)->credits -= refueling_fee;
 
-    static float docking_fee = XMLSupport::parse_float(vs_config->getVariable("general", "docking_fee", "0"));
+    const float docking_fee = configuration()->general.docking_fee;
     _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
 }
 
@@ -2536,12 +2536,6 @@ bool Unit::Downgrade(const Unit *downgradeor,
             gen_downgrade_list);
 }
 
-double ComputeMinDowngradePercent() {
-    static float MyPercentMin =
-            XMLSupport::parse_float(vs_config->getVariable("general", "remove_downgrades_less_than_percent", ".9"));
-    return MyPercentMin;
-}
-
 class DoubleName {
 public:
     string s;
@@ -2917,7 +2911,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
         }
     }
     if (gen_downgrade_list) {
-        float MyPercentMin = ComputeMinDowngradePercent();
+        const float MyPercentMin = configuration()->general.remove_downgrades_less_than_percent;
         if (downgrade && percentage > MyPercentMin) {
             for (vsUMap<int, DoubleName>::iterator i = tempdownmap.begin(); i != tempdownmap.end(); ++i) {
                 downgrademap[(*i).first] = (*i).second;
@@ -3150,14 +3144,12 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
 
 static const GFXColor disable(1, 0, 0, 1);
 extern int GetModeFromName(const char *);
-extern double ComputeMinDowngradePercent();
 
 vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool downgrade) {
     const Unit *templ = NULL;
     const Unit *downgradelimit = NULL;
-    static bool staticrem =
-            XMLSupport::parse_bool(vs_config->getVariable("general", "remove_impossible_downgrades", "true"));
-    static float MyPercentMin = ComputeMinDowngradePercent();
+    const bool staticrem = configuration()->general.remove_impossible_downgrades;
+    const float MyPercentMin = configuration()->general.remove_downgrades_less_than_percent;
     int upgrfac = FactionUtil::GetUpgradeFaction();
     for (unsigned int i = 0; i < mylist.size(); ++i) {
         bool removethis = true /*staticrem*/;
@@ -3247,8 +3239,7 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
 }
 
 vector<CargoColor> &Unit::FilterUpgradeList(vector<CargoColor> &mylist) {
-    static bool filtercargoprice =
-            XMLSupport::parse_bool(vs_config->getVariable("cargo", "filter_expensive_cargo", "false"));
+    const bool filtercargoprice = configuration()->cargo.filter_expensive_cargo;
     if (filtercargoprice) {
         Cockpit *cp = _Universe->isPlayerStarship(this);
         if (cp) {
@@ -3312,8 +3303,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
     for (unsigned int i = 0; i < numcarg; ++i) {
         Cargo c = GetUnitMasterPartList().GetCargo(i);
         if (c.GetCategory() == category) {
-            static float aveweight =
-                    fabs(XMLSupport::parse_float(vs_config->getVariable("cargo", "price_recenter_factor", "0")));
+            const float aveweight = fabs(configuration()->cargo.price_recenter_factor);
             c.SetQuantity(float_to_int(quantity - quantdev));
             float baseprice = c.GetPrice();
             c.SetPrice(c.GetPrice() * (price - pricedev));
@@ -3329,12 +3319,9 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                 //quantity more than zero
             else if (maxprice > minprice + .01) {
                 float renormprice = (baseprice - minprice) / (maxprice - minprice);
-                static float maxpricequantadj =
-                        XMLSupport::parse_float(vs_config->getVariable("cargo", "max_price_quant_adj", "5"));
-                static float minpricequantadj =
-                        XMLSupport::parse_float(vs_config->getVariable("cargo", "min_price_quant_adj", "1"));
-                static float
-                        powah = XMLSupport::parse_float(vs_config->getVariable("cargo", "price_quant_adj_power", "1"));
+                const float maxpricequantadj = configuration()->cargo.max_price_quant_adj;
+                const float minpricequantadj = configuration()->cargo.min_price_quant_adj;
+                const float powah = configuration()->cargo.price_quant_adj_power;
                 renormprice = std::pow(renormprice, powah);
                 renormprice *= (maxpricequantadj - minpricequantadj);
                 renormprice += 1;
@@ -3345,7 +3332,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                     }
                 }
             }
-            static float minprice = XMLSupport::parse_float(vs_config->getVariable("cargo", "min_cargo_price", "0.01"));
+            const float minprice = configuration()->cargo.min_cargo_price;
             if (c.GetPrice() < minprice) {
                 c.SetPrice(minprice);
             }

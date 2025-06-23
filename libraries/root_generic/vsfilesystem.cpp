@@ -89,7 +89,7 @@ using std::string;
 int VSFS_DEBUG() {
 //    return 3;
     if (vs_config) {
-        return (game_options()->debug_fs);
+        return (configuration()->general.debug_fs);
     }
     return 0;
 }

@@ -2744,8 +2744,7 @@ void BaseComputer::loadNewsControls(void) {
     picker->clear();
 
     //Load the picker.
-    static bool newsFromCargolist =
-            XMLSupport::parse_bool(vs_config->getVariable("cargo", "news_from_cargolist", "false"));
+    const bool newsFromCargolist = configuration()->cargo.news_from_cargo_list;
     if (newsFromCargolist) {
         gameMessage last;
         int i = 0;
@@ -3053,10 +3052,17 @@ void BaseComputer::loadBuyUpgradeControls(void) {
 
     //Mark all the upgrades that we can't do.
     //cargo.mission == true means we can't upgrade this.
-    vector<CargoColor>::iterator iter;
-    for (iter = tlist.masterList.begin(); iter != tlist.masterList.end(); iter++) {
+    for (auto iter = tlist.masterList.begin(); iter != tlist.masterList.end(); ++iter) {
         iter->cargo.SetMissionFlag((!equalColors(iter->color, DEFAULT_UPGRADE_COLOR())));
     }
+
+    // Filter integral from masterList
+    auto integral_items = std::stable_partition(tlist.masterList.begin(), tlist.masterList.end(),
+                        [](const CargoColor& cc) {
+                          return !cc.cargo.GetIntegral();
+                        });
+    tlist.masterList.erase(integral_items, tlist.masterList.end());
+
     //Add Basic Repair.
     CargoColor repair;
     repair.cargo.SetName(BASIC_REPAIR_NAME);
@@ -3064,21 +3070,14 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     repair.cargo.SetDescription(BASIC_REPAIR_DESC);
     tlist.masterList.push_back(repair);
 
-    // Filter integral from masterlist
-    auto integral_items = std::remove_if(tlist.masterList.begin(), tlist.masterList.end(),
-                        [](CargoColor cc) {
-                          return cc.cargo.GetIntegral();
-                        });
-    tlist.masterList.erase(integral_items, tlist.masterList.end());
-
     //Load the upgrade picker from the master tlist.
-    SimplePicker *basePicker = static_cast< SimplePicker * > ( window()->findControlById("BaseUpgrades"));
-    assert(basePicker != NULL);
+    SimplePicker *basePicker = vega_dynamic_cast_ptr<SimplePicker> ( window()->findControlById("BaseUpgrades"));
+    assert(basePicker != nullptr);
     loadListPicker(tlist, *basePicker, BUY_UPGRADE, true);
 
     //Fix the Basic Repair color.
-    SimplePickerCells *baseCells = static_cast< SimplePickerCells * > ( basePicker->cells());
-    SimplePickerCell *repairCell = static_cast< SimplePickerCell * > ( baseCells->cellAt(baseCells->count() - 1));
+    SimplePickerCells *baseCells = vega_dynamic_cast_ptr<SimplePickerCells> ( basePicker->cells());
+    SimplePickerCell *repairCell = vega_dynamic_cast_ptr<SimplePickerCell> ( baseCells->cellAt(baseCells->count() - 1));
     assert(repairCell->text() == BASIC_REPAIR_NAME);
     if (isClear(repairCell->textColor())) {
         //Have repair cell, and its color is normal.
@@ -3980,8 +3979,7 @@ public:
 
 void trackPrice(int whichplayer, const Cargo &item, float price, const string &systemName, const string &baseName,
         /*out*/ vector<string> &highest, /*out*/ vector<string> &lowest) {
-    static size_t toprank = (size_t)
-            XMLSupport::parse_int(vs_config->getVariable("general", "trade_interface_tracks_prices_toprank", "10"));
+    const size_t toprank = static_cast<size_t>(configuration()->general.trade_interface_tracks_prices_top_rank);
 
     VS_LOG(info, (boost::format("Ranking item %1%/%2% at %3%/%4%")
             % item.GetCategory() % item.GetName() % systemName % baseName));
@@ -4179,8 +4177,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
 }
 
 string buildCargoDescription(const Cargo &item, BaseComputer &computer, float price) {
-    static bool trackBestPrices =
-            XMLSupport::parse_bool(vs_config->getVariable("general", "trade_interface_tracks_prices", "true"));
+    const bool trackBestPrices = configuration()->general.trade_interface_tracks_prices;
 
     string desc;
 
@@ -4266,8 +4263,7 @@ bool sellShip(Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseComput
                     xtra += shipping_price;
                 }
                 cockpit->RemoveUnit(i);
-                static float shipSellback =
-                        XMLSupport::parse_float(vs_config->getVariable("economics", "ship_sellback_price", ".5"));
+                const float shipSellback = configuration()->economics.ship_sellback_price;
                 cockpit->credits += shipSellback * shipCargo->GetPrice();                 //sellback cost
                 cockpit->credits -= xtra;                 //transportation cost
                 break;
@@ -4404,10 +4400,7 @@ bool buyShip(Unit *baseUnit,
                     if (bcomputer) {
                         bcomputer->m_player.SetUnit(newPart);
                     }
-                    static bool persistent_missions_across_ship_switch =
-                            XMLSupport::parse_bool(vs_config->getVariable("general",
-                                    "persistent_mission_across_ship_switch",
-                                    "true"));
+                    const bool persistent_missions_across_ship_switch = configuration()->general.persistent_mission_across_ship_switch;
                     if (persistent_missions_across_ship_switch) {
                         _Universe->AccessCockpit()->savegame->LoadSavedMissions();
                     }

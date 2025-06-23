@@ -574,7 +574,7 @@ float Carrier::PriceCargo(const std::string &s) {
         if (this != mpl) {
             return mpl->PriceCargo(s);
         } else {
-            static float spacejunk = parse_float(vs_config->getVariable("cargo", "space_junk_price", "10"));
+            const float spacejunk = configuration()->cargo.space_junk_price;
             return spacejunk;
         }
     }
@@ -696,10 +696,9 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
 
     ///FIXME somehow mangle string
     string mangled = unit->cargo[i].name;
-    static float scramblingmanifest =
-            XMLSupport::parse_float(vs_config->getVariable("general", "PercentageSpeedChangeToFaultSearch", ".5"));
+    const float scramblingmanifest = configuration()->general.percentage_speed_change_to_fault_search;
     {
-        //Keep inside subblock, otherwice MSVC will throw an error while redefining 'i'
+        //Keep inside subblock, otherwise MSVC will throw an error while redefining 'i'
         bool last = true;
         for (string::iterator i = mangled.begin(); i != mangled.end(); ++i) {
             if (last) {

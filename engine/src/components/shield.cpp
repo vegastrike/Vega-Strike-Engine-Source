@@ -189,10 +189,18 @@ void Shield::Load(std::string unit_key) {
 void Shield::SaveToCSV(std::map<std::string, std::string>& unit) const {
     // We always save in long form.
     unit["shield_facets"] = std::to_string(number_of_facets);
-    unit["shield_front"] = facets[0].Serialize();
-    unit["shield_back"] = facets[1].Serialize();
-    unit["shield_left"] = facets[2].Serialize();
-    unit["shield_right"] = facets[3].Serialize();
+    if (number_of_facets >= 1) {
+        unit["shield_front"] = facets[0].Serialize();
+    }
+    if (number_of_facets >= 2) {
+        unit["shield_back"] = facets[1].Serialize();
+    }
+    if (number_of_facets >= 3) {
+        unit["shield_left"] = facets[2].Serialize();
+    }
+    if (number_of_facets >= 4) {
+        unit["shield_right"] = facets[3].Serialize();
+    }
 
     //TODO: lib_damage shield leak and efficiency
     unit["Shield_Leak"] = std::to_string(0);
