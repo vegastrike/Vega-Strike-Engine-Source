@@ -74,10 +74,10 @@ void cache_ani(string s) {
 }
 
 void update_ani_cache() {
-    for (std::set<std::string>::iterator it = tempcache.begin(); it != tempcache.end(); it++) {
-        if (cached_ani.find(*it) == cached_ani.end()) {
-            cached_ani.insert(std::pair<std::string, Animation *>(*it,
-                    new Animation((*it).c_str(),
+    for (const auto & it : tempcache) {
+        if (cached_ani.find(it) == cached_ani.end()) {
+            cached_ani.insert(std::pair<std::string, Animation *>(it,
+                    new Animation(it.c_str(),
                             false,
                             .1,
                             BILINEAR,
@@ -88,28 +88,28 @@ void update_ani_cache() {
 }
 
 std::string getRandomCachedAniString() {
-    if (cached_ani.size()) {
+    if (!cached_ani.empty()) {
         unsigned int rn = rand() % cached_ani.size();
-        vsUMap<std::string, Animation *>::iterator j = cached_ani.begin();
-        for (unsigned int i = 0; i < rn; i++) {
-            j++;
+        auto j = cached_ani.begin();
+        for (unsigned int i = 0; i < rn; ++i) {
+            ++j;
         }
-        return (*j).first;
+        return j->first;
     } else {
         return "";
     }
 }
 
 Animation *getRandomCachedAni() {
-    if (cached_ani.size()) {
+    if (!cached_ani.empty()) {
         unsigned int rn = rand() % cached_ani.size();
-        vsUMap<std::string, Animation *>::iterator j = cached_ani.begin();
-        for (unsigned int i = 0; i < rn; i++) {
-            j++;
+        auto j = cached_ani.begin();
+        for (unsigned int i = 0; i < rn; ++i) {
+            ++j;
         }
-        return (*j).second;
+        return j->second;
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 

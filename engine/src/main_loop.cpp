@@ -303,7 +303,7 @@ static void _PitchDown(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-Q,
                     R,
-                    game_options()->camera_pan_speed);
+                    configuration()->graphics.camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -320,7 +320,7 @@ static void _PitchUp(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(Q,
                     R,
-                    game_options()->camera_pan_speed);
+                    configuration()->graphics.camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -337,7 +337,7 @@ static void _YawLeft(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-P,
                     R,
-                    game_options()->camera_pan_speed);
+                    configuration()->graphics.camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -354,7 +354,7 @@ static void _YawRight(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P,
                     R,
-                    game_options()->camera_pan_speed);
+                    configuration()->graphics.camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -394,7 +394,7 @@ void LookDown(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(game_options()->camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(configuration()->graphics.camera_pan_speed * 1000.0);
         } else {
             PitchDown(kbdata, newState);
         }
@@ -412,7 +412,7 @@ void LookUp(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(-game_options()->camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(-configuration()->graphics.camera_pan_speed * 1000.0);
         } else {
             PitchUp(kbdata, newState);
         }
@@ -430,7 +430,7 @@ void LookLeft(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanYawSpeed(game_options()->camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(configuration()->graphics.camera_pan_speed * 1000.0);
         } else {
             YawLeft(kbdata, newState);
         }
@@ -448,7 +448,7 @@ void LookRight(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanYawSpeed(-game_options()->camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(-configuration()->graphics.camera_pan_speed * 1000.0);
         } else {
             YawRight(kbdata, newState);
         }
@@ -470,12 +470,12 @@ void Quit(const KBData &, KBSTATE newState) {
 void Inside(const KBData &, KBSTATE newState) {
     {
         if (_Universe->activeStarSystem() && _Universe->activeStarSystem()->getBackground()) {
-            _Universe->activeStarSystem()->getBackground()->EnableBG(game_options()->background);
+            _Universe->activeStarSystem()->getBackground()->EnableBG(configuration()->graphics.background);
         }
     }
-    static int tmp = (game_options()->cockpit ? 1 : 0);
+    int tmp = (configuration()->graphics.cockpit ? 1 : 0);
     if (newState == PRESS && (_Universe->AccessCockpit()->GetView() == CP_FRONT)
-            && game_options()->disabled_cockpit_allowed) {
+            && configuration()->graphics.disabled_cockpit_allowed) {
         YawLeft(KBData(), RELEASE);
         YawRight(KBData(), RELEASE);
         PitchUp(KBData(), RELEASE);

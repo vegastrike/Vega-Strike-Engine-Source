@@ -436,7 +436,7 @@ void init_opengl_extensions() {
 #ifdef GL_FOG_DISTANCE_MODE_NV
     if (vsExtensionSupported("GL_NV_fog_distance")) {
         VS_LOG(trace, "OpenGL::Accurate Fog Distance supported");
-        switch (game_options()->fogdetail) {
+        switch (configuration()->graphics.fog_detail) {
             case 0:
                 glFogi(GL_FOG_DISTANCE_MODE_NV, GL_EYE_PLANE_ABSOLUTE_NV);
                 break;
@@ -590,14 +590,14 @@ void GFXInit(int argc, char **argv) {
 
     glViewport(0, 0, configuration()->graphics.resolution_x, configuration()->graphics.resolution_y);
     static GFXColor clearcol = vs_config->getColor("space_background");;
-    gl_options.wireframe = game_options()->use_wireframe;
-    gl_options.max_texture_dimension = game_options()->max_texture_dimension;
-    gl_options.max_movie_dimension = game_options()->max_movie_dimension;
+    gl_options.wireframe = configuration()->graphics.use_wireframe;
+    gl_options.max_texture_dimension = configuration()->graphics.max_texture_dimension;
+    gl_options.max_movie_dimension = configuration()->graphics.max_movie_dimension;
     bool textsupported =
             (vsExtensionSupported("GL_ARB_texture_non_power_of_two") || vsExtensionSupported("GL_ARB_texture_rectangle")
                     || vsExtensionSupported("GL_NV_texture_rectangle")) ? "true" : "false";
 
-    gl_options.rect_textures = game_options()->rect_textures ? true : textsupported;
+    gl_options.rect_textures = configuration()->graphics.rect_textures ? true : textsupported;
 
     if (gl_options.rect_textures) {
         VS_LOG(trace, "RECT textures supported");
@@ -615,7 +615,7 @@ void GFXInit(int argc, char **argv) {
     bool vidsupported = (gl_options.rect_textures
                          || (vsExtensionSupported("GL_ARB_texture_non_power_of_two") && vsVendorMatch("nvidia")));
 
-    gl_options.pot_video_textures = game_options()->pot_video_textures ? true : vidsupported;
+    gl_options.pot_video_textures = configuration()->graphics.pot_video_textures ? true : vidsupported;
 
     if (!gl_options.pot_video_textures && gl_options.rect_textures) {
         // Enforce max rect texture for movies, which use them
@@ -631,16 +631,16 @@ void GFXInit(int argc, char **argv) {
     }*/
     // Removing gl_options soon
     gl_options.smooth_shade = game_options()->SmoothShade;
-    gl_options.mipmap = game_options()->mipmapdetail;
-    gl_options.compression = game_options()->texture_compression;
-    gl_options.Multitexture = game_options()->reflection;
-    gl_options.smooth_lines = game_options()->smooth_lines;
-    gl_options.smooth_points = game_options()->smooth_points;
+    gl_options.mipmap = configuration()->graphics.mipmap_detail;
+    gl_options.compression = configuration()->graphics.texture_compression;
+    gl_options.Multitexture = configuration()->graphics.reflection;
+    gl_options.smooth_lines = configuration()->graphics.smooth_lines;
+    gl_options.smooth_points = configuration()->graphics.smooth_points;
 
-    gl_options.display_lists = game_options()->displaylists;
-    gl_options.s3tc = game_options()->s3tc;
-    gl_options.ext_clamp_to_edge = game_options()->ext_clamp_to_edge;
-    gl_options.ext_clamp_to_border = game_options()->ext_clamp_to_border;
+    gl_options.display_lists = configuration()->graphics.displaylists;
+    gl_options.s3tc = configuration()->graphics.s3tc;
+    gl_options.ext_clamp_to_edge = configuration()->graphics.ext_clamp_to_edge;
+    gl_options.ext_clamp_to_border = configuration()->graphics.ext_clamp_to_border;
 
     glClearColor(clearcol.r, clearcol.g, clearcol.b, clearcol.a);
     winsys_set_reshape_func(Reshape);

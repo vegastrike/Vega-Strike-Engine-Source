@@ -30,6 +30,7 @@
 #define GL_EXT_texture_env_combine 1
 #include "gldrv/sdds.h"
 #include "gl_globals.h"
+#include "configuration/configuration.h"
 #include "root_generic/vs_globals.h"
 #include "src/vegastrike.h"
 #include "src/config_xml.h"
@@ -937,10 +938,13 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
         internalformat = GetTextureFormat(internformat);
         if (((textures.at(handle).mipmapped & (TRILINEAR | MIPMAP)) && gl_options.mipmap >= 2) || detail_texture) {
             if (detail_texture) {
-                static FILTER fil = game_options()->detail_texture_trilinear ? TRILINEAR : MIPMAP;
-                textures.at(handle).mipmapped = fil;
+                static boost::optional<FILTER> fil;
+                if (!fil) {
+                    fil = configuration()->graphics.detail_texture_trilinear ? TRILINEAR : MIPMAP;
+                }
+                textures.at(handle).mipmapped = *fil;
                 glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                if (fil & TRILINEAR) {
+                if (*fil & TRILINEAR) {
                     glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
                 } else {
                     glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);

@@ -1651,7 +1651,7 @@ extern string getRandomCachedAniString();
 extern Animation *GetVolatileAni(unsigned int);
 
 bool Unit::Explode(bool drawit, float timeit) {
-    if (this->pImage->pExplosion == NULL && this->pImage->timeexplode == 0) {
+    if (this->pImage->pExplosion == nullptr && this->pImage->timeexplode == 0) {
         //no explosion in unit data file && explosions haven't started yet
 
         //notify the director that a ship got destroyed
@@ -1664,13 +1664,16 @@ bool Unit::Explode(bool drawit, float timeit) {
             FactionUtil::GetRandExplosionAnimation(this->faction, bleh);
         }
         if (bleh.empty()) {
-            static Animation cache(game_options()->explosion_animation.c_str(), false, .1, BILINEAR, false);
+            static boost::optional<Animation> cache;
+            if (!cache) {
+                cache.emplace(configuration()->graphics.explosion_animation.c_str(), false, .1, BILINEAR, false);
+            }
             bleh = getRandomCachedAniString();
-            if (bleh.size() == 0) {
-                bleh = game_options()->explosion_animation;
+            if (bleh.empty()) {
+                bleh = configuration()->graphics.explosion_animation;
             }
         }
-        this->pImage->pExplosion = new Animation(bleh.c_str(), game_options()->explosion_face_player, .1, BILINEAR, true);
+        this->pImage->pExplosion = new Animation(bleh.c_str(), configuration()->graphics.explosion_face_player, .1, BILINEAR, true);
         this->pImage->pExplosion->SetDimensions(this->ExplosionRadius(), this->ExplosionRadius());
         Vector p, q, r;
         this->GetOrientation(p, q, r);
@@ -1701,16 +1704,19 @@ bool Unit::Explode(bool drawit, float timeit) {
         if (!sub) {
             un = _Universe->AccessCockpit()->GetParent();
             if (this->getUnitType() == Vega_UnitType::unit) {
-                if (rand() < RAND_MAX * game_options()->percent_shockwave && (!this->isSubUnit())) {
-                    static string shockani(game_options()->shockwave_animation);
-                    static Animation *__shock__ani = new Animation(shockani.c_str(), true, .1, MIPMAP, false);
+                if (rand() < RAND_MAX * configuration()->graphics.percent_shockwave && (!this->isSubUnit())) {
+                    const std::string shockani(configuration()->graphics.shockwave_animation);
+                    boost::optional<Animation> shock_ani;
+                    if (!shock_ani) {
+                        shock_ani.emplace(shockani.c_str(), true, .1, MIPMAP, false);
+                    }
 
-                    __shock__ani->SetFaceCam(false);
+                    shock_ani->SetFaceCam(false);
                     unsigned int which = AddAnimation(this->Position(),
                             this->ExplosionRadius(),
                             true,
                             shockani,
-                            game_options()->shockwave_growth);
+                            configuration()->graphics.shockwave_growth);
                     Animation *ani = GetVolatileAni(which);
                     if (ani) {
                         ani->SetFaceCam(false);
