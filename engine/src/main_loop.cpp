@@ -95,12 +95,11 @@
 
 #define KEYDOWN(name, key) (name[key]&0x80)
 
-static Texture *tmpcockpittexture;
 Unit **fighters;
-Unit *carrier = NULL;
-Unit *fighter = NULL;
-Unit *fighter2 = NULL;
-Unit *midway = NULL;
+Unit *carrier = nullptr;
+Unit *fighter = nullptr;
+Unit *fighter2 = nullptr;
+Unit *midway = nullptr;
 GFXBOOL capture;
 GFXBOOL quit = GFXFALSE;
 bool _Slew = true;
@@ -1020,7 +1019,6 @@ void destroyObjects() {
         myterrain = nullptr;
     }
     Terrain::DeleteAll();
-    delete tmpcockpittexture;
     delete[] fighters;
     delete locSel;
 }
