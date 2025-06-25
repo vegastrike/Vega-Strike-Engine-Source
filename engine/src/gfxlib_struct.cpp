@@ -325,7 +325,7 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
                 case GFXPOLY:
                 case GFXPOINT:
                     if (((*mode == GFXPOINT)
-                            && gl_options.smooth_points) || ((*mode != GFXPOINT) && gl_options.smooth_lines)) {
+                            && configuration()->graphics.smooth_points) || ((*mode != GFXPOINT) && configuration()->graphics.smooth_lines)) {
                         BLENDFUNC src, dst;
                         GFXGetBlendMode(src, dst);
                         if ((dst != ZERO) && ((src == ONE) || (src == SRCALPHA))) {
@@ -441,8 +441,8 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
                             case GFXPOLY:
                             case GFXPOINT:
                                 if (((mode[i] == GFXPOINT)
-                                        && gl_options.smooth_points)
-                                        || ((mode[i] != GFXPOINT) && gl_options.smooth_lines)) {
+                                        && configuration()->graphics.smooth_points)
+                                        || ((mode[i] != GFXPOINT) && configuration()->graphics.smooth_lines)) {
                                     BLENDFUNC src, dst;
                                     GFXGetBlendMode(src, dst);
                                     if ((dst != ZERO) && ((src == ONE) || (src == SRCALPHA))) {
@@ -478,8 +478,8 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
                         case GFXPOLY:
                         case GFXPOINT:
                             if (((mode[i] == GFXPOINT)
-                                    && gl_options.smooth_points)
-                                    || ((mode[i] != GFXPOINT) && gl_options.smooth_lines)) {
+                                    && configuration()->graphics.smooth_points)
+                                    || ((mode[i] != GFXPOINT) && configuration()->graphics.smooth_lines)) {
                                 BLENDFUNC src, dst;
                                 GFXGetBlendMode(src, dst);
                                 if ((dst != ZERO) && ((src == ONE) || (src == SRCALPHA))) {
