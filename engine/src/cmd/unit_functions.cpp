@@ -41,6 +41,8 @@
 #include <string>
 #include <set>
 
+#include "resource/random_utils.h"
+
 //Various functions that were used in .cpp files that are now included because of
 //the temple GameUnit class
 //If not separated from those files functions would be defined in multiple places
@@ -88,28 +90,20 @@ void update_ani_cache() {
 }
 
 std::string getRandomCachedAniString() {
-    if (!cached_ani.empty()) {
-        unsigned int rn = rand() % cached_ani.size();
-        auto j = cached_ani.begin();
-        for (unsigned int i = 0; i < rn; ++i) {
-            ++j;
-        }
-        return j->first;
-    } else {
+    if (cached_ani.empty()) {
         return "";
     }
+    auto it = cached_ani.begin();
+    std::advance(it, randomInt(cached_ani.size()));
+    return it->first;
 }
 
 Animation *getRandomCachedAni() {
-    if (!cached_ani.empty()) {
-        unsigned int rn = rand() % cached_ani.size();
-        auto j = cached_ani.begin();
-        for (unsigned int i = 0; i < rn; ++i) {
-            ++j;
-        }
-        return j->second;
-    } else {
+    if (cached_ani.empty()) {
         return nullptr;
     }
+    auto it = cached_ani.begin();
+    std::advance(it, randomInt(cached_ani.size()));
+    return it->second;
 }
 
