@@ -42,6 +42,6 @@ double randomDouble() {
     std::random_device dev;
     std::mt19937 rng(dev());
     std::uniform_int_distribution<std::mt19937::result_type> int_dist(0,precision);
-    int random_int = int_dist(rng);
-    return (double)random_int/precision;
+    const unsigned int random_int = int_dist(rng);
+    return static_cast<double>(random_int)/precision;
 }
