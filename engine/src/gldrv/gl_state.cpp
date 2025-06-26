@@ -34,6 +34,8 @@
 #include "root_generic/vs_globals.h"
 #include <stack>
 
+#include "configuration/configuration.h"
+
 #ifndef GL_CONSTANT_ALPHA
 #define GL_CONSTANT_ALPHA 0x8003
 #endif
@@ -163,10 +165,10 @@ void /*GFXDRVAPI*/ GFXEnable(const STATE state) {
             glEnable(GL_CULL_FACE);
             break;
         case SMOOTH:
-            if (gl_options.smooth_lines) {
+            if (configuration()->graphics.smooth_lines) {
                 glEnable(GL_LINE_SMOOTH);
             }
-            if (gl_options.smooth_points) {
+            if (configuration()->graphics.smooth_points) {
                 glEnable(GL_POINT_SMOOTH);
             }
             break;

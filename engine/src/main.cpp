@@ -466,9 +466,9 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
             ani->DrawNow(tmp);
         }
     }
-    bs_tp->Draw(game_options()->default_boot_message.length() > 0 ?
-            game_options()->default_boot_message : message.length() > 0 ?
-                    message : game_options()->initial_boot_message);
+    bs_tp->Draw(configuration()->graphics.default_boot_message.length() > 0 ?
+            configuration()->graphics.default_boot_message : message.length() > 0 ?
+                    message : configuration()->graphics.initial_boot_message);
 
     GFXHudMode(GFXFALSE);
     GFXEndScene();
@@ -522,8 +522,8 @@ vector<string> parse_space_string(std::string s) {
 void bootstrap_first_loop() {
     static int i = 0;
     if (i == 0) {
-        vector<string> s = parse_space_string(game_options()->splash_screen);
-        vector<string> sa = parse_space_string(game_options()->splash_audio);
+        vector<string> s = parse_space_string(configuration()->graphics.splash_screen);
+        vector<string> sa = parse_space_string(configuration()->graphics.splash_audio);
         int snum = time(nullptr) % s.size();
         SplashScreen = new Animation(s[snum].c_str(), false);
         if (!sa.empty() && sa[0].length()) {
@@ -534,7 +534,7 @@ void bootstrap_first_loop() {
     bootstrap_draw("Vegastrike Loading...", SplashScreen);
     if (i++ > 4) {
         if (_Universe) {
-            if (game_options()->main_menu) {
+            if (configuration()->graphics.main_menu) {
                 UniverseUtil::startMenuInterface(true);
             } else {
                 _Universe->Loop(bootstrap_main_loop);

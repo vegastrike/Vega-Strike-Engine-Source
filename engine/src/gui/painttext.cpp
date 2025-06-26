@@ -231,7 +231,7 @@ void PaintText::drawLines(size_t start, size_t count) const {
     }
     //Initialize the graphics state.
     GFXToggleTexture(false, 0);
-    if (gl_options.smooth_lines) {
+    if (configuration()->graphics.smooth_lines) {
         glEnable(GL_LINE_SMOOTH);
     }
     GFXPushBlendMode();
@@ -276,7 +276,7 @@ void PaintText::drawLines(size_t start, size_t count) const {
     glRasterPos2f(0, 0);
     //Undo graphics state
     GFXPopBlendMode();
-    if (gl_options.smooth_lines) {
+    if (configuration()->graphics.smooth_lines) {
         glDisable(GL_LINE_SMOOTH);
     }
     glPopMatrix();

@@ -44,7 +44,7 @@ BoltDrawManager::BoltDrawManager() {
     if (!boltmesh) {
         GFXVertex vtx[12];
 #define V(ii, xx, yy, zz, ss, \
-           tt) vtx[(ii)].x = (xx); vtx[(ii)].y = (yy); vtx[(ii)].z = (zz) + game_options()->bolt_offset + .875; vtx[(ii)].i = 0; vtx[(ii)].j = 0; vtx[(ii)].k = 1; \
+           tt) vtx[(ii)].x = (xx); vtx[(ii)].y = (yy); vtx[(ii)].z = (zz) + configuration()->graphics.bolt_offset + .875; vtx[(ii)].i = 0; vtx[(ii)].j = 0; vtx[(ii)].k = 1; \
     vtx[(ii)].s = (ss); vtx[(ii)].t = (tt);
         V(0, 0, 0, -.875, 0, .5);
         V(1, 0, -1, 0, .875, 1);
@@ -99,7 +99,7 @@ void BoltDrawManager::Draw() {
             * sin(configuration()->graphics.fov * M_PI / 180.0
                     / (configuration()->graphics.resolution_y
                             > configuration()->graphics.resolution_x ? configuration()->graphics.resolution_y : configuration()->graphics.resolution_x))
-            * game_options()->bolt_pixel_size;
+            * configuration()->graphics.bolt_pixel_size;
     pixel_angle *= pixel_angle;
     camera_position = _Universe->AccessCamera()->GetPosition();
     elapsed_time = GetElapsedTime();

@@ -61,12 +61,12 @@ typedef vsUMap<std::string, VSSprite *> VSSpriteCache;
 static VSSpriteCache sprite_cache;
 
 static std::pair<bool, VSSprite *> cacheLookup(const char *file) {
-    std::string hashName = VSFileSystem::GetHashName(std::string(file));
-    VSSpriteCache::iterator it = sprite_cache.find(hashName);
+    const std::string hashName = VSFileSystem::GetHashName(std::string(file));
+    auto it = sprite_cache.find(hashName);
     if (it != sprite_cache.end()) {
         return std::pair<bool, VSSprite *>(true, it->second);
     } else {
-        return std::pair<bool, VSSprite *>(false, (VSSprite *) NULL);
+        return std::pair<bool, VSSprite *>(false, static_cast<VSSprite*>(nullptr));
     }
 }
 
