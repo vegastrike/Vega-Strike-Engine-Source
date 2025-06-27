@@ -74,7 +74,7 @@ BIN_DIR="${ROOT_DIR}/bin"
 COMMAND=""
 
 # -p creates if the target doesn't exist, noop otherwise
-mkdir -pv "${BUILD_DIR}" && cd "${BUILD_DIR}"
+mkdir -pv "${BUILD_DIR}"
 
 cmake --preset "$preset_name"
 
