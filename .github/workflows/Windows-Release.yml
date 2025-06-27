@@ -24,17 +24,11 @@ jobs:
           - os:              windows-2022
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-debug
-            cmake-generator: VS2022Win64
-            enable-pie:      1
-            build-type:      RelWithDebInfo
             python-version:  3.13.4
             is-release:      1
           - os:              windows-2025
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
-            cmake-generator: VS2022Win64
-            enable-pie:      1
-            build-type:      RelWithDebInfo
             python-version:  3.13.4
             is-release:      1
 
@@ -44,9 +38,7 @@ jobs:
       VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
 
     steps:
-      # Set env vars needed for vcpkg to leverage the GitHub Action cache as a storage
-      # for Binary Caching.
-      # Also process the `github.sha` value to produce the SHORT_SHA we'll need later
+      # Process the `github.sha` value to produce the SHORT_SHA we'll need later
       - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
@@ -61,6 +53,9 @@ jobs:
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 2
+          submodules: false
 
       - name: Restore vcpkg cache
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
@@ -77,9 +72,9 @@ jobs:
           update-environment: false
 
       - name: install-cmake
-        uses: lukka/get-cmake@ea004816823209b8d1211e47b216185caee12cc5 #v4.0.2
+        uses: lukka/get-cmake@6b3e96a9bc9976b8b546346fdd102effedae0ca8 # v4.0.3
         with:
-          cmakeVersion: 4.0.2
+          cmakeVersion: 4.0.3
           ninjaVersion: 1.12.1
 
       - name: run-vcpkg

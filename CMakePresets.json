@@ -98,7 +98,7 @@
       }
     },
     {
-      "name": "linux-pie-enabled-glvnd-debug",
+      "name": "linux-ninja-pie-enabled-glvnd-debug",
       "inherits": [
         "pie-enabled",
         "glvnd",
@@ -112,7 +112,7 @@
       }
     },
     {
-      "name": "linux-pie-enabled-glvnd-release",
+      "name": "linux-ninja-pie-enabled-glvnd-release",
       "inherits": [
         "pie-enabled",
         "glvnd",
@@ -126,7 +126,7 @@
       }
     },
     {
-      "name": "linux-pie-enabled-glvnd-RelWithDebInfo",
+      "name": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
       "inherits": [
         "pie-enabled",
         "glvnd",
@@ -140,7 +140,7 @@
       }
     },
     {
-      "name": "linux-pie-enabled-legacy-gl-debug",
+      "name": "linux-ninja-pie-enabled-legacy-gl-debug",
       "inherits": [
         "pie-enabled",
         "legacy-gl",
@@ -154,7 +154,7 @@
       }
     },
     {
-      "name": "linux-pie-enabled-legacy-gl-release",
+      "name": "linux-ninja-pie-enabled-legacy-gl-release",
       "inherits": [
         "pie-enabled",
         "legacy-gl",
@@ -168,7 +168,7 @@
       }
     },
     {
-      "name": "linux-pie-enabled-legacy-gl-RelWithDebInfo",
+      "name": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
       "inherits": [
         "pie-enabled",
         "legacy-gl",
@@ -182,7 +182,7 @@
       }
     },
     {
-      "name": "linux-pie-disabled-glvnd-debug",
+      "name": "linux-ninja-pie-disabled-glvnd-debug",
       "inherits": [
         "pie-disabled",
         "glvnd",
@@ -196,7 +196,7 @@
       }
     },
     {
-      "name": "linux-pie-disabled-glvnd-release",
+      "name": "linux-ninja-pie-disabled-glvnd-release",
       "inherits": [
         "pie-disabled",
         "glvnd",
@@ -210,7 +210,7 @@
       }
     },
     {
-      "name": "linux-pie-disabled-glvnd-RelWithDebInfo",
+      "name": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
       "inherits": [
         "pie-disabled",
         "glvnd",
@@ -224,7 +224,7 @@
       }
     },
     {
-      "name": "linux-pie-disabled-legacy-gl-debug",
+      "name": "linux-ninja-pie-disabled-legacy-gl-debug",
       "inherits": [
         "pie-disabled",
         "legacy-gl",
@@ -238,7 +238,7 @@
       }
     },
     {
-      "name": "linux-pie-disabled-legacy-gl-release",
+      "name": "linux-ninja-pie-disabled-legacy-gl-release",
       "inherits": [
         "pie-disabled",
         "legacy-gl",
@@ -252,7 +252,7 @@
       }
     },
     {
-      "name": "linux-pie-disabled-legacy-gl-RelWithDebInfo",
+      "name": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
       "inherits": [
         "pie-disabled",
         "legacy-gl",
@@ -799,8 +799,8 @@
   ],
   "buildPresets": [
     {
-      "name": "build-linux-pie-enabled-glvnd-debug",
-      "configurePreset": "linux-pie-enabled-glvnd-debug",
+      "name": "build-linux-ninja-pie-enabled-glvnd-debug",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-debug",
       "displayName": "Linux, PIE Enabled, GLVND, Debug",
       "configuration": "Debug",
       "condition": {
@@ -810,8 +810,8 @@
       }
     },
     {
-      "name": "build-linux-pie-enabled-glvnd-release",
-      "configurePreset": "linux-pie-enabled-glvnd-release",
+      "name": "build-linux-ninja-pie-enabled-glvnd-release",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-release",
       "displayName": "Linux, PIE Enabled, GLVND, Release",
       "configuration": "Release",
       "condition": {
@@ -821,8 +821,8 @@
       }
     },
     {
-      "name": "build-linux-pie-enabled-glvnd-RelWithDebInfo",
-      "configurePreset": "linux-pie-enabled-glvnd-RelWithDebInfo",
+      "name": "build-linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
       "displayName": "Linux, PIE Enabled, GLVND, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
@@ -832,8 +832,8 @@
       }
     },
     {
-      "name": "build-linux-pie-enabled-legacy-gl-debug",
-      "configurePreset": "linux-pie-enabled-legacy-gl-debug",
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-debug",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-debug",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, Debug",
       "configuration": "Debug",
       "condition": {
@@ -843,8 +843,8 @@
       }
     },
     {
-      "name": "build-linux-pie-enabled-legacy-gl-release",
-      "configurePreset": "linux-pie-enabled-legacy-gl-release",
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-release",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-release",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, Release",
       "configuration": "Release",
       "condition": {
@@ -854,8 +854,8 @@
       }
     },
     {
-      "name": "build-linux-pie-enabled-legacy-gl-RelWithDebInfo",
-      "configurePreset": "linux-pie-enabled-legacy-gl-RelWithDebInfo",
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
@@ -865,8 +865,8 @@
       }
     },
     {
-      "name": "build-linux-pie-disabled-glvnd-debug",
-      "configurePreset": "linux-pie-disabled-glvnd-debug",
+      "name": "build-linux-ninja-pie-disabled-glvnd-debug",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-debug",
       "displayName": "Linux, PIE Disabled, GLVND, Debug",
       "configuration": "Debug",
       "condition": {
@@ -876,8 +876,8 @@
       }
     },
     {
-      "name": "build-linux-pie-disabled-glvnd-release",
-      "configurePreset": "linux-pie-disabled-glvnd-release",
+      "name": "build-linux-ninja-pie-disabled-glvnd-release",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-release",
       "displayName": "Linux, PIE Disabled, GLVND, Release",
       "configuration": "Release",
       "condition": {
@@ -887,8 +887,8 @@
       }
     },
     {
-      "name": "build-linux-pie-disabled-glvnd-RelWithDebInfo",
-      "configurePreset": "linux-pie-disabled-glvnd-RelWithDebInfo",
+      "name": "build-linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
       "displayName": "Linux, PIE Disabled, GLVND, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
@@ -898,8 +898,8 @@
       }
     },
     {
-      "name": "build-linux-pie-disabled-legacy-gl-debug",
-      "configurePreset": "linux-pie-disabled-legacy-gl-debug",
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-debug",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-debug",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, Debug",
       "configuration": "Debug",
       "condition": {
@@ -909,8 +909,8 @@
       }
     },
     {
-      "name": "build-linux-pie-disabled-legacy-gl-release",
-      "configurePreset": "linux-pie-disabled-legacy-gl-release",
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-release",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-release",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, Release",
       "configuration": "Release",
       "condition": {
@@ -920,8 +920,8 @@
       }
     },
     {
-      "name": "build-linux-pie-disabled-legacy-gl-RelWithDebInfo",
-      "configurePreset": "linux-pie-disabled-legacy-gl-RelWithDebInfo",
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
@@ -1263,8 +1263,8 @@
   ],
   "testPresets": [
     {
-      "name": "test-linux-pie-enabled-glvnd-debug",
-      "configurePreset": "linux-pie-enabled-glvnd-debug",
+      "name": "test-linux-ninja-pie-enabled-glvnd-debug",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-debug",
       "displayName": "Linux, PIE Enabled, GLVND, Debug",
       "configuration": "Debug",
       "condition": {
@@ -1274,8 +1274,8 @@
       }
     },
     {
-      "name": "test-linux-pie-enabled-glvnd-release",
-      "configurePreset": "linux-pie-enabled-glvnd-release",
+      "name": "test-linux-ninja-pie-enabled-glvnd-release",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-release",
       "displayName": "Linux, PIE Enabled, GLVND, Release",
       "configuration": "Release",
       "condition": {
@@ -1285,8 +1285,8 @@
       }
     },
     {
-      "name": "test-linux-pie-enabled-glvnd-RelWithDebInfo",
-      "configurePreset": "linux-pie-enabled-glvnd-RelWithDebInfo",
+      "name": "test-linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
       "displayName": "Linux, PIE Enabled, GLVND, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
@@ -1296,8 +1296,8 @@
       }
     },
     {
-      "name": "test-linux-pie-enabled-legacy-gl-debug",
-      "configurePreset": "linux-pie-enabled-legacy-gl-debug",
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-debug",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-debug",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, Debug",
       "configuration": "Debug",
       "condition": {
@@ -1307,8 +1307,8 @@
       }
     },
     {
-      "name": "test-linux-pie-enabled-legacy-gl-release",
-      "configurePreset": "linux-pie-enabled-legacy-gl-release",
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-release",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-release",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, Release",
       "configuration": "Release",
       "condition": {
@@ -1318,8 +1318,8 @@
       }
     },
     {
-      "name": "test-linux-pie-enabled-legacy-gl-RelWithDebInfo",
-      "configurePreset": "linux-pie-enabled-legacy-gl-RelWithDebInfo",
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
@@ -1329,8 +1329,8 @@
       }
     },
     {
-      "name": "test-linux-pie-disabled-glvnd-debug",
-      "configurePreset": "linux-pie-disabled-glvnd-debug",
+      "name": "test-linux-ninja-pie-disabled-glvnd-debug",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-debug",
       "displayName": "Linux, PIE Disabled, GLVND, Debug",
       "configuration": "Debug",
       "condition": {
@@ -1340,8 +1340,8 @@
       }
     },
     {
-      "name": "test-linux-pie-disabled-glvnd-release",
-      "configurePreset": "linux-pie-disabled-glvnd-release",
+      "name": "test-linux-ninja-pie-disabled-glvnd-release",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-release",
       "displayName": "Linux, PIE Disabled, GLVND, Release",
       "configuration": "Release",
       "condition": {
@@ -1351,8 +1351,8 @@
       }
     },
     {
-      "name": "test-linux-pie-disabled-glvnd-RelWithDebInfo",
-      "configurePreset": "linux-pie-disabled-glvnd-RelWithDebInfo",
+      "name": "test-linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
       "displayName": "Linux, PIE Disabled, GLVND, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
@@ -1362,8 +1362,8 @@
       }
     },
     {
-      "name": "test-linux-pie-disabled-legacy-gl-debug",
-      "configurePreset": "linux-pie-disabled-legacy-gl-debug",
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-debug",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-debug",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, Debug",
       "configuration": "Debug",
       "condition": {
@@ -1373,8 +1373,8 @@
       }
     },
     {
-      "name": "test-linux-pie-disabled-legacy-gl-release",
-      "configurePreset": "linux-pie-disabled-legacy-gl-release",
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-release",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-release",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, Release",
       "configuration": "Release",
       "condition": {
@@ -1384,8 +1384,8 @@
       }
     },
     {
-      "name": "test-linux-pie-disabled-legacy-gl-RelWithDebInfo",
-      "configurePreset": "linux-pie-disabled-legacy-gl-RelWithDebInfo",
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
@@ -1727,8 +1727,8 @@
   ],
   "packagePresets": [
     {
-      "name": "package-linux-pie-enabled-glvnd-debug",
-      "configurePreset": "linux-pie-enabled-glvnd-debug",
+      "name": "package-linux-ninja-pie-enabled-glvnd-debug",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-debug",
       "displayName": "Linux, PIE Enabled, GLVND, Debug",
       "configurations": [
         "Debug"
@@ -1740,8 +1740,8 @@
       }
     },
     {
-      "name": "package-linux-pie-enabled-glvnd-release",
-      "configurePreset": "linux-pie-enabled-glvnd-release",
+      "name": "package-linux-ninja-pie-enabled-glvnd-release",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-release",
       "displayName": "Linux, PIE Enabled, GLVND, Release",
       "configurations": [
         "Release"
@@ -1753,8 +1753,8 @@
       }
     },
     {
-      "name": "package-linux-pie-enabled-glvnd-RelWithDebInfo",
-      "configurePreset": "linux-pie-enabled-glvnd-RelWithDebInfo",
+      "name": "package-linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
       "displayName": "Linux, PIE Enabled, GLVND, RelWithDebInfo",
       "configurations": [
         "RelWithDebInfo"
@@ -1766,8 +1766,8 @@
       }
     },
     {
-      "name": "package-linux-pie-enabled-legacy-gl-debug",
-      "configurePreset": "linux-pie-enabled-legacy-gl-debug",
+      "name": "package-linux-ninja-pie-enabled-legacy-gl-debug",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-debug",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, Debug",
       "configurations": [
         "Debug"
@@ -1779,8 +1779,8 @@
       }
     },
     {
-      "name": "package-linux-pie-enabled-legacy-gl-release",
-      "configurePreset": "linux-pie-enabled-legacy-gl-release",
+      "name": "package-linux-ninja-pie-enabled-legacy-gl-release",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-release",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, Release",
       "configurations": [
         "Release"
@@ -1792,8 +1792,8 @@
       }
     },
     {
-      "name": "package-linux-pie-enabled-legacy-gl-RelWithDebInfo",
-      "configurePreset": "linux-pie-enabled-legacy-gl-RelWithDebInfo",
+      "name": "package-linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
       "configurations": [
         "RelWithDebInfo"
@@ -1805,8 +1805,8 @@
       }
     },
     {
-      "name": "package-linux-pie-disabled-glvnd-debug",
-      "configurePreset": "linux-pie-disabled-glvnd-debug",
+      "name": "package-linux-ninja-pie-disabled-glvnd-debug",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-debug",
       "displayName": "Linux, PIE Disabled, GLVND, Debug",
       "configurations": [
         "Debug"
@@ -1818,8 +1818,8 @@
       }
     },
     {
-      "name": "package-linux-pie-disabled-glvnd-release",
-      "configurePreset": "linux-pie-disabled-glvnd-release",
+      "name": "package-linux-ninja-pie-disabled-glvnd-release",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-release",
       "displayName": "Linux, PIE Disabled, GLVND, Release",
       "configurations": [
         "Release"
@@ -1831,8 +1831,8 @@
       }
     },
     {
-      "name": "package-linux-pie-disabled-glvnd-RelWithDebInfo",
-      "configurePreset": "linux-pie-disabled-glvnd-RelWithDebInfo",
+      "name": "package-linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
       "displayName": "Linux, PIE Disabled, GLVND, RelWithDebInfo",
       "configurations": [
         "RelWithDebInfo"
@@ -1844,8 +1844,8 @@
       }
     },
     {
-      "name": "package-linux-pie-disabled-legacy-gl-debug",
-      "configurePreset": "linux-pie-disabled-legacy-gl-debug",
+      "name": "package-linux-ninja-pie-disabled-legacy-gl-debug",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-debug",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, Debug",
       "configurations": [
         "Debug"
@@ -1857,8 +1857,8 @@
       }
     },
     {
-      "name": "package-linux-pie-disabled-legacy-gl-release",
-      "configurePreset": "linux-pie-disabled-legacy-gl-release",
+      "name": "package-linux-ninja-pie-disabled-legacy-gl-release",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-release",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, Release",
       "configurations": [
         "Release"
@@ -1870,8 +1870,8 @@
       }
     },
     {
-      "name": "package-linux-pie-disabled-legacy-gl-RelWithDebInfo",
-      "configurePreset": "linux-pie-disabled-legacy-gl-RelWithDebInfo",
+      "name": "package-linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
       "configurations": [
         "RelWithDebInfo"

@@ -42,7 +42,7 @@ jobs:
       - name: Bootstrap and Build the Code
         run: |
           sudo script/bootstrap
-          script/build
+          script/build --preset-name=linux-pie-enabled-glvnd-debug
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@4b6aa0b07da05d6e43d0e5f9c8596a6532ce1c85 #v2.15.3
