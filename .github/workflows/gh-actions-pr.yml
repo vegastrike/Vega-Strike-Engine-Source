@@ -32,10 +32,6 @@ jobs:
             COMPILER: 'clang'
             preset-name: 'linux-ninja-pie-enabled-glvnd-RelWithDebInfo'
             allow_failure: false
-          - FROM:     'opensuse/leap:16.0'
-            COMPILER: 'clang'
-            preset-name: 'linux-ninja-pie-enabled-glvnd-RelWithDebInfo'
-            allow_failure: true
           - FROM:     'fedora:41'
             COMPILER: 'clang'
             preset-name: 'linux-ninja-pie-enabled-glvnd-RelWithDebInfo'
