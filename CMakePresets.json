@@ -10,12 +10,18 @@
       "name": "default",
       "hidden": true,
       "displayName": "Default Config",
-      "description": "Default build using Ninja generator",
-      "generator": "Ninja",
+      "description": "Default build",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "debug": {
         "output": true
       }
+    },
+    {
+      "name": "ninja",
+      "hidden": true,
+      "displayName": "Use Ninja generator",
+      "generator": "Ninja",
+      "inherits": "default"
     },
     {
       "name": "unix-makefiles",
@@ -109,7 +115,8 @@
       "inherits": [
         "pie-enabled",
         "glvnd",
-        "debug"
+        "debug",
+        "ninja"
       ],
       "displayName": "Linux, Ninja, PIE Enabled, GLVND, Debug",
       "condition": {
@@ -123,7 +130,8 @@
       "inherits": [
         "pie-enabled",
         "glvnd",
-        "release"
+        "release",
+        "ninja"
       ],
       "displayName": "Linux, Ninja, PIE Enabled, GLVND, Release",
       "condition": {
@@ -137,7 +145,8 @@
       "inherits": [
         "pie-enabled",
         "glvnd",
-        "RelWithDebInfo"
+        "RelWithDebInfo",
+        "ninja"
       ],
       "displayName": "Linux, Ninja, PIE Enabled, GLVND, RelWithDebInfo",
       "condition": {
@@ -151,7 +160,8 @@
       "inherits": [
         "pie-enabled",
         "legacy-gl",
-        "debug"
+        "debug",
+        "ninja"
       ],
       "displayName": "Linux, Ninja, PIE Enabled, Legacy OpenGL, Debug",
       "condition": {
@@ -165,7 +175,8 @@
       "inherits": [
         "pie-enabled",
         "legacy-gl",
-        "release"
+        "release",
+        "ninja"
       ],
       "displayName": "Linux, Ninja, PIE Enabled, Legacy OpenGL, Release",
       "condition": {
@@ -179,7 +190,8 @@
       "inherits": [
         "pie-enabled",
         "legacy-gl",
-        "RelWithDebInfo"
+        "RelWithDebInfo",
+        "ninja"
       ],
       "displayName": "Linux, Ninja, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
       "condition": {
@@ -193,7 +205,8 @@
       "inherits": [
         "pie-disabled",
         "glvnd",
-        "debug"
+        "debug",
+        "ninja"
       ],
       "displayName": "Linux, Ninja, PIE Disabled, GLVND, Debug",
       "condition": {
@@ -207,7 +220,8 @@
       "inherits": [
         "pie-disabled",
         "glvnd",
-        "release"
+        "release",
+        "ninja"
       ],
       "displayName": "Linux, Ninja, PIE Disabled, GLVND, Release",
       "condition": {
@@ -221,7 +235,8 @@
       "inherits": [
         "pie-disabled",
         "glvnd",
-        "RelWithDebInfo"
+        "RelWithDebInfo",
+        "ninja"
       ],
       "displayName": "Linux, Ninja, PIE Disabled, GLVND, RelWithDebInfo",
       "condition": {
@@ -235,7 +250,8 @@
       "inherits": [
         "pie-disabled",
         "legacy-gl",
-        "debug"
+        "debug",
+        "ninja"
       ],
       "displayName": "Linux, Ninja, PIE Disabled, Legacy OpenGL, Debug",
       "condition": {
@@ -249,7 +265,8 @@
       "inherits": [
         "pie-disabled",
         "legacy-gl",
-        "release"
+        "release",
+        "ninja"
       ],
       "displayName": "Linux, Ninja, PIE Disabled, Legacy OpenGL, Release",
       "condition": {
@@ -263,7 +280,8 @@
       "inherits": [
         "pie-disabled",
         "legacy-gl",
-        "RelWithDebInfo"
+        "RelWithDebInfo",
+        "ninja"
       ],
       "displayName": "Linux, Ninja, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
       "condition": {
