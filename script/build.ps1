@@ -28,9 +28,8 @@
 
 
 param(
-    [String]$Generator = "VS2019Win64", # Other options include "ninja" and "VS2022Win64"
-    [Boolean]$EnablePIE = $false,
-    [String]$BuildType = "Release", # You can also specify "Debug"
+    [String]$PresetName = "VS2022Win64-pie-enabled-RelWithDebInfo",
+    [String]$BuildType = "RelWithDebInfo", # You can also specify "Debug" or "Release"
     [Boolean]$IsRelease = $false,
     [String]$GitTag = "not-applicable", # Git Tag, default empty string for PR builds
     [String]$GitSha = "not-applicable"  # Git Short SHA Reference, default empty string for PR builds
@@ -44,40 +43,12 @@ if ($GitSha -ieq "not-applicable" ) {
     $GitSha = ""
 }
 
-[String]$cmakePresetName = ""
-if ($Generator -ieq "Ninja") {
-    $cmakePresetName += "windows-ninja"
-} elseif ($Generator -ieq "VS2019Win64") {
-    $cmakePresetName += "VS2019Win64"
-} elseif ($Generator -ieq "VS2022Win64") {
-    $cmakePresetName += "VS2022Win64"
-} else {
-    Write-Error "Invalid value for Generator: $Generator"
-    exit 1
-}
-$cmakePresetName += "-"
-if ($EnablePIE) {
-    $cmakePresetName += "pie-enabled"
-} else {
-    $cmakePresetName += "pie-disabled"
-}
-$cmakePresetName += "-"
-if ($BuildType -ieq "Debug") {
-    $cmakePresetName += "debug"
-} elseif ($BuildType -ieq "Release") {
-    $cmakePresetName += "release"
-} elseif ($BuildType -ieq "RelWithDebInfo") {
-    $cmakePresetName += "RelWithDebInfo"
-} else {
-    Write-Error "Unrecognized value for BuildType: $BuildType"
-    exit 1
-}
 
 [String]$baseDir = (Get-Location -PSProvider "FileSystem").Path
-[String]$binaryDir = "$baseDir\build\$cmakePresetName"
+[String]$binaryDir = "$baseDir\build\$PresetName"
 Push-Location $baseDir
-cmake --preset $cmakePresetName
-cmake --build --preset "build-$cmakePresetName" -v
+cmake --preset $PresetName
+cmake --build --preset "build-$PresetName" -v
 Pop-Location
 
 New-Item bin -ItemType Directory -Force

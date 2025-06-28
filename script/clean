@@ -5,11 +5,29 @@
 # @usage  : ./script/clean
 # @param  : none
 #====================================
+# Copyright (C) 2020-2025 Stephen G. Tuggy and other Vega Strike contributors.
+#
+# https://github.com/vegastrike/Vega-Strike-Engine-Source
+#
+# This file is part of Vega Strike.
+#
+# Vega Strike is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Vega Strike is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
 echo "--------------------------"
-echo "--- clean | 2020-08-17 ---"
+echo "--- clean | 2025-06-27 ---"
 echo "--------------------------"
-echo "!!!warning!!! for strict developer use"
+echo "!!!warning!!! strictly for developer use"
 echo "--------------------------"
 
 #----------------------------------
@@ -23,11 +41,11 @@ DATA_DIR=$ROOT_DIR/data
 
 # delete build directory
 echo "deleting build directory ($BUILD_DIR)"
-rm -r $BUILD_DIR
+rm -r "$BUILD_DIR"
 
 # delete .pyc files
 echo "deleting compiled python files (*.pyc)"
-find $DATA_DIR -name "*.pyc" -delete
+find "$DATA_DIR" -name "*.pyc" -delete
 
 # delete home vegastrike config
 echo "deleting home vegastrike.config"
