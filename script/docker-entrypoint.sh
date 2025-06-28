@@ -82,7 +82,5 @@ if [ $IS_RELEASE -eq 1 ]
 then
   script/package --preset_name="${preset_name}"
 else
-  pushd build
   script/test --preset_name="${preset_name}"
-  popd
 fi
