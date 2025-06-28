@@ -89,7 +89,7 @@ jobs:
         run: script/cibuild --preset-name=${{ matrix.preset-name }}
 
       - name: Package it
-        working-directory: ${{github.workspace}}/build
+        working-directory: ${{github.workspace}}
         run: cpack -V --preset-name="package-${{ matrix.preset-name }}"
 
       - name: Upload the artifacts

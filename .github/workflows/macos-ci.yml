@@ -72,7 +72,7 @@ jobs:
         run: script/cibuild --preset-name=${{ matrix.preset-name }}
 
       - name: Test
-        working-directory: ${{github.workspace}}/build
+        working-directory: ${{github.workspace}}
         env:
           GTEST_OUTPUT: xml
           GTEST_COLOR: 1
