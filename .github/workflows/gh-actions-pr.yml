@@ -40,14 +40,6 @@ jobs:
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             allow_failure: false
-          - FROM:     'rockylinux_rockylinux:9.5'
-            COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
-            allow_failure: true
-          - FROM:     'manjarolinux/base'
-            COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
-            allow_failure: true
 
     steps:
       - name: Check out repository
