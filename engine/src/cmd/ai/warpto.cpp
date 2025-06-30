@@ -51,11 +51,9 @@ bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following) {
         return true;
     } else if (timetolive > (max_allowable_travel_time())) {
         float mytime = SIMULATION_ATOM * 1.5;
-        static bool rampdown =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "autopilot_ramp_warp_down", "true"));
+        const bool rampdown = configuration()->physics.auto_pilot_ramp_warp_down;
         if (rampdown == false) {
-            static float warprampdowntime =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "warprampdowntime", "0.5"));
+            const float warprampdowntime = configuration()->physics.warp_ramp_down_time;
             mytime = warprampdowntime;
         }
         if (dist - parent->GetWarpVelocity().Magnitude() * mytime < toodamnclose) {

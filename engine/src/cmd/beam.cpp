@@ -467,45 +467,35 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
     }
     //A bunch of needed config variables - its best to have them here, so that they're loaded the
     //very first time Collide() is called. That way, we avoid hiccups.
-    static float nbig = XMLSupport::parse_float(vs_config->getVariable("physics", "percent_to_tractor", ".1"));
+    const float nbig = configuration()->physics.tractor.percent_to_tractor;
     int upgradesfaction = FactionUtil::GetUpgradeFaction();
     static int cargofaction = FactionUtil::GetFactionIndex("cargo");
-    static bool c_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.cargo.force_push", "true"));
-    static bool c_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.cargo.force_in", "true"));
-    static bool u_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.upgrade.force_push", "true"));
-    static bool u_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.upgrade.force_in", "true"));
-    static bool f_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.faction.force_push", "true"));
-    static bool f_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.faction.force_in", "true"));
-    static bool d_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.disabled.force_push", "true"));
-    static bool d_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.disabled.force_in", "true"));
-    static bool o_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.others.force_push", "false"));
-    static bool o_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.others.force_in", "false"));
-    static bool scoop = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.scoop", "true"));
-    static float scoopangle =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.scoop_angle", "0.5"));     //In radians
-    static float scoopcosangle = (float) cos(scoopangle);
-    static float maxrelspeed =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.max_relative_speed", "150"));
-    static float c_ors_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.cargo.distance_own_rsize", "1.5"));
-    static float c_trs_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.cargo.distance_tgt_rsize", "1.1"));
-    static float c_o = XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.cargo.distance", "0"));
-    static float u_ors_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.ugprade.distance_own_rsize", "1.5"));
-    static float u_trs_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.upgrade.distance_tgt_rsize", "1.1"));
-    static float u_o = XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.upgrade.distance", "0"));
-    static float f_ors_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.faction.distance_own_rsize", "2.2"));
-    static float f_trs_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.faction.distance_tgt_rsize", "2.2"));
-    static float f_o = XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.faction.distance", "0"));
-    static float o_ors_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.others.distance_own_rsize", "1.1"));
-    static float o_trs_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.others.distance_tgt_rsize", "1.1"));
-    static float o_o = XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.others.distance", "0"));
+    const bool c_fp = configuration()->physics.tractor.cargo.force_push;
+    const bool c_fi = configuration()->physics.tractor.cargo.force_in;
+    const bool u_fp = configuration()->physics.tractor.upgrade.force_push;
+    const bool u_fi = configuration()->physics.tractor.upgrade.force_in;
+    const bool f_fp = configuration()->physics.tractor.faction.force_push;
+    const bool f_fi = configuration()->physics.tractor.faction.force_in;
+    const bool d_fp = configuration()->physics.tractor.disabled.force_push;
+    const bool d_fi = configuration()->physics.tractor.disabled.force_in;
+    const bool o_fp = configuration()->physics.tractor.others.force_push;
+    const bool o_fi = configuration()->physics.tractor.others.force_in;
+    const bool scoop = configuration()->physics.tractor.scoop;
+    const float scoopangle = configuration()->physics.tractor.scoop_angle;     //In radians
+    const float scoopcosangle = cos(scoopangle);
+    const float maxrelspeed = configuration()->physics.tractor.max_relative_speed;
+    const float c_ors_m = configuration()->physics.tractor.cargo.distance_own_rsize;
+    const float c_trs_m = configuration()->physics.tractor.cargo.distance_tgt_rsize;
+    const float c_o = configuration()->physics.tractor.cargo.distance;
+    const float u_ors_m = configuration()->physics.tractor.upgrade.distance_own_rsize;
+    const float u_trs_m = configuration()->physics.tractor.upgrade.distance_tgt_rsize;
+    const float u_o = configuration()->physics.tractor.upgrade.distance;
+    const float f_ors_m = configuration()->physics.tractor.faction.distance_own_rsize;
+    const float f_trs_m = configuration()->physics.tractor.faction.distance_tgt_rsize;
+    const float f_o = configuration()->physics.tractor.faction.distance;
+    const float o_ors_m = configuration()->physics.tractor.others.distance_own_rsize;
+    const float o_trs_m = configuration()->physics.tractor.others.distance_tgt_rsize;
+    const float o_o = configuration()->physics.tractor.others.distance;
     bool tractor = (damagerate < 0 && phasedamage > 0);
     bool repulsor = (damagerate > 0 && phasedamage < 0);
     if (scoop && (tractor || repulsor)) {
@@ -764,8 +754,7 @@ void Beam::UpdatePhysics(const Transformation &trans,
     cumulative_transformation.Compose(trans, m);
     cumulative_transformation.to_matrix(cumulative_transformation_matrix);
     bool possible = AdjustMatrix(cumulative_transformation_matrix, Vector(0, 0, 0), targ, speed, false, tracking_cone);
-    static bool firemissingautotrackers =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "fire_missing_autotrackers", "true"));
+    const bool firemissingautotrackers = configuration()->physics.fire_missing_autotrackers;
     if (targ && possible == false && !firemissingautotrackers) {
         Destabilize();
     }

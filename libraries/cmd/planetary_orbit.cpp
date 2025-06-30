@@ -86,8 +86,7 @@ void PlanetaryOrbit::Execute() {
         return;
     }
     QVector origin(targetlocation);
-    static float orbit_centroid_averaging =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "orbit_averaging", "16"));
+    const float orbit_centroid_averaging = configuration()->physics.orbit_averaging;
     float averaging = (float) orbit_centroid_averaging / (float) (parent->predicted_priority + 1.0f);
     if (averaging < 1.0f) {
         averaging = 1.0f;
@@ -190,8 +189,7 @@ void PlanetaryOrbit::Execute() {
     double mag = (destination - parent->LocalPosition()).Magnitude();
     parent->Velocity = parent->cumulative_velocity =
             (((destination - parent->LocalPosition()) * (1. / simulation_atom_var)).Cast());
-    static float Unreasonable_value =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "planet_ejection_stophack", "2000"));
+    const float Unreasonable_value = configuration()->physics.planet_ejection_stophack;
     float v2 = parent->Velocity.Dot(parent->Velocity);
     if (v2 > Unreasonable_value * Unreasonable_value) {
         VS_LOG(debug,

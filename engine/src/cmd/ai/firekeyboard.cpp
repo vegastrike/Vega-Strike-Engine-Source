@@ -1698,8 +1698,7 @@ int SelectDockPort(Unit *utdw, Unit *parent);
 
 void FireKeyboard::SetParent(Unit *parent1) {
     this->Order::SetParent(parent1);
-    static bool allow_special_with_weapons =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "special_and_normal_gun_combo", "true"));
+    const bool allow_special_with_weapons = configuration()->physics.allow_special_and_normal_gun_combo;
     if (!allow_special_with_weapons) {
         parent->ToggleWeapon(false, true /*reverse*/ );
         parent->ToggleWeapon(false, false /*reverse*/ );
@@ -1738,8 +1737,7 @@ void FireKeyboard::Execute() {
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if (!_Universe->AccessCockpit()->CanDrawNavSystem()) {
-            static bool allow_special_with_weapons =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "special_and_normal_gun_combo", "true"));
+            const bool allow_special_with_weapons = configuration()->physics.allow_special_and_normal_gun_combo;
             if (!allow_special_with_weapons) {
                 bool special = false;
                 bool normal = false;
