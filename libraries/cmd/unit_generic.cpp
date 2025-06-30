@@ -1683,7 +1683,7 @@ bool Unit::Explode(bool drawit, float timeit) {
                             * game_options()->explosion_damage_center,
                     this->ExplosionRadius()
                             * game_options()->explosion_damage_center
-                            * game_options()->explosion_damage_edge,
+                            * configuration()->physics.explosion_damage_edge,
                     NULL));
         }
         QVector exploc = this->cumulative_transformation.position;
