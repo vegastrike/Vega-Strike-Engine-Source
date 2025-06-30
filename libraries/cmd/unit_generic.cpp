@@ -3471,8 +3471,8 @@ void Unit::Repair() {
     }
 
     // TODO: everything below here needs to go when we're done with lib_components
-    const float repairtime = configuration()->physics.RepairDroidTime;
-    const float checktime = configuration()->physics.RepairDroidCheckTime;
+    const float repairtime = configuration()->physics.repair_droid_time;
+    const float checktime = configuration()->physics.repair_droid_check_time;
     if ((repairtime <= 0) || (checktime <= 0)) {
         return;
     }

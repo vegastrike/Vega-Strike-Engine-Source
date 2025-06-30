@@ -203,10 +203,10 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
     if (autoLandingExcludeList.find(tname) != autoLandingExcludeList.end()) {
         return;
     }
-    const float lessthan = configuration()->physics.AutoLandingDockDistance;
-    const float warnless = configuration()->physics.AutoLandingWarningDistance;
-    const float AutoLandingMoveDistance = configuration()->physics.AutoLandingMoveDistance;
-    const float moveout = configuration()->physics.AutoLandingDisplaceDistance;
+    const float lessthan = configuration()->physics.auto_landing_dock_distance;
+    const float warnless = configuration()->physics.auto_landing_warning_distance;
+    const float AutoLandingMoveDistance = configuration()->physics.auto_landing_move_distance;
+    const float moveout = configuration()->physics.auto_landing_displace_distance;
     const float autorad = configuration()->physics.unit_default_autodock_radius;
     const bool adjust_unit_radius = configuration()->physics.use_unit_autodock_radius;
     float rsize = target->isPlanet() ? target->rSize() : (autorad + (adjust_unit_radius ? target->rSize() : 0));
