@@ -754,7 +754,7 @@ void Universe::Generate2(StarSystem *ss) {
     static bool firsttime = true;
     LoadStarSystem(ss);
     pushActiveStarSystem(ss);
-    for (unsigned int tume = 0; tume <= game_options()->num_times_to_simulate_new_star_system * SIM_QUEUE_SIZE + 1;
+    for (unsigned int tume = 0; tume <= configuration()->physics.num_times_to_simulate_new_star_system * SIM_QUEUE_SIZE + 1;
             ++tume) {
         ss->UpdateUnitsPhysics(true);
     }

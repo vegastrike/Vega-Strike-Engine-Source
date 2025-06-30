@@ -119,8 +119,7 @@ void GetMadAt(Unit *un, Unit *parent, int numhits = 0) {
 
 void AllUnitsCloseAndEngage(Unit *un, int faction) {
     Unit *ally;
-    static float contraband_assist_range =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "contraband_assist_range", "50000"));
+    const float contraband_assist_range = configuration()->physics.contraband_assist_range;
     float relation = 0;
     static float
             minrel = XMLSupport::parse_float(vs_config->getVariable("AI", "max_faction_contraband_relation", "-.05"));
@@ -210,8 +209,7 @@ void CommunicatingAI::UpdateContrabandSearch() {
                 if (u->GetCargo(which_cargo_item).GetQuantity() > 0) {
                     int which_carg_item_bak = which_cargo_item;
                     std::string item = u->GetManifest(which_cargo_item++, parent, SpeedAndCourse);
-                    static bool use_hidden_cargo_space =
-                            XMLSupport::parse_bool(vs_config->getVariable("physics", "use_hidden_cargo_space", "true"));
+                    const bool use_hidden_cargo_space = configuration()->physics.use_hidden_cargo_space;
                     static float speed_course_change =
                             XMLSupport::parse_float(vs_config->getVariable("AI",
                                     "PercentageSpeedChangeToStopSearch",
