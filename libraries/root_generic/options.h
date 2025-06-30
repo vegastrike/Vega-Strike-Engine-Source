@@ -242,7 +242,7 @@ public:
     std::string startDockedTo;
     bool dockOnLoad{};
 
-/* PhysicsConfig Options */
+/* Physics Options */
     std::string Drone;
     int max_missions{};
     double game_speed{};

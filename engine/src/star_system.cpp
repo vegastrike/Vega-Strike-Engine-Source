@@ -559,7 +559,7 @@ void TentativeJumpTo(StarSystem *ss, Unit *un, Unit *jumppoint, const std::strin
 
 float ScaleJumpRadius(float radius) {
     //need this because sys scale doesn't affect j-point size
-    radius *= game_options()->jump_radius_scale * game_options()->game_speed;
+    radius *= configuration()->physics.jump_radius_scale * configuration()->physics.game_speed;
     return radius;
 }
 
@@ -1301,7 +1301,7 @@ void StarSystem::ProcessPendingJumps() {
                     } else if (!player) {
                         un->SetVelocity(Vector(0, 0, 0));
                     }
-                    if (game_options()->jump_disables_shields) {
+                    if (configuration()->physics.jump_disables_shields) {
                         // Zero shield. They'll start recharging from zero.
                         un->shield.Zero();
                     }

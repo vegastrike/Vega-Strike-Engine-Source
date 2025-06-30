@@ -1671,9 +1671,9 @@ bool Unit::Explode(bool drawit, float timeit) {
                     this->shield.AverageMaxLayerValue(),
                     0,
                     this->ExplosionRadius()
-                            * game_options()->explosion_damage_center,
+                            * configuration()->physics.explosion_damage_center,
                     this->ExplosionRadius()
-                            * game_options()->explosion_damage_center
+                            * configuration()->physics.explosion_damage_center
                             * configuration()->physics.explosion_damage_edge,
                     NULL));
         }
@@ -1744,7 +1744,7 @@ bool Unit::Explode(bool drawit, float timeit) {
         }
     }
     bool timealldone =
-            (this->pImage->timeexplode > game_options()->debris_time || this->getUnitType() == Vega_UnitType::missile
+            (this->pImage->timeexplode > configuration()->physics.debris_time || this->getUnitType() == Vega_UnitType::missile
                     || _Universe->AccessCockpit()->GetParent() == this || this->SubUnits.empty());
     if (this->pImage->pExplosion) {
         this->pImage->timeexplode += timeit;
@@ -1770,8 +1770,8 @@ bool Unit::Explode(bool drawit, float timeit) {
             }
         }
     }
-    if ((game_options()->eject_cargo_on_blowup > 0) && (this->numCargo() > 0)) {
-        unsigned int dropcount = floorf(this->numCargo() / game_options()->eject_cargo_on_blowup) + 1;
+    if ((configuration()->physics.eject_cargo_on_blowup > 0) && (this->numCargo() > 0)) {
+        unsigned int dropcount = floorf(this->numCargo() / configuration()->physics.eject_cargo_on_blowup) + 1;
         if (dropcount > this->numCargo()) {
             dropcount = this->numCargo();
         }
