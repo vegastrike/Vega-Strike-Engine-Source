@@ -1260,7 +1260,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
                 do {
                     cargorand = (cargorand_o + i) % cargo.size();
                 } while ((cargo[cargorand].GetQuantity() == 0
-                        || cargo[cargorand].GetMissionFlag()) && (++i) < cargo.size());
+                        || cargo[cargorand].IsMissionFlag()) && (++i) < cargo.size());
                 cargo[cargorand].SetQuantity(cargo[cargorand].GetQuantity() * float_to_int(dam));
             }
             break;
@@ -2683,70 +2683,36 @@ static bool cell_has_recursive_data(const string &name, unsigned int fac, const 
     return retval;
 }
 
-#define STDUPGRADE_SPECIFY_DEFAULTS(my, oth, temp, noth, dgradelimer, dgradelimerdefault, clamp, value_to_lookat) \
-    do {                                                                                                            \
-        retval =                                                                                                    \
-            (                                                                                                       \
-                UpgradeFloat(                                                                                       \
-                    resultdoub,                                                                                     \
-                    my,                                                                                             \
-                    oth,                                                                                            \
-                    (templ != NULL) ? temp : 0,                                                                     \
-                    Adder, Comparer, noth, noth,                                                                    \
-                    Percenter, temppercent,                                                                         \
-                    forcetransaction,                                                                               \
-                    templ != NULL,                                                                                  \
-                    (downgradelimit != NULL) ? dgradelimer : dgradelimerdefault,                                    \
-                    AGreaterB,                                                                                      \
-                    clamp,                                                                                          \
-                    force_change_on_nothing                                                                         \
-                            )                                                                                       \
-            );                                                                                                      \
-        if (retval == UPGRADEOK)                                                                                    \
-        {                                                                                                           \
-            if (touchme)                                                                                            \
-                my = resultdoub;                                                                                    \
-            percentage += temppercent;                                                                              \
-            ++numave;                                                                                               \
-            can_be_redeemed = true;                                                                                 \
-            if (gen_downgrade_list)                                                                                 \
-                AddToDowngradeMap( up->name, oth, ( (char*) &value_to_lookat )-(char*) this, tempdownmap );         \
-        }                                                                                                           \
-        else if (retval != NOTTHERE)                                                                                \
-        {                                                                                                           \
-            if (retval == CAUSESDOWNGRADE)                                                                          \
-                needs_redemption = true;                                                                            \
-            else                                                                                                    \
-                cancompletefully = false;                                                                           \
-        }                                                                                                           \
-    }                                                                                                               \
-    while (0)
-
-#define STDUPGRADE(my, oth, temp, noth)                \
-    do {STDUPGRADE_SPECIFY_DEFAULTS( my,                 \
-                                     oth,                \
-                                     temp,               \
-                                     noth,               \
-                                     downgradelimit->my, \
-                                     blankship->my,      \
-                                     false,              \
-                                     this->my ); }       \
-    while (0)
-
-#define STDUPGRADECLAMP(my, oth, temp, noth)                 \
-    do {STDUPGRADE_SPECIFY_DEFAULTS( my,                       \
-                                     oth,                      \
-                                     temp,                     \
-                                     noth,                     \
-                                     downgradelimit->my,       \
-                                     blankship->my,            \
-                                     !force_change_on_nothing, \
-                                     this->my ); }             \
-    while (0)
-
 // TODO: get rid of this
 extern float accelStarHandler(float &input);
 float speedStarHandler(float &input);
+
+/* Stopgap measure - upgrade/downgrade cargo holds/upgrade spaces */
+void UpAndDownCargoHoldAndUpgradeSpace(Unit *unit, const Unit *upgrade, bool do_upgrade) {
+    float multiple = (do_upgrade ? 1.0f : -1.0f);
+    float cargo_volume = upgrade->CargoVolume;
+    float hidden_volume = upgrade->HiddenCargoVolume;
+    float upgrade_space = upgrade->UpgradeVolume;
+
+    if(!do_upgrade) {
+        cargo_volume = -cargo_volume;
+        hidden_volume = -hidden_volume;
+        upgrade_space = -upgrade_space;
+    }
+
+    if(upgrade->CargoVolume > 0) {
+        unit->CargoVolume += cargo_volume * multiple;
+    }
+
+    if(upgrade->HiddenCargoVolume > 0) {
+        unit->HiddenCargoVolume += hidden_volume * multiple;
+    }
+
+    if(upgrade->UpgradeVolume > 0) {
+        unit->UpgradeVolume += upgrade_space * multiple;
+    }
+}
+
 
 bool Unit::UpAndDownGrade(const Unit *up,
         const Unit *templ,
@@ -2767,16 +2733,14 @@ bool Unit::UpAndDownGrade(const Unit *up,
         return result.success;
     }
 
+    UpAndDownCargoHoldAndUpgradeSpace(this, up, !downgrade);
 
     // Old Code
     percentage = 0;
 
-    static bool
-            csv_cell_null_check = XMLSupport::parse_bool(vs_config->getVariable("data", "empty_cell_check", "true"));
     int numave = 0;
     bool cancompletefully = true;
     bool can_be_redeemed = false;
-    bool needs_redemption = false;
     if (mountoffset >= 0) {
         cancompletefully = UpgradeMounts(up, mountoffset, touchme, downgrade, numave, percentage);
     }
@@ -2785,96 +2749,12 @@ bool Unit::UpAndDownGrade(const Unit *up,
         cancompletefully1 = UpgradeSubUnits(up, subunitoffset, touchme, downgrade, numave, percentage);
     }
     cancompletefully = cancompletefully && cancompletefully1;
-    adder Adder;
-    comparer Comparer;
-    percenter Percenter;
     vsUMap<int, DoubleName> tempdownmap;
     if (cancompletefully && cancompletefully1 && downgrade) {
         if (percentage > 0) {
             AddToDowngradeMap(up->name, 1, curdowngrademapoffset++, tempdownmap);
         }
     }
-
-    if (downgrade) {
-        Adder = &SubtractUp;
-        Percenter = &computeDowngradePercent;
-        Comparer = &GreaterZero;
-    } else {
-        if (additive == 1) {
-            Adder = &AddUp;
-            Percenter = &computeAdderPercent;
-        } else if (additive == 2) {
-            Adder = &MultUp;
-            Percenter = &computeMultPercent;
-        } else {
-            Adder = &GetsB;
-            Percenter = &computePercent;
-        }
-        Comparer = AGreaterB;
-    }
-    double resultdoub;
-    int retval = 0; //"= 0" added by chuck_starchaser to shut off a warning about its possibly being used uninitialized
-    double temppercent;
-    static Unit *blankship = NULL;
-    static bool initblankship = false;
-    if (!initblankship) {
-        blankship = this;
-        initblankship = true;
-        blankship = new Unit("upgrading_dummy_unit", true, FactionUtil::GetUpgradeFaction());
-    }
-    //set up vars for "LookupUnitStat" to check for empty cells
-    string upgrade_name = up->name;
-    //Check SPEC stuff
-    if (!csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data(upgrade_name, up->faction,
-                    "Warp_Min_Multiplier|Warp_Max_Multiplier")) {
-
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Warp_Min_Multiplier")) {
-            STDUPGRADE(graphicOptions.MinWarpMultiplier,
-                    up->graphicOptions.MinWarpMultiplier,
-                    templ->graphicOptions.MinWarpMultiplier,
-                    1);
-        }
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Warp_Max_Multiplier")) {
-            STDUPGRADE(graphicOptions.MaxWarpMultiplier,
-                    up->graphicOptions.MaxWarpMultiplier,
-                    templ->graphicOptions.MaxWarpMultiplier,
-                    1);
-        }
-    }
-
-    /*if (!csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data(upgrade_name, up->faction, "Reactor_Recharge"))
-        STDUPGRADE(recharge, up->recharge, templ->recharge, 0);*/
-    static bool unittable = XMLSupport::parse_bool(vs_config->getVariable("physics", "UnitTable", "false"));
-    //Uncommon fields (capacities... rates... etc...)
-    if (!csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data(upgrade_name,
-                    up->faction,
-                    "Hold_Volume|Upgrade_Storage_Volume|Equipment_Space|Hidden_Hold_Volume")) {
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Hold_Volume"))
-            STDUPGRADE(CargoVolume, up->CargoVolume, templ->CargoVolume, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Upgrade_Storage_Volume"))
-            STDUPGRADE(UpgradeVolume, up->UpgradeVolume, templ->UpgradeVolume, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Hidden_Hold_Volume"))
-            STDUPGRADE(HiddenCargoVolume, up->HiddenCargoVolume, templ->HiddenCargoVolume, 0);
-    }
-
-
-
-
-
-    //DO NOT CHANGE see unit_customize.cpp
-    static float lc = XMLSupport::parse_float(vs_config->getVariable("physics", "lock_cone", ".8"));
-    //DO NOT CHANGE! see unit.cpp:258
-    static float tc = XMLSupport::parse_float(vs_config->getVariable("physics", "autotracking", ".93"));
-    static bool use_template_maxrange =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "use_upgrade_template_maxrange", "true"));
 
     //NO CLUE FOR BELOW
     if (downgrade) {
@@ -2888,11 +2768,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
             }
         }
     }
-    if (needs_redemption) {
-        if (!can_be_redeemed) {
-            cancompletefully = false;
-        }
-    }
+    
     if (0 == numave) {      //Doesn't upgrade anything -- JS_NUDGE -- may want to revisit this later
         percentage = 1.0;
     }
@@ -2911,8 +2787,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
         }
     }
     if (gen_downgrade_list) {
-        const float MyPercentMin = configuration()->general.remove_downgrades_less_than_percent;
-        if (downgrade && percentage > MyPercentMin) {
+        if (downgrade && percentage > configuration()->general.remove_downgrades_less_than_percent) {
             for (vsUMap<int, DoubleName>::iterator i = tempdownmap.begin(); i != tempdownmap.end(); ++i) {
                 downgrademap[(*i).first] = (*i).second;
             }
@@ -2921,9 +2796,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
     return cancompletefully;
 }
 
-#undef STDUPGRADECLAMP
-#undef STDUPGRADE
-#undef STDUPGRADE_SPECIFY_DEFAULTS
 
 bool Unit::ReduceToTemplate() {
     vector<Cargo> savedCargo;
@@ -3026,32 +2898,13 @@ int Unit::RepairUpgrade() {
                 GetCargo(i).SetCategory("upgrades/" + GetCargo(i).GetCategory().substr(damlen));
             }
         }
-    } else if (ret) {
-        const Unit *maxrecharge = makeTemplateUpgrade(name.get() + ".template", faction);
-
-        Unit *mpl = getMasterPartList();
-        for (unsigned int i = 0; i < mpl->numCargo(); ++i) {
-            if (mpl->GetCargo(i).GetCategory().find("upgrades") == 0) {
-                const Unit *up = loadUnitByCache(mpl->GetCargo(i).GetName(), upfac);
-                //now we analyzify up!
-                // TODO: lib_damage
-                /*if (up->MaxShieldVal() == MaxShieldVal() && up->shield.recharge > shield.recharge) {
-                    shield.recharge = up->shield.recharge;
-                    if (maxrecharge)
-                        if (shield.recharge > maxrecharge->shield.recharge)
-                            shield.recharge = maxrecharge->shield.recharge;
-                }*/
-            }
-        }
-    }
+    } 
     return success;
 }
 
 float RepairPrice(float operational, float price) {
     return .5 * price * (1 - operational) * g_game.difficulty;
 }
-
-extern bool isWeapon(std::string name);
 
 //item must be non-null... but baseUnit or credits may be NULL.
 bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
@@ -3068,10 +2921,12 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
             // Pay for repair
             (*credits) -= repair_price;
         }
+
+        GenerateHudText(getDamageColor);
         return true;
     }
 
-    if (isWeapon(item->GetCategory())) {
+    if (item->IsWeapon()) {
         const Unit *upgrade = getUnitFromUpgradeName(item->GetName(), this->faction);
         if (upgrade->getNumMounts()) {
             double price = itemPrice; //RepairPrice probably won't work for mounts.
@@ -3149,7 +3004,6 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
     const Unit *templ = NULL;
     const Unit *downgradelimit = NULL;
     const bool staticrem = configuration()->general.remove_impossible_downgrades;
-    const float MyPercentMin = configuration()->general.remove_downgrades_less_than_percent;
     int upgrfac = FactionUtil::GetUpgradeFaction();
     for (unsigned int i = 0; i < mylist.size(); ++i) {
         bool removethis = true /*staticrem*/;
@@ -3208,7 +3062,7 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
                         double percent = 1;
                         if (downgrade) {
                             if (canDowngrade(NewPart, m, s, percent, downgradelimit)) {
-                                if (percent > MyPercentMin) {
+                                if (percent > configuration()->general.remove_downgrades_less_than_percent) {
                                     removethis = false;
                                     break;
                                 }
@@ -3342,70 +3196,10 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
     }
 }
 
-std::string Unit::massSerializer(const XMLType &input, void *mythis) {
-    Unit *un = (Unit *) mythis;
-    float mass = un->Mass;
-    static bool usemass = XMLSupport::parse_bool(vs_config->getVariable("physics", "use_cargo_mass", "true"));
-    for (unsigned int i = 0; i < un->cargo.size(); ++i) {
-        if (un->cargo[i].GetQuantity() > 0) {
-            if (usemass) {
-                mass -= un->cargo[i].GetMass() * un->cargo[i].GetQuantity();
-            }
-        }
-    }
-    return XMLSupport::tostring((float) mass);
-}
 
-std::string Unit::mountSerializer(const XMLType &input, void *mythis) {
-    Unit *un = (Unit *) mythis;
-    int i = input.w.hardint;
-    if (un->getNumMounts() > i) {
-        string result(getMountSizeString(un->mounts[i].size));
-        if (un->mounts[i].status == Mount::INACTIVE || un->mounts[i].status == Mount::ACTIVE) {
-            result += string("\" weapon=\"") + (un->mounts[i].type->name);
-        }
-        if (un->mounts[i].ammo != -1) {
-            result += string("\" ammo=\"") + XMLSupport::tostring(un->mounts[i].ammo);
-        }
-        if (un->mounts[i].volume != -1) {
-            result += string("\" volume=\"") + XMLSupport::tostring(un->mounts[i].volume);
-        }
-        result += string("\" xyscale=\"") + XMLSupport::tostring(un->mounts[i].xyscale) + string("\" zscale=\"")
-                + XMLSupport::tostring(un->mounts[i].zscale);
-        Matrix m;
-        Transformation(un->mounts[i].GetMountOrientation(), un->mounts[i].GetMountLocation().Cast()).to_matrix(m);
-        result += string("\" x=\"") + tostring((float) (m.p.i / parse_float(input.str)));
-        result += string("\" y=\"") + tostring((float) (m.p.j / parse_float(input.str)));
-        result += string("\" z=\"") + tostring((float) (m.p.k / parse_float(input.str)));
 
-        result += string("\" qi=\"") + tostring(m.getQ().i);
-        result += string("\" qj=\"") + tostring(m.getQ().j);
-        result += string("\" qk=\"") + tostring(m.getQ().k);
 
-        result += string("\" ri=\"") + tostring(m.getR().i);
-        result += string("\" rj=\"") + tostring(m.getR().j);
-        result += string("\" rk=\"") + tostring(m.getR().k);
-        return result;
-    } else {
-        return string("");
-    }
-}
 
-std::string Unit::subunitSerializer(const XMLType &input, void *mythis) {
-    Unit *un = (Unit *) mythis;
-    int index = input.w.hardint;
-    Unit *su;
-    int i = 0;
-    for (un_iter ui = un->getSubUnits(); (su = *ui); ++ui, ++i) {
-        if (i == index) {
-            if (su->pImage->unitwriter) {
-                return su->pImage->unitwriter->getName();
-            }
-            return su->name;
-        }
-    }
-    return string("destroyed_blank");
-}
 
 void Unit::setUnitRole(const std::string &s) {
     unit_role = ROLES::getRole(s);
@@ -3453,18 +3247,7 @@ using std::string;
  **************************************************************************************
  */
 
-bool isWeapon(std::string name) {
-    if (name.find("Weapon") != std::string::npos) {
-        return true;
-    }
-    if (name.find("SubUnit") != std::string::npos) {
-        return true;
-    }
-    if (name.find("Ammunition") != std::string::npos) {
-        return true;
-    }
-    return false;
-}
+
 
 #define REPAIRINTEGRATED(functionality, max_functionality) \
     do {                                                     \
