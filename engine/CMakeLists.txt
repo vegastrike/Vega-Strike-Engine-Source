@@ -1220,6 +1220,7 @@ IF (USE_GTEST)
         src/configuration/tests/configuration_tests.cpp
         src/damage/tests/layer_tests.cpp
         src/damage/tests/object_tests.cpp
+        src/resource/tests/cargo_tests.cpp
         src/resource/tests/buy_sell.cpp
         src/resource/tests/resource_test.cpp
         src/resource/tests/manifest_tests.cpp
