@@ -2688,29 +2688,33 @@ extern float accelStarHandler(float &input);
 float speedStarHandler(float &input);
 
 /* Stopgap measure - upgrade/downgrade cargo holds/upgrade spaces */
-void UpAndDownCargoHoldAndUpgradeSpace(Unit *unit, const Unit *upgrade, bool do_upgrade) {
-    float multiple = (do_upgrade ? 1.0f : -1.0f);
-    float cargo_volume = upgrade->CargoVolume;
-    float hidden_volume = upgrade->HiddenCargoVolume;
-    float upgrade_space = upgrade->UpgradeVolume;
+bool UpAndDownCargoHoldAndUpgradeSpace(Unit *unit, float cargo_volume, float hidden_volume, 
+                                       float upgrade_space, bool is_upgrade, bool do_upgrade) {
+    float multiple = (is_upgrade ? 1.0f : -1.0f);
 
-    if(!do_upgrade) {
-        cargo_volume = -cargo_volume;
-        hidden_volume = -hidden_volume;
-        upgrade_space = -upgrade_space;
+    // Check if this is actually a cargo/upgrade space upgrade
+    if(cargo_volume == 0 && hidden_volume == 0 && upgrade_space == 0) {
+        return false;
     }
 
-    if(upgrade->CargoVolume > 0) {
+    // Just checking if we can, and we can always upgrade/downgrade
+    if(!do_upgrade) {
+        return true;
+    }
+
+    if(cargo_volume != 0) {
         unit->CargoVolume += cargo_volume * multiple;
     }
 
-    if(upgrade->HiddenCargoVolume > 0) {
+    if(hidden_volume != 0) {
         unit->HiddenCargoVolume += hidden_volume * multiple;
     }
 
-    if(upgrade->UpgradeVolume > 0) {
+    if(upgrade_space != 0) {
         unit->UpgradeVolume += upgrade_space * multiple;
     }
+
+    return true;
 }
 
 
@@ -2732,8 +2736,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
         percentage = result.percent;
         return result.success;
     }
-
-    UpAndDownCargoHoldAndUpgradeSpace(this, up, !downgrade);
 
     // Old Code
     percentage = 0;
