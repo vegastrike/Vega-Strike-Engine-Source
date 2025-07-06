@@ -117,7 +117,7 @@ Unit *getMasterPartList() {
 
     if(ret.cargo.empty()) {
         ret.name = "master_part_list";
-        for(const Cargo& c : Manifest::MPL().getItems()) {
+        for(const Cargo& c : Manifest::MPL().GetItems()) {
             ret.cargo_hold.AddCargo(&ret, c);
         }
     }
@@ -2568,11 +2568,6 @@ double Unit::Upgrade(const std::string &file,
                 new Unit(file.c_str(), true, upgradefac));
     }
 
-    // TODO: find the caller in basecomputer and just set the cargo to installed there.
-    Cargo cargo = upgrade_space.GetCargoByName(file);
-    if (!cargo.IsNullCargo()) {
-        cargo.SetInstalled(true);
-    }
     char *unitdir = GetUnitDir(this->name.get().c_str());
     string templnam = string(unitdir) + ".template";
     const Unit *templ = UnitConstCache::getCachedConst(StringIntKey(templnam, this->faction));
@@ -2860,7 +2855,7 @@ int Unit::RepairCost() {
     }
 
 
-    for (const Cargo& c : cargo_hold.getItems()) {
+    for (const Cargo& c : cargo_hold.GetItems()) {
         if (c.Damaged()) {
             ++cost;
         }
@@ -2965,13 +2960,14 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
                     if (notadditive) {
                         this->Upgrade(un, 0, 0, 0, true, percentage, makeTemplateUpgrade(this->name, this->faction));
                     }
-                    if (item->GetCategory().find(DamagedCategory) == 0) {
-                        int index = this->upgrade_space.GetIndex(itemCopy);
-                        Cargo c = this->upgrade_space.GetCargo(index);
-                        if (!c.IsNullCargo()) {
-                            c.SetCategory("upgrades/" + c.GetCategory().substr(strlen(DamagedCategory)));
-                        }
-                    }
+                    // This code changes the category of the item from "upgrades/Damaged/" to the original category.
+                    // if (item->GetCategory().find(DamagedCategory) == 0) {
+                    //     int index = this->upgrade_space.GetIndex(itemCopy);
+                    //     Cargo c = this->upgrade_space.GetCargo(index);
+                    //     if (!c.IsNullCargo()) {
+                    //         c.SetCategory("upgrades/" + c.GetCategory().substr(strlen(DamagedCategory)));
+                    //     }
+                    // }
                     return true;
                 }
             }
@@ -3124,10 +3120,6 @@ bool myless(const Cargo &a, const Cargo &b) {
     return a < b;
 }
 
-Cargo *GetMasterPartList(const char *input_buffer) {
-    const std::string name(input_buffer);
-    return GetUnitMasterPartList().cargo_hold.GetCargoPtrByName(name);
-}
 
 void Unit::ImportPartList(const std::string &category, float price, float pricedev, float quantity, float quantdev) {
     unsigned int numcarg = GetUnitMasterPartList().numCargo();

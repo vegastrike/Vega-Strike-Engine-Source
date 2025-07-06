@@ -1598,7 +1598,7 @@ void Arrested(Unit *parent) {
     if (!attack) {
         Unit *contra = FactionUtil::GetContraband(own);
         if (contra) {
-            for(Cargo& contraband : contra->cargo_hold.getItems()) {
+            for(Cargo& contraband : contra->cargo_hold.GetItems()) {
                 if (parent->cargo_hold.HasCargo(contraband.GetName())) {
                     // Parent has contraband cargo
                     attack = true;

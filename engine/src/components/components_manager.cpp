@@ -163,13 +163,13 @@ bool ComponentsManager::AllowedUpgrade(const Cargo& upgrade) const {
             continue;
         }
 
-        std::vector<Cargo> category_upgrades = upgrade_space.GetCargoByCategory(prohibited_upgrade.first);
+        Manifest category_upgrades = upgrade_space.GetCategoryManifest(prohibited_upgrade.first);
 
-        if(category_upgrades.size() > prohibited_upgrade.second) {
-            std::cerr << "ComponentsManager::AllowedUpgrade: " << category_upgrades.size() << 
+        if(category_upgrades.Size() > prohibited_upgrade.second) {
+            std::cerr << "ComponentsManager::AllowedUpgrade: " << category_upgrades.Size() << 
                       " is greater than " << prohibited_upgrade.second << std::endl << std::flush;
             assert(0);
-        } else if(category_upgrades.size() == prohibited_upgrade.second) {
+        } else if(category_upgrades.Size() == prohibited_upgrade.second) {
             return false;
         }
     }

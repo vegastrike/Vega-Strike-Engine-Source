@@ -231,7 +231,6 @@ static const char *const NEWS_NAME_LABEL = "news";
 
 extern const Unit *makeFinalBlankUpgrade(string name, int faction);
 extern int GetModeFromName(const char *);  //1=add, 2=mult, 0=neither.
-extern Cargo *GetMasterPartList(const char *input_buffer);
 extern Unit &GetUnitMasterPartList();
 static const string LOAD_FAILED = "LOAD_FAILED";
 
@@ -2384,7 +2383,7 @@ void BaseComputer::loadMasterList(Unit *un,
         bool removezero,
         TransactionList &tlist) {
     vector<CargoColor> *items = &tlist.masterList;
-    for (size_t i = 0; i < un->cargo_hold.size(); i++) {
+    for (size_t i = 0; i < un->cargo_hold.Size(); i++) {
         bool filter = filtervec.empty();
         bool invfilter = true;
         size_t vecindex;
@@ -3255,15 +3254,24 @@ void BaseComputer::BuyUpgradeOperation::start(void) {
 
     m_addMultMode =
             GetModeFromName(m_selectedItem.GetName().c_str());     //Whether the price is linear or geometric.
-    unsigned int offset;                //Temp.  Not used.
-    Cargo part = baseUnit->cargo_hold.GetCargo(baseUnit->cargo_hold.GetIndex(m_selectedItem));     //Whether the base has any of these.
-    if (!part.IsNullCargo() && part.GetQuantity() > 0) {
-        m_part = part;
-        endInit();
-    } else {
+
+    int index = baseUnit->cargo_hold.GetIndex(m_selectedItem);
+    if( index == -1) {
         finish();
         //The object may be deleted now. Be careful here.
+        return;
     }
+        
+    Cargo part = baseUnit->cargo_hold.GetCargo(index);     //Whether the base has any of these.
+            
+    if (part.GetQuantity() == 0) {
+        // Shouldn't happen, but just in case.
+        finish();
+        return;
+    }
+        
+    m_part = part;
+    endInit();
 }
 
 //Custom class that handles picking a mount point.
@@ -3402,6 +3410,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
             //Remove the item from the base, since we bought it.
             int index = baseUnit->cargo_hold.GetIndex(m_part.GetName());
             Cargo upgrade = baseUnit->cargo_hold.GetCargo(index);
+            upgrade.SetInstalled(true); 
             baseUnit->cargo_hold.RemoveCargo(baseUnit, index, 1);
             playerUnit->upgrade_space.AddCargo(playerUnit, upgrade);
         } else {
@@ -3440,12 +3449,11 @@ void BaseComputer::SellUpgradeOperation::start(void) {
     m_downgradeLimiter = makeFinalBlankUpgrade(playerUnit->name, faction);
 
     //If its limiter is not available, just assume that there are no limits.
-
-    Cargo *part = GetMasterPartList(m_selectedItem.GetName().c_str());
-    if (part) {
-        m_part = *part;
+    try {
+        m_part = Manifest::MPL().GetCargoByName(m_selectedItem.GetName());
         endInit();
-    } else {
+    } catch (const std::exception& e) {
+        VS_LOG(error, (boost::format("Error in GetCargoByName: %1%") % e.what()));
         finish();
         //The object may be deleted now. Be careful here.
     }
@@ -4134,9 +4142,12 @@ void BaseComputer::loadShipDealerControls(void) {
 bool sellShip(Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseComputer *bcomputer) {
     Cockpit *cockpit = _Universe->isPlayerStarship(playerUnit);
     unsigned int tempInt = 1;
-    Cargo shipCargo = Manifest::MPL().GetCargoByName(shipname);
     
-    if (shipCargo.IsNullCargo()) {
+    Cargo shipCargo;
+    try {
+        shipCargo = Manifest::MPL().GetCargoByName(shipname);
+    } catch (const std::exception& e) {
+        VS_LOG(error, (boost::format("Error in GetCargoByName: %1%") % e.what()));
         return false;
     }
 
@@ -4184,20 +4195,18 @@ bool buyShip(Unit *baseUnit,
         bool myfleet,
         bool force_base_inventory,
         BaseComputer *bcomputer) {
-    unsigned int tempInt;           //Not used.
-    Cargo ship_cargo = Cargo::NullCargo();
+    Cargo ship_cargo;
 
     int index = baseUnit->cargo_hold.GetIndex(content);
     if(index > -1) {
         ship_cargo = baseUnit->cargo_hold.GetCargo(index);
-    }
-    
-    if (ship_cargo.IsNullCargo() && force_base_inventory) {
-        ship_cargo = Manifest::MPL().GetCargoByName(content);
-    }
-
-    if (ship_cargo.IsNullCargo()) {
-        return false;
+    } else {
+        try {
+            ship_cargo = Manifest::MPL().GetCargoByName(content);
+        } catch (const std::exception& e) {
+            VS_LOG(error, (boost::format("Error in GetCargoByName: %1%") % e.what()));
+            return false;
+        }
     }
 
     Cargo *shipCargo = &ship_cargo;
@@ -4263,7 +4272,7 @@ bool buyShip(Unit *baseUnit,
                     _Universe->activeStarSystem()->AddUnit(newPart);
                     SwapInNewShipName(_Universe->AccessCockpit(), baseUnit, content, swappingShipsIndex);
                     for (int j = 0; j < 2; ++j) {
-                        for (int i = playerUnit->cargo_hold.size() - 1; i >= 0; --i) {
+                        for (int i = playerUnit->cargo_hold.Size() - 1; i >= 0; --i) {
                             Cargo c = playerUnit->cargo_hold.GetCargo(i);
                             if ((c.IsMissionFlag() != 0 && j == 0)
                                     || (c.IsMissionFlag() == 0 && j == 1 && (!myfleet)

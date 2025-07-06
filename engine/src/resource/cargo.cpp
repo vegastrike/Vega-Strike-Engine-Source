@@ -412,14 +412,3 @@ void Free(std::vector<Cargo>& ship_manifest) {
 }
 
 
-
-
-
-Cargo Cargo::NullCargo() {
-    return Cargo("NULL_CARGO", "NULL_CARGO", 1, 1, "NULL_CATEGORY", 1, 1);
-}
-
-bool Cargo::IsNullCargo() const {
-    return name == "NULL_CARGO" && category == "NULL_CATEGORY";
-}
-

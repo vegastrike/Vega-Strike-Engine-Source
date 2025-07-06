@@ -186,13 +186,11 @@ void CommunicatingAI::GetMadAt(Unit *un, int numHitsPerContrabandFail) {
 }
 
 static bool InList(std::string item, Unit *un) {
-    float numcontr = 0;
     if (!un) {
-        return 0;
+        return false;
     }
-
-    Cargo c = un->cargo_hold.GetCargoByName(item);
-    return (!c.IsNullCargo());
+    
+    return un->cargo_hold.HasCargo(item);
 }
 
 void CommunicatingAI::UpdateContrabandSearch() {

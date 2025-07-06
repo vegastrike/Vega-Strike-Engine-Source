@@ -40,7 +40,7 @@ TEST(Cargo, Sanity) {
     Cargo c(cargo_text_string);
 }
 
-static std::vector<Cargo> init(const std::string& cargo_string) {
+std::vector<Cargo> init(const std::string& cargo_string) {
     std::vector<std::string> cargo_text_elements;
 
     std::vector<Cargo> ship_manifest;

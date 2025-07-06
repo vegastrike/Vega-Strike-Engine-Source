@@ -135,10 +135,6 @@ public:
     
     bool operator==(const Cargo &other) const;
     bool operator<(const Cargo &other) const;
-    
-    // ???
-    static Cargo NullCargo();
-    bool IsNullCargo() const;
 };
 
 void Enslave(std::vector<Cargo>& ship_manifest);

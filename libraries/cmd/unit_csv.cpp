@@ -586,7 +586,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     // Textual Descriptions
     this->setUnitKey(unit_identifier);
     this->unit_name = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
-    this->unit_description = Manifest::MPL().GetShipDescription(unit_identifier);
+    this->unit_description = Manifest::MPL().GetCargoByName(unit_identifier).GetDescription();
 
     // This shadows the unit variable. It also doesn't support more than one ship.
     // TODO: figure this out.

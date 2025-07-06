@@ -63,6 +63,7 @@ public:
     Cargo RemoveCargo(ComponentsManager *manager, unsigned int index, int quantity);
     Cargo& GetCargo(unsigned int i);
     const Cargo& GetCargo(unsigned int i) const;
+    void Clear();
 
     double CurrentCapacity() const;
     double MaxCapacity() const;

@@ -131,6 +131,10 @@ void CargoHold::AddCargo(ComponentsManager *manager, const Cargo &cargo, bool so
     }
 }
 
+void CargoHold::Clear() {
+    _items.clear();
+}
+
 
 Cargo& CargoHold::GetCargo(unsigned int i) {
     return _items[i];

@@ -411,14 +411,14 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     // If nothing to damage, exit
-    if (unit->cargo_hold.empty()) {
+    if (unit->cargo_hold.Empty()) {
         return;
     }
 
     static std::string restricted_items = vs_config->getVariable("physics", "indestructable_cargo_items", "");
     double change_to_damage = hull_damage ? 0.5 : 0.05;
 
-    for(Cargo &cargo : unit->cargo_hold.getItems()) {
+    for(Cargo &cargo : unit->cargo_hold.GetItems()) {
         // If the cargo is indestructible, skip it
         if (restricted_items.find(cargo.GetName()) != std::string::npos) {
             continue;

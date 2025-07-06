@@ -583,7 +583,7 @@ void RecomputeUnitUpgrades(Unit *un) {
     }
     un->ReduceToTemplate();
 
-    for (Cargo& c : un->upgrade_space.getItems()) {
+    for (Cargo& c : un->upgrade_space.GetItems()) {
         assert(c.IsComponent());
         
         if(c.IsIntegral()) {
@@ -696,7 +696,7 @@ Cargo GetCargoIndex(const Unit *my_unit, int index) {
         return Cargo();
     }
 
-    if (index < 0 || index >= my_unit->cargo_hold.size()) {
+    if (index < 0 || index >= my_unit->cargo_hold.Size()) {
         return Cargo();
     }
     return my_unit->cargo_hold.GetCargo(index);

@@ -107,7 +107,7 @@ void Carrier::EjectCargo(unsigned int index) {
         ejectedPilot.SetVolume(1);
         tmp = &ejectedPilot;
     }
-    if (index < unit->cargo_hold.size()) {
+    if (index < unit->cargo_hold.Size()) {
         tmp = &unit->cargo_hold.GetCargo(index);
     }
 

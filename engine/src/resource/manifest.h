@@ -37,7 +37,9 @@
 /**
  * A manifest is a list of items in a cargo hold.
  * The master part list is a special, singleton instance holding all items
- * in the game. It is read only (const). Its shorthand is MPL.
+ * in the game. Its shorthand is MPL.
+ * To prevent corruption of the MPL, Manifest is read-only.
+ * All write functions are moved to the CargoHold class.
  **/
 class Manifest {
 protected:
@@ -47,30 +49,25 @@ private:
     Manifest(int dummy); // Create the MPL singleton.
 public:
     Manifest();
-    Manifest(std::string category); // Create a subset of the MPL for a category
     
     void AddManifest(const std::vector<Cargo>& cargo_items); // For testing
 
     static Manifest& MPL(); // Get the master part list singleton
-    void Clear();
     Cargo GetCargoByName(const std::string name) const;
-    Cargo* GetCargoPtrByName(const std::string name);
-    Cargo GetRandomCargo(int quantity = 0);
-    Cargo GetRandomCargoFromCategory(std::string category, int quantity = 0);
-    Manifest GetCategoryManifest(std::string category);
-    Manifest GetMissionManifest();
+    Cargo GetRandomCargo(int quantity = 0) const;
+    Cargo GetRandomCargoFromCategory(std::string category, int quantity = 0) const;
+    Manifest GetCategoryManifest(std::string category) const;
+    Manifest GetMissionManifest() const;
     
-    std::vector<Cargo> getItems() { return _items; }
-    bool empty() { return _items.empty(); }
-    int size() const { return _items.size(); }
+    std::vector<Cargo> GetItems() const;
+    bool Empty() const;
+    int Size() const;
 
-    const std::string GetShipDescription(const std::string unit_key);
     int GetIndex(const Cargo& cargo) const;
     int GetIndex(const std::string& name, const std::string& category = "") const;
-
-    std::vector<Cargo> GetCargoByCategory(const std::string& category) const;
 
     bool HasCargo(const std::string& name) const;
 };
 
 #endif //MANIFEST_H
+

@@ -44,13 +44,6 @@ Manifest::Manifest() {
     _items = std::vector<Cargo>();
 }
 
-Manifest::Manifest(std::string category) {
-    Manifest& mpl = Manifest::MPL();
-
-    auto predicate = [&category](Cargo c) {return c.GetCategory() == category;};
-    std::copy_if(mpl._items.begin(), mpl._items.end(),
-             std::back_inserter(_items), predicate);
-}
 
 // Called by MPL if it is empty
 Manifest::Manifest(int dummy) {
@@ -103,9 +96,7 @@ Manifest& Manifest::MPL() {
     return mpl;
 }
 
-void Manifest::Clear() {
-    _items.clear();
-}
+
 
 Cargo Manifest::GetCargoByName(const std::string name) const {
     const std::string upgrades_suffix = "__upgrades";
@@ -125,31 +116,10 @@ Cargo Manifest::GetCargoByName(const std::string name) const {
         }
     }
 
-    return Cargo::NullCargo();
+    throw std::runtime_error("Cargo with name '" + name + "' not found in manifest.");
 }
 
-Cargo* Manifest::GetCargoPtrByName(const std::string name) {
-    const std::string upgrades_suffix = "__upgrades";
-    std::string filename;
-
-    // Check if we need to remove __upgrades suffix
-    if(boost::algorithm::ends_with(name, upgrades_suffix)) {
-        filename = name.substr(0, name.length() - upgrades_suffix.length());
-    } else {
-        filename = name;
-    }
-
-
-    for(Cargo& c : _items) {
-        if(c.name == filename) {
-            return &c;
-        }
-    }
-
-    return nullptr;
-}
-
-Cargo Manifest::GetRandomCargo(int quantity) {
+Cargo Manifest::GetRandomCargo(int quantity) const {
     // TODO: Need to figure a better solution here
     if(_items.empty()) {
         return Cargo();
@@ -163,7 +133,7 @@ Cargo Manifest::GetRandomCargo(int quantity) {
 
 
 
-Cargo Manifest::GetRandomCargoFromCategory(std::string category, int quantity) {
+Cargo Manifest::GetRandomCargoFromCategory(std::string category, int quantity) const {
     Manifest manifest = GetCategoryManifest(category);
 
     // If category is empty, return randomly from MPL itself.
@@ -177,7 +147,7 @@ Cargo Manifest::GetRandomCargoFromCategory(std::string category, int quantity) {
     return manifest.GetRandomCargo(quantity);
 }
 
-Manifest Manifest::GetCategoryManifest(std::string category) {
+Manifest Manifest::GetCategoryManifest(std::string category) const {
     Manifest manifest;
 
     std::copy_if(_items.begin(), _items.end(), back_inserter(manifest._items),
@@ -188,26 +158,31 @@ Manifest Manifest::GetCategoryManifest(std::string category) {
     return manifest;
 }
 
-Manifest Manifest::GetMissionManifest() {
+
+
+Manifest Manifest::GetMissionManifest() const {
     Manifest manifest;
 
     std::copy_if(_items.begin(), _items.end(), back_inserter(manifest._items),
             [](Cargo c) {
-        return c.name.find("mission") != std::string::npos;
+        return c.IsMissionFlag();
     });
 
     return manifest;
 }
 
-const std::string Manifest::GetShipDescription(const std::string unit_key) {
-    for(const Cargo& cargo : _items) {
-        if(cargo.name == unit_key) {
-            return cargo.description;
-        }
-    }
-
-    return "";
+std::vector<Cargo> Manifest::GetItems() const { 
+    return _items; 
 }
+
+bool Manifest::Empty() const { 
+    return _items.empty(); 
+}
+
+int Manifest::Size() const { 
+    return _items.size(); 
+}
+
 
 // This is not as efficient as a hashtable
 // TODO: think about this
@@ -221,9 +196,7 @@ int Manifest::GetIndex(const Cargo& cargo) const {
         index++;
     }
 
-    std::cerr << "Manifest::GetCargoIndex: Cargo " << cargo.name << " not found in MPL\n" << std::flush;
-    assert(0);
-    //return -1;
+    return -1;
 }
 
 
@@ -243,15 +216,8 @@ int Manifest::GetIndex(const std::string& name, const std::string& category) con
     return -1; // Not found
 }
 
-std::vector<Cargo> Manifest::GetCargoByCategory(const std::string& category) const {
-    std::vector<Cargo> upgrades;
-    std::copy_if(_items.begin(), _items.end(), std::back_inserter(upgrades),
-                 [&category](const Cargo& c) {
-                     return c.GetCategory() == category;
-                 });
-    return upgrades;
-}
 
+// Consider deleting this. It's almost exactly the same as GetIndex
 bool Manifest::HasCargo(const std::string& name) const {
     for(const Cargo& c : _items) {
         if(c.name == name) {
