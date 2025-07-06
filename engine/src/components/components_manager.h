@@ -53,15 +53,31 @@
 #include "repair_bot.h"
 #include "ship_functions.h"
 
+#include "cargo_hold.h"
 
+#include <vector>
+
+/** A collection of components. This class is really a proto-ship,
+ * with mass and serving as a stand-in for the Unit sub-class.
+ */
 class ComponentsManager {
     bool player_ship = false;
     
     // Here we store hud text so we won't have to generate it every cycle
     // Instead we only do this when something changes
     std::string hud_text;
+    double mass;
+    double base_mass;
+    float *credits;
+
+    std::vector<std::pair<const std::string, const int>> prohibited_upgrades;
+
+    friend class CargoHold;
 public:
     virtual ~ComponentsManager() = default;
+
+    void Load(std::string unit_key);
+
 // Components
     EnergyContainer fuel = EnergyContainer(ComponentType::Fuel);
     EnergyContainer energy = EnergyContainer(ComponentType::Capacitor);
@@ -88,10 +104,25 @@ public:
     RepairBot repair_bot;
     ShipFunctions ship_functions;
 
-    
+    CargoHold cargo_hold;
+    CargoHold hidden_hold;
+    CargoHold upgrade_space;
+
+    bool ShipDamaged() const;
+    bool AllowedUpgrade(const Cargo& upgrade) const;
     void DamageRandomSystem();
     void GenerateHudText(std::string getDamageColor(double));
     std::string GetHudText();
+    std::string GetTitle(bool show_cargo, bool show_star_date, std::string date);
+
+    /** place stuff here for now. maybe move to subclass */
+    bool BuyCargo(ComponentsManager *seller, Cargo *item, int quantity);
+    bool SellCargo(ComponentsManager *seller, Cargo *item, int quantity);
+    bool BuyUpgrade(ComponentsManager *seller, Cargo *item, int quantity);
+    bool SellUpgrade(ComponentsManager *seller, Cargo *item, int quantity);
+private:
+    bool _Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity);
+    bool _Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *item, int quantity);
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_MANAGER_COMPONENT_H

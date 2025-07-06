@@ -565,62 +565,32 @@ int getFgSubnumber(Unit *my_unit) {
     return my_unit->getFgSubnumber();
 }
 
+// erasezero not used anymore, but keeping it for compatibility
 int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero) {
     if (!my_unit) {
         return 0;
     }
-    unsigned int index;
-    if (my_unit->GetCargo(s, index)) {
-        quantity = my_unit->RemoveCargo(index, quantity, erasezero);
-    } else {
-        quantity = 0;
-    }
-    return quantity;
+
+    Cargo c = my_unit->cargo_hold.RemoveCargo(my_unit, s, quantity);
+    return c.GetQuantity();
 }
 
+// TODO: I'm almost certain this is no longer relevant.
+// Still need to investigate turrets and weapons.
 void RecomputeUnitUpgrades(Unit *un) {
     if (un == NULL) {
         return;
     }
     un->ReduceToTemplate();
-    unsigned int i;
-    for (i = 0; i < un->numCargo(); ++i) {
-        Cargo *c = &un->GetCargo(i);
-        if (c->IsComponent()) {
-            if(c->IsIntegral()) {
-                continue;
-            }
-            if (c->GetName().find("mult_") != 0
-                    && c->GetName().find("add_") != 0) {
-                un->Upgrade(c->GetName(), 0, 0, true, false);
-            }
+
+    for (Cargo& c : un->upgrade_space.getItems()) {
+        assert(c.IsComponent());
+        
+        if(c.IsIntegral()) {
+            continue;
         }
-    }
-    for (i = 0; i < un->numCargo(); ++i) {
-        Cargo *c = &un->GetCargo(i);
-        if (c->IsComponent()) {
-            if(c->IsIntegral()) {
-                continue;
-            }
-            if (c->GetName().find("add_") == 0) {
-                for (int j = 0; j < c->GetQuantity(); ++j) {
-                    un->Upgrade(c->GetName(), 0, 0, true, false);
-                }
-            }
-        }
-    }
-    for (i = 0; i < un->numCargo(); ++i) {
-        Cargo *c = &un->GetCargo(i);
-        if (c->IsComponent() && c->GetCategory().find(DamagedCategory) != 0) {
-            if(c->IsIntegral()) {
-                continue;
-            }
-            if (c->GetName().find("mult_") == 0) {
-                for (int j = 0; j < c->GetQuantity(); ++j) {
-                    un->Upgrade(c->GetName(), 0, 0, true, false);
-                }
-            }
-        }
+        
+        un->Upgrade(c.GetName(), 0, 0, true, false);
     }
 }
 
@@ -662,16 +632,15 @@ int addCargo(Unit *my_unit, Cargo carg) {
     if (!my_unit) {
         return 0;
     }
-    int i;
-    for (i = carg.GetQuantity(); i > 0 && !my_unit->CanAddCargo(carg); i--) {
+ 
+    for (int i = carg.GetQuantity(); i > 0; i--) {
         carg.SetQuantity(i);
+        if(my_unit->cargo_hold.CanAddCargo(carg)) {
+            my_unit->cargo_hold.AddCargo(my_unit, carg);
+            break;
+        } 
     }
-    if (i > 0) {
-        carg.SetQuantity(i);
-        my_unit->AddCargo(carg);
-    } else {
-        carg.SetQuantity(0);
-    }
+
     return carg.GetQuantity();
 }
 
@@ -679,7 +648,10 @@ int forceAddCargo(Unit *my_unit, Cargo carg) {
     if (!my_unit) {
         return 0;
     }
-    my_unit->AddCargo(carg);
+
+    // Force add cargo even if it exceeds the cargo hold capacity
+    // This is used for missions and other special cases
+    my_unit->cargo_hold.AddCargo(my_unit, carg);
     return carg.GetQuantity();
 }
 
@@ -687,12 +659,18 @@ int hasCargo(const Unit *my_unit, string mycarg) {
     if (!my_unit) {
         return 0;
     }
-    unsigned int i;
-    const Cargo *c = my_unit->GetCargo(mycarg, i);
-    if (c == NULL) {
+    
+    if(!my_unit->cargo_hold.HasCargo(mycarg)) {
         return 0;
     }
-    return c->GetQuantity();
+
+    int index = my_unit->cargo_hold.GetIndex(mycarg);
+    if(index == -1) {
+        return 0;
+    }
+
+    Cargo c = my_unit->cargo_hold.GetCargo(index);
+    return c.GetQuantity();
 }
 
 bool JumpTo(Unit *unit, string system) {
@@ -711,64 +689,30 @@ string getUnitSystemFile(const Unit *un) {
     return ss->getFileName();
 }
 
-bool incrementCargo(Unit *my_unit, float percentagechange, int quantity) {
-    if (!my_unit) {
-        return false;
-    }
-    if (my_unit->numCargo() > 0) {
-        unsigned int index;
-        index = rand() % my_unit->numCargo();
-        Cargo c(my_unit->GetCargo(index));
-        c.SetQuantity(quantity);
-        if (c.GetPrice() != 0) {
-            if (my_unit->CanAddCargo(c)) {
-                my_unit->AddCargo(c);
-                my_unit->GetCargo(index).SetPrice(
-                            my_unit->GetCargo(index).GetPrice() * percentagechange);
-                return true;
-            }
-        }
-    }
-    return false;
-}
 
-bool decrementCargo(Unit *my_unit, float percentagechange) {
-    if (!my_unit) {
-        return false;
-    }
-    if (my_unit->numCargo() > 0) {
-        unsigned int index;
-        index = rand() % my_unit->numCargo();
-        if (my_unit->RemoveCargo(index, 1, false)) {
-            my_unit->GetCargo(index).SetPrice(my_unit->GetCargo(index).GetPrice() * percentagechange);
-        }
-        return true;
-    }
-    return false;
-}
 
 Cargo GetCargoIndex(const Unit *my_unit, int index) {
-    if (my_unit) {
-        if (index >= 0 && (unsigned int) index < my_unit->numCargo()) {
-            return my_unit->GetCargo(index);
-        }
+    if (!my_unit) {
+        return Cargo();
     }
-    Cargo ret;
-    ret.SetQuantity(0);
-    return ret;
+
+    if (index < 0 || index >= my_unit->cargo_hold.size()) {
+        return Cargo();
+    }
+    return my_unit->cargo_hold.GetCargo(index);
 }
 
-Cargo GetCargo(const Unit *my_unit, std::string cargname) {
-    if (my_unit) {
-        unsigned int indx = (~(unsigned int) 0);
-        const Cargo *cargptr = my_unit->GetCargo(cargname, indx);
-        if (cargptr && indx != (~(unsigned int) 0)) {
-            return *cargptr;
-        }
+Cargo GetCargo(const Unit *my_unit, std::string cargo_name) {
+    if (!my_unit) {
+        return Cargo();
     }
-    Cargo ret;
-    ret.SetQuantity(0);
-    return ret;
+
+    int index = my_unit->cargo_hold.GetIndex(cargo_name);
+    if (index == -1) {
+        return Cargo();
+    }
+
+    return my_unit->cargo_hold.GetCargo(index);
 }
 
 bool isDockableUnit(const Unit *my_unit) {
@@ -912,7 +856,7 @@ void performDockingOperations(Unit *un, Unit *unitToDockWith, int actually_dock)
     }
 }
 
-float PercentOperational(Unit *un, std::string name, std::string category, bool countHullAndArmorAsFull) {
+float PercentOperational(const Cargo item, Unit *un, std::string name, std::string category, bool countHullAndArmorAsFull) {
     if (!un) {
         return 0;
     }
@@ -996,9 +940,7 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
     if (!upgrade) {
         return 1.0f;
     }
-
-    const Cargo cargo = upgrade->GetCargo(0); 
-    if (cargo.IsWeapon()) {
+    if (item.IsWeapon()) {
         static std::string loadfailed("LOAD_FAILED");
         if (upgrade->getNumMounts()) {
             const Mount *mnt = &upgrade->mounts[0];

@@ -268,7 +268,6 @@ EXPORT_UTIL0( UnitWrapper, getFlightgroupLeader
 EXPORT_UTIL1(bool, setFlightgroupLeader, UnitWrapper, un)
 EXPORT_UTIL0( std::string, getFgDirective
 )
-voidEXPORT_UTIL0( RecomputeUnitUpgrades )
 EXPORT_UTIL1(bool, setFgDirective, std::string, inp)
 //EXPORT_UTIL0(int,getFgSubnumber)
 EXPORT_UTIL3(int, removeCargo, std::string, s, int, quantity, bool, erasezero)
@@ -287,8 +286,6 @@ EXPORT_UTIL5(float,
         loop_through_mounts)
 EXPORT_UTIL1(int, addCargo, Cargo, carg)
 EXPORT_UTIL1(int, forceAddCargo, Cargo, carg)
-EXPORT_UTIL2(bool, incrementCargo, float, percentagechange, int, quantity)
-EXPORT_UTIL1(bool, decrementCargo, float, percentagechange)
 EXPORT_UTIL1(float, getDistance, UnitWrapper, un)
 //EXPORT_UTIL0(float, getPlanetRadiusPercent)
 EXPORT_UTIL1(float, getSignificantDistance, UnitWrapper, sig)
@@ -329,7 +326,6 @@ WRAPPED0(int, RepairCost,
 0 )
 WRAPPED0(int, RepairUpgrade,
 0 )
-EXPORT_UTIL3(float, PercentOperational, std::string, content, std::string, category, bool, countHullAndArmorAsFull)
 WRAPPED1( Vector, MountPercentOperational,
 int, whichMount, Vector( -1.0f, -1.0f, -1.0f ))
 #endif // (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 2)

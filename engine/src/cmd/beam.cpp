@@ -610,8 +610,8 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                     if (c != NULL) {
                         Cargo adder = *c;
                         adder.SetQuantity(1);
-                        if (un->CanAddCargo(adder)) {
-                            un->AddCargo(adder);
+                        if (un->cargo_hold.CanAddCargo(adder)) {
+                            un->cargo_hold.AddCargo(un, adder);
                             if (_Universe->isPlayerStarship(un)) {
                                 static int tractor_onboard =
                                         AUDCreateSoundWAV(vs_config->getVariable("unitaudio", "player_tractor_cargo",

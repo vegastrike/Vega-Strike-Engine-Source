@@ -118,9 +118,8 @@ Unit *getMasterPartList() {
     if(ret.cargo.empty()) {
         ret.name = "master_part_list";
         for(const Cargo& c : Manifest::MPL().getItems()) {
-            ret.AddCargo(c);
+            ret.cargo_hold.AddCargo(&ret, c);
         }
-
     }
     return &ret;
 }
@@ -1452,10 +1451,10 @@ void Unit::ProcessDeleteQueue() {
 
 Unit *makeBlankUpgrade(string templnam, int faction) {
     Unit *bl = new Unit(templnam.c_str(), true, faction);
-    for (int i = bl->numCargo() - 1; i >= 0; i--) {
-        int q = bl->GetCargo(i).GetQuantity();
-        bl->RemoveCargo(i, q);
-    }
+    bl->cargo_hold.Clear();
+    bl->upgrade_space.Clear();
+    bl->hidden_hold.Clear();
+    
     bl->setMass(0);
     return bl;
 }
@@ -2568,10 +2567,11 @@ double Unit::Upgrade(const std::string &file,
         up = UnitConstCache::setCachedConst(StringIntKey(file, upgradefac),
                 new Unit(file.c_str(), true, upgradefac));
     }
-    unsigned int cargonum;
-    Cargo *cargo = GetCargo(file, cargonum);
-    if (cargo) {
-        cargo->SetInstalled(true);
+
+    // TODO: find the caller in basecomputer and just set the cargo to installed there.
+    Cargo cargo = upgrade_space.GetCargoByName(file);
+    if (!cargo.IsNullCargo()) {
+        cargo.SetInstalled(true);
     }
     char *unitdir = GetUnitDir(this->name.get().c_str());
     string templnam = string(unitdir) + ".template";
@@ -2764,8 +2764,8 @@ bool Unit::UpAndDownGrade(const Unit *up,
         //we are upgrading!
         if (touchme) {
             for (unsigned int i = 0; i < up->cargo.size(); ++i) {
-                if (CanAddCargo(up->cargo[i])) {
-                    AddCargo(up->cargo[i], false);
+                if (upgrade_space.CanAddCargo(up->cargo[i])) {
+                    upgrade_space.AddCargo(this, up->cargo[i], false);
                 }
             }
         }
@@ -2860,8 +2860,8 @@ int Unit::RepairCost() {
     }
 
 
-    for (i = 0; i < numCargo(); ++i) {
-        if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
+    for (const Cargo& c : cargo_hold.getItems()) {
+        if (c.Damaged()) {
             ++cost;
         }
     }
@@ -2886,39 +2886,26 @@ int Unit::RepairUpgrade() {
     }
     savedCargo.swap(cargo);
     savedWeap.swap(mounts);
-    UnitImages<void> *im = &GetImageInformation();
 
 
     bool ret = success && pct > 0;
     static bool ComponentBasedUpgrades =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "component_based_upgrades", "false"));
     if (ComponentBasedUpgrades) {
-        for (unsigned int i = 0; i < numCargo(); ++i) {
-            if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
-                ++success;
-                static int damlen = strlen(DamagedCategory);
-                GetCargo(i).SetCategory("upgrades/" + GetCargo(i).GetCategory().substr(damlen));
-            }
-        }
+        // TODO: move this to components_manager
     } 
     return success;
 }
 
-float RepairPrice(float operational, float price) {
-    return .5 * price * (1 - operational) * g_game.difficulty;
-}
 
 //item must be non-null... but baseUnit or credits may be NULL.
 bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
     assert((item != NULL) | !"Unit::RepairUpgradeCargo got a null item."); //added by chuck_starchaser
-    double itemPrice = baseUnit ? baseUnit->PriceCargo(item->GetName()) : item->GetPrice();
-
-    // This needs to happen before we repair the part, obviously.
-    double percent_working = UnitUtil::PercentOperational(this, item->GetName(), "upgrades/", false);
+    double itemPrice = 1; //baseUnit ? baseUnit->PriceCargo(item->GetName()) : item->GetPrice();
 
     // New repair
     if(RepairUnit(item->GetName())) {
-        double repair_price = RepairPrice(percent_working, itemPrice);
+        double repair_price = item->RepairPrice();
         if (credits) {
             // Pay for repair
             (*credits) -= repair_price;
@@ -2969,8 +2956,8 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
             Cargo itemCopy = *item;                 //Copy this because we reload master list before we need it.
             const Unit *un = getUnitFromUpgradeName(item->GetName(), this->faction);
             if (un) {
-                double percentage = UnitUtil::PercentOperational(this, item->GetName(), item->GetCategory(), false);
-                double price = RepairPrice(percentage, itemPrice);
+                double percentage = UnitUtil::PercentOperational(*item, this, item->GetName(), item->GetCategory(), false);
+                double price = item->RepairPrice();
                 if (!credits || price <= (*credits)) {
                     if (credits) {
                         (*credits) -= price;
@@ -2979,10 +2966,10 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
                         this->Upgrade(un, 0, 0, 0, true, percentage, makeTemplateUpgrade(this->name, this->faction));
                     }
                     if (item->GetCategory().find(DamagedCategory) == 0) {
-                        unsigned int where;
-                        Cargo *c = this->GetCargo(item->GetName(), where);
-                        if (c) {
-                            c->SetCategory("upgrades/" + c->GetCategory().substr(strlen(DamagedCategory)));
+                        int index = this->upgrade_space.GetIndex(itemCopy);
+                        Cargo c = this->upgrade_space.GetCargo(index);
+                        if (!c.IsNullCargo()) {
+                            c.SetCategory("upgrades/" + c.GetCategory().substr(strlen(DamagedCategory)));
                         }
                     }
                     return true;
@@ -3138,8 +3125,8 @@ bool myless(const Cargo &a, const Cargo &b) {
 }
 
 Cargo *GetMasterPartList(const char *input_buffer) {
-    unsigned int i;
-    return GetUnitMasterPartList().GetCargo(input_buffer, i);
+    const std::string name(input_buffer);
+    return GetUnitMasterPartList().cargo_hold.GetCargoPtrByName(name);
 }
 
 void Unit::ImportPartList(const std::string &category, float price, float pricedev, float quantity, float quantdev) {
@@ -3147,8 +3134,8 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
     float minprice = FLT_MAX;
     float maxprice = 0;
     for (unsigned int j = 0; j < numcarg; ++j) {
-        if (GetUnitMasterPartList().GetCargo(j).GetCategory() == category) {
-            float price = GetUnitMasterPartList().GetCargo(j).GetPrice();
+        if (GetUnitMasterPartList().cargo_hold.GetCargo(j).GetCategory() == category) {
+            float price = GetUnitMasterPartList().cargo_hold.GetCargo(j).GetPrice();
             if (price < minprice) {
                 minprice = price;
             } else if (price > maxprice) {
@@ -3157,7 +3144,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
         }
     }
     for (unsigned int i = 0; i < numcarg; ++i) {
-        Cargo c = GetUnitMasterPartList().GetCargo(i);
+        Cargo c = GetUnitMasterPartList().cargo_hold.GetCargo(i);
         if (c.GetCategory() == category) {
             const float aveweight = fabs(configuration()->cargo.price_recenter_factor);
             c.SetQuantity(float_to_int(quantity - quantdev));
@@ -3193,7 +3180,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                 c.SetPrice(minprice);
             }
 
-            AddCargo(c, false);
+            cargo_hold.AddCargo(this, c, false);
         }
     }
 }
@@ -3280,7 +3267,7 @@ void Unit::Repair() {
         return;
     }
 
-    if (next_repair_time == -FLT_MAX || next_repair_time <= UniverseUtil::GetGameTime()) {
+    /*if (next_repair_time == -FLT_MAX || next_repair_time <= UniverseUtil::GetGameTime()) {
         unsigned int numcargo = numCargo();
         if (numcargo > 0) {
             if (next_repair_cargo >= numCargo()) {
@@ -3330,7 +3317,7 @@ void Unit::Repair() {
                 ++(next_repair_cargo);
             }
         }
-    }
+    }*/
 
     float ammt_repair = simulation_atom_var / repairtime * repair_bot.Get();
 

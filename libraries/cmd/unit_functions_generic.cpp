@@ -272,5 +272,4 @@ void DealPossibleJumpDamage(Unit *un) {
                         ((float) (rand() % 100)) / 100), nullptr);
 }
 
-extern Cargo *GetMasterPartList(const char *input_buffer);
 

@@ -174,3 +174,125 @@ TEST(Cargo, Free_no_existing_hitchhikers) {
     Cargo passengers = get_cargo("passengers", ship_manifest);
     ASSERT_EQ(passengers.GetQuantity(), 7);
 }
+
+TEST(Cargo, ConstructorAndGetters) {
+    std::string cargo_str = "test_item;category;100.0;5;10.0;2.0;1.0;1.0;desc;false;true";
+    Cargo c(cargo_str);
+
+    EXPECT_EQ(c.GetName(), "test_item");
+    EXPECT_EQ(c.GetDescription(), "desc");
+    EXPECT_EQ(c.GetQuantity(), 5);
+    EXPECT_DOUBLE_EQ(c.GetPrice(), 100.0);
+    EXPECT_EQ(c.GetCategory(), "category");
+    EXPECT_DOUBLE_EQ(c.GetMass(), 10.0);
+    EXPECT_DOUBLE_EQ(c.GetVolume(), 2.0);
+    EXPECT_FALSE(c.IsMissionFlag());
+    EXPECT_TRUE(c.IsComponent());
+    EXPECT_TRUE(c.IsInstalled());
+    EXPECT_FALSE(c.IsIntegral());
+    EXPECT_FALSE(c.IsWeapon());
+    EXPECT_FALSE(c.IsPassenger());
+    EXPECT_FALSE(c.IsSlave());
+}
+
+TEST(Cargo, Setters) {
+    std::string cargo_str = "item;cat;10.0;1;1.0;1.0;1.0;1.0;;false;false";
+    Cargo c(cargo_str);
+
+    c.SetQuantity(42);
+    EXPECT_EQ(c.GetQuantity(), 42);
+
+    c.SetPrice(123.45);
+    EXPECT_DOUBLE_EQ(c.GetPrice(), 123.45);
+
+    c.SetDescription("newdesc");
+    EXPECT_EQ(c.GetDescription(), "newdesc");
+}
+
+TEST(Cargo, EqualityOperators) {
+    std::string cargo_str1 = "item;cat;10.0;1;1.0;1.0;1.0;1.0;;false;false";
+    std::string cargo_str2 = "item;cat;10.0;1;1.0;1.0;1.0;1.0;;false;false";
+    std::string cargo_str3 = "other;cat;10.0;1;1.0;1.0;1.0;1.0;;false;false";
+    Cargo c1(cargo_str1);
+    Cargo c2(cargo_str2);
+    Cargo c3(cargo_str3);
+
+    EXPECT_TRUE(c1 == c2);
+    EXPECT_FALSE(c1 == c3);
+}
+
+TEST(Cargo, Serialization) {
+    std::string cargo_str = "item;cat;10.0;1;1.0;1.0;1.0;1.0;desc;false;false";
+    Cargo c(cargo_str);
+
+    std::string serialized = c.Serialize();
+    std::cout << "Serialized Cargo: " << serialized << std::endl;
+    serialized = serialized.substr(1, serialized.size() - 2);
+    Cargo c2(serialized);
+
+    EXPECT_EQ(c2.GetName(), c.GetName());
+    EXPECT_EQ(c2.GetCategory(), c.GetCategory());
+    EXPECT_DOUBLE_EQ(c2.GetPrice(), c.GetPrice());
+    EXPECT_EQ(c2.GetQuantity(), c.GetQuantity());
+    EXPECT_DOUBLE_EQ(c2.GetMass(), c.GetMass());
+    EXPECT_DOUBLE_EQ(c2.GetVolume(), c.GetVolume());
+    EXPECT_EQ(c2.GetDescription(), c.GetDescription());
+}
+
+TEST(Cargo, IsPassengerAndIsSlave) {
+    std::string passenger_str = "passenger;Passengers;100;1;1;1;1;1;A passenger;0;0;0;0;0;1;0";
+    std::string slave_str = "slave;Contraband;100;1;1;1;1;1;A slave;0;0;0;0;0;1;1";
+    Cargo passenger(passenger_str);
+    Cargo slave(slave_str);
+
+    EXPECT_TRUE(passenger.IsPassenger());
+    EXPECT_FALSE(passenger.IsSlave());
+    EXPECT_TRUE(slave.IsPassenger());
+    EXPECT_TRUE(slave.IsSlave());
+}
+
+TEST(Cargo, AddAndRemoveQuantity) {
+    std::string cargo_str = "item;cat;10.0;5;1.0;1.0;1.0;1.0;;false;false";
+    Cargo c(cargo_str);
+
+    c.Add(3);
+    EXPECT_EQ(c.GetQuantity(), 8);
+
+    // c.RemoveQuantity(2);
+    // EXPECT_EQ(c.GetQuantity(), 6);
+
+    // c.RemoveQuantity(10); // Should not go negative
+    // EXPECT_GE(c.GetQuantity(), 0);
+}
+
+
+TEST(Cargo, CopyAndAssignment) {
+    std::string cargo_str = "item;cat;10.0;5;1.0;1.0;1.0;1.0;;false;false";
+    Cargo c1(cargo_str);
+    Cargo c2 = c1;
+    Cargo c3(c1);
+    c3 = c1;
+
+    EXPECT_EQ(c2.GetName(), c1.GetName());
+    EXPECT_EQ(c3.GetName(), c1.GetName());
+}
+
+TEST(Cargo, Functionality) {
+    std::string cargo_str = "item;cat;10.0;5;1.0;1.0;1.0;1.0;;false;false";
+    Cargo c(cargo_str);
+
+    EXPECT_DOUBLE_EQ(c.GetFunctionality(), 1.0);
+    EXPECT_DOUBLE_EQ(c.RepairPrice(), 0.0);
+    double original_price = c.GetPrice();
+    EXPECT_FALSE(c.Damaged());
+    c.SetFunctionality(0.8);
+    EXPECT_DOUBLE_EQ(c.GetFunctionality(), 0.8);
+    EXPECT_TRUE(c.Damaged());
+    EXPECT_GT(c.RepairPrice(), 0.0);
+
+    double orig_functionality = c.GetFunctionality();
+    c.RandomDamage();
+    // After random damage, damage should be >= original and <= 1.0
+    EXPECT_LE(c.GetFunctionality(), orig_functionality);
+    EXPECT_LE(c.GetPrice(), original_price);
+}

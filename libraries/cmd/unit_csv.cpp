@@ -514,11 +514,12 @@ static void ImportCargo(Unit *thus, const string &imports) {
 }
 
 static void AddCarg(Unit *thus, const string &cargo_text) {
-    // TODO: better error handling here and below
+    // Don't bother parsing if the cargo_text is too short.
     if(cargo_text.size() < 10) {
         return;
     }
 
+    // Trim the prefix { and suffix }
     std::string trimmed_cargo_text = cargo_text.substr(1, cargo_text.size() - 2);
     std::vector<std::string> cargo_text_elements;
     boost::split(cargo_text_elements,trimmed_cargo_text,boost::is_any_of("}{"));
@@ -532,7 +533,11 @@ static void AddCarg(Unit *thus, const string &cargo_text) {
         }
         try {
             Cargo c(cargo_text_element);
-            thus->AddCargo(c);
+            if(c.IsInstalled()) {
+                thus->upgrade_space.AddCargo(thus, c, false);
+            } else {
+                thus->cargo_hold.AddCargo(thus, c, false);
+            }
         } catch (const std::exception& e) {
             std::cerr << "Error parsing cargo: " << e.what() << std::endl;
         }

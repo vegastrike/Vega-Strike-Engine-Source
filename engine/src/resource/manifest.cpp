@@ -82,23 +82,7 @@ Manifest::Manifest(int dummy) {
             try {
                 boost::json::object item = item_value.get_object();
 
-                std::string name = JsonGetStringWithDefault(item, "file", "");
-                std::string category = JsonGetStringWithDefault(item, "categoryname", "");
-                int price = std::stoi(JsonGetStringWithDefault(item, "price", "0"));
-                double mass = std::stod(JsonGetStringWithDefault(item, "mass", "0.0"));
-                double volume = std::stod(JsonGetStringWithDefault(item, "volume", "0.0"));
-                std::string description = JsonGetStringWithDefault(item, "description", "");
-
-                bool component = GetBool(item, "upgrade", false);
-                bool installed = false; 
-                bool integral = false;
-                bool weapon = GetBool(item, "weapon", false);
-                bool passenger = GetBool(item, "passenger", false);
-                bool slave = GetBool(item, "slave", false);
-
-                Cargo cargo = Cargo(name, category, price, 1, mass, volume, 1.0, 1.0, false, 
-                                    component, installed, integral, weapon, passenger, slave);
-                cargo.SetDescription(description);
+                Cargo cargo = Cargo(item);
                 _items.push_back(cargo);
             } catch (...) {
                 std::cerr << "Failed to parse " << item_value << std::endl;
@@ -119,7 +103,11 @@ Manifest& Manifest::MPL() {
     return mpl;
 }
 
-Cargo Manifest::GetCargoByName(const std::string name) {
+void Manifest::Clear() {
+    _items.clear();
+}
+
+Cargo Manifest::GetCargoByName(const std::string name) const {
     const std::string upgrades_suffix = "__upgrades";
     std::string filename;
 
@@ -131,13 +119,34 @@ Cargo Manifest::GetCargoByName(const std::string name) {
     }
 
 
-    for(const Cargo& c : getItems()) {
+    for(const Cargo& c : _items) {
         if(c.name == filename) {
             return c;
         }
     }
 
-    return Cargo();
+    return Cargo::NullCargo();
+}
+
+Cargo* Manifest::GetCargoPtrByName(const std::string name) {
+    const std::string upgrades_suffix = "__upgrades";
+    std::string filename;
+
+    // Check if we need to remove __upgrades suffix
+    if(boost::algorithm::ends_with(name, upgrades_suffix)) {
+        filename = name.substr(0, name.length() - upgrades_suffix.length());
+    } else {
+        filename = name;
+    }
+
+
+    for(Cargo& c : _items) {
+        if(c.name == filename) {
+            return &c;
+        }
+    }
+
+    return nullptr;
 }
 
 Cargo Manifest::GetRandomCargo(int quantity) {
@@ -198,4 +207,57 @@ const std::string Manifest::GetShipDescription(const std::string unit_key) {
     }
 
     return "";
+}
+
+// This is not as efficient as a hashtable
+// TODO: think about this
+int Manifest::GetIndex(const Cargo& cargo) const {
+    int index = 0;
+    for(Cargo c : _items) {
+        if(cargo.name == c.name && cargo.category == c.category) {
+            return index;
+        }
+
+        index++;
+    }
+
+    std::cerr << "Manifest::GetCargoIndex: Cargo " << cargo.name << " not found in MPL\n" << std::flush;
+    assert(0);
+    //return -1;
+}
+
+
+int Manifest::GetIndex(const std::string& name, const std::string& category) const {
+    int index = 0;
+    for(Cargo c : _items) {
+        if(name == c.name && category == c.category) {
+            return index;
+        } else if(name == c.name && category.empty()) {
+            // If no category is specified, we match by name only
+            return index;
+        }
+
+        index++;
+    }
+
+    return -1; // Not found
+}
+
+std::vector<Cargo> Manifest::GetCargoByCategory(const std::string& category) const {
+    std::vector<Cargo> upgrades;
+    std::copy_if(_items.begin(), _items.end(), std::back_inserter(upgrades),
+                 [&category](const Cargo& c) {
+                     return c.GetCategory() == category;
+                 });
+    return upgrades;
+}
+
+bool Manifest::HasCargo(const std::string& name) const {
+    for(const Cargo& c : _items) {
+        if(c.name == name) {
+            return true;
+        }
+    }
+
+    return false;
 }
