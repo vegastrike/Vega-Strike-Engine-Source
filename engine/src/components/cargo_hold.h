@@ -39,9 +39,10 @@ enum class HoldType {
 
 /** A cargo hold. Can hold cargo. */
 class CargoHold : public Component, public Manifest {
+    HoldType hold_type;
     Resource<double> capacity;
 public:
-    CargoHold();
+    CargoHold(HoldType hold_type);
 
     // Component Methods
     void Load(std::string unit_key) override;      
@@ -68,6 +69,11 @@ public:
     double CurrentCapacity() const;
     double MaxCapacity() const;
     double AvailableCapacity() const;
+
+    std::string Serialize() const;
+
+    void Enslave();
+    void Free();
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_CARGO_HOLD_H

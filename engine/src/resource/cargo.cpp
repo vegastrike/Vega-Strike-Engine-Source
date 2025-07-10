@@ -33,7 +33,6 @@
 #include "json_utils.h"
 #include "configuration/configuration.h"
 
-#include <numeric>
 #include <iostream>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -62,14 +61,10 @@ Cargo::Cargo(std::string name, std::string description, int quantity, double pri
     this->functionality = functionality;
 }
 
-Cargo::Cargo(std::string, int quantity, double price, std::string category, double mass, 
-             double volume, bool mission, bool component, bool installed, bool integral, 
-             double functionality, std::string description): 
-             name(name), description(description), quantity(quantity), price(price), 
-             category(category), mass(mass), volume(volume), mission(mission),
-             component(component), installed(installed), integral(integral) {
-    this->functionality = functionality;
-}
+Cargo::Cargo(std::string name, std::string category, float price, int quantity, 
+          float mass, float volume): name(name), category(category),
+          price(price), quantity(quantity), mass(mass), volume(volume) {}
+             
 
 /*  0 name
     1 category
@@ -326,89 +321,5 @@ bool Cargo::operator<(const Cargo &other) const {
     return (category == other.category) ? (name < other.name) : (category < other.category);
 }
 
-
-
-
-
-// TODO: no need to be here. move to carrier
-/* There's a whole bunch of stuff that needs fleshing out:
-   1. Hitchhikers disembark at next port automatically.
-   2. Enslave doesn't affect paying customers on first click.
-   3. Enslave starts with hitchhikers (potential enemy pilots)
-   */
-void Enslave(std::vector<Cargo>& ship_manifest) {
-    // Get number of none-slave passengers and erase passengers
-    int none_slave_passengers = std::accumulate(ship_manifest.begin(), ship_manifest.end(), 0,
-        [](int current_sum, Cargo c) {
-        if (c.IsPassenger() && !c.IsSlave()) {
-            return current_sum + c.GetQuantity();
-        } else {
-            return current_sum;
-        }
-    });
-
-    // If there are no passengers, exit
-    if(none_slave_passengers == 0) {
-        return;
-    }
-
-    // Delete all passengers
-    ship_manifest.erase(std::remove_if(ship_manifest.begin(), ship_manifest.end(), 
-            [](Cargo& c) {
-        return (c.IsPassenger() && !c.IsSlave());
-    }), ship_manifest.end());
-
-    // Find the first slaves instance if exists
-    auto it = std::find_if(ship_manifest.begin(), ship_manifest.end(), [](const Cargo& c) {
-        return c.IsSlave();
-    });
-
-    // Look for existing slaves
-    if (it != ship_manifest.end()) {
-        // Found slaves
-        // Get a pointer to the found element
-        Cargo* existing_slaves = &(*it); 
-        existing_slaves->Add(none_slave_passengers);
-    } else {
-        // Not found. Create a new instance
-        // TODO: name should come from config.
-        Cargo slaves = Manifest::MPL().GetCargoByName("Slaves");
-        slaves.SetQuantity(none_slave_passengers);
-        ship_manifest.push_back(slaves);
-    }
-}
-
-// TODO: no need to be here. move to carrier
-void Free(std::vector<Cargo>& ship_manifest) {
-    auto slave_it = std::find_if(ship_manifest.begin(), ship_manifest.end(), [](const Cargo& c) {
-        // TODO: name should come from config.
-        return c.GetName() == "Slaves";
-    });
-
-    // No slaves to free found, exiting.
-    if (slave_it == ship_manifest.end()) {
-        return;
-    }
-
-    // Find the first hitchhikers instance if exists
-    auto hitch_it = std::find_if(ship_manifest.begin(), ship_manifest.end(), [](const Cargo& c) {
-        // TODO: name should come from config.
-        return c.GetName() == "Hitchhiker";
-    });
-
-    // No hitchhikers found, modify slaves instance.
-    if (hitch_it == ship_manifest.end()) {
-        // TODO: name should come from config.
-        Cargo* existing_slaves = &(*slave_it); 
-        existing_slaves->SetName("Hitchhiker");
-        existing_slaves->SetCategory("Passengers");
-    } else {
-        Cargo* existing_hitchhikers = &(*hitch_it);
-        Cargo* existing_slaves = &(*slave_it);
-        existing_hitchhikers->Add(existing_slaves->GetQuantity());
-        ship_manifest.erase(slave_it);
-    }
-    
-}
 
 

@@ -629,7 +629,6 @@ void bootstrap_main_loop() {
                     mysystem,
                     pos,
                     setplayerXloc,
-                    credits,
                     packedInfo,
                     k);
         } else {
@@ -639,7 +638,6 @@ void bootstrap_main_loop() {
         _Universe->AccessCockpit(k)->UnpackUnitInfo(packedInfo);
         CopySavedShips(playername[k], k, packedInfo, true);
         playersaveunit.push_back(_Universe->AccessCockpit(k)->GetUnitFileName());
-        _Universe->AccessCockpit(k)->credits = credits;
         ss.push_back(_Universe->Init(mysystem, Vector(0, 0, 0), planetname));
         if (setplayerXloc) {
             playerNloc.push_back(pos);

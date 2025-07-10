@@ -37,7 +37,11 @@
 #include <boost/format.hpp>
 #include <iostream>
 
+Resource<double> ComponentsManager::credits = Resource<double>(0.0, 0.0);
+
 void ComponentsManager::Load(std::string unit_key) {
+    mass = base_mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 0.0);
+
     // Consumer
     std::string prohibited_upgrades_string = UnitCSVFactory::GetVariable(unit_key, "Prohibited_Upgrades", std::string());
 
@@ -62,6 +66,7 @@ void ComponentsManager::Load(std::string unit_key) {
     }
 
 }
+
 
 void ComponentsManager::DamageRandomSystem() {
     double percent = 1 - hull.Percent();
@@ -252,7 +257,7 @@ std::string ComponentsManager::GetTitle(bool show_cargo, bool show_star_date, st
         return (boost::format("Stardate: %1$s      Credits: %2$.2f      "
                               "Space left: %3$.6g of %4$.6g cubic meters   Mass: %5$.0f%% (base)")
                               % date
-                              % credits
+                              % credits.Value()
                               % available_volume
                               % empty_volume
                               % mass_percent)
@@ -260,7 +265,7 @@ std::string ComponentsManager::GetTitle(bool show_cargo, bool show_star_date, st
     } else {
         return (boost::format("Credits: %1$.2f      "
                               "Space left: %2$.6g of %3$.6g cubic meters   Mass: %4$.0f%% (base)")
-                              % credits
+                              % credits.Value()
                               % available_volume
                               % empty_volume
                               % mass_percent)
@@ -289,7 +294,7 @@ bool ComponentsManager::_Buy(CargoHold *hold, ComponentsManager *seller, Cargo *
     // In practice, base_computer doesn't provide this.
     item->SetQuantity(quantity);
 
-    if(*credits < item->GetPrice() * quantity) {
+    if(credits < item->GetPrice() * quantity) {
         return false;
     }
 
@@ -305,7 +310,7 @@ bool ComponentsManager::_Buy(CargoHold *hold, ComponentsManager *seller, Cargo *
         return false;
     }
 
-    *credits -= item->GetPrice() * quantity;
+    ComponentsManager::credits -= item->GetPrice() * quantity;
     hold->AddCargo(this, sold_cargo);
     return true;
 }
@@ -331,7 +336,7 @@ bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *
     // Only get paid if not selling "mission" cargo.
     // i.e. other peoples' money
     if(!cargo.IsMissionFlag()) {
-        *credits += cargo.GetTotalValue();
+        credits += cargo.GetTotalValue();
     }
 
     buyer_hold->AddCargo(buyer, cargo);

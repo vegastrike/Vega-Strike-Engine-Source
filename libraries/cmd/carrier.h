@@ -39,8 +39,6 @@ class Unit;
 // A unit (ship) that carries cargo
 class Carrier {
 public:
-    std::vector<Cargo> cargo;
-
     Carrier();
     virtual ~Carrier() = default;
 

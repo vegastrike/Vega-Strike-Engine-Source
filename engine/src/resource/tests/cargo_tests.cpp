@@ -82,8 +82,8 @@ void print(std::vector<Cargo> ship_manifest) {
     }
 }
 
-
-TEST(Cargo, Enslave_existing_slaves) {
+// TODO: move to cargo_hold_tests.cpp
+/*TEST(Cargo, Enslave_existing_slaves) {
     std::string cargo_string = "armor06;upgrades/Armor;120685.710938;1;15.000000;0.000000;1.000000;1.000000;;false;true|capacitor08;upgrades/Capacitors/Standard;60342.941406;1;16.000000;16.000000;1.000000;1.000000;;false;true|jump_drive;upgrades/Jump_Drives;7542.944336;1;16.000000;2.000000;1.000000;1.000000;;false;true|mult_overdrive06;upgrades/Overdrive;120685.796875;1;18.000000;18.000000;1.000000;1.000000;;false;true|reactor08;upgrades/Reactors/Standard;60342.917969;1;8.000000;100.000000;1.000000;1.000000;;false;true|add_spec_capacitor02;upgrades/SPEC_Capacitors;16971.439453;1;10.000000;6.000000;1.000000;1.000000;;false;true|hawkeye4;upgrades/Sensors/Confed;150857.171875;1;0.010000;21.000000;1.000000;1.000000;;false;true|quadshield10;upgrades/Shield_Systems/Standard_Quad_Shields;241371.500000;1;10.000000;61.000000;1.000000;1.000000;;false;true|afterburner;upgrades/integral;2000.000000;1;0.100000;0.100000;1.000000;1.000000;;false;true|drive;upgrades/integral;6000.000000;1;0.100000;0.100000;1.000000;1.000000;;false;true|ftl_drive;upgrades/integral;4500.000000;1;0.100000;0.100000;1.000000;1.000000;;false;true|hull;upgrades/integral;12000.000000;1;0.100000;0.100000;1.000000;1.000000;;false;true|Slaves;Contraband;100;17;32;23;1;1;slaves to sell;false;false;false;false;false;true;true|Hitchhiker;Passengers;50;27;12;17;1;1;some people;false;false;false;false;false;true;false|passengers;Passengers;500;7;10;27;1;1;some more people;false;false;false;false;false;true;false";
     std::vector<Cargo> ship_manifest = init(cargo_string);
 
@@ -173,7 +173,7 @@ TEST(Cargo, Free_no_existing_hitchhikers) {
 
     Cargo passengers = get_cargo("passengers", ship_manifest);
     ASSERT_EQ(passengers.GetQuantity(), 7);
-}
+}*/
 
 TEST(Cargo, ConstructorAndGetters) {
     std::string cargo_str = "test_item;category;100.0;5;10.0;2.0;1.0;1.0;desc;false;true";

@@ -554,20 +554,14 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             viret->type = VAR_FLOAT;
             viret->float_val = 0;
             if (mode == SCRIPT_RUN) {
-                Cockpit *tmp;
-                if ((tmp = _Universe->isPlayerStarship(my_unit))) {
-                    viret->float_val = tmp->credits;
-                }
+                viret->float_val = my_unit->credits;  
             }
             return viret;
         } else if (method_id == CMT_UNIT_addCredits) {
             missionNode *nr_node = getArgument(node, mode, 1);
             float credits = doFloatVar(nr_node, mode);
             if (mode == SCRIPT_RUN) {
-                Cockpit *tmp;
-                if ((tmp = _Universe->isPlayerStarship(my_unit))) {
-                    tmp->credits += credits;
-                }
+               my_unit->credits += credits;
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;

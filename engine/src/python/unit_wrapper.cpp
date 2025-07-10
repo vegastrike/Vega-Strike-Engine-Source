@@ -108,8 +108,7 @@ BOOST_PYTHON_MODULE(VS) {
         .def(boost::python::init<>())
         // Dedicated constructor for python, as primary constructor has default values
         // for some parameters, which is not supported by boost::python.
-        .def(boost::python::init<std::string, int, double, std::string, double, double,
-             bool, bool, bool, bool, double, std::string>())
+        .def(boost::python::init<std::string, std::string, float, int, float, float>())
         .def("SetPrice", &Cargo::SetPrice)
         .def("GetPrice", &Cargo::GetPrice)
         .def("SetMass", &Cargo::SetMass)

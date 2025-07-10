@@ -69,9 +69,8 @@ public:
           double mass, double volume, bool mission = false, 
           bool component = false, bool installed = false, bool integral = false, bool weapon = false, 
           bool passenger = false, bool slave = false, double functionality = 1.0);
-    Cargo(std::string, int quantity, double price, std::string category, double mass, double volume,
-             bool mission, bool component, bool installed, bool integral, double functionality, 
-             std::string description);
+    Cargo(std::string name, std::string category, float price, int quantity, 
+          float mass, float volume);
 
     // Parse string from save file
     Cargo(std::string& cargo_text);
@@ -136,8 +135,5 @@ public:
     bool operator==(const Cargo &other) const;
     bool operator<(const Cargo &other) const;
 };
-
-void Enslave(std::vector<Cargo>& ship_manifest);
-void Free(std::vector<Cargo>& ship_manifest);
 
 #endif //VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H

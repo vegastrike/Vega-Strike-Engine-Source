@@ -114,19 +114,18 @@ float Pilot::getAnger(const Unit *parent, const Unit *target) const {
     if (_Universe->isPlayerStarship(target)) {
         if (FactionUtil::GetFactionName(faction).find("pirates") != std::string::npos) {
             static unsigned int cachedCargoNum = 0;
-            static bool good = true;
-            if (cachedCargoNum != target->numCargo()) {
-                cachedCargoNum = target->numCargo();
-                good = true;
-                for (unsigned int i = 0; i < cachedCargoNum; ++i) {
-                    Cargo *c = &target->pImage->cargo[i];
-                    if (c->quantity != 0 && !c->IsComponent()) {
-                        good = false;
-                        break;
-                    }
+            static bool empty_cargo_hold = true;
+            if (cachedCargoNum != target->cargo_hold.Size()) {
+                cachedCargoNum = target->cargo_hold.Size();
+
+                // Check if pirates 
+                if(cachedCargoNum == 0) {
+                    empty_cargo_hold = true;
+                } else {
+                    empty_cargo_hold = false;
                 }
             }
-            if (good) {
+            if (empty_cargo_hold) {
                 static float goodness_for_nocargo =
                         XMLSupport::parse_float(vs_config->getVariable("AI", "pirate_bonus_for_empty_hold", ".75"));
                 rel += goodness_for_nocargo;

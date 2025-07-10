@@ -68,16 +68,16 @@ class ComponentsManager {
     std::string hud_text;
     double mass;
     double base_mass;
-    float *credits;
 
     std::vector<std::pair<const std::string, const int>> prohibited_upgrades;
 
     friend class CargoHold;
 public:
+    static Resource<double> credits;
+
     virtual ~ComponentsManager() = default;
 
     void Load(std::string unit_key);
-
 // Components
     EnergyContainer fuel = EnergyContainer(ComponentType::Fuel);
     EnergyContainer energy = EnergyContainer(ComponentType::Capacitor);
@@ -104,9 +104,9 @@ public:
     RepairBot repair_bot;
     ShipFunctions ship_functions;
 
-    CargoHold cargo_hold;
-    CargoHold hidden_hold;
-    CargoHold upgrade_space;
+    CargoHold cargo_hold = CargoHold(HoldType::cargo);
+    CargoHold hidden_hold = CargoHold(HoldType::hidden);
+    CargoHold upgrade_space = CargoHold(HoldType::upgrade);
 
     bool ShipDamaged() const;
     bool AllowedUpgrade(const Cargo& upgrade) const;

@@ -2127,11 +2127,11 @@ void FireKeyboard::Execute() {
         }
     }
     if (f().enslave == PRESS) {
-        Enslave(parent->cargo);
+        parent->cargo_hold.Enslave();
         f().enslave = RELEASE;
     }
     if (f().freeslave == PRESS) {
-        Free(parent->cargo);
+        parent->cargo_hold.Free();
         f().freeslave = RELEASE;
     }
     if (f().ejectcargo == PRESS || f().ejectnonmissioncargo == PRESS) {

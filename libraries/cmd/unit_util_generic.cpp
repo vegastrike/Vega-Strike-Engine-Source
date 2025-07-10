@@ -471,22 +471,16 @@ float getCredits(const Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
-    Cockpit *tmp;
-    float viret = 0;
-    if ((tmp = _Universe->isPlayerStarship(my_unit))) {
-        viret = tmp->credits;
-    }
-    return viret;
+
+    return my_unit->credits;;
 }
 
 void addCredits(const Unit *my_unit, float credits) {
     if (!my_unit) {
         return;
     }
-    Cockpit *tmp;
-    if ((tmp = _Universe->isPlayerStarship(my_unit))) {
-        tmp->credits += credits;
-    }
+    
+    my_unit->credits += credits;  
 }
 
 const string &getFlightgroupNameCR(const Unit *my_unit) {

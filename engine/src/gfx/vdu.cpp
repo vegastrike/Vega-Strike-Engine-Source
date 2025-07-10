@@ -970,7 +970,7 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
     if (target != parent && simple_manifest == false) {
         retval += string("Tgt: ") + reformatName(target->name) + string("\n");
     } else {
-        retval += string("--------\nCredits: ") + tostring((int) _Universe->AccessCockpit()->credits) + string("\n");
+        retval += string("--------\nCredits: ") + tostring((int) ComponentsManager::credits) + string("\n");
     }
     unsigned int load = 0;
     unsigned int cred = 0;

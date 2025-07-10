@@ -366,7 +366,7 @@ void Carrier::EjectCargo(unsigned int index) {
                 }
                 _Universe->activeStarSystem()->AddUnit(cargo);
                 if ((unsigned int) index != ((unsigned int) -1) && (unsigned int) index != ((unsigned int) -2)) {
-                    if (index < unit->cargo.size()) {
+                    if (index < unit->cargo_hold.Size()) {
                         unit->cargo_hold.RemoveCargo(unit, index, 1);
                     }
                 }
@@ -379,33 +379,27 @@ void Carrier::EjectCargo(unsigned int index) {
 float Carrier::PriceCargo(const std::string &s) {
     Unit *unit = static_cast<Unit *>(this);
 
-    Cargo tmp;
-    tmp.SetName(s);
-    vector<Cargo>::iterator mycargo = std::find(unit->cargo.begin(),
-            unit->cargo.end(), tmp);
-    if (mycargo == unit->cargo.end()) {
-        Unit *mpl = getMasterPartList();
-        if (this != mpl) {
-            return mpl->PriceCargo(s);
-        } else {
-            const float spacejunk = configuration()->cargo.space_junk_price;
-            return spacejunk;
-        }
+    int index = unit->cargo_hold.GetIndex(s);
+    if(index != -1) {
+        return unit->cargo_hold.GetCargo(index).GetPrice();
     }
-    float price;
-    price = (*mycargo).GetPrice();
-    return price;
+
+    if(Manifest::MPL().HasCargo(s)) {
+        return Manifest::MPL().GetCargoByName(s).GetPrice();
+    }
+
+    return configuration()->cargo.space_junk_price;
 }
 unsigned int Carrier::numCargo() const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    return unit->cargo.size();
+    return unit->cargo_hold.Size();
 }
 
 std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vector &oldspd) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     ///FIXME somehow mangle string
-    string mangled = unit->cargo[i].GetName();
+    string mangled = unit->cargo_hold.GetCargo(i).GetName();
     const float scramblingmanifest = configuration()->general.percentage_speed_change_to_fault_search;
     {
         //Keep inside subblock, otherwise MSVC will throw an error while redefining 'i'
