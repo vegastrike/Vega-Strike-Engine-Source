@@ -19,14 +19,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os:              windows-2019
-            triplet:         x64-win10
-            preset-name:     VS2019Win64-pie-enabled-release
-            cmake-generator: VS2019Win64
-            enable-pie:      1
-            build-type:      Release
-            python-version:  3.12.10
-            is-release:      0
           - os:              windows-2022
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-debug
@@ -52,6 +44,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 2
+          submodules: false
 
       - name: Restore vcpkg cache
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
@@ -68,9 +63,9 @@ jobs:
           update-environment: false
 
       - name: install-cmake
-        uses: lukka/get-cmake@ea004816823209b8d1211e47b216185caee12cc5 #v4.0.2
+        uses: lukka/get-cmake@6b3e96a9bc9976b8b546346fdd102effedae0ca8 # v4.0.3
         with:
-          cmakeVersion: 4.0.2
+          cmakeVersion: 4.0.3
           ninjaVersion: 1.12.1
 
       - name: run-vcpkg
@@ -100,6 +95,10 @@ jobs:
         with:
           path: ${{ github.workspace }}/vcpkg_cache
           key: vcpkg-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
+
+      - name: Run the tests
+        working-directory: ${{ github.workspace }}
+        run: ctest -V --preset "test-${{ matrix.preset-name }}"
 
       - name: Upload test results
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
