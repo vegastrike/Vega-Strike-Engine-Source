@@ -309,7 +309,7 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
                         "Targetting",
                         "MassInertialPriorityCutoff",
                         "5000"));
-        if (me->getMass() > mass_inertial_priority_cutoff) {
+        if (me->GetMass() > mass_inertial_priority_cutoff) {
             static float mass_inertial_priority_scale =
                     XMLSupport::parse_float(vs_config->getVariable("AI",
                             "Targetting",
@@ -321,7 +321,7 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
             Vector ourToThem = targ->Position() - me->Position();
             ourToThem.Normalize();
             inertial_priority =
-                    mass_inertial_priority_scale * (.5 + .5 * (normv.Dot(ourToThem))) * me->getMass() * Speed;
+                    mass_inertial_priority_scale * (.5 + .5 * (normv.Dot(ourToThem))) * me->GetMass() * Speed;
         }
     }
     static float

@@ -1455,7 +1455,7 @@ Unit *makeBlankUpgrade(string templnam, int faction) {
     bl->upgrade_space.Clear();
     bl->hidden_hold.Clear();
     
-    bl->setMass(0);
+    bl->SetMass(0);
     return bl;
 }
 
@@ -2772,11 +2772,11 @@ bool Unit::UpAndDownGrade(const Unit *up,
     if (numave) {
         percentage = percentage / numave;
     }
-    if (0 && touchme && up->Mass && numave) {
+    if (0 && touchme && up->GetMass() && numave) {
         float multiplyer = ((downgrade) ? -1 : 1);
-        Mass += multiplyer * percentage * up->Mass;
-        if (Mass < (templ ? templ->Mass : .000000001)) {
-            Mass = (templ ? templ->Mass : .000000001);
+        mass += multiplyer * percentage * up->mass;
+        if (mass < (templ ? templ->mass : .000000001)) {
+            mass = (templ ? templ->mass : .000000001);
         }
         Momentofinertia += multiplyer * percentage * up->Momentofinertia;
         if (Momentofinertia < (templ ? templ->Momentofinertia : 0.00000001)) {

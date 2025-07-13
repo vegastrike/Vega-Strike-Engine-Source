@@ -315,7 +315,7 @@ void Carrier::EjectCargo(unsigned int index) {
                         velmul = XMLSupport::parse_float(vs_config->getVariable("physics", "eject_cargo_speed", "1"));
                 cargo->SetOwner(unit);
                 cargo->SetVelocity(unit->Velocity * velmul + randVector(-.25, .25).Cast());
-                cargo->setMass(tmp->GetMass());
+                cargo->SetMass(tmp->GetMass());
                 if (name.length() > 0) {
                     cargo->name = name;
                 } else if (tmp) {

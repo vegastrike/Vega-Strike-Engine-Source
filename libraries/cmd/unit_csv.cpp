@@ -694,8 +694,6 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     pImage->CockpitCenter.i = UnitCSVFactory::GetVariable(unit_key, "CockpitX", 0.0f) * xml.unitscale;
     pImage->CockpitCenter.j = UnitCSVFactory::GetVariable(unit_key, "CockpitY", 0.0f) * xml.unitscale;
     pImage->CockpitCenter.k = UnitCSVFactory::GetVariable(unit_key, "CockpitZ", 0.0f) * xml.unitscale;
-    Mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 1.0f);
-    Momentofinertia = Mass;
 
 
     // Hull
@@ -941,6 +939,7 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
     unit["Key"] = unit_key;
     unit["Name"] = unit_name;
     unit["Textual_Description"] = unit_description; // Used in ship view
+    Serialize(unit);
 
     // Take some immutable stats directly from the original unit
     const std::string immutable_stats[] = {"Directory", "STATUS", "Combat_Role", "Hud_image",
@@ -1043,7 +1042,6 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
         cargo_text += hidden_hold.Serialize();
         unit["Cargo"] = cargo_text;
     }
-    unit["Mass"] = tos(Mass);
 
     hull.SaveToCSV(unit);
     armor.SaveToCSV(unit);

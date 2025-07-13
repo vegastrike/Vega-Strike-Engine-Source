@@ -64,9 +64,35 @@ void ComponentsManager::Load(std::string unit_key) {
             std::cerr << "Invalid format in prohibited upgrades string: " << upgrade << std::endl;
         }
     }
-
 }
 
+void ComponentsManager::Serialize(std::map<std::string, std::string>& unit) const {
+    unit["Mass"] = std::to_string(base_mass);
+
+    // Serialize prohibited upgrades
+    if (!prohibited_upgrades.empty()) {
+        std::string prohibited_upgrades_string;
+        for (const auto& upgrade : prohibited_upgrades) {
+            if (!prohibited_upgrades_string.empty()) {
+                prohibited_upgrades_string += ";";
+            }
+            prohibited_upgrades_string += boost::str(boost::format("%s:%d") % upgrade.first % upgrade.second);
+        }
+        unit["Prohibited_Upgrades"] = prohibited_upgrades_string;
+    }
+}
+
+double ComponentsManager::GetMass() {
+    return mass;
+}
+
+double ComponentsManager::GetMass() const {
+    return mass;
+}
+
+double ComponentsManager::SetMass(float mass) {
+    this->mass = mass;
+}
 
 void ComponentsManager::DamageRandomSystem() {
     double percent = 1 - hull.Percent();

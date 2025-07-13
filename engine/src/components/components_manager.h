@@ -66,6 +66,8 @@ class ComponentsManager {
     // Here we store hud text so we won't have to generate it every cycle
     // Instead we only do this when something changes
     std::string hud_text;
+
+    // TODO: make it change with fuel consumption
     double mass;
     double base_mass;
 
@@ -78,6 +80,14 @@ public:
     virtual ~ComponentsManager() = default;
 
     void Load(std::string unit_key);
+    void Serialize(std::map<std::string, std::string>& unit) const;
+
+    double GetMass();
+    double GetMass() const;
+    double SetMass(float mass);
+
+    friend class Unit;
+
 // Components
     EnergyContainer fuel = EnergyContainer(ComponentType::Fuel);
     EnergyContainer energy = EnergyContainer(ComponentType::Capacitor);
