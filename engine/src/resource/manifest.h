@@ -46,6 +46,8 @@ class Manifest {
 public:
     Manifest();
     Manifest(std::string category); // Create a subset of the MPL for a category
+    
+    void AddManifest(const std::vector<Cargo>& cargo_items); // For testing
 
     static Manifest& MPL(); // Get the master part list singleton
     Cargo GetCargoByName(const std::string name);

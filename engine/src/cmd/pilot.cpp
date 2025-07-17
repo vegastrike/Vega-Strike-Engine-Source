@@ -127,7 +127,7 @@ float Pilot::getAnger(const Unit *parent, const Unit *target) const {
                 good = true;
                 for (unsigned int i = 0; i < cachedCargoNum; ++i) {
                     Cargo *c = const_cast<Cargo *>(&target->cargo[i]);
-                    if (c->GetQuantity() != 0 && c->GetCategory().find("upgrades") == string::npos) {
+                    if (c->GetQuantity() != 0 && !c->IsComponent()) {
                         good = false;
                         break;
                     }
