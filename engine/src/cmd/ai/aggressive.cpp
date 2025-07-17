@@ -325,7 +325,7 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
                 value = (pdmag - parent->rSize() - targ->rSize());
                 double myvel = PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / value;        ///pdmag;
                 if (myvel > 0) {
-                    value -= myvel * myvel / (2 * (parent->drive.retro / parent->getMass()));
+                    value -= myvel * myvel / (2 * (parent->drive.retro / parent->GetMass()));
                 }
             } else {
                 value = 10000;
@@ -1565,7 +1565,7 @@ void AggressiveAI::ExecuteNoEnemies() {
         } else if (lurk_on_arrival > 0) {
             lurk_on_arrival -= simulation_atom_var;
             //slowdown
-            parent->Thrust(-parent->getMass() * parent->UpCoordinateLevel(parent->GetVelocity()) / simulation_atom_var,
+            parent->Thrust(-parent->GetMass() * parent->UpCoordinateLevel(parent->GetVelocity()) / simulation_atom_var,
                     false);
             parent->ftl_drive.Disable();
             if (lurk_on_arrival <= 0) {

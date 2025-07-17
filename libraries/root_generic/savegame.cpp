@@ -463,10 +463,10 @@ void WriteSaveGame(Cockpit *cp, bool auto_save) {
         cp->PackUnitInfo(packedInfo);
 
         cp->savegame->WriteSaveGame(cp->activeStarSystem->getFileName().c_str(),
-                                    un->LocalPosition(), cp->credits, packedInfo, auto_save ? -1 : player_num);
+                                    un->LocalPosition(), ComponentsManager::credits, packedInfo, auto_save ? -1 : player_num);
         un->WriteUnit(cp->GetUnitModifications().c_str());
         if (GetWritePlayerSaveGame(player_num).length() && !auto_save) {
-            cp->savegame->SetSavedCredits(_Universe->AccessCockpit()->credits);
+            cp->savegame->SetSavedCredits(ComponentsManager::credits);
             cp->savegame->SetStarSystem(cp->activeStarSystem->getFileName());
             cp->savegame->SetPlayerLocation(un->LocalPosition());
             CopySavedShips(cp->GetUnitModifications(), player_num, packedInfo, false);
@@ -1052,7 +1052,6 @@ void SaveGame::ParseSaveGame(const string &filename_p,
                              const string &originalstarsystem,
                              QVector &PP,
                              bool &shouldupdatepos,
-                             float &credits,
                              vector<string> &savedstarship,
                              int player_num,
                              const string &save_contents,
@@ -1113,6 +1112,7 @@ void SaveGame::ParseSaveGame(const string &filename_p,
             }
             factionname[headlen + 1] = '\0';
             QVector tmppos;
+            float credits = 0.0f;
             int res = sscanf(buf, "%s %lf %lf %lf %s", tmp2, &tmppos.i, &tmppos.j, &tmppos.k, factionname);
             if (res == 4 || res == 5) {
                 //Extract credits & starship
@@ -1131,6 +1131,9 @@ void SaveGame::ParseSaveGame(const string &filename_p,
                         break;
                     }
                 }
+
+                ComponentsManager::credits = credits;
+
                 //In networking save we include the faction at the end of the first line
                 if (res == 5) {
                     playerfaction = string(factionname);
@@ -1174,7 +1177,7 @@ void SaveGame::ParseSaveGame(const string &filename_p,
         originalsystem = ForceStarSystem;
         FSS = ForceStarSystem;
     }
-    SetSavedCredits(credits);
+    SetSavedCredits(ComponentsManager::credits);
 }
 
 const string &GetCurrentSaveGame() {

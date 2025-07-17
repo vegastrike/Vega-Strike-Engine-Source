@@ -970,7 +970,7 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
     if (target != parent && simple_manifest == false) {
         retval += string("Tgt: ") + reformatName(target->name) + string("\n");
     } else {
-        retval += string("--------\nCredits: ") + tostring((int) _Universe->AccessCockpit()->credits) + string("\n");
+        retval += string("--------\nCredits: ") + tostring((int) ComponentsManager::credits) + string("\n");
     }
     unsigned int load = 0;
     unsigned int cred = 0;
@@ -979,9 +979,9 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
     unsigned int maxCargo = 16;
     string lastCat;
     for (unsigned int i = 0; i < numCargo; i++) {
-        if ((target->GetCargo(i).GetCategory().find("upgrades/") != 0)
-                && (target->GetCargo(i).GetQuantity() > 0)) {
-            Cargo ca = target->GetCargo(i);
+        if ((target->cargo_hold.GetCargo(i).GetCategory().find("upgrades/") != 0)
+                && (target->cargo_hold.GetCargo(i).GetQuantity() > 0)) {
+            Cargo ca = target->cargo_hold.GetCargo(i);
             int cq = ca.GetQuantity();
             float cm = ca.GetMass();
             float cv = ca.GetVolume();

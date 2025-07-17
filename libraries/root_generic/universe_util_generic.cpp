@@ -913,7 +913,6 @@ namespace UniverseUtil {
                                "",
                                pos,
                                updatepos,
-                               creds,
                                Ships,
                                _Universe->CurrentCockpit(),
                                "",
@@ -923,6 +922,8 @@ namespace UniverseUtil {
                                true,
                                true,
                                campaign_score_vars);
+
+        creds = ComponentsManager::credits;
         UniverseUtil::setCurrentSaveGame(sillytemp);
         std::ostringstream ss{};
         ss << "Savegame: " << filename << lf;

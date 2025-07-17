@@ -149,7 +149,6 @@ public:
             const std::string &originalstarsystem,
             QVector &pos,
             bool &shouldupdatedfighter0pos,
-            float &credits,
             std::vector<std::string> &originalunit,
             int player_num,
             const std::string &savestr = std::string(),

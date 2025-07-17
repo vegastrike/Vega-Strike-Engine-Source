@@ -139,12 +139,12 @@ void MoveTo::SetDest(const QVector &target) {
 }
 
 bool MoveToParent::OptimizeSpeed(Unit *parent, float v, float &a, float max_speed) {
-    v += (a / parent->getMass()) * simulation_atom_var;
+    v += (a / parent->GetMass()) * simulation_atom_var;
     if ((!max_speed) || fabs(v) <= max_speed) {
         return true;
     }
     float deltaa =
-            parent->getMass() * (fabs(v) - max_speed) / simulation_atom_var;       //clamping should take care of it
+            parent->GetMass() * (fabs(v) - max_speed) / simulation_atom_var;       //clamping should take care of it
     a += (v > 0) ? -deltaa : deltaa;
     return false;
 }
@@ -201,7 +201,7 @@ bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation) {
             }
             return done;
         }
-        thrust = (-parent->getMass() / simulation_atom_var) * last_velocity;
+        thrust = (-parent->GetMass() / simulation_atom_var) * last_velocity;
     } else {
         float div = 1.0f;
         float vdiv = 1.0f;
@@ -225,7 +225,7 @@ bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation) {
         }
         //start with Forward/Reverse:
         float t =
-                CalculateDecelTime(heading.k, last_velocity.k, thrust.k, parent->drive.retro / div, parent->getMass());
+                CalculateDecelTime(heading.k, last_velocity.k, thrust.k, parent->drive.retro / div, parent->GetMass());
         if (t < THRESHOLD) {
             thrust.k =
                     (thrust.k > 0 ? -parent->drive.retro
@@ -240,14 +240,14 @@ bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation) {
                             / simulation_atom_var;
         }
         OptimizeSpeed(parent, last_velocity.k, thrust.k, max_velocity.k / vdiv);
-        t = CalculateBalancedDecelTime(heading.i, last_velocity.i, thrust.i, parent->getMass());
+        t = CalculateBalancedDecelTime(heading.i, last_velocity.i, thrust.i, parent->GetMass());
         if (t < THRESHOLD) {
             thrust.i = -thrust.i;
         } else if (t < simulation_atom_var) {
             thrust.i *= (t - (simulation_atom_var - t)) / simulation_atom_var;
         }
         OptimizeSpeed(parent, last_velocity.i, thrust.i, max_velocity.i / vdiv);
-        t = CalculateBalancedDecelTime(heading.j, last_velocity.j, thrust.j, parent->getMass());
+        t = CalculateBalancedDecelTime(heading.j, last_velocity.j, thrust.j, parent->GetMass());
         if (t < THRESHOLD) {
             thrust.j = -thrust.j;
         } else if (t < simulation_atom_var) {
@@ -352,7 +352,7 @@ void ChangeHeading::Execute() {
     bool cheater = false;
     static float min_for_no_oversteer =
             XMLSupport::parse_float(vs_config->getVariable("AI", "min_angular_accel_cheat", "50"));
-    if (AICheat && ((parent->drive.yaw + parent->drive.pitch) * 180 / (PI * parent->getMass()) > min_for_no_oversteer)
+    if (AICheat && ((parent->drive.yaw + parent->drive.pitch) * 180 / (PI * parent->GetMass()) > min_for_no_oversteer)
             && !parent->isSubUnit()) {
         if (xswitch || yswitch) {
             Vector P, Q, R;
@@ -686,7 +686,7 @@ void AutoLongHaul::Execute() {
     if (!parent->ftl_drive.Enabled() && parent->graphicOptions.RampCounter == 0) {
         deactivatewarp = false;
     }
-    double mass = parent->getMass();
+    double mass = parent->GetMass();
     double minaccel =
             mymin(parent->drive.lateral,
                     mymin(parent->drive.vertical, mymin(parent->drive.forward, parent->drive.retro)));

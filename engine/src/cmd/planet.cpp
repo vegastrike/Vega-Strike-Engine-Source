@@ -434,8 +434,7 @@ void Planet::InitPlanet(QVector x,
     const float densityOfJumpPoint = configuration()->physics.density_of_jump_point;
     //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
     hull.Set((4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : densityOfJumpPoint));
-    this->Mass =
-            (4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : (densityOfJumpPoint / 100000));
+    this->SetMass((4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : (densityOfJumpPoint / 100000)));
     SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent));     //behavior
     terraintrans = nullptr;
 
@@ -462,9 +461,11 @@ void Planet::InitPlanet(QVector x,
 
     const bool smartplanets = configuration()->physics.planets_can_have_subunits;
     if (un->name != string("LOAD_FAILED")) {
-        cargo = un->cargo;
-        CargoVolume = un->CargoVolume;
-        UpgradeVolume = un->UpgradeVolume;
+        // TODO: test this
+        cargo_hold = un->cargo_hold;
+        upgrade_space = un->upgrade_space;
+        
+
         VSSprite *tmp = pImage->pHudImage;
         pImage->pHudImage = un->GetImageInformation().pHudImage;
         un->GetImageInformation().pHudImage = tmp;

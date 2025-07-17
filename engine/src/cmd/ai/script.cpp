@@ -825,7 +825,7 @@ void AIScript::LoadXML() {
                     double myvel =
                             pdmag > 0 ? PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / pdmag : 0;
                     if (myvel > 0) {
-                        value -= myvel * myvel / (2 * (parent->drive.retro / parent->getMass()));
+                        value -= myvel * myvel / (2 * (parent->drive.retro / parent->GetMass()));
                     }
                 } else {
                     value = 10000;
