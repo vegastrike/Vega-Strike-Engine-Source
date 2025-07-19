@@ -22,29 +22,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          # x86-64
-          - macos-13
-          # M1 processor
-          #- macos-14
-        python-version:
-          #- 3.12.8
-          - 3.13.5
-        compiler:
-          - AppleClang
-          #- clang
-          #- gcc
-        homebrew-gl:
-          - true
-          #- false
-        homebrew-al:
-          - true
-          #- false
-        ENABLE_PIE:
-          - 'ON'
-          #- 'OFF'
-        build-type:
-          - RelWithDebInfo
+        include:
+          - os: macOS-13
+            build-type: RelWithDebInfo
+            preset-name: macos-pie-enabled-RelWithDebInfo
+            python-version: 3.13.5
 
     steps:
 
