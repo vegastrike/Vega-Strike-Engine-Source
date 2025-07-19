@@ -375,7 +375,6 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     constexpr Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_JOYSTICK;
 #endif
 
-    configuration()->graphics.full_screen = configuration()->graphics.full_screen;
     gl_options.color_depth = configuration()->graphics.color_depth;
     /*
      * Initialize SDL
