@@ -18,19 +18,19 @@ jobs:
         include:
           - FROM:     'ubuntu:noble'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             allow_failure: false
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             allow_failure: false
           - FROM:     'linuxmintd/mint22-amd64'
             COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             allow_failure: false
           - FROM:     'debian:bookworm'
             COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             allow_failure: false
           - FROM:     'fedora:41'
             COMPILER: 'clang'
