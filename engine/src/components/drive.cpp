@@ -126,7 +126,7 @@ void Drive::Load(std::string unit_key) {
 void Drive::SaveToCSV(std::map<std::string, std::string>& unit) const {
     static const double game_speed = configuration()->physics.game_speed;
     static const double game_accel = configuration()->physics.game_accel;
-    static const double game_accel_speed = 1/ (game_speed * game_accel);
+    static const double game_accel_speed = (game_speed * game_accel);
     const double to_degrees = M_PI / 180;
     unit["Maneuver_Yaw"] = yaw.Serialize(to_degrees);
     unit["Maneuver_Pitch"] = pitch.Serialize(to_degrees);
