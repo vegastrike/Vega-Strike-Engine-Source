@@ -60,7 +60,7 @@ void vs_options::init() {
     loss_relationship = XMLSupport::parse_floatf(vs_config->getVariable("audio", "loss_relationship", "-.1"));
     victory_relationship = XMLSupport::parse_floatf(vs_config->getVariable("audio", "victory_relationship", ".5"));
     time_between_music = XMLSupport::parse_floatf(vs_config->getVariable("audio", "time_between_music", "180"));
-    debris_time = XMLSupport::parse_floatf(vs_config->getVariable("physics", "debris_time", "500"));
+    debris_time = configuration()->physics.debris_time;
     /* Cockpit Audio Options */
     comm = vs_config->getVariable("cockpitaudio", "comm", "vdu_c");
     scanning = vs_config->getVariable("cockpitaudio", "scanning", "vdu_c");
@@ -237,40 +237,32 @@ void vs_options::init() {
     dockOnLoad = XMLSupport::parse_bool(vs_config->getVariable("AI", "dockOnLoad", "true"));
 
     /* PhysicsConfig Options */
-    Drone = vs_config->getVariable("physics", "Drone", "drone");
-    max_missions = XMLSupport::parse_int(vs_config->getVariable("physics", "max_missions", "4"));
-    game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1.0"));
-    runtime_compactness = XMLSupport::parse_float(vs_config->getVariable("physics", "runtime_compactness", "1.0"));
-    autogen_compactness = XMLSupport::parse_float(vs_config->getVariable("physics", "autogen_compactness", "1.0"));
-    AsteroidDifficulty = XMLSupport::parse_float(vs_config->getVariable("physics", "AsteroidDifficulty", ".4"));
-    YearScale = XMLSupport::parse_float(vs_config->getVariable("physics", "YearScale", "10.0"));
-    game_speed_affects_autogen_systems =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "game_speed_affects_autogen_systems", "false"));
-    star_system_scale = XMLSupport::parse_float(vs_config->getVariable("physics", "star_system_scale", "1.0"));
-    respawn_unit_size = XMLSupport::parse_float(vs_config->getVariable("physics", "respawn_unit_size", "400.0"));
-    campaigns = vs_config->getVariable("physics",
-                                       "campaigns",
-                                       "privateer_campaign vegastrike_campaign");     //WRONG SECTION   change after 0.5
-    NumRunningSystems = XMLSupport::parse_int(vs_config->getVariable("physics", "NumRunningSystems", "4"));
-    InactiveSystemTime = XMLSupport::parse_floatf(vs_config->getVariable("physics", "InactiveSystemTime", "0.3"));
-    jump_radius_scale = XMLSupport::parse_floatf(vs_config->getVariable("physics", "jump_radius_scale", "2"));
-    jump_disables_shields = XMLSupport::parse_bool(vs_config->getVariable("physics", "jump_disables_shields", "true"));
-    display_in_meters = XMLSupport::parse_bool(vs_config->getVariable("physics", "display_in_meters", "true"));
-    game_speed_lying = XMLSupport::parse_bool(vs_config->getVariable("physics", "game_speed_lying", "true"));
-    num_times_to_simulate_new_star_system =
-            XMLSupport::parse_int(vs_config->getVariable("physics", "num_times_to_simulate_new_star_system", "20"));
-    gun_speed_adjusted_game_speed =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "gun_speed_adjusted_game_speed", "false"));
-    gun_speed = XMLSupport::parse_floatf(vs_config->getVariable("physics", "gun_speed", "1"));
-    weapon_damage_efficiency =
-            XMLSupport::parse_floatf(vs_config->getVariable("physics", "weapon_damage_efficiency", "1.0"));
-    refire_difficulty_scaling =
-            XMLSupport::parse_floatf(vs_config->getVariable("physics", "refire_difficutly_scaling", "3.0"));
-    debris_mass = XMLSupport::parse_floatf(vs_config->getVariable("physics", "debris_mass", ".00001"));
-    explosion_damage_center =
-            XMLSupport::parse_floatf(vs_config->getVariable("physics", "explosion_damage_center", "1"));
+    Drone = configuration()->physics.drone;
+    max_missions = configuration()->physics.max_missions;
+    game_speed = configuration()->physics.game_speed;
+    runtime_compactness = configuration()->physics.runtime_compactness;
+    autogen_compactness = configuration()->physics.autogen_compactness;
+    AsteroidDifficulty = configuration()->physics.asteroid_difficulty;
+    YearScale = configuration()->physics.year_scale;
+    game_speed_affects_autogen_systems = configuration()->physics.game_speed_affects_autogen_systems;
+    star_system_scale = configuration()->physics.star_system_scale;
+    respawn_unit_size = configuration()->physics.respawn_unit_size;
+    NumRunningSystems = configuration()->physics.num_running_systems;
+    campaigns = configuration()->game_start.campaigns;
+    InactiveSystemTime = configuration()->physics.inactive_system_time;
+    jump_radius_scale = configuration()->physics.jump_radius_scale;
+    jump_disables_shields = configuration()->physics.jump_disables_shields;
+    display_in_meters = configuration()->physics.display_in_meters;
+    game_speed_lying = configuration()->physics.game_speed_lying;
+    num_times_to_simulate_new_star_system = configuration()->physics.num_times_to_simulate_new_star_system;
+    gun_speed_adjusted_game_speed = configuration()->physics.gun_speed_adjusted_game_speed;
+    gun_speed = configuration()->physics.gun_speed;
+    weapon_damage_efficiency = configuration()->physics.weapon_damage_efficiency;
+    refire_difficulty_scaling = configuration()->physics.refire_difficulty_scaling;
+    debris_mass = configuration()->physics.debris_mass;
+    explosion_damage_center = configuration()->physics.explosion_damage_center;
     explosion_damage_edge = configuration()->physics.explosion_damage_edge;
-    eject_cargo_on_blowup = XMLSupport::parse_int(vs_config->getVariable("physics", "eject_cargo_on_blowup", "0"));
+    eject_cargo_on_blowup = configuration()->physics.eject_cargo_on_blowup;
 
     /* Data Options */
     universe_path = vs_config->getVariable("data", "universe_path", "universe");

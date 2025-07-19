@@ -203,17 +203,12 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
     if (autoLandingExcludeList.find(tname) != autoLandingExcludeList.end()) {
         return;
     }
-    static float lessthan = XMLSupport::parse_float(vs_config->getVariable("physics", "AutoLandingDockDistance", "50"));
-    static float
-            warnless = XMLSupport::parse_float(vs_config->getVariable("physics", "AutoLandingWarningDistance", "350"));
-    static float AutoLandingMoveDistance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "AutoLandingMoveDistance", "50"));
-    static float
-            moveout = XMLSupport::parse_float(vs_config->getVariable("physics", "AutoLandingDisplaceDistance", "50"));
-    static float
-            autorad = XMLSupport::parse_float(vs_config->getVariable("physics", "unit_default_autodock_radius", "0"));
-    static bool adjust_unit_radius =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "use_unit_autodock_radius", "false"));
+    const float lessthan = configuration()->physics.auto_landing_dock_distance;
+    const float warnless = configuration()->physics.auto_landing_warning_distance;
+    const float AutoLandingMoveDistance = configuration()->physics.auto_landing_move_distance;
+    const float moveout = configuration()->physics.auto_landing_displace_distance;
+    const float autorad = configuration()->physics.unit_default_autodock_radius;
+    const bool adjust_unit_radius = configuration()->physics.use_unit_autodock_radius;
     float rsize = target->isPlanet() ? target->rSize() : (autorad + (adjust_unit_radius ? target->rSize() : 0));
     QVector diffvec = un->Position() - target->Position();
     float dist = diffvec.Magnitude() - un->rSize() - rsize;
@@ -313,10 +308,9 @@ void GameCockpit::AutoLanding() {
 
 
 float GameCockpit::LookupUnitStat(int stat, Unit *target) {
-    static float game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1"));
-    static bool
-            display_in_meters = XMLSupport::parse_bool(vs_config->getVariable("physics", "display_in_meters", "true"));
-    static bool lie = XMLSupport::parse_bool(vs_config->getVariable("physics", "game_speed_lying", "true"));
+    const float game_speed = configuration()->physics.game_speed;
+    const bool display_in_meters = configuration()->physics.display_in_meters;
+    const bool lie = configuration()->physics.game_speed_lying;
     static float fpsval = 0;
     const float fpsmax = 1;
     static float numtimes = fpsmax;
@@ -1189,9 +1183,7 @@ int GameCockpit::Autopilot(Unit *target) {
                         AccessCamera(CP_FIXEDPOS)->SetOrientation(R, Q, -P);
                     }
 
-                    static float autotime = XMLSupport::parse_float(vs_config->getVariable("physics",
-                            "autotime",
-                            "10"));                    //10 seconds for auto to kick in;
+                    const float autotime = configuration()->physics.auto_time_in_seconds;                    //10 seconds for auto to kick in;
 
                     autopilot_time = autotime;
                     autopilot_target.SetUnit(target);

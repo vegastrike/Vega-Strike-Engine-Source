@@ -559,10 +559,7 @@ inline void CautiousWarpRampOn(Unit *un) {
 }
 
 bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
-    static float specInterdictionLimit =
-            XMLSupport::parse_float(vs_config->getVariable("physics",
-                    "min_spec_interdiction_for_jittery_autopilot",
-                    ".05"));
+    const float specInterdictionLimit = configuration()->physics.min_spec_interdiction_for_jittery_autopilot;
     if (target->isPlanet() == false
             && (target->graphicOptions.specInterdictionOnline == 0
                     || fabs(target->ship_functions.Value(Function::ftl_interdiction)) < specInterdictionLimit)) {
@@ -572,12 +569,8 @@ bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
         return true;
     }
     float maxspeed = parent->afterburner.speed;
-    static float accel_auto_limit =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "max_accel_for_smooth_autopilot", "10"));
-    static float speed_auto_limit =
-            XMLSupport::parse_float(vs_config->getVariable("physics",
-                    "max_over_combat_speed_for_smooth_autopilot",
-                    "2"));
+    const float accel_auto_limit = configuration()->physics.max_accel_for_smooth_autopilot;
+    const float speed_auto_limit = configuration()->physics.max_over_combat_speed_for_smooth_autopilot;
     if (minaccel < accel_auto_limit || parent->Velocity.MagnitudeSquared() > maxspeed * maxspeed * speed_auto_limit
             * speed_auto_limit) {
         return true;
@@ -586,8 +579,7 @@ bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
 }
 
 bool AutoLongHaul::InsideLandingPort(const Unit *obstacle) const {
-    static float landing_port_limit =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "auto_landing_port_unclamped_seconds", "120"));
+    const float landing_port_limit = configuration()->physics.auto_landing_port_unclamped_seconds;
     return UnitUtil::getSignificantDistance(parent,
             obstacle)
             < -landing_port_limit * parent->afterburner.speed;
@@ -601,19 +593,12 @@ void AutoLongHaul::Execute() {
         parent->autopilotactive = false;
         return;
     }
-    static bool compensate_for_interdiction =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "autopilot_compensate_for_interdiction", "false"));
-    static float enough_warp_for_cruise =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "enough_warp_for_cruise", "1000"));
-    static float go_perpendicular_speed =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "warp_perpendicular", "80"));
-    static float min_warp_orbit_radius =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "min_warp_orbit_radius", "100000000"));
-    static float warp_orbit_multiplier =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "warp_orbit_multiplier", "4"));
-    static float warp_behind_angle =
-            cos(3.1415926536 * XMLSupport::parse_float(vs_config->getVariable("physics", "warp_behind_angle", "150"))
-                    / 180.);
+    const bool compensate_for_interdiction = configuration()->physics.auto_pilot_compensate_for_interdiction;
+    const float enough_warp_for_cruise = configuration()->physics.enough_warp_for_cruise;
+    const float go_perpendicular_speed = configuration()->physics.warp_perpendicular;
+    const float min_warp_orbit_radius = configuration()->physics.min_warp_orbit_radius;
+    const float warp_orbit_multiplier = configuration()->physics.warp_orbit_multiplier;
+    const float warp_behind_angle = cos(3.1415926536 * configuration()->physics.warp_behind_angle / 180.0);
     QVector myposition = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();     //get unit pos
     QVector destination = target->isSubUnit() ? target->Position() : target->LocalPosition();     //get destination
     QVector destinationdirection = (destination - myposition);       //find vector from us to destination
@@ -699,10 +684,7 @@ void AutoLongHaul::Execute() {
         if (speed > .01) {
             cfacing = cfacing * (1. / speed);
         }
-        static float dotLimit =
-                cos(3.1415926536 * XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "autopilot_spec_lining_up_angle",
-                        "3")) / 180.);
+        const float dotLimit = cos(3.1415926536 * configuration()->physics.auto_pilot_spec_lining_up_angle / 180.0);
         if (cfacing.Dot(destinationdirection) < dotLimit) {          //if wanting to face target but overshooting.
             deactivatewarp = true;
         }              //turn off drive
@@ -717,10 +699,8 @@ void AutoLongHaul::Execute() {
     double dis = UnitUtil::getSignificantDistance(parent, target);
     float time_to_destination = dis / maxspeed;
 
-    static bool
-            rampdown = XMLSupport::parse_bool(vs_config->getVariable("physics", "autopilot_ramp_warp_down", "true"));
-    static float
-            warprampdowntime = XMLSupport::parse_float(vs_config->getVariable("physics", "warprampdowntime", "0.5"));
+    const bool rampdown = configuration()->physics.auto_pilot_ramp_warp_down;
+    const float warprampdowntime = configuration()->physics.warp_ramp_down_time;
     float time_to_stop = simulation_atom_var;
     if (rampdown) {
         time_to_stop += warprampdowntime;
@@ -743,14 +723,9 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    static float distance_to_stop =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance", "6000"));
-    static float enemy_distance_to_stop =
-            XMLSupport::parse_float(vs_config->getVariable("physics",
-                    "auto_pilot_termination_distance_enemy",
-                    "24000"));
-    static bool
-            do_auto_finish = XMLSupport::parse_bool(vs_config->getVariable("physics", "autopilot_terminate", "true"));
+    const float distance_to_stop = configuration()->physics.auto_pilot_termination_distance;
+    const float enemy_distance_to_stop = configuration()->physics.auto_pilot_termination_distance_enemy;
+    const bool do_auto_finish = configuration()->physics.auto_pilot_terminate;
     bool stopnow = false;
     maxspeed = parent->afterburner.speed;
     if (maxspeed && parent->drive.retro) {

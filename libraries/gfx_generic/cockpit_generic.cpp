@@ -168,7 +168,7 @@ void Cockpit::Delete() {
 }
 
 void Cockpit::RestoreGodliness() {
-    static float maxgodliness = XMLSupport::parse_float(vs_config->getVariable("physics", "player_godliness", "0"));
+    const float maxgodliness = configuration()->physics.player_godliness;
     godliness = maxgodliness;
     if (godliness > maxgodliness) {
         godliness = maxgodliness;
@@ -181,8 +181,7 @@ void Cockpit::InitStatic() {
 }
 
 bool Cockpit::unitInAutoRegion(Unit *un) {
-    static float autopilot_term_distance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance", "6000"));
+    const float autopilot_term_distance = configuration()->physics.auto_pilot_termination_distance;
     Unit *targ = autopilot_target.GetUnit();
     if (targ) {
         return UnitUtil::getSignificantDistance(un, targ)
@@ -279,15 +278,14 @@ int Cockpit::Autopilot(Unit *target) {
                 //can he even start to autopilot
                 //SetView (CP_PAN);
                 un->AutoPilotTo(target, false);
-                static bool face_target_on_auto =
-                        XMLSupport::parse_bool(vs_config->getVariable("physics", "face_on_auto", "false"));
+                const bool face_target_on_auto = configuration()->physics.face_target_on_auto;
                 if (face_target_on_auto) {
                     FaceTarget(un);
                 }
                 static double averagetime = GetElapsedTime() / getTimeCompression();
                 static double numave = 1.0;
                 averagetime += GetElapsedTime() / getTimeCompression();
-                //static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
+                //const float autospeed = configuration()->physics.autospeed;//10 seconds for auto to kick in;
                 numave++;
                 /*
                  *  AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
@@ -297,9 +295,7 @@ int Cockpit::Autopilot(Unit *target) {
                  */
                 const float initialzoom = configuration()->graphics.initial_zoom_factor;
                 zoomfactor = initialzoom;
-                static float autotime = XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "autotime",
-                        "10"));                 //10 seconds for auto to kick in;
+                const float autotime = configuration()->physics.auto_time_in_seconds;                 //10 seconds for auto to kick in;
 
                 autopilot_time = autotime;
                 autopilot_target.SetUnit(target);
@@ -335,8 +331,7 @@ void SwitchUnits(Unit *ol, Unit *nw) {
 }
 
 static void SwitchUnitsTurret(Unit *ol, Unit *nw) {
-    static bool FlyStraightInTurret =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "ai_pilot_when_in_turret", "true"));
+    const bool FlyStraightInTurret = configuration()->physics.ai_pilot_when_in_turret;
     if (FlyStraightInTurret) {
         SwitchUnits(ol, nw);
     } else {
@@ -529,10 +524,7 @@ bool Cockpit::Update() {
     if (autoclear && par) {
         Unit *targ = par->Target();
         if (targ) {
-            static float autopilot_term_distance =
-                    XMLSupport::parse_float(vs_config->getVariable("physics",
-                            "auto_pilot_termination_distance",
-                            "6000"));
+            const float autopilot_term_distance = configuration()->physics.auto_pilot_termination_distance;
             float doubled = dockingdistance(targ, par);
             if (((targ->getUnitType() != Vega_UnitType::planet
                     && doubled < autopilot_term_distance)
@@ -710,8 +702,7 @@ bool Cockpit::Update() {
                 savegame->SetPlayerLocation(pos);
                 CopySavedShips(savegame->GetCallsign(), whichcp, packedInfo, true);
                 bool actually_have_save = false;
-                static bool persistent_on_load =
-                        XMLSupport::parse_bool(vs_config->getVariable("physics", "persistent_on_load", "true"));
+                const bool persistent_on_load = configuration()->physics.persistent_on_load;
                 if (savegame->GetStarSystem() != "") {
                     actually_have_save = true;
                     newsystem = savegame->GetStarSystem() + ".system";

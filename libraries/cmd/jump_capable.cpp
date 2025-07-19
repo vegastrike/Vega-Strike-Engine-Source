@@ -376,23 +376,20 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
         bool count_negative_warp_units) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
-    static float smallwarphack = XMLSupport::parse_float(vs_config->getVariable("physics", "minwarpeffectsize", "100"));
-    static float bigwarphack =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "maxwarpeffectsize", "10000000"));
+    const float smallwarphack = configuration()->physics.min_warp_effect_size;
+    const float bigwarphack = configuration()->physics.max_warp_effect_size;
     //Boundary between multiplier regions 1&2. 2 is "high" mult
-    static double warpregion1 = XMLSupport::parse_float(vs_config->getVariable("physics", "warpregion1", "5000000"));
+    const double warpregion1 = configuration()->physics.warp_region1;
     //Boundary between multiplier regions 0&1 0 is mult=1
-    static double warpregion0 = XMLSupport::parse_float(vs_config->getVariable("physics", "warpregion0", "5000"));
+    const double warpregion0 = configuration()->physics.warp_region0;
     //Mult at 1-2 boundary
-    static double warpcruisemult = XMLSupport::parse_float(vs_config->getVariable("physics", "warpcruisemult", "5000"));
+    const double warpcruisemult = configuration()->physics.warp_cruise_mult;
     //degree of curve
-    static double curvedegree = XMLSupport::parse_float(vs_config->getVariable("physics", "warpcurvedegree", "1.5"));
+    const double curvedegree = configuration()->physics.warp_curve_degree;
     //coefficient so as to agree with above
-    static double upcurvek = warpcruisemult / std::pow((warpregion1 - warpregion0), curvedegree);
+    const double upcurvek = warpcruisemult / std::pow((warpregion1 - warpregion0), curvedegree);
     //inverse fractional effect of ship vs real big object
-    static float def_inv_interdiction = 1.
-            / XMLSupport::parse_float(vs_config->getVariable("physics", "default_interdiction",
-                    ".125"));
+    const float def_inv_interdiction = 1.0 / configuration()->physics.default_interdiction;
     Unit *planet;
     Unit *testthis = NULL;
     {
