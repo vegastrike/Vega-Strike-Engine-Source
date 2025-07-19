@@ -103,7 +103,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 
     glDisable(GL_TEXTURE_2D);
     glLoadIdentity();
-    if (gl_options.smooth_lines) {
+    if (configuration()->graphics.smooth_lines) {
         glEnable(GL_LINE_SMOOTH);
     }
     glLineWidth(wid);
@@ -127,7 +127,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
             } else {
                 width = 0;
                 glLoadIdentity();
-                if (gl_options.smooth_lines) {
+                if (configuration()->graphics.smooth_lines) {
                     glEnable(GL_LINE_SMOOTH);
                 }
                 glLineWidth(wid);
@@ -142,7 +142,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
         }
     }
     glLoadIdentity();
-    if (gl_options.smooth_lines) {
+    if (configuration()->graphics.smooth_lines) {
         glDisable(GL_LINE_SMOOTH);
     }
 }

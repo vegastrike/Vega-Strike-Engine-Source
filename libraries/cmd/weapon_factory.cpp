@@ -58,10 +58,6 @@ bool gamma_needed(int gamma, int count, int depth)
 
 void ParseWeapon(const boost::json::object& weapon) {
     WeaponInfo wi;
-    /*static float gun_speed =
-            game_options()->gun_speed * (game_options()->gun_speed_adjusted_game_speed ? game_options()->game_speed : 1);
-    static int gamma = (int) (20 * game_options()->weapon_gamma);*/
-
 
     // Weapon Type
     const std::string weapon_type = JsonGetWithDefault(weapon, "type", std::string());
