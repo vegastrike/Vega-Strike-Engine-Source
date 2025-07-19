@@ -22,12 +22,12 @@ jobs:
           - os:              windows-2022
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-debug
-            python-version:  3.13.4
+            python-version:  3.13.5
             is-release:      0
           - os:              windows-2025
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
-            python-version:  3.13.4
+            python-version:  3.13.5
             is-release:      0
 
     env:
