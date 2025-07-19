@@ -47,12 +47,15 @@
 #include "root_generic/options.h"
 
 void CacheJumpStar(bool destroy) {
-    static boost::optional<Animation> cachedani;
-    if (!cachedani) {
-        cachedani.emplace(configuration()->graphics.jump_gate.c_str(), true, .1, MIPMAP, false);
+    static Animation* cached_ani;
+    static bool initialized = false;
+    if (!initialized) {
+        initialized = true;
+        cached_ani = new Animation(configuration()->graphics.jump_gate.c_str(), true, 0.1, MIPMAP, false);
     }
     if (destroy) {
-        cachedani = boost::none;
+        delete cached_ani;
+        cached_ani = nullptr;
     }
 }
 

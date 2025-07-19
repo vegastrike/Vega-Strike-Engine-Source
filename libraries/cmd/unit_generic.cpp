@@ -1664,9 +1664,11 @@ bool Unit::Explode(bool drawit, float timeit) {
             FactionUtil::GetRandExplosionAnimation(this->faction, bleh);
         }
         if (bleh.empty()) {
-            static boost::optional<Animation> cache;
-            if (!cache) {
-                cache.emplace(configuration()->graphics.explosion_animation.c_str(), false, .1, BILINEAR, false);
+            static Animation * cache;
+            static bool initialized = false;
+            if (!initialized) {
+                initialized = true;
+                cache = new Animation(configuration()->graphics.explosion_animation.c_str(), false, 0.1, BILINEAR, false);
             }
             bleh = getRandomCachedAniString();
             if (bleh.empty()) {
@@ -1706,9 +1708,11 @@ bool Unit::Explode(bool drawit, float timeit) {
             if (this->getUnitType() == Vega_UnitType::unit) {
                 if (rand() < RAND_MAX * configuration()->graphics.percent_shockwave && (!this->isSubUnit())) {
                     const std::string shockani(configuration()->graphics.shockwave_animation);
-                    boost::optional<Animation> shock_ani;
-                    if (!shock_ani) {
-                        shock_ani.emplace(shockani.c_str(), true, .1, MIPMAP, false);
+                    static Animation * shock_ani;
+                    static bool initialized = false;
+                    if (!initialized) {
+                        initialized = true;
+                        shock_ani = new Animation(shockani.c_str(), true, 0.1, MIPMAP, false);
                     }
 
                     shock_ani->SetFaceCam(false);
