@@ -26,45 +26,15 @@
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-
 param(
-    [String]$Generator = "VS2019Win64", # Other options include "ninja" and "VS2022Win64"
-    [Boolean]$EnablePIE = $false,
-    [String]$BuildType = "Release" # You can also specify "Debug"
+    [String]$PresetName = "VS2022Win64-pie-enabled-RelWithDebInfo",
+    [String]$BuildType = "RelWithDebInfo" # You can also specify "Debug" or "Release"
 )
 
-[String]$cmakePresetName = ""
-if ($Generator -ieq "Ninja") {
-    $cmakePresetName += "windows-ninja"
-} elseif ($Generator -ieq "VS2019Win64") {
-    $cmakePresetName += "VS2019Win64"
-} elseif ($Generator -ieq "VS2022Win64") {
-    $cmakePresetName += "VS2022Win64"
-} else {
-    Write-Error "Invalid value for Generator: $Generator"
-    exit 1
-}
-$cmakePresetName += "-"
-if ($EnablePIE) {
-    $cmakePresetName += "pie-enabled"
-} else {
-    $cmakePresetName += "pie-disabled"
-}
-$cmakePresetName += "-"
-if ($BuildType -ieq "Debug") {
-    $cmakePresetName += "debug"
-} elseif ($BuildType -ieq "Release") {
-    $cmakePresetName += "release"
-} elseif ($BuildType -ieq "RelWithDebInfo") {
-    $cmakePresetName += "RelWithDebInfo"
-} else {
-    Write-Error "Unrecognized value for BuildType: $BuildType"
-    exit 1
-}
-
 [String]$baseDir = (Get-Location -PSProvider "FileSystem").Path
-[String]$binaryDir = "$baseDir\build\$cmakePresetName"
+[String]$testBaseDir = "$baseDir\build\$PresetName"
+Push-Location $testBaseDir
 
-Push-Location $baseDir
-ctest -V --preset "test-$cmakePresetName"
+GTEST_OUTPUT=xml:$testBaseDir/test-results ctest -V --preset "test-$PresetName"
+
 Pop-Location

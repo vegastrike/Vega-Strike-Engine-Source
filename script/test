@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
-
+#====================================
+# @file   : test
+# @brief  : Tests Vega Strike for purposes of CI/CD (GitHub Actions)
+# @usage  : ./script/test --preset-name=VS2022Win64-pie-enabled-RelWithDebInfo
+# @param  : preset-name=, build-type=
+#====================================
 ##
-# docker-entrypoint.sh
+# test
 #
-# Copyright (c) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
-# and other Vega Strike Contributors
+# Copyright (c) 2025 Stephen G. Tuggy and other Vega Strike Contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -24,12 +28,11 @@
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-
 set -e
 
-echo "-----------------------------------------"
-echo "--- docker-entrypoint.sh | 2025-06-27 ---"
-echo "-----------------------------------------"
+echo "-------------------------"
+echo "--- test | 2025-06-27 ---"
+echo "-------------------------"
 
 #----------------------------------
 # validate parameters
@@ -58,29 +61,4 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-echo "Re-run bootstrap"
-script/bootstrap
-
-if [ "$COMPILER" == "gcc" ]
-then
-  export CC=gcc
-  export CXX=g++
-elif [ "$COMPILER" == "clang" ]
-then
-  export CC=clang
-  export CXX=clang++
-fi
-
-if [ -z "$preset_name" ] && [ -n "$PRESET_NAME" ]
-then
-  preset_name="${PRESET_NAME}"
-fi
-
-script/build --preset_name="${preset_name}"
-
-if [ $IS_RELEASE -eq 1 ]
-then
-  script/package --preset_name="${preset_name}"
-else
-  script/test --preset_name="${preset_name}"
-fi
+GTEST_OUTPUT=xml:$(pwd)/test-results ctest -V --preset "test-${preset_name}"

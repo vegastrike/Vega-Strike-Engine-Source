@@ -23,18 +23,12 @@ jobs:
         include:
           - os:              windows-2022
             triplet:         x64-win10
-            preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
-            cmake-generator: VS2022Win64
-            enable-pie:      1
-            build-type:      RelWithDebInfo
+            preset-name:     VS2022Win64-pie-enabled-debug
             python-version:  3.13.5
             is-release:      1
           - os:              windows-2025
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
-            cmake-generator: VS2022Win64
-            enable-pie:      1
-            build-type:      RelWithDebInfo
             python-version:  3.13.5
             is-release:      1
 

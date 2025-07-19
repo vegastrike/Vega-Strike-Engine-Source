@@ -22,17 +22,11 @@ jobs:
           - os:              windows-2022
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-debug
-            cmake-generator: VS2022Win64
-            enable-pie:      1
-            build-type:      Debug
             python-version:  3.13.5
             is-release:      0
           - os:              windows-2025
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
-            cmake-generator: VS2022Win64
-            enable-pie:      1
-            build-type:      RelWithDebInfo
             python-version:  3.13.5
             is-release:      0
 
@@ -101,7 +95,7 @@ jobs:
         run: ctest -V --preset "test-${{ matrix.preset-name }}"
 
       - name: Upload test results
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: failure()
         with:
           name: test_results_xml
