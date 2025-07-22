@@ -242,9 +242,8 @@ int parseMountSizes(const char *str) {
 }
 
 void DealPossibleJumpDamage(Unit *un) {
-    static double jump_damage_multiplier =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "jump_damage_multiplier", ".1"));
-    static double max_damage = XMLSupport::parse_float(vs_config->getVariable("physics", "max_jump_damage", "100"));
+    const double jump_damage_multiplier = configuration()->physics.jump_damage_multiplier;
+    const double max_damage = configuration()->physics.max_jump_damage;
 
     // Also damage multiplier
     double chance_to_damage = randomDouble() - 0.01;

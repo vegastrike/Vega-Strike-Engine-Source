@@ -54,8 +54,7 @@ extern int numprocessed;
 extern double targetpick;
 
 static bool NoDockWithClear() {
-    static bool nodockwithclear =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "dock_with_clear_planets", "true"));
+    const bool nodockwithclear = configuration()->physics.dock_with_clear_planets;
     return nodockwithclear;
 }
 

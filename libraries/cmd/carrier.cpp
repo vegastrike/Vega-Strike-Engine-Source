@@ -207,7 +207,7 @@ void Carrier::EjectCargo(unsigned int index) {
         tmp->SetMass(0.01);
     }
 
-    static float cargotime = XMLSupport::parse_float(vs_config->getVariable("physics", "cargo_live_time", "600"));
+    const float cargotime = configuration()->physics.cargo_live_time;
     if (tmp) {
         string tmpcontent = tmp->name;
         if (tmp->GetMissionFlag()) {
@@ -297,8 +297,7 @@ void Carrier::EjectCargo(unsigned int index) {
                         }
                     } else {
                         int fac = FactionUtil::GetUpgradeFaction();
-                        static float ejectcargotime =
-                                XMLSupport::parse_float(vs_config->getVariable("physics", "eject_live_time", "0"));
+                        const float ejectcargotime = configuration()->physics.eject_live_time;
                         if (cargotime == 0.0) {
                             cargo = new Unit("eject", false, fac, "", NULL, 0);
                         } else {
@@ -371,8 +370,7 @@ void Carrier::EjectCargo(unsigned int index) {
                 }
                 tmpvel.Normalize();
                 if ((SelectDockPort(unit, unit) > -1)) {
-                    static float eject_cargo_offset =
-                            XMLSupport::parse_float(vs_config->getVariable("physics", "eject_distance", "20"));
+                    const float eject_cargo_offset = configuration()->physics.eject_distance;
                     QVector loc(Transform(unit->GetTransformation(),
                             unit->DockingPortLocations()[0].GetPosition().Cast()));
                     //index is always > -1 because it's unsigned.  Lets use the correct terms, -1 in Uint is UINT_MAX
@@ -393,8 +391,7 @@ void Carrier::EjectCargo(unsigned int index) {
                             + randVector(-.5 * unit->rSize(), .5 * unit->rSize()));
                     cargo->SetAngularVelocity(rotation);
                 }
-                static float
-                        velmul = XMLSupport::parse_float(vs_config->getVariable("physics", "eject_cargo_speed", "1"));
+                const float velmul = configuration()->physics.eject_cargo_speed;
                 cargo->SetOwner(unit);
                 cargo->SetVelocity(unit->Velocity * velmul + randVector(-.25, .25).Cast());
                 cargo->setMass(tmp->GetMass());
@@ -411,10 +408,7 @@ void Carrier::EjectCargo(unsigned int index) {
                     //changes control to that cockpit
                     cp->SetParent(cargo, "", "", unit->Position());
                     if (tmpcontent == "return_to_cockpit") {
-                        static bool simulate_while_at_base =
-                                XMLSupport::parse_bool(vs_config->getVariable("physics",
-                                        "simulate_while_docked",
-                                        "false"));
+                        const bool simulate_while_at_base = configuration()->physics.simulate_while_docked;
                         if ((simulate_while_at_base) || (_Universe->numPlayers() > 1)) {
                             unit->TurretFAW();
                         }
@@ -468,7 +462,7 @@ int Carrier::RemoveCargo(unsigned int i, int quantity, bool eraseZero) {
         quantity = carg->quantity;
     }
 
-    static bool usemass = XMLSupport::parse_bool(vs_config->getVariable("physics", "use_cargo_mass", "true"));
+    const bool usemass = configuration()->physics.use_cargo_mass;
     if (usemass) {
         unit->setMass(unit->getMass() - quantity * carg->GetMass());
     }
@@ -483,7 +477,7 @@ int Carrier::RemoveCargo(unsigned int i, int quantity, bool eraseZero) {
 void Carrier::AddCargo(const Cargo &carg, bool sort) {
     Unit *unit = static_cast<Unit *>(this);
 
-    static bool usemass = XMLSupport::parse_bool(vs_config->getVariable("physics", "use_cargo_mass", "true"));
+    const bool usemass = configuration()->physics.use_cargo_mass;
     if (usemass) {
         unit->setMass(unit->getMass() + carg.quantity.Value() * carg.GetMass());
     }

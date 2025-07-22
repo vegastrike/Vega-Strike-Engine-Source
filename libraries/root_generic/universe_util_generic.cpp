@@ -674,7 +674,7 @@ namespace UniverseUtil {
 
     QVector SafeStarSystemEntrancePoint(StarSystem *sts, QVector pos, float radial_size) {
         if (radial_size < 0) {
-            radial_size = game_options()->respawn_unit_size;
+            radial_size = configuration()->physics.respawn_unit_size;
         }
         for (unsigned int k = 0; k < 10; ++k) {
             Unit *un;

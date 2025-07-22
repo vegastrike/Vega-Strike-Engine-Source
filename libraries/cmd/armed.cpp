@@ -141,8 +141,7 @@ public:
                 }
             }
         }
-        static bool allow_special_with_weapons =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "special_and_normal_gun_combo", "true"));
+        const bool allow_special_with_weapons = configuration()->physics.allow_special_and_normal_gun_combo;
         if (allow_special_with_weapons) {
             myset.insert(allWeapons);
         }
@@ -429,8 +428,7 @@ bool Armed::TargetLocked(const Unit *checktarget) const {
 
 bool Armed::TargetTracked(const Unit *checktarget) {
     Unit *unit = static_cast<Unit *>(this);
-    static bool must_lock_to_autotrack = XMLSupport::parse_bool(
-            vs_config->getVariable("physics", "must_lock_to_autotrack", "true"));
+    const bool must_lock_to_autotrack = configuration()->physics.must_lock_to_autotrack;
 
     bool we_do_track = unit->radar.tracking_active
             && (!_Universe->isPlayerStarship(unit) || TargetLocked() || !must_lock_to_autotrack);

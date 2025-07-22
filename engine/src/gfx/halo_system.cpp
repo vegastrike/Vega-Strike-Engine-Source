@@ -146,7 +146,7 @@ unsigned int HaloSystem::AddHalo(const char *filename,
             size.j * game_options()->engine_radii_scale,
             size.k * game_options()->engine_length_scale);
     halo.back().mesh = Mesh::LoadMesh((string(filename)).c_str(), Vector(1, 1, 1), neutralfac, NULL);
-    halo.back().activation = activation_accel * game_options()->game_speed;
+    halo.back().activation = activation_accel * configuration()->physics.game_speed;
     halo.back().oscale = 0;
     halo.back().sparkle_accum = 0;
     halo.back().sparkle_rate = 0.5 + rand() * 0.5 / float(RAND_MAX);
