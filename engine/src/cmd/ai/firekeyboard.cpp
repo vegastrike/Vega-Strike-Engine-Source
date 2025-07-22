@@ -63,6 +63,7 @@
 #include "cmd/weapon_info.h"
 #include "src/vs_logging.h"
 #include "cmd/unit_util.h"
+#include "resource/cargo.h"
 
 extern bool toggle_pause();
 
@@ -1293,8 +1294,6 @@ static bool UnDockNow(Unit *me, Unit *targ) {
     return ret;
 }
 
-void Enslave(Unit *, bool);
-
 void PlayDockingSound(int dock) {
     switch (dock) {
         case 5: {
@@ -1599,14 +1598,11 @@ void Arrested(Unit *parent) {
     if (!attack) {
         Unit *contra = FactionUtil::GetContraband(own);
         if (contra) {
-            for (unsigned int i = 0; (!attack) && i < parent->numCargo(); ++i) {
-                Cargo *ci = &parent->GetCargo(i);
-                for (unsigned int j = 0; j < contra->numCargo(); ++j) {
-                    Cargo *cj = &contra->GetCargo(j);
-                    if (ci->GetName() == cj->GetName()) {
-                        attack = true;
-                        break;
-                    }
+            for(Cargo& contraband : contra->cargo_hold.GetItems()) {
+                if (parent->cargo_hold.HasCargo(contraband.GetName())) {
+                    // Parent has contraband cargo
+                    attack = true;
+                    break;
                 }
             }
         }
@@ -1661,9 +1657,8 @@ void Arrested(Unit *parent) {
                 parent->aistate = NULL;
                 parent->PrimeOrders(new Orders::DockingOps(owner, tmp, true, true));
                 arrested_list_do_not_dereference.insert(parent);
-                for (int i = parent->numCargo() - 1; i >= 0; --i) {
-                    parent->RemoveCargo(i, parent->GetCargo((unsigned int) i).GetQuantity(), true);
-                }
+                parent->cargo_hold.Clear();
+                
                 UniverseUtil::IOmessage(
                         0,
                         "game",
@@ -2131,9 +2126,12 @@ void FireKeyboard::Execute() {
             _Universe->AccessCockpit()->communication_choices = "\nNo Communication\nLink\nEstablished";
         }
     }
-    if (f().enslave == PRESS || f().freeslave == PRESS) {
-        Enslave(parent, f().enslave == PRESS);
+    if (f().enslave == PRESS) {
+        parent->cargo_hold.Enslave();
         f().enslave = RELEASE;
+    }
+    if (f().freeslave == PRESS) {
+        parent->cargo_hold.Free();
         f().freeslave = RELEASE;
     }
     if (f().ejectcargo == PRESS || f().ejectnonmissioncargo == PRESS) {
@@ -2147,8 +2145,8 @@ void FireKeyboard::Execute() {
             offset -= 3;
         }
         for (; offset < static_cast<int>(parent->numCargo()); ++offset) {
-            Cargo *tmp = &parent->GetCargo(offset);
-            if (tmp->GetCategory().find("upgrades") == string::npos && (missiontoo || tmp->GetMissionFlag() == false)) {
+            Cargo tmp = parent->cargo_hold.GetCargo(offset);
+            if (missiontoo || !tmp.IsMissionFlag()) {
                 parent->EjectCargo(offset);
                 break;
             }

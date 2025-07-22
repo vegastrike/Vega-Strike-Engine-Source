@@ -62,8 +62,6 @@ int removeWeapon(Unit *my_unit, string weapon, int mountoffset, bool loop_throug
 float upgrade(Unit *my_unit, string file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
 int addCargo(Unit *my_unit, Cargo carg);
 int forceAddCargo(Unit *my_unit, Cargo carg);
-bool incrementCargo(Unit *my_unit, float percentagechange, int quantity);
-bool decrementCargo(Unit *my_unit, float percentagechange);
 float getDistance(const Unit *my_unit, const Unit *un);
 float getSignificantDistance(const Unit *un, const Unit *sig);
 int hasCargo(const Unit *my_unit, std::string mycarg);
@@ -90,7 +88,7 @@ Unit *owner(const Unit *un);
 float maxSpeed(const Unit *un);
 float maxAfterburnerSpeed(const Unit *un);
 void performDockingOperations(Unit *un, Unit *unitToDockWith, int actuallyDockP);
-float PercentOperational(Unit *un, string, string category, bool countHullAndArmorAsFull);
+float PercentOperational(const Cargo item, Unit *un, string, string category, bool countHullAndArmorAsFull);
 }
 
 #endif //VEGA_STRIKE_ENGINE_CMD_UNIT_UTIL_H

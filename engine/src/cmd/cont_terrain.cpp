@@ -420,7 +420,7 @@ void ContinuousTerrain::Collide(Unit *un, Matrix t) {
             if (autocol) {
                 static float mass = 1000;
                 un->ApplyForce(
-                        bigNormal * .4 * un->Mass * fabs(bigNormal.Dot((un->GetVelocity() / simulation_atom_var))));
+                        bigNormal * .4 * un->GetMass() * fabs(bigNormal.Dot((un->GetVelocity() / simulation_atom_var))));
 
                 Damage damage(.5 * fabs(bigNormal.Dot(un->GetVelocity())) * mass * simulation_atom_var);
 

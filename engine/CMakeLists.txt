@@ -223,8 +223,6 @@ SET(LIBDAMAGE
 
 SET(LIBRESOURCE
     src/resource/resource.cpp
-    src/resource/store.cpp
-    src/resource/product.cpp
     src/resource/cargo.cpp
     src/resource/manifest.cpp
     src/resource/json_utils.cpp
@@ -253,6 +251,7 @@ SET(LIBCOMPONENT
     src/components/afterburner_upgrade.cpp
     src/components/computer.cpp
     src/components/cloak.cpp
+    src/components/cargo_hold.cpp
     src/components/drive.cpp
     src/components/drive_upgrade.cpp
     src/components/ftl_drive.cpp
@@ -1220,6 +1219,7 @@ IF (USE_GTEST)
         src/configuration/tests/configuration_tests.cpp
         src/damage/tests/layer_tests.cpp
         src/damage/tests/object_tests.cpp
+        src/resource/tests/cargo_tests.cpp
         src/resource/tests/buy_sell.cpp
         src/resource/tests/resource_test.cpp
         src/resource/tests/manifest_tests.cpp

@@ -115,12 +115,11 @@ using std::list;
 Unit *getMasterPartList() {
     static Unit ret;
 
-    if(ret.cargo.empty()) {
+    if(ret.cargo_hold.Empty()) {
         ret.name = "master_part_list";
-        for(const Cargo& c : Manifest::MPL().getItems()) {
-            ret.AddCargo(c);
+        for(const Cargo& c : Manifest::MPL().GetItems()) {
+            ret.cargo_hold.AddCargo(&ret, c);
         }
-
     }
     return &ret;
 }
@@ -1249,22 +1248,22 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
             case 3: ftl_drive.Damage(); break;
             case 4: jump_drive.Damage(); break;
             case 5: afterburner.Damage(); break;
-            case 6: CargoVolume *= dam; break;
-            case 7: UpgradeVolume *= dam; break;
+            // case 6: CargoVolume *= dam; break;
+            // case 7: UpgradeVolume *= dam; break;
             case 8:
             //Do something NASTY to the cargo
-            if (cargo.size() > 0) {
+            if (!cargo_hold.Empty()) {
                 unsigned int i = 0;
                 unsigned int cargorand_o = rand();
                 unsigned int cargorand;
-                do {
+                /*do {
                     cargorand = (cargorand_o + i) % cargo.size();
                 } while ((cargo[cargorand].GetQuantity() == 0
-                        || cargo[cargorand].GetMissionFlag()) && (++i) < cargo.size());
-                cargo[cargorand].SetQuantity(cargo[cargorand].GetQuantity() * float_to_int(dam));
+                        || cargo[cargorand].IsMissionFlag()) && (++i) < cargo.size());
+                cargo[cargorand].SetQuantity(cargo[cargorand].GetQuantity() * float_to_int(dam));*/
             }
             break;
-            //default:
+            // default:
                 // No damage
         }
 
@@ -1452,11 +1451,11 @@ void Unit::ProcessDeleteQueue() {
 
 Unit *makeBlankUpgrade(string templnam, int faction) {
     Unit *bl = new Unit(templnam.c_str(), true, faction);
-    for (int i = bl->numCargo() - 1; i >= 0; i--) {
-        int q = bl->GetCargo(i).GetQuantity();
-        bl->RemoveCargo(i, q);
-    }
-    bl->setMass(0);
+    bl->cargo_hold.Clear();
+    bl->upgrade_space.Clear();
+    bl->hidden_hold.Clear();
+    
+    bl->SetMass(0);
     return bl;
 }
 
@@ -1998,10 +1997,10 @@ void rechargeShip(Unit *unit, unsigned int cockpit) {
 
     // Refueling fee
     const float refueling_fee = configuration()->general.fuel_docking_fee;
-    _Universe->AccessCockpit(cockpit)->credits -= refueling_fee;
+    unit->credits -= refueling_fee;
 
     const float docking_fee = configuration()->general.docking_fee;
-    _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
+    unit->credits -= docking_fee;
 }
 
 
@@ -2568,11 +2567,7 @@ double Unit::Upgrade(const std::string &file,
         up = UnitConstCache::setCachedConst(StringIntKey(file, upgradefac),
                 new Unit(file.c_str(), true, upgradefac));
     }
-    unsigned int cargonum;
-    Cargo *cargo = GetCargo(file, cargonum);
-    if (cargo) {
-        cargo->SetInstalled(true);
-    }
+
     char *unitdir = GetUnitDir(this->name.get().c_str());
     string templnam = string(unitdir) + ".template";
     const Unit *templ = UnitConstCache::getCachedConst(StringIntKey(templnam, this->faction));
@@ -2683,70 +2678,40 @@ static bool cell_has_recursive_data(const string &name, unsigned int fac, const 
     return retval;
 }
 
-#define STDUPGRADE_SPECIFY_DEFAULTS(my, oth, temp, noth, dgradelimer, dgradelimerdefault, clamp, value_to_lookat) \
-    do {                                                                                                            \
-        retval =                                                                                                    \
-            (                                                                                                       \
-                UpgradeFloat(                                                                                       \
-                    resultdoub,                                                                                     \
-                    my,                                                                                             \
-                    oth,                                                                                            \
-                    (templ != NULL) ? temp : 0,                                                                     \
-                    Adder, Comparer, noth, noth,                                                                    \
-                    Percenter, temppercent,                                                                         \
-                    forcetransaction,                                                                               \
-                    templ != NULL,                                                                                  \
-                    (downgradelimit != NULL) ? dgradelimer : dgradelimerdefault,                                    \
-                    AGreaterB,                                                                                      \
-                    clamp,                                                                                          \
-                    force_change_on_nothing                                                                         \
-                            )                                                                                       \
-            );                                                                                                      \
-        if (retval == UPGRADEOK)                                                                                    \
-        {                                                                                                           \
-            if (touchme)                                                                                            \
-                my = resultdoub;                                                                                    \
-            percentage += temppercent;                                                                              \
-            ++numave;                                                                                               \
-            can_be_redeemed = true;                                                                                 \
-            if (gen_downgrade_list)                                                                                 \
-                AddToDowngradeMap( up->name, oth, ( (char*) &value_to_lookat )-(char*) this, tempdownmap );         \
-        }                                                                                                           \
-        else if (retval != NOTTHERE)                                                                                \
-        {                                                                                                           \
-            if (retval == CAUSESDOWNGRADE)                                                                          \
-                needs_redemption = true;                                                                            \
-            else                                                                                                    \
-                cancompletefully = false;                                                                           \
-        }                                                                                                           \
-    }                                                                                                               \
-    while (0)
-
-#define STDUPGRADE(my, oth, temp, noth)                \
-    do {STDUPGRADE_SPECIFY_DEFAULTS( my,                 \
-                                     oth,                \
-                                     temp,               \
-                                     noth,               \
-                                     downgradelimit->my, \
-                                     blankship->my,      \
-                                     false,              \
-                                     this->my ); }       \
-    while (0)
-
-#define STDUPGRADECLAMP(my, oth, temp, noth)                 \
-    do {STDUPGRADE_SPECIFY_DEFAULTS( my,                       \
-                                     oth,                      \
-                                     temp,                     \
-                                     noth,                     \
-                                     downgradelimit->my,       \
-                                     blankship->my,            \
-                                     !force_change_on_nothing, \
-                                     this->my ); }             \
-    while (0)
-
 // TODO: get rid of this
 extern float accelStarHandler(float &input);
 float speedStarHandler(float &input);
+
+/* Stopgap measure - upgrade/downgrade cargo holds/upgrade spaces */
+bool UpAndDownCargoHoldAndUpgradeSpace(Unit *unit, float cargo_volume, float hidden_volume, 
+                                       float upgrade_space, bool is_upgrade, bool do_upgrade) {
+    float multiple = (is_upgrade ? 1.0f : -1.0f);
+
+    // Check if this is actually a cargo/upgrade space upgrade
+    if(cargo_volume == 0 && hidden_volume == 0 && upgrade_space == 0) {
+        return false;
+    }
+
+    // Just checking if we can, and we can always upgrade/downgrade
+    if(!do_upgrade) {
+        return true;
+    }
+
+    // if(cargo_volume != 0) {
+    //     unit->CargoVolume += cargo_volume * multiple;
+    // }
+
+    // if(hidden_volume != 0) {
+    //     unit->HiddenCargoVolume += hidden_volume * multiple;
+    // }
+
+    // if(upgrade_space != 0) {
+    //     unit->UpgradeVolume += upgrade_space * multiple;
+    // }
+
+    return true;
+}
+
 
 bool Unit::UpAndDownGrade(const Unit *up,
         const Unit *templ,
@@ -2767,16 +2732,12 @@ bool Unit::UpAndDownGrade(const Unit *up,
         return result.success;
     }
 
-
     // Old Code
     percentage = 0;
 
-    static bool
-            csv_cell_null_check = XMLSupport::parse_bool(vs_config->getVariable("data", "empty_cell_check", "true"));
     int numave = 0;
     bool cancompletefully = true;
     bool can_be_redeemed = false;
-    bool needs_redemption = false;
     if (mountoffset >= 0) {
         cancompletefully = UpgradeMounts(up, mountoffset, touchme, downgrade, numave, percentage);
     }
@@ -2785,9 +2746,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
         cancompletefully1 = UpgradeSubUnits(up, subunitoffset, touchme, downgrade, numave, percentage);
     }
     cancompletefully = cancompletefully && cancompletefully1;
-    adder Adder;
-    comparer Comparer;
-    percenter Percenter;
     vsUMap<int, DoubleName> tempdownmap;
     if (cancompletefully && cancompletefully1 && downgrade) {
         if (percentage > 0) {
@@ -2795,115 +2753,30 @@ bool Unit::UpAndDownGrade(const Unit *up,
         }
     }
 
-    if (downgrade) {
-        Adder = &SubtractUp;
-        Percenter = &computeDowngradePercent;
-        Comparer = &GreaterZero;
-    } else {
-        if (additive == 1) {
-            Adder = &AddUp;
-            Percenter = &computeAdderPercent;
-        } else if (additive == 2) {
-            Adder = &MultUp;
-            Percenter = &computeMultPercent;
-        } else {
-            Adder = &GetsB;
-            Percenter = &computePercent;
-        }
-        Comparer = AGreaterB;
-    }
-    double resultdoub;
-    int retval = 0; //"= 0" added by chuck_starchaser to shut off a warning about its possibly being used uninitialized
-    double temppercent;
-    static Unit *blankship = NULL;
-    static bool initblankship = false;
-    if (!initblankship) {
-        blankship = this;
-        initblankship = true;
-        blankship = new Unit("upgrading_dummy_unit", true, FactionUtil::GetUpgradeFaction());
-    }
-    //set up vars for "LookupUnitStat" to check for empty cells
-    string upgrade_name = up->name;
-    //Check SPEC stuff
-    if (!csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data(upgrade_name, up->faction,
-                    "Warp_Min_Multiplier|Warp_Max_Multiplier")) {
-
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Warp_Min_Multiplier")) {
-            STDUPGRADE(graphicOptions.MinWarpMultiplier,
-                    up->graphicOptions.MinWarpMultiplier,
-                    templ->graphicOptions.MinWarpMultiplier,
-                    1);
-        }
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Warp_Max_Multiplier")) {
-            STDUPGRADE(graphicOptions.MaxWarpMultiplier,
-                    up->graphicOptions.MaxWarpMultiplier,
-                    templ->graphicOptions.MaxWarpMultiplier,
-                    1);
-        }
-    }
-
-    /*if (!csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data(upgrade_name, up->faction, "Reactor_Recharge"))
-        STDUPGRADE(recharge, up->recharge, templ->recharge, 0);*/
-    static bool unittable = XMLSupport::parse_bool(vs_config->getVariable("physics", "UnitTable", "false"));
-    //Uncommon fields (capacities... rates... etc...)
-    if (!csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data(upgrade_name,
-                    up->faction,
-                    "Hold_Volume|Upgrade_Storage_Volume|Equipment_Space|Hidden_Hold_Volume")) {
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Hold_Volume"))
-            STDUPGRADE(CargoVolume, up->CargoVolume, templ->CargoVolume, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Upgrade_Storage_Volume"))
-            STDUPGRADE(UpgradeVolume, up->UpgradeVolume, templ->UpgradeVolume, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Hidden_Hold_Volume"))
-            STDUPGRADE(HiddenCargoVolume, up->HiddenCargoVolume, templ->HiddenCargoVolume, 0);
-    }
-
-
-
-
-
-    //DO NOT CHANGE see unit_customize.cpp
-    static float lc = XMLSupport::parse_float(vs_config->getVariable("physics", "lock_cone", ".8"));
-    //DO NOT CHANGE! see unit.cpp:258
-    static float tc = XMLSupport::parse_float(vs_config->getVariable("physics", "autotracking", ".93"));
-    static bool use_template_maxrange =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "use_upgrade_template_maxrange", "true"));
-
     //NO CLUE FOR BELOW
     if (downgrade) {
     } else {
         //we are upgrading!
         if (touchme) {
-            for (unsigned int i = 0; i < up->cargo.size(); ++i) {
-                if (CanAddCargo(up->cargo[i])) {
-                    AddCargo(up->cargo[i], false);
+            for (const Cargo cargo : up->cargo_hold.GetItems()) {
+                if (upgrade_space.CanAddCargo(cargo)) {
+                    upgrade_space.AddCargo(this, cargo, false);
                 }
             }
         }
     }
-    if (needs_redemption) {
-        if (!can_be_redeemed) {
-            cancompletefully = false;
-        }
-    }
+    
     if (0 == numave) {      //Doesn't upgrade anything -- JS_NUDGE -- may want to revisit this later
         percentage = 1.0;
     }
     if (numave) {
         percentage = percentage / numave;
     }
-    if (0 && touchme && up->Mass && numave) {
+    if (0 && touchme && up->GetMass() && numave) {
         float multiplyer = ((downgrade) ? -1 : 1);
-        Mass += multiplyer * percentage * up->Mass;
-        if (Mass < (templ ? templ->Mass : .000000001)) {
-            Mass = (templ ? templ->Mass : .000000001);
+        mass += multiplyer * percentage * up->mass;
+        if (mass < (templ ? templ->mass : .000000001)) {
+            mass = (templ ? templ->mass : .000000001);
         }
         Momentofinertia += multiplyer * percentage * up->Momentofinertia;
         if (Momentofinertia < (templ ? templ->Momentofinertia : 0.00000001)) {
@@ -2911,8 +2784,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
         }
     }
     if (gen_downgrade_list) {
-        const float MyPercentMin = configuration()->general.remove_downgrades_less_than_percent;
-        if (downgrade && percentage > MyPercentMin) {
+        if (downgrade && percentage > configuration()->general.remove_downgrades_less_than_percent) {
             for (vsUMap<int, DoubleName>::iterator i = tempdownmap.begin(); i != tempdownmap.end(); ++i) {
                 downgrademap[(*i).first] = (*i).second;
             }
@@ -2921,13 +2793,11 @@ bool Unit::UpAndDownGrade(const Unit *up,
     return cancompletefully;
 }
 
-#undef STDUPGRADECLAMP
-#undef STDUPGRADE
-#undef STDUPGRADE_SPECIFY_DEFAULTS
 
 bool Unit::ReduceToTemplate() {
     vector<Cargo> savedCargo;
-    savedCargo.swap(cargo);
+    savedCargo = std::vector<Cargo>(upgrade_space.GetItems());
+    upgrade_space.Clear();
 
     vector<Mount> savedWeap;
     savedWeap.swap(mounts);
@@ -2940,7 +2810,11 @@ bool Unit::ReduceToTemplate() {
             success = true;
         }
     }
-    savedCargo.swap(cargo);
+
+    for(const Cargo &c : savedCargo) {
+        upgrade_space.AddCargo(this, c, false);
+    }
+    
     savedWeap.swap(mounts);
     return success;
 }
@@ -2986,8 +2860,8 @@ int Unit::RepairCost() {
     }
 
 
-    for (i = 0; i < numCargo(); ++i) {
-        if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
+    for (const Cargo& c : cargo_hold.GetItems()) {
+        if (c.Damaged()) {
             ++cost;
         }
     }
@@ -2995,9 +2869,10 @@ int Unit::RepairCost() {
 }
 
 // This is called when performing a BASIC_REPAIR
+// This function probably doesn't do anything anymore
 int Unit::RepairUpgrade() {
     vector<Cargo> savedCargo;
-    savedCargo.swap(cargo);
+    //savedCargo.swap(cargo);
     vector<Mount> savedWeap;
     savedWeap.swap(mounts);
     int upfac = FactionUtil::GetUpgradeFaction();
@@ -3010,75 +2885,41 @@ int Unit::RepairUpgrade() {
             success = 1;
         }
     }
-    savedCargo.swap(cargo);
+    //savedCargo.swap(cargo);
     savedWeap.swap(mounts);
-    UnitImages<void> *im = &GetImageInformation();
 
 
     bool ret = success && pct > 0;
     static bool ComponentBasedUpgrades =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "component_based_upgrades", "false"));
     if (ComponentBasedUpgrades) {
-        for (unsigned int i = 0; i < numCargo(); ++i) {
-            if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
-                ++success;
-                static int damlen = strlen(DamagedCategory);
-                GetCargo(i).SetCategory("upgrades/" + GetCargo(i).GetCategory().substr(damlen));
-            }
-        }
-    } else if (ret) {
-        const Unit *maxrecharge = makeTemplateUpgrade(name.get() + ".template", faction);
-
-        Unit *mpl = getMasterPartList();
-        for (unsigned int i = 0; i < mpl->numCargo(); ++i) {
-            if (mpl->GetCargo(i).GetCategory().find("upgrades") == 0) {
-                const Unit *up = loadUnitByCache(mpl->GetCargo(i).GetName(), upfac);
-                //now we analyzify up!
-                // TODO: lib_damage
-                /*if (up->MaxShieldVal() == MaxShieldVal() && up->shield.recharge > shield.recharge) {
-                    shield.recharge = up->shield.recharge;
-                    if (maxrecharge)
-                        if (shield.recharge > maxrecharge->shield.recharge)
-                            shield.recharge = maxrecharge->shield.recharge;
-                }*/
-            }
-        }
-    }
+        // TODO: move this to components_manager
+    } 
     return success;
 }
 
-float RepairPrice(float operational, float price) {
-    return .5 * price * (1 - operational) * g_game.difficulty;
-}
-
-extern bool isWeapon(std::string name);
 
 //item must be non-null... but baseUnit or credits may be NULL.
-bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
+bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit) {
     assert((item != NULL) | !"Unit::RepairUpgradeCargo got a null item."); //added by chuck_starchaser
-    double itemPrice = baseUnit ? baseUnit->PriceCargo(item->GetName()) : item->GetPrice();
-
-    // This needs to happen before we repair the part, obviously.
-    double percent_working = UnitUtil::PercentOperational(this, item->GetName(), "upgrades/", false);
+    double itemPrice = 1; //baseUnit ? baseUnit->PriceCargo(item->GetName()) : item->GetPrice();
 
     // New repair
     if(RepairUnit(item->GetName())) {
-        double repair_price = RepairPrice(percent_working, itemPrice);
-        if (credits) {
-            // Pay for repair
-            (*credits) -= repair_price;
-        }
+        double repair_price = item->RepairPrice();
+        ComponentsManager::credits -= repair_price;
+
+        GenerateHudText(getDamageColor);
         return true;
     }
 
-    if (isWeapon(item->GetCategory())) {
+    if (item->IsWeapon()) {
         const Unit *upgrade = getUnitFromUpgradeName(item->GetName(), this->faction);
         if (upgrade->getNumMounts()) {
             double price = itemPrice; //RepairPrice probably won't work for mounts.
-            if (!credits || price <= (*credits)) {
-                if (credits) {
-                    (*credits) -= price;
-                }
+            if (price <= ComponentsManager::credits) {
+                ComponentsManager::credits -= price;
+                
                 const Mount *mnt = &upgrade->mounts[0];
                 unsigned int nummounts = this->getNumMounts();
                 bool complete = false;
@@ -3112,22 +2953,22 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
             Cargo itemCopy = *item;                 //Copy this because we reload master list before we need it.
             const Unit *un = getUnitFromUpgradeName(item->GetName(), this->faction);
             if (un) {
-                double percentage = UnitUtil::PercentOperational(this, item->GetName(), item->GetCategory(), false);
-                double price = RepairPrice(percentage, itemPrice);
-                if (!credits || price <= (*credits)) {
-                    if (credits) {
-                        (*credits) -= price;
-                    }
+                double percentage = UnitUtil::PercentOperational(*item, this, item->GetName(), item->GetCategory(), false);
+                double price = item->RepairPrice();
+                if (price <= ComponentsManager::credits) {
+                    ComponentsManager::credits -= price;
+                    
                     if (notadditive) {
                         this->Upgrade(un, 0, 0, 0, true, percentage, makeTemplateUpgrade(this->name, this->faction));
                     }
-                    if (item->GetCategory().find(DamagedCategory) == 0) {
-                        unsigned int where;
-                        Cargo *c = this->GetCargo(item->GetName(), where);
-                        if (c) {
-                            c->SetCategory("upgrades/" + c->GetCategory().substr(strlen(DamagedCategory)));
-                        }
-                    }
+                    // This code changes the category of the item from "upgrades/Damaged/" to the original category.
+                    // if (item->GetCategory().find(DamagedCategory) == 0) {
+                    //     int index = this->upgrade_space.GetIndex(itemCopy);
+                    //     Cargo c = this->upgrade_space.GetCargo(index);
+                    //     if (!c.IsNullCargo()) {
+                    //         c.SetCategory("upgrades/" + c.GetCategory().substr(strlen(DamagedCategory)));
+                    //     }
+                    // }
                     return true;
                 }
             }
@@ -3149,7 +2990,6 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
     const Unit *templ = NULL;
     const Unit *downgradelimit = NULL;
     const bool staticrem = configuration()->general.remove_impossible_downgrades;
-    const float MyPercentMin = configuration()->general.remove_downgrades_less_than_percent;
     int upgrfac = FactionUtil::GetUpgradeFaction();
     for (unsigned int i = 0; i < mylist.size(); ++i) {
         bool removethis = true /*staticrem*/;
@@ -3208,7 +3048,7 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
                         double percent = 1;
                         if (downgrade) {
                             if (canDowngrade(NewPart, m, s, percent, downgradelimit)) {
-                                if (percent > MyPercentMin) {
+                                if (percent > configuration()->general.remove_downgrades_less_than_percent) {
                                     removethis = false;
                                     break;
                                 }
@@ -3241,12 +3081,9 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
 vector<CargoColor> &Unit::FilterUpgradeList(vector<CargoColor> &mylist) {
     const bool filtercargoprice = configuration()->cargo.filter_expensive_cargo;
     if (filtercargoprice) {
-        Cockpit *cp = _Universe->isPlayerStarship(this);
-        if (cp) {
-            for (unsigned int i = 0; i < mylist.size(); ++i) {
-                if (mylist[i].cargo.GetPrice() > cp->credits) {
-                    mylist[i].color = disable;
-                }
+        for (unsigned int i = 0; i < mylist.size(); ++i) {
+            if (mylist[i].cargo.GetPrice() > credits) {
+                mylist[i].color = disable;
             }
         }
     }
@@ -3281,131 +3118,71 @@ bool myless(const Cargo &a, const Cargo &b) {
     return a < b;
 }
 
-Cargo *GetMasterPartList(const char *input_buffer) {
-    unsigned int i;
-    return GetUnitMasterPartList().GetCargo(input_buffer, i);
-}
 
 void Unit::ImportPartList(const std::string &category, float price, float pricedev, float quantity, float quantdev) {
-    unsigned int numcarg = GetUnitMasterPartList().numCargo();
-    float minprice = FLT_MAX;
-    float maxprice = 0;
-    for (unsigned int j = 0; j < numcarg; ++j) {
-        if (GetUnitMasterPartList().GetCargo(j).GetCategory() == category) {
-            float price = GetUnitMasterPartList().GetCargo(j).GetPrice();
-            if (price < minprice) {
-                minprice = price;
-            } else if (price > maxprice) {
-                maxprice = price;
-            }
+    Manifest category_manifest = Manifest::MPL().GetCategoryManifest(category);
+    std::vector<Cargo> cargo_list = category_manifest.GetItems();
+
+    // Find the minimum and maximum prices in the cargo list
+    // We start with extreme values but at the end, min < max
+    float min_cargo_price = FLT_MAX;
+    float max_cargo_price = 0.0f;
+    for (const Cargo& c : cargo_list) {
+        float price = c.GetPrice();
+        if (price < min_cargo_price) {
+            min_cargo_price = price;
+        }
+        if (price > max_cargo_price) {
+            max_cargo_price = price;
         }
     }
-    for (unsigned int i = 0; i < numcarg; ++i) {
-        Cargo c = GetUnitMasterPartList().GetCargo(i);
-        if (c.GetCategory() == category) {
-            const float aveweight = fabs(configuration()->cargo.price_recenter_factor);
-            c.SetQuantity(float_to_int(quantity - quantdev));
-            float baseprice = c.GetPrice();
-            c.SetPrice(c.GetPrice() * (price - pricedev));
 
-            //stupid way
-            c.SetQuantity(c.GetQuantity() + float_to_int((quantdev * 2 + 1) * ((double) rand()) / (((double) RAND_MAX) + 1)));
-            c.SetPrice(c.GetPrice() + pricedev * 2 * ((float) rand()) / RAND_MAX);
-            c.SetPrice(fabs(c.GetPrice()));
-            c.SetPrice((c.GetPrice() + (baseprice * aveweight)) / (aveweight + 1));
-            if (c.GetQuantity() <= 0) {
-                c.SetQuantity(0);
-            }
-                //quantity more than zero
-            else if (maxprice > minprice + .01) {
-                float renormprice = (baseprice - minprice) / (maxprice - minprice);
-                const float maxpricequantadj = configuration()->cargo.max_price_quant_adj;
-                const float minpricequantadj = configuration()->cargo.min_price_quant_adj;
-                const float powah = configuration()->cargo.price_quant_adj_power;
-                renormprice = std::pow(renormprice, powah);
-                renormprice *= (maxpricequantadj - minpricequantadj);
-                renormprice += 1;
-                if (renormprice > .001) {
-                    c.SetQuantity(c.GetQuantity() / float_to_int(renormprice));
-                    if (c.GetQuantity() < 1) {
-                        c.SetQuantity(1);
-                    }
+    
+    for (const Cargo& cargo : cargo_list) {    
+        Cargo c = cargo; // Copy the cargo item
+        const float aveweight = fabs(configuration()->cargo.price_recenter_factor);
+        c.SetQuantity(float_to_int(quantity - quantdev));
+        float baseprice = c.GetPrice();
+        c.SetPrice(c.GetPrice() * (price - pricedev));
+
+        //stupid way
+        c.SetQuantity(c.GetQuantity() + float_to_int((quantdev * 2 + 1) * ((double) rand()) / (((double) RAND_MAX) + 1)));
+        c.SetPrice(c.GetPrice() + pricedev * 2 * ((float) rand()) / RAND_MAX);
+        c.SetPrice(fabs(c.GetPrice()));
+        c.SetPrice((c.GetPrice() + (baseprice * aveweight)) / (aveweight + 1));
+        if (c.GetQuantity() <= 0) {
+            c.SetQuantity(0);
+        }
+            //quantity more than zero
+        else if (max_cargo_price > min_cargo_price + .01) {
+            float renormprice = (baseprice - min_cargo_price) / (max_cargo_price - min_cargo_price);
+            const float maxpricequantadj = configuration()->cargo.max_price_quant_adj;
+            const float minpricequantadj = configuration()->cargo.min_price_quant_adj;
+            const float powah = configuration()->cargo.price_quant_adj_power;
+            renormprice = std::pow(renormprice, powah);
+            renormprice *= (maxpricequantadj - minpricequantadj);
+            renormprice += 1;
+            if (renormprice > .001) {
+                c.SetQuantity(c.GetQuantity() / float_to_int(renormprice));
+                if (c.GetQuantity() < 1) {
+                    c.SetQuantity(1);
                 }
             }
-            const float minprice = configuration()->cargo.min_cargo_price;
-            if (c.GetPrice() < minprice) {
-                c.SetPrice(minprice);
-            }
-
-            AddCargo(c, false);
         }
+        const float minprice = configuration()->cargo.min_cargo_price;
+        if (c.GetPrice() < minprice) {
+            c.SetPrice(minprice);
+        }
+
+        cargo_hold.AddCargo(this, c, false);
+        
     }
 }
 
-std::string Unit::massSerializer(const XMLType &input, void *mythis) {
-    Unit *un = (Unit *) mythis;
-    float mass = un->Mass;
-    static bool usemass = XMLSupport::parse_bool(vs_config->getVariable("physics", "use_cargo_mass", "true"));
-    for (unsigned int i = 0; i < un->cargo.size(); ++i) {
-        if (un->cargo[i].GetQuantity() > 0) {
-            if (usemass) {
-                mass -= un->cargo[i].GetMass() * un->cargo[i].GetQuantity();
-            }
-        }
-    }
-    return XMLSupport::tostring((float) mass);
-}
 
-std::string Unit::mountSerializer(const XMLType &input, void *mythis) {
-    Unit *un = (Unit *) mythis;
-    int i = input.w.hardint;
-    if (un->getNumMounts() > i) {
-        string result(getMountSizeString(un->mounts[i].size));
-        if (un->mounts[i].status == Mount::INACTIVE || un->mounts[i].status == Mount::ACTIVE) {
-            result += string("\" weapon=\"") + (un->mounts[i].type->name);
-        }
-        if (un->mounts[i].ammo != -1) {
-            result += string("\" ammo=\"") + XMLSupport::tostring(un->mounts[i].ammo);
-        }
-        if (un->mounts[i].volume != -1) {
-            result += string("\" volume=\"") + XMLSupport::tostring(un->mounts[i].volume);
-        }
-        result += string("\" xyscale=\"") + XMLSupport::tostring(un->mounts[i].xyscale) + string("\" zscale=\"")
-                + XMLSupport::tostring(un->mounts[i].zscale);
-        Matrix m;
-        Transformation(un->mounts[i].GetMountOrientation(), un->mounts[i].GetMountLocation().Cast()).to_matrix(m);
-        result += string("\" x=\"") + tostring((float) (m.p.i / parse_float(input.str)));
-        result += string("\" y=\"") + tostring((float) (m.p.j / parse_float(input.str)));
-        result += string("\" z=\"") + tostring((float) (m.p.k / parse_float(input.str)));
 
-        result += string("\" qi=\"") + tostring(m.getQ().i);
-        result += string("\" qj=\"") + tostring(m.getQ().j);
-        result += string("\" qk=\"") + tostring(m.getQ().k);
 
-        result += string("\" ri=\"") + tostring(m.getR().i);
-        result += string("\" rj=\"") + tostring(m.getR().j);
-        result += string("\" rk=\"") + tostring(m.getR().k);
-        return result;
-    } else {
-        return string("");
-    }
-}
 
-std::string Unit::subunitSerializer(const XMLType &input, void *mythis) {
-    Unit *un = (Unit *) mythis;
-    int index = input.w.hardint;
-    Unit *su;
-    int i = 0;
-    for (un_iter ui = un->getSubUnits(); (su = *ui); ++ui, ++i) {
-        if (i == index) {
-            if (su->pImage->unitwriter) {
-                return su->pImage->unitwriter->getName();
-            }
-            return su->name;
-        }
-    }
-    return string("destroyed_blank");
-}
 
 void Unit::setUnitRole(const std::string &s) {
     unit_role = ROLES::getRole(s);
@@ -3453,18 +3230,7 @@ using std::string;
  **************************************************************************************
  */
 
-bool isWeapon(std::string name) {
-    if (name.find("Weapon") != std::string::npos) {
-        return true;
-    }
-    if (name.find("SubUnit") != std::string::npos) {
-        return true;
-    }
-    if (name.find("Ammunition") != std::string::npos) {
-        return true;
-    }
-    return false;
-}
+
 
 #define REPAIRINTEGRATED(functionality, max_functionality) \
     do {                                                     \
@@ -3495,7 +3261,7 @@ void Unit::Repair() {
         return;
     }
 
-    if (next_repair_time == -FLT_MAX || next_repair_time <= UniverseUtil::GetGameTime()) {
+    /*if (next_repair_time == -FLT_MAX || next_repair_time <= UniverseUtil::GetGameTime()) {
         unsigned int numcargo = numCargo();
         if (numcargo > 0) {
             if (next_repair_cargo >= numCargo()) {
@@ -3545,7 +3311,7 @@ void Unit::Repair() {
                 ++(next_repair_cargo);
             }
         }
-    }
+    }*/
 
     float ammt_repair = simulation_atom_var / repairtime * repair_bot.Get();
 
