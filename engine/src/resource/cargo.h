@@ -31,6 +31,7 @@
 #include "resource/product.h"
 
 #include <string>
+#include <vector>
 
 class Cargo : public Product {
 protected:
@@ -39,18 +40,29 @@ protected:
 
     float mass;
     float volume;
-    bool mission;
-    bool installed; // TODO: move down to ShipModule
-    bool integral;
-    float functionality;
-    float max_functionality;
+    bool mission = false;
+    bool component = false;
+    bool installed = false; 
+    bool integral = false;
+    bool weapon = false;
+    bool passenger = false;
+    bool slave = false;
+
+    float functionality = 1.0;
+    float max_functionality = 1.0;
 
     friend class Manifest;
 public:
     Cargo();
     Cargo(std::string name, std::string category, float price, int quantity, float mass, float volume,
           float functionality = 1.0f, float max_functionality= 1.0f, bool mission = false, 
-          bool installed = false, bool integral = false);
+          bool component = false, bool installed = false, bool integral = false, bool weapon = false, 
+          bool passenger = false, bool slave = false);
+
+    // Parse string from save file
+    Cargo(std::string& cargo_text);
+
+    std::string Serialize() const;
 
     float GetFunctionality();
     float GetMaxFunctionality();
@@ -66,10 +78,16 @@ public:
     void SetQuantity(int quantity);
     void SetContent(const std::string &content);
     void SetCategory(const std::string &category);
-
-    bool GetMissionFlag() const;
-    bool GetInstalled() const;
-    bool GetIntegral() const;
+    void SetSlave(bool slave);
+    
+    bool IsMissionFlag() const;
+    bool IsComponent() const;
+    bool IsInstalled() const;
+    bool IsIntegral() const;
+    bool IsWeapon() const;
+    bool IsPassenger() const;
+    bool IsSlave() const;
+    
     const std::string &GetCategory() const;
     const std::string &GetContent() const;
     const std::string &GetDescription() const;
@@ -88,5 +106,8 @@ public:
     // TODO: replace this hack
     int reduce() { quantity--; return quantity; }
 };
+
+void Enslave(std::vector<Cargo>& ship_manifest);
+void Free(std::vector<Cargo>& ship_manifest);
 
 #endif //VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H

@@ -89,7 +89,15 @@ Manifest::Manifest(int dummy) {
                 double volume = std::stod(JsonGetStringWithDefault(item, "volume", "0.0"));
                 std::string description = JsonGetStringWithDefault(item, "description", "");
 
-                Cargo cargo = Cargo(name, category, price, 1, mass, volume);
+                bool component = GetBool(item, "upgrade", false);
+                bool installed = false; 
+                bool integral = false;
+                bool weapon = GetBool(item, "weapon", false);
+                bool passenger = GetBool(item, "passenger", false);
+                bool slave = GetBool(item, "slave", false);
+
+                Cargo cargo = Cargo(name, category, price, 1, mass, volume, 1.0, 1.0, false, 
+                                    component, installed, integral, weapon, passenger, slave);
                 cargo.SetDescription(description);
                 _items.push_back(cargo);
             } catch (...) {
@@ -98,6 +106,11 @@ Manifest::Manifest(int dummy) {
 
         }
     }
+}
+
+// For testing
+void Manifest::AddManifest(const std::vector<Cargo>& cargo_items) {
+    _items = cargo_items;
 }
 
 Manifest& Manifest::MPL() {

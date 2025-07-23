@@ -119,7 +119,7 @@ BOOST_PYTHON_MODULE(VS) {
         PYTHON_DEFINE_METHOD(Class, &Cargo::SetCategory, "SetCategory");
         PYTHON_DEFINE_METHOD(Class, &Cargo::GetCategoryPython, "GetCategory");
         PYTHON_DEFINE_METHOD(Class, &Cargo::SetMissionFlag, "SetMissionFlag");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::GetMissionFlag, "GetMissionFlag");
+        PYTHON_DEFINE_METHOD(Class, &Cargo::IsMissionFlag, "GetMissionFlag");
         PYTHON_DEFINE_METHOD(Class, &Cargo::GetDescriptionPython, "GetDescription");
         PYTHON_DEFINE_METHOD(Class, &Cargo::SetFunctionality, "SetFunctionality");
         PYTHON_DEFINE_METHOD(Class, &Cargo::GetFunctionality, "GetFunctionality");
