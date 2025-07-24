@@ -938,7 +938,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
         internalformat = GetTextureFormat(internformat);
         if (((textures.at(handle).mipmapped & (TRILINEAR | MIPMAP)) && gl_options.mipmap >= 2) || detail_texture) {
             if (detail_texture) {
-                textures.at(handle).mipmapped = configuration()->graphics.detail_texture_filter;
+                textures.at(handle).mipmapped =  configuration()->graphics.detail_texture_trilinear ? TRILINEAR : MIPMAP;
                 glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 if (textures.at(handle).mipmapped & TRILINEAR) {
                     glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
