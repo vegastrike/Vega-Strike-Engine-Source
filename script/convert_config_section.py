@@ -463,9 +463,10 @@ def read_options_h(section_name: str) -> dict[str, VegaSetting]:
                     if not attempted_match:
                         print("Don't know what to do with this options.h line:")
                         print(line)
+            return settings
         else:
             print("Didn't find section " + section_name + " in options.h")
-            return {}
+            return settings
 
 
 def get_newline_positions(file_contents: str) -> list[int]:
@@ -549,8 +550,18 @@ def list_files_recursive() -> list[Path]:
     return ret_val
 
 
-def inline_options(configuration_items: dict[str, VegaSetting]):
-    pass
+def build_gl_options_parse_keys(parse_keys_list: list[ParseKey], config_items: dict[str, VegaSetting]) -> list[ParseKey]:
+    for each_key in config_items.keys():
+        this_setting: VegaSetting = config_items[each_key]
+        if this_setting:
+            new_parse_key = ParseKey()
+            new_parse_key.pattern = re.compile(r'\bgl_options\.' + this_setting.name + r'\b', regex_flags_multiline)
+            new_parse_key.substitution = this_setting.replacement_expression
+            new_parse_key.leave_as_is = ''
+            if new_parse_key.pattern and new_parse_key.substitution:
+                parse_keys_list.append(new_parse_key)
+
+    return parse_keys
 
 
 def main() -> int:
@@ -559,21 +570,16 @@ def main() -> int:
     my_parse_keys: list[ParseKey] = build_parse_keys(section_name_parsed)
     configuration_items: dict[str, VegaSetting]
     configuration_items = read_options_h(section_name_parsed)
-    # with options_h_path.open(mode='w', encoding='utf-8', newline=None) as options_h_writer:
-    #     options_h_writer.write(options_h_output)
 
-    # preprocess_a(options_cpp_path)
     read_options_cpp(configuration_items)
-    # with options_cpp_path.open(mode='w', encoding='utf-8', newline=None) as options_cpp_writer:
-    #     options_cpp_writer.write(options_cpp_output)
 
     build_game_options_parse_keys(my_parse_keys, configuration_items)
+
+    build_gl_options_parse_keys(my_parse_keys, configuration_items)
 
     file_list: list[Path] = list_files_recursive()
     for file in file_list:
         read_parse_write_misc_file(file, my_parse_keys)
-
-    inline_options(configuration_items)
 
     return 0
 

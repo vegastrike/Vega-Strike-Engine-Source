@@ -28,6 +28,8 @@
 
 
 #include <stack>
+
+#include "configuration/configuration.h"
 using std::stack;
 #include <assert.h>
 #include "root_generic/vs_globals.h"
@@ -419,8 +421,8 @@ static void SetupGLLightGlobals() {
         }
     }
 
-    GFXSetCutoff(game_options()->lightcutoff);
-    GFXSetOptimalIntensity(game_options()->lightoptimalintensity, game_options()->lightsaturation);
-    GFXSetOptimalNumLights(game_options()->numlights);
-    GFXSetSeparateSpecularColor(game_options()->separate_specular_color ? GFXTRUE : GFXFALSE);
+    GFXSetCutoff(configuration()->graphics.light_cutoff);
+    GFXSetOptimalIntensity(configuration()->graphics.light_optimal_intensity, configuration()->graphics.light_saturation);
+    GFXSetOptimalNumLights(configuration()->graphics.num_lights);
+    GFXSetSeparateSpecularColor(configuration()->graphics.separate_specular_color ? GFXTRUE : GFXFALSE);
 }

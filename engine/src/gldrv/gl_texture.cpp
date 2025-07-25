@@ -30,6 +30,7 @@
 #define GL_EXT_texture_env_combine 1
 #include "gldrv/sdds.h"
 #include "gl_globals.h"
+#include "configuration/configuration.h"
 #include "root_generic/vs_globals.h"
 #include "src/vegastrike.h"
 #include "src/config_xml.h"
@@ -563,7 +564,7 @@ static void DownSampleTexture(unsigned char **newbuf,
 static GLenum RGBCompressed(GLenum internalformat) {
     if (gl_options.compression) {
         internalformat = GL_COMPRESSED_RGB_ARB;
-        if (gl_options.s3tc) {
+        if (configuration()->graphics.s3tc) {
             internalformat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
         }
     }
@@ -573,7 +574,7 @@ static GLenum RGBCompressed(GLenum internalformat) {
 static GLenum RGBACompressed(GLenum internalformat) {
     if (gl_options.compression) {
         internalformat = GL_COMPRESSED_RGBA_ARB;
-        if (gl_options.s3tc) {
+        if (configuration()->graphics.s3tc) {
             switch (gl_options.compression) {
                 case 3:
                     internalformat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
@@ -774,7 +775,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
     //for the max dimension, so that we know to grep the GL max number.
     //Otherwise maxdimension is set by some user argument based on quality settings.
     if (maxdimension == 65536) {
-        maxdimension = gl_options.max_texture_dimension;
+        maxdimension = configuration()->graphics.max_texture_dimension;
     }
     VS_LOG(debug,
             (boost::format(
@@ -926,7 +927,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
     int height = textures.at(handle).height;
     int width = textures.at(handle).width;
     //If s3tc compression is disabled, our DDS files must be software decompressed
-    if (internformat >= DXT1 && internformat <= DXT5 && !gl_options.s3tc) {
+    if (internformat >= DXT1 && internformat <= DXT5 && !configuration()->graphics.s3tc) {
         unsigned char *tmpbuffer = buffer + offset1;
         ddsDecompress(tmpbuffer, data, internformat, textures.at(handle).height, textures.at(handle).width);
         buffer = data;
@@ -937,10 +938,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
         internalformat = GetTextureFormat(internformat);
         if (((textures.at(handle).mipmapped & (TRILINEAR | MIPMAP)) && gl_options.mipmap >= 2) || detail_texture) {
             if (detail_texture) {
-                static FILTER fil = game_options()->detail_texture_trilinear ? TRILINEAR : MIPMAP;
-                textures.at(handle).mipmapped = fil;
+                textures.at(handle).mipmapped =  configuration()->graphics.detail_texture_trilinear ? TRILINEAR : MIPMAP;
                 glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                if (fil & TRILINEAR) {
+                if (textures.at(handle).mipmapped & TRILINEAR) {
                     glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
                 } else {
                     glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);

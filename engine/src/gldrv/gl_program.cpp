@@ -33,6 +33,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "gl_globals.h"
+#include "configuration/configuration.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
@@ -415,9 +416,9 @@ int getDefaultProgram() {
 
 // THIS IS STUPID,  Also why is lofi not configurable ?
 #if defined(__APPLE__) && defined (__MACH__)
-        hifiProgramName = game_options()->mac_shader_name;
+        hifiProgramName = configuration()->graphics.mac_shader_name;
 #else
-        hifiProgramName = game_options()->shader_name;
+        hifiProgramName = configuration()->graphics.shader_name;
 #endif
 // END STUPID
 
@@ -550,7 +551,7 @@ GameSpeed GFXGetFramerate() {
 
 bool GFXShaderReloaded() {
     bool retval = programChanged;
-    if (game_options()->framerate_changes_shader) {
+    if (configuration()->graphics.framerate_changes_shader) {
         switch (GFXGetFramerate()) {
             case TOOSLOW:
                 if (defaultprog) {

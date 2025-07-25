@@ -259,12 +259,12 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
     glLineWidth(1);
     if (!use_bit && font_antialias) {
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
-        if (gl_options.smooth_lines) {
+        if (configuration()->graphics.smooth_lines) {
             glEnable(GL_LINE_SMOOTH);
         }
     } else {
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
-        if (gl_options.smooth_lines) {
+        if (configuration()->graphics.smooth_lines) {
             glDisable(GL_LINE_SMOOTH);
         }
     }
@@ -406,7 +406,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
         }
         text_it++;
     }
-    if (gl_options.smooth_lines) {
+    if (configuration()->graphics.smooth_lines) {
         glDisable(GL_LINE_SMOOTH);
     }
     glPopMatrix();

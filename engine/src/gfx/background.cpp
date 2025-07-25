@@ -387,7 +387,7 @@ void Background::Draw() {
                 int   numpasses = tex->numPasses();
                 float ms = tex->mintcoord.i, Ms = tex->maxtcoord.i;
                 float mt = tex->mintcoord.j, Mt = tex->maxtcoord.j;
-                if (!gl_options.ext_clamp_to_edge) {
+                if (!configuration()->graphics.ext_clamp_to_edge) {
                     ms += 1.0/tex->boundSizeX;
                     Ms -= 1.0/tex->boundSizeX;
                     mt += 1.0/tex->boundSizeY;

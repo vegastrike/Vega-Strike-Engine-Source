@@ -31,7 +31,6 @@
 
 #include <cassert>
 #include <iterator>
-#include <boost/optional.hpp>
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
 #include "cmd/ai/navigation.h"
