@@ -47,7 +47,7 @@
 #include "root_generic/options.h"
 
 void CacheJumpStar(bool destroy) {
-    static Animation* cached_ani;
+    static Animation* cached_ani = nullptr;
     static bool initialized = false;
     if (!initialized) {
         initialized = true;
