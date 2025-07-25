@@ -791,7 +791,7 @@ void createObjects(std::vector<std::string> &fighter0name,
     vector<std::string> fighter0mods;
     vector<int> fighter0indices;
 
-    static Vector * terrain_scale;
+    static Vector * terrain_scale = nullptr;
     static bool initialized = false;
     if (!initialized) {
         initialized = true;
