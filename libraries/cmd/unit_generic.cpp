@@ -1664,7 +1664,7 @@ bool Unit::Explode(bool drawit, float timeit) {
             FactionUtil::GetRandExplosionAnimation(this->faction, bleh);
         }
         if (bleh.empty()) {
-            static Animation * cache;
+            static Animation * cache = nullptr;
             static bool initialized = false;
             if (!initialized) {
                 initialized = true;
