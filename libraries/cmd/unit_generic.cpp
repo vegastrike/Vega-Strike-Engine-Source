@@ -1708,7 +1708,7 @@ bool Unit::Explode(bool drawit, float timeit) {
             if (this->getUnitType() == Vega_UnitType::unit) {
                 if (rand() < RAND_MAX * configuration()->graphics.percent_shockwave && (!this->isSubUnit())) {
                     const std::string shockani(configuration()->graphics.shockwave_animation);
-                    static Animation * shock_ani;
+                    static Animation * shock_ani = nullptr;
                     static bool initialized = false;
                     if (!initialized) {
                         initialized = true;
