@@ -20,29 +20,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          # x86-64
-          - macos-13
-          # M1 processor
-          #- macos-14
-        python-version:
-          #- 3.12.8
-          - 3.13.5
-        compiler:
-          - AppleClang
-          #- clang
-          #- gcc
-        homebrew-gl:
-          - true
-          #- false
-        homebrew-al:
-          - true
-          #- false
-        ENABLE_PIE:
-          - 'ON'
-          #- 'OFF'
-        build-type:
-          - RelWithDebInfo
+        include:
+          - os: macOS-13
+            build-type: Debug
+            preset-name: macos-pie-enabled-debug
+            python-version: 3.12.10
+          - os: macOS-13
+            build-type: RelWithDebInfo
+            preset-name: macos-pie-enabled-RelWithDebInfo
+            python-version: 3.13.5
 
     steps:
       - name: Setup Python
@@ -69,11 +55,6 @@ jobs:
           fetch-depth: 2
           submodules: false
 
-      # Ensure PRs are built against the PR Head as opposed to the merge commit
-      - name: Conditionally relocate to PR HEAD
-        if: github.event.pull_request
-        run: git checkout HEAD^2
-
       - name: Bootstrap MacOS
         run: script/bootstrap-mac.sh
 
@@ -83,24 +64,22 @@ jobs:
         env:
           MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
-          FLAGS:      "-DCMAKE_BUILD_TYPE=${{ matrix.build-type }} -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ matrix.vega-py-setup.outputs.python-path }}"
-          OPENALDIR:  "/usr/local/opt/openal-soft"
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
           PYTHONHOME: ""
           PYTHONPATH: ""
-        run: script/cibuild $FLAGS
+        run: script/cibuild --preset-name=${{ matrix.preset-name }}
 
       - name: Test
-        working-directory: ${{github.workspace}}/build
+        working-directory: ${{github.workspace}}
         env:
           GTEST_OUTPUT: xml
           GTEST_COLOR: 1
-        run: ctest -V
+        run: ctest -V --preset-name=${{ matrix.preset-name }}
 
       - name: Upload test results
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: failure()
         with:
           name: test_results_xml

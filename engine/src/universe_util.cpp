@@ -185,17 +185,20 @@ void saveGame(const string &savename) {
 }
 
 void showSplashScreen(const string &filename) {
-    static Animation *curSplash = 0;
+    static Animation *curSplash = nullptr;
     if (!filename.empty()) {
         if (curSplash != nullptr) {
             delete curSplash;
             curSplash = nullptr;
         }
-        curSplash = new Animation(filename.c_str(), 0);
+        curSplash = new Animation(filename.c_str(), false);
     } else if (!curSplash && !GetSplashScreen()) {
-        static std::vector<std::string> s = ParseDestinations(game_options()->splash_screen);
-        int snum = time(NULL) % s.size();
-        curSplash = new Animation(s[snum].c_str(), 0);
+        boost::optional<std::vector<std::string>> s;
+        if (!s) {
+            s.emplace(ParseDestinations(configuration()->graphics.splash_screen));
+        }
+        int snum = time(nullptr) % s->size();
+        curSplash = new Animation(s->at(snum).c_str(), false);
     }
     SetStarSystemLoading(true);
     bootstrap_draw("Loading...", curSplash);

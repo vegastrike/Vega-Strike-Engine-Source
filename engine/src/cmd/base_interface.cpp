@@ -681,7 +681,7 @@ int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y) {
     return -1;
 }
 
-BaseInterface *BaseInterface::CurrentBase = NULL;
+BaseInterface *BaseInterface::CurrentBase = nullptr;
 
 bool RefreshGUI(void) {
     bool retval = false;
@@ -1019,10 +1019,10 @@ BaseInterface::~BaseInterface() {
         VSFileSystem::vs_close( fp );
     }
 #endif
-    CurrentBase = 0;
+    CurrentBase = nullptr;
     restore_main_loop();
-    for (size_t i = 0; i < rooms.size(); i++) {
-        delete rooms[i];
+    for (auto & room : rooms) {
+        delete room;
     }
 }
 
@@ -1222,7 +1222,7 @@ void InitCallbacks(void) {
 void TerminateCurrentBase(void) {
     if (BaseInterface::CurrentBase) {
         BaseInterface::CurrentBase->Terminate();
-        BaseInterface::CurrentBase = NULL;
+        BaseInterface::CurrentBase = nullptr;
     }
 }
 
@@ -1262,7 +1262,7 @@ void BaseInterface::Terminate() {
             vec.push_back(string());
             saveStringList(cpt, mission_key, vec);
         }
-        BaseInterface::CurrentBase = NULL;
+        BaseInterface::CurrentBase = nullptr;
         restore_main_loop();
         delete this;
     }

@@ -41,6 +41,8 @@
 #include <string>
 #include <set>
 
+#include "resource/random_utils.h"
+
 //Various functions that were used in .cpp files that are now included because of
 //the temple GameUnit class
 //If not separated from those files functions would be defined in multiple places
@@ -74,10 +76,10 @@ void cache_ani(string s) {
 }
 
 void update_ani_cache() {
-    for (std::set<std::string>::iterator it = tempcache.begin(); it != tempcache.end(); it++) {
-        if (cached_ani.find(*it) == cached_ani.end()) {
-            cached_ani.insert(std::pair<std::string, Animation *>(*it,
-                    new Animation((*it).c_str(),
+    for (const auto & it : tempcache) {
+        if (cached_ani.find(it) == cached_ani.end()) {
+            cached_ani.insert(std::pair<std::string, Animation *>(it,
+                    new Animation(it.c_str(),
                             false,
                             .1,
                             BILINEAR,
@@ -88,28 +90,20 @@ void update_ani_cache() {
 }
 
 std::string getRandomCachedAniString() {
-    if (cached_ani.size()) {
-        unsigned int rn = rand() % cached_ani.size();
-        vsUMap<std::string, Animation *>::iterator j = cached_ani.begin();
-        for (unsigned int i = 0; i < rn; i++) {
-            j++;
-        }
-        return (*j).first;
-    } else {
+    if (cached_ani.empty()) {
         return "";
     }
+    auto it = cached_ani.begin();
+    std::advance(it, randomInt(cached_ani.size()));
+    return it->first;
 }
 
 Animation *getRandomCachedAni() {
-    if (cached_ani.size()) {
-        unsigned int rn = rand() % cached_ani.size();
-        vsUMap<std::string, Animation *>::iterator j = cached_ani.begin();
-        for (unsigned int i = 0; i < rn; i++) {
-            j++;
-        }
-        return (*j).second;
-    } else {
-        return NULL;
+    if (cached_ani.empty()) {
+        return nullptr;
     }
+    auto it = cached_ani.begin();
+    std::advance(it, randomInt(cached_ani.size()));
+    return it->second;
 }
 

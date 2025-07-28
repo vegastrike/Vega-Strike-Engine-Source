@@ -41,6 +41,8 @@
 
 #include <vector>
 
+#include "configuration/configuration.h"
+
 GLenum PolyLookup(POLYTYPE poly) {
     switch (poly) {
         case GFXTRI:
@@ -120,10 +122,10 @@ static void EnableArrays(const GFXVertex *data) {
 
 void GFXVertexList::RefreshDisplayList() {
 #ifndef NO_VBO_SUPPORT
-    if (game_options()->vbo && !vbo_data) {
+    if (configuration()->graphics.vbo && !vbo_data) {
         if (glGenBuffersARB_p == nullptr || glBindBufferARB_p == nullptr || glBufferDataARB_p == nullptr || glMapBufferARB_p == nullptr
                 || glUnmapBufferARB_p == nullptr) {
-            game_options()->vbo = false;
+            configuration()->graphics.vbo = false;
         } else {
             (*glGenBuffersARB_p)(1, (GLuint *) &vbo_data);
             if (changed & HAS_INDEX) {
@@ -323,7 +325,7 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
                 case GFXPOLY:
                 case GFXPOINT:
                     if (((*mode == GFXPOINT)
-                            && gl_options.smooth_points) || ((*mode != GFXPOINT) && gl_options.smooth_lines)) {
+                            && configuration()->graphics.smooth_points) || ((*mode != GFXPOINT) && configuration()->graphics.smooth_lines)) {
                         BLENDFUNC src, dst;
                         GFXGetBlendMode(src, dst);
                         if ((dst != ZERO) && ((src == ONE) || (src == SRCALPHA))) {
@@ -439,8 +441,8 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
                             case GFXPOLY:
                             case GFXPOINT:
                                 if (((mode[i] == GFXPOINT)
-                                        && gl_options.smooth_points)
-                                        || ((mode[i] != GFXPOINT) && gl_options.smooth_lines)) {
+                                        && configuration()->graphics.smooth_points)
+                                        || ((mode[i] != GFXPOINT) && configuration()->graphics.smooth_lines)) {
                                     BLENDFUNC src, dst;
                                     GFXGetBlendMode(src, dst);
                                     if ((dst != ZERO) && ((src == ONE) || (src == SRCALPHA))) {
@@ -476,8 +478,8 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
                         case GFXPOLY:
                         case GFXPOINT:
                             if (((mode[i] == GFXPOINT)
-                                    && gl_options.smooth_points)
-                                    || ((mode[i] != GFXPOINT) && gl_options.smooth_lines)) {
+                                    && configuration()->graphics.smooth_points)
+                                    || ((mode[i] != GFXPOINT) && configuration()->graphics.smooth_lines)) {
                                 BLENDFUNC src, dst;
                                 GFXGetBlendMode(src, dst);
                                 if ((dst != ZERO) && ((src == ONE) || (src == SRCALPHA))) {
