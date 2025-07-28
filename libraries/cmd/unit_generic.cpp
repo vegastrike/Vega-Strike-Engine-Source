@@ -185,6 +185,7 @@ Unit* CheckNullAndCastToUnit(ComponentsManager* manager) {
     if (manager == nullptr) {
         return nullptr;
     }
+    // VS_LOG_AND_FLUSH(trace, (boost::format("CheckNullAndCastToUnit: Runtime type is %1%") % typeid(*manager).name()));
     return vega_dynamic_cast_ptr<Unit>(manager);
 }
 
@@ -396,7 +397,7 @@ Unit::~Unit() {
     VS_LOG_AND_FLUSH(trace, (boost::format("%1$d") % 5));
 #endif
 #ifdef DESTRUCTDEBUG
-    VS_LOG_AND_FLUSH(trace, (boost::format("%1$d %2$x") % 6 % &mounts);
+    VS_LOG_AND_FLUSH(trace, (boost::format("%1$d %2$x") % 6 % &mounts));
 #endif
 
 #ifdef DESTRUCTDEBUG
@@ -1059,8 +1060,9 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
 
             smalle->jump_drive.UnsetDestination();
             Unit *jumppoint = this;
+            vector<std::string> smalles_destinations = GetDestinations();
             _Universe->activeStarSystem()
-                    ->JumpTo(smalle, jumppoint, GetDestinations()[dest % GetDestinations().size()]);
+                     ->JumpTo(smalle, jumppoint, smalles_destinations.at(dest % smalles_destinations.size()));
             return true;
         }
         return true;
@@ -1342,10 +1344,9 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
         const int i_player_survival = float_to_int((RAND_MAX * player_survival));
 
         vector<Unit *> dockedun;
-        unsigned int i;
-        for (i = 0; i < pImage->dockedunits.size(); ++i) {
+        for (auto & docked_unit : pImage->dockedunits) {
             Unit *un;
-            if (NULL != (un = pImage->dockedunits[i]->uc.GetUnit())) {
+            if (nullptr != (un = docked_unit->uc.GetUnit())) {
                 dockedun.push_back(un);
             }
         }
@@ -1359,7 +1360,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
             dockedun.pop_back();
         }
     }
-    //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
+    //eradicate everything. naturally (see previous line) we won't eradicate beams eradicated above
     if (!isSubUnit()) {
         RemoveFromSystem();
     }
@@ -1373,7 +1374,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
         aistate->ClearMessages();
         aistate->Destroy();
     }
-    aistate = NULL;
+    aistate = nullptr;
 
     // The following we don't want to do twice
     killed = true;
@@ -1392,8 +1393,13 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
         Unitdeletequeue.push_back(this);
         if (flightgroup) {
             if (flightgroup->leader.GetUnit() == this) {
-                flightgroup->leader.SetUnit(NULL);
+                flightgroup->leader.SetUnit(nullptr);
             }
+        }
+
+        if (_Universe && _Universe->AccessCockpit() && _Universe->AccessCockpit()->GetParent() && _Universe->AccessCockpit()->GetParent()->Target() == this) {
+            VS_LOG_AND_FLUSH(info, "Killing player's target");
+            _Universe->AccessCockpit()->GetParent()->SetTarget(nullptr);
         }
 
 //#ifdef DESTRUCTDEBUG
@@ -1427,11 +1433,11 @@ float Unit::ExplosionRadius() {
 void Unit::ProcessDeleteQueue() {
     while (!Unitdeletequeue.empty()) {
 #ifdef DESTRUCTDEBUG
-                                                                                                                                VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$x - %2$d") % Unitdeletequeue.back() % Unitdeletequeue.size()));
+        VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$x - %2$d") % Unitdeletequeue.back() % Unitdeletequeue.size()));
         VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$s") % Unitdeletequeue.back()->name.get().c_str()));
 #endif
 #ifdef DESTRUCTDEBUG
-                                                                                                                                if ( Unitdeletequeue.back()->isSubUnit() ) {
+        if ( Unitdeletequeue.back()->isSubUnit() ) {
             VS_LOG(debug, "Subunit Deleting (related to double dipping)");
         }
 #endif
@@ -1568,7 +1574,7 @@ void Unit::Target(Unit *targ) {
         return;
     }
 
-    if (!(activeStarSystem == NULL || activeStarSystem == _Universe->activeStarSystem())) {
+    if (!(activeStarSystem == nullptr || activeStarSystem == _Universe->activeStarSystem())) {
         computer.target = nullptr;
         return;
     }
@@ -1588,7 +1594,7 @@ void Unit::Target(Unit *targ) {
             if (!jump_drive.Installed() || jump_drive.IsDestinationSet()) {
                 bool found = false;
                 Unit *u;
-                for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (u = *i) != NULL; ++i) {
+                for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (u = *i) != nullptr; ++i) {
                     if (!u->GetDestinations().empty()) {
                         if (std::find(u->GetDestinations().begin(), u->GetDestinations().end(),
                                 targ->activeStarSystem->getFileName()) != u->GetDestinations().end()) {

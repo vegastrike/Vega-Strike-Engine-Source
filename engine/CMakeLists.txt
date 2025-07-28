@@ -693,6 +693,11 @@ IF (NOT DISABLE_CLIENT)
         TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC LOG_TIME_TAKEN_DETAILS)
     ENDIF ()
 
+    OPTION (JUMP_DEBUG "Whether to log details when warping between systems" OFF)
+    IF (JUMP_DEBUG)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC JUMP_DEBUG)
+    ENDIF ()
+
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine PRIVATE
             # VS engine headers

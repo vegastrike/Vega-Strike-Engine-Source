@@ -655,12 +655,13 @@ bool Cockpit::Update() {
     }
     if (!par) {
         if (respawnunit.size() > _Universe->CurrentCockpit()) {
-            if (respawnunit[_Universe->CurrentCockpit()]) {
+            if (respawnunit.at(_Universe->CurrentCockpit())) {
+                VS_LOG(debug, "respawnunit.at(_Universe->CurrentCockpit()) is truthy");
                 const float initialzoom = configuration()->graphics.initial_zoom_factor;
                 zoomfactor = initialzoom;
 
-                parentturret.SetUnit(NULL);
-                respawnunit[_Universe->CurrentCockpit()] = 0;
+                parentturret.SetUnit(nullptr);
+                respawnunit.at(_Universe->CurrentCockpit()) = 0;
                 std::string savegamefile = mission->getVariable("savegame", "");
                 unsigned int k;
                 for (k = 0; k < _Universe->numPlayers(); ++k) {

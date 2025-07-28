@@ -358,9 +358,7 @@ void Carrier::EjectCargo(unsigned int index) {
                     rotation *= arot;
                 }
             }
-            if (0 && cargo->rSize() >= unit->rSize()) {
-                cargo->Kill();
-            } else {
+            {
                 Vector tmpvel = -unit->Velocity;
                 if (tmpvel.MagnitudeSquared() < .00001) {
                     tmpvel = randVector(-unit->rSize(), unit->rSize()).Cast();

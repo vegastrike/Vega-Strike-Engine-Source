@@ -619,6 +619,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                                 }
                             }
                             target->Kill();
+                            target = nullptr;
                         }
                     }
                 }
