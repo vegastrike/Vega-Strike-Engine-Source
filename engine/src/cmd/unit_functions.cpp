@@ -94,7 +94,7 @@ std::string getRandomCachedAniString() {
         return "";
     }
     auto it = cached_ani.begin();
-    std::advance(it, randomInt(cached_ani.size()));
+    std::advance(it, randomInt(cached_ani.size() - 1));
     return it->first;
 }
 
@@ -103,7 +103,7 @@ Animation *getRandomCachedAni() {
         return nullptr;
     }
     auto it = cached_ani.begin();
-    std::advance(it, randomInt(cached_ani.size()));
+    std::advance(it, randomInt(cached_ani.size() - 1));
     return it->second;
 }
 
