@@ -154,7 +154,7 @@ unsigned int getCurrentPlayer() {
 }
 
 unsigned int maxMissions() {
-    return game_options()->max_missions;
+    return configuration()->physics.max_missions;
 }
 
 void addParticle(QVector loc, Vector velocity, GFXColor color, float size) {

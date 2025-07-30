@@ -1060,8 +1060,7 @@ void BaseInterface::InitCallbacks() {
     winsys_set_passive_motion_func(PassiveMouseOverWin);
     CurrentBase = this;
     CallComp = false;
-    static bool simulate_while_at_base =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "simulate_while_docked", "false"));
+    const bool simulate_while_at_base = configuration()->physics.simulate_while_docked;
     if (!(simulate_while_at_base || _Universe->numPlayers() > 1)) {
         GFXLoop(base_main_loop);
     }
@@ -1335,8 +1334,7 @@ void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, in
                         + randyVector(-.5 * bas->rSize(), .5 * bas->rSize()));
                 playa->SetAngularVelocity(bas->AngularVelocity);
                 playa->SetOwner(bas);
-                static float
-                        velmul = XMLSupport::parse_float(vs_config->getVariable("physics", "eject_cargo_speed", "1"));
+                const float velmul = configuration()->physics.eject_cargo_speed;
                 playa->SetVelocity(bas->Velocity * velmul + randyVector(-.25, .25).Cast());
             }
             playa->UnDock(bas);

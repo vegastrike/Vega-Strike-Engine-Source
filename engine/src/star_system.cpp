@@ -309,8 +309,8 @@ void StarSystem::Draw(bool DrawCockpit) {
     if (DrawCockpit) {
         AnimatedTexture::UpdateAllFrame();
     }
-    for (unsigned int i = 0; i < continuous_terrains.size(); ++i) {
-        continuous_terrains[i]->AdjustTerrain(this);
+    for (auto & continuous_terrain : continuous_terrains) {
+        continuous_terrain->AdjustTerrain(this);
     }
     Unit *par;
     if ((par = _Universe->AccessCockpit()->GetParent()) == nullptr) {
@@ -559,7 +559,7 @@ void TentativeJumpTo(StarSystem *ss, Unit *un, Unit *jumppoint, const std::strin
 
 float ScaleJumpRadius(float radius) {
     //need this because sys scale doesn't affect j-point size
-    radius *= game_options()->jump_radius_scale * game_options()->game_speed;
+    radius *= configuration()->physics.jump_radius_scale * configuration()->physics.game_speed;
     return radius;
 }
 
@@ -902,14 +902,20 @@ void StarSystem::RequestPhysics(Unit *un, unsigned int queue) {
 //randomization on priority changes, so we're fine.
 void StarSystem::UpdateUnitsPhysics(bool firstframe) {
     static int batchcount = SIM_QUEUE_SIZE - 1;
-    double collidetime = 0.0;
-    double bolttime = 0.0;
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    double collide_time = 0.0;
+    double bolt_time = 0.0;
+    double time_on_two_arg_UpdateUnitPhysics = 0.0;
+#endif
     targetpick = 0.0;
     aggfire = 0.0;
     numprocessed = 0;
     stats.CheckVitals(this);
 
     for (++batchcount; batchcount > 0; --batchcount) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double before_calling_two_arg_UpdateUnitPhysics = realTime();
+#endif
         try {
             UnitCollection col = physics_buffer[current_sim_location];
             un_iter iter = physics_buffer[current_sim_location].createIterator();
@@ -926,9 +932,13 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
             }
             throw;
         }
+#if defined(LOG_TIME_TAKEN_DETAILS)
         const double c0 = realTime();
+#endif
         Bolt::UpdatePhysics(this);
+#if defined(LOG_TIME_TAKEN_DETAILS)
         const double cc = realTime();
+#endif
         last_collisions.clear();
         collide_map[Unit::UNIT_BOLT]->flatten();
         if (Unit::NUM_COLLIDE_MAPS > 1) {
@@ -951,16 +961,22 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
                 iter.moveBefore(physics_buffer[newloc]);
             }
         }
+#if defined(LOG_TIME_TAKEN_DETAILS)
         const double dd = realTime();
-        collidetime += dd - cc;
-        bolttime += cc - c0;
+        time_on_two_arg_UpdateUnitPhysics += c0 - before_calling_two_arg_UpdateUnitPhysics;
+        collide_time += dd - cc;
+        bolt_time += cc - c0;
+#endif
         current_sim_location = (current_sim_location + 1) % SIM_QUEUE_SIZE;
         ++physicsframecounter;
         totalprocessed += theunitcounter;
         theunitcounter = 0;
     }
-    VS_LOG(trace, (boost::format("collidetime: %1%") % collidetime));
-    VS_LOG(trace, (boost::format("bolttime: %1%") % bolttime));
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    VS_LOG(trace, (boost::format("Time taken by two-arg UpdateUnitPhysics: %1%") % time_on_two_arg_UpdateUnitPhysics));
+    VS_LOG(trace, (boost::format("Time taken by unit->CollideAll() ('collidetime'): %1%") % collide_time));
+    VS_LOG(trace, (boost::format("Time taken by Bolt::UpdatePhysics(this) ('bolttime'): %1%") % bolt_time));
+#endif
 }
 
 void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit) {
@@ -988,8 +1004,17 @@ void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit) {
         simulation_atom_var *= priority;
         //VS_LOG(trace, (boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg B: simulation_atom_var as multiplied: %1%") % simulation_atom_var));
         unit->sim_atom_multiplier = priority;
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double before_execute_ai = realTime();
+#endif
         unit->ExecuteAI();
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double before_reset_threat_level = realTime();
+#endif
         unit->ResetThreatLevel();
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double before_unit_update_physics = realTime();
+#endif
         //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
         unit->UpdatePhysics(identity_transformation,
                 identity_matrix,
@@ -1000,7 +1025,15 @@ void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit) {
                         == 1 ? firstframe : true,
                 &this->gravitationalUnits(),
                 unit);
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double after_unit_update_physics = realTime();
+#endif
         simulation_atom_var = backup;
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        VS_LOG(trace, (boost::format("Time taken by unit->ExecuteAI(): %1%") % (before_reset_threat_level - before_execute_ai)));
+        VS_LOG(trace, (boost::format("Time taken by unit->ResetThreatLevel(): %1%") % (before_unit_update_physics - before_reset_threat_level)));
+        VS_LOG(trace, (boost::format("Time taken by unit->UpdatePhysics with 6 arguments: %1%") % (after_unit_update_physics - before_unit_update_physics)));
+#endif
     } catch (...) {
         simulation_atom_var = backup;
         throw;
@@ -1301,7 +1334,7 @@ void StarSystem::ProcessPendingJumps() {
                     } else if (!player) {
                         un->SetVelocity(Vector(0, 0, 0));
                     }
-                    if (game_options()->jump_disables_shields) {
+                    if (configuration()->physics.jump_disables_shields) {
                         // Zero shield. They'll start recharging from zero.
                         un->shield.Zero();
                     }
@@ -1420,6 +1453,7 @@ bool StarSystem::JumpTo(Unit *un, Unit *jumppoint, const std::string &system, bo
 
 #ifdef JUMP_DEBUG
     VS_LOG(trace, (boost::format("jumping to %1%.  ") % system));
+    const double start_time = realTime();
 #endif
     StarSystem *ss = star_system_table.Get(system);
     std::string ssys(system + ".system");
@@ -1455,6 +1489,10 @@ bool StarSystem::JumpTo(Unit *un, Unit *jumppoint, const std::string &system, bo
         ActivateAnimation(jumppoint);
     }
 
+#ifdef JUMP_DEBUG
+    VS_LOG(trace, (boost::format("finished jumping to %1%") % system));
+    VS_LOG(trace, (boost::format("Time taken by jumping: %1%") % (realTime() - start_time)));
+#endif
     return true;
 }
 

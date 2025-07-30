@@ -929,7 +929,7 @@ void Drawable::Split(int level) {
         unit->SubUnits.prepend(splitsub = new Unit(tempmeshes, true, unit->faction));
         splitsub->hull.Set(1000.0);
         splitsub->name = "debris";
-        splitsub->setMass(game_options()->debris_mass * splitsub->getMass() / level);
+        splitsub->setMass(configuration()->physics.debris_mass * splitsub->getMass() / level);
         splitsub->pImage->timeexplode = .1;
         if (splitsub->meshdata[0]) {
             Vector loc = splitsub->meshdata[0]->Position();
@@ -949,7 +949,7 @@ void Drawable::Split(int level) {
     old.clear();
     this->meshdata.clear();
     this->meshdata.push_back(nullptr);     //the shield
-    unit->Mass *= game_options()->debris_mass;
+    unit->Mass *= configuration()->physics.debris_mass;
 }
 
 void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, const GFXColor &color) {
@@ -975,9 +975,8 @@ void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, 
 Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
-    if (unit->GetWarpVelocity().MagnitudeSquared()
-            < (static_cast<double>(configuration()->graphics.warp_stretch_cutoff) * configuration()->graphics.warp_stretch_cutoff * game_options()->game_speed
-                    * game_options()->game_speed)
+    if (unit->GetWarpVelocity().MagnitudeSquared() < (configuration()->graphics.warp_stretch_cutoff)
+            * configuration()->graphics.warp_stretch_cutoff * configuration()->physics.game_speed
             || (configuration()->graphics.only_stretch_in_warp && unit->ftl_drive.Enabled())) {
         return ctm;
     } else {
@@ -985,15 +984,15 @@ Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
 
         float speed = unit->GetWarpVelocity().Magnitude();
         float stretchregion0length = static_cast<float>(configuration()->graphics.warp_stretch_region0_max
-                * (speed - (configuration()->graphics.warp_stretch_cutoff * game_options()->game_speed))
-                / ((configuration()->graphics.warp_stretch_max_region0_speed * game_options()->game_speed)
-                        - (configuration()->graphics.warp_stretch_cutoff * game_options()->game_speed)));
+                * (speed - (configuration()->graphics.warp_stretch_cutoff * configuration()->physics.game_speed))
+                / ((configuration()->graphics.warp_stretch_max_region0_speed * configuration()->physics.game_speed)
+                        - (configuration()->graphics.warp_stretch_cutoff * configuration()->physics.game_speed)));
         float stretchlength =
                 static_cast<float>((configuration()->graphics.warp_stretch_max
                         - configuration()->graphics.warp_stretch_region0_max)
-                        * (speed - (configuration()->graphics.warp_stretch_max_region0_speed * game_options()->game_speed))
-                        / ((configuration()->graphics.warp_stretch_max_speed * game_options()->game_speed)
-                                - (configuration()->graphics.warp_stretch_max_region0_speed * game_options()->game_speed) + .06125f)
+                        * (speed - (configuration()->graphics.warp_stretch_max_region0_speed * configuration()->physics.game_speed))
+                        / ((configuration()->graphics.warp_stretch_max_speed * configuration()->physics.game_speed)
+                                - (configuration()->graphics.warp_stretch_max_region0_speed * configuration()->physics.game_speed) + .06125f)
                         + configuration()->graphics.warp_stretch_region0_max);
         if (stretchlength > configuration()->graphics.warp_stretch_max) {
             stretchlength = configuration()->graphics.warp_stretch_max;
@@ -1004,7 +1003,7 @@ Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
         ScaleMatrix(k,
                 Vector(1,
                         1,
-                        1 + (speed > (configuration()->graphics.warp_stretch_max_region0_speed * game_options()->game_speed)
+                        1 + (speed > (configuration()->graphics.warp_stretch_max_region0_speed * configuration()->physics.game_speed)
                                 ? stretchlength : stretchregion0length)));
         return k;
     }
