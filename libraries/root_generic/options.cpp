@@ -211,21 +211,19 @@ void vs_options::init() {
     /* Player Options */
 
     /* Joystick Options */
-    joystick_exponent = XMLSupport::parse_floatf(vs_config->getVariable("joystick", "joystick_exponent", "1.0"));
-    polling_rate = XMLSupport::parse_int(vs_config->getVariable("joystick", "polling_rate", "0"));
-    force_use_of_joystick =
-            XMLSupport::parse_bool(vs_config->getVariable("joystick", "force_use_of_joystick", "false"));
-    debug_digital_hatswitch =
-            XMLSupport::parse_bool(vs_config->getVariable("joystick", "debug_digital_hatswitch", "false"));
-    deadband = XMLSupport::parse_floatf(vs_config->getVariable("joystick", "deadband", "0.05"));
-    mouse_deadband = XMLSupport::parse_floatf(vs_config->getVariable("joystick", "mouse_deadband", "0.025"));
-    warp_mouse = XMLSupport::parse_bool(vs_config->getVariable("joystick", "warp_mouse", "false"));
-    mouse_sensitivity = XMLSupport::parse_floatf(vs_config->getVariable("joystick", "mouse_sensitivity", "50.0"));
-    mouse_exponent = XMLSupport::parse_floatf(vs_config->getVariable("joystick", "mouse_exponent", "3.0"));
-    mouse_blur = XMLSupport::parse_floatf(vs_config->getVariable("joystick", "mouse_blur", ".025"));
-    force_feedback = XMLSupport::parse_bool(vs_config->getVariable("joystick", "force_feedback", "false"));
-    ff_device = XMLSupport::parse_int(vs_config->getVariable("joystick", "ff_device", "0"));
-    warp_mouse_zone = XMLSupport::parse_int(vs_config->getVariable("joystick", "warp_mouse_zone", "100"));
+    joystick_exponent = configuration()->joystick.joystick_exponent;
+    polling_rate = configuration()->joystick.polling_rate;
+    force_use_of_joystick = configuration()->joystick.force_use_of_joystick;
+    debug_digital_hatswitch = configuration()->joystick.debug_digital_hatswitch;
+    deadband = configuration()->joystick.deadband;
+    mouse_deadband = configuration()->joystick.mouse_deadband;
+    warp_mouse = configuration()->joystick.warp_mouse;
+    mouse_sensitivity = configuration()->joystick.mouse_sensitivity;
+    mouse_exponent = configuration()->joystick.mouse_exponent;
+    mouse_blur = configuration()->joystick.mouse_blur;
+    force_feedback = configuration()->joystick.force_feedback;
+    ff_device = configuration()->joystick.ff_device;
+    warp_mouse_zone = configuration()->joystick.warp_mouse_zone;
 
     /* AI Options */
     AllowCivilWar = XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowCivilWar", "false"));

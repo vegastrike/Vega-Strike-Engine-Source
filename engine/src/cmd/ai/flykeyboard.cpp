@@ -140,7 +140,7 @@ FlyByKeyboard::FlyByKeyboard(unsigned int whichplayer) : FlyByWire(), axis_key(0
     //Initial Joystick Mode
     //NOTE: Perhaps it should be handled by FlyByJoystick, but it was cumbersome to do that
     //since it handled mainly keystrokes - Any ideas?
-    static string initialJoyMode = vs_config->getVariable("joystick", "initial_mode", "normal");
+    static string initialJoyMode = configuration()->joystick.initial_mode;;
     joy_mode = 0;
     if (initialJoyMode == "inertialxy") {
         joy_mode = joyModeInertialXY;

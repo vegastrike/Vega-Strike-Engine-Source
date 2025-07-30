@@ -73,9 +73,8 @@ static unsigned int &getMouseButtonMask() {
 
 static void biModifyMouseSensitivity(int &x, int &y, bool invert) {
     int xrez = configuration()->graphics.resolution_x;
-    static int
-            whentodouble = XMLSupport::parse_int(vs_config->getVariable("joystick", "double_mouse_position", "1280"));
-    static float factor = XMLSupport::parse_float(vs_config->getVariable("joystick", "double_mouse_factor", "2"));
+    const int whentodouble = configuration()->joystick.double_mouse_position;
+    const float factor = configuration()->joystick.double_mouse_factor;
     if (xrez >= whentodouble) {
         x -= configuration()->graphics.resolution_x / 2;
         y -= configuration()->graphics.resolution_y / 2;

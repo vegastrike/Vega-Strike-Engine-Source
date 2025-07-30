@@ -1914,13 +1914,10 @@ void GameCockpit::Draw() {
     //CommandInterpretor.renderconsole();
     //}
     GFXAlphaTest(ALWAYS, 0);
-    static bool mouseCursor = XMLSupport::parse_bool(vs_config->getVariable("joystick", "mouse_cursor", "false"));
-    static bool mousecursor_pancam =
-            XMLSupport::parse_bool(vs_config->getVariable("joystick", "mouse_cursor_pancam", "false"));
-    static bool mousecursor_pantgt =
-            XMLSupport::parse_bool(vs_config->getVariable("joystick", "mouse_cursor_pantgt", "false"));
-    static bool mousecursor_chasecam =
-            XMLSupport::parse_bool(vs_config->getVariable("joystick", "mouse_cursor_chasecam", "true"));
+    const bool mouseCursor = configuration()->joystick.mouse_cursor;
+    const bool mousecursor_pancam = configuration()->joystick.mouse_cursor_pancam;
+    const bool mousecursor_pantgt = configuration()->joystick.mouse_cursor_pantgt;
+    const bool mousecursor_chasecam = configuration()->joystick.mouse_cursor_chasecam;
     if (mouseCursor && screenshotkey == false) {
         if ((view == CP_PAN
                 && !mousecursor_pancam)
