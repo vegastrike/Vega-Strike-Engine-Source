@@ -79,10 +79,10 @@ void modifyDeadZone(JoyStick *j) {
 }
 
 void modifyExponent(JoyStick *j) {
-    if ((game_options()->joystick_exponent != 1.0) && (game_options()->joystick_exponent > 0)) {
+    if ((configuration()->joystick.joystick_exponent != 1.0) && (configuration()->joystick.joystick_exponent > 0)) {
         for (int a = 0; a < j->nr_of_axes; a++) {
             j->joy_axis[a] =
-                    ((j->joy_axis[a] < 0) ? -std::pow(-j->joy_axis[a], game_options()->joystick_exponent) : std::pow(j->joy_axis[a],
+                    ((j->joy_axis[a] < 0) ? -std::pow(-j->joy_axis[a], configuration()->joystick.joystick_exponent) : std::pow(j->joy_axis[a],
                             game_options()->
                                     joystick_exponent));
         }
