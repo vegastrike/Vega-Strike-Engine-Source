@@ -318,7 +318,7 @@ void vs_options::init() {
     news_from_cargolist = configuration()->cargo.news_from_cargo_list;
 
     /* Keyboard Options */
-    enable_unicode = XMLSupport::parse_bool(vs_config->getVariable("keyboard", "enable_unicode", "true"));
+    enable_unicode = configuration()->keyboard.enable_unicode;
 
     /* Player Options */
     password = vs_config->getVariable("player", "password", "");
