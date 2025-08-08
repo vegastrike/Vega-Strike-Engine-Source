@@ -39,7 +39,6 @@
 #include "src/gfxlib_struct.h"
 #include "gfx/aux_texture.h"
 #include "gfx/animation.h"
-#include "src/audiolib.h"
 #include "src/config_xml.h"
 #include "gfx/camera.h"
 #include "root_generic/options.h"
@@ -59,11 +58,11 @@ inline void BlendTrans(Matrix &drawmat, const QVector &cur_position, const QVect
 
 // Bolts have texture
 int Bolt::AddTexture(BoltDrawManager *q, std::string file) {
-    int decal = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
-    if (decal >= (int) q->bolts.size()) {
+    size_t decal = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
+    if (decal >= q->bolts.size()) {
         q->bolts.push_back(vector<Bolt>());
-        int blargh = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
-        if (blargh >= (int) q->bolts.size()) {
+        size_t blargh = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
+        if (blargh >= q->bolts.size()) {
             q->bolts.push_back(vector<Bolt>());
         }
     }
@@ -185,9 +184,10 @@ void Bolt::DrawBolt(GFXVertexList *qmesh) {
     Matrix drawmat(this->drawmat);
     if (configuration()->graphics.stretch_bolts > 0) {
         ScaleMatrix(drawmat,
-                Vector(1,
-                        1,
-                        type->speed * BoltDrawManager::elapsed_time * configuration()->graphics.stretch_bolts / type->length));
+                    Vector(1,
+                           1,
+                           static_cast<double>(type->speed) * BoltDrawManager::elapsed_time * configuration()->graphics.
+                           stretch_bolts / type->length));
     }
     GFXLoadMatrixModel(drawmat);
     GFXColor4f(wt->r, wt->g, wt->b, wt->a);
