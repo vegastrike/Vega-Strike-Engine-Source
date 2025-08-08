@@ -116,8 +116,7 @@ bool hasDockingUnits(const Unit *my_unit) {
 }
 
 int getPhysicsPriority(Unit *un) {
-    static bool FORCE_TOP_PRIORITY = XMLSupport::parse_bool(
-            vs_config->getVariable("physics", "priorities", "force_top_priority", "false"));
+    const bool FORCE_TOP_PRIORITY = configuration()->physics.priorities.force_top_priority;
     if (FORCE_TOP_PRIORITY) {
         return 1;
     }
@@ -196,7 +195,7 @@ int getPhysicsPriority(Unit *un) {
     const int ASTEROID_PARENT_PRIORITY = configuration()->physics.priorities.asteroid_parent;
     const int ASTEROID_HIGH_PRIORITY = configuration()->physics.priorities.asteroid_high;
     //static int   ASTEROID_LOW_PRIORITY    = XMLSupport::parse_int(
-    //    vs_config->getVariable( "physics", "priorities", "asteroid.low", "32" ) );
+    //    configuration()->physics.priorities.asteroid_low; );
     const int HIGH_PRIORITY = configuration()->physics.priorities.high;
     const int MEDIUMHIGH_PRIORITY = configuration()->physics.priorities.medium_high;
     const int MEDIUM_PRIORITY = configuration()->physics.priorities.medium;
@@ -253,7 +252,7 @@ int getPhysicsPriority(Unit *un) {
     }
     if (UnitUtil::isAsteroid(un)) {
         //some mods don't do the scheduling--still want correctness
-        static std::string blah = vs_config->getVariable("physics", "priorities", "min_asteroid_distance", "none");
+        const std::string blah = configuration()->physics.priorities.min_asteroid_distance;
         //static float too_close_asteroid = (blah == "none") ? tooclose : XMLSupport::parse_float( blah );
         //if (dist < too_close_asteroid)
         return ASTEROID_HIGH_PRIORITY;

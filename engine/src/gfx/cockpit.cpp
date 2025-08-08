@@ -280,8 +280,7 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
 }
 
 void GameCockpit::AutoLanding() {
-    static bool autolanding_enable =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "AutoLandingEnable", "false"));
+    const bool autolanding_enable = configuration()->physics.auto_landing_enable;
     if (autolanding_enable) {
         Unit *player = GetParent();
         if (player == NULL) {

@@ -1379,7 +1379,7 @@ static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity)
             XMLSupport::parse_float(vs_config->getVariable("AI", "min_docking_relationship", "-.002"));
     static bool can_dock_to_enemy_base =
             XMLSupport::parse_bool(vs_config->getVariable("AI", "can_dock_to_enemy_base", "true"));
-    static bool nojumpinSPEC = XMLSupport::parse_bool(vs_config->getVariable("physics", "noSPECJUMP", "true"));
+    const bool nojumpinSPEC = configuration()->physics.no_spec_jump;
     bool SPEC_interference = targ && parent && nojumpinSPEC
             && (targ->ftl_drive.Enabled() || parent->ftl_drive.Enabled());
     unsigned char gender = 0;

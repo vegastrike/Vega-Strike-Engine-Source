@@ -559,7 +559,7 @@ void Universe::StartGFX() {
 void Universe::Update() {
     for (unsigned int i = 0; i < star_system.size(); ++i) {
         //Calls the update function for server
-        star_system[i]->Update((i == 0) ? 1 : game_options()->InactiveSystemTime / i);
+        star_system[i]->Update((i == 0) ? 1 : configuration()->physics.inactive_system_time / i);
     }
 }
 

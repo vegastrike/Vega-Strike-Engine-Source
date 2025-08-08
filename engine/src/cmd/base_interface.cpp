@@ -1272,8 +1272,7 @@ extern void PlayDockingSound(int dock);
 void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
-        static bool
-                auto_undock_var = XMLSupport::parse_bool(vs_config->getVariable("physics", "AutomaticUnDock", "true"));
+        const bool auto_undock_var = configuration()->physics.automatic_undock;
         bool auto_undock = auto_undock_var;
         Unit *bas = base->baseun.GetUnit();
         Unit *playa = base->caller.GetUnit();
@@ -1315,7 +1314,7 @@ inline QVector randyVector(float min, float max) {
 void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
-        XMLSupport::parse_bool(vs_config->getVariable("physics", "AutomaticUnDock", "true"));
+        configuration()->physics.automatic_undock;  // TODO: Omit this line?
         Unit *bas = base->baseun.GetUnit();
         Unit *playa = base->caller.GetUnit();
         if (playa && bas) {

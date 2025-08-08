@@ -391,14 +391,12 @@ bool Bolt::Collide(Unit *target) {
         }
         enum Vega_UnitType type = target->getUnitType();
         if (type == Vega_UnitType::nebula || type == Vega_UnitType::asteroid) {
-            static bool collideroids =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "AsteroidWeaponCollision", "false"));
+            const bool collideroids = configuration()->physics.asteroid_weapon_collision;
             if (type != Vega_UnitType::asteroid || (!collideroids)) {
                 return false;
             }
         }
-        static bool
-                collidejump = XMLSupport::parse_bool(vs_config->getVariable("physics", "JumpWeaponCollision", "false"));
+        const bool collidejump = configuration()->physics.jump_weapon_collision;
         if (type == Vega_UnitType::planet && (!collidejump) && !target->GetDestinations().empty()) {
             return false;
         }

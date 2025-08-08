@@ -172,9 +172,7 @@ MatchVelocity::~MatchVelocity() {
 }
 
 static bool getControlType() {
-    static bool control = XMLSupport::parse_bool(vs_config->getVariable("physics", "CarControl",
-            "false"
-    ));
+    const bool control = configuration()->physics.car_control;
     return control;
 }
 

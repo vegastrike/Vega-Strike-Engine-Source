@@ -891,12 +891,12 @@ namespace UniverseUtil {
         static bool campaign_score_vars_init = false;
         if (!campaign_score_vars_init) {
 
-            string::size_type where = 0, when = game_options()->campaigns.find(' ');
+            string::size_type where = 0, when = configuration()->game_start.campaigns.find(' ');
             while (where != string::npos) {
-                campaign_score_vars.insert(game_options()->campaigns
+                campaign_score_vars.insert(configuration()->game_start.campaigns
                                                    .substr(where, ((when == string::npos) ? when : when - where)));
                 where = (when == string::npos) ? when : when + 1;
-                when = game_options()->campaigns.find(' ', where);
+                when = configuration()->game_start.campaigns.find(' ', where);
             }
             campaign_score_vars_init = true;
         }
