@@ -152,7 +152,7 @@ equals_configuration_parse_key_1.substitution = r'\g<initial_space>\g<name> = \g
 equals_configuration_parse_key_1.leave_as_is = ''
 parse_keys.append(equals_configuration_parse_key_1)
 equals_configuration_parse_key_2 = ParseKey()
-equals_configuration_parse_key_2.pattern = re.compile(r'^(?P<initial_space> *)(?P<name>\w+)\s*=\s*(?P<config_expr>configuration\(\)->\w+(?:\.\w+)+);$',
+equals_configuration_parse_key_2.pattern = re.compile(r'^(?P<initial_space> *)(?P<name>\w+)\s*=\s*(?P<config_expr>configuration\(\)->\w+(?:\.\w+)+); *(?://[^\r\n]*?)?$',
                                                       regex_flags_single_line)
 equals_configuration_parse_key_2.substitution = r'\g<initial_space>\g<name> = \g<config_expr>;'
 equals_configuration_parse_key_2.leave_as_is = ''
