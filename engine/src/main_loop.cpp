@@ -795,13 +795,13 @@ void createObjects(std::vector<std::string> &fighter0name,
     static bool initialized = false;
     if (!initialized) {
         initialized = true;
-        terrain_scale = new Vector(game_options()->xscale, game_options()->yscale, game_options()->zscale);
+        terrain_scale = new Vector(configuration()->terrain.xscale, configuration()->terrain.yscale, configuration()->terrain.zscale);
     }
 
     myterrain = nullptr;
     std::string stdstr = mission->getVariable("terrain", "");
     if (stdstr.length() > 0) {
-        Terrain *terr = new Terrain(stdstr.c_str(), *terrain_scale, game_options()->mass, game_options()->radius);
+        Terrain *terr = new Terrain(stdstr.c_str(), *terrain_scale, configuration()->terrain.mass, configuration()->terrain.radius);
         Matrix tmp;
         ScaleMatrix(tmp, *terrain_scale);
         QVector pos;
@@ -811,7 +811,7 @@ void createObjects(std::vector<std::string> &fighter0name,
     }
     stdstr = mission->getVariable("continuousterrain", "");
     if (stdstr.length() > 0) {
-        myterrain = new ContinuousTerrain(stdstr.c_str(), *terrain_scale, game_options()->mass);
+        myterrain = new ContinuousTerrain(stdstr.c_str(), *terrain_scale, configuration()->terrain.mass);
         Matrix tmp;
         Identity(tmp);
         QVector pos;
