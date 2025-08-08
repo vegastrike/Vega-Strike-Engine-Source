@@ -106,6 +106,16 @@ setting_declaration_namespaced_parse_key_1a.pattern = re.compile(r'^(?P<initial_
                                                                  regex_flags_multiline)
 setting_declaration_namespaced_parse_key_1a.substitution = r'\g<initial_space>\g<type> \g<name>\g<init_braces>;\n'
 setting_declaration_namespaced_parse_key_1a.leave_as_is = ''
+setting_declaration_namespaced_parse_key_1b = ParseKey()
+setting_declaration_namespaced_parse_key_1b.pattern = re.compile(r'^(?P<initial_space> {4})(?P<type>std::string)\s+('
+                                                                 r'?P<name>[a-z0-9_]+)\s*=\s*\"(?P<default_value>w+)\"\s*; *\r?\n',
+                                                                 regex_flags_multiline)
+setting_declaration_namespaced_parse_key_1b.substitution = r'\g<initial_space>\g<type> \g<name> = \g<default_value>;\n'
+setting_declaration_namespaced_parse_key_1b.leave_as_is = ''
+setting_declaration_namespaced_parse_key_1c = ParseKey()
+setting_declaration_namespaced_parse_key_1c.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*(?P<type>std::string)\s+(?P<name>[a-z0-9_]+)\s*=\s*\"(?P<default_value>w+)\"\s*; *\r?\n', regex_flags_multiline)
+setting_declaration_namespaced_parse_key_1c.substitution = 'r\g<initial_space>\g<static_or_const> \g<type> \g<name> = \g<default_value>;\n'
+setting_declaration_namespaced_parse_key_1c.leave_as_is = ''
 setting_declaration_simple_parse_key = ParseKey()
 setting_declaration_simple_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*('
                                                           r'?P<type>bool|double|float|int)\s+(?P<name>[a-z0-9_]+)(?P<init_braces>\{})?\s*; '
@@ -118,11 +128,24 @@ setting_declaration_simple_parse_key_1a.pattern = re.compile(r'^(?P<initial_spac
                                                              r'?P<init_braces>\{})?\s*; *\r?\n', regex_flags_multiline)
 setting_declaration_simple_parse_key_1a.substitution = r'\g<initial_space>\g<type> \g<name>\g<init_braces>;\n'
 setting_declaration_simple_parse_key_1a.leave_as_is = ''
+setting_declaration_simple_parse_key_1b = ParseKey()
+setting_declaration_simple_parse_key_1b.pattern = re.compile(r'^((?P<initial_space> {4})(?P<type>bool|double|float|int)\s+(?P<name>[a-z0-9_]+))\s*=\s*\"(?P<default_value>w+)\"\s*; *\r?\n', regex_flags_multiline)
+setting_declaration_simple_parse_key_1b.substitution = r'^\g<initial_space>\g<type> \g<name> = \g<default_value>;\n'
+setting_declaration_simple_parse_key_1b.leave_as_is = ''
+setting_declaration_simple_parse_key_1c = ParseKey()
+setting_declaration_simple_parse_key_1c.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*('
+                                                             r'?P<type>bool|double|float|int)\s+(?P<name>[a-z0-9_]+)\s*=\s*\"(?P<default_value>w+)\"\s*; *\r?\n')
+setting_declaration_simple_parse_key_1c.substitution = r'^\g<initial_space>\g<static_or_const> \g<type> \g<name> = \g<default_value>;\n'
+setting_declaration_simple_parse_key_1c.leave_as_is = ''
 
 setting_declaration_parse_keys: list[ParseKey] = [setting_declaration_namespaced_parse_key,
                                                   setting_declaration_namespaced_parse_key_1a,
+                                                  setting_declaration_namespaced_parse_key_1b,
+                                                  setting_declaration_namespaced_parse_key_1c,
                                                   setting_declaration_simple_parse_key,
-                                                  setting_declaration_simple_parse_key_1a]
+                                                  setting_declaration_simple_parse_key_1a,
+                                                  setting_declaration_simple_parse_key_1b,
+                                                  setting_declaration_simple_parse_key_1c]
 
 equals_configuration_parse_key_1 = ParseKey()
 equals_configuration_parse_key_1.pattern = re.compile(r'^(?P<initial_space> *)(?P<name>\w+)\s*=\s*('
