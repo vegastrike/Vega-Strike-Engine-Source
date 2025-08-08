@@ -95,42 +95,42 @@ trailing_comment_parse_key_2.leave_as_is = r'\2'
 # parse_keys.append(trailing_comment_parse_key_2)
 
 setting_declaration_namespaced_parse_key = ParseKey()
-setting_declaration_namespaced_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*(?P<type>std::string)\s+(?P<name>\w+)(?P<init_braces>\{})?\s*;\s*(?://.*?)?\r?\n',
+setting_declaration_namespaced_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*(?P<type>std::string)\s+(?P<name>\w+)(?P<init_braces>\{})?\s*;\s*(?://[^\r\n]*?)?\r?\n',
                                                               regex_flags_multiline)
 setting_declaration_namespaced_parse_key.substitution = r'\g<initial_space>\g<static_or_const> \g<type> \g<name>\g<init_braces>;\n'
 setting_declaration_namespaced_parse_key.leave_as_is = ''
 setting_declaration_namespaced_parse_key_1a = ParseKey()
-setting_declaration_namespaced_parse_key_1a.pattern = re.compile(r'^(?P<initial_space> {4})(?P<type>std::string)\s+(?P<name>\w+)(?P<init_braces>\{})?\s*;\s*(?://.*?)?\r?\n',
+setting_declaration_namespaced_parse_key_1a.pattern = re.compile(r'^(?P<initial_space> {4})(?P<type>std::string)\s+(?P<name>\w+)(?P<init_braces>\{})?\s*;\s*(?://[^\r\n]*?)?\r?\n',
                                                                  regex_flags_multiline)
 setting_declaration_namespaced_parse_key_1a.substitution = r'\g<initial_space>\g<type> \g<name>\g<init_braces>;\n'
 setting_declaration_namespaced_parse_key_1a.leave_as_is = ''
 setting_declaration_namespaced_parse_key_1b = ParseKey()
-setting_declaration_namespaced_parse_key_1b.pattern = re.compile(r'^(?P<initial_space> {4})(?P<type>std::string)\s+(?P<name>\w+)\s*=\s*\"(?P<default_value>[^\"]*)\"\s*;\s*(?://.*?)?\r?\n',
+setting_declaration_namespaced_parse_key_1b.pattern = re.compile(r'^(?P<initial_space> {4})(?P<type>std::string)\s+(?P<name>\w+)\s*=\s*\"(?P<default_value>[^\"]*)\"\s*;\s*(?://[^\r\n]*?)?\r?\n',
                                                                  regex_flags_multiline)
 setting_declaration_namespaced_parse_key_1b.substitution = r'\g<initial_space>\g<type> \g<name> = \g<default_value>;\n'
 setting_declaration_namespaced_parse_key_1b.leave_as_is = ''
 setting_declaration_namespaced_parse_key_1c = ParseKey()
-setting_declaration_namespaced_parse_key_1c.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*(?P<type>std::string)\s+(?P<name>\w+)\s*=\s*\"(?P<default_value>[^\"]*)\"\s*;\s*(?://.*?)?\r?\n',
+setting_declaration_namespaced_parse_key_1c.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*(?P<type>std::string)\s+(?P<name>\w+)\s*=\s*\"(?P<default_value>[^\"]*)\"\s*;\s*(?://[^\r\n]*?)?\r?\n',
                                                                  regex_flags_multiline)
 setting_declaration_namespaced_parse_key_1c.substitution = r'\g<initial_space>\g<static_or_const> \g<type> \g<name> = \g<default_value>;\n'
 setting_declaration_namespaced_parse_key_1c.leave_as_is = ''
 setting_declaration_simple_parse_key = ParseKey()
-setting_declaration_simple_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*(?P<type>bool|double|float|int)\s+(?P<name>\w+)(?P<init_braces>\{})?\s*;\s*(?://.*?)?\r?\n',
+setting_declaration_simple_parse_key.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*(?P<type>bool|double|float|int)\s+(?P<name>\w+)(?P<init_braces>\{})?\s*;\s*(?://[^\r\n]*?)?\r?\n',
                                                           regex_flags_multiline)
 setting_declaration_simple_parse_key.substitution = r'\g<initial_space>\g<static_or_const> \g<type> \g<name>\g<init_braces>;\n'
 setting_declaration_simple_parse_key.leave_as_is = ''
 setting_declaration_simple_parse_key_1a = ParseKey()
-setting_declaration_simple_parse_key_1a.pattern = re.compile(r'^(?P<initial_space> {4})(?P<type>bool|double|float|int)\s+(?P<name>\w+)(?P<init_braces>\{})?\s*;\s*(?://.*?)?\r?\n',
+setting_declaration_simple_parse_key_1a.pattern = re.compile(r'^(?P<initial_space> {4})(?P<type>bool|double|float|int)\s+(?P<name>\w+)(?P<init_braces>\{})?\s*;\s*(?://[^\r\n]*?)?\r?\n',
                                                              regex_flags_multiline)
 setting_declaration_simple_parse_key_1a.substitution = r'\g<initial_space>\g<type> \g<name>\g<init_braces>;\n'
 setting_declaration_simple_parse_key_1a.leave_as_is = ''
 setting_declaration_simple_parse_key_1b = ParseKey()
-setting_declaration_simple_parse_key_1b.pattern = re.compile(r'^(?P<initial_space> {4})(?P<type>bool|double|float|int)\s+(?P<name>\w+)\s*=\s*\"(?P<default_value>[^\"]*)\"\s*;\s*(?://.*?)?\r?\n',
+setting_declaration_simple_parse_key_1b.pattern = re.compile(r'^(?P<initial_space> {4})(?P<type>bool|double|float|int)\s+(?P<name>\w+)\s*=\s*\"(?P<default_value>[^\"]*)\"\s*;\s*(?://[^\r\n]*?)?\r?\n',
                                                              regex_flags_multiline)
 setting_declaration_simple_parse_key_1b.substitution = r'^\g<initial_space>\g<type> \g<name> = \g<default_value>;\n'
 setting_declaration_simple_parse_key_1b.leave_as_is = ''
 setting_declaration_simple_parse_key_1c = ParseKey()
-setting_declaration_simple_parse_key_1c.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*(?P<type>bool|double|float|int)\s+(?P<name>\w+)\s*=\s*\"(?P<default_value>[^\"]*)\"\s*;\s*(?://.*?)?\r?\n',
+setting_declaration_simple_parse_key_1c.pattern = re.compile(r'^(?P<initial_space> {4})(?P<static_or_const>static|const)\s*(?P<type>bool|double|float|int)\s+(?P<name>\w+)\s*=\s*\"(?P<default_value>[^\"]*)\"\s*;\s*(?://[^\r\n]*?)?\r?\n',
                                                              regex_flags_multiline)
 setting_declaration_simple_parse_key_1c.substitution = r'^\g<initial_space>\g<static_or_const> \g<type> \g<name> = \g<default_value>;\n'
 setting_declaration_simple_parse_key_1c.leave_as_is = ''
@@ -146,7 +146,7 @@ setting_declaration_parse_keys: list[ParseKey] = [setting_declaration_namespaced
 
 equals_configuration_parse_key_1 = ParseKey()
 equals_configuration_parse_key_1.pattern = re.compile(r'^(?P<initial_space> *)(?P<name>\w+)\s*=\s*('
-                                                      r'?P<config_expr>configuration\(\)->\w+(?:\.\w+)+);\s*(?://.*?)?\r?\n',
+                                                      r'?P<config_expr>configuration\(\)->\w+(?:\.\w+)+);\s*(?://[^\r\n]*?)?\r?\n',
                                                       regex_flags_multiline)
 equals_configuration_parse_key_1.substitution = r'\g<initial_space>\g<name> = \g<config_expr>;\n'
 equals_configuration_parse_key_1.leave_as_is = ''
