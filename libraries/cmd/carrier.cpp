@@ -85,8 +85,8 @@ inline QVector randVector(float min, float max) {
 
 std::string CargoToString(const Cargo &cargo) {
     string missioncargo;
-    if (cargo.GetMissionFlag()) {
-        missioncargo = string("\" missioncargo=\"") + XMLSupport::tostring(cargo.GetMissionFlag());
+    if (cargo.IsMissionFlag()) {
+        missioncargo = string("\" missioncargo=\"") + XMLSupport::tostring(cargo.IsMissionFlag());
     }
     return string("\t\t\t<Cargo mass=\"") + XMLSupport::tostring((float) cargo.GetMass()) + string("\" price=\"")
             + XMLSupport::tostring((float) cargo.GetPrice()) + string("\" volume=\"")
@@ -118,7 +118,7 @@ void Carrier::SortCargo() {
                 tmpvolume /= un->cargo[i].quantity;
             }
             un->cargo[i].SetVolume(tmpvolume);
-            un->cargo[i].SetMissionFlag((un->cargo[i].GetMissionFlag() || un->cargo[i + 1].GetMissionFlag()));
+            un->cargo[i].SetMissionFlag((un->cargo[i].IsMissionFlag() || un->cargo[i + 1].IsMissionFlag()));
             un->cargo[i].SetMass(tmpmass);
             //group up similar ones
             un->cargo.erase(un->cargo.begin() + (i + 1));
@@ -195,7 +195,7 @@ void Carrier::EjectCargo(unsigned int index) {
 
     // Some sanity checks for tmp
     // Can't eject an upgrade, unless ship is destroyed
-    if(tmp->GetInstalled() && !unit->hull.Destroyed()) {
+    if(tmp->IsInstalled() && !unit->hull.Destroyed()) {
         return;
     }
 
@@ -210,12 +210,12 @@ void Carrier::EjectCargo(unsigned int index) {
     const float cargotime = configuration()->physics.cargo_live_time;
     if (tmp) {
         string tmpcontent = tmp->name;
-        if (tmp->GetMissionFlag()) {
+        if (tmp->IsMissionFlag()) {
             tmpcontent = "Mission_Cargo";
         }
-        const int ulen = strlen("upgrades");
+
         //prevents a number of bad things, incl. impossible speeds and people getting rich on broken stuff
-        if ((!tmp->GetMissionFlag()) && memcmp(tmp->GetCategory().c_str(), "upgrades", ulen) == 0) {
+        if ((!tmp->IsMissionFlag()) && tmp->IsComponent()) {
             tmpcontent = "Space_Salvage";
         }
         //this happens if it's a ship
@@ -223,7 +223,7 @@ void Carrier::EjectCargo(unsigned int index) {
             const int sslen = strlen("starships");
             Unit *cargo = NULL;
             if (tmp->GetCategory().length() >= (unsigned int) sslen) {
-                if ((!tmp->GetMissionFlag()) && memcmp(tmp->GetCategory().c_str(), "starships", sslen) == 0) {
+                if ((!tmp->IsMissionFlag()) && tmp->GetCategory() == "starships") {
                     string ans = tmpcontent;
                     string::size_type blank = ans.find(".blank");
                     if (blank != string::npos) {
@@ -498,10 +498,6 @@ void Carrier::AddCargo(const Cargo &carg, bool sort) {
     }
 }
 
-bool cargoIsUpgrade(const Cargo &c) {
-    return c.GetCategory().find("upgrades") == 0;
-}
-
 float Carrier::getHiddenCargoVolume() const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->HiddenCargoVolume;
@@ -515,9 +511,8 @@ bool Carrier::CanAddCargo(const Cargo &carg) const {
         return true;
     }
     //Test volume availability
-    bool upgradep = cargoIsUpgrade(carg);
-    float total_volume = carg.quantity.Value() * carg.GetVolume() + (upgradep ? getUpgradeVolume() : getCargoVolume());
-    if (total_volume <= (upgradep ? getEmptyUpgradeVolume() : getEmptyCargoVolume())) {
+    float total_volume = carg.quantity.Value() * carg.GetVolume() + (carg.IsComponent() ? getUpgradeVolume() : getCargoVolume());
+    if (total_volume <= (carg.IsComponent() ? getEmptyUpgradeVolume() : getEmptyCargoVolume())) {
         return true;
     }
     //Hm... not in main unit... perhaps a subunit can take it
@@ -545,7 +540,7 @@ float Carrier::getCargoVolume(void) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     float result = 0.0;
     for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
-        if (!cargoIsUpgrade(unit->cargo[i])) {
+        if (!(unit->cargo[i].IsComponent())) {
             result += unit->cargo[i].quantity.Value() * unit->cargo[i].GetVolume();
         }
     }
@@ -579,7 +574,7 @@ float Carrier::getUpgradeVolume(void) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     float result = 0.0;
     for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
-        if (cargoIsUpgrade(unit->cargo[i])) {
+        if ((unit->cargo[i].IsComponent())) {
             result += unit->cargo[i].quantity.Value() * unit->cargo[i].GetVolume();
         }
     }

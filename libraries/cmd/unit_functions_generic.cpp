@@ -271,37 +271,5 @@ void DealPossibleJumpDamage(Unit *un) {
                         ((float) (rand() % 100)) / 100), nullptr);
 }
 
-void Enslave(Unit *parent, bool enslave) {
-    unsigned int i;
-    vector<Cargo> ToBeChanged;
-    unsigned int numcargo = parent->numCargo();
-    for (i = numcargo; i > 0;) {
-        Cargo *carg = &parent->GetCargo(--i);
-        if (enslave) {
-            if (carg->GetCategory().find("Passengers") != string::npos && carg->GetName() != "Hitchhiker") {
-                ToBeChanged.push_back(*carg);
-                parent->RemoveCargo(i, carg->GetQuantity(), true);
-            }
-        } else if (carg->GetName() == "Slaves" || carg->GetName() == "Pilot") {
-            ToBeChanged.push_back(*carg);
-            parent->RemoveCargo(i, carg->GetQuantity(), true);
-        }
-    }
-    unsigned int dummy;
-    Cargo *newCarg = UniverseUtil::GetMasterPartList()->GetCargo(enslave ? "Slaves" : "Hitchhiker", dummy);
-    if (newCarg) {
-        Cargo slave = *newCarg;
-        for (i = 0; i < ToBeChanged.size(); ++i) {
-            slave.SetQuantity(ToBeChanged[i].GetQuantity());
-
-            while (parent->CanAddCargo(slave) == false && (slave.reduce()) > 0) {
-            }
-            if (slave.GetQuantity()) {
-                if (parent->CanAddCargo(slave)) {
-                    parent->AddCargo(slave, true);
-                }
-            }
-        }
-    }
-}
+extern Cargo *GetMasterPartList(const char *input_buffer);
 

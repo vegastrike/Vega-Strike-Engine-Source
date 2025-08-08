@@ -63,6 +63,7 @@
 #include "cmd/weapon_info.h"
 #include "src/vs_logging.h"
 #include "cmd/unit_util.h"
+#include "resource/cargo.h"
 
 extern bool toggle_pause();
 
@@ -1293,8 +1294,6 @@ static bool UnDockNow(Unit *me, Unit *targ) {
     return ret;
 }
 
-void Enslave(Unit *, bool);
-
 void PlayDockingSound(int dock) {
     switch (dock) {
         case 5: {
@@ -2129,9 +2128,12 @@ void FireKeyboard::Execute() {
             _Universe->AccessCockpit()->communication_choices = "\nNo Communication\nLink\nEstablished";
         }
     }
-    if (f().enslave == PRESS || f().freeslave == PRESS) {
-        Enslave(parent, f().enslave == PRESS);
+    if (f().enslave == PRESS) {
+        Enslave(parent->cargo);
         f().enslave = RELEASE;
+    }
+    if (f().freeslave == PRESS) {
+        Free(parent->cargo);
         f().freeslave = RELEASE;
     }
     if (f().ejectcargo == PRESS || f().ejectnonmissioncargo == PRESS) {
@@ -2146,7 +2148,7 @@ void FireKeyboard::Execute() {
         }
         for (; offset < static_cast<int>(parent->numCargo()); ++offset) {
             Cargo *tmp = &parent->GetCargo(offset);
-            if (tmp->GetCategory().find("upgrades") == string::npos && (missiontoo || tmp->GetMissionFlag() == false)) {
+            if (!tmp->IsComponent() && (missiontoo || !tmp->IsMissionFlag())) {
                 parent->EjectCargo(offset);
                 break;
             }
