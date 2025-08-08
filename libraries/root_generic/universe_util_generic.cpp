@@ -630,7 +630,7 @@ namespace UniverseUtil {
     }
 
     void IOmessage(int delay, string from, string to, string message) {
-        if (to == "news" && (!game_options()->news_from_cargolist)) {
+        if (to == "news" && (!configuration()->cargo.news_from_cargo_list)) {
             for (unsigned int i = 0; i < _Universe->numPlayers(); i++) {
                 pushSaveString(i, "news", string("#") + message);
             }
