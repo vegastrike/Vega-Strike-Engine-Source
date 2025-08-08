@@ -459,7 +459,7 @@ void SystemFactory::processSpaceElevator(Object &object, Planet *owner) {
 }
 
 void SystemFactory::processFog(Star_XML *xml, Object &object, Planet *owner) {
-    if (!game_options()->usePlanetFog) {
+    if (!configuration()->graphics.use_planet_fog) {
         return;
     }
 

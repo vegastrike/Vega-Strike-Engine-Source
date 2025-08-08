@@ -101,7 +101,7 @@ void vs_options::init() {
     usePlanetFog = configuration()->graphics.use_planet_fog;
     reflectivity = configuration()->graphics.reflectivity;
     hardware_cursor = configuration()->physics.hardware_cursor;
-    always_make_smooth_cam =  configuration()->graphics.always_make_smooth_cam;     //Not used yet
+    always_make_smooth_cam = configuration()->graphics.always_make_smooth_cam;
     precull_dist = configuration()->graphics.precull_dist;
     draw_near_stars_in_front_of_planets = configuration()->graphics.draw_near_stars_in_front_of_planets;
     starblend = configuration()->graphics.star_blend;
