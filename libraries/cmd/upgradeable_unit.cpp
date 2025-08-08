@@ -121,7 +121,8 @@ UpgradeableUnit::UpgradeableUnit()
 
 extern int GetModeFromName(const char *input_buffer);
 
-
+extern bool UpAndDownCargoHoldAndUpgradeSpace(Unit *unit, float cargo_volume, float hidden_volume, 
+                                       float upgrade_space, bool is_upgrade, bool do_upgrade);
 
 UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_name,
                      bool upgrade, bool apply) {
@@ -195,8 +196,18 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
             break;
 
         default:
-            //std::cout << "Unhandled type for " << upgrade_name << std::endl;
             break;
+    }
+
+    // Check for cargo upgrades
+    // TODO: align them with components above
+    double cargo_hold = UnitCSVFactory::GetVariable(upgrade_key, "Hold_Volume", 0.0);
+    double hidden_hold = UnitCSVFactory::GetVariable(upgrade_key, "Hidden_Hold_Volume", 0.0);
+    double upgrade_space = UnitCSVFactory::GetVariable(upgrade_key, "Upgrade_Storage_Volume", 0.0);
+    if(cargo_hold != 0.0) {
+        UpAndDownCargoHoldAndUpgradeSpace(unit, cargo_hold, hidden_hold, upgrade_space, upgrade, apply);
+        result.upgradeable = true;
+        result.success = true;
     }
 
     return result;

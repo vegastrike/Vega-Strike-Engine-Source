@@ -105,7 +105,7 @@ void ComponentsManager::DamageRandomSystem() {
                 do {
                     cargorand = (cargorand_o + i) % cargo.size();
                 } while ((cargo[cargorand].GetQuantity() == 0
-                        || cargo[cargorand].GetMissionFlag()) && (++i) < cargo.size());
+                        || cargo[cargorand].IsMissionFlag()) && (++i) < cargo.size());
                 cargo[cargorand].SetQuantity(cargo[cargorand].GetQuantity() * float_to_int(dam));
             }
     }*/

@@ -404,8 +404,7 @@ extern const Unit *makeTemplateUpgrade(string name, int faction);
 //Ported from old code.  Not sure what it does.
 const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0);
 
-//Takes in a category of an upgrade or cargo and returns true if it is any type of mountable weapon.
-extern bool isWeapon(std::string name);
+
 
 #define PRETTY_ADD(str, val, digits)                        \
     do {                                                      \
@@ -1673,25 +1672,25 @@ void BaseComputer::configureCargoCommitControls(const Cargo &item, TransactionTy
         NewButton *commitButton = static_cast< NewButton * > ( window()->findControlById("Commit"));
         assert(commitButton != NULL);
         commitButton->setHidden(false);
-        commitButton->setLabel(item.GetMissionFlag() ? "Dump 1" : "Sell 1");
+        commitButton->setLabel(item.IsMissionFlag() ? "Dump 1" : "Sell 1");
         commitButton->setCommand("SellCargo");
 
         //"Sell 10" button.
         NewButton *commit10Button = static_cast< NewButton * > ( window()->findControlById("Commit10"));
         assert(commit10Button != NULL);
         commit10Button->setHidden(false);
-        commit10Button->setLabel(item.GetMissionFlag() ? "Dump 10" : "Sell 10");
+        commit10Button->setLabel(item.IsMissionFlag() ? "Dump 10" : "Sell 10");
         commit10Button->setCommand("Sell10Cargo");
 
         //"Sell All" button.
         NewButton *commitAllButton = static_cast< NewButton * > ( window()->findControlById("CommitAll"));
         assert(commitAllButton != NULL);
         commitAllButton->setHidden(false);
-        commitAllButton->setLabel(item.GetMissionFlag() ? "Dump" : "Sell");
+        commitAllButton->setLabel(item.IsMissionFlag() ? "Dump" : "Sell");
         commitAllButton->setCommand("SellAllCargo");
 
         //Total price display.
-        const double totalPrice = (double)item.GetPrice() * (double)item.GetQuantity() * (double)(item.GetMissionFlag() ? 0 : 1);
+        const double totalPrice = (double)item.GetPrice() * (double)item.GetQuantity() * (double)(item.IsMissionFlag() ? 0 : 1);
         std::string tempString = (boost::format("Total: #b#%1$.2f#-b") % totalPrice).str();
         StaticDisplay *totalDisplay = static_cast< StaticDisplay * > ( window()->findControlById("TotalPrice"));
         assert(totalDisplay != NULL);
@@ -1728,20 +1727,20 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
             bool CanDoSell = true;
             Unit *player = m_player.GetUnit();
             unsigned int numc = player->numCargo();
-            if (!isWeapon(item.GetCategory())) {
-                //weapons can always be sold
-                for (unsigned int i = 0; i < numc; ++i) {
-                    Cargo *c = &player->GetCargo(i);
-                    if (c->GetCategory().find("upgrades/") == 0 && !isWeapon(c->GetCategory())) {
-                        float po = UnitUtil::PercentOperational(player, c->GetName(), c->GetCategory(), false);
-                        if (po > .02 && po < .98) {
-                            const bool must_fix_first = configuration()->physics.must_repair_to_sell;
+            
+            //weapons can always be sold
+            for (unsigned int i = 0; i < numc; ++i) {
+                Cargo *c = &player->GetCargo(i);
+                if (c->IsComponent() && !c->IsWeapon()) {
+                    float po = UnitUtil::PercentOperational(player, c->GetName(), c->GetCategory(), false);
+                    if (po > .02 && po < .98) {
+                        const bool must_fix_first = configuration()->physics.must_repair_to_sell;
 
-                            CanDoSell = (emergency_downgrade_mode.length() != 0 || must_fix_first == false);
-                        }
+                        CanDoSell = (emergency_downgrade_mode.length() != 0 || must_fix_first == false);
                     }
                 }
             }
+            
             if (CanDoSell) {
                 commitButton->setHidden(false);
                 commitButton->setLabel("Sell");
@@ -1967,7 +1966,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     }
                     item.SetDescription(temp);
                 }
-                if (item.GetMissionFlag()) {
+                if (item.IsMissionFlag()) {
                     tempString = "Destroy evidence of mission cargo. Credit received: 0.00.";
                 } else {
                     tempString = (boost::format("Value: #b#%1$.2f#-b, purchased for %2$.2f#n#")
@@ -1979,7 +1978,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 tempString = (boost::format("Cargo volume: %1$.2f cubic meters;  Mass: %2$.2f metric tons#n1.5#")
                         % item.GetVolume() % item.GetMass()).str();
                 descString += tempString;
-                if (!item.GetMissionFlag()) {
+                if (!item.IsMissionFlag()) {
                     tailString = buildCargoDescription(item, *this, baseUnit->PriceCargo(item.GetName()));
                 }
                 break;
@@ -2151,7 +2150,7 @@ bool UpgradeAllowed(const Cargo &item, Unit *playerUnit) {
 
 //Return whether or not the current item and quantity can be "transacted".
 bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType transType, int quantity) {
-    if (originalItem.GetMissionFlag() && transType != SELL_CARGO) {
+    if (originalItem.IsMissionFlag() && transType != SELL_CARGO) {
         color_downgrade_or_noncompatible_flag = true;
         return false;
     }
@@ -2188,7 +2187,7 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
             break;
         case SELL_CARGO:
             //There is a base here, and it is willing to buy the item.
-            if (!originalItem.GetMissionFlag()) {
+            if (!originalItem.IsMissionFlag()) {
                 if (baseUnit) {
                     havespace = baseUnit->CanAddCargo(item);
                     if (havespace) {
@@ -2234,7 +2233,7 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
             havespace = (playerUnit->CanAddCargo(item) || upgradeNotAddedToCargo(item.GetCategory()));
 
             //UpgradeAllowed must be first -- short circuit && operator
-            if (UpgradeAllowed(item, playerUnit) && havemoney && havespace && !item.GetMissionFlag()) {
+            if (UpgradeAllowed(item, playerUnit) && havemoney && havespace && !item.IsMissionFlag()) {
                 return true;
             } else {
                 if (!havemoney) {
@@ -2358,7 +2357,7 @@ void BaseComputer::loadListPicker(TransactionList &tlist,
             //Just in case we want to change the default reason for non-purchase
             bad_trans_color = NO_MONEY_COLOR();
         }
-        GFXColor base_color = (transOK ? (item.GetMissionFlag() ? MISSION_COLOR() : GUI_CLEAR) : bad_trans_color);
+        GFXColor base_color = (transOK ? (item.IsMissionFlag() ? MISSION_COLOR() : GUI_CLEAR) : bad_trans_color);
         //Reset cause-color flags
         color_prohibited_upgrade_flag = false;
         color_downgrade_or_noncompatible_flag = false;
@@ -2642,7 +2641,7 @@ bool BaseComputer::sellSelectedCargo(int requestedQuantity) {
         Cargo itemCopy = *item;     //Not sure what "sold" has in it.  Need copy of sold item.
         Cargo sold;
         const int quantity = (requestedQuantity <= 0 ? item->GetQuantity() : requestedQuantity);
-        if (item->GetMissionFlag()) {
+        if (item->IsMissionFlag()) {
             vector<Cargo>::iterator mycargo = std::find(playerUnit->cargo.begin(),
                     playerUnit->cargo.end(), *item);
             if (mycargo != playerUnit->cargo.end()) {
@@ -3052,7 +3051,7 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     // Filter integral from masterList
     auto integral_items = std::stable_partition(tlist.masterList.begin(), tlist.masterList.end(),
                         [](const CargoColor& cc) {
-                          return !cc.cargo.GetIntegral();
+                          return !cc.cargo.IsIntegral();
                         });
     tlist.masterList.erase(integral_items, tlist.masterList.end());
 
@@ -3503,8 +3502,9 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
             }
             //Remove the item from the base, since we bought it.
             unsigned int index;
-            baseUnit->GetCargo(m_part.GetName(), index);
+            Cargo upgrade = Cargo(*baseUnit->GetCargo(m_part.GetName(), index));
             baseUnit->RemoveCargo(index, 1, false);
+            playerUnit->AddCargo(upgrade);
         } else {
             break;
         }
@@ -3728,7 +3728,7 @@ bool BaseComputer::buyUpgrade(const EventCommandId &command, Control *control) {
             }
             return true;
         }
-        if (!isWeapon(item->GetCategory())) {
+        if (!item->IsWeapon()) {
             if (playerUnit) {
                 Unit *baseUnit = m_base.GetUnit();
                 if (baseUnit) {
@@ -3752,7 +3752,7 @@ bool BaseComputer::buyUpgrade(const EventCommandId &command, Control *control) {
 bool BaseComputer::sellUpgrade(const EventCommandId &command, Control *control) {
     Cargo *item = selectedItem();
     if (item) {
-        if (!isWeapon(item->GetCategory())) {
+        if (!item->IsWeapon()){
             Cargo sold;
             const int quantity = 1;
             Unit *playerUnit = m_player.GetUnit();
@@ -4349,9 +4349,9 @@ bool buyShip(Unit *baseUnit,
                     for (int j = 0; j < 2; ++j) {
                         for (int i = playerUnit->numCargo() - 1; i >= 0; --i) {
                             Cargo c = playerUnit->GetCargo(i);
-                            if ((c.GetMissionFlag() != 0 && j == 0)
-                                    || (c.GetMissionFlag() == 0 && j == 1 && (!myfleet)
-                                            && c.GetCategory().find("upgrades") != 0)) {
+                            if ((c.IsMissionFlag() != 0 && j == 0)
+                                    || (c.IsMissionFlag() == 0 && j == 1 && (!myfleet)
+                                            && c.IsComponent())) {
                                 for (int k = c.GetQuantity(); k > 0; --k) {
                                     c.SetQuantity(k);
                                     if (newPart->CanAddCargo(c)) {

@@ -59,7 +59,6 @@
 const Unit *makeTemplateUpgrade(string name, int faction); //for percentoperational
 const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0); //for percentoperational
 extern const char *DamagedCategory;  //for percentoperational
-extern bool isWeapon(std::string name); //for percentoperational
 using std::string;
 extern Unit *getTopLevelOwner();
 
@@ -562,8 +561,8 @@ void RecomputeUnitUpgrades(Unit *un) {
     unsigned int i;
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
-        if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
-            if(c->GetCategory().find("upgrades/integral") == 0) {
+        if (c->IsComponent()) {
+            if(c->IsIntegral()) {
                 continue;
             }
             if (c->GetName().find("mult_") != 0
@@ -574,8 +573,8 @@ void RecomputeUnitUpgrades(Unit *un) {
     }
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
-        if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
-            if(c->GetCategory().find("upgrades/integral") == 0) {
+        if (c->IsComponent()) {
+            if(c->IsIntegral()) {
                 continue;
             }
             if (c->GetName().find("add_") == 0) {
@@ -587,8 +586,8 @@ void RecomputeUnitUpgrades(Unit *un) {
     }
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
-        if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
-            if(c->GetCategory().find("upgrades/integral") == 0) {
+        if (c->IsComponent() && c->GetCategory().find(DamagedCategory) != 0) {
+            if(c->IsIntegral()) {
                 continue;
             }
             if (c->GetName().find("mult_") == 0) {
@@ -971,7 +970,9 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
     if (!upgrade) {
         return 1.0f;
     }
-    if (isWeapon(category)) {
+
+    const Cargo cargo = upgrade->GetCargo(0); 
+    if (cargo.IsWeapon()) {
         static std::string loadfailed("LOAD_FAILED");
         if (upgrade->getNumMounts()) {
             const Mount *mnt = &upgrade->mounts[0];

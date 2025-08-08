@@ -570,7 +570,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                     Cargo tmp;
                     bool isnotcargo = (c == NULL);
                     if (!isnotcargo) {
-                        if (c->GetCategory().find("upgrades") == 0) {
+                        if (c->IsComponent()) {
                             isnotcargo = true;
                         }
                     }

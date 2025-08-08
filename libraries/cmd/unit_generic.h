@@ -490,11 +490,6 @@ public:
     void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes);
     void endElement(const std::string &name);
 
-protected:
-    static std::string massSerializer(const struct XMLType &input, void *mythis);
-    static std::string mountSerializer(const struct XMLType &input, void *mythis);
-    static std::string subunitSerializer(const struct XMLType &input, void *mythis);
-
 public:
 //tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
     void WriteUnit(const char *modificationname = "");

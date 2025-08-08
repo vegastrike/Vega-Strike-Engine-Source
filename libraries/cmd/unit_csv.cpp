@@ -199,26 +199,7 @@ static string nextElement(string &inp) {
     return ret;
 }
 
-static bool stob(const string &inp, bool defaul) {
-    if (inp.length() != 0) {
-        return XMLSupport::parse_bool(inp);
-    }
-    return defaul;
-}
 
-static double stof(const string &inp, double def = 0) {
-    if (inp.length() != 0) {
-        return XMLSupport::parse_float(inp);
-    }
-    return def;
-}
-
-static int stoi(const string &inp, int def = 0) {
-    if (inp.length() != 0) {
-        return XMLSupport::parse_int(inp);
-    }
-    return def;
-}
 
 extern bool CheckAccessory(Unit *);
 
@@ -532,45 +513,28 @@ static void ImportCargo(Unit *thus, const string &imports) {
     }
 }
 
-static void AddCarg(Unit *thus, const string &cargos) {
-    string::size_type where, when, ofs = 0;
-    {
-        int nelem = 0;
-        while ((ofs = cargos.find('{', ofs)) != string::npos) {
-            nelem++, ofs++;
-        }
-        thus->cargo.reserve(nelem + thus->cargo.size());
-        ofs = 0;
+static void AddCarg(Unit *thus, const string &cargo_text) {
+    // TODO: better error handling here and below
+    if(cargo_text.size() < 10) {
+        return;
     }
-    while ((where = cargos.find('{', ofs)) != string::npos) {
-        if ((when = cargos.find('}', where + 1)) != string::npos) {
-            string::size_type elemstart = where + 1, elemend = when;
-            ofs = when + 1;
 
-            std::string name = nextElementString(cargos, elemstart, elemend);
-            std::string category = nextElementString(cargos, elemstart, elemend);
-            float price = nextElementFloat(cargos, elemstart, elemend);
-            int quantity = nextElementInt(cargos, elemstart, elemend);
-            float mass = nextElementFloat(cargos, elemstart, elemend);
-            float volume = nextElementFloat(cargos, elemstart, elemend);
-            float functionality = nextElementFloat(cargos, elemstart, elemend, 1.f);
-            float max_functionality = nextElementFloat(cargos, elemstart, elemend, 1.f);
-            std::string description = nextElementString(cargos, elemstart, elemend);
-            bool mission = nextElementBool(cargos, elemstart, elemend, false);
-            bool installed = nextElementBool(cargos, elemstart, elemend,
-                    category.find("upgrades/") == 0);
-            bool integral = nextElementBool(cargos, elemstart, elemend,
-                    category.find("upgrades/integral") == 0);
+    std::string trimmed_cargo_text = cargo_text.substr(1, cargo_text.size() - 2);
+    std::vector<std::string> cargo_text_elements;
+    boost::split(cargo_text_elements,trimmed_cargo_text,boost::is_any_of("}{"));
 
-            Cargo carg(name, category, price, quantity, mass, volume, functionality,
-                       max_functionality, mission, installed, integral);
-
-
-
-
-            thus->AddCargo(carg, false);
-        } else {
-            ofs = string::npos;
+    for(std::string& cargo_text_element : cargo_text_elements) {
+        if(cargo_text_element.size()<10) {
+            // There's probably a better minimum size, but it should be good enough
+            // This is used to identify text that created a dummy cargo with defaults
+            // probably at the beginning or end of the cargo_text_elements vector.
+            continue;
+        }
+        try {
+            Cargo c(cargo_text_element);
+            thus->AddCargo(c);
+        } catch (const std::exception& e) {
+            std::cerr << "Error parsing cargo: " << e.what() << std::endl;
         }
     }
 }
@@ -1059,21 +1023,9 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
         }
     }
     {
-        string carg;
-        for (unsigned int i = 0; i < numCargo(); ++i) {
-            Cargo *c = &GetCargo(i);
-            char tmp[2048];
-            sprintf(tmp, ";%f;%d;%f;%f;%f;%f;;%s;%s}",
-                    c->GetPrice(),
-                    c->GetQuantity(),
-                    c->GetMass(),
-                    c->GetVolume(),
-                    c->GetFunctionality(),
-                    c->GetMaxFunctionality(),
-                    c->GetMissionFlag() ? "true" : "false",
-                    c->GetInstalled() ? "true" : "false"
-            );
-            carg += "{" + c->GetName() + ";" + c->GetCategory() + tmp;
+        string carg ;
+        for (const Cargo& c : cargo) {
+            carg += c.Serialize();
         }
         unit["Cargo"] = carg;
     }
