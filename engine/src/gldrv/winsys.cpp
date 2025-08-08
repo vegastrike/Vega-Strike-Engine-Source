@@ -215,14 +215,14 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
-    if (game_options()->rgb_pixel_format == "undefined") {
-        game_options()->rgb_pixel_format = ((bpp == 16) ? "555" : "888");
+    if (configuration()->graphics.rgb_pixel_format == "undefined") {
+        configuration()->graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
-    if ((game_options()->rgb_pixel_format.length() == 3) && isdigit(game_options()->rgb_pixel_format[0])
-            && isdigit(game_options()->rgb_pixel_format[1]) && isdigit(game_options()->rgb_pixel_format[2])) {
-        rs = game_options()->rgb_pixel_format[0] - '0';
-        gs = game_options()->rgb_pixel_format[1] - '0';
-        bs = game_options()->rgb_pixel_format[2] - '0';
+    if ((configuration()->graphics.rgb_pixel_format.length() == 3) && isdigit(configuration()->graphics.rgb_pixel_format[0])
+            && isdigit(configuration()->graphics.rgb_pixel_format[1]) && isdigit(configuration()->graphics.rgb_pixel_format[2])) {
+        rs = configuration()->graphics.rgb_pixel_format[0] - '0';
+        gs = configuration()->graphics.rgb_pixel_format[1] - '0';
+        bs = configuration()->graphics.rgb_pixel_format[2] - '0';
     }
     int otherbpp;
     int otherattributes;
@@ -232,7 +232,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, rs);
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, gs);
         SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, bs);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, configuration()->graphics.z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     } else {
         otherattributes = 5;
@@ -240,7 +240,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, rs);
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, gs);
         SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, bs);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, configuration()->graphics.z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     }
     if (configuration()->graphics.gl_accelerated_visual) {
@@ -327,11 +327,11 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         version = reinterpret_cast<const char *>(renderer_string);
     }
     if (version == "GDI Generic" || version == "software") {
-        if (game_options()->gl_accelerated_visual) {
+        if (configuration()->graphics.gl_accelerated_visual) {
             VS_LOG_AND_FLUSH(error, "GDI Generic software driver reported, trying to reset.");
             SDL_ClearError();
             SDL_Quit();
-            game_options()->gl_accelerated_visual = false;
+            configuration()->graphics.gl_accelerated_visual = false;
             return false;
         } else {
             VS_LOG(error, "GDI Generic software driver reported, reset failed.");
@@ -375,7 +375,6 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     constexpr Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_JOYSTICK;
 #endif
 
-    gl_options.fullscreen = configuration()->graphics.full_screen;
     gl_options.color_depth = configuration()->graphics.color_depth;
     /*
      * Initialize SDL

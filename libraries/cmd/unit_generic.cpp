@@ -185,6 +185,7 @@ Unit* CheckNullAndCastToUnit(ComponentsManager* manager) {
     if (manager == nullptr) {
         return nullptr;
     }
+    // VS_LOG_AND_FLUSH(trace, (boost::format("CheckNullAndCastToUnit: Runtime type is %1%") % typeid(*manager).name()));
     return vega_dynamic_cast_ptr<Unit>(manager);
 }
 
@@ -396,7 +397,7 @@ Unit::~Unit() {
     VS_LOG_AND_FLUSH(trace, (boost::format("%1$d") % 5));
 #endif
 #ifdef DESTRUCTDEBUG
-    VS_LOG_AND_FLUSH(trace, (boost::format("%1$d %2$x") % 6 % &mounts);
+    VS_LOG_AND_FLUSH(trace, (boost::format("%1$d %2$x") % 6 % &mounts));
 #endif
 
 #ifdef DESTRUCTDEBUG
@@ -1059,8 +1060,9 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
 
             smalle->jump_drive.UnsetDestination();
             Unit *jumppoint = this;
+            vector<std::string> smalles_destinations = GetDestinations();
             _Universe->activeStarSystem()
-                    ->JumpTo(smalle, jumppoint, GetDestinations()[dest % GetDestinations().size()]);
+                     ->JumpTo(smalle, jumppoint, smalles_destinations.at(dest % smalles_destinations.size()));
             return true;
         }
         return true;
@@ -1286,20 +1288,20 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         //DAMAGE Reactor
         //DAMAGE JUMP
         if (randnum >= .9) {
-            /*static char max_shield_leak =
+            /*const char max_shield_leak =
                 (char) std::max( 0.0,
-                             std::min( 100.0, XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_leak", "90" ) ) ) );
-            static char min_shield_leak =
+                             std::min( 100.0, configuration()->physics.max_shield_leak ) );
+            const char min_shield_leak =
                 (char) std::max( 0.0,
-                             std::min( 100.0, XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_leak", "0" ) ) ) );*/
+                             std::min( 100.0, configuration()->physics.max_shield_leak ) );*/
             //char newleak = float_to_int( std::max( min_shield_leak, std::max( max_shield_leak, (char) ( (randnum-.9)*10.0*100.0 ) ) ) );
             // TODO: lib_damage if (shield.leak < newleak)
             //shield.leak = newleak;
         } else if (randnum >= .7) {
             // TODO: lib_damage shield.recharge *= dam;
         } else if (randnum >= .5) {
-            /*static float mindam =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "min_recharge_shot_damage", "0.5"));
+            /*const float mindam =
+                    configuration()->physics.min_recharge_shot_damage;
             if (dam < mindam) {
                 dam = mindam;
             }
@@ -1307,8 +1309,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
             // TODO: do the above
             reactor.Damage();
         } else if (randnum >= .2) {
-            static float mindam =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "min_maxenergy_shot_damage", "0.2"));
+            const float mindam = configuration()->physics.min_maxenergy_shot_damage;
             if (dam < mindam) {
                 dam = mindam;
             }
@@ -1337,20 +1338,15 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
     ClearMounts();
 
     if (docked & (DOCKING_UNITS)) {
-        static float survival =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "survival_chance_on_base_death", "0.1"));
-        static float player_survival =
-                XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "player_survival_chance_on_base_death",
-                        "1.0"));
-        static int i_survival = float_to_int((RAND_MAX * survival));
-        static int i_player_survival = float_to_int((RAND_MAX * player_survival));
+        const float survival = configuration()->physics.survival_chance_on_base_death;
+        const float player_survival = configuration()->physics.player_survival_chance_on_base_death;
+        const int i_survival = float_to_int((RAND_MAX * survival));
+        const int i_player_survival = float_to_int((RAND_MAX * player_survival));
 
         vector<Unit *> dockedun;
-        unsigned int i;
-        for (i = 0; i < pImage->dockedunits.size(); ++i) {
+        for (auto & docked_unit : pImage->dockedunits) {
             Unit *un;
-            if (NULL != (un = pImage->dockedunits[i]->uc.GetUnit())) {
+            if (nullptr != (un = docked_unit->uc.GetUnit())) {
                 dockedun.push_back(un);
             }
         }
@@ -1364,7 +1360,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
             dockedun.pop_back();
         }
     }
-    //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
+    //eradicate everything. naturally (see previous line) we won't eradicate beams eradicated above
     if (!isSubUnit()) {
         RemoveFromSystem();
     }
@@ -1378,7 +1374,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
         aistate->ClearMessages();
         aistate->Destroy();
     }
-    aistate = NULL;
+    aistate = nullptr;
 
     // The following we don't want to do twice
     killed = true;
@@ -1397,8 +1393,13 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
         Unitdeletequeue.push_back(this);
         if (flightgroup) {
             if (flightgroup->leader.GetUnit() == this) {
-                flightgroup->leader.SetUnit(NULL);
+                flightgroup->leader.SetUnit(nullptr);
             }
+        }
+
+        if (_Universe && _Universe->AccessCockpit() && _Universe->AccessCockpit()->GetParent() && _Universe->AccessCockpit()->GetParent()->Target() == this) {
+            VS_LOG_AND_FLUSH(info, "Killing player's target");
+            _Universe->AccessCockpit()->GetParent()->SetTarget(nullptr);
         }
 
 //#ifdef DESTRUCTDEBUG
@@ -1432,11 +1433,11 @@ float Unit::ExplosionRadius() {
 void Unit::ProcessDeleteQueue() {
     while (!Unitdeletequeue.empty()) {
 #ifdef DESTRUCTDEBUG
-                                                                                                                                VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$x - %2$d") % Unitdeletequeue.back() % Unitdeletequeue.size()));
+        VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$x - %2$d") % Unitdeletequeue.back() % Unitdeletequeue.size()));
         VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$s") % Unitdeletequeue.back()->name.get().c_str()));
 #endif
 #ifdef DESTRUCTDEBUG
-                                                                                                                                if ( Unitdeletequeue.back()->isSubUnit() ) {
+        if ( Unitdeletequeue.back()->isSubUnit() ) {
             VS_LOG(debug, "Subunit Deleting (related to double dipping)");
         }
 #endif
@@ -1505,9 +1506,8 @@ const Unit *loadUnitByCache(std::string name, int faction) {
 }
 
 bool DestroySystem(float hull_percent, float numhits) {
-    static float damage_chance = XMLSupport::parse_float(vs_config->getVariable("physics", "damage_chance", ".005"));
-    static float guaranteed_chance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "definite_damage_chance", ".1"));
+    const float damage_chance = configuration()->physics.damage_chance;
+    const float guaranteed_chance = configuration()->physics.definite_damage_chance;
     float chance = 1 - (damage_chance * (guaranteed_chance + hull_percent));
     if (numhits > 1) {
         chance = std::pow(chance, numhits);
@@ -1516,10 +1516,8 @@ bool DestroySystem(float hull_percent, float numhits) {
 }
 
 bool DestroyPlayerSystem(float hull_percent, float numhits) {
-    static float
-            damage_chance = XMLSupport::parse_float(vs_config->getVariable("physics", "damage_player_chance", ".5"));
-    static float guaranteed_chance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "definite_damage_chance", ".1"));
+    const float damage_chance = configuration()->physics.damage_player_chance;
+    const float guaranteed_chance = configuration()->physics.definite_damage_chance;
     float chance = 1 - (damage_chance * (guaranteed_chance + hull_percent));
     if (numhits > 1) {
         chance = std::pow(chance, numhits);
@@ -1553,10 +1551,9 @@ void Unit::TargetTurret(Unit *targ) {
 }
 
 void WarpPursuit(Unit *un, StarSystem *sourcess, std::string destination) {
-    static bool AINotUseJump = XMLSupport::parse_bool(vs_config->getVariable("physics", "no_ai_jump_points", "false"));
+    const bool AINotUseJump = configuration()->physics.no_ai_jump_points;
     if (AINotUseJump) {
-        static float seconds_per_parsec =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "seconds_per_parsec", "10"));
+        const float seconds_per_parsec = configuration()->physics.seconds_per_parsec;
         float ttime =
                 (SystemLocation(sourcess->getFileName()) - SystemLocation(destination)).Magnitude()
                         * seconds_per_parsec;
@@ -1577,7 +1574,7 @@ void Unit::Target(Unit *targ) {
         return;
     }
 
-    if (!(activeStarSystem == NULL || activeStarSystem == _Universe->activeStarSystem())) {
+    if (!(activeStarSystem == nullptr || activeStarSystem == _Universe->activeStarSystem())) {
         computer.target = nullptr;
         return;
     }
@@ -1597,7 +1594,7 @@ void Unit::Target(Unit *targ) {
             if (!jump_drive.Installed() || jump_drive.IsDestinationSet()) {
                 bool found = false;
                 Unit *u;
-                for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (u = *i) != NULL; ++i) {
+                for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (u = *i) != nullptr; ++i) {
                     if (!u->GetDestinations().empty()) {
                         if (std::find(u->GetDestinations().begin(), u->GetDestinations().end(),
                                 targ->activeStarSystem->getFileName()) != u->GetDestinations().end()) {
@@ -1651,7 +1648,7 @@ extern string getRandomCachedAniString();
 extern Animation *GetVolatileAni(unsigned int);
 
 bool Unit::Explode(bool drawit, float timeit) {
-    if (this->pImage->pExplosion == NULL && this->pImage->timeexplode == 0) {
+    if (this->pImage->pExplosion == nullptr && this->pImage->timeexplode == 0) {
         //no explosion in unit data file && explosions haven't started yet
 
         //notify the director that a ship got destroyed
@@ -1664,13 +1661,18 @@ bool Unit::Explode(bool drawit, float timeit) {
             FactionUtil::GetRandExplosionAnimation(this->faction, bleh);
         }
         if (bleh.empty()) {
-            static Animation cache(game_options()->explosion_animation.c_str(), false, .1, BILINEAR, false);
+            static Animation * cache = nullptr;
+            static bool initialized = false;
+            if (!initialized) {
+                initialized = true;
+                cache = new Animation(configuration()->graphics.explosion_animation.c_str(), false, 0.1, BILINEAR, false);
+            }
             bleh = getRandomCachedAniString();
-            if (bleh.size() == 0) {
-                bleh = game_options()->explosion_animation;
+            if (bleh.empty()) {
+                bleh = configuration()->graphics.explosion_animation;
             }
         }
-        this->pImage->pExplosion = new Animation(bleh.c_str(), game_options()->explosion_face_player, .1, BILINEAR, true);
+        this->pImage->pExplosion = new Animation(bleh.c_str(), configuration()->graphics.explosion_face_player, .1, BILINEAR, true);
         this->pImage->pExplosion->SetDimensions(this->ExplosionRadius(), this->ExplosionRadius());
         Vector p, q, r;
         this->GetOrientation(p, q, r);
@@ -1680,10 +1682,10 @@ bool Unit::Explode(bool drawit, float timeit) {
                     this->shield.AverageMaxLayerValue(),
                     0,
                     this->ExplosionRadius()
-                            * game_options()->explosion_damage_center,
+                            * configuration()->physics.explosion_damage_center,
                     this->ExplosionRadius()
-                            * game_options()->explosion_damage_center
-                            * game_options()->explosion_damage_edge,
+                            * configuration()->physics.explosion_damage_center
+                            * configuration()->physics.explosion_damage_edge,
                     NULL));
         }
         QVector exploc = this->cumulative_transformation.position;
@@ -1701,16 +1703,21 @@ bool Unit::Explode(bool drawit, float timeit) {
         if (!sub) {
             un = _Universe->AccessCockpit()->GetParent();
             if (this->getUnitType() == Vega_UnitType::unit) {
-                if (rand() < RAND_MAX * game_options()->percent_shockwave && (!this->isSubUnit())) {
-                    static string shockani(game_options()->shockwave_animation);
-                    static Animation *__shock__ani = new Animation(shockani.c_str(), true, .1, MIPMAP, false);
+                if (rand() < RAND_MAX * configuration()->graphics.percent_shockwave && (!this->isSubUnit())) {
+                    const std::string shockani(configuration()->graphics.shockwave_animation);
+                    static Animation * shock_ani = nullptr;
+                    static bool initialized = false;
+                    if (!initialized) {
+                        initialized = true;
+                        shock_ani = new Animation(shockani.c_str(), true, 0.1, MIPMAP, false);
+                    }
 
-                    __shock__ani->SetFaceCam(false);
+                    shock_ani->SetFaceCam(false);
                     unsigned int which = AddAnimation(this->Position(),
                             this->ExplosionRadius(),
                             true,
                             shockani,
-                            game_options()->shockwave_growth);
+                            configuration()->graphics.shockwave_growth);
                     Animation *ani = GetVolatileAni(which);
                     if (ani) {
                         ani->SetFaceCam(false);
@@ -1753,7 +1760,7 @@ bool Unit::Explode(bool drawit, float timeit) {
         }
     }
     bool timealldone =
-            (this->pImage->timeexplode > game_options()->debris_time || this->getUnitType() == Vega_UnitType::missile
+            (this->pImage->timeexplode > configuration()->physics.debris_time || this->getUnitType() == Vega_UnitType::missile
                     || _Universe->AccessCockpit()->GetParent() == this || this->SubUnits.empty());
     if (this->pImage->pExplosion) {
         this->pImage->timeexplode += timeit;
@@ -1779,8 +1786,8 @@ bool Unit::Explode(bool drawit, float timeit) {
             }
         }
     }
-    if ((game_options()->eject_cargo_on_blowup > 0) && (this->numCargo() > 0)) {
-        unsigned int dropcount = floorf(this->numCargo() / game_options()->eject_cargo_on_blowup) + 1;
+    if ((configuration()->physics.eject_cargo_on_blowup > 0) && (this->numCargo() > 0)) {
+        unsigned int dropcount = floorf(this->numCargo() / configuration()->physics.eject_cargo_on_blowup) + 1;
         if (dropcount > this->numCargo()) {
             dropcount = this->numCargo();
         }
@@ -1792,7 +1799,7 @@ bool Unit::Explode(bool drawit, float timeit) {
 }
 
 float Unit::ExplodingProgress() const {
-    static float debrisTime = XMLSupport::parse_float(vs_config->getVariable("physics", "debris_time", "500"));
+    const float debrisTime = configuration()->physics.debris_time;
     return std::min(pImage->timeexplode / debrisTime, 1.0f);
 }
 
@@ -1940,8 +1947,7 @@ static Transformation HoldPositionWithRespectTo(Transformation holder,
     holder.position = TransformNormal(m, holder.position);
 
     holder.position = holder.position + changenew.position;
-    static bool changeddockedorient =
-            (XMLSupport::parse_bool(vs_config->getVariable("physics", "change_docking_orientation", "false")));
+    const bool changeddockedorient = (configuration()->physics.change_docking_orientation);
     if (!changeddockedorient) {
         holder.orientation = bak;
     }
@@ -2112,10 +2118,8 @@ bool Unit::UnDock(Unit *utdw) {
             docked &= (~(DOCKED_INSIDE | DOCKED));
             pImage->DockedTo.SetUnit(NULL);
             Velocity = utdw->Velocity;
-            static float
-                    launch_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "launch_speed", "-1"));
-            static bool auto_turn_towards =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "undock_turn_away", "true"));
+            const float launch_speed = configuration()->physics.launch_speed;
+            const bool auto_turn_towards = configuration()->physics.undock_turn_away;
 
             if (launch_speed > 0) {
                 computer.set_speed = launch_speed;
@@ -2890,8 +2894,7 @@ int Unit::RepairUpgrade() {
 
 
     bool ret = success && pct > 0;
-    static bool ComponentBasedUpgrades =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "component_based_upgrades", "false"));
+    const bool ComponentBasedUpgrades = configuration()->physics.component_based_upgrades;
     if (ComponentBasedUpgrades) {
         for (unsigned int i = 0; i < numCargo(); ++i) {
             if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
@@ -3270,8 +3273,8 @@ void Unit::Repair() {
     }
 
     // TODO: everything below here needs to go when we're done with lib_components
-    static float repairtime = XMLSupport::parse_float(vs_config->getVariable("physics", "RepairDroidTime", "180"));
-    static float checktime = XMLSupport::parse_float(vs_config->getVariable("physics", "RepairDroidCheckTime", "5"));
+    const float repairtime = configuration()->physics.repair_droid_time;
+    const float checktime = configuration()->physics.repair_droid_check_time;
     if ((repairtime <= 0) || (checktime <= 0)) {
         return;
     }
@@ -3336,12 +3339,10 @@ void Unit::Repair() {
 
     unsigned int numg = (1 + UnitImages<void>::NUMGAUGES + MAXVDUS);
     unsigned int which = vsrandom.genrand_int31() % numg;
-    static float hud_repair_quantity =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "hud_repair_unit", ".25"));
+    const float hud_repair_quantity = configuration()->physics.hud_repair_unit;
 
     if (mounts.size()) {
-        static float mount_repair_quantity =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "mount_repair_unit", ".25"));
+        const float mount_repair_quantity = configuration()->physics.mount_repair_unit;
         unsigned int i = vsrandom.genrand_int31() % mounts.size();
         if (mounts[i].functionality < mounts[i].maxfunctionality) {
             mounts[i].functionality += mount_repair_quantity;
@@ -3596,8 +3597,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
 
     float difficulty;
     Cockpit *player_cockpit = GetVelocityDifficultyMult(difficulty);
-    static float EXTRA_CARGO_SPACE_DRAG =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "extra_space_drag_for_cargo", "0.005"));
+    const float EXTRA_CARGO_SPACE_DRAG = configuration()->physics.extra_space_drag_for_cargo;
     if (EXTRA_CARGO_SPACE_DRAG > 0) {
         int upgfac = FactionUtil::GetUpgradeFaction();
         if ((this->faction == upgfac) || (this->name == "eject") || (this->name == "Pilot")) {
@@ -3633,7 +3633,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
             }
         }
     }
-    static float SPACE_DRAG = XMLSupport::parse_float(vs_config->getVariable("physics", "unit_space_drag", "0.000000"));
+    const float SPACE_DRAG = configuration()->physics.unit_space_drag;
 
     if (SPACE_DRAG > 0) {
         Velocity = Velocity * (1 - SPACE_DRAG);
@@ -3658,8 +3658,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
             }
             if (increase_locking && (dist_sqr_to_target < mounts[i].type->range * mounts[i].type->range)) {
                 mounts[i].time_to_lock -= simulation_atom_var;
-                static bool ai_lock_cheat =
-                        XMLSupport::parse_bool(vs_config->getVariable("physics", "ai_lock_cheat", "true"));
+                const bool ai_lock_cheat = configuration()->physics.ai_lock_cheat;
                 if (!player_cockpit) {
                     if (ai_lock_cheat) {
                         mounts[i].time_to_lock = -1;
@@ -3800,12 +3799,10 @@ void Unit::UpdatePhysics3(const Transformation &trans,
             uc,
             superunit);
     //can a unit get to another system without jumping?.
-    static bool warp_is_interstellar =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "warp_is_interstellar", "false"));
+    const bool warp_is_interstellar = configuration()->physics.warp_is_interstellar;
     if (warp_is_interstellar
             && (curr_physical_state.position.MagnitudeSquared() > std::pow(configuration()->physics.distance_to_warp, 2) && !isSubUnit())) {
-        static bool direct =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "direct_interstellar_journey", "true"));
+        const bool direct = configuration()->physics.direct_interstellar_journey;
         bool jumpDirect = false;
         if (direct) {
             Cockpit *cp = _Universe->isPlayerStarship(this);

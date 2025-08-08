@@ -681,7 +681,7 @@ int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y) {
     return -1;
 }
 
-BaseInterface *BaseInterface::CurrentBase = NULL;
+BaseInterface *BaseInterface::CurrentBase = nullptr;
 
 bool RefreshGUI(void) {
     bool retval = false;
@@ -1019,10 +1019,10 @@ BaseInterface::~BaseInterface() {
         VSFileSystem::vs_close( fp );
     }
 #endif
-    CurrentBase = 0;
+    CurrentBase = nullptr;
     restore_main_loop();
-    for (size_t i = 0; i < rooms.size(); i++) {
-        delete rooms[i];
+    for (auto & room : rooms) {
+        delete room;
     }
 }
 
@@ -1060,8 +1060,7 @@ void BaseInterface::InitCallbacks() {
     winsys_set_passive_motion_func(PassiveMouseOverWin);
     CurrentBase = this;
     CallComp = false;
-    static bool simulate_while_at_base =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "simulate_while_docked", "false"));
+    const bool simulate_while_at_base = configuration()->physics.simulate_while_docked;
     if (!(simulate_while_at_base || _Universe->numPlayers() > 1)) {
         GFXLoop(base_main_loop);
     }
@@ -1223,7 +1222,7 @@ void InitCallbacks(void) {
 void TerminateCurrentBase(void) {
     if (BaseInterface::CurrentBase) {
         BaseInterface::CurrentBase->Terminate();
-        BaseInterface::CurrentBase = NULL;
+        BaseInterface::CurrentBase = nullptr;
     }
 }
 
@@ -1263,7 +1262,7 @@ void BaseInterface::Terminate() {
             vec.push_back(string());
             saveStringList(cpt, mission_key, vec);
         }
-        BaseInterface::CurrentBase = NULL;
+        BaseInterface::CurrentBase = nullptr;
         restore_main_loop();
         delete this;
     }
@@ -1335,8 +1334,7 @@ void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, in
                         + randyVector(-.5 * bas->rSize(), .5 * bas->rSize()));
                 playa->SetAngularVelocity(bas->AngularVelocity);
                 playa->SetOwner(bas);
-                static float
-                        velmul = XMLSupport::parse_float(vs_config->getVariable("physics", "eject_cargo_speed", "1"));
+                const float velmul = configuration()->physics.eject_cargo_speed;
                 playa->SetVelocity(bas->Velocity * velmul + randyVector(-.25, .25).Cast());
             }
             playa->UnDock(bas);

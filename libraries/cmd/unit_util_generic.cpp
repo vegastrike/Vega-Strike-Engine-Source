@@ -121,12 +121,9 @@ int getPhysicsPriority(Unit *un) {
         return 1;
     }
     //Some other comment mentions these need special treatment for subunit scheduling
-    static int PLAYER_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "player", "1"));
-    static int MISSILE_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "missile", "1"));
-    static int DOCKABLE_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "dockable", "1"));
+    const int PLAYER_PRIORITY = configuration()->physics.priorities.player;
+    const int MISSILE_PRIORITY = configuration()->physics.priorities.missile;
+    const int DOCKABLE_PRIORITY = configuration()->physics.priorities.dockable;
 
     float rad = un->rSize();
     Vega_UnitType untype = un->getUnitType();
@@ -134,10 +131,9 @@ int getPhysicsPriority(Unit *un) {
     float tooclose = 0;
     unsigned int np = _Universe->numPlayers();
     Cockpit *cockpit = _Universe->AccessCockpit();
-    //static float     fixed_system_orbit_priorities =
-    //    XMLSupport::parse_float( vs_config->getVariable( "physics", "fixed_system_priority_velocity_cutoff", "3" ) );
-    static int SYSTEM_INSTALLATION_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "system_installation", "3"));
+    //const float     fixed_system_orbit_priorities =
+    //    configuration()->physics.fixed_system_priority_velocity_cutoff;
+    const int SYSTEM_INSTALLATION_PRIORITY = configuration()->physics.priorities.system_installation;
     bool system_installation = un->owner == getTopLevelOwner();
     bool force_system_installation_priority = true;
     //if (system_installation && un->Velocity.MagnitudeSquared() > fixed_system_orbit_priorities*fixed_system_orbit_priorities)
@@ -196,41 +192,25 @@ int getPhysicsPriority(Unit *un) {
     if (hasDockingUnits(un)) {
         return DOCKABLE_PRIORITY;
     }
-    static int ASTEROID_PARENT_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "asteroid_parent", "1"));
-    static int ASTEROID_HIGH_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "asteroid_high", "2"));
+    const int ASTEROID_PARENT_PRIORITY = configuration()->physics.priorities.asteroid_parent;
+    const int ASTEROID_HIGH_PRIORITY = configuration()->physics.priorities.asteroid_high;
     //static int   ASTEROID_LOW_PRIORITY    = XMLSupport::parse_int(
     //    vs_config->getVariable( "physics", "priorities", "asteroid.low", "32" ) );
-    static int HIGH_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "high", "2"));
-    static int MEDIUMHIGH_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "mediumhigh", "4"));
-    static int MEDIUM_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "medium", "8"));
-    static int LOW_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "low", "32"));
-    static int NOT_VISIBLE_COMBAT_HIGH = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "notvisible_combat_high", "10"));
-    static int NOT_VISIBLE_COMBAT_MEDIUM = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "notvisible_combat_medium", "20"));
-    static int NOT_VISIBLE_COMBAT_LOW = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "notvisible_combat_low", "40"));
-    static int NO_ENEMIES = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "no_enemies", "64"));
-    static int INERT_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "inert", "64"));
-    static double _PLAYERTHREAT_DISTANCE_FACTOR = XMLSupport::parse_float(
-            vs_config->getVariable("physics", "priorities", "playerthreat_distance_factor", "2"));
-    static double _THREAT_DISTANCE_FACTOR = XMLSupport::parse_float(
-            vs_config->getVariable("physics", "priorities", "threat_distance_factor", "1"));
-    static double DYNAMIC_THROTTLE_MINFACTOR = XMLSupport::parse_float(
-            vs_config->getVariable("physics", "priorities", "dynamic_throttle.mindistancefactor", "0.25"));
-    static double DYNAMIC_THROTTLE_MAXFACTOR = XMLSupport::parse_float(
-            vs_config->getVariable("physics", "priorities", "dynamic_throttle.maxdistancefactor", "4"));
-    static double DYNAMIC_THROTTLE_TARGETFPS = XMLSupport::parse_float(
-            vs_config->getVariable("physics", "priorities", "dynamic_throttle.targetfps", "30"));
-    static double DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.0 / DYNAMIC_THROTTLE_TARGETFPS;
+    const int HIGH_PRIORITY = configuration()->physics.priorities.high;
+    const int MEDIUMHIGH_PRIORITY = configuration()->physics.priorities.medium_high;
+    const int MEDIUM_PRIORITY = configuration()->physics.priorities.medium;
+    const int LOW_PRIORITY = configuration()->physics.priorities.low;
+    const int NOT_VISIBLE_COMBAT_HIGH = configuration()->physics.priorities.not_visible_combat_high;
+    const int NOT_VISIBLE_COMBAT_MEDIUM = configuration()->physics.priorities.not_visible_combat_medium;
+    const int NOT_VISIBLE_COMBAT_LOW = configuration()->physics.priorities.not_visible_combat_low;
+    const int NO_ENEMIES = configuration()->physics.priorities.no_enemies;
+    const int INERT_PRIORITY = configuration()->physics.priorities.inert;
+    const double _PLAYERTHREAT_DISTANCE_FACTOR = configuration()->physics.priorities.player_threat_distance_factor;
+    const double _THREAT_DISTANCE_FACTOR = configuration()->physics.priorities.threat_distance_factor;
+    const double DYNAMIC_THROTTLE_MINFACTOR = configuration()->physics.priorities.dynamic_throttle.min_distance_factor;
+    const double DYNAMIC_THROTTLE_MAXFACTOR = configuration()->physics.priorities.dynamic_throttle.max_distance_factor;
+    const double DYNAMIC_THROTTLE_TARGETFPS = configuration()->physics.priorities.dynamic_throttle.target_fps;
+    const double DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.0 / DYNAMIC_THROTTLE_TARGETFPS;
     static double DYNAMIC_THROTTLE_FACTOR = 1.0;
     static double lastThrottleAdjust = 0.0;
     if (UniverseUtil::GetGameTime() != lastThrottleAdjust) {
@@ -239,8 +219,8 @@ int getPhysicsPriority(Unit *un) {
         newfactor = mymax(DYNAMIC_THROTTLE_MINFACTOR, mymin(DYNAMIC_THROTTLE_MAXFACTOR, newfactor));
         DYNAMIC_THROTTLE_FACTOR = (newfactor * GetElapsedTime() + DYNAMIC_THROTTLE_FACTOR) / (1.0 + GetElapsedTime());
     }
-    static double PLAYERTHREAT_DISTANCE_FACTOR = _PLAYERTHREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
-    static double THREAT_DISTANCE_FACTOR = _THREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
+    const double PLAYERTHREAT_DISTANCE_FACTOR = _PLAYERTHREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
+    const double THREAT_DISTANCE_FACTOR = _THREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
     Unit *parent = cockpit->GetParent();
     float gun_range = 0;
     float missile_range = 0;
@@ -249,7 +229,7 @@ int getPhysicsPriority(Unit *un) {
         float speed = 0;
         parent->getAverageGunSpeed(speed, gun_range, missile_range);
     }
-    static int cargofac = FactionUtil::GetFactionIndex("cargo");
+    const int cargofac = FactionUtil::GetFactionIndex("cargo");
     int upfac = FactionUtil::GetUpgradeFaction();
     int neutral = FactionUtil::GetNeutralFaction();
     if (un->schedule_priority != Unit::scheduleDefault) {
@@ -290,12 +270,8 @@ int getPhysicsPriority(Unit *un) {
         }
     }
     if (un->graphicOptions.WarpRamping || un->graphicOptions.RampCounter != 0) {
-        static float compwarprampuptime =
-                XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "computerwarprampuptime",
-                        "10")); //for the heck of it.  NOTE, variable also in unit_generic.cpp
-        static float warprampdowntime =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "warprampdowntime", "0.5"));
+        const float compwarprampuptime = configuration()->physics.computer_warp_ramp_up_time; //for the heck of it.  NOTE, variable also in unit_generic.cpp
+        const float warprampdowntime = configuration()->physics.warp_ramp_down_time;
         float lowest_priority_time = SIM_QUEUE_SIZE * SIMULATION_ATOM;
 
         float time_ramped = compwarprampuptime - un->graphicOptions.RampCounter;
@@ -789,8 +765,7 @@ bool isDockableUnit(const Unit *my_unit) {
 }
 
 bool isCloseEnoughToDock(const Unit *my_unit, const Unit *un) {
-    static bool
-            superdock = XMLSupport::parse_bool(vs_config->getVariable("physics", "dock_within_base_shield", "false"));
+    const bool superdock = configuration()->physics.dock_within_base_shield;
     float dis =
             (un->getUnitType() == Vega_UnitType::planet || superdock) ? UnitUtil::getSignificantDistance(my_unit, un)
                     : UnitUtil::getDistance(

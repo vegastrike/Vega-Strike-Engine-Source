@@ -884,8 +884,8 @@ Unit *VDU::GetCommunicating() {
 void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
     //Unit * you = _Universe->AccessCockpit()->GetParent();
     //Unit * targ = you!=NULL?you->Target():NULL;
-    //static float game_speed = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-    //static bool  lie = XMLSupport::parse_bool( vs_config->getVariable( "physics", "game_speed_lying", "true" ) );
+    //const float game_speed = configuration()->physics.game_speed;
+    //const bool lie = configuration()->physics.game_speed_lying;
     string nam = "none";
     if (targ) {
         nam = reformatName(targ->name);

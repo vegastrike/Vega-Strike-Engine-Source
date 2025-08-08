@@ -42,6 +42,9 @@ inline TargetType* vega_dynamic_cast_ptr(SourceType* from) {
     } catch (std::bad_cast& e) {
         VS_LOG_AND_FLUSH(fatal, (boost::format("Fatal Error '%1%' casting type %2%* to %3%*") % e.what() % typeid(SourceType).name() % typeid(TargetType).name()));
         VSExit(-422);
+    } catch (std::exception& e) {
+        VS_LOG_AND_FLUSH(fatal, (boost::format("Fatal Error '%1%' casting type %2%* to %3%*") % e.what() % typeid(SourceType).name() % typeid(TargetType).name()));
+        VSExit(-423);
     }
     if (ret_val == nullptr) {
         VS_LOG_AND_FLUSH(fatal, (boost::format("Fatal Failure to Cast type %1%* to %2%* -- nullptr encountered") % typeid(SourceType).name() % typeid(TargetType).name()));
@@ -58,6 +61,9 @@ inline const TargetType* vega_dynamic_const_cast_ptr(const SourceType* from) {
     } catch (std::bad_cast& e) {
         VS_LOG_AND_FLUSH(fatal, (boost::format("Fatal Error '%1%' casting type %2%* to %3%*") % e.what() % typeid(SourceType).name() % typeid(TargetType).name()));
         VSExit(-422);
+    } catch (std::exception& e) {
+        VS_LOG_AND_FLUSH(fatal, (boost::format("Fatal Error '%1%' casting type %2%* to %3%*") % e.what() % typeid(SourceType).name() % typeid(TargetType).name()));
+        VSExit(-423);
     }
     if (ret_val == nullptr) {
         VS_LOG_AND_FLUSH(fatal, (boost::format("Fatal Failure to Cast type %1%* to %2%* -- nullptr encountered") % typeid(SourceType).name() % typeid(TargetType).name()));

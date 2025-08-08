@@ -436,7 +436,7 @@ void init_opengl_extensions() {
 #ifdef GL_FOG_DISTANCE_MODE_NV
     if (vsExtensionSupported("GL_NV_fog_distance")) {
         VS_LOG(trace, "OpenGL::Accurate Fog Distance supported");
-        switch (game_options()->fogdetail) {
+        switch (configuration()->graphics.fog_detail) {
             case 0:
                 glFogi(GL_FOG_DISTANCE_MODE_NV, GL_EYE_PLANE_ABSOLUTE_NV);
                 break;
@@ -463,7 +463,7 @@ void init_opengl_extensions() {
         VS_LOG(trace, "OpenGL::S3TC Texture Compression supported");
         //should be true;
     } else {
-        gl_options.s3tc = false;
+        configuration()->graphics.s3tc = false;
         VS_LOG(info, "OpenGL::S3TC Texture Compression unsupported");
     }
     if ((glMultiTexCoord2fARB_p && glMultiTexCoord4fARB_p && glClientActiveTextureARB_p && glActiveTextureARB_p)
@@ -494,14 +494,14 @@ void init_opengl_extensions() {
         VS_LOG(trace, "OpenGL::S3TC Texture Clamp-to-Edge supported");
         // should be true
     } else {
-        gl_options.ext_clamp_to_edge = false;
+        configuration()->graphics.ext_clamp_to_edge = false;
         VS_LOG(info, "OpenGL::S3TC Texture Clamp-to-Edge unsupported");
     }
     if (vsExtensionSupported("GL_ARB_texture_border_clamp") || vsExtensionSupported("GL_SGIS_texture_border_clamp")) {
         VS_LOG(trace, "OpenGL::S3TC Texture Clamp-to-Border supported");
         // should be true
     } else {
-        gl_options.ext_clamp_to_border = false;
+        configuration()->graphics.ext_clamp_to_border = false;
         VS_LOG(info, "OpenGL::S3TC Texture Clamp-to-Border unsupported");
     }
     if (vsExtensionSupported("GL_ARB_framebuffer_sRGB") || vsExtensionSupported("GL_EXT_framebuffer_sRGB")) {
@@ -590,16 +590,16 @@ void GFXInit(int argc, char **argv) {
 
     glViewport(0, 0, configuration()->graphics.resolution_x, configuration()->graphics.resolution_y);
     static GFXColor clearcol = vs_config->getColor("space_background");;
-    gl_options.wireframe = game_options()->use_wireframe;
-    gl_options.max_texture_dimension = game_options()->max_texture_dimension;
-    gl_options.max_movie_dimension = game_options()->max_movie_dimension;
+    gl_options.wireframe = configuration()->graphics.use_wireframe;
+    configuration()->graphics.max_texture_dimension = configuration()->graphics.max_texture_dimension;
+    configuration()->graphics.max_movie_dimension = configuration()->graphics.max_movie_dimension;
     bool textsupported =
             (vsExtensionSupported("GL_ARB_texture_non_power_of_two") || vsExtensionSupported("GL_ARB_texture_rectangle")
                     || vsExtensionSupported("GL_NV_texture_rectangle")) ? "true" : "false";
 
-    gl_options.rect_textures = game_options()->rect_textures ? true : textsupported;
+    configuration()->graphics.rect_textures = configuration()->graphics.rect_textures ? true : textsupported;
 
-    if (gl_options.rect_textures) {
+    if (configuration()->graphics.rect_textures) {
         VS_LOG(trace, "RECT textures supported");
 
         // Fetch max rect textue dimension
@@ -612,35 +612,35 @@ void GFXInit(int argc, char **argv) {
         VS_LOG(trace, (boost::format("RECT max texture dimension: %1%") % max_rect_dimension));
     }
 
-    bool vidsupported = (gl_options.rect_textures
+    bool vidsupported = (configuration()->graphics.rect_textures
                          || (vsExtensionSupported("GL_ARB_texture_non_power_of_two") && vsVendorMatch("nvidia")));
 
-    gl_options.pot_video_textures = game_options()->pot_video_textures ? true : vidsupported;
+    configuration()->graphics.pot_video_textures = configuration()->graphics.pot_video_textures ? true : vidsupported;
 
-    if (!gl_options.pot_video_textures && gl_options.rect_textures) {
+    if (!configuration()->graphics.pot_video_textures && configuration()->graphics.rect_textures) {
         // Enforce max rect texture for movies, which use them
-        if (gl_options.max_movie_dimension > gl_options.max_rect_dimension) {
-            gl_options.max_movie_dimension = gl_options.max_rect_dimension;
+        if (configuration()->graphics.max_movie_dimension > gl_options.max_rect_dimension) {
+            configuration()->graphics.max_movie_dimension = gl_options.max_rect_dimension;
         }
     }
 
-    /*if (gl_options.pot_video_textures) {
+    /*if (configuration()->graphics.pot_video_textures) {
         VS_LOG(info, "Forcing POT video textures");
     } else {
         VS_LOG(trace, "Using NPOT video textures");
     }*/
     // Removing gl_options soon
     gl_options.smooth_shade = game_options()->SmoothShade;
-    gl_options.mipmap = game_options()->mipmapdetail;
-    gl_options.compression = game_options()->texture_compression;
-    gl_options.Multitexture = game_options()->reflection;
-    gl_options.smooth_lines = game_options()->smooth_lines;
-    gl_options.smooth_points = game_options()->smooth_points;
+    gl_options.mipmap = configuration()->graphics.mipmap_detail;
+    gl_options.compression = configuration()->graphics.texture_compression;
+    gl_options.Multitexture = configuration()->graphics.reflection;
+    configuration()->graphics.smooth_lines = configuration()->graphics.smooth_lines;
+    configuration()->graphics.smooth_points = configuration()->graphics.smooth_points;
 
-    gl_options.display_lists = game_options()->displaylists;
-    gl_options.s3tc = game_options()->s3tc;
-    gl_options.ext_clamp_to_edge = game_options()->ext_clamp_to_edge;
-    gl_options.ext_clamp_to_border = game_options()->ext_clamp_to_border;
+    gl_options.display_lists = configuration()->graphics.displaylists;
+    configuration()->graphics.s3tc = configuration()->graphics.s3tc;
+    configuration()->graphics.ext_clamp_to_edge = configuration()->graphics.ext_clamp_to_edge;
+    configuration()->graphics.ext_clamp_to_border = configuration()->graphics.ext_clamp_to_border;
 
     glClearColor(clearcol.r, clearcol.g, clearcol.b, clearcol.a);
     winsys_set_reshape_func(Reshape);
@@ -758,7 +758,7 @@ void GFXShutdown() {
 
     GFXDestroyAllTextures();
     GFXDestroyAllLights();
-    if (gl_options.fullscreen) {
+    if (configuration()->graphics.full_screen) {
         winsys_shutdown();
     }
 }

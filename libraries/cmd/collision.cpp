@@ -273,7 +273,7 @@ void Collision::validateCollision(const QVector &relative_velocity,
 }
 
 // Discussion - the original code ran this once for both units. This required a comparison of the units to find out which is smaller.
-// The history on this is as follows - one of the normals is picked to compute the force along; while this is arbitrary in the ideal case, given interpentration, we use the heuristic that the larger object's normal is likely to better characterize the collision angles
+// The history on this is as follows - one of the normals is picked to compute the force along; while this is arbitrary in the ideal case, given interpenetration, we use the heuristic that the larger object's normal is likely to better characterize the collision angles
 void Collision::collide(Unit *unit1,
         const QVector &location1,
         const Vector &normal1,
@@ -289,9 +289,16 @@ void Collision::collide(Unit *unit1,
     // See commit a66bdcfa1e00bf039183603913567d48e52c7a8e method crashLand for an example
     // If configured, the game should behave like privateer and land if close enough to a dock
 
-    // TODO: Try "auto jump" both ways
-    // See commit a66bdcfa1e00bf039183603913567d48e52c7a8e method Unit->jumpReactToCollision for an example
-    // I assume this is for "always open" jump gates that you pass through
+    // Try "auto jump" if either unit is a jump point
+    if (unit1->isJumppoint()) {
+        VS_LOG(debug, "unit1->jumpReactToCollision(unit2) being called");
+        unit1->jumpReactToCollision(unit2);
+        return;
+    } else if (unit2->isJumppoint()) {
+        VS_LOG(debug, "unit2->jumpReactToCollision(unit1) being called");
+        unit2->jumpReactToCollision(unit1);
+        return;
+    }
 
     collision1.shouldApplyForceAndDealDamage(unit2);
     collision2.shouldApplyForceAndDealDamage(unit1);
