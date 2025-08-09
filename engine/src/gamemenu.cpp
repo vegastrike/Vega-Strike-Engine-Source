@@ -157,7 +157,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     serverInputText->setTextColor(GUI_OPAQUE_WHITE());
     serverInputText->setTextMargins(Size(.02, .01));
     serverInputText->setId("VegaserverHost");
-    serverInputText->setText(game_options()->server_ip);
+    serverInputText->setText(configuration()->network.server_ip);
     hostConnGroup->addChild(serverInputText);
 
     mplayTitle = new StaticDisplay;
@@ -179,7 +179,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     portInputText->setTextColor(GUI_OPAQUE_WHITE());
     portInputText->setTextMargins(Size(.02, .01));
     portInputText->setId("VegaserverPort");
-    portInputText->setText(game_options()->server_port);
+    portInputText->setText(configuration()->network.server_port);
     hostConnGroup->addChild(portInputText);
 
     mplayTitle = new StaticDisplay;
@@ -200,7 +200,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     acctserverInput->setTextColor(GUI_OPAQUE_WHITE());
     acctserverInput->setTextMargins(Size(.02, .01));
     acctserverInput->setId("AccountServer");
-    acctserverInput->setText(game_options()->account_server_url);
+    acctserverInput->setText(configuration()->network.account_server_url);
     acctConnGroup->addChild(acctserverInput);
 
     mplayTitle = new StaticDisplay;
@@ -221,8 +221,8 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     usernameInput->setTextColor(GUI_OPAQUE_WHITE());
     usernameInput->setTextMargins(Size(.02, .01));
     usernameInput->setId("Username");
-    if (!game_options()->password.empty()) {
-        usernameInput->setText(game_options()->callsign);
+    if (!configuration()->player.password.empty()) {
+        usernameInput->setText(configuration()->player.callsign);
     }
     serverConnGroup->addChild(usernameInput);
 
@@ -254,7 +254,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     passwordInput->setTextColor(GUI_OPAQUE_WHITE());
     passwordInput->setTextMargins(Size(.02, .01));
     passwordInput->setId("Password");
-    passwordInput->setText(game_options()->password);
+    passwordInput->setText(configuration()->player.password);
     serverConnGroup->addChild(passwordInput);
 
     NewButton *multiStart = new NewButton;

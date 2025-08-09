@@ -83,8 +83,7 @@ void modifyExponent(JoyStick *j) {
         for (int a = 0; a < j->nr_of_axes; a++) {
             j->joy_axis[a] =
                     ((j->joy_axis[a] < 0) ? -std::pow(-j->joy_axis[a], configuration()->joystick.joystick_exponent) : std::pow(j->joy_axis[a],
-                            game_options()->
-                                    joystick_exponent));
+                            configuration()->joystick.joystick_exponent));
         }
     }
 }
