@@ -348,6 +348,13 @@ def build_game_options_parse_keys(parse_keys_list: list[ParseKey], config_items:
             if new_parse_key.pattern and new_parse_key.substitution:
                 parse_keys_list.append(new_parse_key)
 
+            new_parse_key_1 = ParseKey()
+            new_parse_key_1.pattern = re.compile(r'\bg_game\.' + this_setting.name + r'\b', regex_flags_multiline)
+            new_parse_key_1.substitution = this_setting.replacement_expression
+            new_parse_key_1.leave_as_is = ''
+            if new_parse_key_1.pattern and new_parse_key_1.substitution:
+                parse_keys_list.append(new_parse_key_1)
+
     return parse_keys
 
 
