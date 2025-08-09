@@ -38,7 +38,7 @@
 
 #include "src/config_xml.h"
 #include "cmd/script/mission.h"
-#include "root_generic/options.h"
+#include "configuration/configuration.h"
 
 #define FF_DOIT 1
 
@@ -210,7 +210,7 @@ void ForceFeedback::init()
         return;
     }
     char devname[200];
-    sprintf( devname, "/dev/input/event%d", configuration()->joystick.ff_device );
+    std::snprintf( devname, 200, "/dev/input/event%d", configuration()->joystick.ff_device );
 
     ff_fd = open( devname, O_RDWR );
     if (ff_fd == -1) {
@@ -266,69 +266,6 @@ void ForceFeedback::init()
         have_ff = false;
         return;
     }
-
-#if 0
-    effects[1].type = FF_CONSTANT;
-    effects[1].id   = -1;
-    effects[1].u.constant.level = 0x2000;       /* Strength : 25 % */
-    effects[1].direction = 0x6000;      /* 135 degrees */
-    effects[1].u.constant.envelope.attack_length = 0x100;
-    effects[1].u.constant.envelope.attack_level  = 0;
-    effects[1].u.constant.envelope.fade_length   = 0x100;
-    effects[1].u.constant.envelope.fade_level    = 0;
-    effects[1].trigger.button   = 0;
-    effects[1].trigger.interval = 0;
-    effects[1].replay.length    = 2000;     /* 2 seconds */
-    effects[1].replay.delay     = 0;
-
-    /* download a periodic sinusoidal effect */
-    effects[0].type = FF_PERIODIC;
-    effects[0].id   = -1;
-    effects[0].u.periodic.waveform  = FF_SINE;
-    effects[0].u.periodic.period    = 0.4*0x100;        /* 0.1 second */
-    effects[0].u.periodic.magnitude = 0x6000;           /* 0.5 * Maximum magnitude */
-    effects[0].u.periodic.offset    = 0;
-    effects[0].u.periodic.phase     = 0;
-    effects[0].direction = 0x000;       /* Along X axis */
-    effects[0].u.periodic.envelope.attack_length = 0x100;
-    effects[0].u.periodic.envelope.attack_level  = 0;
-    effects[0].u.periodic.envelope.fade_length   = 0x100;
-    effects[0].u.periodic.envelope.fade_level    = 0;
-    effects[0].trigger.button   = 0;
-    effects[0].trigger.interval = 0;
-    effects[0].replay.length    = 500;     /* 1 seconds */
-    effects[0].replay.delay     = 0;
-
-    /* download an condition spring effect */
-    effects[2].type = FF_SPRING;
-    effects[2].id   = -1;
-    effects[2].u.condition[0].right_saturation = 0x7fff;
-    effects[2].u.condition[0].left_saturation  = 0x7fff;
-    effects[2].u.condition[0].right_coeff = 0x2000;
-    effects[2].u.condition[0].left_coeff  = 0x2000;
-    effects[2].u.condition[0].deadband    = 0x0;
-    effects[2].u.condition[0].center = 0x0;
-    effects[2].u.condition[1]   = effects[2].u.condition[0];
-    effects[2].trigger.button   = 0;
-    effects[2].trigger.interval = 0;
-    effects[2].replay.length    = 0xFFFF;
-    effects[2].replay.delay     = 0;
-
-    /* download an condition damper effect */
-    effects[3].type = FF_DAMPER;
-    effects[3].id   = -1;
-    effects[3].u.condition[0].right_saturation = 0x7fff;
-    effects[3].u.condition[0].left_saturation  = 0x7fff;
-    effects[3].u.condition[0].right_coeff = 0x2000;
-    effects[3].u.condition[0].left_coeff  = 0x2000;
-    effects[3].u.condition[0].deadband    = 0x0;
-    effects[3].u.condition[0].center = 0x0;
-    effects[3].u.condition[1]      = effects[3].u.condition[0];
-    effects[3].trigger.button      = 0;
-    effects[3].trigger.interval    = 0;
-    effects[3].replay.length       = 2000;     /* 2 seconds */
-    effects[3].replay.delay        = 0;
-#endif
 
     effects[eff_speed_damper].type = FF_DAMPER;
     effects[eff_speed_damper].id   = -1;

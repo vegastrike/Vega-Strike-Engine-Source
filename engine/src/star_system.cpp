@@ -29,7 +29,7 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include <assert.h>
+#include <cassert>
 #include "src/star_system.h"
 
 #include "root_generic/lin_time.h"
@@ -81,6 +81,7 @@
 #include "gfx_generic/cockpit_generic.h"
 
 #include <boost/python/errors.hpp>
+#include <utility>
 
 using std::endl;
 
@@ -160,7 +161,7 @@ StarSystem::~StarSystem() {
         }
         _Universe->popActiveStarSystem();
     }
-    while (activ.size()) {
+    while (!activ.empty()) {
         _Universe->pushActiveStarSystem(activ.back());
         activ.pop_back();
     }
@@ -381,13 +382,13 @@ void StarSystem::Draw(bool DrawCockpit) {
 
     Collidable key_iterator(0, 1, drawstartpos);
     UnitWithinRangeOfPosition<UnitDrawer> drawer(configuration()->graphics.precull_dist, 0, key_iterator);
-    //Need to draw really big stuff (i.e. planets, deathstars, and other mind-bogglingly big things that shouldn't be culled despited extreme distance
+    //Need to draw really big stuff (i.e. planets, deathstars, and other mind-bogglingly big things that shouldn't be culled despite extreme distance
     Unit *unit;
     if ((drawer.action.parent = _Universe->AccessCockpit()->GetParent()) != nullptr) {
         drawer.action.parenttarget = drawer.action.parent->Target();
     }
     for (un_iter iter = this->gravitational_units.createIterator(); (unit = *iter); ++iter) {
-        float distance = (drawstartpos - unit->Position()).Magnitude() - unit->rSize();
+        const double distance = (drawstartpos - unit->Position()).Magnitude() - unit->rSize();
         if (distance < configuration()->graphics.precull_dist) {
             drawer.action.grav_acquire(unit);
         } else {
@@ -491,7 +492,7 @@ void StarSystem::createBackground(Star_XML *xml) {
     light_map[0] = new Texture((xml->backgroundname + "_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
             GFXFALSE, configuration()->graphics.max_cubemap_size);
     if (light_map[0]->LoadSuccess() && light_map[0]->isCube()) {
-        light_map[1] = light_map[2] = light_map[3] = light_map[4] = light_map[5] = 0;
+        light_map[1] = light_map[2] = light_map[3] = light_map[4] = light_map[5] = nullptr;
     } else {
         delete light_map[0];
         light_map[0] =
@@ -565,7 +566,7 @@ float ScaleJumpRadius(float radius) {
 
 /********* FROM STAR SYSTEM XML *********/
 void setStaticFlightgroup(vector<Flightgroup *> &fg, const std::string &nam, int faction) {
-    while (faction >= (int) fg.size()) {
+    while (faction >= static_cast<int>(fg.size())) {
         fg.push_back(new Flightgroup());
         fg.back()->nr_ships = 0;
     }
@@ -786,8 +787,8 @@ void Statistics::CheckVitals(StarSystem *ss) {
         }
     }
     if (checkIter >= sortedsize && sortedsize
-            > (unsigned int) (enemycount + neutralcount + friendlycount
-                    + citizencount) / 4 /*suppose at least 1/4 survive a given frame*/) {
+            > static_cast<unsigned int>(enemycount + neutralcount + friendlycount
+                + citizencount) / 4 /*suppose at least 1/4 survive a given frame*/) {
         citizencount = newcitizencount;
         newcitizencount = 0;
         enemycount = newenemycount;
@@ -813,7 +814,7 @@ void Statistics::AddUnit(Unit *un) {
             ++neutralcount;
         }
     }
-    if (un->GetDestinations().size()) {
+    if (!un->GetDestinations().empty()) {
         jumpPoints[un->GetDestinations()[0]].SetUnit(un);
     }
     if (UnitUtil::isSignificant(un)) {
@@ -828,7 +829,7 @@ void Statistics::AddUnit(Unit *un) {
         if (UnitUtil::isAsteroid(un)) {
             k = 2;
         }
-        navs[k].push_back(UnitContainer(un));
+        navs[k].emplace_back(un);
     }
 }
 
@@ -845,7 +846,7 @@ void Statistics::RemoveUnit(Unit *un) {
             --neutralcount;
         }
     }
-    if (un->GetDestinations().size()) {
+    if (!un->GetDestinations().empty()) {
         //make sure it is there
         jumpPoints[(un->GetDestinations()[0])].SetUnit(nullptr);
         //kill it--stupid I know--but hardly time critical
@@ -1416,8 +1417,8 @@ void ActivateAnimation(Unit *jumppoint) {
 }
 
 static bool isJumping(const vector<unorigdest *> &pending, Unit *un) {
-    for (size_t i = 0; i < pending.size(); ++i) {
-        if (pending[i]->un == un) {
+    for (const auto i : pending) {
+        if (i->un == un) {
             return true;
         }
     }
@@ -1428,8 +1429,8 @@ QVector SystemLocation(std::string system);
 
 
 QVector ComputeJumpPointArrival(QVector pos, std::string origin, std::string destination) {
-    QVector finish = SystemLocation(destination);
-    QVector start = SystemLocation(origin);
+    QVector finish = SystemLocation(std::move(destination));
+    QVector start = SystemLocation(std::move(origin));
     QVector dir = finish - start;
     if (dir.MagnitudeSquared()) {
         dir.Normalize();
@@ -1531,7 +1532,7 @@ void StarSystem::UpdateMissiles() {
                 > 0) {           //we can avoid this iterated check for kinetic projectiles even if they "discharge" on hit
             Unit *un;
             for (un_iter ui = getUnitList().createIterator();
-                    NULL != (un = (*ui));
+                    nullptr != (un = (*ui));
                     ++ui) {
                 enum Vega_UnitType type = un->getUnitType();
                 if (collideroids || type
