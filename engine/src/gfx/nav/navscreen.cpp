@@ -353,15 +353,15 @@ void NavigationSystem::Setup() {
     ScreenToCoord(buttonskipby4_7[2]);
     ScreenToCoord(buttonskipby4_7[3]);
 
-//reverse = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
+    reverse = configuration()->joystick.reverse_mouse_spr ? 1 : -1;
 
-    reverse = -1;
+    // reverse = -1;
     if ((screenskipby4[1] - screenskipby4[0]) < (screenskipby4[3] - screenskipby4[2])) {
         system_item_scale *= (screenskipby4[1] - screenskipby4[0]);            //is actually over 1, which is itself
     } else {
         system_item_scale *= (screenskipby4[3] - screenskipby4[2]);
     }
-    screenoccupation = new navscreenoccupied(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], 1);
+    screenoccupation = new navscreenoccupied(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], true);
 
     //Get special colors from the config
     currentcol = vs_config->getColor("nav", "current_system",

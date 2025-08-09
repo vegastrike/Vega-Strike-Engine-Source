@@ -29,6 +29,7 @@
 #define VEGA_STRIKE_ENGINE_STAR_XML_H
 
 #include "root_generic/xml_support.h"
+#include "gfxlib_struct.h"
 
 using namespace XMLSupport;
 

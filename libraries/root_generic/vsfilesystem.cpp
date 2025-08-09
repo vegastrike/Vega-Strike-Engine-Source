@@ -891,7 +891,7 @@ void InitPaths(string conf, string subdir) {
     sharedmeshes = game_options()->sharedmeshes;
     sharedunits = game_options()->sharedunits;
     aidir = game_options()->ai_directory;
-    universe_name = game_options()->galaxy;
+    universe_name = configuration()->game_start.galaxy;
 
     //Setup the directory lists we know about - note these are relative paths to datadir or homedir
     //----- THE Directories vector contains the resource/volume files name without extension or the main directory to files

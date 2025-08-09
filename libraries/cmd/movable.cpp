@@ -41,10 +41,12 @@
 #include "root_generic/configxml.h"
 
 
-#include <iostream>
 #include <string>
 #include "src/vega_cast_utils.h"
-#include <limits.h>
+#include <climits>
+#include <utility>
+
+#include "resource/random_utils.h"
 
 float accelStarHandler(float &input) {
     return input / (configuration()->physics.game_speed * configuration()->physics.game_accel);
@@ -54,16 +56,16 @@ float speedStarHandler(float &input) {
     return input / configuration()->physics.game_speed;
 }
 
-Movable::Movable() : cumulative_transformation_matrix(identity_matrix),
-        sim_atom_multiplier(1),
+Movable::Movable() : sim_atom_multiplier(1),
         predicted_priority(1),
         last_processed_sqs(0),
         docked(NOT_DOCKED),
+        cumulative_transformation_matrix(identity_matrix),
         corner_min(Vector(FLT_MAX, FLT_MAX, FLT_MAX)),
         corner_max(Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX)),
         radial_size(0),
         Momentofinertia(0.01) {
-    cur_sim_queue_slot = rand() % SIM_QUEUE_SIZE;
+    cur_sim_queue_slot = randomInt(SIM_QUEUE_SIZE);
     const Vector default_angular_velocity(configuration()->general.pitch,
             configuration()->general.yaw,
             configuration()->general.roll);
@@ -124,12 +126,12 @@ float Movable::GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn
 
     Vector p, q, r;
     GetOrientation(p, q, r);
-    Vector lref(ref * p, ref * q, ref * r);
-    float tp = (lref.i == 0) ? 0 : fabs(unit->drive.lateral.Value() / lref.i);
-    float tq = (lref.j == 0) ? 0 : fabs(unit->drive.vertical.Value() / lref.j);
-    float tr = (lref.k == 0) ? 0 : fabs(((lref.k > 0) ? unit->drive.forward.Value() : unit->drive.retro.Value()) / lref.k);
-    float trqmin = (tr < tq) ? tr : tq;
-    float tm = tp < trqmin ? tp : trqmin;
+    const Vector lref(ref * p, ref * q, ref * r);
+    const float tp = (lref.i == 0) ? 0 : fabs(unit->drive.lateral.Value() / lref.i);
+    const float tq = (lref.j == 0) ? 0 : fabs(unit->drive.vertical.Value() / lref.j);
+    const float tr = (lref.k == 0) ? 0 : fabs(((lref.k > 0) ? unit->drive.forward.Value() : unit->drive.retro.Value()) / lref.k);
+    const float trqmin = (tr < tq) ? tr : tq;
+    const float tm = tp < trqmin ? tp : trqmin;
     return lref.Magnitude() * tm / Mass;
 }
 
@@ -153,11 +155,11 @@ void Movable::UpdatePhysics(const Transformation &trans,
         UnitCollection *uc,
         Unit *superunit) {
     //Save information about when this happened
-    unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+    const unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
     //Well, wasn't skipped actually, but...
     this->last_processed_sqs = cur_sim_frame;
     this->cur_sim_queue_slot = (cur_sim_frame + this->sim_atom_multiplier) % SIM_QUEUE_SIZE;
-    Transformation old_physical_state = curr_physical_state;
+    const Transformation old_physical_state = curr_physical_state;
 
     UpdatePhysics3(trans, transmat, lastframe, uc, superunit);
 
@@ -165,7 +167,7 @@ void Movable::UpdatePhysics(const Transformation &trans,
         //clamp velocity
         // TODO: use resource class to do this more elegantly
         ResolveForces(trans, transmat);
-        float velocity_max = configuration()->physics.velocity_max;
+        const float velocity_max = configuration()->physics.velocity_max;
         if (Velocity.i > velocity_max) {
             Velocity.i = velocity_max;
         } else if (Velocity.i < -velocity_max) {
@@ -237,7 +239,7 @@ void Movable::AddVelocity(float difficulty) {
     } else {
         graphicOptions.WarpFieldStrength = 1;
     }
-    //not any more? lastWarpField=1;
+    //not anymore? lastWarpField=1;
     Vector v;
     if (graphicOptions.WarpFieldStrength != 1.0) {
         v = unit->GetWarpVelocity();
@@ -249,7 +251,7 @@ void Movable::AddVelocity(float difficulty) {
             lastWarpField * configuration()->warp.warp_memory_effect + (1.0 - configuration()->warp.warp_memory_effect) * graphicOptions.WarpFieldStrength;
     curr_physical_state.position = curr_physical_state.position + (v * simulation_atom_var * difficulty).Cast();
     //now we do this later in update physics
-    //I guess you have to, to be robust}
+    //I guess you have to, to be robust
 }
 
 void Movable::UpdatePhysics2(const Transformation &trans,
@@ -410,7 +412,7 @@ void Movable::SetOrientation(QVector p, QVector q, QVector r) {
 }
 
 void Movable::SetOrientation(Quaternion Q) {
-    curr_physical_state.orientation = Q;
+    curr_physical_state.orientation = std::move(Q);
 }
 
 #define MM(A, B) m.r[B*3+A]
@@ -485,7 +487,7 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
 void Movable::FireEngines(const Vector &Direction /*unit vector... might default to "r"*/,
         float FuelSpeed,
         float FMass) {
-    NetForce += Direction * ((double)FuelSpeed * (double)FMass / GetElapsedTime());
+    NetForce += Direction * (static_cast<double>(FuelSpeed) * static_cast<double>(FMass) / GetElapsedTime());
 }
 
 //applies a force for the whole gameturn upon the center of mass
@@ -633,6 +635,7 @@ Vector Movable::MaxThrust(const Vector &amt1) {
 Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
+    // TODO: Figure out why this constant isn't used, and either use it or delete it
     const bool finegrainedFuelEfficiency = configuration()->components.fuel.variable_fuel_consumption;
 
 
@@ -750,7 +753,7 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
 
     static bool must_afterburn_to_buzz =
             XMLSupport::parse_bool(vs_config->getVariable("audio", "buzzing_needs_afterburner", "false"));
-    if (_Universe->isPlayerStarship(unit) != NULL) {
+    if (_Universe->isPlayerStarship(unit) != nullptr) {
         static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
                 "player_afterburner",
                 "sfx10.wav"), true);

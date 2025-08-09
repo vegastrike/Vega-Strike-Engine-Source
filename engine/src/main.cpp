@@ -67,7 +67,7 @@
 #include "audio/SceneManager.h"
 #include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
 #include "configuration/configuration.h"
-#include <time.h>
+#include <ctime>
 #if !defined(_WIN32) && !defined (__HAIKU__)
 #include <signal.h>
 #endif
@@ -335,7 +335,7 @@ int main(int argc, char *argv[]) {
     VegaStrikeLogging::VegaStrikeLogger::instance().InitLoggingPart2(g_game.vsdebug, home_subdir_path);
 
     // can use the vegastrike config variable to read in the default mission
-    if (game_options()->force_client_connect) {
+    if (configuration()->network.force_client_connect) {
         ignore_network = false;
     }
 
@@ -379,7 +379,7 @@ int main(int argc, char *argv[]) {
         CommandInterpretor = new commandI;
         InitShipCommands();
     }
-    _Universe = new Universe(argc, argv, game_options()->galaxy.c_str());
+    _Universe = new Universe(argc, argv, configuration()->game_start.galaxy.c_str());
     TheTopLevelUnit = new Unit(0);
     _Universe->Loop(bootstrap_first_loop);
 
@@ -466,8 +466,8 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
             ani->DrawNow(tmp);
         }
     }
-    bs_tp->Draw(configuration()->graphics.default_boot_message.length() > 0 ?
-            configuration()->graphics.default_boot_message : message.length() > 0 ?
+    bs_tp->Draw(!configuration()->graphics.default_boot_message.empty() ?
+            configuration()->graphics.default_boot_message : !message.empty() ?
                     message : configuration()->graphics.initial_boot_message);
 
     GFXHudMode(GFXFALSE);
@@ -511,7 +511,7 @@ bool SetPlayerSystem(std::string &sys, bool set) {
 vector<string> parse_space_string(std::string s) {
     vector<string> ret;
     string::size_type index = 0;
-    while ((index = s.find(" ")) != string::npos) {
+    while ((index = s.find(' ')) != string::npos) {
         ret.push_back(s.substr(0, index));
         s = s.substr(index + 1);
     }
@@ -526,7 +526,7 @@ void bootstrap_first_loop() {
         vector<string> sa = parse_space_string(configuration()->graphics.splash_audio);
         int snum = time(nullptr) % s.size();
         SplashScreen = new Animation(s[snum].c_str(), false);
-        if (!sa.empty() && sa[0].length()) {
+        if (!sa.empty() && !sa[0].empty()) {
             muzak->GotoSong(sa[snum % sa.size()]);
         }
         bs_tp = new TextPlane();
@@ -644,10 +644,11 @@ void bootstrap_main_loop() {
         if (setplayerXloc) {
             playerNloc.push_back(pos);
         } else {
-            playerNloc.push_back(QVector(FLT_MAX, FLT_MAX, FLT_MAX));
+            playerNloc.emplace_back(FLT_MAX, FLT_MAX, FLT_MAX);
         }
-        for (unsigned int j = 0; j < saved.size(); j++) {
-            savedun.push_back(saved[j]);
+        savedun.reserve(saved.size());
+        for (const auto & j : saved) {
+            savedun.push_back(j);
         }
 
         SetStarSystemLoading(true);
@@ -673,8 +674,8 @@ void bootstrap_main_loop() {
             }
         }
 
-        if (mission->getVariable("savegame",
-                "").length() != 0
+        if (!mission->getVariable("savegame",
+                "").empty()
                 && game_options()->dockOnLoad) {
             for (size_t i = 0; i < _Universe->numPlayers(); i++) {
                 QVector vec;
@@ -701,7 +702,7 @@ void bootstrap_main_loop() {
     ///Draw Texture
 }
 
-const char versionmessage[] =
+constexpr char versionmessage[] =
         // (BenjamenMeyer) this will be `major.minor.patch+githash` once all is said and done
         "Vega Strike Engine Version " VEGASTRIKE_VERSION_STR "\n"
         "\n";

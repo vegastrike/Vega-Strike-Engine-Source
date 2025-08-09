@@ -211,11 +211,11 @@ void parse_dual_alpha(const char *alpha, BLENDFUNC &blendSrc, BLENDFUNC &blendDs
 }
 
 int GetNumNearStarsScale() {
-    return game_options()->num_near_stars;
+    return configuration()->graphics.num_near_stars;
 }
 
 int GetNumStarsScale() {
-    return game_options()->num_far_stars;
+    return configuration()->graphics.num_far_stars;
 }
 
 float GetStarSpreadScale() {

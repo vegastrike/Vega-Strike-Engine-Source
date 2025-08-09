@@ -152,8 +152,8 @@ protected:
 
 public:
     /// Repair
-    float next_repair_time;
-    unsigned int next_repair_cargo;    //(~0 : select randomly)
+    float next_repair_time{};
+    unsigned int next_repair_cargo{};    //(~0 : select randomly)
 
     /// Volume
     // This isn't mass. Denser materials translate to more mass
@@ -227,8 +227,8 @@ public:
     bool GettingDestroyed() const;
 
 
-   
-    
+
+
 
 /*
  **************************************************************************************
@@ -974,7 +974,7 @@ public:
     // Example:
     // MACRO_FUNCTION(field_a, object_a, object_b)
     // object_a->field_a = object_b->field_b;
-    float temporary_upgrade_float_variable;
+    float temporary_upgrade_float_variable{};
 };
 
 Unit *findUnitInStarsystem(const void *unitDoNotDereference);
