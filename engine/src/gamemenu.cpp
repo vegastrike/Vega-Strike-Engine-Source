@@ -131,12 +131,12 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
 
     GroupControl *acctConnGroup = new GroupControl;
     acctConnGroup->setId("MultiPlayerAccountServer");
-    acctConnGroup->setHidden(!game_options()->use_account_server);
+    acctConnGroup->setHidden(!configuration()->network.use_account_server);
     serverConnGroup->addChild(acctConnGroup);
 
     GroupControl *hostConnGroup = new GroupControl;
     hostConnGroup->setId("MultiPlayerHostPort");
-    hostConnGroup->setHidden(game_options()->use_account_server);
+    hostConnGroup->setHidden(configuration()->network.use_account_server);
     serverConnGroup->addChild(hostConnGroup);
     StaticDisplay *mplayTitle = new StaticDisplay;
     mplayTitle->setRect(Rect(-.7, .6, 1, .1));

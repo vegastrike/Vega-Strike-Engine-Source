@@ -256,7 +256,7 @@ void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x,
 
 void TextMessageKey(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
-        if (game_options()->chat_only_in_network) {
+        if (configuration()->network.chat_only_in_network) {
             return;
         }
         winsys_set_keyboard_func(TextMessageCallback);

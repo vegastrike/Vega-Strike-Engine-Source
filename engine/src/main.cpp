@@ -335,7 +335,7 @@ int main(int argc, char *argv[]) {
     VegaStrikeLogging::VegaStrikeLogger::instance().InitLoggingPart2(g_game.vsdebug, home_subdir_path);
 
     // can use the vegastrike config variable to read in the default mission
-    if (game_options()->force_client_connect) {
+    if (configuration()->network.force_client_connect) {
         ignore_network = false;
     }
 
