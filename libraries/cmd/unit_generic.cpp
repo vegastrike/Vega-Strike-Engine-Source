@@ -1206,7 +1206,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
             //Do something NASTY to the cargo
             if (!cargo.empty()) {
                 unsigned int i = 0;
-                const unsigned int cargo_rand_o = randomInt(INT_MAX);
+                const unsigned int cargo_rand_o = randomInt(RAND_MAX);
                 unsigned int cargo_rand;
                 do {
                     cargo_rand = (cargo_rand_o + i) % cargo.size();
@@ -1305,7 +1305,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
 
             dockedun.back()->UnDock(this);
 
-            if (randomInt(INT_MAX) <= (UnitUtil::isPlayerStarship(dockedun.back()) ? i_player_survival : i_survival)) {
+            if (randomInt(RAND_MAX) <= (UnitUtil::isPlayerStarship(dockedun.back()) ? i_player_survival : i_survival)) {
                 dockedun.back()->Kill();
             }
             dockedun.pop_back();
@@ -3076,12 +3076,13 @@ Cargo *GetMasterPartList(const char *input_buffer) {
 }
 
 void Unit::ImportPartList(const std::string &category, float price, float pricedev, float quantity, float quantdev) {
-    unsigned int numcarg = GetUnitMasterPartList().numCargo();
+    auto& unit_master_part_list = GetUnitMasterPartList();
+    unsigned int numcarg = unit_master_part_list.numCargo();
     float minprice = FLT_MAX;
     float maxprice = 0;
     for (unsigned int j = 0; j < numcarg; ++j) {
-        if (GetUnitMasterPartList().GetCargo(j).GetCategory() == category) {
-            float price = GetUnitMasterPartList().GetCargo(j).GetPrice();
+        if (unit_master_part_list.GetCargo(j).GetCategory() == category) {
+            float price = unit_master_part_list.GetCargo(j).GetPrice();
             if (price < minprice) {
                 minprice = price;
             } else if (price > maxprice) {
@@ -3090,7 +3091,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
         }
     }
     for (unsigned int i = 0; i < numcarg; ++i) {
-        Cargo c = GetUnitMasterPartList().GetCargo(i);
+        Cargo c = unit_master_part_list.GetCargo(i);
         if (c.GetCategory() == category) {
             const float aveweight = fabs(configuration()->cargo.price_recenter_factor_flt);
             c.SetQuantity(float_to_int(quantity - quantdev));

@@ -571,7 +571,7 @@ float Carrier::PriceCargo(const std::string &s) {
 }
 
 float Carrier::getUpgradeVolume(void) const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     float result = 0.0;
     for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
         if ((unit->cargo[i].IsComponent())) {
@@ -582,12 +582,12 @@ float Carrier::getUpgradeVolume(void) const {
 }
 
 Cargo &Carrier::GetCargo(unsigned int i) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     return unit->cargo[i];
 }
 
 const Cargo &Carrier::GetCargo(unsigned int i) const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     return unit->cargo[i];
 }
 

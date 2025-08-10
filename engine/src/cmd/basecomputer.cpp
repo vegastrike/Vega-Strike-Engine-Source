@@ -1730,14 +1730,16 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
 
             //weapons can always be sold
             for (unsigned int i = 0; i < numc; ++i) {
-                Cargo *c = &player->GetCargo(i);
+                const Cargo *c = &player->GetCargo(i);
                 if (c->IsComponent() && !c->IsWeapon()) {
-                    float po = UnitUtil::PercentOperational(player, c->GetName(), c->GetCategory(), false);
+                    const float po = UnitUtil::PercentOperational(player, c->GetName(), c->GetCategory(), false);
                     if (po > .02 && po < .98) {
                         const bool must_fix_first = configuration()->physics.must_repair_to_sell;
 
                         CanDoSell = (emergency_downgrade_mode.length() != 0 || must_fix_first == false);
                     }
+                } else if (c->IsComponent() && c->IsWeapon()) {
+                    CanDoSell = true;
                 }
             }
 
@@ -2121,6 +2123,7 @@ bool UpgradeAllowed(const Cargo &item, Unit *playerUnit) {
         if (item.GetName() == name || (0 == string(item.GetCategory()).find(name))) {
             if (quantity == 0) {
                 color_prohibited_upgrade_flag = true;
+                VS_LOG(debug, "Upgrade not allowed because quantity is zero");
                 return false;
             }
             unsigned int i = 0;
@@ -2128,6 +2131,7 @@ bool UpgradeAllowed(const Cargo &item, Unit *playerUnit) {
             if (numUpgrades) {
                 if (numUpgrades->GetQuantity() >= quantity) {
                     color_prohibited_upgrade_flag = true;
+                    VS_LOG(debug, (boost::format("Upgrade not allowed because numUpgrades->GetQuantity(), %1%, is >= quantity, %2%") % numUpgrades->GetQuantity() % quantity));
                     return false;
                 }
             }
@@ -2141,6 +2145,7 @@ bool UpgradeAllowed(const Cargo &item, Unit *playerUnit) {
             }
             if (totalquant >= quantity) {
                 color_prohibited_upgrade_flag = true;
+                VS_LOG(debug, (boost::format("Upgrade not allowed because totalquant, %1%, is >= quantity, %2%") % totalquant % quantity));
                 return false;
             }
         }
@@ -2492,6 +2497,14 @@ void BaseComputer::loadMasterList(Unit *un,
                     col.cargo.SetCategory("#c.5:1:.3#Uncategorized Cargo");
                 }
                 items->push_back(col);
+            } else {
+                if (un->GetCargo(i).GetCategory().find_first_of("Weapon") != string::npos) {
+                    VS_LOG(debug, (boost::format("%1%: Not adding weapon %2% to Master List because its quantity is 0") % __FUNCTION__ % un->GetCargo(i).GetName()));
+                }
+            }
+        } else {
+            if (un->GetCargo(i).GetCategory().find_first_of("Weapon") != string::npos) {
+                VS_LOG(debug, (boost::format("%1%: Not adding weapon %2% to Master List because it was filtered out") % __FUNCTION__ % un->GetCargo(i).GetName()));
             }
         }
     }
@@ -3038,7 +3051,9 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     //Get all the upgrades.
     assert(equalColors(CargoColor().color, DEFAULT_UPGRADE_COLOR()));
     std::vector<std::string> filtervec;
+    filtervec.push_back("upgrades/Weapon");
     filtervec.push_back("upgrades");
+    filtervec.push_back("upgrades/Ammunition");
     loadMasterList(baseUnit, filtervec, std::vector<std::string>(), true, tlist);
     playerUnit->FilterUpgradeList(tlist.masterList);
 
@@ -3096,17 +3111,16 @@ void BaseComputer::loadSellUpgradeControls(void) {
     const bool clearDowngrades = configuration()->physics.only_show_best_downgrade;
     if (clearDowngrades) {
         std::set<std::string> downgradeMap = GetListOfDowngrades();
-        for (unsigned int i = 0; i < tlist.masterList.size(); ++i) {
-            if (downgradeMap.find(tlist.masterList.at(i).cargo.GetName()) == downgradeMap.end()) {
-                tlist.masterList.erase(tlist.masterList.begin() + i);
-                i--;
-            }
-        }
+        const auto first_to_remove = std::stable_partition(tlist.masterList.begin(), tlist.masterList.end(),
+                                                           [downgradeMap](const CargoColor &cargo_color) {
+                                                               return downgradeMap.find(cargo_color.cargo.GetName()) !=
+                                                                      downgradeMap.end();
+                                                           });
+        tlist.masterList.erase(first_to_remove, tlist.masterList.end());
     }
     //Mark all the upgrades that we can't do.
     //cargo.mission == true means we can't upgrade this.
-    vector<CargoColor>::iterator iter;
-    for (iter = tlist.masterList.begin(); iter != tlist.masterList.end(); iter++) {
+    for (auto iter = tlist.masterList.begin(); iter != tlist.masterList.end(); ++iter) {
         iter->cargo.SetMissionFlag((!equalColors(iter->color, DEFAULT_UPGRADE_COLOR())));
     }
     std::vector<std::string> invplayerfiltervec = weapfiltervec;
@@ -4210,20 +4224,20 @@ void BaseComputer::loadShipDealerControls(void) {
     loadMasterList(m_base.GetUnit(), filtervec, std::vector<std::string>(), true, m_transList1);
 
     //Add in the starships owned by this player.
-    Cockpit *cockpit = _Universe->AccessCockpit();
+    const Cockpit *cockpit = _Universe->AccessCockpit();
     for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i) {
         CargoColor cargoColor;
         cargoColor.cargo = CreateCargoForOwnerStarship(cockpit, m_base.GetUnit(), i);
         m_transList1.masterList.push_back(cargoColor);
     }
-    //remove the descriptions, we don't build them all here, it is a time consuming operation
+    //remove the descriptions, we don't build them all here, it is a time-consuming operation
     vector<CargoColor> *items = &m_transList1.masterList;
-    for (vector<CargoColor>::iterator it = items->begin(); it != items->end(); it++) {
-        (*it).cargo.SetDescription("");
+    for (auto it = items->begin(); it != items->end(); ++it) {
+        it->cargo.SetDescription("");
     }
     //Load the picker from the master list.
-    SimplePicker *basePicker = static_cast< SimplePicker * > ( window()->findControlById("Ships"));
-    assert(basePicker != NULL);
+    SimplePicker *basePicker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("Ships"));
+    assert(basePicker != nullptr);
     loadListPicker(m_transList1, *basePicker, BUY_SHIP, true);
 
     //Make the title right.
