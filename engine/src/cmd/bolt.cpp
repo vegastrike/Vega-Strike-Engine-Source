@@ -182,12 +182,12 @@ void Bolt::DrawBolt(GFXVertexList *qmesh) {
 
     BlendTrans(drawmat, cur_position, prev_position);
     Matrix drawmat(this->drawmat);
-    if (configuration()->graphics.stretch_bolts > 0) {
+    if (configuration()->graphics.stretch_bolts_flt > 0.0F) {
         ScaleMatrix(drawmat,
                     Vector(1,
                            1,
                            static_cast<double>(type->speed) * BoltDrawManager::elapsed_time * configuration()->graphics.
-                           stretch_bolts / type->length));
+                           stretch_bolts_dbl / type->length));
     }
     GFXLoadMatrixModel(drawmat);
     GFXColor4f(wt->r, wt->g, wt->b, wt->a);

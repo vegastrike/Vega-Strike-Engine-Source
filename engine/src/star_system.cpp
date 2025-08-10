@@ -439,7 +439,7 @@ void StarSystem::Draw(bool DrawCockpit) {
     QVector drawstartpos = _Universe->AccessCamera()->GetPosition();
 
     Collidable key_iterator(0, 1, drawstartpos);
-    UnitWithinRangeOfPosition<UnitDrawer> drawer(configuration()->graphics.precull_dist, 0, key_iterator);
+    UnitWithinRangeOfPosition<UnitDrawer> drawer(configuration()->graphics.precull_dist_dbl, 0, key_iterator);
     //Need to draw really big stuff (i.e. planets, deathstars, and other mind-bogglingly big things that shouldn't be culled despite extreme distance
     Unit* unit;
     if ((drawer.action.parent = _Universe->AccessCockpit()->GetParent()) != nullptr) {
@@ -447,7 +447,7 @@ void StarSystem::Draw(bool DrawCockpit) {
     }
     for (un_iter iter = this->gravitational_units.createIterator(); (unit = *iter); ++iter) {
         const double distance = (drawstartpos - unit->Position()).Magnitude() - unit->rSize();
-        if (distance < configuration()->graphics.precull_dist) {
+        if (distance < configuration()->graphics.precull_dist_dbl) {
             drawer.action.grav_acquire(unit);
         }
         else {
@@ -619,7 +619,7 @@ void StarSystem::createBackground(Star_XML *xml) {
     background = new Background(
             xml->backgroundname.c_str(),
             xml->numstars,
-            configuration()->graphics.zfar * .9,
+            configuration()->graphics.zfar_flt * 0.9F,
             filename,
             xml->backgroundColor,
             xml->backgroundDegamma);
@@ -645,7 +645,7 @@ void TentativeJumpTo(StarSystem *ss, Unit *un, Unit *jumppoint, const std::strin
 
 float ScaleJumpRadius(float radius) {
     //need this because sys scale doesn't affect j-point size
-    radius *= configuration()->physics.jump_radius_scale * configuration()->physics.game_speed;
+    radius *= configuration()->physics.jump_radius_scale_flt * configuration()->physics.game_speed_flt;
     return radius;
 }
 
@@ -1547,7 +1547,7 @@ QVector ComputeJumpPointArrival(QVector pos, std::string origin, std::string des
         if (pos.MagnitudeSquared()) {
             pos.Normalize();
         }
-        return (dir * .5 + pos * .125) * configuration()->physics.distance_to_warp;
+        return (dir * .5 + pos * .125) * configuration()->physics.distance_to_warp_dbl;
     }
     return QVector(0, 0, 0);
 }

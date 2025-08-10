@@ -494,7 +494,7 @@ void Universe::StartDraw() {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double update_star_system_start_time = realTime();
 #endif
-        star_system[i]->Update((i == 0) ? 1 : configuration()->physics.inactive_system_time / i, true);
+        star_system[i]->Update((i == 0) ? 1 : configuration()->physics.inactive_system_time_flt / i, true);
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double update_star_system_end_time = realTime();
         VS_LOG(trace,
@@ -591,7 +591,7 @@ void Universe::StartGFX() {
 void Universe::Update() {
     for (unsigned int i = 0; i < star_system.size(); ++i) {
         //Calls the update function for server
-        star_system[i]->Update((i == 0) ? 1 : configuration()->physics.inactive_system_time / i);
+        star_system[i]->Update((i == 0) ? 1 : configuration()->physics.inactive_system_time_flt / i);
     }
 }
 

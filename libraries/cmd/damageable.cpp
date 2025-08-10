@@ -196,7 +196,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
         }
 
         // Eject cargo
-        const float cargo_eject_percent = configuration()->physics.ejection.eject_cargo_percent;
+        const float cargo_eject_percent = configuration()->physics.ejection.eject_cargo_percent_flt;
         const uint32_t max_dump_cargo = configuration()->physics.ejection.max_dumped_cargo;
         uint32_t dumped_cargo = 0;
 
@@ -211,7 +211,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
         // Eject Pilot
         // Can't use this as we can't reach negative hull damage
 //        const float hull_dam_to_eject = configuration()->physics.ejection.hull_damage_to_eject;
-        const float auto_eject_percent = configuration()->physics.ejection.auto_eject_percent;
+        const float auto_eject_percent = configuration()->physics.ejection.auto_eject_percent_flt;
         const bool player_autoeject = configuration()->physics.ejection.player_auto_eject;
 
         if (shot_at_is_player) {
@@ -277,8 +277,8 @@ void Damageable::ApplyDamage(const Vector &pnt,
     }
 
     // Only happens if we crossed the threshold in this attack
-    if (previous_hull_percent >= configuration()->ai.hull_percent_for_comm &&
-            unit->hull.Percent() < configuration()->ai.hull_percent_for_comm &&
+    if (previous_hull_percent >= configuration()->ai.hull_percent_for_comm_flt &&
+            unit->hull.Percent() < configuration()->ai.hull_percent_for_comm_flt &&
             (shooter_is_player || shot_at_is_player)) {
         Unit *computer_ai = nullptr;
         Unit *player = nullptr;
@@ -373,7 +373,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     // indiscriminate is a fraction (25% by default).
     // Damage is calculated as 0.25 * rand + 0.75 * (hull_damage)/(current_hull)
     // Therefore,
-    double indiscriminate_system_destruction = configuration()->physics.indiscriminate_system_destruction;
+    double indiscriminate_system_destruction = configuration()->physics.indiscriminate_system_destruction_dbl;
     double random_damage_factor = indiscriminate_system_destruction * randomDouble();
     double hull_damage_modifier = 1 - indiscriminate_system_destruction;
     double hull_damage_factor = hull_damage_modifier * (1 - hull_damage / unit->hull.Get());
@@ -492,13 +492,13 @@ bool Damageable::flickerDamage() {
     static double counter = getNewTime();
 
     float diff = getNewTime() - counter;
-    if (diff > configuration()->graphics.glow_flicker.flicker_time) {
+    if (diff > configuration()->graphics.glow_flicker.flicker_time_flt) {
         counter = getNewTime();
         diff = 0;
     }
-    float tmpflicker = configuration()->graphics.glow_flicker.flicker_time * damagelevel;
-    if (tmpflicker < configuration()->graphics.glow_flicker.min_flicker_cycle) {
-        tmpflicker = configuration()->graphics.glow_flicker.min_flicker_cycle;
+    float tmpflicker = configuration()->graphics.glow_flicker.flicker_time_flt * damagelevel;
+    if (tmpflicker < configuration()->graphics.glow_flicker.min_flicker_cycle_flt) {
+        tmpflicker = configuration()->graphics.glow_flicker.min_flicker_cycle_flt;
     }
     diff = fmod(diff, tmpflicker);
     //we know counter is somewhere between 0 and damage level
@@ -506,9 +506,9 @@ bool Damageable::flickerDamage() {
     unsigned int thus = ((unsigned int) (size_t) this) >> 2;
     thus = thus % ((unsigned int) tmpflicker);
     diff = fmod(diff + thus, tmpflicker);
-    if (configuration()->graphics.glow_flicker.flicker_off_time > diff) {
-        if (damagelevel > configuration()->graphics.glow_flicker.hull_for_total_dark) {
-            return rand() > RAND_MAX * GetElapsedTime() * configuration()->graphics.glow_flicker.num_times_per_second_on;
+    if (configuration()->graphics.glow_flicker.flicker_off_time_flt > diff) {
+        if (damagelevel > configuration()->graphics.glow_flicker.hull_for_total_dark_flt) {
+            return rand() > RAND_MAX * GetElapsedTime() * configuration()->graphics.glow_flicker.num_times_per_second_on_flt;
         } else {
             return true;
         }

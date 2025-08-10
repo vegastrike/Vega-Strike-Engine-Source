@@ -353,8 +353,8 @@ Planet *SystemFactory::processPlanet(Star_XML *xml, Object &object, Planet *owne
     // Adjust speed and rotation
     // Discussion - the original value (day/year) needs to be adjusted to velocity
     // by multiplying
-    float float_pi = static_cast<float>(M_PI);
-    float float_year_scale = static_cast<float>(configuration()->physics.year_scale);
+    float float_pi = M_PI;
+    float float_year_scale = configuration()->physics.year_scale_flt;
     // TODO: turn floating point comparisons into a function
     if (std::fabs(rotational_velocity) > .00001f) {
         rotational_velocity = 2.0f * float_pi / (float_year_scale * rotational_velocity);
@@ -523,8 +523,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
     int faction = 0;
     int neutralfaction = FactionUtil::GetNeutralFaction();
 
-    float scalex = getFloatAttribute(object, "difficulty",
-            static_cast<float>(configuration()->physics.asteroid_difficulty));
+    float scalex = getFloatAttribute(object, "difficulty", configuration()->physics.asteroid_difficulty_flt);
     float absolute_scalex = std::fabs(scalex);
     double velocity = getDoubleAttribute(object, "year", 0.0);
     float rotational_velocity = getFloatAttribute(object, "day", 0.0f);
@@ -559,14 +558,14 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
     // I assume negative means counter movement and therefore fabs
     // TODO: this code is repeated. Refactor into function
     float float_pi = static_cast<float>(M_PI);
-    float float_year_scale = static_cast<float>(configuration()->physics.year_scale);
+    float float_year_scale = configuration()->physics.year_scale_flt;
     // TODO: turn floating point comparisons into a function
     if (std::fabs(rotational_velocity) > .00001f) {
         rotational_velocity = 2.0f * float_pi / (float_year_scale * rotational_velocity);
     }
 
     if (std::fabs(velocity) > .00001) {
-        velocity = 2.0 * M_PI / (configuration()->physics.year_scale * velocity);
+        velocity = 2.0 * M_PI / (configuration()->physics.year_scale_flt * velocity);
     }
 
     if (boost::iequals(element, "nebula")) {
@@ -591,7 +590,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
 
         if (unit->faction != neutralfaction) {
             unit->SetTurretAI(); //FIXME un de-referenced before allocation
-            unit->EnqueueAI(new Orders::FireAt(configuration()->ai.firing.aggressivity)); //FIXME un de-referenced before allocation
+            unit->EnqueueAI(new Orders::FireAt(configuration()->ai.firing.aggressivity_flt)); //FIXME un de-referenced before allocation
         }
     } else if (boost::iequals(element, "asteroid")) {
         Flightgroup *fg = getStaticAsteroidFlightgroup(faction);

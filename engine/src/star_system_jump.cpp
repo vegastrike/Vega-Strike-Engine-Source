@@ -110,7 +110,7 @@ static unsigned int AddJumpAnimation(const QVector &pos, const float size, bool 
 
 void StarSystem::VolitalizeJumpAnimation(const int ani) {
     if (ani != -1) {
-        VolatileJumpAnimations.push_back(ResizeAni(JumpAnimations[ani].a, configuration()->graphics.jump_animation_shrink));
+        VolatileJumpAnimations.push_back(ResizeAni(JumpAnimations[ani].a, configuration()->graphics.jump_animation_shrink_flt));
         JumpAnimations[ani].a = NULL;
         AnimationNulls.push_back(ani);
     }
@@ -129,7 +129,7 @@ void StarSystem::DrawJumpStars() {
                         ->SetPosition(
                                 un->Position() + r.Cast() * un->rSize() * (pendingjump[kk]->delay + .25));
                 JumpAnimations[k].a->SetOrientation(p, q, r);
-                float dd = un->rSize() * configuration()->graphics.jump_gate_size
+                float dd = un->rSize() * configuration()->graphics.jump_gate_size_flt
                         * (un->jump_drive.Delay() - pendingjump[kk]->delay) / (float) un->jump_drive.Delay();
                 JumpAnimations[k].a->SetDimensions(dd, dd);
             }
@@ -161,7 +161,7 @@ void StarSystem::DrawJumpStars() {
 void StarSystem::DoJumpingComeSightAndSound(Unit *un) {
     Vector p, q, r;
     un->GetOrientation(p, q, r);
-    unsigned int myani = AddJumpAnimation(un->LocalPosition(), un->rSize() * configuration()->graphics.jump_gate_size, true);
+    unsigned int myani = AddJumpAnimation(un->LocalPosition(), un->rSize() * configuration()->graphics.jump_gate_size_flt, true);
     VolatileJumpAnimations[myani].a->SetOrientation(p, q, r);
 }
 

@@ -79,11 +79,11 @@ void modifyDeadZone(JoyStick *j) {
 }
 
 void modifyExponent(JoyStick *j) {
-    if ((configuration()->joystick.joystick_exponent != 1.0) && (configuration()->joystick.joystick_exponent > 0)) {
+    if ((configuration()->joystick.joystick_exponent_flt != 1.0F) && (configuration()->joystick.joystick_exponent_flt > 0.0F)) {
         for (int a = 0; a < j->nr_of_axes; a++) {
             j->joy_axis[a] =
-                    ((j->joy_axis[a] < 0) ? -std::pow(-j->joy_axis[a], configuration()->joystick.joystick_exponent) : std::pow(j->joy_axis[a],
-                            configuration()->joystick.joystick_exponent));
+                    ((j->joy_axis[a] < 0) ? -std::pow(-j->joy_axis[a], configuration()->joystick.joystick_exponent_flt) : std::pow(j->joy_axis[a],
+                            configuration()->joystick.joystick_exponent_flt));
         }
     }
 }
@@ -221,9 +221,9 @@ JoyStick::JoyStick(int which) : mouse(which == MOUSE_JOYSTICK) {
     player = which;     //by default bind players to whichever joystick it is
     debug_digital_hatswitch = configuration()->joystick.debug_digital_hatswitch;
     if (which != MOUSE_JOYSTICK) {
-        deadzone = configuration()->joystick.deadband;
+        deadzone = configuration()->joystick.deadband_flt;
     } else {
-        deadzone = configuration()->joystick.mouse_deadband;
+        deadzone = configuration()->joystick.mouse_deadband_flt;
     };
     joy_available = 0;
     joy_x = joy_y = joy_z = 0;
@@ -312,7 +312,7 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
         static std::list<mouseData> md;
         std::list<mouseData>::iterator i = md.begin();
         float ttime = getNewTime();
-        float lasttime = ttime - configuration()->joystick.mouse_blur;
+        float lasttime = ttime - configuration()->joystick.mouse_blur_flt;
         int avg = (_dx || _dy) ? 1 : 0;
         float valx = _dx;
         float valy = _dy;
@@ -346,16 +346,16 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
             _dx = float_to_int(valx / avg);
             _dy = float_to_int(valy / avg);
         }
-        fdx = float(valx) / configuration()->joystick.mouse_blur;
-        fdy = float(valy) / configuration()->joystick.mouse_blur;
+        fdx = float(valx) / configuration()->joystick.mouse_blur_flt;
+        fdy = float(valy) / configuration()->joystick.mouse_blur_flt;
     }
-    joy_axis[0] = fdx / (configuration()->graphics.resolution_x * def_mouse_sens / configuration()->joystick.mouse_sensitivity);
-    joy_axis[1] = fdy / (configuration()->graphics.resolution_y * def_mouse_sens / configuration()->joystick.mouse_sensitivity);
+    joy_axis[0] = fdx / (configuration()->graphics.resolution_x * def_mouse_sens / configuration()->joystick.mouse_sensitivity_flt);
+    joy_axis[1] = fdy / (configuration()->graphics.resolution_y * def_mouse_sens / configuration()->joystick.mouse_sensitivity_flt);
     if (!configuration()->joystick.warp_mouse) {
         modifyDeadZone(this);
     }
-    joy_axis[0] *= configuration()->joystick.mouse_exponent;
-    joy_axis[1] *= configuration()->joystick.mouse_exponent;
+    joy_axis[0] *= configuration()->joystick.mouse_exponent_flt;
+    joy_axis[1] *= configuration()->joystick.mouse_exponent_flt;
     x = joy_axis[0];
     y = joy_axis[1];
 

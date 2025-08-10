@@ -142,7 +142,7 @@ public:
 
         const bool draw_significant_blips = configuration()->graphics.hud.draw_significant_blips;
         const bool untarget_out_cone = configuration()->graphics.hud.untarget_beyond_cone;
-        const float min_radar_blip_size = configuration()->graphics.hud.min_radar_blip_size;
+        const float min_radar_blip_size = configuration()->graphics.hud.min_radar_blip_size_flt;
 
         if (target != player) {
             const bool isCurrentTarget = (player->Target() == target);
@@ -189,7 +189,7 @@ const Sensor::TrackCollection &Sensor::FindTracksInRange() const {
     collection.clear();
 
     // Find all units within range
-    const float kMaxUnitRadius = configuration()->graphics.hud.radar_search_extra_radius;
+    const float kMaxUnitRadius = configuration()->graphics.hud.radar_search_extra_radius_flt;
     const bool kDrawGravitationalObjects = configuration()->graphics.hud.draw_gravitational_objects;
 
     UnitWithinRangeLocator<CollectRadarTracks> unitLocator(GetMaxRange(), kMaxUnitRadius);

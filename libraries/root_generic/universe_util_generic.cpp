@@ -180,7 +180,7 @@ namespace UniverseUtil {
                           string squadlogo,
                           string destinations) {
         Vega_UnitType clstype = DeserializeUnitType(unittype_string);
-        
+
         CreateFlightgroup cf;
         cf.fg = Flightgroup::newFlightgroup(name_string,
                                             type_string,
@@ -674,7 +674,7 @@ namespace UniverseUtil {
 
     QVector SafeStarSystemEntrancePoint(StarSystem *sts, QVector pos, float radial_size) {
         if (radial_size < 0) {
-            radial_size = configuration()->physics.respawn_unit_size;
+            radial_size = configuration()->physics.respawn_unit_size_flt;
         }
         for (unsigned int k = 0; k < 10; ++k) {
             Unit *un;
@@ -804,7 +804,7 @@ namespace UniverseUtil {
     }
 
     float getPlanetRadiusPercent() {
-        return configuration()->physics.auto_pilot_planet_radius_percent;
+        return configuration()->physics.auto_pilot_planet_radius_percent_flt;
     }
 
     std::string getVariable(std::string section, std::string name, std::string def) {

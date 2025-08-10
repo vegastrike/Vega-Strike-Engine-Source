@@ -553,7 +553,7 @@ void init_opengl_extensions() {
 }
 
 static void initfov() {
-    g_game.detaillevel = configuration()->graphics.model_detail;
+    g_game.detaillevel = configuration()->graphics.model_detail_flt;
     g_game.use_textures = configuration()->graphics.use_textures;
     g_game.use_ship_textures = configuration()->graphics.use_ship_textures;
     g_game.use_planet_textures = configuration()->graphics.use_planet_textures;
