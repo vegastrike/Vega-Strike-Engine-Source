@@ -891,7 +891,7 @@ void InitPaths(string conf, string subdir) {
     sharedmeshes = game_options()->sharedmeshes;
     sharedunits = game_options()->sharedunits;
     aidir = game_options()->ai_directory;
-    universe_name = game_options()->galaxy;
+    universe_name = configuration().game_start.galaxy;
 
     //Setup the directory lists we know about - note these are relative paths to datadir or homedir
     //----- THE Directories vector contains the resource/volume files name without extension or the main directory to files
@@ -940,9 +940,9 @@ void InitPaths(string conf, string subdir) {
     Directories[PythonFile] = "bases";
     Directories[AccountFile] = "accounts";
 
-    SIMULATION_ATOM = configuration().general.simulation_atom;
+    SIMULATION_ATOM = configuration().general.simulation_atom_flt;
     simulation_atom_var = SIMULATION_ATOM;
-    AUDIO_ATOM = configuration().general.audio_atom;
+    AUDIO_ATOM = configuration().general.audio_atom_flt;
     audio_atom_var = AUDIO_ATOM;
     VS_LOG(info, (boost::format("SIMULATION_ATOM: %1%") % SIMULATION_ATOM));
 
