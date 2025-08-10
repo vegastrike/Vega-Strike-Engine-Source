@@ -65,7 +65,7 @@ Vega_UnitType::nebula,
 Vega_UnitType::asteroid,
 Vega_UnitType::enhancement,
 Vega_UnitType::missile*/
-void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
+void Collision::shouldApplyForceAndDealDamage(Unit* other_unit) {
     Vega_UnitType other_units_type = other_unit->getUnitType();
 
     // Collision with a nebula does nothing
@@ -90,84 +90,88 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
     }
 
     switch (unit_type) {
-        // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
-        case Vega_UnitType::missile:
-            // Missile should explode when killed
-            // If not, uncomment this
-            //((Missile*)unit)->Discharge();
-            unit->Kill();
-            return;
+    // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
+    case Vega_UnitType::missile:
+        // Missile should explode when killed
+        // If not, uncomment this
+        //((Missile*)unit)->Discharge();
+        unit->Kill();
+        return;
 
-        case Vega_UnitType::asteroid:
-            apply_force = true;
-            deal_damage = true;
-            return;
+    case Vega_UnitType::asteroid:
+        apply_force = true;
+        deal_damage = true;
+        return;
 
-            // Planets and Nebulas can't be killed right now
-        case Vega_UnitType::planet:
-        case Vega_UnitType::nebula:
-            return;
+    // Planets and Nebulas can't be killed right now
+    case Vega_UnitType::planet:
+    case Vega_UnitType::nebula:
+        return;
 
-            // Buildings should not calculate actual damage
-        case Vega_UnitType::building:
-            return;
+    // Buildings should not calculate actual damage
+    case Vega_UnitType::building:
+        return;
 
-            // Units (ships) should calculate actual damage
-        case Vega_UnitType::unit:
-            // Handle the "Nav 8" case
-            if (other_units_type == Vega_UnitType::planet) {
+    // Units (ships) should calculate actual damage
+    case Vega_UnitType::unit:
+        // Handle the "Nav 8" case
+        if (other_units_type == Vega_UnitType::planet) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
-                const double nav_8_start_time = realTime();
+            const double nav_8_start_time = realTime();
 #endif
-                const auto* as_planet = vega_dynamic_const_cast_ptr<const Planet>(other_unit);
-                if (as_planet->is_nav_point()) {
-                    VS_LOG(debug, "Can't collide with a Nav Point");
-#if defined(LOG_TIME_TAKEN_DETAILS)
-                    const double nav_8_end_time = realTime();
-                    VS_LOG(trace, (boost::format("%1%: Time taken by handling Nav 8 case: %2%") % __FUNCTION__ % (nav_8_end_time - nav_8_start_time)));
-#endif
-                    return;
-                }
+            const auto* as_planet = vega_dynamic_const_cast_ptr<const Planet>(other_unit);
+            if (as_planet->is_nav_point()) {
+                VS_LOG(debug, "Can't collide with a Nav Point");
 #if defined(LOG_TIME_TAKEN_DETAILS)
                 const double nav_8_end_time = realTime();
-                VS_LOG(trace, (boost::format("%1%: Time taken by handling Nav 8 case: %2%") % __FUNCTION__ % (nav_8_end_time - nav_8_start_time)));
+                VS_LOG(trace,
+                       (boost::format("%1%: Time taken by handling Nav 8 case: %2%") % __FUNCTION__ % (nav_8_end_time -
+                           nav_8_start_time)));
 #endif
-            }
-            apply_force = true;
-            deal_damage = true;
-            return;
-
-            // An enhancement upgrades the shields of the unit it collided with.
-            // TODO: refactor this.
-        case Vega_UnitType::enhancement:
-            // We can't enhance rocks
-            if (other_units_type == Vega_UnitType::asteroid ||
-                    other_units_type == Vega_UnitType::planet) {
-                apply_force = true;
                 return;
             }
+#if defined(LOG_TIME_TAKEN_DETAILS)
+            const double nav_8_end_time = realTime();
+            VS_LOG(trace,
+                   (boost::format("%1%: Time taken by handling Nav 8 case: %2%") % __FUNCTION__ % (nav_8_end_time -
+                       nav_8_start_time)));
+#endif
+        }
+        apply_force = true;
+        deal_damage = true;
+        return;
 
-            // disabled for now.
-            // TODO: someone from the "product" team needs to define the
-            // exact behavior. Preferably after we sort the upgrade
-            // code.
-
-
-            /*double percent;
-            char tempdata[sizeof(Shield)];
-            memcpy( tempdata, &unit->shield, sizeof(Shield));
-            unit->shield.number = 0;     //don't want them getting our boosted shields!
-            unit->shield.shield2fb.front = unit->shield.shield2fb.back =
-                    unit->shield.shield2fb.frontmax = unit->shield.shield2fb.backmax = 0;
-            other_unit->Upgrade( unit, 0, 0, true, true, percent );
-            memcpy( &unit->shield, tempdata, sizeof (Shield) );
-            string fn( unit->filename );
-            string fac( FactionUtil::GetFaction( unit->faction ) );*/
-            unit->Kill();
-
-            //_Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), Vega_UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
+    // An enhancement upgrades the shields of the unit it collided with.
+    // TODO: refactor this.
+    case Vega_UnitType::enhancement:
+        // We can't enhance rocks
+        if (other_units_type == Vega_UnitType::asteroid ||
+            other_units_type == Vega_UnitType::planet) {
             apply_force = true;
             return;
+        }
+
+        // disabled for now.
+        // TODO: someone from the "product" team needs to define the
+        // exact behavior. Preferably after we sort the upgrade
+        // code.
+
+
+        /*double percent;
+        char tempdata[sizeof(Shield)];
+        memcpy( tempdata, &unit->shield, sizeof(Shield));
+        unit->shield.number = 0;     //don't want them getting our boosted shields!
+        unit->shield.shield2fb.front = unit->shield.shield2fb.back =
+                unit->shield.shield2fb.frontmax = unit->shield.shield2fb.backmax = 0;
+        other_unit->Upgrade( unit, 0, 0, true, true, percent );
+        memcpy( &unit->shield, tempdata, sizeof (Shield) );
+        string fn( unit->filename );
+        string fac( FactionUtil::GetFaction( unit->faction ) );*/
+        unit->Kill();
+
+        //_Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), Vega_UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
+        apply_force = true;
+        return;
     }
 }
 
