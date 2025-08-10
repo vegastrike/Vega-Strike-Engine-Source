@@ -391,7 +391,7 @@ static double usedValue(double originalValue) {
 extern float RepairPrice(float operational, float price);
 
 static float basicRepairPrice(void) {
-    const float price = configuration()->economics.repair_price;
+    const float price = configuration()->economics.repair_price_flt;
     return price * g_game.difficulty;
 }
 
@@ -478,7 +478,7 @@ BaseComputer::~BaseComputer(void) {
 
 GFXColor BaseComputer::getColorForGroup(std::string id) {
     const bool use_faction_background = configuration()->graphics.use_faction_gui_background_color;
-    const float faction_color_darkness = configuration()->graphics.base_faction_color_darkness;
+    const float faction_color_darkness = configuration()->graphics.base_faction_color_darkness_flt;
     if (use_faction_background) {
         int fac = m_base.GetUnit()->faction;
         if (FactionUtil::GetFactionName(fac) == "neutral") {
@@ -1727,7 +1727,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
             bool CanDoSell = true;
             Unit *player = m_player.GetUnit();
             unsigned int numc = player->numCargo();
-            
+
             //weapons can always be sold
             for (unsigned int i = 0; i < numc; ++i) {
                 Cargo *c = &player->GetCargo(i);
@@ -1740,7 +1740,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
                     }
                 }
             }
-            
+
             if (CanDoSell) {
                 commitButton->setHidden(false);
                 commitButton->setLabel("Sell");
@@ -3824,9 +3824,9 @@ Cargo CreateCargoForOwnerStarship(const Cockpit *cockpit, const Unit *base, int 
     bool needsJumpTransport = (locationSystemName != destinationSystemName);
     bool needsInsysTransport = (locationBaseName != destinationBaseName);
 
-    const float shipping_price_base = configuration()->economics.shipping_price_base;
-    const float shipping_price_insys = configuration()->economics.shipping_price_insys;
-    const float shipping_price_perjump = configuration()->economics.shipping_price_perjump;
+    const float shipping_price_base = configuration()->economics.shipping_price_base_flt;
+    const float shipping_price_insys = configuration()->economics.shipping_price_insys_flt;
+    const float shipping_price_perjump = configuration()->economics.shipping_price_perjump_flt;
 
     cargo.SetPrice(shipping_price_base);
     cargo.SetName(cockpit->GetUnitFileName(i));
@@ -4244,11 +4244,11 @@ bool sellShip(Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseComput
 
                 float xtra = 0;
                 if (cockpit->GetUnitSystemName(i) == _Universe->activeStarSystem()->getFileName()) {
-                    const float shipping_price = configuration()->economics.sellback_shipping_price;
+                    const float shipping_price = configuration()->economics.sellback_shipping_price_flt;
                     xtra += shipping_price;
                 }
                 cockpit->RemoveUnit(i);
-                const float shipSellback = configuration()->economics.ship_sellback_price;
+                const float shipSellback = configuration()->economics.ship_sellback_price_flt;
                 cockpit->credits += shipSellback * shipCargo->GetPrice();                 //sellback cost
                 cockpit->credits -= xtra;                 //transportation cost
                 break;

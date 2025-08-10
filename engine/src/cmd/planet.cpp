@@ -116,9 +116,9 @@ string GetElMeshName(string name, string faction, char direction) {
 static void SetFogMaterialColor(Mesh *thus, const GFXColor &color, const GFXColor &dcolor) {
     GFXMaterial m{};
     setMaterialAmbient(m, 0.0);
-    setMaterialDiffuse(m, configuration()->graphics.atmosphere_diffuse * dcolor);
+    setMaterialDiffuse(m, configuration()->graphics.atmosphere_diffuse_flt * dcolor);
     setMaterialSpecular(m, 0.0);
-    setMaterialEmissive(m, configuration()->graphics.atmosphere_emissive * color);
+    setMaterialEmissive(m, configuration()->graphics.atmosphere_emissive_flt * color);
     m.power = 0;
     thus->SetMaterial(m);
 }
@@ -307,7 +307,7 @@ Planet::Planet(QVector x,
     }
     calculate_extent(false);
     if (wormhole) {
-        const float radscale = configuration()->physics.jump_mesh_radius_scale;
+        const float radscale = configuration()->physics.jump_mesh_radius_scale_flt;
         radius *= radscale;
         corner_min.i = corner_min.j = corner_min.k = -radius;
         corner_max.i = corner_max.j = corner_max.k = radius;
@@ -317,10 +317,10 @@ Planet::Planet(QVector x,
         }
     }
     if (ligh.size() > 0) {
-        const float bodyradius = configuration()->graphics.star_body_radius;
+        const float bodyradius = configuration()->graphics.star_body_radius_flt;
         const bool drawglow = configuration()->graphics.draw_star_glow;
         const bool drawstar = configuration()->graphics.draw_star_body;
-        const float glowradius = configuration()->graphics.star_glow_radius / bodyradius;
+        const float glowradius = configuration()->graphics.star_glow_radius_flt / bodyradius;
         if (drawglow) {
             GFXColor c = getMaterialEmissive(ourmat);
             const bool spec = configuration()->graphics.glow_ambient_star_light;
@@ -408,7 +408,7 @@ void Planet::InitPlanet(QVector x,
                         bool inside_out,
                         unsigned int lights_num,
                         const float days) {
-    const float bodyradius = configuration()->graphics.star_body_radius;
+    const float bodyradius = configuration()->graphics.star_body_radius_flt;
 
     if (lights_num) {
         radius *= bodyradius;
@@ -430,8 +430,8 @@ void Planet::InitPlanet(QVector x,
     this->radius = radius;
     this->gravity = gravity;
     this->days = days;
-    const float densityOfRock = configuration()->physics.density_of_rock;
-    const float densityOfJumpPoint = configuration()->physics.density_of_jump_point;
+    const float densityOfRock = configuration()->physics.density_of_rock_flt;
+    const float densityOfJumpPoint = configuration()->physics.density_of_jump_point_flt;
     //const float massofplanet = configuration()->physics.mass_of_planet;
     hull.Set((4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : densityOfJumpPoint));
     this->Mass =
@@ -442,8 +442,8 @@ void Planet::InitPlanet(QVector x,
     colTrees = nullptr;
     SetAngularVelocity(rotvel);
     // The docking port is 20% bigger than the planet
-    const float planetdockportsize = configuration()->dock.planet_dock_port_size;
-    const float planetdockportminsize = configuration()->dock.planet_dock_port_min_size;
+    const float planetdockportsize = configuration()->dock.planet_dock_port_size_flt;
+    const float planetdockportminsize = configuration()->dock.planet_dock_port_min_size_flt;
     if ((!atmospheric) && notJumppoint) {
         float dock = radius * planetdockportsize;
         if (dock - radius < planetdockportminsize) {
@@ -541,8 +541,8 @@ void Planet::AddCity(const std::string &texture,
     }
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
-    const float materialweight = configuration()->graphics.city_light_strength;
-    const float daymaterialweight = configuration()->graphics.day_city_light_strength;
+    const float materialweight = configuration()->graphics.city_light_strength_flt;
+    const float daymaterialweight = configuration()->graphics.day_city_light_strength_flt;
     GFXMaterial m{};
     setMaterialAmbient(m, 0.0);
     setMaterialDiffuse(m, materialweight);

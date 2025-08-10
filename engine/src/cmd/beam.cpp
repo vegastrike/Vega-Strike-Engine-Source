@@ -100,8 +100,8 @@ static bool beamCheckCollision(QVector pos, float len, const Collidable &un) {
 
 void Beam::RecalculateVertices(const Matrix &trans) {
     GFXColorVertex *beam = (vlist->BeginMutate(0))->colors;
-    const float fadelocation = configuration()->graphics.beam_fadeout_length;
-    const float hitfadelocation = configuration()->graphics.beam_fadeout_hit_length;
+    const float fadelocation = configuration()->graphics.beam_fadeout_length_flt;
+    const float hitfadelocation = configuration()->graphics.beam_fadeout_hit_length_flt;
     static float scoopangle =
             //In radians - the /2 is because of the way in which we check against the cone.
             XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.scoop_fov", "0.5")) / 2;
@@ -466,7 +466,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
     }
     //A bunch of needed config variables - its best to have them here, so that they're loaded the
     //very first time Collide() is called. That way, we avoid hiccups.
-    const float nbig = configuration()->physics.tractor.percent_to_tractor;
+    const float nbig = configuration()->physics.tractor.percent_to_tractor_flt;
     int upgradesfaction = FactionUtil::GetUpgradeFaction();
     static int cargofaction = FactionUtil::GetFactionIndex("cargo");
     const bool c_fp = configuration()->physics.tractor.cargo.force_push;
@@ -480,21 +480,21 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
     const bool o_fp = configuration()->physics.tractor.others.force_push;
     const bool o_fi = configuration()->physics.tractor.others.force_in;
     const bool scoop = configuration()->physics.tractor.scoop;
-    const float scoopangle = configuration()->physics.tractor.scoop_angle;     //In radians
+    const float scoopangle = configuration()->physics.tractor.scoop_angle_flt;     //In radians
     const float scoopcosangle = cos(scoopangle);
     const float maxrelspeed = configuration()->physics.tractor.max_relative_speed;
-    const float c_ors_m = configuration()->physics.tractor.cargo.distance_own_rsize;
-    const float c_trs_m = configuration()->physics.tractor.cargo.distance_tgt_rsize;
-    const float c_o = configuration()->physics.tractor.cargo.distance;
-    const float u_ors_m = configuration()->physics.tractor.upgrade.distance_own_rsize;
-    const float u_trs_m = configuration()->physics.tractor.upgrade.distance_tgt_rsize;
-    const float u_o = configuration()->physics.tractor.upgrade.distance;
-    const float f_ors_m = configuration()->physics.tractor.faction.distance_own_rsize;
-    const float f_trs_m = configuration()->physics.tractor.faction.distance_tgt_rsize;
-    const float f_o = configuration()->physics.tractor.faction.distance;
-    const float o_ors_m = configuration()->physics.tractor.others.distance_own_rsize;
-    const float o_trs_m = configuration()->physics.tractor.others.distance_tgt_rsize;
-    const float o_o = configuration()->physics.tractor.others.distance;
+    const float c_ors_m = configuration()->physics.tractor.cargo.distance_own_rsize_flt;
+    const float c_trs_m = configuration()->physics.tractor.cargo.distance_tgt_rsize_flt;
+    const float c_o = configuration()->physics.tractor.cargo.distance_flt;
+    const float u_ors_m = configuration()->physics.tractor.upgrade.distance_own_rsize_flt;
+    const float u_trs_m = configuration()->physics.tractor.upgrade.distance_tgt_rsize_flt;
+    const float u_o = configuration()->physics.tractor.upgrade.distance_flt;
+    const float f_ors_m = configuration()->physics.tractor.faction.distance_own_rsize_flt;
+    const float f_trs_m = configuration()->physics.tractor.faction.distance_tgt_rsize_flt;
+    const float f_o = configuration()->physics.tractor.faction.distance_flt;
+    const float o_ors_m = configuration()->physics.tractor.others.distance_own_rsize_flt;
+    const float o_trs_m = configuration()->physics.tractor.others.distance_tgt_rsize_flt;
+    const float o_o = configuration()->physics.tractor.others.distance_flt;
     bool tractor = (damagerate < 0 && phasedamage > 0);
     bool repulsor = (damagerate > 0 && phasedamage < 0);
     if (scoop && (tractor || repulsor)) {
@@ -579,7 +579,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         c = &tmp;
                         tmp.SetName("Space_Salvage");
                         tmp.SetCategory("Uncategorized_Cargo");
-                        const float spacejunk = configuration()->cargo.space_junk_price;
+                        const float spacejunk = configuration()->cargo.space_junk_price_flt;
                         tmp.SetPrice(spacejunk);
                         tmp.SetQuantity(1);
                         tmp.SetMass(.001);
@@ -587,9 +587,9 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         if (target->faction != upgradesfaction) {
                             tmp.SetName(target->name);
                             tmp.SetCategory("starships");
-                            const float starshipprice = configuration()->cargo.junk_starship_price;
-                            const float starshipmass = configuration()->cargo.junk_starship_mass;
-                            const float starshipvolume = configuration()->cargo.junk_starship_volume;
+                            const float starshipprice = configuration()->cargo.junk_starship_price_flt;
+                            const float starshipmass = configuration()->cargo.junk_starship_mass_flt;
+                            const float starshipvolume = configuration()->cargo.junk_starship_volume_flt;
                             tmp.SetPrice(starshipprice);
                             tmp.SetQuantity(1);
                             tmp.SetMass(starshipmass);

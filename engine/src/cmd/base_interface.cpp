@@ -74,7 +74,7 @@ static unsigned int &getMouseButtonMask() {
 static void biModifyMouseSensitivity(int &x, int &y, bool invert) {
     int xrez = configuration()->graphics.resolution_x;
     const int whentodouble = configuration()->joystick.double_mouse_position;
-    const float factor = configuration()->joystick.double_mouse_factor;
+    const float factor = configuration()->joystick.double_mouse_factor_flt;
     if (xrez >= whentodouble) {
         x -= configuration()->graphics.resolution_x / 2;
         y -= configuration()->graphics.resolution_y / 2;
@@ -255,7 +255,7 @@ void BaseInterface::Room::BaseVSMovie::SetTime(float t) {
 }
 
 void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base) {
-    const float AlphaTestingCutoff = configuration()->graphics.bases.alpha_test_cutoff;
+    const float AlphaTestingCutoff = configuration()->graphics.bases.alpha_test_cutoff_flt;
     GFXAlphaTest(GREATER, AlphaTestingCutoff);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXEnable(TEXTURE0);
@@ -312,9 +312,9 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
     Unit *un = base->caller.GetUnit();
     if (un) {
         GFXHudMode(GFXFALSE);
-        float tmp = configuration()->graphics.fov;
-        const float standard_fov = configuration()->graphics.bases.fov;
-        configuration()->graphics.fov = standard_fov;
+        float tmp = configuration()->graphics.fov_flt;
+        const float standard_fov = configuration()->graphics.bases.fov_flt;
+        configuration()->graphics.fov_flt = standard_fov;
         float tmp1 = _Universe->AccessCamera()->GetFov();
         _Universe->AccessCamera()->SetFov(standard_fov);
         Vector p, q, r;
@@ -327,7 +327,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         Matrix final;
         Matrix newmat = mat;
         newmat.p.k *= un->rSize();
-        newmat.p += QVector(0, 0, configuration()->graphics.znear);
+        newmat.p += QVector(0, 0, configuration()->graphics.znear_dbl);
         newmat.p.i *= newmat.p.k;
         newmat.p.j *= newmat.p.k;
         MultMatrix(final, cam, newmat);
@@ -360,7 +360,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         _Universe->AccessCamera()->UpdateGFX();
         SetupViewport();
         GFXHudMode(GFXTRUE);
-        configuration()->graphics.fov = tmp;
+        configuration()->graphics.fov_flt = tmp;
         _Universe->AccessCamera()->SetFov(tmp1);
     }
 }
@@ -391,15 +391,15 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
     const bool draw_text = configuration()->graphics.bases.draw_location_text;
     const bool draw_always = configuration()->graphics.bases.location_marker_draw_always;
     static float y_lower = kYLower;           //shows the offset on the lower edge of the screen (for the textline there)
-    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha;
+    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha_flt;
     if (enable_markers) {
         float x, y, text_wid, text_hei;
         //get offset from config;
-        const float text_offset_x = configuration()->graphics.bases.location_marker_text_offset_x;
-        const float text_offset_y = configuration()->graphics.bases.location_marker_text_offset_y;
-        const float text_color_r = configuration()->graphics.bases.location_marker_text_color_r;
-        const float text_color_g = configuration()->graphics.bases.location_marker_text_color_g;
-        const float text_color_b = configuration()->graphics.bases.location_marker_text_color_b;
+        const float text_offset_x = configuration()->graphics.bases.location_marker_text_offset_x_flt;
+        const float text_offset_y = configuration()->graphics.bases.location_marker_text_offset_y_flt;
+        const float text_color_r = configuration()->graphics.bases.location_marker_text_color_r_flt;
+        const float text_color_g = configuration()->graphics.bases.location_marker_text_color_g_flt;
+        const float text_color_b = configuration()->graphics.bases.location_marker_text_color_b_flt;
         for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
             if (links[i]) {
                 if ((links[i]->alpha < 1) || (draw_always)) {
@@ -483,8 +483,8 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
     if (draw_borders || debug_markers) {
         float x, y, text_wid, text_hei;
         //get offset from config;
-        const float text_offset_x = configuration()->graphics.bases.location_marker_text_offset_x;
-        const float text_offset_y = configuration()->graphics.bases.location_marker_text_offset_y;
+        const float text_offset_x = configuration()->graphics.bases.location_marker_text_offset_x_flt;
+        const float text_offset_y = configuration()->graphics.bases.location_marker_text_offset_y_flt;
         for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
             if (links[i]) {
                 //Debug marker
@@ -573,7 +573,7 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
             configuration()->graphics.resolution_y = base_max_height;
         }
     }
-    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha;
+    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha_flt;
     GFXColor tmpbg = text.bgcol;
     bool automatte = (0 == tmpbg.a);
     if (automatte) {
@@ -636,7 +636,7 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
         return;
     }
     curtime += GetElapsedTime() / getTimeCompression();
-    const float delay = configuration()->graphics.text_delay;
+    const float delay = configuration()->graphics.text_delay_flt;
     if ((std::find(active_talks.begin(), active_talks.end(),
             this) == active_talks.end())
             || (curchar >= message.size() && curtime > ((delay * message.size()) + 2))) {
@@ -656,7 +656,7 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
         return;         //do not do ANYTHING with 'this' after the previous statement...
     }
     if (curchar < message.size()) {
-        const float inbetween = configuration()->graphics.text_speed;
+        const float inbetween = configuration()->graphics.text_speed_flt;
         if (curtime > inbetween) {
             base->othtext.SetText(message.substr(0, ++curchar));
             curtime = 0;
@@ -885,7 +885,7 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
         mousePointerStyle = MOUSE_POINTER_NORMAL;
     }
     const bool draw_always = configuration()->graphics.bases.location_marker_draw_always;
-    const float defined_distance = configuration()->graphics.bases.location_marker_distance;
+    const float defined_distance = configuration()->graphics.bases.location_marker_distance_flt;
     if (!draw_always) {
         float cx, cy;
         float dist_cur2link;
@@ -1330,7 +1330,7 @@ void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, in
                         + randyVector(-.5 * bas->rSize(), .5 * bas->rSize()));
                 playa->SetAngularVelocity(bas->AngularVelocity);
                 playa->SetOwner(bas);
-                const float velmul = configuration()->physics.eject_cargo_speed;
+                const float velmul = configuration()->physics.eject_cargo_speed_flt;
                 playa->SetVelocity(bas->Velocity * velmul + randyVector(-.25, .25).Cast());
             }
             playa->UnDock(bas);
@@ -1493,7 +1493,7 @@ void BaseInterface::Draw() {
 
     float x, y;
     glViewport(0, 0, configuration()->graphics.resolution_x, configuration()->graphics.resolution_y);
-    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha;
+    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha_flt;
 
     curtext.GetCharSize(x, y);
     curtext.SetPos(-.99, -1 + (y * 1.5));

@@ -91,7 +91,7 @@ float word_length(const char *str) {
 }
 
 void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
-    const float rescale_font = configuration()->graphics.gui_font_scale;
+    const float rescale_font = configuration()->graphics.gui_font_scale_flt;
     float font_size_float = rescale_font * 5. / 100;
 
     int cur;

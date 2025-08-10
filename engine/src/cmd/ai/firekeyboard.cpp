@@ -1428,7 +1428,7 @@ static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
             endt->graphicOptions.WarpRamping = 1;
         }
         endt->ftl_drive.Disable();
-        const float clearencetime = configuration()->general.docking_time;
+        const float clearencetime = configuration()->general.docking_time_flt;
         endt->EnqueueAIFirst(new Orders::ExecuteFor(new Orders::MatchVelocity(Vector(0, 0, 0),
                 Vector(0, 0, 0),
                 true,

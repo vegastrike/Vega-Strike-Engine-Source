@@ -449,7 +449,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
     static unsigned int counter = 0;
     counter++;
     if (SSCK.jumpkey) {
-        const float jump_key_delay = configuration()->general.jump_key_delay;
+        const float jump_key_delay = configuration()->general.jump_key_delay_flt;
         if ((counter - last_jumped) > static_cast<unsigned>(jump_key_delay / SIMULATION_ATOM) || last_jumped == 0) {
             last_jumped = counter;
             parent->ActivateJumpDrive();

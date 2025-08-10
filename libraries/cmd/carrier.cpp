@@ -207,7 +207,7 @@ void Carrier::EjectCargo(unsigned int index) {
         tmp->SetMass(0.01);
     }
 
-    const float cargotime = configuration()->physics.cargo_live_time;
+    const float cargotime = configuration()->physics.cargo_live_time_flt;
     if (tmp) {
         string tmpcontent = tmp->name;
         if (tmp->IsMissionFlag()) {
@@ -245,12 +245,12 @@ void Carrier::EjectCargo(unsigned int index) {
             }
             float arot = 0;
             const float grot =
-                    configuration()->graphics.generic_cargo_rotation_speed * 3.1415926536 / 180;
+                    configuration()->graphics.generic_cargo_rotation_speed_flt * 3.1415926536F / 180.0F;
             if (!cargo) {
                 const float crot =
-                        configuration()->graphics.cargo_rotation_speed * 3.1415926536 / 180;
+                        configuration()->graphics.cargo_rotation_speed_flt * 3.1415926536F / 180.0F;
                 const float erot =
-                        configuration()->graphics.eject_rotation_speed * 3.1415926536 / 180;
+                        configuration()->graphics.eject_rotation_speed_flt * 3.1415926536F / 180.0F;
                 if (tmpcontent == "eject") {
                     if (isplayer) {
                         Flightgroup *fg = unit->getFlightgroup();
@@ -297,7 +297,7 @@ void Carrier::EjectCargo(unsigned int index) {
                         }
                     } else {
                         int fac = FactionUtil::GetUpgradeFaction();
-                        const float ejectcargotime = configuration()->physics.eject_live_time;
+                        const float ejectcargotime = configuration()->physics.eject_live_time_flt;
                         if (cargotime == 0.0) {
                             cargo = new Unit("eject", false, fac, "", NULL, 0);
                         } else {
@@ -368,7 +368,7 @@ void Carrier::EjectCargo(unsigned int index) {
                 }
                 tmpvel.Normalize();
                 if ((SelectDockPort(unit, unit) > -1)) {
-                    const float eject_cargo_offset = configuration()->physics.eject_distance;
+                    const float eject_cargo_offset = configuration()->physics.eject_distance_flt;
                     QVector loc(Transform(unit->GetTransformation(),
                             unit->DockingPortLocations()[0].GetPosition().Cast()));
                     //index is always > -1 because it's unsigned.  Lets use the correct terms, -1 in Uint is UINT_MAX
@@ -389,7 +389,7 @@ void Carrier::EjectCargo(unsigned int index) {
                             + randVector(-.5 * unit->rSize(), .5 * unit->rSize()));
                     cargo->SetAngularVelocity(rotation);
                 }
-                const float velmul = configuration()->physics.eject_cargo_speed;
+                const float velmul = configuration()->physics.eject_cargo_speed_flt;
                 cargo->SetOwner(unit);
                 cargo->SetVelocity(unit->Velocity * velmul + randVector(-.25, .25).Cast());
                 cargo->setMass(tmp->GetMass());
@@ -561,7 +561,7 @@ float Carrier::PriceCargo(const std::string &s) {
         if (this != mpl) {
             return mpl->PriceCargo(s);
         } else {
-            const float spacejunk = configuration()->cargo.space_junk_price;
+            const float spacejunk = configuration()->cargo.space_junk_price_flt;
             return spacejunk;
         }
     }
@@ -683,7 +683,7 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
 
     ///FIXME somehow mangle string
     string mangled = unit->cargo[i].name;
-    const float scramblingmanifest = configuration()->general.percentage_speed_change_to_fault_search;
+    const float scramblingmanifest = configuration()->general.percentage_speed_change_to_fault_search_flt;
     {
         //Keep inside subblock, otherwise MSVC will throw an error while redefining 'i'
         bool last = true;

@@ -203,11 +203,11 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
     if (autoLandingExcludeList.find(tname) != autoLandingExcludeList.end()) {
         return;
     }
-    const float lessthan = configuration()->physics.auto_landing_dock_distance;
-    const float warnless = configuration()->physics.auto_landing_warning_distance;
-    const float AutoLandingMoveDistance = configuration()->physics.auto_landing_move_distance;
-    const float moveout = configuration()->physics.auto_landing_displace_distance;
-    const float autorad = configuration()->physics.unit_default_autodock_radius;
+    const float lessthan = configuration()->physics.auto_landing_dock_distance_flt;
+    const float warnless = configuration()->physics.auto_landing_warning_distance_flt;
+    const float AutoLandingMoveDistance = configuration()->physics.auto_landing_move_distance_flt;
+    const float moveout = configuration()->physics.auto_landing_displace_distance_flt;
+    const float autorad = configuration()->physics.unit_default_autodock_radius_flt;
     const bool adjust_unit_radius = configuration()->physics.use_unit_autodock_radius;
     float rsize = target->isPlanet() ? target->rSize() : (autorad + (adjust_unit_radius ? target->rSize() : 0));
     QVector diffvec = un->Position() - target->Position();
@@ -307,7 +307,7 @@ void GameCockpit::AutoLanding() {
 
 
 float GameCockpit::LookupUnitStat(int stat, Unit *target) {
-    const float game_speed = configuration()->physics.game_speed;
+    const float game_speed = configuration()->physics.game_speed_flt;
     const bool display_in_meters = configuration()->physics.display_in_meters;
     const bool lie = configuration()->physics.game_speed_lying;
     static float fpsval = 0;
@@ -394,7 +394,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         }
         case UnitImages<void>::LOCK: {
             float distance;
-            const float locklight_time = configuration()->graphics.locklight_time;
+            const float locklight_time = configuration()->graphics.locklight_time_flt;
             bool res = false;
             if (tmpunit = target->Threat()) {
                 res = tmpunit->cosAngleTo(target, distance, FLT_MAX, FLT_MAX) > .95;
@@ -405,7 +405,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return (res || ((UniverseUtil::GetGameTime() - last_locktime) < locklight_time)) ? 1.0f : 0.0f;
         }
         case UnitImages<void>::MISSILELOCK: {
-            const float locklight_time = configuration()->graphics.locklight_time;
+            const float locklight_time = configuration()->graphics.locklight_time_flt;
             const bool res = target->graphicOptions.missilelock;
             if (res) {
                 last_mlocktime = UniverseUtil::GetGameTime();
@@ -413,7 +413,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return (res || ((UniverseUtil::GetGameTime() - last_mlocktime) < locklight_time)) ? 1.0f : 0.0f;
         }
         case UnitImages<void>::COLLISION: {
-            const double collidepanic = configuration()->physics.collision_inertial_time;
+            const double collidepanic = configuration()->physics.collision_inertial_time_dbl;
             return (getNewTime() - TimeOfLastCollision) < collidepanic;
         }
         case UnitImages<void>::ECM:
@@ -507,7 +507,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                     abletoautopilot = (target->ftl_drive.Enabled());
                 } else {
                     abletoautopilot = (target->AutoPilotTo(target, false) ? 1 : 0);
-                    const float no_auto_light_below = configuration()->physics.no_auto_light_below;
+                    const float no_auto_light_below = configuration()->physics.no_auto_light_below_flt;
                     Unit *targtarg = target->Target();
                     if (targtarg) {
                         if ((target->Position() - targtarg->Position()).Magnitude() - targtarg->rSize()
@@ -830,7 +830,7 @@ void GameCockpit::TriggerEvents(Unit *un) {
 
 
 void GameCockpit::Init(const char *file) {
-    smooth_fov = configuration()->graphics.fov;
+    smooth_fov = configuration()->graphics.fov_flt;
     editingTextMessage = false;
     Cockpit::Init(file);
     if (Panel.size() > 0) {
@@ -943,14 +943,14 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
     radarDisplay = Radar::Factory(Radar::Type::NullDisplay);
 
     //Compute the screen limits. Used to display the arrow pointing to the selected target.
-    const float limit_y = configuration()->graphics.fov;
+    const float limit_y = configuration()->graphics.fov_flt;
     smooth_fov = limit_y;
     projection_limit_y = limit_y;
     //The angle between the center of the screen and the border is half the fov.
     projection_limit_y = tan(projection_limit_y * M_PI / (180 * 2));
-    projection_limit_x = projection_limit_y * configuration()->graphics.aspect;
+    projection_limit_x = projection_limit_y * configuration()->graphics.aspect_flt;
     //Precompute this division... performance.
-    inv_screen_aspect_ratio = 1 / configuration()->graphics.aspect;
+    inv_screen_aspect_ratio = 1 / configuration()->graphics.aspect_flt;
 
     oaccel = Vector(0, 0, 0);
 
@@ -1167,8 +1167,8 @@ int GameCockpit::Autopilot(Unit *target) {
                         Vector P(1, 0, 0), Q(0, 1, 0), R(0, 0, 1);
                         Vector uP, uQ, uR;
                         un->GetOrientation(uP, uQ, uR);
-                        const float auto_side_bias = configuration()->graphics.autopilot_side_bias;
-                        const float auto_front_bias = configuration()->graphics.autopilot_front_bias;
+                        const float auto_side_bias = configuration()->graphics.autopilot_side_bias_flt;
+                        const float auto_front_bias = configuration()->graphics.autopilot_front_bias_flt;
                         P += uP * auto_side_bias + uR * auto_front_bias;
                         P.Normalize();
                         R = P.Cross(Q);
@@ -1182,7 +1182,7 @@ int GameCockpit::Autopilot(Unit *target) {
                         AccessCamera(CP_FIXEDPOS)->SetOrientation(R, Q, -P);
                     }
 
-                    const float autotime = configuration()->physics.auto_time_in_seconds;                    //10 seconds for auto to kick in;
+                    const float autotime = configuration()->physics.auto_time_in_seconds_flt;                    //10 seconds for auto to kick in;
 
                     autopilot_time = autotime;
                     autopilot_target.SetUnit(target);
@@ -1196,8 +1196,8 @@ int GameCockpit::Autopilot(Unit *target) {
 extern void reset_time_compression(const KBData &, KBSTATE a);
 
 void GameCockpit::Shake(float amt, int dtype) {
-    const float shak = configuration()->graphics.cockpit_shake;
-    const float shak_max = configuration()->graphics.cockpit_shake_max;
+    const float shak = configuration()->graphics.cockpit_shake_flt;
+    const float shak_max = configuration()->graphics.cockpit_shake_max_flt;
     shakin += shak;
     if (shakin > shak_max) {
         shakin = shak_max;
@@ -1322,7 +1322,7 @@ static void DrawHeadingMarker(Cockpit &cp, const GFXColor &col) {
     cam->GetPQR(p, q, r);
 
     // znear offset
-    float offset = 2 * configuration()->graphics.znear / cos(cam->GetFov() * M_PI / 180.0);
+    float offset = 2 * configuration()->graphics.znear_flt / cos(cam->GetFov() * M_PI / 180.0);
     v *= offset;
     d *= offset;
 
@@ -1430,10 +1430,10 @@ void GameCockpit::Draw() {
                 if (delta.i != 0 || dest.j != 0 || dest.k != 0) {
                     delta.Normalize();
                     Unit *par = GetParent();
-                    delta = delta * configuration()->physics.distance_to_warp * 1.01 - (par ? (par->Position()) : QVector(0, 0, 0));
+                    delta = delta * configuration()->physics.distance_to_warp_dbl * 1.01 - (par ? (par->Position()) : QVector(0, 0, 0));
                     destination_system_location = delta.Cast();
                     Vector P, Q, R;
-                    const float nav_symbol_size = configuration()->graphics.nav.symbol_size;
+                    const float nav_symbol_size = configuration()->graphics.nav.symbol_size_flt;
                     AccessCamera()->GetPQR(P, Q, R);
 
                     GFXColor4f(destination_system_color.r,
@@ -1463,7 +1463,7 @@ void GameCockpit::Draw() {
             if (par) {
                 //cockpit is unaffected by FOV WARP-Link
                 float oldfov = AccessCamera()->GetFov();
-                AccessCamera()->SetFov(configuration()->graphics.fov);
+                AccessCamera()->SetFov(configuration()->graphics.fov_flt);
 
                 GFXLoadIdentity(MODEL);
 
@@ -1489,17 +1489,17 @@ void GameCockpit::Draw() {
                 headtrans.push_back(Matrix());
                 VectorAndPositionToMatrix(headtrans.back(), -P, Q, R, QVector(0, 0, 0));
                 static float theta = 0, wtheta = 0;
-                const float shake_speed = configuration()->graphics.shake_speed;
-                const float shake_reduction = configuration()->graphics.shake_reduction;
-                const float shake_limit = configuration()->graphics.shake_limit;
-                const float shake_mag = configuration()->graphics.shake_magnitude;
-                const float drift_limit = configuration()->graphics.cockpit_drift_limit;
-                const float drift_amount = configuration()->graphics.cockpit_drift_amount;
-                const float drift_ref_accel = configuration()->graphics.cockpit_drift_ref_accel;
+                const float shake_speed = configuration()->graphics.shake_speed_flt;
+                const float shake_reduction = configuration()->graphics.shake_reduction_flt;
+                const float shake_limit = configuration()->graphics.shake_limit_flt;
+                const float shake_mag = configuration()->graphics.shake_magnitude_flt;
+                const float drift_limit = configuration()->graphics.cockpit_drift_limit_flt;
+                const float drift_amount = configuration()->graphics.cockpit_drift_amount_flt;
+                const float drift_ref_accel = configuration()->graphics.cockpit_drift_ref_accel_flt;
 
-                const float warp_shake_mag = configuration()->graphics.warp_shake_magnitude;
-                const float warp_shake_speed = configuration()->graphics.warp_shake_speed;
-                float warp_shake_ref = configuration()->graphics.warp_shake_ref;
+                const float warp_shake_mag = configuration()->graphics.warp_shake_magnitude_flt;
+                const float warp_shake_speed = configuration()->graphics.warp_shake_speed_flt;
+                float warp_shake_ref = configuration()->graphics.warp_shake_ref_flt;
                 if (warp_shake_ref <= 0) {
                     warp_shake_ref = 1;
                 }
@@ -1584,7 +1584,7 @@ void GameCockpit::Draw() {
                 ->UpdateGFX(GFXFALSE, GFXFALSE, GFXTRUE, GFXFALSE, 0, 1000000);         //Restore normal frustrum
     }
     GFXHudMode(true);
-    const float damage_flash_length = configuration()->graphics.damage_flash_length;
+    const float damage_flash_length = configuration()->graphics.damage_flash_length_flt;
     const bool damage_flash_first = configuration()->graphics.flash_behind_hud;
     if (view < CP_CHASE && damage_flash_first && getNewTime() - shake_time < damage_flash_length) {
         DrawDamageFlash(shake_type);
@@ -1632,7 +1632,7 @@ void GameCockpit::Draw() {
     const bool drawTgtcp = configuration()->graphics.draw_cockpit_from_target_cam;
     const bool drawPadcp = configuration()->graphics.draw_cockpit_from_padlock_cam;
 
-    const float AlphaTestingCutoff = configuration()->graphics.stars_alpha_test_cutoff;
+    const float AlphaTestingCutoff = configuration()->graphics.stars_alpha_test_cutoff_flt;
     if (blend_cockpit) {
         GFXAlphaTest(ALWAYS, 0);
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -1875,7 +1875,7 @@ void GameCockpit::Draw() {
                 }
                 GFXColor4f(1, 1, 1, 1);
 
-                const float min_die_time = configuration()->graphics.death_scene_time;
+                const float min_die_time = configuration()->graphics.death_scene_time_flt;
                 if (dietime > min_die_time) {
                     static std::string death_menu_script = configuration()->graphics.death_menu_script;
                     if (death_menu_script.empty()) {
@@ -1927,7 +1927,7 @@ void GameCockpit::Draw() {
             GFXEnable(TEXTURE0);
             //GFXDisable (DEPTHTEST);
             //GFXDisable(TEXTURE1);
-            const float deadband = configuration()->joystick.mouse_deadband;
+            const float deadband = configuration()->joystick.mouse_deadband_flt;
             const int reverse_spr = configuration()->joystick.reverse_mouse_spr;
             const string blah = configuration()->joystick.mouse_crosshair;
             // Needs to be static for performance reasons
@@ -1961,7 +1961,7 @@ void GameCockpit::Draw() {
     {
         //again, NAV computer is unaffected by FOV WARP-Link
         float oldfov = AccessCamera()->GetFov();
-        AccessCamera()->SetFov(configuration()->graphics.fov);
+        AccessCamera()->SetFov(configuration()->graphics.fov_flt);
         AccessCamera()->UpdateGFXAgain();
         DrawNavSystem(&ThisNav, AccessCamera(), cockpit_offset);
         AccessCamera()->SetFov(oldfov);
@@ -2047,7 +2047,7 @@ void GameCockpit::UpdAutoPilot() {
                 Vector origR = Vector(0, 0, 1);
                 Vector origP = Vector(1, 0, 0);
 
-                const float rotspd = configuration()->graphics.autopilot_rotation_speed;
+                const float rotspd = configuration()->graphics.autopilot_rotation_speed_flt;
 
                 static float curtime = 0;
                 curtime += SIMULATION_ATOM;
@@ -2059,7 +2059,7 @@ void GameCockpit::UpdAutoPilot() {
                 origQ.Normalize();
                 origR.Normalize();
                 AccessCamera(CP_FIXED)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));                 //hack
-                const float initialzoom = configuration()->graphics.initial_zoom_factor;
+                const float initialzoom = configuration()->graphics.initial_zoom_factor_flt;
                 zoomfactor = initialzoom;
             }
         }
@@ -2233,7 +2233,7 @@ static void ShoveCamBehindUnit(int cam, Unit *un, float zoomfactor) {
     //commented out by chuck_starchaser; --never used
     QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
     _Universe->AccessCamera(cam)->SetPosition(
-            unpos - _Universe->AccessCamera()->GetR().Cast() * (un->rSize() + configuration()->graphics.znear * 2) * zoomfactor,
+            unpos - _Universe->AccessCamera()->GetR().Cast() * (un->rSize() + configuration()->graphics.znear_dbl * 2) * zoomfactor,
             un->GetWarpVelocity(), un->GetAngularVelocity(), un->GetAcceleration());
 }
 
@@ -2242,9 +2242,9 @@ static void ShoveCamBelowUnit(int cam, Unit *un, float zoomfactor) {
     QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
     Vector p, q, r;
     _Universe->AccessCamera(cam)->GetOrientation(p, q, r);
-    const float ammttoshovecam = configuration()->graphics.shove_camera_down;
+    const float ammttoshovecam = configuration()->graphics.shove_camera_down_flt;
     _Universe->AccessCamera(cam)->SetPosition(
-            unpos - (r - ammttoshovecam * q).Cast() * (un->rSize() + configuration()->graphics.znear * 2) * zoomfactor,
+            unpos - (r - ammttoshovecam * q).Cast() * (un->rSize() + configuration()->graphics.znear_dbl * 2) * zoomfactor,
             un->GetWarpVelocity(),
             un->GetAngularVelocity(),
             un->GetAcceleration());
@@ -2324,9 +2324,9 @@ void GameCockpit::SetupViewPort(bool clip) {
             CrossProduct(tmp, r, q);
             //Padlock block
             if (view == CP_VIEWTARGET) {
-                const float padlock_view_lag = configuration()->graphics.hud.padlock_view_lag;
+                const float padlock_view_lag = configuration()->graphics.hud.padlock_view_lag_flt;
                 const float padlock_view_lag_inv = 1.0F / padlock_view_lag;
-                const float padlock_view_lag_fix = configuration()->graphics.hud.padlock_view_lag_fix_zone;
+                const float padlock_view_lag_fix = configuration()->graphics.hud.padlock_view_lag_fix_zone_flt;
                 const float padlock_view_lag_fix_cos = (float) cos(padlock_view_lag_fix);
 
                 //pp,qq,rr <-- world-relative padlock target
@@ -2373,31 +2373,31 @@ void GameCockpit::SetupViewPort(bool clip) {
 
         //WARP-FOV link
         {
-            const float stable_lowarpref = configuration()->warp.fov_link.stable.low_ref; /* default: 1 */
-            float stable_hiwarpref = configuration()->warp.fov_link.stable.high_ref; /* default: 100000 */
-            const float stable_refexp = configuration()->warp.fov_link.stable.exp; /* default: 0.5 */
+            const float stable_lowarpref = configuration()->warp.fov_link.stable.low_ref_flt; /* default: 1 */
+            float stable_hiwarpref = configuration()->warp.fov_link.stable.high_ref_flt; /* default: 100000 */
+            const float stable_refexp = configuration()->warp.fov_link.stable.exp_flt; /* default: 0.5 */
             const bool stable_asymptotic = configuration()->warp.fov_link.stable.asymptotic; /* default: 1 */
-            const float stable_offset_f = configuration()->warp.fov_link.stable.offset.front; /* default: 0 */
-            const float stable_offset_b = configuration()->warp.fov_link.stable.offset.back; /* default: 0 */
-            const float stable_offset_p = configuration()->warp.fov_link.stable.offset.perpendicular; /* default: 0 */
-            const float stable_multiplier_f = configuration()->warp.fov_link.stable.multiplier.front; /* default: 0.85 */
-            const float stable_multiplier_b = configuration()->warp.fov_link.stable.multiplier.back; /* default: 1.5 */
-            const float stable_multiplier_p = configuration()->warp.fov_link.stable.multiplier.perpendicular; /* default: 1.25 */
+            const float stable_offset_f = configuration()->warp.fov_link.stable.offset.front_flt; /* default: 0 */
+            const float stable_offset_b = configuration()->warp.fov_link.stable.offset.back_flt; /* default: 0 */
+            const float stable_offset_p = configuration()->warp.fov_link.stable.offset.perpendicular_flt; /* default: 0 */
+            const float stable_multiplier_f = configuration()->warp.fov_link.stable.multiplier.front_flt; /* default: 0.85 */
+            const float stable_multiplier_b = configuration()->warp.fov_link.stable.multiplier.back_flt; /* default: 1.5 */
+            const float stable_multiplier_p = configuration()->warp.fov_link.stable.multiplier.perpendicular_flt; /* default: 1.25 */
 
-            const float shake_lowarpref = configuration()->warp.fov_link.shake.low_ref; /* default: 10000 */
-            float shake_hiwarpref = configuration()->warp.fov_link.shake.high_ref; /* default: 200000 */
-            const float shake_refexp = configuration()->warp.fov_link.shake.exp; /* default: 1.5 */
+            const float shake_lowarpref = configuration()->warp.fov_link.shake.low_ref_flt; /* default: 10000 */
+            float shake_hiwarpref = configuration()->warp.fov_link.shake.high_ref_flt; /* default: 200000 */
+            const float shake_refexp = configuration()->warp.fov_link.shake.exp_flt; /* default: 1.5 */
             const bool shake_asymptotic = configuration()->warp.fov_link.shake.asymptotic; /* default: 1 */
-            const float shake_speed = configuration()->warp.fov_link.shake.speed; /* default: 10 */
-            const float shake_offset_f = configuration()->warp.fov_link.shake.offset.front; /* default: 0 */
-            const float shake_offset_b = configuration()->warp.fov_link.shake.offset.back; /* default: 0 */
-            const float shake_offset_p = configuration()->warp.fov_link.shake.offset.perpendicular; /* default: 0 */
-            const float shake_multiplier_f = configuration()->warp.fov_link.shake.multiplier.front; /* default: 0 */
-            const float shake_multiplier_b = configuration()->warp.fov_link.shake.multiplier.back; /* default: 0 */
-            const float shake_multiplier_p = configuration()->warp.fov_link.shake.multiplier.perpendicular; /* default: 0 */
+            const float shake_speed = configuration()->warp.fov_link.shake.speed_flt; /* default: 10 */
+            const float shake_offset_f = configuration()->warp.fov_link.shake.offset.front_flt; /* default: 0 */
+            const float shake_offset_b = configuration()->warp.fov_link.shake.offset.back_flt; /* default: 0 */
+            const float shake_offset_p = configuration()->warp.fov_link.shake.offset.perpendicular_flt; /* default: 0 */
+            const float shake_multiplier_f = configuration()->warp.fov_link.shake.multiplier.front_flt; /* default: 0 */
+            const float shake_multiplier_b = configuration()->warp.fov_link.shake.multiplier.back_flt; /* default: 0 */
+            const float shake_multiplier_p = configuration()->warp.fov_link.shake.multiplier.perpendicular_flt; /* default: 0 */
 
             //0 means automatic
-            const float refkpsoverride = configuration()->warp.fov_link.reference_kps; /* default: 0 */
+            const float refkpsoverride = configuration()->warp.fov_link.reference_kps_flt; /* default: 0 */
 
             static float theta = 0;
             theta += shake_speed * GetElapsedTime();
@@ -2459,13 +2459,13 @@ void GameCockpit::SetupViewPort(bool clip) {
             sh_offs *= sh_warpfieldstrength * costheta;
             st_mult = (1 - st_warpfieldstrength) + st_mult * st_warpfieldstrength;
             sh_mult *= sh_warpfieldstrength * costheta;
-            const float fov_smoothing = configuration()->warp.fov_link.smoothing;
+            const float fov_smoothing = configuration()->warp.fov_link.smoothing_flt;
             float fov_smoot = std::pow(double(fov_smoothing), GetElapsedTime());
             smooth_fov =
                     min(170.0,
                             max(5.0,
                                     (1 - fov_smoot) * smooth_fov
-                                            + fov_smoot * (configuration()->graphics.fov * (st_mult + sh_mult) + st_offs + sh_offs)));
+                                            + fov_smoot * (configuration()->graphics.fov_dbl * (st_mult + sh_mult) + st_offs + sh_offs)));
             _Universe->AccessCamera()->SetFov(smooth_fov);
         }
     }

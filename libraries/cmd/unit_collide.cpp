@@ -74,11 +74,11 @@ void Unit::RemoveFromSystem() {
                     for (i = activeStarSystem->collide_map[locind]->begin();
                             i != activeStarSystem->collide_map[locind]->end(); ++i) {
                         if (i == this->location[locind]) {
-                            VS_LOG(info, (boost::format("hussah %1$b") % (*i == *this->location[locind])));
+                            VS_LOG(info, (boost::format("hussah %1%") % (*i == *this->location[locind])));
                             found = true;
                         }
                         if (**i < **j) {
-                            VS_LOG(warning, (boost::format("(%1$f %2$f %3$f) and (%4$f %5$f %6$f) %7$f < %8$f %9$b!!!")
+                            VS_LOG(warning, (boost::format("(%1$f %2$f %3$f) and (%4$f %5$f %6$f) %7$f < %8$f %9%!!!")
                                     % (**i).GetPosition().i
                                     % (**i).GetPosition().j
                                     % (**i).GetPosition().k
@@ -92,7 +92,7 @@ void Unit::RemoveFromSystem() {
                         }
                         j = i;
                     }
-                    VS_LOG(info, (boost::format("fin %1$p %2$b ") % (*(int *) &i) % found));
+                    VS_LOG(info, (boost::format("fin %1$p %2% ") % (*(int *) &i) % found));
                     activeStarSystem->collide_map[locind]->checkSet();
                     assert(0);
                 }
@@ -240,7 +240,7 @@ bool Unit::InsideCollideTree(Unit *smaller,
         }
     }
     un_iter i;
-    const float rsizelim = configuration()->physics.smallest_subunit_to_collide;
+    const float rsizelim = configuration()->physics.smallest_subunit_to_collide_flt;
     Vega_UnitType bigtype = bigasteroid ? Vega_UnitType::asteroid : bigger->getUnitType();
     Vega_UnitType smalltype = smallasteroid ? Vega_UnitType::asteroid : smaller->getUnitType();
     if (bigger->SubUnits.empty() == false
@@ -303,7 +303,7 @@ bool Unit::Collide(Unit *target) {
     }
     Vega_UnitType targetisUnit = target->isUnit();
     Vega_UnitType thisisUnit = this->isUnit();
-    const float NEBULA_SPACE_DRAG = configuration()->physics.nebula_space_drag;
+    const float NEBULA_SPACE_DRAG = configuration()->physics.nebula_space_drag_flt;
     if (targetisUnit == Vega_UnitType::nebula) {
         //why? why not?
         this->Velocity *= (1 - NEBULA_SPACE_DRAG);

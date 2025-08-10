@@ -67,7 +67,7 @@ Halo::~Halo() {
 void Halo::Draw(const Transformation &quat, const Matrix &m, float alpha) {
     Vector p, q, r;
     QVector pos;
-    const double HaloOffset = configuration()->graphics.halo_offset;
+    const double HaloOffset = configuration()->graphics.halo_offset_dbl;
     pos = position.Transform(m);
     float wid = sizex;
     float hei = sizey;

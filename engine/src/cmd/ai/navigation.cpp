@@ -559,7 +559,7 @@ inline void CautiousWarpRampOn(Unit *un) {
 }
 
 bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
-    const float specInterdictionLimit = configuration()->physics.min_spec_interdiction_for_jittery_autopilot;
+    const float specInterdictionLimit = configuration()->physics.min_spec_interdiction_for_jittery_autopilot_flt;
     if (target->isPlanet() == false
             && (target->graphicOptions.specInterdictionOnline == 0
                     || fabs(target->ship_functions.Value(Function::ftl_interdiction)) < specInterdictionLimit)) {
@@ -569,8 +569,8 @@ bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
         return true;
     }
     float maxspeed = parent->afterburner.speed;
-    const float accel_auto_limit = configuration()->physics.max_accel_for_smooth_autopilot;
-    const float speed_auto_limit = configuration()->physics.max_over_combat_speed_for_smooth_autopilot;
+    const float accel_auto_limit = configuration()->physics.max_accel_for_smooth_autopilot_flt;
+    const float speed_auto_limit = configuration()->physics.max_over_combat_speed_for_smooth_autopilot_flt;
     if (minaccel < accel_auto_limit || parent->Velocity.MagnitudeSquared() > maxspeed * maxspeed * speed_auto_limit
             * speed_auto_limit) {
         return true;
@@ -579,7 +579,7 @@ bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
 }
 
 bool AutoLongHaul::InsideLandingPort(const Unit *obstacle) const {
-    const float landing_port_limit = configuration()->physics.auto_landing_port_unclamped_seconds;
+    const float landing_port_limit = configuration()->physics.auto_landing_port_unclamped_seconds_flt;
     return UnitUtil::getSignificantDistance(parent,
             obstacle)
             < -landing_port_limit * parent->afterburner.speed;
@@ -594,11 +594,11 @@ void AutoLongHaul::Execute() {
         return;
     }
     const bool compensate_for_interdiction = configuration()->physics.auto_pilot_compensate_for_interdiction;
-    const float enough_warp_for_cruise = configuration()->physics.enough_warp_for_cruise;
-    const float go_perpendicular_speed = configuration()->physics.warp_perpendicular;
-    const float min_warp_orbit_radius = configuration()->physics.min_warp_orbit_radius;
-    const float warp_orbit_multiplier = configuration()->physics.warp_orbit_multiplier;
-    const float warp_behind_angle = cos(3.1415926536 * configuration()->physics.warp_behind_angle / 180.0);
+    const float enough_warp_for_cruise = configuration()->physics.enough_warp_for_cruise_flt;
+    const float go_perpendicular_speed = configuration()->physics.warp_perpendicular_flt;
+    const float min_warp_orbit_radius = configuration()->physics.min_warp_orbit_radius_flt;
+    const float warp_orbit_multiplier = configuration()->physics.warp_orbit_multiplier_flt;
+    const float warp_behind_angle = cos(3.1415926536F * configuration()->physics.warp_behind_angle_flt / 180.0F);
     QVector myposition = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();     //get unit pos
     QVector destination = target->isSubUnit() ? target->Position() : target->LocalPosition();     //get destination
     QVector destinationdirection = (destination - myposition);       //find vector from us to destination
@@ -684,7 +684,7 @@ void AutoLongHaul::Execute() {
         if (speed > .01) {
             cfacing = cfacing * (1. / speed);
         }
-        const float dotLimit = cos(3.1415926536 * configuration()->physics.auto_pilot_spec_lining_up_angle / 180.0);
+        const float dotLimit = cos(3.1415926536F * configuration()->physics.auto_pilot_spec_lining_up_angle_flt / 180.0F);
         if (cfacing.Dot(destinationdirection) < dotLimit) {          //if wanting to face target but overshooting.
             deactivatewarp = true;
         }              //turn off drive
@@ -700,7 +700,7 @@ void AutoLongHaul::Execute() {
     float time_to_destination = dis / maxspeed;
 
     const bool rampdown = configuration()->physics.auto_pilot_ramp_warp_down;
-    const float warprampdowntime = configuration()->physics.warp_ramp_down_time;
+    const float warprampdowntime = configuration()->physics.warp_ramp_down_time_flt;
     float time_to_stop = simulation_atom_var;
     if (rampdown) {
         time_to_stop += warprampdowntime;
@@ -723,8 +723,8 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    const float distance_to_stop = configuration()->physics.auto_pilot_termination_distance;
-    const float enemy_distance_to_stop = configuration()->physics.auto_pilot_termination_distance_enemy;
+    const float distance_to_stop = configuration()->physics.auto_pilot_termination_distance_flt;
+    const float enemy_distance_to_stop = configuration()->physics.auto_pilot_termination_distance_enemy_flt;
     const bool do_auto_finish = configuration()->physics.auto_pilot_terminate;
     bool stopnow = false;
     maxspeed = parent->afterburner.speed;

@@ -204,11 +204,11 @@ int getPhysicsPriority(Unit *un) {
     const int NOT_VISIBLE_COMBAT_LOW = configuration()->physics.priorities.not_visible_combat_low;
     const int NO_ENEMIES = configuration()->physics.priorities.no_enemies;
     const int INERT_PRIORITY = configuration()->physics.priorities.inert;
-    const double _PLAYERTHREAT_DISTANCE_FACTOR = configuration()->physics.priorities.player_threat_distance_factor;
-    const double _THREAT_DISTANCE_FACTOR = configuration()->physics.priorities.threat_distance_factor;
-    const double DYNAMIC_THROTTLE_MINFACTOR = configuration()->physics.priorities.dynamic_throttle.min_distance_factor;
-    const double DYNAMIC_THROTTLE_MAXFACTOR = configuration()->physics.priorities.dynamic_throttle.max_distance_factor;
-    const double DYNAMIC_THROTTLE_TARGETFPS = configuration()->physics.priorities.dynamic_throttle.target_fps;
+    const double _PLAYERTHREAT_DISTANCE_FACTOR = configuration()->physics.priorities.player_threat_distance_factor_dbl;
+    const double _THREAT_DISTANCE_FACTOR = configuration()->physics.priorities.threat_distance_factor_dbl;
+    const double DYNAMIC_THROTTLE_MINFACTOR = configuration()->physics.priorities.dynamic_throttle.min_distance_factor_dbl;
+    const double DYNAMIC_THROTTLE_MAXFACTOR = configuration()->physics.priorities.dynamic_throttle.max_distance_factor_dbl;
+    const double DYNAMIC_THROTTLE_TARGETFPS = configuration()->physics.priorities.dynamic_throttle.target_fps_dbl;
     const double DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.0 / DYNAMIC_THROTTLE_TARGETFPS;
     static double DYNAMIC_THROTTLE_FACTOR = 1.0;
     static double lastThrottleAdjust = 0.0;
@@ -269,8 +269,8 @@ int getPhysicsPriority(Unit *un) {
         }
     }
     if (un->graphicOptions.WarpRamping || un->graphicOptions.RampCounter != 0) {
-        const float compwarprampuptime = configuration()->physics.computer_warp_ramp_up_time; //for the heck of it.  NOTE, variable also in unit_generic.cpp
-        const float warprampdowntime = configuration()->physics.warp_ramp_down_time;
+        const float compwarprampuptime = configuration()->physics.computer_warp_ramp_up_time_flt; //for the heck of it.  NOTE, variable also in unit_generic.cpp
+        const float warprampdowntime = configuration()->physics.warp_ramp_down_time_flt;
         float lowest_priority_time = SIM_QUEUE_SIZE * SIMULATION_ATOM;
 
         float time_ramped = compwarprampuptime - un->graphicOptions.RampCounter;
@@ -345,7 +345,7 @@ void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVec
             }
         }
         if (my_unit->faction != FactionUtil::GetFactionIndex("neutral")) {
-            Order *tmp = new Orders::FireAt(configuration()->ai.firing.aggressivity);
+            Order *tmp = new Orders::FireAt(configuration()->ai.firing.aggressivity_flt);
             my_unit->EnqueueAI(tmp);
             my_unit->SetTurretAI();
         }
@@ -971,7 +971,7 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
         return 1.0f;
     }
 
-    const Cargo cargo = upgrade->GetCargo(0); 
+    const Cargo cargo = upgrade->GetCargo(0);
     if (cargo.IsWeapon()) {
         static std::string loadfailed("LOAD_FAILED");
         if (upgrade->getNumMounts()) {

@@ -267,7 +267,7 @@ void FlyByWire::Accel(float per) {
     if (cpu->set_speed > parent->MaxSpeed()) {
         cpu->set_speed = parent->MaxSpeed();
     }
-    const float reverse_speed_limit = configuration()->physics.reverse_speed_limit;
+    const float reverse_speed_limit = configuration()->physics.reverse_speed_limit_flt;
     if (cpu->set_speed < -parent->MaxSpeed() * reverse_speed_limit) {
         cpu->set_speed = -parent->MaxSpeed() * reverse_speed_limit;
     }
@@ -353,7 +353,7 @@ void FlyByWire::Execute() {
         parent->computer.set_speed = stolen_setspeed_value;
         stolen_setspeed = false;
     }
-    const double collidepanic = configuration()->physics.collision_inertial_time;
+    const double collidepanic = configuration()->physics.collision_inertial_time_dbl;
     Cockpit *tempcp = _Universe->isPlayerStarship(parent);
     if (((sheltonslide || inertial_flight_model
             || !controltype)
