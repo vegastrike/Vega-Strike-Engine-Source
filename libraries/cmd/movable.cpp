@@ -148,12 +148,12 @@ void Movable::SetResolveForces(bool ys) {
     resolveforces = ys;
 }
 
-void Movable::UpdatePhysics(const Transformation &trans,
-        const Matrix &transmat,
-        const Vector &cum_vel,
-        bool lastframe,
-        UnitCollection *uc,
-        Unit *superunit) {
+void Movable::UpdatePhysics(const Transformation& trans,
+                            const Matrix& transmat,
+                            const Vector& cum_vel,
+                            bool lastframe,
+                            UnitCollection* uc,
+                            Unit* superunit) {
     //Save information about when this happened
     const unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
     //Well, wasn't skipped actually, but...
@@ -161,7 +161,16 @@ void Movable::UpdatePhysics(const Transformation &trans,
     this->cur_sim_queue_slot = (cur_sim_frame + this->sim_atom_multiplier) % SIM_QUEUE_SIZE;
     const Transformation old_physical_state = curr_physical_state;
 
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double b4_update_physics_3 = realTime();
+#endif
     UpdatePhysics3(trans, transmat, lastframe, uc, superunit);
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_update_physics_3 = realTime();
+    VS_LOG(trace,
+           (boost::format("%1%: Time taken by UpdatePhysics3: %2%") % __FUNCTION__ % (after_update_physics_3 -
+               b4_update_physics_3)));
+#endif
 
     if (resolveforces) {
         //clamp velocity
@@ -170,24 +179,40 @@ void Movable::UpdatePhysics(const Transformation &trans,
         const float velocity_max = configuration()->physics.velocity_max;
         if (Velocity.i > velocity_max) {
             Velocity.i = velocity_max;
-        } else if (Velocity.i < -velocity_max) {
+        }
+        else if (Velocity.i < -velocity_max) {
             Velocity.i = -velocity_max;
         }
         if (Velocity.j > velocity_max) {
             Velocity.j = velocity_max;
-        } else if (Velocity.j < -velocity_max) {
+        }
+        else if (Velocity.j < -velocity_max) {
             Velocity.j = -velocity_max;
         }
         if (Velocity.k > velocity_max) {
             Velocity.k = velocity_max;
-        } else if (Velocity.k < -velocity_max) {
+        }
+        else if (Velocity.k < -velocity_max) {
             Velocity.k = -velocity_max;
         }
     }
 
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_resolve_forces = realTime();
+    VS_LOG(trace,
+           (boost::format("%1%: Time taken by ResolveForces: %2%") % __FUNCTION__ % (after_resolve_forces -
+               after_update_physics_3)));
+#endif
+
     // The 1.0 difficulty is a hack based on the hack in GetVelocityDifficultyMult
     this->UpdatePhysics2(trans, old_physical_state, Vector(), 1.0, transmat, cum_vel, lastframe, uc);
 
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_update_physics_2 = realTime();
+    VS_LOG(trace,
+           (boost::format("%1%: Time taken by UpdatePhysics2: %2%") % __FUNCTION__ % (after_update_physics_2 -
+               after_resolve_forces)));
+#endif
 }
 
 void Movable::AddVelocity(float difficulty) {
