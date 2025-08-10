@@ -302,55 +302,103 @@ public:
 #define UPDATEDEBUG  //for hard to track down bugs
 
 void StarSystem::Draw(bool DrawCockpit) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double start_time = realTime();
+#endif
     GFXEnable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
     saved_interpolation_blend_factor = interpolation_blend_factor =
-            (1. / PHY_NUM) * ((PHY_NUM * time) / static_cast<double>(simulation_atom_var) + current_stage);
+        (1. / PHY_NUM) * ((PHY_NUM * time) / static_cast<double>(simulation_atom_var) + current_stage);
     GFXColor4f(1, 1, 1, 1);
     if (DrawCockpit) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double b4_update_all_frame = realTime();
+#endif
         AnimatedTexture::UpdateAllFrame();
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double after_update_all_frame = realTime();
+        VS_LOG(trace,
+               (boost::format("%1%: Time taken by AnimatedTexture::UpdateAllFrame(): %2%") % __FUNCTION__ % (
+                   after_update_all_frame - b4_update_all_frame)));
+#endif
     }
-    for (auto & continuous_terrain : continuous_terrains) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double b4_continuous_terrain_adjust_terrain = realTime();
+#endif
+    for (auto& continuous_terrain : continuous_terrains) {
         continuous_terrain->AdjustTerrain(this);
     }
-    Unit *par;
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_continuous_terrain_adjust_terrain = realTime();
+    VS_LOG(trace,
+           (boost::format("%1%: Time taken by continuous_terrain->AdjustTerrain(this) loop: %2%") % __FUNCTION__ % (
+               after_continuous_terrain_adjust_terrain - b4_continuous_terrain_adjust_terrain)));
+#endif
+    Unit* par;
     if ((par = _Universe->AccessCockpit()->GetParent()) == nullptr) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double b4_universe_access_camera_update_gfx = realTime();
+#endif
         _Universe->AccessCamera()->UpdateGFX(GFXTRUE);
-    } else if (!par->isSubUnit()) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double after_universe_access_camera_update_gfx = realTime();
+        VS_LOG(trace,
+               (boost::format("%1%: Time taken by _Universe->AccessCamera()->UpdateGFX(GFXTRUE): %2%") % __FUNCTION__ %
+                   (after_universe_access_camera_update_gfx - b4_universe_access_camera_update_gfx)));
+#endif
+    }
+    else if (!par->isSubUnit()) {
         //now we can assume world is topps
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double b4_linear_interpolation = realTime();
+#endif
         par->cumulative_transformation = linear_interpolate(par->prev_physical_state,
-                par->curr_physical_state,
-                interpolation_blend_factor);
-        Unit *targ = par->Target();
+                                                            par->curr_physical_state,
+                                                            interpolation_blend_factor);
+        Unit* targ = par->Target();
         if (targ && !targ->isSubUnit()) {
             targ->cumulative_transformation = linear_interpolate(targ->prev_physical_state,
-                    targ->curr_physical_state,
-                    interpolation_blend_factor);
+                                                                 targ->curr_physical_state,
+                                                                 interpolation_blend_factor);
         }
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double after_linear_interpolation = realTime();
+        VS_LOG(trace,
+               (boost::format("%1%: Time taken by cumulative transformations / linear interpolations: %2%") %
+                   __FUNCTION__ % (after_linear_interpolation - b4_linear_interpolation)));
+#endif
         _Universe->AccessCockpit()->SetupViewPort(true);
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double after_viewport_update_gfx = realTime();
+        VS_LOG(trace,
+               (boost::format("%1%: Time taken by _Universe->AccessCockpit()->SetupViewPort(true): %2%") % __FUNCTION__
+                   % (after_viewport_update_gfx - after_linear_interpolation)));
+#endif
     }
-    double setupdrawtime = realTime();
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    double setup_draw_time = realTime();
+#endif
     {
         cam_setup_phase = true;
 
-        Unit *saveparent = _Universe->AccessCockpit()->GetSaveParent();
-        Unit *targ = nullptr;
+        Unit* saveparent = _Universe->AccessCockpit()->GetSaveParent();
+        Unit* targ = nullptr;
         if (saveparent) {
             targ = saveparent->Target();
         }
         //Array containing the two interesting units, so as not to have to copy-paste code
-        Unit *camunits[2] = {saveparent, targ};
+        Unit* camunits[2] = {saveparent, targ};
         const float backup = simulation_atom_var;
         const unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         //VS_LOG(trace, (boost::format("StarSystem::Draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var));
         for (int i = 0; i < 2; ++i) {
-            Unit *unit = camunits[i];
+            Unit* unit = camunits[i];
             //Make sure unit is not null;
             if (unit && !unit->isSubUnit()) {
                 interpolation_blend_factor = calc_blend_factor(saved_interpolation_blend_factor,
-                        unit->sim_atom_multiplier,
-                        unit->cur_sim_queue_slot,
-                        cur_sim_frame);
+                                                               unit->sim_atom_multiplier,
+                                                               unit->cur_sim_queue_slot,
+                                                               cur_sim_frame);
                 // stephengtuggy 2020-07-25 - Should we just use the standard SIMULATION_ATOM here?
                 simulation_atom_var = backup * unit->sim_atom_multiplier;
                 //VS_LOG(trace, (boost::format("StarSystem::Draw(): simulation_atom_var as multiplied = %1%") % simulation_atom_var));
@@ -368,10 +416,20 @@ void StarSystem::Draw(bool DrawCockpit) {
 
         cam_setup_phase = false;
     }
-    setupdrawtime = realTime() - setupdrawtime;
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    setup_draw_time = realTime() - setup_draw_time;
+    VS_LOG(trace, (boost::format("%1%: Time taken by cam setup phase: %2%") % __FUNCTION__ % setup_draw_time));
+    const double b4_background_draw = realTime();
+#endif
     GFXDisable(LIGHTING);
     background->Draw();
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_background_draw = realTime();
+    VS_LOG(trace,
+           (boost::format("%1%: Time taken by background->Draw(): %2%") % __FUNCTION__ % (after_background_draw -
+               b4_background_draw)));
     double drawtime = realTime();
+#endif
 
     // Initialize occluder system (we'll populate it during unit render)
     Occlusion::start();
@@ -383,7 +441,7 @@ void StarSystem::Draw(bool DrawCockpit) {
     Collidable key_iterator(0, 1, drawstartpos);
     UnitWithinRangeOfPosition<UnitDrawer> drawer(configuration()->graphics.precull_dist, 0, key_iterator);
     //Need to draw really big stuff (i.e. planets, deathstars, and other mind-bogglingly big things that shouldn't be culled despite extreme distance
-    Unit *unit;
+    Unit* unit;
     if ((drawer.action.parent = _Universe->AccessCockpit()->GetParent()) != nullptr) {
         drawer.action.parenttarget = drawer.action.parent->Target();
     }
@@ -391,27 +449,45 @@ void StarSystem::Draw(bool DrawCockpit) {
         const double distance = (drawstartpos - unit->Position()).Magnitude() - unit->rSize();
         if (distance < configuration()->graphics.precull_dist) {
             drawer.action.grav_acquire(unit);
-        } else {
+        }
+        else {
             drawer.action.draw(unit);
         }
     }
     //Need to get iterator to approx camera position
     CollideMap::iterator parent = collide_map[Unit::UNIT_ONLY]->lower_bound(key_iterator);
     findObjectsFromPosition(this->collide_map[Unit::UNIT_ONLY], parent, &drawer, drawstartpos, 0, true);
-    drawer.action.drawParents();     //draw units targeted by camera
+    drawer.action.drawParents(); //draw units targeted by camera
     //FIXME  maybe we could do bolts & units instead of unit only--and avoid bolt drawing step
 
+#if defined(LOG_TIME_TAKEN_DETAILS)
     drawtime = realTime() - drawtime;
+    VS_LOG(trace, (boost::format("%1%: Time taken by drawing: %2%") % __FUNCTION__ % drawtime));
+    const double b4_warp_trail_draw = realTime();
+#endif
     WarpTrailDraw();
-
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_warp_trail_draw = realTime();
+    VS_LOG(trace,
+           (boost::format("%1%: Time taken by WarpTrailDraw(): %2%") % __FUNCTION__ % (after_warp_trail_draw -
+               b4_warp_trail_draw)));
+#endif
     GFXFogMode(FOG_OFF);
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_gfx_fog_mode = realTime();
+    VS_LOG(trace,
+           (boost::format("%1%: Time taken by GFXFogMode(FOG_OFF): %2%") % __FUNCTION__ % (after_gfx_fog_mode -
+               after_warp_trail_draw)));
+#endif
 
     // At this point, we've set all occluders
     // Mesh::ProcessXMeshes will query it
 
     GFXColor tmpcol(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
-    double processmesh = realTime();
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    double process_mesh = realTime();
+#endif
     if (!configuration()->graphics.draw_near_stars_in_front_of_planets) {
         stars->Draw();
     }
@@ -425,8 +501,12 @@ void StarSystem::Draw(bool DrawCockpit) {
     Planet::ProcessTerrains();
     Terrain::RenderAll();
     Mesh::ProcessUndrawnMeshes(true);
-    processmesh = realTime() - processmesh;
-    Nebula *neb;
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    process_mesh = realTime() - process_mesh;
+    VS_LOG(trace, (boost::format("%1%: Time taken by mesh processing: %2%") % __FUNCTION__ % process_mesh));
+    const double b4_wrapup = realTime();
+#endif
+    Nebula* neb;
 
     Matrix ident;
     Identity(ident);
@@ -453,6 +533,11 @@ void StarSystem::Draw(bool DrawCockpit) {
 
     // And now we're done with the occluder set
     Occlusion::end();
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_wrapup = realTime();
+    VS_LOG(trace, (boost::format("%1%: Time taken by wrap up: %2%") % __FUNCTION__ % (after_wrapup - b4_wrapup)));
+    VS_LOG(trace, (boost::format("%1%: Total time taken: %2%") % __FUNCTION__ % (after_wrapup - start_time)));
+#endif
 }
 
 extern void update_ani_cache();
