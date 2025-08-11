@@ -29,7 +29,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2024-12-31 ---"
+echo "--- bootstrap | 2025-08-11 ---"
 echo "------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -96,7 +96,9 @@ function bootstrapOnDebian()
                       libboost-program-options1.81-dev \
                       libxmu-dev \
                       clang \
-                      lsb-release
+                      lsb-release \
+                      opentelemetry-cpp-dev \
+                      libprotobuf-dev
       ;;
     "bullseye")
       apt-get -qy install \
@@ -159,7 +161,9 @@ function bootstrapOnUbuntu()
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
-                      lsb-release
+                      lsb-release \
+                      opentelemetry-cpp-dev \
+                      libprotobuf-dev
       ;;
     "jammy")
       echo "Sorry, Ubuntu jammy is no longer supported"
@@ -234,7 +238,9 @@ function bootstrapOnPopOS ()
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
-                      lsb-release
+                      lsb-release \
+                      opentelemetry-cpp-dev \
+                      libprotobuf-dev
       ;;
     "noble")
       apt-get -qy install \
@@ -268,7 +274,9 @@ function bootstrapOnPopOS ()
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
-                      lsb-release
+                      lsb-release \
+                      opentelemetry-cpp-dev \
+                      libprotobuf-dev
       ;;
     *)
       echo "Sorry, this version of Pop! OS is not currently supported"
@@ -319,7 +327,9 @@ function bootstrapOnLinuxMint ()
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
-                      lsb-release
+                      lsb-release \
+                      opentelemetry-cpp-dev \
+                      libprotobuf-dev
       ;;
     "virginia")
       apt-get -qy install \
@@ -353,7 +363,9 @@ function bootstrapOnLinuxMint ()
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
-                      lsb-release
+                      lsb-release \
+                      opentelemetry-cpp-dev \
+                      libprotobuf-dev
       ;;
     "victoria")
       apt-get -qy install \
@@ -387,7 +399,9 @@ function bootstrapOnLinuxMint ()
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
-                      lsb-release
+                      lsb-release \
+                      opentelemetry-cpp-dev \
+                      libprotobuf-dev
       ;;
     "vera")
       apt-get -qy install \
@@ -421,7 +435,9 @@ function bootstrapOnLinuxMint ()
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
-                      lsb-release
+                      lsb-release \
+                      opentelemetry-cpp-dev \
+                      libprotobuf-dev
       ;;
     "vanessa")
       apt-get -qy install \
@@ -455,7 +471,9 @@ function bootstrapOnLinuxMint ()
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
-                      lsb-release
+                      lsb-release \
+                      opentelemetry-cpp-dev \
+                      libprotobuf-dev
       ;;
     "ulyana")
       apt-get -qy install \
@@ -487,7 +505,9 @@ function bootstrapOnLinuxMint ()
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
-                      lsb-release
+                      lsb-release \
+                      opentelemetry-cpp-dev \
+                      libprotobuf-dev
       ;;
     *)
       echo "This version of Linux Mint is not directly supported. You may be able to use the corresponding Ubuntu installation package"
@@ -853,6 +873,26 @@ function bootstrapOnFedora ()
                           gcc-c++ \
                           openal-soft-devel \
                           sdl12-compat-devel \
+                          SDL2-devel \
+                          libvorbis-devel \
+                          libglvnd-devel \
+                          libjpeg-turbo-devel \
+                          libpng-devel \
+                          expat-devel \
+                          gtk3-devel \
+                          python3-devel \
+                          rpm-build \
+                          make \
+                          clang
+      ;;
+    42)
+      dnf install -y \
+                          git \
+                          cmake \
+                          boost-devel \
+                          freeglut-devel \
+                          gcc-c++ \
+                          openal-soft-devel \
                           SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
