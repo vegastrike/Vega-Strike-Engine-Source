@@ -494,7 +494,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::MASSEFFECT: {
             float basemass = atof(UniverseUtil::LookupUnitStat(target->name, "", "Mass").c_str());
             if (basemass > 0) {
-                return 100 * target->getMass() / basemass;
+                return 100 * target->GetMass() / basemass;
             } else {
                 return 0;
             }

@@ -91,7 +91,7 @@ void Building::UpdatePhysics2(const Transformation &trans,
         {
             tmp1 = 200 * q.Cross(p);
         }
-        NetLocalTorque += ((tmp1 - tmp1 * (tmp1.Dot(GetAngularVelocity()) / tmp1.Dot(tmp1)))) * 1. / Mass;
+        NetLocalTorque += ((tmp1 - tmp1 * (tmp1.Dot(GetAngularVelocity()) / tmp1.Dot(tmp1)))) * 1. / static_cast<float>(GetMass());
     }
     SetCurPosition(tmp);
 }

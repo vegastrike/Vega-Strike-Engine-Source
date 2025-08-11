@@ -71,7 +71,7 @@ using Orders::MatchAngularVelocity;
 
 #define MATCHLINVELEXECUTE()                                                                         \
     do {                                                                                             \
-        parent->Thrust( (parent->getMass()                                                           \
+        parent->Thrust( (parent->GetMass()                                                           \
                          *(parent->ClampVelocity( desired,                                           \
                                                   afterburn )+FrameOfRef-velocity)/simulation_atom_var), \
                        afterburn );                                                                  \
