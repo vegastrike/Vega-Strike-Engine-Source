@@ -340,7 +340,7 @@ LIST(APPEND TST_LIBS ${Boost_LIBRARIES})
 
 # Set the default build type
 IF (NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
+    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
 ENDIF (NOT CMAKE_BUILD_TYPE)
 MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 

@@ -129,11 +129,11 @@ ENDIF(NOT DISABLE_CLIENT) ##########
 
 OPTION(USE_OPEN_TELEMETRY "Include and use opentelemetry-cpp" OFF)
 IF (USE_OPEN_TELEMETRY)
-    SET(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBUGINFO "Debug")
+    SET(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO "Debug")
 
-    SET(opentelemetry-cpp_DIR ${Vega_Strike_SOURCE_DIR}/lib/cmake/opentelemetry-cpp)
-    SET(nlohmann_json_DIR ${Vega_Strike_SOURCE_DIR}/share/cmake/nlohmann_json)
-    SET(Protobuf_DIR ${Vega_Strike_SOURCE_DIR}/cmake)
+#    SET(opentelemetry-cpp_DIR ${Vega_Strike_SOURCE_DIR}/lib/cmake/opentelemetry-cpp)
+#    SET(nlohmann_json_DIR ${Vega_Strike_SOURCE_DIR}/share/cmake/nlohmann_json)
+#    SET(Protobuf_DIR ${Vega_Strike_SOURCE_DIR}/cmake)
     #    SET(Protobuf_INCLUDE_DIR ${Vega_Strike_SOURCE_DIR}/include/google/protobuf)
     FIND_PACKAGE(Protobuf CONFIG)
 
@@ -774,27 +774,22 @@ IF (NOT DISABLE_CLIENT)
     )
 
     IF (USE_OPEN_TELEMETRY)
-        TARGET_LINK_LIBRARIES(
-                vegastrike-engine PRIVATE
-                opentelemetry_api
-                opentelemetry_sdk
-                opentelemetry_common
-                opentelemetry_resources
-                opentelemetry_version
-                opentelemetry_logs
-                opentelemetry_trace
-                opentelemetry_metrics
-                opentelemetry_ext
-                opentelemetry_otlp_recordable
-                opentelemetry_proto
-                opentelemetry_exporter_otlp_file_client
-                opentelemetry_exporter_otlp_file
-                opentelemetry_exporter_otlp_file_log
-                opentelemetry_exporter_otlp_file_metric
-                opentelemetry_exporter_ostream_span
-                opentelemetry_exporter_ostream_metrics
-                opentelemetry_exporter_ostream_logs
-        )
+        if(DEFINED OPENTELEMETRY_BUILD_DLL)
+            target_compile_definitions(vegastrike-engine
+                    PRIVATE OPENTELEMETRY_BUILD_IMPORT_DLL)
+            target_link_libraries(vegastrike-engine
+                    PRIVATE opentelemetry-cpp::opentelemetry_cpp)
+        else()
+            target_link_libraries(vegastrike-engine
+                    PRIVATE opentelemetry-cpp::api
+                    opentelemetry-cpp::common
+                    opentelemetry-cpp::logs
+                    opentelemetry-cpp::metrics
+                    opentelemetry-cpp::resources
+                    opentelemetry-cpp::sdk
+                    opentelemetry-cpp::trace
+            )
+        endif()
     ENDIF ()
 
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
@@ -1379,27 +1374,22 @@ IF (USE_GTEST)
             Boost::json
     )
     IF (USE_OPEN_TELEMETRY)
-        TARGET_LINK_LIBRARIES(
-                ${TEST_NAME} PRIVATE
-                opentelemetry_api
-                opentelemetry_sdk
-                opentelemetry_common
-                opentelemetry_resources
-                opentelemetry_version
-                opentelemetry_logs
-                opentelemetry_trace
-                opentelemetry_metrics
-                opentelemetry_ext
-                opentelemetry_otlp_recordable
-                opentelemetry_proto
-                opentelemetry_exporter_otlp_file_client
-                opentelemetry_exporter_otlp_file
-                opentelemetry_exporter_otlp_file_log
-                opentelemetry_exporter_otlp_file_metric
-                opentelemetry_exporter_ostream_span
-                opentelemetry_exporter_ostream_metrics
-                opentelemetry_exporter_ostream_logs
-        )
+        if(DEFINED OPENTELEMETRY_BUILD_DLL)
+            target_compile_definitions(${TEST_NAME}
+                    PRIVATE OPENTELEMETRY_BUILD_IMPORT_DLL)
+            target_link_libraries(${TEST_NAME}
+                    PRIVATE opentelemetry-cpp::opentelemetry_cpp)
+        else()
+            target_link_libraries(${TEST_NAME}
+                    PRIVATE opentelemetry-cpp::api
+                    opentelemetry-cpp::common
+                    opentelemetry-cpp::logs
+                    opentelemetry-cpp::metrics
+                    opentelemetry-cpp::resources
+                    opentelemetry-cpp::sdk
+                    opentelemetry-cpp::trace
+            )
+        endif()
     ENDIF ()
     TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
     IF (WIN32)

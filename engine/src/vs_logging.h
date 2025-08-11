@@ -52,11 +52,11 @@
 #include <string>
 #include <utility>
 
-#include "opentelemetry/exporters/otlp/otlp_file_client_options.h"
-#include "opentelemetry/exporters/otlp/otlp_file_exporter_factory.h"
-#include "opentelemetry/exporters/otlp/otlp_file_exporter_options.h"
-#include "opentelemetry/exporters/otlp/otlp_file_log_record_exporter_factory.h"
-#include "opentelemetry/exporters/otlp/otlp_file_log_record_exporter_options.h"
+// #include "opentelemetry/exporters/otlp/otlp_file_client_options.h"
+// #include "opentelemetry/exporters/otlp/otlp_file_exporter_factory.h"
+// #include "opentelemetry/exporters/otlp/otlp_file_exporter_options.h"
+// #include "opentelemetry/exporters/otlp/otlp_file_log_record_exporter_factory.h"
+// #include "opentelemetry/exporters/otlp/otlp_file_log_record_exporter_options.h"
 #include "opentelemetry/logs/logger_provider.h"
 #include "opentelemetry/nostd/shared_ptr.h"
 #include "opentelemetry/sdk/logs/exporter.h"

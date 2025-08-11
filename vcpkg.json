@@ -26,6 +26,9 @@
     "libvorbis",
     "openal-soft",
     "opengl",
+    "opentelemetry-cpp",
+    "protobuf",
+    "nlohmann-json",
     "sdl2",
     "zlib"
   ]
