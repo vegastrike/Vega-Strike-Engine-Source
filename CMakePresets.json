@@ -688,8 +688,9 @@
       "displayName": "Windows Default",
       "description": "Default build for Windows",
       "environment": {
-        "VCPKG_TARGET_TRIPLET": "x64-win10",
-        "VCPKG_HOST_TRIPLET": "x64-win10",
+        "VCPKG_FEATURE_FLAGS": "manifests,registries",
+        "VCPKG_TARGET_TRIPLET": "x64-win10-static",
+        "VCPKG_HOST_TRIPLET": "x64-win10-static",
         "X_VCPKG_APPLOCAL_DEPS_INSTALL": "ON"
       },
       "cacheVariables": {
@@ -697,8 +698,8 @@
           "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
           "type": "FILEPATH"
         },
-        "VCPKG_TARGET_TRIPLET": "x64-win10",
-        "VCPKG_HOST_TRIPLET": "x64-win10",
+        "VCPKG_TARGET_TRIPLET": "x64-win10-static",
+        "VCPKG_HOST_TRIPLET": "x64-win10-static",
         "VCPKG_INSTALL_OPTIONS": "--x-buildtrees-root=C:\\Projects\\vbuild"
       },
       "debug": {

@@ -2,7 +2,6 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "vega-strike",
   "version-string": "0.10.0",
-  "builtin-baseline": "dd3097e305afa53f7b4312371f62058d2e665320",
   "dependencies": [
     "boost-python",
     "boost-log",
@@ -26,9 +25,13 @@
     "libvorbis",
     "openal-soft",
     "opengl",
-    "opentelemetry-cpp",
-    "protobuf",
-    "nlohmann-json",
+    {
+      "name": "opentelemetry-cpp",
+      "version>=": "1.22.0#1",
+      "features": [
+        "otlp-file"
+      ]
+    },
     "sdl2",
     "zlib"
   ]
