@@ -2809,6 +2809,7 @@ int Unit::RepairUpgrade() {
     savedCargo.swap(cargo);
     vector<Mount> savedWeap;
     savedWeap.swap(mounts);
+    int upfac = FactionUtil::GetUpgradeFaction();
     const Unit *temprate = makeFinalBlankUpgrade(name, faction);
     int success = 0;
     double pct = 0;
@@ -2945,7 +2946,7 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
         int mode = GetModeFromName(mylist[i].cargo.GetName().c_str());
         if (mode != 2 || (!downgrade)) {
             const Unit *NewPart =
-                    UnitConstCache::getCachedConst(StringIntKey(mylist[i].cargo.GetName(), upgrfac));
+                    UnitConstCache::getCachedConst(StringIntKey(mylist[i].cargo.GetName().c_str(), upgrfac));
             if (!NewPart) {
                 NewPart = UnitConstCache::setCachedConst(StringIntKey(
                                 mylist[i].cargo.GetName(),
@@ -2957,7 +2958,7 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
                 const Unit *NewPart =
                         UnitConstCache::getCachedConst(StringIntKey(mylist[i].cargo.GetName(), faction));
                 if (!NewPart) {
-                    NewPart = UnitConstCache::setCachedConst(StringIntKey(mylist[i].cargo.GetName(), faction),
+                    NewPart = UnitConstCache::setCachedConst(StringIntKey(mylist[i].cargo.GetName().c_str(), faction),
                             new Unit(mylist[i].cargo.GetName().c_str(),
                                     false, faction));
                 }
@@ -3098,8 +3099,8 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
             c.SetPrice(c.GetPrice() * (price - pricedev));
 
             //stupid way
-            c.SetQuantity(c.GetQuantity() + float_to_int((quantdev * 2 + 1) * randomDouble() / (static_cast<double>(RAND_MAX) + 1)));
-            c.SetPrice(c.GetPrice() + pricedev * 2 * static_cast<float>(randomDouble()) / RAND_MAX);
+            c.SetQuantity(c.GetQuantity() + float_to_int((quantdev * 2 + 1) * static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) + 1)));
+            c.SetPrice(c.GetPrice() + pricedev * 2 * static_cast<float>(rand()) / RAND_MAX);
             c.SetPrice(fabs(c.GetPrice()));
             c.SetPrice((c.GetPrice() + (baseprice * aveweight)) / (aveweight + 1));
             if (c.GetQuantity() <= 0) {
