@@ -4,7 +4,7 @@ set -e
 DETECT_MAC_OS_VERSION=$(sw_vers -productVersion | cut -f 1,2 -d '.')
 echo "Detected Mac OS X Version: ${DETECT_MAC_OS_VERSION}"
 
-MAC_OS_NAME="UNKOWN"
+MAC_OS_NAME="UNKNOWN"
 case "${DETECT_MAC_OS_VERSION}" in
     "10.13")
         MAC_OS_NAME="High_Sierra"
@@ -61,7 +61,9 @@ brew install \
     libpng \
     gtk+3 \
     gtkglext \
-    sdl2
+    sdl2 \
+    opentelemetry-cpp \
+    protobuf
 
 # The following Apple-provided libraries are deprecated:
 # * OpenGL as of macOS 10.14
