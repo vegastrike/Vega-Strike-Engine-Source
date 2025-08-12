@@ -774,9 +774,11 @@ IF (NOT DISABLE_CLIENT)
     )
 
     IF (USE_OPEN_TELEMETRY)
+        target_compile_definitions(vegastrike-engine PRIVATE USE_OPEN_TELEMETRY=1)
         if(DEFINED OPENTELEMETRY_BUILD_DLL)
             target_compile_definitions(vegastrike-engine
-                    PRIVATE OPENTELEMETRY_BUILD_IMPORT_DLL)
+                    PRIVATE OPENTELEMETRY_BUILD_IMPORT_DLL
+            )
             target_link_libraries(vegastrike-engine
                     PRIVATE opentelemetry-cpp::opentelemetry_cpp)
         else()
@@ -1374,6 +1376,7 @@ IF (USE_GTEST)
             Boost::json
     )
     IF (USE_OPEN_TELEMETRY)
+        target_compile_definitions(${TEST_NAME} PRIVATE USE_OPEN_TELEMETRY=1)
         if(DEFINED OPENTELEMETRY_BUILD_DLL)
             target_compile_definitions(${TEST_NAME}
                     PRIVATE OPENTELEMETRY_BUILD_IMPORT_DLL)
