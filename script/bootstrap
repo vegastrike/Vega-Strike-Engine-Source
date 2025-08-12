@@ -133,9 +133,7 @@ function bootstrapOnDebian()
                             libboost-program-options1.81-dev \
                             libxmu-dev \
                             clang \
-                            lsb-release \
-                            opentelemetry-cpp-dev \
-                            libprotobuf-dev
+                            lsb-release
             ;;
         "bullseye"|"buster"|"stretch")
             echo "Sorry, Debian ${LINUX_CODENAME} is no longer supported"
