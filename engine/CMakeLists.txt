@@ -137,7 +137,7 @@ IF (USE_OPEN_TELEMETRY)
     FIND_PACKAGE(Protobuf CONFIG)
 
     # Use find_package to include OpenTelemetry C++
-    FIND_PACKAGE(opentelemetry-cpp CONFIG)
+    FIND_PACKAGE(opentelemetry-cpp CONFIG REQUIRED COMPONENTS api sdk exporters_otlp_file)
 
     #    #find the opentelemetry libraries path
     #    find_library(OPENTELEMETRY_COMMON_LIB NAMES libopentelemetry_common.a HINTS "${OPENTELEMETRY_ROOT}/build/sdk/src/common" NO_DEFAULT_PATH)
