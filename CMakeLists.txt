@@ -306,6 +306,8 @@ ENDIF (GLUT_FOUND)
 UNSET(OPENGL_LIBRARY_DIR)
 SET(CMAKE_FIND_FRAMEWORK "LAST")
 
+OPTION(USE_OPEN_TELEMETRY "Include and use opentelemetry-cpp" OFF)
+
 # Detect available Linux Distros that can be built for
 # 2021-09-18 stephengtuggy - This needs to happen before the boost_python detection logic,
 # so that we can handle the special cases for Xenial and stretch

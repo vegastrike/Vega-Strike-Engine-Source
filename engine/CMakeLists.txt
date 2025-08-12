@@ -127,7 +127,6 @@ IF (NOT DISABLE_CLIENT) ##########
 
 ENDIF(NOT DISABLE_CLIENT) ##########
 
-OPTION(USE_OPEN_TELEMETRY "Include and use opentelemetry-cpp" OFF)
 IF (USE_OPEN_TELEMETRY)
     SET(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO "Debug")
 
@@ -639,7 +638,9 @@ TARGET_LINK_LIBRARIES(vegastrike-engine_com PRIVATE
         ${Boost_LIBRARIES}
         ${Python3_LIBRARIES}
 )
-
+IF (USE_OPEN_TELEMETRY)
+    target_compile_definitions(vegastrike-engine_com PRIVATE USE_OPEN_TELEMETRY=1)
+ENDIF ()
 SET(VEGASTRIKE_SOURCES
     ${VEGA_GL_H_PATH}
     ${VEGA_GLU_H_PATH}
