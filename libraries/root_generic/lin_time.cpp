@@ -37,7 +37,7 @@ VSRandom vsrandom(time(NULL));
 
 #ifdef WIN32
 #ifndef NOMINMAX
-#define NOMINMAX
+#define NOMINMAX 1
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
 static LARGE_INTEGER ttime{};
@@ -120,7 +120,7 @@ bool toggle_pause() {
 #ifdef _WIN32
 
 #ifndef NOMINMAX
-#define NOMINMAX
+#define NOMINMAX 1
 #endif //tells VCC not to generate min/max macros
 
 #include <windows.h>

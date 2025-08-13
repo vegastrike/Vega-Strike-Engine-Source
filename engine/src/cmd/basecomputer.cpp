@@ -76,7 +76,7 @@ using VSFileSystem::SaveFile;
 //for directory thing
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #ifndef NOMINMAX
-#define NOMINMAX
+#define NOMINMAX 1
 #endif //tells VCC not to generate min/max macros
 #include <cstdlib>
 #else
@@ -1727,7 +1727,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
             bool CanDoSell = true;
             Unit *player = m_player.GetUnit();
             unsigned int numc = player->numCargo();
-            
+
             //weapons can always be sold
             for (unsigned int i = 0; i < numc; ++i) {
                 Cargo *c = &player->GetCargo(i);
@@ -1740,7 +1740,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
                     }
                 }
             }
-            
+
             if (CanDoSell) {
                 commitButton->setHidden(false);
                 commitButton->setLabel("Sell");

@@ -31,6 +31,7 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include <boost/program_options.hpp>
 #include "audio/test.h"
 #if defined (HAVE_SDL)

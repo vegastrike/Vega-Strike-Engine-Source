@@ -48,7 +48,7 @@
 
 #else
 #ifndef NOMINMAX
-#define NOMINMAX
+#define NOMINMAX 1
 #endif //tells VCC not to generate min/max macros
 // #if defined(__APPLE__) && defined (__MACH__)
 // #include <GL/glew.h>

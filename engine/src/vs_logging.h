@@ -76,36 +76,29 @@
 #include "opentelemetry/sdk/trace/simple_processor_factory.h"
 #include "opentelemetry/sdk/trace/tracer_provider.h"
 #include "opentelemetry/sdk/trace/tracer_provider_factory.h"
-
-namespace nostd     = ::opentelemetry::nostd;
-namespace otlp      = ::opentelemetry::exporter::otlp;
-namespace logs_sdk  = ::opentelemetry::sdk::logs;
-namespace trace_sdk = ::opentelemetry::sdk::trace;
-
 #endif
 
 namespace VegaStrikeLogging {
 
 #if defined(USE_OPEN_TELEMETRY)
-    ::opentelemetry::exporter::otlp::OtlpFileExporterOptions opts;
-    ::opentelemetry::exporter::otlp::OtlpFileLogRecordExporterOptions log_opts;
+    namespace nostd     = opentelemetry::nostd;
+    namespace otlp      = opentelemetry::exporter::otlp;
+    namespace logs_sdk  = opentelemetry::sdk::logs;
+    namespace trace_sdk = opentelemetry::sdk::trace;
 
-    std::shared_ptr<::opentelemetry::sdk::trace::TracerProvider> tracer_provider;
-    std::shared_ptr<::opentelemetry::sdk::logs::LoggerProvider> logger_provider;
+    opentelemetry::exporter::otlp::OtlpFileExporterOptions opts;
+    opentelemetry::exporter::otlp::OtlpFileLogRecordExporterOptions log_opts;
 
-    namespace logs  = ::opentelemetry::logs;
-    namespace trace = ::opentelemetry::trace;
+    std::shared_ptr<opentelemetry::sdk::trace::TracerProvider> tracer_provider;
+    std::shared_ptr<opentelemetry::sdk::logs::LoggerProvider> logger_provider;
 
-    ::opentelemetry::nostd::shared_ptr<trace::Tracer> get_tracer()
+    namespace logs  = opentelemetry::logs;
+    namespace trace = opentelemetry::trace;
+
+    inline opentelemetry::nostd::shared_ptr<trace::Tracer> get_tracer()
     {
         auto provider = trace::Provider::GetTracerProvider();
         return provider->GetTracer("vega_strike");
-    }
-
-    ::opentelemetry::nostd::shared_ptr<logs::Logger> get_otel_logger()
-    {
-        auto provider = logs::Provider::GetLoggerProvider();
-        return provider->GetLogger("vega_strike_logger", "vega_strike");
     }
 
     inline void InitTracer()
@@ -116,7 +109,7 @@ namespace VegaStrikeLogging {
         tracer_provider = trace_sdk::TracerProviderFactory::Create(std::move(processor));
 
         // Set the global trace provider
-        std::shared_ptr<::opentelemetry::trace::TracerProvider> api_provider = tracer_provider;
+        std::shared_ptr<opentelemetry::trace::TracerProvider> api_provider = tracer_provider;
         trace_sdk::Provider::SetTracerProvider(api_provider);
     }
 
@@ -129,7 +122,7 @@ namespace VegaStrikeLogging {
         }
 
         tracer_provider.reset();
-        std::shared_ptr<::opentelemetry::trace::TracerProvider> none;
+        std::shared_ptr<opentelemetry::trace::TracerProvider> none;
         trace_sdk::Provider::SetTracerProvider(none);
     }
 
@@ -140,7 +133,7 @@ namespace VegaStrikeLogging {
         auto processor  = logs_sdk::SimpleLogRecordProcessorFactory::Create(std::move(exporter));
         logger_provider = logs_sdk::LoggerProviderFactory::Create(std::move(processor));
 
-        std::shared_ptr<::opentelemetry::logs::LoggerProvider> api_provider = logger_provider;
+        std::shared_ptr<opentelemetry::logs::LoggerProvider> api_provider = logger_provider;
         logs_sdk::Provider::SetLoggerProvider(api_provider);
     }
 
@@ -153,7 +146,7 @@ namespace VegaStrikeLogging {
         }
 
         logger_provider.reset();
-        nostd::shared_ptr<::opentelemetry::logs::LoggerProvider> none;
+        nostd::shared_ptr<opentelemetry::logs::LoggerProvider> none;
         logs_sdk::Provider::SetLoggerProvider(none);
     }
 

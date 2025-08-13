@@ -31,6 +31,7 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include "cmd/unit_generic.h"
 #include <float.h>
 #include "root_generic/vsfilesystem.h"

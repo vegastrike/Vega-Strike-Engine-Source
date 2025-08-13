@@ -1240,12 +1240,12 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         //DAMAGE JUMP
         if (random_number >= .9) {
             /*const char max_shield_leak =
-                (char) std::max( 0.0,
-                             std::min( 100.0, configuration()->physics.max_shield_leak ) );
+                (char) (std::max)( 0.0,
+                             (std::min)( 100.0, configuration()->physics.max_shield_leak ) );
             const char min_shield_leak =
-                (char) std::max( 0.0,
-                             std::min( 100.0, configuration()->physics.max_shield_leak ) );*/
-            //char newleak = float_to_int( std::max( min_shield_leak, std::max( max_shield_leak, (char) ( (randnum-.9)*10.0*100.0 ) ) ) );
+                (char) (std::max)( 0.0,
+                             (std::min)( 100.0, configuration()->physics.max_shield_leak ) );*/
+            //char newleak = float_to_int( (std::max)( min_shield_leak, (std::max)( max_shield_leak, (char) ( (randnum-.9)*10.0*100.0 ) ) ) );
             // TODO: lib_damage if (shield.leak < newleak)
             //shield.leak = newleak;
         } else if (random_number >= .7) {
@@ -1754,7 +1754,7 @@ bool Unit::Explode(bool drawit, float timeit) {
 
 float Unit::ExplodingProgress() const {
     const float debrisTime = configuration()->physics.debris_time;
-    return std::min(pImage->timeexplode / debrisTime, 1.0f);
+    return (std::min)(pImage->timeexplode / debrisTime, 1.0f);
 }
 
 void Unit::SetCollisionParent(Unit *name) {

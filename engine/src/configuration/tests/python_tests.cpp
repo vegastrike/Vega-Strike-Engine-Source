@@ -31,6 +31,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include <boost/version.hpp>
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>

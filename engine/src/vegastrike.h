@@ -62,7 +62,7 @@ extern float AUDIO_ATOM;
 /* Note that this will define WIN32 for us, if it isn't defined already
  */
 #ifndef NOMINMAX
-    #define NOMINMAX
+    #define NOMINMAX 1
 #endif //tells VCC not to generate min/max macros
     #include <windows.h>
  //#include <wingdi.h>

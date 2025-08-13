@@ -32,6 +32,7 @@
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include "cmd/vega_py_run.h"
 #include "vega_string_utils.h"
 #include "src/vs_logging.h"

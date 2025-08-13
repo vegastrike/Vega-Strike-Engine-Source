@@ -144,7 +144,7 @@ VertexBuilder<> GetLockingIcon(const QVector &location, const Vector& cam_p,
     const bool bracket_inner_or_outer = configuration()->graphics.hud.rotating_bracket_inner;
     const float bracket_width = configuration()->graphics.hud.rotating_bracket_width;
 
-    const float bounded_r_size = std::max(r_size, static_cast<float>(configuration()->graphics.hud.min_lock_box_size));
+    const float bounded_r_size = (std::max)(r_size, static_cast<float>(configuration()->graphics.hud.min_lock_box_size));
     const float inner_distance = configuration()->graphics.hud.min_missile_bracket_size + (configuration()->graphics.hud.max_missile_bracket_size - configuration()->graphics.hud.min_missile_bracket_size) * lock_percent;
     const float outer_distance = inner_distance + configuration()->graphics.hud.rotating_bracket_size;
     const float bracket_distance = (bracket_inner_or_outer ? inner_distance : outer_distance);
@@ -209,7 +209,7 @@ VertexBuilder<> GetAnimatedLockingIcon(const QVector &location, const Vector& ca
     t_lock_box = (t_lock_box.i*cam_p+t_lock_box.j*cam_q+t_lock_box.k*cam_r).Cast();
     s_lock_box = (s_lock_box.i*cam_p+s_lock_box.j*cam_q+s_lock_box.k*cam_r).Cast();
 
-    const double r_1_size = std::max(r_size * configuration()->graphics.hud.rotating_bracket_size, configuration()->graphics.hud.min_lock_box_size);
+    const double r_1_size = (std::max)(r_size * configuration()->graphics.hud.rotating_bracket_size, configuration()->graphics.hud.min_lock_box_size);
 
     t_lock_box *= r_1_size;
     s_lock_box *= r_1_size;

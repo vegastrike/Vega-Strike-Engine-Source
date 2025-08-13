@@ -1496,7 +1496,7 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
                     (iter < maxiter) && ((pass.perLightIteration == 0 && lightnum == 0) || (lightnum < nlights));
                     ++iter, lightnum += npasslights) {
                 //Setup transform and lights
-                npasslights = std::max(0, std::min(int(nlights) - int(lightnum), int(maxlights)));
+                npasslights = (std::max)(0, (std::min)(int(nlights) - int(lightnum), int(maxlights)));
 
                 //MultiAlphaBlend stuff
                 if (iter > 0) {

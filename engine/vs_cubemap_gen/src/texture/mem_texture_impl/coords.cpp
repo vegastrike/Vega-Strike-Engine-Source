@@ -130,7 +130,7 @@ void ccoords::check_invariants() //just for debugging; --should pass if code is 
 }
 
 ccoords::ccoords(fvector const &v) {
-    float inv_max = 1.0f / std::max(std::max(abs(v.x_), abs(v.y_)), abs(v.z_));
+    float inv_max = 1.0f / (std::max)((std::max)(abs(v.x_), abs(v.y_)), abs(v.z_));
     x_ = v.x_ * inv_max;
     y_ = v.y_ * inv_max;
     z_ = v.z_ * inv_max;

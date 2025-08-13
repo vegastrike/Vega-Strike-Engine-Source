@@ -439,7 +439,7 @@ void ParticleTrail::DrawAndUpdate() {
     } else {
         for (auto & particle : particles) {
             particle.location += particle.velocity * elapsed_time_as_double;
-            particle.color.a = std::max(0.0F, particle.color.a - pfade * elapsed_time_as_float);
+            particle.color.a = (std::max)(0.0F, particle.color.a - pfade * elapsed_time_as_float);
         }
     }
 
@@ -547,7 +547,7 @@ void ParticleEmitter::doParticles(const QVector &pos,
 
         pp.col = color;
         particleTrail.AddParticle(pp,
-                rand * (std::max(velocity.Magnitude(), config.absSpeed) * config.spread
+                rand * ((std::max)(velocity.Magnitude(), config.absSpeed) * config.spread
                         + config.absSpeed)
                         + velocity * config.speed + basevelocity,
                 config.fixedSize ? config.relSize : (pSize * config.relSize)

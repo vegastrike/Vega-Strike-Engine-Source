@@ -32,9 +32,11 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include "src/command.h"
 #include <pyerrors.h>
 #include <pythonrun.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include "gldrv/winsys.h"
 #include "src/main_loop.h"
 #include "src/vs_random.h"

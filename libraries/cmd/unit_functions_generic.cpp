@@ -258,7 +258,7 @@ void DealPossibleJumpDamage(Unit *un) {
 
     double jump_damage = mass * speed * chance_to_damage * jump_damage_multiplier;
 
-    jump_damage = std::min(jump_damage, max_damage);
+    jump_damage = (std::min)(jump_damage, max_damage);
 
     Damage damage;
     damage.normal_damage = jump_damage;

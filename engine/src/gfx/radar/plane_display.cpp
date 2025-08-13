@@ -188,8 +188,8 @@ void PlaneDisplay::PrepareAnimation(const Vector &fromAngle,
 
     // Use the longest-running sequence and zero-pad shorter sequuences
     AngleSequence::size_type longestSequenceSize = xsequence.size();
-    longestSequenceSize = std::max(longestSequenceSize, ysequence.size());
-    longestSequenceSize = std::max(longestSequenceSize, zsequence.size());
+    longestSequenceSize = (std::max)(longestSequenceSize, ysequence.size());
+    longestSequenceSize = (std::max)(longestSequenceSize, zsequence.size());
     for (AngleSequence::size_type i = 0; i < longestSequenceSize; ++i) {
         float xentry = (i < xsequence.size()) ? xsequence[i] : 0.0;
         float yentry = (i < ysequence.size()) ? ysequence[i] : 0.0;
@@ -450,7 +450,7 @@ void PlaneDisplay::DrawTrack(const Sensor &sensor,
         color.a *= (1.0 - track.ExplodingProgress());
     }
 
-    float trackSize = std::max(1.0f, std::log10(track.GetSize()));
+    float trackSize = (std::max)(1.0f, std::log10(track.GetSize()));
     if (track.GetType() != Track::Type::Cargo) {
         trackSize += 1.0;
     }
@@ -493,7 +493,7 @@ void PlaneDisplay::DrawTargetMarker(const Vector &head,
     }
 
     // Diamond
-    float size = 6.0 * std::max(trackSize, 1.0f);
+    float size = 6.0 * (std::max)(trackSize, 1.0f);
     float xsize = size / configuration()->graphics.resolution_x;
     float ysize = size / configuration()->graphics.resolution_y;
 

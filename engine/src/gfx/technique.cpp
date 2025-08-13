@@ -333,7 +333,7 @@ void Pass::compile() {
                     if (tit->origTargetIndex < 0) {
                         tit->targetIndex = lastTU + 1;
                     }
-                    lastTU = std::max(tit->targetIndex, lastTU);
+                    lastTU = (std::max)(tit->targetIndex, lastTU);
                 }
             }
         }

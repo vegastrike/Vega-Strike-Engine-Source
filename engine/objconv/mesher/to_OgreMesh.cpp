@@ -792,7 +792,7 @@ static Ogre::VertexData * CreateVertexBuffers( const vector< GFXVertex > &vertic
             Vector3 P( p[0], p[1], p[2] );
             min.makeFloor( P );
             max.makeCeil( P );
-            maxsqr = std::max( P.squaredLength(), maxsqr );
+            maxsqr = (std::max)( P.squaredLength(), maxsqr );
         }
         if (normals) {
             float *n = (float*) (pVert+ofs_n);
@@ -1191,7 +1191,7 @@ void DoneMeshes( void *outputcontext )
         newBox.merge( currBox );
         //do not pad the bounding box
         m->_setBounds( newBox, false );
-        m->_setBoundingSphereRadius( std::max( Ogre::Math::Sqrt( ctxt->maxsqr ), currRadius ) );
+        m->_setBoundingSphereRadius( (std::max)( Ogre::Math::Sqrt( ctxt->maxsqr ), currRadius ) );
     }
 }
 

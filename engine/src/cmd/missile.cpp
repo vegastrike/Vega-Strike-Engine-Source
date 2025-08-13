@@ -355,7 +355,7 @@ bool Missile::useFuel(Unit *target, bool had_target) {
     // If we had a target but it's now gone, limit the missile's fuel
     // If we didn't have a target (dumbfire?), keep original fuel
     if (had_target && target == nullptr) {
-        time = std::min(static_cast<double>(time), configuration()->physics.max_lost_target_live_time);
+        time = (std::min)(static_cast<double>(time), configuration()->physics.max_lost_target_live_time);
     }
 
     // Reduce missile TTL/Fuel by tick

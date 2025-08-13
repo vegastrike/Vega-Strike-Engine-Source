@@ -31,6 +31,7 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include <algorithm>
 
 #include "vega_cast_utils.h"

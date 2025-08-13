@@ -969,7 +969,7 @@ void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, 
     }
 
     mesh->AddDamageFX(pnt, unit->shieldtight ? unit->shieldtight * normal : Vector(0, 0, 0),
-            std::min(1.0f, std::max(0.0f, amt)), color);
+            (std::min)(1.0f, (std::max)(0.0f, amt)), color);
 }
 
 Matrix Drawable::WarpMatrix(const Matrix &ctm) const {

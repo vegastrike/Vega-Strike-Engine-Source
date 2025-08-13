@@ -34,6 +34,7 @@
 #include <boost/python/class.hpp>
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 
 #include "cmd/unit_generic.h"
 #include "cmd/ai/order.h"

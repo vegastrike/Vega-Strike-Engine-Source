@@ -41,6 +41,7 @@
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include <compile.h>
 #if ((PY_VERSION_HEX) < 0x030B0000)
 #include <eval.h>

@@ -95,7 +95,7 @@ void OpenALStreamingSound::loadImpl(bool wait) {
 
         // Set capacity to a quarter second or 16k samples, whatever's bigger
         // TODO: make it configurable. But first, implement a central configuration repository.
-        bufferSamples = std::max(16384U, targetFormat.sampleFrequency / 4);
+        bufferSamples = (std::max)(16384U, targetFormat.sampleFrequency / 4);
 
         // Prepare a buffer, so we avoid repeated allocation/deallocation
         buffer.reserve(bufferSamples, targetFormat);

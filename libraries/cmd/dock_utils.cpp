@@ -53,7 +53,7 @@ double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
         distance -= second_unit->rSize();
     }
 
-    return std::max(0.0, distance);
+    return (std::max)(0.0, distance);
 }
 
 /**

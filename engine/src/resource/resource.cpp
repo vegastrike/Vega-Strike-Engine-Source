@@ -174,9 +174,9 @@ template<typename T>
 void Resource<T>::Set(const T &value) {
     value_ = value;
     if(!no_max_) {
-        value_ = std::min(adjusted_max_value_, value_);
+        value_ = (std::min)(adjusted_max_value_, value_);
     }
-    value_ = std::max(min_value_, value_);
+    value_ = (std::max)(min_value_, value_);
 }
 
 template<typename T>
@@ -205,12 +205,12 @@ void Resource<T>::SetAdjustedMaxValue(const T &value) {
         return;
     }
 
-    v = std::max(min_value_, v);
-    v = std::min(max_value_, v);
+    v = (std::max)(min_value_, v);
+    v = (std::min)(max_value_, v);
 
     adjusted_max_value_ = v;
 
-    value_ = std::min(value_, adjusted_max_value_);
+    value_ = (std::min)(value_, adjusted_max_value_);
 }
 
 template<typename T>
@@ -266,8 +266,8 @@ void Resource<T>::DamageByValue(const T &value) {
         return;
     }
 
-    adjusted_max_value_ = std::max(min_value_, adjusted_max_value_ - value);
-    value_ = std::min(value_, adjusted_max_value_);
+    adjusted_max_value_ = (std::max)(min_value_, adjusted_max_value_ - value);
+    value_ = (std::min)(value_, adjusted_max_value_);
 }
 
 template<typename T>
@@ -310,7 +310,7 @@ void Resource<T>::RepairByValue(const T &value) {
         return;
     }
 
-    adjusted_max_value_ = std::min(max_value_, adjusted_max_value_ + value);
+    adjusted_max_value_ = (std::min)(max_value_, adjusted_max_value_ + value);
     value_ = adjusted_max_value_;
 }
 
@@ -325,7 +325,7 @@ void Resource<T>::RepairByPercent(const T &value) {
         return;
     }
 
-    adjusted_max_value_ = std::min(max_value_, adjusted_max_value_ + (max_value_ * value));
+    adjusted_max_value_ = (std::min)(max_value_, adjusted_max_value_ + (max_value_ * value));
     value_ = adjusted_max_value_;
 }
 
@@ -343,9 +343,9 @@ template<typename T>
 Resource<T> Resource<T>::operator=(const T &value) {
     value_ = value;
     if(!no_max_) {
-        value_ = std::min(adjusted_max_value_, value_);
+        value_ = (std::min)(adjusted_max_value_, value_);
     }
-    value_ = std::max(min_value_, value_);
+    value_ = (std::max)(min_value_, value_);
 
     return *this;
 }
@@ -353,7 +353,7 @@ Resource<T> Resource<T>::operator=(const T &value) {
 template<typename T>
 Resource<T> Resource<T>::operator+=(const T &value) {
     if(!no_max_) {   // Only applicable if there's max
-        value_ = std::min(value_ + value, adjusted_max_value_);
+        value_ = (std::min)(value_ + value, adjusted_max_value_);
     } else {
         value_ += value;
     }
@@ -363,7 +363,7 @@ Resource<T> Resource<T>::operator+=(const T &value) {
 
 template<typename T>
 Resource<T> Resource<T>::operator-=(const T &value) {
-    value_ = std::max(value_ - value, min_value_);
+    value_ = (std::max)(value_ - value, min_value_);
     return *this;
 }
 
@@ -371,7 +371,7 @@ Resource<T> Resource<T>::operator-=(const T &value) {
 template<typename T>
 Resource<T> Resource<T>::operator+=(T &value) {
     if(!no_max_) {   // Only applicable if there's max
-        value_ = std::min(value_ + value, adjusted_max_value_);
+        value_ = (std::min)(value_ + value, adjusted_max_value_);
     } else {
         value_ += value;
     }
@@ -381,7 +381,7 @@ Resource<T> Resource<T>::operator+=(T &value) {
 
 template<typename T>
 Resource<T> Resource<T>::operator-=(T &value) {
-    value_ = std::max(value_ - value, min_value_);
+    value_ = (std::max)(value_ - value, min_value_);
     return *this;
 }
 

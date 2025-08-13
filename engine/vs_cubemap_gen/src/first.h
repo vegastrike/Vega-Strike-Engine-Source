@@ -33,7 +33,7 @@
 //When including windows.h, it must come before other headers;
 //but you should tell VCC not to generate min and max macros...
 #ifdef WIN32
-#define NOMINMAX
+#define NOMINMAX 1
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif

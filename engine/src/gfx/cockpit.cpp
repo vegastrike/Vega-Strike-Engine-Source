@@ -1328,7 +1328,7 @@ static void DrawHeadingMarker(Cockpit &cp, const GFXColor &col) {
 
     // size scale and flight dir alpha
     float size = 0.175f;
-    float alpha = std::min(0.60f, (v - d).MagnitudeSquared() / (size * size * 36));
+    float alpha = (std::min)(0.60f, (v - d).MagnitudeSquared() / (size * size * 36));
 
     // draw
     GFXDisable(TEXTURE0);

@@ -34,6 +34,7 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 
 #if BOOST_VERSION != 102800
 typedef boost::python::dict BoostPythonDictionary;

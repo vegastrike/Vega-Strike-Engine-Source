@@ -94,7 +94,7 @@ bool Cloak::Upgrade(const std::string upgrade_key) {
     glass = UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Glass", false);
     rate = UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Rate", 0.0);
     minimum = UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Min", 0.0);
-    minimum = std::min(1.0, std::max(0.0, minimum));
+    minimum = (std::min)(1.0, (std::max)(0.0, minimum));
     current = 0;
     installed = true;
 
@@ -161,7 +161,7 @@ void Cloak::Update()
 
 
     if(status == CloakingStatus::decloaking) {
-        current = std::max(0.0, current - rate * simulation_atom_var);
+        current = (std::max)(0.0, current - rate * simulation_atom_var);
 
         if(current == 0) {
             status = CloakingStatus::ready;
@@ -169,7 +169,7 @@ void Cloak::Update()
     }
 
     if(status == CloakingStatus::cloaking) {
-        current = std::min(1.0, current + rate * simulation_atom_var);
+        current = (std::min)(1.0, current + rate * simulation_atom_var);
 
         if(current > minimum) {
             status = CloakingStatus::cloaked;

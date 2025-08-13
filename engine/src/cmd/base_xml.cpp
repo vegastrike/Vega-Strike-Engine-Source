@@ -37,6 +37,7 @@
 #endif
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include <vector>
 #include <string>
 #include <math.h>

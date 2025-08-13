@@ -46,6 +46,10 @@
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/filesystem.hpp>
 
+#if defined(USE_OPEN_TELEMETRY)
+#include "opentelemetry/nostd/shared_ptr.h"
+#endif
+
 namespace VegaStrikeLogging {
 
 void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
@@ -155,6 +159,14 @@ VegaStrikeLogger::~VegaStrikeLogger() {
     FlushLogsProgramExiting();
     logging_core_->remove_all_sinks();
 }
+
+#if defined(USE_OPEN_TELEMETRY)
+nostd::shared_ptr<logs::Logger> get_otel_logger()
+{
+    auto provider = logs::Provider::GetLoggerProvider();
+    return provider->GetLogger("vega_strike_logger", "vega_strike");
+}
+#endif
 
 void VegaStrikeLogger::Log(const vega_log_level level, const std::string &message) {
     if (STATIC_VARS_DESTROYED) {

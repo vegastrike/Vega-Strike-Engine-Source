@@ -40,7 +40,7 @@
 #include <direct.h>
 #include <cstring>
 #ifndef NOMINMAX
-#define NOMINMAX
+#define NOMINMAX 1
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #include <cstdlib>

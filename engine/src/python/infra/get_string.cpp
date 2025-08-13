@@ -32,6 +32,7 @@
 #include "root_generic/vsfilesystem.h"
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include <boost/python.hpp>
 #include <boost/filesystem.hpp>
 

@@ -50,7 +50,7 @@ Collision::Collision(Unit *unit, const QVector &location, const Vector &normal) 
     cockpit = _Universe->isPlayerStarship(unit); // smcp/thcp
     unit_type = unit->getUnitType();
     is_player_ship = _Universe->isPlayerStarship(unit);
-    mass = std::max(unit->getMass(), static_cast<float>(configuration()->physics.minimum_mass));
+    mass = (std::max)(unit->getMass(), static_cast<float>(configuration()->physics.minimum_mass));
     position = unit->Position();
     velocity = unit->GetVelocity();
 }
@@ -330,18 +330,18 @@ void Collision::collide(Unit *unit1,
     // 2/3 constant from shell approximation -- this will disappear when moment of inertia is actually turned into a 3x3 matrix OR getter is adjusted to fix dataside issues
     // should assert: mass >0; radial_size !=0; moment !=0; -- may require data set cleaning if asserted
     double I1 =
-            std::max(static_cast<double>(unit1->GetMoment()), configuration()->physics.minimum_mass) * unit1->radial_size * unit1->radial_size
+            (std::max)(static_cast<double>(unit1->GetMoment()), configuration()->physics.minimum_mass) * unit1->radial_size * unit1->radial_size
                     * 0.667; // deriving scalar moment of inertia for unit 1
     double I2 =
-            std::max(static_cast<double>(unit2->GetMoment()), configuration()->physics.minimum_mass) * unit2->radial_size * unit2->radial_size
+            (std::max)(static_cast<double>(unit2->GetMoment()), configuration()->physics.minimum_mass) * unit2->radial_size * unit2->radial_size
                     * 0.667; // deriving scalar moment of inertia for unit 2
     double I1_inverse = 1.0
             / I1; // Matrix inverse for matrix version of momentof inertia I1 is computable, but probably still better to have precomputed and fetched -- not an issue when I is still scalar
     double I2_inverse = 1.0 / I2;
-    double mass1 = std::max(static_cast<double>(unit1->GetMass()),
+    double mass1 = (std::max)(static_cast<double>(unit1->GetMass()),
             configuration()->physics
                     .minimum_mass); // avoid subsequent divides by 0 - again, should probably just check all the invariants and yell at the dataset with an assert here OR change the getter for mass and moment and [add getter for] radial_size that do the data cleaning/logging/yelling
-    double mass2 = std::max(static_cast<double>(unit2->GetMass()), configuration()->physics.minimum_mass); // avoid subsequent divides by 0
+    double mass2 = (std::max)(static_cast<double>(unit2->GetMass()), configuration()->physics.minimum_mass); // avoid subsequent divides by 0
     double mass1_inverse = 1.0 / mass1;
     double mass2_inverse = 1.0 / mass2;
     // impulse magnitude, as per equation 5 in wiki -- note that  e = 1 - inelastic_scale, so 1+e = 1 + 1 -inelastic_scale = 2 - inelastic_scale

@@ -88,7 +88,7 @@ void OpenALSimpleSound::loadImpl(bool wait) {
 
         // Set capacity to half a second or 16k samples, whatever's bigger
         size_t bufferCapacity =
-                std::max(16384U, targetFormat.sampleFrequency / 2);
+                (std::max)(16384U, targetFormat.sampleFrequency / 2);
 
         // Prepare a list of buffers, we'll stack them here and later append them
         std::list<SoundBuffer> buffers;

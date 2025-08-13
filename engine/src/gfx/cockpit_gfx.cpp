@@ -27,7 +27,6 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "gfx/cockpit_gfx.h"
 
 #include "configuration/game_config.h"
@@ -87,7 +86,7 @@ inline void DrawOneTargetBox( const QVector &Loc,
     }
 
     // Still locking on
-    lock_percent = std::max(0.0F, lock_percent);
+    lock_percent = (std::max)(0.0F, lock_percent);
     if (lock_percent < 0.99F) {
         glLineWidth(configuration()->graphics.hud.diamond_line_thickness);
 
@@ -548,7 +547,7 @@ void DrawRadar(const Radar::Sensor& sensor, float  cockpit_time, float radar_tim
         // Draw radar damage
         float damage = sensor.GetPlayer()->ship_functions.Value(Function::cockpit);
         if (sensor.GetMaxRange() < 1.0)
-            damage = std::min(damage, 0.25f);
+            damage = (std::min)(damage, 0.25f);
         if (damage < .985) {
             if (radar_time >= 0) {
                 if ( damage > .001 && ( cockpit_time > radar_time+(1-damage) ) ) {

@@ -31,6 +31,7 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include <string>
 
 #include "gfx/aux_texture.h"

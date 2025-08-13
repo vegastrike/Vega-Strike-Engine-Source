@@ -46,6 +46,7 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #endif
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include "src/python/python_class.h"
 #include "cmd/base.h"
 #include "cmd/base_util.h"

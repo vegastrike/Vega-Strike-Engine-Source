@@ -91,7 +91,7 @@ typedef struct {
 
 #ifndef NOMINMAX
 //tells VCC not to generate min/max macros
-#define NOMINMAX
+#define NOMINMAX 1
 #endif
 #include <windows.h>
 

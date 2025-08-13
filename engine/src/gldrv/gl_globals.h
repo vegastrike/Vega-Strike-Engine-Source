@@ -102,7 +102,7 @@ struct GFXStats
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #if defined (_WIN32) || defined (__CYGWIN__)
 #ifndef NOMINMAX
-#define NOMINMAX
+#define NOMINMAX 1
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #include <gl.h>

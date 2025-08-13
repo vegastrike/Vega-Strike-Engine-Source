@@ -88,7 +88,7 @@ void DamageableLayer::DealDamageComponent(int impacted_facet_index, int type,
     // Here we adjust for specialized weapons such as shield bypassing and shield leeching
     // which only damage the shield.
     // We also cap the actual damage at the current health
-    const double adjusted_damage = std::min(damage * vulnerability, facets[impacted_facet_index].Value());
+    const double adjusted_damage = (std::min)(damage * vulnerability, facets[impacted_facet_index].Value());
 
     // Damage the current health
     facets[impacted_facet_index].DamageByValue(adjusted_damage);

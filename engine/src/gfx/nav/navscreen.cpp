@@ -1921,7 +1921,7 @@ void NavigationSystem::TranslateCoordinates(QVector &pos,
 
     float navscreen_width_delta = (screenskipby4[1] - screenskipby4[0]);
     float navscreen_height_delta = (screenskipby4[3] - screenskipby4[2]);
-    float navscreen_small_delta = std::min(navscreen_width_delta, navscreen_height_delta);
+    float navscreen_small_delta = std::min<float>(navscreen_width_delta, navscreen_height_delta);
 
     the_x = (the_x * navscreen_small_delta);
     the_x = the_x + center_nav_x;

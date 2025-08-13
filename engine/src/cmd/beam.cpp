@@ -131,8 +131,8 @@ void Beam::RecalculateVertices(const Matrix &trans) {
             * (1 - interpolation_blend_factor) : thickness;
     float ethick = (thick / ((thickness > 0) ? thickness : 1.0f)) * (doscoop ? curlength * scooptanangle : 0);
     const float invfadelen = thick * fadeinlength;
-    const float invfadealpha = std::max(0.0f, std::min(1.0f, 1.0f - std::sqrt(invfadelen / len)));
-    const float fadealpha = std::max(0.0f, std::min(1.0f, 1.0f - std::sqrt(fadelen / len)));
+    const float invfadealpha = (std::max)(0.0f, (std::min)(1.0f, 1.0f - std::sqrt(invfadelen / len)));
+    const float fadealpha = (std::max)(0.0f, (std::min)(1.0f, 1.0f - std::sqrt(fadelen / len)));
     const float endalpha = 0.0f;
     const float peralpha = doscoop ? 0.25f : 0.0f;
     int a = 0;
@@ -144,9 +144,9 @@ void Beam::RecalculateVertices(const Matrix &trans) {
         x.Normalize();
         y.Normalize();
         z.Normalize();
-        const float xyalpha = std::max(0.0f, fabs(z * r));
-        const float xzalpha = std::max(0.0f, fabs(y * r)) * 0.5f;
-        const float yzalpha = std::max(0.0f, fabs(x * r)) * 0.5f;
+        const float xyalpha = (std::max)(0.0f, fabs(z * r));
+        const float xzalpha = (std::max)(0.0f, fabs(y * r)) * 0.5f;
+        const float yzalpha = (std::max)(0.0f, fabs(x * r)) * 0.5f;
         const float lislices = (longslices > 0) ? 1.0f / longslices : 0.0f;
         const float rislices = (radslices > 0) ? 1.0f / radslices : 0.0f;
         const float bxyalpha = xyalpha * lislices;
@@ -157,9 +157,9 @@ void Beam::RecalculateVertices(const Matrix &trans) {
         const float rim1 = (radslices - 1) * rislices * 2;
         for (int i = 0; i < longslices; i++) {
             float f = i * lislices;
-            float xa = std::max(0.0f, 1.0f - std::sqrt(f)) * byzalpha * scoopa;
-            float ya = std::max(0.0f, 1.0f - std::sqrt(f)) * bxzalpha * scoopa;
-            float za = std::max(0.0f, 1.0f - std::sqrt(f)) * bxyalpha * scoopa;
+            float xa = (std::max)(0.0f, 1.0f - std::sqrt(f)) * byzalpha * scoopa;
+            float ya = (std::max)(0.0f, 1.0f - std::sqrt(f)) * bxzalpha * scoopa;
+            float za = (std::max)(0.0f, 1.0f - std::sqrt(f)) * bxyalpha * scoopa;
             float th = f * ethick + thick;
             float z = i * zs + invfadelen;
             if (za > 0.03) {
@@ -376,7 +376,7 @@ Beam::Beam(const Transformation &trans, const WeaponInfo &clne, void *own, Unit 
     }
     static GFXVertexList *_vlist = 0;
     if (!_vlist) {
-        int numvertex = float_to_int(std::max(48, ((4 * radslices) + 1) * longslices * 4));
+        int numvertex = float_to_int((std::max)(48, ((4 * radslices) + 1) * longslices * 4));
         GFXColorVertex *beam =
                 new GFXColorVertex[numvertex];         //regretably necessary: radslices and longslices come from the config file... so it's at runtime.
 //        memset( beam, 0, sizeof (*beam)*numvertex );
@@ -425,7 +425,7 @@ void Beam::Reinitialize() {
     }
     static GFXVertexList *_vlist = 0;
     if (!_vlist) {
-        int numvertex = float_to_int(std::max(48, ((4 * radslices) + 1) * longslices * 4));
+        int numvertex = float_to_int((std::max)(48, ((4 * radslices) + 1) * longslices * 4));
         GFXColorVertex *beam =
                 new GFXColorVertex[numvertex];         //regretably necessary: radslices and longslices come from the config file... so it's at runtime.
 //        memset( beam, 0, sizeof (*beam)*numvertex );
@@ -547,7 +547,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                             * (appldam
                                     / sqrt( /*(target->sim_atom_multiplier
                                                  > 0) ? target->sim_atom_multiplier : */ 1.0)
-                                    * std::min(1.0f, target->getMass())));
+                                    * (std::min)(1.0f, target->getMass())));
                 }
             }
             float ors_m = o_ors_m, trs_m = o_trs_m, ofs = o_o;

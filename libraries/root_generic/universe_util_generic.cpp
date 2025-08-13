@@ -31,6 +31,7 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include <math.h>
 #include <sys/stat.h>
 #include "root_generic/lin_time.h"
@@ -180,7 +181,7 @@ namespace UniverseUtil {
                           string squadlogo,
                           string destinations) {
         Vega_UnitType clstype = DeserializeUnitType(unittype_string);
-        
+
         CreateFlightgroup cf;
         cf.fg = Flightgroup::newFlightgroup(name_string,
                                             type_string,

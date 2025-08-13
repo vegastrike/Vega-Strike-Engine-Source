@@ -48,7 +48,7 @@
 #else
 #ifdef _WIN32
     #ifndef NOMINMAX
-        #define NOMINMAX
+        #define NOMINMAX 1
     #endif //tells VCC not to generate min/max macros
     #include <windows.h>
 #endif

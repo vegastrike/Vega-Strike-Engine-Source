@@ -32,6 +32,7 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 #include <math.h>
 #include "pythonmission.h"
 #include "src/python/python_compile.h"

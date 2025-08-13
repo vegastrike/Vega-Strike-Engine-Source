@@ -38,6 +38,7 @@
 #include <boost/python/class.hpp>
 
 #include <Python.h>
+#undef _CRT_NONSTDC_NO_DEPRECATE
 
 #include <math.h>
 #include <stdlib.h>
