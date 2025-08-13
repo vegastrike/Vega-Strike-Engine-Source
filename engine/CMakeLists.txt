@@ -33,7 +33,6 @@ MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/src/version.h)
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/setup/src/include/version.h)
 
-SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 INCLUDE(InstallRequiredSystemLibraries)
 
 # The source files used to be listed here...
@@ -546,7 +545,7 @@ ADD_LIBRARY(vegastrike_python SHARED
 set_property(TARGET vegastrike_python PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 SET_PROPERTY(TARGET vegastrike_python PROPERTY CXX_STANDARD 14)
 SET_PROPERTY(TARGET vegastrike_python PROPERTY CXX_STANDARD_REQUIRED TRUE)
-SET_PROPERTY(TARGET vegastrike_python PROPERTY CXX_EXTENSIONS ON)
+SET_PROPERTY(TARGET vegastrike_python PROPERTY CXX_EXTENSIONS OFF)
 TARGET_INCLUDE_DIRECTORIES(vegastrike_python SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 
 
@@ -559,56 +558,21 @@ TARGET_LINK_LIBRARIES(
 # Name must be witout the lib prefix
 SET_TARGET_PROPERTIES(vegastrike_python PROPERTIES PREFIX "")
 
-ADD_LIBRARY(vegastrike-engine_com OBJECT
-    ${VEGA_GL_H_PATH}
-    ${VEGA_GLU_H_PATH}
-    ${VEGA_GLEXT_H_PATH}
-    ${VEGA_GLUT_H_PATH}
-    ${LIBPYTHON}
-    ${LIBVS_LOGGING}
-    ${LIBCONFIG}
-    ${LIBDAMAGE}
-    ${LIBRESOURCE}
-    ${LIBCOMPONENT}
-    ${LIBAI_SOURCES}
-    ${LIBNET_SOURCES}
-    ${LIBPYTHON_SOURCES}
-    ${LIBSCRIPT_SOURCES}
-)
-
-#TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
-SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_STANDARD 14)
-SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_STANDARD_REQUIRED TRUE)
-SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_EXTENSIONS ON)
-set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
-
-TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
-IF (WIN32)
-    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
-    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC _WIN32_WINNT=0x0A00)
-    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC WINVER=0x0A00)
-    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
-ENDIF()
-
-TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${VSE_TST_INCLUDES})
-TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
-        # VS engine headers
-        ${Vega_Strike_SOURCE_DIR}
-        ${Vega_Strike_SOURCE_DIR}/engine
-        ${Vega_Strike_SOURCE_DIR}/engine/src
-        # Library Headers
-        ${Vega_Strike_SOURCE_DIR}/libraries
-        # CMake Artifacts
-        ${Vega_Strike_BINARY_DIR}
-        ${Vega_Strike_BINARY_DIR}/src
-        ${Vega_Strike_BINARY_DIR}/engine
-        ${Vega_Strike_BINARY_DIR}/engine/src
-)
-
-IF (USE_OPEN_TELEMETRY)
-    target_compile_definitions(vegastrike-engine_com PRIVATE USE_OPEN_TELEMETRY=1)
-ENDIF ()
 SET(VEGASTRIKE_SOURCES
+        ${VEGA_GL_H_PATH}
+        ${VEGA_GLU_H_PATH}
+        ${VEGA_GLEXT_H_PATH}
+        ${VEGA_GLUT_H_PATH}
+        ${LIBPYTHON}
+        ${LIBVS_LOGGING}
+        ${LIBCONFIG}
+        ${LIBDAMAGE}
+        ${LIBRESOURCE}
+        ${LIBCOMPONENT}
+        ${LIBAI_SOURCES}
+        ${LIBNET_SOURCES}
+        ${LIBPYTHON_SOURCES}
+        ${LIBSCRIPT_SOURCES}
     ${VEGA_GL_H_PATH}
     ${VEGA_GLU_H_PATH}
     ${VEGA_GLEXT_H_PATH}
@@ -688,7 +652,7 @@ IF (NOT DISABLE_CLIENT)
     #    TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_14)
     SET_PROPERTY(TARGET vegastrike-engine PROPERTY CXX_STANDARD 14)
     SET_PROPERTY(TARGET vegastrike-engine PROPERTY CXX_STANDARD_REQUIRED TRUE)
-    SET_PROPERTY(TARGET vegastrike-engine PROPERTY CXX_EXTENSIONS ON)
+    SET_PROPERTY(TARGET vegastrike-engine PROPERTY CXX_EXTENSIONS OFF)
 
     TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
     IF (WIN32)
@@ -734,7 +698,6 @@ IF (NOT DISABLE_CLIENT)
             ${VSE_TST_LIBS}
             ${Boost_LIBRARIES}
             ${Python3_LIBRARIES}
-            $<TARGET_OBJECTS:vegastrike-engine_com>
             vegastrike_gfx_generic
             vegastrike_root_generic
             vegastrike_cmd

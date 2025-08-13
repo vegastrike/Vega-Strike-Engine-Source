@@ -80,6 +80,16 @@ struct PerFrequency {
     }
 };
 
+#if !defined(NOMINMAX)
+#define NOMINMAX
+#endif
+#if defined(min)
+#undef min
+#endif
+#if defined(max)
+#undef max
+#endif
+
 /** Range data usually comes in min/max bundles */
 template<typename T>
 struct Range {

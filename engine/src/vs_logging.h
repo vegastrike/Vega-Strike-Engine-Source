@@ -86,11 +86,11 @@ namespace VegaStrikeLogging {
     namespace logs_sdk  = opentelemetry::sdk::logs;
     namespace trace_sdk = opentelemetry::sdk::trace;
 
-    opentelemetry::exporter::otlp::OtlpFileExporterOptions opts;
-    opentelemetry::exporter::otlp::OtlpFileLogRecordExporterOptions log_opts;
+    extern opentelemetry::exporter::otlp::OtlpFileExporterOptions opts;
+    extern opentelemetry::exporter::otlp::OtlpFileLogRecordExporterOptions log_opts;
 
-    std::shared_ptr<opentelemetry::sdk::trace::TracerProvider> tracer_provider;
-    std::shared_ptr<opentelemetry::sdk::logs::LoggerProvider> logger_provider;
+    extern std::shared_ptr<opentelemetry::sdk::trace::TracerProvider> tracer_provider;
+    extern std::shared_ptr<opentelemetry::sdk::logs::LoggerProvider> logger_provider;
 
     namespace logs  = opentelemetry::logs;
     namespace trace = opentelemetry::trace;
