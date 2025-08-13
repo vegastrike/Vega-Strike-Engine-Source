@@ -45,22 +45,6 @@ class Movable {
 protected:
 
 public:
-    //mass of this unit (may change with cargo)
-    // TODO: subclass with return Mass+fuel;
-    float Mass{};
-
-    float getMass() {
-        return Mass;
-    }
-
-    float getMass() const {
-        return Mass;
-    }
-
-    void setMass(float mass) {
-        Mass = mass;
-    }
-
     // Fields
     //The velocity this unit has in World Space
     Vector cumulative_velocity;
@@ -221,10 +205,6 @@ public:
 
     float GetMoment() const {
         return Momentofinertia; // TODO: subclass with return Momentofinertia+fuel;
-    }
-
-    float GetMass() const {
-        return Mass; // TODO: subclass with return Mass+fuel;
     }
 
     //Sets if forces should resolve on this unit or not
