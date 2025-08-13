@@ -130,40 +130,18 @@ ENDIF(NOT DISABLE_CLIENT) ##########
 IF (USE_OPEN_TELEMETRY)
     SET(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO "Debug")
 
-#    SET(opentelemetry-cpp_DIR ${Vega_Strike_SOURCE_DIR}/lib/cmake/opentelemetry-cpp)
-#    SET(nlohmann_json_DIR ${Vega_Strike_SOURCE_DIR}/share/cmake/nlohmann_json)
-#    SET(Protobuf_DIR ${Vega_Strike_SOURCE_DIR}/cmake)
-    #    SET(Protobuf_INCLUDE_DIR ${Vega_Strike_SOURCE_DIR}/include/google/protobuf)
     FIND_PACKAGE(Protobuf CONFIG)
 
     # Use find_package to include OpenTelemetry C++
-    FIND_PACKAGE(opentelemetry-cpp CONFIG REQUIRED COMPONENTS api sdk exporters_otlp_file)
-
-    #    #find the opentelemetry libraries path
-    #    find_library(OPENTELEMETRY_COMMON_LIB NAMES libopentelemetry_common.a HINTS "${OPENTELEMETRY_ROOT}/build/sdk/src/common" NO_DEFAULT_PATH)
-    #    find_library(OPENTELEMETRY_TRACE_LIB NAMES libopentelemetry_trace.a HINTS "${OPENTELEMETRY_ROOT}/build/sdk/src/trace" NO_DEFAULT_PATH)
-    #    find_library(OPENTELEMETRY_EXPORTER_LIB NAMES libopentelemetry_exporter_ostream_span.a HINTS "${OPENTELEMETRY_ROOT}/build/exporters/ostream" NO_DEFAULT_PATH)
-    #    find_library(OPENTELEMETRY_RESOURCE_LIB NAMES libopentelemetry_resources.a HINTS "${OPENTELEMETRY_ROOT}/build/sdk/src/resource" NO_DEFAULT_PATH)
-    #
-    #    #set the path of opentelemetry to the directory containing "opentelemetry" package configuration files
-    #    include_directories(${OPENTELEMETRY_ROOT}/api/include)
-    #    include_directories(${OPENTELEMETRY_ROOT}/sdk/include)
-    #    #include_directories(${OPENTELEMETRY_ROOT}/sdk/src)
-    #    include_directories(${OPENTELEMETRY_ROOT}/exporters/otlp/include)
+    FIND_PACKAGE(opentelemetry-cpp CONFIG COMPONENTS api sdk exporters_otlp_file)
 
     #check whether opentelemetry libraries found
     IF (opentelemetry-cpp_FOUND)
         MESSAGE(STATUS "Found opentelemetry libraries; preparing to use them")
     ELSE ()
         MESSAGE(WARNING "Did not find opentelemetry libraries; building without")
+        SET(USE_OPEN_TELEMETRY OFF)
     ENDIF ()
-
-    #    if(OPENTELEMETRY_COMMON_LIB AND OPENTELEMETRY_TRACE_LIB AND OPENTELEMETRY_EXPORTER_LIB AND OPENTELEMETRY_RESOURCE_LIB)
-    #        message(STATUS "Found opentelemetry libraries; preparing to use them")
-    #    else()
-    #        message(WARNING "Did not find opentelemetry libraries; building without")
-    #        SET(USE_OPEN_TELEMETRY OFF)
-    #    ENDIF ()
 ELSE ()
     MESSAGE(STATUS "USE_OPEN_TELEMETRY not set; building without")
 ENDIF ()
@@ -627,17 +605,6 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         ${Vega_Strike_BINARY_DIR}/engine/src
 )
 
-IF (NEED_LINKING_AGAINST_LIBM)
-    TARGET_LINK_LIBRARIES(vegastrike-engine_com PRIVATE m)
-ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike-engine_com PRIVATE
-        OpenGL::GL
-        OpenGL::GLU
-        GLUT::GLUT
-        ${VSE_TST_LIBS}
-        ${Boost_LIBRARIES}
-        ${Python3_LIBRARIES}
-)
 IF (USE_OPEN_TELEMETRY)
     target_compile_definitions(vegastrike-engine_com PRIVATE USE_OPEN_TELEMETRY=1)
 ENDIF ()
@@ -791,6 +758,9 @@ IF (NOT DISABLE_CLIENT)
                     opentelemetry-cpp::resources
                     opentelemetry-cpp::sdk
                     opentelemetry-cpp::trace
+                    opentelemetry-cpp::otlp_file_exporter
+                    opentelemetry-cpp::otlp_file_metric_exporter
+                    opentelemetry-cpp::otlp_file_log_record_exporter
             )
         endif()
     ENDIF ()
@@ -1392,6 +1362,9 @@ IF (USE_GTEST)
                     opentelemetry-cpp::resources
                     opentelemetry-cpp::sdk
                     opentelemetry-cpp::trace
+                    opentelemetry-cpp::otlp_file_exporter
+                    opentelemetry-cpp::otlp_file_metric_exporter
+                    opentelemetry-cpp::otlp_file_log_record_exporter
             )
         endif()
     ENDIF ()

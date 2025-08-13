@@ -58,16 +58,16 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
 
     switch (debug_level) {
         case 1:
-            logging_core_->set_filter(severity >= info);
+            logging_core_->set_filter(severity >= vega_log_level::info);
             break;
         case 2:
-            logging_core_->set_filter(severity >= debug);
+            logging_core_->set_filter(severity >= vega_log_level::debug);
             break;
         case 3:
-            logging_core_->set_filter(severity >= trace);
+            logging_core_->set_filter(severity >= vega_log_level::trace);
             break;
         default:
-            logging_core_->set_filter(severity >= important_info);
+            logging_core_->set_filter(severity >= vega_log_level::important_info);
             break;
     }
 
@@ -87,7 +87,21 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
                             * 1024UL                                      /*< stop boost::log when there's only 5 GiB free space left >*/
             );
 
-    console_log_sink_->set_filter(severity >= important_info);
+    console_log_sink_->set_filter(severity >= vega_log_level::important_info);
+
+#if defined(USE_OPEN_TELEMETRY)
+    opentelemetry::exporter::otlp::OtlpFileClientFileSystemOptions fs_backend;
+    fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_otel.trace";
+    opts.backend_options    = fs_backend;
+
+    InitTracer();
+
+    opentelemetry::exporter::otlp::OtlpFileClientFileSystemOptions logs_fs_backend;
+    logs_fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_otel.log";
+    log_opts.backend_options     = logs_fs_backend;
+
+    InitOtelLogger();
+#endif
 }
 
 void VegaStrikeLogger::FlushLogs() {
@@ -110,12 +124,17 @@ void VegaStrikeLogger::FlushLogsProgramExiting() {
     std::clog << std::flush;
     fflush(stdout);
     fflush(stderr);
+    #if defined(USE_OPEN_TELEMETRY)
+    CleanupOtelLogger();
+    CleanupTracer();
+    #endif
     STATIC_VARS_DESTROYED = true;
 }
 
 BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, severity_logger_mt<vega_log_level>) {
     boost::log::sources::severity_logger_mt<vega_log_level> lg;
     boost::log::add_common_attributes();
+
     return lg;
 }
 
@@ -142,13 +161,45 @@ void VegaStrikeLogger::Log(const vega_log_level level, const std::string &messag
         return;
     }
     boost::log::record rec = slg_.open_record(boost::log::keywords::severity = level);
-    if (rec)
-    {
+    if (rec) {
         boost::log::record_ostream strm(rec);
         strm << message;
         strm.flush();
         slg_.push_record(boost::move(rec));
     }
+
+#if defined(USE_OPEN_TELEMETRY)
+    auto span = get_tracer()->StartSpan("logging span");
+    auto ctx = span->GetContext();
+    auto otel_logger = get_otel_logger();
+
+    switch (level) {
+        case vega_log_level::info:
+        case vega_log_level::important_info:
+            otel_logger->Info(message, ctx.trace_id(), ctx.span_id(), ctx.trace_flags());
+            break;
+        case vega_log_level::debug:
+            otel_logger->Debug(message, ctx.trace_id(), ctx.span_id(), ctx.trace_flags());
+            break;
+        case vega_log_level::trace:
+            otel_logger->Trace(message, ctx.trace_id(), ctx.span_id(), ctx.trace_flags());
+            break;
+        case vega_log_level::warning:
+        case vega_log_level::serious_warning:
+            otel_logger->Warn(message, ctx.trace_id(), ctx.span_id(), ctx.trace_flags());
+            break;
+        case vega_log_level::error:
+            otel_logger->Error(message, ctx.trace_id(), ctx.span_id(), ctx.trace_flags());
+            break;
+        case vega_log_level::fatal:
+            otel_logger->Fatal(message, ctx.trace_id(), ctx.span_id(), ctx.trace_flags());
+            break;
+        default:
+            otel_logger->Error("unrecognized log level (shouldn't happen)", ctx.trace_id(), ctx.span_id(),
+                               ctx.trace_flags());
+            break;
+    }
+#endif
 }
 
 void VegaStrikeLogger::LogAndFlush(const vega_log_level level, const std::string &message) {

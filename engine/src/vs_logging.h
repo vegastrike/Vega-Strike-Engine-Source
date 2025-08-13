@@ -52,31 +52,114 @@
 #include <string>
 #include <utility>
 
-// #include "opentelemetry/exporters/otlp/otlp_file_client_options.h"
-// #include "opentelemetry/exporters/otlp/otlp_file_exporter_factory.h"
-// #include "opentelemetry/exporters/otlp/otlp_file_exporter_options.h"
-// #include "opentelemetry/exporters/otlp/otlp_file_log_record_exporter_factory.h"
-// #include "opentelemetry/exporters/otlp/otlp_file_log_record_exporter_options.h"
+#include "opentelemetry/logs/logger.h"
 #include "opentelemetry/logs/logger_provider.h"
+#include "opentelemetry/logs/provider.h"
 #include "opentelemetry/nostd/shared_ptr.h"
-#include "opentelemetry/sdk/logs/exporter.h"
+#include "opentelemetry/nostd/string_view.h"
+#include "opentelemetry/trace/provider.h"
+#include "opentelemetry/trace/scope.h"
+#include "opentelemetry/trace/span_context.h"
+#include "opentelemetry/trace/tracer.h"
+#include "opentelemetry/trace/tracer_provider.h"
+#include "opentelemetry/exporters/otlp/otlp_file_client_options.h"
+#include "opentelemetry/exporters/otlp/otlp_file_exporter_factory.h"
+#include "opentelemetry/exporters/otlp/otlp_file_exporter_options.h"
+#include "opentelemetry/exporters/otlp/otlp_file_log_record_exporter_factory.h"
+#include "opentelemetry/exporters/otlp/otlp_file_log_record_exporter_options.h"
+#include "opentelemetry/nostd/shared_ptr.h"
 #include "opentelemetry/sdk/logs/logger_provider.h"
 #include "opentelemetry/sdk/logs/logger_provider_factory.h"
-#include "opentelemetry/sdk/logs/processor.h"
 #include "opentelemetry/sdk/logs/provider.h"
 #include "opentelemetry/sdk/logs/simple_log_record_processor_factory.h"
-#include "opentelemetry/sdk/trace/exporter.h"
-#include "opentelemetry/sdk/trace/processor.h"
 #include "opentelemetry/sdk/trace/provider.h"
 #include "opentelemetry/sdk/trace/simple_processor_factory.h"
 #include "opentelemetry/sdk/trace/tracer_provider.h"
 #include "opentelemetry/sdk/trace/tracer_provider_factory.h"
-#include "opentelemetry/trace/tracer_provider.h"
+
+namespace nostd     = ::opentelemetry::nostd;
+namespace otlp      = ::opentelemetry::exporter::otlp;
+namespace logs_sdk  = ::opentelemetry::sdk::logs;
+namespace trace_sdk = ::opentelemetry::sdk::trace;
+
 #endif
 
 namespace VegaStrikeLogging {
 
-enum vega_log_level {
+#if defined(USE_OPEN_TELEMETRY)
+    ::opentelemetry::exporter::otlp::OtlpFileExporterOptions opts;
+    ::opentelemetry::exporter::otlp::OtlpFileLogRecordExporterOptions log_opts;
+
+    std::shared_ptr<::opentelemetry::sdk::trace::TracerProvider> tracer_provider;
+    std::shared_ptr<::opentelemetry::sdk::logs::LoggerProvider> logger_provider;
+
+    namespace logs  = ::opentelemetry::logs;
+    namespace trace = ::opentelemetry::trace;
+
+    ::opentelemetry::nostd::shared_ptr<trace::Tracer> get_tracer()
+    {
+        auto provider = trace::Provider::GetTracerProvider();
+        return provider->GetTracer("vega_strike");
+    }
+
+    ::opentelemetry::nostd::shared_ptr<logs::Logger> get_otel_logger()
+    {
+        auto provider = logs::Provider::GetLoggerProvider();
+        return provider->GetLogger("vega_strike_logger", "vega_strike");
+    }
+
+    inline void InitTracer()
+    {
+        // Create OTLP exporter instance
+        auto exporter   = otlp::OtlpFileExporterFactory::Create(opts);
+        auto processor  = trace_sdk::SimpleSpanProcessorFactory::Create(std::move(exporter));
+        tracer_provider = trace_sdk::TracerProviderFactory::Create(std::move(processor));
+
+        // Set the global trace provider
+        std::shared_ptr<::opentelemetry::trace::TracerProvider> api_provider = tracer_provider;
+        trace_sdk::Provider::SetTracerProvider(api_provider);
+    }
+
+    inline void CleanupTracer()
+    {
+        // We call ForceFlush to prevent to cancel running exportings, It's optional.
+        if (tracer_provider)
+        {
+            tracer_provider->ForceFlush();
+        }
+
+        tracer_provider.reset();
+        std::shared_ptr<::opentelemetry::trace::TracerProvider> none;
+        trace_sdk::Provider::SetTracerProvider(none);
+    }
+
+    inline void InitOtelLogger()
+    {
+        // Create OTLP exporter instance
+        auto exporter   = otlp::OtlpFileLogRecordExporterFactory::Create(log_opts);
+        auto processor  = logs_sdk::SimpleLogRecordProcessorFactory::Create(std::move(exporter));
+        logger_provider = logs_sdk::LoggerProviderFactory::Create(std::move(processor));
+
+        std::shared_ptr<::opentelemetry::logs::LoggerProvider> api_provider = logger_provider;
+        logs_sdk::Provider::SetLoggerProvider(api_provider);
+    }
+
+    inline void CleanupOtelLogger()
+    {
+        // We call ForceFlush to prevent to cancel running exportings, It's optional.
+        if (logger_provider)
+        {
+            logger_provider->ForceFlush();
+        }
+
+        logger_provider.reset();
+        nostd::shared_ptr<::opentelemetry::logs::LoggerProvider> none;
+        logs_sdk::Provider::SetLoggerProvider(none);
+    }
+
+#endif
+
+    enum class vega_log_level {
     trace,
     debug,
     info,
@@ -91,8 +174,8 @@ BOOST_LOG_GLOBAL_LOGGER(my_logger, boost::log::sources::severity_logger_mt<VegaS
 
 BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", vega_log_level)
 
-typedef boost::log::sinks::text_ostream_backend ConsoleLogBackEnd;
-typedef boost::log::sinks::text_file_backend FileLogBackEnd;
+typedef boost::log::sinks::text_ostream_backend                ConsoleLogBackEnd;
+typedef boost::log::sinks::text_file_backend                   FileLogBackEnd;
 typedef boost::log::sinks::synchronous_sink<ConsoleLogBackEnd> ConsoleLogSink;
 typedef boost::log::sinks::synchronous_sink<FileLogBackEnd>    FileLogSink;
 
