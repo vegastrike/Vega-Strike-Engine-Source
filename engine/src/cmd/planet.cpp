@@ -434,8 +434,7 @@ void Planet::InitPlanet(QVector x,
     const float densityOfJumpPoint = configuration()->physics.density_of_jump_point;
     //const float massofplanet = configuration()->physics.mass_of_planet;
     hull.Set((4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : densityOfJumpPoint));
-    this->Mass =
-            (4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : (densityOfJumpPoint / 100000));
+    this->SetMass((4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : (densityOfJumpPoint / 100000)));
     SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent));     //behavior
     terraintrans = nullptr;
 

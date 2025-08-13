@@ -32,8 +32,23 @@
 #include "component_utils.h"
 #include "resource/random_utils.h"
 #include "configuration/configuration.h"
+#include "cmd/unit_csv_factory.h"
 
+void ComponentsManager::Load(std::string unit_key) {
+    mass = base_mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 0.0);
+}
 
+void ComponentsManager::Serialize(std::map<std::string, std::string>& unit) const {
+    unit["Mass"] = std::to_string(base_mass);
+}
+
+double ComponentsManager::GetMass() const {
+    return mass;
+}
+
+void ComponentsManager::SetMass(double mass) {
+    this->mass = mass;
+}
 
 void ComponentsManager::DamageRandomSystem() {
     double percent = 1 - hull.Percent();
