@@ -462,7 +462,8 @@ int Carrier::RemoveCargo(unsigned int i, int quantity, bool eraseZero) {
 
     const bool usemass = configuration()->physics.use_cargo_mass;
     if (usemass) {
-        unit->SetMass(unit->GetMass() - quantity * carg->GetMass());
+        // TODO: remove static_cast when carg->GetMass returns double
+        unit->SetMass(unit->GetMass() - quantity * static_cast<double>(carg->GetMass()));
     }
 
     carg->quantity -= quantity;
@@ -477,7 +478,8 @@ void Carrier::AddCargo(const Cargo &carg, bool sort) {
 
     const bool usemass = configuration()->physics.use_cargo_mass;
     if (usemass) {
-        unit->SetMass(unit->GetMass() + carg.quantity.Value() * carg.GetMass());
+        // TODO: remove static_cast when carg->GetMass returns double
+        unit->SetMass(unit->GetMass() + carg.quantity.Value() * static_cast<double>(carg.GetMass()));
     }
 
     bool found = false;
