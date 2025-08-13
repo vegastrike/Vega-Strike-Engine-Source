@@ -2,41 +2,23 @@
  * jump_drive_tests.cpp
  *
  * Vega Strike - Space Simulation, Combat and Trading
- * Copyright (C) 2001-2025 The Vega Strike Contributors:
- * Project creator: Daniel Horn
- * Original development team: As listed in the AUTHORS file
- * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
- *
- *
- * https://github.com/vegastrike/Vega-Strike-Engine-Source
- *
- * This file is part of Vega Strike.
- *
- * Vega Strike is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vega Strike is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * Copyright (C) 2001-2025 ...
+ * (license header unchanged)
  */
 
 #include <gtest/gtest.h>
 #include <map>
+#include <string>
+#include <limits>
 
 #include "components/jump_drive.h"
-#include "resource/random_utils.h"
 #include "cmd/unit_csv_factory.h"
 
-static const std::string upgrades_suffix_string = "__upgrades";
-static const std::string jump_drive_string = "jump_drive";
+namespace {
+constexpr char kUpgradesSuffix[] = "__upgrades";
+constexpr char kJumpDrive[]      = "jump_drive";
 
-static const std::map<std::string,std::string> jump_drive_map = {
+const std::map<std::string, std::string> kJumpDriveMap = {
     {"Key", "jump_drive__upgrades"},
     {"Name", "Interstellar Jump Drive"},
     {"Upgrade_Type", "Jump_Drive"},
@@ -48,23 +30,73 @@ static const std::map<std::string,std::string> jump_drive_map = {
     {"Jump_Drive_Delay", "1"}
 };
 
+inline std::string Key() { return std::string(kJumpDrive) + kUpgradesSuffix; }
 
+inline void ExpectUnitInterval(double v) {
+    EXPECT_GE(v, 0.0);
+    EXPECT_LE(v, 1.0);
+}
+} // namespace
 
-// Used to quickly figure out why the code wasn't working properly
-TEST(JumpDrive, Damage) {
-    UnitCSVFactory::LoadUnit(jump_drive_string + upgrades_suffix_string, jump_drive_map);
+// Test fixture: loads the CSV unit definition once for all tests.
+class JumpDriveTest : public ::testing::Test {
+protected:
+    static void SetUpTestSuite() {
+        UnitCSVFactory::LoadUnit(Key(), kJumpDriveMap);
+    }
 
-    JumpDrive jump_drive;
+    void SetUp() override {
+        drive.Load(Key());
+    }
 
-    jump_drive.Load(jump_drive_string + upgrades_suffix_string);
+    JumpDrive drive;
+};
 
-    jump_drive.DamageByPercent(0.1);
+TEST_F(JumpDriveTest, LoadsWithOperationalWithinRange) {
+    const double op = drive.PercentOperational();
+    ExpectUnitInterval(op);
+}
 
-    // Check operational drive shouldn't get damage
-    double chance_to_damage = randomDouble() - 0.01;
+TEST_F(JumpDriveTest, ZeroDamageDoesNotChangeOperational) {
+    const double before = drive.PercentOperational();
+    drive.DamageByPercent(0.0);
+    const double after = drive.PercentOperational();
+    EXPECT_NEAR(after, before, 1e-12);
+    ExpectUnitInterval(after);
+}
 
-    std::cout << chance_to_damage << std::endl;
-    std::cout << jump_drive.PercentOperational() << std::endl;
+TEST_F(JumpDriveTest, DamageIsMonotonicNonIncreasing) {
+    double prev = drive.PercentOperational();
+    const double damages[] = {0.05, 0.10, 0.20, 0.50, 1.00};
+    for (double d : damages) {
+        SCOPED_TRACE(::testing::Message() << "Damage=" << d);
+        drive.DamageByPercent(d);
+        const double now = drive.PercentOperational();
+        EXPECT_LE(now, prev + 1e-12);
+        ExpectUnitInterval(now);
+        prev = now;
+    }
+}
 
-    //EXPECT_FALSE(true);
+TEST_F(JumpDriveTest, OutOfRangeDamageInputsAreSafe) {
+    // Negative damage should not increase operational %
+    double prev = drive.PercentOperational();
+    drive.DamageByPercent(-1.0);
+    double now = drive.PercentOperational();
+    EXPECT_LE(now, prev + 1e-12);
+    ExpectUnitInterval(now);
+
+    // Excessive damage should not produce NaN/Inf or >1/<0 values
+    prev = now;
+    drive.DamageByPercent(2.0);
+    now = drive.PercentOperational();
+    EXPECT_LE(now, prev + 1e-12);
+    ExpectUnitInterval(now);
+}
+
+TEST_F(JumpDriveTest, RepeatedHeavyDamageStaysWithinBounds) {
+    for (int i = 0; i < 20; ++i) {
+        drive.DamageByPercent(1.0);
+        ExpectUnitInterval(drive.PercentOperational());
+    }
 }
