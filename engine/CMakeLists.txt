@@ -661,6 +661,7 @@ IF (NOT DISABLE_CLIENT)
         TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC WINVER=0x0A00)
         TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC AL_LIBTYPE_STATIC 1)
 
     OPTION (LOG_TIME_TAKEN_DETAILS "Whether to log timing details in the main loop" OFF)
     IF (LOG_TIME_TAKEN_DETAILS)
@@ -702,6 +703,7 @@ IF (NOT DISABLE_CLIENT)
             vegastrike_root_generic
             vegastrike_cmd
             vegastrike-OPcollide
+            OpenAL::OpenAL
     )
 
     IF (USE_OPEN_TELEMETRY)
@@ -1293,10 +1295,11 @@ IF (USE_GTEST)
         TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC WINVER=0x0A00)
         TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
+    TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC AL_LIBTYPE_STATIC 1)
 
     TARGET_LINK_LIBRARIES(
             ${TEST_NAME} PRIVATE
-            ${OPENAL_LIBRARY}
+            OpenAL::OpenAL
             ${Vorbis_LIBRARIES}
             ${JPEG_LIBRARIES}
             ${PNG_LIBRARIES}
