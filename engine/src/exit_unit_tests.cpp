@@ -34,11 +34,13 @@
 bool STATIC_VARS_DESTROYED = false;
 
 #if defined(USE_OPEN_TELEMETRY)
-opentelemetry::exporter::otlp::OtlpFileExporterOptions VegaStrikeLogging::opts;
-opentelemetry::exporter::otlp::OtlpFileLogRecordExporterOptions VegaStrikeLogging::log_opts;
+namespace VegaStrikeLogging {
+    opentelemetry::exporter::otlp::OtlpFileExporterOptions VegaStrikeLogging::opts;
+    opentelemetry::exporter::otlp::OtlpFileLogRecordExporterOptions VegaStrikeLogging::log_opts;
 
-std::shared_ptr<opentelemetry::sdk::trace::TracerProvider> VegaStrikeLogging::tracer_provider;
-std::shared_ptr<opentelemetry::sdk::logs::LoggerProvider> VegaStrikeLogging::logger_provider;
+    std::shared_ptr<opentelemetry::sdk::trace::TracerProvider> VegaStrikeLogging::tracer_provider;
+    std::shared_ptr<opentelemetry::sdk::logs::LoggerProvider> VegaStrikeLogging::logger_provider;
+}
 #endif
 
 void VSExit(int code) {

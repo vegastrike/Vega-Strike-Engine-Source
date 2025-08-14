@@ -44,8 +44,8 @@
     #define __alp(x) x
     #define __alpr(x) x
 #else
-    #define __alpn(x,a) ((typeof(x))(__builtin_assume_aligned(x,a)))
-    #define __alprn(x,a) ((typeof(x) __restrict__)(__builtin_assume_aligned(x,a)))
+    #define __alpn(x,a) ((__typeof__(x))(__builtin_assume_aligned(x,a)))
+    #define __alprn(x,a) ((__typeof__(x) __restrict__)(__builtin_assume_aligned(x,a)))
     #define __alp(x) __alpn(x,16)
     #define __alpr(x) __alprn(x,16)
 #endif

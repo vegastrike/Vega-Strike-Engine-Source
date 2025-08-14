@@ -547,7 +547,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                             * (appldam
                                     / sqrt( /*(target->sim_atom_multiplier
                                                  > 0) ? target->sim_atom_multiplier : */ 1.0)
-                                    * (std::min)(1.0F, target->GetMass())));
+                                    * (std::min)(1.0, target->GetMass())));
                 }
             }
             float ors_m = o_ors_m, trs_m = o_trs_m, ofs = o_o;

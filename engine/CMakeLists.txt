@@ -1219,6 +1219,12 @@ IF (USE_GTEST)
     SET(TEST_NAME ${PROJECT_NAME}_tests)
     ADD_EXECUTABLE(
         ${TEST_NAME}
+        ${LIBPYTHON}
+        ${LIBVS_LOGGING}
+        ${LIBCONFIG}
+        ${LIBDAMAGE}
+        ${LIBRESOURCE}
+        ${LIBCOMPONENT}
         src/cmd/tests/csv_tests.cpp
         src/cmd/tests/json_tests.cpp
         src/configuration/tests/configuration_tests.cpp
@@ -1262,16 +1268,8 @@ IF (USE_GTEST)
         TARGET_LINK_LIBRARIES(${TEST_NAME} m)
     ENDIF()
 
-    ADD_LIBRARY(vegastrike-testing OBJECT
-        ${LIBPYTHON}
-        ${LIBVS_LOGGING}
-        ${LIBCONFIG}
-        ${LIBDAMAGE}
-        ${LIBRESOURCE}
-        ${LIBCOMPONENT}
-    )
-    TARGET_INCLUDE_DIRECTORIES(vegastrike-testing SYSTEM PRIVATE ${VSE_TST_INCLUDES})
-    TARGET_INCLUDE_DIRECTORIES(vegastrike-testing PRIVATE
+    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${VSE_TST_INCLUDES})
+    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PRIVATE
             # VS engine headers
             ${Vega_Strike_SOURCE_DIR}
             ${Vega_Strike_SOURCE_DIR}/engine
@@ -1284,17 +1282,17 @@ IF (USE_GTEST)
             ${Vega_Strike_BINARY_DIR}/engine
             ${Vega_Strike_BINARY_DIR}/engine/src
     )
-    TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
-    SET_PROPERTY(TARGET vegastrike-testing PROPERTY CXX_STANDARD 14)
-    SET_PROPERTY(TARGET vegastrike-testing PROPERTY CXX_STANDARD_REQUIRED TRUE)
-    SET_PROPERTY(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+    TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    SET_PROPERTY(TARGET ${TEST_NAME} PROPERTY CXX_STANDARD 14)
+    SET_PROPERTY(TARGET ${TEST_NAME} PROPERTY CXX_STANDARD_REQUIRED TRUE)
+    SET_PROPERTY(TARGET ${TEST_NAME} PROPERTY POSITION_INDEPENDENT_CODE TRUE)
     IF (WIN32)
-        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
-        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC _WIN32_WINNT=0x0A00)
-        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC WINVER=0x0A00)
-        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC _WIN32_WINNT=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC WINVER=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
-    TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC AL_LIBTYPE_STATIC)
+    TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC AL_LIBTYPE_STATIC)
 
     TARGET_LINK_LIBRARIES(
             ${TEST_NAME} PRIVATE
@@ -1305,7 +1303,6 @@ IF (USE_GTEST)
             ${Boost_LIBRARIES}
             ${Python3_LIBRARIES}
             gtest_main
-            $<TARGET_OBJECTS:vegastrike-testing>
             vegastrike_cmd
             Boost::log
             Boost::log_setup
