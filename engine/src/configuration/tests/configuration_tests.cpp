@@ -64,6 +64,21 @@ TEST(LoadConfig, Sanity) {
         VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable. Took %1% milliseconds") % duration.count()));
     }
 
+    {
+        VS_LOG_AND_FLUSH(important_info, "Starting test of static optional setting variable with .get()");
+        const auto start_time = std::chrono::system_clock::now();
+        static boost::optional<double> setting;
+        for (int i = 0; i < 1000000; ++i) {
+            if (setting == boost::none) {
+                setting = configuration()->physics.asteroid_difficulty_dbl;
+            }
+            setting.get();
+        }
+        const auto end_time = std::chrono::system_clock::now();
+        const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable with .get(). Took %1% milliseconds") % duration.count()));
+    }
+
     // Test without configuration
     const bool default_bool = vega_config::GetGameConfig().GetBool("test.boolean_variable", false);
     const int32_t default_int_32_t = vega_config::GetGameConfig().GetInt32("test.int_variable", 1);

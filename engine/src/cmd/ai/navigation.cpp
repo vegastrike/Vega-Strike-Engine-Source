@@ -559,30 +559,42 @@ inline void CautiousWarpRampOn(Unit *un) {
 }
 
 bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
-    const float specInterdictionLimit = configuration()->physics.min_spec_interdiction_for_jittery_autopilot_flt;
+    static boost::optional<float> specInterdictionLimit;
+    if (specInterdictionLimit == boost::none) {
+        specInterdictionLimit = configuration()->physics.min_spec_interdiction_for_jittery_autopilot_flt;
+    };
     if (target->isPlanet() == false
             && (target->graphicOptions.specInterdictionOnline == 0
-                    || fabs(target->ship_functions.Value(Function::ftl_interdiction)) < specInterdictionLimit)) {
+                    || fabs(target->ship_functions.Value(Function::ftl_interdiction)) < specInterdictionLimit.get())) {
         return true;
     }
     if (parent->computer.combat_mode == false) {
         return true;
     }
     float maxspeed = parent->afterburner.speed;
-    const float accel_auto_limit = configuration()->physics.max_accel_for_smooth_autopilot_flt;
-    const float speed_auto_limit = configuration()->physics.max_over_combat_speed_for_smooth_autopilot_flt;
-    if (minaccel < accel_auto_limit || parent->Velocity.MagnitudeSquared() > maxspeed * maxspeed * speed_auto_limit
-            * speed_auto_limit) {
+    static boost::optional<float> accel_auto_limit;
+    if (accel_auto_limit == boost::none) {
+        accel_auto_limit = configuration()->physics.max_accel_for_smooth_autopilot_flt;
+    };
+    static boost::optional<float> speed_auto_limit;
+    if (speed_auto_limit == boost::none) {
+        speed_auto_limit = configuration()->physics.max_over_combat_speed_for_smooth_autopilot_flt;
+    };
+    if (minaccel < accel_auto_limit || parent->Velocity.MagnitudeSquared() > maxspeed * maxspeed * speed_auto_limit.get()
+            * speed_auto_limit.get()) {
         return true;
     }
     return false;
 }
 
 bool AutoLongHaul::InsideLandingPort(const Unit *obstacle) const {
-    const float landing_port_limit = configuration()->physics.auto_landing_port_unclamped_seconds_flt;
+    static boost::optional<float> landing_port_limit;
+    if (landing_port_limit == boost::none) {
+        landing_port_limit = configuration()->physics.auto_landing_port_unclamped_seconds_flt;
+    };
     return UnitUtil::getSignificantDistance(parent,
             obstacle)
-            < -landing_port_limit * parent->afterburner.speed;
+            < -(landing_port_limit.get()) * parent->afterburner.speed;
 }
 
 void AutoLongHaul::Execute() {
@@ -593,11 +605,26 @@ void AutoLongHaul::Execute() {
         parent->autopilotactive = false;
         return;
     }
-    const bool compensate_for_interdiction = configuration()->physics.auto_pilot_compensate_for_interdiction;
-    const float enough_warp_for_cruise = configuration()->physics.enough_warp_for_cruise_flt;
-    const float go_perpendicular_speed = configuration()->physics.warp_perpendicular_flt;
-    const float min_warp_orbit_radius = configuration()->physics.min_warp_orbit_radius_flt;
-    const float warp_orbit_multiplier = configuration()->physics.warp_orbit_multiplier_flt;
+    static boost::optional<bool> compensate_for_interdiction;
+    if (compensate_for_interdiction == boost::none) {
+        compensate_for_interdiction = configuration()->physics.auto_pilot_compensate_for_interdiction;
+    }
+    static boost::optional<float> enough_warp_for_cruise;
+    if (enough_warp_for_cruise == boost::none) {
+        enough_warp_for_cruise = configuration()->physics.enough_warp_for_cruise_flt;
+    };
+    static boost::optional<float> go_perpendicular_speed;
+    if (go_perpendicular_speed == boost::none) {
+        go_perpendicular_speed = configuration()->physics.warp_perpendicular_flt;
+    };
+    static boost::optional<float> min_warp_orbit_radius;
+    if (min_warp_orbit_radius == boost::none) {
+        min_warp_orbit_radius = configuration()->physics.min_warp_orbit_radius_flt;
+    };
+    static boost::optional<float> warp_orbit_multiplier;
+    if (warp_orbit_multiplier == boost::none) {
+        warp_orbit_multiplier = configuration()->physics.warp_orbit_multiplier_flt;
+    };
     const float warp_behind_angle = cos(3.1415926536F * configuration()->physics.warp_behind_angle_flt / 180.0F);
     QVector myposition = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();     //get unit pos
     QVector destination = target->isSubUnit() ? target->Position() : target->LocalPosition();     //get destination
@@ -614,7 +641,7 @@ void AutoLongHaul::Execute() {
         Unit *obstacle = NULL;
         float maxmultiplier = parent->CalculateNearestWarpUnit(FLT_MAX,
                 &obstacle,
-                compensate_for_interdiction);         //find the unit affecting our spec
+                compensate_for_interdiction.get());         //find the unit affecting our spec
         bool currently_inside_landing_zone = false;
         if (obstacle) {
             currently_inside_landing_zone = InsideLandingPort(obstacle);
@@ -646,18 +673,18 @@ void AutoLongHaul::Execute() {
                 if (renormalizedetour > .01) {
                     detourvector = detourvector * (1. / renormalizedetour);
                 }                     //normalize it
-                double finaldetourdistance = mymax(obstacle->rSize() * warp_orbit_multiplier,
-                        min_warp_orbit_radius);                //scale that direction by some multiplier of obstacle size and a constant
+                double finaldetourdistance = mymax(obstacle->rSize() * warp_orbit_multiplier.get(),
+                        min_warp_orbit_radius.get());                //scale that direction by some multiplier of obstacle size and a constant
                 detourvector = detourvector
                         * finaldetourdistance;                 //we want to go perpendicular to our transit direction by that ammt
                 QVector newdestination = NewDestination(obstacle->LocalPosition() + detourvector,
                         finaldetourdistance);                 //add to our position
-                float weight = (maxmultiplier - go_perpendicular_speed) / (enough_warp_for_cruise
-                        - go_perpendicular_speed);                   //find out how close we are to our desired warp multiplier and weight our direction by that
+                float weight = (maxmultiplier - go_perpendicular_speed.get()) / (enough_warp_for_cruise.get()
+                        - go_perpendicular_speed.get());                   //find out how close we are to our desired warp multiplier and weight our direction by that
                 weight *= weight;                 //
                 if (maxmultiplier < go_perpendicular_speed) {
                     QVector perpendicular = myposition + planetme * (finaldetourdistance / planetme.Magnitude());
-                    weight = (go_perpendicular_speed - maxmultiplier) / go_perpendicular_speed;
+                    weight = (go_perpendicular_speed.get() - maxmultiplier) / go_perpendicular_speed.get();
                     destination = weight * perpendicular + (1 - weight) * newdestination;
                 } else {
                     QVector olddestination = myposition + destinationdirection
@@ -699,11 +726,17 @@ void AutoLongHaul::Execute() {
     double dis = UnitUtil::getSignificantDistance(parent, target);
     float time_to_destination = dis / maxspeed;
 
-    const bool rampdown = configuration()->physics.auto_pilot_ramp_warp_down;
-    const float warprampdowntime = configuration()->physics.warp_ramp_down_time_flt;
+    static boost::optional<bool> rampdown;
+    if (rampdown == boost::none) {
+        rampdown = configuration()->physics.auto_pilot_ramp_warp_down;
+    }
+    static boost::optional<float> warprampdowntime;
+    if (warprampdowntime == boost::none) {
+        warprampdowntime = configuration()->physics.warp_ramp_down_time_flt;
+    };
     float time_to_stop = simulation_atom_var;
     if (rampdown) {
-        time_to_stop += warprampdowntime;
+        time_to_stop += warprampdowntime.get();
     }
     if (time_to_destination <= time_to_stop) {
         deactivatewarp = true;
@@ -713,7 +746,7 @@ void AutoLongHaul::Execute() {
         \
         CautiousWarpRampOn(parent);
     } else {
-        WarpRampOff(parent, rampdown);
+        WarpRampOff(parent, rampdown.get());
     }
     SetDest(destination);
     bool combat_mode = parent->computer.combat_mode;
@@ -723,9 +756,18 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    const float distance_to_stop = configuration()->physics.auto_pilot_termination_distance_flt;
-    const float enemy_distance_to_stop = configuration()->physics.auto_pilot_termination_distance_enemy_flt;
-    const bool do_auto_finish = configuration()->physics.auto_pilot_terminate;
+    static boost::optional<float> distance_to_stop;
+    if (distance_to_stop == boost::none) {
+        distance_to_stop = configuration()->physics.auto_pilot_termination_distance_flt;
+    };
+    static boost::optional<float> enemy_distance_to_stop;
+    if (enemy_distance_to_stop == boost::none) {
+        enemy_distance_to_stop = configuration()->physics.auto_pilot_termination_distance_enemy_flt;
+    };
+    static boost::optional<bool> do_auto_finish;
+    if (do_auto_finish == boost::none) {
+        do_auto_finish = configuration()->physics.auto_pilot_terminate;
+    }
     bool stopnow = false;
     maxspeed = parent->afterburner.speed;
     if (maxspeed && parent->drive.retro) {
@@ -736,9 +778,9 @@ void AutoLongHaul::Execute() {
         }
     }
     if (do_auto_finish
-            && (stopnow || dis < distance_to_stop || (target->Target() == parent && dis < enemy_distance_to_stop))) {
+            && (stopnow || dis < distance_to_stop.get() || (target->Target() == parent && dis < enemy_distance_to_stop.get()))) {
         parent->autopilotactive = false;
-        WarpRampOff(parent, rampdown);
+        WarpRampOff(parent, rampdown.get());
         done = true;
     }
 }

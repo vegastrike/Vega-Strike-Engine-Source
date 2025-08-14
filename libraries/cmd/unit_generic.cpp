@@ -136,7 +136,10 @@ void Unit::SetNebula(Nebula *neb) {
 
 // Move to radar
 bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool lock) const {
-    const float capship_size = configuration()->physics.capship_size_flt;
+    static boost::optional<float> capship_size;
+    if (capship_size == boost::none) {
+        capship_size = configuration()->physics.capship_size_flt;
+    }
 
     if (this == target || target->cloak.Cloaked()) {
         return false;
@@ -972,8 +975,14 @@ void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
 }
 
 bool Unit::jumpReactToCollision(Unit *smalle) {
-    const bool ai_jump_cheat = configuration()->ai.jump_without_energy;
-    const bool nojumpinSPEC = configuration()->physics.no_spec_jump;
+    static boost::optional<bool> ai_jump_cheat;
+    if (ai_jump_cheat == boost::none) {
+        ai_jump_cheat = configuration()->ai.jump_without_energy;
+    }
+    static boost::optional<bool> nojumpinSPEC;
+    if (nojumpinSPEC == boost::none) {
+        nojumpinSPEC = configuration()->physics.no_spec_jump;
+    }
     bool SPEC_interference = (nullptr != _Universe->isPlayerStarship(smalle)) ? smalle->ftl_drive.Enabled()
             && nojumpinSPEC : (nullptr != _Universe->isPlayerStarship(this)) && ftl_drive.Enabled()
             && nojumpinSPEC;
@@ -1260,9 +1269,12 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
             // TODO: do the above
             reactor.Damage();
         } else if (random_number >= .2) {
-            const float mindam = configuration()->physics.min_maxenergy_shot_damage_flt;
-            if (dam < mindam) {
-                dam = mindam;
+            static boost::optional<float> mindam;
+            if (mindam == boost::none) {
+                mindam = configuration()->physics.min_maxenergy_shot_damage_flt;
+            }
+            if (dam < mindam.get()) {
+                dam = mindam.get();
             }
             energy.DamageByPercent(dam);
         } else {
@@ -1289,10 +1301,16 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
     ClearMounts();
 
     if (docked & (DOCKING_UNITS)) {
-        const float survival = configuration()->physics.survival_chance_on_base_death_flt;
-        const float player_survival = configuration()->physics.player_survival_chance_on_base_death_flt;
-        const int i_survival = float_to_int((RAND_MAX * survival));
-        const int i_player_survival = float_to_int((RAND_MAX * player_survival));
+        static boost::optional<float> survival;
+        if (survival == boost::none) {
+            survival = configuration()->physics.survival_chance_on_base_death_flt;
+        }
+        static boost::optional<float> player_survival;
+        if (player_survival == boost::none) {
+            player_survival = configuration()->physics.player_survival_chance_on_base_death_flt;
+        }
+        const int i_survival = float_to_int((RAND_MAX * survival.get()));
+        const int i_player_survival = float_to_int((RAND_MAX * player_survival.get()));
 
         vector<Unit *> dockedun;
         for (auto & docked_unit : pImage->dockedunits) {
@@ -1377,8 +1395,11 @@ void Unit::UnRef() {
 }
 
 float Unit::ExplosionRadius() {
-    const float expsize = configuration()->graphics.explosion_size_flt;
-    return expsize * rSize();
+    static boost::optional<float> expsize;
+    if (expsize == boost::none) {
+        expsize = configuration()->graphics.explosion_size_flt;
+    }
+    return expsize.get() * rSize();
 }
 
 void Unit::ProcessDeleteQueue() {
@@ -1457,9 +1478,15 @@ const Unit *loadUnitByCache(std::string name, int faction) {
 }
 
 bool DestroySystem(float hull_percent, float numhits) {
-    const float damage_chance = configuration()->physics.damage_chance_flt;
-    const float guaranteed_chance = configuration()->physics.definite_damage_chance_flt;
-    float chance = 1 - (damage_chance * (guaranteed_chance + hull_percent));
+    static boost::optional<float> damage_chance;
+    if (damage_chance == boost::none) {
+        damage_chance = configuration()->physics.damage_chance_flt;
+    }
+    static boost::optional<float> guaranteed_chance;
+    if (guaranteed_chance == boost::none) {
+        guaranteed_chance = configuration()->physics.definite_damage_chance_flt;
+    }
+    float chance = 1 - (damage_chance.get() * (guaranteed_chance.get() + hull_percent));
     if (numhits > 1) {
         chance = std::pow(chance, numhits);
     }
@@ -1467,9 +1494,15 @@ bool DestroySystem(float hull_percent, float numhits) {
 }
 
 bool DestroyPlayerSystem(float hull_percent, float numhits) {
-    const float damage_chance = configuration()->physics.damage_player_chance_flt;
-    const float guaranteed_chance = configuration()->physics.definite_damage_chance_flt;
-    float chance = 1 - (damage_chance * (guaranteed_chance + hull_percent));
+    static boost::optional<float> damage_chance;
+    if (damage_chance == boost::none) {
+        damage_chance = configuration()->physics.damage_player_chance_flt;
+    }
+    static boost::optional<float> guaranteed_chance;
+    if (guaranteed_chance == boost::none) {
+        guaranteed_chance = configuration()->physics.definite_damage_chance_flt;
+    }
+    float chance = 1 - (damage_chance.get() * (guaranteed_chance.get() + hull_percent));
     if (numhits > 1) {
         chance = std::pow(chance, numhits);
     }
@@ -1502,12 +1535,18 @@ void Unit::TargetTurret(Unit *targ) {
 }
 
 void WarpPursuit(Unit *un, StarSystem *sourcess, std::string destination) {
-    const bool AINotUseJump = configuration()->physics.no_ai_jump_points;
+    static boost::optional<bool> AINotUseJump;
+    if (AINotUseJump == boost::none) {
+        AINotUseJump = configuration()->physics.no_ai_jump_points;
+    }
     if (AINotUseJump) {
-        const float seconds_per_parsec = configuration()->physics.seconds_per_parsec_flt;
+        static boost::optional<float> seconds_per_parsec;
+        if (seconds_per_parsec == boost::none) {
+            seconds_per_parsec = configuration()->physics.seconds_per_parsec_flt;
+        }
         float ttime =
                 (SystemLocation(sourcess->getFileName()) - SystemLocation(destination)).Magnitude()
-                        * seconds_per_parsec;
+                        * seconds_per_parsec.get();
         un->jump_drive.SetDelay(float_to_int(ttime));
         sourcess->JumpTo(un, nullptr, destination, true, true);
         un->jump_drive.SetDelay(-float_to_int(ttime));
@@ -1753,8 +1792,11 @@ bool Unit::Explode(bool drawit, float timeit) {
 }
 
 float Unit::ExplodingProgress() const {
-    const float debrisTime = configuration()->physics.debris_time_flt;
-    return std::min(pImage->timeexplode / debrisTime, 1.0f);
+    static boost::optional<float> debrisTime;
+    if (debrisTime == boost::none) {
+        debrisTime = configuration()->physics.debris_time_flt;
+    }
+    return std::min(pImage->timeexplode / debrisTime.get(), 1.0f);
 }
 
 void Unit::SetCollisionParent(Unit *name) {
@@ -1951,11 +1993,17 @@ void rechargeShip(Unit *unit, unsigned int cockpit) {
 
     // Refueling fee
     // TODO: Use a more precise type for credits
-    const float refueling_fee = configuration()->general.fuel_docking_fee_flt;
-    _Universe->AccessCockpit(cockpit)->credits -= refueling_fee;
+    static boost::optional<float> refueling_fee;
+    if (refueling_fee == boost::none) {
+        refueling_fee = configuration()->general.fuel_docking_fee_flt;
+    }
+    _Universe->AccessCockpit(cockpit)->credits -= refueling_fee.get();
 
-    const float docking_fee = configuration()->general.docking_fee_flt;
-    _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
+    static boost::optional<float> docking_fee;
+    if (docking_fee == boost::none) {
+        docking_fee = configuration()->general.docking_fee_flt;
+    }
+    _Universe->AccessCockpit(cockpit)->credits -= docking_fee.get();
 }
 
 
@@ -2066,11 +2114,17 @@ bool Unit::UnDock(Unit *utdw) {
             docked &= (~(DOCKED_INSIDE | DOCKED));
             pImage->DockedTo.SetUnit(nullptr);
             Velocity = utdw->Velocity;
-            const float launch_speed = configuration()->physics.launch_speed_flt;
-            const bool auto_turn_towards = configuration()->physics.undock_turn_away;
+            static boost::optional<float> launch_speed;
+            if (launch_speed == boost::none) {
+                launch_speed = configuration()->physics.launch_speed_flt;
+            }
+            static boost::optional<bool> auto_turn_towards;
+            if (auto_turn_towards == boost::none) {
+                auto_turn_towards = configuration()->physics.undock_turn_away;
+            }
 
-            if (launch_speed > 0) {
-                computer.set_speed = launch_speed;
+            if (launch_speed.get() > 0) {
+                computer.set_speed = launch_speed.get();
             }
             if (auto_turn_towards) {
                 for (int i = 0; i < 3; ++i) {
@@ -2828,7 +2882,10 @@ int Unit::RepairUpgrade() {
 
 
     bool ret = success && pct > 0;
-    const bool ComponentBasedUpgrades = configuration()->physics.component_based_upgrades;
+    static boost::optional<bool> ComponentBasedUpgrades;
+    if (ComponentBasedUpgrades == boost::none) {
+        ComponentBasedUpgrades = configuration()->physics.component_based_upgrades;
+    }
     if (ComponentBasedUpgrades) {
         for (unsigned int i = 0; i < numCargo(); ++i) {
             if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
@@ -2942,7 +2999,10 @@ extern int GetModeFromName(const char *);
 vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool downgrade) {
     const Unit *templ = nullptr;
     const Unit *downgradelimit = nullptr;
-    const bool staticrem = configuration()->general.remove_impossible_downgrades;
+    static boost::optional<bool> staticrem;
+    if (staticrem == boost::none) {
+        staticrem = configuration()->general.remove_impossible_downgrades;
+    }
     int upgrfac = FactionUtil::GetUpgradeFaction();
     for (unsigned int i = 0; i < mylist.size(); ++i) {
         bool removethis = true /*staticrem*/;
@@ -3032,7 +3092,10 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
 }
 
 vector<CargoColor> &Unit::FilterUpgradeList(vector<CargoColor> &mylist) {
-    const bool filtercargoprice = configuration()->cargo.filter_expensive_cargo;
+    static boost::optional<bool> filtercargoprice;
+    if (filtercargoprice == boost::none) {
+        filtercargoprice = configuration()->cargo.filter_expensive_cargo;
+    }
     if (filtercargoprice) {
         Cockpit *cp = _Universe->isPlayerStarship(this);
         if (cp) {
@@ -3113,11 +3176,20 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                 //quantity more than zero
             else if (maxprice > minprice + .01) {
                 float renormprice = (baseprice - minprice) / (maxprice - minprice);
-                const float maxpricequantadj = configuration()->cargo.max_price_quant_adj_flt;
-                const float minpricequantadj = configuration()->cargo.min_price_quant_adj_flt;
-                const float powah = configuration()->cargo.price_quant_adj_power_flt;
-                renormprice = std::pow(renormprice, powah);
-                renormprice *= (maxpricequantadj - minpricequantadj);
+                static boost::optional<float> maxpricequantadj;
+                if (maxpricequantadj == boost::none) {
+                    maxpricequantadj = configuration()->cargo.max_price_quant_adj_flt;
+                }
+                static boost::optional<float> minpricequantadj;
+                if (minpricequantadj == boost::none) {
+                    minpricequantadj = configuration()->cargo.min_price_quant_adj_flt;
+                }
+                static boost::optional<float> powah;
+                if (powah == boost::none) {
+                    powah = configuration()->cargo.price_quant_adj_power_flt;
+                }
+                renormprice = std::pow(renormprice, powah.get());
+                renormprice *= (maxpricequantadj.get() - minpricequantadj.get());
                 renormprice += 1;
                 if (renormprice > .001) {
                     c.SetQuantity(c.GetQuantity() / float_to_int(renormprice));
@@ -3126,9 +3198,12 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                     }
                 }
             }
-            const float minprice = configuration()->cargo.min_cargo_price_flt;
+            static boost::optional<float> minprice;
+            if (minprice == boost::none) {
+                minprice = configuration()->cargo.min_cargo_price_flt;
+            }
             if (c.GetPrice() < minprice) {
-                c.SetPrice(minprice);
+                c.SetPrice(minprice.get());
             }
 
             AddCargo(c, false);
@@ -3208,9 +3283,15 @@ void Unit::Repair() {
     }
 
     // TODO: everything below here needs to go when we're done with lib_components
-    const float repairtime = configuration()->physics.repair_droid_time_flt;
-    const float checktime = configuration()->physics.repair_droid_check_time_flt;
-    if ((repairtime <= 0) || (checktime <= 0)) {
+    static boost::optional<float> repairtime;
+    if (repairtime == boost::none) {
+        repairtime = configuration()->physics.repair_droid_time_flt;
+    }
+    static boost::optional<float> checktime;
+    if (checktime == boost::none) {
+        checktime = configuration()->physics.repair_droid_check_time_flt;
+    }
+    if ((repairtime.get() <= 0) || (checktime.get() <= 0)) {
         return;
     }
 
@@ -3234,7 +3315,7 @@ void Unit::Repair() {
                             UnitUtil::PercentOperational(this, carg->GetName(), carg->GetCategory(), true)) < 1.f)) {
                 if (next_repair_time == -FLT_MAX) {
                     next_repair_time =
-                            UniverseUtil::GetGameTime() + repairtime * (1 - percentoperational) / repair_bot.Get();
+                            UniverseUtil::GetGameTime() + repairtime.get() * (1 - percentoperational) / repair_bot.Get();
                 } else {
                     //ACtually fix the cargo here
                     static int upfac = FactionUtil::GetUpgradeFaction();
@@ -3271,17 +3352,23 @@ void Unit::Repair() {
     }
 
     // TODO: Figure out why these variables are unused, and either use them or delete them
-    float ammt_repair = simulation_atom_var / repairtime * repair_bot.Get();
+    float ammt_repair = simulation_atom_var / repairtime.get() * repair_bot.Get();
 
     unsigned int numg = (1 + UnitImages<void>::NUMGAUGES + MAXVDUS);
     unsigned int which = vsrandom.genrand_int31() % numg;
-    const float hud_repair_quantity = configuration()->physics.hud_repair_unit_flt;
+    static boost::optional<float> hud_repair_quantity;
+    if (hud_repair_quantity == boost::none) {
+        hud_repair_quantity = configuration()->physics.hud_repair_unit_flt;
+    }
 
     if (!mounts.empty()) {
-        const float mount_repair_quantity = configuration()->physics.mount_repair_unit_flt;
+        static boost::optional<float> mount_repair_quantity;
+        if (mount_repair_quantity == boost::none) {
+            mount_repair_quantity = configuration()->physics.mount_repair_unit_flt;
+        }
         const unsigned int i = vsrandom.genrand_int31() % mounts.size();
         if (mounts[i].functionality < mounts[i].maxfunctionality) {
-            mounts[i].functionality += mount_repair_quantity;
+            mounts[i].functionality += mount_repair_quantity.get();
             if (mounts[i].functionality > mounts[i].maxfunctionality) {
                 mounts[i].functionality = mounts[i].maxfunctionality;
             }
@@ -3534,11 +3621,14 @@ void Unit::UpdatePhysics3(const Transformation &trans,
 
     float difficulty;
     Cockpit *player_cockpit = GetVelocityDifficultyMult(difficulty);
-    const float EXTRA_CARGO_SPACE_DRAG = configuration()->physics.extra_space_drag_for_cargo_flt;
-    if (EXTRA_CARGO_SPACE_DRAG > 0) {
+    static boost::optional<float> EXTRA_CARGO_SPACE_DRAG;
+    if (EXTRA_CARGO_SPACE_DRAG == boost::none) {
+        EXTRA_CARGO_SPACE_DRAG = configuration()->physics.extra_space_drag_for_cargo_flt;
+    }
+    if (EXTRA_CARGO_SPACE_DRAG.get() > 0) {
         int upgfac = FactionUtil::GetUpgradeFaction();
         if ((this->faction == upgfac) || (this->name == "eject") || (this->name == "Pilot")) {
-            Velocity = Velocity * (1 - EXTRA_CARGO_SPACE_DRAG);
+            Velocity = Velocity * (1 - EXTRA_CARGO_SPACE_DRAG.get());
         }
     }
 
@@ -3570,10 +3660,13 @@ void Unit::UpdatePhysics3(const Transformation &trans,
             }
         }
     }
-    const float SPACE_DRAG = configuration()->physics.unit_space_drag_flt;
+    static boost::optional<float> SPACE_DRAG;
+    if (SPACE_DRAG == boost::none) {
+        SPACE_DRAG = configuration()->physics.unit_space_drag_flt;
+    }
 
-    if (SPACE_DRAG > 0) {
-        Velocity = Velocity * (1 - SPACE_DRAG);
+    if (SPACE_DRAG.get() > 0) {
+        Velocity = Velocity * (1 - SPACE_DRAG.get());
     }
 
     static string LockingSoundName = vs_config->getVariable("unitaudio", "locking", "locking.wav");
@@ -3593,7 +3686,10 @@ void Unit::UpdatePhysics3(const Transformation &trans,
             }
             if (increase_locking && (dist_sqr_to_target < mounts[i].type->range * mounts[i].type->range)) {
                 mounts[i].time_to_lock -= simulation_atom_var;
-                const bool ai_lock_cheat = configuration()->physics.ai_lock_cheat;
+                static boost::optional<bool> ai_lock_cheat;
+                if (ai_lock_cheat == boost::none) {
+                    ai_lock_cheat = configuration()->physics.ai_lock_cheat;
+                }
                 if (!player_cockpit) {
                     if (ai_lock_cheat) {
                         mounts[i].time_to_lock = -1;
@@ -3733,10 +3829,16 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                          uc,
                          superunit);
     //can a unit get to another system without jumping?.
-    const bool warp_is_interstellar = configuration()->physics.warp_is_interstellar;
+    static boost::optional<bool> warp_is_interstellar;
+    if (warp_is_interstellar == boost::none) {
+        warp_is_interstellar = configuration()->physics.warp_is_interstellar;
+    }
     if (warp_is_interstellar
             && (curr_physical_state.position.MagnitudeSquared() > std::pow(configuration()->physics.distance_to_warp_dbl, 2) && !isSubUnit())) {
-        const bool direct = configuration()->physics.direct_interstellar_journey;
+        static boost::optional<bool> direct;
+        if (direct == boost::none) {
+            direct = configuration()->physics.direct_interstellar_journey;
+        }
         bool jumpDirect = false;
         if (direct) {
             Cockpit *cp = _Universe->isPlayerStarship(this);

@@ -2131,7 +2131,7 @@ bool UpgradeAllowed(const Cargo &item, Unit *playerUnit) {
             if (numUpgrades) {
                 if (numUpgrades->GetQuantity() >= quantity) {
                     color_prohibited_upgrade_flag = true;
-                    VS_LOG(debug, (boost::format("Upgrade not allowed because numUpgrades->GetQuantity(), %1%, is >= quantity, %2%") % numUpgrades->GetQuantity() % quantity));
+                    VS_LOG(debug, "Ship already has the maximum number of upgrades of this type");
                     return false;
                 }
             }
@@ -2145,7 +2145,7 @@ bool UpgradeAllowed(const Cargo &item, Unit *playerUnit) {
             }
             if (totalquant >= quantity) {
                 color_prohibited_upgrade_flag = true;
-                VS_LOG(debug, (boost::format("Upgrade not allowed because totalquant, %1%, is >= quantity, %2%") % totalquant % quantity));
+                VS_LOG(debug, "Ship already has the maximum number of upgrades of this type");
                 return false;
             }
         }
@@ -2469,12 +2469,12 @@ public:
 };
 
 //Get a filtered list of items from a unit.
-void BaseComputer::loadMasterList(Unit *un,
-        const vector<string> &filtervec,
-        const vector<string> &invfiltervec,
-        bool removezero,
-        TransactionList &tlist) {
-    vector<CargoColor> *items = &tlist.masterList;
+void BaseComputer::loadMasterList(Unit* un,
+                                  const vector<string>& filtervec,
+                                  const vector<string>& invfiltervec,
+                                  bool removezero,
+                                  TransactionList& tlist) {
+    vector<CargoColor>* items = &tlist.masterList;
     for (size_t i = 0; i < un->numCargo(); i++) {
         bool filter = filtervec.empty();
         bool invfilter = true;
@@ -2498,13 +2498,17 @@ void BaseComputer::loadMasterList(Unit *un,
                 }
                 items->push_back(col);
             } else {
-                if (un->GetCargo(i).GetCategory().find_first_of("Weapon") != string::npos) {
-                    VS_LOG(debug, (boost::format("%1%: Not adding weapon %2% to Master List because its quantity is 0") % __FUNCTION__ % un->GetCargo(i).GetName()));
+                if (un->GetCargo(i).IsWeapon()) {
+                    VS_LOG(debug,
+                           (boost::format("%1%: Not adding weapon %2% to Master List because its quantity is 0") %
+                               __FUNCTION__ % un->GetCargo(i).GetName()));
                 }
             }
         } else {
-            if (un->GetCargo(i).GetCategory().find_first_of("Weapon") != string::npos) {
-                VS_LOG(debug, (boost::format("%1%: Not adding weapon %2% to Master List because it was filtered out") % __FUNCTION__ % un->GetCargo(i).GetName()));
+            if (un->GetCargo(i).IsWeapon()) {
+                VS_LOG(debug,
+                       (boost::format("%1%: Not adding weapon %2% to Master List because it was filtered out") %
+                           __FUNCTION__ % un->GetCargo(i).GetName()));
             }
         }
     }
