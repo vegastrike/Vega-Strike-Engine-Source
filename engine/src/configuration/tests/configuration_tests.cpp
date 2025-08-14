@@ -33,7 +33,37 @@
 
 #include <string>
 
+#include "configuration/configuration.h"
+#include "root_generic/lin_time.h"
+
 TEST(LoadConfig, Sanity) {
+    {
+        VS_LOG_AND_FLUSH(important_info, "Starting configuration()->..._dbl test");
+        const auto start_time = std::chrono::system_clock::now();
+        for (int i = 0; i < 1000000; ++i) {
+            // ReSharper disable CppDFAUnreadVariable
+            const double asteroid_difficulty = configuration()->physics.asteroid_difficulty_dbl;
+            // ReSharper restore CppDFAUnreadVariable
+        }
+        const auto end_time = std::chrono::system_clock::now();
+        const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        VS_LOG_AND_FLUSH(important_info, (boost::format("Finished configuration()->..._dbl test. Took %1% milliseconds") % duration.count()));
+    }
+
+    {
+        VS_LOG_AND_FLUSH(important_info, "Starting test of static optional setting variable");
+        const auto start_time = std::chrono::system_clock::now();
+        static boost::optional<double> setting;
+        for (int i = 0; i < 1000000; ++i) {
+            if (setting == boost::none) {
+                setting = configuration()->physics.asteroid_difficulty_dbl;
+            }
+        }
+        const auto end_time = std::chrono::system_clock::now();
+        const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable. Took %1% milliseconds") % duration.count()));
+    }
+
     // Test without configuration
     const bool default_bool = vega_config::GetGameConfig().GetBool("test.boolean_variable", false);
     const int32_t default_int_32_t = vega_config::GetGameConfig().GetInt32("test.int_variable", 1);
@@ -87,10 +117,10 @@ TEST(LoadConfig, Sanity) {
     EXPECT_EQ(test_string2, "hello");
     EXPECT_EQ(escaped_string2, "#FF0000Hello\r\nthere!#000000");
 
-//    VS_LOG_AND_FLUSH(fatal, "Starting GetFloat performance test");
-//    for (int i = 0; i < 1000000; ++i) {
-//        vega_config::GetGameConfig().GetFloat("test.subsection.subsection_float_variable", 11.1F);
-//    }
-//    VS_LOG_AND_FLUSH(fatal, "Finished GetFloat performance test");
+    VS_LOG_AND_FLUSH(important_info, "Starting GetFloat performance test");
+    for (int i = 0; i < 100000; ++i) {
+        vega_config::GetGameConfig().GetFloat("test.subsection.subsection_float_variable", 11.1F);
+    }
+    VS_LOG_AND_FLUSH(important_info, "Finished GetFloat performance test");
 
 }
