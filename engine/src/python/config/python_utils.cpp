@@ -87,8 +87,8 @@ PyObject* GetClassFromPython(
     const std::string python_path = GetPythonPath();
     const std::wstring python_path_w(python_path.begin(), python_path.end());
     const std::wstring path_string_w = std::wstring(path_string.begin(), path_string.end());
-    const std::string python_sitelib_path = QUOTE(Python_SITELIB);
-    const std::wstring python_sitelib_path_wstring = std::wstring(python_sitelib_path.begin(), python_sitelib_path.end());
+    // // const std::string python_sitelib_path = QUOTE(Python_SITELIB);
+    // const std::wstring python_sitelib_path_wstring = std::wstring(python_sitelib_path.begin(), python_sitelib_path.end());
     const std::wstring build_path_w = std::wstring(build_path.begin(), build_path.end());
     const std::wstring data_path_w = std::wstring(datadir.begin(), datadir.end());
 
@@ -105,12 +105,12 @@ PyObject* GetClassFromPython(
         PyErr_Print();
         Py_ExitStatusException(status);
     }
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, python_sitelib_path_wstring.c_str());
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python path list append 3 failed" << std::endl << std::flush;
-        PyErr_Print();
-        Py_ExitStatusException(status);
-    }
+    // status = PyWideStringList_Append(&python_path_py_wide_string_list, python_sitelib_path_wstring.c_str());
+    // if (PyStatus_Exception(status)) {
+    //     std::cerr << "Python path list append 3 failed" << std::endl << std::flush;
+    //     PyErr_Print();
+    //     Py_ExitStatusException(status);
+    // }
     status = PyWideStringList_Append(&python_path_py_wide_string_list, build_path_w.c_str());
     if (PyStatus_Exception(status)) {
         std::cerr << "Python path list append 4 failed" << std::endl << std::flush;
