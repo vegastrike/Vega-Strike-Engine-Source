@@ -929,7 +929,7 @@ void Drawable::Split(int level) {
         unit->SubUnits.prepend(splitsub = new Unit(tempmeshes, true, unit->faction));
         splitsub->hull.Set(1000.0);
         splitsub->name = "debris";
-        splitsub->setMass(configuration()->physics.debris_mass * splitsub->getMass() / level);
+        splitsub->SetMass(configuration()->physics.debris_mass * splitsub->GetMass() / level);
         splitsub->pImage->timeexplode = .1;
         if (splitsub->meshdata[0]) {
             Vector loc = splitsub->meshdata[0]->Position();
@@ -938,7 +938,7 @@ void Drawable::Split(int level) {
                 locm = 1;
             }
             splitsub->ApplyForce(
-                    splitsub->meshdata[0]->rSize() * configuration()->graphics.explosion_force * 10 * splitsub->getMass() * loc
+                    splitsub->meshdata[0]->rSize() * configuration()->graphics.explosion_force * 10 * splitsub->GetMass() * loc
                             / locm);
             loc.Set(rand(), rand(), rand() + .1);
             loc.Normalize();
@@ -949,7 +949,7 @@ void Drawable::Split(int level) {
     old.clear();
     this->meshdata.clear();
     this->meshdata.push_back(nullptr);     //the shield
-    unit->Mass *= configuration()->physics.debris_mass;
+    unit->SetMass(unit->GetMass() * configuration()->physics.debris_mass);
 }
 
 void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, const GFXColor &color) {

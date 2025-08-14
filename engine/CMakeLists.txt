@@ -378,7 +378,6 @@ SET(LIBCMDSERVER_SOURCES
     src/cmd/unit_functions_server.cpp
     src/cmd/unit_util_server.cpp
     src/cmd/unit_server.cpp
-    src/cmd/pilot_server.cpp
     src/cmd/images_server.cpp
     src/cmd/faction_xml_server.cpp
 )

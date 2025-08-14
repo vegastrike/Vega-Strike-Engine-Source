@@ -392,7 +392,7 @@ void Carrier::EjectCargo(unsigned int index) {
                 const float velmul = configuration()->physics.eject_cargo_speed;
                 cargo->SetOwner(unit);
                 cargo->SetVelocity(unit->Velocity * velmul + randVector(-.25, .25).Cast());
-                cargo->setMass(tmp->GetMass());
+                cargo->SetMass(tmp->GetMass());
                 if (name.length() > 0) {
                     cargo->name = name;
                 } else if (tmp) {
@@ -462,7 +462,8 @@ int Carrier::RemoveCargo(unsigned int i, int quantity, bool eraseZero) {
 
     const bool usemass = configuration()->physics.use_cargo_mass;
     if (usemass) {
-        unit->setMass(unit->getMass() - quantity * carg->GetMass());
+        // TODO: remove static_cast when carg->GetMass returns double
+        unit->SetMass(unit->GetMass() - quantity * static_cast<double>(carg->GetMass()));
     }
 
     carg->quantity -= quantity;
@@ -477,7 +478,8 @@ void Carrier::AddCargo(const Cargo &carg, bool sort) {
 
     const bool usemass = configuration()->physics.use_cargo_mass;
     if (usemass) {
-        unit->setMass(unit->getMass() + carg.quantity.Value() * carg.GetMass());
+        // TODO: remove static_cast when carg->GetMass returns double
+        unit->SetMass(unit->GetMass() + carg.quantity.Value() * static_cast<double>(carg.GetMass()));
     }
 
     bool found = false;
@@ -706,7 +708,7 @@ bool Carrier::SellCargo(unsigned int i, int quantity, float &creds, Cargo &carg,
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (i < 0 || i >= unit->cargo.size() || !buyer->CanAddCargo(unit->cargo[i])
-            || unit->getMass() < unit->cargo[i].GetMass()) {
+            || unit->GetMass() < unit->cargo[i].GetMass()) {
         return false;
     }
     carg = unit->cargo[i];

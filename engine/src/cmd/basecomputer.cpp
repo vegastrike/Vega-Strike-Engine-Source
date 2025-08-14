@@ -1473,7 +1473,7 @@ void BaseComputer::recalcTitle() {
                 const float basemass = atof(UniverseUtil::LookupUnitStat(playerUnit->name, "", "Mass").c_str());
                 float massEffect = 0.0;
                 if (basemass > 0) {
-                    massEffect = 100 * playerUnit->getMass() / basemass;
+                    massEffect = 100 * playerUnit->GetMass() / basemass;
                 }
                 if (showStardate) {
                     playerTitle = (boost::format("Stardate: %1$s      Credits: %2$.2f      "

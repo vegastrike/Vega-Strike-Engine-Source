@@ -106,11 +106,12 @@ void Movable::GetOrientation(Vector &p, Vector &q, Vector &r) const {
 }
 
 Vector Movable::GetNetAcceleration() const {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     Vector p, q, r;
     GetOrientation(p, q, r);
     Vector res(NetLocalForce.i * p + NetLocalForce.j * q + NetLocalForce.k * r);
     res += NetForce;
-    return res / Mass;
+    return res / static_cast<float>(unit->mass);
 }
 
 Vector Movable::GetNetAngularAcceleration() const {
@@ -132,7 +133,7 @@ float Movable::GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn
     const float tr = (lref.k == 0) ? 0 : fabs(((lref.k > 0) ? unit->drive.forward.Value() : unit->drive.retro.Value()) / lref.k);
     const float trqmin = (tr < tq) ? tr : tq;
     const float tm = tp < trqmin ? tp : trqmin;
-    return lref.Magnitude() * tm / Mass;
+    return lref.Magnitude() * tm / static_cast<float>(unit->mass);
 }
 
 void Movable::SetVelocity(const Vector &v) {
@@ -293,6 +294,8 @@ void Movable::Rotate(const Vector &axis) {
 }
 
 Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transmat) {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+
     //First, save theoretical instantaneous acceleration (not time-quantized) for GetAcceleration()
     SavedAccel = GetNetAcceleration();
     SavedAngAccel = GetNetAngularAcceleration();
@@ -330,7 +333,7 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     if (NetForce.i || NetForce.j || NetForce.k) {
         temp2 += InvTransformNormal(transmat, NetForce);
     }
-    temp2 = temp2 / Mass;
+    temp2 = temp2 / static_cast<float>(unit->mass);
     temp = temp2 * simulation_atom_var;
     if (!(FINITE(temp2.i) && FINITE(temp2.j) && FINITE(temp2.k))) {
         VS_LOG(info, "NetForce transform skrewed");
@@ -370,7 +373,7 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     if (air_res_coef != 0.0F || lateral_air_res_coef != 0.0F) {
         float velmag = Velocity.Magnitude();
         Vector AirResistance = Velocity
-                * (air_res_coef * velmag / Mass) * (corner_max.i - corner_min.i) * (corner_max.j - corner_min.j);
+                * (air_res_coef * velmag / static_cast<float>(unit->mass)) * (corner_max.i - corner_min.i) * (corner_max.j - corner_min.j);
         if (AirResistance.Magnitude() > velmag) {
             Velocity.Set(0, 0, 0);
         } else {
@@ -381,7 +384,7 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
                 Vector lateralVel = p * Velocity.Dot(p) + q * Velocity.Dot(q);
                 AirResistance = lateralVel
                         * (lateral_air_res_coef * velmag
-                                / Mass) * (corner_max.i - corner_min.i) * (corner_max.j - corner_min.j);
+                                / static_cast<float>(unit->mass)) * (corner_max.i - corner_min.i) * (corner_max.j - corner_min.j);
                 if (AirResistance.Magnitude() > lateralVel.Magnitude()) {
                     Velocity = r * Velocity.Dot(r);
                 } else {
@@ -509,8 +512,9 @@ void Movable::ApplyLocalForce(const Vector &Vforce) {
 }
 
 void Movable::Accelerate(const Vector &Vforce) {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     if (FINITE(Vforce.i) && FINITE(Vforce.j) && FINITE(Vforce.k)) {
-        NetForce += Vforce * Mass;
+        NetForce += Vforce * static_cast<float>(unit->mass);
     } else {
         VS_LOG(error, "fatal force");
     }

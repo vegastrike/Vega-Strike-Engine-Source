@@ -1408,7 +1408,7 @@ Unit *makeBlankUpgrade(string templnam, int faction) {
         int q = bl->GetCargo(i).GetQuantity();
         bl->RemoveCargo(i, q);
     }
-    bl->setMass(0);
+    bl->SetMass(0);
     return bl;
 }
 
@@ -2724,6 +2724,9 @@ bool Unit::UpAndDownGrade(const Unit *up,
     if (numave) {
         percentage = percentage / numave;
     }
+
+    // TODO: intertial dampener component - reduces mass
+
     if (gen_downgrade_list) {
         if (downgrade && percentage > configuration()->general.remove_downgrades_less_than_percent) {
             for (auto each_downgrade = tempdownmap.begin(); each_downgrade != tempdownmap.end(); ++each_downgrade) {
