@@ -79,6 +79,8 @@ public:
     double Percent(int facet) const;
 
     int Layer() const;
+
+    virtual ~DamageableLayer() = default;
 };
 
 #endif //VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_LAYER_H
