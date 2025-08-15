@@ -36,8 +36,7 @@
       "displayName": "Debug",
       "inherits": "default",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "LOG_TIME_TAKEN_DETAILS": true
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
