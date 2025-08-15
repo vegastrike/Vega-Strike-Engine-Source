@@ -5408,6 +5408,7 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
             const boost::json::value * num_lights_value_ptr = graphics_object.if_contains("num_lights");
             if (num_lights_value_ptr != nullptr) {
                 graphics.num_lights = boost::json::value_to<int>(*num_lights_value_ptr);
+                VS_LOG(debug, (boost::format("%1%: graphics.num_lights = %2%") % __FUNCTION__ % graphics.num_lights));
             }
 
             const boost::json::value * num_messages_value_ptr = graphics_object.if_contains("num_messages");

@@ -62,7 +62,7 @@ void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
         GlobalEffectsFreelist.pop();
     }
 
-    unpicklights();     //costly but necessary to get rid of pesky local enables that shoudln't be tagged to get reenabled
+    unpicklights();     //costly but necessary to get rid of pesky local enables that shouldn't be tagged to get re-enabled
     for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
         tmp[i] = (0 != (GLLights[i].options & OpenGLL::GL_ENABLED));
         if (GLLights[i].options & OpenGLL::GL_ENABLED) {
@@ -303,12 +303,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateLight(int &light, const GFXLight &templatecopy, c
         }
     }
     if (light == static_cast<int>(_llights->size())) {
+        VS_LOG_AND_FLUSH(debug, (boost::format("%1%: Creating light number %2% in context %3%") % __FUNCTION__ % light % _currentContext));
         _llights->push_back(gfx_light());
     }
     return (*_llights)[light].Create(templatecopy, global);
 }
 
 void /*GFXDRVAPI*/ GFXDeleteLight(const int light) {
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1%: Deleting light number %2% from context %3%") % __FUNCTION__ % light % _currentContext));
     (*_llights)[light].Kill();
 }
 
@@ -331,11 +333,25 @@ GFXBOOL /*GFXDRVAPI*/  GFXSetLight(const int light, const enum LIGHT_TARGET lt, 
 }
 
 const GFXLight & /*GFXDRVAPI*/ GFXGetLight(const int light) {
+    if (light < 0) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: light # %2% < zero") % __FUNCTION__ % light));
+        throw std::out_of_range("GFXGetLight()");
+    } else if (light >= static_cast<int>(_llights->size())) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: light # %2% is past the upper bound of the collection %3%") % __FUNCTION__ % light % _llights->size()));
+        throw std::out_of_range("GFXGetLight()");
+    }
     return (*_llights)[light];
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(int light) {
-    assert(light >= 0 && light <= static_cast<int>(_llights->size()));
+    if (light < 0) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: light # %2% < zero") % __FUNCTION__ % light));
+        return GFXFALSE;
+    } else if (light >= static_cast<int>(_llights->size())) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: light # %2% is past the upper bound of the collection %3%") % __FUNCTION__ % light % _llights->size()));
+        return GFXFALSE;
+    }
+    // assert(light >= 0 && light < static_cast<int>(_llights->size()));
     //return FALSE;
     if ((*_llights)[light].Target() == -2) {
         return GFXFALSE;
@@ -345,7 +361,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(int light) {
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXDisableLight(int light) {
-    assert(light >= 0 && light <= static_cast<int>(_llights->size()));
+    if (light < 0) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: light # %2% < zero") % __FUNCTION__ % light));
+        return GFXFALSE;
+    } else if (light >= static_cast<int>(_llights->size())) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: light # %2% is past the upper bound of the collection %3%") % __FUNCTION__ % light % _llights->size()));
+        return GFXFALSE;
+    }
+    // assert(light >= 0 && light < static_cast<int>(_llights->size()));
     if ((*_llights)[light].Target() == -2) {
         return GFXFALSE;
     }
@@ -365,10 +388,12 @@ void /*GFXDRVAPI*/ GFXCreateLightContext(int &con_number) {
     _currentContext = con_number;
     _ambient_light.push_back(GFXColor(0, 0, 0, 1));
     _local_lights_dat.push_back(vector<gfx_light>());
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1%: current light context: %2%, containing %3% lights") % __FUNCTION__ % con_number % _llights->size()));
     GFXSetLightContext(con_number);
 }
 
 void /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number) {
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1%: current light context: %2%, containing %3% lights") % __FUNCTION__ % con_number % _llights->size()));
     _local_lights_dat[con_number] = vector<gfx_light>();
 }
 
@@ -379,6 +404,7 @@ void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number) {
     lighttable.Clear();
     _currentContext = con_number;
     _llights = &_local_lights_dat[con_number];
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1%: current light context: %2%, containing %3% lights") % __FUNCTION__ % con_number % _llights->size()));
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (GLfloat *) &(_ambient_light[con_number]));
     //reset all lights so they arean't in GLLights
     for (i = 0; i < _llights->size(); i++) {
@@ -403,6 +429,7 @@ void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number) {
 }
 
 void GFXDestroyAllLights() {
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1%: current light context: %2%, containing %3% lights") % __FUNCTION__ % _currentContext % _llights->size()));
     lighttable.Clear();
     if (GLLights != nullptr) {
         free(GLLights);
@@ -423,6 +450,7 @@ static void SetupGLLightGlobals() {
 
     GFXSetCutoff(configuration()->graphics.light_cutoff_flt);
     GFXSetOptimalIntensity(configuration()->graphics.light_optimal_intensity_flt, configuration()->graphics.light_saturation_flt);
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1%: configuration()->graphics.num_lights == %2%") % __FUNCTION__ % configuration()->graphics.num_lights));
     GFXSetOptimalNumLights(configuration()->graphics.num_lights);
     GFXSetSeparateSpecularColor(configuration()->graphics.separate_specular_color ? GFXTRUE : GFXFALSE);
 }
