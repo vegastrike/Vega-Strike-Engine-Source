@@ -32,6 +32,7 @@
 #include "src/vs_logging.h"
 
 #include <string>
+#include <chrono>
 
 #include "configuration/configuration.h"
 #include "root_generic/lin_time.h"
