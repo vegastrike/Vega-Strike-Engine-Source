@@ -415,7 +415,7 @@ void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number) {
             if (_llights->at(i).LocalLight()) {
                 _llights->at(i).AddToTable();
             } else {
-                GLLights[GLLindex].index = -1;                 //make it clobber completley! no trace of old light.
+                GLLights[GLLindex].index = -1;                 //make it clobber completely! no trace of old light.
                 _llights->at(i).ClobberGLLight(GLLindex);
                 GLLindex++;
             }
