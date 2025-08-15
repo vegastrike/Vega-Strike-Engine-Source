@@ -33,9 +33,11 @@
 #include "src/vs_logging.h"
 #include "root_generic/vs_globals.h"
 #include "src/vs_exit.h"
+#include "root_generic/lin_time.h"
 
 template<class TargetType, class SourceType>
 inline TargetType* vega_dynamic_cast_ptr(SourceType* from) {
+    // const double start_time = realTime();
     TargetType* ret_val = nullptr;
     try {
         ret_val = dynamic_cast<TargetType*>(from);
@@ -50,11 +52,14 @@ inline TargetType* vega_dynamic_cast_ptr(SourceType* from) {
         VS_LOG_AND_FLUSH(fatal, (boost::format("Fatal Failure to Cast type %1%* to %2%* -- nullptr encountered") % typeid(SourceType).name() % typeid(TargetType).name()));
         VSExit(-422);
     }
+    // const double end_time = realTime();
+    // VS_LOG(trace, (boost::format("%1% took %2%") % __FUNCTION__ % (end_time - start_time)));
     return ret_val;
 }
 
 template<class TargetType, class SourceType>
 inline const TargetType* vega_dynamic_const_cast_ptr(const SourceType* from) {
+    // const double start_time = realTime();
     TargetType* ret_val = nullptr;
     try {
         ret_val = dynamic_cast<TargetType*>(from);
@@ -69,6 +74,8 @@ inline const TargetType* vega_dynamic_const_cast_ptr(const SourceType* from) {
         VS_LOG_AND_FLUSH(fatal, (boost::format("Fatal Failure to Cast type %1%* to %2%* -- nullptr encountered") % typeid(SourceType).name() % typeid(TargetType).name()));
         VSExit(-422);
     }
+    // const double end_time = realTime();
+    // VS_LOG(trace, (boost::format("%1% took %2%") % __FUNCTION__ % (end_time - start_time)));
     return ret_val;
 }
 

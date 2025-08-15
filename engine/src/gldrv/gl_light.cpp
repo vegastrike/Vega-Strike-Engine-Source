@@ -324,7 +324,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, const enum LIGHT_TARGET lt, c
 }
 
 GFXBOOL /*GFXDRVAPI*/  GFXSetLight(const int light, const enum LIGHT_TARGET lt, const Vector& vector) {
-    if (_llights->at(light).Target() == -2) {
+    if (_llights->size() < light || _llights->at(light).Target() == -2) {
         return GFXFALSE;
     }
     _llights->at(light).ResetProperties(lt, vector);

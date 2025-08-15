@@ -215,7 +215,11 @@ ClickList *StarSystem::getClickList() {
 }
 
 void ConditionalCursorDraw(bool tf) {
-    if (configuration()->physics.hardware_cursor) {
+    static boost::optional<bool> hardware_cursor;
+    if (hardware_cursor == boost::none) {
+        hardware_cursor = configuration()->physics.hardware_cursor;
+    }
+    if (hardware_cursor) {
         winsys_show_cursor(tf);
     }
 }
@@ -439,7 +443,11 @@ void StarSystem::Draw(bool DrawCockpit) {
     QVector drawstartpos = _Universe->AccessCamera()->GetPosition();
 
     Collidable key_iterator(0, 1, drawstartpos);
-    UnitWithinRangeOfPosition<UnitDrawer> drawer(configuration()->graphics.precull_dist_dbl, 0, key_iterator);
+    static boost::optional<double> precull_dist;
+    if (precull_dist == boost::none) {
+        precull_dist = configuration()->graphics.precull_dist_dbl;
+    }
+    UnitWithinRangeOfPosition<UnitDrawer> drawer(precull_dist.get(), 0, key_iterator);
     //Need to draw really big stuff (i.e. planets, deathstars, and other mind-bogglingly big things that shouldn't be culled despite extreme distance
     Unit* unit;
     if ((drawer.action.parent = _Universe->AccessCockpit()->GetParent()) != nullptr) {
@@ -447,7 +455,7 @@ void StarSystem::Draw(bool DrawCockpit) {
     }
     for (un_iter iter = this->gravitational_units.createIterator(); (unit = *iter); ++iter) {
         const double distance = (drawstartpos - unit->Position()).Magnitude() - unit->rSize();
-        if (distance < configuration()->graphics.precull_dist_dbl) {
+        if (distance < precull_dist.get()) {
             drawer.action.grav_acquire(unit);
         }
         else {
@@ -488,11 +496,15 @@ void StarSystem::Draw(bool DrawCockpit) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
     double process_mesh = realTime();
 #endif
-    if (!configuration()->graphics.draw_near_stars_in_front_of_planets) {
+    static boost::optional<bool> draw_near_stars_in_front_of_planets;
+    if (draw_near_stars_in_front_of_planets == boost::none) {
+        draw_near_stars_in_front_of_planets = configuration()->graphics.draw_near_stars_in_front_of_planets;
+    }
+    if (!draw_near_stars_in_front_of_planets) {
         stars->Draw();
     }
     Mesh::ProcessZFarMeshes();
-    if (configuration()->graphics.draw_near_stars_in_front_of_planets) {
+    if (draw_near_stars_in_front_of_planets) {
         stars->Draw();
     }
     GFXEnable(DEPTHTEST);
@@ -574,34 +586,39 @@ void NebulaUpdate(StarSystem *ss) {
 void StarSystem::createBackground(Star_XML *xml) {
 #ifdef NV_CUBE_MAP
     VS_LOG(info, "using NV_CUBE_MAP");
+    static boost::optional<int> max_cubemap_size;
+    if (max_cubemap_size == boost::none) {
+        max_cubemap_size = configuration()->graphics.max_cubemap_size;
+    }
+    max_cubemap_size = configuration()->graphics.max_cubemap_size;
     light_map[0] = new Texture((xml->backgroundname + "_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
-            GFXFALSE, configuration()->graphics.max_cubemap_size);
+                               GFXFALSE, max_cubemap_size.get());
     if (light_map[0]->LoadSuccess() && light_map[0]->isCube()) {
         light_map[1] = light_map[2] = light_map[3] = light_map[4] = light_map[5] = nullptr;
     } else {
         delete light_map[0];
         light_map[0] =
                 new Texture((xml->backgroundname + "_right.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size);
+                        GFXFALSE, max_cubemap_size.get());
         light_map[1] =
                 new Texture((xml->backgroundname + "_left.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_X,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, max_cubemap_size.get(), GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[2] =
                 new Texture((xml->backgroundname + "_up.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Y,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, max_cubemap_size.get(), GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[3] =
                 new Texture((xml->backgroundname + "_down.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Y,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, max_cubemap_size.get(), GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[4] =
                 new Texture((xml->backgroundname + "_front.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Z,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, max_cubemap_size.get(), GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[5] =
                 new Texture((xml->backgroundname + "_back.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Z,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, max_cubemap_size.get(), GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
     }
 #else
@@ -616,15 +633,23 @@ void StarSystem::createBackground(Star_XML *xml) {
     light_map[0] = new Texture( bgfile.c_str(), 1, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE );
 #endif
 
+    static boost::optional<float> zfar;
+    if (zfar == boost::none) {
+        zfar = configuration()->graphics.zfar_flt;
+    }
     background = new Background(
-            xml->backgroundname.c_str(),
-            xml->numstars,
-            configuration()->graphics.zfar_flt * 0.9F,
-            filename,
-            xml->backgroundColor,
-            xml->backgroundDegamma);
+                                                            xml->backgroundname.c_str(),
+                                                            xml->numstars,
+                                                            zfar.get() * 0.9F,
+                                                            filename,
+                                                            xml->backgroundColor,
+                                                            xml->backgroundDegamma);
     stars = new Stars(xml->numnearstars, xml->starsp);
-    stars->SetBlend(configuration()->graphics.star_blend, configuration()->graphics.star_blend);
+    static boost::optional<bool> star_blend;
+    if (star_blend == boost::none) {
+        star_blend = configuration()->graphics.star_blend;
+    }
+    stars->SetBlend(star_blend.get(), star_blend.get());
 }
 
 

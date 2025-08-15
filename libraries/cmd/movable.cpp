@@ -177,24 +177,27 @@ void Movable::UpdatePhysics(const Transformation& trans,
         //clamp velocity
         // TODO: use resource class to do this more elegantly
         ResolveForces(trans, transmat);
-        const float velocity_max = configuration()->physics.velocity_max_flt;
-        if (Velocity.i > velocity_max) {
-            Velocity.i = velocity_max;
+        static boost::optional<float> velocity_max;
+        if (velocity_max == boost::none) {
+            velocity_max = configuration()->physics.velocity_max_flt;
         }
-        else if (Velocity.i < -velocity_max) {
-            Velocity.i = -velocity_max;
+        if (Velocity.i > velocity_max.get()) {
+            Velocity.i = velocity_max.get();
         }
-        if (Velocity.j > velocity_max) {
-            Velocity.j = velocity_max;
+        else if (Velocity.i < -velocity_max.get()) {
+            Velocity.i = -velocity_max.get();
         }
-        else if (Velocity.j < -velocity_max) {
-            Velocity.j = -velocity_max;
+        if (Velocity.j > velocity_max.get()) {
+            Velocity.j = velocity_max.get();
         }
-        if (Velocity.k > velocity_max) {
-            Velocity.k = velocity_max;
+        else if (Velocity.j < -velocity_max.get()) {
+            Velocity.j = -velocity_max.get();
         }
-        else if (Velocity.k < -velocity_max) {
-            Velocity.k = -velocity_max;
+        if (Velocity.k > velocity_max.get()) {
+            Velocity.k = velocity_max.get();
+        }
+        else if (Velocity.k < -velocity_max.get()) {
+            Velocity.k = -velocity_max.get();
         }
     }
 
@@ -222,19 +225,36 @@ void Movable::AddVelocity(float difficulty) {
 
     bool playa = isPlayerShip();
 
-    float warprampuptime = playa ? configuration()->warp.warp_ramp_up_time_flt : configuration()->warp.computer_warp_ramp_up_time_flt;
+    static boost::optional<float> warp_ramp_up_time;
+    if (warp_ramp_up_time == boost::none) {
+        warp_ramp_up_time = configuration()->warp.warp_ramp_up_time_flt;
+    }
+    static boost::optional<float> computer_warp_ramp_up_time;
+    if (computer_warp_ramp_up_time == boost::none) {
+        computer_warp_ramp_up_time = configuration()->warp.computer_warp_ramp_up_time_flt;
+    }
+    static boost::optional<float> warp_ramp_down_time;
+    if (warp_ramp_down_time == boost::none) {
+        warp_ramp_down_time = configuration()->warp.warp_ramp_down_time_flt;
+    }
+    static boost::optional<float> warp_memory_effect;
+    if (warp_memory_effect == boost::none) {
+        warp_memory_effect = configuration()->warp.warp_memory_effect_flt;
+    }
+
+    float warprampuptime = playa ? warp_ramp_up_time.get() : computer_warp_ramp_up_time.get();
     //Warp Turning on/off
     if (graphicOptions.WarpRamping) {
         float oldrampcounter = graphicOptions.RampCounter;
         if (unit->ftl_drive.Enabled()) {             //Warp Turning on
             graphicOptions.RampCounter = warprampuptime;
         } else {                                        //Warp Turning off
-            graphicOptions.RampCounter = configuration()->warp.warp_ramp_down_time_flt;
+            graphicOptions.RampCounter = warp_ramp_down_time.get();
         }
         //switched mid - ramp time; we also know old mode's ramptime != 0, or there won't be ramping
         if (oldrampcounter != 0 && graphicOptions.RampCounter != 0) {
             if (unit->ftl_drive.Enabled()) {             //Warp is turning on before it turned off
-                graphicOptions.RampCounter *= (1 - oldrampcounter / configuration()->warp.warp_ramp_down_time_flt);
+                graphicOptions.RampCounter *= (1 - oldrampcounter / warp_ramp_down_time.get());
             } else {                                        //Warp is turning off before it turned on
                 graphicOptions.RampCounter *= (1 - oldrampcounter / warprampuptime);
             }
@@ -248,8 +268,8 @@ void Movable::AddVelocity(float difficulty) {
             if (graphicOptions.RampCounter <= 0) {
                 graphicOptions.RampCounter = 0;
             }
-            if (!unit->ftl_drive.Enabled() && graphicOptions.RampCounter > configuration()->warp.warp_ramp_down_time_flt) {
-                graphicOptions.RampCounter = (1 - graphicOptions.RampCounter / warprampuptime) * configuration()->warp.warp_ramp_down_time_flt;
+            if (!unit->ftl_drive.Enabled() && graphicOptions.RampCounter > warp_ramp_down_time.get()) {
+                graphicOptions.RampCounter = (1 - graphicOptions.RampCounter / warprampuptime) * warp_ramp_down_time.get();
             }
             if (unit->ftl_drive.Enabled() && graphicOptions.RampCounter > warprampuptime) {
                 graphicOptions.RampCounter = warprampuptime;
@@ -259,7 +279,7 @@ void Movable::AddVelocity(float difficulty) {
                             / warprampuptime)
                             * (graphicOptions.RampCounter
                                     / warprampuptime)) : (graphicOptions.RampCounter
-                    / configuration()->warp.warp_ramp_down_time_flt) * (graphicOptions.RampCounter / configuration()->warp.warp_ramp_down_time_flt);
+                    / warp_ramp_down_time.get()) * (graphicOptions.RampCounter / warp_ramp_down_time.get());
         }
         graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult);
     } else {
@@ -274,7 +294,7 @@ void Movable::AddVelocity(float difficulty) {
     }
 
     graphicOptions.WarpFieldStrength =
-            lastWarpField * configuration()->warp.warp_memory_effect_flt + (1.0 - configuration()->warp.warp_memory_effect_flt) * graphicOptions.WarpFieldStrength;
+            lastWarpField * warp_memory_effect.get() + (1.0 - warp_memory_effect.get()) * graphicOptions.WarpFieldStrength;
     curr_physical_state.position = curr_physical_state.position + (v * simulation_atom_var * difficulty).Cast();
     //now we do this later in update physics
     //I guess you have to, to be robust
