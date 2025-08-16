@@ -4,6 +4,9 @@
 # You may wish to alter this file to override the set of languages analyzed,
 # or to provide custom queries or build logic.
 name: CodeQL
+permissions:
+    contents: read
+    pull-requests: read
 
 on:
   push:
