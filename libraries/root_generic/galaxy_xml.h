@@ -49,18 +49,19 @@ protected:
 
 public:
     SGalaxy() {
-        subheirarchy = NULL;
+        subheirarchy = nullptr;
     }
 
-    SGalaxy(const char *configfile);
+    explicit SGalaxy(const char *configfile);
     SGalaxy(const SGalaxy &g);
-    void writeGalaxy(VSFileSystem::VSFile &f) const;
+
+    virtual void writeGalaxy(VSFileSystem::VSFile &f) const;
     void writeSector(VSFileSystem::VSFile &f, int tabs, const string &sectorType, SGalaxy *planet_types) const;
 
     void processGalaxy(const string &sys);
     void processSystem(const string &sys, const QVector &suggested_coordinates);
 
-    ~SGalaxy();
+    virtual ~SGalaxy();
     const string &getVariable(const std::vector<string> &section,
             const string &name,
             const string &default_value) const;
@@ -76,7 +77,7 @@ public:
 
     const std::string &operator[](const std::string &s) const {
         static std::string empty_string;
-        StringMap::const_iterator it = data.find(s);
+        const auto it = data.find(s);
         if (it != data.end()) {
             return it->second;
         } else {
@@ -84,6 +85,7 @@ public:
         }
     }
 };
+
 class Galaxy : public SGalaxy {
     SGalaxy *getInitialPlanetTypes();
     SGalaxy *planet_types;
@@ -95,7 +97,7 @@ public:
 
     const string &getPlanetNameFromInitial(const string &abbrev) const {
         static std::string empty_string;
-        StringMap::const_iterator it = initial2name.find(abbrev);
+        const auto it = initial2name.find(abbrev);
         if (it != initial2name.end()) {
             return it->second;
         } else {
@@ -105,7 +107,7 @@ public:
 
     const string &getPlanetNameFromTexture(const string &tex) const {
         static std::string empty_string;
-        StringMap::const_iterator it = texture2name.find(tex);
+        const auto it = texture2name.find(tex);
         if (it != texture2name.end()) {
             return it->second;
         } else {
@@ -115,19 +117,21 @@ public:
 
     const string &getPlanetVariable(const string &name, const string &defaultvalue) const;
     const string &getPlanetVariable(const string &planet, const string &name, const string &defaultvalue) const;
-    void writeGalaxy(VSFileSystem::VSFile &f) const;
+    void writeGalaxy(VSFileSystem::VSFile &f) const override;
     SGalaxy *getPlanetTypes();
     bool setPlanetVariable(const string &name, const string &value);
     void addPlanetSection(const std::vector<string> &section);
     bool setPlanetVariable(const string &planet, const string &name, const string &value);
 
     Galaxy() {
-        subheirarchy = NULL;
-        planet_types = NULL;
+        subheirarchy = nullptr;
+        planet_types = nullptr;
     }
 
-    Galaxy(const char *configfile);
-    Galaxy(const SGalaxy &g);
+    explicit Galaxy(const char *configfile);
+    explicit Galaxy(const SGalaxy &g);
+
+    ~Galaxy() override;
 };
 
 class SubHeirarchy : public vsUMap<std::string, class SGalaxy> {};

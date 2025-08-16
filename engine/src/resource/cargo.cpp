@@ -54,7 +54,7 @@ Cargo::Cargo(): Product() {
 
 Cargo::Cargo(std::string name, std::string category, float price, int quantity,
              float mass, float volume, float functionality, float max_functionality,
-             bool mission, bool component, bool installed, bool integral, 
+             bool mission, bool component, bool installed, bool integral,
              bool weapon, bool passenger, bool slave):
              Product(name, quantity, price), category(category), description(""),
              mass(mass), volume(volume), functionality(functionality),
@@ -94,13 +94,13 @@ Cargo::Cargo(std::string& cargo_text) {
         case 7: break; // max_functionality is always 1.0. cargo_parts[6] not used.
         case 8: description = cargo_parts[8]; break;
         case 9: mission = _parse_bool(cargo_parts[9]); break;
-        case 10: installed = component = _parse_bool(cargo_parts[10]); break;
+        case 10: installed = _parse_bool(cargo_parts[10]); break;
         case 11: integral = _parse_bool(cargo_parts[11]); break;
         case 12: component = _parse_bool(cargo_parts[12]); break;
         case 13: weapon = _parse_bool(cargo_parts[13]); break;
         case 14: passenger = _parse_bool(cargo_parts[14]); break;
         case 15: slave = _parse_bool(cargo_parts[15]); break;
-        
+
         default:
             break;
         }
@@ -111,7 +111,7 @@ std::string Cargo::Serialize() const {
     return (boost::format("{%s;%s;%f;%d;%f;%f;%f;%f;%s;%d;%d;%d;%d;%d;%d;%d}")
         % this->name % this->category % this->price % this->quantity.Value() % this->mass
         % this->volume % this->functionality % 1.0 % this->description % this->mission
-        % this->installed % this->integral % this->component % this->weapon % 
+        % this->installed % this->integral % this->component % this->weapon %
         this->passenger % this->slave
     ).str();
 }
@@ -180,8 +180,8 @@ bool Cargo::IsMissionFlag() const {
     return mission;
 }
 
-bool Cargo::IsComponent() const { 
-    return component; 
+bool Cargo::IsComponent() const {
+    return component;
 }
 
 bool Cargo::IsInstalled() const {
@@ -192,16 +192,16 @@ bool Cargo::IsIntegral() const {
     return integral;
 }
 
-bool Cargo::IsWeapon() const { 
-    return weapon; 
+bool Cargo::IsWeapon() const {
+    return weapon;
 }
 
-bool Cargo::IsPassenger() const { 
-    return passenger; 
+bool Cargo::IsPassenger() const {
+    return passenger;
 }
 
-bool Cargo::IsSlave() const { 
-    return slave; 
+bool Cargo::IsSlave() const {
+    return slave;
 }
 
 const std::string &Cargo::GetCategory() const {
@@ -285,7 +285,7 @@ void Enslave(std::vector<Cargo>& ship_manifest) {
     }
 
     // Delete all passengers
-    ship_manifest.erase(std::remove_if(ship_manifest.begin(), ship_manifest.end(), 
+    ship_manifest.erase(std::remove_if(ship_manifest.begin(), ship_manifest.end(),
             [](Cargo& c) {
         return (c.IsPassenger() && !c.IsSlave());
     }), ship_manifest.end());
@@ -299,7 +299,7 @@ void Enslave(std::vector<Cargo>& ship_manifest) {
     if (it != ship_manifest.end()) {
         // Found slaves
         // Get a pointer to the found element
-        Cargo* existing_slaves = &(*it); 
+        Cargo* existing_slaves = &(*it);
         existing_slaves->Add(none_slave_passengers);
     } else {
         // Not found. Create a new instance
@@ -331,7 +331,7 @@ void Free(std::vector<Cargo>& ship_manifest) {
     // No hitchhikers found, modify slaves instance.
     if (hitch_it == ship_manifest.end()) {
         // TODO: name should come from config.
-        Cargo* existing_slaves = &(*slave_it); 
+        Cargo* existing_slaves = &(*slave_it);
         existing_slaves->SetName("Hitchhiker");
         existing_slaves->SetCategory("Passengers");
     } else {
@@ -340,6 +340,6 @@ void Free(std::vector<Cargo>& ship_manifest) {
         existing_hitchhikers->Add(existing_slaves->GetQuantity());
         ship_manifest.erase(slave_it);
     }
-    
+
 }
 

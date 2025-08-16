@@ -701,16 +701,16 @@ public:
     int target;
 ///last is w for positional, otherwise 3 for spec
     int options;
-    float vect[3];
-    float diffuse[4];
-    float specular[4];
-    float ambient[4];
-    float attenuate[3];
-    float direction[3];
+    float vect[3]{};
+    float diffuse[4]{};
+    float specular[4]{};
+    float ambient[4]{};
+    float attenuate[3]{};
+    float direction[3]{};
     float exp;
     float cutoff;
     float size;
-    float occlusion;
+    float occlusion{};
 
 public:
     GFXLight() {
@@ -772,6 +772,8 @@ public:
         occlusion = other.occlusion;
         options = other.options;
     };
+
+    virtual ~GFXLight() = default;
 
     void SetProperties(enum LIGHT_TARGET light_target, const GFXColor &color);
     void SetProperties(enum LIGHT_TARGET light_target, const Vector &vector);

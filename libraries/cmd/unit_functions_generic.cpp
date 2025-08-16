@@ -104,11 +104,11 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
     int killedCp = _Universe->whichPlayerStarship(killedUnit);
     int killerCp = killedCp;
     if (killedCp != -1) {
-        UniverseUtil::adjustRelationModifierInt(killedCp, un->faction, configuration()->ai.kill_factor);
+        UniverseUtil::adjustRelationModifierInt(killedCp, un->faction, configuration()->ai.kill_factor_flt);
     } else {
         killerCp = _Universe->whichPlayerStarship(un);
         if (killerCp != -1) {
-            UniverseUtil::adjustRelationModifierInt(killerCp, killedUnit->faction, configuration()->ai.kill_factor);
+            UniverseUtil::adjustRelationModifierInt(killerCp, killedUnit->faction, configuration()->ai.kill_factor_flt);
         }
     }
     int faction = killedUnit->faction;
@@ -121,7 +121,7 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
             }
             if (relation != 0.0F) {
                 if (killerCp != -1) {
-                    UniverseUtil::adjustRelationModifierInt(killerCp, i, configuration()->ai.friend_factor * relation);
+                    UniverseUtil::adjustRelationModifierInt(killerCp, i, configuration()->ai.friend_factor_flt * relation);
                 }
             }
         }
@@ -158,13 +158,13 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
 
 
 float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false) {
-    const float friendly_autodist = configuration()->physics.friendly_auto_radius;
-    const float neutral_autodist = configuration()->physics.neutral_auto_radius;
-    const float hostile_autodist = configuration()->physics.hostile_auto_radius;
+    const float friendly_autodist = configuration()->physics.friendly_auto_radius_flt;
+    const float neutral_autodist = configuration()->physics.neutral_auto_radius_flt;
+    const float hostile_autodist = configuration()->physics.hostile_auto_radius_flt;
     int upgradefaction = FactionUtil::GetUpgradeFaction();
     int neutral = FactionUtil::GetNeutralFaction();
     if (un->getUnitType() == Vega_UnitType::asteroid) {
-        return configuration()->physics.min_asteroid_distance;
+        return configuration()->physics.min_asteroid_distance_flt;
     }
     if (un->getUnitType() == Vega_UnitType::planet
             || (un->getFlightgroup() == orig->getFlightgroup() && orig->getFlightgroup())) {
@@ -242,8 +242,8 @@ int parseMountSizes(const char *str) {
 }
 
 void DealPossibleJumpDamage(Unit *un) {
-    const double jump_damage_multiplier = configuration()->physics.jump_damage_multiplier;
-    const double max_damage = configuration()->physics.max_jump_damage;
+    const double jump_damage_multiplier = configuration()->physics.jump_damage_multiplier_dbl;
+    const double max_damage = configuration()->physics.max_jump_damage_dbl;
 
     // Also damage multiplier
     double chance_to_damage = randomDouble() - 0.01;

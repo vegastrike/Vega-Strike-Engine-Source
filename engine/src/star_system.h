@@ -32,8 +32,6 @@
 #include "cmd/container.h"
 
 #include "gfx_generic/vec.h"
-#include "src/gfxlib.h"
-#include "src/gfxlib_struct.h"
 
 #include "src/star_xml.h"
 
@@ -61,7 +59,7 @@ class Unit;
 class Universe;
 class StarSystem;
 
-const unsigned int SIM_QUEUE_SIZE = 128;
+constexpr unsigned int SIM_QUEUE_SIZE = 128;
 bool PendingJumpsEmpty();
 
 struct Statistics {
@@ -94,7 +92,7 @@ class StarSystem {
 public:
     Statistics stats;
     std::multimap<Unit *, Unit *> last_collisions;
-    CollideMap *collide_map[2]; // 0 Unit 1 Bolt
+    CollideMap *collide_map[2]{}; // 0 Unit 1 Bolt
     class CollideTable *collide_table = nullptr;
 
 protected:
@@ -129,19 +127,19 @@ protected:
     unsigned char no_collision_time = 0;
 
     unsigned int zone = 0; //short fix - TODO: figure out for what
-    int light_context;
+    int light_context{};
     vector<class MissileEffect *> discharged_missiles;
 
     ///Starsystem XML Struct For use with XML loading
-    Star_XML *xml;
+    Star_XML *xml{};
 
     ///The background associated with this system
     Background *background = nullptr;
     ///The Light Map corresponding for the BP for spheremapping
-    Texture *light_map[6];
+    Texture *light_map[6]{};
 public:
     // Constructors
-    StarSystem(const string filename, const Vector &centroid = Vector(0, 0, 0), const float timeofyear = 0);
+    explicit StarSystem(const string filename, const Vector &centroid = Vector(0, 0, 0), const float timeofyear = 0);
     virtual ~StarSystem();
     friend class Universe;
 

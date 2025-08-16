@@ -48,10 +48,10 @@ CRadar::CRadar():
         locked(false),
         can_lock(false),
         tracking_active(true) {
-    long default_max_range = configuration()->components.computer.default_max_range;
+    long default_max_range = static_cast<long>(configuration()->components.computer.default_max_range_dbl);
     max_range = Resource<long>(default_max_range,0,default_max_range);
-    tracking_cone = configuration()->components.computer.default_tracking_cone;
-    lock_cone = configuration()->components.computer.default_lock_cone;
+    tracking_cone = configuration()->components.computer.default_tracking_cone_dbl;
+    lock_cone = configuration()->components.computer.default_lock_cone_dbl;
 }
 
 CRadar::~CRadar()

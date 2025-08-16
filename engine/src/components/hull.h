@@ -38,8 +38,8 @@ public:
     Hull();
 
     // Component Methods
-    void Load(std::string unit_key) override;      
-    
+    void Load(std::string unit_key) override;
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const;
 
     bool CanDowngrade() const override;
@@ -55,12 +55,13 @@ public:
     double Percent() const;
     bool Damaged() const override;
     void Repair() override;
-    
+
     void Destroy() override;
 
     double Get();
     double GetMax();
     void Set(double value);
+    ~Hull() override = default;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_HULL_H

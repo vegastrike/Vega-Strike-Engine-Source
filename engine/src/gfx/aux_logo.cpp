@@ -157,8 +157,8 @@ void Logo::ProcessDrawQueue() {
     if (!g_game.use_logos || draw_queue->empty()) {
         return;
     }
-    const float offs = configuration()->graphics.logo_offset;
-    const float scl = configuration()->graphics.logo_offset_scale;
+    const float offs = configuration()->graphics.logo_offset_flt;
+    const float scl = configuration()->graphics.logo_offset_scale_flt;
 
     GFXEnable(TEXTURE0);
     GFXEnable(TEXTURE1);

@@ -29,7 +29,7 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include <assert.h>
+#include <cassert>
 #include "src/star_system.h"
 
 #include "root_generic/lin_time.h"
@@ -81,6 +81,7 @@
 #include "gfx_generic/cockpit_generic.h"
 
 #include <boost/python/errors.hpp>
+#include <utility>
 
 using std::endl;
 
@@ -160,7 +161,7 @@ StarSystem::~StarSystem() {
         }
         _Universe->popActiveStarSystem();
     }
-    while (activ.size()) {
+    while (!activ.empty()) {
         _Universe->pushActiveStarSystem(activ.back());
         activ.pop_back();
     }
@@ -214,7 +215,11 @@ ClickList *StarSystem::getClickList() {
 }
 
 void ConditionalCursorDraw(bool tf) {
-    if (configuration()->physics.hardware_cursor) {
+    static boost::optional<bool> hardware_cursor;
+    if (hardware_cursor == boost::none) {
+        hardware_cursor = configuration()->physics.hardware_cursor;
+    }
+    if (hardware_cursor) {
         winsys_show_cursor(tf);
     }
 }
@@ -301,55 +306,103 @@ public:
 #define UPDATEDEBUG  //for hard to track down bugs
 
 void StarSystem::Draw(bool DrawCockpit) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double start_time = realTime();
+#endif
     GFXEnable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
     saved_interpolation_blend_factor = interpolation_blend_factor =
-            (1. / PHY_NUM) * ((PHY_NUM * time) / static_cast<double>(simulation_atom_var) + current_stage);
+        (1. / PHY_NUM) * ((PHY_NUM * time) / static_cast<double>(simulation_atom_var) + current_stage);
     GFXColor4f(1, 1, 1, 1);
     if (DrawCockpit) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double b4_update_all_frame = realTime();
+#endif
         AnimatedTexture::UpdateAllFrame();
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double after_update_all_frame = realTime();
+        VS_LOG(trace,
+               (boost::format("%1%: Time taken by AnimatedTexture::UpdateAllFrame(): %2%") % __FUNCTION__ % (
+                   after_update_all_frame - b4_update_all_frame)));
+#endif
     }
-    for (auto & continuous_terrain : continuous_terrains) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double b4_continuous_terrain_adjust_terrain = realTime();
+#endif
+    for (auto& continuous_terrain : continuous_terrains) {
         continuous_terrain->AdjustTerrain(this);
     }
-    Unit *par;
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_continuous_terrain_adjust_terrain = realTime();
+    VS_LOG(trace,
+           (boost::format("%1%: Time taken by continuous_terrain->AdjustTerrain(this) loop: %2%") % __FUNCTION__ % (
+               after_continuous_terrain_adjust_terrain - b4_continuous_terrain_adjust_terrain)));
+#endif
+    Unit* par;
     if ((par = _Universe->AccessCockpit()->GetParent()) == nullptr) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double b4_universe_access_camera_update_gfx = realTime();
+#endif
         _Universe->AccessCamera()->UpdateGFX(GFXTRUE);
-    } else if (!par->isSubUnit()) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double after_universe_access_camera_update_gfx = realTime();
+        VS_LOG(trace,
+               (boost::format("%1%: Time taken by _Universe->AccessCamera()->UpdateGFX(GFXTRUE): %2%") % __FUNCTION__ %
+                   (after_universe_access_camera_update_gfx - b4_universe_access_camera_update_gfx)));
+#endif
+    }
+    else if (!par->isSubUnit()) {
         //now we can assume world is topps
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double b4_linear_interpolation = realTime();
+#endif
         par->cumulative_transformation = linear_interpolate(par->prev_physical_state,
-                par->curr_physical_state,
-                interpolation_blend_factor);
-        Unit *targ = par->Target();
+                                                            par->curr_physical_state,
+                                                            interpolation_blend_factor);
+        Unit* targ = par->Target();
         if (targ && !targ->isSubUnit()) {
             targ->cumulative_transformation = linear_interpolate(targ->prev_physical_state,
-                    targ->curr_physical_state,
-                    interpolation_blend_factor);
+                                                                 targ->curr_physical_state,
+                                                                 interpolation_blend_factor);
         }
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double after_linear_interpolation = realTime();
+        VS_LOG(trace,
+               (boost::format("%1%: Time taken by cumulative transformations / linear interpolations: %2%") %
+                   __FUNCTION__ % (after_linear_interpolation - b4_linear_interpolation)));
+#endif
         _Universe->AccessCockpit()->SetupViewPort(true);
+#if defined(LOG_TIME_TAKEN_DETAILS)
+        const double after_viewport_update_gfx = realTime();
+        VS_LOG(trace,
+               (boost::format("%1%: Time taken by _Universe->AccessCockpit()->SetupViewPort(true): %2%") % __FUNCTION__
+                   % (after_viewport_update_gfx - after_linear_interpolation)));
+#endif
     }
-    double setupdrawtime = realTime();
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    double setup_draw_time = realTime();
+#endif
     {
         cam_setup_phase = true;
 
-        Unit *saveparent = _Universe->AccessCockpit()->GetSaveParent();
-        Unit *targ = nullptr;
+        Unit* saveparent = _Universe->AccessCockpit()->GetSaveParent();
+        Unit* targ = nullptr;
         if (saveparent) {
             targ = saveparent->Target();
         }
         //Array containing the two interesting units, so as not to have to copy-paste code
-        Unit *camunits[2] = {saveparent, targ};
+        Unit* camunits[2] = {saveparent, targ};
         const float backup = simulation_atom_var;
         const unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         //VS_LOG(trace, (boost::format("StarSystem::Draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var));
         for (int i = 0; i < 2; ++i) {
-            Unit *unit = camunits[i];
+            Unit* unit = camunits[i];
             //Make sure unit is not null;
             if (unit && !unit->isSubUnit()) {
                 interpolation_blend_factor = calc_blend_factor(saved_interpolation_blend_factor,
-                        unit->sim_atom_multiplier,
-                        unit->cur_sim_queue_slot,
-                        cur_sim_frame);
+                                                               unit->sim_atom_multiplier,
+                                                               unit->cur_sim_queue_slot,
+                                                               cur_sim_frame);
                 // stephengtuggy 2020-07-25 - Should we just use the standard SIMULATION_ATOM here?
                 simulation_atom_var = backup * unit->sim_atom_multiplier;
                 //VS_LOG(trace, (boost::format("StarSystem::Draw(): simulation_atom_var as multiplied = %1%") % simulation_atom_var));
@@ -367,10 +420,20 @@ void StarSystem::Draw(bool DrawCockpit) {
 
         cam_setup_phase = false;
     }
-    setupdrawtime = realTime() - setupdrawtime;
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    setup_draw_time = realTime() - setup_draw_time;
+    VS_LOG(trace, (boost::format("%1%: Time taken by cam setup phase: %2%") % __FUNCTION__ % setup_draw_time));
+    const double b4_background_draw = realTime();
+#endif
     GFXDisable(LIGHTING);
     background->Draw();
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_background_draw = realTime();
+    VS_LOG(trace,
+           (boost::format("%1%: Time taken by background->Draw(): %2%") % __FUNCTION__ % (after_background_draw -
+               b4_background_draw)));
     double drawtime = realTime();
+#endif
 
     // Initialize occluder system (we'll populate it during unit render)
     Occlusion::start();
@@ -380,42 +443,68 @@ void StarSystem::Draw(bool DrawCockpit) {
     QVector drawstartpos = _Universe->AccessCamera()->GetPosition();
 
     Collidable key_iterator(0, 1, drawstartpos);
-    UnitWithinRangeOfPosition<UnitDrawer> drawer(configuration()->graphics.precull_dist, 0, key_iterator);
-    //Need to draw really big stuff (i.e. planets, deathstars, and other mind-bogglingly big things that shouldn't be culled despited extreme distance
-    Unit *unit;
+    static boost::optional<double> precull_dist;
+    if (precull_dist == boost::none) {
+        precull_dist = configuration()->graphics.precull_dist_dbl;
+    }
+    UnitWithinRangeOfPosition<UnitDrawer> drawer(precull_dist.get(), 0, key_iterator);
+    //Need to draw really big stuff (i.e. planets, deathstars, and other mind-bogglingly big things that shouldn't be culled despite extreme distance
+    Unit* unit;
     if ((drawer.action.parent = _Universe->AccessCockpit()->GetParent()) != nullptr) {
         drawer.action.parenttarget = drawer.action.parent->Target();
     }
     for (un_iter iter = this->gravitational_units.createIterator(); (unit = *iter); ++iter) {
-        float distance = (drawstartpos - unit->Position()).Magnitude() - unit->rSize();
-        if (distance < configuration()->graphics.precull_dist) {
+        const double distance = (drawstartpos - unit->Position()).Magnitude() - unit->rSize();
+        if (distance < precull_dist.get()) {
             drawer.action.grav_acquire(unit);
-        } else {
+        }
+        else {
             drawer.action.draw(unit);
         }
     }
     //Need to get iterator to approx camera position
     CollideMap::iterator parent = collide_map[Unit::UNIT_ONLY]->lower_bound(key_iterator);
     findObjectsFromPosition(this->collide_map[Unit::UNIT_ONLY], parent, &drawer, drawstartpos, 0, true);
-    drawer.action.drawParents();     //draw units targeted by camera
+    drawer.action.drawParents(); //draw units targeted by camera
     //FIXME  maybe we could do bolts & units instead of unit only--and avoid bolt drawing step
 
+#if defined(LOG_TIME_TAKEN_DETAILS)
     drawtime = realTime() - drawtime;
+    VS_LOG(trace, (boost::format("%1%: Time taken by drawing: %2%") % __FUNCTION__ % drawtime));
+    const double b4_warp_trail_draw = realTime();
+#endif
     WarpTrailDraw();
-
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_warp_trail_draw = realTime();
+    VS_LOG(trace,
+           (boost::format("%1%: Time taken by WarpTrailDraw(): %2%") % __FUNCTION__ % (after_warp_trail_draw -
+               b4_warp_trail_draw)));
+#endif
     GFXFogMode(FOG_OFF);
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_gfx_fog_mode = realTime();
+    VS_LOG(trace,
+           (boost::format("%1%: Time taken by GFXFogMode(FOG_OFF): %2%") % __FUNCTION__ % (after_gfx_fog_mode -
+               after_warp_trail_draw)));
+#endif
 
     // At this point, we've set all occluders
     // Mesh::ProcessXMeshes will query it
 
     GFXColor tmpcol(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
-    double processmesh = realTime();
-    if (!configuration()->graphics.draw_near_stars_in_front_of_planets) {
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    double process_mesh = realTime();
+#endif
+    static boost::optional<bool> draw_near_stars_in_front_of_planets;
+    if (draw_near_stars_in_front_of_planets == boost::none) {
+        draw_near_stars_in_front_of_planets = configuration()->graphics.draw_near_stars_in_front_of_planets;
+    }
+    if (!draw_near_stars_in_front_of_planets) {
         stars->Draw();
     }
     Mesh::ProcessZFarMeshes();
-    if (configuration()->graphics.draw_near_stars_in_front_of_planets) {
+    if (draw_near_stars_in_front_of_planets) {
         stars->Draw();
     }
     GFXEnable(DEPTHTEST);
@@ -424,8 +513,12 @@ void StarSystem::Draw(bool DrawCockpit) {
     Planet::ProcessTerrains();
     Terrain::RenderAll();
     Mesh::ProcessUndrawnMeshes(true);
-    processmesh = realTime() - processmesh;
-    Nebula *neb;
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    process_mesh = realTime() - process_mesh;
+    VS_LOG(trace, (boost::format("%1%: Time taken by mesh processing: %2%") % __FUNCTION__ % process_mesh));
+    const double b4_wrapup = realTime();
+#endif
+    Nebula* neb;
 
     Matrix ident;
     Identity(ident);
@@ -452,6 +545,11 @@ void StarSystem::Draw(bool DrawCockpit) {
 
     // And now we're done with the occluder set
     Occlusion::end();
+#if defined(LOG_TIME_TAKEN_DETAILS)
+    const double after_wrapup = realTime();
+    VS_LOG(trace, (boost::format("%1%: Time taken by wrap up: %2%") % __FUNCTION__ % (after_wrapup - b4_wrapup)));
+    VS_LOG(trace, (boost::format("%1%: Total time taken: %2%") % __FUNCTION__ % (after_wrapup - start_time)));
+#endif
 }
 
 extern void update_ani_cache();
@@ -488,34 +586,39 @@ void NebulaUpdate(StarSystem *ss) {
 void StarSystem::createBackground(Star_XML *xml) {
 #ifdef NV_CUBE_MAP
     VS_LOG(info, "using NV_CUBE_MAP");
+    static boost::optional<int> max_cubemap_size;
+    if (max_cubemap_size == boost::none) {
+        max_cubemap_size = configuration()->graphics.max_cubemap_size;
+    }
+    max_cubemap_size = configuration()->graphics.max_cubemap_size;
     light_map[0] = new Texture((xml->backgroundname + "_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
-            GFXFALSE, configuration()->graphics.max_cubemap_size);
+                               GFXFALSE, max_cubemap_size.get());
     if (light_map[0]->LoadSuccess() && light_map[0]->isCube()) {
-        light_map[1] = light_map[2] = light_map[3] = light_map[4] = light_map[5] = 0;
+        light_map[1] = light_map[2] = light_map[3] = light_map[4] = light_map[5] = nullptr;
     } else {
         delete light_map[0];
         light_map[0] =
                 new Texture((xml->backgroundname + "_right.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size);
+                        GFXFALSE, max_cubemap_size.get());
         light_map[1] =
                 new Texture((xml->backgroundname + "_left.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_X,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, max_cubemap_size.get(), GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[2] =
                 new Texture((xml->backgroundname + "_up.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Y,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, max_cubemap_size.get(), GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[3] =
                 new Texture((xml->backgroundname + "_down.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Y,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, max_cubemap_size.get(), GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[4] =
                 new Texture((xml->backgroundname + "_front.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Z,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, max_cubemap_size.get(), GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[5] =
                 new Texture((xml->backgroundname + "_back.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Z,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, max_cubemap_size.get(), GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
     }
 #else
@@ -530,15 +633,23 @@ void StarSystem::createBackground(Star_XML *xml) {
     light_map[0] = new Texture( bgfile.c_str(), 1, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE );
 #endif
 
+    static boost::optional<float> zfar;
+    if (zfar == boost::none) {
+        zfar = configuration()->graphics.zfar_flt;
+    }
     background = new Background(
-            xml->backgroundname.c_str(),
-            xml->numstars,
-            configuration()->graphics.zfar * .9,
-            filename,
-            xml->backgroundColor,
-            xml->backgroundDegamma);
+                                                            xml->backgroundname.c_str(),
+                                                            xml->numstars,
+                                                            zfar.get() * 0.9F,
+                                                            filename,
+                                                            xml->backgroundColor,
+                                                            xml->backgroundDegamma);
     stars = new Stars(xml->numnearstars, xml->starsp);
-    stars->SetBlend(configuration()->graphics.star_blend, configuration()->graphics.star_blend);
+    static boost::optional<bool> star_blend;
+    if (star_blend == boost::none) {
+        star_blend = configuration()->graphics.star_blend;
+    }
+    stars->SetBlend(star_blend.get(), star_blend.get());
 }
 
 
@@ -559,13 +670,13 @@ void TentativeJumpTo(StarSystem *ss, Unit *un, Unit *jumppoint, const std::strin
 
 float ScaleJumpRadius(float radius) {
     //need this because sys scale doesn't affect j-point size
-    radius *= configuration()->physics.jump_radius_scale * configuration()->physics.game_speed;
+    radius *= configuration()->physics.jump_radius_scale_flt * configuration()->physics.game_speed_flt;
     return radius;
 }
 
 /********* FROM STAR SYSTEM XML *********/
 void setStaticFlightgroup(vector<Flightgroup *> &fg, const std::string &nam, int faction) {
-    while (faction >= (int) fg.size()) {
+    while (faction >= static_cast<int>(fg.size())) {
         fg.push_back(new Flightgroup());
         fg.back()->nr_ships = 0;
     }
@@ -786,8 +897,8 @@ void Statistics::CheckVitals(StarSystem *ss) {
         }
     }
     if (checkIter >= sortedsize && sortedsize
-            > (unsigned int) (enemycount + neutralcount + friendlycount
-                    + citizencount) / 4 /*suppose at least 1/4 survive a given frame*/) {
+            > static_cast<unsigned int>(enemycount + neutralcount + friendlycount
+                + citizencount) / 4 /*suppose at least 1/4 survive a given frame*/) {
         citizencount = newcitizencount;
         newcitizencount = 0;
         enemycount = newenemycount;
@@ -813,7 +924,7 @@ void Statistics::AddUnit(Unit *un) {
             ++neutralcount;
         }
     }
-    if (un->GetDestinations().size()) {
+    if (!un->GetDestinations().empty()) {
         jumpPoints[un->GetDestinations()[0]].SetUnit(un);
     }
     if (UnitUtil::isSignificant(un)) {
@@ -828,7 +939,7 @@ void Statistics::AddUnit(Unit *un) {
         if (UnitUtil::isAsteroid(un)) {
             k = 2;
         }
-        navs[k].push_back(UnitContainer(un));
+        navs[k].emplace_back(un);
     }
 }
 
@@ -845,7 +956,7 @@ void Statistics::RemoveUnit(Unit *un) {
             --neutralcount;
         }
     }
-    if (un->GetDestinations().size()) {
+    if (!un->GetDestinations().empty()) {
         //make sure it is there
         jumpPoints[(un->GetDestinations()[0])].SetUnit(nullptr);
         //kill it--stupid I know--but hardly time critical
@@ -1151,9 +1262,9 @@ void StarSystem::Update(float priority, bool executeDirector) {
     if (time > simulation_atom_var) {
         if (time > simulation_atom_var * 2) {
             VS_LOG(trace,
-                    (boost::format(
-                            "%1% %2%: time, %3$.6f, is more than twice simulation_atom_var, %4$.6f")
-                            % __FILE__ % __LINE__ % time % simulation_atom_var));
+                   (boost::format(
+                           "%1% %2%: time, %3$.6f, is more than twice simulation_atom_var, %4$.6f")
+                       % __FILE__ % __LINE__ % time % simulation_atom_var));
         }
 
 #if defined(LOG_TIME_TAKEN_DETAILS)
@@ -1172,13 +1283,13 @@ void StarSystem::Update(float priority, bool executeDirector) {
             VS_LOG(trace, "void StarSystem::Update( float priority, bool executeDirector ): Chewing up a sim atom");
             if (current_stage == MISSION_SIMULATION) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
-                double missionSimulationStageStartTime = realTime();
+                const double missionSimulationStageStartTime = realTime();
 #endif
                 TerrainCollide();
                 UpdateAnimatedTexture();
                 Unit::ProcessDeleteQueue();
                 if ((run_only_player_starsystem
-                        && _Universe->getActiveStarSystem(0) == this) || !run_only_player_starsystem) {
+                    && _Universe->getActiveStarSystem(0) == this) || !run_only_player_starsystem) {
                     if (executeDirector) {
                         ExecuteDirector();
                     }
@@ -1194,23 +1305,27 @@ void StarSystem::Update(float priority, bool executeDirector) {
                     active_missions[i]->BriefingUpdate();
                 }
 #if defined(LOG_TIME_TAKEN_DETAILS)
-                double missionSimulationStageEndTime = realTime();
+                const double missionSimulationStageEndTime = realTime();
                 missionSimulationTimeSubtotal += (missionSimulationStageEndTime - missionSimulationStageStartTime);
-                VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Time taken by MISSION_SIMULATION stage: %1%") % (missionSimulationStageEndTime - missionSimulationStageStartTime)));
+                VS_LOG(trace,
+                       (boost::format(
+                           "void StarSystem::Update( float priority, bool executeDirector ): Time taken by MISSION_SIMULATION stage: %1%"
+                       ) % (missionSimulationStageEndTime - missionSimulationStageStartTime)));
 #endif
                 current_stage = PROCESS_UNIT;
-            } else if (current_stage == PROCESS_UNIT) {
+            }
+            else if (current_stage == PROCESS_UNIT) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
-                double processUnitStageStartTime = realTime();
+                const double processUnitStageStartTime = realTime();
 #endif
                 UpdateUnitsPhysics(firstframe);
 #if defined(LOG_TIME_TAKEN_DETAILS)
-                double updateUnitsPhysicsDoneTime = realTime();
+                const double updateUnitsPhysicsDoneTime = realTime();
                 updateUnitsPhysicsTimeSubtotal += (updateUnitsPhysicsDoneTime - processUnitStageStartTime);
 #endif
                 UpdateMissiles(); //do explosions
 #if defined(LOG_TIME_TAKEN_DETAILS)
-                double updateMissilesDoneTime = realTime();
+                const double updateMissilesDoneTime = realTime();
                 updateMissilesTimeSubtotal += (updateMissilesDoneTime - updateUnitsPhysicsDoneTime);
 #endif
                 collide_table->Update();
@@ -1227,7 +1342,10 @@ void StarSystem::Update(float priority, bool executeDirector) {
                 double processUnitStageEndTime = realTime();
                 processUnitTimeSubtotal += (processUnitStageEndTime - processUnitStageStartTime);
                 updateCameraSoundsTimeSubtotal += (processUnitStageEndTime - collideTableUpdateDoneTime);
-                VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Time taken by PROCESS_UNIT stage: %1%") % (processUnitStageEndTime - processUnitStageStartTime)));
+                VS_LOG(trace,
+                       (boost::format(
+                           "void StarSystem::Update( float priority, bool executeDirector ): Time taken by PROCESS_UNIT stage: %1%"
+                       ) % (processUnitStageEndTime - processUnitStageStartTime)));
 #endif
                 current_stage = MISSION_SIMULATION;
                 firstframe = false;
@@ -1236,15 +1354,27 @@ void StarSystem::Update(float priority, bool executeDirector) {
         }
 
 #if defined(LOG_TIME_TAKEN_DETAILS)
-        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by MISSION_SIMULATION: %3%") % __FILE__ % __LINE__ % missionSimulationTimeSubtotal));
-        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by PROCESS_UNIT: %3%") % __FILE__ % __LINE__ % processUnitTimeSubtotal));
+        VS_LOG(trace,
+               (boost::format("%1% %2%: Subtotal of time taken by MISSION_SIMULATION: %3%") % __FILE__ % __LINE__ %
+                   missionSimulationTimeSubtotal));
+        VS_LOG(trace,
+               (boost::format("%1% %2%: Subtotal of time taken by PROCESS_UNIT: %3%") % __FILE__ % __LINE__ %
+                   processUnitTimeSubtotal));
 
-        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating units' physics: %3%") % __FILE__ % __LINE__ % updateUnitsPhysicsTimeSubtotal));
-        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating missiles: %3%") % __FILE__ % __LINE__ % updateMissilesTimeSubtotal));
-        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating collide tables: %3%") % __FILE__ % __LINE__ % collideTableUpdateTimeSubtotal));
-        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating camera sounds: %3%") % __FILE__ % __LINE__ % updateCameraSoundsTimeSubtotal));
+        VS_LOG(trace,
+               (boost::format("%1% %2%: Subtotal of time taken by updating units' physics: %3%") % __FILE__ % __LINE__ %
+                   updateUnitsPhysicsTimeSubtotal));
+        VS_LOG(trace,
+               (boost::format("%1% %2%: Subtotal of time taken by updating missiles: %3%") % __FILE__ % __LINE__ %
+                   updateMissilesTimeSubtotal));
+        VS_LOG(trace,
+               (boost::format("%1% %2%: Subtotal of time taken by updating collide tables: %3%") % __FILE__ % __LINE__ %
+                   collideTableUpdateTimeSubtotal));
+        VS_LOG(trace,
+               (boost::format("%1% %2%: Subtotal of time taken by updating camera sounds: %3%") % __FILE__ % __LINE__ %
+                   updateCameraSoundsTimeSubtotal));
 
-        double cycleThroughPlayersStartTime = realTime();
+        const double cycleThroughPlayersStartTime = realTime();
 #endif
 
         unsigned int i = _Universe->CurrentCockpit();
@@ -1263,13 +1393,16 @@ void StarSystem::Update(float priority, bool executeDirector) {
         }
         _Universe->SetActiveCockpit(i);
 #if defined(LOG_TIME_TAKEN_DETAILS)
-        double cycleThroughPlayersEndTime = realTime();
-        VS_LOG(trace, (boost::format("%1% %2%: Time taken by cycling through active players / cockpits: %3%") % __FILE__ % __LINE__ % (cycleThroughPlayersEndTime - cycleThroughPlayersStartTime)));
+        const double cycleThroughPlayersEndTime = realTime();
+        VS_LOG(trace,
+               (boost::format("%1% %2%: Time taken by cycling through active players / cockpits: %3%") % __FILE__ %
+                   __LINE__ % (cycleThroughPlayersEndTime - cycleThroughPlayersStartTime)));
 #endif
     }
     if (sigIter.isDone()) {
         sigIter = draw_list.createIterator();
-    } else {
+    }
+    else {
         ++sigIter;
     }
     while (!sigIter.isDone() && !UnitUtil::isSignificant(*sigIter)) {
@@ -1416,8 +1549,8 @@ void ActivateAnimation(Unit *jumppoint) {
 }
 
 static bool isJumping(const vector<unorigdest *> &pending, Unit *un) {
-    for (size_t i = 0; i < pending.size(); ++i) {
-        if (pending[i]->un == un) {
+    for (const auto i : pending) {
+        if (i->un == un) {
             return true;
         }
     }
@@ -1428,8 +1561,8 @@ QVector SystemLocation(std::string system);
 
 
 QVector ComputeJumpPointArrival(QVector pos, std::string origin, std::string destination) {
-    QVector finish = SystemLocation(destination);
-    QVector start = SystemLocation(origin);
+    QVector finish = SystemLocation(std::move(destination));
+    QVector start = SystemLocation(std::move(origin));
     QVector dir = finish - start;
     if (dir.MagnitudeSquared()) {
         dir.Normalize();
@@ -1439,7 +1572,7 @@ QVector ComputeJumpPointArrival(QVector pos, std::string origin, std::string des
         if (pos.MagnitudeSquared()) {
             pos.Normalize();
         }
-        return (dir * .5 + pos * .125) * configuration()->physics.distance_to_warp;
+        return (dir * .5 + pos * .125) * configuration()->physics.distance_to_warp_dbl;
     }
     return QVector(0, 0, 0);
 }
@@ -1519,8 +1652,7 @@ unsigned int StarSystem::numContTerrain() {
 void StarSystem::UpdateMissiles() {
     //if false, missiles collide with rocks as units, but not harm them with explosions
     //FIXME that's how it's used now, but not really correct, as there could be separate AsteroidWeaponDamage for this
-    static bool collideroids =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "AsteroidWeaponCollision", "false"));
+    const bool collideroids = configuration()->physics.asteroid_weapon_collision;
 
     //WARNING: This is a big performance problem...
     //...responsible for many hiccups.
@@ -1532,7 +1664,7 @@ void StarSystem::UpdateMissiles() {
                 > 0) {           //we can avoid this iterated check for kinetic projectiles even if they "discharge" on hit
             Unit *un;
             for (un_iter ui = getUnitList().createIterator();
-                    NULL != (un = (*ui));
+                    nullptr != (un = (*ui));
                     ++ui) {
                 enum Vega_UnitType type = un->getUnitType();
                 if (collideroids || type

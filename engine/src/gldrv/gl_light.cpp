@@ -45,10 +45,10 @@ GFXBOOL GFXLIGHTING = GFXFALSE;
 int _currentContext = 0;
 vector<vector<gfx_light> > _local_lights_dat;
 vector<GFXColor> _ambient_light;
-vector<gfx_light> *_llights = NULL;
+vector<gfx_light> *_llights = nullptr;
 
 //currently stored GL lights!
-OpenGLLights *GLLights = NULL; //{-1,-1,-1,-1,-1,-1,-1,-1};
+OpenGLLights *GLLights = nullptr; //{-1,-1,-1,-1,-1,-1,-1,-1};
 static stack<bool *> GlobalEffects;
 static stack<bool *> GlobalEffectsFreelist;
 static stack<GFXColor> GlobalEffectsAmbient;
@@ -62,7 +62,7 @@ void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
         GlobalEffectsFreelist.pop();
     }
 
-    unpicklights();     //costly but necessary to get rid of pesky local enables that shoudln't be tagged to get reenabled
+    unpicklights();     //costly but necessary to get rid of pesky local enables that shouldn't be tagged to get re-enabled
     for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
         tmp[i] = (0 != (GLLights[i].options & OpenGLL::GL_ENABLED));
         if (GLLights[i].options & OpenGLL::GL_ENABLED) {
@@ -70,7 +70,7 @@ void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
         }
     }
     GlobalEffects.push(tmp);
-    GlobalEffectsAmbient.push(_ambient_light[_currentContext]);
+    GlobalEffectsAmbient.push(_ambient_light.at(_currentContext));
     GFXLightContextAmbient(GFXColor(0, 0, 0, 1));
 }
 
@@ -279,10 +279,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient(const GFXColor &amb) {
     if (_currentContext >= static_cast<int>(_ambient_light.size())) {
         return GFXFALSE;
     }
-    (_ambient_light[_currentContext]) = amb;
-    //(_ambient_light[_currentContext])[1]=amb.g;
-    //(_ambient_light[_currentContext])[2]=amb.b;
-    //(_ambient_light[_currentContext])[3]=amb.a;
+    (_ambient_light.at(_currentContext)) = amb;
+    //(_ambient_light.at(_currentContext))[1]=amb.g;
+    //(_ambient_light.at(_currentContext))[2]=amb.b;
+    //(_ambient_light.at(_currentContext))[3]=amb.a;
     float tmp[4] = {amb.r, amb.g, amb.b, amb.a};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, tmp);
     return GFXTRUE;
@@ -292,64 +292,87 @@ GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient(GFXColor &amb) {
     if (_currentContext >= static_cast<int>(_ambient_light.size())) {
         return GFXFALSE;
     }
-    amb = (_ambient_light[_currentContext]);
+    amb = (_ambient_light.at(_currentContext));
     return GFXTRUE;
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXCreateLight(int &light, const GFXLight &templatecopy, const bool global) {
     for (light = 0; light < static_cast<int>(_llights->size()); light++) {
-        if ((*_llights)[light].Target() == -2) {
+        if (_llights->at(light).Target() == -2) {
             break;
         }
     }
     if (light == static_cast<int>(_llights->size())) {
-        _llights->push_back(gfx_light());
+        VS_LOG_AND_FLUSH(debug, (boost::format("%1%: Creating light number %2% in context %3%") % __FUNCTION__ % light % _currentContext));
+        _llights->emplace_back();
     }
-    return (*_llights)[light].Create(templatecopy, global);
+    return _llights->at(light).Create(templatecopy, global);
 }
 
 void /*GFXDRVAPI*/ GFXDeleteLight(const int light) {
-    (*_llights)[light].Kill();
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1%: Deleting light number %2% from context %3%") % __FUNCTION__ % light % _currentContext));
+    _llights->at(light).Kill();
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, const enum LIGHT_TARGET lt, const GFXColor &color) {
-    if ((*_llights)[light].Target() == -2) {
+    if (_llights->at(light).Target() == -2) {
         return GFXFALSE;
     }
-    (*_llights)[light].ResetProperties(lt, color);
+    _llights->at(light).ResetProperties(lt, color);
 
     return GFXTRUE;
 }
 
 GFXBOOL /*GFXDRVAPI*/  GFXSetLight(const int light, const enum LIGHT_TARGET lt, const Vector& vector) {
-    if ((*_llights)[light].Target() == -2) {
+    if (_llights->size() <= light || _llights->at(light).Target() == -2) {
         return GFXFALSE;
     }
-    (*_llights)[light].ResetProperties(lt, vector);
+    _llights->at(light).ResetProperties(lt, vector);
 
     return GFXTRUE;
 }
 
 const GFXLight & /*GFXDRVAPI*/ GFXGetLight(const int light) {
-    return (*_llights)[light];
+    if (light < 0) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: light # %2% < zero") % __FUNCTION__ % light));
+        throw std::out_of_range("GFXGetLight()");
+    } else if (light >= static_cast<int>(_llights->size())) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: light # %2% is past the upper bound of the collection %3%") % __FUNCTION__ % light % _llights->size()));
+        throw std::out_of_range("GFXGetLight()");
+    }
+    return _llights->at(light);
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(int light) {
-    assert(light >= 0 && light <= static_cast<int>(_llights->size()));
-    //return FALSE;
-    if ((*_llights)[light].Target() == -2) {
+    if (light < 0) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: light # %2% < zero") % __FUNCTION__ % light));
+        return GFXFALSE;
+    } else if (light >= static_cast<int>(_llights->size())) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: light # %2% is past the upper bound of the collection %3%") % __FUNCTION__ % light % _llights->size()));
         return GFXFALSE;
     }
-    (*_llights)[light].Enable();
+    // assert(light >= 0 && light < static_cast<int>(_llights->size()));
+    //return FALSE;
+    if (_llights->at(light).Target() == -2) {
+        return GFXFALSE;
+    }
+    _llights->at(light).Enable();
     return GFXTRUE;
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXDisableLight(int light) {
-    assert(light >= 0 && light <= static_cast<int>(_llights->size()));
-    if ((*_llights)[light].Target() == -2) {
+    if (light < 0) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: light # %2% < zero") % __FUNCTION__ % light));
+        return GFXFALSE;
+    } else if (light >= static_cast<int>(_llights->size())) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: light # %2% is past the upper bound of the collection %3%") % __FUNCTION__ % light % _llights->size()));
         return GFXFALSE;
     }
-    (*_llights)[light].Disable();
+    // assert(light >= 0 && light < static_cast<int>(_llights->size()));
+    if (_llights->at(light).Target() == -2) {
+        return GFXFALSE;
+    }
+    _llights->at(light).Disable();
     return GFXTRUE;
 }
 
@@ -363,13 +386,15 @@ void /*GFXDRVAPI*/ GFXCreateLightContext(int &con_number) {
     }
     con_number = _local_lights_dat.size();
     _currentContext = con_number;
-    _ambient_light.push_back(GFXColor(0, 0, 0, 1));
-    _local_lights_dat.push_back(vector<gfx_light>());
+    _ambient_light.emplace_back(0, 0, 0, 1);
+    _local_lights_dat.emplace_back();
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1%: setting light context to %2%, containing %3% lights") % __FUNCTION__ % con_number % _local_lights_dat.at(con_number).size()));
     GFXSetLightContext(con_number);
 }
 
 void /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number) {
-    _local_lights_dat[con_number] = vector<gfx_light>();
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1%: deleting light context %2%, containing %3% lights") % __FUNCTION__ % con_number % _local_lights_dat.at(con_number).size()));
+    _local_lights_dat.at(con_number) = vector<gfx_light>();
 }
 
 void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number) {
@@ -378,19 +403,20 @@ void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number) {
     unsigned int i;
     lighttable.Clear();
     _currentContext = con_number;
-    _llights = &_local_lights_dat[con_number];
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (GLfloat *) &(_ambient_light[con_number]));
-    //reset all lights so they arean't in GLLights
+    _llights = &_local_lights_dat.at(con_number);
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1%: current light context: %2%, containing %3% lights") % __FUNCTION__ % con_number % _llights->size()));
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, reinterpret_cast<GLfloat *>(&(_ambient_light.at(con_number))));
+    //reset all lights so they aren't in GLLights
     for (i = 0; i < _llights->size(); i++) {
-        (*_llights)[i].Target() = -1;
+        _llights->at(i).Target() = -1;
     }
     for (i = 0; i < _llights->size() && GLLindex < GFX_MAX_LIGHTS; i++) {
-        if ((*_llights)[i].enabled()) {
-            if ((*_llights)[i].LocalLight()) {
-                (*_llights)[i].AddToTable();
+        if (_llights->at(i).enabled()) {
+            if (_llights->at(i).LocalLight()) {
+                _llights->at(i).AddToTable();
             } else {
-                GLLights[GLLindex].index = -1;                 //make it clobber completley! no trace of old light.
-                (*_llights)[i].ClobberGLLight(GLLindex);
+                GLLights[GLLindex].index = -1;                 //make it clobber completely! no trace of old light.
+                _llights->at(i).ClobberGLLight(GLLindex);
                 GLLindex++;
             }
         }
@@ -403,6 +429,7 @@ void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number) {
 }
 
 void GFXDestroyAllLights() {
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1%: current light context: %2%, containing %3% lights") % __FUNCTION__ % _currentContext % _llights->size()));
     lighttable.Clear();
     if (GLLights != nullptr) {
         free(GLLights);
@@ -415,14 +442,15 @@ static void SetupGLLightGlobals() {
             1);     //don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
     glGetIntegerv(GL_MAX_LIGHTS, &GFX_MAX_LIGHTS);
     if (!GLLights) {
-        GLLights = (OpenGLLights *) malloc(sizeof(OpenGLLights) * GFX_MAX_LIGHTS);
+        GLLights = static_cast<OpenGLLights *>(malloc(sizeof(OpenGLLights) * GFX_MAX_LIGHTS));
         for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
             GLLights[i].index = -1;
         }
     }
 
-    GFXSetCutoff(configuration()->graphics.light_cutoff);
-    GFXSetOptimalIntensity(configuration()->graphics.light_optimal_intensity, configuration()->graphics.light_saturation);
+    GFXSetCutoff(configuration()->graphics.light_cutoff_flt);
+    GFXSetOptimalIntensity(configuration()->graphics.light_optimal_intensity_flt, configuration()->graphics.light_saturation_flt);
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1%: configuration()->graphics.num_lights == %2%") % __FUNCTION__ % configuration()->graphics.num_lights));
     GFXSetOptimalNumLights(configuration()->graphics.num_lights);
     GFXSetSeparateSpecularColor(configuration()->graphics.separate_specular_color ? GFXTRUE : GFXFALSE);
 }

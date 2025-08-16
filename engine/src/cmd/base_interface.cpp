@@ -32,6 +32,8 @@
 
 #include <Python.h>
 #include <algorithm>
+
+#include "vega_cast_utils.h"
 #include "cmd/vega_py_run.h"
 #include "cmd/base.h"
 #include "gldrv/winsys.h"
@@ -51,20 +53,19 @@
 #include "gfx/cockpit.h"
 #include "gfx/ani_texture.h"
 #include "cmd/music.h"
-#include "root_generic/lin_time.h"
-#include "root_generic/load_mission.h"
 #include "src/universe_util.h"
-#include "gui/guidefs.h"
 #ifdef RENDER_FROM_TEXTURE
 #include "gfx/stream_texture.h"
 #endif
 #include "src/main_loop.h"
-#include "src/in_mouse.h"
 #include "src/in_kb.h"
 #include "src/universe.h"
 
 #include "cmd/ai/communication.h"
 #include "audio/SceneManager.h"
+
+// shows the offset on the lower edge of the screen (for the text line there)
+constexpr double kYLower = -0.9;
 
 static unsigned int &getMouseButtonMask() {
     static unsigned int mask = 0;
@@ -73,18 +74,17 @@ static unsigned int &getMouseButtonMask() {
 
 static void biModifyMouseSensitivity(int &x, int &y, bool invert) {
     int xrez = configuration()->graphics.resolution_x;
-    static int
-            whentodouble = XMLSupport::parse_int(vs_config->getVariable("joystick", "double_mouse_position", "1280"));
-    static float factor = XMLSupport::parse_float(vs_config->getVariable("joystick", "double_mouse_factor", "2"));
+    const int whentodouble = configuration()->joystick.double_mouse_position;
+    const float factor = configuration()->joystick.double_mouse_factor_flt;
     if (xrez >= whentodouble) {
         x -= configuration()->graphics.resolution_x / 2;
         y -= configuration()->graphics.resolution_y / 2;
         if (invert) {
-            x = int(x / factor);
-            y = int(y / factor);
+            x = static_cast<int>(x / factor);
+            y = static_cast<int>(y / factor);
         } else {
-            x = int(x * factor);
-            y = int(y * factor);
+            x = static_cast<int>(x * factor);
+            y = static_cast<int>(y * factor);
         }
         x += configuration()->graphics.resolution_x / 2;
         y += configuration()->graphics.resolution_y / 2;
@@ -134,8 +134,8 @@ using namespace VSFileSystem;
 std::vector<unsigned int> base_keyboard_queue;
 
 static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float *y) {
-    (*x) = (((float) (xbeforecalc * 2)) / configuration()->graphics.resolution_x) - 1;
-    (*y) = -(((float) (ybeforecalc * 2)) / configuration()->graphics.resolution_y) + 1;
+    (*x) = (static_cast<float>(xbeforecalc * 2) / configuration()->graphics.resolution_x) - 1;
+    (*y) = -(static_cast<float>(ybeforecalc * 2) / configuration()->graphics.resolution_y) + 1;
 }
 
 #define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
@@ -187,7 +187,7 @@ BaseInterface::Room::BaseVSSprite::BaseVSSprite(const std::string &spritefile, c
 }
 
 BaseInterface::Room::BaseVSSprite::~BaseVSSprite() {
-    if (soundsource.get() != NULL) {
+    if (soundsource.get() != nullptr) {
         BaseUtil::DestroyVideoSoundStream(soundsource, soundscene);
     }
     spr.ClearTimeSource();
@@ -234,7 +234,7 @@ void BaseInterface::Room::BaseVSMovie::SetMovie(const std::string &moviefile) {
     new(&spr)VSSprite(AnimatedTexture::CreateVideoTexture(moviefile), x, y, w, h, 0, 0, true);
     spr.SetRotation(rot);
 
-    if (soundsource.get() != NULL) {
+    if (soundsource.get() != nullptr) {
         BaseUtil::DestroyVideoSoundStream(soundsource, soundscene);
     }
     soundscene = "video";
@@ -256,7 +256,7 @@ void BaseInterface::Room::BaseVSMovie::SetTime(float t) {
 }
 
 void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base) {
-    const float AlphaTestingCutoff = configuration()->graphics.bases.alpha_test_cutoff;
+    const float AlphaTestingCutoff = configuration()->graphics.bases.alpha_test_cutoff_flt;
     GFXAlphaTest(GREATER, AlphaTestingCutoff);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXEnable(TEXTURE0);
@@ -264,7 +264,7 @@ void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base) {
     GFXAlphaTest(ALWAYS, 0);
 
     // Play the associated source if it isn't playing
-    if (soundsource.get() != NULL) {
+    if (soundsource.get() != nullptr) {
         if (!soundsource->isPlaying()) {
             soundsource->startPlaying();
         }
@@ -272,7 +272,7 @@ void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base) {
 }
 
 void BaseInterface::Room::BaseVSMovie::Draw(BaseInterface *base) {
-    if (soundsource.get() == NULL) {
+    if (soundsource.get() == nullptr) {
         // If it's not playing, mark as playing, and reset the sprite's animation
         // (it's not automatic without a time source)
         if (!playing) {
@@ -294,7 +294,7 @@ void BaseInterface::Room::BaseVSMovie::Draw(BaseInterface *base) {
 
     BaseInterface::Room::BaseVSSprite::Draw(base);
 
-    if (soundsource.get() == NULL) {
+    if (soundsource.get() == nullptr) {
         // If there is no sound source, and the sprite is an animated sprite, and
         // it's finished, then we must invoke the callback
         if (!getCallback().empty() && spr.Done()) {
@@ -305,17 +305,17 @@ void BaseInterface::Room::BaseVSMovie::Draw(BaseInterface *base) {
 }
 
 bool BaseInterface::Room::BaseVSSprite::isPlaying() const {
-    return soundsource.get() != NULL
-            && soundsource->isPlaying();
+    return soundsource.get() != nullptr
+        && soundsource->isPlaying();
 }
 
 void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
     Unit *un = base->caller.GetUnit();
     if (un) {
         GFXHudMode(GFXFALSE);
-        float tmp = configuration()->graphics.fov;
-        const float standard_fov = configuration()->graphics.bases.fov;
-        configuration()->graphics.fov = standard_fov;
+        float tmp = configuration()->graphics.fov_flt;
+        const float standard_fov = configuration()->graphics.bases.fov_flt;
+        configuration()->graphics.fov_flt = standard_fov;
         float tmp1 = _Universe->AccessCamera()->GetFov();
         _Universe->AccessCamera()->SetFov(standard_fov);
         Vector p, q, r;
@@ -328,7 +328,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         Matrix final;
         Matrix newmat = mat;
         newmat.p.k *= un->rSize();
-        newmat.p += QVector(0, 0, configuration()->graphics.znear);
+        newmat.p += QVector(0, 0, configuration()->graphics.znear_dbl);
         newmat.p.i *= newmat.p.k;
         newmat.p.j *= newmat.p.k;
         MultMatrix(final, cam, newmat);
@@ -361,7 +361,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         _Universe->AccessCamera()->UpdateGFX();
         SetupViewport();
         GFXHudMode(GFXTRUE);
-        configuration()->graphics.fov = tmp;
+        configuration()->graphics.fov_flt = tmp;
         _Universe->AccessCamera()->SetFov(tmp1);
     }
 }
@@ -391,17 +391,15 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
     const bool enable_markers = configuration()->graphics.bases.enable_location_markers;
     const bool draw_text = configuration()->graphics.bases.draw_location_text;
     const bool draw_always = configuration()->graphics.bases.location_marker_draw_always;
-    static float y_lower =
-            -0.9;           //shows the offset on the lower edge of the screen (for the textline there) -> TODO: Should be defined globally somewhere
-    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha;
+    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha_flt;
     if (enable_markers) {
         float x, y, text_wid, text_hei;
         //get offset from config;
-        const float text_offset_x = configuration()->graphics.bases.location_marker_text_offset_x;
-        const float text_offset_y = configuration()->graphics.bases.location_marker_text_offset_y;
-        const float text_color_r = configuration()->graphics.bases.location_marker_text_color_r;
-        const float text_color_g = configuration()->graphics.bases.location_marker_text_color_g;
-        const float text_color_b = configuration()->graphics.bases.location_marker_text_color_b;
+        const float text_offset_x = configuration()->graphics.bases.location_marker_text_offset_x_flt;
+        const float text_offset_y = configuration()->graphics.bases.location_marker_text_offset_y_flt;
+        const float text_color_r = configuration()->graphics.bases.location_marker_text_color_r_flt;
+        const float text_color_g = configuration()->graphics.bases.location_marker_text_color_g_flt;
+        const float text_color_b = configuration()->graphics.bases.location_marker_text_color_b_flt;
         for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
             if (links[i]) {
                 if ((links[i]->alpha < 1) || (draw_always)) {
@@ -427,8 +425,8 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                         if ((x - (wid / 2)) <= -1) {
                             x = (-1 + (wid / 2));
                         }
-                        if ((y - (hei / 2)) <= y_lower) {
-                            y = (y_lower + (hei / 2));
+                        if ((y - (hei / 2)) <= kYLower) {
+                            y = (kYLower + (hei / 2));
                         }
                         spr_marker->SetPosition(x, y);
                         GFXDisable(TEXTURE1);
@@ -457,7 +455,7 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                                     - fabs(text_offset_y));
                         }                                          //align on bottom
                         if ((text_pos_y + text_offset_y - text_hei)
-                                <= y_lower) {                             //check lower screenborder
+                                <= kYLower) {                             //check lower screenborder
                             text_pos_y = (y + fabs(text_offset_y)
                                     + text_hei);
                         }                                   //align on top
@@ -485,8 +483,8 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
     if (draw_borders || debug_markers) {
         float x, y, text_wid, text_hei;
         //get offset from config;
-        const float text_offset_x = configuration()->graphics.bases.location_marker_text_offset_x;
-        const float text_offset_y = configuration()->graphics.bases.location_marker_text_offset_y;
+        const float text_offset_x = configuration()->graphics.bases.location_marker_text_offset_x_flt;
+        const float text_offset_y = configuration()->graphics.bases.location_marker_text_offset_y_flt;
         for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
             if (links[i]) {
                 //Debug marker
@@ -510,7 +508,7 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                         text_pos_y = (y - fabs(text_offset_y));
                     }                                      //align on bottom
                     if ((text_pos_y + text_offset_y - text_hei)
-                            <= y_lower) {                         //check lower screenborder
+                            <= kYLower) {                         //check lower screenborder
                         text_pos_y = (y + fabs(text_offset_y) + text_hei);
                     }                               //align on top
                     if (enable_markers) {
@@ -575,7 +573,7 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
             configuration()->graphics.resolution_y = base_max_height;
         }
     }
-    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha;
+    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha_flt;
     GFXColor tmpbg = text.bgcol;
     bool automatte = (0 == tmpbg.a);
     if (automatte) {
@@ -638,7 +636,7 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
         return;
     }
     curtime += GetElapsedTime() / getTimeCompression();
-    const float delay = configuration()->graphics.text_delay;
+    const float delay = configuration()->graphics.text_delay_flt;
     if ((std::find(active_talks.begin(), active_talks.end(),
             this) == active_talks.end())
             || (curchar >= message.size() && curtime > ((delay * message.size()) + 2))) {
@@ -647,18 +645,18 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
                 base->rooms[base->curroom]->objs.end(),
                 this);
         if (ind != base->rooms[base->curroom]->objs.end()) {
-            *ind = NULL;
+            *ind = nullptr;
         }
         std::vector<BaseTalk *>::iterator ind2 = std::find(active_talks.begin(), active_talks.end(), this);
         if (ind2 != active_talks.end()) {
-            *ind2 = NULL;
+            *ind2 = nullptr;
         }
         base->othtext.SetText("");
         delete this;
         return;         //do not do ANYTHING with 'this' after the previous statement...
     }
     if (curchar < message.size()) {
-        const float inbetween = configuration()->graphics.text_speed;
+        const float inbetween = configuration()->graphics.text_speed_flt;
         if (curtime > inbetween) {
             base->othtext.SetText(message.substr(0, ++curchar));
             curtime = 0;
@@ -835,8 +833,8 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
             while (count++ < links.size()) {
                 Link *curlink = links[base->curlinkindex++ % links.size()];
                 if (curlink) {
-                    int x = int((((curlink->x + (curlink->wid / 2)) + 1) / 2) * configuration()->graphics.resolution_x);
-                    int y = -int((((curlink->y + (curlink->hei / 2)) - 1) / 2) * configuration()->graphics.resolution_y);
+                    int x = static_cast<int>((((curlink->x + (curlink->wid / 2)) + 1) / 2) * configuration()->graphics.resolution_x);
+                    int y = -static_cast<int>((((curlink->y + (curlink->hei / 2)) - 1) / 2) * configuration()->graphics.resolution_y);
                     biModifyMouseSensitivity(x, y, true);
                     winsys_warp_pointer(x, y);
                     PassiveMouseOverWin(x, y);
@@ -854,8 +852,8 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
     int i = rooms[curroom]->MouseOver(this,
             x,
             y); //FIXME Whatever this is, it shouldn't be named just "i"; & possibly should be size_t
-    Room::Link *link = 0;
-    Room::Link *hotlink = 0;
+    Room::Link *link = nullptr;
+    Room::Link *hotlink = nullptr;
     if (i >= 0) {
         link = rooms[curroom]->links[i];
     }
@@ -887,7 +885,7 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
         mousePointerStyle = MOUSE_POINTER_NORMAL;
     }
     const bool draw_always = configuration()->graphics.bases.location_marker_draw_always;
-    const float defined_distance = configuration()->graphics.bases.location_marker_distance;
+    const float defined_distance = configuration()->graphics.bases.location_marker_distance_flt;
     if (!draw_always) {
         float cx, cy;
         float dist_cur2link;
@@ -1096,13 +1094,13 @@ double compute_light_dot(Unit *base, Unit *un) {
     StarSystem *ss = base->getStarSystem();
     double ret = -1;
     Unit *st;
-    Unit *base_owner = NULL;
+    Unit *base_owner = nullptr;
     if (ss) {
         _Universe->pushActiveStarSystem(ss);
         un_iter ui = ss->getUnitList().createIterator();
         for (; (st = *ui); ++ui) {
             if (st->isPlanet()) {
-                if (((Planet *) st)->hasLights()) {
+                if (vega_dynamic_cast_ptr<Planet>(st)->hasLights()) {
 #ifdef VS_DEBUG
                     QVector v1  = ( un->Position()-base->Position() ).Normalize();
                     QVector v2  = ( st->Position()-base->Position() ).Normalize();
@@ -1114,8 +1112,8 @@ double compute_light_dot(Unit *base, Unit *un) {
                     }
 #endif
                 } else {
-                    un_iter ui = ((Planet *) st)->satellites.createIterator();
-                    Unit *ownz = NULL;
+                    un_iter ui = vega_dynamic_cast_ptr<Planet>(st)->satellites.createIterator();
+                    Unit *ownz = nullptr;
                     for (; (ownz = *ui); ++ui) {
                         if (ownz == base) {
                             base_owner = st;
@@ -1128,7 +1126,7 @@ double compute_light_dot(Unit *base, Unit *un) {
     } else {
         return 1;
     }
-    if (base_owner == NULL || base->getUnitType() == Vega_UnitType::planet) {
+    if (base_owner == nullptr || base->getUnitType() == Vega_UnitType::planet) {
         return ret;
     } else {
         return compute_light_dot(base_owner, un);
@@ -1273,9 +1271,6 @@ extern void PlayDockingSound(int dock);
 void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
-        static bool
-                auto_undock_var = XMLSupport::parse_bool(vs_config->getVariable("physics", "AutomaticUnDock", "true"));
-        bool auto_undock = auto_undock_var;
         Unit *bas = base->baseun.GetUnit();
         Unit *playa = base->caller.GetUnit();
 
@@ -1285,10 +1280,10 @@ void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, i
                 playa->name = "return_to_cockpit";
             }
         }
-        if ((playa && bas) && (auto_undock || (playa->name == "return_to_cockpit"))) {
+        if ((playa && bas) && (configuration()->physics.automatic_undock || (playa->name == "return_to_cockpit"))) {
             playa->UnDock(bas);
-            CommunicationMessage c(bas, playa, NULL, 0);
-            c.SetCurrentState(c.fsm->GetUnDockNode(), NULL, 0);
+            CommunicationMessage c(bas, playa, nullptr, 0);
+            c.SetCurrentState(c.fsm->GetUnDockNode(), nullptr, 0);
             if (playa->getAIState()) {
                 playa->getAIState()->Communicate(c);
             }
@@ -1304,7 +1299,7 @@ void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, i
 }
 
 inline float aynrand(float min, float max) {
-    return ((float) (rand()) / RAND_MAX) * (max - min) + min;
+    return (static_cast<float>(rand()) / RAND_MAX) * (max - min) + min;
 }
 
 inline QVector randyVector(float min, float max) {
@@ -1316,7 +1311,6 @@ inline QVector randyVector(float min, float max) {
 void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
-        XMLSupport::parse_bool(vs_config->getVariable("physics", "AutomaticUnDock", "true"));
         Unit *bas = base->baseun.GetUnit();
         Unit *playa = base->caller.GetUnit();
         if (playa && bas) {
@@ -1334,17 +1328,17 @@ void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, in
                         + randyVector(-.5 * bas->rSize(), .5 * bas->rSize()));
                 playa->SetAngularVelocity(bas->AngularVelocity);
                 playa->SetOwner(bas);
-                const float velmul = configuration()->physics.eject_cargo_speed;
+                const float velmul = configuration()->physics.eject_cargo_speed_flt;
                 playa->SetVelocity(bas->Velocity * velmul + randyVector(-.25, .25).Cast());
             }
             playa->UnDock(bas);
-            CommunicationMessage c(bas, playa, NULL, 0);
-            c.SetCurrentState(c.fsm->GetUnDockNode(), NULL, 0);
+            CommunicationMessage c(bas, playa, nullptr, 0);
+            c.SetCurrentState(c.fsm->GetUnDockNode(), nullptr, 0);
             if (playa->getAIState()) {
                 playa->getAIState()->Communicate(c);
             }
             PlayDockingSound(5);
-            playa->EjectCargo((unsigned int) -1);
+            playa->EjectCargo(static_cast<unsigned int>(-1));
             if ((playa->name == "return_to_cockpit") || (playa->name == "ejecting") || (playa->name == "eject")
                     || (playa->name == "Eject") || (playa->name == "Pilot") || (playa->name == "pilot")) {
                 playa->Kill();
@@ -1366,7 +1360,7 @@ void BaseInterface::Room::Talk::Click(BaseInterface *base, float x, float y, int
         Link::Click(base, x, y, button, state);
         if (index >= 0) {
             delete base->rooms[curroom]->objs[index];
-            base->rooms[curroom]->objs[index] = NULL;
+            base->rooms[curroom]->objs[index] = nullptr;
             index = -1;
             base->othtext.SetText("");
         } else if (say.size()) {
@@ -1497,7 +1491,7 @@ void BaseInterface::Draw() {
 
     float x, y;
     glViewport(0, 0, configuration()->graphics.resolution_x, configuration()->graphics.resolution_y);
-    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha;
+    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha_flt;
 
     curtext.GetCharSize(x, y);
     curtext.SetPos(-.99, -1 + (y * 1.5));

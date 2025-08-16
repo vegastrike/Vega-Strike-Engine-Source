@@ -128,14 +128,12 @@ protected:
 public:
     Movable();
 
-protected:
     // forbidden
     Movable(const Movable &) = delete;
     // forbidden
     Movable &operator=(const Movable &) = delete;
     virtual ~Movable() = default;
 
-public:
     void AddVelocity(float difficulty);
 //Resolves forces of given unit on a physics frame
     virtual Vector ResolveForces(const Transformation &, const Matrix &);
@@ -162,13 +160,13 @@ public:
 
 //acceleration, stable over the simulation
     float GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn) const;
-//Transforms a orientation vector Up a coordinate level. Does not take position into account
+//Transforms an orientation vector Up a coordinate level. Does not take position into account
     Vector UpCoordinateLevel(const Vector &v) const;
-//Transforms a orientation vector Down a coordinate level. Does not take position into account
+//Transforms an orientation vector Down a coordinate level. Does not take position into account
     Vector DownCoordinateLevel(const Vector &v) const;
-//Transforms a orientation vector from world space to local space. Does not take position into account
+//Transforms an orientation vector from world space to local space. Does not take position into account
     Vector ToLocalCoordinates(const Vector &v) const;
-//Transforms a orientation vector to world space. Does not take position into account
+//Transforms an orientation vector to world space. Does not take position into account
     Vector ToWorldCoordinates(const Vector &v) const;
 
     virtual bool isPlayerShip() {
@@ -190,7 +188,7 @@ public:
             const Matrix &transmat,
             const Vector &CumulativeVelocity,
             bool ResolveLast,
-            UnitCollection *uc = NULL);
+            UnitCollection *uc = nullptr);
 
     //Returns unit-space ang velocity
     const Vector &GetAngularVelocity() const {

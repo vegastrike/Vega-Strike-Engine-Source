@@ -718,7 +718,7 @@ void PaintText::calcLayout(void) {
     m_verticalScaling = m_font.verticalScaling();
     m_horizontalScaling = m_font.horizontalScaling();
     //Max line width in character reference space.
-    const double font_width_hack = configuration()->graphics.font_width_hack;
+    const double font_width_hack = configuration()->graphics.font_width_hack_dbl;
     const float maxLineWidth = m_rect.size.width * font_width_hack / m_horizontalScaling;
     //The temporary global state for the layout operation.
     //Make sure this gets initialized at the beginning of an operation.

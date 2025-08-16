@@ -53,7 +53,7 @@ Background::Background(const char *file,
         : Enabled(true), degamma(degamma_), color(color_), stars(NULL) {
     string temp;
     const string starspritetextures = configuration()->graphics.far_stars_sprite_texture;
-    const float starspritesize = configuration()->graphics.far_stars_sprite_size;
+    const float starspritesize = configuration()->graphics.far_stars_sprite_size_flt;
     if (starspritetextures.length() == 0) {
         stars =
                 new PointStarVlist(numstars, 200 /*spread*/,
@@ -370,7 +370,7 @@ void Background::Draw() {
                     tex = _Universe->getLightMap();
                 }
                 const int numpasses = 1;
-                const float edge_fixup = configuration()->graphics.background_edge_fixup;
+                const float edge_fixup = configuration()->graphics.background_edge_fixup_flt;
                 const float ms = 0.f, Ms = 1.f - edge_fixup / tex->boundSizeX;
                 const float mt = 0.f, Mt = 1.f - edge_fixup / tex->boundSizeY;
                 const float _stca[] = {-1.f, -Ms, ms, Ms, +1.f}, _ttca[] = {-1.f, -Mt, mt, Mt, +1.f};
@@ -484,7 +484,7 @@ void Background::Draw() {
     GFXDisable(TEXTURE1);
     GFXDisable(DEPTHWRITE);
     GFXBlendMode(ONE, ONE);
-    const float background_velocity_scale = configuration()->graphics.background_star_streak_velocity_scale;
+    const float background_velocity_scale = configuration()->graphics.background_star_streak_velocity_scale_flt;
     stars->DrawAll(QVector(0, 0, 0), _Universe->AccessCamera()->GetVelocity().Scale(
             background_velocity_scale), _Universe->AccessCamera()->GetAngularVelocity(), true, true);
     GFXBlendMode(ONE, ZERO);

@@ -85,7 +85,7 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
         bool done = false;
         Vector back = vel;
         back.Normalize();
-        back *= -configuration()->graphics.sparkle_absolute_speed;
+        back *= -configuration()->graphics.sparkle_absolute_speed_flt;
 
         collideTrees *colTrees = mush->colTrees;
         if (colTrees) {
@@ -101,7 +101,7 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
                             vel,
                             back,
                             0,
-                            mush->rSize() * configuration()->graphics.sparkle_engine_size_relative_to_ship,
+                            mush->rSize() * configuration()->graphics.sparkle_engine_size_relative_to_ship_flt,
                             faction);
                     done = true;
                 }
@@ -121,7 +121,7 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
                         vel,
                         back,
                         0,
-                        mush->rSize() * configuration()->graphics.sparkle_engine_size_relative_to_ship,
+                        mush->rSize() * configuration()->graphics.sparkle_engine_size_relative_to_ship_flt,
                         faction);
                 done = true;
             }
@@ -142,11 +142,11 @@ unsigned int HaloSystem::AddHalo(const char *filename,
     int neutralfac = FactionUtil::GetNeutralFaction();
     halo.push_back(Halo());
     halo.back().trans = trans;
-    halo.back().size = Vector(size.i * configuration()->graphics.engine_radii_scale,
-            size.j * configuration()->graphics.engine_radii_scale,
-            size.k * configuration()->graphics.engine_length_scale);
+    halo.back().size = Vector(size.i * configuration()->graphics.engine_radii_scale_flt,
+            size.j * configuration()->graphics.engine_radii_scale_flt,
+            size.k * configuration()->graphics.engine_length_scale_flt);
     halo.back().mesh = Mesh::LoadMesh((string(filename)).c_str(), Vector(1, 1, 1), neutralfac, NULL);
-    halo.back().activation = activation_accel * configuration()->physics.game_speed;
+    halo.back().activation = activation_accel * configuration()->physics.game_speed_flt;
     halo.back().oscale = 0;
     halo.back().sparkle_accum = 0;
     halo.back().sparkle_rate = 0.5 + rand() * 0.5 / float(RAND_MAX);
@@ -190,7 +190,7 @@ void HaloSystem::Draw(const Matrix &trans,
         maxvelocity = 1;
     }
 
-    double sparkledelta = GetElapsedTime() * configuration()->graphics.halo_sparkle_rate;
+    double sparkledelta = GetElapsedTime() * configuration()->graphics.halo_sparkle_rate_dbl;
 
     for (std::vector<Halo>::iterator i = halo.begin(); i != halo.end(); ++i) {
         Vector thrustvector = TransformNormal(trans, i->trans.getR()).Normalize();
@@ -213,7 +213,7 @@ void HaloSystem::Draw(const Matrix &trans,
             ScaleMatrix(m, Vector(scale.i * i->size.i, scale.j * i->size.j, scale.k * i->size.k * value / maxvalue));
 
             float maxfade =
-                    minvalue * (1.0 - configuration()->graphics.percent_halo_fade_in) + maxvalue * configuration()->graphics.percent_halo_fade_in;
+                    minvalue * (1.0 - configuration()->graphics.percent_halo_fade_in_flt) + maxvalue * configuration()->graphics.percent_halo_fade_in_flt;
             int alpha = halo_alpha;
             if (value < maxfade) {
                 if (alpha < 0) {
@@ -223,19 +223,19 @@ void HaloSystem::Draw(const Matrix &trans,
                 alpha |= 1;
             }
 
-            GFXColor blend = GFXColor(configuration()->graphics.engine_color_red,
-                    configuration()->graphics.engine_color_green,
-                    configuration()->graphics.engine_color_blue,
+            GFXColor blend = GFXColor(configuration()->graphics.engine_color_red_flt,
+                    configuration()->graphics.engine_color_green_flt,
+                    configuration()->graphics.engine_color_blue_flt,
                     1);
-            if (value > maxvalue * configuration()->graphics.percent_afterburner_color_change) {
-                float test = value - maxvalue * configuration()->graphics.percent_afterburner_color_change;
-                test /= maxvalue * configuration()->graphics.percent_afterburner_color_change;
+            if (value > maxvalue * configuration()->graphics.percent_afterburner_color_change_flt) {
+                float test = value - maxvalue * configuration()->graphics.percent_afterburner_color_change_flt;
+                test /= maxvalue * configuration()->graphics.percent_afterburner_color_change_flt;
                 if (!(test < 1.0)) {
                     test = 1.0;
                 }
-                float r = configuration()->graphics.afterburner_color_red * test + configuration()->graphics.engine_color_red * (1.0 - test);
-                float g = configuration()->graphics.afterburner_color_green * test + configuration()->graphics.engine_color_green * (1.0 - test);
-                float b = configuration()->graphics.afterburner_color_blue * test + configuration()->graphics.engine_color_blue * (1.0 - test);
+                float r = configuration()->graphics.afterburner_color_red_flt * test + configuration()->graphics.engine_color_red_flt * (1.0 - test);
+                float g = configuration()->graphics.afterburner_color_green_flt * test + configuration()->graphics.engine_color_green_flt * (1.0 - test);
+                float b = configuration()->graphics.afterburner_color_blue_flt * test + configuration()->graphics.engine_color_blue_flt * (1.0 - test);
                 blend = GFXColor(r, g, b, 1.0);
             }
 
@@ -259,14 +259,14 @@ void HaloSystem::Draw(const Matrix &trans,
                     i->sparkle_accum -= 1;
 
                     float rsize = i->mesh->rSize() * scale.i * i->size.i;
-                    Vector pvelocity = thrustvector * -rsize * configuration()->graphics.halo_sparkle_speed * vpercent;
+                    Vector pvelocity = thrustvector * -rsize * configuration()->graphics.halo_sparkle_speed_flt * vpercent;
 
                     DoParticles(m.p,
                             hullpercent,
                             velocity,
                             pvelocity,
                             rsize,
-                            rsize * configuration()->graphics.halo_sparkle_scale,
+                            rsize * configuration()->graphics.halo_sparkle_scale_flt,
                             faction);
                 }
             } else {

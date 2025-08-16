@@ -35,7 +35,7 @@
 #include "configuration/configuration.h"
 
 GFXColor SaturatedColor(float r, float g, float b, float a) {
-    const float Saturation = configuration()->graphics.base_saturation;
+    const float Saturation = configuration()->graphics.base_saturation_flt;
 
     return GFXColor((r * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3,
             (g * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3,

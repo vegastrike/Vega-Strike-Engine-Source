@@ -53,7 +53,10 @@ public:
     gfx_light() : GFXLight() {
     }
 
+    ~gfx_light() override = default;
+
     ///assigns a GFXLight to a gfx_light
+    ///TODO: Fix this to make it conform more to usual C++ conventions
     GFXLight operator=(const GFXLight &tmp);
 
     ///Returns the number this light is in the _llights list

@@ -77,7 +77,7 @@ const EnumMap element_map(element_names, 8);
 const EnumMap attribute_map(attribute_names, 3);
 class XML {
 public:
-    SGalaxy *g;
+    SGalaxy *g{};
     std::vector<std::string> stak;
 };
 
@@ -96,7 +96,7 @@ void beginElement(void *userdata, const XML_Char *nam, const XML_Char **atts) {
         case SYSTEMS:
             break;
         case PLANETS:
-            xml->stak.push_back("<planets>");
+            xml->stak.emplace_back("<planets>");
             xml->g->addSection(xml->stak);
             break;
         case SECTOR:
@@ -169,6 +169,7 @@ SGalaxy::~SGalaxy() {
     }
 }
 
+// FIXME: does not handle self-assignment properly, according to CLion
 SGalaxy &SGalaxy::operator=(const SGalaxy &g) {
     if (g.subheirarchy) {
         SubHeirarchy *temp = new SubHeirarchy(*g.subheirarchy);
@@ -198,7 +199,7 @@ void SGalaxy::processSystem(const string &sys, const QVector &coords) {
     char coord[65536];
     sprintf(coord, "%lf %lf %lf", coords.i, coords.j, coords.k);
     string ret = getVariable(sector, sys2, "");
-    if (ret.length() == 0) {
+    if (ret.empty()) {
         setVariable(sector, sys2, "xyz", coord);
     }
 }
@@ -248,7 +249,7 @@ void SGalaxy::writeSector(VSFileSystem::VSFile &f, int tabs, const string &secto
 
 void SGalaxy::writeGalaxy(VSFile &f) const {
     f.Fprintf("<galaxy>\n<systems>\n");
-    writeSector(f, 1, "sector", NULL);
+    writeSector(f, 1, "sector", nullptr);
     f.Fprintf("</systems>\n");
     f.Fprintf("</galaxy>\n");
 }
@@ -259,7 +260,7 @@ void Galaxy::writeGalaxy(VSFile &f) const {
     f.Fprintf("</systems>\n");
     if (planet_types) {
         f.Fprintf("<planets>\n");
-        planet_types->writeSector(f, 1, "planet", NULL);
+        planet_types->writeSector(f, 1, "planet", nullptr);
         f.Fprintf("</planets>\n");
     }
     f.Fprintf("</galaxy>\n");
@@ -267,14 +268,14 @@ void Galaxy::writeGalaxy(VSFile &f) const {
 
 SGalaxy::SGalaxy(const char *configfile) {
     using namespace VSFileSystem;
-    subheirarchy = NULL;
+    subheirarchy = nullptr;
     VSFile f;
     VSError err = f.OpenReadOnly(configfile, UniverseFile);
     if (err <= Ok) {
         GalaxyXML::XML x;
         x.g = this;
 
-        XML_Parser parser = XML_ParserCreate(NULL);
+        XML_Parser parser = XML_ParserCreate(nullptr);
         XML_SetUserData(parser, &x);
         XML_SetElementHandler(parser, &GalaxyXML::beginElement, &GalaxyXML::endElement);
         XML_Parse(parser, (f.ReadFull()).c_str(), f.Size(), 1);
@@ -422,6 +423,9 @@ bool Galaxy::setPlanetVariable(const string &name, const string &value) {
     return true;
 }
 
+void Galaxy::addPlanetSection(const std::vector<string> &section) {
+}
+
 bool Galaxy::setPlanetVariable(const string &section, const string &name, const string &value) {
     if (!planet_types) {
         return false;
@@ -549,6 +553,13 @@ void Galaxy::setupPlanetTypeMaps() {
 Galaxy::Galaxy(const SGalaxy &g) : SGalaxy(g) {
     planet_types = getInitialPlanetTypes();
     setupPlanetTypeMaps();
+}
+
+Galaxy::~Galaxy() {
+    if (planet_types != nullptr) {
+        delete planet_types;
+        planet_types = nullptr;
+    }
 }
 
 Galaxy::Galaxy(const char *configfile) : SGalaxy(configfile) {
