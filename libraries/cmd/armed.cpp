@@ -205,12 +205,29 @@ void Armed::ActivateGuns(const WeaponInfo *sz, bool ms) {
 void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    if (unit->cloak.Active() && !configuration()->weapons.can_fire_in_cloak) {
-        VS_LOG(trace, (boost::format("%1%: can't fire while cloaked") % __FUNCTION__));
+    static boost::optional<bool> can_fire_in_cloak;
+    if (can_fire_in_cloak == boost::none) {
+        can_fire_in_cloak = configuration()->weapons.can_fire_in_cloak;
+    }
+    static boost::optional<bool> can_fire_in_spec;
+    if (can_fire_in_spec == boost::none) {
+        can_fire_in_spec = configuration()->weapons.can_fire_in_spec;
+    }
+    static boost::optional<bool> verbose_debug;
+    if (verbose_debug == boost::none) {
+        verbose_debug = configuration()->logging.verbose_debug;
+    }
+
+    if (unit->cloak.Active() && !can_fire_in_cloak) {
+        if (verbose_debug) {
+            VS_LOG(trace, (boost::format("%1%: can't fire while cloaked") % __FUNCTION__));
+        }
         UnFire();
         return;
-    } else if (unit->ftl_drive.Enabled() && !configuration()->weapons.can_fire_in_spec) {
-        VS_LOG(trace, (boost::format("%1%: can't fire while in SPEC flight") % __FUNCTION__));
+    } else if (unit->ftl_drive.Enabled() && !can_fire_in_spec) {
+        if (verbose_debug) {
+            VS_LOG(trace, (boost::format("%1%: can't fire while in SPEC flight") % __FUNCTION__));
+        }
         UnFire();
         return;
     }
@@ -223,7 +240,9 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
         unsigned int index = counter;
         Mount *i = &mounts[index];
         if (i->status != Mount::ACTIVE) {
-            VS_LOG(trace, (boost::format("%1%: mount %2% is inactive") % __FUNCTION__ % counter));
+            if (verbose_debug) {
+                VS_LOG(trace, (boost::format("%1%: mount %2% is inactive") % __FUNCTION__ % counter));
+            }
             continue;
         }
         if (i->bank == true) {
@@ -256,7 +275,8 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
         const bool locked_missile = (mis && locked_on && lockable_weapon);
         const bool missile_and_want_to_fire_missiles = (mis && (weapon_type_bitmask & ROLES::FIRE_MISSILES));
         const bool gun_and_want_to_fire_guns = ((!mis) && (weapon_type_bitmask & ROLES::FIRE_GUNS));
-        if (configuration()->logging.verbose_debug && missile_and_want_to_fire_missiles && locked_missile) {
+
+        if (verbose_debug && missile_and_want_to_fire_missiles && locked_missile) {
             VS_LOG(important_info, (boost::format("%1%: about to fire locked missile %2%") % __FUNCTION__ % counter));
         }
         bool want_to_fire = (fire_non_autotrackers || autotracking_gun || locked_missile) &&
