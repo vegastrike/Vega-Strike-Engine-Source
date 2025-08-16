@@ -1,4 +1,7 @@
 name: 'MacOS-Release'
+permissions:
+    contents: read
+    pull-requests: read
 
 on:
   release:

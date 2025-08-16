@@ -1,4 +1,7 @@
 name: Windows-Release
+permissions:
+    contents: read
+    pull-requests: read
 
 # Controls when the action will run.
 on:
