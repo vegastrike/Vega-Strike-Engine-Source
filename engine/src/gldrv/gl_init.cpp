@@ -463,7 +463,7 @@ void init_opengl_extensions() {
         VS_LOG(trace, "OpenGL::S3TC Texture Compression supported");
         //should be true;
     } else {
-        configuration().graphics.s3tc = false;
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.s3tc = false;
         VS_LOG(info, "OpenGL::S3TC Texture Compression unsupported");
     }
     if ((glMultiTexCoord2fARB_p && glMultiTexCoord4fARB_p && glClientActiveTextureARB_p && glActiveTextureARB_p)
@@ -494,14 +494,14 @@ void init_opengl_extensions() {
         VS_LOG(trace, "OpenGL::S3TC Texture Clamp-to-Edge supported");
         // should be true
     } else {
-        configuration().graphics.ext_clamp_to_edge = false;
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.ext_clamp_to_edge = false;
         VS_LOG(info, "OpenGL::S3TC Texture Clamp-to-Edge unsupported");
     }
     if (vsExtensionSupported("GL_ARB_texture_border_clamp") || vsExtensionSupported("GL_SGIS_texture_border_clamp")) {
         VS_LOG(trace, "OpenGL::S3TC Texture Clamp-to-Border supported");
         // should be true
     } else {
-        configuration().graphics.ext_clamp_to_border = false;
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.ext_clamp_to_border = false;
         VS_LOG(info, "OpenGL::S3TC Texture Clamp-to-Border unsupported");
     }
     if (vsExtensionSupported("GL_ARB_framebuffer_sRGB") || vsExtensionSupported("GL_EXT_framebuffer_sRGB")) {
@@ -575,8 +575,8 @@ static void initfov() {
 }
 
 static void Reshape(int x, int y) {
-    configuration().graphics.resolution_x = x;
-    configuration().graphics.resolution_y = y;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = x;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = y;
     VS_LOG(trace, (boost::format("Reshaping %1% %2%") % x % y));
 }
 
@@ -591,13 +591,13 @@ void GFXInit(int argc, char **argv) {
     glViewport(0, 0, configuration().graphics.resolution_x, configuration().graphics.resolution_y);
     static GFXColor clearcol = vs_config->getColor("space_background");;
     gl_options.wireframe = configuration().graphics.use_wireframe;
-    configuration().graphics.max_texture_dimension = configuration().graphics.max_texture_dimension;
-    configuration().graphics.max_movie_dimension = configuration().graphics.max_movie_dimension;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.max_texture_dimension = configuration().graphics.max_texture_dimension;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.max_movie_dimension = configuration().graphics.max_movie_dimension;
     bool textsupported =
             (vsExtensionSupported("GL_ARB_texture_non_power_of_two") || vsExtensionSupported("GL_ARB_texture_rectangle")
                     || vsExtensionSupported("GL_NV_texture_rectangle")) ? "true" : "false";
 
-    configuration().graphics.rect_textures = configuration().graphics.rect_textures ? true : textsupported;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.rect_textures = configuration().graphics.rect_textures ? true : textsupported;
 
     if (configuration().graphics.rect_textures) {
         VS_LOG(trace, "RECT textures supported");
@@ -615,12 +615,12 @@ void GFXInit(int argc, char **argv) {
     bool vidsupported = (configuration().graphics.rect_textures
                          || (vsExtensionSupported("GL_ARB_texture_non_power_of_two") && vsVendorMatch("nvidia")));
 
-    configuration().graphics.pot_video_textures = configuration().graphics.pot_video_textures ? true : vidsupported;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.pot_video_textures = configuration().graphics.pot_video_textures ? true : vidsupported;
 
     if (!configuration().graphics.pot_video_textures && configuration().graphics.rect_textures) {
         // Enforce max rect texture for movies, which use them
         if (configuration().graphics.max_movie_dimension > gl_options.max_rect_dimension) {
-            configuration().graphics.max_movie_dimension = gl_options.max_rect_dimension;
+            (const_cast<vega_config::Configuration &>(configuration())).graphics.max_movie_dimension = gl_options.max_rect_dimension;
         }
     }
 
@@ -634,13 +634,13 @@ void GFXInit(int argc, char **argv) {
     gl_options.mipmap = configuration().graphics.mipmap_detail;
     gl_options.compression = configuration().graphics.texture_compression;
     gl_options.Multitexture = configuration().graphics.reflection;
-    configuration().graphics.smooth_lines = configuration().graphics.smooth_lines;
-    configuration().graphics.smooth_points = configuration().graphics.smooth_points;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.smooth_lines = configuration().graphics.smooth_lines;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.smooth_points = configuration().graphics.smooth_points;
 
     gl_options.display_lists = configuration().graphics.displaylists;
-    configuration().graphics.s3tc = configuration().graphics.s3tc;
-    configuration().graphics.ext_clamp_to_edge = configuration().graphics.ext_clamp_to_edge;
-    configuration().graphics.ext_clamp_to_border = configuration().graphics.ext_clamp_to_border;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.s3tc = configuration().graphics.s3tc;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.ext_clamp_to_edge = configuration().graphics.ext_clamp_to_edge;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.ext_clamp_to_border = configuration().graphics.ext_clamp_to_border;
 
     glClearColor(clearcol.r, clearcol.g, clearcol.b, clearcol.a);
     winsys_set_reshape_func(Reshape);

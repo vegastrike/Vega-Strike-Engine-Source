@@ -315,7 +315,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         GFXHudMode(GFXFALSE);
         float tmp = configuration().graphics.fov;
         const float standard_fov = configuration().graphics.bases.fov;
-        configuration().graphics.fov = standard_fov;
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.fov = standard_fov;
         float tmp1 = _Universe->AccessCamera()->GetFov();
         _Universe->AccessCamera()->SetFov(standard_fov);
         Vector p, q, r;
@@ -361,7 +361,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         _Universe->AccessCamera()->UpdateGFX();
         SetupViewport();
         GFXHudMode(GFXTRUE);
-        configuration().graphics.fov = tmp;
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.fov = tmp;
         _Universe->AccessCamera()->SetFov(tmp1);
     }
 }
@@ -569,10 +569,10 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
     const int base_max_height = configuration().graphics.bases.max_height;
     if (base_max_width && base_max_height) {
         if (base_max_width < tmpx) {
-            configuration().graphics.resolution_x = base_max_width;
+            (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = base_max_width;
         }
         if (base_max_height < tmpy) {
-            configuration().graphics.resolution_y = base_max_height;
+            (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = base_max_height;
         }
     }
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha;
@@ -598,8 +598,8 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         text.Draw(text.GetText(), 0, true, false, automatte);
     }
     text.bgcol = tmpbg;
-    configuration().graphics.resolution_x = tmpx;
-    configuration().graphics.resolution_y = tmpy;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = tmpx;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = tmpy;
 }
 
 void RunPython(const char *filnam) {

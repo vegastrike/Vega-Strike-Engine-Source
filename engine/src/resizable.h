@@ -50,8 +50,8 @@ public:
         num = c.num;
         alloc = c.alloc;
         q = new ITEM[alloc]{};
-        for (unsigned int i = 0; i < c.size(); ++i) {
-            q[i] = c[i];
+        for (unsigned int i = 0; i < c.num; ++i) {
+            q[i] = const_cast<Resizable<ITEM>&>(c)[i];
         }
     }
 
@@ -66,7 +66,7 @@ private:
     void grow_storage(unsigned int n) {
         while (n + num > alloc) {
             alloc *= 2;
-            const std::vector<ITEM> tmp;
+            std::vector<ITEM> tmp;
             for (unsigned int i = 0; i < num; ++i) {
                 tmp.push_back(q[i]);
             }

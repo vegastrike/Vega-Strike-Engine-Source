@@ -1799,7 +1799,7 @@ void GameCockpit::Draw() {
                         && !configuration().graphics.hud.draw_arrow_on_pan_cam)
                         || (view == CP_PANTARGET
                                 && !configuration().graphics.hud.draw_arrow_on_pan_target) || (view == CP_CHASE && !configuration()
-                        ->graphics
+                        .graphics
                         .hud
                         .draw_arrow_on_chase_cam)) {
                 } else {

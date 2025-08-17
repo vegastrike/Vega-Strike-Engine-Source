@@ -125,7 +125,7 @@ void GFXVertexList::RefreshDisplayList() {
     if (configuration().graphics.vbo && !vbo_data) {
         if (glGenBuffersARB_p == nullptr || glBindBufferARB_p == nullptr || glBufferDataARB_p == nullptr || glMapBufferARB_p == nullptr
                 || glUnmapBufferARB_p == nullptr) {
-            configuration().graphics.vbo = false;
+            (const_cast<vega_config::Configuration &>(configuration())).graphics.vbo = false;
         } else {
             (*glGenBuffersARB_p)(1, (GLuint *) &vbo_data);
             if (changed & HAS_INDEX) {

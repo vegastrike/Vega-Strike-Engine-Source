@@ -46,7 +46,7 @@ TEST(configuration, const_Performance) {
     const auto start_time = std::chrono::system_clock::now();
     for (int i = 0; i < 1000000; ++i) {
         // ReSharper disable CppDFAUnreadVariable
-        const double asteroid_difficulty = configuration()->physics.asteroid_difficulty_dbl;
+        const double asteroid_difficulty = configuration().physics.asteroid_difficulty;
         // ReSharper restore CppDFAUnreadVariable
     }
     const auto end_time = std::chrono::system_clock::now();
@@ -60,7 +60,7 @@ TEST(configuration, static_optional_Performance) {
     static boost::optional<double> setting;
     for (int i = 0; i < 1000000; ++i) {
         if (setting == boost::none) {
-            setting = configuration()->physics.asteroid_difficulty_dbl;
+            setting = configuration().physics.asteroid_difficulty;
         }
     }
     const auto end_time = std::chrono::system_clock::now();
@@ -74,7 +74,7 @@ TEST(configuration, Performance_of_static_optional_with_get) {
     static boost::optional<double> setting;
     for (int i = 0; i < 1000000; ++i) {
         if (setting == boost::none) {
-            setting = configuration()->physics.asteroid_difficulty_dbl;
+            setting = configuration().physics.asteroid_difficulty;
         }
         setting.get();
     }

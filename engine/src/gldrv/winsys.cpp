@@ -216,7 +216,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
     if (configuration().graphics.rgb_pixel_format == "undefined") {
-        configuration().graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
     if ((configuration().graphics.rgb_pixel_format.length() == 3) && isdigit(configuration().graphics.rgb_pixel_format[0])
             && isdigit(configuration().graphics.rgb_pixel_format[1]) && isdigit(configuration().graphics.rgb_pixel_format[2])) {
@@ -331,7 +331,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
             VS_LOG_AND_FLUSH(error, "GDI Generic software driver reported, trying to reset.");
             SDL_ClearError();
             SDL_Quit();
-            configuration().graphics.gl_accelerated_visual = false;
+            (const_cast<vega_config::Configuration &>(configuration())).graphics.gl_accelerated_visual = false;
             return false;
         } else {
             VS_LOG(error, "GDI Generic software driver reported, reset failed.");
@@ -523,8 +523,8 @@ void winsys_process_events() {
 
                 case SDL_WINDOWEVENT_RESIZED:
 #if !(defined (_WIN32) && defined (SDL_WINDOWING ))
-                    configuration().graphics.resolution_x = event.window.data1;
-                    configuration().graphics.resolution_y = event.window.data2;
+                    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = event.window.data1;
+                    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = event.window.data2;
                     //setup_sdl_video_mode(argc, argv);
                     if (reshape_func) {
                         (*reshape_func)(event.window.data1,
