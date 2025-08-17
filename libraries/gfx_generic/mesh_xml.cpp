@@ -304,7 +304,7 @@ bool shouldreflect(string r) {
 }
 
 void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &attributes) {
-    const bool use_detail_texture = configuration()->graphics.use_detail_texture;
+    const bool use_detail_texture = configuration().graphics.use_detail_texture;
     //static bool flatshadeit=false;
     AttributeList::const_iterator iter;
     float flotsize = 1;
@@ -335,7 +335,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                             break;
                     }
                 }
-                const float detailscale = configuration()->graphics.detail_texture_scale;
+                const float detailscale = configuration().graphics.detail_texture_scale;
                 if (detailPlanes.size() < 6) {
                     detailPlanes.push_back(vec * detailscale);
                 }
@@ -359,7 +359,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                         setEnvMap(shouldreflect((*iter).value));
                         break;
                     case MeshXML::LIGHTINGON:
-                        setLighting(configuration()->graphics.force_lighting
+                        setLighting(configuration().graphics.force_lighting
                                 || XMLSupport::parse_bool((*iter).value));
                         break;
                     case MeshXML::CULLFACE:
@@ -470,7 +470,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                     case MeshXML::SHAREVERT:
                         xml->sharevert =
                                 (XMLSupport::parse_bool((*iter).value)
-                                        && configuration()->graphics.shared_vertex_arrays);
+                                        && configuration().graphics.shared_vertex_arrays);
                         break;
                     case MeshXML::POLYGONOFFSET:
                         this->polygon_offset = XMLSupport::parse_float((*iter).value);
@@ -529,7 +529,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                             if (!ind.empty()) {
                                 texindex = XMLSupport::parse_int(ind);
                             }
-                            const bool per_pixel_lighting = configuration()->graphics.per_pixel_lighting;
+                            const bool per_pixel_lighting = configuration().graphics.per_pixel_lighting;
                             if ((texindex == 0) || per_pixel_lighting) {
                                 while (xml->decals.size() <= texindex) {
                                     xml->decals.push_back(MeshXML::ZeTexture());
@@ -2056,9 +2056,9 @@ void Mesh::PostProcessLoading(MeshXML *xml, const vector<string> &textureOverrid
                 (ind.size() ? &ind[0] : 0));
     } else {
         const bool usopttmp =
-                (configuration()->graphics.optimize_vertex_arrays);
+                (configuration().graphics.optimize_vertex_arrays);
         const float optvertexlimit =
-                (configuration()->graphics.optimize_vertex_condition);
+                (configuration().graphics.optimize_vertex_condition);
         bool cachunk = false;
         if (usopttmp && (vertexlist.size() > 0)) {
             int numopt = totalvertexsize;

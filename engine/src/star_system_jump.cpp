@@ -51,7 +51,7 @@ void CacheJumpStar(bool destroy) {
     static bool initialized = false;
     if (!initialized) {
         initialized = true;
-        cached_ani = new Animation(configuration()->graphics.jump_gate.c_str(), true, 0.1, MIPMAP, false);
+        cached_ani = new Animation(configuration().graphics.jump_gate.c_str(), true, 0.1, MIPMAP, false);
     }
     if (destroy) {
         delete cached_ani;
@@ -105,12 +105,12 @@ unsigned int AddAnimation(const QVector &pos,
 }
 
 static unsigned int AddJumpAnimation(const QVector &pos, const float size, bool mvolatile = false) {
-    return AddAnimation(pos, size, mvolatile, configuration()->graphics.jump_gate, .95);
+    return AddAnimation(pos, size, mvolatile, configuration().graphics.jump_gate, .95);
 }
 
 void StarSystem::VolitalizeJumpAnimation(const int ani) {
     if (ani != -1) {
-        VolatileJumpAnimations.push_back(ResizeAni(JumpAnimations[ani].a, configuration()->graphics.jump_animation_shrink));
+        VolatileJumpAnimations.push_back(ResizeAni(JumpAnimations[ani].a, configuration().graphics.jump_animation_shrink));
         JumpAnimations[ani].a = NULL;
         AnimationNulls.push_back(ani);
     }
@@ -129,7 +129,7 @@ void StarSystem::DrawJumpStars() {
                         ->SetPosition(
                                 un->Position() + r.Cast() * un->rSize() * (pendingjump[kk]->delay + .25));
                 JumpAnimations[k].a->SetOrientation(p, q, r);
-                float dd = un->rSize() * configuration()->graphics.jump_gate_size
+                float dd = un->rSize() * configuration().graphics.jump_gate_size
                         * (un->jump_drive.Delay() - pendingjump[kk]->delay) / (float) un->jump_drive.Delay();
                 JumpAnimations[k].a->SetDimensions(dd, dd);
             }
@@ -161,7 +161,7 @@ void StarSystem::DrawJumpStars() {
 void StarSystem::DoJumpingComeSightAndSound(Unit *un) {
     Vector p, q, r;
     un->GetOrientation(p, q, r);
-    unsigned int myani = AddJumpAnimation(un->LocalPosition(), un->rSize() * configuration()->graphics.jump_gate_size, true);
+    unsigned int myani = AddJumpAnimation(un->LocalPosition(), un->rSize() * configuration().graphics.jump_gate_size, true);
     VolatileJumpAnimations[myani].a->SetOrientation(p, q, r);
 }
 

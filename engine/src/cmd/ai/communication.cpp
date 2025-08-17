@@ -316,7 +316,7 @@ std::string FSM::GetEdgesString(unsigned int curstate) {
     for (unsigned int i = 0; i < nodes[curstate].edges.size(); i++) {
         retval += tostring((int) ((i + 1) % 10)) + "." + nodes[nodes[curstate].edges[i]].messages[0] + "\n";
     }
-    if (configuration()->graphics.hud.print_request_docking) {
+    if (configuration().graphics.hud.print_request_docking) {
         retval += "0. Request Docking Clearance";
     }
     return retval;
@@ -492,7 +492,7 @@ RGBstring GetRelationshipRGBstring(float rel) {
 }
 
 unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &node) {
-    const float scale_rel_color = configuration()->graphics.hud.scale_relationship_color;
+    const float scale_rel_color = configuration().graphics.hud.scale_relationship_color;
     static std::string
             ownname_RGBstr = colToString(vs_config->getColor("player_name", GFXColor(0.0, 0.2, 1.0))).str; // bluish
     unsigned int dummy = 0;

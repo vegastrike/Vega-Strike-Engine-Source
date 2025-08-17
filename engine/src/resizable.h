@@ -25,10 +25,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
 
-#include <cstdlib>
-#include <string.h>
+#ifndef VEGA_STRIKE_ENGINE_SRC_RESIZABLE_H
+#define VEGA_STRIKE_ENGINE_SRC_RESIZABLE_H
+
+#include <cassert>
+#include <cstring>
+
+#include "vs_logging.h"
+
 template<class ITEM>
 class Resizable {
     unsigned int num;
@@ -38,26 +43,45 @@ public:
     Resizable() {
         num = 0;
         alloc = 16;
-        q = (ITEM *) malloc(sizeof(ITEM) * 16);
+        q = new ITEM[16]{};
     }
 
     Resizable(const Resizable<ITEM> &c) {
         num = c.num;
         alloc = c.alloc;
-        q = (ITEM *) malloc(sizeof(ITEM) * alloc);
-        memcpy(q, c.q, sizeof(ITEM) * num);
+        q = new ITEM[alloc]{};
+        for (unsigned int i = 0; i < c.size(); ++i) {
+            q[i] = c[i];
+        }
     }
 
     ~Resizable() {
-        free(q);
-        q = NULL;
+        delete[] q;
+        q = nullptr;
+        num = 0;
+        alloc = 0;
     }
 
-    void assert_free(unsigned int n) {
+private:
+    void grow_storage(unsigned int n) {
         while (n + num > alloc) {
             alloc *= 2;
-            q = (ITEM *) realloc(q, sizeof(ITEM) * alloc);
+            const std::vector<ITEM> tmp;
+            for (unsigned int i = 0; i < num; ++i) {
+                tmp.push_back(q[i]);
+            }
+            delete [] q;
+            q = new ITEM[alloc]{};
+            unsigned int i = 0;
+            for (auto item : tmp) {
+                q[i++] = item;
+            }
         }
+    }
+
+public:
+    void assert_free(unsigned int n) {
+        grow_storage(n);
     }
 
     void push_back_nocheck(const ITEM &a) {
@@ -70,19 +94,13 @@ public:
     }
 
     void push_back(const ITEM &a) {
-        if (alloc < num + 1) {
-            alloc *= 2;
-            q = (ITEM *) realloc(q, sizeof(ITEM) * alloc);
-        }
+        grow_storage(1);
         q[num] = a;
         num++;
     }
 
     void push_back3(const ITEM aa[3]) {
-        if (alloc < num + 3) {
-            alloc *= 2;
-            q = (ITEM *) realloc(q, sizeof(ITEM) * alloc);
-        }
+        grow_storage(3);
         q[num] = aa[0];
         q[num + 1] = aa[1];
         q[num + 2] = aa[2];
@@ -90,10 +108,7 @@ public:
     }
 
     void push_back(const ITEM &aa, const ITEM &bb, const ITEM &cc) {
-        if (alloc < num + 3) {
-            alloc *= 2;
-            q = (ITEM *) realloc(q, sizeof(ITEM) * alloc);
-        }
+        grow_storage(3);
         q[num] = aa;
         q[num + 1] = bb;
         q[num + 2] = cc;
@@ -101,10 +116,7 @@ public:
     }
 
     void push_backN(const ITEM *aa, const unsigned int N) {
-        while (alloc < num + N) {
-            alloc *= 2;
-            q = (ITEM *) realloc(q, sizeof(ITEM) * alloc);
-        }
+        grow_storage(N);
         for (unsigned int i = 0; i < N; i++) {
             q[num + i] = aa[i];
         }
@@ -135,5 +147,19 @@ public:
     unsigned int size() {
         return num;
     }
-};
 
+    ITEM &operator[](unsigned int i) {
+        if (i >= num) {
+            VS_LOG(error, "out of bounds");
+        }
+        return q[i];
+    }
+
+    ITEM &at(unsigned int i) {
+        if (i >= num) {
+            VS_LOG(error, "out of bounds");
+        }
+        return q[i];
+    }
+};
+#endif // VEGA_STRIKE_ENGINE_SRC_RESIZABLE_H

@@ -127,7 +127,7 @@ int GetModeFromName(const char *input_buffer) {
 extern bool CheckAccessory(Unit *);
 
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg) {
-    const bool forceit = configuration()->graphics.force_one_one_shield_blend;
+    const bool forceit = configuration().graphics.force_one_one_shield_blend;
     xml->shieldmesh = Mesh::LoadMesh(filename, Vector(scale, scale, scale), faction, fg);
     if (xml->shieldmesh && forceit) {
         xml->shieldmesh->SetBlendMode(ONE, ONE, true);

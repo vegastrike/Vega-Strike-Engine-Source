@@ -283,8 +283,8 @@ void BubbleDisplay::DrawTrack(const Sensor &sensor,
 void BubbleDisplay::DrawTargetMarker(const Vector &position, const GFXColor &color, float trackSize) {
     // Split octagon
     float size = 3.0 * std::max(trackSize, 3.0f);
-    float xsize = size / configuration()->graphics.resolution_x;
-    float ysize = size / configuration()->graphics.resolution_y;
+    float xsize = size / configuration().graphics.resolution_x;
+    float ysize = size / configuration().graphics.resolution_y;
 
     Impl::LineElements::value_type base_index = Impl::LineElements::value_type(impl->lines.size());
 
@@ -322,8 +322,8 @@ void BubbleDisplay::DrawBackground(const ViewArea &radarView, float trackSize) {
 
     // Split octagon
     float size = 3.0 * std::max(trackSize, 3.0f);
-    float xground = size / configuration()->graphics.resolution_x;
-    float yground = size / configuration()->graphics.resolution_y;
+    float xground = size / configuration().graphics.resolution_x;
+    float yground = size / configuration().graphics.resolution_y;
     Vector center = radarView.Scale(Vector(0.0, 0.0, 0.0));
 
     Impl::LineElements::value_type base_index = Impl::LineElements::value_type(impl->lines.size());

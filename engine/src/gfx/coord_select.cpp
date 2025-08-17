@@ -55,8 +55,8 @@ void CoordinateSelect::MouseMoveHandle(KBSTATE, int x, int y, int, int, int) {
 CoordinateSelect::CoordinateSelect(QVector start) : LocSelAni("locationselect.ani", true, .5, MIPMAP, true),
         LocalPosition(start) {
     CrosshairSize = 2;
-    CoordinateSelectmousex = configuration()->graphics.resolution_x / 2;
-    CoordinateSelectmousey = configuration()->graphics.resolution_y / 2;
+    CoordinateSelectmousex = configuration().graphics.resolution_x / 2;
+    CoordinateSelectmousey = configuration().graphics.resolution_y / 2;
     CoordinateSelectChange = 1;
 }
 
@@ -90,7 +90,7 @@ void CoordinateSelect::UpdateMouse() {
         LocalPosition = LocalPosition - CamPos;
         float distance = sqrt(CamR.Dot(LocalPosition));         //distance out into z...straight line...
         //make it a ratio btw top and bottom.... for near and far;
-        float ratio = float(configuration()->graphics.resolution_y - CoordinateSelectmousey) / configuration()->graphics.resolution_y;
+        float ratio = float(configuration().graphics.resolution_y - CoordinateSelectmousey) / configuration().graphics.resolution_y;
         float tmp, n, f;
         GFXGetFrustumVars(true, &tmp, &tmp, &tmp, &tmp, &n, &f);         ///unkind call :-D
         tmp = n + ratio * ratio * ratio * (f - n);           //how far n^3 law

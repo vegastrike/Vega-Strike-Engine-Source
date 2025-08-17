@@ -117,15 +117,15 @@ void EnergyContainer::Load(std::string unit_key) {
 
     switch(type) {
         case ComponentType::Fuel:
-        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FUEL_CAPACITY, std::string("0.0")), configuration()->components.fuel.factor);
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FUEL_CAPACITY, std::string("0.0")), configuration().components.fuel.factor);
         break;
 
         case ComponentType::Capacitor:
-        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, CAPACITOR, std::string("0.0")), configuration()->components.energy.factor);
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, CAPACITOR, std::string("0.0")), configuration().components.energy.factor);
         break;
 
         case ComponentType::FtlCapacitor:
-        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FTL_CAPACITOR, std::string("0.0")), configuration()->components.ftl_energy.factor);
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FTL_CAPACITOR, std::string("0.0")), configuration().components.ftl_energy.factor);
         break;
 
         default: // This really can't happen
@@ -142,15 +142,15 @@ void EnergyContainer::Load(std::string unit_key) {
 void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const {
     switch(type) {
         case ComponentType::Fuel:
-        unit[FUEL_CAPACITY] = level.Serialize(configuration()->components.fuel.factor);
+        unit[FUEL_CAPACITY] = level.Serialize(configuration().components.fuel.factor);
         break;
 
         case ComponentType::Capacitor:
-        unit[CAPACITOR] = level.Serialize(configuration()->components.energy.factor);
+        unit[CAPACITOR] = level.Serialize(configuration().components.energy.factor);
         break;
 
         case ComponentType::FtlCapacitor:
-        unit[FTL_CAPACITOR] = level.Serialize(configuration()->components.ftl_energy.factor);
+        unit[FTL_CAPACITOR] = level.Serialize(configuration().components.ftl_energy.factor);
         break;
 
         default: // This really can't happen

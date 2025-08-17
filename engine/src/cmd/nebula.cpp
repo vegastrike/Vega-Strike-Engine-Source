@@ -155,7 +155,7 @@ static void Nebula_endElement(void *Userdata, const XML_Char *) {
 void Nebula::LoadXML(const char *filename) {
     VSFile f;
     VSError err = f.OpenReadOnly(filename, UnitFile);
-    const bool usefog = configuration()->graphics.fog;
+    const bool usefog = configuration().graphics.fog;
     if (err > Ok || !usefog) {
         if (err <= Ok) {
             f.Close();
@@ -190,7 +190,7 @@ void Nebula::UpdatePhysics2(const Transformation &trans,
         const Vector &CumulativeVelocity,
         bool ResolveLast,
         UnitCollection *uc) {
-    const float nebdelta = configuration()->graphics.fog_time;
+    const float nebdelta = configuration().graphics.fog_time;
     lastfadein = fadeinvalue;
     fadeinvalue -= nebdelta * simulation_atom_var;
     if (fadeinvalue < 0) {
@@ -226,8 +226,8 @@ void Nebula::UpdatePhysics2(const Transformation &trans,
 }
 
 void Nebula::PutInsideCam(int i) {
-    const float nebdelta = configuration()->graphics.fog_time;
-    const float fadeinrate = configuration()->graphics.fog_fade_in_percent;
+    const float nebdelta = configuration().graphics.fog_time;
+    const float fadeinrate = configuration().graphics.fog_fade_in_percent;
     if (_Universe->AccessCamera() == _Universe->AccessCamera(i)) {
         fadeinvalue += (1 + fadeinrate) * nebdelta * simulation_atom_var;
         if (fadeinvalue > 1) {

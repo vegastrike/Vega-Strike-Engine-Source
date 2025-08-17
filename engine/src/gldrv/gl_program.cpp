@@ -416,9 +416,9 @@ int getDefaultProgram() {
 
 // THIS IS STUPID,  Also why is lofi not configurable ?
 #if defined(__APPLE__) && defined (__MACH__)
-        hifiProgramName = configuration()->graphics.mac_shader_name;
+        hifiProgramName = configuration().graphics.mac_shader_name;
 #else
-        hifiProgramName = configuration()->graphics.shader_name;
+        hifiProgramName = configuration().graphics.shader_name;
 #endif
 // END STUPID
 
@@ -551,7 +551,7 @@ GameSpeed GFXGetFramerate() {
 
 bool GFXShaderReloaded() {
     bool retval = programChanged;
-    if (configuration()->graphics.framerate_changes_shader) {
+    if (configuration().graphics.framerate_changes_shader) {
         switch (GFXGetFramerate()) {
             case TOOSLOW:
                 if (defaultprog) {

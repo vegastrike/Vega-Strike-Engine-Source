@@ -65,9 +65,9 @@ Mount::Mount() {
     processed = Mount::PROCESSED;
     sound = -1;
     last_sound_refire_time = 0.0;
-    const float xyscalestat = configuration()->graphics.weapon_xyscale;
+    const float xyscalestat = configuration().graphics.weapon_xyscale;
 
-    const float zscalestat = configuration()->graphics.weapon_zscale;
+    const float zscalestat = configuration().graphics.weapon_zscale;
     xyscale = xyscalestat;
     zscale = zscalestat;
 }
@@ -108,9 +108,9 @@ Mount::Mount(const string &filename, int am, int vol, float xyscale, float zscal
     maxfunctionality = maxfunc;
     static WeaponInfo wi(WEAPON_TYPE::BEAM);
     size = as_integer(MOUNT_SIZE::NOWEAP);
-    const float xyscalestat = configuration()->graphics.weapon_xyscale;
+    const float xyscalestat = configuration().graphics.weapon_xyscale;
 
-    const float zscalestat = configuration()->graphics.weapon_zscale;
+    const float zscalestat = configuration().graphics.weapon_zscale;
     if (xyscale == -1) {
         xyscale = xyscalestat;
     }
@@ -251,7 +251,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
     if (time_to_lock > 0) {
         target = NULL;
     }
-    const bool lock_disrupted_by_false_fire = configuration()->physics.out_of_arc_fire_disrupts_lock;
+    const bool lock_disrupted_by_false_fire = configuration().physics.out_of_arc_fire_disrupts_lock;
     if (lock_disrupted_by_false_fire) {
         time_to_lock = type->lock_time;
     }
@@ -270,7 +270,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
         Matrix mat;
         tmp.to_matrix(mat);
         mat.p = Transform(mat, (type->offset + Vector(0, 0, zscale)).Cast());
-        const bool firemissingautotrackers = configuration()->physics.fire_missing_autotrackers;
+        const bool firemissingautotrackers = configuration().physics.fire_missing_autotrackers;
         if (autotrack && NULL != target) {
             if (!AdjustMatrix(mat, velocity, target, type->speed, autotrack >= 2, trackingcone)) {
                 if (!firemissingautotrackers) {
@@ -288,7 +288,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 ammo--;
             }
         } else {
-            const bool reduce_beam_ammo = configuration()->physics.reduce_beam_ammo;
+            const bool reduce_beam_ammo = configuration().physics.reduce_beam_ammo;
             if (ammo > 0 && reduce_beam_ammo) {
                 ammo--;
             }
@@ -318,7 +318,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 break;
             }
             case WEAPON_TYPE::PROJECTILE:
-                const bool match_speed_with_target = configuration()->physics.match_speed_with_target;
+                const bool match_speed_with_target = configuration().physics.match_speed_with_target;
                 string skript = /*string("ai/script/")+*/ type->file + string(".xai");
                 VSError err = LookForFile(skript, AiFile);
                 if (err <= Ok) {

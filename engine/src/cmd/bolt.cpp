@@ -109,7 +109,7 @@ void Bolt::DrawAllBolts() {
     GFXTextureCoordGenMode(0, NO_GEN, nullptr, nullptr);
 
     BLENDFUNC bsrc, bdst;
-    if (configuration()->graphics.blend_guns) {
+    if (configuration().graphics.blend_guns) {
         GFXBlendMode(bsrc = ONE, bdst = ONE);
     } else {
         GFXBlendMode(bsrc = ONE, bdst = ZERO);

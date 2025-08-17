@@ -193,7 +193,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             }
         } else {
             // Use AutoDocker if docking clearance on target, otherwise use AutoPilot
-            const bool autodock = configuration()->test.autodocker;
+            const bool autodock = configuration().test.autodocker;
             Order *autoNavigator = NULL;
             if (autodock) {
                 Unit *station = parent->Target();
@@ -450,7 +450,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
     static unsigned int counter = 0;
     counter++;
     if (SSCK.jumpkey) {
-        const float jump_key_delay = configuration()->general.jump_key_delay;
+        const float jump_key_delay = configuration().general.jump_key_delay;
         if ((counter - last_jumped) > static_cast<unsigned>(jump_key_delay / SIMULATION_ATOM) || last_jumped == 0) {
             last_jumped = counter;
             parent->ActivateJumpDrive();

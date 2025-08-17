@@ -292,7 +292,7 @@ string VegaConfig::getVariable(configNode *section, string name, string defaultv
     static bool shouldwarn = true;
     if (!foundshouldwarn) {
         if (name != "debug_config") {
-            shouldwarn = configuration()->general.debug_config;
+            shouldwarn = configuration().general.debug_config;
             foundshouldwarn = true;
         }
     }

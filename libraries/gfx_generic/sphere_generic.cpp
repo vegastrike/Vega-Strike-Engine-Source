@@ -309,7 +309,7 @@ CityLights::CityLights(float radius,
     wrapx = zzwrapx;
     wrapy = zzwrapy;
     static FILTER filter =
-            static_cast<FILTER>(configuration()->graphics.city_light_filter);
+            static_cast<FILTER>(configuration().graphics.city_light_filter);
     InitSphere(radius,
             stacks,
             slices,

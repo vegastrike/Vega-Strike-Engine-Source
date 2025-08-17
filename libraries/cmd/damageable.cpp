@@ -100,8 +100,8 @@ void Damageable::ApplyDamage(const Vector &pnt,
     InflictedDamage inflicted_damage(3);
 
     //We also do the following lock on client side in order not to display shield hits
-    const bool no_dock_damage = configuration()->physics.no_damage_to_docked_ships;
-    const bool apply_difficulty_enemy_damage = configuration()->physics.difficulty_based_enemy_damage;
+    const bool no_dock_damage = configuration().physics.no_damage_to_docked_ships;
+    const bool apply_difficulty_enemy_damage = configuration().physics.difficulty_based_enemy_damage;
 
     // Stop processing if the affected unit isn't this unit
     // How could this happen? Why even have two parameters (this and affected_unit)???
@@ -138,7 +138,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
         // Anger Management
         float inflicted_armor_damage = inflicted_damage.inflicted_damage_by_layer[1];
-        int anger = inflicted_armor_damage ? configuration()->ai.hull_damage_anger : configuration()->ai.shield_damage_anger;
+        int anger = inflicted_armor_damage ? configuration().ai.hull_damage_anger : configuration().ai.shield_damage_anger;
 
         // If we damage the armor, we do this 10 times by default
         for (int i = 0; i < anger; ++i) {
@@ -196,8 +196,8 @@ void Damageable::ApplyDamage(const Vector &pnt,
         }
 
         // Eject cargo
-        const float cargo_eject_percent = configuration()->physics.ejection.eject_cargo_percent;
-        const uint32_t max_dump_cargo = configuration()->physics.ejection.max_dumped_cargo;
+        const float cargo_eject_percent = configuration().physics.ejection.eject_cargo_percent;
+        const uint32_t max_dump_cargo = configuration().physics.ejection.max_dumped_cargo;
         uint32_t dumped_cargo = 0;
 
         for (unsigned int i = 0; i < unit->numCargo(); ++i) {
@@ -210,9 +210,9 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
         // Eject Pilot
         // Can't use this as we can't reach negative hull damage
-//        const float hull_dam_to_eject = configuration()->physics.ejection.hull_damage_to_eject;
-        const float auto_eject_percent = configuration()->physics.ejection.auto_eject_percent;
-        const bool player_autoeject = configuration()->physics.ejection.player_auto_eject;
+//        const float hull_dam_to_eject = configuration().physics.ejection.hull_damage_to_eject;
+        const float auto_eject_percent = configuration().physics.ejection.auto_eject_percent;
+        const bool player_autoeject = configuration().physics.ejection.player_auto_eject;
 
         if (shot_at_is_player) {
             if (player_autoeject
@@ -277,8 +277,8 @@ void Damageable::ApplyDamage(const Vector &pnt,
     }
 
     // Only happens if we crossed the threshold in this attack
-    if (previous_hull_percent >= configuration()->ai.hull_percent_for_comm &&
-            unit->hull.Percent() < configuration()->ai.hull_percent_for_comm &&
+    if (previous_hull_percent >= configuration().ai.hull_percent_for_comm &&
+            unit->hull.Percent() < configuration().ai.hull_percent_for_comm &&
             (shooter_is_player || shot_at_is_player)) {
         Unit *computer_ai = nullptr;
         Unit *player = nullptr;
@@ -299,7 +299,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
                     ai_is_unit && player_is_unit) {
                 unsigned char gender;
                 vector<Animation *> *anim = computer_ai->pilot->getCommFaces(gender);
-                if (shooter_is_player && configuration()->ai.assist_friend_in_need) {
+                if (shooter_is_player && configuration().ai.assist_friend_in_need) {
                     AllUnitsCloseAndEngage(player, computer_ai->faction);
                 }
                 if (unit->hull.Percent() > 0 || !shooter_cockpit) {
@@ -323,7 +323,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
     // TODO: lib_damage rewrite non-lethal
     // Note: we really want a complete rewrite together with the modules sub-system
     // Non-lethal/Disabling Weapon code here
-    /*const float disabling_constant = configuration()->physics.disabling_weapon_constant;
+    /*const float disabling_constant = configuration().physics.disabling_weapon_constant;
     if (hull > 0)
         pImage->LifeSupportFunctionality += disabling_constant*damage/hull;
     if (pImage->LifeSupportFunctionality < 0) {
@@ -353,7 +353,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
 
     // It's actually easier to read this condition than the equivalent form
-    if (!(hull_damage || (configuration()->physics.system_damage_on_armor && armor_damage))) {
+    if (!(hull_damage || (configuration().physics.system_damage_on_armor && armor_damage))) {
         return;
     }
 
@@ -373,7 +373,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     // indiscriminate is a fraction (25% by default).
     // Damage is calculated as 0.25 * rand + 0.75 * (hull_damage)/(current_hull)
     // Therefore,
-    double indiscriminate_system_destruction = configuration()->physics.indiscriminate_system_destruction;
+    double indiscriminate_system_destruction = configuration().physics.indiscriminate_system_destruction;
     double random_damage_factor = indiscriminate_system_destruction * randomDouble();
     double hull_damage_modifier = 1 - indiscriminate_system_destruction;
     double hull_damage_factor = hull_damage_modifier * (1 - hull_damage / unit->hull.Get());
@@ -385,7 +385,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     // The following code needs to be renabled and placed somewhere
     // Non-lethal/Disabling Weapon code here
     // TODO: enable
-    /*const float disabling_constant = configuration()->physics.disabling_weapon_constant;
+    /*const float disabling_constant = configuration().physics.disabling_weapon_constant;
     if (hull > 0)
       pImage->LifeSupportFunctionality += disabling_constant*damage/hull;
     if (pImage->LifeSupportFunctionality < 0) {
@@ -399,7 +399,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
 
     // TODO: Same condition as DamageRandomSystem - move up and merge
-    if (!(hull_damage || (configuration()->physics.system_damage_on_armor && armor_damage))) {
+    if (!(hull_damage || (configuration().physics.system_damage_on_armor && armor_damage))) {
         return;
     }
 
@@ -415,7 +415,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
         return;
     }
 
-    const std::string restricted_items = configuration()->physics.indestructible_cargo_items;
+    const std::string restricted_items = configuration().physics.indestructible_cargo_items;
     int cargo_to_damage_index = rand() % unit->numCargo();
     Cargo &cargo = unit->GetCargo(cargo_to_damage_index);
     const std::string &cargo_category = cargo.GetCategory();
@@ -435,7 +435,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     cargo.SetCategory("upgrades/Damaged/" + cargo_category.substr(prefix_length));
 
     // TODO: find a better name for whatever this is. Right now it's not not downgrade
-    if (configuration()->physics.separate_system_flakiness_component) {
+    if (configuration().physics.separate_system_flakiness_component) {
         return;
     }
 
@@ -492,13 +492,13 @@ bool Damageable::flickerDamage() {
     static double counter = getNewTime();
 
     float diff = getNewTime() - counter;
-    if (diff > configuration()->graphics.glow_flicker.flicker_time) {
+    if (diff > configuration().graphics.glow_flicker.flicker_time) {
         counter = getNewTime();
         diff = 0;
     }
-    float tmpflicker = configuration()->graphics.glow_flicker.flicker_time * damagelevel;
-    if (tmpflicker < configuration()->graphics.glow_flicker.min_flicker_cycle) {
-        tmpflicker = configuration()->graphics.glow_flicker.min_flicker_cycle;
+    float tmpflicker = configuration().graphics.glow_flicker.flicker_time * damagelevel;
+    if (tmpflicker < configuration().graphics.glow_flicker.min_flicker_cycle) {
+        tmpflicker = configuration().graphics.glow_flicker.min_flicker_cycle;
     }
     diff = fmod(diff, tmpflicker);
     //we know counter is somewhere between 0 and damage level
@@ -506,9 +506,9 @@ bool Damageable::flickerDamage() {
     unsigned int thus = ((unsigned int) (size_t) this) >> 2;
     thus = thus % ((unsigned int) tmpflicker);
     diff = fmod(diff + thus, tmpflicker);
-    if (configuration()->graphics.glow_flicker.flicker_off_time > diff) {
-        if (damagelevel > configuration()->graphics.glow_flicker.hull_for_total_dark) {
-            return rand() > RAND_MAX * GetElapsedTime() * configuration()->graphics.glow_flicker.num_times_per_second_on;
+    if (configuration().graphics.glow_flicker.flicker_off_time > diff) {
+        if (damagelevel > configuration().graphics.glow_flicker.hull_for_total_dark) {
+            return rand() > RAND_MAX * GetElapsedTime() * configuration().graphics.glow_flicker.num_times_per_second_on;
         } else {
             return true;
         }

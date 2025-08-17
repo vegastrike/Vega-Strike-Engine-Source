@@ -72,13 +72,13 @@ static unsigned int &getMouseButtonMask() {
 }
 
 static void biModifyMouseSensitivity(int &x, int &y, bool invert) {
-    int xrez = configuration()->graphics.resolution_x;
+    int xrez = configuration().graphics.resolution_x;
     static int
             whentodouble = XMLSupport::parse_int(vs_config->getVariable("joystick", "double_mouse_position", "1280"));
     static float factor = XMLSupport::parse_float(vs_config->getVariable("joystick", "double_mouse_factor", "2"));
     if (xrez >= whentodouble) {
-        x -= configuration()->graphics.resolution_x / 2;
-        y -= configuration()->graphics.resolution_y / 2;
+        x -= configuration().graphics.resolution_x / 2;
+        y -= configuration().graphics.resolution_y / 2;
         if (invert) {
             x = int(x / factor);
             y = int(y / factor);
@@ -86,13 +86,13 @@ static void biModifyMouseSensitivity(int &x, int &y, bool invert) {
             x = int(x * factor);
             y = int(y * factor);
         }
-        x += configuration()->graphics.resolution_x / 2;
-        y += configuration()->graphics.resolution_y / 2;
-        if (x > configuration()->graphics.resolution_x) {
-            x = configuration()->graphics.resolution_x;
+        x += configuration().graphics.resolution_x / 2;
+        y += configuration().graphics.resolution_y / 2;
+        if (x > configuration().graphics.resolution_x) {
+            x = configuration().graphics.resolution_x;
         }
-        if (y > configuration()->graphics.resolution_y) {
-            y = configuration()->graphics.resolution_y;
+        if (y > configuration().graphics.resolution_y) {
+            y = configuration().graphics.resolution_y;
         }
         if (x < 0) {
             x = 0;
@@ -134,20 +134,20 @@ using namespace VSFileSystem;
 std::vector<unsigned int> base_keyboard_queue;
 
 static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float *y) {
-    (*x) = (((float) (xbeforecalc * 2)) / configuration()->graphics.resolution_x) - 1;
-    (*y) = -(((float) (ybeforecalc * 2)) / configuration()->graphics.resolution_y) + 1;
+    (*x) = (((float) (xbeforecalc * 2)) / configuration().graphics.resolution_x) - 1;
+    (*y) = -(((float) (ybeforecalc * 2)) / configuration().graphics.resolution_y) + 1;
 }
 
 #define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
 
 static void SetupViewport() {
-    const int base_max_width = configuration()->graphics.bases.max_width;
-    const int base_max_height = configuration()->graphics.bases.max_height;
+    const int base_max_width = configuration().graphics.bases.max_width;
+    const int base_max_height = configuration().graphics.bases.max_height;
     if (base_max_width && base_max_height) {
-        int xrez = mymin(configuration()->graphics.resolution_x, base_max_width);
-        int yrez = mymin(configuration()->graphics.resolution_y, base_max_height);
-        int offsetx = (configuration()->graphics.resolution_x - xrez) / 2;
-        int offsety = (configuration()->graphics.resolution_y - yrez) / 2;
+        int xrez = mymin(configuration().graphics.resolution_x, base_max_width);
+        int yrez = mymin(configuration().graphics.resolution_y, base_max_height);
+        int offsetx = (configuration().graphics.resolution_x - xrez) / 2;
+        int offsety = (configuration().graphics.resolution_y - yrez) / 2;
         glViewport(offsetx, offsety, xrez, yrez);
     }
 }
@@ -178,7 +178,7 @@ void BaseInterface::Room::BaseObj::Draw(BaseInterface *base) {
 }
 
 static FILTER BlurBases() {
-    const bool blur_bases = configuration()->graphics.bases.blur_bases;
+    const bool blur_bases = configuration().graphics.bases.blur_bases;
     return blur_bases ? BILINEAR : NEAREST;
 }
 
@@ -256,7 +256,7 @@ void BaseInterface::Room::BaseVSMovie::SetTime(float t) {
 }
 
 void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base) {
-    const float AlphaTestingCutoff = configuration()->graphics.bases.alpha_test_cutoff;
+    const float AlphaTestingCutoff = configuration().graphics.bases.alpha_test_cutoff;
     GFXAlphaTest(GREATER, AlphaTestingCutoff);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXEnable(TEXTURE0);
@@ -313,9 +313,9 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
     Unit *un = base->caller.GetUnit();
     if (un) {
         GFXHudMode(GFXFALSE);
-        float tmp = configuration()->graphics.fov;
-        const float standard_fov = configuration()->graphics.bases.fov;
-        configuration()->graphics.fov = standard_fov;
+        float tmp = configuration().graphics.fov;
+        const float standard_fov = configuration().graphics.bases.fov;
+        configuration().graphics.fov = standard_fov;
         float tmp1 = _Universe->AccessCamera()->GetFov();
         _Universe->AccessCamera()->SetFov(standard_fov);
         Vector p, q, r;
@@ -328,7 +328,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         Matrix final;
         Matrix newmat = mat;
         newmat.p.k *= un->rSize();
-        newmat.p += QVector(0, 0, configuration()->graphics.znear);
+        newmat.p += QVector(0, 0, configuration().graphics.znear);
         newmat.p.i *= newmat.p.k;
         newmat.p.j *= newmat.p.k;
         MultMatrix(final, cam, newmat);
@@ -361,7 +361,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         _Universe->AccessCamera()->UpdateGFX();
         SetupViewport();
         GFXHudMode(GFXTRUE);
-        configuration()->graphics.fov = tmp;
+        configuration().graphics.fov = tmp;
         _Universe->AccessCamera()->SetFov(tmp1);
     }
 }
@@ -388,20 +388,20 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
     //<var name="base_locationmarker_textcolor_g" value="1.0"/>
     //<var name="base_locationmarker_textcolor_b" value="1.0"/>
     //<var name="base_drawlocationborders" value="false"/>
-    const bool enable_markers = configuration()->graphics.bases.enable_location_markers;
-    const bool draw_text = configuration()->graphics.bases.draw_location_text;
-    const bool draw_always = configuration()->graphics.bases.location_marker_draw_always;
+    const bool enable_markers = configuration().graphics.bases.enable_location_markers;
+    const bool draw_text = configuration().graphics.bases.draw_location_text;
+    const bool draw_always = configuration().graphics.bases.location_marker_draw_always;
     static float y_lower =
             -0.9;           //shows the offset on the lower edge of the screen (for the textline there) -> TODO: Should be defined globally somewhere
-    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha;
+    const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha;
     if (enable_markers) {
         float x, y, text_wid, text_hei;
         //get offset from config;
-        const float text_offset_x = configuration()->graphics.bases.location_marker_text_offset_x;
-        const float text_offset_y = configuration()->graphics.bases.location_marker_text_offset_y;
-        const float text_color_r = configuration()->graphics.bases.location_marker_text_color_r;
-        const float text_color_g = configuration()->graphics.bases.location_marker_text_color_g;
-        const float text_color_b = configuration()->graphics.bases.location_marker_text_color_b;
+        const float text_offset_x = configuration().graphics.bases.location_marker_text_offset_x;
+        const float text_offset_y = configuration().graphics.bases.location_marker_text_offset_y;
+        const float text_color_r = configuration().graphics.bases.location_marker_text_color_r;
+        const float text_color_g = configuration().graphics.bases.location_marker_text_color_g;
+        const float text_color_b = configuration().graphics.bases.location_marker_text_color_b;
         for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
             if (links[i]) {
                 if ((links[i]->alpha < 1) || (draw_always)) {
@@ -412,7 +412,7 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                     y = (links[i]->y + (links[i]->hei / 2));                         //get the center of the location
 
                     /* draw marker */
-                    const std::string spritefile_marker = configuration()->graphics.bases.location_marker_sprite;
+                    const std::string spritefile_marker = configuration().graphics.bases.location_marker_sprite;
                     if (!spritefile_marker.empty() && links[i]->text.find("XXX") != 0) {
                         static VSSprite *spr_marker = new VSSprite(spritefile_marker.c_str());
                         float wid, hei;
@@ -480,13 +480,13 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
         //for i
     }     //enable_markers
 
-    const bool draw_borders = configuration()->graphics.bases.draw_location_borders;
-    const bool debug_markers = configuration()->graphics.bases.enable_debug_markers;
+    const bool draw_borders = configuration().graphics.bases.draw_location_borders;
+    const bool debug_markers = configuration().graphics.bases.enable_debug_markers;
     if (draw_borders || debug_markers) {
         float x, y, text_wid, text_hei;
         //get offset from config;
-        const float text_offset_x = configuration()->graphics.bases.location_marker_text_offset_x;
-        const float text_offset_y = configuration()->graphics.bases.location_marker_text_offset_y;
+        const float text_offset_x = configuration().graphics.bases.location_marker_text_offset_x;
+        const float text_offset_y = configuration().graphics.bases.location_marker_text_offset_y;
         for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
             if (links[i]) {
                 //Debug marker
@@ -563,19 +563,19 @@ BaseInterface::Room::BaseTalk::BaseTalk(const std::string &msg, const std::strin
 }
 
 void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
-    int tmpx = configuration()->graphics.resolution_x;
-    int tmpy = configuration()->graphics.resolution_y;
-    const int base_max_width = configuration()->graphics.bases.max_width;
-    const int base_max_height = configuration()->graphics.bases.max_height;
+    int tmpx = configuration().graphics.resolution_x;
+    int tmpy = configuration().graphics.resolution_y;
+    const int base_max_width = configuration().graphics.bases.max_width;
+    const int base_max_height = configuration().graphics.bases.max_height;
     if (base_max_width && base_max_height) {
         if (base_max_width < tmpx) {
-            configuration()->graphics.resolution_x = base_max_width;
+            configuration().graphics.resolution_x = base_max_width;
         }
         if (base_max_height < tmpy) {
-            configuration()->graphics.resolution_y = base_max_height;
+            configuration().graphics.resolution_y = base_max_height;
         }
     }
-    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha;
+    const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha;
     GFXColor tmpbg = text.bgcol;
     bool automatte = (0 == tmpbg.a);
     if (automatte) {
@@ -598,8 +598,8 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         text.Draw(text.GetText(), 0, true, false, automatte);
     }
     text.bgcol = tmpbg;
-    configuration()->graphics.resolution_x = tmpx;
-    configuration()->graphics.resolution_y = tmpy;
+    configuration().graphics.resolution_x = tmpx;
+    configuration().graphics.resolution_y = tmpy;
 }
 
 void RunPython(const char *filnam) {
@@ -638,7 +638,7 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
         return;
     }
     curtime += GetElapsedTime() / getTimeCompression();
-    const float delay = configuration()->graphics.text_delay;
+    const float delay = configuration().graphics.text_delay;
     if ((std::find(active_talks.begin(), active_talks.end(),
             this) == active_talks.end())
             || (curchar >= message.size() && curtime > ((delay * message.size()) + 2))) {
@@ -658,7 +658,7 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
         return;         //do not do ANYTHING with 'this' after the previous statement...
     }
     if (curchar < message.size()) {
-        const float inbetween = configuration()->graphics.text_speed;
+        const float inbetween = configuration().graphics.text_speed;
         if (curtime > inbetween) {
             base->othtext.SetText(message.substr(0, ++curchar));
             curtime = 0;
@@ -835,8 +835,8 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
             while (count++ < links.size()) {
                 Link *curlink = links[base->curlinkindex++ % links.size()];
                 if (curlink) {
-                    int x = int((((curlink->x + (curlink->wid / 2)) + 1) / 2) * configuration()->graphics.resolution_x);
-                    int y = -int((((curlink->y + (curlink->hei / 2)) - 1) / 2) * configuration()->graphics.resolution_y);
+                    int x = int((((curlink->x + (curlink->wid / 2)) + 1) / 2) * configuration().graphics.resolution_x);
+                    int y = -int((((curlink->y + (curlink->hei / 2)) - 1) / 2) * configuration().graphics.resolution_y);
                     biModifyMouseSensitivity(x, y, true);
                     winsys_warp_pointer(x, y);
                     PassiveMouseOverWin(x, y);
@@ -886,8 +886,8 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
         curtext.col = GFXColor(inactivecolor[0], inactivecolor[1], inactivecolor[2], inactivecolor[3]);
         mousePointerStyle = MOUSE_POINTER_NORMAL;
     }
-    const bool draw_always = configuration()->graphics.bases.location_marker_draw_always;
-    const float defined_distance = configuration()->graphics.bases.location_marker_distance;
+    const bool draw_always = configuration().graphics.bases.location_marker_draw_always;
+    const float defined_distance = configuration().graphics.bases.location_marker_distance;
     if (!draw_always) {
         float cx, cy;
         float dist_cur2link;
@@ -1060,7 +1060,7 @@ void BaseInterface::InitCallbacks() {
     winsys_set_passive_motion_func(PassiveMouseOverWin);
     CurrentBase = this;
     CallComp = false;
-    const bool simulate_while_at_base = configuration()->physics.simulate_while_docked;
+    const bool simulate_while_at_base = configuration().physics.simulate_while_docked;
     if (!(simulate_while_at_base || _Universe->numPlayers() > 1)) {
         GFXLoop(base_main_loop);
     }
@@ -1334,7 +1334,7 @@ void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, in
                         + randyVector(-.5 * bas->rSize(), .5 * bas->rSize()));
                 playa->SetAngularVelocity(bas->AngularVelocity);
                 playa->SetOwner(bas);
-                const float velmul = configuration()->physics.eject_cargo_speed;
+                const float velmul = configuration().physics.eject_cargo_speed;
                 playa->SetVelocity(bas->Velocity * velmul + randyVector(-.25, .25).Cast());
             }
             playa->UnDock(bas);
@@ -1496,8 +1496,8 @@ void BaseInterface::Draw() {
     AnimationDraw();
 
     float x, y;
-    glViewport(0, 0, configuration()->graphics.resolution_x, configuration()->graphics.resolution_y);
-    const float base_text_background_alpha = configuration()->graphics.bases.text_background_alpha;
+    glViewport(0, 0, configuration().graphics.resolution_x, configuration().graphics.resolution_y);
+    const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha;
 
     curtext.GetCharSize(x, y);
     curtext.SetPos(-.99, -1 + (y * 1.5));
@@ -1524,7 +1524,7 @@ void BaseInterface::Draw() {
     }
     SetupViewport();
     EndGUIFrame(mousePointerStyle);
-    glViewport(0, 0, configuration()->graphics.resolution_x, configuration()->graphics.resolution_y);
+    glViewport(0, 0, configuration().graphics.resolution_x, configuration().graphics.resolution_y);
     Unit *un = caller.GetUnit();
     Unit *base = baseun.GetUnit();
     if (un && (!base)) {

@@ -331,7 +331,7 @@ void Texture::Load(const char *FileName,
     VSError err2 = VSFileSystem::FileNotFound;
     if (t) {
         if (t[0] != '\0') {
-            const bool use_alphamap = configuration()->graphics.bitmap_alphamap;
+            const bool use_alphamap = configuration().graphics.bitmap_alphamap;
             if (use_alphamap) {
                 err2 = f2.OpenReadOnly(t, TextureFile);
             }
@@ -493,7 +493,7 @@ void Texture::Load(const char *FileNameRGB,
     VSFile f1;
     VSError err1 = Unspecified;
     if (FileNameA) {
-        const bool use_alphamap = configuration()->graphics.bitmap_alphamap;
+        const bool use_alphamap = configuration().graphics.bitmap_alphamap;
         if (use_alphamap) {
             std::string tmp;
             err1 = f1.OpenReadOnly(FileNameA, TextureFile);
