@@ -76,6 +76,10 @@ private:
             for (auto item : tmp) {
                 q[i++] = item;
             }
+            for (; i < alloc; ++i) {
+                ITEM blank_item{};
+                q[i] = blank_item;
+            }
         }
     }
 
@@ -151,6 +155,8 @@ public:
     ITEM &operator[](unsigned int i) {
         if (i >= num) {
             VS_LOG(error, "out of bounds");
+            ITEM blank_item;
+            return blank_item;
         }
         return q[i];
     }
@@ -158,6 +164,8 @@ public:
     ITEM &at(unsigned int i) {
         if (i >= num) {
             VS_LOG(error, "out of bounds");
+            ITEM blank_item;
+            return blank_item;
         }
         return q[i];
     }
