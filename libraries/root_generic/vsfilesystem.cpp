@@ -871,9 +871,9 @@ void InitPaths(string conf, string subdir) {
     }
 
     const boost::filesystem::path config_file_path{datadir + "/config.json"};
-    configuration().load_config(config_file_path);
+    (const_cast<vega_config::Configuration&>(configuration())).load_config(config_file_path);
     const boost::filesystem::path config_file_path2{homedir + "/config.json"};
-    configuration().load_config(config_file_path2);
+    (const_cast<vega_config::Configuration&>(configuration())).load_config(config_file_path2);
 
     LoadConfig(std::move(subdir));
 
