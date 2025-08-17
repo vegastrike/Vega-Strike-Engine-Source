@@ -155,7 +155,7 @@ public:
     ITEM &operator[](unsigned int i) {
         if (i >= num) {
             VS_LOG(error, "out of bounds");
-            ITEM blank_item;
+            static ITEM blank_item;
             return blank_item;
         }
         return q[i];
@@ -164,7 +164,7 @@ public:
     ITEM &at(unsigned int i) {
         if (i >= num) {
             VS_LOG(error, "out of bounds");
-            ITEM blank_item;
+            static ITEM blank_item;
             return blank_item;
         }
         return q[i];
