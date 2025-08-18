@@ -268,7 +268,6 @@ public:
     float debris_mass{};
     float explosion_damage_center{};
     float explosion_damage_edge{};
-    float debris_time{};
     int eject_cargo_on_blowup{};
 
 /* Data Options */
