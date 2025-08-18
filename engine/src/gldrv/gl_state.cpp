@@ -165,10 +165,10 @@ void /*GFXDRVAPI*/ GFXEnable(const STATE state) {
             glEnable(GL_CULL_FACE);
             break;
         case SMOOTH:
-            if (configuration()->graphics.smooth_lines) {
+            if (configuration().graphics.smooth_lines) {
                 glEnable(GL_LINE_SMOOTH);
             }
-            if (configuration()->graphics.smooth_points) {
+            if (configuration().graphics.smooth_points) {
                 glEnable(GL_POINT_SMOOTH);
             }
             break;

@@ -116,9 +116,9 @@ string GetElMeshName(string name, string faction, char direction) {
 static void SetFogMaterialColor(Mesh *thus, const GFXColor &color, const GFXColor &dcolor) {
     GFXMaterial m{};
     setMaterialAmbient(m, 0.0);
-    setMaterialDiffuse(m, configuration()->graphics.atmosphere_diffuse * dcolor);
+    setMaterialDiffuse(m, configuration().graphics.atmosphere_diffuse * dcolor);
     setMaterialSpecular(m, 0.0);
-    setMaterialEmissive(m, configuration()->graphics.atmosphere_emissive * color);
+    setMaterialEmissive(m, configuration().graphics.atmosphere_emissive * color);
     m.power = 0;
     thus->SetMaterial(m);
 }
@@ -129,7 +129,7 @@ Mesh *MakeFogMesh(const AtmosphericFogMesh &f, float radius) {
     string nam = f.meshname + XMLSupport::tostring(count) + ".png";
     if (f.min_alpha != 0 || f.max_alpha != 255 || f.concavity != 0 || f.focus != .5 || f.tail_mode_start != -1
             || f.tail_mode_end != -1) {
-        const int rez = configuration()->graphics.atmosphere_texture_resolution;
+        const int rez = configuration().graphics.atmosphere_texture_resolution;
         unsigned char *tex = (unsigned char *) malloc(sizeof(char) * rez * 4);
         for (int i = 0; i < rez; ++i) {
             tex[i * 4] = 255;
@@ -245,7 +245,7 @@ Planet::Planet(QVector x,
     }
     bool wormhole = dest.size() != 0;
     if (wormhole) {
-        const std::string& wormhole_unit = configuration()->graphics.wormhole_unit;
+        const std::string& wormhole_unit = configuration().graphics.wormhole_unit;
         string stab(".stable");
         if (rand() > RAND_MAX * .99) {
             stab = ".unstable";
@@ -290,7 +290,7 @@ Planet::Planet(QVector x,
         wormhole = anytrue;
     }
     if (!wormhole) {
-        const int stacks = configuration()->graphics.planet_detail_level;
+        const int stacks = configuration().graphics.planet_detail_level;
         atmospheric = !(blendSrc == ONE && blendDst == ZERO);
         meshdata.push_back(new SphereMesh(radius,
                 stacks,
@@ -307,7 +307,7 @@ Planet::Planet(QVector x,
     }
     calculate_extent(false);
     if (wormhole) {
-        const float radscale = configuration()->physics.jump_mesh_radius_scale;
+        const float radscale = configuration().physics.jump_mesh_radius_scale;
         radius *= radscale;
         corner_min.i = corner_min.j = corner_min.k = -radius;
         corner_max.i = corner_max.j = corner_max.k = radius;
@@ -317,14 +317,14 @@ Planet::Planet(QVector x,
         }
     }
     if (ligh.size() > 0) {
-        const float bodyradius = configuration()->graphics.star_body_radius;
-        const bool drawglow = configuration()->graphics.draw_star_glow;
-        const bool drawstar = configuration()->graphics.draw_star_body;
-        const float glowradius = configuration()->graphics.star_glow_radius / bodyradius;
+        const float bodyradius = configuration().graphics.star_body_radius;
+        const bool drawglow = configuration().graphics.draw_star_glow;
+        const bool drawstar = configuration().graphics.draw_star_body;
+        const float glowradius = configuration().graphics.star_glow_radius / bodyradius;
         if (drawglow) {
             GFXColor c = getMaterialEmissive(ourmat);
-            const bool spec = configuration()->graphics.glow_ambient_star_light;
-            const bool diff = configuration()->graphics.glow_diffuse_star_light;
+            const bool spec = configuration().graphics.glow_ambient_star_light;
+            const bool diff = configuration().graphics.glow_diffuse_star_light;
             if (diff) {
                 c = ligh[0].ligh.GetProperties(DIFFUSE);
             }
@@ -334,7 +334,7 @@ Planet::Planet(QVector x,
 
             // TODO: Refactor the below section of code
             vector<string>
-                    shines = ParseDestinations(configuration()->graphics.star_shine);
+                    shines = ParseDestinations(configuration().graphics.star_shine);
             if (shines.empty()) {
                 shines.emplace_back("shine.ani");
             }
@@ -408,7 +408,7 @@ void Planet::InitPlanet(QVector x,
                         bool inside_out,
                         unsigned int lights_num,
                         const float days) {
-    const float bodyradius = configuration()->graphics.star_body_radius;
+    const float bodyradius = configuration().graphics.star_body_radius;
 
     if (lights_num) {
         radius *= bodyradius;
@@ -430,9 +430,9 @@ void Planet::InitPlanet(QVector x,
     this->radius = radius;
     this->gravity = gravity;
     this->days = days;
-    const float densityOfRock = configuration()->physics.density_of_rock;
-    const float densityOfJumpPoint = configuration()->physics.density_of_jump_point;
-    //const float massofplanet = configuration()->physics.mass_of_planet;
+    const float densityOfRock = configuration().physics.density_of_rock;
+    const float densityOfJumpPoint = configuration().physics.density_of_jump_point;
+    //const float massofplanet = configuration().physics.mass_of_planet;
     hull.Set((4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : densityOfJumpPoint));
     this->SetMass((4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : (densityOfJumpPoint / 100000)));
     SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent));     //behavior
@@ -441,8 +441,8 @@ void Planet::InitPlanet(QVector x,
     colTrees = nullptr;
     SetAngularVelocity(rotvel);
     // The docking port is 20% bigger than the planet
-    const float planetdockportsize = configuration()->dock.planet_dock_port_size;
-    const float planetdockportminsize = configuration()->dock.planet_dock_port_min_size;
+    const float planetdockportsize = configuration().dock.planet_dock_port_size;
+    const float planetdockportminsize = configuration().dock.planet_dock_port_min_size;
     if ((!atmospheric) && notJumppoint) {
         float dock = radius * planetdockportsize;
         if (dock - radius < planetdockportminsize) {
@@ -459,7 +459,7 @@ void Planet::InitPlanet(QVector x,
     }
     Unit *un = new Unit(tempname.c_str(), true, tmpfac);
 
-    const bool smartplanets = configuration()->physics.planets_can_have_subunits;
+    const bool smartplanets = configuration().physics.planets_can_have_subunits;
     if (un->name != string("LOAD_FAILED")) {
         cargo = un->cargo;
         CargoVolume = un->CargoVolume;
@@ -475,7 +475,7 @@ void Planet::InitPlanet(QVector x,
             un->SetTurretAI();              //allows adding planetary defenses, also allows launching fighters from planets, interestingly
             un->name = "Defense_grid";
         }
-        const bool neutralplanets = configuration()->physics.planets_always_neutral;
+        const bool neutralplanets = configuration().physics.planets_always_neutral;
         if (neutralplanets) {
             // TODO: Move to configuration()
             const int neutralfaction = FactionUtil::GetNeutralFaction();
@@ -503,7 +503,7 @@ void Planet::AddAtmosphere(const std::string &texture,
     }
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
-    const int stacks = configuration()->graphics.planet_detail_level;
+    const int stacks = configuration().graphics.planet_detail_level;
     meshdata.push_back(new SphereMesh(radius,
             stacks,
             stacks,
@@ -540,15 +540,15 @@ void Planet::AddCity(const std::string &texture,
     }
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
-    const float materialweight = configuration()->graphics.city_light_strength;
-    const float daymaterialweight = configuration()->graphics.day_city_light_strength;
+    const float materialweight = configuration().graphics.city_light_strength;
+    const float daymaterialweight = configuration().graphics.day_city_light_strength;
     GFXMaterial m{};
     setMaterialAmbient(m, 0.0);
     setMaterialDiffuse(m, materialweight);
     setMaterialSpecular(m, 0.0);
     setMaterialEmissive(m, daymaterialweight);
     m.power = 0.0;
-    const int stacks = configuration()->graphics.planet_detail_level;
+    const int stacks = configuration().graphics.planet_detail_level;
     meshdata.push_back(new CityLights(radius, stacks, stacks, texture.c_str(), numwrapx, numwrapy, inside_out, ONE, ONE,
             false, 0, M_PI, 0.0, 2 * M_PI, reverse_normals));
     meshdata.back()->setEnvMap(GFXFALSE);
@@ -598,7 +598,7 @@ void Planet::AddRing(const std::string &texture,
     }
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
-    int stacks = configuration()->graphics.planet_detail_level;
+    int stacks = configuration().graphics.planet_detail_level;
     if (slices > 0) {
         stacks = stacks;
         if (stacks < 3) {
@@ -723,7 +723,7 @@ void Planet::Draw(const Transformation &quat, const Matrix &m) {
         MatrixToVectors(cumulative_transformation_matrix, p, q, r, c);
         shine->SetOrientation(p, q, r);
         shine->SetPosition(c);
-        const int32_t num_shine_drawing = configuration()->graphics.num_times_to_draw_shine;
+        const int32_t num_shine_drawing = configuration().graphics.num_times_to_draw_shine;
         for (int32_t i = 0; i < num_shine_drawing; ++i) {
             shine->Draw();
         }

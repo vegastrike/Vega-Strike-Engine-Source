@@ -494,8 +494,8 @@ void PlaneDisplay::DrawTargetMarker(const Vector &head,
 
     // Diamond
     float size = 6.0 * std::max(trackSize, 1.0f);
-    float xsize = size / configuration()->graphics.resolution_x;
-    float ysize = size / configuration()->graphics.resolution_y;
+    float xsize = size / configuration().graphics.resolution_x;
+    float ysize = size / configuration().graphics.resolution_y;
 
 
     // Don't overflow the index type

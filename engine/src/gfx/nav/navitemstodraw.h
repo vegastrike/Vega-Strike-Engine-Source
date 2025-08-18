@@ -31,9 +31,9 @@
 //**********************************
 void NavigationSystem::DrawCursor(float x, float y, float wid, float hei, const GFXColor &col) {
     float sizex, sizey;
-    const bool modern_nav_cursor = configuration()->graphics.nav.modern_mouse_cursor;
+    const bool modern_nav_cursor = configuration().graphics.nav.modern_mouse_cursor;
     if (modern_nav_cursor) {
-        const std::string mouse_cursor_sprite = configuration()->graphics.nav.mouse_cursor_sprite;
+        const std::string mouse_cursor_sprite = configuration().graphics.nav.mouse_cursor_sprite;
         static VSSprite MouseVSSprite(mouse_cursor_sprite.c_str(), BILINEAR, GFXTRUE);
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
         GFXColorf(GUI_OPAQUE_WHITE());
@@ -71,7 +71,7 @@ void NavigationSystem::DrawCursor(float x, float y, float wid, float hei, const 
 //This draws the grid over the nav screen area
 //**********************************
 void NavigationSystem::DrawGrid(float &x1, float &x2, float &y1, float &y2, const GFXColor &col) {
-    if (!configuration()->graphics.hud.draw_nav_grid) {
+    if (!configuration().graphics.hud.draw_nav_grid) {
         return;
     }
     GFXColorf(col);

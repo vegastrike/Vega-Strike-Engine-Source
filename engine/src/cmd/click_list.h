@@ -41,7 +41,7 @@ private:
     UnitCollection *lastCollection;
     Unit *lastSelected;
 public:
-//gets passed in unnormalized mouse values btw 0 and configuration()->graphics.resolution_x&& configuration()->graphics.resolution_y
+//gets passed in unnormalized mouse values btw 0 and configuration().graphics.resolution_x&& configuration().graphics.resolution_y
     bool queryShip(int mouseX, int mouseY, Unit *); //returns if the ship's in iterator utilizes
     ClickList(StarSystem *parSystem, UnitCollection *parentIter);
 

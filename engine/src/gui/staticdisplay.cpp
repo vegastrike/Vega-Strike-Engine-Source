@@ -97,7 +97,7 @@ bool StaticDisplay::processCommand(const EventCommandId &command, Control *contr
 
 //Process wheel events for scrolling.
 bool StaticDisplay::processMouseDown(const InputEvent &event) {
-    const int zoominc = configuration()->general.wheel_increment_lines;
+    const int zoominc = configuration().general.wheel_increment_lines;
     if (m_scroller) {
         if (event.code == WHEELUP_MOUSE_BUTTON) {
             if (hitTest(event.loc)) {

@@ -48,7 +48,7 @@ static const double GLUT_WIDTH_HACK = 0.6;
 static const char SPACE_CHAR = ' ';
 
 bool useStroke() {
-    const bool tmp = configuration()->graphics.high_quality_font_computer;
+    const bool tmp = configuration().graphics.high_quality_font_computer;
     return !tmp;
 }
 
@@ -67,7 +67,7 @@ void Font::calcMetrics(void) {
     const double minimumStrokeWidth = 1.0;
 
     const double nonClippedStrokeWidth = size() * referenceStrokeWidth * strokeWeight()
-            * (configuration()->graphics.resolution_x / referenceStrokeWidthResolution);
+            * (configuration().graphics.resolution_x / referenceStrokeWidthResolution);
 
     m_strokeWidth = guiMax(minimumStrokeWidth, nonClippedStrokeWidth);
     m_needMetrics = false;
@@ -79,13 +79,13 @@ void Font::calcMetrics(void) {
     //resolution.  Otherwise the fonts are slightly stretched horizontally -- there
     //are more pixels horizontally than vertically per unit in the identity coord space.
     if (useStroke()) {
-        m_horizontalScaling = (m_verticalScaling * configuration()->graphics.resolution_y) / configuration()->graphics.resolution_x;
+        m_horizontalScaling = (m_verticalScaling * configuration().graphics.resolution_y) / configuration().graphics.resolution_x;
     } else {
         //Calculation above seems broken... this seems to work for most sizes with bitmap.
-        m_horizontalScaling = m_verticalScaling / (1.6 * configuration()->graphics.resolution_x / 1000);
+        m_horizontalScaling = m_verticalScaling / (1.6 * configuration().graphics.resolution_x / 1000);
     }
     //The size of a horizontal pixel in reference space.
-    const double horizPixelInRefSpace = REFERENCE_LINE_SPACING / (configuration()->graphics.resolution_x / 2) / size();
+    const double horizPixelInRefSpace = REFERENCE_LINE_SPACING / (configuration().graphics.resolution_x / 2) / size();
 
     //Recalculate the extra char width.
     m_extraCharWidth = horizPixelInRefSpace * m_strokeWidth;

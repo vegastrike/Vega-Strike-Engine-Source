@@ -120,8 +120,8 @@ public:
 
 //bool shouldwedraw
 static void saturate(float &r, float &g, float &b) {
-    const float conemin = configuration()->graphics.star_minimum_color_value;
-    const float colorpower = configuration()->graphics.star_color_power;
+    const float conemin = configuration().graphics.star_minimum_color_value;
+    const float colorpower = configuration().graphics.star_color_power;
     if (r < conemin) {
         r += conemin;
     }
@@ -138,9 +138,9 @@ static void saturate(float &r, float &g, float &b) {
 
 bool computeStarColor(float &r, float &g, float &b, Vector luminmax, float distance, float maxdistance) {
     saturate(r, g, b);
-    const float luminscale = configuration()->graphics.star_lumin_scale;
-    const float starcoloraverage = configuration()->graphics.star_color_average;
-    const float starcolorincrement = configuration()->graphics.star_color_increment;
+    const float luminscale = configuration().graphics.star_lumin_scale;
+    const float starcoloraverage = configuration().graphics.star_color_average;
+    const float starcolorincrement = configuration().graphics.star_color_increment;
     float dissqr = distance * distance / (maxdistance * maxdistance);
     float lum = 100 * luminmax.i / (luminmax.k * dissqr);
     lum = log((double) luminmax.i * 10. / (double) luminmax.j) * luminscale / dissqr;
@@ -154,7 +154,7 @@ bool computeStarColor(float &r, float &g, float &b, Vector luminmax, float dista
     r *= lum;
     g *= lum;
     b *= lum;
-    const float starcolorcutoff = configuration()->graphics.star_color_cutoff;
+    const float starcolorcutoff = configuration().graphics.star_color_cutoff;
     return lum > starcolorcutoff;
 }
 
@@ -171,9 +171,9 @@ StarVlist::StarVlist(float spread) {
 }
 
 static GFXColorVertex *AllocVerticesForSystem(std::string our_system_name, float spread, int *num, int repetition) {
-    const float staroverlap = configuration()->graphics.star_overlap;
+    const float staroverlap = configuration().graphics.star_overlap;
     float xyzspread = spread * 2 * staroverlap;
-    const string allowedSectors = configuration()->graphics.star_allowable_sectors;
+    const string allowedSectors = configuration().graphics.star_allowable_sectors;
     if (our_system_name.size() > 0) {
         string lumi = _Universe->getGalaxyProperty(our_system_name, "luminosity");
         if (lumi.length() == 0 || strtod(lumi.c_str(), NULL) == 0) {
@@ -370,14 +370,14 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
         bool yawpitch,
         int whichTexture) {
     UpdateGraphics();
-    const bool StarStreaks = configuration()->graphics.star_streaks;
+    const bool StarStreaks = configuration().graphics.star_streaks;
     GFXColorMaterial(AMBIENT | DIFFUSE);
     bool ret = false;
     if (StarStreaks) {
         Matrix rollMatrix;
-        const float velstreakscale = configuration()->graphics.velocity_star_streak_scale;
-        const float minstreak = configuration()->graphics.velocity_star_streak_min;
-        const float fov_smoothing = configuration()->warp.fov_link.smoothing;
+        const float velstreakscale = configuration().graphics.velocity_star_streak_scale;
+        const float minstreak = configuration().graphics.velocity_star_streak_min;
+        const float fov_smoothing = configuration().warp.fov_link.smoothing;
         float fov_smoot = std::pow(double(fov_smoothing), GetElapsedTime());
         Vector vel(-velocity * velstreakscale);
         float speed = vel.Magnitude();
@@ -388,7 +388,7 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
             if (speed < minstreak) {
                 speed = minstreak;
             }
-            const float streakcap = configuration()->graphics.velocity_star_streak_max;
+            const float streakcap = configuration().graphics.velocity_star_streak_max;
             if (speed > streakcap) {
                 speed = streakcap;
             }
@@ -397,7 +397,7 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
             GFXColorVertex *v = vlist->BeginMutate(0)->colors;
             int numvertices = vlist->GetNumVertices();
 
-            const float torquestreakscale = configuration()->graphics.torque_star_streak_scale;
+            const float torquestreakscale = configuration().graphics.torque_star_streak_scale;
             for (int j = 0; j < numvertices - 1; j += 2) {
                 int i = j;
 //if (SlowStarStreaks)
@@ -449,8 +449,8 @@ PointStarVlist::~PointStarVlist() {
 }
 
 Stars::Stars(int num, float spread) : vlist(NULL), spread(spread) {
-    const string starspritetextures = configuration()->graphics.near_stars_sprite_texture;
-    const float starspritesize = configuration()->graphics.near_stars_sprite_size;
+    const string starspritetextures = configuration().graphics.near_stars_sprite_texture;
+    const float starspritesize = configuration().graphics.near_stars_sprite_size;
     if (starspritetextures.length() == 0) {
         vlist = new PointStarVlist((num / STARnumvlist) + 1, spread, "");
     } else {
@@ -466,7 +466,7 @@ void Stars::SetBlend(bool blendit, bool fadeit) {
 }
 
 void Stars::Draw() {
-    const bool stars_dont_move = configuration()->graphics.stars_dont_move;
+    const bool stars_dont_move = configuration().graphics.stars_dont_move;
     if (stars_dont_move) {
         return;
     }
@@ -479,9 +479,9 @@ void Stars::Draw() {
     GFXDisable(TEXTURE0);
     GFXDisable(TEXTURE1);
     GFXEnable(DEPTHTEST);
-    const bool near_stars_alpha = configuration()->graphics.near_stars_alpha;
-    const bool near_stars_alpha_blend = configuration()->graphics.near_stars_alpha_blend;
-    const float AlphaTestingCutoff = configuration()->graphics.stars_alpha_test_cutoff;
+    const bool near_stars_alpha = configuration().graphics.near_stars_alpha;
+    const bool near_stars_alpha_blend = configuration().graphics.near_stars_alpha_blend;
+    const float AlphaTestingCutoff = configuration().graphics.stars_alpha_test_cutoff;
     if (near_stars_alpha) {
         GFXAlphaTest(GREATER, AlphaTestingCutoff);
         if (!near_stars_alpha_blend) {
@@ -500,7 +500,7 @@ void Stars::Draw() {
     int ligh;
     GFXSelectMaterial(0);
     if (fade) {
-        const float star_spread_attenuation = configuration()->graphics.star_spread_attenuation;
+        const float star_spread_attenuation = configuration().graphics.star_spread_attenuation;
         GFXPushGlobalEffects();
         GFXLight fadeLight(true, GFXColor(cp.i, cp.j, cp.k),
                 GFXColor(0, 0, 0, 1),
@@ -639,7 +639,7 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
         float size) : StarVlist(spread) {
     int curtexture = 0;
     vector<AnimatedTexture *> animations;
-    const bool near_stars_alpha = configuration()->graphics.near_stars_alpha;
+    const bool near_stars_alpha = configuration().graphics.near_stars_alpha;
     for (curtexture = 0; curtexture < NUM_ACTIVE_ANIMATIONS; ++curtexture) {
         std::string::size_type where = texturenames.find(" ");
         string texturename = texturenames.substr(0, where);
@@ -790,7 +790,7 @@ void SpriteStarVlist::EndDrawState(bool stretch, int whichTex) {
 extern bool isVista;
 
 void SpriteStarVlist::Draw(bool strertch, int whichTexture) {
-    const bool force_draw = configuration()->graphics.vista_draw_stars;
+    const bool force_draw = configuration().graphics.vista_draw_stars;
     if (force_draw || !isVista) {
         vlist[whichTexture]->Draw();
     }

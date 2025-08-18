@@ -316,13 +316,13 @@ bool Shield::Damaged() const {
 
 
 void Shield::Regenerate(const bool player_ship) {
-    //const bool apply_difficulty_shields = configuration()->physics.difficulty_based_shield_recharge;
+    //const bool apply_difficulty_shields = configuration().physics.difficulty_based_shield_recharge;
 
     // Discharge numbers for nicer, gradual discharge
-    //const float discharge_per_second = configuration()->physics.speeding_discharge;
+    //const float discharge_per_second = configuration().physics.speeding_discharge;
     //approx
     //const float discharge_rate = (1 - (1 - discharge_per_second) * simulation_atom_var);
-    //const float min_shield_discharge = configuration()->physics.min_shield_speeding_discharge;
+    //const float min_shield_discharge = configuration().physics.min_shield_speeding_discharge;
 
     // Some basic sanity checks first
     // No point in all this code if there are no shields.
@@ -331,7 +331,7 @@ void Shield::Regenerate(const bool player_ship) {
     }
 
     // No shields in SPEC
-    if (ftl_drive->Enabled() && !configuration()->physics.shields_in_spec) {
+    if (ftl_drive->Enabled() && !configuration().physics.shields_in_spec) {
         Decrease();
         return;
     }
@@ -352,7 +352,7 @@ void Shield::Regenerate(const bool player_ship) {
     // TODO: lib_damage restore efficiency by replacing with shield->efficiency
     //const double efficiency = 1;
 
-    const double shield_maintenance_cost = TotalMaxLayerValue() * configuration()->components.shield.maintenance_factor;
+    const double shield_maintenance_cost = TotalMaxLayerValue() * configuration().components.shield.maintenance_factor;
     SetConsumption(shield_maintenance_cost);
     const double actual_maintenance_percent = Consume();
     if(Percent() > actual_maintenance_percent) {
@@ -372,7 +372,7 @@ void Shield::Regenerate(const bool player_ship) {
         return;
     }
 
-    const double shield_regeneration_cost = regeneration.AdjustedValue() * configuration()->components.shield.regeneration_factor;
+    const double shield_regeneration_cost = regeneration.AdjustedValue() * configuration().components.shield.regeneration_factor;
     SetConsumption(shield_regeneration_cost);
     const double actual_regeneration_percent = Consume();
     double regen = actual_regeneration_percent * regeneration.AdjustedValue() * simulation_atom_var;
@@ -397,7 +397,7 @@ void Shield::Regenerate(const bool player_ship) {
         shield_recharge *= difficulty;
     }*/
 
-    //const float nebshields = configuration()->physics.nebula_shield_recharge;
+    //const float nebshields = configuration().physics.nebula_shield_recharge;
 }
 
 void Shield::AdjustPower(double percent) {

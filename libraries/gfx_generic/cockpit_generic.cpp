@@ -168,7 +168,7 @@ void Cockpit::Delete() {
 }
 
 void Cockpit::RestoreGodliness() {
-    const float maxgodliness = configuration()->physics.player_godliness;
+    const float maxgodliness = configuration().physics.player_godliness;
     godliness = maxgodliness;
     if (godliness > maxgodliness) {
         godliness = maxgodliness;
@@ -181,7 +181,7 @@ void Cockpit::InitStatic() {
 }
 
 bool Cockpit::unitInAutoRegion(Unit *un) {
-    const float autopilot_term_distance = configuration()->physics.auto_pilot_termination_distance;
+    const float autopilot_term_distance = configuration().physics.auto_pilot_termination_distance;
     Unit *targ = autopilot_target.GetUnit();
     if (targ) {
         return UnitUtil::getSignificantDistance(un, targ)
@@ -192,7 +192,7 @@ bool Cockpit::unitInAutoRegion(Unit *un) {
 }
 
 static float getInitialZoomFactor() {
-    const float inizoom = configuration()->graphics.initial_zoom_factor;
+    const float inizoom = configuration().graphics.initial_zoom_factor;
     return inizoom;
 }
 
@@ -278,14 +278,14 @@ int Cockpit::Autopilot(Unit *target) {
                 //can he even start to autopilot
                 //SetView (CP_PAN);
                 un->AutoPilotTo(target, false);
-                const bool face_target_on_auto = configuration()->physics.face_target_on_auto;
+                const bool face_target_on_auto = configuration().physics.face_target_on_auto;
                 if (face_target_on_auto) {
                     FaceTarget(un);
                 }
                 static double averagetime = GetElapsedTime() / getTimeCompression();
                 static double numave = 1.0;
                 averagetime += GetElapsedTime() / getTimeCompression();
-                //const float autospeed = configuration()->physics.autospeed;//10 seconds for auto to kick in;
+                //const float autospeed = configuration().physics.autospeed;//10 seconds for auto to kick in;
                 numave++;
                 /*
                  *  AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
@@ -293,9 +293,9 @@ int Cockpit::Autopilot(Unit *target) {
                  *                                                     _Universe->AccessCamera()->R,
                  *                                                     averagetime*autospeed/(numave));
                  */
-                const float initialzoom = configuration()->graphics.initial_zoom_factor;
+                const float initialzoom = configuration().graphics.initial_zoom_factor;
                 zoomfactor = initialzoom;
-                const float autotime = configuration()->physics.auto_time_in_seconds;                 //10 seconds for auto to kick in;
+                const float autotime = configuration().physics.auto_time_in_seconds;                 //10 seconds for auto to kick in;
 
                 autopilot_time = autotime;
                 autopilot_target.SetUnit(target);
@@ -331,7 +331,7 @@ void SwitchUnits(Unit *ol, Unit *nw) {
 }
 
 static void SwitchUnitsTurret(Unit *ol, Unit *nw) {
-    const bool FlyStraightInTurret = configuration()->physics.ai_pilot_when_in_turret;
+    const bool FlyStraightInTurret = configuration().physics.ai_pilot_when_in_turret;
     if (FlyStraightInTurret) {
         SwitchUnits(ol, nw);
     } else {
@@ -524,7 +524,7 @@ bool Cockpit::Update() {
     if (autoclear && par) {
         Unit *targ = par->Target();
         if (targ) {
-            const float autopilot_term_distance = configuration()->physics.auto_pilot_termination_distance;
+            const float autopilot_term_distance = configuration().physics.auto_pilot_termination_distance;
             float doubled = dockingdistance(targ, par);
             if (((targ->getUnitType() != Vega_UnitType::planet
                     && doubled < autopilot_term_distance)
@@ -553,7 +553,7 @@ bool Cockpit::Update() {
         if (switchunit[_Universe->CurrentCockpit()]) {
             parentturret.SetUnit(NULL);
 
-            const float initialzoom = configuration()->graphics.initial_zoom_factor;
+            const float initialzoom = configuration().graphics.initial_zoom_factor;
             zoomfactor = initialzoom;
             static int index = 0;
             switchunit[_Universe->CurrentCockpit()] = 0;
@@ -657,7 +657,7 @@ bool Cockpit::Update() {
         if (respawnunit.size() > _Universe->CurrentCockpit()) {
             if (respawnunit.at(_Universe->CurrentCockpit())) {
                 VS_LOG(debug, "respawnunit.at(_Universe->CurrentCockpit()) is truthy");
-                const float initialzoom = configuration()->graphics.initial_zoom_factor;
+                const float initialzoom = configuration().graphics.initial_zoom_factor;
                 zoomfactor = initialzoom;
 
                 parentturret.SetUnit(nullptr);
@@ -703,7 +703,7 @@ bool Cockpit::Update() {
                 savegame->SetPlayerLocation(pos);
                 CopySavedShips(savegame->GetCallsign(), whichcp, packedInfo, true);
                 bool actually_have_save = false;
-                const bool persistent_on_load = configuration()->physics.persistent_on_load;
+                const bool persistent_on_load = configuration().physics.persistent_on_load;
                 if (savegame->GetStarSystem() != "") {
                     actually_have_save = true;
                     newsystem = savegame->GetStarSystem() + ".system";

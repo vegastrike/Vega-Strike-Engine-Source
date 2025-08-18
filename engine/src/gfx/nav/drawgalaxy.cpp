@@ -87,7 +87,7 @@ static void DrawNodeDescription(string text,
     }
     TextPlane displayname;   //will be used to display shits names
     displayname.col = col;
-    const float background_alpha = configuration()->graphics.hud.text_background_alpha;
+    const float background_alpha = configuration().graphics.hud.text_background_alpha;
     int length = text.size();
     float offset = (float(length) * 0.005);
     if (ignore_occupied_areas) {
@@ -307,7 +307,7 @@ NavigationSystem::SystemIterator &NavigationSystem::SystemIterator::next() {
 
 bool checkedVisited(const std::string &n) {
     const bool dontbothervisiting =
-            !configuration()->graphics.explore_for_map;
+            !configuration().graphics.explore_for_map;
     if (dontbothervisiting) {
         return true;
     } else {

@@ -359,7 +359,7 @@ bool Picker::processCommand(const EventCommandId &command, Control *control) {
 
 //Mouse clicked down.
 bool Picker::processMouseDown(const InputEvent &event) {
-    const int zoominc = configuration()->general.wheel_increment_lines;
+    const int zoominc = configuration().general.wheel_increment_lines;
     if (event.code == LEFT_MOUSE_BUTTON) {
         PickerCell *cell = cellForMouse(event.loc);
         if (cell != NULL) {

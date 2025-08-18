@@ -149,10 +149,10 @@ void ShipCommands::setkps(const char *in) {
     float kps = XMLSupport::parse_float(std::string(in));
     Unit *player = UniverseUtil::getPlayer();
     if (player) {
-        if (configuration()->physics.game_speed_lying) {
-            kps *= configuration()->physics.game_speed;
+        if (configuration().physics.game_speed_lying) {
+            kps *= configuration().physics.game_speed;
         } else {
-            kps /= configuration()->physics.display_in_meters ? 1.0f : 3.6f;
+            kps /= configuration().physics.display_in_meters ? 1.0f : 3.6f;
         }
         player->computer.set_speed = fmin(player->MaxSpeed(), kps);
     }

@@ -87,10 +87,10 @@ UnitCollection *ClickList::requestIterator(int minX, int minY, int maxX, int max
     GFXFrustum(frustmat,
             drivel,
             l
-                    * (-2. * minX / configuration()->graphics.resolution_x + 1) /*  *g_game.MouseSensitivityX*/,
-            r * (2. * maxX / configuration()->graphics.resolution_x - 1) /*  *g_game.MouseSensitivityX*/,
-            t * (-2. * minY / configuration()->graphics.resolution_y + 1) /*  *g_game.MouseSensitivityY*/,
-            b * (2. * maxY / configuration()->graphics.resolution_y - 1) /*  *g_game.MouseSensitivityY*/,
+                    * (-2. * minX / configuration().graphics.resolution_x + 1) /*  *g_game.MouseSensitivityX*/,
+            r * (2. * maxX / configuration().graphics.resolution_x - 1) /*  *g_game.MouseSensitivityX*/,
+            t * (-2. * minY / configuration().graphics.resolution_y + 1) /*  *g_game.MouseSensitivityY*/,
+            b * (2. * maxY / configuration().graphics.resolution_y - 1) /*  *g_game.MouseSensitivityY*/,
             n,
             f);
     _Universe->AccessCamera()->GetView(view);

@@ -67,12 +67,12 @@ Halo::~Halo() {
 void Halo::Draw(const Transformation &quat, const Matrix &m, float alpha) {
     Vector p, q, r;
     QVector pos;
-    const double HaloOffset = configuration()->graphics.halo_offset;
+    const double HaloOffset = configuration().graphics.halo_offset;
     pos = position.Transform(m);
     float wid = sizex;
     float hei = sizey;
     const bool far_shine =
-            configuration()->graphics.draw_star_glow_halo || configuration()->graphics.halo_far_draw;
+            configuration().graphics.draw_star_glow_halo || configuration().graphics.halo_far_draw;
     CalculateOrientation(pos, p, q, r, wid, hei, HaloOffset, far_shine, NULL);
     p = p * wid;
     r = -r;

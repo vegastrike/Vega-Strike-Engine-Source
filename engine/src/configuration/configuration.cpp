@@ -6359,7 +6359,7 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
     }
 }
 
-std::shared_ptr<vega_config::Configuration> configuration() {
-    static const std::shared_ptr<vega_config::Configuration> kConfiguration = std::make_shared<vega_config::Configuration>();
+const vega_config::Configuration& configuration() {
+    static const vega_config::Configuration kConfiguration{};
     return kConfiguration;
 }

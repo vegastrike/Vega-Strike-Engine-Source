@@ -214,7 +214,7 @@ ClickList *StarSystem::getClickList() {
 }
 
 void ConditionalCursorDraw(bool tf) {
-    if (configuration()->physics.hardware_cursor) {
+    if (configuration().physics.hardware_cursor) {
         winsys_show_cursor(tf);
     }
 }
@@ -380,7 +380,7 @@ void StarSystem::Draw(bool DrawCockpit) {
     QVector drawstartpos = _Universe->AccessCamera()->GetPosition();
 
     Collidable key_iterator(0, 1, drawstartpos);
-    UnitWithinRangeOfPosition<UnitDrawer> drawer(configuration()->graphics.precull_dist, 0, key_iterator);
+    UnitWithinRangeOfPosition<UnitDrawer> drawer(configuration().graphics.precull_dist, 0, key_iterator);
     //Need to draw really big stuff (i.e. planets, deathstars, and other mind-bogglingly big things that shouldn't be culled despited extreme distance
     Unit *unit;
     if ((drawer.action.parent = _Universe->AccessCockpit()->GetParent()) != nullptr) {
@@ -388,7 +388,7 @@ void StarSystem::Draw(bool DrawCockpit) {
     }
     for (un_iter iter = this->gravitational_units.createIterator(); (unit = *iter); ++iter) {
         float distance = (drawstartpos - unit->Position()).Magnitude() - unit->rSize();
-        if (distance < configuration()->graphics.precull_dist) {
+        if (distance < configuration().graphics.precull_dist) {
             drawer.action.grav_acquire(unit);
         } else {
             drawer.action.draw(unit);
@@ -411,11 +411,11 @@ void StarSystem::Draw(bool DrawCockpit) {
     GFXColor tmpcol(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
     double processmesh = realTime();
-    if (!configuration()->graphics.draw_near_stars_in_front_of_planets) {
+    if (!configuration().graphics.draw_near_stars_in_front_of_planets) {
         stars->Draw();
     }
     Mesh::ProcessZFarMeshes();
-    if (configuration()->graphics.draw_near_stars_in_front_of_planets) {
+    if (configuration().graphics.draw_near_stars_in_front_of_planets) {
         stars->Draw();
     }
     GFXEnable(DEPTHTEST);
@@ -489,33 +489,33 @@ void StarSystem::createBackground(Star_XML *xml) {
 #ifdef NV_CUBE_MAP
     VS_LOG(info, "using NV_CUBE_MAP");
     light_map[0] = new Texture((xml->backgroundname + "_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
-            GFXFALSE, configuration()->graphics.max_cubemap_size);
+            GFXFALSE, configuration().graphics.max_cubemap_size);
     if (light_map[0]->LoadSuccess() && light_map[0]->isCube()) {
         light_map[1] = light_map[2] = light_map[3] = light_map[4] = light_map[5] = 0;
     } else {
         delete light_map[0];
         light_map[0] =
                 new Texture((xml->backgroundname + "_right.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size);
+                        GFXFALSE, configuration().graphics.max_cubemap_size);
         light_map[1] =
                 new Texture((xml->backgroundname + "_left.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_X,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, configuration().graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[2] =
                 new Texture((xml->backgroundname + "_up.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Y,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, configuration().graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[3] =
                 new Texture((xml->backgroundname + "_down.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Y,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, configuration().graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[4] =
                 new Texture((xml->backgroundname + "_front.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Z,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, configuration().graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[5] =
                 new Texture((xml->backgroundname + "_back.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Z,
-                        GFXFALSE, configuration()->graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, configuration().graphics.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
     }
 #else
@@ -533,12 +533,12 @@ void StarSystem::createBackground(Star_XML *xml) {
     background = new Background(
             xml->backgroundname.c_str(),
             xml->numstars,
-            configuration()->graphics.zfar * .9,
+            configuration().graphics.zfar * .9,
             filename,
             xml->backgroundColor,
             xml->backgroundDegamma);
     stars = new Stars(xml->numnearstars, xml->starsp);
-    stars->SetBlend(configuration()->graphics.star_blend, configuration()->graphics.star_blend);
+    stars->SetBlend(configuration().graphics.star_blend, configuration().graphics.star_blend);
 }
 
 
@@ -559,7 +559,7 @@ void TentativeJumpTo(StarSystem *ss, Unit *un, Unit *jumppoint, const std::strin
 
 float ScaleJumpRadius(float radius) {
     //need this because sys scale doesn't affect j-point size
-    radius *= configuration()->physics.jump_radius_scale * configuration()->physics.game_speed;
+    radius *= configuration().physics.jump_radius_scale * configuration().physics.game_speed;
     return radius;
 }
 
@@ -1334,7 +1334,7 @@ void StarSystem::ProcessPendingJumps() {
                     } else if (!player) {
                         un->SetVelocity(Vector(0, 0, 0));
                     }
-                    if (configuration()->physics.jump_disables_shields) {
+                    if (configuration().physics.jump_disables_shields) {
                         // Zero shield. They'll start recharging from zero.
                         un->shield.Zero();
                     }
@@ -1439,7 +1439,7 @@ QVector ComputeJumpPointArrival(QVector pos, std::string origin, std::string des
         if (pos.MagnitudeSquared()) {
             pos.Normalize();
         }
-        return (dir * .5 + pos * .125) * configuration()->physics.distance_to_warp;
+        return (dir * .5 + pos * .125) * configuration().physics.distance_to_warp;
     }
     return QVector(0, 0, 0);
 }

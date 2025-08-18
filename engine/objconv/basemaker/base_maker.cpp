@@ -1526,7 +1526,7 @@ void Base::Room::BaseShip::Draw(Base *base) {
      *       Matrix final;
      *       Matrix newmat = mat;
      *       newmat.p.k*=un->rSize();
-     *       newmat.p+=QVector(0,0,configuration()->graphics.znear);
+     *       newmat.p+=QVector(0,0,configuration().graphics.znear);
      *       newmat.p.i*=newmat.p.k;
      *       newmat.p.j*=newmat.p.k;
      *       MultMatrix (final,cam,newmat);

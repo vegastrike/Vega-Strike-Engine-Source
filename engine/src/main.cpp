@@ -319,7 +319,7 @@ int main(int argc, char *argv[]) {
 
     // If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0') {
-        g_game.vsdebug = configuration()->logging.vsdebug;
+        g_game.vsdebug = configuration().logging.vsdebug;
     }
 
     // Ugly hack until we can find a way to redo all the directory initialization stuff properly.
@@ -341,7 +341,7 @@ int main(int argc, char *argv[]) {
 
     // Override config with command line argument
     if (!mission_name.empty()) {
-        configuration()->game_start.default_mission = mission_name;
+        (const_cast<vega_config::Configuration &>(configuration())).game_start.default_mission = mission_name;
         VS_LOG(info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
 
@@ -375,7 +375,7 @@ int main(int argc, char *argv[]) {
 
     //Register commands
     //COmmand Interpretor Seems to break VC8, so I'm leaving disabled for now - Patrick, Dec 24
-    if (configuration()->general.command_interpreter) {
+    if (configuration().general.command_interpreter) {
         CommandInterpretor = new commandI;
         InitShipCommands();
     }
@@ -466,9 +466,9 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
             ani->DrawNow(tmp);
         }
     }
-    bs_tp->Draw(configuration()->graphics.default_boot_message.length() > 0 ?
-            configuration()->graphics.default_boot_message : message.length() > 0 ?
-                    message : configuration()->graphics.initial_boot_message);
+    bs_tp->Draw(configuration().graphics.default_boot_message.length() > 0 ?
+            configuration().graphics.default_boot_message : message.length() > 0 ?
+                    message : configuration().graphics.initial_boot_message);
 
     GFXHudMode(GFXFALSE);
     GFXEndScene();
@@ -522,8 +522,8 @@ vector<string> parse_space_string(std::string s) {
 void bootstrap_first_loop() {
     static int i = 0;
     if (i == 0) {
-        vector<string> s = parse_space_string(configuration()->graphics.splash_screen);
-        vector<string> sa = parse_space_string(configuration()->graphics.splash_audio);
+        vector<string> s = parse_space_string(configuration().graphics.splash_screen);
+        vector<string> sa = parse_space_string(configuration().graphics.splash_audio);
         int snum = time(nullptr) % s.size();
         SplashScreen = new Animation(s[snum].c_str(), false);
         if (!sa.empty() && sa[0].length()) {
@@ -534,7 +534,7 @@ void bootstrap_first_loop() {
     bootstrap_draw("Vegastrike Loading...", SplashScreen);
     if (i++ > 4) {
         if (_Universe) {
-            if (configuration()->graphics.main_menu) {
+            if (configuration().graphics.main_menu) {
                 UniverseUtil::startMenuInterface(true);
             } else {
                 _Universe->Loop(bootstrap_main_loop);
@@ -544,10 +544,10 @@ void bootstrap_first_loop() {
 }
 
 void SetStartupView(Cockpit *cp) {
-    VS_LOG(debug, (boost::format("%1%: Setting cockpit startup view to: %2%") % __FUNCTION__ % configuration()->graphics.startup_cockpit_view));
-    cp->SetView(configuration()->graphics.startup_cockpit_view
-            == "view_target" ? CP_TARGET : (configuration()->graphics.startup_cockpit_view
-            == "back" ? CP_BACK : (configuration()->graphics.startup_cockpit_view
+    VS_LOG(debug, (boost::format("%1%: Setting cockpit startup view to: %2%") % __FUNCTION__ % configuration().graphics.startup_cockpit_view));
+    cp->SetView(configuration().graphics.startup_cockpit_view
+            == "view_target" ? CP_TARGET : (configuration().graphics.startup_cockpit_view
+            == "back" ? CP_BACK : (configuration().graphics.startup_cockpit_view
             == "chase" ? CP_CHASE
             : CP_FRONT)));
 }
@@ -557,7 +557,7 @@ void bootstrap_main_loop() {
     // InitTime();
     if (LoadMission) {
         LoadMission = false;
-        active_missions.push_back(mission = new Mission(configuration()->game_start.default_mission.c_str()));
+        active_missions.push_back(mission = new Mission(configuration().game_start.default_mission.c_str()));
 
         mission->initMission();
 
@@ -623,7 +623,7 @@ void bootstrap_main_loop() {
         vector<SavedUnits> saved;
         vector<string> packedInfo;
 
-        if (configuration()->general.load_last_savegame) {
+        if (configuration().general.load_last_savegame) {
             _Universe->AccessCockpit(k)->savegame->ParseSaveGame(savegamefile,
                     mysystem,
                     mysystem,
@@ -666,7 +666,7 @@ void bootstrap_main_loop() {
         FactionUtil::LoadContrabandLists();
         {
             std::vector<std::string> intro_lines;
-            boost::split(intro_lines, configuration()->game_start.introduction, boost::is_any_of("\n"));
+            boost::split(intro_lines, configuration().game_start.introduction, boost::is_any_of("\n"));
 
             for(const std::string& line : intro_lines) {
                 UniverseUtil::IOmessage(0, "game", "all", line);
@@ -682,7 +682,7 @@ void bootstrap_main_loop() {
             }
         }
 
-        if (configuration()->general.load_last_savegame) {
+        if (configuration().general.load_last_savegame) {
             //Don't write if we didn't load...
             for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
                 WriteSaveGame(_Universe->AccessCockpit(i), false);
@@ -694,7 +694,7 @@ void bootstrap_main_loop() {
         }
         _Universe->Loop(main_loop);
         ///return to idle func which now should call main_loop mohahahah
-        if (configuration()->splash.auto_hide) {
+        if (configuration().splash.auto_hide) {
             UniverseUtil::hideSplashScreen();
         }
     }
@@ -843,12 +843,12 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     }
 
     if (cmd_args.count("h")) {
-        configuration()->graphics.resolution_x = 1024;
-        configuration()->graphics.resolution_y = 768;
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = 1024;
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = 768;
     }
     if (cmd_args.count("v")) {
-        configuration()->graphics.resolution_x = 1280;
-        configuration()->graphics.resolution_y = 1024;
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = 1280;
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = 1024;
     }
 
     if (cmd_args.count("mission_name")) {

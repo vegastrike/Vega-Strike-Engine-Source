@@ -52,17 +52,17 @@ Background::Background(const char *file,
         bool degamma_)
         : Enabled(true), degamma(degamma_), color(color_), stars(NULL) {
     string temp;
-    const string starspritetextures = configuration()->graphics.far_stars_sprite_texture;
-    const float starspritesize = configuration()->graphics.far_stars_sprite_size;
+    const string starspritetextures = configuration().graphics.far_stars_sprite_texture;
+    const float starspritesize = configuration().graphics.far_stars_sprite_size;
     if (starspritetextures.length() == 0) {
         stars =
                 new PointStarVlist(numstars, 200 /*spread*/,
-                        configuration()->graphics.use_star_coords ? filename : "");
+                        configuration().graphics.use_star_coords ? filename : "");
     } else {
         stars =
                 new SpriteStarVlist(numstars,
                         200 /*spread*/,
-                        configuration()->graphics.use_star_coords ? filename : "",
+                        configuration().graphics.use_star_coords ? filename : "",
                         starspritetextures,
                         starspritesize);
     }
@@ -71,7 +71,7 @@ Background::Background(const char *file,
     SphereBackground = NULL;
 
 #ifndef NV_CUBE_MAP
-    static int max_cube_size = configuration()->graphics.max_cubemap_size;
+    static int max_cube_size = configuration().graphics.max_cubemap_size;
     string     suffix = ".image";
     temp = string( file )+"_up.image";
     up   = new Texture( temp.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE, max_cube_size );
@@ -370,7 +370,7 @@ void Background::Draw() {
                     tex = _Universe->getLightMap();
                 }
                 const int numpasses = 1;
-                const float edge_fixup = configuration()->graphics.background_edge_fixup;
+                const float edge_fixup = configuration().graphics.background_edge_fixup;
                 const float ms = 0.f, Ms = 1.f - edge_fixup / tex->boundSizeX;
                 const float mt = 0.f, Mt = 1.f - edge_fixup / tex->boundSizeY;
                 const float _stca[] = {-1.f, -Ms, ms, Ms, +1.f}, _ttca[] = {-1.f, -Mt, mt, Mt, +1.f};
@@ -387,7 +387,7 @@ void Background::Draw() {
                 int   numpasses = tex->numPasses();
                 float ms = tex->mintcoord.i, Ms = tex->maxtcoord.i;
                 float mt = tex->mintcoord.j, Mt = tex->maxtcoord.j;
-                if (!configuration()->graphics.ext_clamp_to_edge) {
+                if (!configuration().graphics.ext_clamp_to_edge) {
                     ms += 1.0/tex->boundSizeX;
                     Ms -= 1.0/tex->boundSizeX;
                     mt += 1.0/tex->boundSizeY;
@@ -484,7 +484,7 @@ void Background::Draw() {
     GFXDisable(TEXTURE1);
     GFXDisable(DEPTHWRITE);
     GFXBlendMode(ONE, ONE);
-    const float background_velocity_scale = configuration()->graphics.background_star_streak_velocity_scale;
+    const float background_velocity_scale = configuration().graphics.background_star_streak_velocity_scale;
     stars->DrawAll(QVector(0, 0, 0), _Universe->AccessCamera()->GetVelocity().Scale(
             background_velocity_scale), _Universe->AccessCamera()->GetAngularVelocity(), true, true);
     GFXBlendMode(ONE, ZERO);
