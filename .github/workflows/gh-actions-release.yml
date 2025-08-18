@@ -1,4 +1,7 @@
 name: 'GH Actions - Release'
+permissions:
+    contents: write
+    pull-requests: read
 
 on:
   release:
