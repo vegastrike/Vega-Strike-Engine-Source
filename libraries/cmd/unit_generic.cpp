@@ -475,7 +475,7 @@ void Unit::Init(const char *filename,
     if (unit_key.empty()) {
         // This is actually used for upgrade checks.
         bool is_template = (string::npos != (string(filename).find(".template")));
-        if (!is_template || (is_template && configuration()->data.using_templates)) {
+        if (!is_template || (is_template && configuration().data.using_templates)) {
             VS_LOG(trace, (boost::format("Unit file %1% not found") % filename));
         }
         meshdata.clear();
@@ -1263,7 +1263,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
             // TODO: lib_damage shield.recharge *= dam;
         } else if (random_number >= .5) {
             /*const float mindam =
-                    configuration()->physics.min_recharge_shot_damage;
+                    configuration().physics.min_recharge_shot_damage;
             if (dam < mindam) {
                 dam = mindam;
             }

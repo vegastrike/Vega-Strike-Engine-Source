@@ -120,7 +120,7 @@ TEST(vega_dynamic_const_cast_ptr, Performance) {
 }
 
 TEST(configuration, const_Performance) {
-    VS_LOG_AND_FLUSH(important_info, "Starting configuration()->..._dbl test");
+    VS_LOG_AND_FLUSH(important_info, "Starting configuration()...._dbl test");
     const auto start_time = std::chrono::steady_clock::now();
     for (int i = 0; i < kIterations; ++i) {
         // ReSharper disable once CppDFAUnreadVariable
@@ -130,7 +130,7 @@ TEST(configuration, const_Performance) {
     }
     const auto end_time = std::chrono::steady_clock::now();
     const auto duration = std::chrono::duration<double, std::micro>(end_time - start_time);
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished configuration()->..._dbl test. Took %1% microseconds for %2% iterations") % duration.count() % kIterations));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished configuration()...._dbl test. Took %1% microseconds for %2% iterations") % duration.count() % kIterations));
 }
 
 TEST(configuration, static_optional_Performance) {

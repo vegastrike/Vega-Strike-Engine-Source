@@ -490,7 +490,7 @@ void Universe::StartDraw() {
            (boost::format("%1%: Time taken by _Universe->SetActiveCockpit(...): %2%") % __FUNCTION__ % (
                universe_set_active_cockpit_end_time - update_time_compression_sounds_end_time)));
 #endif
-    for (i = 0; i < star_system.size() && i < configuration()->physics.num_running_systems; ++i) {
+    for (i = 0; i < star_system.size() && i < configuration().physics.num_running_systems; ++i) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double update_star_system_start_time = realTime();
 #endif

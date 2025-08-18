@@ -193,7 +193,7 @@ int getPhysicsPriority(Unit *un) {
     }
     const int ASTEROID_PARENT_PRIORITY = configuration().physics.priorities.asteroid_parent;
     const int ASTEROID_HIGH_PRIORITY = configuration().physics.priorities.asteroid_high;
-    //const int ASTEROID_LOW_PRIORITY = configuration()->physics.priorities.asteroid_low;
+    //const int ASTEROID_LOW_PRIORITY = configuration().physics.priorities.asteroid_low;
     const int HIGH_PRIORITY = configuration().physics.priorities.high;
     const int MEDIUMHIGH_PRIORITY = configuration().physics.priorities.medium_high;
     const int MEDIUM_PRIORITY = configuration().physics.priorities.medium;
@@ -250,7 +250,7 @@ int getPhysicsPriority(Unit *un) {
     }
     if (UnitUtil::isAsteroid(un)) {
         //some mods don't do the scheduling--still want correctness
-        const std::string blah = configuration()->physics.priorities.min_asteroid_distance;
+        const std::string blah = configuration().physics.priorities.min_asteroid_distance;
         //static float too_close_asteroid = (blah == "none") ? tooclose : XMLSupport::parse_float( blah );
         //if (dist < too_close_asteroid)
         return ASTEROID_HIGH_PRIORITY;
