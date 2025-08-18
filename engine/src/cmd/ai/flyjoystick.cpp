@@ -36,52 +36,16 @@
 #include "src/config_xml.h"
 #include  "in_kb_data.h"
 
-FlyByJoystick::FlyByJoystick(unsigned int configfile) : FlyByKeyboard(configfile) {
+FlyByJoystick::FlyByJoystick(unsigned int configfile) : FlyByKeyboard(configfile), keyboard(false) {
     for (int i = 0; i < MAX_JOYSTICKS; i++) {
-        if ((unsigned int) joystick[i]->player == configfile) {
+        if (static_cast<unsigned int>(joystick[i]->player) == configfile) {
             whichjoystick.push_back(i);
         }
     }
     //remember keybindings from config file?
 
     //this below is outdated
-#if 0
-    //why does the compiler not allow this?//check out my queued events section in firekeyboard.cpp
-    BindButton( 0, FireKeyboard::FireKey );
-    BindButton( 1, FireKeyboard::MissileKey );
-#endif
 }
-
-#if 0
-void FlyByJoystick::JShelt( KBSTATE k, float, float, int )
-{
-    if (k == DOWN) {
-        FlyByKeyboard::SheltonKey( std::string(), DOWN );
-        FlyByKeyboard::SheltonKey( std::string(), DOWN );
-        FlyByKeyboard::SheltonKey( std::string(), DOWN );
-    }
-    if (k == UP) {}
-}
-void FlyByJoystick::JAB( KBSTATE k, float, float, int )
-{
-    if (k == PRESS) {
-        FlyByKeyboard::ABKey( std::string(), PRESS );
-        FlyByKeyboard::ABKey( std::string(), DOWN );
-    }
-    if (k == DOWN)
-        FlyByKeyboard::ABKey( std::string(), DOWN );
-}
-
-void FlyByJoystick::JAccelKey( KBSTATE k, float, float, int )
-{
-    FlyByKeyboard::AccelKey( std::string(), k );
-}
-void FlyByJoystick::JDecelKey( KBSTATE k, float, float, int )
-{
-    FlyByKeyboard::DecelKey( std::string(), k );
-}
-
-#endif
 
 void FlyByJoystick::Execute() {
     static bool clamp_joystick_axes = XMLSupport::parse_bool(vs_config->getVariable("joystick", "clamp_axes", "true"));
