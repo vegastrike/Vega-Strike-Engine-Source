@@ -4,6 +4,10 @@
 # You may wish to alter this file to override the set of languages analyzed,
 # or to provide custom queries or build logic.
 name: CodeQL
+permissions:
+    contents: read
+    pull-requests: read
+    security-events: write
 
 on:
   push:
@@ -46,5 +50,4 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@4b6aa0b07da05d6e43d0e5f9c8596a6532ce1c85 #v2.15.3
-        with:
-          tools: codeql-bundle.tar.gz
+
