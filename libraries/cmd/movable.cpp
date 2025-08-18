@@ -133,7 +133,7 @@ float Movable::GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn
     const float tr = (lref.k == 0) ? 0 : fabs(((lref.k > 0) ? unit->drive.forward.Value() : unit->drive.retro.Value()) / lref.k);
     const float trqmin = (tr < tq) ? tr : tq;
     const float tm = tp < trqmin ? tp : trqmin;
-    return lref.Magnitude() * tm / unit.GetMass();
+    return lref.Magnitude() * tm / unit->GetMass();
 }
 
 void Movable::SetVelocity(const Vector &v) {
@@ -355,7 +355,7 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     if (NetForce.i || NetForce.j || NetForce.k) {
         temp2 += InvTransformNormal(transmat, NetForce);
     }
-    temp2 = temp2 / unit->GetMass();
+    temp2 = temp2 / static_cast<float>(unit->GetMass());
     temp = temp2 * simulation_atom_var;
     if (!(FINITE(temp2.i) && FINITE(temp2.j) && FINITE(temp2.k))) {
         VS_LOG(info, "NetForce transform skrewed");

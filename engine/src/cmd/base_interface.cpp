@@ -32,6 +32,8 @@
 
 #include <Python.h>
 #include <algorithm>
+
+#include "vega_cast_utils.h"
 #include "cmd/vega_py_run.h"
 #include "cmd/base.h"
 #include "gldrv/winsys.h"
@@ -65,6 +67,9 @@
 
 #include "cmd/ai/communication.h"
 #include "audio/SceneManager.h"
+
+// shows the offset on the lower edge of the screen (for the text line there)
+constexpr double kYLower = -0.9;
 
 static unsigned int &getMouseButtonMask() {
     static unsigned int mask = 0;
@@ -390,7 +395,6 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
     const bool enable_markers = configuration().graphics.bases.enable_location_markers;
     const bool draw_text = configuration().graphics.bases.draw_location_text;
     const bool draw_always = configuration().graphics.bases.location_marker_draw_always;
-    static float y_lower = kYLower;           //shows the offset on the lower edge of the screen (for the textline there) -> TODO: Should be defined globally somewhere
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
     if (enable_markers) {
         float x, y, text_wid, text_hei;
@@ -425,8 +429,8 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                         if ((x - (wid / 2)) <= -1) {
                             x = (-1 + (wid / 2));
                         }
-                        if ((y - (hei / 2)) <= y_lower) {
-                            y = (y_lower + (hei / 2));
+                        if ((y - (hei / 2)) <= kYLower) {
+                            y = (kYLower + (hei / 2));
                         }
                         spr_marker->SetPosition(x, y);
                         GFXDisable(TEXTURE1);
@@ -455,7 +459,7 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                                     - fabs(text_offset_y));
                         }                                          //align on bottom
                         if ((text_pos_y + text_offset_y - text_hei)
-                                <= y_lower) {                             //check lower screenborder
+                                <= kYLower) {                             //check lower screenborder
                             text_pos_y = (y + fabs(text_offset_y)
                                     + text_hei);
                         }                                   //align on top
@@ -508,7 +512,7 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                         text_pos_y = (y - fabs(text_offset_y));
                     }                                      //align on bottom
                     if ((text_pos_y + text_offset_y - text_hei)
-                            <= y_lower) {                         //check lower screenborder
+                            <= kYLower) {                         //check lower screenborder
                         text_pos_y = (y + fabs(text_offset_y) + text_hei);
                     }                               //align on top
                     if (enable_markers) {
