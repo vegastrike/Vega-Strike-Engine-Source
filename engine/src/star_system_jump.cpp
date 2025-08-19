@@ -129,8 +129,8 @@ void StarSystem::DrawJumpStars() {
                         ->SetPosition(
                                 un->Position() + r.Cast() * un->rSize() * (pendingjump[kk]->delay + .25));
                 JumpAnimations[k].a->SetOrientation(p, q, r);
-                float dd = un->rSize() * configuration().graphics.jump_gate_size_flt
-                        * (un->jump_drive.Delay() - pendingjump[kk]->delay) / (float) un->jump_drive.Delay();
+                const float dd = un->rSize() * configuration().graphics.jump_gate_size_dbl
+                        * (un->jump_drive.Delay() - pendingjump[kk]->delay) / un->jump_drive.Delay();
                 JumpAnimations[k].a->SetDimensions(dd, dd);
             }
         }

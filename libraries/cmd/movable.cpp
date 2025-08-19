@@ -128,11 +128,11 @@ float Movable::GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn
     Vector p, q, r;
     GetOrientation(p, q, r);
     const Vector lref(ref * p, ref * q, ref * r);
-    const float tp = (lref.i == 0) ? 0 : fabs(unit->drive.lateral.Value() / lref.i);
-    const float tq = (lref.j == 0) ? 0 : fabs(unit->drive.vertical.Value() / lref.j);
-    const float tr = (lref.k == 0) ? 0 : fabs(((lref.k > 0) ? unit->drive.forward.Value() : unit->drive.retro.Value()) / lref.k);
-    const float trqmin = (tr < tq) ? tr : tq;
-    const float tm = tp < trqmin ? tp : trqmin;
+    const double tp = (lref.i == 0) ? 0 : fabs(unit->drive.lateral.Value() / lref.i);
+    const double tq = (lref.j == 0) ? 0 : fabs(unit->drive.vertical.Value() / lref.j);
+    const double tr = (lref.k == 0) ? 0 : fabs(((lref.k > 0) ? unit->drive.forward.Value() : unit->drive.retro.Value()) / lref.k);
+    const double trqmin = (tr < tq) ? tr : tq;
+    const double tm = tp < trqmin ? tp : trqmin;
     return lref.Magnitude() * tm / unit->GetMass();
 }
 
