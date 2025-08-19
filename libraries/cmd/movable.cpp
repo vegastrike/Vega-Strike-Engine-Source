@@ -393,7 +393,7 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     lateral_air_res_coef = XMLSupport::parse_floatf(active_missions[0]->getVariable("lateral_air_resistance", "0"));
 
     if (air_res_coef != 0.0F || lateral_air_res_coef != 0.0F) {
-        float velmag = Velocity.Magnitude();
+        double velmag = Velocity.Magnitude();
         Vector AirResistance = Velocity
                 * (air_res_coef * velmag / unit->GetMass()) * (corner_max.i - corner_min.i) * (corner_max.j - corner_min.j);
         if (AirResistance.Magnitude() > velmag) {
