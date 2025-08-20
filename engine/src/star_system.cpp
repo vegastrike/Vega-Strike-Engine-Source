@@ -1188,7 +1188,7 @@ void StarSystem::Update(float priority) {
     time += GetElapsedTime();
     _Universe->pushActiveStarSystem(this);
     if (time > SIMULATION_ATOM * 2) {
-        VS_LOG(trace,
+        VS_LOG(debug,
                 (boost::format(
                         "%1% %2%: time, %3$.6f, is more than twice simulation_atom_var, %4$.6f")
                         % __FILE__ % __LINE__ % time % simulation_atom_var));
@@ -1235,7 +1235,7 @@ void StarSystem::Update(float priority, bool executeDirector) {
 #endif
     if (time > simulation_atom_var) {
         if (time > simulation_atom_var * 2) {
-            VS_LOG(trace,
+            VS_LOG(debug,
                     (boost::format(
                             "%1% %2%: time, %3$.6f, is more than twice simulation_atom_var, %4$.6f")
                             % __FILE__ % __LINE__ % time % simulation_atom_var));
