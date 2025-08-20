@@ -37,3 +37,6 @@ test_assets/python_tests.py
 test_assets/units.json
 test_assets/vegastrike.config
 CMakeUserPresets.json
+vcpkg_installed/
+share/
+nlohmann_json.natvis
