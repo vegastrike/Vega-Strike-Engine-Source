@@ -66,6 +66,8 @@ public:
 
     DamageableLayer() = delete;
 
+    virtual ~DamageableLayer();
+
     void DealDamage(const CoreVector &attack_vector, Damage &damage, InflictedDamage &inflicted_damage);
     void DealDamageComponent(int impacted_facet_index, int type, double &damage, double vulnerability, InflictedDamage &inflicted_damage);
 
@@ -75,7 +77,8 @@ public:
     double TotalMaxLayerValue() const;
     double AverageLayerValue() const;
     double AverageMaxLayerValue() const;
-    double Percent() const;
+
+    virtual double Percent() const;
     double Percent(int facet) const;
 
     int Layer() const;

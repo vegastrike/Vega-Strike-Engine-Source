@@ -91,6 +91,8 @@ void Hull::Set(double value) {
     facets[0] = Resource<double>(value, 0, value);
 }
 
+Hull::~Hull() = default;
+
 double Hull::PercentOperational() const {
     return Percent();
 }
