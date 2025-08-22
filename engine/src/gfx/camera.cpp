@@ -215,8 +215,8 @@ void Camera::SetPosition(const QVector &origin, const Vector &vel, const Vector 
         Coord = origin;
         changed = GFXTRUE;
     } else {
-        VS_LOG_AND_FLUSH(fatal, "fatal error in camera");
-        VSExit(-3); // What value should this return? -- stephengtuggy 2021-09-06
+        // What value should this return? -- stephengtuggy 2021-09-06
+        VS_LOG_FLUSH_EXIT(fatal, "fatal error in camera", -3);
     }
 }
 
