@@ -39,4 +39,3 @@ test_assets/vegastrike.config
 CMakeUserPresets.json
 vcpkg_installed/
 share/
-nlohmann_json.natvis
