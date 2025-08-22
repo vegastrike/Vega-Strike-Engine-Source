@@ -53,6 +53,8 @@ Audible::Audible() {
     defaultSoundNames[SoundType::cloaking] = vs_config->getVariable("unitaudio", "cloak", "sfx43.wav");
 }
 
+Audible::~Audible() = default;
+
 void Audible::addDefaultSounds() {
     for (const SoundType &soundType : typesArray) {
         if (sounds[soundType] == -1) {

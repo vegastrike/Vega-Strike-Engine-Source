@@ -64,6 +64,8 @@ public:
 
     /// assignment operator forbidden
     Asteroid &operator=(const Asteroid &) = delete;
+
+    ~Asteroid() override;
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_ASTEROID_H

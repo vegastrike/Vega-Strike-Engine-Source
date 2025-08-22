@@ -86,6 +86,8 @@ public:
     Nebula(const Nebula &) = delete;
     /// assignment operator forbidden
     Nebula &operator=(const Nebula &) = delete;
+
+    ~Nebula() override;
 };
 
 namespace NebulaXML {

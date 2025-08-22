@@ -371,3 +371,5 @@ bool Missile::useFuel(Unit *target, bool had_target) {
 
     return false;
 }
+
+Missile::~Missile() = default;

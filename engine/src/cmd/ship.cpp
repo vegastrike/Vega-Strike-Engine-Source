@@ -30,10 +30,7 @@
 
 #include "cmd/ship.h"
 
-Ship::Ship()
-{
-
-}
+Ship::Ship() = default;
 
 Ship::Ship(const char *filename,
         bool SubU,
@@ -43,3 +40,5 @@ Ship::Ship(const char *filename,
         int fg_subnumber)
         : Unit(filename, SubU, faction, unitModifications, flightgrp, fg_subnumber)
 {}
+
+Ship::~Ship() = default;
