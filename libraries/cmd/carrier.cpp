@@ -244,13 +244,10 @@ void Carrier::EjectCargo(unsigned int index) {
                 }
             }
             float arot = 0;
-            const float grot =
-                    configuration().graphics.generic_cargo_rotation_speed_flt * 3.1415926536F / 180.0F;
+            const float grot = configuration().graphics.generic_cargo_rotation_speed_dbl * M_PI / 180.0;
             if (!cargo) {
-                const float crot =
-                        configuration().graphics.cargo_rotation_speed_flt * 3.1415926536F / 180.0F;
-                const float erot =
-                        configuration().graphics.eject_rotation_speed_flt * 3.1415926536F / 180.0F;
+                const float crot = configuration().graphics.cargo_rotation_speed_dbl * M_PI / 180.0;
+                const float erot = configuration().graphics.eject_rotation_speed_dbl * M_PI / 180.0;
                 if (tmpcontent == "eject") {
                     if (isplayer) {
                         Flightgroup *fg = unit->getFlightgroup();
