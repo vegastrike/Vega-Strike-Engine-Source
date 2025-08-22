@@ -1,8 +1,12 @@
 /*
  * star.cpp
  *
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -116,8 +120,8 @@ public:
 
 //bool shouldwedraw
 static void saturate(float &r, float &g, float &b) {
-    static float conemin = XMLSupport::parse_float(vs_config->getVariable("graphics", "starmincolorval", ".3"));
-    static float colorpower = XMLSupport::parse_float(vs_config->getVariable("graphics", "starcolorpower", ".25"));
+    const float conemin = configuration().graphics.star_minimum_color_value;
+    const float colorpower = configuration().graphics.star_color_power;
     if (r < conemin) {
         r += conemin;
     }
@@ -134,11 +138,9 @@ static void saturate(float &r, float &g, float &b) {
 
 bool computeStarColor(float &r, float &g, float &b, Vector luminmax, float distance, float maxdistance) {
     saturate(r, g, b);
-    static float luminscale = XMLSupport::parse_float(vs_config->getVariable("graphics", "starluminscale", ".001"));
-    static float
-            starcoloraverage = XMLSupport::parse_float(vs_config->getVariable("graphics", "starcoloraverage", ".6"));
-    static float starcolorincrement =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "starcolorincrement", "100"));
+    const float luminscale = configuration().graphics.star_lumin_scale;
+    const float starcoloraverage = configuration().graphics.star_color_average;
+    const float starcolorincrement = configuration().graphics.star_color_increment;
     float dissqr = distance * distance / (maxdistance * maxdistance);
     float lum = 100 * luminmax.i / (luminmax.k * dissqr);
     lum = log((double) luminmax.i * 10. / (double) luminmax.j) * luminscale / dissqr;
@@ -152,7 +154,7 @@ bool computeStarColor(float &r, float &g, float &b, Vector luminmax, float dista
     r *= lum;
     g *= lum;
     b *= lum;
-    static float starcolorcutoff = XMLSupport::parse_float(vs_config->getVariable("graphics", "starcolorcutoff", ".1"));
+    const float starcolorcutoff = configuration().graphics.star_color_cutoff;
     return lum > starcolorcutoff;
 }
 
@@ -169,9 +171,9 @@ StarVlist::StarVlist(float spread) {
 }
 
 static GFXColorVertex *AllocVerticesForSystem(std::string our_system_name, float spread, int *num, int repetition) {
-    static float staroverlap = XMLSupport::parse_float(vs_config->getVariable("graphics", "star_overlap", "1"));
+    const float staroverlap = configuration().graphics.star_overlap;
     float xyzspread = spread * 2 * staroverlap;
-    static string allowedSectors = vs_config->getVariable("graphics", "star_allowable_sectors", "Vega Sol");
+    const string allowedSectors = configuration().graphics.star_allowable_sectors;
     if (our_system_name.size() > 0) {
         string lumi = _Universe->getGalaxyProperty(our_system_name, "luminosity");
         if (lumi.length() == 0 || strtod(lumi.c_str(), NULL) == 0) {
@@ -341,16 +343,12 @@ static GFXColorVertex *AllocVerticesForSystem(std::string our_system_name, float
 
 PointStarVlist::PointStarVlist(int num, float spread, const std::string &sysnam) : StarVlist(spread) {
     smoothstreak = 0;
-    //static bool StarStreaks=XMLSupport::parse_bool(vs_config->getVariable("graphics","star_streaks","false"));
     GFXColorVertex *tmpvertex = AllocVerticesForSystem(sysnam, this->spread, &num, 2);
-    //if(StarStreaks) {
     vlist = new GFXVertexList(GFXLINE, num, tmpvertex, num, true, 0);
-    //}else {
     for (int i = 0, j = 1; i < num / 2; ++i, j += 2) {
         tmpvertex[i] = tmpvertex[j];
     }
     nonstretchvlist = new GFXVertexList(GFXPOINT, num / 2, tmpvertex, num / 2, false, 0);
-    //}
     delete[] tmpvertex;
 }
 
@@ -372,17 +370,14 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
         bool yawpitch,
         int whichTexture) {
     UpdateGraphics();
-    static bool StarStreaks = XMLSupport::parse_bool(vs_config->getVariable("graphics", "star_streaks", "false"));
+    const bool StarStreaks = configuration().graphics.star_streaks;
     GFXColorMaterial(AMBIENT | DIFFUSE);
     bool ret = false;
     if (StarStreaks) {
         Matrix rollMatrix;
-        static float velstreakscale =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "velocity_star_streak_scale", "5"));
-        static float minstreak =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "velocity_star_streak_min", "1"));
-        static float fov_smoothing =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.smoothing", ".4"));
+        const float velstreakscale = configuration().graphics.velocity_star_streak_scale;
+        const float minstreak = configuration().graphics.velocity_star_streak_min;
+        const float fov_smoothing = configuration().warp.fov_link.smoothing;
         float fov_smoot = std::pow(double(fov_smoothing), GetElapsedTime());
         Vector vel(-velocity * velstreakscale);
         float speed = vel.Magnitude();
@@ -393,8 +388,7 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
             if (speed < minstreak) {
                 speed = minstreak;
             }
-            static float streakcap =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "velocity_star_streak_max", "100"));
+            const float streakcap = configuration().graphics.velocity_star_streak_max;
             if (speed > streakcap) {
                 speed = streakcap;
             }
@@ -403,8 +397,7 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
             GFXColorVertex *v = vlist->BeginMutate(0)->colors;
             int numvertices = vlist->GetNumVertices();
 
-            static float torquestreakscale =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "torque_star_streak_scale", "1"));
+            const float torquestreakscale = configuration().graphics.torque_star_streak_scale;
             for (int j = 0; j < numvertices - 1; j += 2) {
                 int i = j;
 //if (SlowStarStreaks)
@@ -418,9 +411,6 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
                 v[i].x = vpoint.i - vel.i;
                 v[i].y = vpoint.j - vel.j;
                 v[i].z = vpoint.k - vel.k;
-//static float NumSlowStarStreaks=XMLSupport::parse_float(vs_config->getVariable("graphics","num_star_streaks",".05"));
-//if (SlowStarStreaks&&j<NumSlowStarStreaks*numvertices)
-//break;
             }
             vlist->EndMutate();
         }
@@ -459,9 +449,8 @@ PointStarVlist::~PointStarVlist() {
 }
 
 Stars::Stars(int num, float spread) : vlist(NULL), spread(spread) {
-    static string starspritetextures = vs_config->getVariable("graphics", "near_stars_sprite_texture", "");
-    static float starspritesize =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "near_stars_sprite_size", "2"));
+    const string starspritetextures = configuration().graphics.near_stars_sprite_texture;
+    const float starspritesize = configuration().graphics.near_stars_sprite_size;
     if (starspritetextures.length() == 0) {
         vlist = new PointStarVlist((num / STARnumvlist) + 1, spread, "");
     } else {
@@ -477,8 +466,7 @@ void Stars::SetBlend(bool blendit, bool fadeit) {
 }
 
 void Stars::Draw() {
-    static bool
-            stars_dont_move = XMLSupport::parse_bool(vs_config->getVariable("graphics", "stars_dont_move", "false"));
+    const bool stars_dont_move = configuration().graphics.stars_dont_move;
     if (stars_dont_move) {
         return;
     }
@@ -491,12 +479,9 @@ void Stars::Draw() {
     GFXDisable(TEXTURE0);
     GFXDisable(TEXTURE1);
     GFXEnable(DEPTHTEST);
-    static bool near_stars_alpha =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "near_stars_alpha", "false"));
-    static bool near_stars_alpha_blend =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "near_stars_alpha_blend", "false"));
-    static float AlphaTestingCutoff =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "stars_alpha_test_cutoff", ".2"));
+    const bool near_stars_alpha = configuration().graphics.near_stars_alpha;
+    const bool near_stars_alpha_blend = configuration().graphics.near_stars_alpha_blend;
+    const float AlphaTestingCutoff = configuration().graphics.stars_alpha_test_cutoff;
     if (near_stars_alpha) {
         GFXAlphaTest(GREATER, AlphaTestingCutoff);
         if (!near_stars_alpha_blend) {
@@ -515,8 +500,7 @@ void Stars::Draw() {
     int ligh;
     GFXSelectMaterial(0);
     if (fade) {
-        static float star_spread_attenuation =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "star_spread_attenuation", ".2"));
+        const float star_spread_attenuation = configuration().graphics.star_spread_attenuation;
         GFXPushGlobalEffects();
         GFXLight fadeLight(true, GFXColor(cp.i, cp.j, cp.k),
                 GFXColor(0, 0, 0, 1),
@@ -655,8 +639,7 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
         float size) : StarVlist(spread) {
     int curtexture = 0;
     vector<AnimatedTexture *> animations;
-    static bool
-            near_stars_alpha = XMLSupport::parse_bool(vs_config->getVariable("graphics", "near_stars_alpha", "false"));
+    const bool near_stars_alpha = configuration().graphics.near_stars_alpha;
     for (curtexture = 0; curtexture < NUM_ACTIVE_ANIMATIONS; ++curtexture) {
         std::string::size_type where = texturenames.find(" ");
         string texturename = texturenames.substr(0, where);
@@ -807,7 +790,7 @@ void SpriteStarVlist::EndDrawState(bool stretch, int whichTex) {
 extern bool isVista;
 
 void SpriteStarVlist::Draw(bool strertch, int whichTexture) {
-    static bool force_draw = XMLSupport::parse_bool(vs_config->getVariable("graphics", "vista_draw_stars", "false"));
+    const bool force_draw = configuration().graphics.vista_draw_stars;
     if (force_draw || !isVista) {
         vlist[whichTexture]->Draw();
     }

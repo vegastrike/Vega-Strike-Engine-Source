@@ -141,8 +141,7 @@ public:
                 }
             }
         }
-        static bool allow_special_with_weapons =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "special_and_normal_gun_combo", "true"));
+        const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
         if (allow_special_with_weapons) {
             myset.insert(allWeapons);
         }
@@ -206,11 +205,11 @@ void Armed::ActivateGuns(const WeaponInfo *sz, bool ms) {
 void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    if (unit->cloak.Active() && !configuration()->weapons.can_fire_in_cloak) {
+    if (unit->cloak.Active() && !configuration().weapons.can_fire_in_cloak) {
         VS_LOG(trace, (boost::format("%1%: can't fire while cloaked") % __FUNCTION__));
         UnFire();
         return;
-    } else if (unit->ftl_drive.Enabled() && !configuration()->weapons.can_fire_in_spec) {
+    } else if (unit->ftl_drive.Enabled() && !configuration().weapons.can_fire_in_spec) {
         VS_LOG(trace, (boost::format("%1%: can't fire while in SPEC flight") % __FUNCTION__));
         UnFire();
         return;
@@ -257,7 +256,7 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
         const bool locked_missile = (mis && locked_on && lockable_weapon);
         const bool missile_and_want_to_fire_missiles = (mis && (weapon_type_bitmask & ROLES::FIRE_MISSILES));
         const bool gun_and_want_to_fire_guns = ((!mis) && (weapon_type_bitmask & ROLES::FIRE_GUNS));
-        if (configuration()->logging.verbose_debug && missile_and_want_to_fire_missiles && locked_missile) {
+        if (configuration().logging.verbose_debug && missile_and_want_to_fire_missiles && locked_missile) {
             VS_LOG(important_info, (boost::format("%1%: about to fire locked missile %2%") % __FUNCTION__ % counter));
         }
         bool want_to_fire = (fire_non_autotrackers || autotracking_gun || locked_missile) &&
@@ -429,8 +428,7 @@ bool Armed::TargetLocked(const Unit *checktarget) const {
 
 bool Armed::TargetTracked(const Unit *checktarget) {
     Unit *unit = static_cast<Unit *>(this);
-    static bool must_lock_to_autotrack = XMLSupport::parse_bool(
-            vs_config->getVariable("physics", "must_lock_to_autotrack", "true"));
+    const bool must_lock_to_autotrack = configuration().physics.must_lock_to_autotrack;
 
     bool we_do_track = unit->radar.tracking_active
             && (!_Universe->isPlayerStarship(unit) || TargetLocked() || !must_lock_to_autotrack);

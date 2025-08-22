@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, Alexander Rawass, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * in_joystick.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Alexander Rawass
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -300,9 +306,9 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     GetMouseXY(_mx, _my);
     GetMouseDelta(_dx, _dy);
     if (!game_options()->warp_mouse) {
-        fdx = (float) (_dx = _mx - configuration()->graphics.resolution_x / 2.0f);
+        fdx = (float) (_dx = _mx - configuration().graphics.resolution_x / 2.0f);
         def_mouse_sens = 25;
-        fdy = (float) (_dy = _my - configuration()->graphics.resolution_y / 2.0f);
+        fdy = (float) (_dy = _my - configuration().graphics.resolution_y / 2.0f);
     } else {
         static std::list<mouseData> md;
         std::list<mouseData>::iterator i = md.begin();
@@ -344,8 +350,8 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
         fdx = float(valx) / game_options()->mouse_blur;
         fdy = float(valy) / game_options()->mouse_blur;
     }
-    joy_axis[0] = fdx / (configuration()->graphics.resolution_x * def_mouse_sens / game_options()->mouse_sensitivity);
-    joy_axis[1] = fdy / (configuration()->graphics.resolution_y * def_mouse_sens / game_options()->mouse_sensitivity);
+    joy_axis[0] = fdx / (configuration().graphics.resolution_x * def_mouse_sens / game_options()->mouse_sensitivity);
+    joy_axis[1] = fdy / (configuration().graphics.resolution_y * def_mouse_sens / game_options()->mouse_sensitivity);
     if (!game_options()->warp_mouse) {
         modifyDeadZone(this);
     }

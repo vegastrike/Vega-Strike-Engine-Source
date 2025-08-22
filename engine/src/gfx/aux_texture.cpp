@@ -1,9 +1,12 @@
-/**
+/*
  * aux_texture.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, Roy Falk,
- * and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -328,9 +331,7 @@ void Texture::Load(const char *FileName,
     VSError err2 = VSFileSystem::FileNotFound;
     if (t) {
         if (t[0] != '\0') {
-            static bool use_alphamap = parse_bool(vs_config->getVariable("graphics",
-                    "bitmap_alphamap",
-                    "true"));
+            const bool use_alphamap = configuration().graphics.bitmap_alphamap;
             if (use_alphamap) {
                 err2 = f2.OpenReadOnly(t, TextureFile);
             }
@@ -492,10 +493,7 @@ void Texture::Load(const char *FileNameRGB,
     VSFile f1;
     VSError err1 = Unspecified;
     if (FileNameA) {
-        static bool use_alphamap =
-                parse_bool(vs_config->getVariable("graphics",
-                        "bitmap_alphamap",
-                        "true"));
+        const bool use_alphamap = configuration().graphics.bitmap_alphamap;
         if (use_alphamap) {
             std::string tmp;
             err1 = f1.OpenReadOnly(FileNameA, TextureFile);

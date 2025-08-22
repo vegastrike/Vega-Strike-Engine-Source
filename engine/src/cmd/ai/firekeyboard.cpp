@@ -1,8 +1,12 @@
 /*
  * firekeyboard.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -59,6 +63,7 @@
 #include "cmd/weapon_info.h"
 #include "src/vs_logging.h"
 #include "cmd/unit_util.h"
+#include "resource/cargo.h"
 
 extern bool toggle_pause();
 
@@ -1013,7 +1018,7 @@ bool TargMission(Unit *me, Unit *target) {
 }
 
 bool TargAll(Unit *me, Unit *target) {
-    static bool can_target_sun = XMLSupport::parse_bool(vs_config->getVariable("graphics", "can_target_sun", "false"));
+    const bool can_target_sun = configuration().graphics.can_target_sun;
     return (me->InRange(target, true,
             false)
             || me->InRange(target, true, true)) && (can_target_sun || !UnitUtil::isSun(target)) && isNotTurretOwner(
@@ -1022,8 +1027,7 @@ bool TargAll(Unit *me, Unit *target) {
 }
 
 bool TargSig(Unit *me, Unit *target) {
-    static bool can_target_asteroid =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "can_target_asteroid", "true"));
+    const bool can_target_asteroid = configuration().graphics.can_target_asteroid;
 
     bool ret =
             me->InRange(target, false,
@@ -1041,8 +1045,7 @@ bool TargSig(Unit *me, Unit *target) {
 extern Unit *getTopLevelOwner();
 
 bool TargUn(Unit *me, Unit *target) {
-    static bool
-            can_target_cargo = XMLSupport::parse_bool(vs_config->getVariable("graphics", "can_target_cargo", "false"));
+    const bool can_target_cargo = configuration().graphics.can_target_cargo;
     int up = FactionUtil::GetUpgradeFaction();
     return me->InRange(target, true,
             false)
@@ -1093,7 +1096,7 @@ bool TargThreat(Unit *me, Unit *target) {
 }
 
 bool TargNear(Unit *me, Unit *target) {
-    static bool can_target_sun = XMLSupport::parse_bool(vs_config->getVariable("graphics", "can_target_sun", "false"));
+    const bool can_target_sun = configuration().graphics.can_target_sun;
     return (me->getRelation(target) < 0
             || TargThreat(me,
                     target)
@@ -1291,8 +1294,6 @@ static bool UnDockNow(Unit *me, Unit *targ) {
     return ret;
 }
 
-void Enslave(Unit *, bool);
-
 void PlayDockingSound(int dock) {
     switch (dock) {
         case 5: {
@@ -1427,7 +1428,7 @@ static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
             endt->graphicOptions.WarpRamping = 1;
         }
         endt->ftl_drive.Disable();
-        static float clearencetime = (XMLSupport::parse_float(vs_config->getVariable("general", "dockingtime", "20")));
+        const float clearencetime = configuration().general.docking_time;
         endt->EnqueueAIFirst(new Orders::ExecuteFor(new Orders::MatchVelocity(Vector(0, 0, 0),
                 Vector(0, 0, 0),
                 true,
@@ -1526,7 +1527,7 @@ unsigned int FireKeyboard::DoSpeechAndAni(Unit *un, Unit *parent, class Communic
 
 static void MyFunction() {
     //quit it--he's dead all ready
-    static string comm_static = vs_config->getVariable("graphics", "comm_static", "static.ani");
+    const string comm_static = configuration().graphics.comm_static;
     //dead dead dead dead
     static Animation Statuc(comm_static.c_str());
     //yep really dead
@@ -1679,8 +1680,7 @@ void Arrested(Unit *parent) {
 static void ForceChangeTarget(Unit *parent) {
     Unit *curtarg = parent->Target();
     ChooseTargets(parent, TargUn, false);
-    static bool force_change_only_unit =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "target_null_if_no_unit", "false"));
+    const bool force_change_only_unit = configuration().graphics.target_null_if_no_unit;
     if (parent->Target() == curtarg) {
         if (force_change_only_unit) {
             parent->Target(NULL);
@@ -1697,8 +1697,7 @@ int SelectDockPort(Unit *utdw, Unit *parent);
 
 void FireKeyboard::SetParent(Unit *parent1) {
     this->Order::SetParent(parent1);
-    static bool allow_special_with_weapons =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "special_and_normal_gun_combo", "true"));
+    const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
     if (!allow_special_with_weapons) {
         parent->ToggleWeapon(false, true /*reverse*/ );
         parent->ToggleWeapon(false, false /*reverse*/ );
@@ -1737,8 +1736,7 @@ void FireKeyboard::Execute() {
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if (!_Universe->AccessCockpit()->CanDrawNavSystem()) {
-            static bool allow_special_with_weapons =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "special_and_normal_gun_combo", "true"));
+            const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
             if (!allow_special_with_weapons) {
                 bool special = false;
                 bool normal = false;
@@ -1819,8 +1817,7 @@ void FireKeyboard::Execute() {
     }
     if (f().targetukey == PRESS) {
         f().targetukey = DOWN;
-        static bool smart_targetting =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "smart_targetting_key", "true"));
+        const bool smart_targetting = configuration().graphics.smart_targetting_key;
         Unit *tmp = parent->Target();
         bool sysobj = false;
         if (tmp) {
@@ -1900,8 +1897,7 @@ void FireKeyboard::Execute() {
     }
     if (f().rtargetukey == PRESS) {
         f().rtargetukey = DOWN;
-        static bool smart_targetting =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "smart_targetting_key", "true"));
+        const bool smart_targetting = configuration().graphics.smart_targetting_key;
         Unit *tmp = parent->Target();
         bool sysobj = false;
         if (tmp) {
@@ -2132,9 +2128,12 @@ void FireKeyboard::Execute() {
             _Universe->AccessCockpit()->communication_choices = "\nNo Communication\nLink\nEstablished";
         }
     }
-    if (f().enslave == PRESS || f().freeslave == PRESS) {
-        Enslave(parent, f().enslave == PRESS);
+    if (f().enslave == PRESS) {
+        Enslave(parent->cargo);
         f().enslave = RELEASE;
+    }
+    if (f().freeslave == PRESS) {
+        Free(parent->cargo);
         f().freeslave = RELEASE;
     }
     if (f().ejectcargo == PRESS || f().ejectnonmissioncargo == PRESS) {
@@ -2149,7 +2148,7 @@ void FireKeyboard::Execute() {
         }
         for (; offset < static_cast<int>(parent->numCargo()); ++offset) {
             Cargo *tmp = &parent->GetCargo(offset);
-            if (tmp->GetCategory().find("upgrades") == string::npos && (missiontoo || tmp->GetMissionFlag() == false)) {
+            if (!tmp->IsComponent() && (missiontoo || !tmp->IsMissionFlag())) {
                 parent->EjectCargo(offset);
                 break;
             }

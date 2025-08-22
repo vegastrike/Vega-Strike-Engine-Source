@@ -65,6 +65,8 @@
 #include "src/universe.h"
 #include "cmd/vega_py_run.h"
 #include "src/vs_exit.h"
+#include "cmd/unit_type.h"
+
 
 #include <boost/filesystem.hpp>
 #include <boost/chrono/time_point.hpp>
@@ -177,14 +179,8 @@ namespace UniverseUtil {
                           QVector pos,
                           string squadlogo,
                           string destinations) {
-        int clstype = Vega_UnitType::unit;
-        if (unittype_string == "planet") {
-            clstype = Vega_UnitType::planet;
-        } else if (unittype_string == "asteroid") {
-            clstype = Vega_UnitType::asteroid;
-        } else if (unittype_string == "nebula") {
-            clstype = Vega_UnitType::nebula;
-        }
+        Vega_UnitType clstype = DeserializeUnitType(unittype_string);
+
         CreateFlightgroup cf;
         cf.fg = Flightgroup::newFlightgroup(name_string,
                                             type_string,
@@ -678,7 +674,7 @@ namespace UniverseUtil {
 
     QVector SafeStarSystemEntrancePoint(StarSystem *sts, QVector pos, float radial_size) {
         if (radial_size < 0) {
-            radial_size = game_options()->respawn_unit_size;
+            radial_size = configuration().physics.respawn_unit_size;
         }
         for (unsigned int k = 0; k < 10; ++k) {
             Unit *un;
@@ -785,7 +781,7 @@ namespace UniverseUtil {
         securepythonstr(cmd);
         securepythonstr(args);
         securepythonstr(id);
-        string pythonCode = configuration()->general.custom_python + "(" + (trusted ? "True" : "False")
+        string pythonCode = configuration().general.custom_python + "(" + (trusted ? "True" : "False")
                             + ", r\'" + cmd + "\', r\'" + args + "\', r\'" + id + "\')\n";
         VS_LOG(info, "Executing python command: ");
         VS_LOG(info, (boost::format("    %1%") % pythonCode));
@@ -808,7 +804,7 @@ namespace UniverseUtil {
     }
 
     float getPlanetRadiusPercent() {
-        return configuration()->physics.auto_pilot_planet_radius_percent;
+        return configuration().physics.auto_pilot_planet_radius_percent;
     }
 
     std::string getVariable(std::string section, std::string name, std::string def) {
@@ -923,7 +919,7 @@ namespace UniverseUtil {
                                "",
                                true,
                                false,
-                               configuration()->general.quick_savegame_summaries,
+                               configuration().general.quick_savegame_summaries,
                                true,
                                true,
                                campaign_score_vars);
@@ -974,7 +970,7 @@ namespace UniverseUtil {
                 }
             }
         }
-        if (!configuration()->general.quick_savegame_summaries) {
+        if (!configuration().general.quick_savegame_summaries) {
             bool hit = false;
             for (set<string>::const_iterator it = campaign_score_vars.begin(); it != campaign_score_vars.end(); ++it) {
                 string var = *it;

@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * picker.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Mike Byron
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "src/vegastrike.h"
@@ -33,6 +39,8 @@
 #include "root_generic/xml_support.h"
 
 #include <list>
+
+#include "configuration/configuration.h"
 
 //Calculation for indenting children.  Use a factor times total cell height.
 static const float CHILD_INDENT_FACTOR = 0.6;
@@ -351,7 +359,7 @@ bool Picker::processCommand(const EventCommandId &command, Control *control) {
 
 //Mouse clicked down.
 bool Picker::processMouseDown(const InputEvent &event) {
-    static int zoominc = XMLSupport::parse_int(vs_config->getVariable("general", "wheel_increment_lines", "3"));
+    const int zoominc = configuration().general.wheel_increment_lines;
     if (event.code == LEFT_MOUSE_BUTTON) {
         PickerCell *cell = cellForMouse(event.loc);
         if (cell != NULL) {

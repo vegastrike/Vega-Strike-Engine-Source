@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * universe.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -462,11 +468,11 @@ void Universe::StartDraw() {
     const double universe_set_active_cockpit_end_time = realTime();
     VS_LOG(trace, (boost::format("%1%: Time taken by _Universe->SetActiveCockpit(...): %2%") % __FUNCTION__ % (universe_set_active_cockpit_end_time - update_time_compression_sounds_end_time)));
 #endif
-    for (i = 0; i < star_system.size() && i < configuration()->physics.num_running_systems; ++i) {
+    for (i = 0; i < star_system.size() && i < configuration().physics.num_running_systems; ++i) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double update_star_system_start_time = realTime();
 #endif
-        star_system[i]->Update((i == 0) ? 1 : configuration()->physics.inactive_system_time / i, true);
+        star_system[i]->Update((i == 0) ? 1 : configuration().physics.inactive_system_time / i, true);
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double update_star_system_end_time = realTime();
         VS_LOG(trace, (boost::format("%1%: Time taken by star_system[i]->Update(...): %2%") % __FUNCTION__ % (update_star_system_end_time - update_star_system_start_time)));
@@ -511,12 +517,12 @@ void Universe::StartDraw() {
 
     //remove systems not recently visited?
     static int sorttime = 0;
-    if (configuration()->general.garbage_collect_frequency != 0) {
+    if (configuration().general.garbage_collect_frequency != 0) {
         //don't want to delete something when there is something pending to jump therexo
         if (PendingJumpsEmpty()) {
-            if ((++sorttime) % configuration()->general.garbage_collect_frequency == 1) {
+            if ((++sorttime) % configuration().general.garbage_collect_frequency == 1) {
                 SortStarSystems(star_system, _active_star_systems.back());
-                if (star_system.size() > configuration()->general.num_old_systems && configuration()->general.delete_old_systems) {
+                if (star_system.size() > configuration().general.num_old_systems && configuration().general.delete_old_systems) {
                     if (std::find(_active_star_systems.begin(), _active_star_systems.end(),
                             star_system.back()) == _active_star_systems.end()) {
                         delete star_system.back();
@@ -733,7 +739,7 @@ void Universe::UnloadStarSystem(StarSystem *s) {
 
 void Universe::Generate1(const char *file, const char *jumpback) {
     int count = 0;
-    if (configuration()->general.while_loading_star_system) {
+    if (configuration().general.while_loading_star_system) {
         ss_generating(true);
     }
     VSFile f;
@@ -748,7 +754,7 @@ void Universe::Generate2(StarSystem *ss) {
     static bool firsttime = true;
     LoadStarSystem(ss);
     pushActiveStarSystem(ss);
-    for (unsigned int tume = 0; tume <= game_options()->num_times_to_simulate_new_star_system * SIM_QUEUE_SIZE + 1;
+    for (unsigned int tume = 0; tume <= configuration().physics.num_times_to_simulate_new_star_system * SIM_QUEUE_SIZE + 1;
             ++tume) {
         ss->UpdateUnitsPhysics(true);
     }

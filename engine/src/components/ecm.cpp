@@ -1,8 +1,12 @@
 /*
  * ecm.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "ecm.h"
@@ -47,7 +51,7 @@ ECM::~ECM()
 void ECM::Load(std::string unit_key) {
     Component::Load(unit_key);
 
-    double consumption = configuration()->components.fuel.ecm_energy_cost * static_cast<double>(ecm);
+    double consumption = configuration().components.fuel.ecm_energy_cost * static_cast<double>(ecm);
     SetConsumption(consumption);
 
     _upgrade(upgrade_key);
@@ -127,7 +131,7 @@ bool ECM::BreakLock(void* missile) const {
     // Second check
     uintmax_t missile_hash = reinterpret_cast<uintmax_t>(missile) / 16383ULL;
 
-    if (static_cast<int>(missile_hash % configuration()->physics.max_ecm) < ecm) {
+    if (static_cast<int>(missile_hash % configuration().physics.max_ecm) < ecm) {
         return true;
     }
 

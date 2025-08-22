@@ -1,8 +1,12 @@
 /*
  * base_util.cpp
  *
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -175,8 +179,7 @@ int Room(std::string text) {
         p_base_vs_sprite->texfile = file;
 #endif
         float tx = 0, ty = 0;
-        static bool
-                addspritepos = XMLSupport::parse_bool(vs_config->getVariable("graphics", "offset_sprites_by_pos", "true"));
+        const bool addspritepos = configuration().graphics.offset_sprites_by_pos;
         if (addspritepos) {
             p_base_vs_sprite->spr.GetPosition(tx, ty);
         }
@@ -883,11 +886,10 @@ const Dictionary &GetEventData() {
 }
 
 float GetTextHeight(std::string text, Vector widheimult) {
-    static bool force_highquality = true;
-    static bool use_bit = force_highquality
-            || XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font", "false"));
-    static float font_point = XMLSupport::parse_float(vs_config->getVariable("graphics", "font_point", "16"));
-    return use_bit ? getFontHeight() : (font_point * 2 / configuration()->graphics.resolution_y);
+    static constexpr bool force_highquality = true;
+    constexpr bool use_bit = force_highquality ||  configuration().graphics.high_quality_font;
+    const float font_point = configuration().graphics.font_point;
+    return use_bit ? getFontHeight() : (font_point * 2 / configuration().graphics.resolution_y);
 }
 
 float GetTextWidth(std::string text, Vector widheimult) {

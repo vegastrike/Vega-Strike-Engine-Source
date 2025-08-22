@@ -1,8 +1,12 @@
 /*
  * manifest.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "resource/manifest.h"
@@ -85,7 +89,15 @@ Manifest::Manifest(int dummy) {
                 double volume = std::stod(JsonGetStringWithDefault(item, "volume", "0.0"));
                 std::string description = JsonGetStringWithDefault(item, "description", "");
 
-                Cargo cargo = Cargo(name, category, price, 1, mass, volume);
+                bool component = GetBool(item, "upgrade", false);
+                bool installed = false; 
+                bool integral = false;
+                bool weapon = GetBool(item, "weapon", false);
+                bool passenger = GetBool(item, "passenger", false);
+                bool slave = GetBool(item, "slave", false);
+
+                Cargo cargo = Cargo(name, category, price, 1, mass, volume, 1.0, 1.0, false, 
+                                    component, installed, integral, weapon, passenger, slave);
                 cargo.SetDescription(description);
                 _items.push_back(cargo);
             } catch (...) {
@@ -94,6 +106,11 @@ Manifest::Manifest(int dummy) {
 
         }
     }
+}
+
+// For testing
+void Manifest::AddManifest(const std::vector<Cargo>& cargo_items) {
+    _items = cargo_items;
 }
 
 Manifest& Manifest::MPL() {

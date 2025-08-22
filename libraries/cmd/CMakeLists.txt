@@ -97,6 +97,9 @@ ADD_LIBRARY(vegastrike_cmd STATIC
         planetary_orbit.cpp
         planetary_orbit.h
 
+        unit_type.h
+        unit_type.cpp
+
         weapon_factory.cpp
         weapon_factory.h
         weapon_info.cpp
@@ -127,6 +130,11 @@ ENDIF()
 OPTION (LOG_TIME_TAKEN_DETAILS "Whether to log timing details in the main loop" OFF)
 IF (LOG_TIME_TAKEN_DETAILS)
     TARGET_COMPILE_DEFINITIONS(vegastrike_cmd PUBLIC LOG_TIME_TAKEN_DETAILS)
+ENDIF ()
+
+OPTION (DESTRUCTDEBUG "Whether to log details of unit destruction in unit_generic.cpp" OFF)
+IF (DESTRUCTDEBUG)
+    TARGET_COMPILE_DEFINITIONS(vegastrike_cmd PUBLIC DESTRUCTDEBUG)
 ENDIF ()
 
 TARGET_INCLUDE_DIRECTORIES(vegastrike_cmd SYSTEM PRIVATE ${TST_INCLUDES})

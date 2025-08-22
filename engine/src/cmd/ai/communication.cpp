@@ -1,9 +1,12 @@
 /*
  * communication.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -313,7 +316,7 @@ std::string FSM::GetEdgesString(unsigned int curstate) {
     for (unsigned int i = 0; i < nodes[curstate].edges.size(); i++) {
         retval += tostring((int) ((i + 1) % 10)) + "." + nodes[nodes[curstate].edges[i]].messages[0] + "\n";
     }
-    if (configuration()->graphics.hud.print_request_docking) {
+    if (configuration().graphics.hud.print_request_docking) {
         retval += "0. Request Docking Clearance";
     }
     return retval;
@@ -489,7 +492,7 @@ RGBstring GetRelationshipRGBstring(float rel) {
 }
 
 unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &node) {
-    const float scale_rel_color = configuration()->graphics.hud.scale_relationship_color;
+    const float scale_rel_color = configuration().graphics.hud.scale_relationship_color;
     static std::string
             ownname_RGBstr = colToString(vs_config->getColor("player_name", GFXColor(0.0, 0.2, 1.0))).str; // bluish
     unsigned int dummy = 0;

@@ -1,10 +1,12 @@
-/**
+/*
  * comm_ai.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -21,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -54,16 +56,16 @@ CommunicatingAI::CommunicatingAI(int ttype,
         randomresponse(randomresp),
         mood(mood) {
     if (appease > 665 && appease < 667) {
-        this->appease = configuration()->ai.ease_to_appease;
+        this->appease = configuration().ai.ease_to_appease;
     }
     if ((anger > 665 && anger < 667) || (anger > -667 && anger < -665)) {
-        this->anger = configuration()->ai.ease_to_anger;
+        this->anger = configuration().ai.ease_to_anger;
     }
     if (moodswingyness > 665 && moodswingyness < 667) {
-        this->moodswingyness = configuration()->ai.mood_swing_level;
+        this->moodswingyness = configuration().ai.mood_swing_level;
     }
     if (randomresp > 665 && moodswingyness < 667) {
-        this->randomresponse = configuration()->ai.random_response_range;
+        this->randomresponse = configuration().ai.random_response_range;
     }
 }
 
@@ -74,10 +76,10 @@ bool MatchingMood(const CommunicationMessage &c, float mood, float randomrespons
                     relationship)]);
     std::vector<unsigned int>::const_iterator iend = n->edges.end();
     for (std::vector<unsigned int>::const_iterator i = n->edges.begin(); i != iend; ++i) {
-        if (c.fsm->nodes[*i].messagedelta >= configuration()->ai.lowest_positive_comm_choice && relationship >= 0) {
+        if (c.fsm->nodes[*i].messagedelta >= configuration().ai.lowest_positive_comm_choice && relationship >= 0) {
             return true;
         }
-        if (c.fsm->nodes[*i].messagedelta <= configuration()->ai.lowest_negative_comm_choice && relationship < 0) {
+        if (c.fsm->nodes[*i].messagedelta <= configuration().ai.lowest_negative_comm_choice && relationship < 0) {
             return true;
         }
     }
@@ -117,8 +119,7 @@ void GetMadAt(Unit *un, Unit *parent, int numhits = 0) {
 
 void AllUnitsCloseAndEngage(Unit *un, int faction) {
     Unit *ally;
-    static float contraband_assist_range =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "contraband_assist_range", "50000"));
+    const float contraband_assist_range = configuration().physics.contraband_assist_range;
     float relation = 0;
     static float
             minrel = XMLSupport::parse_float(vs_config->getVariable("AI", "max_faction_contraband_relation", "-.05"));
@@ -208,8 +209,7 @@ void CommunicatingAI::UpdateContrabandSearch() {
                 if (u->GetCargo(which_cargo_item).GetQuantity() > 0) {
                     int which_carg_item_bak = which_cargo_item;
                     std::string item = u->GetManifest(which_cargo_item++, parent, SpeedAndCourse);
-                    static bool use_hidden_cargo_space =
-                            XMLSupport::parse_bool(vs_config->getVariable("physics", "use_hidden_cargo_space", "true"));
+                    const bool use_hidden_cargo_space = configuration().physics.use_hidden_cargo_space;
                     static float speed_course_change =
                             XMLSupport::parse_float(vs_config->getVariable("AI",
                                     "PercentageSpeedChangeToStopSearch",
@@ -372,7 +372,7 @@ Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
     NearestUnitLocator unitLocator;
 #ifdef VS_ENABLE_COLLIDE_KEY
     CollideMap  *cm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
-    const float unitRad = configuration()->graphics.hud.radar_search_extra_radius;
+    const float unitRad = configuration().graphics.hud.radar_search_extra_radius;
     CollideMap::iterator iter = cm->lower_bound( wherewrapper );
     if (iter != cm->end() && (*iter)->radius > 0)
         if ( (*iter)->ref.unit != parent )

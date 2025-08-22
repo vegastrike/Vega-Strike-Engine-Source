@@ -1,9 +1,12 @@
 /*
  * radar.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2023 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -20,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
@@ -45,10 +48,10 @@ CRadar::CRadar():
         locked(false),
         can_lock(false),
         tracking_active(true) {
-    long default_max_range = configuration()->components.computer.default_max_range;
+    long default_max_range = configuration().components.computer.default_max_range;
     max_range = Resource<long>(default_max_range,0,default_max_range);
-    tracking_cone = configuration()->components.computer.default_tracking_cone;
-    lock_cone = configuration()->components.computer.default_lock_cone;
+    tracking_cone = configuration().components.computer.default_tracking_cone;
+    lock_cone = configuration().components.computer.default_lock_cone;
 }
 
 CRadar::~CRadar()

@@ -1,8 +1,15 @@
 /*
  * director_generic.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Nachum Barcohen, Roy Falk,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Also: Nachum Barcohen
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
  * This file is part of Vega Strike.
  *
@@ -13,11 +20,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -454,9 +461,9 @@ void Mission::UnPickle(string pickled) {
 void Mission::DirectorStart(missionNode *node) {
     VS_LOG(trace, "DIRECTOR START");
 
-    static int st_debuglevel = atoi(vs_config->getVariable("interpreter", "debuglevel", "0").c_str());
-    static bool st_start_game = XMLSupport::parse_bool(vs_config->getVariable("interpreter", "startgame", "true"));
-    static bool st_do_trace = XMLSupport::parse_bool(vs_config->getVariable("interpreter", "trace", "false"));
+    const int st_debuglevel = configuration().interpreter.debug_level;
+    const bool st_start_game = configuration().interpreter.start_game;
+    const bool st_do_trace = configuration().interpreter.trace;
 
     debuglevel = st_debuglevel;
     start_game = st_start_game;

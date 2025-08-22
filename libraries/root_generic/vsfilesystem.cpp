@@ -89,7 +89,7 @@ using std::string;
 int VSFS_DEBUG() {
 //    return 3;
     if (vs_config) {
-        return (game_options()->debug_fs);
+        return (configuration().general.debug_fs);
     }
     return 0;
 }
@@ -714,9 +714,9 @@ void LoadConfig(string subdir) {
 
     vs_config = createVegaConfig(config_file.c_str());
 
-    string universe_file = datadir + "/" \
- + vs_config->getVariable("data", "universe_path", "universe") + "/" \
- + vs_config->getVariable("general", "galaxy", "milky_way.xml");
+    std::string universe_file = datadir + "/" \
+            + configuration().data.universe_path + "/" \
+            + configuration().game_start.galaxy;
     VS_LOG(debug, (boost::format("Force galaxy to %1%") % universe_file));
     try {
         Galaxy galaxy = Galaxy(universe_file);
@@ -870,10 +870,10 @@ void InitPaths(string conf, string subdir) {
         SubDirectories.push_back(vec);
     }
 
-    boost::filesystem::path config_file_path{datadir + "/config.json"};
-    configuration()->load_config(config_file_path);
-    boost::filesystem::path config_file_path2{homedir + "/config.json"};
-    configuration()->load_config(config_file_path2);
+    const boost::filesystem::path config_file_path{datadir + "/config.json"};
+    (const_cast<vega_config::Configuration&>(configuration())).load_config(config_file_path);
+    const boost::filesystem::path config_file_path2{homedir + "/config.json"};
+    (const_cast<vega_config::Configuration&>(configuration())).load_config(config_file_path2);
 
     LoadConfig(std::move(subdir));
 
@@ -940,9 +940,9 @@ void InitPaths(string conf, string subdir) {
     Directories[PythonFile] = "bases";
     Directories[AccountFile] = "accounts";
 
-    SIMULATION_ATOM = configuration()->general.simulation_atom;
+    SIMULATION_ATOM = configuration().general.simulation_atom;
     simulation_atom_var = SIMULATION_ATOM;
-    AUDIO_ATOM = configuration()->general.audio_atom;
+    AUDIO_ATOM = configuration().general.audio_atom;
     audio_atom_var = AUDIO_ATOM;
     VS_LOG(info, (boost::format("SIMULATION_ATOM: %1%") % SIMULATION_ATOM));
 

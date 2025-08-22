@@ -1,8 +1,12 @@
 /*
  * jump_drive.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "components/jump_drive.h"
@@ -84,7 +88,7 @@ void JumpDrive::Load(std::string unit_key) {
     // Consumer
     double energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
     // Jump drive is unique - consumption and atom_consumption are identical
-    atom_consumption = consumption = energy * configuration()->components.jump_drive.factor;
+    atom_consumption = consumption = energy * configuration().components.jump_drive.factor;
 
     // Jump Drive
     installed = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false);
@@ -94,7 +98,7 @@ void JumpDrive::Load(std::string unit_key) {
 void JumpDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Jump_Drive_Present"] = std::to_string(Installed());
     unit["Jump_Drive_Delay"] = std::to_string(delay);
-    unit["Outsystem_Jump_Cost"] = std::to_string(consumption / configuration()->components.jump_drive.factor);
+    unit["Outsystem_Jump_Cost"] = std::to_string(consumption / configuration().components.jump_drive.factor);
 }
 
 bool JumpDrive::CanDowngrade() const {

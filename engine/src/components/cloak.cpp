@@ -1,8 +1,12 @@
 /*
  * cloak.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "components/cloak.h"
@@ -147,7 +151,7 @@ void Cloak::Update()
     }
 
     // TODO: Use warp power for cloaking (SPEC capacitor)
-    //const static bool warp_energy_for_cloak = configuration()->warp.use_warp_energy_for_cloak;
+    //const static bool warp_energy_for_cloak = configuration().warp.use_warp_energy_for_cloak;
 
 
 

@@ -78,7 +78,7 @@ void UncheckUnit( class Unit*un );
 #include "cmd/role_bitmask.h"
 #include "cmd/upgradeable_unit.h"
 #include "components/cloak.h"
-
+#include "cmd/unit_type.h"
 
 
 #include "configuration/configuration.h"
@@ -113,15 +113,6 @@ class AsteroidGeneric;
  * Needed by star system to determine whether current unit
  * is orbitable
  */
-enum Vega_UnitType {
-    unit,
-    planet,
-    building,
-    nebula,
-    asteroid,
-    enhancement,
-    missile
-};
 
 class VDU;
 //template
@@ -236,8 +227,8 @@ public:
     bool GettingDestroyed() const;
 
 
-   
-    
+
+
 
 /*
  **************************************************************************************
@@ -499,11 +490,6 @@ public:
     void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes);
     void endElement(const std::string &name);
 
-protected:
-    static std::string massSerializer(const struct XMLType &input, void *mythis);
-    static std::string mountSerializer(const struct XMLType &input, void *mythis);
-    static std::string subunitSerializer(const struct XMLType &input, void *mythis);
-
 public:
 //tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
     void WriteUnit(const char *modificationname = "");
@@ -571,7 +557,7 @@ public:
 public:
     //BUCO! Must add shield tightness back into units.csv for great justice.
     //are shields tight to the hull.  zero means bubble
-    float shieldtight = configuration()->physics.default_shield_tightness;
+    float shieldtight = configuration().physics.default_shield_tightness;
 
 public:
     // TODO: move to jump_capable?

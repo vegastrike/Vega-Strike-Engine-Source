@@ -1,8 +1,12 @@
 /*
  * aggressive.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -102,7 +106,7 @@ static void TurretFAW(Unit *parent) {
     Unit *un;
     while (NULL != (un = *iter)) {
         if (!CheckAccessory(un)) {
-            un->EnqueueAIFirst(new Orders::FireAt(configuration()->ai.firing.aggressivity));
+            un->EnqueueAIFirst(new Orders::FireAt(configuration().ai.firing.aggressivity));
             un->EnqueueAIFirst(new Orders::FaceTarget(false, 3));
         }
         TurretFAW(un);
@@ -240,7 +244,7 @@ AggressiveAI::AggressiveAI(const char *filename, Unit *target)
     logiccurtime = logic->maxtime;     //set it to the time allotted
     obedient = true;
     if (aggressivity == 2.01F) {
-        aggressivity = configuration()->unit.default_aggressivity;
+        aggressivity = configuration().unit.default_aggressivity;
     }
     if (target != nullptr) {
         AttachOrder(target);
@@ -321,12 +325,12 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
                 value = (pdmag - parent->rSize() - targ->rSize());
                 double myvel = PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / value;        ///pdmag;
                 if (myvel > 0) {
-                    value -= myvel * myvel / (2 * (parent->drive.retro / parent->getMass()));
+                    value -= myvel * myvel / (2 * (parent->drive.retro / parent->GetMass()));
                 }
             } else {
                 value = 10000;
             }
-            value /= configuration()->physics.game_speed;     /*game_accel*/
+            value /= configuration().physics.game_speed;     /*game_accel*/
             break;
         }
         case THREAT:
@@ -569,7 +573,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
             last_directive = fg->directive;
         }
         if (fg->directive != last_directive) {
-            if (configuration()->ai.always_obedient) {
+            if (configuration().ai.always_obedient) {
                 obedient = true;
             } else if (float ( rand())/RAND_MAX < (obedient ? (1 - logic->obedience) : logic->obedience)) {
                 obedient = !obedient;
@@ -685,8 +689,8 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                             if (o) {
                                 o->Communicate(c);
                             }
-                            const float esc_percent = configuration()->ai.targeting.escort_distance;
-                            const float turn_leader = configuration()->ai.targeting.turn_leader_distance;
+                            const float esc_percent = configuration().ai.targeting.escort_distance;
+                            const float turn_leader = configuration().ai.targeting.turn_leader_distance;
                             int fgnum = parent->getFgSubnumber();
                             if (parent->getFlightgroup()) {
                                 int tempnum = 0;
@@ -763,8 +767,8 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                             if (o) {
                                 o->Communicate(c);
                             }
-                            const float esc_percent = configuration()->ai.targeting.escort_distance;
-                            const float turn_leader = configuration()->ai.targeting.turn_leader_distance;
+                            const float esc_percent = configuration().ai.targeting.escort_distance;
+                            const float turn_leader = configuration().ai.targeting.turn_leader_distance;
                             int fgnum = parent->getFgSubnumber();
                             if (parent->getFlightgroup()) {
                                 int tempnum = 0;
@@ -930,7 +934,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                             CommunicationMessage c(parent, leader, NULL, 0);
 //this order is only valid for cargo wingmen, other wingmen will not comply
                             c.SetCurrentState(c.fsm->GetYesNode(), NULL, 0);
-                            const float turn_leader = configuration()->ai.targeting.turn_leader_distance;
+                            const float turn_leader = configuration().ai.targeting.turn_leader_distance;
                             int fgnum = parent->getFgSubnumber();
                             if (parent->getFlightgroup()) {
                                 int tempnum = 0;
@@ -1183,8 +1187,8 @@ static bool overridable(const std::string &s) {
 extern void LeadMe(Unit *un, string directive, string speech, bool changetarget);
 
 void AggressiveAI::ReCommandWing(Flightgroup *fg) {
-    const float time_to_recommand_wing = configuration()->ai.targeting.time_to_recommand_wing;
-    const bool verbose_debug = configuration()->logging.verbose_debug;
+    const float time_to_recommand_wing = configuration().ai.targeting.time_to_recommand_wing;
+    const bool verbose_debug = configuration().logging.verbose_debug;
     if (fg != nullptr) {
         Unit *lead;
         if (overridable(fg->directive)) {
@@ -1561,7 +1565,7 @@ void AggressiveAI::ExecuteNoEnemies() {
         } else if (lurk_on_arrival > 0) {
             lurk_on_arrival -= simulation_atom_var;
             //slowdown
-            parent->Thrust(-parent->getMass() * parent->UpCoordinateLevel(parent->GetVelocity()) / simulation_atom_var,
+            parent->Thrust(-parent->GetMass() * parent->UpCoordinateLevel(parent->GetVelocity()) / simulation_atom_var,
                     false);
             parent->ftl_drive.Disable();
             if (lurk_on_arrival <= 0) {

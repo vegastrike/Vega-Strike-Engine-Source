@@ -1,8 +1,12 @@
 /*
  * drive.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #define _USE_MATH_DEFINES
@@ -53,18 +57,18 @@ Drive::~Drive()
 
 // Component Methods
 void Drive::Load(std::string unit_key) {
-    static const double game_speed = configuration()->physics.game_speed;
-    static const double game_accel = configuration()->physics.game_accel;
+    static const double game_speed = configuration().physics.game_speed;
+    static const double game_accel = configuration().physics.game_accel;
     static const double game_accel_speed = game_speed * game_accel;
 
     // Minimum drive capability for limp home (in %)
-    static const double minimal_drive_functionality = configuration()->components.drive.minimum_drive;
+    static const double minimal_drive_functionality = configuration().components.drive.minimum_drive;
 
     Component::Load(unit_key);
 
     // Consumer
     // We do not support all options here.
-    if(configuration()->components.drive.energy_source == "fuel") {
+    if(configuration().components.drive.energy_source == "fuel") {
         SetConsumption(1.0);
     } else {
         SetConsumption(1.0);
@@ -120,9 +124,9 @@ void Drive::Load(std::string unit_key) {
 
 
 void Drive::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    static const double game_speed = configuration()->physics.game_speed;
-    static const double game_accel = configuration()->physics.game_accel;
-    static const double game_accel_speed = 1/ (game_speed * game_accel);
+    static const double game_speed = configuration().physics.game_speed;
+    static const double game_accel = configuration().physics.game_accel;
+    static const double game_accel_speed = (game_speed * game_accel);
     const double to_degrees = M_PI / 180;
     unit["Maneuver_Yaw"] = yaw.Serialize(to_degrees);
     unit["Maneuver_Pitch"] = pitch.Serialize(to_degrees);

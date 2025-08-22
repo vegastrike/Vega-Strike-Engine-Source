@@ -1,7 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, ace123, surfdargent, klaussfreire,
- * jacks, dan_w, pyramid3d, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * animation.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -18,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "cmd/unit_generic.h"
@@ -232,7 +237,7 @@ bool Animation::CalculateOrientation(Matrix &result) {
     QVector pos(Position());
     float hei = height;
     float wid = width;
-    static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable("graphics", "HaloOffset", ".1"));
+    const double HaloOffset = configuration().graphics.halo_offset;
     bool retval =
             ::CalculateOrientation(pos,
                     camp,
@@ -460,20 +465,19 @@ void Animation::Draw() {
         Vector camp, camq, camr;
         QVector pos(Position());
 
-        static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable("graphics", "HaloOffset", ".1"));
+        const double HaloOffset = configuration().graphics.halo_offset;
 
         /**/
         //Why do all this if we can use ::CalculateOrientation?
         //-- well one reason is that the code change broke it :-/  Until suns display properly or we switch to ogre we should keep it as it was (problem was, flare wouldn't display--- or would display behind the sun)
         QVector R(_Universe->AccessCamera()->GetR().i, _Universe->AccessCamera()->GetR().j,
                 _Universe->AccessCamera()->GetR().k);
-        static float too_far_dist = XMLSupport::parse_float(
-                vs_config->getVariable("graphics", "anim_far_percent", ".8"));
+        const double too_far_dist = configuration().graphics.anim_far_percent;
         if (( /*R.Dot*/ (Position()
                 - _Universe->AccessCamera()->GetPosition()).Magnitude() + HaloOffset
                 *
                         (height > width ? height : width)) <
-                too_far_dist * configuration()->graphics.zfar) {
+                too_far_dist * configuration().graphics.zfar) {
             //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {ss
             animationdrawqueue.push_back(this);
         } else {

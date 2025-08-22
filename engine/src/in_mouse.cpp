@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * in_mouse.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "src/vegastrike.h"
@@ -92,11 +98,11 @@ void DealWithWarp(int x, int y) {
     if (game_options()->warp_mouse) {
         if (joystick[MOUSE_JOYSTICK]->player < _Universe->numPlayers()) {
             if (x < game_options()->warp_mouse_zone || y < game_options()->warp_mouse_zone
-                    || x > configuration()->graphics.resolution_x - game_options()->warp_mouse_zone || y
-                    > configuration()->graphics.resolution_y - game_options()->warp_mouse_zone) {
+                    || x > configuration().graphics.resolution_x - game_options()->warp_mouse_zone || y
+                    > configuration().graphics.resolution_y - game_options()->warp_mouse_zone) {
 
-                int delx = -x + configuration()->graphics.resolution_x / 2;
-                int dely = -y + configuration()->graphics.resolution_y / 2;
+                int delx = -x + configuration().graphics.resolution_x / 2;
+                int dely = -y + configuration().graphics.resolution_y / 2;
                 mousex += delx;
                 mousey += dely;
                 deque<MouseEvent>::iterator i;
@@ -105,7 +111,7 @@ void DealWithWarp(int x, int y) {
                     i->y += dely;
                 }
                 if (warpallowage-- >= 0) {
-                    winsys_warp_pointer(configuration()->graphics.resolution_x / 2, configuration()->graphics.resolution_y / 2);
+                    winsys_warp_pointer(configuration().graphics.resolution_x / 2, configuration().graphics.resolution_y / 2);
                 }
             }
         }

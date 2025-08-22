@@ -1,8 +1,12 @@
 /*
  * gl_program.cpp
  *
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -29,6 +33,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "gl_globals.h"
+#include "configuration/configuration.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
@@ -411,9 +416,9 @@ int getDefaultProgram() {
 
 // THIS IS STUPID,  Also why is lofi not configurable ?
 #if defined(__APPLE__) && defined (__MACH__)
-        hifiProgramName = game_options()->mac_shader_name;
+        hifiProgramName = configuration().graphics.mac_shader_name;
 #else
-        hifiProgramName = game_options()->shader_name;
+        hifiProgramName = configuration().graphics.shader_name;
 #endif
 // END STUPID
 
@@ -546,7 +551,7 @@ GameSpeed GFXGetFramerate() {
 
 bool GFXShaderReloaded() {
     bool retval = programChanged;
-    if (game_options()->framerate_changes_shader) {
+    if (configuration().graphics.framerate_changes_shader) {
         switch (GFXGetFramerate()) {
             case TOOSLOW:
                 if (defaultprog) {

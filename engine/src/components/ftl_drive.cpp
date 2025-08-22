@@ -1,8 +1,12 @@
 /*
  * ftl_drive.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "ftl_drive.h"
@@ -71,13 +75,13 @@ void FtlDrive::Load(std::string unit_key) {
 
     // Consumer
     double energy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
-    SetConsumption(energy * configuration()->components.ftl_drive.factor);
+    SetConsumption(energy * configuration().components.ftl_drive.factor);
 
     // FTL Drive
 }
 
 void FtlDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    unit["Warp_Usage_Cost"] = std::to_string(consumption  / configuration()->components.ftl_drive.factor);
+    unit["Warp_Usage_Cost"] = std::to_string(consumption  / configuration().components.ftl_drive.factor);
 }
 
 // FTL drive is integrated and so cannot be upgraded/downgraded

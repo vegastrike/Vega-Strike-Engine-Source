@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+#====================================
+# @file   : test
+# @brief  : Tests Vega Strike for purposes of CI/CD (GitHub Actions)
+# @usage  : ./script/test --preset-name=VS2022Win64-pie-enabled-RelWithDebInfo
+# @param  : preset-name=, build-type=
+#====================================
+##
+# test
+#
+# Copyright (c) 2025 Stephen G. Tuggy and other Vega Strike Contributors
+#
+# https://github.com/vegastrike/Vega-Strike-Engine-Source
+#
+# This file is part of Vega Strike.
+#
+# Vega Strike is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Vega Strike is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+set -e
+
+echo "-------------------------"
+echo "--- test | 2025-06-27 ---"
+echo "-------------------------"
+
+#----------------------------------
+# validate parameters
+#----------------------------------
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --preset_name=*)
+      preset_name="${1#*=}"
+      ;;
+    --preset-name=*)
+      preset_name="${1#*=}"
+      ;;
+    --build_type=*)
+      build_type="${1#*=}"
+      ;;
+    --build-type=*)
+      build_type="${1#*=}"
+      ;;
+    *)
+      printf "***************************\n"
+      printf "* Error: Invalid argument.*\n"
+      printf "***************************\n"
+      exit 1
+  esac
+  shift
+done
+
+GTEST_OUTPUT=xml:$(pwd)/test-results ctest -V --preset "test-${preset_name}"

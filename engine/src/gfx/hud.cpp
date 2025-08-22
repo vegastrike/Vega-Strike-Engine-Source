@@ -1,11 +1,13 @@
 /*
  * hud.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
- * Copyright (C) 2002-2019 pyramid3d, ace123, dan_w, jacks, klaussfreire,
- *  and other Vega Strike Contributors
- * Copyright (C) 2019-2025 Stephen G. Tuggy, Roy Falk,
- *  and other Vega Strike Contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically:
+ * pyramid3d, ace123, dan_w, jacks, klaussfreire
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +15,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -22,7 +24,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -30,12 +32,9 @@
 #include "src/gfxlib.h"
 #include "cmd/unit_generic.h"
 #include "gfx/hud.h"
-#include "root_generic/lin_time.h"
 #include "src/file_main.h"
-#include "gfx/aux_texture.h"
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
-#include "root_generic/xml_support.h"
 #include "cmd/base.h"
 //#include "glut.h"
 #include "src/universe.h"
@@ -50,8 +49,6 @@ static bool isInside() {
 }
 
 const std::string &getStringFont(bool &changed, bool force_inside = false, bool whatinside = false) {
-    static std::string whichfont = vs_config->getVariable("graphics", "font", "helvetica12");
-    static std::string whichdockedfont = vs_config->getVariable("graphics", "basefont", "helvetica12");
     bool inside = isInside();
     if (force_inside) {
         inside = whatinside;
@@ -63,13 +60,11 @@ const std::string &getStringFont(bool &changed, bool force_inside = false, bool 
     } else {
         changed = false;
     }
-    return inside ? whichdockedfont : whichfont;
+    return inside ? configuration().graphics.bases.font : configuration().graphics.font;
 }
 
 const std::string &getStringFontForHeight(bool &changed) {
-    static std::string whichfont = vs_config->getVariable("graphics", "font", "helvetica12");
-    static std::string whichdockedfont = vs_config->getVariable("graphics", "basefont", "helvetica12");
-    bool inside = isInside();
+    const bool inside = isInside();
     static bool lastinside = inside;
     if (lastinside != inside) {
         changed = true;
@@ -77,17 +72,17 @@ const std::string &getStringFontForHeight(bool &changed) {
     } else {
         changed = false;
     }
-    return inside ? whichdockedfont : whichfont;
+    return inside ? configuration().graphics.bases.font : configuration().graphics.font;
 }
 
 void *getFont(bool forceinside = false, bool whichinside = false) {
     bool changed = false;
     std::string whichfont = getStringFont(changed, forceinside, whichinside);
-    static void *retval = NULL;
+    static void *retval = nullptr;
     if (changed) {
-        retval = NULL;
+        retval = nullptr;
     }
-    if (retval == NULL) {
+    if (retval == nullptr) {
         if (whichfont == "helvetica10") {
             retval = GLUT_BITMAP_HELVETICA_10;
         } else if (whichfont == "helvetica18") {
@@ -131,7 +126,7 @@ float getFontHeight() {
             point = 26;
         }
     }
-    return point / configuration()->graphics.resolution_y;
+    return point / configuration().graphics.resolution_y;
 }
 
 TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol) {
@@ -143,8 +138,7 @@ TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol) {
     SetPos(0, 0);
 }
 
-TextPlane::~TextPlane() {
-}
+TextPlane::~TextPlane() = default;
 
 int TextPlane::Draw(int offset) {
     return Draw(myText, offset, true, false, true);
@@ -154,9 +148,8 @@ static unsigned int *CreateLists() {
     static unsigned int lists[256] = {0};
     void *fnt0 = getFont(true, false);
     void *fnt1 = getFont(true, true);
-    static bool use_bit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font", "false"));
-    static bool use_display_lists =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "text_display_lists", "true"));
+    const bool use_bit = configuration().graphics.high_quality_font;
+    const bool use_display_lists = configuration().graphics.text_display_lists;
     if (use_display_lists) {
         for (unsigned int i = 32; i < 256; i++) {
             if ((i < 128) || (i >= 128 + 32)) {
@@ -209,7 +202,7 @@ void DrawSquare(float left, float right, float top, float bot) {
 }
 
 float charWidth(char c, float myFontMetrics) {
-    static bool use_bit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font", "false"));
+    const bool use_bit = configuration().graphics.high_quality_font;
     void *fnt = use_bit ? getFont() : GLUT_STROKE_ROMAN;
     float charwid = use_bit ? glutBitmapWidth(fnt, c) : glutStrokeWidth(fnt, c);
     float dubyawid = use_bit ? glutBitmapWidth(fnt, 'W') : glutStrokeWidth(fnt, 'W');
@@ -241,10 +234,9 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
     static unsigned int *display_lists = CreateLists();
     //some stuff to draw the text stuff
     string::const_iterator text_it = newText.begin();
-    static bool use_bit = force_highquality
-            || XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font", "false"));
-    static float font_point = XMLSupport::parse_float(vs_config->getVariable("graphics", "font_point", "16"));
-    static bool font_antialias = XMLSupport::parse_bool(vs_config->getVariable("graphics", "font_antialias", "true"));
+    const bool use_bit = force_highquality || configuration().graphics.high_quality_font;
+    const float font_point = configuration().graphics.font_point;
+    const bool font_antialias = configuration().graphics.font_antialias;
     void *fnt = getFont();
     static float std_wid = glutStrokeWidth(GLUT_STROKE_ROMAN, 'W');
     myFontMetrics.i = font_point * std_wid / (119.05 + 33.33);
@@ -252,8 +244,8 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
         myFontMetrics.i = glutBitmapWidth(fnt, 'W');
     }
     myFontMetrics.j = font_point;
-    myFontMetrics.i /= .5 * configuration()->graphics.resolution_x;
-    myFontMetrics.j /= .5 * configuration()->graphics.resolution_y;
+    myFontMetrics.i /= .5 * configuration().graphics.resolution_x;
+    myFontMetrics.j /= .5 * configuration().graphics.resolution_y;
     float tmp, row, col;
     float origcol;
     GetPos(row, col);
@@ -267,12 +259,12 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
     glLineWidth(1);
     if (!use_bit && font_antialias) {
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
-        if (gl_options.smooth_lines) {
+        if (configuration().graphics.smooth_lines) {
             glEnable(GL_LINE_SMOOTH);
         }
     } else {
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
-        if (gl_options.smooth_lines) {
+        if (configuration().graphics.smooth_lines) {
             glDisable(GL_LINE_SMOOTH);
         }
     }
@@ -319,11 +311,11 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
         }
         float shadowlen = 0;
         if (myc == '\t') {
-            shadowlen = glutBitmapWidth(fnt, ' ') * 5. / (.5 * configuration()->graphics.resolution_x);
+            shadowlen = glutBitmapWidth(fnt, ' ') * 5. / (.5 * configuration().graphics.resolution_x);
         } else {
             if (use_bit) {
                 shadowlen = glutBitmapWidth(fnt, myc) / (float) (.5
-                        * configuration()->graphics.resolution_x);                    //need to use myc -- could have transformed '_' to ' '
+                        * configuration().graphics.resolution_x);                    //need to use myc -- could have transformed '_' to ' '
             } else {
                 shadowlen = myFontMetrics.i * glutStrokeWidth(GLUT_STROKE_ROMAN, myc) / std_wid;
             }
@@ -340,8 +332,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
                     currentCol = GFXColor(r, g, b, this->col.a);
                 }
                 GFXColorf(currentCol);
-                static bool setRasterPos =
-                        XMLSupport::parse_bool(vs_config->getVariable("graphics", "set_raster_text_color", "true"));
+                const bool setRasterPos = configuration().graphics.set_raster_text_color;
                 if (use_bit && setRasterPos) {
                     glRasterPos2f(col - origcol, 0);
                 }
@@ -379,7 +370,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
             if (automatte) {
                 GFXColorf(this->bgcol);
                 DrawSquare(col - origcol,
-                        col - origcol + shadowlen * 5 / (.5 * configuration()->graphics.resolution_x),
+                        col - origcol + shadowlen * 5 / (.5 * configuration().graphics.resolution_x),
                         -rowheight * .25 / scaley,
                         rowheight * .75 / scaley);
                 GFXColorf(currentCol);
@@ -415,7 +406,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
         }
         text_it++;
     }
-    if (gl_options.smooth_lines) {
+    if (configuration().graphics.smooth_lines) {
         glDisable(GL_LINE_SMOOTH);
     }
     glPopMatrix();

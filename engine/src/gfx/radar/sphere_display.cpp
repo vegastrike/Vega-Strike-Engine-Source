@@ -1,11 +1,13 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
-/**
+/*
  * sphere_display.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +15,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -22,7 +24,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -106,7 +108,7 @@ void SphereDisplay::Draw(const Sensor &sensor,
     DrawBackground(sensor, rightRadar);
 
     for (Sensor::TrackCollection::const_iterator it = tracks.begin(); it != tracks.end(); ++it) {
-        const bool draw_both = configuration()->graphics.hud.draw_blips_on_both_radar;
+        const bool draw_both = configuration().graphics.hud.draw_blips_on_both_radar;
         if (it->GetPosition().z < 0 || draw_both) {
             // Draw tracks behind the ship
             DrawTrack(sensor, rightRadar, *it, true);
@@ -146,7 +148,7 @@ void SphereDisplay::DrawTrack(const Sensor &sensor,
         position.z = -position.z;
     }
     if (position.z < 0) {
-        if (configuration()->graphics.hud.show_negative_blips_as_positive) {
+        if (configuration().graphics.hud.show_negative_blips_as_positive) {
             position.z = -position.z;
         } else {
             position.z = 0.125;
@@ -205,8 +207,8 @@ void SphereDisplay::DrawTrack(const Sensor &sensor,
 void SphereDisplay::DrawTargetMarker(const Vector &position, const GFXColor &color, float trackSize) {
     // Crosshair
     const float crossSize = 8.0;
-    const float xcross = crossSize / configuration()->graphics.resolution_x;
-    const float ycross = crossSize / configuration()->graphics.resolution_y;
+    const float xcross = crossSize / configuration().graphics.resolution_x;
+    const float ycross = crossSize / configuration().graphics.resolution_y;
 
     // The crosshair wiggles as it moves around. The wiggling is less noticable
     // when the crosshair is drawn with the smooth option.
@@ -232,8 +234,8 @@ void SphereDisplay::DrawBackground(const Sensor &sensor, const ViewArea &radarVi
         logvelocity = std::log10(velocity);
     }
     const float size = 3.0 * logvelocity; // [9; 31]
-    const float xground = size / configuration()->graphics.resolution_x;
-    const float yground = size / configuration()->graphics.resolution_y;
+    const float xground = size / configuration().graphics.resolution_x;
+    const float yground = size / configuration().graphics.resolution_y;
     Vector center = radarView.Scale(Vector(0.0, 0.0, 0.0));
 
     impl->thinlines.insert(center.x - 2.0 * xground, center.y, center.z, groundColor);

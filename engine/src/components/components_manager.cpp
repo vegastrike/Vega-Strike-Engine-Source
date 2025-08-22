@@ -1,9 +1,12 @@
 /*
  * components_manager.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2023 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -20,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
@@ -29,8 +32,23 @@
 #include "component_utils.h"
 #include "resource/random_utils.h"
 #include "configuration/configuration.h"
+#include "cmd/unit_csv_factory.h"
 
+void ComponentsManager::Load(std::string unit_key) {
+    mass = base_mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 0.0);
+}
 
+void ComponentsManager::Serialize(std::map<std::string, std::string>& unit) const {
+    unit["Mass"] = std::to_string(base_mass);
+}
+
+double ComponentsManager::GetMass() const {
+    return mass;
+}
+
+void ComponentsManager::SetMass(double mass) {
+    this->mass = mass;
+}
 
 void ComponentsManager::DamageRandomSystem() {
     double percent = 1 - hull.Percent();
@@ -39,14 +57,14 @@ void ComponentsManager::DamageRandomSystem() {
                                &afterburner, &cloak, &drive, &ftl_drive,
                                &jump_drive, &computer, &radar, &shield,
                                &ecm, &repair_bot, &ship_functions};
-    
+
     for(Component* component : components) {
         double chance_to_damage = randomDouble();
         if (chance_to_damage < percent) {
             component->DamageByPercent(chance_to_damage/10.0);
         }
     }
-    
+
     // TODO: GenerateHudText();
 
     /*
@@ -59,8 +77,8 @@ void ComponentsManager::DamageRandomSystem() {
         TODO: mounts
 
         To think about:
-        1. Should we damage the cargo? 
-            - To be handled by carrier. 
+        1. Should we damage the cargo?
+            - To be handled by carrier.
             - More applicable for really large ships
         2. Should we damage the upgrade volume?
             - Probably not. How would that work in real life?!
@@ -69,7 +87,7 @@ void ComponentsManager::DamageRandomSystem() {
             - More applicable for really large ships, where you shoot at one of the cargo containers
     */
 
-  
+
 
     // TODO: take actual damage into account when damaging components
     /*
@@ -93,7 +111,7 @@ void ComponentsManager::DamageRandomSystem() {
         }
         return;
     }
-    
+
             //Do something NASTY to the cargo
             if (cargo.size() > 0) {
                 unsigned int i = 0;
@@ -102,7 +120,7 @@ void ComponentsManager::DamageRandomSystem() {
                 do {
                     cargorand = (cargorand_o + i) % cargo.size();
                 } while ((cargo[cargorand].GetQuantity() == 0
-                        || cargo[cargorand].GetMissionFlag()) && (++i) < cargo.size());
+                        || cargo[cargorand].IsMissionFlag()) && (++i) < cargo.size());
                 cargo[cargorand].SetQuantity(cargo[cargorand].GetQuantity() * float_to_int(dam));
             }
     }*/
@@ -128,7 +146,7 @@ struct HudText {
 void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
     std::string report;
 
-    report += configuration()->graphics.hud.damage_report_heading + "\n\n";
+    report += configuration().graphics.hud.damage_report_heading + "\n\n";
 
     // TODO: this should be taken from assets so "FTL Drive" would be "SPEC Drive"
     const HudText hud_texts[] = {
@@ -149,8 +167,8 @@ void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
         HudText(&cloak, "Cloak", true),
         HudText(&repair_bot, "Repair System", false)
     };
-    
-    
+
+
     for(const HudText& text : hud_texts) {
         if(text.component->Installed()) {
             std::string new_hud_text = PrintFormattedComponentInHud(

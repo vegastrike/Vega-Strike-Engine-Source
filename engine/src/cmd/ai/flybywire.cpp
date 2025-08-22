@@ -1,9 +1,12 @@
 /*
  * flybywire.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -68,7 +71,7 @@ using Orders::MatchAngularVelocity;
 
 #define MATCHLINVELEXECUTE()                                                                         \
     do {                                                                                             \
-        parent->Thrust( (parent->getMass()                                                           \
+        parent->Thrust( (parent->GetMass()                                                           \
                          *(parent->ClampVelocity( desired,                                           \
                                                   afterburn )+FrameOfRef-velocity)/simulation_atom_var), \
                        afterburn );                                                                  \
@@ -266,8 +269,7 @@ void FlyByWire::Accel(float per) {
     if (cpu->set_speed > parent->MaxSpeed()) {
         cpu->set_speed = parent->MaxSpeed();
     }
-    static float reverse_speed_limit =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "reverse_speed_limit", "1.0"));
+    const float reverse_speed_limit = configuration().physics.reverse_speed_limit;
     if (cpu->set_speed < -parent->MaxSpeed() * reverse_speed_limit) {
         cpu->set_speed = -parent->MaxSpeed() * reverse_speed_limit;
     }
@@ -353,8 +355,7 @@ void FlyByWire::Execute() {
         parent->computer.set_speed = stolen_setspeed_value;
         stolen_setspeed = false;
     }
-    static double collidepanic =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "collision_inertial_time", "1.25"));
+    const double collidepanic = configuration().physics.collision_inertial_time;
     Cockpit *tempcp = _Universe->isPlayerStarship(parent);
     if (((sheltonslide || inertial_flight_model
             || !controltype)

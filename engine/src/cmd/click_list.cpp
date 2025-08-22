@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * click_list.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -81,10 +87,10 @@ UnitCollection *ClickList::requestIterator(int minX, int minY, int maxX, int max
     GFXFrustum(frustmat,
             drivel,
             l
-                    * (-2. * minX / configuration()->graphics.resolution_x + 1) /*  *g_game.MouseSensitivityX*/,
-            r * (2. * maxX / configuration()->graphics.resolution_x - 1) /*  *g_game.MouseSensitivityX*/,
-            t * (-2. * minY / configuration()->graphics.resolution_y + 1) /*  *g_game.MouseSensitivityY*/,
-            b * (2. * maxY / configuration()->graphics.resolution_y - 1) /*  *g_game.MouseSensitivityY*/,
+                    * (-2. * minX / configuration().graphics.resolution_x + 1) /*  *g_game.MouseSensitivityX*/,
+            r * (2. * maxX / configuration().graphics.resolution_x - 1) /*  *g_game.MouseSensitivityX*/,
+            t * (-2. * minY / configuration().graphics.resolution_y + 1) /*  *g_game.MouseSensitivityY*/,
+            b * (2. * maxY / configuration().graphics.resolution_y - 1) /*  *g_game.MouseSensitivityY*/,
             n,
             f);
     _Universe->AccessCamera()->GetView(view);

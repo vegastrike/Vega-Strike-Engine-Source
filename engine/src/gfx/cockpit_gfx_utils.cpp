@@ -3,7 +3,7 @@
 /*
  * cockpit_gfx_utils.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy, and
+ * Copyright (C) 2020-2025 Daniel Horn, Roy Falk, Stephen G. Tuggy, and
  * other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -141,12 +141,12 @@ VertexBuilder<> GetOpenRectangle(const QVector &location, const Vector& cam_p,
 VertexBuilder<> GetLockingIcon(const QVector &location, const Vector& cam_p,
                             const Vector& cam_q, const float& r_size,
                             const float& lock_percent) {
-    const bool bracket_inner_or_outer = configuration()->graphics.hud.rotating_bracket_inner;
-    const float bracket_width = configuration()->graphics.hud.rotating_bracket_width;
+    const bool bracket_inner_or_outer = configuration().graphics.hud.rotating_bracket_inner;
+    const float bracket_width = configuration().graphics.hud.rotating_bracket_width;
 
-    const float bounded_r_size = std::max(r_size, static_cast<float>(configuration()->graphics.hud.min_lock_box_size));
-    const float inner_distance = configuration()->graphics.hud.min_missile_bracket_size + (configuration()->graphics.hud.max_missile_bracket_size - configuration()->graphics.hud.min_missile_bracket_size) * lock_percent;
-    const float outer_distance = inner_distance + configuration()->graphics.hud.rotating_bracket_size;
+    const float bounded_r_size = std::max(r_size, static_cast<float>(configuration().graphics.hud.min_lock_box_size));
+    const float inner_distance = configuration().graphics.hud.min_missile_bracket_size + (configuration().graphics.hud.max_missile_bracket_size - configuration().graphics.hud.min_missile_bracket_size) * lock_percent;
+    const float outer_distance = inner_distance + configuration().graphics.hud.rotating_bracket_size;
     const float bracket_distance = (bracket_inner_or_outer ? inner_distance : outer_distance);
 
     const float adjusted_inner_distance = inner_distance * bounded_r_size;
@@ -191,12 +191,12 @@ VertexBuilder<> GetLockingIcon(const QVector &location, const Vector& cam_p,
 VertexBuilder<> GetAnimatedLockingIcon(const QVector &location, const Vector& cam_p,
                             const Vector& cam_q, const Vector& cam_r,
                             const float& r_size, const float& lock_percent) {
-    const float lock_line = configuration()->graphics.hud.lock_confirm_line_length;
-    const double diamond_size = configuration()->graphics.hud.diamond_size;
-    const float theta_speed = configuration()->graphics.hud.diamond_rotation_speed;
+    const float lock_line = configuration().graphics.hud.lock_confirm_line_length;
+    const double diamond_size = configuration().graphics.hud.diamond_size;
+    const float theta_speed = configuration().graphics.hud.diamond_rotation_speed;
 
-    const float max = diamond_size * r_size * 0.75 * configuration()->graphics.hud.min_missile_bracket_size;
-    const float coord = configuration()->graphics.hud.min_missile_bracket_size + (configuration()->graphics.hud.max_missile_bracket_size - configuration()->graphics.hud.min_missile_bracket_size) * lock_percent;
+    const float max = diamond_size * r_size * 0.75 * configuration().graphics.hud.min_missile_bracket_size;
+    const float coord = configuration().graphics.hud.min_missile_bracket_size + (configuration().graphics.hud.max_missile_bracket_size - configuration().graphics.hud.min_missile_bracket_size) * lock_percent;
     const double rtot = 1.0 / sqrtf(2.0);
 
     //this causes the rotation!
@@ -209,7 +209,7 @@ VertexBuilder<> GetAnimatedLockingIcon(const QVector &location, const Vector& ca
     t_lock_box = (t_lock_box.i*cam_p+t_lock_box.j*cam_q+t_lock_box.k*cam_r).Cast();
     s_lock_box = (s_lock_box.i*cam_p+s_lock_box.j*cam_q+s_lock_box.k*cam_r).Cast();
 
-    const double r_1_size = std::max(r_size * configuration()->graphics.hud.rotating_bracket_size, configuration()->graphics.hud.min_lock_box_size);
+    const double r_1_size = std::max(r_size * configuration().graphics.hud.rotating_bracket_size, configuration().graphics.hud.min_lock_box_size);
 
     t_lock_box *= r_1_size;
     s_lock_box *= r_1_size;
@@ -268,13 +268,13 @@ VertexBuilder<> GetAnimatedLockingIcon(const QVector &location, const Vector& ca
 void SetThickness(ShapeType type) {
     switch(type) {
         case ShapeType::Box:
-            GFXLineWidth(configuration()->graphics.hud.box_line_thickness);
+            GFXLineWidth(configuration().graphics.hud.box_line_thickness);
             break;
         case ShapeType::Diamond:
-            GFXLineWidth(configuration()->graphics.hud.diamond_line_thickness);
+            GFXLineWidth(configuration().graphics.hud.diamond_line_thickness);
             break;
         case ShapeType::Cross:
-            GFXLineWidth(configuration()->graphics.hud.nav_cross_line_thickness);
+            GFXLineWidth(configuration().graphics.hud.nav_cross_line_thickness);
             break;
         default:
             GFXLineWidth(1.0F);

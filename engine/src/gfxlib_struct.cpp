@@ -1,8 +1,12 @@
 /*
  * gfxlib_struct.cpp
  *
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -36,6 +40,8 @@
 #include "root_generic/options.h"
 
 #include <vector>
+
+#include "configuration/configuration.h"
 
 GLenum PolyLookup(POLYTYPE poly) {
     switch (poly) {
@@ -116,10 +122,10 @@ static void EnableArrays(const GFXVertex *data) {
 
 void GFXVertexList::RefreshDisplayList() {
 #ifndef NO_VBO_SUPPORT
-    if (game_options()->vbo && !vbo_data) {
+    if (configuration().graphics.vbo && !vbo_data) {
         if (glGenBuffersARB_p == nullptr || glBindBufferARB_p == nullptr || glBufferDataARB_p == nullptr || glMapBufferARB_p == nullptr
                 || glUnmapBufferARB_p == nullptr) {
-            game_options()->vbo = false;
+            (const_cast<vega_config::Configuration &>(configuration())).graphics.vbo = false;
         } else {
             (*glGenBuffersARB_p)(1, (GLuint *) &vbo_data);
             if (changed & HAS_INDEX) {
@@ -319,7 +325,7 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
                 case GFXPOLY:
                 case GFXPOINT:
                     if (((*mode == GFXPOINT)
-                            && gl_options.smooth_points) || ((*mode != GFXPOINT) && gl_options.smooth_lines)) {
+                            && configuration().graphics.smooth_points) || ((*mode != GFXPOINT) && configuration().graphics.smooth_lines)) {
                         BLENDFUNC src, dst;
                         GFXGetBlendMode(src, dst);
                         if ((dst != ZERO) && ((src == ONE) || (src == SRCALPHA))) {
@@ -435,8 +441,8 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
                             case GFXPOLY:
                             case GFXPOINT:
                                 if (((mode[i] == GFXPOINT)
-                                        && gl_options.smooth_points)
-                                        || ((mode[i] != GFXPOINT) && gl_options.smooth_lines)) {
+                                        && configuration().graphics.smooth_points)
+                                        || ((mode[i] != GFXPOINT) && configuration().graphics.smooth_lines)) {
                                     BLENDFUNC src, dst;
                                     GFXGetBlendMode(src, dst);
                                     if ((dst != ZERO) && ((src == ONE) || (src == SRCALPHA))) {
@@ -472,8 +478,8 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
                         case GFXPOLY:
                         case GFXPOINT:
                             if (((mode[i] == GFXPOINT)
-                                    && gl_options.smooth_points)
-                                    || ((mode[i] != GFXPOINT) && gl_options.smooth_lines)) {
+                                    && configuration().graphics.smooth_points)
+                                    || ((mode[i] != GFXPOINT) && configuration().graphics.smooth_lines)) {
                                 BLENDFUNC src, dst;
                                 GFXGetBlendMode(src, dst);
                                 if ((dst != ZERO) && ((src == ONE) || (src == SRCALPHA))) {

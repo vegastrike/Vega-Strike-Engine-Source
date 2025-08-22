@@ -1,9 +1,12 @@
 /*
  * flykeyboard.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -190,8 +193,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             }
         } else {
             // Use AutoDocker if docking clearance on target, otherwise use AutoPilot
-            static bool autodock =
-                    XMLSupport::parse_bool(vs_config->getVariable("test", "autodocker", "false"));
+            const bool autodock = configuration().test.autodocker;
             Order *autoNavigator = NULL;
             if (autodock) {
                 Unit *station = parent->Target();
@@ -448,8 +450,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
     static unsigned int counter = 0;
     counter++;
     if (SSCK.jumpkey) {
-        static float
-                jump_key_delay = XMLSupport::parse_float(vs_config->getVariable("general", "jump_key_delay", ".125"));
+        const float jump_key_delay = configuration().general.jump_key_delay;
         if ((counter - last_jumped) > static_cast<unsigned>(jump_key_delay / SIMULATION_ATOM) || last_jumped == 0) {
             last_jumped = counter;
             parent->ActivateJumpDrive();

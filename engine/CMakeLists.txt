@@ -1,17 +1,13 @@
-#====================================
-# @file   : CMakeLists.txt
-# @brief  : cmake configuration file for VegaStrike
-#====================================
-# create a build directory somewhere outside of this source tree
-# > cd .. && mkdir build && cd build
-# run > cmake <path to source tree>
-# run > make
-# to change build target (in Release, RelWithDebInfo, Debug, Profiler)
-# > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
-#====================================
-# Copyright (C) 2001-2025 safemode, Anth0rx, pyramid, Roy Falk,
-# Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
-# Evert Vorster, and other Vega Strike contributors.
+##
+# CMakeLists.txt
+#
+# Vega Strike - Space Simulation, Combat and Trading
+# Copyright (C) 2001-2025 The Vega Strike Contributors:
+# Project creator: Daniel Horn
+# Original development team: As listed in the AUTHORS file. Specifically:
+# safemode, Anth0rx, pyramid, Nachum Barcohen, Rune Morling
+# Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+#
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -24,11 +20,12 @@
 #
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+#
 
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -363,7 +360,6 @@ SET(LIBCMDSERVER_SOURCES
     src/cmd/unit_functions_server.cpp
     src/cmd/unit_util_server.cpp
     src/cmd/unit_server.cpp
-    src/cmd/pilot_server.cpp
     src/cmd/images_server.cpp
     src/cmd/faction_xml_server.cpp
 )
@@ -694,6 +690,11 @@ IF (NOT DISABLE_CLIENT)
     OPTION (LOG_TIME_TAKEN_DETAILS "Whether to log timing details in the main loop" OFF)
     IF (LOG_TIME_TAKEN_DETAILS)
         TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC LOG_TIME_TAKEN_DETAILS)
+    ENDIF ()
+
+    OPTION (JUMP_DEBUG "Whether to log details when warping between systems" OFF)
+    IF (JUMP_DEBUG)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC JUMP_DEBUG)
     ENDIF ()
 
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${VSE_TST_INCLUDES})
@@ -1223,6 +1224,7 @@ IF (USE_GTEST)
         src/configuration/tests/configuration_tests.cpp
         src/damage/tests/layer_tests.cpp
         src/damage/tests/object_tests.cpp
+        src/resource/tests/cargo_tests.cpp
         src/resource/tests/buy_sell.cpp
         src/resource/tests/resource_test.cpp
         src/resource/tests/manifest_tests.cpp

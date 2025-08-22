@@ -1,10 +1,12 @@
 /*
  * mission.h
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) Alexander Rawass <alexannika@users.sourceforge.net>
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Alexander Rawass
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -45,6 +47,7 @@
 #include "root_generic/vs_globals.h"
 #include "msgcenter.h"
 #include "cmd/container.h"
+#include "cmd/unit_type.h"
 class Unit;
 class Order;
 class MessageCenter;
@@ -451,7 +454,7 @@ public:
     static double gametime;
     std::string mission_name;
     void terminateMission();
-    Unit *call_unit_launch(class CreateFlightgroup *fg, int type /*Vega_UnitType type*/, const std::string &destinations);
+    Unit *call_unit_launch(class CreateFlightgroup *fg, Vega_UnitType type /*Vega_UnitType type*/, const std::string &destinations);
 
     Mission(const char *configfile, bool loadscripts = true);
     Mission(const char *filename, const std::string &pythonscript, bool loadscripts = true);

@@ -1,4 +1,7 @@
 name: 'GH Actions - PR'
+permissions:
+    contents: read
+    pull-requests: read
 
 on: [ pull_request ]
 
@@ -18,90 +21,28 @@ jobs:
         include:
           - FROM:     'ubuntu:noble'
             COMPILER: 'gcc'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'OFF'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             allow_failure: false
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'OFF'
-            allow_failure: false
-          - FROM:     'ubuntu:noble'
-            COMPILER: 'gcc'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
-            allow_failure: false
-          - FROM:     'ubuntu:noble'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             allow_failure: false
           - FROM:     'linuxmintd/mint22-amd64'
             COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             allow_failure: false
           - FROM:     'debian:bookworm'
             COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             allow_failure: false
-          #- FROM:     'opensuse/leap:15.6'
-          #  COMPILER: 'clang'
-          #  OpenGL_GL_PREFERENCE: 'LEGACY'
-          #  ENABLE_PIE: 'ON'
-          #  allow_failure: true
           - FROM:     'fedora:41'
             COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'ON'
-            allow_failure: true
-          - FROM:     'fedora:41'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
-            allow_failure: true
-          - FROM:     'fedora:40'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'ON'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             allow_failure: false
           - FROM:     'fedora:40'
             COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             allow_failure: false
-          #- FROM:     'rockylinux_rockylinux:9.5'
-          #  COMPILER: 'gcc'
-          #  OpenGL_GL_PREFERENCE: 'GLVND'
-          #  ENABLE_PIE: 'ON'
-          #  allow_failure: true
-          # Disabled until the build can be fixed
-          #- FROM:     'rockylinux_rockylinux:8.10'
-          #  COMPILER: 'clang'
-          #  OpenGL_GL_PREFERENCE: 'GLVND'
-          #  ENABLE_PIE: 'ON'
-          #  allow_failure: false
-          #- FROM:     'manjarolinux/base'
-          #  COMPILER: 'clang'
-          #  OpenGL_GL_PREFERENCE: 'LEGACY'
-          #  ENABLE_PIE: 'ON'
-          #  allow_failure: true
-          #- FROM:     'manjarolinux/base'
-          #  COMPILER: 'clang'
-          #  OpenGL_GL_PREFERENCE: 'GLVND'
-          #  ENABLE_PIE: 'ON'
-          #  allow_failure: true
-          #- FROM:     'funtoo/stage3-generic_64'
-          #  COMPILER: 'gcc'
-          #  OpenGL_GL_PREFERENCE: 'LEGACY'
-          #  ENABLE_PIE: 'ON'
-          #  allow_failure: true
-          #- FROM:     'funtoo/stage3-generic_64'
-          #  COMPILER: 'gcc'
-          #  OpenGL_GL_PREFERENCE: 'GLVND'
-          #  ENABLE_PIE: 'ON'
-          #  allow_failure: true
 
     steps:
       - name: Check out repository
@@ -127,21 +68,12 @@ jobs:
         env:
           FROM:       ${{ matrix.FROM }}
           COMPILER:   ${{ matrix.COMPILER }}
-          FLAGS:      '-DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }} -DENABLE_PIE=${{ matrix.ENABLE_PIE }}'
           MY_OS_NAME: linux
           IS_RELEASE: 0
-        run: script/cibuild $FLAGS
-
-      # This is run from inside the Docker container, by script/docker-entrypoint.sh
-      # - name: Test
-      #   working-directory: ${{github.workspace}}/build
-      #   env:
-      #     GTEST_OUTPUT: xml
-      #     GTEST_COLOR: 1
-      #   run: ctest -V
+        run: script/cibuild --preset-name="${{ matrix.preset-name }}"
 
       - name: Upload test results
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: failure()
         with:
           name: test_results_xml

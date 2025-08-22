@@ -199,26 +199,7 @@ static string nextElement(string &inp) {
     return ret;
 }
 
-static bool stob(const string &inp, bool defaul) {
-    if (inp.length() != 0) {
-        return XMLSupport::parse_bool(inp);
-    }
-    return defaul;
-}
 
-static double stof(const string &inp, double def = 0) {
-    if (inp.length() != 0) {
-        return XMLSupport::parse_float(inp);
-    }
-    return def;
-}
-
-static int stoi(const string &inp, int def = 0) {
-    if (inp.length() != 0) {
-        return XMLSupport::parse_int(inp);
-    }
-    return def;
-}
 
 extern bool CheckAccessory(Unit *);
 
@@ -290,7 +271,7 @@ static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts) {
         }
     }
     unsigned char parity = 0;
-    bool half_sounds = configuration()->audio.every_other_mount;
+    bool half_sounds = configuration().audio.every_other_mount;
     for (unsigned int a = first_new_mount; a < thus->mounts.size(); ++a) {
         if ((a & 1) == parity) {
             int b = a;
@@ -458,7 +439,7 @@ void AddDocks(Unit *thus, Unit::XML &xml, const string &docks) {
 }
 
 void AddLights(Unit *thus, Unit::XML &xml, const string &lights) {
-    const float default_halo_activation = configuration()->graphics.default_engine_activation;
+    const float default_halo_activation = configuration().graphics.default_engine_activation;
     string::size_type where, when;
     string::size_type ofs = 0;
     while ((where = lights.find('{', ofs)) != string::npos) {
@@ -532,45 +513,28 @@ static void ImportCargo(Unit *thus, const string &imports) {
     }
 }
 
-static void AddCarg(Unit *thus, const string &cargos) {
-    string::size_type where, when, ofs = 0;
-    {
-        int nelem = 0;
-        while ((ofs = cargos.find('{', ofs)) != string::npos) {
-            nelem++, ofs++;
-        }
-        thus->cargo.reserve(nelem + thus->cargo.size());
-        ofs = 0;
+static void AddCarg(Unit *thus, const string &cargo_text) {
+    // TODO: better error handling here and below
+    if(cargo_text.size() < 10) {
+        return;
     }
-    while ((where = cargos.find('{', ofs)) != string::npos) {
-        if ((when = cargos.find('}', where + 1)) != string::npos) {
-            string::size_type elemstart = where + 1, elemend = when;
-            ofs = when + 1;
 
-            std::string name = nextElementString(cargos, elemstart, elemend);
-            std::string category = nextElementString(cargos, elemstart, elemend);
-            float price = nextElementFloat(cargos, elemstart, elemend);
-            int quantity = nextElementInt(cargos, elemstart, elemend);
-            float mass = nextElementFloat(cargos, elemstart, elemend);
-            float volume = nextElementFloat(cargos, elemstart, elemend);
-            float functionality = nextElementFloat(cargos, elemstart, elemend, 1.f);
-            float max_functionality = nextElementFloat(cargos, elemstart, elemend, 1.f);
-            std::string description = nextElementString(cargos, elemstart, elemend);
-            bool mission = nextElementBool(cargos, elemstart, elemend, false);
-            bool installed = nextElementBool(cargos, elemstart, elemend,
-                    category.find("upgrades/") == 0);
-            bool integral = nextElementBool(cargos, elemstart, elemend,
-                    category.find("upgrades/integral") == 0);
+    std::string trimmed_cargo_text = cargo_text.substr(1, cargo_text.size() - 2);
+    std::vector<std::string> cargo_text_elements;
+    boost::split(cargo_text_elements,trimmed_cargo_text,boost::is_any_of("}{"));
 
-            Cargo carg(name, category, price, quantity, mass, volume, functionality,
-                       max_functionality, mission, installed, integral);
-
-
-
-
-            thus->AddCargo(carg, false);
-        } else {
-            ofs = string::npos;
+    for(std::string& cargo_text_element : cargo_text_elements) {
+        if(cargo_text_element.size()<10) {
+            // There's probably a better minimum size, but it should be good enough
+            // This is used to identify text that created a dummy cargo with defaults
+            // probably at the beginning or end of the cargo_text_elements vector.
+            continue;
+        }
+        try {
+            Cargo c(cargo_text_element);
+            thus->AddCargo(c);
+        } catch (const std::exception& e) {
+            std::cerr << "Error parsing cargo: " << e.what() << std::endl;
         }
     }
 }
@@ -706,8 +670,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     pImage->CockpitCenter.i = UnitCSVFactory::GetVariable(unit_key, "CockpitX", 0.0f) * xml.unitscale;
     pImage->CockpitCenter.j = UnitCSVFactory::GetVariable(unit_key, "CockpitY", 0.0f) * xml.unitscale;
     pImage->CockpitCenter.k = UnitCSVFactory::GetVariable(unit_key, "CockpitZ", 0.0f) * xml.unitscale;
-    Mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 1.0f);
-    Momentofinertia = Mass;
+    Load(unit_key); // ComponentsManager
+    Momentofinertia = GetMass();
 
 
     // Hull
@@ -754,7 +718,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     radar.Load(unit_key);
 
-    const static bool warp_energy_for_cloak = configuration()->warp.use_warp_energy_for_cloak;
+    const static bool warp_energy_for_cloak = configuration().warp.use_warp_energy_for_cloak;
     cloak.SetSource((warp_energy_for_cloak ? &ftl_energy : &energy));
     cloak.Load(unit_key);
 
@@ -788,7 +752,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     if (pImage->explosion_type.get().length()) {
         cache_ani(pImage->explosion_type);
     } else {
-        const std::string expani = configuration()->graphics.explosion_animation;
+        const std::string expani = configuration().graphics.explosion_animation;
         cache_ani(expani);
     }
     AddLights(this, xml, UnitCSVFactory::GetVariable(unit_key, "Light", std::string()));
@@ -797,9 +761,9 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
         addShieldMesh(&xml, xml.shieldmesh_str.c_str(), xml.unitscale, faction, getFlightgroup());
         meshdata.back() = xml.shieldmesh;
     } else {
-        const int shieldstacks = configuration()->graphics.shield_detail_level;
-        const std::string& shieldtex = configuration()->graphics.shield_texture;
-        const std::string& shieldtechnique = configuration()->graphics.shield_technique;
+        const int shieldstacks = configuration().graphics.shield_detail_level;
+        const std::string& shieldtex = configuration().graphics.shield_texture;
+        const std::string& shieldtechnique = configuration().graphics.shield_technique;
         meshdata.back() = new SphereMesh(rSize(),
                 shieldstacks,
                 shieldstacks,
@@ -1059,25 +1023,13 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
         }
     }
     {
-        string carg;
-        for (unsigned int i = 0; i < numCargo(); ++i) {
-            Cargo *c = &GetCargo(i);
-            char tmp[2048];
-            sprintf(tmp, ";%f;%d;%f;%f;%f;%f;;%s;%s}",
-                    c->GetPrice(),
-                    c->GetQuantity(),
-                    c->GetMass(),
-                    c->GetVolume(),
-                    c->GetFunctionality(),
-                    c->GetMaxFunctionality(),
-                    c->GetMissionFlag() ? "true" : "false",
-                    c->GetInstalled() ? "true" : "false"
-            );
-            carg += "{" + c->GetName() + ";" + c->GetCategory() + tmp;
+        string carg ;
+        for (const Cargo& c : cargo) {
+            carg += c.Serialize();
         }
         unit["Cargo"] = carg;
     }
-    unit["Mass"] = tos(Mass);
+    Serialize(unit); // ComponentsManager
 
     hull.SaveToCSV(unit);
     armor.SaveToCSV(unit);

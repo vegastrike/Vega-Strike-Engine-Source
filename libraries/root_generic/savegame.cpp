@@ -68,7 +68,7 @@ std::string CurrentSaveGameName = "";
 
 std::string GetHelperPlayerSaveGame(int num) {
     if (CurrentSaveGameName.length() > 0) {
-        if (configuration()->general.remember_savegame) {
+        if (configuration().general.remember_savegame) {
             VSFile f;
             VSError err = f.OpenCreateWrite("save.4.x.txt", UnknownFile);
             if (err <= Ok) {
@@ -92,7 +92,7 @@ std::string GetHelperPlayerSaveGame(int num) {
             //IF save.4.x.txt DOES NOT EXIST WE CREATE ONE WITH "default" AS SAVENAME
             err = f.OpenCreateWrite("save.4.x.txt", UnknownFile);
             if (err <= Ok) {
-                f.Write(configuration()->general.new_game_save_name.c_str(), configuration()->general.new_game_save_name.length());
+                f.Write(configuration().general.new_game_save_name.c_str(), configuration().general.new_game_save_name.length());
                 f.Write("\n", 1);
                 f.Close();
             } else {
@@ -128,7 +128,7 @@ std::string GetHelperPlayerSaveGame(int num) {
             }
             f.Close();
         }
-        if (configuration()->general.remember_savegame && !res->empty()) {
+        if (configuration().general.remember_savegame && !res->empty()) {
             //Set filetype to Unknown so that it is searched in homedir/
             if (*res->begin() == '~') {
                 err = f.OpenCreateWrite("save.4.x.txt", VSFileSystem::UnknownFile);
@@ -893,7 +893,7 @@ void SaveGame::LoadSavedMissions() {
 }
 
 string SaveGame::WriteSavedUnit(SavedUnits *su) {
-    return string("\n") + XMLSupport::tostring(su->type) + string(" ") + su->filename + " " + su->faction;
+    return string("\n") + std::to_string(SerializeUnitType(su->type)) + string(" ") + su->filename + " " + su->faction;
 }
 
 extern bool STATIC_VARS_DESTROYED;
@@ -1086,9 +1086,9 @@ void SaveGame::ParseSaveGame(const string &filename_p,
     }
     if (err <= Ok) {
         if (quick_read) {
-            char *buf = (char *) malloc(configuration()->general.quick_savegame_summaries_buffer_size + 1);
-            buf[configuration()->general.quick_savegame_summaries_buffer_size] = '\0';
-            err = f.ReadLine(buf, configuration()->general.quick_savegame_summaries_buffer_size);
+            char *buf = (char *) malloc(configuration().general.quick_savegame_summaries_buffer_size + 1);
+            buf[configuration().general.quick_savegame_summaries_buffer_size] = '\0';
+            err = f.ReadLine(buf, configuration().general.quick_savegame_summaries_buffer_size);
             savestring = buf;
             free(buf);
         } else {

@@ -1,8 +1,12 @@
 /*
  * camera.cpp
  *
- * Copyright (C) 2001-2025 Daniel Horn, Alan Shieh, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Alan Shieh
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -58,7 +62,7 @@ Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1, 0.075
     x = y = 0;
     xsize = ysize = 1.0;
     zoom = 1.0;
-    fov = configuration()->graphics.fov;
+    fov = configuration().graphics.fov;
 
     lastGFXUpdate.clip = GFXTRUE;
     lastGFXUpdate.updateFrustum = GFXTRUE;
@@ -103,22 +107,22 @@ void Camera::UpdateGFX(GFXBOOL clip,
     //FIXMEGFXLoadIdentity(VIEW);
     switch (projectionType) {
         case Camera::PERSPECTIVE:
-            znear = (overrideZFrustum ? overrideZNear : configuration()->graphics.znear);
-            zfar = (overrideZFrustum ? overrideZFar : configuration()->graphics.zfar * (clip ? 1 : ZFARCONST));
+            znear = (overrideZFrustum ? overrideZNear : configuration().graphics.znear);
+            zfar = (overrideZFrustum ? overrideZFar : configuration().graphics.zfar * (clip ? 1 : ZFARCONST));
 
             GFXPerspective(zoom * fov,
-                    configuration()->graphics.aspect,
+                    configuration().graphics.aspect,
                     znear,
                     zfar,
                     cockpit_offset);             //set perspective to 78 degree FOV
             break;
         case Camera::PARALLEL:
 
-            znear = (overrideZFrustum ? overrideZNear : -configuration()->graphics.zfar * (clip ? 1 : ZFARCONST));
-            zfar = (overrideZFrustum ? overrideZFar : configuration()->graphics.zfar * (clip ? 1 : ZFARCONST));
+            znear = (overrideZFrustum ? overrideZNear : -configuration().graphics.zfar * (clip ? 1 : ZFARCONST));
+            zfar = (overrideZFrustum ? overrideZFar : configuration().graphics.zfar * (clip ? 1 : ZFARCONST));
 
             //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
-            GFXParallel(configuration()->graphics.aspect * -zoom, configuration()->graphics.aspect * zoom, -zoom, zoom, znear, zfar);
+            GFXParallel(configuration().graphics.aspect * -zoom, configuration().graphics.aspect * zoom, -zoom, zoom, znear, zfar);
             break;
     }
     GFXLookAt(-R, centerCamera ? QVector(0, 0, 0) : Coord, Q);
@@ -184,15 +188,15 @@ void Camera::UpdateGLCenter() {
         switch (Camera::PERSPECTIVE) {
             case Camera::PERSPECTIVE:
                 GFXPerspective(zoom * fov,
-                        configuration()->graphics.aspect,
-                        configuration()->graphics.znear,
-                        configuration()->graphics.zfar,
+                        configuration().graphics.aspect,
+                        configuration().graphics.znear,
+                        configuration().graphics.zfar,
                         cockpit_offset);             //set perspective to 78 degree FOV
                 break;
             case Camera::PARALLEL:
 
                 //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
-                GFXParallel(configuration()->graphics.aspect * -zoom, configuration()->graphics.aspect * zoom, -zoom, zoom, -configuration()->graphics.znear, configuration()->graphics.zfar);
+                GFXParallel(configuration().graphics.aspect * -zoom, configuration().graphics.aspect * zoom, -zoom, zoom, -configuration().graphics.znear, configuration().graphics.zfar);
                 break;
         }
         RestoreViewPort(0, 0);

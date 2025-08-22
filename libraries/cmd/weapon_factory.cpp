@@ -58,10 +58,6 @@ bool gamma_needed(int gamma, int count, int depth)
 
 void ParseWeapon(const boost::json::object& weapon) {
     WeaponInfo wi;
-    /*static float gun_speed =
-            game_options()->gun_speed * (game_options()->gun_speed_adjusted_game_speed ? game_options()->game_speed : 1);
-    static int gamma = (int) (20 * game_options()->weapon_gamma);*/
-
 
     // Weapon Type
     const std::string weapon_type = JsonGetWithDefault(weapon, "type", std::string());
@@ -107,7 +103,7 @@ void ParseWeapon(const boost::json::object& weapon) {
     //wi.bug = inner.get( "Energy.<xmlattr>.detonationrange", wi.bug );
 
     // TODO: is this really necessary???
-    /*if(game_options()->gun_speed_adjusted_game_speed) {
+    /*if(configuration().physics.gun_speed_adjusted_game_speed) {
         if (wi.speed < 1000) {
             wi.speed *= 1.0+gun_speed/1.25;
         } else if (wi.speed < 2000) {

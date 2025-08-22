@@ -85,8 +85,8 @@ inline QVector randVector(float min, float max) {
 
 std::string CargoToString(const Cargo &cargo) {
     string missioncargo;
-    if (cargo.GetMissionFlag()) {
-        missioncargo = string("\" missioncargo=\"") + XMLSupport::tostring(cargo.GetMissionFlag());
+    if (cargo.IsMissionFlag()) {
+        missioncargo = string("\" missioncargo=\"") + XMLSupport::tostring(cargo.IsMissionFlag());
     }
     return string("\t\t\t<Cargo mass=\"") + XMLSupport::tostring((float) cargo.GetMass()) + string("\" price=\"")
             + XMLSupport::tostring((float) cargo.GetPrice()) + string("\" volume=\"")
@@ -118,7 +118,7 @@ void Carrier::SortCargo() {
                 tmpvolume /= un->cargo[i].quantity;
             }
             un->cargo[i].SetVolume(tmpvolume);
-            un->cargo[i].SetMissionFlag((un->cargo[i].GetMissionFlag() || un->cargo[i + 1].GetMissionFlag()));
+            un->cargo[i].SetMissionFlag((un->cargo[i].IsMissionFlag() || un->cargo[i + 1].IsMissionFlag()));
             un->cargo[i].SetMass(tmpmass);
             //group up similar ones
             un->cargo.erase(un->cargo.begin() + (i + 1));
@@ -195,7 +195,7 @@ void Carrier::EjectCargo(unsigned int index) {
 
     // Some sanity checks for tmp
     // Can't eject an upgrade, unless ship is destroyed
-    if(tmp->GetInstalled() && !unit->hull.Destroyed()) {
+    if(tmp->IsInstalled() && !unit->hull.Destroyed()) {
         return;
     }
 
@@ -207,15 +207,15 @@ void Carrier::EjectCargo(unsigned int index) {
         tmp->SetMass(0.01);
     }
 
-    static float cargotime = XMLSupport::parse_float(vs_config->getVariable("physics", "cargo_live_time", "600"));
+    const float cargotime = configuration().physics.cargo_live_time;
     if (tmp) {
         string tmpcontent = tmp->name;
-        if (tmp->GetMissionFlag()) {
+        if (tmp->IsMissionFlag()) {
             tmpcontent = "Mission_Cargo";
         }
-        const int ulen = strlen("upgrades");
+
         //prevents a number of bad things, incl. impossible speeds and people getting rich on broken stuff
-        if ((!tmp->GetMissionFlag()) && memcmp(tmp->GetCategory().c_str(), "upgrades", ulen) == 0) {
+        if ((!tmp->IsMissionFlag()) && tmp->IsComponent()) {
             tmpcontent = "Space_Salvage";
         }
         //this happens if it's a ship
@@ -223,7 +223,7 @@ void Carrier::EjectCargo(unsigned int index) {
             const int sslen = strlen("starships");
             Unit *cargo = NULL;
             if (tmp->GetCategory().length() >= (unsigned int) sslen) {
-                if ((!tmp->GetMissionFlag()) && memcmp(tmp->GetCategory().c_str(), "starships", sslen) == 0) {
+                if ((!tmp->IsMissionFlag()) && tmp->GetCategory() == "starships") {
                     string ans = tmpcontent;
                     string::size_type blank = ans.find(".blank");
                     if (blank != string::npos) {
@@ -244,16 +244,13 @@ void Carrier::EjectCargo(unsigned int index) {
                 }
             }
             float arot = 0;
-            static float grot =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "generic_cargo_rotation_speed",
-                            "1")) * 3.1415926536 / 180;
+            const float grot =
+                    configuration().graphics.generic_cargo_rotation_speed * 3.1415926536 / 180;
             if (!cargo) {
-                static float crot =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "cargo_rotation_speed",
-                                "60")) * 3.1415926536 / 180;
-                static float erot =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "eject_rotation_speed",
-                                "0")) * 3.1415926536 / 180;
+                const float crot =
+                        configuration().graphics.cargo_rotation_speed * 3.1415926536 / 180;
+                const float erot =
+                        configuration().graphics.eject_rotation_speed * 3.1415926536 / 180;
                 if (tmpcontent == "eject") {
                     if (isplayer) {
                         Flightgroup *fg = unit->getFlightgroup();
@@ -300,8 +297,7 @@ void Carrier::EjectCargo(unsigned int index) {
                         }
                     } else {
                         int fac = FactionUtil::GetUpgradeFaction();
-                        static float ejectcargotime =
-                                XMLSupport::parse_float(vs_config->getVariable("physics", "eject_live_time", "0"));
+                        const float ejectcargotime = configuration().physics.eject_live_time;
                         if (cargotime == 0.0) {
                             cargo = new Unit("eject", false, fac, "", NULL, 0);
                         } else {
@@ -354,8 +350,7 @@ void Carrier::EjectCargo(unsigned int index) {
             Vector rotation
                     (vsrandom.uniformInc(-arot, arot), vsrandom.uniformInc(-arot, arot), vsrandom.uniformInc(-arot,
                             arot));
-            static bool all_rotate_same =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "cargo_rotates_at_same_speed", "true"));
+            const bool all_rotate_same = configuration().graphics.cargo_rotates_at_same_speed;
             if (all_rotate_same && arot != 0) {
                 float tmp = rotation.Magnitude();
                 if (tmp > .001) {
@@ -363,9 +358,7 @@ void Carrier::EjectCargo(unsigned int index) {
                     rotation *= arot;
                 }
             }
-            if (0 && cargo->rSize() >= unit->rSize()) {
-                cargo->Kill();
-            } else {
+            {
                 Vector tmpvel = -unit->Velocity;
                 if (tmpvel.MagnitudeSquared() < .00001) {
                     tmpvel = randVector(-unit->rSize(), unit->rSize()).Cast();
@@ -375,8 +368,7 @@ void Carrier::EjectCargo(unsigned int index) {
                 }
                 tmpvel.Normalize();
                 if ((SelectDockPort(unit, unit) > -1)) {
-                    static float eject_cargo_offset =
-                            XMLSupport::parse_float(vs_config->getVariable("physics", "eject_distance", "20"));
+                    const float eject_cargo_offset = configuration().physics.eject_distance;
                     QVector loc(Transform(unit->GetTransformation(),
                             unit->DockingPortLocations()[0].GetPosition().Cast()));
                     //index is always > -1 because it's unsigned.  Lets use the correct terms, -1 in Uint is UINT_MAX
@@ -397,11 +389,10 @@ void Carrier::EjectCargo(unsigned int index) {
                             + randVector(-.5 * unit->rSize(), .5 * unit->rSize()));
                     cargo->SetAngularVelocity(rotation);
                 }
-                static float
-                        velmul = XMLSupport::parse_float(vs_config->getVariable("physics", "eject_cargo_speed", "1"));
+                const float velmul = configuration().physics.eject_cargo_speed;
                 cargo->SetOwner(unit);
                 cargo->SetVelocity(unit->Velocity * velmul + randVector(-.25, .25).Cast());
-                cargo->setMass(tmp->GetMass());
+                cargo->SetMass(tmp->GetMass());
                 if (name.length() > 0) {
                     cargo->name = name;
                 } else if (tmp) {
@@ -415,10 +406,7 @@ void Carrier::EjectCargo(unsigned int index) {
                     //changes control to that cockpit
                     cp->SetParent(cargo, "", "", unit->Position());
                     if (tmpcontent == "return_to_cockpit") {
-                        static bool simulate_while_at_base =
-                                XMLSupport::parse_bool(vs_config->getVariable("physics",
-                                        "simulate_while_docked",
-                                        "false"));
+                        const bool simulate_while_at_base = configuration().physics.simulate_while_docked;
                         if ((simulate_while_at_base) || (_Universe->numPlayers() > 1)) {
                             unit->TurretFAW();
                         }
@@ -472,9 +460,10 @@ int Carrier::RemoveCargo(unsigned int i, int quantity, bool eraseZero) {
         quantity = carg->quantity;
     }
 
-    static bool usemass = XMLSupport::parse_bool(vs_config->getVariable("physics", "use_cargo_mass", "true"));
+    const bool usemass = configuration().physics.use_cargo_mass;
     if (usemass) {
-        unit->setMass(unit->getMass() - quantity * carg->GetMass());
+        // TODO: remove static_cast when carg->GetMass returns double
+        unit->SetMass(unit->GetMass() - quantity * static_cast<double>(carg->GetMass()));
     }
 
     carg->quantity -= quantity;
@@ -487,9 +476,10 @@ int Carrier::RemoveCargo(unsigned int i, int quantity, bool eraseZero) {
 void Carrier::AddCargo(const Cargo &carg, bool sort) {
     Unit *unit = static_cast<Unit *>(this);
 
-    static bool usemass = XMLSupport::parse_bool(vs_config->getVariable("physics", "use_cargo_mass", "true"));
+    const bool usemass = configuration().physics.use_cargo_mass;
     if (usemass) {
-        unit->setMass(unit->getMass() + carg.quantity.Value() * carg.GetMass());
+        // TODO: remove static_cast when carg->GetMass returns double
+        unit->SetMass(unit->GetMass() + carg.quantity.Value() * static_cast<double>(carg.GetMass()));
     }
 
     bool found = false;
@@ -504,14 +494,10 @@ void Carrier::AddCargo(const Cargo &carg, bool sort) {
     if(!found) {
         unit->cargo.push_back(carg);
     }
-    
+
     if (sort) {
         SortCargo();
     }
-}
-
-bool cargoIsUpgrade(const Cargo &c) {
-    return c.GetCategory().find("upgrades") == 0;
 }
 
 float Carrier::getHiddenCargoVolume() const {
@@ -527,9 +513,8 @@ bool Carrier::CanAddCargo(const Cargo &carg) const {
         return true;
     }
     //Test volume availability
-    bool upgradep = cargoIsUpgrade(carg);
-    float total_volume = carg.quantity.Value() * carg.GetVolume() + (upgradep ? getUpgradeVolume() : getCargoVolume());
-    if (total_volume <= (upgradep ? getEmptyUpgradeVolume() : getEmptyCargoVolume())) {
+    float total_volume = carg.quantity.Value() * carg.GetVolume() + (carg.IsComponent() ? getUpgradeVolume() : getCargoVolume());
+    if (total_volume <= (carg.IsComponent() ? getEmptyUpgradeVolume() : getEmptyCargoVolume())) {
         return true;
     }
     //Hm... not in main unit... perhaps a subunit can take it
@@ -557,7 +542,7 @@ float Carrier::getCargoVolume(void) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     float result = 0.0;
     for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
-        if (!cargoIsUpgrade(unit->cargo[i])) {
+        if (!(unit->cargo[i].IsComponent())) {
             result += unit->cargo[i].quantity.Value() * unit->cargo[i].GetVolume();
         }
     }
@@ -578,7 +563,7 @@ float Carrier::PriceCargo(const std::string &s) {
         if (this != mpl) {
             return mpl->PriceCargo(s);
         } else {
-            static float spacejunk = parse_float(vs_config->getVariable("cargo", "space_junk_price", "10"));
+            const float spacejunk = configuration().cargo.space_junk_price;
             return spacejunk;
         }
     }
@@ -591,7 +576,7 @@ float Carrier::getUpgradeVolume(void) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     float result = 0.0;
     for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
-        if (cargoIsUpgrade(unit->cargo[i])) {
+        if ((unit->cargo[i].IsComponent())) {
             result += unit->cargo[i].quantity.Value() * unit->cargo[i].GetVolume();
         }
     }
@@ -700,10 +685,9 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
 
     ///FIXME somehow mangle string
     string mangled = unit->cargo[i].name;
-    static float scramblingmanifest =
-            XMLSupport::parse_float(vs_config->getVariable("general", "PercentageSpeedChangeToFaultSearch", ".5"));
+    const float scramblingmanifest = configuration().general.percentage_speed_change_to_fault_search;
     {
-        //Keep inside subblock, otherwice MSVC will throw an error while redefining 'i'
+        //Keep inside subblock, otherwise MSVC will throw an error while redefining 'i'
         bool last = true;
         for (string::iterator i = mangled.begin(); i != mangled.end(); ++i) {
             if (last) {
@@ -724,7 +708,7 @@ bool Carrier::SellCargo(unsigned int i, int quantity, float &creds, Cargo &carg,
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (i < 0 || i >= unit->cargo.size() || !buyer->CanAddCargo(unit->cargo[i])
-            || unit->getMass() < unit->cargo[i].GetMass()) {
+            || unit->GetMass() < unit->cargo[i].GetMass()) {
         return false;
     }
     carg = unit->cargo[i];

@@ -142,7 +142,7 @@ public:
     float lightoptimalintensity{};
     float lightsaturation{};
     int numlights{};
-    bool separatespecularcolor{};
+    bool separate_specular_color{};
     bool LockVertexArrays{};
     int fogdetail{};
     float ModelDetail{};
@@ -242,7 +242,7 @@ public:
     std::string startDockedTo;
     bool dockOnLoad{};
 
-/* PhysicsConfig Options */
+/* Physics Options */
     std::string Drone;
     int max_missions{};
     double game_speed{};

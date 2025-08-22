@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, Mike Byron, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * painttext.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Mike Byron
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "src/vegastrike.h"
@@ -203,10 +209,9 @@ static float drawChars(const string &str,
     if (useStroke()) {
         glLineWidth(font.strokeWidth());
     } else {
-        static bool setRasterPos =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "set_raster_text_color", "true"));
+        const bool setRasterPos = configuration().graphics.set_raster_text_color;
         if (setRasterPos) {
-            glRasterPos2f(inRasterPos / (configuration()->graphics.resolution_x / 2), 0);
+            glRasterPos2f(inRasterPos / (configuration().graphics.resolution_x / 2), 0);
         }
     }
     //Draw all the characters.
@@ -226,7 +231,7 @@ void PaintText::drawLines(size_t start, size_t count) const {
     }
     //Initialize the graphics state.
     GFXToggleTexture(false, 0);
-    if (gl_options.smooth_lines) {
+    if (configuration().graphics.smooth_lines) {
         glEnable(GL_LINE_SMOOTH);
     }
     GFXPushBlendMode();
@@ -271,7 +276,7 @@ void PaintText::drawLines(size_t start, size_t count) const {
     glRasterPos2f(0, 0);
     //Undo graphics state
     GFXPopBlendMode();
-    if (gl_options.smooth_lines) {
+    if (configuration().graphics.smooth_lines) {
         glDisable(GL_LINE_SMOOTH);
     }
     glPopMatrix();
@@ -713,8 +718,7 @@ void PaintText::calcLayout(void) {
     m_verticalScaling = m_font.verticalScaling();
     m_horizontalScaling = m_font.horizontalScaling();
     //Max line width in character reference space.
-    static double
-            font_width_hack = XMLSupport::parse_float(vs_config->getVariable("graphics", "font_width_hack", "0.925"));
+    const double font_width_hack = configuration().graphics.font_width_hack;
     const float maxLineWidth = m_rect.size.width * font_width_hack / m_horizontalScaling;
     //The temporary global state for the layout operation.
     //Make sure this gets initialized at the beginning of an operation.
