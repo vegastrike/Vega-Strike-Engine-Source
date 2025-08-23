@@ -734,7 +734,7 @@ IF (NOT DISABLE_CLIENT)
 ENDIF (NOT DISABLE_CLIENT)
 
 # Vssetup Sub build file
-ADD_SUBDIRECTORY(setup)
+#ADD_SUBDIRECTORY(setup)
 
 # Add other utilities here
 ADD_SUBDIRECTORY(objconv)
