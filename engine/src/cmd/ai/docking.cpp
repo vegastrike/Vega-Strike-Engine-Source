@@ -64,7 +64,7 @@ DockingOps::DockingOps(Unit *unitToDockWith, Order *ai, bool physically_dock, bo
     facedtarget = false;
     physicallyDock = true;
     port = -1;
-    const float temptimer = configuration()->physics.docking_time;
+    const float temptimer = configuration().physics.docking_time;
     timer = temptimer;
 }
 
@@ -213,7 +213,7 @@ bool DockingOps::DockToTarget(Unit *utdw) {
         }
     } else if (diss <= 1.2 * rad * rad) {
         timer += SIMULATION_ATOM;
-        const float tmp = configuration()->physics.docking_time;
+        const float tmp = configuration().physics.docking_time;
         if (timer >= 1.5 * tmp) {
             if (physicallyDock) {
                 return parent->Dock(utdw);
@@ -230,7 +230,7 @@ bool DockingOps::PerformDockingOperations(Unit *utdw) {
     timer -= SIMULATION_ATOM;
     bool isplanet = utdw->getUnitType() == Vega_UnitType::planet;
     if (timer < 0) {
-        const float tmp = configuration()->physics.un_docking_time;
+        const float tmp = configuration().physics.un_docking_time;
         timer = tmp;
         EnqueueOrder(new ChangeHeading(parent->Position() * 2 - utdw->Position(), 4, 1, true));
         if (physicallyDock) {

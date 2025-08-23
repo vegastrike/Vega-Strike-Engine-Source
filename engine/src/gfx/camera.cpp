@@ -62,7 +62,7 @@ Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1, 0.075
     x = y = 0;
     xsize = ysize = 1.0;
     zoom = 1.0;
-    fov = configuration()->graphics.fov;
+    fov = configuration().graphics.fov;
 
     lastGFXUpdate.clip = GFXTRUE;
     lastGFXUpdate.updateFrustum = GFXTRUE;
@@ -107,22 +107,22 @@ void Camera::UpdateGFX(GFXBOOL clip,
     //FIXMEGFXLoadIdentity(VIEW);
     switch (projectionType) {
         case Camera::PERSPECTIVE:
-            znear = (overrideZFrustum ? overrideZNear : configuration()->graphics.znear);
-            zfar = (overrideZFrustum ? overrideZFar : configuration()->graphics.zfar * (clip ? 1 : ZFARCONST));
+            znear = (overrideZFrustum ? overrideZNear : configuration().graphics.znear);
+            zfar = (overrideZFrustum ? overrideZFar : configuration().graphics.zfar * (clip ? 1 : ZFARCONST));
 
             GFXPerspective(zoom * fov,
-                    configuration()->graphics.aspect,
+                    configuration().graphics.aspect,
                     znear,
                     zfar,
                     cockpit_offset);             //set perspective to 78 degree FOV
             break;
         case Camera::PARALLEL:
 
-            znear = (overrideZFrustum ? overrideZNear : -configuration()->graphics.zfar * (clip ? 1 : ZFARCONST));
-            zfar = (overrideZFrustum ? overrideZFar : configuration()->graphics.zfar * (clip ? 1 : ZFARCONST));
+            znear = (overrideZFrustum ? overrideZNear : -configuration().graphics.zfar * (clip ? 1 : ZFARCONST));
+            zfar = (overrideZFrustum ? overrideZFar : configuration().graphics.zfar * (clip ? 1 : ZFARCONST));
 
             //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
-            GFXParallel(configuration()->graphics.aspect * -zoom, configuration()->graphics.aspect * zoom, -zoom, zoom, znear, zfar);
+            GFXParallel(configuration().graphics.aspect * -zoom, configuration().graphics.aspect * zoom, -zoom, zoom, znear, zfar);
             break;
     }
     GFXLookAt(-R, centerCamera ? QVector(0, 0, 0) : Coord, Q);
@@ -188,15 +188,15 @@ void Camera::UpdateGLCenter() {
         switch (Camera::PERSPECTIVE) {
             case Camera::PERSPECTIVE:
                 GFXPerspective(zoom * fov,
-                        configuration()->graphics.aspect,
-                        configuration()->graphics.znear,
-                        configuration()->graphics.zfar,
+                        configuration().graphics.aspect,
+                        configuration().graphics.znear,
+                        configuration().graphics.zfar,
                         cockpit_offset);             //set perspective to 78 degree FOV
                 break;
             case Camera::PARALLEL:
 
                 //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
-                GFXParallel(configuration()->graphics.aspect * -zoom, configuration()->graphics.aspect * zoom, -zoom, zoom, -configuration()->graphics.znear, configuration()->graphics.zfar);
+                GFXParallel(configuration().graphics.aspect * -zoom, configuration().graphics.aspect * zoom, -zoom, zoom, -configuration().graphics.znear, configuration().graphics.zfar);
                 break;
         }
         RestoreViewPort(0, 0);

@@ -115,7 +115,7 @@ Cargo CargoHold::RemoveCargo(ComponentsManager *manager, unsigned int index,
 
     capacity -= quantity * cargo_to_remove.volume;
 
-    if(configuration()->physics.use_cargo_mass) {
+    if(configuration().physics.use_cargo_mass) {
         manager->mass -= quantity * cargo_to_remove.mass;
     }
 
@@ -126,7 +126,7 @@ Cargo CargoHold::RemoveCargo(ComponentsManager *manager, unsigned int index,
 }
 
 void CargoHold::AddCargo(ComponentsManager *manager, const Cargo &cargo, bool sort) {
-    if(configuration()->physics.use_cargo_mass) {
+    if(configuration().physics.use_cargo_mass) {
         manager->mass += cargo.quantity.Value() * cargo.mass;
     }
 

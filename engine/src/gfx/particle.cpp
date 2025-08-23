@@ -305,7 +305,7 @@ void ParticleTrail::DrawAndUpdate() {
 
         GFXDisable(TEXTURE0);
         GFXPointSize(psize);
-        if (psmooth && configuration()->graphics.smooth_points) {
+        if (psmooth && configuration().graphics.smooth_points) {
             glEnable(GL_POINT_SMOOTH);
         }
         if (pblend) {

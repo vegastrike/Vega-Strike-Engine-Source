@@ -51,7 +51,7 @@ ECM::~ECM()
 void ECM::Load(std::string unit_key) {
     Component::Load(unit_key);
 
-    double consumption = configuration()->components.fuel.ecm_energy_cost * static_cast<double>(ecm);
+    double consumption = configuration().components.fuel.ecm_energy_cost * static_cast<double>(ecm);
     SetConsumption(consumption);
 
     _upgrade(upgrade_key);
@@ -131,7 +131,7 @@ bool ECM::BreakLock(void* missile) const {
     // Second check
     uintmax_t missile_hash = reinterpret_cast<uintmax_t>(missile) / 16383ULL;
 
-    if (static_cast<int>(missile_hash % configuration()->physics.max_ecm) < ecm) {
+    if (static_cast<int>(missile_hash % configuration().physics.max_ecm) < ecm) {
         return true;
     }
 

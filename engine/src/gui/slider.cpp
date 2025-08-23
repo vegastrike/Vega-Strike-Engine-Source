@@ -183,7 +183,7 @@ void Slider::draw(void) {
 }
 
 bool Slider::processMouseDown(const InputEvent &event) {
-    const int zoominc = configuration()->general.wheel_increment_lines;
+    const int zoominc = configuration().general.wheel_increment_lines;
     if (event.code == LEFT_MOUSE_BUTTON && m_thumbLength != NO_THUMB_LENGTH && hitTest(event.loc)) {
         if (m_vertical) {
             if (event.loc.y < m_thumbRect.origin.y) {

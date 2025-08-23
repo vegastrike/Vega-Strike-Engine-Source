@@ -121,9 +121,9 @@ int getPhysicsPriority(Unit *un) {
         return 1;
     }
     //Some other comment mentions these need special treatment for subunit scheduling
-    const int PLAYER_PRIORITY = configuration()->physics.priorities.player;
-    const int MISSILE_PRIORITY = configuration()->physics.priorities.missile;
-    const int DOCKABLE_PRIORITY = configuration()->physics.priorities.dockable;
+    const int PLAYER_PRIORITY = configuration().physics.priorities.player;
+    const int MISSILE_PRIORITY = configuration().physics.priorities.missile;
+    const int DOCKABLE_PRIORITY = configuration().physics.priorities.dockable;
 
     float rad = un->rSize();
     Vega_UnitType untype = un->getUnitType();
@@ -132,8 +132,8 @@ int getPhysicsPriority(Unit *un) {
     unsigned int np = _Universe->numPlayers();
     Cockpit *cockpit = _Universe->AccessCockpit();
     //const float     fixed_system_orbit_priorities =
-    //    configuration()->physics.fixed_system_priority_velocity_cutoff;
-    const int SYSTEM_INSTALLATION_PRIORITY = configuration()->physics.priorities.system_installation;
+    //    configuration().physics.fixed_system_priority_velocity_cutoff;
+    const int SYSTEM_INSTALLATION_PRIORITY = configuration().physics.priorities.system_installation;
     bool system_installation = un->owner == getTopLevelOwner();
     bool force_system_installation_priority = true;
     //if (system_installation && un->Velocity.MagnitudeSquared() > fixed_system_orbit_priorities*fixed_system_orbit_priorities)
@@ -192,24 +192,24 @@ int getPhysicsPriority(Unit *un) {
     if (hasDockingUnits(un)) {
         return DOCKABLE_PRIORITY;
     }
-    const int ASTEROID_PARENT_PRIORITY = configuration()->physics.priorities.asteroid_parent;
-    const int ASTEROID_HIGH_PRIORITY = configuration()->physics.priorities.asteroid_high;
+    const int ASTEROID_PARENT_PRIORITY = configuration().physics.priorities.asteroid_parent;
+    const int ASTEROID_HIGH_PRIORITY = configuration().physics.priorities.asteroid_high;
     //static int   ASTEROID_LOW_PRIORITY    = XMLSupport::parse_int(
     //    vs_config->getVariable( "physics", "priorities", "asteroid.low", "32" ) );
-    const int HIGH_PRIORITY = configuration()->physics.priorities.high;
-    const int MEDIUMHIGH_PRIORITY = configuration()->physics.priorities.medium_high;
-    const int MEDIUM_PRIORITY = configuration()->physics.priorities.medium;
-    const int LOW_PRIORITY = configuration()->physics.priorities.low;
-    const int NOT_VISIBLE_COMBAT_HIGH = configuration()->physics.priorities.not_visible_combat_high;
-    const int NOT_VISIBLE_COMBAT_MEDIUM = configuration()->physics.priorities.not_visible_combat_medium;
-    const int NOT_VISIBLE_COMBAT_LOW = configuration()->physics.priorities.not_visible_combat_low;
-    const int NO_ENEMIES = configuration()->physics.priorities.no_enemies;
-    const int INERT_PRIORITY = configuration()->physics.priorities.inert;
-    const double _PLAYERTHREAT_DISTANCE_FACTOR = configuration()->physics.priorities.player_threat_distance_factor;
-    const double _THREAT_DISTANCE_FACTOR = configuration()->physics.priorities.threat_distance_factor;
-    const double DYNAMIC_THROTTLE_MINFACTOR = configuration()->physics.priorities.dynamic_throttle.min_distance_factor;
-    const double DYNAMIC_THROTTLE_MAXFACTOR = configuration()->physics.priorities.dynamic_throttle.max_distance_factor;
-    const double DYNAMIC_THROTTLE_TARGETFPS = configuration()->physics.priorities.dynamic_throttle.target_fps;
+    const int HIGH_PRIORITY = configuration().physics.priorities.high;
+    const int MEDIUMHIGH_PRIORITY = configuration().physics.priorities.medium_high;
+    const int MEDIUM_PRIORITY = configuration().physics.priorities.medium;
+    const int LOW_PRIORITY = configuration().physics.priorities.low;
+    const int NOT_VISIBLE_COMBAT_HIGH = configuration().physics.priorities.not_visible_combat_high;
+    const int NOT_VISIBLE_COMBAT_MEDIUM = configuration().physics.priorities.not_visible_combat_medium;
+    const int NOT_VISIBLE_COMBAT_LOW = configuration().physics.priorities.not_visible_combat_low;
+    const int NO_ENEMIES = configuration().physics.priorities.no_enemies;
+    const int INERT_PRIORITY = configuration().physics.priorities.inert;
+    const double _PLAYERTHREAT_DISTANCE_FACTOR = configuration().physics.priorities.player_threat_distance_factor;
+    const double _THREAT_DISTANCE_FACTOR = configuration().physics.priorities.threat_distance_factor;
+    const double DYNAMIC_THROTTLE_MINFACTOR = configuration().physics.priorities.dynamic_throttle.min_distance_factor;
+    const double DYNAMIC_THROTTLE_MAXFACTOR = configuration().physics.priorities.dynamic_throttle.max_distance_factor;
+    const double DYNAMIC_THROTTLE_TARGETFPS = configuration().physics.priorities.dynamic_throttle.target_fps;
     const double DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.0 / DYNAMIC_THROTTLE_TARGETFPS;
     static double DYNAMIC_THROTTLE_FACTOR = 1.0;
     static double lastThrottleAdjust = 0.0;
@@ -270,8 +270,8 @@ int getPhysicsPriority(Unit *un) {
         }
     }
     if (un->graphicOptions.WarpRamping || un->graphicOptions.RampCounter != 0) {
-        const float compwarprampuptime = configuration()->physics.computer_warp_ramp_up_time; //for the heck of it.  NOTE, variable also in unit_generic.cpp
-        const float warprampdowntime = configuration()->physics.warp_ramp_down_time;
+        const float compwarprampuptime = configuration().physics.computer_warp_ramp_up_time; //for the heck of it.  NOTE, variable also in unit_generic.cpp
+        const float warprampdowntime = configuration().physics.warp_ramp_down_time;
         float lowest_priority_time = SIM_QUEUE_SIZE * SIMULATION_ATOM;
 
         float time_ramped = compwarprampuptime - un->graphicOptions.RampCounter;
@@ -346,7 +346,7 @@ void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVec
             }
         }
         if (my_unit->faction != FactionUtil::GetFactionIndex("neutral")) {
-            Order *tmp = new Orders::FireAt(configuration()->ai.firing.aggressivity);
+            Order *tmp = new Orders::FireAt(configuration().ai.firing.aggressivity);
             my_unit->EnqueueAI(tmp);
             my_unit->SetTurretAI();
         }
@@ -703,7 +703,7 @@ bool isDockableUnit(const Unit *my_unit) {
 }
 
 bool isCloseEnoughToDock(const Unit *my_unit, const Unit *un) {
-    const bool superdock = configuration()->physics.dock_within_base_shield;
+    const bool superdock = configuration().physics.dock_within_base_shield;
     float dis =
             (un->getUnitType() == Vega_UnitType::planet || superdock) ? UnitUtil::getSignificantDistance(my_unit, un)
                     : UnitUtil::getDistance(

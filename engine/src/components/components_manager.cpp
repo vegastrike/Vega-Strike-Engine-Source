@@ -97,14 +97,14 @@ void ComponentsManager::DamageRandomSystem() {
                                &afterburner, &cloak, &drive, &ftl_drive,
                                &jump_drive, &computer, &radar, &shield,
                                &ecm, &repair_bot, &ship_functions};
-    
+
     for(Component* component : components) {
         double chance_to_damage = randomDouble();
         if (chance_to_damage < percent) {
             component->DamageByPercent(chance_to_damage/10.0);
         }
     }
-    
+
     // TODO: GenerateHudText();
 
     /*
@@ -117,8 +117,8 @@ void ComponentsManager::DamageRandomSystem() {
         TODO: mounts
 
         To think about:
-        1. Should we damage the cargo? 
-            - To be handled by carrier. 
+        1. Should we damage the cargo?
+            - To be handled by carrier.
             - More applicable for really large ships
         2. Should we damage the upgrade volume?
             - Probably not. How would that work in real life?!
@@ -127,7 +127,7 @@ void ComponentsManager::DamageRandomSystem() {
             - More applicable for really large ships, where you shoot at one of the cargo containers
     */
 
-  
+
 
     // TODO: take actual damage into account when damaging components
     /*
@@ -151,7 +151,7 @@ void ComponentsManager::DamageRandomSystem() {
         }
         return;
     }
-    
+
             //Do something NASTY to the cargo
             if (cargo.size() > 0) {
                 unsigned int i = 0;
@@ -224,7 +224,7 @@ struct HudText {
 void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
     std::string report;
 
-    report += configuration()->graphics.hud.damage_report_heading + "\n\n";
+    report += configuration().graphics.hud.damage_report_heading + "\n\n";
 
     // TODO: this should be taken from assets so "FTL Drive" would be "SPEC Drive"
     const HudText hud_texts[] = {
@@ -245,8 +245,8 @@ void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
         HudText(&cloak, "Cloak", true),
         HudText(&repair_bot, "Repair System", false)
     };
-    
-    
+
+
     for(const HudText& text : hud_texts) {
         if(text.component->Installed()) {
             std::string new_hud_text = PrintFormattedComponentInHud(

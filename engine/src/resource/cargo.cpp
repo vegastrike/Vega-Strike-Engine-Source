@@ -285,7 +285,7 @@ bool Cargo::CanSell(bool ship_damaged) const {
         return true;
     }
 
-    const bool must_fix_first = configuration()->physics.must_repair_to_sell;
+    const bool must_fix_first = configuration().physics.must_repair_to_sell;
     return (!must_fix_first || !ship_damaged);
 }
 

@@ -91,7 +91,7 @@ float word_length(const char *str) {
 }
 
 void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
-    const float rescale_font = configuration()->graphics.gui_font_scale;
+    const float rescale_font = configuration().graphics.gui_font_scale;
     float font_size_float = rescale_font * 5. / 100;
 
     int cur;
@@ -103,7 +103,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 
     glDisable(GL_TEXTURE_2D);
     glLoadIdentity();
-    if (configuration()->graphics.smooth_lines) {
+    if (configuration().graphics.smooth_lines) {
         glEnable(GL_LINE_SMOOTH);
     }
     glLineWidth(wid);
@@ -127,7 +127,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
             } else {
                 width = 0;
                 glLoadIdentity();
-                if (configuration()->graphics.smooth_lines) {
+                if (configuration().graphics.smooth_lines) {
                     glEnable(GL_LINE_SMOOTH);
                 }
                 glLineWidth(wid);
@@ -142,7 +142,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
         }
     }
     glLoadIdentity();
-    if (configuration()->graphics.smooth_lines) {
+    if (configuration().graphics.smooth_lines) {
         glDisable(GL_LINE_SMOOTH);
     }
 }
@@ -165,7 +165,7 @@ void SetSoftwareMousePosition(int x, int y) {
  */
 void StartGUIFrame(GFXBOOL clr) {
     //glutSetCursor(GLUT_CURSOR_INHERIT);
-    //GFXViewPort (0,0,configuration()->graphics.resolution_x,configuration()->graphics.resolution_y);
+    //GFXViewPort (0,0,configuration().graphics.resolution_x,configuration().graphics.resolution_y);
     GFXHudMode(true);
     GFXColor4f(1, 1, 1, 1);
 
@@ -192,7 +192,7 @@ void DrawGlutMouse(int mousex, int mousey, VSSprite *spr) {
     float tempx = 0, tempy = 0;
     spr->GetPosition(tempx, tempy);
     spr->SetPosition(tempx + -1 + .5 * sizex + float(mousex)
-            / (.5 * configuration()->graphics.resolution_x), tempy + 1 + .5 * sizey - float(mousey) / (.5 * configuration()->graphics.resolution_y));
+            / (.5 * configuration().graphics.resolution_x), tempy + 1 + .5 * sizey - float(mousey) / (.5 * configuration().graphics.resolution_y));
     spr->Draw();
     GFXDisable(TEXTURE0);
     GFXEnable(TEXTURE0);

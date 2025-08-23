@@ -56,16 +56,16 @@ CommunicatingAI::CommunicatingAI(int ttype,
         randomresponse(randomresp),
         mood(mood) {
     if (appease > 665 && appease < 667) {
-        this->appease = configuration()->ai.ease_to_appease;
+        this->appease = configuration().ai.ease_to_appease;
     }
     if ((anger > 665 && anger < 667) || (anger > -667 && anger < -665)) {
-        this->anger = configuration()->ai.ease_to_anger;
+        this->anger = configuration().ai.ease_to_anger;
     }
     if (moodswingyness > 665 && moodswingyness < 667) {
-        this->moodswingyness = configuration()->ai.mood_swing_level;
+        this->moodswingyness = configuration().ai.mood_swing_level;
     }
     if (randomresp > 665 && moodswingyness < 667) {
-        this->randomresponse = configuration()->ai.random_response_range;
+        this->randomresponse = configuration().ai.random_response_range;
     }
 }
 
@@ -76,10 +76,10 @@ bool MatchingMood(const CommunicationMessage &c, float mood, float randomrespons
                     relationship)]);
     std::vector<unsigned int>::const_iterator iend = n->edges.end();
     for (std::vector<unsigned int>::const_iterator i = n->edges.begin(); i != iend; ++i) {
-        if (c.fsm->nodes[*i].messagedelta >= configuration()->ai.lowest_positive_comm_choice && relationship >= 0) {
+        if (c.fsm->nodes[*i].messagedelta >= configuration().ai.lowest_positive_comm_choice && relationship >= 0) {
             return true;
         }
-        if (c.fsm->nodes[*i].messagedelta <= configuration()->ai.lowest_negative_comm_choice && relationship < 0) {
+        if (c.fsm->nodes[*i].messagedelta <= configuration().ai.lowest_negative_comm_choice && relationship < 0) {
             return true;
         }
     }
@@ -119,7 +119,7 @@ void GetMadAt(Unit *un, Unit *parent, int numhits = 0) {
 
 void AllUnitsCloseAndEngage(Unit *un, int faction) {
     Unit *ally;
-    const float contraband_assist_range = configuration()->physics.contraband_assist_range;
+    const float contraband_assist_range = configuration().physics.contraband_assist_range;
     float relation = 0;
     static float
             minrel = XMLSupport::parse_float(vs_config->getVariable("AI", "max_faction_contraband_relation", "-.05"));
@@ -203,7 +203,7 @@ void CommunicatingAI::UpdateContrabandSearch() {
                 if (u->cargo_hold.GetCargo(which_cargo_item).GetQuantity() > 0) {
                     int which_carg_item_bak = which_cargo_item;
                     std::string item = u->GetManifest(which_cargo_item++, parent, SpeedAndCourse);
-                    const bool use_hidden_cargo_space = configuration()->physics.use_hidden_cargo_space;
+                    const bool use_hidden_cargo_space = configuration().physics.use_hidden_cargo_space;
                     static float speed_course_change =
                             XMLSupport::parse_float(vs_config->getVariable("AI",
                                     "PercentageSpeedChangeToStopSearch",
@@ -367,7 +367,7 @@ Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
     NearestUnitLocator unitLocator;
 #ifdef VS_ENABLE_COLLIDE_KEY
     CollideMap  *cm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
-    const float unitRad = configuration()->graphics.hud.radar_search_extra_radius;
+    const float unitRad = configuration().graphics.hud.radar_search_extra_radius;
     CollideMap::iterator iter = cm->lower_bound( wherewrapper );
     if (iter != cm->end() && (*iter)->radius > 0)
         if ( (*iter)->ref.unit != parent )

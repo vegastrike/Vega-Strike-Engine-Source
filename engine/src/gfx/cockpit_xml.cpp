@@ -275,7 +275,7 @@ using namespace CockpitXML;
 
 string getRes(string inp) {
     string::size_type where = inp.rfind(".");
-    int x = configuration()->graphics.resolution_x;
+    int x = configuration().graphics.resolution_x;
     if (x < 700) {
         x = 640;
     } else if (x < 840) {
@@ -298,9 +298,9 @@ string getRes(string inp) {
 }
 
 void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
-    const bool cockpit_smooth = configuration()->graphics.cockpit_smooth_texture;
-    const bool panel_smooth = configuration()->graphics.panel_smooth_texture;
-    const bool crosshair_smooth = configuration()->graphics.crosshair_smooth_texture;
+    const bool cockpit_smooth = configuration().graphics.cockpit_smooth_texture;
+    const bool panel_smooth = configuration().graphics.panel_smooth_texture;
+    const bool crosshair_smooth = configuration().graphics.crosshair_smooth_texture;
     AttributeList::const_iterator iter;
     Gauge::DIRECTION tmpdir = Gauge::GAUGE_UP;
     VSSprite **newsprite = NULL;

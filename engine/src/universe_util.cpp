@@ -154,7 +154,7 @@ unsigned int getCurrentPlayer() {
 }
 
 unsigned int maxMissions() {
-    return configuration()->physics.max_missions;
+    return configuration().physics.max_missions;
 }
 
 void addParticle(QVector loc, Vector velocity, GFXColor color, float size) {
@@ -195,7 +195,7 @@ void showSplashScreen(const string &filename) {
     } else if (!curSplash && !GetSplashScreen()) {
         boost::optional<std::vector<std::string>> s;
         if (!s) {
-            s.emplace(ParseDestinations(configuration()->graphics.splash_screen));
+            s.emplace(ParseDestinations(configuration().graphics.splash_screen));
         }
         int snum = time(nullptr) % s->size();
         curSplash = new Animation(s->at(snum).c_str(), false);

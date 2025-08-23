@@ -104,25 +104,25 @@ EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel,
                            EnergyContainer* energy, EnergyContainer* ftl_energy) {
     switch(component_type) {
         case ComponentType::Shield:
-            return GetSourceFromConfiguration(configuration()->components.shield.energy_source, fuel, energy, ftl_energy);;
+            return GetSourceFromConfiguration(configuration().components.shield.energy_source, fuel, energy, ftl_energy);;
 
         case ComponentType::FtlDrive:
-            return GetSourceFromConfiguration(configuration()->components.ftl_drive.energy_source, fuel, energy, ftl_energy);
+            return GetSourceFromConfiguration(configuration().components.ftl_drive.energy_source, fuel, energy, ftl_energy);
 
         case ComponentType::Reactor:
-            return GetSourceFromConfiguration(configuration()->components.reactor.energy_source,
+            return GetSourceFromConfiguration(configuration().components.reactor.energy_source,
                                               fuel, energy, ftl_energy);
         case ComponentType::Drive:
-            return GetSourceFromConfiguration(configuration()->components.drive.energy_source,
+            return GetSourceFromConfiguration(configuration().components.drive.energy_source,
                                               fuel, energy, ftl_energy);
         case ComponentType::Afterburner:
-            return GetSourceFromConfiguration(configuration()->components.afterburner.energy_source,
+            return GetSourceFromConfiguration(configuration().components.afterburner.energy_source,
                                               fuel, energy, ftl_energy);
         case ComponentType::JumpDrive:
-            return GetSourceFromConfiguration(configuration()->components.jump_drive.energy_source,
+            return GetSourceFromConfiguration(configuration().components.jump_drive.energy_source,
                                               fuel, energy, ftl_energy);
         case ComponentType::Cloak:
-            return GetSourceFromConfiguration(configuration()->components.cloak.energy_source,
+            return GetSourceFromConfiguration(configuration().components.cloak.energy_source,
                                               fuel, energy, ftl_energy);
 
         default:
@@ -200,7 +200,7 @@ void ResourceYawPitchRollParser(std::string unit_key, const YPR ypr,
 std::string PrintFormattedComponentInHud(double percent, std::string component_name,
                                          bool damageable,
                                          std::string GetDamageColor(double)) {
-    const bool print_percent_working = configuration()->graphics.hud.print_damage_percent;
+    const bool print_percent_working = configuration().graphics.hud.print_damage_percent;
 
     const std::string damage_color = GetDamageColor(percent);
     const int int_percent = percent * 100;
@@ -209,7 +209,7 @@ std::string PrintFormattedComponentInHud(double percent, std::string component_n
     // Note we reset color to white/undamaged at the end of each line
     if(print_percent_working && damageable) {
         return (boost::format("%1%%2% (%3%%%)%4%\n") %
-            damage_color % component_name % int_percent % 
+            damage_color % component_name % int_percent %
             white_color).str();
     } else {
         return (boost::format("%1%%2%%3%\n") %

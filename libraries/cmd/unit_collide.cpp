@@ -64,7 +64,7 @@ void Unit::RemoveFromSystem() {
                 VS_LOG(error, "NONFATAL NULL activeStarSystem detected...please fix");
                 activeStarSystem = _Universe->activeStarSystem();
             }
-            const bool collidemap_sanity_check = configuration()->physics.collidemap_sanity_check;
+            const bool collidemap_sanity_check = configuration().physics.collidemap_sanity_check;
             if (collidemap_sanity_check) {
                 if (0) {
                     CollideMap::iterator i;
@@ -127,7 +127,7 @@ void Unit::UpdateCollideQueue(StarSystem *ss, CollideMap::iterator hint[NUM_COLL
 }
 
 void Unit::CollideAll() {
-    if (isSubUnit() || killed || configuration()->physics.no_unit_collisions) {
+    if (isSubUnit() || killed || configuration().physics.no_unit_collisions) {
         return;
     }
     for (unsigned int locind = 0; locind < NUM_COLLIDE_MAPS; ++locind) {
@@ -240,7 +240,7 @@ bool Unit::InsideCollideTree(Unit *smaller,
         }
     }
     un_iter i;
-    const float rsizelim = configuration()->physics.smallest_subunit_to_collide;
+    const float rsizelim = configuration().physics.smallest_subunit_to_collide;
     Vega_UnitType bigtype = bigasteroid ? Vega_UnitType::asteroid : bigger->getUnitType();
     Vega_UnitType smalltype = smallasteroid ? Vega_UnitType::asteroid : smaller->getUnitType();
     if (bigger->SubUnits.empty() == false
@@ -303,7 +303,7 @@ bool Unit::Collide(Unit *target) {
     }
     Vega_UnitType targetisUnit = target->isUnit();
     Vega_UnitType thisisUnit = this->isUnit();
-    const float NEBULA_SPACE_DRAG = configuration()->physics.nebula_space_drag;
+    const float NEBULA_SPACE_DRAG = configuration().physics.nebula_space_drag;
     if (targetisUnit == Vega_UnitType::nebula) {
         //why? why not?
         this->Velocity *= (1 - NEBULA_SPACE_DRAG);
@@ -435,7 +435,7 @@ Unit *Unit::rayCollide(const QVector &start, const QVector &end, Vector &norm, f
     }
     QVector st(InvTransform(cumulative_transformation_matrix, start));
     QVector ed(InvTransform(cumulative_transformation_matrix, end));
-    const bool sphere_test = configuration()->physics.sphere_collision;
+    const bool sphere_test = configuration().physics.sphere_collision;
     distance = querySphereNoRecurse(start, end);
     if (distance > 0.0f || (this->colTrees && this->colTrees->colTree(this, this->GetWarpVelocity()) && !sphere_test)) {
         Vector coord;

@@ -60,7 +60,7 @@ const std::string &getStringFont(bool &changed, bool force_inside = false, bool 
     } else {
         changed = false;
     }
-    return inside ? configuration()->graphics.bases.font : configuration()->graphics.font;
+    return inside ? configuration().graphics.bases.font : configuration().graphics.font;
 }
 
 const std::string &getStringFontForHeight(bool &changed) {
@@ -72,7 +72,7 @@ const std::string &getStringFontForHeight(bool &changed) {
     } else {
         changed = false;
     }
-    return inside ? configuration()->graphics.bases.font : configuration()->graphics.font;
+    return inside ? configuration().graphics.bases.font : configuration().graphics.font;
 }
 
 void *getFont(bool forceinside = false, bool whichinside = false) {
@@ -126,7 +126,7 @@ float getFontHeight() {
             point = 26;
         }
     }
-    return point / configuration()->graphics.resolution_y;
+    return point / configuration().graphics.resolution_y;
 }
 
 TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol) {
@@ -148,8 +148,8 @@ static unsigned int *CreateLists() {
     static unsigned int lists[256] = {0};
     void *fnt0 = getFont(true, false);
     void *fnt1 = getFont(true, true);
-    const bool use_bit = configuration()->graphics.high_quality_font;
-    const bool use_display_lists = configuration()->graphics.text_display_lists;
+    const bool use_bit = configuration().graphics.high_quality_font;
+    const bool use_display_lists = configuration().graphics.text_display_lists;
     if (use_display_lists) {
         for (unsigned int i = 32; i < 256; i++) {
             if ((i < 128) || (i >= 128 + 32)) {
@@ -202,7 +202,7 @@ void DrawSquare(float left, float right, float top, float bot) {
 }
 
 float charWidth(char c, float myFontMetrics) {
-    const bool use_bit = configuration()->graphics.high_quality_font;
+    const bool use_bit = configuration().graphics.high_quality_font;
     void *fnt = use_bit ? getFont() : GLUT_STROKE_ROMAN;
     float charwid = use_bit ? glutBitmapWidth(fnt, c) : glutStrokeWidth(fnt, c);
     float dubyawid = use_bit ? glutBitmapWidth(fnt, 'W') : glutStrokeWidth(fnt, 'W');
@@ -234,9 +234,9 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
     static unsigned int *display_lists = CreateLists();
     //some stuff to draw the text stuff
     string::const_iterator text_it = newText.begin();
-    const bool use_bit = force_highquality || configuration()->graphics.high_quality_font;
-    const float font_point = configuration()->graphics.font_point;
-    const bool font_antialias = configuration()->graphics.font_antialias;
+    const bool use_bit = force_highquality || configuration().graphics.high_quality_font;
+    const float font_point = configuration().graphics.font_point;
+    const bool font_antialias = configuration().graphics.font_antialias;
     void *fnt = getFont();
     static float std_wid = glutStrokeWidth(GLUT_STROKE_ROMAN, 'W');
     myFontMetrics.i = font_point * std_wid / (119.05 + 33.33);
@@ -244,8 +244,8 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
         myFontMetrics.i = glutBitmapWidth(fnt, 'W');
     }
     myFontMetrics.j = font_point;
-    myFontMetrics.i /= .5 * configuration()->graphics.resolution_x;
-    myFontMetrics.j /= .5 * configuration()->graphics.resolution_y;
+    myFontMetrics.i /= .5 * configuration().graphics.resolution_x;
+    myFontMetrics.j /= .5 * configuration().graphics.resolution_y;
     float tmp, row, col;
     float origcol;
     GetPos(row, col);
@@ -259,12 +259,12 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
     glLineWidth(1);
     if (!use_bit && font_antialias) {
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
-        if (configuration()->graphics.smooth_lines) {
+        if (configuration().graphics.smooth_lines) {
             glEnable(GL_LINE_SMOOTH);
         }
     } else {
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
-        if (configuration()->graphics.smooth_lines) {
+        if (configuration().graphics.smooth_lines) {
             glDisable(GL_LINE_SMOOTH);
         }
     }
@@ -311,11 +311,11 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
         }
         float shadowlen = 0;
         if (myc == '\t') {
-            shadowlen = glutBitmapWidth(fnt, ' ') * 5. / (.5 * configuration()->graphics.resolution_x);
+            shadowlen = glutBitmapWidth(fnt, ' ') * 5. / (.5 * configuration().graphics.resolution_x);
         } else {
             if (use_bit) {
                 shadowlen = glutBitmapWidth(fnt, myc) / (float) (.5
-                        * configuration()->graphics.resolution_x);                    //need to use myc -- could have transformed '_' to ' '
+                        * configuration().graphics.resolution_x);                    //need to use myc -- could have transformed '_' to ' '
             } else {
                 shadowlen = myFontMetrics.i * glutStrokeWidth(GLUT_STROKE_ROMAN, myc) / std_wid;
             }
@@ -332,7 +332,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
                     currentCol = GFXColor(r, g, b, this->col.a);
                 }
                 GFXColorf(currentCol);
-                const bool setRasterPos = configuration()->graphics.set_raster_text_color;
+                const bool setRasterPos = configuration().graphics.set_raster_text_color;
                 if (use_bit && setRasterPos) {
                     glRasterPos2f(col - origcol, 0);
                 }
@@ -370,7 +370,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
             if (automatte) {
                 GFXColorf(this->bgcol);
                 DrawSquare(col - origcol,
-                        col - origcol + shadowlen * 5 / (.5 * configuration()->graphics.resolution_x),
+                        col - origcol + shadowlen * 5 / (.5 * configuration().graphics.resolution_x),
                         -rowheight * .25 / scaley,
                         rowheight * .75 / scaley);
                 GFXColorf(currentCol);
@@ -406,7 +406,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
         }
         text_it++;
     }
-    if (configuration()->graphics.smooth_lines) {
+    if (configuration().graphics.smooth_lines) {
         glDisable(GL_LINE_SMOOTH);
     }
     glPopMatrix();

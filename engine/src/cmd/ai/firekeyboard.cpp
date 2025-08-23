@@ -1018,7 +1018,7 @@ bool TargMission(Unit *me, Unit *target) {
 }
 
 bool TargAll(Unit *me, Unit *target) {
-    const bool can_target_sun = configuration()->graphics.can_target_sun;
+    const bool can_target_sun = configuration().graphics.can_target_sun;
     return (me->InRange(target, true,
             false)
             || me->InRange(target, true, true)) && (can_target_sun || !UnitUtil::isSun(target)) && isNotTurretOwner(
@@ -1027,7 +1027,7 @@ bool TargAll(Unit *me, Unit *target) {
 }
 
 bool TargSig(Unit *me, Unit *target) {
-    const bool can_target_asteroid = configuration()->graphics.can_target_asteroid;
+    const bool can_target_asteroid = configuration().graphics.can_target_asteroid;
 
     bool ret =
             me->InRange(target, false,
@@ -1045,7 +1045,7 @@ bool TargSig(Unit *me, Unit *target) {
 extern Unit *getTopLevelOwner();
 
 bool TargUn(Unit *me, Unit *target) {
-    const bool can_target_cargo = configuration()->graphics.can_target_cargo;
+    const bool can_target_cargo = configuration().graphics.can_target_cargo;
     int up = FactionUtil::GetUpgradeFaction();
     return me->InRange(target, true,
             false)
@@ -1096,7 +1096,7 @@ bool TargThreat(Unit *me, Unit *target) {
 }
 
 bool TargNear(Unit *me, Unit *target) {
-    const bool can_target_sun = configuration()->graphics.can_target_sun;
+    const bool can_target_sun = configuration().graphics.can_target_sun;
     return (me->getRelation(target) < 0
             || TargThreat(me,
                     target)
@@ -1428,7 +1428,7 @@ static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
             endt->graphicOptions.WarpRamping = 1;
         }
         endt->ftl_drive.Disable();
-        const float clearencetime = configuration()->general.docking_time;
+        const float clearencetime = configuration().general.docking_time;
         endt->EnqueueAIFirst(new Orders::ExecuteFor(new Orders::MatchVelocity(Vector(0, 0, 0),
                 Vector(0, 0, 0),
                 true,
@@ -1527,7 +1527,7 @@ unsigned int FireKeyboard::DoSpeechAndAni(Unit *un, Unit *parent, class Communic
 
 static void MyFunction() {
     //quit it--he's dead all ready
-    const string comm_static = configuration()->graphics.comm_static;
+    const string comm_static = configuration().graphics.comm_static;
     //dead dead dead dead
     static Animation Statuc(comm_static.c_str());
     //yep really dead
@@ -1676,7 +1676,7 @@ void Arrested(Unit *parent) {
 static void ForceChangeTarget(Unit *parent) {
     Unit *curtarg = parent->Target();
     ChooseTargets(parent, TargUn, false);
-    const bool force_change_only_unit = configuration()->graphics.target_null_if_no_unit;
+    const bool force_change_only_unit = configuration().graphics.target_null_if_no_unit;
     if (parent->Target() == curtarg) {
         if (force_change_only_unit) {
             parent->Target(NULL);
@@ -1693,7 +1693,7 @@ int SelectDockPort(Unit *utdw, Unit *parent);
 
 void FireKeyboard::SetParent(Unit *parent1) {
     this->Order::SetParent(parent1);
-    const bool allow_special_with_weapons = configuration()->physics.allow_special_and_normal_gun_combo;
+    const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
     if (!allow_special_with_weapons) {
         parent->ToggleWeapon(false, true /*reverse*/ );
         parent->ToggleWeapon(false, false /*reverse*/ );
@@ -1732,7 +1732,7 @@ void FireKeyboard::Execute() {
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if (!_Universe->AccessCockpit()->CanDrawNavSystem()) {
-            const bool allow_special_with_weapons = configuration()->physics.allow_special_and_normal_gun_combo;
+            const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
             if (!allow_special_with_weapons) {
                 bool special = false;
                 bool normal = false;
@@ -1813,7 +1813,7 @@ void FireKeyboard::Execute() {
     }
     if (f().targetukey == PRESS) {
         f().targetukey = DOWN;
-        const bool smart_targetting = configuration()->graphics.smart_targetting_key;
+        const bool smart_targetting = configuration().graphics.smart_targetting_key;
         Unit *tmp = parent->Target();
         bool sysobj = false;
         if (tmp) {
@@ -1893,7 +1893,7 @@ void FireKeyboard::Execute() {
     }
     if (f().rtargetukey == PRESS) {
         f().rtargetukey = DOWN;
-        const bool smart_targetting = configuration()->graphics.smart_targetting_key;
+        const bool smart_targetting = configuration().graphics.smart_targetting_key;
         Unit *tmp = parent->Target();
         bool sysobj = false;
         if (tmp) {

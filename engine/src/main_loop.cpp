@@ -181,7 +181,7 @@ static void SwitchVDUTo(VDU::VDU_MODE v) {
 
 void ExamineWhenTargetKey() {
     //if (game_options()->switchToTargetModeOnKey) {
-    if (configuration()->graphics.hud.switch_to_target_mode_on_key) {
+    if (configuration().graphics.hud.switch_to_target_mode_on_key) {
         int view = 0;
         int examine = 0;
         for (; view < 2; ++view) {
@@ -267,7 +267,7 @@ void TextMessageKey(const KBData &, KBSTATE newState) {
 void QuitNow() {
     if (!cleanexit) {
         cleanexit = true;
-        if (configuration()->general.write_savegame_on_exit) {
+        if (configuration().general.write_savegame_on_exit) {
             _Universe->WriteSaveGame(true);              //gotta do important stuff first
         }
         for (size_t i = 0; i < active_missions.size(); ++i) {
@@ -302,7 +302,7 @@ static void _PitchDown(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-Q,
                     R,
-                    configuration()->graphics.camera_pan_speed);
+                    configuration().graphics.camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -319,7 +319,7 @@ static void _PitchUp(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(Q,
                     R,
-                    configuration()->graphics.camera_pan_speed);
+                    configuration().graphics.camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -336,7 +336,7 @@ static void _YawLeft(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-P,
                     R,
-                    configuration()->graphics.camera_pan_speed);
+                    configuration().graphics.camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -353,7 +353,7 @@ static void _YawRight(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P,
                     R,
-                    configuration()->graphics.camera_pan_speed);
+                    configuration().graphics.camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -393,7 +393,7 @@ void LookDown(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(configuration()->graphics.camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(configuration().graphics.camera_pan_speed * 1000.0);
         } else {
             PitchDown(kbdata, newState);
         }
@@ -411,7 +411,7 @@ void LookUp(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(-configuration()->graphics.camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(-configuration().graphics.camera_pan_speed * 1000.0);
         } else {
             PitchUp(kbdata, newState);
         }
@@ -429,7 +429,7 @@ void LookLeft(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanYawSpeed(configuration()->graphics.camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(configuration().graphics.camera_pan_speed * 1000.0);
         } else {
             YawLeft(kbdata, newState);
         }
@@ -447,7 +447,7 @@ void LookRight(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanYawSpeed(-configuration()->graphics.camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(-configuration().graphics.camera_pan_speed * 1000.0);
         } else {
             YawRight(kbdata, newState);
         }
@@ -469,12 +469,12 @@ void Quit(const KBData &, KBSTATE newState) {
 void Inside(const KBData &, KBSTATE newState) {
     {
         if (_Universe->activeStarSystem() && _Universe->activeStarSystem()->getBackground()) {
-            _Universe->activeStarSystem()->getBackground()->EnableBG(configuration()->graphics.background);
+            _Universe->activeStarSystem()->getBackground()->EnableBG(configuration().graphics.background);
         }
     }
-    int tmp = (configuration()->graphics.cockpit ? 1 : 0);
+    int tmp = (configuration().graphics.cockpit ? 1 : 0);
     if (newState == PRESS && (_Universe->AccessCockpit()->GetView() == CP_FRONT)
-            && configuration()->graphics.disabled_cockpit_allowed) {
+            && configuration().graphics.disabled_cockpit_allowed) {
         YawLeft(KBData(), RELEASE);
         YawRight(KBData(), RELEASE);
         PitchUp(KBData(), RELEASE);
@@ -779,7 +779,7 @@ void IncrementStartupVariable() {
         var = getSaveData(0, "436457r1K3574r7uP71m35", 0);
         putSaveData(0, "436457r1K3574r7uP71m35", 0, var + 1);
     }
-    if (var <= configuration()->general.times_to_show_help_screen) {
+    if (var <= configuration().general.times_to_show_help_screen) {
         GameCockpit::NavScreen(KBData(), PRESS);
     }          //HELP FIXME
 }

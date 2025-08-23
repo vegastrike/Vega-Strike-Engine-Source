@@ -237,7 +237,7 @@ bool Animation::CalculateOrientation(Matrix &result) {
     QVector pos(Position());
     float hei = height;
     float wid = width;
-    const double HaloOffset = configuration()->graphics.halo_offset;
+    const double HaloOffset = configuration().graphics.halo_offset;
     bool retval =
             ::CalculateOrientation(pos,
                     camp,
@@ -465,19 +465,19 @@ void Animation::Draw() {
         Vector camp, camq, camr;
         QVector pos(Position());
 
-        const double HaloOffset = configuration()->graphics.halo_offset;
+        const double HaloOffset = configuration().graphics.halo_offset;
 
         /**/
         //Why do all this if we can use ::CalculateOrientation?
         //-- well one reason is that the code change broke it :-/  Until suns display properly or we switch to ogre we should keep it as it was (problem was, flare wouldn't display--- or would display behind the sun)
         QVector R(_Universe->AccessCamera()->GetR().i, _Universe->AccessCamera()->GetR().j,
                 _Universe->AccessCamera()->GetR().k);
-        const double too_far_dist = configuration()->graphics.anim_far_percent;
+        const double too_far_dist = configuration().graphics.anim_far_percent;
         if (( /*R.Dot*/ (Position()
                 - _Universe->AccessCamera()->GetPosition()).Magnitude() + HaloOffset
                 *
                         (height > width ? height : width)) <
-                too_far_dist * configuration()->graphics.zfar) {
+                too_far_dist * configuration().graphics.zfar) {
             //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {ss
             animationdrawqueue.push_back(this);
         } else {

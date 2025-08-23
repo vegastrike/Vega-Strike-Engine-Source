@@ -461,9 +461,9 @@ void Mission::UnPickle(string pickled) {
 void Mission::DirectorStart(missionNode *node) {
     VS_LOG(trace, "DIRECTOR START");
 
-    const int st_debuglevel = configuration()->interpreter.debug_level;
-    const bool st_start_game = configuration()->interpreter.start_game;
-    const bool st_do_trace = configuration()->interpreter.trace;
+    const int st_debuglevel = configuration().interpreter.debug_level;
+    const bool st_start_game = configuration().interpreter.start_game;
+    const bool st_do_trace = configuration().interpreter.trace;
 
     debuglevel = st_debuglevel;
     start_game = st_start_game;

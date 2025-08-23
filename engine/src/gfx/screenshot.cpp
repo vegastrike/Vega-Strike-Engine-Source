@@ -40,8 +40,8 @@ using namespace VSFileSystem;
 void Screenshot(const KBData &, KBSTATE state) {
     if (state == PRESS) {
         GLint xywh[4] = {0, 0, 0, 0};
-        xywh[2] = configuration()->graphics.resolution_x;
-        xywh[3] = configuration()->graphics.resolution_y;
+        xywh[2] = configuration().graphics.resolution_x;
+        xywh[3] = configuration().graphics.resolution_y;
         glGetIntegerv(GL_VIEWPORT, xywh);
         unsigned char *tmp = static_cast<unsigned char *>(malloc(
             static_cast<size_t>(xywh[2]) * static_cast<size_t>(xywh[3]) * 4 * sizeof(unsigned char)));

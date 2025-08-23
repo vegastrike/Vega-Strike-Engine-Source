@@ -125,7 +125,7 @@ void Carrier::EjectCargo(unsigned int index) {
         tmp->SetMass(0.01);
     }
 
-    const float cargotime = configuration()->physics.cargo_live_time;
+    const float cargotime = configuration().physics.cargo_live_time;
     if (tmp) {
         string tmpcontent = tmp->GetName();
         if (tmp->IsMissionFlag()) {
@@ -163,12 +163,12 @@ void Carrier::EjectCargo(unsigned int index) {
             }
             float arot = 0;
             const float grot =
-                    configuration()->graphics.generic_cargo_rotation_speed * 3.1415926536 / 180;
+                    configuration().graphics.generic_cargo_rotation_speed * 3.1415926536 / 180;
             if (!cargo) {
                 const float crot =
-                        configuration()->graphics.cargo_rotation_speed * 3.1415926536 / 180;
+                        configuration().graphics.cargo_rotation_speed * 3.1415926536 / 180;
                 const float erot =
-                        configuration()->graphics.eject_rotation_speed * 3.1415926536 / 180;
+                        configuration().graphics.eject_rotation_speed * 3.1415926536 / 180;
                 if (tmpcontent == "eject") {
                     if (isplayer) {
                         Flightgroup *fg = unit->getFlightgroup();
@@ -215,7 +215,7 @@ void Carrier::EjectCargo(unsigned int index) {
                         }
                     } else {
                         int fac = FactionUtil::GetUpgradeFaction();
-                        const float ejectcargotime = configuration()->physics.eject_live_time;
+                        const float ejectcargotime = configuration().physics.eject_live_time;
                         if (cargotime == 0.0) {
                             cargo = new Unit("eject", false, fac, "", NULL, 0);
                         } else {
@@ -268,7 +268,7 @@ void Carrier::EjectCargo(unsigned int index) {
             Vector rotation
                     (vsrandom.uniformInc(-arot, arot), vsrandom.uniformInc(-arot, arot), vsrandom.uniformInc(-arot,
                             arot));
-            const bool all_rotate_same = configuration()->graphics.cargo_rotates_at_same_speed;
+            const bool all_rotate_same = configuration().graphics.cargo_rotates_at_same_speed;
             if (all_rotate_same && arot != 0) {
                 float tmp = rotation.Magnitude();
                 if (tmp > .001) {
@@ -286,7 +286,7 @@ void Carrier::EjectCargo(unsigned int index) {
                 }
                 tmpvel.Normalize();
                 if ((SelectDockPort(unit, unit) > -1)) {
-                    const float eject_cargo_offset = configuration()->physics.eject_distance;
+                    const float eject_cargo_offset = configuration().physics.eject_distance;
                     QVector loc(Transform(unit->GetTransformation(),
                             unit->DockingPortLocations()[0].GetPosition().Cast()));
                     //index is always > -1 because it's unsigned.  Lets use the correct terms, -1 in Uint is UINT_MAX
@@ -307,7 +307,7 @@ void Carrier::EjectCargo(unsigned int index) {
                             + randVector(-.5 * unit->rSize(), .5 * unit->rSize()));
                     cargo->SetAngularVelocity(rotation);
                 }
-                const float velmul = configuration()->physics.eject_cargo_speed;
+                const float velmul = configuration().physics.eject_cargo_speed;
                 cargo->SetOwner(unit);
                 cargo->SetVelocity(unit->Velocity * velmul + randVector(-.25, .25).Cast());
                 cargo->SetMass(tmp->GetMass());
@@ -324,7 +324,7 @@ void Carrier::EjectCargo(unsigned int index) {
                     //changes control to that cockpit
                     cp->SetParent(cargo, "", "", unit->Position());
                     if (tmpcontent == "return_to_cockpit") {
-                        const bool simulate_while_at_base = configuration()->physics.simulate_while_docked;
+                        const bool simulate_while_at_base = configuration().physics.simulate_while_docked;
                         if ((simulate_while_at_base) || (_Universe->numPlayers() > 1)) {
                             unit->TurretFAW();
                         }
@@ -380,7 +380,7 @@ float Carrier::PriceCargo(const std::string &s) {
         return Manifest::MPL().GetCargoByName(s).GetPrice();
     }
 
-    return configuration()->cargo.space_junk_price;
+    return configuration().cargo.space_junk_price;
 }
 unsigned int Carrier::numCargo() const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
@@ -392,7 +392,7 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
 
     ///FIXME somehow mangle string
     string mangled = unit->cargo_hold.GetCargo(i).GetName();
-    const float scramblingmanifest = configuration()->general.percentage_speed_change_to_fault_search;
+    const float scramblingmanifest = configuration().general.percentage_speed_change_to_fault_search;
     {
         //Keep inside subblock, otherwise MSVC will throw an error while redefining 'i'
         bool last = true;

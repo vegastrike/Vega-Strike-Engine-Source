@@ -391,7 +391,7 @@ static double usedValue(double originalValue) {
 
 
 static float basicRepairPrice(void) {
-    const float price = configuration()->economics.repair_price;
+    const float price = configuration().economics.repair_price;
     return price * g_game.difficulty;
 }
 
@@ -477,8 +477,8 @@ BaseComputer::~BaseComputer(void) {
 }
 
 GFXColor BaseComputer::getColorForGroup(std::string id) {
-    const bool use_faction_background = configuration()->graphics.use_faction_gui_background_color;
-    const float faction_color_darkness = configuration()->graphics.base_faction_color_darkness;
+    const bool use_faction_background = configuration().graphics.use_faction_gui_background_color;
+    const float faction_color_darkness = configuration().graphics.base_faction_color_darkness;
     if (use_faction_background) {
         int fac = m_base.GetUnit()->faction;
         if (FactionUtil::GetFactionName(fac) == "neutral") {
@@ -1411,7 +1411,7 @@ void BaseComputer::recalcTitle() {
     }
     // at this point, baseName will be e.g. "Agricultural planet Helen" or "mining_base Achilles"
     baseTitle += emergency_downgrade_mode;
-    const bool includebasename = configuration()->graphics.bases.include_base_name_on_dock;
+    const bool includebasename = configuration().graphics.bases.include_base_name_on_dock;
     if (includebasename) {
         baseTitle += baseName;
 
@@ -1429,7 +1429,7 @@ void BaseComputer::recalcTitle() {
     //Generic player title for display
     std::string playerTitle = "";
 
-    const bool showStardate = configuration()->graphics.show_stardate;
+    const bool showStardate = configuration().graphics.show_stardate;
 
     //Credits the player has.
     const std::string stardateString = _Universe->current_stardate.GetFullTrekDate();
@@ -1807,7 +1807,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
             case ACCEPT_MISSION:
                 if (item.GetCategory().find("Active_Missions") != string::npos) {
                     commitButton->setLabel("Abort");
-                    const bool allow_abort_mission = configuration()->physics.allow_mission_abort;
+                    const bool allow_abort_mission = configuration().physics.allow_mission_abort;
                     if (allow_abort_mission == false) {
                         commitButton->setHidden(true);
                     }
@@ -1898,7 +1898,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 } else {
                     PRETTY_ADDN("", item.GetPrice(), 2);
                     tempString = (boost::format("Price: #b#%1%#-b#n#") % text).str();
-                    const bool printvolume = configuration()->graphics.bases.print_cargo_volume;
+                    const bool printvolume = configuration().graphics.bases.print_cargo_volume;
                     if (printvolume) {
                         descString += tempString;
                         tempString = (boost::format("Vessel volume: %1$.2f cubic meters;  "
@@ -2178,7 +2178,7 @@ SimplePickerCell *BaseComputer::createCategoryCell(SimplePickerCells &cells,
     }
     SimplePickerCell
             *parentCell = static_cast< SimplePickerCell * > ( cells.cellAt(cells.count() - 1));     //Last cell in list.
-    const bool showDefault = configuration()->graphics.open_picker_categories;
+    const bool showDefault = configuration().graphics.open_picker_categories;
     parentCell->setHideChildren(!showDefault);
     if (loc == string::npos) {
         //This is a simple category -- we are done.
@@ -2296,8 +2296,8 @@ extern int SelectDockPort(Unit *utdw, Unit *parent);
 void BaseComputer::loadCargoControls(void) {
     //Make sure there's nothing in the transaction lists.
     resetTransactionLists();
-    const bool requireportforlaunch = configuration()->physics.cargo_wingmen_only_with_dockport;
-    const bool portallowsupgrades = configuration()->physics.dockport_allows_upgrade_storage;
+    const bool requireportforlaunch = configuration().physics.cargo_wingmen_only_with_dockport;
+    const bool portallowsupgrades = configuration().physics.dockport_allows_upgrade_storage;
     //Set up the base dealer's transaction list. Note that you need a docking port to buy starships!
     vector<string> donttakethis;
     donttakethis.push_back("missions");
@@ -2309,7 +2309,7 @@ void BaseComputer::loadCargoControls(void) {
     if ((SelectDockPort(m_player.GetUnit(), m_player.GetUnit()) < 0) && (requireportforlaunch)) {
         donttakethis.push_back("starships");
     }
-    const bool starship_purchase = configuration()->physics.starships_as_cargo;
+    const bool starship_purchase = configuration().physics.starships_as_cargo;
     if (!starship_purchase) {
         donttakethis.push_back("starships");
         donttakethis.push_back("starship");
@@ -2611,7 +2611,7 @@ void BaseComputer::loadNewsControls(void) {
     picker->clear();
 
     //Load the picker.
-    const bool newsFromCargolist = configuration()->cargo.news_from_cargo_list;
+    const bool newsFromCargolist = configuration().cargo.news_from_cargo_list;
     if (newsFromCargolist) {
         gameMessage last;
         int i = 0;
@@ -2968,7 +2968,7 @@ void BaseComputer::loadSellUpgradeControls(void) {
     loadMasterList(partListUnit, partListUnit->cargo_hold, weapfiltervec, std::vector<std::string>(), false, tlist);
     ClearDowngradeMap();
     playerUnit->FilterDowngradeList(tlist.masterList);
-    const bool clearDowngrades = configuration()->physics.only_show_best_downgrade;
+    const bool clearDowngrades = configuration().physics.only_show_best_downgrade;
     if (clearDowngrades) {
         std::set<std::string> downgradeMap = GetListOfDowngrades();
         for (unsigned int i = 0; i < tlist.masterList.size(); ++i) {
@@ -3379,7 +3379,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
                     true,
                     percent,
                     m_theTemplate);
-            const bool allow_special_with_weapons = configuration()->physics.allow_special_and_normal_gun_combo;
+            const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
             if (!allow_special_with_weapons) {
                 playerUnit->ToggleWeapon(false, /*backwards*/ true);
                 playerUnit->ToggleWeapon(false, /*backwards*/ false);
@@ -3700,9 +3700,9 @@ Cargo CreateCargoForOwnerStarship(const Cockpit *cockpit, const Unit *base, int 
     bool needsJumpTransport = (locationSystemName != destinationSystemName);
     bool needsInsysTransport = (locationBaseName != destinationBaseName);
 
-    const float shipping_price_base = configuration()->economics.shipping_price_base;
-    const float shipping_price_insys = configuration()->economics.shipping_price_insys;
-    const float shipping_price_perjump = configuration()->economics.shipping_price_perjump;
+    const float shipping_price_base = configuration().economics.shipping_price_base;
+    const float shipping_price_insys = configuration().economics.shipping_price_insys;
+    const float shipping_price_perjump = configuration().economics.shipping_price_perjump;
 
     cargo.SetPrice(shipping_price_base);
     cargo.SetName(cockpit->GetUnitFileName(i));
@@ -3843,7 +3843,7 @@ public:
 
 void trackPrice(int whichplayer, const Cargo &item, float price, const string &systemName, const string &baseName,
         /*out*/ vector<string> &highest, /*out*/ vector<string> &lowest) {
-    const size_t toprank = static_cast<size_t>(configuration()->general.trade_interface_tracks_prices_top_rank);
+    const size_t toprank = static_cast<size_t>(configuration().general.trade_interface_tracks_prices_top_rank);
 
     VS_LOG(info, (boost::format("Ranking item %1%/%2% at %3%/%4%")
             % item.GetCategory() % item.GetName() % systemName % baseName));
@@ -4041,7 +4041,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
 }
 
 string buildCargoDescription(const Cargo &item, BaseComputer &computer, float price) {
-    const bool trackBestPrices = configuration()->general.trade_interface_tracks_prices;
+    const bool trackBestPrices = configuration().general.trade_interface_tracks_prices;
 
     string desc;
 
@@ -4123,12 +4123,12 @@ bool sellShip(Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseComput
     for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i) {
         if (cockpit->GetUnitFileName(i) == shipname) {
             if (cockpit->GetUnitSystemName(i) == _Universe->activeStarSystem()->getFileName()) {
-                const float shipping_price = configuration()->economics.sellback_shipping_price;
+                const float shipping_price = configuration().economics.sellback_shipping_price;
                 ComponentsManager::credits -= shipping_price; //transportation cost
             }
             cockpit->RemoveUnit(i);
-            const float shipSellback = configuration()->economics.ship_sellback_price;
-            ComponentsManager::credits += shipSellback * shipCargo.GetPrice();
+            const float shipSellback = configuration().economics.ship_sellback_price;
+            ComponentsManager::credits += shipSellback * shipCargo.GetPrice(); //sellback cost
             break;
         }
     }
@@ -4272,7 +4272,7 @@ bool buyShip(Unit *baseUnit,
                     if (bcomputer) {
                         bcomputer->m_player.SetUnit(newPart);
                     }
-                    const bool persistent_missions_across_ship_switch = configuration()->general.persistent_mission_across_ship_switch;
+                    const bool persistent_missions_across_ship_switch = configuration().general.persistent_mission_across_ship_switch;
                     if (persistent_missions_across_ship_switch) {
                         _Universe->AccessCockpit()->savegame->LoadSavedMissions();
                     }
