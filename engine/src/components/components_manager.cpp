@@ -33,7 +33,6 @@
 #include "resource/random_utils.h"
 #include "configuration/configuration.h"
 #include "cmd/unit_csv_factory.h"
-
 #include <boost/format.hpp>
 #include <iostream>
 
@@ -82,15 +81,12 @@ void ComponentsManager::Serialize(std::map<std::string, std::string>& unit) cons
     }
 }
 
-double ComponentsManager::GetMass() {
-    return mass;
-}
 
 double ComponentsManager::GetMass() const {
     return mass;
 }
 
-double ComponentsManager::SetMass(float mass) {
+void ComponentsManager::SetMass(double mass) {
     this->mass = mass;
 }
 

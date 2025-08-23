@@ -432,7 +432,7 @@ void Planet::InitPlanet(QVector x,
     this->days = days;
     const float densityOfRock = configuration()->physics.density_of_rock;
     const float densityOfJumpPoint = configuration()->physics.density_of_jump_point;
-    //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
+    //const float massofplanet = configuration()->physics.mass_of_planet;
     hull.Set((4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : densityOfJumpPoint));
     this->SetMass((4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : (densityOfJumpPoint / 100000)));
     SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent));     //behavior

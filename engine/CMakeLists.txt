@@ -359,7 +359,6 @@ SET(LIBCMDSERVER_SOURCES
     src/cmd/unit_functions_server.cpp
     src/cmd/unit_util_server.cpp
     src/cmd/unit_server.cpp
-    src/cmd/pilot_server.cpp
     src/cmd/images_server.cpp
     src/cmd/faction_xml_server.cpp
 )
@@ -690,6 +689,11 @@ IF (NOT DISABLE_CLIENT)
     OPTION (LOG_TIME_TAKEN_DETAILS "Whether to log timing details in the main loop" OFF)
     IF (LOG_TIME_TAKEN_DETAILS)
         TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC LOG_TIME_TAKEN_DETAILS)
+    ENDIF ()
+
+    OPTION (JUMP_DEBUG "Whether to log details when warping between systems" OFF)
+    IF (JUMP_DEBUG)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC JUMP_DEBUG)
     ENDIF ()
 
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${VSE_TST_INCLUDES})

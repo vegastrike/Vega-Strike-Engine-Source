@@ -464,7 +464,7 @@ void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile &f) {
 
     try {
         vidSource = new ::VidFile();
-        vidSource->open(wrapper_file_path, gl_options.max_movie_dimension, gl_options.pot_video_textures);
+        vidSource->open(wrapper_file_path, configuration()->graphics.max_movie_dimension, configuration()->graphics.pot_video_textures);
 
         physicsactive = vidSource->getDuration();
         timeperframe = 1.0 / vidSource->getFrameRate();
@@ -480,7 +480,7 @@ void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile &f) {
         sizeY = vidSource->getHeight();
         mode = _24BIT;
         data = (unsigned char *) vidSource->getFrameBuffer();
-        if ((ismipmapped == BILINEAR || ismipmapped == NEAREST) && gl_options.rect_textures) {
+        if ((ismipmapped == BILINEAR || ismipmapped == NEAREST) && configuration()->graphics.rect_textures) {
             texture_target = TEXTURERECT;
             image_target = TEXTURE_RECTANGLE;
         }

@@ -694,6 +694,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     pImage->CockpitCenter.i = UnitCSVFactory::GetVariable(unit_key, "CockpitX", 0.0f) * xml.unitscale;
     pImage->CockpitCenter.j = UnitCSVFactory::GetVariable(unit_key, "CockpitY", 0.0f) * xml.unitscale;
     pImage->CockpitCenter.k = UnitCSVFactory::GetVariable(unit_key, "CockpitZ", 0.0f) * xml.unitscale;
+    Load(unit_key); // ComponentsManager
+    Momentofinertia = GetMass();
 
 
     // Hull
@@ -1042,6 +1044,7 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
         cargo_text += hidden_hold.Serialize();
         unit["Cargo"] = cargo_text;
     }
+    Serialize(unit); // ComponentsManager
 
     hull.SaveToCSV(unit);
     armor.SaveToCSV(unit);

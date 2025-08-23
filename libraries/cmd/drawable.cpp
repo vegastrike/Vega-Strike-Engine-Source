@@ -447,7 +447,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
     Matrix wmat = WarpMatrix(mat);
     for (i = 0; i < nummounts; ++i) {
         Mount *mahnt = &unit->mounts[i];
-        if (game_options()->draw_weapons) {
+        if (configuration()->graphics.draw_weapons) {
             if (mahnt->xyscale != 0 && mahnt->zscale != 0) {
                 Mesh *gun = mahnt->type->gun;
                 if (gun && mahnt->status != Mount::UNCHOSEN) {
@@ -667,7 +667,7 @@ void Drawable::Sparkle(const bool on_screen, const Matrix *ctm) {
         return;
     }
 
-    double sparkle_accum = GetElapsedTime() * game_options()->sparklerate;
+    double sparkle_accum = GetElapsedTime() * configuration()->graphics.sparkle_rate;
     int spawn = static_cast<int>(sparkle_accum);
     sparkle_accum -= spawn;
 
@@ -772,7 +772,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float aver
         }
 
         // Don't draw mounts if game is set not to...
-        if (!game_options()->draw_weapons) {
+        if (!configuration()->graphics.draw_weapons) {
             continue;
         }
 
@@ -828,7 +828,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float aver
 void Drawable::Split(int level) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    if (game_options()->split_dead_subunits) {
+    if (configuration()->graphics.split_dead_subunits) {
         for (un_iter su = unit->getSubUnits(); *su; ++su) {
             (*su)->Split(level);
         }
@@ -929,7 +929,7 @@ void Drawable::Split(int level) {
         unit->SubUnits.prepend(splitsub = new Unit(tempmeshes, true, unit->faction));
         splitsub->hull.Set(1000.0);
         splitsub->name = "debris";
-        splitsub->SetMass(game_options()->debris_mass * splitsub->GetMass() / level);
+        splitsub->SetMass(configuration()->physics.debris_mass * splitsub->GetMass() / level);
         splitsub->pImage->timeexplode = .1;
         if (splitsub->meshdata[0]) {
             Vector loc = splitsub->meshdata[0]->Position();
@@ -938,18 +938,18 @@ void Drawable::Split(int level) {
                 locm = 1;
             }
             splitsub->ApplyForce(
-                    splitsub->meshdata[0]->rSize() * game_options()->explosionforce * 10 * splitsub->GetMass() * loc
+                    splitsub->meshdata[0]->rSize() * configuration()->graphics.explosion_force * 10 * splitsub->GetMass() * loc
                             / locm);
             loc.Set(rand(), rand(), rand() + .1);
             loc.Normalize();
-            splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * game_options()->explosiontorque
+            splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * configuration()->graphics.explosion_torque
                     * (1 + rand() % static_cast<int>(1 + unit->rSize())));
         }
     }
     old.clear();
     this->meshdata.clear();
     this->meshdata.push_back(nullptr);     //the shield
-    unit->SetMass(unit->GetMass()*game_options()->debris_mass);
+    unit->SetMass(unit->GetMass() * configuration()->physics.debris_mass);
 }
 
 void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, const GFXColor &color) {
@@ -975,36 +975,35 @@ void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, 
 Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
-    if (unit->GetWarpVelocity().MagnitudeSquared()
-            < (static_cast<double>(game_options()->warp_stretch_cutoff) * game_options()->warp_stretch_cutoff * game_options()->game_speed
-                    * game_options()->game_speed)
-            || (game_options()->only_stretch_in_warp && unit->ftl_drive.Enabled())) {
+    if (unit->GetWarpVelocity().MagnitudeSquared() < (configuration()->graphics.warp_stretch_cutoff)
+            * configuration()->graphics.warp_stretch_cutoff * configuration()->physics.game_speed
+            || (configuration()->graphics.only_stretch_in_warp && unit->ftl_drive.Enabled())) {
         return ctm;
     } else {
         Matrix k(ctm);
 
         float speed = unit->GetWarpVelocity().Magnitude();
-        float stretchregion0length = static_cast<float>(game_options()->warp_stretch_region0_max
-                * (speed - (game_options()->warp_stretch_cutoff * game_options()->game_speed))
-                / ((game_options()->warp_stretch_max_region0_speed * game_options()->game_speed)
-                        - (game_options()->warp_stretch_cutoff * game_options()->game_speed)));
+        float stretchregion0length = static_cast<float>(configuration()->graphics.warp_stretch_region0_max
+                * (speed - (configuration()->graphics.warp_stretch_cutoff * configuration()->physics.game_speed))
+                / ((configuration()->graphics.warp_stretch_max_region0_speed * configuration()->physics.game_speed)
+                        - (configuration()->graphics.warp_stretch_cutoff * configuration()->physics.game_speed)));
         float stretchlength =
-                static_cast<float>((game_options()->warp_stretch_max
-                        - game_options()->warp_stretch_region0_max)
-                        * (speed - (game_options()->warp_stretch_max_region0_speed * game_options()->game_speed))
-                        / ((game_options()->warp_stretch_max_speed * game_options()->game_speed)
-                                - (game_options()->warp_stretch_max_region0_speed * game_options()->game_speed) + .06125f)
-                        + game_options()->warp_stretch_region0_max);
-        if (stretchlength > game_options()->warp_stretch_max) {
-            stretchlength = game_options()->warp_stretch_max;
+                static_cast<float>((configuration()->graphics.warp_stretch_max
+                        - configuration()->graphics.warp_stretch_region0_max)
+                        * (speed - (configuration()->graphics.warp_stretch_max_region0_speed * configuration()->physics.game_speed))
+                        / ((configuration()->graphics.warp_stretch_max_speed * configuration()->physics.game_speed)
+                                - (configuration()->graphics.warp_stretch_max_region0_speed * configuration()->physics.game_speed) + .06125f)
+                        + configuration()->graphics.warp_stretch_region0_max);
+        if (stretchlength > configuration()->graphics.warp_stretch_max) {
+            stretchlength = configuration()->graphics.warp_stretch_max;
         }
-        if (stretchregion0length > game_options()->warp_stretch_region0_max) {
-            stretchregion0length = game_options()->warp_stretch_region0_max;
+        if (stretchregion0length > configuration()->graphics.warp_stretch_region0_max) {
+            stretchregion0length = configuration()->graphics.warp_stretch_region0_max;
         }
         ScaleMatrix(k,
                 Vector(1,
                         1,
-                        1 + (speed > (game_options()->warp_stretch_max_region0_speed * game_options()->game_speed)
+                        1 + (speed > (configuration()->graphics.warp_stretch_max_region0_speed * configuration()->physics.game_speed)
                                 ? stretchlength : stretchregion0length)));
         return k;
     }

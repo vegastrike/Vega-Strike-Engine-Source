@@ -323,8 +323,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
     // TODO: lib_damage rewrite non-lethal
     // Note: we really want a complete rewrite together with the modules sub-system
     // Non-lethal/Disabling Weapon code here
-    /*static float disabling_constant =
-            XMLSupport::parse_float( vs_config->getVariable( "physics", "disabling_weapon_constant", "1" ) );
+    /*const float disabling_constant = configuration()->physics.disabling_weapon_constant;
     if (hull > 0)
         pImage->LifeSupportFunctionality += disabling_constant*damage/hull;
     if (pImage->LifeSupportFunctionality < 0) {
@@ -389,8 +388,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     // The following code needs to be renabled and placed somewhere
     // Non-lethal/Disabling Weapon code here
     // TODO: enable
-    /*static float disabling_constant =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "disabling_weapon_constant", "1" ) );
+    /*const float disabling_constant = configuration()->physics.disabling_weapon_constant;
     if (hull > 0)
       pImage->LifeSupportFunctionality += disabling_constant*damage/hull;
     if (pImage->LifeSupportFunctionality < 0) {
@@ -415,7 +413,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
         return;
     }
 
-    static std::string restricted_items = vs_config->getVariable("physics", "indestructable_cargo_items", "");
+    const std::string restricted_items = configuration()->physics.indestructible_cargo_items;
     double change_to_damage = hull_damage ? 0.5 : 0.05;
 
     for(Cargo &cargo : unit->cargo_hold.GetItems()) {
@@ -428,7 +426,6 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
             // Damage the cargo
             cargo.RandomDamage();
         }
-
     }
 }
 

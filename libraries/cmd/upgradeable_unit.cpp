@@ -196,7 +196,6 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
             break;
 
         default:
-            //std::cout << "Unhandled type for " << upgrade_name << std::endl;
             break;
     }
 

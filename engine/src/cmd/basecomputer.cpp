@@ -391,7 +391,7 @@ static double usedValue(double originalValue) {
 
 
 static float basicRepairPrice(void) {
-    static float price = XMLSupport::parse_float(vs_config->getVariable("physics", "repair_price", "5000"));
+    const float price = configuration()->economics.repair_price;
     return price * g_game.difficulty;
 }
 
@@ -1807,8 +1807,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
             case ACCEPT_MISSION:
                 if (item.GetCategory().find("Active_Missions") != string::npos) {
                     commitButton->setLabel("Abort");
-                    static bool allow_abort_mission =
-                            XMLSupport::parse_bool(vs_config->getVariable("physics", "allow_mission_abort", "true"));
+                    const bool allow_abort_mission = configuration()->physics.allow_mission_abort;
                     if (allow_abort_mission == false) {
                         commitButton->setHidden(true);
                     }
@@ -2297,10 +2296,8 @@ extern int SelectDockPort(Unit *utdw, Unit *parent);
 void BaseComputer::loadCargoControls(void) {
     //Make sure there's nothing in the transaction lists.
     resetTransactionLists();
-    static bool requireportforlaunch =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "cargo_wingmen_only_with_dockport", "false"));
-    static bool portallowsupgrades =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "dockport_allows_ugrade_storage", "false"));
+    const bool requireportforlaunch = configuration()->physics.cargo_wingmen_only_with_dockport;
+    const bool portallowsupgrades = configuration()->physics.dockport_allows_upgrade_storage;
     //Set up the base dealer's transaction list. Note that you need a docking port to buy starships!
     vector<string> donttakethis;
     donttakethis.push_back("missions");
@@ -2312,8 +2309,7 @@ void BaseComputer::loadCargoControls(void) {
     if ((SelectDockPort(m_player.GetUnit(), m_player.GetUnit()) < 0) && (requireportforlaunch)) {
         donttakethis.push_back("starships");
     }
-    static bool
-            starship_purchase = XMLSupport::parse_bool(vs_config->getVariable("physics", "starships_as_cargo", "true"));
+    const bool starship_purchase = configuration()->physics.starships_as_cargo;
     if (!starship_purchase) {
         donttakethis.push_back("starships");
         donttakethis.push_back("starship");
@@ -2972,8 +2968,7 @@ void BaseComputer::loadSellUpgradeControls(void) {
     loadMasterList(partListUnit, partListUnit->cargo_hold, weapfiltervec, std::vector<std::string>(), false, tlist);
     ClearDowngradeMap();
     playerUnit->FilterDowngradeList(tlist.masterList);
-    static bool clearDowngrades =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "only_show_best_downgrade", "true"));
+    const bool clearDowngrades = configuration()->physics.only_show_best_downgrade;
     if (clearDowngrades) {
         std::set<std::string> downgradeMap = GetListOfDowngrades();
         for (unsigned int i = 0; i < tlist.masterList.size(); ++i) {
@@ -3384,8 +3379,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
                     true,
                     percent,
                     m_theTemplate);
-            static bool allow_special_with_weapons =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "special_and_normal_gun_combo", "true"));
+            const bool allow_special_with_weapons = configuration()->physics.allow_special_and_normal_gun_combo;
             if (!allow_special_with_weapons) {
                 playerUnit->ToggleWeapon(false, /*backwards*/ true);
                 playerUnit->ToggleWeapon(false, /*backwards*/ false);
@@ -3706,12 +3700,9 @@ Cargo CreateCargoForOwnerStarship(const Cockpit *cockpit, const Unit *base, int 
     bool needsJumpTransport = (locationSystemName != destinationSystemName);
     bool needsInsysTransport = (locationBaseName != destinationBaseName);
 
-    static float shipping_price_base =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "shipping_price_base", "0"));
-    static float shipping_price_insys =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "shipping_price_insys", "1000"));
-    static float shipping_price_perjump =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "shipping_price_perjump", "25000"));
+    const float shipping_price_base = configuration()->economics.shipping_price_base;
+    const float shipping_price_insys = configuration()->economics.shipping_price_insys;
+    const float shipping_price_perjump = configuration()->economics.shipping_price_perjump;
 
     cargo.SetPrice(shipping_price_base);
     cargo.SetName(cockpit->GetUnitFileName(i));
@@ -4127,26 +4118,21 @@ bool sellShip(Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseComput
         return false;
     }
 
+    
     //now we can actually do the selling
     for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i) {
         if (cockpit->GetUnitFileName(i) == shipname) {
-
-            float xtra = 0;
             if (cockpit->GetUnitSystemName(i) == _Universe->activeStarSystem()->getFileName()) {
-                static float shipping_price =
-                        XMLSupport::parse_float(vs_config->getVariable("physics",
-                                "sellback_shipping_price",
-                                "6000"));
-                xtra += shipping_price;
+                const float shipping_price = configuration()->economics.sellback_shipping_price;
+                ComponentsManager::credits -= shipping_price; //transportation cost
             }
             cockpit->RemoveUnit(i);
-            static float shipSellback =
-                    XMLSupport::parse_float(vs_config->getVariable("economics", "ship_sellback_price", ".5"));
-            ComponentsManager::credits += shipSellback * shipCargo.GetPrice();                 //sellback cost
-            ComponentsManager::credits -= xtra;                 //transportation cost
+            const float shipSellback = configuration()->economics.ship_sellback_price;
+            ComponentsManager::credits += shipSellback * shipCargo.GetPrice();
             break;
         }
     }
+    
     if (bcomputer) {
         bcomputer->loadShipDealerControls();
         bcomputer->updateTransactionControlsForSelection(NULL);

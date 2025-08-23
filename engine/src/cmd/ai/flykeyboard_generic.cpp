@@ -36,7 +36,7 @@
 #include "root_generic/lin_time.h"
 
 float FlyByKeyboard::clamp_axis(float v) {
-    static int axis_scale = XMLSupport::parse_int(vs_config->getVariable("physics", "slide_start", "3"));
+    const int axis_scale = configuration()->physics.slide_start;
     int as = parent->computer.slide_start;
     if (as == 0) {
         as = axis_scale;
@@ -54,7 +54,7 @@ float FlyByKeyboard::clamp_axis(float v) {
 }
 
 float FlyByKeyboard::reduce_axis(float v) {
-    static int axis_scale = XMLSupport::parse_int(vs_config->getVariable("physics", "slide_end", "2"));
+    const int axis_scale = configuration()->physics.slide_end;
     int as = parent->computer.slide_end;
     if (as == 0) {
         as = axis_scale;

@@ -30,7 +30,7 @@
 #include "src/SharedPool.h"
 
 template<typename T, typename RT>
-SharedPool<T, RT> *SharedPool<T, RT>::ms_singleton = 0;
+SharedPool<T, RT> *SharedPool<T, RT>::ms_singleton = nullptr;
 
 template<typename T, typename RT>
 SharedPool<T, RT>::SharedPool()
@@ -42,7 +42,7 @@ SharedPool<T, RT>::SharedPool()
 )
 #endif
 {
-    if (ms_singleton == 0) {
+    if (ms_singleton == nullptr) {
         ms_singleton = this;
     }
 }

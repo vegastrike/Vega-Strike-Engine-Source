@@ -67,13 +67,15 @@ class ComponentsManager {
     // Instead we only do this when something changes
     std::string hud_text;
 
-    // TODO: make it change with fuel consumption
-    double mass;
-    double base_mass;
-
     std::vector<std::pair<const std::string, const int>> prohibited_upgrades;
 
     friend class CargoHold;
+    friend class Movable;
+
+protected:
+    // TODO: make it change with fuel consumption
+    double mass;
+    double base_mass;
 public:
     static Resource<double> credits;
 
@@ -82,11 +84,8 @@ public:
     void Load(std::string unit_key);
     void Serialize(std::map<std::string, std::string>& unit) const;
 
-    double GetMass();
     double GetMass() const;
-    double SetMass(float mass);
-
-    friend class Unit;
+    void SetMass(double mass);
 
 // Components
     EnergyContainer fuel = EnergyContainer(ComponentType::Fuel);
