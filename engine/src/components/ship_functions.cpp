@@ -141,3 +141,5 @@ std::string ShipFunctions::GetHudText(std::string getDamageColor(double)) {
     report += PrintFormattedComponentInHud(life_support.Percent(), "Life Support", true, getDamageColor);
     return report;
 }
+
+ShipFunctions::~ShipFunctions() = default;

@@ -127,15 +127,17 @@ Animation::Animation(const char *FileName,
 }
 
 Animation::~Animation() {
-    vector<Animation *>::iterator i;
-    while ((i =
-            std::find(far_animationdrawqueue.begin(), far_animationdrawqueue.end(),
-                    this)) != far_animationdrawqueue.end()) {
-        far_animationdrawqueue.erase(i);
+    if (!far_animationdrawqueue.empty()) {
+        const auto first_to_remove = std::stable_partition(far_animationdrawqueue.begin(), far_animationdrawqueue.end(),
+                                                           [this](const Animation *pi) { return pi != this; });
+        far_animationdrawqueue.erase(first_to_remove, far_animationdrawqueue.end());
     }
-    while ((i = std::find(animationdrawqueue.begin(), animationdrawqueue.end(), this)) != animationdrawqueue.end()) {
-        animationdrawqueue.erase(i);
+    if (!animationdrawqueue.empty()) {
+        const auto first_to_remove = std::stable_partition(animationdrawqueue.begin(), animationdrawqueue.end(),
+                                                           [this](const Animation *pi) { return pi != this; });
+        animationdrawqueue.erase(first_to_remove, animationdrawqueue.end());
     }
+
     VSDESTRUCT2
 }
 

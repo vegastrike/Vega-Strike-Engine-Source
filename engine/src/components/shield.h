@@ -63,8 +63,8 @@ public:
     double PercentOperational() const override;
     void CalculatePercentOperational();
 
-    void Damage();
-    void DamageByPercent(double percent);
+    void Damage() override;
+    void DamageByPercent(double percent) override;
     void Repair() override;
     bool Damaged() const override;
 

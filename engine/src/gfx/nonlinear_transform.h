@@ -39,9 +39,8 @@
  */
 class IdentityTransform {
 public:
-    virtual ~IdentityTransform() {
-        // dtor
-    }
+    /// dtor
+    virtual ~IdentityTransform() = default;
 
 ///Transforms in a possibly nonlinear way the point to some new space
     virtual QVector Transform(const QVector &v) const {
@@ -102,23 +101,23 @@ public:
         return M_PI / scalez;
     }
 
-    QVector Transform(const QVector &v) const {
+    QVector Transform(const QVector &v) const override {
         Vector T(v.i * scalex, r + v.j, v.k * scalez - .5 * M_PI);
         double cosphi = cos(T.k);
         return QVector(T.j * cosphi * cos(T.i), static_cast<double>(T.j) * sin(T.k), T.j * cosphi * sin(T.i));
     }
 
-    QVector TransformNormal(const QVector &point, const QVector &n) const {
+    QVector TransformNormal(const QVector &point, const QVector &n) const override {
         return SphericalTransform::Transform(n + point) - Transform(point);
     }
 
-    QVector InvTransform(const QVector &v) const {
+    QVector InvTransform(const QVector &v) const override {
         float rplusy = v.Magnitude();
         //float lengthxypln = sqrtf (rplusy*rplusy-v.j*v.j);//pythagorus
         return QVector((atan2(-v.k, -v.i) + M_PI) / scalex, rplusy - r, (asin(v.j / rplusy) + M_PI * .5) / scalez);
     }
 
-    CLIPSTATE BoxInFrustum(Vector &min, Vector &max, const Vector &campos) const {
+    CLIPSTATE BoxInFrustum(Vector &min, Vector &max, const Vector &campos) const override {
         const float rendermin = 3;
         /*
          *  float tmpx = fabs(campos.i-min.i);float maxx = fabs(campos.i-max.i);
@@ -135,7 +134,10 @@ public:
 
         return GFXSpherePartiallyInFrustum(tmax, rad);
     }
+
+    ~SphericalTransform() override = default;
 };
+
 /*
  *  class PlanetaryTransform:public SphericalTransform {
  *  Vector Origin;

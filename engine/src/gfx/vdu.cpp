@@ -1480,15 +1480,6 @@ inline const char *GetColorFromSuccess(float suc) {
     return suc_col_str;
 }
 
-#if 0
-                                                                                                                        int VDU::DrawVDUObjective( void *obj, int offset )
-{
-    static bool VDU_DrawVDUObjective_is_now_outdated = false;
-    assert( VDU_DrawVDUObjective_is_now_outdated == true );
-    return 0;
-}
-#endif
-
 void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent) {
     std::string rez("\n");
     std::string rezcompleted("");
@@ -1742,3 +1733,4 @@ bool VDU::CheckCommAnimation(Unit *un) const {
     return false;
 }
 
+VDU::~VDU() = default;

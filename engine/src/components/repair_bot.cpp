@@ -78,3 +78,5 @@ bool RepairBot::Upgrade(const std::string upgrade_key) {
 int RepairBot::Get() const {
     return repair_bot;
 }
+
+RepairBot::~RepairBot() = default;

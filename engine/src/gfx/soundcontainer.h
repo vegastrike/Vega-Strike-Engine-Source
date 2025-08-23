@@ -47,9 +47,9 @@ public:
     /**
      * Create a refernece to an optionally-looping sound file.
      */
-    GameSoundContainer(const SoundContainer &other);
+    explicit GameSoundContainer(const SoundContainer &other);
 
-    virtual ~GameSoundContainer();
+    ~GameSoundContainer() override;
 
     /**
      * Forced loading of the resource. It's not necessary to call it,

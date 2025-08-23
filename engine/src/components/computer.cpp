@@ -29,7 +29,7 @@
 #include "computer.h"
 
 
-Computer::Computer() : 
+Computer::Computer() :
         nav_point(0, 0, 0),
         target(nullptr),
         threat(nullptr),
@@ -50,7 +50,7 @@ Computer::Computer() :
 // Component Methods
 void Computer::Load(std::string unit_key) {
     Component::Load(unit_key);
-}      
+}
 
 void Computer::SaveToCSV(std::map<std::string, std::string>& unit) const {}
 
@@ -85,7 +85,9 @@ void Computer::DamageByPercent(double percent) {
 }
 
 void Computer::Repair() {
-    itts = original_itts;    
+    itts = original_itts;
 
     operational = 1.0;
 }
+
+Computer::~Computer() = default;

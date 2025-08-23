@@ -799,7 +799,7 @@ void Cockpit::visitSystem(string systemname) {
 }
 
 Cockpit::~Cockpit() {
-    Delete();
+    Cockpit::Delete();
     if (savegame != nullptr) {
         delete savegame;
         savegame = nullptr;

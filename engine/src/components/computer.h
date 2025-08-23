@@ -36,7 +36,7 @@
 class Unit;
 
 // A stand-in for Unit
-class ComponentsManager; 
+class ComponentsManager;
 
 /**
  * The computer holds all data in the navigation computer of the current unit.
@@ -63,7 +63,7 @@ class Computer : public Component {
     //Unit that it should match velocity with (not speed) if null, matches velocity with universe frame (star)
     ComponentsManager* velocity_reference;
 
-    public: 
+    public:
     bool force_velocity_ref;
 
     //The threat level that was calculated from attacking unit's threat
@@ -90,8 +90,8 @@ public:
     Computer();
 
     // Component Methods
-    void Load(std::string unit_key) override;      
-    
+    void Load(std::string unit_key) override;
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;
@@ -102,6 +102,8 @@ public:
     void Damage() override;
     void DamageByPercent(double percent) override;
     void Repair() override;
+
+    ~Computer() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPUTER_H

@@ -53,7 +53,8 @@ class VSSprite {
     bool isAnimation;
 
 //For private use only
-    VSSprite() : surface(0) {
+    VSSprite() : xcenter(0.0F), ycenter(0.0F), widtho2(0.0F), heighto2(0.0F), maxs(0.0F), maxt(0.0F), rotation(0.0F), surface(nullptr),
+                 isAnimation(false) {
     }
 
 public:
@@ -70,7 +71,7 @@ public:
             float t = 0.f,
             bool isAnimation = false);
     VSSprite(const VSSprite &source);
-    ~VSSprite();
+    virtual ~VSSprite();
 //Return true if sprite was loaded successfully
     bool LoadSuccess() const;
     void Draw();
