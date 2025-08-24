@@ -196,7 +196,6 @@ bool ComponentsManager::AllowedUpgrade(const Cargo& upgrade) const {
         if(category_upgrades.Size() > prohibited_upgrade.second) {
             VS_LOG_FLUSH_EXIT(fatal,(boost::format("ComponentsManager::AllowedUpgrade: %1% is greater than %2%\n") % category_upgrades.Size() 
                       % prohibited_upgrade.second), EXIT_FAILURE);
-            assert(0);
         } else if(category_upgrades.Size() == prohibited_upgrade.second) {
             return false;
         }
