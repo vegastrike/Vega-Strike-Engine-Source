@@ -33,6 +33,7 @@
 #include "resource/random_utils.h"
 #include "configuration/configuration.h"
 #include "cmd/unit_csv_factory.h"
+#include "vs_logging.h"
 #include <boost/format.hpp>
 #include <iostream>
 
@@ -185,7 +186,7 @@ bool ComponentsManager::ShipDamaged() const {
  *  The previous implementation also worked by specific upgrades.
  */
 bool ComponentsManager::AllowedUpgrade(const Cargo& upgrade) const {
-    for(const std::pair<const std::string, const int> prohibited_upgrade : prohibited_upgrades) {
+    for(const std::pair<const std::string, const int>& prohibited_upgrade : prohibited_upgrades) {
         if(prohibited_upgrade.first != upgrade.GetCategory()) {
             continue;
         }
@@ -193,8 +194,8 @@ bool ComponentsManager::AllowedUpgrade(const Cargo& upgrade) const {
         Manifest category_upgrades = upgrade_space.GetCategoryManifest(prohibited_upgrade.first);
 
         if(category_upgrades.Size() > prohibited_upgrade.second) {
-            std::cerr << "ComponentsManager::AllowedUpgrade: " << category_upgrades.Size() << 
-                      " is greater than " << prohibited_upgrade.second << std::endl << std::flush;
+            VS_LOG_FLUSH_EXIT(fatal,(boost::format("ComponentsManager::AllowedUpgrade: %1% is greater than %2%\n") % category_upgrades.Size() 
+                      % prohibited_upgrade.second), EXIT_FAILURE);
             assert(0);
         } else if(category_upgrades.Size() == prohibited_upgrade.second) {
             return false;
