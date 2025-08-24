@@ -29,38 +29,43 @@
 
 #include "resource/cargo.h"
 #include "resource/manifest.h"
+#include "resource/random_utils.h"
+#include "json_utils.h"
+#include "configuration/configuration.h"
 
-#include <numeric>
 #include <iostream>
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
+static const std::string default_product_name("DEFAULT_PRODUCT_NAME");
 
 // A simple utility function to parse a boolean value
 static bool _parse_bool(const std::string& value) {
     return (value == "1" || value == "true");
 }
 
+// Constructors
+
+Cargo::Cargo(): name(default_product_name) {}
 
 
-Cargo::Cargo(): Product() {
-    mass = 0;
-    volume = 0;
-    mission = false;
-    installed = false;
-    functionality = max_functionality = 1.0f;
+Cargo::Cargo(std::string name, std::string description, int quantity, double price, 
+             std::string category, double mass, double volume, bool mission, 
+             bool component, bool installed, bool integral, bool weapon, bool passenger, 
+             bool slave, double functionality) :
+             name(name), description(description), quantity(quantity), price(price), 
+             category(category), mass(mass), volume(volume), mission(mission),
+             component(component), installed(installed), integral(integral) {
+    this->functionality = functionality;
 }
 
-Cargo::Cargo(std::string name, std::string category, float price, int quantity,
-             float mass, float volume, float functionality, float max_functionality,
-             bool mission, bool component, bool installed, bool integral, 
-             bool weapon, bool passenger, bool slave):
-             Product(name, quantity, price), category(category), description(""),
-             mass(mass), volume(volume), functionality(functionality),
-             max_functionality(max_functionality), mission(mission),
-             component(component), installed(installed), integral(integral),
-             weapon(weapon), passenger(passenger), slave(slave) {}
+Cargo::Cargo(std::string name, std::string category, float price, int quantity, 
+          float mass, float volume): name(name), category(category),
+          price(price), quantity(quantity), mass(mass), volume(volume) {}
+             
+
 /*  0 name
     1 category
     2 price
@@ -107,73 +112,51 @@ Cargo::Cargo(std::string& cargo_text) {
     }
 }
 
-std::string Cargo::Serialize() const {
-    return (boost::format("{%s;%s;%f;%d;%f;%f;%f;%f;%s;%d;%d;%d;%d;%d;%d;%d}")
-        % this->name % this->category % this->price % this->quantity.Value() % this->mass
-        % this->volume % this->functionality % 1.0 % this->description % this->mission
-        % this->installed % this->integral % this->component % this->weapon % 
-        this->passenger % this->slave
-    ).str();
+Cargo::Cargo(boost::json::object json): 
+    name(JsonGetStringWithDefault(json, "file", "")),
+    description(JsonGetStringWithDefault(json, "description", "")),
+    quantity(1), 
+    price(std::stoi(JsonGetStringWithDefault(json, "price", "0"))), 
+    category(JsonGetStringWithDefault(json, "categoryname", "")),
+    mass(std::stod(JsonGetStringWithDefault(json, "mass", "0.0"))), 
+    volume(std::stod(JsonGetStringWithDefault(json, "volume", "0.0"))),
+    mission(false), 
+    component((JsonGetStringWithDefault(json, "component", "false")) == "true"),
+    installed(false), 
+    integral(false),
+    functionality(Resource<double>(1.0, 0.0, 1.0)) {}
+
+// Getters
+std::string Cargo::GetName() const { 
+    return name; 
 }
 
-float Cargo::GetFunctionality() {
-    return functionality;
+std::string Cargo::GetDescription() const { 
+    return description; 
 }
 
-float Cargo::GetMaxFunctionality() {
-    return max_functionality;
+int Cargo::GetQuantity() const { 
+    return quantity.Value(); 
 }
 
-void Cargo::SetDescription(const std::string &description) {
-    this->description = description;
+double Cargo::GetPrice() const { 
+    return price; 
 }
 
-void Cargo::SetFunctionality(float func) {
-    functionality = func;
+double Cargo::GetTotalValue() const {
+    return price * quantity.Value();
 }
 
-void Cargo::SetInstalled(bool installed) {
-    this->installed = installed;
+std::string Cargo::GetCategory() const {
+    return category;
 }
 
-void Cargo::SetIntegral(bool installed) {
-    this->integral = installed;
+double Cargo::GetVolume() const {
+    return volume;
 }
 
-void Cargo::SetMaxFunctionality(float func) {
-    max_functionality = func;
-}
-
-void Cargo::SetMissionFlag(bool flag) {
-    this->mission = flag;
-}
-
-void Cargo::SetPrice(float price) {
-    this->price = price;
-}
-
-void Cargo::SetMass(float mass) {
-    this->mass = mass;
-}
-
-void Cargo::SetVolume(float vol) {
-    this->volume = vol;
-}
-
-void Cargo::SetQuantity(int quantity) {
-    this->quantity = quantity;
-}
-
-void Cargo::SetContent(const std::string &content) {
-    this->name = content;
-}
-
-void Cargo::SetCategory(const std::string &category) {
-    this->category = category;
-}
-
-void Cargo::SetSlave(bool slave) {
-    this->slave = slave;
+double Cargo::GetMass() const {
+    return mass;
 }
 
 bool Cargo::IsMissionFlag() const {
@@ -204,51 +187,132 @@ bool Cargo::IsSlave() const {
     return slave; 
 }
 
-const std::string &Cargo::GetCategory() const {
+double Cargo::GetFunctionality() const {
+    return functionality.Value();
+}
+
+std::string Cargo::GetCategoryPython() const {
     return category;
 }
 
-const std::string &Cargo::GetContent() const {
+std::string Cargo::GetContentPython() const {
     return name;
 }
 
-const std::string &Cargo::GetDescription() const {
+std::string Cargo::GetDescriptionPython() const {
     return description;
 }
 
-
-
-std::string Cargo::GetCategoryPython() {
-    return category;
+// For script_call_unit_generic
+std::string* Cargo::GetNameAddress() { 
+    return &name; 
 }
 
-std::string Cargo::GetContentPython() {
-    return name;
+std::string* Cargo::GetCategoryAddress() { 
+    return &category; 
 }
 
-std::string Cargo::GetDescriptionPython() {
-    return description;
+// Setters
+
+void Cargo::SetName(const std::string& name) { 
+    this->name = name; 
 }
 
-int Cargo::GetQuantity() const {
-    return (quantity.Value());
+void Cargo::SetDescription(const std::string& description) { 
+    this->description = description; 
 }
 
-float Cargo::GetVolume() const {
-    return volume;
+void Cargo::SetQuantity(const int quantity) { 
+    this->quantity = quantity; 
 }
 
-float Cargo::GetMass() const {
-    return mass;
+void Cargo::SetPrice(const double price) { 
+    this->price = price; 
 }
 
-float Cargo::GetPrice() const {
-    return price;
+void Cargo::SetCategory(const std::string& category) {
+    this->category = category;
 }
 
+void Cargo::SetMass(double mass) {
+    this->mass = mass;
+}
 
+void Cargo::SetVolume(double volume) {
+    this->volume = volume;
+}
 
+void Cargo::SetMissionFlag(bool flag) {
+    this->mission = flag;
+}
 
+void Cargo::SetComponent(bool component) {
+    this->component = component;
+}
+
+void Cargo::SetInstalled(bool installed) {
+    this->installed = installed;
+}
+
+void Cargo::SetIntegral(bool integral) {
+    this->integral = integral;
+}
+
+void Cargo::SetSlave(bool slave) {
+    this->slave = slave;
+}
+
+void Cargo::SetFunctionality(double func) {
+    functionality = func;
+}
+
+// Misc.
+
+void Cargo::Add(int quantity) {
+    this->quantity += quantity;
+}
+
+bool Cargo::CanSell(bool ship_damaged) const {
+    if(!component) {
+        return true;
+    }
+
+    if(integral) {
+        return false;
+    }
+
+    if(weapon) {
+        return true;
+    }
+
+    const bool must_fix_first = configuration().physics.must_repair_to_sell;
+    return (!must_fix_first || !ship_damaged);
+}
+
+bool Cargo::Damaged() const {
+    // Can't call functionality.Damaged() because we're using value to record damage and not adjusted value.
+    return functionality.Value() < functionality.MaxValue();
+}
+
+void Cargo::RandomDamage() {
+    // Can't call functionality.RandomDamage() because we're using value to record damage and not adjusted value.
+    functionality -= randomDouble();
+}
+
+double Cargo::RepairPrice() const {
+    return .5 * price * (1 - functionality.Value()); // TODO: * configuration()->general.difficulty;
+}
+
+std::string Cargo::Serialize() const {
+    return (boost::format("{%s;%s;%f;%d;%f;%f;%f;%f;%s;%d;%d;%d;%d;%d;%d;%d}")
+        % this->name % this->category % this->price % this->quantity.Value() % this->mass
+        % this->volume % this->functionality.Value() % 1.0 % this->description % this->mission
+        % this->installed % this->integral % this->component % this->weapon % 
+        this->passenger % this->slave
+    ).str();
+}
+
+// Operators
 bool Cargo::operator==(const Cargo &other) const {
     return name == other.name;
 }
@@ -258,88 +322,4 @@ bool Cargo::operator<(const Cargo &other) const {
 }
 
 
-void Cargo::Add(int quantity) {
-    this->quantity += quantity;
-}
-
-// TODO: no need to be here. move to carrier
-/* There's a whole bunch of stuff that needs fleshing out:
-   1. Hitchhikers disembark at next port automatically.
-   2. Enslave doesn't affect paying customers on first click.
-   3. Enslave starts with hitchhikers (potential enemy pilots)
-   */
-void Enslave(std::vector<Cargo>& ship_manifest) {
-    // Get number of none-slave passengers and erase passengers
-    int none_slave_passengers = std::accumulate(ship_manifest.begin(), ship_manifest.end(), 0,
-        [](int current_sum, Cargo c) {
-        if (c.IsPassenger() && !c.IsSlave()) {
-            return current_sum + c.GetQuantity();
-        } else {
-            return current_sum;
-        }
-    });
-
-    // If there are no passengers, exit
-    if(none_slave_passengers == 0) {
-        return;
-    }
-
-    // Delete all passengers
-    ship_manifest.erase(std::remove_if(ship_manifest.begin(), ship_manifest.end(), 
-            [](Cargo& c) {
-        return (c.IsPassenger() && !c.IsSlave());
-    }), ship_manifest.end());
-
-    // Find the first slaves instance if exists
-    auto it = std::find_if(ship_manifest.begin(), ship_manifest.end(), [](const Cargo& c) {
-        return c.IsSlave();
-    });
-
-    // Look for existing slaves
-    if (it != ship_manifest.end()) {
-        // Found slaves
-        // Get a pointer to the found element
-        Cargo* existing_slaves = &(*it); 
-        existing_slaves->Add(none_slave_passengers);
-    } else {
-        // Not found. Create a new instance
-        // TODO: name should come from config.
-        Cargo slaves = Manifest::MPL().GetCargoByName("Slaves");
-        slaves.SetQuantity(none_slave_passengers);
-        ship_manifest.push_back(slaves);
-    }
-}
-
-// TODO: no need to be here. move to carrier
-void Free(std::vector<Cargo>& ship_manifest) {
-    auto slave_it = std::find_if(ship_manifest.begin(), ship_manifest.end(), [](const Cargo& c) {
-        // TODO: name should come from config.
-        return c.GetName() == "Slaves";
-    });
-
-    // No slaves to free found, exiting.
-    if (slave_it == ship_manifest.end()) {
-        return;
-    }
-
-    // Find the first hitchhikers instance if exists
-    auto hitch_it = std::find_if(ship_manifest.begin(), ship_manifest.end(), [](const Cargo& c) {
-        // TODO: name should come from config.
-        return c.GetName() == "Hitchhiker";
-    });
-
-    // No hitchhikers found, modify slaves instance.
-    if (hitch_it == ship_manifest.end()) {
-        // TODO: name should come from config.
-        Cargo* existing_slaves = &(*slave_it); 
-        existing_slaves->SetName("Hitchhiker");
-        existing_slaves->SetCategory("Passengers");
-    } else {
-        Cargo* existing_hitchhikers = &(*hitch_it);
-        Cargo* existing_slaves = &(*slave_it);
-        existing_hitchhikers->Add(existing_slaves->GetQuantity());
-        ship_manifest.erase(slave_it);
-    }
-    
-}
 

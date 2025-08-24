@@ -49,7 +49,6 @@ using std::vector;
  */
 extern double interpolation_blend_factor;
 extern void AdjustMatrixToTrackTarget(Matrix &mat, const Vector &vel, Unit *target, float speed, bool lead, float cone);
-extern Cargo *GetMasterPartList(const char *);
 extern bool AdjustMatrix(Matrix &mat, const Vector &velocity, Unit *target, float speed, bool lead, float cone);
 
 /*
@@ -567,7 +566,13 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                 if (target->faction == upgradesfaction || owner_rsize * nbig > target->rSize()) {
                     //we have our man!
                     //lets add our cargo to him
-                    Cargo *c = GetMasterPartList(target->name.get().c_str());
+
+                    Cargo *c = nullptr;
+                    try {
+                        Cargo cargo = Manifest::MPL().GetCargoByName(target->name.get());
+                        c = &cargo;
+                    } catch (const std::exception& e) {}
+                     
                     Cargo tmp;
                     bool isnotcargo = (c == NULL);
                     if (!isnotcargo) {
@@ -600,8 +605,8 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                     if (c != NULL) {
                         Cargo adder = *c;
                         adder.SetQuantity(1);
-                        if (un->CanAddCargo(adder)) {
-                            un->AddCargo(adder);
+                        if (un->cargo_hold.CanAddCargo(adder)) {
+                            un->cargo_hold.AddCargo(un, adder);
                             if (_Universe->isPlayerStarship(un)) {
                                 static int tractor_onboard =
                                         AUDCreateSoundWAV(vs_config->getVariable("unitaudio", "player_tractor_cargo",

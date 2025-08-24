@@ -184,18 +184,12 @@ void CommunicatingAI::GetMadAt(Unit *un, int numHitsPerContrabandFail) {
     ::GetMadAt(un, parent, numHitsPerContrabandFail);
 }
 
-static int InList(std::string item, Unit *un) {
-    float numcontr = 0;
-    if (un) {
-        for (unsigned int i = 0; i < un->numCargo(); i++) {
-            if (un->GetCargo(i).GetName() == item) {
-                if (un->GetCargo(i).GetQuantity() > 0) {
-                    numcontr++;
-                }
-            }
-        }
+static bool InList(std::string item, Unit *un) {
+    if (!un) {
+        return false;
     }
-    return float_to_int(numcontr);
+    
+    return un->cargo_hold.HasCargo(item);
 }
 
 void CommunicatingAI::UpdateContrabandSearch() {
@@ -206,7 +200,7 @@ void CommunicatingAI::UpdateContrabandSearch() {
         if (u && (u->faction != parent->faction)) {
             //don't scan your buddies
             if (which_cargo_item < (int) u->numCargo()) {
-                if (u->GetCargo(which_cargo_item).GetQuantity() > 0) {
+                if (u->cargo_hold.GetCargo(which_cargo_item).GetQuantity() > 0) {
                     int which_carg_item_bak = which_cargo_item;
                     std::string item = u->GetManifest(which_cargo_item++, parent, SpeedAndCourse);
                     const bool use_hidden_cargo_space = configuration().physics.use_hidden_cargo_space;
@@ -226,18 +220,19 @@ void CommunicatingAI::UpdateContrabandSearch() {
                         GetMadAt(u, 1);
                         SpeedAndCourse = u->GetVelocity();
                     }
-                    float HiddenTotal = use_hidden_cargo_space ? (u->getHiddenCargoVolume()) : (0);
+                    float HiddenTotal = use_hidden_cargo_space ? (u->hidden_hold.MaxCapacity()) : (0);
                     Unit *contrabandlist = FactionUtil::GetContraband(parent->faction);
-                    if (InList(item, contrabandlist) > 0) {
+                    if (InList(item, contrabandlist)) {
                         //inlist now returns an integer so that we can do this at all...
-                        if (HiddenTotal == 0 || u->GetCargo(which_carg_item_bak).GetQuantity() > HiddenTotal) {
+                        if (HiddenTotal == 0 || u->hidden_hold.GetCargo(which_carg_item_bak).GetQuantity() > HiddenTotal) {
                             TerminateContrabandSearch(true);                             //BUCO this is where we want to check against free hidden cargo space.
                         } else {
                             unsigned int max = u->numCargo();
                             unsigned int quantity = 0;
                             for (unsigned int i = 0; i < max; ++i) {
-                                if (InList(u->GetCargo(i).GetName(), contrabandlist) > 0) {
-                                    quantity += u->GetCargo(i).GetQuantity();
+                                Cargo cargo_to_inspect = u->hidden_hold.GetCargo(i);
+                                if (InList(cargo_to_inspect.GetName(), contrabandlist)) {
+                                    quantity += cargo_to_inspect.GetQuantity();
                                     if (quantity > HiddenTotal) {
                                         TerminateContrabandSearch(true);
                                         break;

@@ -115,12 +115,11 @@ using std::list;
 Unit *getMasterPartList() {
     static Unit ret;
 
-    if(ret.cargo.empty()) {
+    if(ret.cargo_hold.Empty()) {
         ret.name = "master_part_list";
-        for(const Cargo& c : Manifest::MPL().getItems()) {
-            ret.AddCargo(c);
+        for(const Cargo& c : Manifest::MPL().GetItems()) {
+            ret.cargo_hold.AddCargo(&ret, c);
         }
-
     }
     return &ret;
 }
@@ -1251,22 +1250,22 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
             case 3: ftl_drive.Damage(); break;
             case 4: jump_drive.Damage(); break;
             case 5: afterburner.Damage(); break;
-            case 6: CargoVolume *= dam; break;
-            case 7: UpgradeVolume *= dam; break;
+            // case 6: CargoVolume *= dam; break;
+            // case 7: UpgradeVolume *= dam; break;
             case 8:
             //Do something NASTY to the cargo
-            if (cargo.size() > 0) {
+            if (!cargo_hold.Empty()) {
                 unsigned int i = 0;
                 unsigned int cargorand_o = rand();
                 unsigned int cargorand;
-                do {
+                /*do {
                     cargorand = (cargorand_o + i) % cargo.size();
                 } while ((cargo[cargorand].GetQuantity() == 0
                         || cargo[cargorand].IsMissionFlag()) && (++i) < cargo.size());
-                cargo[cargorand].SetQuantity(cargo[cargorand].GetQuantity() * float_to_int(dam));
+                cargo[cargorand].SetQuantity(cargo[cargorand].GetQuantity() * float_to_int(dam));*/
             }
             break;
-            //default:
+            // default:
                 // No damage
         }
 
@@ -1453,10 +1452,10 @@ void Unit::ProcessDeleteQueue() {
 
 Unit *makeBlankUpgrade(string templnam, int faction) {
     Unit *bl = new Unit(templnam.c_str(), true, faction);
-    for (int i = bl->numCargo() - 1; i >= 0; i--) {
-        int q = bl->GetCargo(i).GetQuantity();
-        bl->RemoveCargo(i, q);
-    }
+    bl->cargo_hold.Clear();
+    bl->upgrade_space.Clear();
+    bl->hidden_hold.Clear();
+    
     bl->SetMass(0);
     return bl;
 }
@@ -2004,10 +2003,10 @@ void rechargeShip(Unit *unit, unsigned int cockpit) {
 
     // Refueling fee
     const float refueling_fee = configuration().general.fuel_docking_fee;
-    _Universe->AccessCockpit(cockpit)->credits -= refueling_fee;
+    unit->credits -= refueling_fee;
 
     const float docking_fee = configuration().general.docking_fee;
-    _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
+    unit->credits -= docking_fee;
 }
 
 
@@ -2572,11 +2571,7 @@ double Unit::Upgrade(const std::string &file,
         up = UnitConstCache::setCachedConst(StringIntKey(file, upgradefac),
                 new Unit(file.c_str(), true, upgradefac));
     }
-    unsigned int cargonum;
-    Cargo *cargo = GetCargo(file, cargonum);
-    if (cargo) {
-        cargo->SetInstalled(true);
-    }
+
     char *unitdir = GetUnitDir(this->name.get().c_str());
     string templnam = string(unitdir) + ".template";
     const Unit *templ = UnitConstCache::getCachedConst(StringIntKey(templnam, this->faction));
@@ -2706,17 +2701,17 @@ bool UpAndDownCargoHoldAndUpgradeSpace(Unit *unit, float cargo_volume, float hid
         return true;
     }
 
-    if(cargo_volume != 0) {
-        unit->CargoVolume += cargo_volume * multiple;
-    }
+    // if(cargo_volume != 0) {
+    //     unit->CargoVolume += cargo_volume * multiple;
+    // }
 
-    if(hidden_volume != 0) {
-        unit->HiddenCargoVolume += hidden_volume * multiple;
-    }
+    // if(hidden_volume != 0) {
+    //     unit->HiddenCargoVolume += hidden_volume * multiple;
+    // }
 
-    if(upgrade_space != 0) {
-        unit->UpgradeVolume += upgrade_space * multiple;
-    }
+    // if(upgrade_space != 0) {
+    //     unit->UpgradeVolume += upgrade_space * multiple;
+    // }
 
     return true;
 }
@@ -2767,9 +2762,9 @@ bool Unit::UpAndDownGrade(const Unit *up,
     } else {
         //we are upgrading!
         if (touchme) {
-            for (unsigned int i = 0; i < up->cargo.size(); ++i) {
-                if (CanAddCargo(up->cargo[i])) {
-                    AddCargo(up->cargo[i], false);
+            for (const Cargo cargo : up->cargo_hold.GetItems()) {
+                if (upgrade_space.CanAddCargo(cargo)) {
+                    upgrade_space.AddCargo(this, cargo, false);
                 }
             }
         }
@@ -2797,7 +2792,8 @@ bool Unit::UpAndDownGrade(const Unit *up,
 
 bool Unit::ReduceToTemplate() {
     vector<Cargo> savedCargo;
-    savedCargo.swap(cargo);
+    savedCargo = std::vector<Cargo>(upgrade_space.GetItems());
+    upgrade_space.Clear();
 
     vector<Mount> savedWeap;
     savedWeap.swap(mounts);
@@ -2810,7 +2806,11 @@ bool Unit::ReduceToTemplate() {
             success = true;
         }
     }
-    savedCargo.swap(cargo);
+
+    for(const Cargo &c : savedCargo) {
+        upgrade_space.AddCargo(this, c, false);
+    }
+    
     savedWeap.swap(mounts);
     return success;
 }
@@ -2856,8 +2856,8 @@ int Unit::RepairCost() {
     }
 
 
-    for (i = 0; i < numCargo(); ++i) {
-        if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
+    for (const Cargo& c : cargo_hold.GetItems()) {
+        if (c.Damaged()) {
             ++cost;
         }
     }
@@ -2865,9 +2865,10 @@ int Unit::RepairCost() {
 }
 
 // This is called when performing a BASIC_REPAIR
+// This function probably doesn't do anything anymore
 int Unit::RepairUpgrade() {
     vector<Cargo> savedCargo;
-    savedCargo.swap(cargo);
+    //savedCargo.swap(cargo);
     vector<Mount> savedWeap;
     savedWeap.swap(mounts);
     int upfac = FactionUtil::GetUpgradeFaction();
@@ -2880,44 +2881,28 @@ int Unit::RepairUpgrade() {
             success = 1;
         }
     }
-    savedCargo.swap(cargo);
+    //savedCargo.swap(cargo);
     savedWeap.swap(mounts);
-    UnitImages<void> *im = &GetImageInformation();
 
 
     bool ret = success && pct > 0;
     const bool ComponentBasedUpgrades = configuration().physics.component_based_upgrades;
     if (ComponentBasedUpgrades) {
-        for (unsigned int i = 0; i < numCargo(); ++i) {
-            if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
-                ++success;
-                static int damlen = strlen(DamagedCategory);
-                GetCargo(i).SetCategory("upgrades/" + GetCargo(i).GetCategory().substr(damlen));
-            }
-        }
-    }
+        // TODO: move this to components_manager
+    } 
     return success;
 }
 
-float RepairPrice(float operational, float price) {
-    return .5 * price * (1 - operational) * g_game.difficulty;
-}
 
 //item must be non-null... but baseUnit or credits may be NULL.
-bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
+bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit) {
     assert((item != NULL) | !"Unit::RepairUpgradeCargo got a null item."); //added by chuck_starchaser
-    double itemPrice = baseUnit ? baseUnit->PriceCargo(item->GetName()) : item->GetPrice();
-
-    // This needs to happen before we repair the part, obviously.
-    double percent_working = UnitUtil::PercentOperational(this, item->GetName(), "upgrades/", false);
+    double itemPrice = 1; //baseUnit ? baseUnit->PriceCargo(item->GetName()) : item->GetPrice();
 
     // New repair
     if(RepairUnit(item->GetName())) {
-        double repair_price = RepairPrice(percent_working, itemPrice);
-        if (credits) {
-            // Pay for repair
-            (*credits) -= repair_price;
-        }
+        double repair_price = item->RepairPrice();
+        ComponentsManager::credits -= repair_price;
 
         GenerateHudText(getDamageColor);
         return true;
@@ -2927,10 +2912,9 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
         const Unit *upgrade = getUnitFromUpgradeName(item->GetName(), this->faction);
         if (upgrade->getNumMounts()) {
             double price = itemPrice; //RepairPrice probably won't work for mounts.
-            if (!credits || price <= (*credits)) {
-                if (credits) {
-                    (*credits) -= price;
-                }
+            if (price <= ComponentsManager::credits) {
+                ComponentsManager::credits -= price;
+                
                 const Mount *mnt = &upgrade->mounts[0];
                 unsigned int nummounts = this->getNumMounts();
                 bool complete = false;
@@ -2964,22 +2948,22 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
             Cargo itemCopy = *item;                 //Copy this because we reload master list before we need it.
             const Unit *un = getUnitFromUpgradeName(item->GetName(), this->faction);
             if (un) {
-                double percentage = UnitUtil::PercentOperational(this, item->GetName(), item->GetCategory(), false);
-                double price = RepairPrice(percentage, itemPrice);
-                if (!credits || price <= (*credits)) {
-                    if (credits) {
-                        (*credits) -= price;
-                    }
+                double percentage = UnitUtil::PercentOperational(*item, this, item->GetName(), item->GetCategory(), false);
+                double price = item->RepairPrice();
+                if (price <= ComponentsManager::credits) {
+                    ComponentsManager::credits -= price;
+                    
                     if (notadditive) {
                         this->Upgrade(un, 0, 0, 0, true, percentage, makeTemplateUpgrade(this->name, this->faction));
                     }
-                    if (item->GetCategory().find(DamagedCategory) == 0) {
-                        unsigned int where;
-                        Cargo *c = this->GetCargo(item->GetName(), where);
-                        if (c) {
-                            c->SetCategory("upgrades/" + c->GetCategory().substr(strlen(DamagedCategory)));
-                        }
-                    }
+                    // This code changes the category of the item from "upgrades/Damaged/" to the original category.
+                    // if (item->GetCategory().find(DamagedCategory) == 0) {
+                    //     int index = this->upgrade_space.GetIndex(itemCopy);
+                    //     Cargo c = this->upgrade_space.GetCargo(index);
+                    //     if (!c.IsNullCargo()) {
+                    //         c.SetCategory("upgrades/" + c.GetCategory().substr(strlen(DamagedCategory)));
+                    //     }
+                    // }
                     return true;
                 }
             }
@@ -3092,12 +3076,9 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
 vector<CargoColor> &Unit::FilterUpgradeList(vector<CargoColor> &mylist) {
     const bool filtercargoprice = configuration().cargo.filter_expensive_cargo;
     if (filtercargoprice) {
-        Cockpit *cp = _Universe->isPlayerStarship(this);
-        if (cp) {
-            for (unsigned int i = 0; i < mylist.size(); ++i) {
-                if (mylist[i].cargo.GetPrice() > cp->credits) {
-                    mylist[i].color = disable;
-                }
+        for (unsigned int i = 0; i < mylist.size(); ++i) {
+            if (mylist[i].cargo.GetPrice() > credits) {
+                mylist[i].color = disable;
             }
         }
     }
@@ -3132,64 +3113,64 @@ bool myless(const Cargo &a, const Cargo &b) {
     return a < b;
 }
 
-Cargo *GetMasterPartList(const char *input_buffer) {
-    unsigned int i;
-    return GetUnitMasterPartList().GetCargo(input_buffer, i);
-}
 
 void Unit::ImportPartList(const std::string &category, float price, float pricedev, float quantity, float quantdev) {
-    unsigned int numcarg = GetUnitMasterPartList().numCargo();
-    float minprice = FLT_MAX;
-    float maxprice = 0;
-    for (unsigned int j = 0; j < numcarg; ++j) {
-        if (GetUnitMasterPartList().GetCargo(j).GetCategory() == category) {
-            float price = GetUnitMasterPartList().GetCargo(j).GetPrice();
-            if (price < minprice) {
-                minprice = price;
-            } else if (price > maxprice) {
-                maxprice = price;
-            }
+    Manifest category_manifest = Manifest::MPL().GetCategoryManifest(category);
+    std::vector<Cargo> cargo_list = category_manifest.GetItems();
+
+    // Find the minimum and maximum prices in the cargo list
+    // We start with extreme values but at the end, min < max
+    float min_cargo_price = FLT_MAX;
+    float max_cargo_price = 0.0f;
+    for (const Cargo& c : cargo_list) {
+        float price = c.GetPrice();
+        if (price < min_cargo_price) {
+            min_cargo_price = price;
+        }
+        if (price > max_cargo_price) {
+            max_cargo_price = price;
         }
     }
-    for (unsigned int i = 0; i < numcarg; ++i) {
-        Cargo c = GetUnitMasterPartList().GetCargo(i);
-        if (c.GetCategory() == category) {
-            const float aveweight = fabs(configuration().cargo.price_recenter_factor);
-            c.SetQuantity(float_to_int(quantity - quantdev));
-            float baseprice = c.GetPrice();
-            c.SetPrice(c.GetPrice() * (price - pricedev));
 
-            //stupid way
-            c.SetQuantity(c.GetQuantity() + float_to_int((quantdev * 2 + 1) * ((double) rand()) / (((double) RAND_MAX) + 1)));
-            c.SetPrice(c.GetPrice() + pricedev * 2 * ((float) rand()) / RAND_MAX);
-            c.SetPrice(fabs(c.GetPrice()));
-            c.SetPrice((c.GetPrice() + (baseprice * aveweight)) / (aveweight + 1));
-            if (c.GetQuantity() <= 0) {
-                c.SetQuantity(0);
-            }
-                //quantity more than zero
-            else if (maxprice > minprice + .01) {
-                float renormprice = (baseprice - minprice) / (maxprice - minprice);
-                const float maxpricequantadj = configuration().cargo.max_price_quant_adj;
-                const float minpricequantadj = configuration().cargo.min_price_quant_adj;
-                const float powah = configuration().cargo.price_quant_adj_power;
-                renormprice = std::pow(renormprice, powah);
-                renormprice *= (maxpricequantadj - minpricequantadj);
-                renormprice += 1;
-                if (renormprice > .001) {
-                    c.SetQuantity(c.GetQuantity() / float_to_int(renormprice));
-                    if (c.GetQuantity() < 1) {
-                        c.SetQuantity(1);
-                    }
+    
+    for (const Cargo& cargo : cargo_list) {    
+        Cargo c = cargo; // Copy the cargo item
+        const float aveweight = fabs(configuration().cargo.price_recenter_factor);
+        c.SetQuantity(float_to_int(quantity - quantdev));
+        float baseprice = c.GetPrice();
+        c.SetPrice(c.GetPrice() * (price - pricedev));
+
+        //stupid way
+        c.SetQuantity(c.GetQuantity() + float_to_int((quantdev * 2 + 1) * ((double) rand()) / (((double) RAND_MAX) + 1)));
+        c.SetPrice(c.GetPrice() + pricedev * 2 * ((float) rand()) / RAND_MAX);
+        c.SetPrice(fabs(c.GetPrice()));
+        c.SetPrice((c.GetPrice() + (baseprice * aveweight)) / (aveweight + 1));
+        if (c.GetQuantity() <= 0) {
+            c.SetQuantity(0);
+        }
+            //quantity more than zero
+        else if (max_cargo_price > min_cargo_price + .01) {
+            float renormprice = (baseprice - min_cargo_price) / (max_cargo_price - min_cargo_price);
+            const float maxpricequantadj = configuration().cargo.max_price_quant_adj;
+            const float minpricequantadj = configuration().cargo.min_price_quant_adj;
+            const float powah = configuration().cargo.price_quant_adj_power;
+            renormprice = std::pow(renormprice, powah);
+            renormprice *= (maxpricequantadj - minpricequantadj);
+            renormprice += 1;
+            if (renormprice > .001) {
+                c.SetQuantity(c.GetQuantity() / float_to_int(renormprice));
+                if (c.GetQuantity() < 1) {
+                    c.SetQuantity(1);
                 }
             }
-            const float minprice = configuration().cargo.min_cargo_price;
-            if (c.GetPrice() < minprice) {
-                c.SetPrice(minprice);
-            }
-
-            AddCargo(c, false);
         }
+        const float minprice = configuration().cargo.min_cargo_price;
+        if (c.GetPrice() < minprice) {
+            c.SetPrice(minprice);
+        }
+
+        cargo_hold.AddCargo(this, c, false);
+        
     }
 }
 
@@ -3275,7 +3256,7 @@ void Unit::Repair() {
         return;
     }
 
-    if (next_repair_time == -FLT_MAX || next_repair_time <= UniverseUtil::GetGameTime()) {
+    /*if (next_repair_time == -FLT_MAX || next_repair_time <= UniverseUtil::GetGameTime()) {
         unsigned int numcargo = numCargo();
         if (numcargo > 0) {
             if (next_repair_cargo >= numCargo()) {
@@ -3325,7 +3306,7 @@ void Unit::Repair() {
                 ++(next_repair_cargo);
             }
         }
-    }
+    }*/
 
     float ammt_repair = simulation_atom_var / repairtime * repair_bot.Get();
 

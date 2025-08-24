@@ -33,14 +33,55 @@
 #include "resource/random_utils.h"
 #include "configuration/configuration.h"
 #include "cmd/unit_csv_factory.h"
+#include "vs_logging.h"
+#include <boost/format.hpp>
+#include <iostream>
+
+Resource<double> ComponentsManager::credits = Resource<double>(0.0, 0.0);
 
 void ComponentsManager::Load(std::string unit_key) {
     mass = base_mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 0.0);
+
+    // Consumer
+    std::string prohibited_upgrades_string = UnitCSVFactory::GetVariable(unit_key, "Prohibited_Upgrades", std::string());
+
+    if(prohibited_upgrades_string.empty()) {
+        return;
+    }
+
+    std::vector<std::string> upgrades;
+
+    boost::split(upgrades, prohibited_upgrades_string, boost::is_any_of(";"));
+    for (const std::string& upgrade : upgrades) {
+        std::vector<std::string> parts;
+        boost::split(parts, upgrade, boost::is_any_of(":"));
+        if (parts.size() == 2) {
+            const std::string category = parts[0];
+            const int limit = std::stoi(parts[1]);
+            //const std::pair<const std::string, const int> pair(category, limit);
+            prohibited_upgrades.emplace_back(category, limit);
+        } else {
+            std::cerr << "Invalid format in prohibited upgrades string: " << upgrade << std::endl;
+        }
+    }
 }
 
 void ComponentsManager::Serialize(std::map<std::string, std::string>& unit) const {
     unit["Mass"] = std::to_string(base_mass);
+
+    // Serialize prohibited upgrades
+    if (!prohibited_upgrades.empty()) {
+        std::string prohibited_upgrades_string;
+        for (const auto& upgrade : prohibited_upgrades) {
+            if (!prohibited_upgrades_string.empty()) {
+                prohibited_upgrades_string += ";";
+            }
+            prohibited_upgrades_string += boost::str(boost::format("%s:%d") % upgrade.first % upgrade.second);
+        }
+        unit["Prohibited_Upgrades"] = prohibited_upgrades_string;
+    }
 }
+
 
 double ComponentsManager::GetMass() const {
     return mass;
@@ -126,6 +167,43 @@ void ComponentsManager::DamageRandomSystem() {
     }*/
 }
 
+bool ComponentsManager::ShipDamaged() const {
+    const Component* components[] = {&fuel, &energy, &ftl_energy, &reactor,
+                               &afterburner, &cloak, &drive, &ftl_drive,
+                               &jump_drive, &computer, &radar, &shield,
+                               &ecm, &repair_bot, &ship_functions};
+    
+    for(const Component* component : components) {
+        if(component->Damaged()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/** This function works by category only.
+ *  The previous implementation also worked by specific upgrades.
+ */
+bool ComponentsManager::AllowedUpgrade(const Cargo& upgrade) const {
+    for(const std::pair<const std::string, const int>& prohibited_upgrade : prohibited_upgrades) {
+        if(prohibited_upgrade.first != upgrade.GetCategory()) {
+            continue;
+        }
+
+        Manifest category_upgrades = upgrade_space.GetCategoryManifest(prohibited_upgrade.first);
+
+        if(category_upgrades.Size() > prohibited_upgrade.second) {
+            VS_LOG_FLUSH_EXIT(fatal,(boost::format("ComponentsManager::AllowedUpgrade: %1% is greater than %2%\n") % category_upgrades.Size() 
+                      % prohibited_upgrade.second), EXIT_FAILURE);
+        } else if(category_upgrades.Size() == prohibited_upgrade.second) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 /** A convenience struct to hold the data used below */
 struct HudText {
     const Component *component;
@@ -186,4 +264,103 @@ void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
 
 std::string ComponentsManager::GetHudText() {
     return hud_text;
+}
+
+std::string ComponentsManager::GetTitle(bool show_cargo, bool show_star_date, std::string date) {
+    const double empty_volume = show_cargo ? cargo_hold.MaxCapacity()
+                                : upgrade_space.MaxCapacity();
+    const double available_volume = show_cargo ? cargo_hold.AvailableCapacity()
+                                : upgrade_space.AvailableCapacity();
+    
+    // Cargo mass renders your ship harder to manoeuver. Display it.
+    double mass_percent = mass / base_mass * 100;
+    
+    if (show_star_date) {
+        return (boost::format("Stardate: %1$s      Credits: %2$.2f      "
+                              "Space left: %3$.6g of %4$.6g cubic meters   Mass: %5$.0f%% (base)")
+                              % date
+                              % credits.Value()
+                              % available_volume
+                              % empty_volume
+                              % mass_percent)
+                              .str();
+    } else {
+        return (boost::format("Credits: %1$.2f      "
+                              "Space left: %2$.6g of %3$.6g cubic meters   Mass: %4$.0f%% (base)")
+                              % credits.Value()
+                              % available_volume
+                              % empty_volume
+                              % mass_percent)
+                              .str();
+    }
+}
+
+bool ComponentsManager::BuyCargo(ComponentsManager *seller, Cargo *item, int quantity) {
+    return _Buy(&cargo_hold, seller, item, quantity);
+}
+
+bool ComponentsManager::SellCargo(ComponentsManager *buyer, Cargo *item, int quantity) {
+    return _Sell(&cargo_hold, buyer, item, quantity);
+}
+
+bool ComponentsManager::BuyUpgrade(ComponentsManager *seller, Cargo *item, int quantity) {
+    return _Buy(&upgrade_space, seller, item, quantity);
+}
+
+bool ComponentsManager::SellUpgrade(ComponentsManager *buyer, Cargo *item, int quantity) {
+    return _Sell(&upgrade_space, buyer, item, quantity);
+}
+
+bool ComponentsManager::_Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity) {
+    // In theory, item should already have the right quantity.
+    // In practice, base_computer doesn't provide this.
+    item->SetQuantity(quantity);
+
+    if(credits < item->GetPrice() * quantity) {
+        return false;
+    }
+
+    int index = seller->cargo_hold.GetIndex(*item);
+    if(index == -1) {
+        return false;
+    }
+
+    Cargo sold_cargo = seller->cargo_hold.RemoveCargo(seller, index, quantity);
+
+    if(!hold->CanAddCargo(sold_cargo)) {
+        seller->cargo_hold.AddCargo(seller, sold_cargo);
+        return false;
+    }
+
+    ComponentsManager::credits -= item->GetPrice() * quantity;
+    hold->AddCargo(this, sold_cargo);
+    return true;
+}
+
+bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *item, int quantity) {
+    item->SetQuantity(quantity);
+
+    CargoHold *buyer_hold = &buyer->cargo_hold;
+
+    int index = hold->GetIndex(*item);
+    if(index == -1) {
+        return false;
+    }
+
+    // For now, NPCs can always afford to buy our stuff
+
+    if (!buyer_hold->CanAddCargo(*item)) {
+        return false;
+    }
+
+    Cargo cargo = hold->RemoveCargo(this, index, quantity);
+
+    // Only get paid if not selling "mission" cargo.
+    // i.e. other peoples' money
+    if(!cargo.IsMissionFlag()) {
+        credits += cargo.GetTotalValue();
+    }
+
+    buyer_hold->AddCargo(buyer, cargo);
+    return true;
 }

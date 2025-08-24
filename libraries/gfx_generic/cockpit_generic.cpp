@@ -693,7 +693,6 @@ bool Cockpit::Update() {
                         newsystem,
                         pos,
                         setplayerXloc,
-                        this->credits,
                         packedInfo,
                         k);
                 UnpackUnitInfo(packedInfo);
@@ -757,7 +756,7 @@ bool Cockpit::Update() {
 
                 this->SetParent(un, GetUnitFileName().c_str(), unitmodname.c_str(), savegame->GetPlayerLocation());
                 SwitchUnits(NULL, un);
-                this->credits = savegame->GetSavedCredits();
+                ComponentsManager::credits = savegame->GetSavedCredits();
                 DoCockpitKeys();
                 _Universe->popActiveStarSystem();
                 _Universe->pushActiveStarSystem(ss);
