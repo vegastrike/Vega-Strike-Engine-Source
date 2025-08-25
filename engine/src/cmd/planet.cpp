@@ -463,9 +463,11 @@ void Planet::InitPlanet(QVector x,
 
     const bool smartplanets = configuration().physics.planets_can_have_subunits;
     if (un->name != string("LOAD_FAILED")) {
-        cargo = un->cargo;
-        CargoVolume = un->CargoVolume;
-        UpgradeVolume = un->UpgradeVolume;
+        // TODO: test this
+        cargo_hold = un->cargo_hold;
+        upgrade_space = un->upgrade_space;
+        
+
         VSSprite *tmp = pImage->pHudImage;
         pImage->pHudImage = un->GetImageInformation().pHudImage;
         un->GetImageInformation().pHudImage = tmp;

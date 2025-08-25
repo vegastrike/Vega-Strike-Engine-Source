@@ -50,105 +50,23 @@ extern void PlayDockingSound(int dock);
 
 constexpr float M_PI_FLT = M_PI;
 
-// TODO: probably replace with a lambda expression
-class CatCompare {
-public:
-    bool operator()(const Cargo &a, const Cargo &b) {
-        std::string::const_iterator aiter = a.GetCategory().begin();
-        std::string::const_iterator aend = a.GetCategory().end();
-        std::string::const_iterator biter = b.GetCategory().begin();
-        std::string::const_iterator bend = b.GetCategory().end();
-        for (; aiter != aend && biter != bend; ++aiter, ++biter) {
-            char achar = *aiter;
-            char bchar = *biter;
-            if (achar < bchar) {
-                return true;
-            }
-            if (achar > bchar) {
-                return false;
-            }
-        }
-        return false;
-    }
-};
+
 
 // TODO: move these two functions to vector and make into single constructor
-inline float uniformrand(float min, float max) {
-    return ((float) (rand()) / RAND_MAX) * (max - min) + min;
+inline double uniformrand(double min, double max) {
+    return ((double) (rand()) / RAND_MAX) * (max - min) + min;
 }
 
-inline QVector randVector(float min, float max) {
+inline QVector randVector(double min, double max) {
     return QVector(uniformrand(min, max),
             uniformrand(min, max),
             uniformrand(min, max));
-}
-
-std::string CargoToString(const Cargo &cargo) {
-    string missioncargo;
-    if (cargo.IsMissionFlag()) {
-        missioncargo = string("\" missioncargo=\"") + XMLSupport::tostring(cargo.IsMissionFlag());
-    }
-    return string("\t\t\t<Cargo mass=\"") + XMLSupport::tostring((float) cargo.GetMass()) + string("\" price=\"")
-            + XMLSupport::tostring((float) cargo.GetPrice()) + string("\" volume=\"")
-            + XMLSupport::tostring((float) cargo.GetVolume())
-            + string(
-                    "\" quantity=\"") + XMLSupport::tostring((int) cargo.GetQuantity()) + string("\" file=\"")
-            + cargo.GetName()
-            + missioncargo
-            + string("\"/>\n");
 }
 
 Carrier::Carrier() {
 
 }
 
-void Carrier::SortCargo() {
-    // TODO: better cast
-    Unit *un = (Unit *) this;
-    std::sort(un->cargo.begin(), un->cargo.end());
-    for (unsigned int i = 0; i + 1 < un->cargo.size(); ++i) {
-        if (un->cargo[i].name == un->cargo[i + 1].name) {
-            float tmpmass = un->cargo[i].quantity * un->cargo[i].GetMass()
-                    + un->cargo[i + 1].quantity * un->cargo[i + 1].GetMass();
-            float tmpvolume = un->cargo[i].quantity * un->cargo[i].GetVolume()
-                    + un->cargo[i + 1].quantity * un->cargo[i + 1].GetVolume();
-            un->cargo[i].quantity += un->cargo[i + 1].quantity;
-            if (un->cargo[i].quantity) {
-                tmpmass /= un->cargo[i].quantity;
-                tmpvolume /= un->cargo[i].quantity;
-            }
-            un->cargo[i].SetVolume(tmpvolume);
-            un->cargo[i].SetMissionFlag((un->cargo[i].IsMissionFlag() || un->cargo[i + 1].IsMissionFlag()));
-            un->cargo[i].SetMass(tmpmass);
-            //group up similar ones
-            un->cargo.erase(un->cargo.begin() + (i + 1));
-            i--;
-        }
-    }
-}
-
-std::string Carrier::cargoSerializer(const XMLType &input, void *mythis) {
-    Unit *un = (Unit *) mythis;
-    if (un->cargo.size() == 0) {
-        return string("0");
-    }
-    un->SortCargo();
-    string retval("");
-    if (!(un->cargo.empty())) {
-        retval = un->cargo[0].GetCategory() + string("\">\n") + CargoToString(un->cargo[0]);
-        for (unsigned int kk = 1; kk < un->cargo.size(); ++kk) {
-            if (un->cargo[kk].GetCategory() != un->cargo[kk - 1].GetCategory()) {
-                retval += string("\t\t</Category>\n\t\t<Category file=\"") + un->cargo[kk].GetCategory() + string(
-                        "\">\n");
-            }
-            retval += CargoToString(un->cargo[kk]);
-        }
-        retval += string("\t\t</Category>\n\t\t<Category file=\"nothing");
-    } else {
-        retval = string("nothing");
-    }
-    return retval;
-}
 
 //index in here is unsigned, UINT_MAX and UINT_MAX-1 seem to be
 //special states.  This means the total amount of cargo any ship can have
@@ -172,7 +90,7 @@ void Carrier::EjectCargo(unsigned int index) {
             isplayer = true;
         }
         //we will have to check for this on undock to return to the parent unit!
-        dockedPilot.name = "return_to_cockpit";
+        dockedPilot.SetName("return_to_cockpit");
         dockedPilot.SetMass(.1);
         dockedPilot.SetVolume(1);
         tmp = &dockedPilot;
@@ -184,13 +102,13 @@ void Carrier::EjectCargo(unsigned int index) {
             string playernum = string("player") + ((pilotnum == 0) ? string("") : XMLSupport::tostring(pilotnum));
             isplayer = true;
         }
-        ejectedPilot.name = "eject";
+        ejectedPilot.SetName("eject");
         ejectedPilot.SetMass(.1);
         ejectedPilot.SetVolume(1);
         tmp = &ejectedPilot;
     }
-    if (index < numCargo()) {
-        tmp = &GetCargo(index);
+    if (index < unit->cargo_hold.Size()) {
+        tmp = &unit->cargo_hold.GetCargo(index);
     }
 
     // Some sanity checks for tmp
@@ -209,7 +127,7 @@ void Carrier::EjectCargo(unsigned int index) {
 
     const float cargotime = configuration().physics.cargo_live_time_flt;
     if (tmp) {
-        string tmpcontent = tmp->name;
+        string tmpcontent = tmp->GetName();
         if (tmp->IsMissionFlag()) {
             tmpcontent = "Mission_Cargo";
         }
@@ -219,7 +137,7 @@ void Carrier::EjectCargo(unsigned int index) {
             tmpcontent = "Space_Salvage";
         }
         //this happens if it's a ship
-        if (tmp->quantity > 0) {
+        if (tmp->GetQuantity() > 0) {
             const int sslen = strlen("starships");
             Unit *cargo = NULL;
             if (tmp->GetCategory().length() >= (unsigned int) sslen) {
@@ -437,8 +355,8 @@ void Carrier::EjectCargo(unsigned int index) {
                 }
                 _Universe->activeStarSystem()->AddUnit(cargo);
                 if ((unsigned int) index != ((unsigned int) -1) && (unsigned int) index != ((unsigned int) -2)) {
-                    if (index < unit->cargo.size()) {
-                        RemoveCargo(index, 1, true);
+                    if (index < unit->cargo_hold.Size()) {
+                        unit->cargo_hold.RemoveCargo(unit, index, 1);
                     }
                 }
             }
@@ -446,242 +364,31 @@ void Carrier::EjectCargo(unsigned int index) {
     }
 }
 
-int Carrier::RemoveCargo(unsigned int i, int quantity, bool eraseZero) {
-    Unit *unit = static_cast<Unit *>(this);
-    if (!(i < unit->cargo.size())) {
-        VS_LOG(error, "(previously) FATAL problem...removing cargo that is past the end of array bounds.");
-        return 0;
-    }
-    Cargo *carg = &(unit->cargo[i]);
-    if (quantity > carg->quantity) {
-        quantity = carg->quantity;
-    }
-
-    const bool usemass = configuration().physics.use_cargo_mass;
-    if (usemass) {
-        // TODO: remove static_cast when carg->GetMass returns double
-        unit->SetMass(unit->GetMass() - quantity * static_cast<double>(carg->GetMass()));
-    }
-
-    carg->quantity -= quantity;
-    if (carg->quantity <= 0 && eraseZero) {
-        unit->cargo.erase(unit->cargo.begin() + i);
-    }
-    return quantity;
-}
-
-void Carrier::AddCargo(const Cargo &carg, bool sort) {
-    Unit *unit = static_cast<Unit *>(this);
-
-    const bool usemass = configuration().physics.use_cargo_mass;
-    if (usemass) {
-        // TODO: remove static_cast when carg->GetMass returns double
-        unit->SetMass(unit->GetMass() + carg.quantity.Value() * static_cast<double>(carg.GetMass()));
-    }
-
-    bool found = false;
-
-    for(Cargo c: this->cargo) {
-        if(c.GetName() == carg.GetName() && c.GetCategory() == carg.GetCategory()) {
-            found = true;
-            c.Add(carg.GetQuantity());
-        }
-    }
-
-    if(!found) {
-        unit->cargo.push_back(carg);
-    }
-
-    if (sort) {
-        SortCargo();
-    }
-}
-
-float Carrier::getHiddenCargoVolume() const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    return unit->HiddenCargoVolume;
-}
-
-bool Carrier::CanAddCargo(const Cargo &carg) const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-
-    //Always can, in this case (this accounts for some odd precision issues)
-    if ((carg.quantity == 0) || (carg.GetVolume() == 0)) {
-        return true;
-    }
-    //Test volume availability
-    float total_volume = carg.quantity.Value() * carg.GetVolume() + (carg.IsComponent() ? getUpgradeVolume() : getCargoVolume());
-    if (total_volume <= (carg.IsComponent() ? getEmptyUpgradeVolume() : getEmptyCargoVolume())) {
-        return true;
-    }
-    //Hm... not in main unit... perhaps a subunit can take it
-    for (un_kiter i = unit->viewSubUnits(); !i.isDone(); ++i) {
-        if ((*i)->CanAddCargo(carg)) {
-            return true;
-        }
-    }
-    //Bad luck
-    return false;
-}
-
-//The cargo volume of this ship when empty.  Max cargo volume.
-float Carrier::getEmptyCargoVolume(void) const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    return unit->CargoVolume;
-}
-
-float Carrier::getEmptyUpgradeVolume(void) const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    return unit->UpgradeVolume;
-}
-
-float Carrier::getCargoVolume(void) const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    float result = 0.0;
-    for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
-        if (!(unit->cargo[i].IsComponent())) {
-            result += unit->cargo[i].quantity.Value() * unit->cargo[i].GetVolume();
-        }
-    }
-    return result;
-}
-
-
 
 float Carrier::PriceCargo(const std::string &s) {
     Unit *unit = static_cast<Unit *>(this);
 
-    Cargo tmp;
-    tmp.name = s;
-    vector<Cargo>::iterator mycargo = std::find(unit->cargo.begin(),
-            unit->cargo.end(), tmp);
-    if (mycargo == unit->cargo.end()) {
-        Unit *mpl = getMasterPartList();
-        if (this != mpl) {
-            return mpl->PriceCargo(s);
-        } else {
-            const float spacejunk = configuration().cargo.space_junk_price_flt;
-            return spacejunk;
-        }
+    int index = unit->cargo_hold.GetIndex(s);
+    if(index != -1) {
+        return unit->cargo_hold.GetCargo(index).GetPrice();
     }
-    float price;
-    price = (*mycargo).price;
-    return price;
-}
 
-float Carrier::getUpgradeVolume(void) const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    float result = 0.0;
-    for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
-        if ((unit->cargo[i].IsComponent())) {
-            result += unit->cargo[i].quantity.Value() * unit->cargo[i].GetVolume();
-        }
+    if(Manifest::MPL().HasCargo(s)) {
+        return Manifest::MPL().GetCargoByName(s).GetPrice();
     }
-    return result;
+
+    return configuration().cargo.space_junk_price;
 }
-
-Cargo &Carrier::GetCargo(unsigned int i) {
-    Unit *unit = static_cast<Unit *>(this);
-    return unit->cargo[i];
-}
-
-const Cargo &Carrier::GetCargo(unsigned int i) const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    return unit->cargo[i];
-}
-
-void Carrier::GetSortedCargoCat(const std::string &cat, size_t &begin, size_t &end) {
-    Unit *unit = static_cast<Unit *>(this);
-    vector<Cargo>::iterator Begin = unit->cargo.begin();
-    vector<Cargo>::iterator End = unit->cargo.end();
-    vector<Cargo>::iterator lbound = unit->cargo.end();
-    vector<Cargo>::iterator ubound = unit->cargo.end();
-
-    Cargo beginningtype;
-    beginningtype.SetCategory(cat);
-    CatCompare Comp;
-    lbound = std::lower_bound(Begin, End, beginningtype, Comp);
-    beginningtype.name = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
-    ubound = std::upper_bound(Begin, End, beginningtype, Comp);
-    begin = lbound - Begin;
-    end = ubound - Begin;
-}
-
-// TODO: I removed a superfluous call via this->GetCargo and got a warning about recursion
-// all paths through this function will call itself
-// The game also crashed due to endless loop.
-// I returned the code and now it works and I don't know why.
-Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    if (unit->GetCargo(s, i)) {
-        return &GetCargo(i);
-    }
-    return NULL;
-}
-
-const Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-
-    static Hashtable<string, unsigned int, 2047> index_cache_table;
-    Unit *mpl = getMasterPartList();
-    if (this == mpl) {
-        unsigned int *ind = index_cache_table.Get(s);
-        if (ind) {
-            if (*ind < unit->cargo.size()) {
-                Cargo *guess = const_cast<Cargo *>(&unit->cargo[*ind]);
-                if (guess->name == s) {
-                    i = *ind;
-                    return guess;
-                }
-            }
-        }
-        Cargo searchfor;
-        searchfor.name = s;
-
-        // TODO: could not deduce the right var type. Resorted to auto
-        //vector< Cargo >::iterator tmp = std::find( unit->cargo.begin(),
-        //                                           unit->cargo.end(), searchfor );
-        auto tmp = std::find(unit->cargo.begin(), unit->cargo.end(), searchfor);
-        if (tmp == unit->cargo.end()) {
-            return nullptr;
-        }
-        if ((*tmp).name == searchfor.name) {
-            i = (tmp - unit->cargo.begin());
-            if (this == mpl) {
-                unsigned int *tmp = new unsigned int;
-                *tmp = i;
-                if (index_cache_table.Get(s)) {
-                    index_cache_table.Delete(s);
-                }
-                //memory leak--should not be reached though, ever
-                index_cache_table.Put(s, tmp);
-            }
-            return &(*tmp);
-        }
-        return nullptr;
-    }
-    Cargo searchfor;
-    searchfor.name = s;
-
-    // TODO: could not deduce the right var type. Resorted to auto
-    auto tmp = (std::find(unit->cargo.begin(), unit->cargo.end(), searchfor));
-    if (tmp == unit->cargo.end()) {
-        return NULL;
-    }
-    i = (tmp - unit->cargo.begin());
-    return &(*tmp);
-}
-
 unsigned int Carrier::numCargo() const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    return unit->cargo.size();
+    return unit->cargo_hold.Size();
 }
 
 std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vector &oldspd) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     ///FIXME somehow mangle string
-    string mangled = unit->cargo[i].name;
+    string mangled = unit->cargo_hold.GetCargo(i).GetName();
     const float scramblingmanifest = configuration().general.percentage_speed_change_to_fault_search_flt;
     {
         //Keep inside subblock, otherwise MSVC will throw an error while redefining 'i'
@@ -701,71 +408,3 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
     return mangled;
 }
 
-bool Carrier::SellCargo(unsigned int i, int quantity, float &creds, Cargo &carg, Unit *buyer) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-
-    if (i < 0 || i >= unit->cargo.size() || !buyer->CanAddCargo(unit->cargo[i])
-            || unit->GetMass() < unit->cargo[i].GetMass()) {
-        return false;
-    }
-    carg = unit->cargo[i];
-    if (quantity > unit->cargo[i].quantity.Value()) {
-        quantity = unit->cargo[i].quantity.Value();
-    }
-    carg.price = buyer->PriceCargo(unit->cargo[i].name);
-    creds += quantity * carg.price;
-
-    carg.quantity = quantity;
-    buyer->AddCargo(carg);
-
-    RemoveCargo(i, quantity);
-    return true;
-}
-
-bool Carrier::SellCargo(const std::string &s, int quantity, float &creds, Cargo &carg, Unit *buyer) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-
-    Cargo tmp;
-    tmp.name = s;
-
-    // TODO: could not deduce the right var type. Resorted to auto
-    auto mycargo = std::find(unit->cargo.begin(), unit->cargo.end(), tmp);
-    if (mycargo == unit->cargo.end()) {
-        return false;
-    }
-    return SellCargo(mycargo - unit->cargo.begin(), quantity, creds, carg, buyer);
-}
-
-bool Carrier::BuyCargo(const Cargo &carg, float &creds) {
-    if (!CanAddCargo(carg) || creds < carg.quantity.Value() * carg.price) {
-        return false;
-    }
-    AddCargo(carg);
-    creds -= carg.quantity.Value() * carg.price;
-
-    return true;
-}
-
-bool Carrier::BuyCargo(unsigned int i, unsigned int quantity, Unit *seller, float &creds) {
-    Cargo soldcargo = seller->cargo[i];
-    if (quantity > (unsigned int) soldcargo.quantity) {
-        quantity = soldcargo.quantity;
-    }
-    if (quantity == 0) {
-        return false;
-    }
-    soldcargo.quantity = quantity;
-    if (BuyCargo(soldcargo, creds)) {
-        seller->RemoveCargo(i, quantity, false);
-        return true;
-    }
-    return false;
-}
-
-bool Carrier::BuyCargo(const std::string &cargo, unsigned int quantity, Unit *seller, float &creds) {
-    unsigned int i;
-    if (seller->GetCargo(cargo, i)) {
-        return BuyCargo(i, quantity, seller, creds);
-    }
-    return false;
-}

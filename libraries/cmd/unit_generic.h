@@ -155,13 +155,6 @@ public:
     float next_repair_time{};
     unsigned int next_repair_cargo{};    //(~0 : select randomly)
 
-    /// Volume
-    // This isn't mass. Denser materials translate to more mass
-    // TODO: move this to ship class
-    float UpgradeVolume = 0;
-    float CargoVolume = 0;     ///mass just makes you turn worse
-    float HiddenCargoVolume = 0;
-
 //The name (type) of this unit shouldn't be public
     StringPool::Reference name;
     StringPool::Reference filename;
@@ -322,8 +315,7 @@ public:
     int RepairUpgrade();                 //returns how many things were repaired
 //returns percentOperational,maxPercentOperational,and whether mount is damaged (1 is damaged, 0 is fine, -1 is invalid mount)
     bool RepairUpgradeCargo(Cargo *item,
-            Unit *baseUnit,
-            float *credits);           //item must not be NULL but baseUnit/credits are only used for pricing.
+            Unit *baseUnit);           //item must not be NULL but baseUnit/credits are only used for pricing.
     Vector MountPercentOperational(int whichmount);
     bool ReduceToTemplate();
     double Upgrade(const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);

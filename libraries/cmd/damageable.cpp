@@ -382,6 +382,9 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     unit->DamageRandSys(random_damage_factor + hull_damage_factor, attack_vector);
 }
 
+
+// Note: this function can damage cargo and that may/should affect missions and cargo price
+// TODO: consider adding a condition that cargo arrives pristine or above minimum condition
 void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     // TODO: lib_damage
     // The following code needs to be renabled and placed somewhere
@@ -408,47 +411,23 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     // If nothing to damage, exit
-    if (unit->numCargo() == 0) {
-        return;
-    }
-
-    // Is the hit unit, lucky or not
-    if (DestroySystem(unit->hull.Percent(), unit->numCargo())) {
+    if (unit->cargo_hold.Empty()) {
         return;
     }
 
     const std::string restricted_items = configuration().physics.indestructible_cargo_items;
-    int cargo_to_damage_index = rand() % unit->numCargo();
-    Cargo &cargo = unit->GetCargo(cargo_to_damage_index);
-    const std::string &cargo_category = cargo.GetCategory();
+    double change_to_damage = hull_damage ? 0.5 : 0.05;
 
-    bool is_upgrade = cargo_category.find("upgrades/") == 0;
-    bool already_damaged = cargo_category.find("upgrades/Damaged/") == 0;
-    bool is_multiple = cargo_category.find("mult_") == 0;
-    bool is_restricted = restricted_items.find(cargo.GetName()) == string::npos;
+    for(Cargo &cargo : unit->cargo_hold.GetItems()) {
+        // If the cargo is indestructible, skip it
+        if (restricted_items.find(cargo.GetName()) != std::string::npos) {
+            continue;
+        }
 
-    // The following comment was kept in the hopes someone else knows what it means
-    //why not downgrade _add GetCargo(which).content.find("add_")!=0&&
-    if (!is_upgrade || already_damaged || is_multiple || is_restricted) {
-        return;
-    }
-
-    const int prefix_length = strlen("upgrades/");
-    cargo.SetCategory("upgrades/Damaged/" + cargo_category.substr(prefix_length));
-
-    // TODO: find a better name for whatever this is. Right now it's not not downgrade
-    if (configuration().physics.separate_system_flakiness_component) {
-        return;
-    }
-
-    const Unit *downgrade = loadUnitByCache(cargo.GetName(), FactionUtil::GetFactionIndex("upgrades"));
-    if (!downgrade) {
-        return;
-    }
-
-    if (0 == downgrade->getNumMounts() && downgrade->SubUnits.empty()) {
-        double percentage = 0;
-        unit->Downgrade(downgrade, 0, 0, percentage, nullptr);
+        if( randomDouble() < change_to_damage) {
+            // Damage the cargo
+            cargo.RandomDamage();
+        }
     }
 }
 
