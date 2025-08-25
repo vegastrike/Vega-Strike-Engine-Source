@@ -291,7 +291,7 @@ protected:
     GFXColor getColorForGroup(std::string id);
 
 //Get a filtered list of items from a unit.
-    void loadMasterList(Unit *un,
+    void loadMasterList(Unit *un, CargoHold &hold,
             const vector<string> &filterthis,
             const vector<string> &invfilterthis,
             bool removezero,

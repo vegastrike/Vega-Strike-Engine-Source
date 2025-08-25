@@ -223,8 +223,6 @@ SET(LIBDAMAGE
 
 SET(LIBRESOURCE
     src/resource/resource.cpp
-    src/resource/store.cpp
-    src/resource/product.cpp
     src/resource/cargo.cpp
     src/resource/manifest.cpp
     src/resource/json_utils.cpp
@@ -253,6 +251,7 @@ SET(LIBCOMPONENT
     src/components/afterburner_upgrade.cpp
     src/components/computer.cpp
     src/components/cloak.cpp
+    src/components/cargo_hold.cpp
     src/components/drive.cpp
     src/components/drive_upgrade.cpp
     src/components/ftl_drive.cpp
