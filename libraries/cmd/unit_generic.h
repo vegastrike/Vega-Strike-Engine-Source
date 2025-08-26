@@ -317,7 +317,6 @@ public:
     bool RepairUpgradeCargo(Cargo *item,
             Unit *baseUnit);           //item must not be NULL but baseUnit/credits are only used for pricing.
     Vector MountPercentOperational(int whichmount);
-    bool ReduceToTemplate();
     double Upgrade(const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
     bool canDowngrade(const Unit *downgradeor,
             int mountoffset,
