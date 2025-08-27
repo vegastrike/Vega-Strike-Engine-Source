@@ -209,23 +209,6 @@ void vs_options::init() {
 
     /* Player Options */
 
-    /* Joystick Options */
-    joystick_exponent = XMLSupport::parse_floatf(vs_config->getVariable("joystick", "joystick_exponent", "1.0"));
-    polling_rate = XMLSupport::parse_int(vs_config->getVariable("joystick", "polling_rate", "0"));
-    force_use_of_joystick =
-            XMLSupport::parse_bool(vs_config->getVariable("joystick", "force_use_of_joystick", "false"));
-    debug_digital_hatswitch =
-            XMLSupport::parse_bool(vs_config->getVariable("joystick", "debug_digital_hatswitch", "false"));
-    deadband = XMLSupport::parse_floatf(vs_config->getVariable("joystick", "deadband", "0.05"));
-    mouse_deadband = XMLSupport::parse_floatf(vs_config->getVariable("joystick", "mouse_deadband", "0.025"));
-    warp_mouse = XMLSupport::parse_bool(vs_config->getVariable("joystick", "warp_mouse", "false"));
-    mouse_sensitivity = XMLSupport::parse_floatf(vs_config->getVariable("joystick", "mouse_sensitivity", "50.0"));
-    mouse_exponent = XMLSupport::parse_floatf(vs_config->getVariable("joystick", "mouse_exponent", "3.0"));
-    mouse_blur = XMLSupport::parse_floatf(vs_config->getVariable("joystick", "mouse_blur", ".025"));
-    force_feedback = XMLSupport::parse_bool(vs_config->getVariable("joystick", "force_feedback", "false"));
-    ff_device = XMLSupport::parse_int(vs_config->getVariable("joystick", "ff_device", "0"));
-    warp_mouse_zone = XMLSupport::parse_int(vs_config->getVariable("joystick", "warp_mouse_zone", "100"));
-
     /* AI Options */
     AllowCivilWar = XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowCivilWar", "false"));
     CappedFactionRating = XMLSupport::parse_bool(vs_config->getVariable("AI", "CappedFactionRating", "true"));
