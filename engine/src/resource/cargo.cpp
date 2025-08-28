@@ -121,7 +121,8 @@ Cargo::Cargo(boost::json::object json):
     mass(std::stod(JsonGetStringWithDefault(json, "mass", "0.0"))), 
     volume(std::stod(JsonGetStringWithDefault(json, "volume", "0.0"))),
     mission(false), 
-    component((JsonGetStringWithDefault(json, "component", "false")) == "true"),
+    component(GetBool(json, "upgrade", false)),
+    weapon(GetBool(json, "weapon", false)),
     installed(false), 
     integral(false),
     functionality(Resource<double>(1.0, 0.0, 1.0)) {}
