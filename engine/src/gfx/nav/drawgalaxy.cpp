@@ -68,6 +68,8 @@
 using std::string;
 using std::vector;
 
+constexpr double kPi = 3.1415926536;
+
 float SYSTEM_DEFAULT_SIZE = 0.02;
 const int systemambiguous = 0;
 static GFXColor GrayColor(.5, .5, .5, .5);
@@ -289,7 +291,7 @@ QVector NavigationSystem::SystemIterator::Position() {
         }
         k %= 200000;
 //float y = (k-100000)/(200000.);
-        return QVector(ratio * cos(locatio * 2 * 3.1415926536), ratio * sin(locatio * 2 * 3.1415926536), 0)
+        return QVector(ratio * cos(locatio * 2 * kPi), ratio * sin(locatio * 2 * kPi), 0)
                 * screensmash;
     }
 }

@@ -61,6 +61,8 @@ extern const char *DamagedCategory;  //for percentoperational
 using std::string;
 extern Unit *getTopLevelOwner();
 
+constexpr double kPi = 3.1415926536;
+
 static bool nameIsAsteroid(std::string name) {
     if (name.length() < 8) {
         return false;
@@ -331,12 +333,12 @@ int getPhysicsPriority(Unit *un) {
 void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVector center) {
     if (my_unit) {
         my_unit->PrimeOrders(new PlanetaryOrbit(my_unit,
-                speed / (3.1415926536 * (S.Magnitude() + R.Magnitude())),
-                0,
-                R,
-                S,
-                center,
-                orbitee));
+                                                speed / (kPi * (S.Magnitude() + R.Magnitude())),
+                                                0,
+                                                R,
+                                                S,
+                                                center,
+                                                orbitee));
         if (orbitee) {
             if (orbitee->getUnitType() == Vega_UnitType::planet) {
                 ((Planet *) orbitee)->AddSatellite(my_unit);
@@ -452,8 +454,8 @@ void addCredits(const Unit *my_unit, float credits) {
     if (!my_unit) {
         return;
     }
-    
-    my_unit->credits += credits;  
+
+    my_unit->credits += credits;
 }
 
 const string &getFlightgroupNameCR(const Unit *my_unit) {
@@ -581,13 +583,13 @@ int addCargo(Unit *my_unit, Cargo carg) {
     if (!my_unit) {
         return 0;
     }
- 
+
     for (int i = carg.GetQuantity(); i > 0; i--) {
         carg.SetQuantity(i);
         if(my_unit->cargo_hold.CanAddCargo(carg)) {
             my_unit->cargo_hold.AddCargo(my_unit, carg);
             break;
-        } 
+        }
     }
 
     return carg.GetQuantity();
@@ -608,7 +610,7 @@ int hasCargo(const Unit *my_unit, string mycarg) {
     if (!my_unit) {
         return 0;
     }
-    
+
     if(!my_unit->cargo_hold.HasCargo(mycarg)) {
         return 0;
     }
