@@ -806,8 +806,8 @@ static std::string NearestSystem(std::string currentsystem, QVector pos) {
     if (pos.i == 0 && pos.j == 0 && pos.k == 0) {
         return "";
     }
-    QVector pos_normalized = pos.Normalize();
-    pos_normalized.Normalize();
+    QVector normalized_position = pos.Normalize();
+    normalized_position.Normalize();
     QVector cur = SystemLocation(std::move(currentsystem));
     if (cur.i == 0 && cur.j == 0 && cur.k == 0) {
         return "";
@@ -830,7 +830,7 @@ static std::string NearestSystem(std::string currentsystem, QVector pos) {
                     QVector dir = pos2 - cur;
                     QVector norm = dir;
                     norm.Normalize();
-                    double test = pos_normalized.Dot(norm);
+                    double test = normalized_position.Dot(norm);
                     if (test > .2) {
                         //test=1-test;
                         double tmp = dir.MagnitudeSquared() / test / test / test;
