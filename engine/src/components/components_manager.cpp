@@ -322,34 +322,36 @@ bool ComponentsManager::SellUpgrade(ComponentsManager *buyer, Cargo *item, int q
 }
 
 bool ComponentsManager::_Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity) {
-    // In theory, item should already have the right quantity.
-    // In practice, base_computer doesn't provide this.
-    item->SetQuantity(quantity);
-
-    if(credits < item->GetPrice() * quantity) {
-        return false;
-    }
-
+    // Some sanity checks
     int index = seller->cargo_hold.GetIndex(*item);
     if(index == -1) {
         return false;
     }
 
-    Cargo sold_cargo = seller->cargo_hold.RemoveCargo(seller, index, quantity);
+    // Check quantity is available in seller's hold
+    quantity = std::min(item->GetQuantity(), quantity);
 
-    if(!hold->CanAddCargo(sold_cargo)) {
-        seller->cargo_hold.AddCargo(seller, sold_cargo);
+    // Check the maximum you can afford
+    int max_affordable_quantity = static_cast<int>(std::floor(credits / item->GetPrice()));
+    quantity = std::min(max_affordable_quantity, quantity);
+
+    // Check the maximum you can fit in your hold
+    int max_stackable_quantity = static_cast<int>(std::floor(hold->AvailableCapacity() / item->GetVolume()));
+    quantity = std::min(max_stackable_quantity, quantity);
+
+    // Sanity check of the quantity - isn't 0 or negative
+    if(quantity <= 0) {
         return false;
     }
 
+    // Actual transaction
+    Cargo sold_cargo = seller->cargo_hold.RemoveCargo(seller, index, quantity);
     ComponentsManager::credits -= item->GetPrice() * quantity;
     hold->AddCargo(this, sold_cargo);
     return true;
 }
 
 bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *item, int quantity) {
-    item->SetQuantity(quantity);
-
     CargoHold *buyer_hold = &buyer->cargo_hold;
 
     int index = hold->GetIndex(*item);
@@ -357,9 +359,14 @@ bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *
         return false;
     }
 
-    // For now, NPCs can always afford to buy our stuff
+    // Note: For now, NPCs can always afford to buy our stuff
+    // Check the maximum you can fit in your hold
+    // Disabled. Check returns a negative number for small items
+    //int max_stackable_quantity = static_cast<int>(std::floor(buyer->cargo_hold.AvailableCapacity() / item->GetVolume()));
+    //quantity = std::min(max_stackable_quantity, quantity);
 
-    if (!buyer_hold->CanAddCargo(*item)) {
+    // Quantity sanity check - must be positive
+    if (quantity <= 0) {
         return false;
     }
 
