@@ -10,7 +10,7 @@ if they were compatible with a given version of the engine. Starting in Vega Str
 the Engine API Version tooling was introduced.
 
 If the Engine API is not available, then the game assets can assume that the running Vega Strike Engine
-is versioni 0.7.x or earlier. No guarentees are then made to the stability of the API or anything being
+is version 0.7.x or earlier. No guarantees are then made to the stability of the API or anything being
 available.
 
 The below documents the changes to the Engine API starting with Vega Strike Engine 0.8.0, Engine API Version 1.
