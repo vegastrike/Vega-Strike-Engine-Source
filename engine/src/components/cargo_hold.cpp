@@ -132,7 +132,7 @@ void CargoHold::AddCargo(ComponentsManager *manager, const Cargo &cargo, bool so
 
     bool found = false;
 
-    for(Cargo c: _items) {
+    for(Cargo& c: _items) {
         if(c.name == cargo.name && c.category == cargo.category) {
             found = true;
             c.quantity += cargo.quantity.Value();

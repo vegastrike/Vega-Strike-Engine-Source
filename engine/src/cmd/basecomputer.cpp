@@ -2482,20 +2482,17 @@ void BaseComputer::draw() {
 bool BaseComputer::buySelectedCargo(int requestedQuantity) {
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
-    if (!(playerUnit && baseUnit)) {
+    Cargo *item = selectedItem();
+
+    if (!(playerUnit && baseUnit && item)) {
         return true;
     }
-    Cargo *item = selectedItem();
-    if (item) {
-        int quantity = (requestedQuantity <= 0 ? item->GetQuantity() : requestedQuantity);
-        quantity = maxQuantityForPlayer(*item, quantity);
-        int index = baseUnit->cargo_hold.GetIndex(*item);        
-        playerUnit->BuyCargo(baseUnit, item, quantity);
-        //Reload the UI -- inventory has changed.  Because we reload the UI, we need to
-        //find, select, and scroll to the thing we bought.  The item might be gone from the
-        //list (along with some categories) after the transaction.
-        refresh();         //This will reload master lists.
-    }
+
+    playerUnit->BuyCargo(baseUnit, item, requestedQuantity);
+    //Reload the UI -- inventory has changed.  Because we reload the UI, we need to
+    //find, select, and scroll to the thing we bought.  The item might be gone from the
+    //list (along with some categories) after the transaction.
+    refresh();         //This will reload master lists.
     return true;
 }
 
@@ -2511,7 +2508,7 @@ bool BaseComputer::buy10Cargo(const EventCommandId &command, Control *control) {
 
 //Buy all of an item from the cargo list.
 bool BaseComputer::buyAllCargo(const EventCommandId &command, Control *control) {
-    return buySelectedCargo(-1);
+    return buySelectedCargo(9999);
 }
 
 //Sell some items from the Cargo list.  Use -1 for quantity to buy all of the item.
@@ -2546,7 +2543,7 @@ bool BaseComputer::sell10Cargo(const EventCommandId &command, Control *control) 
 
 //Sell all of an item from the cargo list.
 bool BaseComputer::sellAllCargo(const EventCommandId &command, Control *control) {
-    return sellSelectedCargo(-1);
+    return sellSelectedCargo(9999);
 }
 
 //Change controls to NEWS mode.
