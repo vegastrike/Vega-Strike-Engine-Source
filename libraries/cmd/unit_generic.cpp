@@ -253,7 +253,7 @@ void Unit::Ref() {
 #define kInverseForceDistance 5400
 extern void PlayDockingSound(int dock);
 
-static list<Unit *> Unit_delete_queue;
+static list<Unit *> unit_delete_queue;
 static Hashtable<uintmax_t, Unit, 2095> deletedUn;
 int deathofvs = 1;
 
@@ -1342,7 +1342,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
     if (ucref == 0) {
         VS_LOG(trace, (boost::format("UNIT DELETION QUEUED: %1$s %2$s (file %3$s, addr 0x%4$08x)")
                 % name.get().c_str() % fullname.c_str() % filename.get().c_str() % this));
-        Unit_delete_queue.push_back(this);
+        unit_delete_queue.push_back(this);
         if (flightgroup) {
             if (flightgroup->leader.GetUnit() == this) {
                 flightgroup->leader.SetUnit(nullptr);
@@ -1370,9 +1370,9 @@ void Unit::UnRef() {
         deletedUn.Put( (uintmax_t) this, this );
 #endif
         //delete
-        Unit_delete_queue.push_back(this);
+        unit_delete_queue.push_back(this);
 #ifdef DESTRUCTDEBUG
-        VS_LOG(trace, (boost::format("%1$s %2$x - %3$d") % name.get().c_str() % this % Unit_delete_queue.size()));
+        VS_LOG(trace, (boost::format("%1$s %2$x - %3$d") % name.get().c_str() % this % unit_delete_queue.size()));
 #endif
     }
 }
@@ -1383,22 +1383,22 @@ float Unit::ExplosionRadius() {
 }
 
 void Unit::ProcessDeleteQueue() {
-    while (!Unit_delete_queue.empty()) {
+    while (!unit_delete_queue.empty()) {
 #ifdef DESTRUCTDEBUG
-        VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$x - %2$d") % Unit_delete_queue.back() % Unit_delete_queue.size()));
-        VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$s") % Unit_delete_queue.back()->name.get().c_str()));
+        VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$x - %2$d") % unit_delete_queue.back() % unit_delete_queue.size()));
+        VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$s") % unit_delete_queue.back()->name.get().c_str()));
 #endif
 #ifdef DESTRUCTDEBUG
-        if ( Unit_delete_queue.back()->isSubUnit() ) {
+        if ( unit_delete_queue.back()->isSubUnit() ) {
             VS_LOG(debug, "Subunit Deleting (related to double dipping)");
         }
 #endif
-        Unit *mydeleter = Unit_delete_queue.back();
-        Unit_delete_queue.pop_back();
+        Unit *mydeleter = unit_delete_queue.back();
+        unit_delete_queue.pop_back();
         delete mydeleter;                        ///might modify unitdeletequeue
 
 #ifdef DESTRUCTDEBUG
-        VS_LOG_AND_FLUSH(trace, (boost::format("Completed %1$d") % Unit_delete_queue.size()));
+        VS_LOG_AND_FLUSH(trace, (boost::format("Completed %1$d") % unit_delete_queue.size()));
 #endif
     }
 }
