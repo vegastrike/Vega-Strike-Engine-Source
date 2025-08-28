@@ -289,14 +289,14 @@ def build_parse_keys(section_name: str) -> list[ParseKey]:
     parse_key_9.pattern = re.compile(
         r'^(?P<initial_space> *)(?P<name>\w+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>\w+)"\s*,\s*"[^"]*"\s*\)\s*\)\s*;\r?\n',
         regex_flags_multiline)
-    parse_key_9.substitution = r'\g<initial_space>\g<name> = configuration().' + section_name + r'\g<name2>;\n'
+    parse_key_9.substitution = r'\g<initial_space>\g<name> = configuration().' + section_name + r'.\g<name2>;\n'
     parse_key_9.leave_as_is = ''
     parse_keys.append(parse_key_9)
     parse_key_9a = ParseKey()
     parse_key_9a.pattern = re.compile(
         r'^(?P<initial_space> *)(?P<name>\w+)\s+=\s*XMLSupport::parse_[a-z0-9_]+\s*\(\s*vs_config->getVariable\s*\(\s*"' + section_name + r'"\s*,\s*"(?P<name2>\w+)"\s*,\s*"[^"]*"\s*\)\s*\)',
         regex_flags_multiline)
-    parse_key_9a.substitution = r'\g<initial_space>\g<name> = configuration().' + section_name + r'\g<name2>'
+    parse_key_9a.substitution = r'\g<initial_space>\g<name> = configuration().' + section_name + r'.\g<name2>'
     parse_key_9a.leave_as_is = ''
     parse_keys.append(parse_key_9a)
     parse_key_10 = ParseKey()
