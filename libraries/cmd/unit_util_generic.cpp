@@ -56,7 +56,6 @@
 #ifndef NO_GFX
 #include "gfx/cockpit.h"
 #endif
-const Unit *makeTemplateUpgrade(string name, int faction); //for percentoperational
 const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0); //for percentoperational
 extern const char *DamagedCategory;  //for percentoperational
 using std::string;
@@ -543,24 +542,6 @@ int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero) {
     return c.GetQuantity();
 }
 
-// TODO: I'm almost certain this is no longer relevant.
-// Still need to investigate turrets and weapons.
-void RecomputeUnitUpgrades(Unit *un) {
-    if (un == NULL) {
-        return;
-    }
-    un->ReduceToTemplate();
-
-    for (Cargo& c : un->upgrade_space.GetItems()) {
-        assert(c.IsComponent());
-        
-        if(c.IsIntegral()) {
-            continue;
-        }
-        
-        un->Upgrade(c.GetName(), 0, 0, true, false);
-    }
-}
 
 bool repair(Unit *my_unit) {
     if (!my_unit) {
@@ -922,20 +903,6 @@ float PercentOperational(const Cargo item, Unit *un, std::string name, std::stri
                     }
                 }
             }
-        }
-    } else if (name.find("add_") != 0 && name.find("mult_") != 0) {
-        double percent = 0;
-        if (un->canUpgrade(upgrade, -1, -1, 0, true, percent, makeTemplateUpgrade(un->name, un->faction), false)) {
-            if (percent > 0 && percent < 1) {
-                return percent;
-            } else if (percent
-                    >= 1) { //FIXME workaround for sensors -- see below comment, not sure why sensors report erroneous functional percentage
-                return 1.0;
-            } else {
-                return .5;
-            } //FIXME does not interact well with radar type
-        } else if (percent > 0) {
-            return percent;
         }
     }
     return 1.0;

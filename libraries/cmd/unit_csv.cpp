@@ -609,6 +609,10 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     // TODO: figure this out.
     std::string unit_key = (saved_game ? "player_ship" : unit_identifier);
 
+    if(saved_game) {
+        SetPlayerShip();
+    }
+
     fullname = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
 
     tmpstr = UnitCSVFactory::GetVariable(unit_key, "Hud_image", std::string());
@@ -663,6 +667,9 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
             mesh_string, faction,
             getFlightgroup());
 
+    // Should come before cargo or upgrades
+    Load(unit_key); // ComponentsManager
+
     std::string dock_string = UnitCSVFactory::GetVariable(unit_key, "Dock", std::string());
     AddDocks(this, xml, UnitCSVFactory::GetVariable(unit_key, "Dock", std::string()));
 
@@ -694,7 +701,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     pImage->CockpitCenter.i = UnitCSVFactory::GetVariable(unit_key, "CockpitX", 0.0f) * xml.unitscale;
     pImage->CockpitCenter.j = UnitCSVFactory::GetVariable(unit_key, "CockpitY", 0.0f) * xml.unitscale;
     pImage->CockpitCenter.k = UnitCSVFactory::GetVariable(unit_key, "CockpitZ", 0.0f) * xml.unitscale;
-    Load(unit_key); // ComponentsManager
+    
     Momentofinertia = GetMass();
 
 
