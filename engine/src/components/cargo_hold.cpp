@@ -100,7 +100,7 @@ Cargo CargoHold::RemoveCargo(ComponentsManager *manager, const std::string& name
 
 Cargo CargoHold::RemoveCargo(ComponentsManager *manager, unsigned int index, 
                            int quantity) {
-    if (!(index < _items.size())) {
+    if (index >= _items.size()) {
         VS_LOG(error, "(previously) FATAL problem...removing cargo that is past the end of array bounds.");
         return Cargo();
     }
