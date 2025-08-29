@@ -229,7 +229,6 @@ static const char *const NEWS_NAME_LABEL = "news";
 //Some upgrade declarations.
 //These should probably be in a header file somewhere.
 
-extern const Unit *makeFinalBlankUpgrade(string name, int faction);
 extern int GetModeFromName(const char *);  //1=add, 2=mult, 0=neither.
 extern Unit &GetUnitMasterPartList();
 static const string LOAD_FAILED = "LOAD_FAILED";
@@ -399,7 +398,6 @@ static float SellPrice(float operational, float price) {
     return usedValue(price);// - RepairPrice(operational, price);
 }
 
-extern const Unit *makeTemplateUpgrade(string name, int faction);
 
 //Ported from old code.  Not sure what it does.
 const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0);
@@ -2048,7 +2046,7 @@ bool BaseComputer::pickerChangedSelection(const EventCommandId &command, Control
 }
 
 bool UpgradeAllowed(const Cargo &item, Unit *playerUnit) {
-    if(playerUnit->AllowedUpgrade(item)) {
+    if(!playerUnit->AllowedUpgrade(item)) {
         color_prohibited_upgrade_flag = true;
         return false;
     }
@@ -3010,18 +3008,10 @@ bool BaseComputer::changeToUpgradeMode(const EventCommandId &command, Control *c
     return true;
 }
 
-//Actually do a repair operation.
+
 static void BasicRepair(Unit *parent) {
-    if (parent) {
-        int repairmultiplier = parent->RepairCost();
-        if (UnitUtil::getCredits(parent) < basicRepairPrice() * repairmultiplier) {
-            showAlert("You don't have enough credits to repair your ship.");
-        } else if ((repairmultiplier = parent->RepairUpgrade())) {
-            UnitUtil::addCredits(parent, -basicRepairPrice() * repairmultiplier);
-        } else {
-            showAlert("Your ship has no damage.  No charge.");
-        }
-    }
+    // This function does nothing. Kept for compatibility with python API.
+    // TODO: remove
 }
 
 //The "Operation" classes deal with upgrades.
@@ -3069,7 +3059,7 @@ class BaseComputer::BuyUpgradeOperation : public BaseComputer::UpgradeOperation 
 public:
     void start(void);             //Start the operation.
 
-    BuyUpgradeOperation(BaseComputer &p) : UpgradeOperation(p), m_theTemplate(NULL), m_addMultMode(0) {
+    BuyUpgradeOperation(BaseComputer &p) : UpgradeOperation(p) {
     };
 protected:
     virtual bool checkTransaction(void);              //Check, and verify user wants transaction.
@@ -3078,9 +3068,6 @@ protected:
 
     virtual ~BuyUpgradeOperation(void) {
     }
-
-    const Unit *m_theTemplate;
-    int m_addMultMode;
 };
 
 //Sell an upgrade from our ship.
@@ -3225,10 +3212,6 @@ void BaseComputer::BuyUpgradeOperation::start(void) {
         finish();
         return;
     }
-    m_theTemplate = makeTemplateUpgrade(playerUnit->name.get(), playerUnit->faction);
-
-    m_addMultMode =
-            GetModeFromName(m_selectedItem.GetName().c_str());     //Whether the price is linear or geometric.
 
     int index = baseUnit->cargo_hold.GetIndex(m_selectedItem);
     if( index == -1) {
@@ -3295,13 +3278,7 @@ void BaseComputer::BuyUpgradeOperation::selectMount(void) {
     for (int i = 0; i < playerUnit->getNumMounts(); i++) {
         //Mount is selectable if we can upgrade with the new part using that mount.
         double percent;             //Temp.  Not used.
-        const bool selectable = playerUnit->canUpgrade(m_newPart,
-                i,
-                m_selectedTurret,
-                m_addMultMode,
-                false,
-                percent,
-                m_theTemplate);
+        const bool selectable = playerUnit->canUpgrade(m_newPart, i, m_selectedTurret, 0, false, percent);
 
         //Figure color and label based on weapon that is in the slot.
         GFXColor mountColor = MOUNT_POINT_NO_SELECT();
@@ -3337,8 +3314,7 @@ bool BaseComputer::BuyUpgradeOperation::checkTransaction(void) {
         return false;         //We want the window to die to avoid accessing of deleted memory.
     }
     double percent;         //Temp.  Not used.
-    if (playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, false, percent,
-            m_theTemplate)) {
+    if (playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, 0, false, percent)) {
         //We can buy the upgrade.
         concludeTransaction();
         return false;
@@ -3361,21 +3337,14 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
     double percent;
     int numleft = basecargoassets(baseUnit, m_part.GetName());
     while (numleft > 0
-            && playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, true, percent,
-                    m_theTemplate)) {
+            && playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, 0, true, percent)) {
         const float price = m_part.GetPrice();         //* (1-usedValue(percent));
         if (ComponentsManager::credits >= price) {
             //Have enough money.  Buy it.
             ComponentsManager::credits -= price;
 
             //Upgrade the ship.
-            playerUnit->Upgrade(m_newPart,
-                    m_selectedMount,
-                    m_selectedTurret,
-                    m_addMultMode,
-                    true,
-                    percent,
-                    m_theTemplate);
+            playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, 0, true, percent);
             const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
             if (!allow_special_with_weapons) {
                 playerUnit->ToggleWeapon(false, /*backwards*/ true);
@@ -3418,9 +3387,6 @@ void BaseComputer::SellUpgradeOperation::start(void) {
     const string unitDir = GetUnitDir(playerUnit->name.get().c_str());
     const string limiterName = unitDir + ".blank";
     const int faction = playerUnit->faction;
-
-    //Get the "limiter" for this operation.  Stats can't decrease more than the blank ship.
-    m_downgradeLimiter = makeFinalBlankUpgrade(playerUnit->name, faction);
 
     //If its limiter is not available, just assume that there are no limits.
     try {
@@ -3637,11 +3603,6 @@ bool BaseComputer::sellUpgrade(const EventCommandId &command, Control *control) 
             Unit *baseUnit = m_base.GetUnit();
             if (baseUnit && playerUnit) {
                 playerUnit->SellUpgrade(baseUnit, item, quantity);
-
-                // Old system
-                UnitUtil::RecomputeUnitUpgrades(playerUnit);
-
-                // New system
                 UpgradeOperationResult result = playerUnit->UpgradeUnit(item->GetName(), false, true);
                 refresh();
             }

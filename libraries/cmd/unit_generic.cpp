@@ -1450,50 +1450,11 @@ void Unit::ProcessDeleteQueue() {
     }
 }
 
-Unit *makeBlankUpgrade(string templnam, int faction) {
-    Unit *bl = new Unit(templnam.c_str(), true, faction);
-    bl->cargo_hold.Clear();
-    bl->upgrade_space.Clear();
-    bl->hidden_hold.Clear();
-    
-    bl->SetMass(0);
-    return bl;
-}
+
 
 static const string LOAD_FAILED = "LOAD_FAILED";
 
-const Unit *makeFinalBlankUpgrade(string name, int faction) {
-    char *unitdir = GetUnitDir(name.c_str());
-    string limiternam = name;
-    if (unitdir != name) {
-        limiternam = string(unitdir) + string(".blank");
-    }
-    free(unitdir);
-    const Unit *lim = UnitConstCache::getCachedConst(StringIntKey(limiternam, faction));
-    if (!lim) {
-        lim = UnitConstCache::setCachedConst(StringIntKey(limiternam, faction), makeBlankUpgrade(limiternam, faction));
-    }
-    if (lim->name == LOAD_FAILED) {
-        lim = NULL;
-    }
-    return lim;
-}
 
-const Unit *makeTemplateUpgrade(string name, int faction) {
-    char *unitdir = GetUnitDir(name.c_str());
-    string limiternam = string(unitdir) + string(".template");
-    free(unitdir);
-    const Unit *lim = UnitConstCache::getCachedConst(StringIntKey(limiternam, faction));
-    if (!lim) {
-        lim =
-                UnitConstCache::setCachedConst(StringIntKey(limiternam,
-                        faction), new Unit(limiternam.c_str(), true, faction));
-    }
-    if (lim->name == LOAD_FAILED) {
-        lim = NULL;
-    }
-    return lim;
-}
 
 const Unit *loadUnitByCache(std::string name, int faction) {
     const Unit *temprate = UnitConstCache::getCachedConst(StringIntKey(name, faction));
@@ -2790,30 +2751,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
 }
 
 
-bool Unit::ReduceToTemplate() {
-    vector<Cargo> savedCargo;
-    savedCargo = std::vector<Cargo>(upgrade_space.GetItems());
-    upgrade_space.Clear();
 
-    vector<Mount> savedWeap;
-    savedWeap.swap(mounts);
-    const Unit *temprate = makeFinalBlankUpgrade(name, faction);
-    bool success = false;
-    double pct = 0;
-    if (temprate && temprate->name != string("LOAD_FAILED")) {
-        success = Upgrade(temprate, -1, -1, 0, true, pct, NULL, true);
-        if (pct > 0) {
-            success = true;
-        }
-    }
-
-    for(const Cargo &c : savedCargo) {
-        upgrade_space.AddCargo(this, c, false);
-    }
-    
-    savedWeap.swap(mounts);
-    return success;
-}
 
 Vector Unit::MountPercentOperational(int whichmount) {
     if (whichmount < 0 || (unsigned int) whichmount >= mounts.size()) {
@@ -2825,72 +2763,19 @@ Vector Unit::MountPercentOperational(int whichmount) {
                     == Mount::INACTIVE) ? 0.0 : (mounts[whichmount].status == Mount::UNCHOSEN ? 2.0 : 1.0)));
 }
 
+// TODO: remove function
+// We no longer do repair through basic repair.
+// Kept for compatibility with python API.
 int Unit::RepairCost() {
-    int cost = 1;
-    unsigned int i;
-
-    // TODO: something better
-    if(ship_functions.Damaged()) {
-        cost += 15;
-    }
-
-    // TODO: figure out better cost
-    if (afterburner.Damaged()) {
-        cost += 5;
-    }
-
-    if (afterburner_upgrade.Damaged()) {
-        cost += 3;
-    }
-
-    if (drive.Damaged()) {
-        cost += 7;
-    }
-
-    if (drive_upgrade.Damaged()) {
-        cost += 5;
-    }
-
-    if (ftl_drive.Damaged()) {
-        cost += 7;
-    }
-
-
-    for (const Cargo& c : cargo_hold.GetItems()) {
-        if (c.Damaged()) {
-            ++cost;
-        }
-    }
-    return cost;
+    return 0;
 }
 
-// This is called when performing a BASIC_REPAIR
-// This function probably doesn't do anything anymore
+// This was called when performing a BASIC_REPAIR
+// This function doesn't do anything anymore
+// Kept for compatibility with python API.
 int Unit::RepairUpgrade() {
-    vector<Cargo> savedCargo;
-    //savedCargo.swap(cargo);
-    vector<Mount> savedWeap;
-    savedWeap.swap(mounts);
-    int upfac = FactionUtil::GetUpgradeFaction();
-    const Unit *temprate = makeFinalBlankUpgrade(name, faction);
-    int success = 0;
-    double pct = 0;
-    if (temprate && temprate->name != string("LOAD_FAILED")) {
-        success = Upgrade(temprate, -1, -1, 0, false, pct, NULL, false) ? 1 : 0;
-        if (pct > 0) {
-            success = 1;
-        }
-    }
-    //savedCargo.swap(cargo);
-    savedWeap.swap(mounts);
-
-
-    bool ret = success && pct > 0;
-    const bool ComponentBasedUpgrades = configuration().physics.component_based_upgrades;
-    if (ComponentBasedUpgrades) {
-        // TODO: move this to components_manager
-    } 
-    return success;
+    // TODO: remove
+    return 1;
 }
 
 
@@ -2953,9 +2838,11 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit) {
                 if (price <= ComponentsManager::credits) {
                     ComponentsManager::credits -= price;
                     
-                    if (notadditive) {
-                        this->Upgrade(un, 0, 0, 0, true, percentage, makeTemplateUpgrade(this->name, this->faction));
-                    }
+                    // TODO: look closer at this
+                    //if (notadditive) {
+                    //    this->Upgrade(un, 0, 0, 0, true, percentage, makeTemplateUpgrade(this->name, this->faction));
+                    //}
+
                     // This code changes the category of the item from "upgrades/Damaged/" to the original category.
                     // if (item->GetCategory().find(DamagedCategory) == 0) {
                     //     int index = this->upgrade_space.GetIndex(itemCopy);
