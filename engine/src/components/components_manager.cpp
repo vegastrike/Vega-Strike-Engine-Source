@@ -34,6 +34,7 @@
 #include "configuration/configuration.h"
 #include "cmd/unit_csv_factory.h"
 #include "vs_logging.h"
+#include "resource/manifest.h"
 #include <boost/format.hpp>
 #include <iostream>
 
@@ -332,7 +333,11 @@ bool ComponentsManager::_Buy(CargoHold *hold, ComponentsManager *seller, Cargo *
     quantity = std::min(item->GetQuantity(), quantity);
 
     // Check the maximum you can afford
-    int max_affordable_quantity = static_cast<int>(std::floor(credits / item->GetPrice()));
+    const double price = seller->PriceCargo(item->GetName());
+    VS_LOG(trace, (boost::format("Buy price: %1% seller price: %2% percent: %3%%%") 
+        % item->GetPrice() % price % (price/item->GetPrice())).str());
+
+    int max_affordable_quantity = static_cast<int>(std::floor(credits / price));
     quantity = std::min(max_affordable_quantity, quantity);
 
     // Check the maximum you can fit in your hold
@@ -346,9 +351,24 @@ bool ComponentsManager::_Buy(CargoHold *hold, ComponentsManager *seller, Cargo *
 
     // Actual transaction
     Cargo sold_cargo = seller->cargo_hold.RemoveCargo(seller, index, quantity);
-    ComponentsManager::credits -= item->GetPrice() * quantity;
+    ComponentsManager::credits -= price * quantity;
     hold->AddCargo(this, sold_cargo);
     return true;
+}
+
+/** This function is called by SellCargo to add variability to the sale price */
+double ComponentsManager::PriceCargo(const std::string &cargo_name) {
+    if(cargo_hold.HasCargo(cargo_name)) {
+        Cargo cargo = cargo_hold.GetCargoByName(cargo_name);
+        return cargo.GetPrice();
+    }
+
+    if(Manifest::MPL().HasCargo(cargo_name)) {
+        Cargo cargo = Manifest::MPL().GetCargoByName(cargo_name);
+        return cargo.GetPrice();
+    }
+
+    return configuration().cargo.space_junk_price;
 }
 
 bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *item, int quantity) {
@@ -372,10 +392,17 @@ bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *
 
     Cargo cargo = hold->RemoveCargo(this, index, quantity);
 
+    quantity = std::min(quantity, cargo.GetQuantity());
+
+    const double price = buyer->PriceCargo(item->GetName());
+    VS_LOG(trace, (boost::format("Sell price: %1% buyer price: %2% percent: %3%%%") 
+        % item->GetPrice() % price % (price/item->GetPrice())).str());
+
+
     // Only get paid if not selling "mission" cargo.
     // i.e. other peoples' money
     if(!cargo.IsMissionFlag()) {
-        credits += cargo.GetTotalValue();
+        credits += price * quantity;
     }
 
     buyer_hold->AddCargo(buyer, cargo);

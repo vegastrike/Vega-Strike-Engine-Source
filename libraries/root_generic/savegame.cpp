@@ -463,10 +463,9 @@ void WriteSaveGame(Cockpit *cp, bool auto_save) {
         cp->PackUnitInfo(packedInfo);
 
         cp->savegame->WriteSaveGame(cp->activeStarSystem->getFileName().c_str(),
-                                    un->LocalPosition(), ComponentsManager::credits, packedInfo, auto_save ? -1 : player_num);
+                                    un->LocalPosition(), packedInfo, auto_save ? -1 : player_num);
         un->WriteUnit(cp->GetUnitModifications().c_str());
         if (GetWritePlayerSaveGame(player_num).length() && !auto_save) {
-            cp->savegame->SetSavedCredits(ComponentsManager::credits);
             cp->savegame->SetStarSystem(cp->activeStarSystem->getFileName());
             cp->savegame->SetPlayerLocation(un->LocalPosition());
             CopySavedShips(cp->GetUnitModifications(), player_num, packedInfo, false);
@@ -913,7 +912,6 @@ static char *tmprealloc(char *var, int &oldlength, int newlength) {
 string SaveGame::WritePlayerData(const QVector &FP,
                                  std::vector<std::string> unitname,
                                  const char *systemname,
-                                 float credits,
                                  std::string fact) {
     string playerdata("");
     int MB = MAXBUFFER;
@@ -925,6 +923,10 @@ string SaveGame::WritePlayerData(const QVector &FP,
     string pipedunitname = createPipedString(unitname);
     tmp = tmprealloc(tmp, MB, pipedunitname.length() + strlen(systemname) + 256 /*4 floats*/ );
     //If we specify no faction, it won't be saved in there
+
+    // Convert to float, otherwise sprintf will save the wrong number.
+    const float credits = ComponentsManager::credits;
+
     if (fact != "") {
         sprintf(tmp, "%s^%f^%s %f %f %f %s", systemname, credits,
                 pipedunitname.c_str(), FighterPos.i, FighterPos.j, FighterPos.k, fact.c_str());
@@ -940,7 +942,6 @@ string SaveGame::WritePlayerData(const QVector &FP,
     }
     playerdata = string(tmp);
     this->playerfaction = fact;
-    SetSavedCredits(credits);
     free(tmp);
     tmp = NULL;
 
@@ -996,14 +997,13 @@ using namespace VSFileSystem;
 
 string SaveGame::WriteSaveGame(const char *systemname,
                                const QVector &FP,
-                               float credits,
                                std::vector<std::string> unitname,
                                int player_num,
                                std::string fact,
                                bool write) {
     savestring = string("");
     VS_LOG(info, (boost::format("Writing Save Game %1%") % outputsavegame));
-    savestring += WritePlayerData(FP, unitname, systemname, credits, fact);
+    savestring += WritePlayerData(FP, unitname, systemname, fact);
     savestring += WriteDynamicUniverse();
     if (outputsavegame.length() != 0) {
         if (write) {
@@ -1029,15 +1029,6 @@ string SaveGame::WriteSaveGame(const char *systemname,
     return savestring;
 }
 
-static float savedcredits = 0;
-
-float SaveGame::GetSavedCredits() {
-    return savedcredits;
-}
-
-void SaveGame::SetSavedCredits(float c) {
-    savedcredits = c;
-}
 
 void SaveGame::SetOutputFileName(const string &filename) {
     if (!filename.empty()) {
@@ -1047,7 +1038,7 @@ void SaveGame::SetOutputFileName(const string &filename) {
     } //empty name?
 }
 
-void SaveGame::ParseSaveGame(const string &filename_p,
+float SaveGame::ParseSaveGame(const string &filename_p,
                              string &FSS,
                              const string &originalstarsystem,
                              QVector &PP,
@@ -1061,6 +1052,7 @@ void SaveGame::ParseSaveGame(const string &filename_p,
                              bool skip_news,
                              bool select_data,
                              const std::set<std::string> &select_data_filter) {
+    float credits = 0.0f;
     const string &str = save_contents;     //alias
     string filename;
     //Now leave filename empty, use the default name regardless...
@@ -1112,7 +1104,6 @@ void SaveGame::ParseSaveGame(const string &filename_p,
             }
             factionname[headlen + 1] = '\0';
             QVector tmppos;
-            float credits = 0.0f;
             int res = sscanf(buf, "%s %lf %lf %lf %s", tmp2, &tmppos.i, &tmppos.j, &tmppos.k, factionname);
             if (res == 4 || res == 5) {
                 //Extract credits & starship
@@ -1131,8 +1122,6 @@ void SaveGame::ParseSaveGame(const string &filename_p,
                         break;
                     }
                 }
-
-                ComponentsManager::credits = credits;
 
                 //In networking save we include the faction at the end of the first line
                 if (res == 5) {
@@ -1177,7 +1166,8 @@ void SaveGame::ParseSaveGame(const string &filename_p,
         originalsystem = ForceStarSystem;
         FSS = ForceStarSystem;
     }
-    SetSavedCredits(ComponentsManager::credits);
+
+    return credits;
 }
 
 const string &GetCurrentSaveGame() {

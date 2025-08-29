@@ -908,22 +908,21 @@ namespace UniverseUtil {
         vector<std::string> Ships;
         std::string sillytemp = UniverseUtil::setCurrentSaveGame(filename);
         savegame.SetStarSystem("");
-        savegame.ParseSaveGame(filename,
-                               system,
-                               "",
-                               pos,
-                               updatepos,
-                               Ships,
-                               _Universe->CurrentCockpit(),
-                               "",
-                               true,
-                               false,
-                               configuration().general.quick_savegame_summaries,
-                               true,
-                               true,
-                               campaign_score_vars);
+        creds = savegame.ParseSaveGame(filename,
+                                    system,
+                                    "",
+                                    pos,
+                                    updatepos,
+                                    Ships,
+                                    _Universe->CurrentCockpit(),
+                                    "",
+                                    true,
+                                    false,
+                                    configuration().general.quick_savegame_summaries,
+                                    true,
+                                    true,
+                                    campaign_score_vars);
 
-        creds = ComponentsManager::credits;
         UniverseUtil::setCurrentSaveGame(sillytemp);
         std::ostringstream ss{};
         ss << "Savegame: " << filename << lf;

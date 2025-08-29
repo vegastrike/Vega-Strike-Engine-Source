@@ -366,7 +366,7 @@ void Carrier::EjectCargo(unsigned int index) {
 
 
 float Carrier::PriceCargo(const std::string &s) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+    Unit *unit = static_cast<Unit *>(this);
 
     int index = unit->cargo_hold.GetIndex(s);
     if(index != -1) {
@@ -377,7 +377,7 @@ float Carrier::PriceCargo(const std::string &s) {
         return Manifest::MPL().GetCargoByName(s).GetPrice();
     }
 
-    return configuration().cargo.space_junk_price_flt;
+    return configuration().cargo.space_junk_price;
 }
 unsigned int Carrier::numCargo() const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);

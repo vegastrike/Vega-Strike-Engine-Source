@@ -688,7 +688,7 @@ bool Cockpit::Update() {
                 QVector tmpoldpos = savegame->GetPlayerLocation();
                 savegame->SetPlayerLocation(QVector(FLT_MAX, FLT_MAX, FLT_MAX));
                 vector<string> packedInfo;
-                savegame->ParseSaveGame(savegamefile,
+                ComponentsManager::credits = savegame->ParseSaveGame(savegamefile,
                         newsystem,
                         newsystem,
                         pos,
@@ -756,7 +756,6 @@ bool Cockpit::Update() {
 
                 this->SetParent(un, GetUnitFileName().c_str(), unitmodname.c_str(), savegame->GetPlayerLocation());
                 SwitchUnits(NULL, un);
-                ComponentsManager::credits = savegame->GetSavedCredits();
                 DoCockpitKeys();
                 _Universe->popActiveStarSystem();
                 _Universe->pushActiveStarSystem(ss);

@@ -70,6 +70,7 @@ using VSFileSystem::SaveFile;
 #include "src/python/infra/get_string.h"
 #include "root_generic/configxml.h"
 #include "resource/manifest.h"
+#include "cmd/reload_utils.h"
 
 #include <boost/python.hpp>
 #include "configuration/configuration.h"
@@ -328,6 +329,7 @@ const BaseComputer::WctlTableEntry WctlBase<BaseComputer>::WctlCommandTable[] = 
         BaseComputer::WctlTableEntry("BuyUpgrade", "", &BaseComputer::buyUpgrade),
         BaseComputer::WctlTableEntry("SellUpgrade", "", &BaseComputer::sellUpgrade),
         BaseComputer::WctlTableEntry("FixUpgrade", "", &BaseComputer::fixUpgrade),
+        BaseComputer::WctlTableEntry("ReloadUpgrade", "", &BaseComputer::reloadUpgrade),
 
         BaseComputer::WctlTableEntry("BuyShip", "", &BaseComputer::buyShip),
         BaseComputer::WctlTableEntry("SellShip", "", &BaseComputer::sellShip),
@@ -399,7 +401,9 @@ static float SellPrice(float operational, float price) {
 }
 
 
-//Ported from old code.  Not sure what it does.
+// This generate an upgrade unit from the name and faction.
+// An upgrade unit is the unit representation of a specific upgrade.
+// e.g. Micro_Driver_ammo__upgrades in units.json
 const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0);
 
 
@@ -1722,6 +1726,15 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
                         unhidden = false;
                     }
                 }
+            } 
+        } else if(item.IsWeapon()) {
+            if(canReload(m_player.GetUnit(), item.GetName())) {
+                if (commitFixButton) {
+                    commitFixButton->setHidden(false);
+                    commitFixButton->setLabel("Reload");
+                    commitFixButton->setCommand("ReloadUpgrade");
+                    unhidden = false;
+                }
             }
         }
         if (unhidden && commitFixButton) {
@@ -1845,7 +1858,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     tempString = (boost::format("#b#Transport cost: %$1.2f#-b#n1.5#") % item.GetPrice()).str();
                 } else {
                     tempString = (boost::format("Price: #b#%1$.2f#-b#n#")
-                            % item.GetPrice()).str();
+                            % baseUnit->PriceCargo(item.GetName())).str();
                     descString += tempString;
                     tempString = (boost::format("Cargo volume: %1$.2f cubic meters;  "
                                                 "Mass: %2$.2f metric tons#n1.5#") % item.GetVolume() % item.GetMass()).str();
@@ -1866,7 +1879,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                             % (basicRepairPrice() * multiplier))
                             .str();
                 } else {
-                    tempString = (boost::format("Price: #b#%1$.2f#-b#n1.5#") % item.GetPrice())
+                    tempString = (boost::format("Price: #b#%1$.2f#-b#n1.5#") % baseUnit->PriceCargo(item.GetName()))
                             .str();
                 }
                 descString += tempString;
@@ -1894,7 +1907,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     //the current base.  "Buying" this ship makes it my current ship.
                     tempString = (boost::format("#b#Transport cost: %1$.2f#-b#n1.5#") % item.GetPrice()).str();
                 } else {
-                    PRETTY_ADDN("", item.GetPrice(), 2);
+                    PRETTY_ADDN("", baseUnit->PriceCargo(item.GetName()), 2);
                     tempString = (boost::format("Price: #b#%1%#-b#n#") % text).str();
                     const bool printvolume = configuration().graphics.bases.print_cargo_volume;
                     if (printvolume) {
@@ -1919,7 +1932,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     tempString = "Destroy evidence of mission cargo. Credit received: 0.00.";
                 } else {
                     tempString = (boost::format("Value: #b#%1$.2f#-b, purchased for %2$.2f#n#")
-                            % item.GetPrice()
+                            % baseUnit->PriceCargo(item.GetName())
                             % item.GetPrice())
                             .str();
                 }
@@ -1929,7 +1942,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 descString += tempString;
 
                 if (!item.IsMissionFlag()) {
-                    tailString = buildCargoDescription(item, *this, item.GetPrice());
+                    tailString = buildCargoDescription(item, *this, baseUnit->PriceCargo(item.GetName()));
                 }
                 break;
             case SELL_UPGRADE:
@@ -1941,7 +1954,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 if (percent_working < 1) {
                     //IF DAMAGED
                     tempString = (boost::format("Damaged and Used value: #b#%1$.2f#-b, purchased for %2$.2f#n1.5#")
-                            % SellPrice(percent_working, item.GetPrice())
+                            % SellPrice(percent_working, baseUnit->PriceCargo(item.GetName()))
                             % item.GetPrice())
                             .str();
                     descString += tempString;
@@ -1954,7 +1967,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     descString += tempString;
                 } else {
                     tempString = (boost::format("Used value: #b#%1$.2f#-b, purchased for %2$.2f#n1.5#")
-                            % usedValue(item.GetPrice()) % item.GetPrice()).str();
+                            % usedValue(baseUnit->PriceCargo(item.GetName())) % item.GetPrice()).str();
                     descString += tempString;
                 }
                 if (damaged_mode) {
@@ -1963,6 +1976,13 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                             "sell this item until you fix those damaged items in this column in order to allow the "
                             "mechanics to remove this item.#-c#-b#n1.5#";
                 }
+
+                if(item.IsWeapon()) {
+                    if(canReload(m_player.GetUnit(), item.GetName())) {
+                        descString += getReloadDescription(m_player.GetUnit(), item.GetPrice(), item.GetName());
+                    }
+                }
+                
                 //********************************************************************************************
                 if (item.GetDescription() == "" || item.GetDescription()[0] != '#') {
                     std::map<std::string, std::string> ship_map = m_player.GetUnit()->UnitToMap();
@@ -3544,7 +3564,7 @@ void BaseComputer::SellUpgradeOperation::concludeTransaction(void) {
     if (playerUnit->Downgrade(m_newPart, m_selectedMount, m_selectedTurret, percent, m_downgradeLimiter)) {
         //Remove the item from the ship, since we sold it, and add it to the base.
         m_part.SetQuantity(1);
-        m_part.SetPrice(m_part.GetPrice());
+        m_part.SetPrice(baseUnit->PriceCargo(m_part.GetName()));
         baseUnit->cargo_hold.AddCargo(baseUnit, m_part);
     }
     updateUI();
@@ -3630,6 +3650,60 @@ bool BaseComputer::fixUpgrade(const EventCommandId &command, Control *control) {
         }
         refresh();
     }
+    return true;
+}
+
+// Reload a gun.
+bool BaseComputer::reloadUpgrade(const EventCommandId &command, Control *control) {
+    Cargo *item = selectedItem();
+    Unit *playerUnit = m_player.GetUnit();
+    Unit *baseUnit = m_base.GetUnit();
+
+    if (!baseUnit || !playerUnit || !item) {
+        return false;
+    }
+
+    
+    // Mount name is the name of the weapon as a unit in units.json
+    const Unit *weapon = getUnitFromUpgradeName(item->GetName(), FactionUtil::GetUpgradeFaction());
+    
+    // Something went wrong
+    if(!weapon) {
+        return false;
+    }
+
+    Mount weapon_mount = weapon->mounts[0];
+    // Weapon type has no ammo
+    if(weapon_mount.ammo == 0) {
+        return false;
+    }
+
+    // Weapon name is the name of the weapon in weapons.json.
+    const std::string weapon_name = weapon->mounts[0].type->name;
+
+    for(Mount& mount : playerUnit->mounts) {
+        if(weapon_name != mount.type->name) {
+            continue;
+        }
+
+        const int max_ammo = weapon_mount.ammo;
+        int ammo_to_reload = max_ammo - mount.ammo;
+        if(ammo_to_reload == 0) {
+            continue;
+        }
+
+        // Full reload price is 5% of gun. 
+        // TODO: make it configurable
+        double reload_price = ammo_to_reload/max_ammo * 0.05 * item->GetPrice();
+        if(reload_price < playerUnit->credits) {
+            playerUnit->credits -= reload_price;
+            mount.ammo = max_ammo;
+            refresh();
+            return true;
+        }
+    }
+
+    refresh();
     return true;
 }
 
