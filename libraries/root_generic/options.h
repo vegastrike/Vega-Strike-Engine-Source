@@ -160,10 +160,6 @@ public:
     std::string account_server_url;
     bool chat_only_in_network{};
 
-    /* Keyboard Options */
-
-    bool enable_unicode{};
-
     // TODO: Refactor / move these
     std::string getCallsign(int);
     std::string getPlayer(int);

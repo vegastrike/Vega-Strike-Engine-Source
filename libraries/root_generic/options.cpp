@@ -151,11 +151,6 @@ void vs_options::init() {
             "account_server_url",
             "http://vegastrike.sourceforge.net/cgi-bin/accountserver.py?");
     chat_only_in_network = XMLSupport::parse_bool(vs_config->getVariable("network", "chat_only_in_network", "false"));
-
-    /* Keyboard Options */
-
-    enable_unicode = XMLSupport::parse_bool(vs_config->getVariable("keyboard", "enable_unicode", "true"));
-
 }
 
 string vs_options::getCallsign(int squadnum) {
