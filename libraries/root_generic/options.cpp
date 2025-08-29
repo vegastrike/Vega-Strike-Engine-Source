@@ -160,11 +160,6 @@ void vs_options::init() {
 
     enable_unicode = XMLSupport::parse_bool(vs_config->getVariable("keyboard", "enable_unicode", "true"));
 
-    /* Player Options */
-
-    password = vs_config->getVariable("player", "password", "");
-    callsign = vs_config->getVariable("player", "callsign", "");
-
 }
 
 string vs_options::getCallsign(int squadnum) {

@@ -98,11 +98,6 @@ public:
     std::string player_hull_hit;
     std::string player_shield_hit;
 
-    /* Player Options */
-
-    std::string password;
-    std::string callsign;
-
     /* AI Options */
 
     bool AllowCivilWar{};
