@@ -1,5 +1,5 @@
 /*
- * carrier.h
+ * reload_utils.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -25,26 +25,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef VEGA_STRIKE_ENGINE_CMD_CARRIER_H
-#define VEGA_STRIKE_ENGINE_CMD_CARRIER_H
-
-#include "resource/cargo.h"
-#include "gfx_generic/vec.h"
+#ifndef VEGA_STRIKE_ENGINE_CMD_RELOAD_UTILS_H
+#define VEGA_STRIKE_ENGINE_CMD_RELOAD_UTILS_H
 
 #include <string>
-#include <vector>
 
 class Unit;
 
-// A unit (ship) that carries cargo
-class Carrier {
-public:
-    Carrier();
-    virtual ~Carrier() = default;
+bool canReload(Unit *unit, const std::string& weapon_unit_name);
+std::string getReloadDescription(Unit *unit, const double price, const std::string& weapon_unit_name);
 
-    unsigned int numCargo() const;
-    std::string GetManifest(unsigned int i, Unit *scanningUnit, const Vector &original_velocity) const;
-    void EjectCargo(unsigned int index);
-};
-
-#endif //VEGA_STRIKE_ENGINE_CMD_CARRIER_H
+#endif // VEGA_STRIKE_ENGINE_CMD_RELOAD_UTILS_H

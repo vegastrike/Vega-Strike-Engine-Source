@@ -149,6 +149,8 @@ protected:
     bool sellUpgrade(const EventCommandId &command, Control *control);
 //Fix an upgrade on your ship.
     bool fixUpgrade(const EventCommandId &command, Control *control);
+//Reload a gun on your ship.
+    bool reloadUpgrade(const EventCommandId &command, Control *control);
 //Buy ship from the base.
     bool buyShip(const EventCommandId &command, Control *control);
 //Sell ship from your stock
