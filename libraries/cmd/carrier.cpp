@@ -387,7 +387,7 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
     }
     if (unit->CourseDeviation(oldspd, unit->GetVelocity()) > scramblingmanifest) {
         for (char & i : mangled) {
-            i += static_cast<char>(randomInt(1, -1));
+            i += static_cast<char>(randomInt(2) - 1);
         }
     }
     return mangled;
