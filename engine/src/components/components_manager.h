@@ -87,6 +87,7 @@ public:
     double GetMass() const;
     void SetMass(double mass);
 
+    double PriceCargo(const std::string &cargo_name);
     void SetPlayerShip();
     bool PlayerShip();
 
