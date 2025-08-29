@@ -254,7 +254,7 @@ void init_opengl_extensions() {
 
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
     if (vsExtensionSupported("GL_EXT_compiled_vertex_array")
-            && game_options()->LockVertexArrays) {
+            && configuration().graphics.lock_vertex_arrays) {
 #if defined(__APPLE__) && defined (__MACH__)
 #ifndef __APPLE_PANTHER_GCC33_CLI__
 #if defined (glLockArraysEXT) && defined (glUnlockArraysEXT)
@@ -630,7 +630,7 @@ void GFXInit(int argc, char **argv) {
         VS_LOG(trace, "Using NPOT video textures");
     }*/
     // Removing gl_options soon
-    gl_options.smooth_shade = game_options()->SmoothShade;
+    gl_options.smooth_shade = configuration().graphics.smooth_shade;
     gl_options.mipmap = configuration().graphics.mipmap_detail;
     gl_options.compression = configuration().graphics.texture_compression;
     gl_options.Multitexture = configuration().graphics.reflection;
