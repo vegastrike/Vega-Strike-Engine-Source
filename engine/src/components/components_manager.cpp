@@ -381,6 +381,9 @@ bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *
     }
 
     Cargo cargo = hold->RemoveCargo(this, index, quantity);
+
+    quantity = std::min(quantity, cargo.GetQuantity());
+
     const double price = buyer->PriceCargo(item->GetName());
     VS_LOG(trace, (boost::format("Sell price: %1% buyer price: %2% percent: %3%%%") 
         % item->GetPrice() % price % (price/item->GetPrice())).str());
