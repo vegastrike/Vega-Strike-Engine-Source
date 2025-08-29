@@ -85,10 +85,6 @@ void vs_options::init() {
     player_hull_hit = vs_config->getVariable("unitaudio", "player_hull_hit", "bigarmor.wav");
     player_shield_hit = vs_config->getVariable("unitaudio", "player_shield_hit", "shieldhit.wav");
 
-    /* Splash Options */
-
-    auto_hide = configuration().splash.auto_hide;
-
     /* Terrain Options */
 
     xscale = configuration().terrain.xscale_dbl;

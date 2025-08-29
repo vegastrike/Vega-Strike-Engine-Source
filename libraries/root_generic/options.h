@@ -98,10 +98,6 @@ public:
     std::string player_hull_hit;
     std::string player_shield_hit;
 
-    /* Splash Options */
-
-    bool auto_hide{};
-
     /* Terrain Options */
 
     double xscale{};
