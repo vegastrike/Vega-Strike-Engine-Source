@@ -98,14 +98,6 @@ public:
     std::string player_hull_hit;
     std::string player_shield_hit;
 
-    /* Terrain Options */
-
-    double xscale{};
-    double yscale{};
-    double zscale{};
-    double mass{};
-    double radius{};
-
     /* Player Options */
 
     std::string password;

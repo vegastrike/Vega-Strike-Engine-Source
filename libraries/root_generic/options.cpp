@@ -85,14 +85,6 @@ void vs_options::init() {
     player_hull_hit = vs_config->getVariable("unitaudio", "player_hull_hit", "bigarmor.wav");
     player_shield_hit = vs_config->getVariable("unitaudio", "player_shield_hit", "shieldhit.wav");
 
-    /* Terrain Options */
-
-    xscale = configuration().terrain.xscale_dbl;
-    yscale = configuration().terrain.yscale_dbl;
-    zscale = configuration().terrain.zscale_dbl;
-    mass = configuration().terrain.mass_dbl;
-    radius = configuration().terrain.radius_dbl;
-
     /* Player Options */
 
     /* AI Options */
