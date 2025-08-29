@@ -2116,12 +2116,11 @@ void SwitchUnits2(Unit *nw) {
 }
 
 GameCockpit::~GameCockpit() {
-    Delete();
-    int i;
-    for (i = 0; i < 4; i++) {
+    GameCockpit::Delete();
+    for (int i = 0; i < 4; i++) {
         if (Pit[i]) {
             delete Pit[i];
-            Pit[i] = NULL;
+            Pit[i] = nullptr;
         }
     }
     delete savegame;

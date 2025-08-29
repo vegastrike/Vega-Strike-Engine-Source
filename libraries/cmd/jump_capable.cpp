@@ -103,6 +103,8 @@ std::string GenerateAutoError(Unit *me, Unit *targ) {
 
 ///////////////////////////////////////////////
 
+JumpCapable::~JumpCapable() = default;
+
 JumpCapable::JumpCapable() : activeStarSystem(nullptr) {
 };
 

@@ -171,4 +171,6 @@ bool DriveUpgrade::Upgrade(const std::string upgrade_key) {
     return true;
 }
 
+DriveUpgrade::~DriveUpgrade() = default;
+
 

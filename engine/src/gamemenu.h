@@ -34,11 +34,13 @@
 class GameMenu : public WctlBase<GameMenu> {
     friend class WctlBase<GameMenu>;
 public:
-    virtual void init(void);
-    virtual void run(void);
+    void init(void) override;
 
-    GameMenu(bool firsttime);
-    virtual ~GameMenu(void);
+    void run(void) override;
+
+    explicit GameMenu(bool firsttime);
+
+    ~GameMenu(void) override;
 
 protected:
     bool m_firstTime;
@@ -77,14 +79,14 @@ public:
             player(pnum), m_parent(w), netAction(action) {
     }
 
-    virtual ~NetActionConfirm(void) {
+    ~NetActionConfirm(void) override {
     }
 
 //Set up the window and get everything ready.
-    virtual void init(void);
+    void init(void) override;
 
 //Process a command event from the window.
-    virtual bool processWindowCommand(const EventCommandId &command, Control *control);
+    bool processWindowCommand(const EventCommandId &command, Control *control) override;
 
     virtual bool finalizeJoinGame(int launchShip = 0);
     virtual bool confirmedJoinGame();

@@ -182,14 +182,16 @@ void Nebula::SetFogState() const {
     GFXFogIndex(index);
 }
 
+Nebula::~Nebula() = default;
+
 void Nebula::UpdatePhysics2(const Transformation &trans,
-        const Transformation &old_physical_state,
-        const Vector &accel,
-        float difficulty,
-        const Matrix &transmat,
-        const Vector &CumulativeVelocity,
-        bool ResolveLast,
-        UnitCollection *uc) {
+                            const Transformation &old_physical_state,
+                            const Vector &accel,
+                            float difficulty,
+                            const Matrix &transmat,
+                            const Vector &CumulativeVelocity,
+                            bool ResolveLast,
+                            UnitCollection *uc) {
     const float nebdelta = configuration().graphics.fog_time_flt;
     lastfadein = fadeinvalue;
     fadeinvalue -= nebdelta * simulation_atom_var;

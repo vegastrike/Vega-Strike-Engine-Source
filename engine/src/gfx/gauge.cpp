@@ -54,6 +54,8 @@ void Gauge::GetSize(float &x, float &y) {
     }
 }
 
+Gauge::~Gauge() = default;
+
 void Gauge::Draw(float percentage) {
     if (percentage < 0) {
         percentage = 0;

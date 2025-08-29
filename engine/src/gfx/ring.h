@@ -69,23 +69,25 @@ public:
             float theta_min = 0.0,
             float theta_max = 2 * M_PI,
             FILTER mipmap = TRILINEAR) {
-        InitRing(iradius,
-                oradius,
-                slices,
-                texture,
-                r,
-                s,
-                texwrapx,
-                texwrapy,
-                a,
-                b,
-                envMap,
-                theta_min,
-                theta_max,
-                mipmap);
+        RingMesh::InitRing(iradius,
+                           oradius,
+                           slices,
+                           texture,
+                           r,
+                           s,
+                           texwrapx,
+                           texwrapy,
+                           a,
+                           b,
+                           envMap,
+                           theta_min,
+                           theta_max,
+                           mipmap);
     }
 
-    virtual float clipRadialSize() const;
+    float clipRadialSize() const override;
+
+    ~RingMesh() override;
 };
 
 #endif //VEGA_STRIKE_ENGINE_GFX_RING_H

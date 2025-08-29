@@ -69,6 +69,8 @@ float Damageable::DealDamageToHull(const Vector &pnt, float damage) {
     return damage / denominator;
 }
 
+Damageable::~Damageable() = default;
+
 float Damageable::DealDamageToShield(const Vector &pnt, float &damage) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     Damage dmg(damage);

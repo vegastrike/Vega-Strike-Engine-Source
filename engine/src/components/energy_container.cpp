@@ -235,3 +235,5 @@ bool EnergyContainer::Damaged() const {
 bool EnergyContainer::Installed() const {
     return level > 0.0;
 }
+
+EnergyContainer::~EnergyContainer() = default;

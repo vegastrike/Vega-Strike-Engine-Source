@@ -173,7 +173,7 @@ public:
         planetRadius = radiusOfPlanet;
     }
 
-    virtual void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix) {
+    void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix) override {
         QVector dirtocam = _Universe->AccessCamera()->GetPosition() - m.p;
         Transformation qua = quat;
         Matrix mat = m;
@@ -191,6 +191,8 @@ public:
         qua.position = mat.p;
         Unit::Draw(qua, mat);
     }
+
+    ~AtmosphereHalo() override = default;
 };
 
 //////////////////////////////////////////////

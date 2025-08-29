@@ -41,8 +41,8 @@ public:
     RepairBot();
 
     // Component Methods
-    void Load(std::string unit_key) override;      
-    
+    void Load(std::string unit_key) override;
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;
@@ -55,6 +55,8 @@ public:
 
     // Bot Methods
     int Get() const;
+
+    ~RepairBot() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_REPAIR_BOT_H
