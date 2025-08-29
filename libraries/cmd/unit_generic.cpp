@@ -253,7 +253,7 @@ void Unit::Ref() {
 #define kInverseForceDistance 5400
 extern void PlayDockingSound(int dock);
 
-static list<Unit *> Unit_delete_queue;
+static list<Unit *> unit_delete_queue;
 static Hashtable<uintmax_t, Unit, 2095> deletedUn;
 int deathofvs = 1;
 
@@ -806,8 +806,8 @@ static std::string NearestSystem(std::string currentsystem, QVector pos) {
     if (pos.i == 0 && pos.j == 0 && pos.k == 0) {
         return "";
     }
-    QVector pos_normalized = pos.Normalize();
-    pos_normalized.Normalize();
+    QVector normalized_position = pos.Normalize();
+    normalized_position.Normalize();
     QVector cur = SystemLocation(std::move(currentsystem));
     if (cur.i == 0 && cur.j == 0 && cur.k == 0) {
         return "";
@@ -830,7 +830,7 @@ static std::string NearestSystem(std::string currentsystem, QVector pos) {
                     QVector dir = pos2 - cur;
                     QVector norm = dir;
                     norm.Normalize();
-                    double test = pos_normalized.Dot(norm);
+                    double test = normalized_position.Dot(norm);
                     if (test > .2) {
                         //test=1-test;
                         double tmp = dir.MagnitudeSquared() / test / test / test;
@@ -1195,31 +1195,40 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         std::mt19937 rng(dev());
         std::uniform_int_distribution<std::mt19937::result_type> dist20(0,19); // distribution in range [1, 6]
 
-        switch(dist20(rng)) {
-            case 0: fuel.Damage(); break;   // Fuel
-            case 1: energy.Damage(); break; // Energy
-            case 2: ftl_energy.Damage(); break;
-            case 3: ftl_drive.Damage(); break;
-            case 4: jump_drive.Damage(); break;
-            case 5: afterburner.Damage(); break;
-            // case 6: CargoVolume *= dam; break;
-            // case 7: UpgradeVolume *= dam; break;
-            case 8:
-                //Do something NASTY to the cargo
-                if (!cargo_hold.Empty()) {
-                    unsigned int i = 0;
-                    unsigned int cargorand_o = rand();
-                    unsigned int cargorand;
-                    /*do {
-                        cargorand = (cargorand_o + i) % cargo.size();
-                    } while ((cargo[cargorand].GetQuantity() == 0
-                            || cargo[cargorand].IsMissionFlag()) && (++i) < cargo.size());
-                    cargo[cargorand].SetQuantity(cargo[cargorand].GetQuantity() * float_to_int(dam));*/
+        switch (dist20(rng)) {
+        case 0: fuel.Damage();
+            break; // Fuel
+        case 1: energy.Damage();
+            break; // Energy
+        case 2: ftl_energy.Damage();
+            break;
+        case 3: ftl_drive.Damage();
+            break;
+        case 4: jump_drive.Damage();
+            break;
+        case 5: afterburner.Damage();
+            break;
+        //case 6: CargoVolume *= dam;
+            break;
+        //case 7: UpgradeVolume *= dam;
+            break;
+        case 8:
+            //Do something NASTY to the cargo
+            if (!cargo_hold.Empty()) {
+                unsigned int i = 0;
+                const unsigned int cargo_rand_o = randomInt(INT_MAX);
+                unsigned int cargo_rand;
+                /*do {
+                    cargo_rand = (cargo_rand_o + i) % cargo.size();
                 }
-                break;
-            default:
-                // No damage
-                return;
+                while ((cargo[cargo_rand].GetQuantity() == 0
+                    || cargo[cargo_rand].IsMissionFlag()) && (++i) < cargo.size());
+                cargo[cargo_rand].SetQuantity(cargo[cargo_rand].GetQuantity() * float_to_int(dam));*/
+            }
+            break;
+        default:
+            // No damage
+            break;
         }
 
         GenerateHudText(getDamageColor);
@@ -1342,7 +1351,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
     if (ucref == 0) {
         VS_LOG(trace, (boost::format("UNIT DELETION QUEUED: %1$s %2$s (file %3$s, addr 0x%4$08x)")
                 % name.get().c_str() % fullname.c_str() % filename.get().c_str() % this));
-        Unit_delete_queue.push_back(this);
+        unit_delete_queue.push_back(this);
         if (flightgroup) {
             if (flightgroup->leader.GetUnit() == this) {
                 flightgroup->leader.SetUnit(nullptr);
@@ -1370,9 +1379,9 @@ void Unit::UnRef() {
         deletedUn.Put( (uintmax_t) this, this );
 #endif
         //delete
-        Unit_delete_queue.push_back(this);
+        unit_delete_queue.push_back(this);
 #ifdef DESTRUCTDEBUG
-        VS_LOG(trace, (boost::format("%1$s %2$x - %3$d") % name.get().c_str() % this % Unit_delete_queue.size()));
+        VS_LOG(trace, (boost::format("%1$s %2$x - %3$d") % name.get().c_str() % this % unit_delete_queue.size()));
 #endif
     }
 }
@@ -1383,70 +1392,31 @@ float Unit::ExplosionRadius() {
 }
 
 void Unit::ProcessDeleteQueue() {
-    while (!Unit_delete_queue.empty()) {
+    while (!unit_delete_queue.empty()) {
 #ifdef DESTRUCTDEBUG
-        VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$x - %2$d") % Unit_delete_queue.back() % Unit_delete_queue.size()));
-        VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$s") % Unit_delete_queue.back()->name.get().c_str()));
+        VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$x - %2$d") % unit_delete_queue.back() % unit_delete_queue.size()));
+        VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$s") % unit_delete_queue.back()->name.get().c_str()));
 #endif
 #ifdef DESTRUCTDEBUG
-        if ( Unit_delete_queue.back()->isSubUnit() ) {
+        if ( unit_delete_queue.back()->isSubUnit() ) {
             VS_LOG(debug, "Subunit Deleting (related to double dipping)");
         }
 #endif
-        Unit *mydeleter = Unit_delete_queue.back();
-        Unit_delete_queue.pop_back();
+        Unit *mydeleter = unit_delete_queue.back();
+        unit_delete_queue.pop_back();
         delete mydeleter;                        ///might modify unitdeletequeue
 
 #ifdef DESTRUCTDEBUG
-        VS_LOG_AND_FLUSH(trace, (boost::format("Completed %1$d") % Unit_delete_queue.size()));
+        VS_LOG_AND_FLUSH(trace, (boost::format("Completed %1$d") % unit_delete_queue.size()));
 #endif
     }
 }
 
-Unit *makeBlankUpgrade(string templnam, int faction) {
-    Unit *bl = new Unit(templnam.c_str(), true, faction);
-    bl->cargo_hold.Clear();
-    bl->upgrade_space.Clear();
-    bl->hidden_hold.Clear();
 
-    bl->SetMass(0);
-    return bl;
-}
 
 static const string LOAD_FAILED = "LOAD_FAILED";
 
-const Unit *makeFinalBlankUpgrade(string name, int faction) {
-    char *unitdir = GetUnitDir(name.c_str());
-    string limiternam = name;
-    if (unitdir != name) {
-        limiternam = string(unitdir) + string(".blank");
-    }
-    free(unitdir);
-    const Unit *lim = UnitConstCache::getCachedConst(StringIntKey(limiternam, faction));
-    if (!lim) {
-        lim = UnitConstCache::setCachedConst(StringIntKey(limiternam, faction), makeBlankUpgrade(limiternam, faction));
-    }
-    if (lim->name == LOAD_FAILED) {
-        lim = nullptr;
-    }
-    return lim;
-}
 
-const Unit *makeTemplateUpgrade(string name, int faction) {
-    char *unitdir = GetUnitDir(name.c_str());
-    string limiternam = string(unitdir) + string(".template");
-    free(unitdir);
-    const Unit *lim = UnitConstCache::getCachedConst(StringIntKey(limiternam, faction));
-    if (!lim) {
-        lim =
-                UnitConstCache::setCachedConst(StringIntKey(limiternam,
-                        faction), new Unit(limiternam.c_str(), true, faction));
-    }
-    if (lim->name == LOAD_FAILED) {
-        lim = nullptr;
-    }
-    return lim;
-}
 
 const Unit *loadUnitByCache(std::string name, int faction) {
     const Unit *temprate = UnitConstCache::getCachedConst(StringIntKey(name, faction));
@@ -2735,30 +2705,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
 }
 
 
-bool Unit::ReduceToTemplate() {
-    vector<Cargo> savedCargo;
-    savedCargo = std::vector<Cargo>(upgrade_space.GetItems());
-    upgrade_space.Clear();
 
-    vector<Mount> savedWeap;
-    savedWeap.swap(mounts);
-    const Unit *temprate = makeFinalBlankUpgrade(name, faction);
-    bool success = false;
-    if (temprate && temprate->name != string("LOAD_FAILED")) {
-        double pct = 0;
-        success = Upgrade(temprate, -1, -1, 0, true, pct, nullptr, true);
-        if (pct > 0) {
-            success = true;
-        }
-    }
-
-    for(const Cargo &c : savedCargo) {
-        upgrade_space.AddCargo(this, c, false);
-    }
-
-    savedWeap.swap(mounts);
-    return success;
-}
 
 Vector Unit::MountPercentOperational(int whichmount) {
     if (whichmount < 0 || static_cast<unsigned int>(whichmount) >= mounts.size()) {
@@ -2770,71 +2717,19 @@ Vector Unit::MountPercentOperational(int whichmount) {
                     == Mount::INACTIVE) ? 0.0 : (mounts[whichmount].status == Mount::UNCHOSEN ? 2.0 : 1.0)));
 }
 
+// TODO: remove function
+// We no longer do repair through basic repair.
+// Kept for compatibility with python API.
 int Unit::RepairCost() {
-    int cost = 1;
-
-    // TODO: something better
-    if(ship_functions.Damaged()) {
-        cost += 15;
-    }
-
-    // TODO: figure out better cost
-    if (afterburner.Damaged()) {
-        cost += 5;
-    }
-
-    if (afterburner_upgrade.Damaged()) {
-        cost += 3;
-    }
-
-    if (drive.Damaged()) {
-        cost += 7;
-    }
-
-    if (drive_upgrade.Damaged()) {
-        cost += 5;
-    }
-
-    if (ftl_drive.Damaged()) {
-        cost += 7;
-    }
-
-
-    for (const Cargo& c : cargo_hold.GetItems()) {
-        if (c.Damaged()) {
-            ++cost;
-        }
-    }
-    return cost;
+    return 0;
 }
 
-// This is called when performing a BASIC_REPAIR
-// This function probably doesn't do anything anymore
+// This was called when performing a BASIC_REPAIR
+// This function doesn't do anything anymore
+// Kept for compatibility with python API.
 int Unit::RepairUpgrade() {
-    vector<Cargo> savedCargo;
-    //savedCargo.swap(cargo);
-    vector<Mount> savedWeap;
-    savedWeap.swap(mounts);
-    int upfac = FactionUtil::GetUpgradeFaction();
-    const Unit *temprate = makeFinalBlankUpgrade(name, faction);
-    int success = 0;
-    double pct = 0;
-    if (temprate && temprate->name != string("LOAD_FAILED")) {
-        success = Upgrade(temprate, -1, -1, 0, false, pct, nullptr, false) ? 1 : 0;
-        if (pct > 0) {
-            success = 1;
-        }
-    }
-    //savedCargo.swap(cargo);
-    savedWeap.swap(mounts);
-
-
-    bool ret = success && pct > 0;
-    const bool ComponentBasedUpgrades = configuration().physics.component_based_upgrades;
-    if (ComponentBasedUpgrades) {
-        // TODO: move this to components_manager
-    }
-    return success;
+    // TODO: remove
+    return 1;
 }
 
 
@@ -2897,9 +2792,11 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit) {
                 if (price <= ComponentsManager::credits) {
                     ComponentsManager::credits -= price;
 
-                    if (notadditive) {
-                        this->Upgrade(un, 0, 0, 0, true, percentage, makeTemplateUpgrade(this->name, this->faction));
-                    }
+                    // TODO: look closer at this
+                    //if (notadditive) {
+                    //    this->Upgrade(un, 0, 0, 0, true, percentage, makeTemplateUpgrade(this->name, this->faction));
+                    //}
+
                     // This code changes the category of the item from "upgrades/Damaged/" to the original category.
                     // if (item->GetCategory().find(DamagedCategory) == 0) {
                     //     int index = this->upgrade_space.GetIndex(itemCopy);

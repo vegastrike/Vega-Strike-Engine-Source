@@ -56,11 +56,12 @@
 #ifndef NO_GFX
 #include "gfx/cockpit.h"
 #endif
-const Unit *makeTemplateUpgrade(string name, int faction); //for percentoperational
 const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0); //for percentoperational
 extern const char *DamagedCategory;  //for percentoperational
 using std::string;
 extern Unit *getTopLevelOwner();
+
+constexpr double kPi = 3.1415926536;
 
 static bool nameIsAsteroid(std::string name) {
     if (name.length() < 8) {
@@ -332,12 +333,12 @@ int getPhysicsPriority(Unit *un) {
 void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVector center) {
     if (my_unit) {
         my_unit->PrimeOrders(new PlanetaryOrbit(my_unit,
-                speed / (3.1415926536 * (S.Magnitude() + R.Magnitude())),
-                0,
-                R,
-                S,
-                center,
-                orbitee));
+                                                speed / (kPi * (S.Magnitude() + R.Magnitude())),
+                                                0,
+                                                R,
+                                                S,
+                                                center,
+                                                orbitee));
         if (orbitee) {
             if (orbitee->getUnitType() == Vega_UnitType::planet) {
                 ((Planet *) orbitee)->AddSatellite(my_unit);
@@ -453,8 +454,8 @@ void addCredits(const Unit *my_unit, float credits) {
     if (!my_unit) {
         return;
     }
-    
-    my_unit->credits += credits;  
+
+    my_unit->credits += credits;
 }
 
 const string &getFlightgroupNameCR(const Unit *my_unit) {
@@ -543,24 +544,6 @@ int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero) {
     return c.GetQuantity();
 }
 
-// TODO: I'm almost certain this is no longer relevant.
-// Still need to investigate turrets and weapons.
-void RecomputeUnitUpgrades(Unit *un) {
-    if (un == NULL) {
-        return;
-    }
-    un->ReduceToTemplate();
-
-    for (Cargo& c : un->upgrade_space.GetItems()) {
-        assert(c.IsComponent());
-        
-        if(c.IsIntegral()) {
-            continue;
-        }
-        
-        un->Upgrade(c.GetName(), 0, 0, true, false);
-    }
-}
 
 bool repair(Unit *my_unit) {
     if (!my_unit) {
@@ -600,13 +583,13 @@ int addCargo(Unit *my_unit, Cargo carg) {
     if (!my_unit) {
         return 0;
     }
- 
+
     for (int i = carg.GetQuantity(); i > 0; i--) {
         carg.SetQuantity(i);
         if(my_unit->cargo_hold.CanAddCargo(carg)) {
             my_unit->cargo_hold.AddCargo(my_unit, carg);
             break;
-        } 
+        }
     }
 
     return carg.GetQuantity();
@@ -627,7 +610,7 @@ int hasCargo(const Unit *my_unit, string mycarg) {
     if (!my_unit) {
         return 0;
     }
-    
+
     if(!my_unit->cargo_hold.HasCargo(mycarg)) {
         return 0;
     }
@@ -922,20 +905,6 @@ float PercentOperational(const Cargo item, Unit *un, std::string name, std::stri
                     }
                 }
             }
-        }
-    } else if (name.find("add_") != 0 && name.find("mult_") != 0) {
-        double percent = 0;
-        if (un->canUpgrade(upgrade, -1, -1, 0, true, percent, makeTemplateUpgrade(un->name, un->faction), false)) {
-            if (percent > 0 && percent < 1) {
-                return percent;
-            } else if (percent
-                    >= 1) { //FIXME workaround for sensors -- see below comment, not sure why sensors report erroneous functional percentage
-                return 1.0;
-            } else {
-                return .5;
-            } //FIXME does not interact well with radar type
-        } else if (percent > 0) {
-            return percent;
         }
     }
     return 1.0;

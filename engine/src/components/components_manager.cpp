@@ -55,7 +55,10 @@ void ComponentsManager::Load(std::string unit_key) {
     for (const std::string& upgrade : upgrades) {
         std::vector<std::string> parts;
         boost::split(parts, upgrade, boost::is_any_of(":"));
-        if (parts.size() == 2) {
+        if (parts.size() == 1) {
+            const std::string category = parts[0];
+            prohibited_upgrades.emplace_back(category, 0);
+        } else if (parts.size() == 2) {
             const std::string category = parts[0];
             const int limit = std::stoi(parts[1]);
             //const std::pair<const std::string, const int> pair(category, limit);
@@ -89,6 +92,14 @@ double ComponentsManager::GetMass() const {
 
 void ComponentsManager::SetMass(double mass) {
     this->mass = mass;
+}
+
+void ComponentsManager::SetPlayerShip() {
+    player_ship = true;
+}
+
+bool ComponentsManager::PlayerShip() {
+    return player_ship;
 }
 
 void ComponentsManager::DamageRandomSystem() {
@@ -274,24 +285,23 @@ std::string ComponentsManager::GetTitle(bool show_cargo, bool show_star_date, st
     
     // Cargo mass renders your ship harder to manoeuver. Display it.
     double mass_percent = mass / base_mass * 100;
+    const std::string mass_string = (boost::format("base %1%/ current %2% (%3$.0f%%)") % base_mass % mass % mass_percent).str();
     
     if (show_star_date) {
         return (boost::format("Stardate: %1$s      Credits: %2$.2f      "
-                              "Space left: %3$.6g of %4$.6g cubic meters   Mass: %5$.0f%% (base)")
+                              "Space left: %3$.6g of %4$.6g cubic meters   Mass: %5%")
                               % date
                               % credits.Value()
                               % available_volume
                               % empty_volume
-                              % mass_percent)
-                              .str();
+                              % mass_string).str();
     } else {
         return (boost::format("Credits: %1$.2f      "
-                              "Space left: %2$.6g of %3$.6g cubic meters   Mass: %4$.0f%% (base)")
+                              "Space left: %2$.6g of %3$.6g cubic meters   Mass: %4%")
                               % credits.Value()
                               % available_volume
                               % empty_volume
-                              % mass_percent)
-                              .str();
+                              % mass_string).str();
     }
 }
 
@@ -312,34 +322,36 @@ bool ComponentsManager::SellUpgrade(ComponentsManager *buyer, Cargo *item, int q
 }
 
 bool ComponentsManager::_Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity) {
-    // In theory, item should already have the right quantity.
-    // In practice, base_computer doesn't provide this.
-    item->SetQuantity(quantity);
-
-    if(credits < item->GetPrice() * quantity) {
-        return false;
-    }
-
+    // Some sanity checks
     int index = seller->cargo_hold.GetIndex(*item);
     if(index == -1) {
         return false;
     }
 
-    Cargo sold_cargo = seller->cargo_hold.RemoveCargo(seller, index, quantity);
+    // Check quantity is available in seller's hold
+    quantity = std::min(item->GetQuantity(), quantity);
 
-    if(!hold->CanAddCargo(sold_cargo)) {
-        seller->cargo_hold.AddCargo(seller, sold_cargo);
+    // Check the maximum you can afford
+    int max_affordable_quantity = static_cast<int>(std::floor(credits / item->GetPrice()));
+    quantity = std::min(max_affordable_quantity, quantity);
+
+    // Check the maximum you can fit in your hold
+    int max_stackable_quantity = static_cast<int>(std::floor(hold->AvailableCapacity() / item->GetVolume()));
+    quantity = std::min(max_stackable_quantity, quantity);
+
+    // Sanity check of the quantity - isn't 0 or negative
+    if(quantity <= 0) {
         return false;
     }
 
+    // Actual transaction
+    Cargo sold_cargo = seller->cargo_hold.RemoveCargo(seller, index, quantity);
     ComponentsManager::credits -= item->GetPrice() * quantity;
     hold->AddCargo(this, sold_cargo);
     return true;
 }
 
 bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *item, int quantity) {
-    item->SetQuantity(quantity);
-
     CargoHold *buyer_hold = &buyer->cargo_hold;
 
     int index = hold->GetIndex(*item);
@@ -347,9 +359,14 @@ bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *
         return false;
     }
 
-    // For now, NPCs can always afford to buy our stuff
+    // Note: For now, NPCs can always afford to buy our stuff
+    // Check the maximum you can fit in your hold
+    // Disabled. Check returns a negative number for small items
+    //int max_stackable_quantity = static_cast<int>(std::floor(buyer->cargo_hold.AvailableCapacity() / item->GetVolume()));
+    //quantity = std::min(max_stackable_quantity, quantity);
 
-    if (!buyer_hold->CanAddCargo(*item)) {
+    // Quantity sanity check - must be positive
+    if (quantity <= 0) {
         return false;
     }
 

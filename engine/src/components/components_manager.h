@@ -87,6 +87,9 @@ public:
     double GetMass() const;
     void SetMass(double mass);
 
+    void SetPlayerShip();
+    bool PlayerShip();
+
 // Components
     EnergyContainer fuel = EnergyContainer(ComponentType::Fuel);
     EnergyContainer energy = EnergyContainer(ComponentType::Capacitor);

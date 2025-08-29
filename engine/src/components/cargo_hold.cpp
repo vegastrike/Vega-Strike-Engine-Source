@@ -100,7 +100,7 @@ Cargo CargoHold::RemoveCargo(ComponentsManager *manager, const std::string& name
 
 Cargo CargoHold::RemoveCargo(ComponentsManager *manager, unsigned int index, 
                            int quantity) {
-    if (!(index < _items.size())) {
+    if (index >= _items.size()) {
         VS_LOG(error, "(previously) FATAL problem...removing cargo that is past the end of array bounds.");
         return Cargo();
     }
@@ -132,7 +132,7 @@ void CargoHold::AddCargo(ComponentsManager *manager, const Cargo &cargo, bool so
 
     bool found = false;
 
-    for(Cargo c: _items) {
+    for(Cargo& c: _items) {
         if(c.name == cargo.name && c.category == cargo.category) {
             found = true;
             c.quantity += cargo.quantity.Value();
