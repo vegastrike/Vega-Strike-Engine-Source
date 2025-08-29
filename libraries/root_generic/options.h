@@ -45,13 +45,6 @@ public:
 
     void init();
 
-    /* General Options */
-
-    std::string galaxy;
-    bool command_interpretor{};
-    bool load_last_savegame{};
-    bool debug_fs{};
-
     /* Audio Options */
 
     int threadtime{};

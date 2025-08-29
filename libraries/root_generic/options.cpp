@@ -33,14 +33,6 @@
 extern VegaConfig *vs_config;
 
 void vs_options::init() {
-    /* General Options */
-
-    galaxy = configuration().game_start.galaxy;;
-    command_interpretor = configuration().general.command_interpreter;
-    load_last_savegame = configuration().general.load_last_savegame;
-    debug_fs = configuration().general.debug_fs;
-
-
     /* Audio Options */
 
     threadtime = XMLSupport::parse_int(vs_config->getVariable("audio", "threadtime", "1"));
