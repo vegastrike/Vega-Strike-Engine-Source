@@ -46,12 +46,14 @@ public:
     void init();
 
     /* General Options */
+
     std::string galaxy;
     bool command_interpretor{};
     bool load_last_savegame{};
     bool debug_fs{};
 
     /* Audio Options */
+
     int threadtime{};
     std::string missionvictorysong;
     bool Music{};
@@ -73,6 +75,7 @@ public:
     float time_between_music{};
 
     /* Cockpit Audio Options */
+
     std::string comm;
     std::string scanning;
     std::string objective;
@@ -88,16 +91,19 @@ public:
 
     bool comm_preload{};
 
-/* Unit Audio Options */
+    /* Unit Audio Options */
+
     std::string jumpleave;
     std::string player_armor_hit;
     std::string player_hull_hit;
     std::string player_shield_hit;
 
     /* Splash Options */
+
     bool auto_hide{};
 
     /* Terrain Options */
+
     double xscale{};
     double yscale{};
     double zscale{};
@@ -105,10 +111,12 @@ public:
     double radius{};
 
     /* Player Options */
+
     std::string password;
     std::string callsign;
 
     /* AI Options */
+
     bool AllowCivilWar{};
     bool CappedFactionRating{};
     bool AllowNonplayerFactionChange{};
@@ -116,35 +124,8 @@ public:
     std::string startDockedTo;
     bool dockOnLoad{};
 
-    /* Physics Options */
-    std::string Drone;
-    int max_missions{};
-    double game_speed{};
-    double runtime_compactness{};
-    double autogen_compactness{};
-    double AsteroidDifficulty{};
-    double YearScale{};
-    bool game_speed_affects_autogen_systems{};
-    double star_system_scale{};
-    double respawn_unit_size{};
-    std::string campaigns;              //WRONG SECTION ...change after 0.5
-    uint NumRunningSystems{};
-    float InactiveSystemTime{};
-    float jump_radius_scale{};
-    bool jump_disables_shields{};
-    bool display_in_meters{};
-    bool game_speed_lying{};
-    int num_times_to_simulate_new_star_system{};
-    bool gun_speed_adjusted_game_speed{};
-    float gun_speed{};
-    float weapon_damage_efficiency{};
-    float refire_difficulty_scaling{};
-    float debris_mass{};
-    float explosion_damage_center{};
-    float explosion_damage_edge{};
-    int eject_cargo_on_blowup{};
-
     /* Data Options */
+
     std::string universe_path;
     std::string sectors;
     std::string techniquesBasePath;
@@ -165,6 +146,7 @@ public:
     std::string volume_format;
 
     /* Galaxy Options */
+
     bool PushValuesToMean{};
     float AmbientLightFactor{};
     float StarRadiusScale{};
@@ -187,6 +169,7 @@ public:
 
 
     /* Network Options */
+
     bool force_client_connect{};
     bool use_account_server{};
     std::string server_ip;
@@ -195,9 +178,11 @@ public:
     bool chat_only_in_network{};
 
     /* Cargo Options */
+
     bool news_from_cargolist{};
 
     /* Keyboard Options */
+
     bool enable_unicode{};
 
     std::string getCallsign(int);
