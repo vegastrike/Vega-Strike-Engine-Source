@@ -87,6 +87,8 @@ public:
     double GetMass() const;
     void SetMass(double mass);
 
+    double PriceCargo(const std::string &cargo_name);
+
 // Components
     EnergyContainer fuel = EnergyContainer(ComponentType::Fuel);
     EnergyContainer energy = EnergyContainer(ComponentType::Capacitor);

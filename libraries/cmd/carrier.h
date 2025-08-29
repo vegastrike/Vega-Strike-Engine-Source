@@ -42,7 +42,6 @@ public:
     Carrier();
     virtual ~Carrier() = default;
 
-    float PriceCargo(const std::string &s);
     unsigned int numCargo() const;
     std::string GetManifest(unsigned int i, Unit *scanningUnit, const Vector &original_velocity) const;
     void EjectCargo(unsigned int index);
