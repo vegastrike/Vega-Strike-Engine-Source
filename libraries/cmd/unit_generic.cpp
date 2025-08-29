@@ -1195,31 +1195,40 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         std::mt19937 rng(dev());
         std::uniform_int_distribution<std::mt19937::result_type> dist20(0,19); // distribution in range [1, 6]
 
-        switch(dist20(rng)) {
-            case 0: fuel.Damage(); break;   // Fuel
-            case 1: energy.Damage(); break; // Energy
-            case 2: ftl_energy.Damage(); break;
-            case 3: ftl_drive.Damage(); break;
-            case 4: jump_drive.Damage(); break;
-            case 5: afterburner.Damage(); break;
-            // case 6: CargoVolume *= dam; break;
-            // case 7: UpgradeVolume *= dam; break;
-            case 8:
-                //Do something NASTY to the cargo
-                if (!cargo_hold.Empty()) {
-                    unsigned int i = 0;
-                    unsigned int cargorand_o = rand();
-                    unsigned int cargorand;
-                    /*do {
-                        cargorand = (cargorand_o + i) % cargo.size();
-                    } while ((cargo[cargorand].GetQuantity() == 0
-                            || cargo[cargorand].IsMissionFlag()) && (++i) < cargo.size());
-                    cargo[cargorand].SetQuantity(cargo[cargorand].GetQuantity() * float_to_int(dam));*/
+        switch (dist20(rng)) {
+        case 0: fuel.Damage();
+            break; // Fuel
+        case 1: energy.Damage();
+            break; // Energy
+        case 2: ftl_energy.Damage();
+            break;
+        case 3: ftl_drive.Damage();
+            break;
+        case 4: jump_drive.Damage();
+            break;
+        case 5: afterburner.Damage();
+            break;
+        //case 6: CargoVolume *= dam;
+            break;
+        //case 7: UpgradeVolume *= dam;
+            break;
+        case 8:
+            //Do something NASTY to the cargo
+            if (!cargo_hold.Empty()) {
+                unsigned int i = 0;
+                const unsigned int cargo_rand_o = randomInt(INT_MAX);
+                unsigned int cargo_rand;
+                /*do {
+                    cargo_rand = (cargo_rand_o + i) % cargo.size();
                 }
-                break;
-            default:
-                // No damage
-                return;
+                while ((cargo[cargo_rand].GetQuantity() == 0
+                    || cargo[cargo_rand].IsMissionFlag()) && (++i) < cargo.size());
+                cargo[cargo_rand].SetQuantity(cargo[cargo_rand].GetQuantity() * float_to_int(dam));*/
+            }
+            break;
+        default:
+            // No damage
+            break;
         }
 
         GenerateHudText(getDamageColor);

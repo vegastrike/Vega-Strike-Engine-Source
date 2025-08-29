@@ -289,7 +289,7 @@ QVector NavigationSystem::SystemIterator::Position() {
         }
         k %= 200000;
 //float y = (k-100000)/(200000.);
-        return QVector(ratio * cos(locatio * 2 * 3.1415926536), ratio * sin(locatio * 2 * 3.1415926536), 0)
+        return QVector(ratio * cos(locatio * 2 * M_PI), ratio * sin(locatio * 2 * M_PI), 0)
                 * screensmash;
     }
 }
