@@ -108,8 +108,6 @@ public:
 
     SaveGame(const std::string &pilotname);
     void PurgeZeroStarships();
-    float GetSavedCredits();
-    void SetSavedCredits(float);
     void SetPlayerLocation(const QVector &playerloc);
     QVector GetPlayerLocation();
     void SetStarSystem(std::string sys);
@@ -127,7 +125,6 @@ public:
     std::string WriteSavedUnit(SavedUnits *su);
     std::string WriteSaveGame(const char *systemname,
             const QVector &Pos,
-            float credits,
             std::vector<std::string> unitname,
             int player_num,
             std::string fact = "",
@@ -135,7 +132,6 @@ public:
     std::string WritePlayerData(const QVector &FP,
             std::vector<std::string> unitname,
             const char *systemname,
-            float credits,
             std::string fact = "");
     std::string WriteDynamicUniverse();
     void ReadSavedPackets(char *&buf, bool commitfaction, bool skip_news = false, bool select_data = false,
@@ -144,7 +140,7 @@ public:
     void AddUnitToSave(const char *unitname, int type, const char *faction, long address);
     void RemoveUnitFromSave(long address); //cast it to a long
     void SetOutputFileName(const std::string &filename);
-    void ParseSaveGame(const std::string &filename,
+    float ParseSaveGame(const std::string &filename,
             std::string &ForceStarSystem,
             const std::string &originalstarsystem,
             QVector &pos,

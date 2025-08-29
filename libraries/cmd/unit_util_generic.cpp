@@ -61,8 +61,6 @@ extern const char *DamagedCategory;  //for percentoperational
 using std::string;
 extern Unit *getTopLevelOwner();
 
-constexpr double kPi = 3.1415926536;
-
 static bool nameIsAsteroid(std::string name) {
     if (name.length() < 8) {
         return false;
@@ -333,7 +331,7 @@ int getPhysicsPriority(Unit *un) {
 void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVector center) {
     if (my_unit) {
         my_unit->PrimeOrders(new PlanetaryOrbit(my_unit,
-                                                speed / (kPi * (S.Magnitude() + R.Magnitude())),
+                                                speed / (M_PI * (S.Magnitude() + R.Magnitude())),
                                                 0,
                                                 R,
                                                 S,
