@@ -421,8 +421,8 @@ static void SetupGLLightGlobals() {
         }
     }
 
-    GFXSetCutoff(configuration().graphics.light_cutoff);
-    GFXSetOptimalIntensity(configuration().graphics.light_optimal_intensity, configuration().graphics.light_saturation);
+    GFXSetCutoff(configuration().graphics.light_cutoff_flt);
+    GFXSetOptimalIntensity(configuration().graphics.light_optimal_intensity_flt, configuration().graphics.light_saturation_flt);
     GFXSetOptimalNumLights(configuration().graphics.num_lights);
     GFXSetSeparateSpecularColor(configuration().graphics.separate_specular_color ? GFXTRUE : GFXFALSE);
 }

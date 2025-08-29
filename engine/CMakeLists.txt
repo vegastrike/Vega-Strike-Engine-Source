@@ -1306,6 +1306,7 @@ IF (USE_GTEST)
             gtest_main
             $<TARGET_OBJECTS:vegastrike-testing>
             vegastrike_cmd
+            vegastrike_gfx_generic
             Boost::log
             Boost::log_setup
             Boost::json

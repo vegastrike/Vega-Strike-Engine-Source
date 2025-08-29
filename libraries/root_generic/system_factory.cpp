@@ -355,8 +355,8 @@ Planet *SystemFactory::processPlanet(Star_XML *xml, Object &object, Planet *owne
     // Adjust speed and rotation
     // Discussion - the original value (day/year) needs to be adjusted to velocity
     // by multiplying
-    float float_pi = static_cast<float>(M_PI);
-    float float_year_scale = static_cast<float>(game_options()->YearScale);
+    float float_pi = M_PI;
+    float float_year_scale = configuration().physics.year_scale_flt;
     // TODO: turn floating point comparisons into a function
     if (std::fabs(rotational_velocity) > .00001f) {
         rotational_velocity = 2.0f * float_pi / (float_year_scale * rotational_velocity);
@@ -461,7 +461,7 @@ void SystemFactory::processSpaceElevator(Object &object, Planet *owner) {
 }
 
 void SystemFactory::processFog(Star_XML *xml, Object &object, Planet *owner) {
-    if (!game_options()->usePlanetFog) {
+    if (!configuration().graphics.use_planet_fog) {
         return;
     }
 
@@ -525,8 +525,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
     int faction = 0;
     int neutralfaction = FactionUtil::GetNeutralFaction();
 
-    float scalex = getFloatAttribute(object, "difficulty",
-            static_cast<float>(game_options()->AsteroidDifficulty));
+    float scalex = getFloatAttribute(object, "difficulty", configuration().physics.asteroid_difficulty_flt);
     float absolute_scalex = std::fabs(scalex);
     double velocity = getDoubleAttribute(object, "year", 0.0);
     float rotational_velocity = getFloatAttribute(object, "day", 0.0f);
@@ -561,14 +560,14 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
     // I assume negative means counter movement and therefore fabs
     // TODO: this code is repeated. Refactor into function
     float float_pi = static_cast<float>(M_PI);
-    float float_year_scale = static_cast<float>(game_options()->YearScale);
+    float float_year_scale = configuration().physics.year_scale_flt;
     // TODO: turn floating point comparisons into a function
     if (std::fabs(rotational_velocity) > .00001f) {
         rotational_velocity = 2.0f * float_pi / (float_year_scale * rotational_velocity);
     }
 
     if (std::fabs(velocity) > .00001) {
-        velocity = 2.0 * M_PI / (game_options()->YearScale * velocity);
+        velocity = 2.0 * M_PI / (configuration().physics.year_scale_flt * velocity);
     }
 
     if (boost::iequals(element, "nebula")) {
@@ -593,7 +592,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
 
         if (unit->faction != neutralfaction) {
             unit->SetTurretAI(); //FIXME un de-referenced before allocation
-            unit->EnqueueAI(new Orders::FireAt(configuration().ai.firing.aggressivity));
+            unit->EnqueueAI(new Orders::FireAt(configuration().ai.firing.aggressivity_flt)); //FIXME un de-referenced before allocation
         }
     } else if (boost::iequals(element, "asteroid")) {
         Flightgroup *fg = getStaticAsteroidFlightgroup(faction);
@@ -603,7 +602,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
                         absolute_scalex));
         if (scalex < 0) { // This was almost certainly fixed by the above line. TODO: refactor
             SetSubunitRotation(unit, absolute_scalex);
-        }
+        } //FIXME un de-referenced before allocation
 
     } else if (boost::iequals(element, "enhancement")) {
         unit = vega_dynamic_cast_ptr<Unit>(
@@ -651,6 +650,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
         owner->AddSatellite(unit);
         unit->SetOwner(owner);
         //cheating so nothing collides at top level - is this comment still relevant?
+        // FIXME un de-referenced before allocation - is this comment still relevant?
         unit->SetAngularVelocity(ComputeRotVel(rotational_velocity, R, S));
         unit->SetAI(new PlanetaryOrbit(unit, velocity, position, R, S, QVector(0, 0, 0), owner));
     }

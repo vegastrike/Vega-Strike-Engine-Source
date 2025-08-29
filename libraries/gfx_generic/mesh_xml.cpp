@@ -335,7 +335,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                             break;
                     }
                 }
-                const float detailscale = configuration().graphics.detail_texture_scale;
+                const float detailscale = configuration().graphics.detail_texture_scale_flt;
                 if (detailPlanes.size() < 6) {
                     detailPlanes.push_back(vec * detailscale);
                 }
@@ -2058,7 +2058,7 @@ void Mesh::PostProcessLoading(MeshXML *xml, const vector<string> &textureOverrid
         const bool usopttmp =
                 (configuration().graphics.optimize_vertex_arrays);
         const float optvertexlimit =
-                (configuration().graphics.optimize_vertex_condition);
+                (configuration().graphics.optimize_vertex_condition_flt);
         bool cachunk = false;
         if (usopttmp && (vertexlist.size() > 0)) {
             int numopt = totalvertexsize;

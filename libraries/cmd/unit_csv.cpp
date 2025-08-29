@@ -439,7 +439,7 @@ void AddDocks(Unit *thus, Unit::XML &xml, const string &docks) {
 }
 
 void AddLights(Unit *thus, Unit::XML &xml, const string &lights) {
-    const float default_halo_activation = configuration().graphics.default_engine_activation;
+    const float default_halo_activation = configuration().graphics.default_engine_activation_flt;
     string::size_type where, when;
     string::size_type ofs = 0;
     while ((where = lights.find('{', ofs)) != string::npos) {

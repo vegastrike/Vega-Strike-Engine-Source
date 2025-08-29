@@ -151,9 +151,9 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     if (Guaranteed == Mission::AUTO_OFF) {
         return false;
     }
-    const float autopilot_term_distance = configuration().physics.auto_pilot_termination_distance;
-    const float atd_no_enemies = configuration().physics.auto_pilot_termination_distance_no_enemies;
-    const float autopilot_no_enemies_multiplier = configuration().physics.auto_pilot_no_enemies_distance_multiplier;
+    const float autopilot_term_distance = configuration().physics.auto_pilot_termination_distance_flt;
+    const float atd_no_enemies = configuration().physics.auto_pilot_termination_distance_no_enemies_flt;
+    const float autopilot_no_enemies_multiplier = configuration().physics.auto_pilot_no_enemies_distance_multiplier_flt;
     if (unit->isSubUnit()) {
         static std::string err = "Return To Cockpit for Auto";
         failuremessage = err;
@@ -248,7 +248,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         Unit *un;
         for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != nullptr; ++i) {
             if (UnitUtil::isAsteroid(un)) {
-                const float minasteroiddistance = configuration().physics.min_asteroid_distance;
+                const float minasteroiddistance = configuration().physics.min_asteroid_distance_flt;
                 if (UnitUtil::getDistance(unit, un) < minasteroiddistance) {
                     failuremessage = GenerateAutoError(unit, un);
                     return false;                     //no auto in roid field
@@ -305,8 +305,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                 UniverseUtil::cacheAnimation(insys_jump_ani);
                 docache = false;
             }
-            const float insys_jump_ani_size = configuration().graphics.in_system_jump_animation_size;
-            const float insys_jump_ani_growth = configuration().graphics.in_system_jump_animation_growth;
+            const float insys_jump_ani_size = configuration().graphics.in_system_jump_animation_size_flt;
+            const float insys_jump_ani_growth = configuration().graphics.in_system_jump_animation_growth_flt;
             UniverseUtil::playAnimationGrow(insys_jump_ani, RealPosition(unit),
                     unit->rSize() * insys_jump_ani_size, insys_jump_ani_growth);
 
@@ -314,7 +314,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             v.Normalize();
             Vector p, q, r;
             unit->GetOrientation(p, q, r);
-            const float sec = configuration().graphics.in_system_jump_ani_second_ahead;
+            const float sec = configuration().graphics.in_system_jump_ani_second_ahead_flt;
             UniverseUtil::playAnimationGrow(insys_jump_ani,
                     sep + unit->GetVelocity() * sec + v * unit->rSize(),
                     unit->rSize() * 8,
@@ -327,7 +327,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         }
         const bool warptrail = configuration().graphics.warp_trail;
         if (warptrail && (!nowhere)) {
-            const float warptrailtime = configuration().graphics.warp_trail_time;
+            const float warptrailtime = configuration().graphics.warp_trail_time_flt;
             AddWarp(unit, RealPosition(unit), warptrailtime);
         }
         if (!nowhere) {
@@ -376,20 +376,20 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
         bool count_negative_warp_units) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
-    const float smallwarphack = configuration().physics.min_warp_effect_size;
-    const float bigwarphack = configuration().physics.max_warp_effect_size;
+    const float smallwarphack = configuration().physics.min_warp_effect_size_flt;
+    const float bigwarphack = configuration().physics.max_warp_effect_size_flt;
     //Boundary between multiplier regions 1&2. 2 is "high" mult
-    const double warpregion1 = configuration().physics.warp_region1;
+    const double warpregion1 = configuration().physics.warp_region1_dbl;
     //Boundary between multiplier regions 0&1 0 is mult=1
-    const double warpregion0 = configuration().physics.warp_region0;
+    const double warpregion0 = configuration().physics.warp_region0_dbl;
     //Mult at 1-2 boundary
-    const double warpcruisemult = configuration().physics.warp_cruise_mult;
+    const double warpcruisemult = configuration().physics.warp_cruise_mult_dbl;
     //degree of curve
-    const double curvedegree = configuration().physics.warp_curve_degree;
+    const double curvedegree = configuration().physics.warp_curve_degree_dbl;
     //coefficient so as to agree with above
     const double upcurvek = warpcruisemult / std::pow((warpregion1 - warpregion0), curvedegree);
     //inverse fractional effect of ship vs real big object
-    const float def_inv_interdiction = 1.0 / configuration().physics.default_interdiction;
+    const float def_inv_interdiction = 1.0 / configuration().physics.default_interdiction_flt;
     Unit *planet;
     Unit *testthis = NULL;
     {

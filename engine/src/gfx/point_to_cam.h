@@ -63,15 +63,15 @@ inline bool CalculateOrientation(QVector &Pos,
         double offmag = offset.Magnitude();
         double rad = wid > hei ? wid : hei;
         offset *= 1. / offmag;
-        if ((!moveiftoofar) || offz < rad + .4 * configuration().graphics.zfar) {
-            if (offz - OffsetByThisPercent * rad < 2 * configuration().graphics.znear) {
-                rad = (offz - 2 * configuration().graphics.znear) / OffsetByThisPercent;
+        if ((!moveiftoofar) || offz < rad + .4 * configuration().graphics.zfar_dbl) {
+            if (offz - OffsetByThisPercent * rad < 2 * configuration().graphics.znear_dbl) {
+                rad = (offz - 2 * configuration().graphics.znear_dbl) / OffsetByThisPercent;
             }
             offset *= OffsetByThisPercent * rad;
         } else {
-            offset *= (offmag / offz) * (offz - 2 * configuration().graphics.znear);                 //-rad-.4*configuration().graphics.zfar);
-            wid /= ((offz) / (kkkk * configuration().graphics.znear));                 //it's 1 time away from znear
-            hei /= ((offz) / (kkkk * configuration().graphics.znear));
+            offset *= (offmag / offz) * (offz - 2 * configuration().graphics.znear_dbl);                 //-rad-.4*configuration().graphics.zfar);
+            wid /= ((offz) / (kkkk * configuration().graphics.znear_dbl));                 //it's 1 time away from znear
+            hei /= ((offz) / (kkkk * configuration().graphics.znear_dbl));
         }
         Pos += offset;
         offz += OLDR.Dot(offset);         //coming closer so this means that offz is less
@@ -92,7 +92,7 @@ inline bool CalculateOrientation(QVector &Pos,
         ScaledCrossProduct(r, p, q);
         //if the vectors are linearly dependant we're phucked :) fun fun fun
     }
-    return offz < .4 * configuration().graphics.zfar;
+    return offz < .4 * configuration().graphics.zfar_dbl;
 }
 
 #endif //VEGA_STRIKE_ENGINE_GFX_POINT_TO_CAM_H

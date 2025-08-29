@@ -60,7 +60,6 @@ void vs_options::init() {
     loss_relationship = XMLSupport::parse_floatf(vs_config->getVariable("audio", "loss_relationship", "-.1"));
     victory_relationship = XMLSupport::parse_floatf(vs_config->getVariable("audio", "victory_relationship", ".5"));
     time_between_music = XMLSupport::parse_floatf(vs_config->getVariable("audio", "time_between_music", "180"));
-    debris_time = configuration().physics.debris_time;
     /* Cockpit Audio Options */
     comm = vs_config->getVariable("cockpitaudio", "comm", "vdu_c");
     scanning = vs_config->getVariable("cockpitaudio", "scanning", "vdu_c");
@@ -86,9 +85,9 @@ void vs_options::init() {
 
     /* Graphics Options */
     jumpgate = configuration().graphics.jump_gate;
-    jumpanimationshrink = configuration().graphics.jump_animation_shrink;
-    jumpgatesize = configuration().graphics.jump_gate_size;
-    camera_pan_speed = configuration().graphics.camera_pan_speed;
+    jumpanimationshrink = configuration().graphics.jump_animation_shrink_dbl;
+    jumpgatesize = configuration().graphics.jump_gate_size_dbl;
+    camera_pan_speed = configuration().graphics.camera_pan_speed_dbl;
     background = configuration().graphics.background;
     cockpit = configuration().graphics.cockpit;
     disabled_cockpit_allowed = configuration().graphics.disabled_cockpit_allowed;
@@ -96,31 +95,31 @@ void vs_options::init() {
     vbo = configuration().graphics.vbo;
     num_near_stars = configuration().graphics.num_near_stars;
     num_far_stars = configuration().graphics.num_far_stars;
-    star_spreading = configuration().graphics.star_spreading;
+    star_spreading = configuration().graphics.star_spreading_dbl;
     usePlanetAtmosphere = configuration().graphics.use_planet_atmosphere;
     usePlanetFog = configuration().graphics.use_planet_fog;
-    reflectivity = configuration().graphics.reflectivity;
+    reflectivity = configuration().graphics.reflectivity_dbl;
     hardware_cursor = configuration().physics.hardware_cursor;
     always_make_smooth_cam =  configuration().graphics.always_make_smooth_cam;     //Not used yet
-    precull_dist = configuration().graphics.precull_dist;
+    precull_dist = configuration().graphics.precull_dist_dbl;
     draw_near_stars_in_front_of_planets = configuration().graphics.draw_near_stars_in_front_of_planets;
     starblend = configuration().graphics.star_blend;
-    sparkleenginesizerelativetoship = configuration().graphics.sparkle_engine_size_relative_to_ship;
-    sparkleabsolutespeed = configuration().graphics.sparkle_absolute_speed;
-    engine_radii_scale = configuration().graphics.engine_radii_scale;
-    engine_length_scale = configuration().graphics.engine_length_scale;
+    sparkleenginesizerelativetoship = configuration().graphics.sparkle_engine_size_relative_to_ship_flt;
+    sparkleabsolutespeed = configuration().graphics.sparkle_absolute_speed_flt;
+    engine_radii_scale = configuration().graphics.engine_radii_scale_flt;
+    engine_length_scale = configuration().graphics.engine_length_scale_flt;
     halos_by_velocity = configuration().graphics.halos_by_velocity;
-    percent_afterburner_color_change = configuration().graphics.percent_afterburner_color_change;
-    percent_halo_fade_in = configuration().graphics.percent_halo_fade_in;
-    afterburner_color_red = configuration().graphics.afterburner_color_red;
-    afterburner_color_green = configuration().graphics.afterburner_color_green;
-    afterburner_color_blue = configuration().graphics.afterburner_color_blue;
-    engine_color_red = configuration().graphics.engine_color_red;
-    engine_color_green = configuration().graphics.engine_color_green;
-    engine_color_blue = configuration().graphics.engine_color_blue;
-    halosparklerate = configuration().graphics.halo_sparkle_rate;
-    halosparklescale = configuration().graphics.halo_sparkle_scale;
-    halosparklespeed = configuration().graphics.halo_sparkle_speed;
+    percent_afterburner_color_change = configuration().graphics.percent_afterburner_color_change_flt;
+    percent_halo_fade_in = configuration().graphics.percent_halo_fade_in_flt;
+    afterburner_color_red = configuration().graphics.afterburner_color_red_flt;
+    afterburner_color_green = configuration().graphics.afterburner_color_green_flt;
+    afterburner_color_blue = configuration().graphics.afterburner_color_blue_flt;
+    engine_color_red = configuration().graphics.engine_color_red_flt;
+    engine_color_green = configuration().graphics.engine_color_green_flt;
+    engine_color_blue = configuration().graphics.engine_color_blue_flt;
+    halosparklerate = configuration().graphics.halo_sparkle_rate_flt;
+    halosparklescale = configuration().graphics.halo_sparkle_scale_flt;
+    halosparklespeed = configuration().graphics.halo_sparkle_speed_flt;
     max_cubemap_size = configuration().graphics.max_cubemap_size;
     default_boot_message = configuration().graphics.default_boot_message;
     initial_boot_message = configuration().graphics.initial_boot_message;
@@ -128,14 +127,14 @@ void vs_options::init() {
     main_menu = configuration().graphics.main_menu;
     startup_cockpit_view = configuration().graphics.startup_cockpit_view;
     detail_texture_trilinear = configuration().graphics.detail_texture_trilinear;
-    lightcutoff = configuration().graphics.light_cutoff;
-    lightoptimalintensity = configuration().graphics.light_optimal_intensity;
-    lightsaturation = configuration().graphics.light_saturation;
+    lightcutoff = configuration().graphics.light_cutoff_flt;
+    lightoptimalintensity = configuration().graphics.light_optimal_intensity_flt;
+    lightsaturation = configuration().graphics.light_saturation_flt;
     numlights = configuration().graphics.num_lights;
     separate_specular_color = configuration().graphics.separate_specular_color;
     LockVertexArrays = configuration().graphics.lock_vertex_arrays;
     fogdetail = configuration().graphics.fog_detail;
-    ModelDetail = configuration().graphics.model_detail;
+    ModelDetail = configuration().graphics.model_detail_flt;
     UseTextures = configuration().graphics.use_textures;
     UseShipTextures = configuration().graphics.use_ship_textures;
     UsePlanetTextures = configuration().graphics.use_planet_textures;
@@ -158,7 +157,7 @@ void vs_options::init() {
     ext_clamp_to_edge = configuration().graphics.ext_clamp_to_edge;
     ext_clamp_to_border = configuration().graphics.ext_clamp_to_border;
     ClearOnStartup = configuration().graphics.clear_on_startup;
-    circle_accuracy = configuration().graphics.circle_accuracy;
+    circle_accuracy = configuration().graphics.circle_accuracy_flt;
     rgb_pixel_format = configuration().graphics.rgb_pixel_format;
     gl_accelerated_visual = configuration().graphics.gl_accelerated_visual;
     z_pixel_format = configuration().graphics.z_pixel_format;
@@ -172,25 +171,25 @@ void vs_options::init() {
     shader_name = configuration().graphics.shader_name;
     framerate_changes_shader = configuration().graphics.framerate_changes_shader;
     draw_weapons = configuration().graphics.draw_weapons;
-    sparklerate = configuration().graphics.sparkle_rate;
+    sparklerate = configuration().graphics.sparkle_rate_flt;
     only_stretch_in_warp = configuration().graphics.only_stretch_in_warp;
-    warp_stretch_cutoff = configuration().graphics.warp_stretch_cutoff;
-    warp_stretch_region0_max = configuration().graphics.warp_stretch_region0_max;
-    warp_stretch_max = configuration().graphics.warp_stretch_max;
-    warp_stretch_max_speed = configuration().graphics.warp_stretch_max_speed;
-    warp_stretch_max_region0_speed = configuration().graphics.warp_stretch_max_region0_speed;
-    weapon_gamma = configuration().graphics.weapon_gamma;
+    warp_stretch_cutoff = configuration().graphics.warp_stretch_cutoff_flt;
+    warp_stretch_region0_max = configuration().graphics.warp_stretch_region0_max_flt;
+    warp_stretch_max = configuration().graphics.warp_stretch_max_flt;
+    warp_stretch_max_speed = configuration().graphics.warp_stretch_max_speed_flt;
+    warp_stretch_max_region0_speed = configuration().graphics.warp_stretch_max_region0_speed_flt;
+    weapon_gamma = configuration().graphics.weapon_gamma_flt;
     split_dead_subunits = configuration().graphics.split_dead_subunits;
-    explosionforce = configuration().graphics.explosion_force;
-    explosiontorque = configuration().graphics.explosion_torque;
+    explosionforce = configuration().graphics.explosion_force_flt;
+    explosiontorque = configuration().graphics.explosion_torque_flt;
     explosion_animation = configuration().graphics.explosion_animation;
     explosion_face_player = configuration().graphics.explosion_face_player;
-    percent_shockwave = configuration().graphics.percent_shockwave;
-    shockwave_growth = configuration().graphics.shockwave_growth;
+    percent_shockwave = configuration().graphics.percent_shockwave_flt;
+    shockwave_growth = configuration().graphics.shockwave_growth_flt;
     shockwave_animation = configuration().graphics.shockwave_animation;
-    bolt_offset = configuration().graphics.bolt_offset;
-    StretchBolts = configuration().graphics.stretch_bolts;
-    bolt_pixel_size = configuration().graphics.bolt_pixel_size;
+    bolt_offset = configuration().graphics.bolt_offset_flt;
+    StretchBolts = configuration().graphics.stretch_bolts_flt;
+    bolt_pixel_size = configuration().graphics.bolt_pixel_size_flt;
 
     /* Graphics/Mesh Options */
     smooth_lines = configuration().graphics.smooth_lines;
@@ -202,11 +201,11 @@ void vs_options::init() {
 
 
     /* Terrain Options */
-    xscale = configuration().terrain.xscale;
-    yscale = configuration().terrain.yscale;
-    zscale = configuration().terrain.zscale;
-    mass = configuration().terrain.mass;
-    radius = configuration().terrain.radius;
+    xscale = configuration().terrain.xscale_dbl;
+    yscale = configuration().terrain.yscale_dbl;
+    zscale = configuration().terrain.zscale_dbl;
+    mass = configuration().terrain.mass_dbl;
+    radius = configuration().terrain.radius_dbl;
 
     /* Player Options */
 
@@ -239,29 +238,29 @@ void vs_options::init() {
     /* PhysicsConfig Options */
     Drone = configuration().physics.drone;
     max_missions = configuration().physics.max_missions;
-    game_speed = configuration().physics.game_speed;
-    runtime_compactness = configuration().physics.runtime_compactness;
-    autogen_compactness = configuration().physics.autogen_compactness;
-    AsteroidDifficulty = configuration().physics.asteroid_difficulty;
-    YearScale = configuration().physics.year_scale;
+    game_speed = configuration().physics.game_speed_dbl;
+    runtime_compactness = configuration().physics.runtime_compactness_dbl;
+    autogen_compactness = configuration().physics.autogen_compactness_dbl;
+    AsteroidDifficulty = configuration().physics.asteroid_difficulty_dbl;
+    YearScale = configuration().physics.year_scale_dbl;
     game_speed_affects_autogen_systems = configuration().physics.game_speed_affects_autogen_systems;
-    star_system_scale = configuration().physics.star_system_scale;
-    respawn_unit_size = configuration().physics.respawn_unit_size;
+    star_system_scale = configuration().physics.star_system_scale_dbl;
+    respawn_unit_size = configuration().physics.respawn_unit_size_dbl;
     NumRunningSystems = configuration().physics.num_running_systems;
     campaigns = configuration().game_start.campaigns;
-    InactiveSystemTime = configuration().physics.inactive_system_time;
-    jump_radius_scale = configuration().physics.jump_radius_scale;
+    InactiveSystemTime = configuration().physics.inactive_system_time_flt;
+    jump_radius_scale = configuration().physics.jump_radius_scale_flt;
     jump_disables_shields = configuration().physics.jump_disables_shields;
     display_in_meters = configuration().physics.display_in_meters;
     game_speed_lying = configuration().physics.game_speed_lying;
     num_times_to_simulate_new_star_system = configuration().physics.num_times_to_simulate_new_star_system;
     gun_speed_adjusted_game_speed = configuration().physics.gun_speed_adjusted_game_speed;
-    gun_speed = configuration().physics.gun_speed;
-    weapon_damage_efficiency = configuration().physics.weapon_damage_efficiency;
-    refire_difficulty_scaling = configuration().physics.refire_difficulty_scaling;
-    debris_mass = configuration().physics.debris_mass;
-    explosion_damage_center = configuration().physics.explosion_damage_center;
-    explosion_damage_edge = configuration().physics.explosion_damage_edge;
+    gun_speed = configuration().physics.gun_speed_flt;
+    weapon_damage_efficiency = configuration().physics.weapon_damage_efficiency_flt;
+    refire_difficulty_scaling = configuration().physics.refire_difficulty_scaling_flt;
+    debris_mass = configuration().physics.debris_mass_flt;
+    explosion_damage_center = configuration().physics.explosion_damage_center_flt;
+    explosion_damage_edge = configuration().physics.explosion_damage_edge_flt;
     eject_cargo_on_blowup = configuration().physics.eject_cargo_on_blowup;
 
     /* Data Options */

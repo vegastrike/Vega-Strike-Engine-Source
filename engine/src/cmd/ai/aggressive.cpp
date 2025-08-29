@@ -106,7 +106,7 @@ static void TurretFAW(Unit *parent) {
     Unit *un;
     while (NULL != (un = *iter)) {
         if (!CheckAccessory(un)) {
-            un->EnqueueAIFirst(new Orders::FireAt(configuration().ai.firing.aggressivity));
+            un->EnqueueAIFirst(new Orders::FireAt(configuration().ai.firing.aggressivity_flt));
             un->EnqueueAIFirst(new Orders::FaceTarget(false, 3));
         }
         TurretFAW(un);
@@ -244,7 +244,7 @@ AggressiveAI::AggressiveAI(const char *filename, Unit *target)
     logiccurtime = logic->maxtime;     //set it to the time allotted
     obedient = true;
     if (aggressivity == 2.01F) {
-        aggressivity = configuration().unit.default_aggressivity;
+        aggressivity = configuration().unit.default_aggressivity_flt;
     }
     if (target != nullptr) {
         AttachOrder(target);
@@ -330,7 +330,7 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             } else {
                 value = 10000;
             }
-            value /= configuration().physics.game_speed;     /*game_accel*/
+            value /= configuration().physics.game_speed_dbl;     /*game_accel*/
             break;
         }
         case THREAT:
@@ -689,8 +689,8 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                             if (o) {
                                 o->Communicate(c);
                             }
-                            const float esc_percent = configuration().ai.targeting.escort_distance;
-                            const float turn_leader = configuration().ai.targeting.turn_leader_distance;
+                            const float esc_percent = configuration().ai.targeting.escort_distance_flt;
+                            const float turn_leader = configuration().ai.targeting.turn_leader_distance_flt;
                             int fgnum = parent->getFgSubnumber();
                             if (parent->getFlightgroup()) {
                                 int tempnum = 0;
@@ -767,8 +767,8 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                             if (o) {
                                 o->Communicate(c);
                             }
-                            const float esc_percent = configuration().ai.targeting.escort_distance;
-                            const float turn_leader = configuration().ai.targeting.turn_leader_distance;
+                            const float esc_percent = configuration().ai.targeting.escort_distance_flt;
+                            const float turn_leader = configuration().ai.targeting.turn_leader_distance_flt;
                             int fgnum = parent->getFgSubnumber();
                             if (parent->getFlightgroup()) {
                                 int tempnum = 0;
@@ -934,7 +934,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                             CommunicationMessage c(parent, leader, NULL, 0);
 //this order is only valid for cargo wingmen, other wingmen will not comply
                             c.SetCurrentState(c.fsm->GetYesNode(), NULL, 0);
-                            const float turn_leader = configuration().ai.targeting.turn_leader_distance;
+                            const float turn_leader = configuration().ai.targeting.turn_leader_distance_flt;
                             int fgnum = parent->getFgSubnumber();
                             if (parent->getFlightgroup()) {
                                 int tempnum = 0;
@@ -1187,7 +1187,7 @@ static bool overridable(const std::string &s) {
 extern void LeadMe(Unit *un, string directive, string speech, bool changetarget);
 
 void AggressiveAI::ReCommandWing(Flightgroup *fg) {
-    const float time_to_recommand_wing = configuration().ai.targeting.time_to_recommand_wing;
+    const float time_to_recommand_wing = configuration().ai.targeting.time_to_recommand_wing_flt;
     const bool verbose_debug = configuration().logging.verbose_debug;
     if (fg != nullptr) {
         Unit *lead;

@@ -150,7 +150,7 @@ void ShipCommands::setkps(const char *in) {
     Unit *player = UniverseUtil::getPlayer();
     if (player) {
         if (configuration().physics.game_speed_lying) {
-            kps *= configuration().physics.game_speed;
+            kps *= configuration().physics.game_speed_flt;
         } else {
             kps /= configuration().physics.display_in_meters ? 1.0f : 3.6f;
         }

@@ -553,14 +553,14 @@ void init_opengl_extensions() {
 }
 
 static void initfov() {
-    g_game.detaillevel = game_options()->ModelDetail;
-    g_game.use_textures = game_options()->UseTextures;
-    g_game.use_ship_textures = game_options()->UseShipTextures;
-    g_game.use_planet_textures = game_options()->UsePlanetTextures;
-    g_game.use_logos = game_options()->UseLogos;
-    g_game.use_sprites = game_options()->UseVSSprites;
-    g_game.use_animations = game_options()->UseAnimations;
-    g_game.use_videos = game_options()->UseVideos;
+    g_game.detaillevel = configuration().graphics.model_detail_flt;
+    g_game.use_textures = configuration().graphics.use_textures;
+    g_game.use_ship_textures = configuration().graphics.use_ship_textures;
+    g_game.use_planet_textures = configuration().graphics.use_planet_textures;
+    g_game.use_logos = configuration().graphics.use_logos;
+    g_game.use_sprites = configuration().graphics.use_vs_sprites;
+    g_game.use_animations = configuration().graphics.use_animations;
+    g_game.use_videos = configuration().graphics.use_videos;
 
     /*
      *  FILE * fp = fopen ("glsetup.txt","r");
@@ -729,7 +729,7 @@ void GFXInit(int argc, char **argv) {
     GFXCreateLightContext(con);
     //glutSetCursor(GLUT_CURSOR_NONE);
     /* Avoid scrambled screen on startup - Twice, for triple buffering */
-    if (game_options()->ClearOnStartup) {
+    if (configuration().graphics.clear_on_startup) {
         glClear(GL_COLOR_BUFFER_BIT);
         winsys_swap_buffers();
         glClear(GL_COLOR_BUFFER_BIT);

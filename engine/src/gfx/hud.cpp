@@ -235,7 +235,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
     //some stuff to draw the text stuff
     string::const_iterator text_it = newText.begin();
     const bool use_bit = force_highquality || configuration().graphics.high_quality_font;
-    const float font_point = configuration().graphics.font_point;
+    const float font_point = configuration().graphics.font_point_flt;
     const bool font_antialias = configuration().graphics.font_antialias;
     void *fnt = getFont();
     static float std_wid = glutStrokeWidth(GLUT_STROKE_ROMAN, 'W');
