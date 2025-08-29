@@ -160,14 +160,11 @@ public:
     std::string account_server_url;
     bool chat_only_in_network{};
 
-    /* Cargo Options */
-
-    bool news_from_cargolist{};
-
     /* Keyboard Options */
 
     bool enable_unicode{};
 
+    // TODO: Refactor / move these
     std::string getCallsign(int);
     std::string getPlayer(int);
     std::string getPassword(int);
