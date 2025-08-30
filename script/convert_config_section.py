@@ -172,13 +172,13 @@ def build_parse_keys(section_name: str) -> list[ParseKey]:
     parse_keys.append(parse_key_0)
     parse_key_0a = ParseKey()
     parse_key_0a.pattern = re.compile(r'vs_config->getVariable\s*\(\s*\"' + section_name +
-                                     r'\"\s*,\s*\"(?P<subsection>\w+)\"\s*,\s*\"(?P<name2>\w+)\"\s*,\s*\"(?P<default_value>false)\"\s*\)', regex_flags_multiline)
+                                      r'\"\s*,\s*\"(?P<subsection>\w+)\"\s*,\s*\"(?P<name2>\w+)\"\s*,\s*\"(?P<default_value>false)\"\s*\)', regex_flags_multiline)
     parse_key_0a.substitution = r'configuration().' + section_name + r'.\g<subsection>.\g<name2>'
     parse_key_0a.leave_as_is = ''
     parse_keys.append(parse_key_0a)
     parse_key_0b = ParseKey()
     parse_key_0b.pattern = re.compile(r'vs_config->getVariable\s*\(\s*\"' + section_name +
-                                     r'\"\s*,\s*\"(?P<subsection>\w+)\"\s*,\s*\"(?P<name2>\w+)\"\s*,\s*\"(?P<default_value>\d+)\"\s*\)', regex_flags_multiline)
+                                      r'\"\s*,\s*\"(?P<subsection>\w+)\"\s*,\s*\"(?P<name2>\w+)\"\s*,\s*\"(?P<default_value>\d+)\"\s*\)', regex_flags_multiline)
     parse_key_0b.substitution = r'configuration().' + section_name + r'.\g<subsection>.\g<name2>'
     parse_key_0b.leave_as_is = ''
     parse_keys.append(parse_key_0b)
@@ -190,7 +190,7 @@ def build_parse_keys(section_name: str) -> list[ParseKey]:
     parse_keys.append(parse_key_0c)
     parse_key_0d = ParseKey()
     parse_key_0d.pattern = re.compile(r'vs_config->getVariable\s*\(\s*\"' + section_name +
-                                     r'\"\s*,\s*\"(?P<name2>\w+)\"\s*,\s*\"(?P<default_value>true)\"\s*\)', regex_flags_multiline)
+                                      r'\"\s*,\s*\"(?P<name2>\w+)\"\s*,\s*\"(?P<default_value>true)\"\s*\)', regex_flags_multiline)
     parse_key_0d.substitution = r'configuration().' + section_name + r'.\g<name2>'
     parse_key_0d.leave_as_is = ''
     parse_keys.append(parse_key_0d)
