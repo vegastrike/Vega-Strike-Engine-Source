@@ -89,7 +89,7 @@ public:
 
     double PriceCargo(const std::string &cargo_name);
     void SetPlayerShip();
-    bool PlayerShip();
+    bool IsPlayerShip() const;
 
 // Components
     EnergyContainer fuel = EnergyContainer(ComponentType::Fuel);

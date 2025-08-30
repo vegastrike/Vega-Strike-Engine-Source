@@ -171,9 +171,6 @@ public:
 //Transforms a orientation vector to world space. Does not take position into account
     Vector ToWorldCoordinates(const Vector &v) const;
 
-    virtual bool isPlayerShip() {
-        return false;
-    };
 
     //Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
     //Not needed here, so only in NetUnit and Unit classes

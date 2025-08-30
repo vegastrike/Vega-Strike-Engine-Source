@@ -2547,19 +2547,19 @@ void GameCockpit::SetParent(Unit *unit, const char *filename, const char *unitmo
 }
 
 void GameCockpit::OnDockEnd(Unit *station, Unit *ship) {
-    if (_Universe->isPlayerStarship(ship)) {
+    if (ship->IsPlayerShip()) {
         updateRadar(ship);
     }
 }
 
 void GameCockpit::OnJumpBegin(Unit *ship) {
-    if (_Universe->isPlayerStarship(ship)) {
+    if (ship->IsPlayerShip()) {
         radarDisplay->OnJumpBegin();
     }
 }
 
 void GameCockpit::OnJumpEnd(Unit *ship) {
-    if (_Universe->isPlayerStarship(ship)) {
+    if (ship->IsPlayerShip()) {
         radarDisplay->OnJumpEnd();
     }
 }

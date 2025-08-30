@@ -334,7 +334,7 @@ void NavigationSystem::DrawSystem() {
                  * ++blah;
                  *       continue;
                  *  }*/
-                if (UnitUtil::isPlayerStarship(*blah) > -1) {
+                if (_Universe->whichPlayerStarship(*blah) > -1) {
                     //is THE PLAYER
                     insert_type = navfighter;
                     insert_size = navfightersize;

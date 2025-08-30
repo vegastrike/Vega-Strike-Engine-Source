@@ -152,6 +152,7 @@ void Cockpit::SetParent(Unit *unit, const char *filename, const char *unitmodnam
     }
     activeStarSystem = _Universe->activeStarSystem();          //cannot switch to units in other star systems.
     parent.SetUnit(unit);
+    unit->SetPlayerShip(); // This is the place to set it.
     savegame->SetPlayerLocation(pos);
     if (filename[0] != '\0') {
         this->GetUnitFileName() = std::string(filename);
@@ -481,7 +482,7 @@ bool Cockpit::Update() {
                     tmpgot = true;
                     Unit *un;
                     for (un_iter ui = par->getSubUnits(); (un = *ui);) {
-                        if (_Universe->isPlayerStarship(un)) {
+                        if (un->IsPlayerShip()) {
                             ++ui;
                             continue;
                         }
@@ -506,7 +507,7 @@ bool Cockpit::Update() {
                         index = 0;
                     }
                     Unit *un = parentturret.GetUnit();
-                    if (un && (!_Universe->isPlayerStarship(un))) {
+                    if (un && !un->IsPlayerShip()) {
                         SetParent(un,
                                 GetUnitFileName().c_str(),
                                 this->unitmodname.c_str(),
@@ -573,7 +574,7 @@ bool Cockpit::Update() {
 //stealing a ship from a hired wingman.
                     if ((((par != NULL)
                             && (i++) >= index)
-                            || par == NULL) && (!_Universe->isPlayerStarship(un))
+                            || par == NULL) && (!un->IsPlayerShip())
                             && (switch_nonowned_units
                                     || (par != NULL
                                             && un->owner == par->owner)

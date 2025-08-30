@@ -431,7 +431,7 @@ bool Armed::TargetTracked(const Unit *checktarget) {
     const bool must_lock_to_autotrack = configuration().physics.must_lock_to_autotrack;
 
     bool we_do_track = unit->radar.tracking_active
-            && (!_Universe->isPlayerStarship(unit) || TargetLocked() || !must_lock_to_autotrack);
+            && (!unit->IsPlayerShip() || TargetLocked() || !must_lock_to_autotrack);
     if (!we_do_track) {
         return false;
     }
