@@ -1615,8 +1615,8 @@ bool Unit::Explode(bool drawit, float timeit) {
         Unit *un = nullptr;
         if (!sub) {
             if ((un = _Universe->AccessCockpit(0)->GetParent())) {
-                exploc = un->Position() * game_options()->explosion_closeness
-                        + exploc * (1 - game_options()->explosion_closeness);
+                exploc = un->Position() * configuration().audio.explosion_closeness_flt
+                        + exploc * (1 - configuration().audio.explosion_closeness_flt);
             }
         }
         //AUDPlay( this->sound->explode, exploc, this->Velocity, 1 );
@@ -1663,15 +1663,15 @@ bool Unit::Explode(bool drawit, float timeit) {
                     if (!BaseInterface::CurrentBase) {
                         static double lasttime = 0;
                         double newtime = getNewTime();
-                        if (newtime - lasttime > game_options()->time_between_music
+                        if (newtime - lasttime > configuration().audio.time_between_music_flt
                                 || (_Universe->isPlayerStarship(this) && this->getUnitType() != Vega_UnitType::missile
                                         && this->faction
                                                 != upgradesfaction)) {
                             //No victory for missiles or spawned explosions
-                            if (rel > game_options()->victory_relationship) {
+                            if (rel > configuration().audio.victory_relationship_flt) {
                                 lasttime = newtime;
                                 muzak->SkipRandSong(Music::LOSSLIST);
-                            } else if (rel < game_options()->loss_relationship) {
+                            } else if (rel < configuration().audio.loss_relationship_flt) {
                                 lasttime = newtime;
                                 muzak->SkipRandSong(Music::VICTORYLIST);
                             }

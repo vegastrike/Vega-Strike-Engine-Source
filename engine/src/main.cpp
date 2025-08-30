@@ -366,7 +366,7 @@ int main(int argc, char *argv[]) {
     UpdateTime();
 
     AUDInit();
-    AUDListenerGain(game_options()->sound_gain);
+    AUDListenerGain(configuration().audio.sound_gain_flt);
     Music::InitMuzak();
 
     initSceneManager();
