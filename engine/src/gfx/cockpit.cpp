@@ -180,7 +180,7 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
         autoLandingExcludeList_initialised = true;
         std::string excludes;
 
-        excludes = vs_config->getVariable("physics", "AutoLandingExcludeList", "");
+        excludes = configuration().physics.auto_landing_exclude_list;
         if (!excludes.empty()) {
             std::string::size_type pos = 0, epos = 0;
             while (epos != std::string::npos) {
@@ -189,7 +189,7 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
                 pos = epos + 1;
             }
         }
-        excludes = vs_config->getVariable("physics", "AutoLandingExcludeWarningList", "");
+        excludes = configuration().physics.auto_landing_exclude_warning_list;
         if (!excludes.empty()) {
             std::string::size_type pos = 0, epos = 0;
             while (epos != std::string::npos) {
