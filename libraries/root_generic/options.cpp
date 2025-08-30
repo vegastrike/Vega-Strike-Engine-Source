@@ -35,26 +35,28 @@ extern VegaConfig *vs_config;
 void vs_options::init() {
     /* Audio Options */
 
-    threadtime = XMLSupport::parse_int(vs_config->getVariable("audio", "threadtime", "1"));
-    missionvictorysong = vs_config->getVariable("audio", "missionvictorysong", "../music/victory.ogg");
-    Music = XMLSupport::parse_bool(vs_config->getVariable("audio", "Music", "true"));
-    sound_gain = XMLSupport::parse_floatf(vs_config->getVariable("audio", "sound_gain", ".5"));
-    audio_ref_distance = XMLSupport::parse_floatf(vs_config->getVariable("audio", "audio_ref_distance", "4000"));
-    audio_max_distance = XMLSupport::parse_floatf(vs_config->getVariable("audio", "audio_max_distance", "1000000"));
-    Doppler = XMLSupport::parse_bool(vs_config->getVariable("audio", "Doppler", "false"));
-    Positional = XMLSupport::parse_bool(vs_config->getVariable("audio", "Positional", "true"));
-    Volume = XMLSupport::parse_floatf(vs_config->getVariable("audio", "Volume", "100"));
-    DopplerScale = XMLSupport::parse_floatf(vs_config->getVariable("audio", "DopplerScale", "1"));
-    frequency = XMLSupport::parse_int(vs_config->getVariable("audio", "frequency", "48000"));
-    MaxSingleSounds = XMLSupport::parse_int(vs_config->getVariable("audio", "MaxSingleSounds", "8"));
-    MaxTotalSounds = XMLSupport::parse_int(vs_config->getVariable("audio", "MaxTotalSounds", "20"));
-    Sound = XMLSupport::parse_bool(vs_config->getVariable("audio", "Sound", "true"));
-    ai_sound = XMLSupport::parse_bool(vs_config->getVariable("audio", "ai_sound", "true"));
-    explosion_closeness = XMLSupport::parse_floatf(vs_config->getVariable("audio", "explosion_closeness", ".8"));
-    loss_relationship = XMLSupport::parse_floatf(vs_config->getVariable("audio", "loss_relationship", "-.1"));
-    victory_relationship = XMLSupport::parse_floatf(vs_config->getVariable("audio", "victory_relationship", ".5"));
-    time_between_music = XMLSupport::parse_floatf(vs_config->getVariable("audio", "time_between_music", "180"));
+    threadtime = configuration().audio.thread_time;
+    missionvictorysong = configuration().audio.mission_victory_song;
+    Music = configuration().audio.music;
+    sound_gain = configuration().audio.sound_gain_flt;
+    audio_ref_distance = configuration().audio.audio_ref_distance_flt;
+    audio_max_distance = configuration().audio.audio_max_distance_flt;
+    Doppler = configuration().audio.doppler;
+    Positional = configuration().audio.positional;
+    Volume = configuration().audio.volume_flt;
+    DopplerScale = configuration().audio.doppler_scale_flt;
+    frequency = configuration().audio.frequency;
+    MaxSingleSounds = configuration().audio.max_single_sounds;
+    MaxTotalSounds = configuration().audio.max_total_sounds;
+    Sound = configuration().audio.sound;
+    ai_sound = configuration().audio.ai_sound;
+    explosion_closeness = configuration().audio.explosion_closeness_flt;
+    loss_relationship = configuration().audio.loss_relationship_flt;
+    victory_relationship = configuration().audio.victory_relationship_flt;
+    time_between_music = configuration().audio.time_between_music_flt;
+
     /* Cockpit Audio Options */
+
     comm = vs_config->getVariable("cockpitaudio", "comm", "vdu_c");
     scanning = vs_config->getVariable("cockpitaudio", "scanning", "vdu_c");
     objective = vs_config->getVariable("cockpitaudio", "objective", "vdu_c");

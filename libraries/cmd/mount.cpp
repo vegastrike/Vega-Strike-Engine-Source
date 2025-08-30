@@ -426,26 +426,18 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
 
                 break;
         }
-        static bool use_separate_sound =
-                XMLSupport::parse_bool(vs_config->getVariable("audio", "high_quality_weapon", "true"));
-        static bool ai_use_separate_sound =
-                XMLSupport::parse_bool(vs_config->getVariable("audio", "ai_high_quality_weapon", "false"));
-        static bool ai_sound = XMLSupport::parse_bool(vs_config->getVariable("audio", "ai_sound", "true"));
+        const bool use_separate_sound = configuration().audio.high_quality_weapon;
+        const bool ai_use_separate_sound = configuration().audio.ai_high_quality_weapon;
+        static bool ai_sound = configuration().audio.ai_sound;
         Cockpit *cp;
         bool ips = ((cp = _Universe->isPlayerStarshipVoid(owner)) != NULL);
         double distancesqr = (tmp.position - AUDListenerLocation()).MagnitudeSquared();
-        static double maxdistancesqr =
-                XMLSupport::parse_float(vs_config->getVariable("audio", "max_range_to_hear_weapon_fire",
-                        "100000"))
-                        * XMLSupport::parse_float(vs_config->getVariable("audio",
-                                "max_range_to_hear_weapon_fire",
-                                "100000"));
-        static float weapon_gain =
-                XMLSupport::parse_float(vs_config->getVariable("audio", "weapon_gain", ".25"));
-        static float exterior_weapon_gain =
-                XMLSupport::parse_float(vs_config->getVariable("audio", "exterior_weapon_gain", ".35"));
-        static float min_weapon_sound_refire =
-                XMLSupport::parse_float(vs_config->getVariable("audio", "min_weapon_sound_refire", ".2"));
+        const double maxdistancesqr =
+                configuration().audio.max_range_to_hear_weapon_fire_dbl
+                        * configuration().audio.max_range_to_hear_weapon_fire_dbl;
+        const float weapon_gain = configuration().audio.weapon_gain_flt;
+        const float exterior_weapon_gain = configuration().audio.exterior_weapon_gain_flt;
+        const float min_weapon_sound_refire = configuration().audio.min_weapon_sound_refire_flt;
         float curtime = realTime();
         bool tooquick = ((curtime - last_sound_refire_time) < min_weapon_sound_refire);
         if (!tooquick) {

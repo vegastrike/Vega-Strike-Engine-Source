@@ -1316,8 +1316,7 @@ void PlayDockingSound(int dock) {
         }
         case 3: {
             static soundContainer reqsound;
-            static string
-                    otherstr = vs_config->getVariable("audio", "automatic_docking_zone", "automatic_landing_zone.wav");
+            std::string otherstr = configuration().audio.automatic_docking_zone;
             if (otherstr != "" && rand() < RAND_MAX / 2) {
                 static int s = AUDCreateSoundWAV(otherstr, false);
                 AUDPlay(s, QVector(0, 0, 0), Vector(0, 0, 0), 1);

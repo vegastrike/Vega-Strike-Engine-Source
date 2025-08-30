@@ -129,12 +129,12 @@ Music::Music(Unit *parent) : random(false), p(parent), song(-1), thread_initiali
     for (i = 0; i < MAXLIST; i++) {
         LoadMusic(vs_config->getVariable("audio", listvars[i], deflistvars[i]).c_str());
     }
-    soft_vol_up_latency = XMLSupport::parse_float(vs_config->getVariable("audio", "music_volume_up_latency", "15"));
-    soft_vol_down_latency = XMLSupport::parse_float(vs_config->getVariable("audio", "music_volume_down_latency", "2"));
+    soft_vol_up_latency = configuration().audio.music_volume_up_latency_flt;
+    soft_vol_down_latency = configuration().audio.music_volume_down_latency_flt;
     //Hardware volume = 1
     _SetVolume(1, true);
     //Software volume = from config
-    _SetVolume(XMLSupport::parse_float(vs_config->getVariable("audio", "music_volume", ".5")), false);
+    _SetVolume(configuration().audio.music_volume_flt, false);
 }
 
 void Music::ChangeVolume(float inc, int layer) {
@@ -231,7 +231,7 @@ int Music::SelectTracks(int layer) {
     if (!game_options()->Music) {
         return 0;
     }
-    static bool random = XMLSupport::parse_bool(vs_config->getVariable("audio", "shuffle_songs", "true"));
+    const bool random = configuration().audio.shuffle_songs;
     static size_t maxrecent =
             XMLSupport::parse_int(vs_config->getVariable("audio", "shuffle_songs.history_depth", MAX_RECENT_HISTORY));
     static std::string dj_script = vs_config->getVariable("sound", "dj_script", "modules/dj.py");
@@ -261,7 +261,7 @@ int Music::SelectTracks(int layer) {
     if (_Universe && _Universe->activeStarSystem() != NULL && _Universe->numPlayers()) {
         CompileRunPython(dj_script);
     } else {
-        static std::string loading_tune = vs_config->getVariable("audio", "loading_sound", "../music/loading.ogg");
+        std::string loading_tune = configuration().audio.loading_sound;
         GotoSong(loading_tune, layer);
     }
     return 0;
@@ -303,7 +303,7 @@ readerThread(
         memcpy(songname, me->music_load_info->hashname.data(), len);
         std::map<std::string, AUDSoundProperties>::iterator wherecache = cachedSongs.find(songname);
         bool foundcache = wherecache != cachedSongs.end();
-        static std::string cachable_songs = vs_config->getVariable("audio", "cache_songs", "../music/land.ogg");
+        std::string cachable_songs = configuration().audio.cache_songs;
         bool docacheme = cachable_songs.find(songname) != std::string::npos;
         if (foundcache == false && docacheme) {
             me->music_load_info->wave = NULL;
@@ -449,7 +449,7 @@ void Music::GotoSong(std::string mus, int layer) {
     if (!game_options()->Music) {
         return;
     }
-    static bool cross = XMLSupport::parse_bool(vs_config->getVariable("audio", "cross_fade_music", "true"));
+    const bool cross = configuration().audio.cross_fade_music;
     if (cross && (muzak_count >= 2)) {
         if (layer < 0) {
             if (mus == muzak[muzak_cross_index].cur_song_file) {
@@ -555,7 +555,7 @@ void Music::_SkipRandSong(int whichlist, int layer) {
     }
     if (whichlist != NOLIST && whichlist >= 0 && whichlist < (int) playlist.size()) {
         lastlist = whichlist;
-        static bool random = XMLSupport::parse_bool(vs_config->getVariable("audio", "shuffle_songs", "true"));
+        const bool random = configuration().audio.shuffle_songs;
         if (playlist[whichlist].size()) {
             GotoSong(whichlist, random ? randInt(playlist[whichlist].size()) : playlist[whichlist].counter++
                     % playlist[whichlist].size(), true, layer);
@@ -588,7 +588,7 @@ void Music::_SkipRandList(int layer) {
         return;
     }
     for (unsigned int i = 0; i < playlist.size(); i++) {
-        static bool random = XMLSupport::parse_bool(vs_config->getVariable("audio", "shuffle_songs", "true"));
+        const bool random = configuration().audio.shuffle_songs;
         if (!playlist[i].empty()) {
             GotoSong(i,
                     random ? randInt(playlist[i].size()) : playlist[i].counter++ % playlist[i].size(),
@@ -685,7 +685,7 @@ void Music::SetParent(Unit *parent) {
 }
 
 void Music::InitMuzak() {
-    muzak_count = XMLSupport::parse_int(vs_config->getVariable("audio", "music_layers", "1"));
+    muzak_count = configuration().audio.music_layers;
     muzak = new Music[muzak_count];
 }
 
@@ -777,10 +777,8 @@ void Music::Mute(bool mute, int layer) {
         return;
     }
     if (muzak) {
-        static float muting_fadeout =
-                XMLSupport::parse_float(vs_config->getVariable("audio", "music_muting_fadeout", "0.2"));
-        static float
-                muting_fadein = XMLSupport::parse_float(vs_config->getVariable("audio", "music_muting_fadeout", "0.5"));
+        const float muting_fadeout = configuration().audio.music_muting_fade_out_flt;
+        const float muting_fadein = configuration().audio.music_muting_fade_in_flt;
         if (layer < 0) {
             for (int i = 0; i < muzak_count; i++) {
                 if (mute) {
