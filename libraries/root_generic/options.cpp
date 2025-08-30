@@ -33,28 +33,6 @@
 extern VegaConfig *vs_config;
 
 void vs_options::init() {
-    /* Audio Options */
-
-    threadtime = configuration().audio.thread_time;
-    missionvictorysong = configuration().audio.mission_victory_song;
-    Music = configuration().audio.music;
-    sound_gain = configuration().audio.sound_gain_flt;
-    audio_ref_distance = configuration().audio.audio_ref_distance_flt;
-    audio_max_distance = configuration().audio.audio_max_distance_flt;
-    Doppler = configuration().audio.doppler;
-    Positional = configuration().audio.positional;
-    Volume = configuration().audio.volume_flt;
-    DopplerScale = configuration().audio.doppler_scale_flt;
-    frequency = configuration().audio.frequency;
-    MaxSingleSounds = configuration().audio.max_single_sounds;
-    MaxTotalSounds = configuration().audio.max_total_sounds;
-    Sound = configuration().audio.sound;
-    ai_sound = configuration().audio.ai_sound;
-    explosion_closeness = configuration().audio.explosion_closeness_flt;
-    loss_relationship = configuration().audio.loss_relationship_flt;
-    victory_relationship = configuration().audio.victory_relationship_flt;
-    time_between_music = configuration().audio.time_between_music_flt;
-
     /* Cockpit Audio Options */
 
     comm = vs_config->getVariable("cockpitaudio", "comm", "vdu_c");
@@ -78,8 +56,6 @@ void vs_options::init() {
     player_armor_hit = vs_config->getVariable("unitaudio", "player_armor_hit", "bigarmor.wav");
     player_hull_hit = vs_config->getVariable("unitaudio", "player_hull_hit", "bigarmor.wav");
     player_shield_hit = vs_config->getVariable("unitaudio", "player_shield_hit", "shieldhit.wav");
-
-    /* Player Options */
 
     /* AI Options */
 

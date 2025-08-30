@@ -27,6 +27,7 @@
  */
 
 
+#include "configuration/configuration.h"
 #ifdef HAVE_AL
 #if defined(__APPLE__) && defined (__MACH__)
 #include <al.h>
@@ -163,21 +164,20 @@ static ALCcontext *context_id = NULL;
 bool AUDInit() {
 #ifdef HAVE_AL
     // g_game.sound_enabled =
-    usedoppler = game_options()->Doppler;
-    usepositional = game_options()->Positional;
+    usedoppler = configuration().audio.doppler;
+    usepositional = configuration().audio.positional;
     double linuxadjust = 1;
 #ifndef _WIN32
 #ifndef __APPLE__
-    linuxadjust = 1. / 3.;
+    linuxadjust = 1.0 / 3.0;
 #endif
 #endif
-    scalepos = 1.0f / (game_options()->Volume * linuxadjust);
-    scalevel = game_options()->DopplerScale;
-    g_game.audio_frequency_mode = game_options()->frequency;
-    maxallowedsingle = game_options()->MaxSingleSounds;
-    g_game.max_sound_sources =
-            maxallowedtotal = game_options()->MaxTotalSounds;
-    if (!game_options()->Sound && !game_options()->Music) {
+    scalepos = 1.0 / (configuration().audio.volume_dbl * linuxadjust);
+    scalevel = configuration().audio.doppler_scale_flt;
+    g_game.audio_frequency_mode = configuration().audio.frequency;
+    maxallowedsingle = configuration().audio.max_single_sounds;
+    g_game.max_sound_sources = maxallowedtotal = configuration().audio.max_total_sounds;
+    if (!configuration().audio.sound && !configuration().audio.music) {
         return false;
     }
     int attrlist[] = {ALC_FREQUENCY, g_game.audio_frequency_mode, 0};
@@ -217,7 +217,7 @@ bool AUDInit() {
 
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 
-    g_game.sound_enabled = game_options()->Sound;
+    g_game.sound_enabled = configuration().audio.sound;
 
     return true;
 #endif

@@ -47,26 +47,6 @@ public:
 
     /* Audio Options */
 
-    int threadtime{};
-    std::string missionvictorysong;
-    bool Music{};
-    float sound_gain{};
-    float audio_ref_distance{};
-    float audio_max_distance{};
-    bool Doppler{};
-    bool Positional{};
-    float Volume{};
-    float DopplerScale{};
-    int frequency{};
-    int MaxSingleSounds{};
-    int MaxTotalSounds{};
-    bool Sound{};
-    bool ai_sound{};
-    float explosion_closeness{};
-    float loss_relationship{};
-    float victory_relationship{};
-    float time_between_music{};
-
     /* Cockpit Audio Options */
 
     std::string comm;
