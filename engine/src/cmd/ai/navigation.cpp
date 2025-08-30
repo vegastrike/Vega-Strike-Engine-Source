@@ -47,7 +47,7 @@
 
 using namespace Orders;
 
-constexpr float kPi = 3.1415926536F;
+constexpr float M_PI_FLT = M_PI;
 
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
@@ -600,7 +600,7 @@ void AutoLongHaul::Execute() {
     const float go_perpendicular_speed = configuration().physics.warp_perpendicular_flt;
     const float min_warp_orbit_radius = configuration().physics.min_warp_orbit_radius_flt;
     const float warp_orbit_multiplier = configuration().physics.warp_orbit_multiplier_flt;
-    const float warp_behind_angle = cos(kPi * configuration().physics.warp_behind_angle_flt / 180.0F);
+    const float warp_behind_angle = cos(M_PI_FLT * configuration().physics.warp_behind_angle_flt / 180.0F);
     QVector myposition = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();     //get unit pos
     QVector destination = target->isSubUnit() ? target->Position() : target->LocalPosition();     //get destination
     QVector destinationdirection = (destination - myposition);       //find vector from us to destination
@@ -686,7 +686,7 @@ void AutoLongHaul::Execute() {
         if (speed > .01) {
             cfacing = cfacing * (1. / speed);
         }
-        const float dotLimit = cos(kPi * configuration().physics.auto_pilot_spec_lining_up_angle_flt / 180.0F);
+        const float dotLimit = cos(M_PI_FLT * configuration().physics.auto_pilot_spec_lining_up_angle_flt / 180.0F);
         if (cfacing.Dot(destinationdirection) < dotLimit) {          //if wanting to face target but overshooting.
             deactivatewarp = true;
         }              //turn off drive

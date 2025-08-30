@@ -54,7 +54,6 @@ echo "Detected Mac OS X ${DETECT_MAC_OS_VERSION} - ${MAC_OS_NAME}"
 # Install the stuff we know needs to get installed all the time
 brew install \
     gcc \
-    cmake \
     python3 \
     boost-python3 \
     jpeg \
@@ -62,6 +61,9 @@ brew install \
     gtk+3 \
     gtkglext \
     sdl2
+
+# Only install cmake if it isn't installed yet
+brew ls --versions cmake || brew install cmake
 
 # The following Apple-provided libraries are deprecated:
 # * OpenGL as of macOS 10.14

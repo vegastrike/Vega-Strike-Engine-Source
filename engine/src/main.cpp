@@ -624,7 +624,7 @@ void bootstrap_main_loop() {
         vector<string> packedInfo;
 
         if (configuration().general.load_last_savegame) {
-            _Universe->AccessCockpit(k)->savegame->ParseSaveGame(savegamefile,
+            ComponentsManager::credits = _Universe->AccessCockpit(k)->savegame->ParseSaveGame(savegamefile,
                     mysystem,
                     mysystem,
                     pos,
