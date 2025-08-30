@@ -219,22 +219,7 @@ public:
     std::string password;
     std::string callsign;
 
-/* Joystick Options */
-    float joystick_exponent{};            //joystick axes are 32-bit floats.
-    int polling_rate{};
-    bool force_use_of_joystick{};
-    bool debug_digital_hatswitch{};
-    float deadband{};
-    float mouse_deadband{};
-    bool warp_mouse{};
-    float mouse_sensitivity{};
-    float mouse_exponent{};
-    float mouse_blur{};
-    bool force_feedback{};
-    int ff_device{};
-    int warp_mouse_zone{};
-
-/* AI Options */
+    /* AI Options */
     bool AllowCivilWar{};
     bool CappedFactionRating{};
     bool AllowNonplayerFactionChange{};
