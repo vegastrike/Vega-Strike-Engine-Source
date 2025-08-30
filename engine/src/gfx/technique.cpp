@@ -45,6 +45,7 @@
 #include "root_generic/options.h"
 #include "gldrv/gl_globals.h"
 #include "audio/Exceptions.h"
+#include "configuration/configuration.h"
 
 using namespace XMLDOM;
 using std::map;
@@ -356,11 +357,11 @@ bool Pass::isCompiled(int programVersion) const {
 Technique::Technique(const string &name) :
         name(name), compiled(false), programVersion(0) {
     string root_technique_filename =
-            game_options()->techniquesBasePath + "/"
+            configuration().data.techniques_base_path + "/"
                     + name + ".technique";
     string sub_technique_filename =
-            game_options()->techniquesBasePath + "/"
-                    + game_options()->techniquesSubPath + "/"
+            configuration().data.techniques_base_path + "/"
+                    + configuration().graphics.technique_set + "/"
                     + name + ".technique";
 
     string filename;
