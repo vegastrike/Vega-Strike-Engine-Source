@@ -215,7 +215,7 @@ def build_parse_keys(section_name: str) -> list[ParseKey]:
 
     parse_key_0h = ParseKey()
     parse_key_0h.pattern = re.compile(r'\bXMLSupport::parse_[A-Za-z0-9_]+\s*\(\s*configuration\(\)\.' + section_name + r'\.(?P<subsection>\w+)\.(?P<name2>\w+)\)', regex_flags_multiline)
-    parse_key_0h.substitution = r'configuration().' + section_name + r'\g<subsection>.\g<name2>'
+    parse_key_0h.substitution = r'configuration().' + section_name + r'.\g<subsection>.\g<name2>'
     parse_key_0h.leave_as_is = ''
     parse_keys.append(parse_key_0h)
 
@@ -224,6 +224,18 @@ def build_parse_keys(section_name: str) -> list[ParseKey]:
     parse_key_0i.substitution = r'configuration().' + section_name + r'.\g<name2>'
     parse_key_0i.leave_as_is = ''
     parse_keys.append(parse_key_0i)
+
+    parse_key_0j = ParseKey()
+    parse_key_0j.pattern = re.compile(r'\bstatic\s+(?P<type>bool|double|float|int|(?:std::)?string)\s+(?P<name>\w+)\s+=\s*configuration\(\)\.' + section_name + r'\.(?P<subsection>\w+)\.(?P<name2>\w+)\)', regex_flags_multiline)
+    parse_key_0j.substitution = r'const \g<type> \g<name> = configuration().' + section_name + r'.\g<subsection>.\g<name2>'
+    parse_key_0j.leave_as_is = ''
+    parse_keys.append(parse_key_0j)
+
+    parse_key_0k = ParseKey()
+    parse_key_0k.pattern = re.compile(r'\bstatic\s+(?P<type>bool|double|float|int|(?:std::)?string)\s+(?P<name>\w+)\s+=\s*configuration\(\)\.' + section_name + r'\.(?P<name2>\w+)\)', regex_flags_multiline)
+    parse_key_0k.substitution = r'const \g<type> \g<name> = configuration().' + section_name + r'.\g<name2>'
+    parse_key_0k.leave_as_is = ''
+    parse_keys.append(parse_key_0k)
 
     parse_key_1 = ParseKey()
     parse_key_1.pattern = re.compile(
