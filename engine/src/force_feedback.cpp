@@ -209,8 +209,9 @@ void ForceFeedback::init()
         VS_LOG(info, "force feedback disabled in config file");
         return;
     }
-    char devname[200];
-    snprintf( devname, 199, "/dev/input/event%d", configuration().joystick.ff_device );
+    constexpr size_t BUFFER_SIZE = 200;
+    char devname[BUFFER_SIZE];
+    snprintf( devname, BUFFER_SIZE - 1, "/dev/input/event%d", configuration().joystick.ff_device );
 
     ff_fd = open( devname, O_RDWR );
     if (ff_fd == -1) {
