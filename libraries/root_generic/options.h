@@ -45,23 +45,6 @@ public:
 
     void init();
 
-    /* Audio Options */
-
-    /* Cockpit Audio Options */
-
-    std::string comm;
-    std::string scanning;
-    std::string objective;
-    std::string examine;
-    std::string view;
-    std::string repair;
-    std::string manifest;
-    int compress_max{};
-    std::string compress_loop;
-    std::string compress_change;
-    std::string compress_stop;
-    int compress_interval{};
-
     bool comm_preload{};
 
     /* Unit Audio Options */

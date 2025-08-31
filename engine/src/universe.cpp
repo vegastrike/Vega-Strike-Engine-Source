@@ -140,22 +140,22 @@ inline void loadsounds(const string &str, const int max, soundArray &snds, bool 
 
 static void UpdateTimeCompressionSounds() {
     static int lasttimecompress = 0;
-    if ((timecount != lasttimecompress) && (game_options()->compress_max > 0)) {
+    if ((timecount != lasttimecompress) && (configuration().cockpit_audio.compress_max > 0)) {
         static bool inittimecompresssounds = false;
         static soundArray loop_snds;
         static soundArray burst_snds;
         static soundArray end_snds;
         if (inittimecompresssounds == false) {
-            loadsounds(game_options()->compress_loop, game_options()->compress_max, loop_snds, true);
-            loadsounds(game_options()->compress_stop, game_options()->compress_max, end_snds);
-            loadsounds(game_options()->compress_change, game_options()->compress_max, burst_snds);
+            loadsounds(configuration().cockpit_audio.compress_loop, configuration().cockpit_audio.compress_max, loop_snds, true);
+            loadsounds(configuration().cockpit_audio.compress_stop, configuration().cockpit_audio.compress_max, end_snds);
+            loadsounds(configuration().cockpit_audio.compress_change, configuration().cockpit_audio.compress_max, burst_snds);
             inittimecompresssounds = true;
         }
-        int soundfile = (timecount - 1) / game_options()->compress_interval;
-        int lastsoundfile = (lasttimecompress - 1) / game_options()->compress_interval;
+        int soundfile = (timecount - 1) / configuration().cockpit_audio.compress_interval;
+        int lastsoundfile = (lasttimecompress - 1) / configuration().cockpit_audio.compress_interval;
         if (timecount > 0 && lasttimecompress >= 0) {
-            if ((soundfile + 1) >= game_options()->compress_max) {
-                burst_snds.ptr[game_options()->compress_max - 1].playsound();
+            if ((soundfile + 1) >= configuration().cockpit_audio.compress_max) {
+                burst_snds.ptr[configuration().cockpit_audio.compress_max - 1].playsound();
             } else {
                 if (lasttimecompress > 0 && loop_snds.ptr[lastsoundfile].sound >= 0
                         && AUDIsPlaying(loop_snds.ptr[lastsoundfile].sound)) {
@@ -165,13 +165,13 @@ static void UpdateTimeCompressionSounds() {
                 burst_snds.ptr[soundfile].playsound();
             }
         } else if (lasttimecompress > 0 && timecount == 0) {
-            for (int i = 0; i < game_options()->compress_max; ++i) {
+            for (int i = 0; i < configuration().cockpit_audio.compress_max; ++i) {
                 if (loop_snds.ptr[i].sound >= 0 && AUDIsPlaying(loop_snds.ptr[i].sound)) {
                     AUDStopPlaying(loop_snds.ptr[i].sound);
                 }
             }
-            if (lastsoundfile >= game_options()->compress_max) {
-                end_snds.ptr[game_options()->compress_max - 1].playsound();
+            if (lastsoundfile >= configuration().cockpit_audio.compress_max) {
+                end_snds.ptr[configuration().cockpit_audio.compress_max - 1].playsound();
             } else {
                 end_snds.ptr[lastsoundfile].playsound();
             }

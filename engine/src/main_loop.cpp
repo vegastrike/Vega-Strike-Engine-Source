@@ -596,7 +596,7 @@ void CommModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->comm);
+            sc.loadsound(configuration().cockpit_audio.comm);
         }
         sc.playsound();
         SwitchVDUTo(VDU::COMM);
@@ -607,7 +607,7 @@ void ScanningModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->scanning);
+            sc.loadsound(configuration().cockpit_audio.scanning);
         }
         sc.playsound();
         SwitchVDUTo(VDU::SCANNING);
@@ -618,7 +618,7 @@ void ObjectiveModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->objective);
+            sc.loadsound(configuration().cockpit_audio.objective);
         }
         sc.playsound();
 
@@ -630,7 +630,7 @@ void TargetModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->examine);
+            sc.loadsound(configuration().cockpit_audio.examine);
         }
         sc.playsound();
 
@@ -642,7 +642,7 @@ void ViewModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->view);
+            sc.loadsound(configuration().cockpit_audio.view);
         }
         sc.playsound();
         SwitchVDUTo(VDU::VIEW);
@@ -653,7 +653,7 @@ void DamageModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->repair);
+            sc.loadsound(configuration().cockpit_audio.repair);
         }
         sc.playsound();
 
@@ -665,7 +665,7 @@ void ManifestModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->manifest);
+            sc.loadsound(configuration().cockpit_audio.manifest);
         }
         sc.playsound();
 
