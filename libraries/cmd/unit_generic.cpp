@@ -3186,7 +3186,7 @@ enum Unit::tractorHow Unit::getTractorability() const {
     static bool tractorability_mask_init = false;
     static unsigned char tractorability_mask;
     if (!tractorability_mask_init) {
-        std::string stractorability_mask = vs_config->getVariable("physics", "PlayerTractorabilityMask", "p");
+        std::string stractorability_mask = configuration().physics.player_tractorability_mask;
         if (!stractorability_mask.empty()) {
             tractorability_mask = tractorImmune;
             if (stractorability_mask.find_first_of("pP") != string::npos) {

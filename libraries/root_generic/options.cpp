@@ -33,14 +33,8 @@
 extern VegaConfig *vs_config;
 
 void vs_options::init() {
-    /* General Options */
-    galaxy = configuration().game_start.galaxy;;
-    command_interpretor = configuration().general.command_interpreter;
-    load_last_savegame = configuration().general.load_last_savegame;
-    debug_fs = configuration().general.debug_fs;
-
-
     /* Audio Options */
+
     threadtime = XMLSupport::parse_int(vs_config->getVariable("audio", "threadtime", "1"));
     missionvictorysong = vs_config->getVariable("audio", "missionvictorysong", "../music/victory.ogg");
     Music = XMLSupport::parse_bool(vs_config->getVariable("audio", "Music", "true"));
@@ -77,24 +71,16 @@ void vs_options::init() {
     comm_preload = XMLSupport::parse_bool(vs_config->getVariable("cockpitaudio", "comm_preload", "false"));
 
     /* Unit Audio Options */
+
     jumpleave = vs_config->getVariable("unitaudio", "jumpleave", "sfx43.wav");
     player_armor_hit = vs_config->getVariable("unitaudio", "player_armor_hit", "bigarmor.wav");
     player_hull_hit = vs_config->getVariable("unitaudio", "player_hull_hit", "bigarmor.wav");
     player_shield_hit = vs_config->getVariable("unitaudio", "player_shield_hit", "shieldhit.wav");
 
-    /* Splash Options */
-    auto_hide = configuration().splash.auto_hide;
-
-    /* Terrain Options */
-    xscale = configuration().terrain.xscale_dbl;
-    yscale = configuration().terrain.yscale_dbl;
-    zscale = configuration().terrain.zscale_dbl;
-    mass = configuration().terrain.mass_dbl;
-    radius = configuration().terrain.radius_dbl;
-
     /* Player Options */
 
     /* AI Options */
+
     AllowCivilWar = XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowCivilWar", "false"));
     CappedFactionRating = XMLSupport::parse_bool(vs_config->getVariable("AI", "CappedFactionRating", "true"));
     AllowNonplayerFactionChange =
@@ -103,35 +89,8 @@ void vs_options::init() {
     startDockedTo = vs_config->getVariable("AI", "startDockedTo", "MiningBase");
     dockOnLoad = XMLSupport::parse_bool(vs_config->getVariable("AI", "dockOnLoad", "true"));
 
-    /* PhysicsConfig Options */
-    Drone = configuration().physics.drone;
-    max_missions = configuration().physics.max_missions;
-    game_speed = configuration().physics.game_speed_dbl;
-    runtime_compactness = configuration().physics.runtime_compactness_dbl;
-    autogen_compactness = configuration().physics.autogen_compactness_dbl;
-    AsteroidDifficulty = configuration().physics.asteroid_difficulty_dbl;
-    YearScale = configuration().physics.year_scale_dbl;
-    game_speed_affects_autogen_systems = configuration().physics.game_speed_affects_autogen_systems;
-    star_system_scale = configuration().physics.star_system_scale_dbl;
-    respawn_unit_size = configuration().physics.respawn_unit_size_dbl;
-    NumRunningSystems = configuration().physics.num_running_systems;
-    campaigns = configuration().game_start.campaigns;
-    InactiveSystemTime = configuration().physics.inactive_system_time_flt;
-    jump_radius_scale = configuration().physics.jump_radius_scale_flt;
-    jump_disables_shields = configuration().physics.jump_disables_shields;
-    display_in_meters = configuration().physics.display_in_meters;
-    game_speed_lying = configuration().physics.game_speed_lying;
-    num_times_to_simulate_new_star_system = configuration().physics.num_times_to_simulate_new_star_system;
-    gun_speed_adjusted_game_speed = configuration().physics.gun_speed_adjusted_game_speed;
-    gun_speed = configuration().physics.gun_speed_flt;
-    weapon_damage_efficiency = configuration().physics.weapon_damage_efficiency_flt;
-    refire_difficulty_scaling = configuration().physics.refire_difficulty_scaling_flt;
-    debris_mass = configuration().physics.debris_mass_flt;
-    explosion_damage_center = configuration().physics.explosion_damage_center_flt;
-    explosion_damage_edge = configuration().physics.explosion_damage_edge_flt;
-    eject_cargo_on_blowup = configuration().physics.eject_cargo_on_blowup;
-
     /* Data Options */
+
     universe_path = vs_config->getVariable("data", "universe_path", "universe");
     sectors = vs_config->getVariable("data", "sectors", "sectors");
     techniquesBasePath = vs_config->getVariable("data", "techniques", "techniques");
@@ -151,6 +110,7 @@ void vs_options::init() {
     volume_format = vs_config->getVariable("data", "volume_format", "pk3");
 
     /* Galaxy Options */
+
     PushValuesToMean = XMLSupport::parse_bool(vs_config->getVariable("galaxy", "PushValuesToMean", "true"));
     AmbientLightFactor = XMLSupport::parse_floatf(vs_config->getVariable("galaxy", "AmbientLightFactor", "0"));
     StarRadiusScale = XMLSupport::parse_floatf(vs_config->getVariable("galaxy", "StarRadiusScale", "1000"));
@@ -174,6 +134,7 @@ void vs_options::init() {
 //    SmallUnitsMultiplier   = XMLSupport::parse_floatf( vs_config->getVariable( "galaxy", "SmallUnitsMultiplier", "0" ) );
 
     /* Network Options */
+
     force_client_connect = XMLSupport::parse_bool(vs_config->getVariable("network", "force_client_connect", "false"));
     use_account_server = XMLSupport::parse_bool(vs_config->getVariable("network", "use_account_server", "true"));
     server_ip = vs_config->getVariable("network", "server_ip", "");
@@ -182,17 +143,6 @@ void vs_options::init() {
             "account_server_url",
             "http://vegastrike.sourceforge.net/cgi-bin/accountserver.py?");
     chat_only_in_network = XMLSupport::parse_bool(vs_config->getVariable("network", "chat_only_in_network", "false"));
-
-    /* Cargo Options */
-    news_from_cargolist = configuration().cargo.news_from_cargo_list;
-
-    /* Keyboard Options */
-    enable_unicode = XMLSupport::parse_bool(vs_config->getVariable("keyboard", "enable_unicode", "true"));
-
-    /* Player Options */
-    password = vs_config->getVariable("player", "password", "");
-    callsign = vs_config->getVariable("player", "callsign", "");
-
 }
 
 string vs_options::getCallsign(int squadnum) {
