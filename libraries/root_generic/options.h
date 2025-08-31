@@ -45,8 +45,6 @@ public:
 
     void init();
 
-    bool comm_preload{};
-
     /* Unit Audio Options */
 
     std::string jumpleave;

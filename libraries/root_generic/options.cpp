@@ -33,8 +33,6 @@
 extern VegaConfig *vs_config;
 
 void vs_options::init() {
-    comm_preload = configuration().cockpit_audio.comm_preload;
-
     /* Unit Audio Options */
 
     jumpleave = vs_config->getVariable("unitaudio", "jumpleave", "sfx43.wav");
