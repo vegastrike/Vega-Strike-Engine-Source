@@ -2780,13 +2780,12 @@ int Unit::RepairUpgrade() {
 
 
 //item must be non-null... but baseUnit or credits may be NULL.
-bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit) {
+bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, double repair_price) {
     assert((item != NULL) | !"Unit::RepairUpgradeCargo got a null item."); //added by chuck_starchaser
     double itemPrice = 1; //baseUnit ? baseUnit->PriceCargo(item->GetName()) : item->GetPrice();
 
     // New repair
     if(RepairUnit(item->GetName())) {
-        double repair_price = item->RepairPrice();
         ComponentsManager::credits -= repair_price;
 
         GenerateHudText(getDamageColor);

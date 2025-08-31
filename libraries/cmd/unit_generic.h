@@ -315,7 +315,7 @@ public:
     int RepairUpgrade();                 //returns how many things were repaired
 //returns percentOperational,maxPercentOperational,and whether mount is damaged (1 is damaged, 0 is fine, -1 is invalid mount)
     bool RepairUpgradeCargo(Cargo *item,
-            Unit *baseUnit);           //item must not be NULL but baseUnit/credits are only used for pricing.
+            Unit *baseUnit, double repair_price);           //item must not be NULL but baseUnit/credits are only used for pricing.
     Vector MountPercentOperational(int whichmount);
     double Upgrade(const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
     bool canDowngrade(const Unit *downgradeor,

@@ -821,6 +821,7 @@ float PercentOperational(const Cargo item, Unit *un, std::string name, std::stri
         unit_key = name + "__upgrades";
     }
 
+    // TODO: remove this code. We now have GetComponentByType.
     const std::string upgrade_category = UnitCSVFactory::GetVariable(unit_key, "Upgrade_Type", std::string());
     if(upgrade_category == "Hull") {
         return un->hull.PercentOperational();

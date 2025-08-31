@@ -133,6 +133,8 @@ public:
     bool SellCargo(ComponentsManager *seller, Cargo *item, int quantity);
     bool BuyUpgrade(ComponentsManager *seller, Cargo *item, int quantity);
     bool SellUpgrade(ComponentsManager *seller, Cargo *item, int quantity);
+
+    Component* GetComponentByType(const ComponentType type);
 private:
     bool _Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity);
     bool _Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *item, int quantity);

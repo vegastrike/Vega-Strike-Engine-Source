@@ -71,6 +71,7 @@ using VSFileSystem::SaveFile;
 #include "root_generic/configxml.h"
 #include "resource/manifest.h"
 #include "cmd/reload_utils.h"
+#include "components/component_utils.h"
 
 #include <boost/python.hpp>
 #include "configuration/configuration.h"
@@ -396,8 +397,25 @@ static float basicRepairPrice(void) {
     return price * g_game.difficulty;
 }
 
-static float SellPrice(float operational, float price) {
-    return usedValue(price);// - RepairPrice(operational, price);
+static double GetOperational(Unit *playerUnit, const Cargo *item) {
+    ComponentType type = GetComponentTypeFromName(item->GetName());
+    Component* component = playerUnit->GetComponentByType(type);
+
+    if(component) {
+        return component->PercentOperational();
+    }
+
+    return 0.0;
+}
+
+static double RepairPrice(Unit *playerUnit, const Cargo *item) {
+    // TODO: * configuration()->general.difficulty;
+    return 0.8 * (1-GetOperational(playerUnit, item)) * item->GetPrice();
+}
+
+
+static float SellPrice(Unit *playerUnit, const Cargo *item) {
+    return usedValue(item->GetPrice()) - RepairPrice(playerUnit, item);
 }
 
 
@@ -1717,7 +1735,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
         if (m_player.GetUnit()
                 && UnitUtil::PercentOperational(item, m_player.GetUnit(), item.GetName(), item.GetCategory(), false) < 1) {
             if (m_base.GetUnit()) {
-                if (item.RepairPrice() <= ComponentsManager::credits) {
+                if (RepairPrice(m_player.GetUnit(), &item) <= ComponentsManager::credits) {
                     assert(commitFixButton != NULL);
                     if (commitFixButton) {
                         commitFixButton->setHidden(false);
@@ -1949,16 +1967,15 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
 
                 //********************************************************************************************
             {
-                double percent_working = UnitUtil::PercentOperational(item, 
-                        m_player.GetUnit(), item.GetName(), item.GetCategory(), false);
+                double percent_working = GetOperational(m_player.GetUnit(), &item);
                 if (percent_working < 1) {
                     //IF DAMAGED
                     tempString = (boost::format("Damaged and Used value: #b#%1$.2f#-b, purchased for %2$.2f#n1.5#")
-                            % SellPrice(percent_working, baseUnit->PriceCargo(item.GetName()))
+                            % SellPrice(m_player.GetUnit(), &item)
                             % item.GetPrice())
                             .str();
                     descString += tempString;
-                    double repair_price = item.RepairPrice();
+                    double repair_price = RepairPrice(m_player.GetUnit(), &item);
 
                     tempString = (boost::format("Percent Working: #b#%1$.2f#-b, Repair Cost: %2$.2f#n1.5#")
                             % (percent_working * 100)
@@ -3643,7 +3660,7 @@ bool BaseComputer::fixUpgrade(const EventCommandId &command, Control *control) {
     Unit *baseUnit = m_base.GetUnit();
 
     if (baseUnit && playerUnit && item) {
-        if (playerUnit->RepairUpgradeCargo(item, baseUnit)) {
+        if (playerUnit->RepairUpgradeCargo(item, baseUnit, RepairPrice(playerUnit, item))) {
             if (UnitUtil::PercentOperational(*item, playerUnit, item->GetName(), "upgrades/", false) < 1.0) {
                 emergency_downgrade_mode = "EMERGENCY MODE ";
             }
