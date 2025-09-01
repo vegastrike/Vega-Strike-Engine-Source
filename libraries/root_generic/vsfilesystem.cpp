@@ -734,14 +734,14 @@ void InitMods() {
     struct dirent **dirlist;
     //new config program should insert hqtextures variable
     //with value "hqtextures" in data section.
-    if (!game_options()->hqtextures.empty()) {
+    if (!configuration().data.hqtextures.empty()) {
         //HQ Texture dir sits alongside data dir.
         selectcurrentdir = datadir + "/..";
         boost::filesystem::path p(selectcurrentdir);
         for (boost::filesystem::directory_entry& entry : boost::filesystem::directory_iterator(p)) {
             const boost::filesystem::path& filename = entry.path().filename();
             const std::string filename_string = filename.string();
-            if (filename_string == game_options()->hqtextures && is_directory(entry.status())) {
+            if (filename_string == configuration().data.hqtextures && is_directory(entry.status())) {
                 curpath.clear();
                 curpath.append(selectcurrentdir);
                 curpath.append("/");
@@ -755,7 +755,7 @@ void InitMods() {
 //        if (ret >= 0) {
 //            while (ret--) {
 //                string dname(dirlist[ret]->d_name);
-//                if (dname == game_options()->hqtextures) {
+//                if (dname == configuration().data.hqtextures) {
 //                    curpath.clear();
 //                    curpath.append(selectcurrentdir);
 //                    curpath.append("/");
@@ -879,18 +879,18 @@ void InitPaths(string conf, string subdir) {
 
     game_options()->init();
 
-    sharedsectors = game_options()->sectors;
-    sharedcockpits = game_options()->cockpits;
-    shareduniverse = game_options()->universe_path;
-    sharedanims = game_options()->animations;
-    sharedvideos = game_options()->movies;
-    sharedsprites = game_options()->sprites;
-    savedunitpath = game_options()->serialized_xml;
-    sharedtextures = game_options()->sharedtextures;
-    sharedsounds = game_options()->sharedsounds;
-    sharedmeshes = game_options()->sharedmeshes;
-    sharedunits = game_options()->sharedunits;
-    aidir = game_options()->ai_directory;
+    sharedsectors = configuration().data.sectors;
+    sharedcockpits = configuration().data.cockpits;
+    shareduniverse = configuration().data.universe_path;
+    sharedanims = configuration().data.animations;
+    sharedvideos = configuration().data.movies;
+    sharedsprites = configuration().data.sprites;
+    savedunitpath = configuration().data.serialized_xml;
+    sharedtextures = configuration().data.shared_textures;
+    sharedsounds = configuration().data.shared_sounds;
+    sharedmeshes = configuration().data.shared_meshes;
+    sharedunits = configuration().data.shared_units;
+    aidir = configuration().data.ai_directory;
     universe_name = configuration().game_start.galaxy;
 
     //Setup the directory lists we know about - note these are relative paths to datadir or homedir
@@ -965,7 +965,7 @@ void InitPaths(string conf, string subdir) {
     //NOTE : UniverseFiles cannot use volumes since some are needed by python
     //Also : Have to try with systems, not sure it would work well
     //Setup the use of volumes for certain VSFileType
-    volume_format = game_options()->volume_format;
+    volume_format = configuration().data.volume_format;
     if (volume_format == "vsr") {
         q_volume_format = vfmtVSR;
     } else if (volume_format == "pk3") {

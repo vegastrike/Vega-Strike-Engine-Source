@@ -33,26 +33,6 @@
 extern VegaConfig *vs_config;
 
 void vs_options::init() {
-    /* Data Options */
-
-    universe_path = configuration().data.universe_path;
-    sectors = configuration().data.sectors;
-    techniquesBasePath = configuration().data.techniques_base_path;
-    modUnitCSV = configuration().data.mod_unit_csv;
-    cockpits = configuration().data.cockpits;
-    animations = configuration().data.animations;
-    movies = configuration().data.movies;
-    sprites = configuration().data.sprites;
-    serialized_xml = configuration().data.serialized_xml;
-    sharedtextures = configuration().data.shared_textures;
-    sharedsounds = configuration().data.shared_sounds;
-    sharedmeshes = configuration().data.shared_meshes;
-    sharedunits = configuration().data.shared_units;
-    ai_directory = configuration().data.ai_directory;
-    datadir = configuration().data.data_dir;
-    hqtextures = configuration().data.hqtextures;
-    volume_format = configuration().data.volume_format;
-
     /* Galaxy Options */
 
     PushValuesToMean = XMLSupport::parse_bool(vs_config->getVariable("galaxy", "PushValuesToMean", "true"));

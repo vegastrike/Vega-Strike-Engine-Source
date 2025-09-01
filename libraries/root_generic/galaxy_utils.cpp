@@ -77,16 +77,16 @@ string RemoveDotSystem(const char *input) {
 
 string getUniversePath() {
     char del[] = {'/', '\0'};
-    return game_options()->universe_path + string(del);
+    return configuration().data.universe_path + string(del);
 }
 
 string getVarEitherSectionOrSub(Galaxy *galaxy, string section, string subsection, string variable, string defaultst) {
     string d3fault = galaxy->getVariable(section, subsection, variable,
             galaxy->getVariable(section, variable, defaultst));
-    if (d3fault.length() == 0) {
+    if (d3fault.empty()) {
         d3fault = galaxy->getVariable(section, variable, defaultst);
     }
-    if (d3fault.length() == 0) {
+    if (d3fault.empty()) {
         return defaultst;
     }
     return d3fault;     //this code will prevent the empty planet lists from interfering

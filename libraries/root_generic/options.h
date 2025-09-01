@@ -45,26 +45,7 @@ public:
 
     void init();
 
-    /* Data Options */
-
-    std::string universe_path;
-    std::string sectors;
-    std::string techniquesBasePath;
     std::string unitCSV;
-    std::string modUnitCSV;
-    std::string cockpits;
-    std::string animations;
-    std::string movies;
-    std::string sprites;
-    std::string serialized_xml;
-    std::string sharedtextures;
-    std::string sharedsounds;
-    std::string sharedmeshes;
-    std::string sharedunits;
-    std::string ai_directory;
-    std::string datadir;
-    std::string hqtextures;
-    std::string volume_format;
 
     /* Galaxy Options */
 
