@@ -35,23 +35,23 @@ extern VegaConfig *vs_config;
 void vs_options::init() {
     /* Data Options */
 
-    universe_path = vs_config->getVariable("data", "universe_path", "universe");
-    sectors = vs_config->getVariable("data", "sectors", "sectors");
-    techniquesBasePath = vs_config->getVariable("data", "techniques", "techniques");
-    modUnitCSV = vs_config->getVariable("data", "ModUnitCSV", "");
-    cockpits = vs_config->getVariable("data", "cockpits", "cockpits");
-    animations = vs_config->getVariable("data", "animations", "animations");
-    movies = vs_config->getVariable("data", "movies", "movies");
-    sprites = vs_config->getVariable("data", "sprites", "sprites");
-    serialized_xml = vs_config->getVariable("data", "serialized_xml", "serialized_xml");
-    sharedtextures = vs_config->getVariable("data", "sharedtextures", "textures");
-    sharedsounds = vs_config->getVariable("data", "sharedsounds", "sounds");
-    sharedmeshes = vs_config->getVariable("data", "sharedmeshes", "meshes");
-    sharedunits = vs_config->getVariable("data", "sharedunits", "units");
-    ai_directory = vs_config->getVariable("data", "ai_directory", "ai");
-    datadir = vs_config->getVariable("data", "datadir", "");
-    hqtextures = vs_config->getVariable("data", "hqtextures", "");
-    volume_format = vs_config->getVariable("data", "volume_format", "pk3");
+    universe_path = configuration().data.universe_path;
+    sectors = configuration().data.sectors;
+    techniquesBasePath = configuration().data.techniques_base_path;
+    modUnitCSV = configuration().data.mod_unit_csv;
+    cockpits = configuration().data.cockpits;
+    animations = configuration().data.animations;
+    movies = configuration().data.movies;
+    sprites = configuration().data.sprites;
+    serialized_xml = configuration().data.serialized_xml;
+    sharedtextures = configuration().data.shared_textures;
+    sharedsounds = configuration().data.shared_sounds;
+    sharedmeshes = configuration().data.shared_meshes;
+    sharedunits = configuration().data.shared_units;
+    ai_directory = configuration().data.ai_directory;
+    datadir = configuration().data.data_dir;
+    hqtextures = configuration().data.hqtextures;
+    volume_format = configuration().data.volume_format;
 
     /* Galaxy Options */
 

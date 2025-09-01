@@ -36,6 +36,7 @@
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "cmd/csv.h"
+#include "configuration/configuration.h"
 #include "src/vs_exit.h"
 using std::string;
 using std::pair;
@@ -269,9 +270,7 @@ unsigned int readBitmask(const std::string &ss) {
 }
 
 unsigned int getCapitalRoles() {
-    static string defaultcapshipvalues = vs_config->getVariable("data",
-            "capship_roles",
-            "ESCORTCAP CAPITAL CARRIER BASE TROOP");
+    std::string defaultcapshipvalues = configuration().data.capship_roles;
     unsigned int retval = 0;
     string inp = defaultcapshipvalues;
     string::size_type where;
