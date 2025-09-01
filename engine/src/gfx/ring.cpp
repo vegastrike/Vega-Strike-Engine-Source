@@ -191,3 +191,4 @@ float RingMesh::clipRadialSize() const {
     return /*mx.Magnitude()*.33+*/ rSize();
 }
 
+RingMesh::~RingMesh() = default;

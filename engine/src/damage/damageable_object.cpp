@@ -33,6 +33,8 @@
 #include <iostream>
 
 
+DamageableObject::~DamageableObject() = default;
+
 DamageableObject::DamageableObject():
     number_of_layers(0), invulnerable(false) {}
 

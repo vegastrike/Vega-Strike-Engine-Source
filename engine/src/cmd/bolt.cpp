@@ -39,7 +39,6 @@
 #include "src/gfxlib_struct.h"
 #include "gfx/aux_texture.h"
 #include "gfx/animation.h"
-#include "src/audiolib.h"
 #include "src/config_xml.h"
 #include "gfx/camera.h"
 #include "root_generic/options.h"
@@ -59,11 +58,11 @@ inline void BlendTrans(Matrix &drawmat, const QVector &cur_position, const QVect
 
 // Bolts have texture
 int Bolt::AddTexture(BoltDrawManager *q, std::string file) {
-    int decal = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
-    if (decal >= (int) q->bolts.size()) {
+    size_t decal = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
+    if (decal >= q->bolts.size()) {
         q->bolts.push_back(vector<Bolt>());
-        int blargh = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
-        if (blargh >= (int) q->bolts.size()) {
+        size_t blargh = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
+        if (blargh >= q->bolts.size()) {
             q->bolts.push_back(vector<Bolt>());
         }
     }
@@ -183,11 +182,12 @@ void Bolt::DrawBolt(GFXVertexList *qmesh) {
 
     BlendTrans(drawmat, cur_position, prev_position);
     Matrix drawmat(this->drawmat);
-    if (game_options()->StretchBolts > 0) {
+    if (configuration().graphics.stretch_bolts_flt > 0) {
         ScaleMatrix(drawmat,
-                Vector(1,
-                        1,
-                        type->speed * BoltDrawManager::elapsed_time * game_options()->StretchBolts / type->length));
+                    Vector(1,
+                           1,
+                           static_cast<double>(type->speed) * BoltDrawManager::elapsed_time * configuration().graphics.
+                           stretch_bolts_dbl / type->length));
     }
     GFXLoadMatrixModel(drawmat);
     GFXColor4f(wt->r, wt->g, wt->b, wt->a);
@@ -391,14 +391,12 @@ bool Bolt::Collide(Unit *target) {
         }
         enum Vega_UnitType type = target->getUnitType();
         if (type == Vega_UnitType::nebula || type == Vega_UnitType::asteroid) {
-            static bool collideroids =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "AsteroidWeaponCollision", "false"));
+            const bool collideroids = configuration().physics.asteroid_weapon_collision;
             if (type != Vega_UnitType::asteroid || (!collideroids)) {
                 return false;
             }
         }
-        static bool
-                collidejump = XMLSupport::parse_bool(vs_config->getVariable("physics", "JumpWeaponCollision", "false"));
+        const bool collidejump = configuration().physics.jump_weapon_collision;
         if (type == Vega_UnitType::planet && (!collidejump) && !target->GetDestinations().empty()) {
             return false;
         }

@@ -57,35 +57,38 @@ class BoundingBox;
 struct mesh_polygon {
     std::vector<Vector> v;
 };
+
 /**
  * Mesh FX stores various lights that light up shield or hull for damage
- * They may be merged and they grow and shrink based on their TTL and TTD and delta values
+ * They may be merged, and they grow and shrink based on their TTL and TTD and delta values
  * They must be updated every frame or every physics frame if not drawn (pass in time)
  */
 class MeshFX : public GFXLight {
 public:
-///The ammt of change that such meshFX objects attenuation get
+    ///The amount of change that such meshFX objects attenuation get
     float delta;
-///The Time to live of the current light effect
+    ///The Time to live of the current light effect
     float TTL;
-///After it has achieved its time to live max it has to slowly fade out and die
+    ///After it has achieved its time to live max it has to slowly fade out and die
     float TTD;
 
     MeshFX() : GFXLight() {
         TTL = TTD = delta = 0;
     }
 
-///Makes a meshFX given TTL and delta values.
+    ///Makes a meshFX given TTL and delta values.
     MeshFX(const float TTL, const float delta, const bool enabled, const GFXColor &vect,
             const GFXColor &diffuse = GFXColor(0, 0, 0, 1),
             const GFXColor &specular = GFXColor(0, 0, 0, 1),
             const GFXColor &ambient = GFXColor(0, 0, 0, 1),
             const GFXColor &attenuate = GFXColor(1, 0, 0));
-///Merges two MeshFX in a given way to seamlessly blend multiple hits on a shield
+    ///Merges two MeshFX in a given way to seamlessly blend multiple hits on a shield
     void MergeLights(const MeshFX &other);
-///updates the growth and death of the FX. Returns false if dead
+    ///updates the growth and death of the FX. Returns false if dead
     bool Update(float ttime); //if false::dead
+    ~MeshFX() override = default;
 };
+
 /**
  * Stores relevant info needed to draw a mesh given only the orig
  */
@@ -93,15 +96,15 @@ struct MeshDrawContext {
     ///The matrix in world space
     Matrix mat;
     ///The special FX vector pointing to all active special FX
-    vector<MeshFX> *SpecialFX;
+    vector<MeshFX> *SpecialFX{};
     MeshFX xtraFX;
     bool useXtraFX;
     GFXColor CloakFX;
     enum CLK { NONE = 0x0, CLOAK = 0x1, FOG = 0x2, NEARINVIS = 0x4, GLASSCLOAK = 0x8, RENORMALIZE = 0x10 };
     char cloaked;
-    char mesh_seq;
+    char mesh_seq{};
     unsigned char damage;     //0 is perfect 255 is dead
-    MeshDrawContext(const Matrix &m) : mat(m), CloakFX(1, 1, 1, 1), cloaked(NONE), damage(0) {
+    explicit MeshDrawContext(const Matrix &m) : mat(m), CloakFX(1, 1, 1, 1), cloaked(NONE), damage(0) {
         useXtraFX = false;
     }
 };

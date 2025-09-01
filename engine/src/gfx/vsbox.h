@@ -36,6 +36,8 @@ private:
 public:
     Box(const Vector &cornermin, const Vector &cornermax);
     void ProcessDrawQueue(int whichdrawqueue);
+
+    ~Box() override;
 };
 
 #endif //VEGA_STRIKE_ENGINE_GFX_BOX_H

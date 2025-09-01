@@ -47,17 +47,13 @@ public:
     bool killed;
 
     // Methods
-public:
     Damageable() : killed(false) {}
 
-protected:
-    virtual ~Damageable() = default;
+    virtual ~Damageable();
     // forbidden
     Damageable(const Damageable &) = delete;
     // forbidden
     Damageable &operator=(const Damageable &) = delete;
-
-public:
 
     // Currently available in case someone wants to call from python
     // but there isn't an interface
@@ -75,7 +71,7 @@ public:
             void *ownerDoNotDereference);
     void DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector);
     void DamageCargo(InflictedDamage inflicted_damage);
-    void Destroy(); //explodes then deletes
+    void Destroy() override; //explodes then deletes
 
 
 

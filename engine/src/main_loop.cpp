@@ -256,7 +256,7 @@ void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x,
 
 void TextMessageKey(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
-        if (game_options()->chat_only_in_network) {
+        if (configuration().network.chat_only_in_network) {
             return;
         }
         winsys_set_keyboard_func(TextMessageCallback);
@@ -302,7 +302,7 @@ static void _PitchDown(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-Q,
                     R,
-                    configuration().graphics.camera_pan_speed);
+                    configuration().graphics.camera_pan_speed_flt);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -319,7 +319,7 @@ static void _PitchUp(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(Q,
                     R,
-                    configuration().graphics.camera_pan_speed);
+                    configuration().graphics.camera_pan_speed_flt);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -336,7 +336,7 @@ static void _YawLeft(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-P,
                     R,
-                    configuration().graphics.camera_pan_speed);
+                    configuration().graphics.camera_pan_speed_flt);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -353,7 +353,7 @@ static void _YawRight(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P,
                     R,
-                    configuration().graphics.camera_pan_speed);
+                    configuration().graphics.camera_pan_speed_flt);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -393,7 +393,7 @@ void LookDown(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(configuration().graphics.camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(configuration().graphics.camera_pan_speed_flt * 1000.0);
         } else {
             PitchDown(kbdata, newState);
         }
@@ -411,7 +411,7 @@ void LookUp(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(-configuration().graphics.camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(-configuration().graphics.camera_pan_speed_flt * 1000.0);
         } else {
             PitchUp(kbdata, newState);
         }
@@ -429,7 +429,7 @@ void LookLeft(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanYawSpeed(configuration().graphics.camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(configuration().graphics.camera_pan_speed_flt * 1000.0);
         } else {
             YawLeft(kbdata, newState);
         }
@@ -447,7 +447,7 @@ void LookRight(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanYawSpeed(-configuration().graphics.camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(-configuration().graphics.camera_pan_speed_flt * 1000.0);
         } else {
             YawRight(kbdata, newState);
         }
@@ -795,13 +795,13 @@ void createObjects(std::vector<std::string> &fighter0name,
     static bool initialized = false;
     if (!initialized) {
         initialized = true;
-        terrain_scale = new Vector(game_options()->xscale, game_options()->yscale, game_options()->zscale);
+        terrain_scale = new Vector(configuration().terrain.xscale_flt, configuration().terrain.yscale_flt, configuration().terrain.zscale_flt);
     }
 
     myterrain = nullptr;
     std::string stdstr = mission->getVariable("terrain", "");
     if (stdstr.length() > 0) {
-        Terrain *terr = new Terrain(stdstr.c_str(), *terrain_scale, game_options()->mass, game_options()->radius);
+        Terrain *terr = new Terrain(stdstr.c_str(), *terrain_scale, configuration().terrain.mass_flt, configuration().terrain.radius_flt);
         Matrix tmp;
         ScaleMatrix(tmp, *terrain_scale);
         QVector pos;
@@ -811,7 +811,7 @@ void createObjects(std::vector<std::string> &fighter0name,
     }
     stdstr = mission->getVariable("continuousterrain", "");
     if (stdstr.length() > 0) {
-        myterrain = new ContinuousTerrain(stdstr.c_str(), *terrain_scale, game_options()->mass);
+        myterrain = new ContinuousTerrain(stdstr.c_str(), *terrain_scale, configuration().terrain.mass_flt);
         Matrix tmp;
         Identity(tmp);
         QVector pos;

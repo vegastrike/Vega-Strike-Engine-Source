@@ -96,3 +96,4 @@ void Building::UpdatePhysics2(const Transformation &trans,
     SetCurPosition(tmp);
 }
 
+Building::~Building() = default;

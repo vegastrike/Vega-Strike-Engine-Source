@@ -36,6 +36,8 @@
  * @brief The DamageableObject class represents an overall game object - ship, space station, missile, etc.
  */
 struct DamageableObject {
+    virtual ~DamageableObject();
+
     int number_of_layers;
     std::vector<DamageableLayer*> layers;        // Typically shield/armor/hull
     bool invulnerable;
@@ -46,7 +48,7 @@ struct DamageableObject {
     void AddLayer(DamageableLayer* layer);
     InflictedDamage DealDamage(const CoreVector &attack_vector, Damage &damage);
 
-    void Destroy();
+    virtual void Destroy();
     bool Destroyed();
 
     void SetInvulnerable(bool invulnerable);

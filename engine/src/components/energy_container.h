@@ -37,7 +37,7 @@
 #include "resource/resource.h"
 #include "component.h"
 
-/* Discussion of FTL - yes, it isn't really faster. However, 
+/* Discussion of FTL - yes, it isn't really faster. However,
 * it would be easier for a new developer or someone from WC
 * to figure what it means.
 */
@@ -52,7 +52,7 @@ private:
     Resource<double> level;
 
 public:
-    EnergyContainer(ComponentType type);
+    explicit EnergyContainer(ComponentType type);
 
     // Return value - any surplus charge
     double Charge(const double quantity);
@@ -71,8 +71,8 @@ public:
     void Zero();
 
     // Component
-    void Load(std::string unit_key) override;      
-    
+    void Load(std::string unit_key) override;
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;
@@ -90,6 +90,8 @@ public:
 
     bool Damaged() const override;
     bool Installed() const override;
+
+    ~EnergyContainer() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONTAINER_H

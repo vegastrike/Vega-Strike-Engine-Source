@@ -105,3 +105,4 @@ bool AfterburnerUpgrade::Upgrade(const std::string upgrade_key) {
     return true;
 }
 
+AfterburnerUpgrade::~AfterburnerUpgrade() = default;

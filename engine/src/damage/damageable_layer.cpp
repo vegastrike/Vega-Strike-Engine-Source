@@ -56,6 +56,7 @@ DamageableLayer::DamageableLayer(int layer,
 }
 
 
+DamageableLayer::~DamageableLayer() = default;
 
 void DamageableLayer::DealDamage(const CoreVector &attack_vector, Damage &damage, InflictedDamage &inflicted_damage) {
     if (number_of_facets == 0) {

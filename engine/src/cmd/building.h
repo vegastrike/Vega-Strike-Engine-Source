@@ -90,6 +90,8 @@ public:
     Building(const Building &) = delete;
     /// assignment operator forbidden
     Building &operator=(const Building &) = delete;
+
+    ~Building() override;
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_BUILDING_H

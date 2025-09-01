@@ -53,7 +53,7 @@ bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following) {
         float mytime = SIMULATION_ATOM * 1.5;
         const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
         if (rampdown == false) {
-            const float warprampdowntime = configuration().physics.warp_ramp_down_time;
+            const float warprampdowntime = configuration().physics.warp_ramp_down_time_flt;
             mytime = warprampdowntime;
         }
         if (dist - parent->GetWarpVelocity().Magnitude() * mytime < toodamnclose) {

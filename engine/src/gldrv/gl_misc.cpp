@@ -58,7 +58,7 @@ void GFXCircle(float x, float y, float wid, float hei) {
                     - Vector(static_cast<double>(wid) * configuration().graphics.resolution_x * cos(2.0 * M_PI / 360.0),
                             static_cast<double>(hei) * configuration().graphics.resolution_y * sin(2.0 * M_PI / 360.0),
                             0)).Magnitude();
-    int accuracy = (int) (360.0f * configuration().graphics.circle_accuracy * (1.0f < segmag ? 1.0 : segmag));
+    int accuracy = (int) (360.0f * configuration().graphics.circle_accuracy_flt * (1.0f < segmag ? 1.0f : segmag));
     if (accuracy < 4) {
         accuracy = 4;
     }

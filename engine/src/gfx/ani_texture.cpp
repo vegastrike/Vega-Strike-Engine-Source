@@ -391,9 +391,9 @@ Texture *AnimatedTexture::Clone() {
 
 AnimatedTexture::~AnimatedTexture() {
     Destroy();
-    data = NULL;
+    data = nullptr;
     active = 0;
-    palette = NULL;
+    palette = nullptr;
 }
 
 AnimatedTexture::AnimatedTexture() {
@@ -404,16 +404,15 @@ void AnimatedTexture::Destroy() {
     anis.erase(this);
     if (vidSource) {
         delete vidSource;
-        vidSource = 0;
+        vidSource = nullptr;
     }
     if (Decal) {
-        int i, nf;
-        nf = vidMode ? 1 : numframes;
-        for (i = 0; i < nf; i++) {
+        const int nf = vidMode ? 1 : numframes;
+        for (int i = 0; i < nf; i++) {
             delete Decal[i];
         }
         delete[] Decal;
-        Decal = NULL;
+        Decal = nullptr;
     }
 }
 

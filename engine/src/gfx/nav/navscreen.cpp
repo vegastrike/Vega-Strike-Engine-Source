@@ -353,15 +353,15 @@ void NavigationSystem::Setup() {
     ScreenToCoord(buttonskipby4_7[2]);
     ScreenToCoord(buttonskipby4_7[3]);
 
-//reverse = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
+    reverse = configuration().joystick.reverse_mouse_spr ? 1 : -1;
 
-    reverse = -1;
+    // reverse = -1;
     if ((screenskipby4[1] - screenskipby4[0]) < (screenskipby4[3] - screenskipby4[2])) {
         system_item_scale *= (screenskipby4[1] - screenskipby4[0]);            //is actually over 1, which is itself
     } else {
         system_item_scale *= (screenskipby4[3] - screenskipby4[2]);
     }
-    screenoccupation = new navscreenoccupied(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], 1);
+    screenoccupation = new navscreenoccupied(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], true);
 
     //Get special colors from the config
     currentcol = vs_config->getColor("nav", "current_system",
@@ -390,8 +390,8 @@ void NavigationSystem::Draw() {
     //DRAW THE SCREEN MODEL
     //**********************************
     Vector p, q, r;
-    const float zrange = configuration().graphics.cockpit_nav_zrange;
-    const float zfloor = configuration().graphics.cockpit_nav_zfloor;
+    const float zrange = configuration().graphics.cockpit_nav_zrange_flt;
+    const float zfloor = configuration().graphics.cockpit_nav_zfloor_flt;
     _Universe->AccessCamera()->GetOrientation(p, q, r);
     _Universe->AccessCamera()->UpdateGFX(GFXTRUE,
             GFXTRUE,
@@ -702,7 +702,7 @@ void NavigationSystem::DrawShip() {
     displayname.SetPos(originx - (.1 * deltax), originy /*+(1*deltay)*/ );
     displayname.SetText(writethis);
     displayname.SetCharSize(1, 1);
-    const float background_alpha = configuration().graphics.hud.text_background_alpha;
+    const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     GFXColor tpbg = displayname.bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
@@ -1120,7 +1120,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
     a_label.SetText(label);
     const bool nav_button_labels = configuration().graphics.draw_nav_button_labels;
     if (nav_button_labels) {
-        const float background_alpha = configuration().graphics.hud.text_background_alpha;
+        const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
         GFXColor tpbg = a_label.bgcol;
         bool automatte = (0 == tpbg.a);
         if (automatte) {
@@ -1579,7 +1579,7 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
     if (((mouse_previous_state[1] == 1)
             && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
                     mouse_y_current)) || (mouse_wentdown[3] || mouse_wentdown[4])) {
-        const float wheel_zoom_level = configuration().graphics.wheel_zoom_amount;
+        const float wheel_zoom_level = configuration().graphics.wheel_zoom_amount_flt;
         if (system_vs_galaxy) {
             if (mouse_wentdown[3]) {
                 zoom_s += wheel_zoom_level;

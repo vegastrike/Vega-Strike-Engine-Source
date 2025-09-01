@@ -50,7 +50,7 @@ Collision::Collision(Unit *unit, const QVector &location, const Vector &normal) 
     cockpit = _Universe->isPlayerStarship(unit); // smcp/thcp
     unit_type = unit->getUnitType();
     is_player_ship = _Universe->isPlayerStarship(unit);
-    mass = std::max(unit->GetMass(), configuration().physics.minimum_mass);
+    mass = std::max(unit->GetMass(), configuration().physics.minimum_mass_dbl);
     position = unit->Position();
     velocity = unit->GetVelocity();
 }
@@ -65,7 +65,7 @@ Vega_UnitType::nebula,
 Vega_UnitType::asteroid,
 Vega_UnitType::enhancement,
 Vega_UnitType::missile*/
-void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
+void Collision::shouldApplyForceAndDealDamage(Unit* other_unit) {
     Vega_UnitType other_units_type = other_unit->getUnitType();
 
     // Collision with a nebula does nothing
@@ -90,84 +90,88 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
     }
 
     switch (unit_type) {
-        // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
-        case Vega_UnitType::missile:
-            // Missile should explode when killed
-            // If not, uncomment this
-            //((Missile*)unit)->Discharge();
-            unit->Kill();
-            return;
+    // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
+    case Vega_UnitType::missile:
+        // Missile should explode when killed
+        // If not, uncomment this
+        //((Missile*)unit)->Discharge();
+        unit->Kill();
+        return;
 
-        case Vega_UnitType::asteroid:
-            apply_force = true;
-            deal_damage = true;
-            return;
+    case Vega_UnitType::asteroid:
+        apply_force = true;
+        deal_damage = true;
+        return;
 
-            // Planets and Nebulas can't be killed right now
-        case Vega_UnitType::planet:
-        case Vega_UnitType::nebula:
-            return;
+    // Planets and Nebulas can't be killed right now
+    case Vega_UnitType::planet:
+    case Vega_UnitType::nebula:
+        return;
 
-            // Buildings should not calculate actual damage
-        case Vega_UnitType::building:
-            return;
+    // Buildings should not calculate actual damage
+    case Vega_UnitType::building:
+        return;
 
-            // Units (ships) should calculate actual damage
-        case Vega_UnitType::unit:
-            // Handle the "Nav 8" case
-            if (other_units_type == Vega_UnitType::planet) {
+    // Units (ships) should calculate actual damage
+    case Vega_UnitType::unit:
+        // Handle the "Nav 8" case
+        if (other_units_type == Vega_UnitType::planet) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
-                const double nav_8_start_time = realTime();
+            const double nav_8_start_time = realTime();
 #endif
-                const auto* as_planet = vega_dynamic_const_cast_ptr<const Planet>(other_unit);
-                if (as_planet->is_nav_point()) {
-                    VS_LOG(debug, "Can't collide with a Nav Point");
-#if defined(LOG_TIME_TAKEN_DETAILS)
-                    const double nav_8_end_time = realTime();
-                    VS_LOG(trace, (boost::format("%1%: Time taken by handling Nav 8 case: %2%") % __FUNCTION__ % (nav_8_end_time - nav_8_start_time)));
-#endif
-                    return;
-                }
+            const auto* as_planet = vega_dynamic_const_cast_ptr<const Planet>(other_unit);
+            if (as_planet->is_nav_point()) {
+                VS_LOG(debug, "Can't collide with a Nav Point");
 #if defined(LOG_TIME_TAKEN_DETAILS)
                 const double nav_8_end_time = realTime();
-                VS_LOG(trace, (boost::format("%1%: Time taken by handling Nav 8 case: %2%") % __FUNCTION__ % (nav_8_end_time - nav_8_start_time)));
+                VS_LOG(trace,
+                       (boost::format("%1%: Time taken by handling Nav 8 case: %2%") % __FUNCTION__ % (nav_8_end_time -
+                           nav_8_start_time)));
 #endif
-            }
-            apply_force = true;
-            deal_damage = true;
-            return;
-
-            // An enhancement upgrades the shields of the unit it collided with.
-            // TODO: refactor this.
-        case Vega_UnitType::enhancement:
-            // We can't enhance rocks
-            if (other_units_type == Vega_UnitType::asteroid ||
-                    other_units_type == Vega_UnitType::planet) {
-                apply_force = true;
                 return;
             }
+#if defined(LOG_TIME_TAKEN_DETAILS)
+            const double nav_8_end_time = realTime();
+            VS_LOG(trace,
+                   (boost::format("%1%: Time taken by handling Nav 8 case: %2%") % __FUNCTION__ % (nav_8_end_time -
+                       nav_8_start_time)));
+#endif
+        }
+        apply_force = true;
+        deal_damage = true;
+        return;
 
-            // disabled for now.
-            // TODO: someone from the "product" team needs to define the
-            // exact behavior. Preferably after we sort the upgrade
-            // code.
-
-
-            /*double percent;
-            char tempdata[sizeof(Shield)];
-            memcpy( tempdata, &unit->shield, sizeof(Shield));
-            unit->shield.number = 0;     //don't want them getting our boosted shields!
-            unit->shield.shield2fb.front = unit->shield.shield2fb.back =
-                    unit->shield.shield2fb.frontmax = unit->shield.shield2fb.backmax = 0;
-            other_unit->Upgrade( unit, 0, 0, true, true, percent );
-            memcpy( &unit->shield, tempdata, sizeof (Shield) );
-            string fn( unit->filename );
-            string fac( FactionUtil::GetFaction( unit->faction ) );*/
-            unit->Kill();
-
-            //_Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), Vega_UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
+    // An enhancement upgrades the shields of the unit it collided with.
+    // TODO: refactor this.
+    case Vega_UnitType::enhancement:
+        // We can't enhance rocks
+        if (other_units_type == Vega_UnitType::asteroid ||
+            other_units_type == Vega_UnitType::planet) {
             apply_force = true;
             return;
+        }
+
+        // disabled for now.
+        // TODO: someone from the "product" team needs to define the
+        // exact behavior. Preferably after we sort the upgrade
+        // code.
+
+
+        /*double percent;
+        char tempdata[sizeof(Shield)];
+        memcpy( tempdata, &unit->shield, sizeof(Shield));
+        unit->shield.number = 0;     //don't want them getting our boosted shields!
+        unit->shield.shield2fb.front = unit->shield.shield2fb.back =
+                unit->shield.shield2fb.frontmax = unit->shield.shield2fb.backmax = 0;
+        other_unit->Upgrade( unit, 0, 0, true, true, percent );
+        memcpy( &unit->shield, tempdata, sizeof (Shield) );
+        string fn( unit->filename );
+        string fac( FactionUtil::GetFaction( unit->faction ) );*/
+        unit->Kill();
+
+        //_Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), Vega_UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
+        apply_force = true;
+        return;
     }
 }
 
@@ -258,7 +262,7 @@ void Collision::validateCollision(const QVector &relative_velocity,
         const QVector &w2_new) {
     //following two values should be identical. Due to FP math, should be nearly identical. Checks for both absolute and relative error, the former to shield slightly larger errors on very small values - can set tighter/looser bounds later
     double RestorativeVelAlongNormal =
-            -1 * (1 - configuration().physics.inelastic_scale) * relative_velocity.Dot(normal1);
+            -1.0 * (1.0 - configuration().physics.inelastic_scale_dbl) * relative_velocity.Dot(normal1);
     double ResultantVelAlongNormal =
             ((v2_new + w2_new.Cross(location2_local)) - (v1_new + w1_new.Cross(location1_local))).Dot(normal1);
     double normalizedError = abs(1.0 - ResultantVelAlongNormal / RestorativeVelAlongNormal);
@@ -330,22 +334,22 @@ void Collision::collide(Unit *unit1,
     // 2/3 constant from shell approximation -- this will disappear when moment of inertia is actually turned into a 3x3 matrix OR getter is adjusted to fix dataside issues
     // should assert: mass >0; radial_size !=0; moment !=0; -- may require data set cleaning if asserted
     double I1 =
-            std::max(static_cast<double>(unit1->GetMoment()), configuration().physics.minimum_mass) * unit1->radial_size * unit1->radial_size
+            std::max(static_cast<double>(unit1->GetMoment()), configuration().physics.minimum_mass_dbl) * unit1->radial_size * unit1->radial_size
                     * 0.667; // deriving scalar moment of inertia for unit 1
     double I2 =
-            std::max(static_cast<double>(unit2->GetMoment()), configuration().physics.minimum_mass) * unit2->radial_size * unit2->radial_size
+            std::max(static_cast<double>(unit2->GetMoment()), configuration().physics.minimum_mass_dbl) * unit2->radial_size * unit2->radial_size
                     * 0.667; // deriving scalar moment of inertia for unit 2
     double I1_inverse = 1.0
             / I1; // Matrix inverse for matrix version of momentof inertia I1 is computable, but probably still better to have precomputed and fetched -- not an issue when I is still scalar
     double I2_inverse = 1.0 / I2;
     double mass1 = std::max(static_cast<double>(unit1->GetMass()),
             configuration().physics
-                    .minimum_mass); // avoid subsequent divides by 0 - again, should probably just check all the invariants and yell at the dataset with an assert here OR change the getter for mass and moment and [add getter for] radial_size that do the data cleaning/logging/yelling
-    double mass2 = std::max(static_cast<double>(unit2->GetMass()), configuration().physics.minimum_mass); // avoid subsequent divides by 0
+                    .minimum_mass_dbl); // avoid subsequent divides by 0 - again, should probably just check all the invariants and yell at the dataset with an assert here OR change the getter for mass and moment and [add getter for] radial_size that do the data cleaning/logging/yelling
+    double mass2 = std::max(static_cast<double>(unit2->GetMass()), configuration().physics.minimum_mass_dbl); // avoid subsequent divides by 0
     double mass1_inverse = 1.0 / mass1;
     double mass2_inverse = 1.0 / mass2;
     // impulse magnitude, as per equation 5 in wiki -- note that  e = 1 - inelastic_scale, so 1+e = 1 + 1 -inelastic_scale = 2 - inelastic_scale
-    double impulse_magnitude = -1 * ((2 - configuration().physics.inelastic_scale) * relative_velocity).Dot(normal1) /
+    double impulse_magnitude = -1 * ((2 - configuration().physics.inelastic_scale_dbl) * relative_velocity).Dot(normal1) /
             (mass1_inverse + mass2_inverse +
                     ((I1_inverse * (location1_local.Cross(normal1))).Cross(location1_local)
                             + (I2_inverse * (location2_local.Cross(normal1))).Cross(location2_local)).Dot(normal1)

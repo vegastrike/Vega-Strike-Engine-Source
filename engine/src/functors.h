@@ -91,7 +91,7 @@ private:
     TClass *pt2Object;             //pointer to object
 public:
 //New singularlized call method {{{:
-    virtual void *Call(std::vector<std::string> &d, int &sock_in, bool *isDown) {
+    void *Call(std::vector<std::string> &d, int &sock_in, bool *isDown) override {
         //Comments {{{
         //ok, d[0] == command typed
         //d[1] == arg1
@@ -299,7 +299,7 @@ public:
     }
 //}}}
 
-    virtual ~Functor() {
+    ~Functor() override {
     }
 };
 

@@ -63,6 +63,8 @@ public:
 
     bool Damaged() const override;
     void Repair() override;
+
+    ~Armor() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_ARMOR_H

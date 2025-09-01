@@ -51,6 +51,8 @@ void SphereMesh::ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort,
     GFXPolygonOffset(0, 0);
 }
 
+SphereMesh::~SphereMesh() = default;
+
 void SphereMesh::SelectCullFace(int whichdrawqueue) {
     GFXEnable(CULLFACE);
 }
@@ -65,3 +67,4 @@ void CityLights::ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort,
     GFXPolygonOffset(0, 0);
 }
 
+CityLights::~CityLights() = default;

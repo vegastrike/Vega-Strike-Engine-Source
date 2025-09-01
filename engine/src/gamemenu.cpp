@@ -221,8 +221,8 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     usernameInput->setTextColor(GUI_OPAQUE_WHITE());
     usernameInput->setTextMargins(Size(.02, .01));
     usernameInput->setId("Username");
-    if (!game_options()->password.empty()) {
-        usernameInput->setText(game_options()->callsign);
+    if (!configuration().player.password.empty()) {
+        usernameInput->setText(configuration().player.callsign);
     }
     serverConnGroup->addChild(usernameInput);
 
@@ -254,7 +254,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     passwordInput->setTextColor(GUI_OPAQUE_WHITE());
     passwordInput->setTextMargins(Size(.02, .01));
     passwordInput->setId("Password");
-    passwordInput->setText(game_options()->password);
+    passwordInput->setText(configuration().player.password);
     serverConnGroup->addChild(passwordInput);
 
     NewButton *multiStart = new NewButton;

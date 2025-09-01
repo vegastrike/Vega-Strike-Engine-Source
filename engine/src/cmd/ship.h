@@ -42,6 +42,8 @@ public:
     Ship();
     Ship(const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
             ""), Flightgroup *flightgroup = NULL, int fg_subnumber = 0);
+
+    ~Ship() override;
 };
 
 #endif // SHIP_H

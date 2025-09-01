@@ -61,5 +61,4 @@ Asteroid::Asteroid(const char *filename, int faction, Flightgroup *fg, int fg_sn
     RecursiveSetSchedule(this);
 }
 
-
-
+Asteroid::~Asteroid() = default;

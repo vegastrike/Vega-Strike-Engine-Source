@@ -75,6 +75,7 @@ public:
     static const int _OVERHEAD = (sizeof(T) + ALIGN - 1) / ALIGN + sizeof(size_t);
 
     aligned_allocator() = default;
+    ~aligned_allocator() = default;
 
     template<typename U> struct rebind {
         using value_type = T;
