@@ -181,7 +181,7 @@ static void UpdateTimeCompressionSounds() {
 }
 
 Unit *DockToSavedBases(int playernum, QVector &safevec) {
-    string str = game_options()->startDockedTo;
+    string str = configuration().ai.start_docked_to;
     Unit *plr = _Universe->AccessCockpit(playernum)->GetParent();
     if (!plr || !plr->getStarSystem()) {
         safevec = QVector(0, 0, 0);

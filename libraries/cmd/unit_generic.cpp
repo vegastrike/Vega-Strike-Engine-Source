@@ -3452,11 +3452,17 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         Velocity = Velocity * (1 - SPACE_DRAG);
     }
 
-    static string LockingSoundName = vs_config->getVariable("unitaudio", "locking", "locking.wav");
+    std::string locking_sound_name = configuration().audio.unit_audio.locking;
     //enables spiffy wc2 torpedo music, default to normal though
-    static string LockingSoundTorpName = vs_config->getVariable("unitaudio", "locking_torp", "locking.wav");
-    static int LockingSound = AUDCreateSoundWAV(LockingSoundName, true);
-    static int LockingSoundTorp = AUDCreateSoundWAV(LockingSoundTorpName, true);
+    std::string locking_sound_torp_name = configuration().audio.unit_audio.locking_torp;
+    static boost::optional<int> locking_sound;
+    if (locking_sound == boost::none) {
+        locking_sound = AUDCreateSoundWAV(locking_sound_name, true);
+    }
+    static boost::optional<int> locking_sound_torp;
+    if (locking_sound_torp == boost::none) {
+        locking_sound_torp = AUDCreateSoundWAV(locking_sound_torp_name, true);
+    }
 
     bool locking = false;
     bool touched = false;
@@ -3475,45 +3481,42 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                         mounts[i].time_to_lock = -1;
                     }
                 } else {
-                    int LockingPlay = LockingSound;
+                    int locking_play = locking_sound.get();
 
                     //enables spiffy wc2 torpedo music, default to normal though
-                    static bool LockTrumpsMusic =
-                            XMLSupport::parse_bool(vs_config->getVariable("unitaudio",
-                                    "locking_trumps_music",
-                                    "false"));
+                    const bool lock_trumps_music = configuration().audio.unit_audio.locking_trumps_music;
                     //enables spiffy wc2 torpedo music, default to normal though
-                    static bool TorpLockTrumpsMusic =
-                            XMLSupport::parse_bool(vs_config->getVariable("unitaudio",
-                                    "locking_torp_trumps_music",
-                                    "false"));
+                    const bool torp_lock_trumps_music = configuration().audio.unit_audio.locking_torp_trumps_music;
                     if (mounts[i].type->lock_time > 0) {
-                        static string LockedSoundName = vs_config->getVariable("unitaudio", "locked", "locked.wav");
-                        static int LockedSound = AUDCreateSoundWAV(LockedSoundName, false);
+                        std::string locked_sound_name = configuration().audio.unit_audio.locked;
+                        static boost::optional<int> locked_sound;
+                        if (locked_sound == boost::none) {
+                            locked_sound = AUDCreateSoundWAV(locked_sound_name, false);
+                        }
                         if (mounts[i].type->size == MOUNT_SIZE::SPECIALMISSILE) {
-                            LockingPlay = LockingSoundTorp;
+                            locking_play = locking_sound_torp.get();
                         } else {
-                            LockingPlay = LockingSound;
+                            locking_play = locking_sound.get();
                         }
                         if (mounts[i].time_to_lock > -SIMULATION_ATOM && mounts[i].time_to_lock <= 0) {
-                            if (!AUDIsPlaying(LockedSound)) {
+                            if (!AUDIsPlaying(locked_sound.get())) {
                                 UniverseUtil::musicMute(false);
-                                AUDStartPlaying(LockedSound);
-                                AUDStopPlaying(LockingSound);
-                                AUDStopPlaying(LockingSoundTorp);
+                                AUDStartPlaying(locked_sound.get());
+                                AUDStopPlaying(locking_sound.get());
+                                AUDStopPlaying(locking_sound_torp.get());
                             }
-                            AUDAdjustSound(LockedSound, Position(), GetVelocity());
+                            AUDAdjustSound(locked_sound.get(), Position(), GetVelocity());
                         } else if (mounts[i].time_to_lock > 0) {
                             locking = true;
-                            if (!AUDIsPlaying(LockingPlay)) {
-                                if (LockingPlay == LockingSoundTorp) {
-                                    UniverseUtil::musicMute(TorpLockTrumpsMusic);
+                            if (!AUDIsPlaying(locking_play)) {
+                                if (locking_play == locking_sound_torp) {
+                                    UniverseUtil::musicMute(torp_lock_trumps_music);
                                 } else {
-                                    UniverseUtil::musicMute(LockTrumpsMusic);
+                                    UniverseUtil::musicMute(lock_trumps_music);
                                 }
-                                AUDStartPlaying(LockingSound);
+                                AUDStartPlaying(locking_sound.get());
                             }
-                            AUDAdjustSound(LockingSound, Position(), GetVelocity());
+                            AUDAdjustSound(locking_sound.get(), Position(), GetVelocity());
                         }
                     }
                 }
@@ -3592,13 +3595,13 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         }
     }
     if (locking == false && touched == true) {
-        if (AUDIsPlaying(LockingSound)) {
+        if (AUDIsPlaying(locking_sound.get())) {
             UniverseUtil::musicMute(false);
-            AUDStopPlaying(LockingSound);
+            AUDStopPlaying(locking_sound.get());
         }
-        if (AUDIsPlaying(LockingSoundTorp)) {
+        if (AUDIsPlaying(locking_sound_torp.get())) {
             UniverseUtil::musicMute(false);
-            AUDStopPlaying(LockingSoundTorp);
+            AUDStopPlaying(locking_sound_torp.get());
         }
     }
 
@@ -3828,10 +3831,12 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
                 }
             }
             DealPossibleJumpDamage(this);
-            static int
-                    jumparrive = AUDCreateSound(vs_config->getVariable("unitaudio", "jumparrive", "sfx43.wav"), false);
+            static boost::optional<int> jump_arrive;
+            if (jump_arrive == boost::none) {
+                jump_arrive = AUDCreateSound(configuration().audio.unit_audio.jump_arrive, false);
+            }
             if (dosightandsound) {
-                AUDPlay(jumparrive, this->LocalPosition(), this->GetVelocity(), 1);
+                AUDPlay(jump_arrive.get(), this->LocalPosition(), this->GetVelocity(), 1);
             }
         } else {
 #ifdef JUMP_DEBUG

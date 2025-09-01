@@ -777,15 +777,16 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
 
     const bool must_afterburn_to_buzz = configuration().audio.buzzing_needs_afterburner;
     if (unit->IsPlayerShip()) {
-        static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
-                "player_afterburner",
-                "sfx10.wav"), true);
+        static boost::optional<int> player_engine;
+        if (player_engine == boost::none) {
+            player_engine = AUDCreateSound(configuration().audio.unit_audio.player_afterburner, true);
+        }
         const float enginegain = configuration().audio.afterburner_gain_flt;
-        if (afterburn != AUDIsPlaying(playerengine)) {
+        if (afterburn != AUDIsPlaying(player_engine.get())) {
             if (afterburn) {
-                AUDPlay(playerengine, QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
+                AUDPlay(player_engine.get(), QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
             } else {
-                AUDStopPlaying(playerengine);
+                AUDStopPlaying(player_engine.get());
             }
         }
     } else if (afterburn || !must_afterburn_to_buzz) {

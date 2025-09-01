@@ -33,23 +33,6 @@
 extern VegaConfig *vs_config;
 
 void vs_options::init() {
-    /* Unit Audio Options */
-
-    jumpleave = vs_config->getVariable("unitaudio", "jumpleave", "sfx43.wav");
-    player_armor_hit = vs_config->getVariable("unitaudio", "player_armor_hit", "bigarmor.wav");
-    player_hull_hit = vs_config->getVariable("unitaudio", "player_hull_hit", "bigarmor.wav");
-    player_shield_hit = vs_config->getVariable("unitaudio", "player_shield_hit", "shieldhit.wav");
-
-    /* AI Options */
-
-    AllowCivilWar = XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowCivilWar", "false"));
-    CappedFactionRating = XMLSupport::parse_bool(vs_config->getVariable("AI", "CappedFactionRating", "true"));
-    AllowNonplayerFactionChange =
-            XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowNonplayerFactionChange", "false"));
-    min_relationship = XMLSupport::parse_float(vs_config->getVariable("AI", "min_relationship", "-20.0"));
-    startDockedTo = vs_config->getVariable("AI", "startDockedTo", "MiningBase");
-    dockOnLoad = XMLSupport::parse_bool(vs_config->getVariable("AI", "dockOnLoad", "true"));
-
     /* Data Options */
 
     universe_path = vs_config->getVariable("data", "universe_path", "universe");
