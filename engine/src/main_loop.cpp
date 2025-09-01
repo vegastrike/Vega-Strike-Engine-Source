@@ -1029,7 +1029,7 @@ void destroyObjects() {
 }
 
 int getmicrosleep() {
-    return game_options()->threadtime;
+    return configuration().audio.thread_time;
 }
 
 void restore_main_loop() {

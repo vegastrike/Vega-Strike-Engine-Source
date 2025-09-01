@@ -27,6 +27,7 @@
  */
 
 
+#include "configuration/configuration.h"
 #ifdef HAVE_AL
 #if defined(__APPLE__) && defined (__MACH__)
 #include <al.h>
@@ -97,8 +98,8 @@ static float EstimateGain(const Vector &pos, const float gain) {
     float listener_size = sqrt(mylistener.rsize);
     float distance = (AUDListenerLocation() - pos.Cast()).Magnitude()
             - listener_size
-            - game_options()->audio_ref_distance;
-    float ref = game_options()->audio_ref_distance;
+            - configuration().audio.audio_ref_distance_flt;
+    float ref = configuration().audio.audio_ref_distance_flt;
     float rolloff = 1.0f;
     final_gain *= (distance <= 0) ? 1.f : float(ref / (ref + rolloff * distance));
 
@@ -119,7 +120,7 @@ char AUDQueryAudability(const int sound, const Vector &pos, const Vector &vel, c
         mag = 0;
         return 1;
     }
-    if (!(mag < game_options()->audio_max_distance * game_options()->audio_max_distance)) {
+    if (!(mag < configuration().audio.audio_max_distance_flt * configuration().audio.audio_max_distance_flt)) {
         return 0;
     }
     unsigned int hashed = hash_sound(sounds[sound].buffer);

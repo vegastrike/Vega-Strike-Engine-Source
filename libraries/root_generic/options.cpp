@@ -33,28 +33,8 @@
 extern VegaConfig *vs_config;
 
 void vs_options::init() {
-    /* Audio Options */
-
-    threadtime = XMLSupport::parse_int(vs_config->getVariable("audio", "threadtime", "1"));
-    missionvictorysong = vs_config->getVariable("audio", "missionvictorysong", "../music/victory.ogg");
-    Music = XMLSupport::parse_bool(vs_config->getVariable("audio", "Music", "true"));
-    sound_gain = XMLSupport::parse_floatf(vs_config->getVariable("audio", "sound_gain", ".5"));
-    audio_ref_distance = XMLSupport::parse_floatf(vs_config->getVariable("audio", "audio_ref_distance", "4000"));
-    audio_max_distance = XMLSupport::parse_floatf(vs_config->getVariable("audio", "audio_max_distance", "1000000"));
-    Doppler = XMLSupport::parse_bool(vs_config->getVariable("audio", "Doppler", "false"));
-    Positional = XMLSupport::parse_bool(vs_config->getVariable("audio", "Positional", "true"));
-    Volume = XMLSupport::parse_floatf(vs_config->getVariable("audio", "Volume", "100"));
-    DopplerScale = XMLSupport::parse_floatf(vs_config->getVariable("audio", "DopplerScale", "1"));
-    frequency = XMLSupport::parse_int(vs_config->getVariable("audio", "frequency", "48000"));
-    MaxSingleSounds = XMLSupport::parse_int(vs_config->getVariable("audio", "MaxSingleSounds", "8"));
-    MaxTotalSounds = XMLSupport::parse_int(vs_config->getVariable("audio", "MaxTotalSounds", "20"));
-    Sound = XMLSupport::parse_bool(vs_config->getVariable("audio", "Sound", "true"));
-    ai_sound = XMLSupport::parse_bool(vs_config->getVariable("audio", "ai_sound", "true"));
-    explosion_closeness = XMLSupport::parse_floatf(vs_config->getVariable("audio", "explosion_closeness", ".8"));
-    loss_relationship = XMLSupport::parse_floatf(vs_config->getVariable("audio", "loss_relationship", "-.1"));
-    victory_relationship = XMLSupport::parse_floatf(vs_config->getVariable("audio", "victory_relationship", ".5"));
-    time_between_music = XMLSupport::parse_floatf(vs_config->getVariable("audio", "time_between_music", "180"));
     /* Cockpit Audio Options */
+
     comm = vs_config->getVariable("cockpitaudio", "comm", "vdu_c");
     scanning = vs_config->getVariable("cockpitaudio", "scanning", "vdu_c");
     objective = vs_config->getVariable("cockpitaudio", "objective", "vdu_c");
@@ -76,8 +56,6 @@ void vs_options::init() {
     player_armor_hit = vs_config->getVariable("unitaudio", "player_armor_hit", "bigarmor.wav");
     player_hull_hit = vs_config->getVariable("unitaudio", "player_hull_hit", "bigarmor.wav");
     player_shield_hit = vs_config->getVariable("unitaudio", "player_shield_hit", "shieldhit.wav");
-
-    /* Player Options */
 
     /* AI Options */
 
