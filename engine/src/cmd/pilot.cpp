@@ -118,7 +118,7 @@ float Pilot::getAnger(const Unit *parent, const Unit *target) const {
     if (iter != effective_relationship.end()) {
         rel = iter->second;
     }
-    if (_Universe->isPlayerStarship(target)) {
+    if (target->IsPlayerShip()) {
         if (FactionUtil::GetFactionName(faction).find("pirates") != std::string::npos) {
             static unsigned int cachedCargoNum = 0;
             static bool empty_cargo_hold = true;

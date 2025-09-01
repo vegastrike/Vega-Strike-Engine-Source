@@ -812,7 +812,7 @@ void AIScript::LoadXML() {
                     % parent->name
                     % parent->computer.threatlevel));
         }
-        if (_Universe->isPlayerStarship(parent->Target())) {
+        if (parent->Target()->IsPlayerShip()) {
             double value;
             const double game_speed = configuration().physics.game_speed_dbl;
             const double game_accel = configuration().physics.game_accel_dbl;

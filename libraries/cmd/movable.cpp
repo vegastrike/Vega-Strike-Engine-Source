@@ -217,9 +217,7 @@ void Movable::AddVelocity(float difficulty) {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     float lastWarpField = graphicOptions.WarpFieldStrength;
 
-    bool playa = isPlayerShip();
-
-    float warprampuptime = playa ? configuration().warp.warp_ramp_up_time_flt : configuration().warp.computer_warp_ramp_up_time_flt;
+    float warprampuptime = unit->IsPlayerShip() ? configuration().warp.warp_ramp_up_time_flt : configuration().warp.computer_warp_ramp_up_time_flt;
     //Warp Turning on/off
     if (graphicOptions.WarpRamping) {
         float oldrampcounter = graphicOptions.RampCounter;
@@ -339,7 +337,7 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     AngularVelocity += temp;
 
     float caprate;
-    if (isPlayerShip()) {         //clamp to avoid vomit-comet effects
+    if (unit->IsPlayerShip()) {         //clamp to avoid vomit-comet effects
         caprate = configuration().physics.max_player_rotation_rate_flt;
     } else {
         caprate = configuration().physics.max_non_player_rotation_rate_flt;
@@ -778,7 +776,7 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
     }
 
     const bool must_afterburn_to_buzz = configuration().audio.buzzing_needs_afterburner;
-    if (_Universe->isPlayerStarship(unit) != nullptr) {
+    if (unit->IsPlayerShip()) {
         static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
                 "player_afterburner",
                 "sfx10.wav"), true);

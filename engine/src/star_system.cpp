@@ -1431,12 +1431,11 @@ void StarSystem::ProcessPendingJumps() {
                 float dist = delta.Magnitude();
                 if (pendingjump[kk]->delay > 0) {
                     float speed = dist / pendingjump[kk]->delay;
-                    bool player = (_Universe->isPlayerStarship(un) != nullptr);
-                    if (dist > 10 && player) {
+                    if (dist > 10 && un->IsPlayerShip()) {
                         if (un->activeStarSystem == pendingjump[kk]->orig) {
                             un->SetCurPosition(un->LocalPosition() + simulation_atom_var * delta * (speed / dist));
                         }
-                    } else if (!player) {
+                    } else if (!un->IsPlayerShip()) {
                         un->SetVelocity(Vector(0, 0, 0));
                     }
                     if (configuration().physics.jump_disables_shields) {
@@ -1470,7 +1469,7 @@ void StarSystem::ProcessPendingJumps() {
             --kk;
             continue;
         }
-        bool dosightandsound = ((pendingjump[kk]->dest == savedStarSystem) || _Universe->isPlayerStarship(un));
+        bool dosightandsound = ((pendingjump[kk]->dest == savedStarSystem) || un->IsPlayerShip());
         _Universe->setActiveStarSystem(pendingjump[kk]->orig);
         if (un->TransferUnitToSystem(kk, savedStarSystem, dosightandsound)) {
             un->jump_drive.Consume();
@@ -1574,7 +1573,7 @@ bool StarSystem::JumpTo(Unit *un, Unit *jumppoint, const std::string &system, bo
 #ifdef JUMP_DEBUG
         VS_LOG(debug, "Pushing back to pending queue!");
 #endif
-        bool dosightandsound = ((this == _Universe->getActiveStarSystem(0)) || _Universe->isPlayerStarship(un));
+        bool dosightandsound = ((this == _Universe->getActiveStarSystem(0)) || un->IsPlayerShip());
         int ani = -1;
         if (dosightandsound) {
             ani = _Universe->activeStarSystem()->DoJumpingLeaveSightAndSound(un);

@@ -146,7 +146,7 @@ void Audible::playSound(const Vector &pnt, int sound, int playerSound) {
         AUDStopPlaying(sound);
     }
 
-    if (!_Universe->isPlayerStarship(unit)) {
+    if (!unit->IsPlayerShip()) {
         if (configuration().audio.ai_sound) {
             playDopplerSound(pnt, sound);
         }

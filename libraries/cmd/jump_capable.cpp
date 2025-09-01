@@ -357,7 +357,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                                         followermessage,
                                         recursive_level - 1);
                                 if (leadah) {
-                                    if (nullptr == _Universe->isPlayerStarship(other)) {
+                                    if (other->IsPlayerShip()) {
                                         other->SetPosition(AutoSafeEntrancePoint(unit->LocalPosition(),
                                                 other->rSize() * 1.5,
                                                 other));

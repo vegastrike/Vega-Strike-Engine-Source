@@ -526,7 +526,6 @@ public:
             bool lastframe,
             UnitCollection *uc,
             Unit *superunit) override;
-    bool isPlayerShip() override;
 
 //The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
     void *owner = nullptr;   //void ensures that it won't be referenced by accident

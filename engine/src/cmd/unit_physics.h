@@ -113,7 +113,7 @@ void GameUnit::Thrust(const Vector &amt1, bool afterburn) {
     Unit::Thrust(amt1, afterburn);
 
     const bool must_afterburn_to_buzz = configuration().audio.buzzing_needs_afterburner;
-    if (_Universe->isPlayerStarship(this) != NULL) {
+    if (isPlayerStarship()) {
         static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
                 "player_afterburner",
                 "sfx10.wav"), true);

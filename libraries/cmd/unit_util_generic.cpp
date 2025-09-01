@@ -257,7 +257,7 @@ int getPhysicsPriority(Unit *un) {
         //return ASTEROID_LOW_PRIORITY;
     }
     Unit *targ = un->Target();
-    if (_Universe->isPlayerStarship(targ)) {
+    if (targ && targ->IsPlayerShip()) {
         if (un->isJumppoint()) {
             return PLAYER_PRIORITY;
         } else if (UnitUtil::getDistance(targ, un) <= PLAYERTHREAT_DISTANCE_FACTOR * mymax(gun_range, missile_range)) {

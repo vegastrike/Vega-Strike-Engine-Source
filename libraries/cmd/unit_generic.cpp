@@ -984,8 +984,8 @@ void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
 bool Unit::jumpReactToCollision(Unit *smalle) {
     const bool ai_jump_cheat = configuration().ai.jump_without_energy;
     const bool nojumpinSPEC = configuration().physics.no_spec_jump;
-    bool SPEC_interference = (nullptr != _Universe->isPlayerStarship(smalle)) ? smalle->ftl_drive.Enabled()
-            && nojumpinSPEC : (nullptr != _Universe->isPlayerStarship(this)) && ftl_drive.Enabled()
+    bool SPEC_interference = (smalle->IsPlayerShip()) ? smalle->ftl_drive.Enabled()
+            && nojumpinSPEC : (this->IsPlayerShip()) && ftl_drive.Enabled()
             && nojumpinSPEC;
     //only allow big with small
     if (!GetDestinations().empty()) {
@@ -1046,7 +1046,7 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
 Cockpit *Unit::GetVelocityDifficultyMult(float &difficulty) const {
     difficulty = 1;
     Cockpit *player_cockpit = _Universe->isPlayerStarship(this);
-    if ((player_cockpit) == nullptr) {
+    if (IsPlayerShip()) {
         difficulty = std::pow(g_game.difficulty, configuration().physics.difficulty_speed_exponent_flt);
     }
     return player_cockpit;
@@ -1315,7 +1315,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
 
             dockedun.back()->UnDock(this);
 
-            if (randomInt(INT_MAX) <= (UnitUtil::isPlayerStarship(dockedun.back()) ? i_player_survival : i_survival)) {
+            if (randomInt(INT_MAX) <= (dockedun.back()->IsPlayerShip()) ? i_player_survival : i_survival) {
                 dockedun.back()->Kill();
             }
             dockedun.pop_back();
@@ -1526,7 +1526,7 @@ void Unit::Target(Unit *targ) {
                         }
                     }
                 }
-                if (!found && !_Universe->isPlayerStarship(this)) {
+                if (!found && !IsPlayerShip()) {
                     WarpPursuit(this, _Universe->activeStarSystem(), targ->getStarSystem()->getFileName());
                 }
             } else {
@@ -1664,7 +1664,7 @@ bool Unit::Explode(bool drawit, float timeit) {
                         static double lasttime = 0;
                         double newtime = getNewTime();
                         if (newtime - lasttime > configuration().audio.time_between_music_flt
-                                || (_Universe->isPlayerStarship(this) && this->getUnitType() != Vega_UnitType::missile
+                                || (IsPlayerShip() && this->getUnitType() != Vega_UnitType::missile
                                         && this->faction
                                                 != upgradesfaction)) {
                             //No victory for missiles or spawned explosions
@@ -1953,7 +1953,7 @@ int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
         this->RestoreGodliness();
     }
 
-    unsigned int cockpit = UnitUtil::isPlayerStarship(this);
+    unsigned int cockpit = _Universe->whichPlayerStarship(this);
 
     // Refuel and recharge and charge docking/refueling fees
     rechargeShip(this, cockpit);
@@ -3202,7 +3202,7 @@ enum Unit::tractorHow Unit::getTractorability() const {
         tractorability_mask_init = true;
     }
     unsigned char tflags;
-    if (_Universe->isPlayerStarship(this) != nullptr) {
+    if (IsPlayerShip()) {
         tflags = tractorability_flags & tractorability_mask;
     } else {
         tflags = tractorability_flags;
@@ -3386,14 +3386,10 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         adjustSound(SoundType::cloaking, cumulative_transformation.position, cumulative_velocity);
     }
 
-
-
-    bool is_player_ship = _Universe->isPlayerStarship(this);
-
     reactor.Generate();
     drive.Consume();
 
-    shield.Regenerate(is_player_ship);
+    shield.Regenerate(IsPlayerShip());
     ecm.Consume();
     DecreaseWarpEnergyInWarp();
 
@@ -3664,10 +3660,6 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     }
 }
 
-
-bool Unit::isPlayerShip() {
-    return _Universe->isPlayerStarship(this) ? true : false;
-}
 
 ///Updates the collide Queue with any possible change in sectors
 ///Queries if this unit is within a given frustum
