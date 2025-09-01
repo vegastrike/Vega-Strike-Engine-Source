@@ -235,9 +235,9 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
     } else if (dist < warnless) {
         if (lastwarned != target || !haswarned) {
             if (autoLandingExcludeWarningList.count(target->name) == 0) {
-                static string str = vs_config->getVariable("cockpitaudio", "automatic_landing_zone", "als");
-                static string str1 = vs_config->getVariable("cockpitaudio", "automatic_landing_zone1", "als");
-                static string str2 = vs_config->getVariable("cockpitaudio", "automatic_landing_zone2", "als");
+                static string str = configuration().cockpit_audio.automatic_landing_zone;
+                static string str1 = configuration().cockpit_audio.automatic_landing_zone1;
+                static string str2 = configuration().cockpit_audio.automatic_landing_zone2;
                 const string autolandinga = configuration().graphics.automatic_landing_zone_warning;
                 const string autolandinga1 = configuration().graphics.automatic_landing_zone_warning1;
                 const string autolandinga2 = configuration().graphics.automatic_landing_zone_warning2;
@@ -1143,7 +1143,7 @@ int GameCockpit::Autopilot(Unit *target) {
     int retauto = 0;
     if (target) {
         if (enableautosound.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "autopilot_enabled", "autopilot");
+            static string str = configuration().cockpit_audio.autopilot_enabled;
             enableautosound.loadsound(str);
         }
         enableautosound.playsound();
@@ -2066,7 +2066,7 @@ void GameCockpit::UpdAutoPilot() {
         if (autopilot_time <= 0) {
             AccessCamera(CP_FIXED)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
             if (disableautosound.sound < 0) {
-                static string str = vs_config->getVariable("cockpitaudio", "autopilot_disabled", "autopilot_disabled");
+                static string str = configuration().cockpit_audio.autopilot_disabled;
                 disableautosound.loadsound(str);
             }
             disableautosound.playsound();

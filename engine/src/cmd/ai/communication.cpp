@@ -212,7 +212,7 @@ void FSM::Node::AddSound(std::string soundfile, unsigned char sex, float gain) {
             gains[index] = gain;
 
             // Preload sound if configured to do so
-            if (game_options()->comm_preload) {
+            if (configuration().cockpit_audio.comm_preload) {
                 GetSound(sex, multiple, gain);
             }
 

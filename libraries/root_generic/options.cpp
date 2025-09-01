@@ -33,23 +33,6 @@
 extern VegaConfig *vs_config;
 
 void vs_options::init() {
-    /* Cockpit Audio Options */
-
-    comm = vs_config->getVariable("cockpitaudio", "comm", "vdu_c");
-    scanning = vs_config->getVariable("cockpitaudio", "scanning", "vdu_c");
-    objective = vs_config->getVariable("cockpitaudio", "objective", "vdu_c");
-    examine = vs_config->getVariable("cockpitaudio", "examine", "vdu_b");
-    view = vs_config->getVariable("cockpitaudio", "view", "vdu_b");
-    repair = vs_config->getVariable("cockpitaudio", "repair", "vdu_a");
-    manifest = vs_config->getVariable("cockpitaudio", "manifest", "vdu_a");
-    compress_max = XMLSupport::parse_int(vs_config->getVariable("cockpitaudio", "compress_max", "3"));
-    compress_loop = vs_config->getVariable("cockpitaudio", "compress_loop", "compress_loop");
-    compress_change = vs_config->getVariable("cockpitaudio", "compress_change", "compress_burst");
-    compress_stop = vs_config->getVariable("cockpitaudio", "compress_stop", "compress_end");
-    compress_interval = XMLSupport::parse_int(vs_config->getVariable("cockpitaudio", "compress_interval", "3"));
-
-    comm_preload = XMLSupport::parse_bool(vs_config->getVariable("cockpitaudio", "comm_preload", "false"));
-
     /* Unit Audio Options */
 
     jumpleave = vs_config->getVariable("unitaudio", "jumpleave", "sfx43.wav");

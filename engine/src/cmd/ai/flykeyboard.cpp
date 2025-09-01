@@ -457,7 +457,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             if (parent->jump_drive.IsDestinationSet()) {
                 static soundContainer foobar;
                 if (foobar.sound == -2) {
-                    static string str = vs_config->getVariable("cockpitaudio", "jump_engaged", "jump");
+                    static string str = configuration().cockpit_audio.jump_engaged;
                     foobar.loadsound(str);
                 }
                 foobar.playsound();

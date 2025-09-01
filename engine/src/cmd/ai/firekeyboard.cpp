@@ -194,7 +194,7 @@ void FireKeyboard::SetShieldsOneThird(const KBData &, KBSTATE k) {
         float pow = 1. / 3;
         static soundContainer sc;
         if (sc.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "shield", "vdu_d");
+            static string str = configuration().cockpit_audio.shield;
             sc.loadsound(str);
         }
         sc.playsound();
@@ -211,7 +211,7 @@ void FireKeyboard::SetShieldsOff(const KBData &, KBSTATE k) {
         float pow = 0;
         static soundContainer sc;
         if (sc.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "shield", "vdu_d");
+            static string str = configuration().cockpit_audio.shield;
             sc.loadsound(str);
         }
         sc.playsound();
@@ -228,7 +228,7 @@ void FireKeyboard::SetShieldsTwoThird(const KBData &, KBSTATE k) {
         float pow = 2. / 3;
         static soundContainer sc;
         if (sc.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "shield", "vdu_d");
+            static string str = configuration().cockpit_audio.shield;
             sc.loadsound(str);
         }
         sc.playsound();
@@ -1205,14 +1205,14 @@ bool ChooseTargets(Unit *me, bool (*typeofunit)(Unit *, Unit *), bool reverse) {
                     if (reverse) {
                         static soundContainer foosound;
                         if (foosound.sound < 0) {
-                            static string str = vs_config->getVariable("cockpitaudio", "target", "vdu_b");
+                            static string str = configuration().cockpit_audio.target;
                             foosound.loadsound(str);
                         }
                         foosound.playsound();
                     } else {
                         static soundContainer foobersound;
                         if (foobersound.sound < 0) {
-                            static string str = vs_config->getVariable("cockpitaudio", "target_reverse", "vdu_a");
+                            static string str = configuration().cockpit_audio.target_reverse;
                             foobersound.loadsound(str);
                         }
                         foobersound.playsound();
@@ -1299,7 +1299,7 @@ void PlayDockingSound(int dock) {
         case 5: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "undocking_complete", "undocking_complete");
+                static string str = configuration().cockpit_audio.undocking_complete;
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1308,7 +1308,7 @@ void PlayDockingSound(int dock) {
         case 4: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "undocking_failed", "undocking_failed");
+                static string str = configuration().cockpit_audio.undocking_failed;
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1322,7 +1322,7 @@ void PlayDockingSound(int dock) {
                 AUDPlay(s, QVector(0, 0, 0), Vector(0, 0, 0), 1);
             } else {
                 if (reqsound.sound == -2) {
-                    static string str = vs_config->getVariable("cockpitaudio", "docking_complete", "docking_complete");
+                    static string str = configuration().cockpit_audio.docking_complete;
                     reqsound.loadsound(str);
                 }
                 reqsound.playsound();
@@ -1332,7 +1332,7 @@ void PlayDockingSound(int dock) {
         case 2: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "docking_failed", "docking_failed");
+                static string str = configuration().cockpit_audio.docking_failed;
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1341,7 +1341,7 @@ void PlayDockingSound(int dock) {
         case 1: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "docking_granted", "request_granted");
+                static string str = configuration().cockpit_audio.docking_granted;
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1350,7 +1350,7 @@ void PlayDockingSound(int dock) {
         case 0: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "docking_denied", "request_denied");
+                static string str = configuration().cockpit_audio.docking_denied;
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -2003,7 +2003,7 @@ void FireKeyboard::Execute() {
         parent->ToggleWeapon(false, forward);
         static soundContainer weapsound;
         if (weapsound.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "weapon_switch", "vdu_d");
+            static string str = configuration().cockpit_audio.weapon_switch;
             weapsound.loadsound(str);
         }
         weapsound.playsound();
@@ -2040,7 +2040,7 @@ void FireKeyboard::Execute() {
         parent->ToggleWeapon(true, forward);
         static soundContainer missound;
         if (missound.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "missile_switch", "vdu_d");
+            static string str = configuration().cockpit_audio.missile_switch;
             missound.loadsound(str);
         }
         missound.playsound();
