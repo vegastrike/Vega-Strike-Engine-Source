@@ -45,13 +45,6 @@ public:
 
     void init();
 
-    /* Unit Audio Options */
-
-    std::string jumpleave;
-    std::string player_armor_hit;
-    std::string player_hull_hit;
-    std::string player_shield_hit;
-
     /* AI Options */
 
     bool AllowCivilWar{};

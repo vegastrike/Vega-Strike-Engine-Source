@@ -114,15 +114,16 @@ void GameUnit::Thrust(const Vector &amt1, bool afterburn) {
 
     const bool must_afterburn_to_buzz = configuration().audio.buzzing_needs_afterburner;
     if (isPlayerStarship()) {
-        static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
-                "player_afterburner",
-                "sfx10.wav"), true);
-        const float enginegain = configuration().audio.afterburner_gain;
-        if (afterburn != AUDIsPlaying(playerengine)) {
+        static boost::optional<int> player_engine;
+        if (player_engine == boost::none) {
+            player_engine = AUDCreateSound(configuration().audio.unit_audio.player_afterburner, true);
+        }
+        const float engine_gain = configuration().audio.engine_gain;
+        if (afterburn != AUDIsPlaying(player_engine)) {
             if (afterburn) {
-                AUDPlay(playerengine, QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
+                AUDPlay(player_engine, QVector(0, 0, 0), Vector(0, 0, 0), engine_gain);
             } else {
-                AUDStopPlaying(playerengine);
+                AUDStopPlaying(player_engine);
             }
         }
     } else if (afterburn || !must_afterburn_to_buzz) {

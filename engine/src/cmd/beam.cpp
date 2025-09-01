@@ -607,19 +607,20 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         if (un->cargo_hold.CanAddCargo(adder)) {
                             un->cargo_hold.AddCargo(un, adder);
                             if (un->IsPlayerShip()) {
-                                static int tractor_onboard =
-                                        AUDCreateSoundWAV(vs_config->getVariable("unitaudio", "player_tractor_cargo",
-                                                "tractor_onboard.wav"));
-                                AUDPlay(tractor_onboard, QVector(0, 0, 0), Vector(0, 0, 0), 1);
+                                static boost::optional<int> tractor_onboard;
+                                if (tractor_onboard == boost::none) {
+                                    tractor_onboard = AUDCreateSoundWAV(configuration().audio.unit_audio.player_tractor_cargo);
+                                }
+                                AUDPlay(tractor_onboard.get(), QVector(0, 0, 0), Vector(0, 0, 0), 1);
                             } else {
                                 Unit *tmp = _Universe->AccessCockpit()->GetParent();
                                 if (tmp && tmp->owner == un) {
                                     //Subunit of player (a turret)
-                                    static int tractor_onboard_fromturret =
-                                            AUDCreateSoundWAV(vs_config->getVariable("unitaudio",
-                                                    "player_tractor_cargo_fromturret",
-                                                    "tractor_onboard.wav"));
-                                    AUDPlay(tractor_onboard_fromturret, QVector(0, 0, 0), Vector(0, 0, 0), 1);
+                                    static boost::optional<int> tractor_onboard_fromturret;
+                                    if (tractor_onboard_fromturret == boost::none) {
+                                        tractor_onboard_fromturret = AUDCreateSoundWAV(configuration().audio.unit_audio.player_tractor_cargo_fromturret);
+                                    }
+                                    AUDPlay(tractor_onboard_fromturret.get(), QVector(0, 0, 0), Vector(0, 0, 0), 1);
                                 }
                             }
                             target->Kill();

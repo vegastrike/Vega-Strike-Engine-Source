@@ -174,8 +174,11 @@ int StarSystem::DoJumpingLeaveSightAndSound(Unit *un) {
     un->GetOrientation(p, q, r);
     ani = AddJumpAnimation(un->Position() + r.Cast() * un->rSize() * (un->jump_drive.Delay() + .25),
             10 * un->rSize());
-    static int jumpleave = AUDCreateSound(game_options()->jumpleave, false);
-    AUDPlay(jumpleave, un->LocalPosition(), un->GetVelocity(), 1);
+    static boost::optional<int> jump_leave;
+    if (jump_leave == boost::none) {
+        jump_leave = AUDCreateSound(configuration().audio.unit_audio.jump_leave, false);
+    }
+    AUDPlay(jump_leave.get(), un->LocalPosition(), un->GetVelocity(), 1);
     return ani;
 }
 

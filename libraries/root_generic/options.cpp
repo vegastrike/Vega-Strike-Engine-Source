@@ -33,13 +33,6 @@
 extern VegaConfig *vs_config;
 
 void vs_options::init() {
-    /* Unit Audio Options */
-
-    jumpleave = vs_config->getVariable("unitaudio", "jumpleave", "sfx43.wav");
-    player_armor_hit = vs_config->getVariable("unitaudio", "player_armor_hit", "bigarmor.wav");
-    player_hull_hit = vs_config->getVariable("unitaudio", "player_hull_hit", "bigarmor.wav");
-    player_shield_hit = vs_config->getVariable("unitaudio", "player_shield_hit", "shieldhit.wav");
-
     /* AI Options */
 
     AllowCivilWar = XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowCivilWar", "false"));
