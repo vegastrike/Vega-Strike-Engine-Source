@@ -45,15 +45,6 @@ public:
 
     void init();
 
-    /* AI Options */
-
-    bool AllowCivilWar{};
-    bool CappedFactionRating{};
-    bool AllowNonplayerFactionChange{};
-    double min_relationship{};
-    std::string startDockedTo;
-    bool dockOnLoad{};
-
     /* Data Options */
 
     std::string universe_path;

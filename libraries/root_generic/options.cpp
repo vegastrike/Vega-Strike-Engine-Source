@@ -33,16 +33,6 @@
 extern VegaConfig *vs_config;
 
 void vs_options::init() {
-    /* AI Options */
-
-    AllowCivilWar = XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowCivilWar", "false"));
-    CappedFactionRating = XMLSupport::parse_bool(vs_config->getVariable("AI", "CappedFactionRating", "true"));
-    AllowNonplayerFactionChange =
-            XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowNonplayerFactionChange", "false"));
-    min_relationship = XMLSupport::parse_float(vs_config->getVariable("AI", "min_relationship", "-20.0"));
-    startDockedTo = vs_config->getVariable("AI", "startDockedTo", "MiningBase");
-    dockOnLoad = XMLSupport::parse_bool(vs_config->getVariable("AI", "dockOnLoad", "true"));
-
     /* Data Options */
 
     universe_path = vs_config->getVariable("data", "universe_path", "universe");
