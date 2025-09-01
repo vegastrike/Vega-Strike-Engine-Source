@@ -3505,7 +3505,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                                 AUDStopPlaying(locking_sound.get());
                                 AUDStopPlaying(locking_sound_torp.get());
                             }
-                            AUDAdjustSound(locked_sound, Position(), GetVelocity());
+                            AUDAdjustSound(locked_sound.get(), Position(), GetVelocity());
                         } else if (mounts[i].time_to_lock > 0) {
                             locking = true;
                             if (!AUDIsPlaying(locking_play)) {
