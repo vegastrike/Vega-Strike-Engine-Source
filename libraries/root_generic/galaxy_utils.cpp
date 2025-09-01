@@ -237,7 +237,7 @@ void MakeStarSystem(string file, Galaxy *galaxy, string origin, int forcerandom)
     si.nebulaelist = getVarEitherSectionOrSub(galaxy, si.sector, si.name, "nebulalist", Ave.nebulaelist);
     si.backgrounds = getVarEitherSectionOrSub(galaxy, si.sector, si.name, "backgroundlist", Ave.backgrounds);
     si.force = parse_bool(getVarEitherSectionOrSub(galaxy, si.sector, si.name, "force", Ave.force ? "true" : "false"));
-    if (game_options()->PushValuesToMean) {
+    if (configuration().galaxy.push_values_to_mean) {
         si.force = true;
     }
     string dest = galaxy->getVariable(si.sector, si.name, "jumps", "");

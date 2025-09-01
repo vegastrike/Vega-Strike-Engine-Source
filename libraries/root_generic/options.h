@@ -47,29 +47,6 @@ public:
 
     std::string unitCSV;
 
-    /* Galaxy Options */
-
-    bool PushValuesToMean{};
-    float AmbientLightFactor{};
-    float StarRadiusScale{};
-    std::string DefaultAtmosphereTexture;
-    float AtmosphereProbability{};
-    float RingProbability{};
-    float DoubleRingProbability{};
-    float InnerRingRadius{};
-    float OuterRingRadius{};
-    std::string DefaultRingTexture;
-    float SecondRingDifference{};
-    float MoonRelativeToPlanet{};
-    float MoonRelativeToMoon{};
-    float RockyRelativeToPrimary{};
-    float CompactnessScale{};
-    float JumpCompactnessScale{};
-    int MeanNaturalPhenomena{};
-    int MeanStarBases{};
-//    float    SmallUnitsMultiplier;  not used
-
-
     /* Network Options */
 
     bool force_client_connect{};
