@@ -40,5 +40,7 @@ public:
     void Draw(float percentage);
     void SetSize(float x, float y);
     void GetSize(float &x, float &y);
+
+    ~Gauge() override;
 };
 

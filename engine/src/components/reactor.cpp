@@ -60,7 +60,7 @@ Reactor::~Reactor()
 void Reactor::Load(std::string unit_key) {
     Component::Load(unit_key);
     capacity = Resource<double>(UnitCSVFactory::GetVariable(unit_key, REACTOR_RECHARGE, std::string("0.0")),
-                                configuration().components.reactor.factor);
+                                configuration().components.reactor.factor_dbl);
 
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
@@ -73,7 +73,7 @@ void Reactor::Load(std::string unit_key) {
 
 void Reactor::SaveToCSV(std::map<std::string, std::string>& unit) const {
     // TODO: This won't record damage to recharge
-    unit[REACTOR_RECHARGE] = capacity.Serialize(configuration().components.reactor.factor);
+    unit[REACTOR_RECHARGE] = capacity.Serialize(configuration().components.reactor.factor_dbl);
 }
 
 
@@ -106,7 +106,7 @@ bool Reactor::Upgrade(const std::string upgrade_key) {
     Component::Upgrade(upgrade_key);
 
     capacity = Resource<double>(UnitCSVFactory::GetVariable(upgrade_key, REACTOR_RECHARGE, std::string("0.0")),
-                                configuration().components.reactor.factor);
+                                configuration().components.reactor.factor_dbl);
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
 
@@ -161,7 +161,7 @@ double Reactor::MaxCapacity() const {
 }
 
 void Reactor::SetCapacity(double capacity) {
-    this->capacity.SetMaxValue(capacity * configuration().components.reactor.factor);
+    this->capacity.SetMaxValue(capacity * configuration().components.reactor.factor_dbl);
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
     operational = 1.0;

@@ -70,7 +70,7 @@ void ClientServerSetLightContext(int lightcontext) {
 
 namespace UniverseUtil {
 void playVictoryTune() {
-    muzak->GotoSong(game_options()->missionvictorysong);
+    muzak->GotoSong(configuration().audio.mission_victory_song);
 }
 
 int musicAddList(string str) {

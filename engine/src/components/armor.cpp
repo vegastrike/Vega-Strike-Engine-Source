@@ -169,3 +169,5 @@ void Armor::Repair() {
         facet.RepairFully();
     }
 }
+
+Armor::~Armor() = default;

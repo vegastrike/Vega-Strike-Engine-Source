@@ -87,7 +87,7 @@ static void DrawNodeDescription(string text,
     }
     TextPlane displayname;   //will be used to display shits names
     displayname.col = col;
-    const float background_alpha = configuration().graphics.hud.text_background_alpha;
+    const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     int length = text.size();
     float offset = (float(length) * 0.005);
     if (ignore_occupied_areas) {
@@ -289,7 +289,7 @@ QVector NavigationSystem::SystemIterator::Position() {
         }
         k %= 200000;
 //float y = (k-100000)/(200000.);
-        return QVector(ratio * cos(locatio * 2 * 3.1415926536), ratio * sin(locatio * 2 * 3.1415926536), 0)
+        return QVector(ratio * cos(locatio * 2 * M_PI), ratio * sin(locatio * 2 * M_PI), 0)
                 * screensmash;
     }
 }

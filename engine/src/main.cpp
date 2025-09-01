@@ -366,7 +366,7 @@ int main(int argc, char *argv[]) {
     UpdateTime();
 
     AUDInit();
-    AUDListenerGain(game_options()->sound_gain);
+    AUDListenerGain(configuration().audio.sound_gain_flt);
     Music::InitMuzak();
 
     initSceneManager();
@@ -379,7 +379,7 @@ int main(int argc, char *argv[]) {
         CommandInterpretor = new commandI;
         InitShipCommands();
     }
-    _Universe = new Universe(argc, argv, game_options()->galaxy.c_str());
+    _Universe = new Universe(argc, argv, configuration().game_start.galaxy.c_str());
     TheTopLevelUnit = new Unit(0);
     _Universe->Loop(bootstrap_first_loop);
 

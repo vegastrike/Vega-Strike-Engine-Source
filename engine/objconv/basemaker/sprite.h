@@ -53,7 +53,7 @@ class VSSprite {
     Texture *surface;
 public:
     VSSprite(const char *file, enum FILTER texturefilter = BILINEAR, GFXBOOL force = GFXFALSE);
-    ~VSSprite();
+    virtual ~VSSprite();
 
     bool LoadSuccess() {
         return surface != NULL;

@@ -368,7 +368,7 @@ double ComponentsManager::PriceCargo(const std::string &cargo_name) {
         return cargo.GetPrice();
     }
 
-    return configuration().cargo.space_junk_price;
+    return configuration().cargo.space_junk_price_dbl;
 }
 
 bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *item, int quantity) {

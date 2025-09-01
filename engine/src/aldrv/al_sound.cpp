@@ -543,7 +543,7 @@ int AUDCreateSoundWAV(const std::string &s, const bool music, const bool LOOP) {
 #ifdef SOUND_DEBUG
     VS_LOG(trace, "AUDCreateSoundWAV:: ");
 #endif
-    if ((game_options()->Music && !music) || (game_options()->Music && music)) {
+    if ((configuration().audio.music && !music) || (configuration().audio.music && music)) {
         ALuint *wavbuf = NULL;
         std::string hashname;
         if (!music) {
@@ -594,7 +594,7 @@ int AUDCreateMusicWAV(const std::string &s, const bool LOOP) {
 int AUDCreateSoundMP3(const std::string &s, const bool music, const bool LOOP) {
 #ifdef HAVE_AL
     assert(0);
-    if ((game_options()->Music && !music) || (game_options()->Music && music)) {
+    if ((configuration().audio.music && !music) || (configuration().audio.music && music)) {
         VSFile f;
         VSError error = f.OpenReadOnly(s.c_str(), SoundFile);
         bool shared = (error == Shared);
@@ -742,8 +742,8 @@ void AUDAdjustSound(const int sound, const QVector &pos, const Vector &vel) {
             alSourcei(sounds[sound].source, AL_SOURCE_RELATIVE, relative);
             if (!relative) {
                 // Set rolloff factrs
-                alSourcef(sounds[sound].source, AL_MAX_DISTANCE, scalepos * game_options()->audio_max_distance);
-                alSourcef(sounds[sound].source, AL_REFERENCE_DISTANCE, scalepos * game_options()->audio_ref_distance);
+                alSourcef(sounds[sound].source, AL_MAX_DISTANCE, scalepos * configuration().audio.audio_max_distance_flt);
+                alSourcef(sounds[sound].source, AL_REFERENCE_DISTANCE, scalepos * configuration().audio.audio_ref_distance_flt);
                 alSourcef(sounds[sound].source, AL_ROLLOFF_FACTOR, 1.f);
             }
         }

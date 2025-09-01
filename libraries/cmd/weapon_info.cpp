@@ -62,8 +62,8 @@ float WeaponInfo::Refire() const {
             != 't' || name[len - 2] != 'e' || name[len - 1] != 'r') {
         return refire_rate;
     }
-    return this->refire_rate * (configuration().physics.refire_difficulty_scaling
-            / (1.0f + (configuration().physics.refire_difficulty_scaling - 1.0f) * g_game.difficulty));
+    return this->refire_rate * (configuration().physics.refire_difficulty_scaling_flt
+            / (1.0f + (configuration().physics.refire_difficulty_scaling_flt - 1.0f) * g_game.difficulty));
 }
 
 bool WeaponInfo::isMissile() const {

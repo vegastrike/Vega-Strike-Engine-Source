@@ -51,7 +51,7 @@ ECM::~ECM()
 void ECM::Load(std::string unit_key) {
     Component::Load(unit_key);
 
-    double consumption = configuration().components.fuel.ecm_energy_cost * static_cast<double>(ecm);
+    double consumption = configuration().components.fuel.ecm_energy_cost_dbl * static_cast<double>(ecm);
     SetConsumption(consumption);
 
     _upgrade(upgrade_key);

@@ -152,8 +152,8 @@ protected:
 
 public:
     /// Repair
-    float next_repair_time;
-    unsigned int next_repair_cargo;    //(~0 : select randomly)
+    float next_repair_time{};
+    unsigned int next_repair_cargo{};    //(~0 : select randomly)
 
 //The name (type) of this unit shouldn't be public
     StringPool::Reference name;
@@ -547,7 +547,7 @@ public:
 public:
     //BUCO! Must add shield tightness back into units.csv for great justice.
     //are shields tight to the hull.  zero means bubble
-    float shieldtight = configuration().physics.default_shield_tightness;
+    float shieldtight = configuration().physics.default_shield_tightness_flt;
 
 public:
     // TODO: move to jump_capable?
@@ -964,7 +964,7 @@ public:
     // Example:
     // MACRO_FUNCTION(field_a, object_a, object_b)
     // object_a->field_a = object_b->field_b;
-    float temporary_upgrade_float_variable;
+    float temporary_upgrade_float_variable{};
 };
 
 Unit *findUnitInStarsystem(const void *unitDoNotDereference);

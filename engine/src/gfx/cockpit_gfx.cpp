@@ -66,7 +66,7 @@ inline void DrawOneTargetBox( const QVector &Loc,
                               bool Diamond  )
 {
     SetThickness(ShapeType::Box);
-    const float rat = configuration().graphics.hud.min_target_box_size;
+    const float rat = configuration().graphics.hud.min_target_box_size_flt;
     float len = (Loc).Magnitude();
     float curratio   = rSize/len;
     if (curratio < rat)
@@ -89,7 +89,7 @@ inline void DrawOneTargetBox( const QVector &Loc,
     // Still locking on
     lock_percent = std::max(0.0F, lock_percent);
     if (lock_percent < 0.99F) {
-        glLineWidth(configuration().graphics.hud.diamond_line_thickness);
+        glLineWidth(configuration().graphics.hud.diamond_line_thickness_flt);
 
         if (configuration().graphics.hud.lock_center_crosshair) {
             verts = GetLockingIcon(Loc, CamP, CamQ, rSize, lock_percent);
@@ -274,10 +274,10 @@ void DrawArrowToTarget(const Radar::Sensor& sensor, Vector localcoord,
     p2.i  = p_n.i*TARGET_ARROW_COS_THETA-p_n.j*(-TARGET_ARROW_SIN_THETA);       //p2 = p.rot(-THETA)
     p2.j  = p_n.j*TARGET_ARROW_COS_THETA+p_n.i*(-TARGET_ARROW_SIN_THETA);
     p1.i += s;
-    p1.j *= configuration().graphics.aspect;
+    p1.j *= configuration().graphics.aspect_flt;
     p1.j += t;
     p2.i += s;
-    p2.j *= configuration().graphics.aspect;
+    p2.j *= configuration().graphics.aspect_flt;
     p2.j += t;
     p2.k  = p1.k = 0;
 
@@ -346,7 +346,7 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
         return;
     GFXColorf( textcol );
     GFXColor     origbgcol = text->bgcol;
-    const float background_alpha = configuration().graphics.hud.text_background_alpha;
+    const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     bool automatte = (0 == origbgcol.a);
     if (automatte) {
         text->bgcol = GFXColor( 0, 0, 0, background_alpha );
@@ -587,9 +587,9 @@ void DrawTacticalTargetBox(const Radar::Sensor& sensor)
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
         GFXDisable( LIGHTING );
 
-        const float fudge = configuration().graphics.hud.tac_target_length;
-        const float foci = configuration().graphics.hud.tac_target_foci;
-        glLineWidth( (int) configuration().graphics.hud.tac_target_thickness);         //temp
+        const float fudge = configuration().graphics.hud.tac_target_length_flt;
+        const float foci = configuration().graphics.hud.tac_target_foci_flt;
+        glLineWidth( (int) configuration().graphics.hud.tac_target_thickness_flt);         //temp
         Radar::Track track = sensor.CreateTrack(target, Loc);
         GFXColorf(sensor.GetColor(track));
 
@@ -751,7 +751,7 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
             || ( target->isPlanet() && ( (Planet*) target )->isAtmospheric()
                 && ( draw_jump_nav_symbol
                      || target->GetDestinations().empty() ) ) || !sensor.InRange(track)) ) {
-        const float nav_symbol_size = configuration().graphics.nav.symbol_size;
+        const float nav_symbol_size = configuration().graphics.nav.symbol_size_flt;
         GFXColor4f( 1, 1, 1, 1 );
         DrawNavigationSymbol( Loc, CamP, CamQ, Loc.Magnitude()*nav_symbol_size );
         nav_symbol = true;
@@ -770,7 +770,7 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
         float   scatter  = .25*player->rSize();
         const bool itts_for_locks = configuration().graphics.hud.itts_for_lockable;
         const bool itts_for_beams = configuration().graphics.hud.itts_for_beams;
-        const bool line_to_itts_alpha = configuration().graphics.hud.itts_line_to_mark_alpha;
+        const bool line_to_itts_alpha = configuration().graphics.hud.itts_line_to_mark_alpha_flt;
         QVector p = CamP.Cast();
         QVector q = CamQ.Cast();
         QVector offs = _Universe->AccessCamera()->GetPosition() - SCATTER_CUBE*scatter*10*err;

@@ -38,8 +38,9 @@ class JumpCapable {
 public:
     StarSystem *activeStarSystem;
 
-public:
     JumpCapable();
+
+    virtual ~JumpCapable();
 
     void ActivateJumpDrive(int destination = 0);
     void AddDestination(const std::string &);

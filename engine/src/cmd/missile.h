@@ -72,11 +72,13 @@ public:
             float radmult,
             float detonation_radius);
 
-    Missile(std::vector<Mesh *> m, bool b, int i) :
-            Unit(m, b, i) {
+    Missile(std::vector<Mesh *> m, bool b, int i) : Unit(m, b, i), time(0.0F), damage(0.0F), phasedamage(0.0F), radial_effect(0.0F),
+                                                    radial_multiplier(0.0F),
+                                                    detonation_radius(0.0F),
+                                                    discharged(false),
+                                                    had_target(false), retarget(0) {
     }
 
-public:
     virtual void Kill(bool erase = true);
     void Discharge();
     float ExplosionRadius() override;
@@ -108,6 +110,8 @@ public:
     Missile(const Missile &) = delete;
     /// assignment operator forbidden
     Missile &operator=(const Missile &) = delete;
+
+    ~Missile() override;
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_MISSILE_H

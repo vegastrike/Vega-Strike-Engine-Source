@@ -127,15 +127,17 @@ Animation::Animation(const char *FileName,
 }
 
 Animation::~Animation() {
-    vector<Animation *>::iterator i;
-    while ((i =
-            std::find(far_animationdrawqueue.begin(), far_animationdrawqueue.end(),
-                    this)) != far_animationdrawqueue.end()) {
-        far_animationdrawqueue.erase(i);
+    if (!far_animationdrawqueue.empty()) {
+        const auto first_to_remove = std::stable_partition(far_animationdrawqueue.begin(), far_animationdrawqueue.end(),
+                                                           [this](const Animation *pi) { return pi != this; });
+        far_animationdrawqueue.erase(first_to_remove, far_animationdrawqueue.end());
     }
-    while ((i = std::find(animationdrawqueue.begin(), animationdrawqueue.end(), this)) != animationdrawqueue.end()) {
-        animationdrawqueue.erase(i);
+    if (!animationdrawqueue.empty()) {
+        const auto first_to_remove = std::stable_partition(animationdrawqueue.begin(), animationdrawqueue.end(),
+                                                           [this](const Animation *pi) { return pi != this; });
+        animationdrawqueue.erase(first_to_remove, animationdrawqueue.end());
     }
+
     VSDESTRUCT2
 }
 
@@ -237,7 +239,7 @@ bool Animation::CalculateOrientation(Matrix &result) {
     QVector pos(Position());
     float hei = height;
     float wid = width;
-    const double HaloOffset = configuration().graphics.halo_offset;
+    const double HaloOffset = configuration().graphics.halo_offset_dbl;
     bool retval =
             ::CalculateOrientation(pos,
                     camp,
@@ -465,19 +467,19 @@ void Animation::Draw() {
         Vector camp, camq, camr;
         QVector pos(Position());
 
-        const double HaloOffset = configuration().graphics.halo_offset;
+        const double HaloOffset = configuration().graphics.halo_offset_dbl;
 
         /**/
         //Why do all this if we can use ::CalculateOrientation?
         //-- well one reason is that the code change broke it :-/  Until suns display properly or we switch to ogre we should keep it as it was (problem was, flare wouldn't display--- or would display behind the sun)
         QVector R(_Universe->AccessCamera()->GetR().i, _Universe->AccessCamera()->GetR().j,
                 _Universe->AccessCamera()->GetR().k);
-        const double too_far_dist = configuration().graphics.anim_far_percent;
+        const double too_far_dist = configuration().graphics.anim_far_percent_dbl;
         if (( /*R.Dot*/ (Position()
                 - _Universe->AccessCamera()->GetPosition()).Magnitude() + HaloOffset
                 *
                         (height > width ? height : width)) <
-                too_far_dist * configuration().graphics.zfar) {
+                too_far_dist * configuration().graphics.zfar_dbl) {
             //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {ss
             animationdrawqueue.push_back(this);
         } else {

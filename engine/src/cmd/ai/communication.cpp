@@ -492,7 +492,7 @@ RGBstring GetRelationshipRGBstring(float rel) {
 }
 
 unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &node) {
-    const float scale_rel_color = configuration().graphics.hud.scale_relationship_color;
+    const float scale_rel_color = configuration().graphics.hud.scale_relationship_color_flt;
     static std::string
             ownname_RGBstr = colToString(vs_config->getColor("player_name", GFXColor(0.0, 0.2, 1.0))).str; // bluish
     unsigned int dummy = 0;

@@ -53,6 +53,8 @@ Audible::Audible() {
     defaultSoundNames[SoundType::cloaking] = vs_config->getVariable("unitaudio", "cloak", "sfx43.wav");
 }
 
+Audible::~Audible() = default;
+
 void Audible::addDefaultSounds() {
     for (const SoundType &soundType : typesArray) {
         if (sounds[soundType] == -1) {
@@ -145,7 +147,7 @@ void Audible::playSound(const Vector &pnt, int sound, int playerSound) {
     }
 
     if (!unit->IsPlayerShip()) {
-        if (game_options()->ai_sound) {
+        if (configuration().audio.ai_sound) {
             playDopplerSound(pnt, sound);
         }
     } else {

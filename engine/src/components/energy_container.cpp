@@ -125,7 +125,7 @@ void EnergyContainer::Load(std::string unit_key) {
         break;
 
         case ComponentType::FtlCapacitor:
-        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FTL_CAPACITOR, std::string("0.0")), configuration().components.ftl_energy.factor);
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FTL_CAPACITOR, std::string("0.0")), configuration().components.ftl_energy.factor_dbl);
         break;
 
         default: // This really can't happen
@@ -150,7 +150,7 @@ void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const 
         break;
 
         case ComponentType::FtlCapacitor:
-        unit[FTL_CAPACITOR] = level.Serialize(configuration().components.ftl_energy.factor);
+        unit[FTL_CAPACITOR] = level.Serialize(configuration().components.ftl_energy.factor_dbl);
         break;
 
         default: // This really can't happen
@@ -235,3 +235,5 @@ bool EnergyContainer::Damaged() const {
 bool EnergyContainer::Installed() const {
     return level > 0.0;
 }
+
+EnergyContainer::~EnergyContainer() = default;

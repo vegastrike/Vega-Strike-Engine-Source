@@ -29,7 +29,7 @@
 #include "dummy_component.h"
 
 
-DummyComponent::DummyComponent() : 
+DummyComponent::DummyComponent() :
     Component() {
     type = ComponentType::Dummy;
 }
@@ -38,7 +38,7 @@ DummyComponent::DummyComponent() :
 // Component Methods
 void DummyComponent::Load(std::string unit_key) {
     Component::Load(unit_key);
-}      
+}
 
 void DummyComponent::SaveToCSV(std::map<std::string, std::string>& unit) const {}
 
@@ -58,3 +58,4 @@ bool DummyComponent::Upgrade(const std::string upgrade_key) {
     return false;
 }
 
+DummyComponent::~DummyComponent() = default;

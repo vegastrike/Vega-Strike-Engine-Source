@@ -62,6 +62,8 @@ public:
     Enhancement(const Enhancement &) = delete;
     /// assignment operator forbidden
     Enhancement &operator=(const Enhancement &) = delete;
+
+    ~Enhancement() override = default;
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_ENHANCER_H

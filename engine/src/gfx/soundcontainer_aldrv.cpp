@@ -34,9 +34,8 @@ AldrvSoundContainer::AldrvSoundContainer(const SoundContainer &other)
         : GameSoundContainer(other), sound(-2) {
 }
 
-AldrvSoundContainer::~AldrvSoundContainer() {
-    // unload already takes care
-}
+// unload already takes care
+AldrvSoundContainer::~AldrvSoundContainer() = default;
 
 void AldrvSoundContainer::loadImpl() {
     sound = AUDCreateSoundWAV(getSoundFile(), isLooping());
