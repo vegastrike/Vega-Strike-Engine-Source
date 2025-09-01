@@ -2733,14 +2733,13 @@ int Unit::RepairUpgrade() {
 }
 
 
-//item must be non-null... but baseUnit or credits may be NULL.
-bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit) {
-    assert((item != nullptr) | !"Unit::RepairUpgradeCargo got a null item."); //added by chuck_starchaser
-    double itemPrice = 1; //baseUnit ? baseUnit->PriceCargo(item->GetName()) : item->GetPrice();
+
+bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, double repair_price) {
+    assert((item != nullptr) | !"Unit::RepairUpgradeCargo got a null item.");
+    assert((baseUnit != nullptr) | !"Unit::RepairUpgradeCargo got a null baseUnit.");
 
     // New repair
     if(RepairUnit(item->GetName())) {
-        double repair_price = item->RepairPrice();
         ComponentsManager::credits -= repair_price;
 
         GenerateHudText(getDamageColor);
@@ -2749,10 +2748,12 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit) {
 
     if (item->IsWeapon()) {
         const Unit *upgrade = getUnitFromUpgradeName(item->GetName(), this->faction);
+
+
+        repair_price = baseUnit->PriceCargo(item->GetName());
         if (upgrade->getNumMounts()) {
-            double price = itemPrice; //RepairPrice probably won't work for mounts.
-            if (price <= ComponentsManager::credits) {
-                ComponentsManager::credits -= price;
+            if (repair_price <= ComponentsManager::credits) {
+                ComponentsManager::credits -= repair_price;
 
                 const Mount *mnt = &upgrade->mounts[0];
                 unsigned int nummounts = this->getNumMounts();

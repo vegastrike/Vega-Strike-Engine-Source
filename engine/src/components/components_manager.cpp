@@ -408,3 +408,27 @@ bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *
     buyer_hold->AddCargo(buyer, cargo);
     return true;
 }
+
+Component* ComponentsManager::GetComponentByType(const ComponentType type) {
+    switch(type) {
+        case ComponentType::Hull: return &hull;
+        case ComponentType::Armor: return &armor;
+        case ComponentType::Shield: return &shield;
+        case ComponentType::Afterburner: return &afterburner;
+        case ComponentType::AfterburnerUpgrade: return &afterburner_upgrade;
+        case ComponentType::Drive: return &drive;
+        case ComponentType::DriveUpgrade: return &drive_upgrade;
+        case ComponentType::FtlDrive: return &ftl_drive;
+        case ComponentType::JumpDrive: return &jump_drive;
+        case ComponentType::Reactor: return &reactor;
+        case ComponentType::Fuel: return &fuel;
+        case ComponentType::Capacitor: return &energy;
+        case ComponentType::FtlCapacitor: return &ftl_energy;
+        
+        case ComponentType::Cloak: return &cloak;
+        case ComponentType::Radar: return &radar;
+        case ComponentType::ECM: return &ecm;
+        case ComponentType::RepairBot: return &repair_bot;
+        default: return nullptr;
+    }
+}
