@@ -489,7 +489,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     const int maxnumpollers = configuration().ai.targeting.max_number_of_pollers_per_frame;
     int numpollers[2] = {maxnumpollers, maxnumpollers};
 
-    const int nextframenumpollers[2] = {maxnumpollers, maxnumpollers};
+    int nextframenumpollers[2] = {maxnumpollers, maxnumpollers};
     if (lastchangedtarg + mintimetoswitch > 0) {
         return;
     }          //don't switch if switching too soon

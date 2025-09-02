@@ -183,7 +183,7 @@ public:
         FlyByWire::Execute();
         Vector P, Q, R;
         parent->GetOrientation(P, Q, R);
-        const float ang = cos(configuration().ai.evasion_angle_flt;
+        const float ang = cos(configuration().ai.evasion_angle_flt);
         if (R.Dot(facing) < ang
                 || (desired_ang_velocity.i == 0 && desired_ang_velocity.j == 0 && desired_ang_velocity.k == 0)) {
             SetOppositeDir();
