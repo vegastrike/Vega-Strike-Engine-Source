@@ -65,10 +65,8 @@ void Order::Communicate(const CommunicationMessage &c) {
     }
     if ((un = newC->sender.GetUnit())) {
         if (un != parent) {
-            static bool talk_more_helps =
-                    XMLSupport::parse_bool(vs_config->getVariable("AI", "talking_faster_helps", "true"));
-            static float
-                    talk_factor = XMLSupport::parse_float(vs_config->getVariable("AI", "talk_relation_factor", ".5"));
+            const bool talk_more_helps = configuration().ai.talking_faster_helps;
+            const float talk_factor = configuration().ai.talk_relation_factor_flt;
             if (talk_more_helps || !already_communicated) {
                 AdjustRelationTo(un, newC->getDeltaRelation() * talk_factor);
             }

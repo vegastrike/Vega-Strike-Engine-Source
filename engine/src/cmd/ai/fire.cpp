@@ -297,23 +297,15 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
         rangetotarget = .5 * gunrange;
     }
     if (gunrange <= 0) {
-        static float mountless_gunrange =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MountlessGunRange", "300000000"));
+        const float mountless_gunrange = configuration().ai.targeting.mountless_gun_range_flt;
         gunrange = mountless_gunrange;
     }     //probably a mountless capship. 50000 is chosen arbitrarily
     float inertial_priority = 0;
     {
-        static float mass_inertial_priority_cutoff =
-                XMLSupport::parse_float(vs_config->getVariable("AI",
-                        "Targetting",
-                        "MassInertialPriorityCutoff",
-                        "5000"));
+        const float mass_inertial_priority_cutoff = configuration().ai.targeting.mass_inertial_priority_cutoff_flt;
         if (me->GetMass() > mass_inertial_priority_cutoff) {
-            static float mass_inertial_priority_scale =
-                    XMLSupport::parse_float(vs_config->getVariable("AI",
-                            "Targetting",
-                            "MassInertialPriorityScale",
-                            ".0000001"));
+            const float mass_inertial_priority_scale =
+                    configuration().ai.targeting.mass_inertial_priority_scale_flt;
             Vector normv(me->GetVelocity());
             float Speed = me->GetVelocity().Magnitude();
             normv *= Speed ? 1.0f / Speed : 1.0f;
@@ -323,8 +315,7 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
                     mass_inertial_priority_scale * (.5 + .5 * (normv.Dot(ourToThem))) * me->GetMass() * Speed;
         }
     }
-    static float
-            threat_weight = XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "ThreatWeight", ".5"));
+    const float threat_weight = configuration().ai.targeting.threat_weight_flt;
     float threat_priority = (me->Threat() == targ) ? threat_weight : 0;
     threat_priority += (targ->Target() == me) ? threat_weight : 0;
     float role_priority01 = ((float) *rolepriority) / 31.;
@@ -550,8 +541,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     for (; (su = *subun) != NULL; ++subun) {
         static unsigned int inert = ROLES::getRole("INERT");
         static unsigned int pointdef = ROLES::getRole("POINTDEF");
-        const bool assignpointdef =
-                XMLSupport::parse_bool(vs_config->getVariable("AI", "Targetting", "AssignPointDef", "true"));
+        const bool assignpointdef = configuration().ai.targeting.assign_point_def;
         if ((su->getAttackPreferenceChar() != pointdef) || assignpointdef) {
             if (su->getAttackPreferenceChar() != inert) {
                 AssignTBin(su, tbin);
@@ -566,17 +556,9 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     std::sort(tbin.begin(), tbin.end());
     float efrel = 0;
     float mytargrange = FLT_MAX;
-    static float unitRad =
-            XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Targetting",
-                    "search_extra_radius",
-                    "1000"));                 //Maximum target radius that is guaranteed to be detected
-    static char maxrolepriority =
-            XMLSupport::parse_int(vs_config->getVariable("AI", "Targetting", "search_max_role_priority", "16"));
-    static int maxtargets = XMLSupport::parse_int(vs_config->getVariable("AI",
-            "Targetting",
-            "search_max_candidates",
-            "64"));   //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
+    const float unitRad = configuration().ai.targeting.search_extra_radius_flt;                 //Maximum target radius that is guaranteed to be detected
+    const char maxrolepriority = configuration().ai.targeting.search_max_role_priority;
+    const int maxtargets = configuration().ai.targeting.search_max_candidates;   //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
     UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->radar.GetMaxRange(), unitRad);
     StaticTuple<float, 2> maxranges{};
 
@@ -588,8 +570,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     double pretable = queryTime();
     unitLocator.action.init(this, parent, gunrange, &tbin, maxranges, maxrolepriority, maxtargets);
     static int gcounter = 0;
-    static int
-            min_rechoose_interval = XMLSupport::parse_int(vs_config->getVariable("AI", "min_rechoose_interval", "128"));
+    const int min_rechoose_interval = configuration().ai.targeting.min_rechoose_interval;
     if (curtarg) {
         if (gcounter++ < min_rechoose_interval || rand() / 8 < RAND_MAX / 9) {
             //in this case only look at potentially *interesting* units rather than huge swaths of nearby units...including target, threat, players, and leader's target
@@ -733,8 +714,7 @@ unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile) {
     if (un) {
         firebitm = (1 << un->getUnitRoleChar());
 
-        static bool AlwaysFireAutotrackers =
-                XMLSupport::parse_bool(vs_config->getVariable("AI", "AlwaysFireAutotrackers", "true"));
+        const bool AlwaysFireAutotrackers = configuration().ai.always_fire_autotrackers;
         if (shouldfire) {
             firebitm |= ROLES::FIRE_GUNS;
         }
@@ -779,8 +759,7 @@ bool FireAt::isJumpablePlanet(Unit *targ) {
 using std::string;
 
 void FireAt::PossiblySwitchTarget(bool unused) {
-    static float
-            targettime = XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "TimeUntilSwitch", "20"));
+    const float targettime = configuration().ai.targeting.time_until_switch_flt;
     if ((targettime <= 0) || (vsrandom.uniformInc(0, 1) < simulation_atom_var / targettime)) {
         bool ct = true;
         Flightgroup *fg;

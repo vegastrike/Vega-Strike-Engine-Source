@@ -162,10 +162,8 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
         Unit *t = parent->Target();
         int neu = FactionUtil::GetNeutralFaction();
         int upg = FactionUtil::GetUpgradeFaction();
-        static bool allowanyreference =
-                XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowAnySpeedReference", "false"));
-        static bool onlyupgraderef =
-                XMLSupport::parse_bool(vs_config->getVariable("AI", "OnlyUpgradeSpeedReference", "false"));
+        const bool allowanyreference = configuration().ai.allow_any_speed_reference;
+        const bool onlyupgraderef = configuration().ai.only_upgrade_speed_reference;
         if (t) {
             if ((t->getRelation(parent) >= 0
                     && !onlyupgraderef) || t->faction == neu || t->faction == upg || allowanyreference) {

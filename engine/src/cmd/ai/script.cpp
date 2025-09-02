@@ -779,7 +779,7 @@ void AIScript::endElement(const string &name) {
 }
 
 void AIScript::LoadXML() {
-    static int aidebug = XMLSupport::parse_int(vs_config->getVariable("AI", "debug_level", "0"));
+    const int aidebug = configuration().ai.debug_level;
     using namespace AiXml;
     using namespace VSFileSystem;
     string full_filename = filename;

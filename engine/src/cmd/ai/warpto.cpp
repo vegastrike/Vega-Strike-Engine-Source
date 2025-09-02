@@ -33,16 +33,15 @@
 #include "src/config_xml.h"
 
 float max_allowable_travel_time() {
-    static float mat = XMLSupport::parse_float(vs_config->getVariable("AI", "max_allowable_travel_time", "15"));
+    const float mat = configuration().ai.max_allowable_travel_time_flt;
     return mat;
 }
 
 bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following) {
     //first let us decide whether the target is far enough to warrant using warp
     //double dist =UnitUtil::getSignificantDistance(parent,target);
-    static float tooclose = XMLSupport::parse_float(vs_config->getVariable("AI", "too_close_for_warp_tactic", "13000"));
-    static float tooclosefollowing =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "too_close_for_warp_in_formation", "1500"));
+    const float tooclose = configuration().ai.too_close_for_warp_tactic_flt;
+    const float tooclosefollowing = configuration().ai.too_close_for_warp_in_formation_flt;
     float toodamnclose = following ? tooclosefollowing : tooclose;
     float diff = 1;
     parent->GetVelocityDifficultyMult(diff);
@@ -82,8 +81,8 @@ bool TargetWorthPursuing(Unit *parent, Unit *target) {
 
 static void ActuallyWarpTo(Unit *parent, const QVector &tarpos, Vector tarvel, Unit *MatchSpeed = NULL) {
     Vector vel = parent->GetVelocity();
-    static float mindirveldot = XMLSupport::parse_float(vs_config->getVariable("AI", "warp_cone", ".8"));
-    static float mintarveldot = XMLSupport::parse_float(vs_config->getVariable("AI", "match_velocity_cone", "-.8"));
+    const float mindirveldot = configuration().ai.warp_cone_flt;
+    const float mintarveldot = configuration().ai.match_velocity_cone_flt;
     tarvel.Normalize();
     vel.Normalize();
     Vector dir = tarpos - parent->Position();
@@ -92,10 +91,8 @@ static void ActuallyWarpTo(Unit *parent, const QVector &tarpos, Vector tarvel, U
     dir *= -1;
     float chasedot = dir.Dot(tarvel);
     if (dirveldot > mindirveldot) {
-        static float min_energy_to_enter_warp =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "min_energy_to_enter_warp", ".33"));
-        static float min_warpfield_to_enter_warp =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "min_warp_to_try", "1.5"));
+        const float min_energy_to_enter_warp = configuration().ai.min_energy_to_enter_warp_flt;
+        const float min_warpfield_to_enter_warp = configuration().ai.min_warp_to_try_flt;
         if ((parent->ftl_energy.Percent() > min_energy_to_enter_warp)
                 && (parent->GetMaxWarpFieldStrength(1) > min_warpfield_to_enter_warp)) {
             if (!parent->ftl_drive.Enabled()) {
@@ -106,7 +103,7 @@ static void ActuallyWarpTo(Unit *parent, const QVector &tarpos, Vector tarvel, U
     } else {
         parent->ftl_drive.Disable();
     }
-    static bool domatch = XMLSupport::parse_bool(vs_config->getVariable("AI", "match_velocity_of_pursuant", "false"));
+    const bool domatch = configuration().ai.match_velocity_of_pursuant;
     if (chasedot > mintarveldot || !domatch) {
         parent->VelocityReference(nullptr);
     } else {

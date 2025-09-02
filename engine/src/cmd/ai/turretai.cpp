@@ -78,10 +78,8 @@ void TurretAI::Execute() {
         }
     }
     if (targ) {
-        static float
-                dot_cutoff = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "TurretDotCutoff", ".4"));
-        static float missile_prob =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "TurretMissileProbability", ".05"));
+        const float dot_cutoff = configuration().ai.firing.turret_dot_cutoff_flt;
+        const float missile_prob = configuration().ai.firing.turret_missile_probability_flt;
         FaceTargetITTS::Execute();
         if (parent->getNumMounts() > 0) {
             Vector R(parent->GetTransformation().getR());
