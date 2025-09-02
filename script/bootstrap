@@ -30,7 +30,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2025-08-13 ---"
+echo "--- bootstrap | 2025-09-02 ---"
 echo "------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -329,6 +329,40 @@ function bootstrapOnOpenSuseLeap ()
                                     libboost_json1_75_0-devel \
                                     libboost_container1_75_0-devel \
                                     libboost_program_options1_75_0-devel \
+                                    cmake \
+                                    gcc-c++ \
+                                    freeglut-devel \
+                                    libopenal0 \
+                                    openal-soft-devel \
+                                    libSDL2-devel \
+                                    libvorbis-devel \
+                                    libglvnd-devel \
+                                    libjpeg-turbo \
+                                    libjpeg62-devel \
+                                    libpng16-devel \
+                                    libarchive-devel \
+                                    expat \
+                                    libexpat-devel \
+                                    libgtk-3-0 \
+                                    gtk3-devel \
+                                    python3-devel \
+                                    git \
+                                    rpm-build \
+                                    clang
+            ;;
+        "16.0")
+            zypper --non-interactive install -y \
+                                    libboost_log1_86_0-devel \
+                                    libboost_python-py3-1_86_0-devel \
+                                    libboost_system1_86_0-devel \
+                                    libboost_filesystem1_86_0-devel \
+                                    libboost_thread1_86_0-devel \
+                                    libboost_regex1_86_0-devel \
+                                    libboost_chrono1_86_0-devel \
+                                    libboost_atomic1_86_0-devel \
+                                    libboost_json1_86_0-devel \
+                                    libboost_container1_86_0-devel \
+                                    libboost_program_options1_86_0-devel \
                                     cmake \
                                     gcc-c++ \
                                     freeglut-devel \
