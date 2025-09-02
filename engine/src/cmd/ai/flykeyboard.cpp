@@ -223,8 +223,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
     if (resetangvelocity) {
         desired_ang_velocity = Vector(0, 0, 0);
     }
-    static bool initial_inertial_mode =
-            XMLSupport::parse_bool(vs_config->getVariable("flight", "inertial::initial", "false"));
+    const bool initial_inertial_mode = configuration().flight.inertial.initial;
     if (SSCK.dirty) {
         //go with what's last there: no frames since last physics frame
         if (SSCK.uppress <= 0 && SSCK.downpress <= 0) {

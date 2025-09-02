@@ -506,8 +506,7 @@ AutoLongHaul::AutoLongHaul(bool fini, int accuracy) : ChangeHeading(QVector(0, 0
 
 void AutoLongHaul::MakeLinearVelocityOrder() {
     eraseType(MOVEMENT);
-    static float combat_mode_mult =
-            XMLSupport::parse_float(vs_config->getVariable("auto_physics", "auto_docking_speed_boost", "20"));
+    const float combat_mode_mult = configuration().physics.auto_docking_speed_boost_flt;
 
     float speed =
             parent->computer.combat_mode ? parent->drive.speed
