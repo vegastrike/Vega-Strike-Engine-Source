@@ -1589,7 +1589,7 @@ extern std::set<Unit *> arrested_list_do_not_dereference;
 void Arrested(Unit *parent) {
     std::string fac = UniverseUtil::GetGalaxyFaction(UniverseUtil::getSystemFile());
     int own = FactionUtil::GetFactionIndex(fac);
-    static string po = vs_config->getVariable("galaxy", "police_faction", "homeland-security");
+    std::string po = configuration().galaxy.police_faction;
     int police = FactionUtil::GetFactionIndex(po);
     int police2 = FactionUtil::GetFactionIndex(po + "_" + fac);
     float ownrel = UnitUtil::getRelationFromFaction(parent, own);
@@ -1624,7 +1624,7 @@ void Arrested(Unit *parent) {
         }
     }
     if (attack) {
-        static std::string prison_system = vs_config->getVariable("galaxy", "PrisonSystem", "Sol/Nu_Pheonix");
+        std::string prison_system = configuration().galaxy.prison_system;
         std::string psys = prison_system + "_" + fac;
         if (UnitUtil::getUnitSystemFile(parent) != psys) {
             UnitUtil::JumpTo(parent, psys);
