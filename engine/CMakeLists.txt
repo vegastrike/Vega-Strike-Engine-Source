@@ -1003,10 +1003,8 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
         SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
         SET(CPACK_GENERATOR "DEB")
-    ENDIF (VS_CAN_BUILD_DEB)
-
-    #  "RPM"
-    IF (VS_CAN_BUILD_RPM)
+    # "RPM"
+    ELSEIF (VS_CAN_BUILD_RPM)
         MESSAGE(STATUS "Configuring RPM Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
         SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
@@ -1084,7 +1082,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg, libpng, freeglut, gtk3, libvorbis, openal, SDL2")
         ENDIF (LINUX_ID STREQUAL opensuse-leap)
         SET(CPACK_GENERATOR "RPM")
-    ENDIF (VS_CAN_BUILD_RPM)
+    ENDIF ()
 ELSE ()
     MESSAGE(STATUS "Configuring Packaging for Unknown Platform - \"${CMAKE_SYSTEM_NAME}\"")
     # Unknown Platform --> Just do the various compressed tarballs
