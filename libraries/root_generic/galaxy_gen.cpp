@@ -973,8 +973,8 @@ void MakePlanet(float radius,
         float ringrand = grand();
         if (ringrand < configuration().galaxy.ring_probability_flt) {
             string ringname = getRandName(rings);
-            double inner_rad = (configuration().galaxy.inner_ring_radius_flt * (1.0F + grand() * 0.5F)) * radius;
-            double outer_rad = inner_rad + (static_cast<double>(configuration().galaxy.outer_ring_radius_flt) * grand()) * radius;
+            double inner_rad = configuration().galaxy.inner_ring_radius_dbl * (1.0 + grand() * 0.5) * radius;
+            double outer_rad = inner_rad + configuration().galaxy.outer_ring_radius_dbl * grand() * radius;
             int wrapx = 1;
             int wrapy = 1;
             if (ringname.empty()) {
