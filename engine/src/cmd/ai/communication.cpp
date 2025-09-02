@@ -247,12 +247,8 @@ int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, floa
 #endif
     vector<unsigned int> g;
     vector<unsigned int> b;
-    static float pos_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "LowestPositiveCommChoice",
-            "0"));
-    static float neg_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "LowestNegativeCommChoice",
-            "-.00001"));
+    const float pos_limit = configuration().ai.lowest_positive_comm_choice_flt;
+    const float neg_limit = configuration().ai.lowest_negative_comm_choice_flt;
     for (unsigned int i = 0; i < n->edges.size(); i++) {
         float md = nodes[n->edges[i]].messagedelta;
         if (md >= pos_limit) {

@@ -84,7 +84,7 @@ float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float fac
 }
 
 void Pilot::DoHit(Unit *parent, void *aggressor, int faction) {
-    static float hitcost = XMLSupport::parse_float(vs_config->getVariable("AI", "UnknownRelationHitCost", ".01"));
+    const float hitcost = configuration().ai.unknown_relation_hit_cost_flt;
     if (hitcost) {
         adjustSpecificRelationship(parent, aggressor, hitcost, faction);
         int whichCp = _Universe->whichPlayerStarship(parent);
@@ -131,8 +131,7 @@ float Pilot::getAnger(const Unit *parent, const Unit *target) const {
                 }
             }
             if (empty_cargo_hold) {
-                static float goodness_for_nocargo =
-                        XMLSupport::parse_float(vs_config->getVariable("AI", "pirate_bonus_for_empty_hold", ".75"));
+                const float goodness_for_nocargo = configuration().ai.pirate_bonus_for_empty_hold_flt;
                 rel += goodness_for_nocargo;
             }
         }

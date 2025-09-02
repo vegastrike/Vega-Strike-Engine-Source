@@ -491,29 +491,20 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     float gunspeed, gunrange, missilerange;
     parent->getAverageGunSpeed(gunspeed, gunrange, missilerange);
     static float targettimer = UniverseUtil::GetGameTime();    //timer used to determine passage of physics frames
-    static float mintimetoswitch =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MinTimeToSwitchTargets", "3"));
-    static float minnulltimetoswitch =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MinNullTimeToSwitchTargets", "5"));
-    static int minnumpollers =
-            float_to_int(XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Targetting",
-                    "MinNumberofpollersperframe",
-                    "5")));                    //maximum number of vessels allowed to search for a target in a given physics frame
-    static int maxnumpollers =
-            float_to_int(XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Targetting",
-                    "MaxNumberofpollersperframe",
-                    "49")));                    //maximum number of vessels allowed to search for a target in a given physics frame
-    static int numpollers[2] = {maxnumpollers, maxnumpollers};
+    const float mintimetoswitch = configuration().ai.targeting.min_time_to_switch_targets_flt;
+    const float minnulltimetoswitch = configuration().ai.targeting.min_null_time_to_switch_targets_flt;
+    const int minnumpollers = configuration().ai.targeting.min_number_of_pollers_per_frame;
+    //maximum number of vessels allowed to search for a target in a given physics frame
+    const int maxnumpollers = configuration().ai.targeting.max_number_of_pollers_per_frame;
+    int numpollers[2] = {maxnumpollers, maxnumpollers};
 
-    static int nextframenumpollers[2] = {maxnumpollers, maxnumpollers};
+    const int nextframenumpollers[2] = {maxnumpollers, maxnumpollers};
     if (lastchangedtarg + mintimetoswitch > 0) {
         return;
     }          //don't switch if switching too soon
 
     Unit *curtarg = parent->Target();
-    int hastarg = (curtarg == NULL) ? 0 : 1;
+    int hastarg = (curtarg == nullptr) ? 0 : 1;
     //Following code exists to limit the number of craft polling for a target in a given frame - this is an expensive operation, and needs to be spread out, or there will be pauses.
     if ((UniverseUtil::GetGameTime()) - targettimer >= SIMULATION_ATOM * .99) {
         //Check if one or more physics frames have passed
@@ -559,7 +550,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     for (; (su = *subun) != NULL; ++subun) {
         static unsigned int inert = ROLES::getRole("INERT");
         static unsigned int pointdef = ROLES::getRole("POINTDEF");
-        static bool assignpointdef =
+        const bool assignpointdef =
                 XMLSupport::parse_bool(vs_config->getVariable("AI", "Targetting", "AssignPointDef", "true"));
         if ((su->getAttackPreferenceChar() != pointdef) || assignpointdef) {
             if (su->getAttackPreferenceChar() != inert) {
