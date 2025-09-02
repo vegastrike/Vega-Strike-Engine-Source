@@ -877,8 +877,6 @@ void InitPaths(string conf, string subdir) {
 
     LoadConfig(std::move(subdir));
 
-    game_options()->init();
-
     sharedsectors = configuration().data.sectors;
     sharedcockpits = configuration().data.cockpits;
     shareduniverse = configuration().data.universe_path;

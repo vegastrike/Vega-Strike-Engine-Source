@@ -32,17 +32,6 @@
 
 extern VegaConfig *vs_config;
 
-void vs_options::init() {
-    /* Network Options */
-
-    force_client_connect = configuration().network.force_client_connect;
-    use_account_server = configuration().network.use_account_server;
-    server_ip = configuration().network.server_ip;
-    server_port = configuration().network.server_port;
-    account_server_url = configuration().network.account_server_url;
-    chat_only_in_network = configuration().network.chat_only_in_network;
-}
-
 string vs_options::getCallsign(int squadnum) {
     return vs_config->getVariable(std::string("player")
             + ((squadnum > 0) ? XMLSupport::tostring(squadnum + 1) : std::string(

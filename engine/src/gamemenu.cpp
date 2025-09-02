@@ -131,12 +131,12 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
 
     GroupControl *acctConnGroup = new GroupControl;
     acctConnGroup->setId("MultiPlayerAccountServer");
-    acctConnGroup->setHidden(!game_options()->use_account_server);
+    acctConnGroup->setHidden(!configuration().network.use_account_server);
     serverConnGroup->addChild(acctConnGroup);
 
     GroupControl *hostConnGroup = new GroupControl;
     hostConnGroup->setId("MultiPlayerHostPort");
-    hostConnGroup->setHidden(game_options()->use_account_server);
+    hostConnGroup->setHidden(configuration().network.use_account_server);
     serverConnGroup->addChild(hostConnGroup);
     StaticDisplay *mplayTitle = new StaticDisplay;
     mplayTitle->setRect(Rect(-.7, .6, 1, .1));
@@ -157,7 +157,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     serverInputText->setTextColor(GUI_OPAQUE_WHITE());
     serverInputText->setTextMargins(Size(.02, .01));
     serverInputText->setId("VegaserverHost");
-    serverInputText->setText(game_options()->server_ip);
+    serverInputText->setText(configuration().network.server_ip);
     hostConnGroup->addChild(serverInputText);
 
     mplayTitle = new StaticDisplay;
@@ -179,7 +179,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     portInputText->setTextColor(GUI_OPAQUE_WHITE());
     portInputText->setTextMargins(Size(.02, .01));
     portInputText->setId("VegaserverPort");
-    portInputText->setText(game_options()->server_port);
+    portInputText->setText(configuration().network.server_port);
     hostConnGroup->addChild(portInputText);
 
     mplayTitle = new StaticDisplay;
@@ -200,7 +200,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     acctserverInput->setTextColor(GUI_OPAQUE_WHITE());
     acctserverInput->setTextMargins(Size(.02, .01));
     acctserverInput->setId("AccountServer");
-    acctserverInput->setText(game_options()->account_server_url);
+    acctserverInput->setText(configuration().network.account_server_url);
     acctConnGroup->addChild(acctserverInput);
 
     mplayTitle = new StaticDisplay;

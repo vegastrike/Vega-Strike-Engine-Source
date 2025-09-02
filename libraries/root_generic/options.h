@@ -43,18 +43,9 @@ public:
     ~vs_options() {
     }
 
-    void init();
-
     std::string unitCSV;
 
     /* Network Options */
-
-    bool force_client_connect{};
-    bool use_account_server{};
-    std::string server_ip;
-    std::string server_port;
-    std::string account_server_url;
-    bool chat_only_in_network{};
 
     // TODO: Refactor / move these
     std::string getCallsign(int);
