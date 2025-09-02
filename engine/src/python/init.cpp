@@ -86,8 +86,8 @@ void Python::initpaths() {
      *               pwd[i]=DELIM;
      *  }
      */
-    std::string moduledir(vs_config->getVariable("data", "python_modules", "modules"));
-    std::string basesdir(vs_config->getVariable("data", "python_bases", "bases"));
+    std::string moduledir(configuration().data.python_modules);
+    std::string basesdir(configuration().data.python_bases);
 
     /*
      *  std::string changepath ("import sys\nprint sys.path\nsys.path = ["

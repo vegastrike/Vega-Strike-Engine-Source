@@ -33,26 +33,6 @@
 extern VegaConfig *vs_config;
 
 void vs_options::init() {
-    /* Data Options */
-
-    universe_path = vs_config->getVariable("data", "universe_path", "universe");
-    sectors = vs_config->getVariable("data", "sectors", "sectors");
-    techniquesBasePath = vs_config->getVariable("data", "techniques", "techniques");
-    modUnitCSV = vs_config->getVariable("data", "ModUnitCSV", "");
-    cockpits = vs_config->getVariable("data", "cockpits", "cockpits");
-    animations = vs_config->getVariable("data", "animations", "animations");
-    movies = vs_config->getVariable("data", "movies", "movies");
-    sprites = vs_config->getVariable("data", "sprites", "sprites");
-    serialized_xml = vs_config->getVariable("data", "serialized_xml", "serialized_xml");
-    sharedtextures = vs_config->getVariable("data", "sharedtextures", "textures");
-    sharedsounds = vs_config->getVariable("data", "sharedsounds", "sounds");
-    sharedmeshes = vs_config->getVariable("data", "sharedmeshes", "meshes");
-    sharedunits = vs_config->getVariable("data", "sharedunits", "units");
-    ai_directory = vs_config->getVariable("data", "ai_directory", "ai");
-    datadir = vs_config->getVariable("data", "datadir", "");
-    hqtextures = vs_config->getVariable("data", "hqtextures", "");
-    volume_format = vs_config->getVariable("data", "volume_format", "pk3");
-
     /* Galaxy Options */
 
     PushValuesToMean = XMLSupport::parse_bool(vs_config->getVariable("galaxy", "PushValuesToMean", "true"));

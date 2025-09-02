@@ -278,7 +278,7 @@ static void AppendUnitTables(const string &csvfiles) {
 
 void InitUnitTables() {
     // Old Init
-    AppendUnitTables(game_options()->modUnitCSV);
+    AppendUnitTables(configuration().data.mod_unit_csv);
 
     // New Init
     // Try to open units.json
