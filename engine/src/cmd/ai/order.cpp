@@ -41,7 +41,7 @@ using std::list;
 
 //#define ORDERDEBUG  // FIXME ?
 void Order::Execute() {
-    static float airesptime = XMLSupport::parse_float(vs_config->getVariable("AI", "CommResponseTime", "3"));
+    const float airesptime = configuration().ai.comm_response_time_flt;
     ProcessCommunicationMessages(airesptime, true);
     int completed = 0;
     unsigned int i = 0;

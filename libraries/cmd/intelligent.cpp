@@ -269,7 +269,7 @@ void Intelligent::SetTurretAI() {
     Unit *unit = static_cast<Unit *>(this);
 
     unit->turretstatus = 2;
-    static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI", "independent_turrets", "false"));
+    const bool talkinturrets = configuration().ai.independent_turrets;
     if (talkinturrets) {
         Unit *un;
         for (un_iter iter = unit->getSubUnits(); (un = *iter); ++iter) {

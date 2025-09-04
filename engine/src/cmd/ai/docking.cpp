@@ -39,7 +39,7 @@
 #include <string>
 
 static void DockedScript(Unit *docker, Unit *base) {
-    static string script = vs_config->getVariable("AI", "DockedToScript", "");
+    std::string script = configuration().ai.docked_to_script;
     if (script.length() > 0) {
         Unit *targ = docker->Target();
         docker->Target(base);

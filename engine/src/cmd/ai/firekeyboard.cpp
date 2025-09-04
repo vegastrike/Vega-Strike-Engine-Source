@@ -1373,10 +1373,8 @@ static bool SuperDock(Unit *parent, Unit *target) {
 }
 
 static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity) {
-    static float min_docking_relationship =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "min_docking_relationship", "-.002"));
-    static bool can_dock_to_enemy_base =
-            XMLSupport::parse_bool(vs_config->getVariable("AI", "can_dock_to_enemy_base", "true"));
+    const float min_docking_relationship = configuration().ai.min_docking_relationship_flt;
+    const bool can_dock_to_enemy_base = configuration().ai.can_dock_to_enemy_base;
     const bool nojumpinSPEC = configuration().physics.no_spec_jump;
     bool SPEC_interference = targ && parent && nojumpinSPEC
             && (targ->ftl_drive.Enabled() || parent->ftl_drive.Enabled());
@@ -1438,7 +1436,7 @@ static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
 }
 
 static void DoDockingOps(Unit *parent, Unit *targ, unsigned char playa, unsigned char gender) {
-    static int maxseverity = XMLSupport::parse_bool(vs_config->getVariable("AI", "dock_to_area", "false")) ? 2 : 1;
+    const int maxseverity = configuration().ai.dock_to_area ? 2 : 1;
     Unit *endt = targ;
     bool wasdock = vectorOfKeyboardInput[playa].doc;
     if (vectorOfKeyboardInput[playa].doc) {
@@ -1914,7 +1912,7 @@ void FireKeyboard::Execute() {
         parent->TargetTurret(parent->Target());
         f().turretaikey = DOWN;
     }
-    static bool noturretai = XMLSupport::parse_bool(vs_config->getVariable("AI", "no_turret_ai", "false"));
+    const bool noturretai = configuration().ai.no_turret_ai;
     static int taicounter = 0;
     if (f().turretoffkey == PRESS || (noturretai && taicounter++ % 128 == 0)) {
         parent->DisableTurretAI();
@@ -2172,7 +2170,7 @@ void FireKeyboard::Execute() {
             cp->EjectDock();
         }              //use specialized ejectdock in the future
     }
-    static bool actually_arrest = XMLSupport::parse_bool(vs_config->getVariable("AI", "arrest_energy_zero", "false"));
+    const bool actually_arrest = configuration().ai.arrest_energy_zero;
     if (actually_arrest && parent->reactor.Capacity() == 0) {
         Arrested(parent);
     }

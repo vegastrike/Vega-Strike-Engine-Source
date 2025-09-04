@@ -183,8 +183,7 @@ void Carrier::EjectCargo(unsigned int index) {
                         cargo->owner = unit;
                     }
                     arot = erot;
-                    static bool eject_attacks =
-                            XMLSupport::parse_bool(vs_config->getVariable("AI", "eject_attacks", "false"));
+                    const bool eject_attacks = configuration().ai.eject_attacks;
                     if (eject_attacks) {
                         cargo->PrimeOrders();
                         //generally fraidycat AI

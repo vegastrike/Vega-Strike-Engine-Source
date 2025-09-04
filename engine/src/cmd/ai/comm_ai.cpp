@@ -107,11 +107,11 @@ using std::pair;
 
 void GetMadAt(Unit *un, Unit *parent, int numhits = 0) {
     if (numhits == 0) {
-        static int snumhits = XMLSupport::parse_int(vs_config->getVariable("AI", "ContrabandMadness", "5"));
+        const int snumhits = configuration().ai.contraband_madness;
         numhits = snumhits;
     }
-    CommunicationMessage hit(un, parent, NULL, 0);
-    hit.SetCurrentState(hit.fsm->GetHitNode(), NULL, 0);
+    CommunicationMessage hit(un, parent, nullptr, 0);
+    hit.SetCurrentState(hit.fsm->GetHitNode(), nullptr, 0);
     for (int i = 0; i < numhits; i++) {
         parent->getAIState()->Communicate(hit);
     }
@@ -121,10 +121,8 @@ void AllUnitsCloseAndEngage(Unit *un, int faction) {
     Unit *ally;
     const float contraband_assist_range = configuration().physics.contraband_assist_range_flt;
     float relation = 0;
-    static float
-            minrel = XMLSupport::parse_float(vs_config->getVariable("AI", "max_faction_contraband_relation", "-.05"));
-    static float
-            adj = XMLSupport::parse_float(vs_config->getVariable("AI", "faction_contraband_relation_adjust", "-.025"));
+    const float minrel = configuration().ai.max_faction_contraband_relation_flt;
+    const float adj = configuration().ai.faction_contraband_relation_adjust_flt;
     float delta;
     int cp = _Universe->whichPlayerStarship(un);
     if (cp != -1) {
@@ -193,8 +191,7 @@ static bool InList(std::string item, Unit *un) {
 }
 
 void CommunicatingAI::UpdateContrabandSearch() {
-    static unsigned int contraband_search_batch_update =
-            XMLSupport::parse_int(vs_config->getVariable("AI", "num_contraband_scans_per_search", "10"));
+    const unsigned int contraband_search_batch_update = configuration().ai.num_contraband_scans_per_search;
     for (unsigned int rep = 0; rep < contraband_search_batch_update; ++rep) {
         Unit *u = contraband_searchee.GetUnit();
         if (u && (u->faction != parent->faction)) {
@@ -204,10 +201,7 @@ void CommunicatingAI::UpdateContrabandSearch() {
                     int which_carg_item_bak = which_cargo_item;
                     std::string item = u->GetManifest(which_cargo_item++, parent, SpeedAndCourse);
                     const bool use_hidden_cargo_space = configuration().physics.use_hidden_cargo_space;
-                    static float speed_course_change =
-                            XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "PercentageSpeedChangeToStopSearch",
-                                    "1"));
+                    const float speed_course_change = configuration().ai.percentage_speed_change_to_stop_search_flt;
                     if (u->CourseDeviation(SpeedAndCourse, u->GetVelocity()) > speed_course_change) {
                         unsigned char gender;
                         std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
@@ -415,10 +409,9 @@ int CommunicatingAI::selectCommunicationMessage(CommunicationMessage &c, Unit *u
             return 0;
         }
     } else {
-        static float moodmul = XMLSupport::parse_float(vs_config->getVariable("AI", "MoodAffectsRespose", "0"));
-        static float angermul = XMLSupport::parse_float(vs_config->getVariable("AI", "AngerAffectsRespose", "1"));
-        static float staticrelmul =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "StaticRelationshipAffectsResponse", "1"));
+        const float moodmul = configuration().ai.mood_affects_response_flt;
+        const float angermul = configuration().ai.anger_affects_response_flt;
+        const float staticrelmul = configuration().ai.static_relationship_affects_response_flt;
         return selectCommunicationMessageMood(c, moodmul * mood + angermul * parent->pilot->getAnger(parent,
                 un) + staticrelmul
                 * UnitUtil::getFactionRelation(parent, un));

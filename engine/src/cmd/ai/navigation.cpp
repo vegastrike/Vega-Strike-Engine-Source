@@ -350,10 +350,9 @@ void ChangeHeading::Execute() {
             ((local_heading.i > 0) != (last_velocity.i > 0) || (!local_heading.i)) && last_velocity.i != 0 ? 1 : 0;
     char yswitch =
             ((local_heading.j > 0) != (last_velocity.j > 0) || (!local_heading.j)) && last_velocity.j != 0 ? 1 : 0;
-    static bool AICheat = XMLSupport::parse_bool(vs_config->getVariable("AI", "turn_cheat", "true"));
+    const bool AICheat = configuration().ai.turn_cheat;
     bool cheater = false;
-    static float min_for_no_oversteer =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "min_angular_accel_cheat", "50"));
+    const float min_for_no_oversteer = configuration().ai.min_angular_accel_cheat_flt;
     if (AICheat && ((parent->drive.yaw + parent->drive.pitch) * 180 / (PI * parent->GetMass()) > min_for_no_oversteer)
             && !parent->isSubUnit()) {
         if (xswitch || yswitch) {
@@ -361,7 +360,7 @@ void ChangeHeading::Execute() {
             parent->GetOrientation(P, Q, R);
             Vector desiredR = (final_heading - parent->Position()).Cast();
             desiredR.Normalize();
-            static float cheatpercent = XMLSupport::parse_float(vs_config->getVariable("AI", "ai_cheat_dot", ".99"));
+            const float cheatpercent = configuration().ai.ai_cheat_dot_flt;
             if (desiredR.Dot(R) > cheatpercent) {
                 P = Q.Cross(desiredR);
                 Q = desiredR.Cross(P);
@@ -437,7 +436,7 @@ FaceTargetITTS::FaceTargetITTS(bool fini, int accuracy) : ChangeHeading(QVector(
     subtype = STARGET;
     speed = float(.00001);
     useitts = true;
-    static bool alwaysuseitts = XMLSupport::parse_bool(vs_config->getVariable("AI", "always_use_itts", "false"));
+    const bool alwaysuseitts = configuration().ai.always_use_itts;
     if (!alwaysuseitts) {
         if (rand() >= g_game.difficulty * RAND_MAX) {
             useitts = false;
@@ -507,8 +506,7 @@ AutoLongHaul::AutoLongHaul(bool fini, int accuracy) : ChangeHeading(QVector(0, 0
 
 void AutoLongHaul::MakeLinearVelocityOrder() {
     eraseType(MOVEMENT);
-    static float combat_mode_mult =
-            XMLSupport::parse_float(vs_config->getVariable("auto_physics", "auto_docking_speed_boost", "20"));
+    const float combat_mode_mult = configuration().physics.auto_docking_speed_boost_flt;
 
     float speed =
             parent->computer.combat_mode ? parent->drive.speed
@@ -691,8 +689,7 @@ void AutoLongHaul::Execute() {
             deactivatewarp = true;
         }              //turn off drive
     }
-    static float min_warpfield_to_enter_warp =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "min_warp_to_try", "1.5"));
+    const float min_warpfield_to_enter_warp = configuration().ai.min_warp_to_try_flt;
     if (parent->GetMaxWarpFieldStrength() < min_warpfield_to_enter_warp) {
         deactivatewarp = true;
     }
@@ -808,7 +805,7 @@ void FormUp::Execute() {
     Unit *targ = group.GetUnit();
     if (targ) {
         MoveTo::SetDest(Transform(targ->GetTransformation(), Pos));
-        static bool can_warp_to = XMLSupport::parse_bool(vs_config->getVariable("AI", "warp_to_wingmen", "true"));
+        const bool can_warp_to = configuration().ai.warp_to_wingmen;
         if (rand() % 64 == 0 && (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
             WarpToP(parent, targ, true);
         }
@@ -848,7 +845,7 @@ void FormUpToOwner::Execute() {
     Unit *targ = group.GetUnit();
     if (targ) {
         MoveTo::SetDest(Transform(targ->GetTransformation(), Pos));
-        static bool can_warp_to = XMLSupport::parse_bool(vs_config->getVariable("AI", "warp_to_wingmen", "true"));
+        const bool can_warp_to = configuration().ai.warp_to_wingmen;
         if (rand() % 64 == 0 && (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
             WarpToP(parent, targ, true);
         }

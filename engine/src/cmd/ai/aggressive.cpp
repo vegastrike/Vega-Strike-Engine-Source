@@ -1233,15 +1233,15 @@ static std::string insysString("Insys");
 static std::string arrowString("->");
 
 static Unit *ChooseNavPoint(Unit *parent, Unit **otherdest, float *lurk_on_arrival) {
-    static string script = vs_config->getVariable("AI", "ChooseDestinationScript", "");
+    std::string script = configuration().ai.choose_destination_script;
     *lurk_on_arrival = 0;
     if (script.length() > 0) {
-        Unit *ret = NULL;
+        Unit *ret = nullptr;
         UniverseUtil::setScratchUnit(parent);
         CompileRunPython(script);
         ret = UniverseUtil::getScratchUnit();
-        UniverseUtil::setScratchUnit(NULL);
-        if (ret != NULL && ret != parent) {
+        UniverseUtil::setScratchUnit(nullptr);
+        if (ret != nullptr && ret != parent) {
             return ret;
         }
     }
@@ -1249,12 +1249,10 @@ static Unit *ChooseNavPoint(Unit *parent, Unit **otherdest, float *lurk_on_arriv
     Statistics *stats = &ss->stats;
 
     float sysrel = UnitUtil::getRelationFromFaction(parent, stats->system_faction);
-    static float lurk_time = XMLSupport::parse_float(vs_config->getVariable("AI", "lurk_time", "600"));
-    static float select_time = XMLSupport::parse_float(vs_config->getVariable("AI", "fg_nav_select_time", "120"));
-    static float hostile_select_time =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "pirate_nav_select_time", "400"));
-    static int num_ships_per_roid =
-            XMLSupport::parse_int(vs_config->getVariable("AI", "num_pirates_per_asteroid_field", "12"));
+    const float lurk_time = configuration().ai.lurk_time_flt;
+    const float select_time = configuration().ai.fg_nav_select_time_flt;
+    const float hostile_select_time = configuration().ai.pirate_nav_select_time_flt;
+    const int num_ships_per_roid = configuration().ai.num_pirates_per_asteroid_field;
     bool civilian = FactionUtil::isCitizenInt(parent->faction);
 
     bool hostile = sysrel < 0;
@@ -1302,7 +1300,7 @@ static Unit *ChooseNavPoint(Unit *parent, Unit **otherdest, float *lurk_on_arriv
     std::string::size_type whereconvoy = fgname.find(arrowString);
     bool convoy = (whereconvoy != std::string::npos);
     size_t total_size = stats->navs[0].size() + stats->navs[whichlist].size();     //friendly and neutral
-    static bool bad_units_lurk = XMLSupport::parse_bool(vs_config->getVariable("AI", "hostile_lurk", "true"));
+    const bool bad_units_lurk = configuration().ai.hostile_lurk;
     if (hostile && bad_units_lurk) {
         if (anarchy && !siege) {
             whichlist = 2;
@@ -1404,8 +1402,7 @@ static Unit *ChooseNearNavPoint(Unit *parent, Unit *suggestion, QVector location
 }
 
 bool CloseEnoughToNavOrDest(Unit *parent, Unit *navUnit, QVector nav) {
-    static float how_far_to_stop_moving =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "how_far_to_stop_navigating", "100"));
+    const float how_far_to_stop_moving = configuration().ai.how_far_to_stop_navigating_flt;
     if (navUnit && navUnit->getUnitType() != Vega_UnitType::planet) {
         float dist = UnitUtil::getDistance(navUnit, parent);
         if (dist < SIMULATION_ATOM /*simulation_atom_var?*/ * parent->Velocity.Magnitude() * parent->predicted_priority
@@ -1442,7 +1439,7 @@ public:
             done = true;
         }
         un = NULL;
-        static float mintime = XMLSupport::parse_float(vs_config->getVariable("AI", "min_time_to_auto", "25"));
+        const float mintime = configuration().ai.min_time_to_auto_flt;
         if (getNewTime() - creationtime > mintime) {
             if (_Universe->AccessCockpit()->autoInProgress() && (!_Universe->AccessCockpit()->unitInAutoRegion(parent))
                     && (un = ChooseNearNavPoint(parent, destUnit.GetUnit(), targetlocation, 0)) != NULL) {
@@ -1469,7 +1466,7 @@ static void GoTo(AggressiveAI *ai,
         float creationtime,
         bool boonies = false,
         Unit *destUnit = NULL) {
-    static bool can_afterburn = XMLSupport::parse_bool(vs_config->getVariable("AI", "afterburn_to_no_enemies", "true"));
+    const bool can_afterburn = configuration().ai.afterburn_to_no_enemies;
     Order *mt = new FlyTo(nav, can_afterburn, true, creationtime, boonies ? 16 : 6, destUnit);
     Order *ch = new Orders::ChangeHeading(nav, 32, .25f, false);
     ai->eraseType(Order::FACING);
@@ -1481,15 +1478,14 @@ static void GoTo(AggressiveAI *ai,
 }
 
 void AggressiveAI::ExecuteNoEnemies() {
-    static float safetyspacing = XMLSupport::parse_float(vs_config->getVariable("AI", "safetyspacing", "2500"));
-    static float randspacingfactor = XMLSupport::parse_float(vs_config->getVariable("AI", "randomspacingfactor", "4"));
+    const float safetyspacing = configuration().ai.safety_spacing_flt;
+    const float randspacingfactor = configuration().ai.random_spacing_factor_flt;
     if (nav.i == 0 && nav.j == 0 && nav.k == 0) {
-        Unit *otherdest = NULL;
+        Unit *otherdest = nullptr;
         Unit *dest = ChooseNavPoint(parent, &otherdest, &this->lurk_on_arrival);
         if (dest) {
-            static bool
-                    can_warp_to = XMLSupport::parse_bool(vs_config->getVariable("AI", "warp_to_no_enemies", "true"));
-            static float mintime = XMLSupport::parse_float(vs_config->getVariable("AI", "min_time_to_auto", "25"));
+            const bool can_warp_to = configuration().ai.warp_to_no_enemies;
+            const float mintime = configuration().ai.min_time_to_auto_flt;
             if (getNewTime() - creationtime > mintime) {
                 if (can_warp_to) {
                     WarpToP(parent, dest, true);
@@ -1581,8 +1577,7 @@ void AggressiveAI::ExecuteNoEnemies() {
 
 void AggressiveAI::AfterburnerJumpTurnTowards(Unit *target) {
     AfterburnTurnTowards(this, parent);
-    static float
-            jump_time_limit = XMLSupport::parse_float(vs_config->getVariable("AI", "force_jump_after_time", "120"));
+    const float jump_time_limit = configuration().ai.force_jump_after_time_flt;
     if (jump_time_check == 0) {
         float dist = (target->Position() - parent->Position()).MagnitudeSquared();
         if (last_jump_distance < dist || last_jump_time > jump_time_limit) {
@@ -1616,8 +1611,7 @@ void AggressiveAI::Execute() {
     }
     FireAt::Execute();
     aggfire += queryTime() - firetime;
-    static bool resistance_to_side_movement =
-            XMLSupport::parse_bool(vs_config->getVariable("AI", "resistance_to_side_movement", "false"));
+    const bool resistance_to_side_movement = configuration().ai.resistance_to_side_movement;
     if (resistance_to_side_movement) {
         Vector p, q, r;
         parent->GetOrientation(p, q, r);
@@ -1631,10 +1625,8 @@ void AggressiveAI::Execute() {
         if (forwardness > 0) {
             countervelocity = forwardness * r - parent->Velocity;
         }
-        static float resistance_percent =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "resistance_to_side_movement_percent", ".01"));
-        static float force_resistance_percent =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "resistance_to_side_force_percent", "1"));
+        const float resistance_percent = configuration().ai.resistance_to_side_movement_percent_flt;
+        const float force_resistance_percent = configuration().ai.resistance_to_side_force_percent_flt;
         parent->Velocity += countervelocity * resistance_percent;
         parent->NetForce += counterforce * force_resistance_percent;
         counterforce = -parent->NetLocalForce;
@@ -1649,10 +1641,7 @@ void AggressiveAI::Execute() {
             if (!parent->jump_drive.IsDestinationSet()) {
                 parent->ActivateJumpDrive(0);
                 if (!parent->jump_drive.Installed()) {
-                    static bool AIjumpCheat =
-                            XMLSupport::parse_bool(vs_config->getVariable("AI",
-                                    "always_have_jumpdrive_cheat",
-                                    "false"));
+                    const bool AIjumpCheat = configuration().ai.always_have_jumpdrive_cheat;
                     if (AIjumpCheat) {
                         static int i = 0;
                         if (!i) {
@@ -1661,11 +1650,10 @@ void AggressiveAI::Execute() {
                         }
                         parent->jump_drive.UnsetDestination();
                     } else {
-                        parent->Target(NULL);
+                        parent->Target(nullptr);
                     }
                 } else if (!parent->jump_drive.IsDestinationSet()) {
-                    static bool
-                            AIjumpCheat = XMLSupport::parse_bool(vs_config->getVariable("AI", "jump_cheat", "true"));
+                    const bool AIjumpCheat = configuration().ai.jump_cheat;
                     if (AIjumpCheat) {
                         parent->jump_drive.SetDestination(0);
                     }
@@ -1700,8 +1688,7 @@ void AggressiveAI::Execute() {
             }
         } else {
             if (target) {
-                static bool
-                        can_warp_to = XMLSupport::parse_bool(vs_config->getVariable("AI", "warp_to_enemies", "true"));
+                const bool can_warp_to = configuration().ai.warp_to_enemies;
                 if (can_warp_to || _Universe->AccessCockpit()->autoInProgress()) {
                     WarpToP(parent, target, false);
                 }
