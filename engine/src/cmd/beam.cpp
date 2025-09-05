@@ -598,7 +598,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         if (un->cargo_hold.CanAddCargo(adder)) {
                             un->cargo_hold.AddCargo(un, adder);
                             if (un->IsPlayerShip()) {
-                                static boost::optional<int> tractor_onboard;
+                                static boost::optional<int> tractor_onboard{};
                                 if (tractor_onboard == boost::none) {
                                     tractor_onboard = AUDCreateSoundWAV(configuration().audio.unit_audio.player_tractor_cargo);
                                 }
@@ -607,7 +607,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                                 Unit *tmp = _Universe->AccessCockpit()->GetParent();
                                 if (tmp && tmp->owner == un) {
                                     //Subunit of player (a turret)
-                                    static boost::optional<int> tractor_onboard_fromturret;
+                                    static boost::optional<int> tractor_onboard_fromturret{};
                                     if (tractor_onboard_fromturret == boost::none) {
                                         tractor_onboard_fromturret = AUDCreateSoundWAV(configuration().audio.unit_audio.player_tractor_cargo_fromturret);
                                     }

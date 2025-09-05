@@ -101,7 +101,7 @@ void Audible::playSound(SoundType type) {
 
 void Audible::playShieldDamageSound(const Vector &pnt) {
     const int shield_sound = sounds[SoundType::shield];
-    static boost::optional<int> player_shield_sound;
+    static boost::optional<int> player_shield_sound{};
     if (player_shield_sound == boost::none) {
         player_shield_sound = AUDCreateSoundWAV(configuration().audio.unit_audio.player_shield_hit);
     }
@@ -111,7 +111,7 @@ void Audible::playShieldDamageSound(const Vector &pnt) {
 
 void Audible::playArmorDamageSound(const Vector &pnt) {
     const int armor_sound = sounds[SoundType::armor];
-    static boost::optional<int> player_armor_sound;
+    static boost::optional<int> player_armor_sound{};
     if (player_armor_sound == boost::none) {
         player_armor_sound = AUDCreateSoundWAV(configuration().audio.unit_audio.player_armor_hit);
     }
@@ -121,7 +121,7 @@ void Audible::playArmorDamageSound(const Vector &pnt) {
 
 void Audible::playHullDamageSound(const Vector &pnt) {
     const int hull_sound = sounds[SoundType::hull];
-    static boost::optional<int> player_hull_sound;
+    static boost::optional<int> player_hull_sound{};
     if (player_hull_sound == boost::none) {
         player_hull_sound = AUDCreateSoundWAV(configuration().audio.unit_audio.player_hull_hit);
     }
