@@ -322,18 +322,9 @@ void StarSystem::Draw(bool DrawCockpit) {
                    after_update_all_frame - b4_update_all_frame)));
 #endif
     }
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double b4_continuous_terrain_adjust_terrain = realTime();
-#endif
     for (auto& continuous_terrain : continuous_terrains) {
         continuous_terrain->AdjustTerrain(this);
     }
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double after_continuous_terrain_adjust_terrain = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by continuous_terrain->AdjustTerrain(this) loop: %2%") % __FUNCTION__ % (
-               after_continuous_terrain_adjust_terrain - b4_continuous_terrain_adjust_terrain)));
-#endif
     Unit* par;
     if ((par = _Universe->AccessCockpit()->GetParent()) == nullptr) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
@@ -462,14 +453,10 @@ void StarSystem::Draw(bool DrawCockpit) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
     drawtime = realTime() - drawtime;
     VS_LOG(trace, (boost::format("%1%: Time taken by drawing: %2%") % __FUNCTION__ % drawtime));
-    const double b4_warp_trail_draw = realTime();
 #endif
     WarpTrailDraw();
 #if defined(LOG_TIME_TAKEN_DETAILS)
     const double after_warp_trail_draw = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by WarpTrailDraw(): %2%") % __FUNCTION__ % (after_warp_trail_draw -
-               b4_warp_trail_draw)));
 #endif
     GFXFogMode(FOG_OFF);
 #if defined(LOG_TIME_TAKEN_DETAILS)
@@ -1089,17 +1076,8 @@ void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit) {
         simulation_atom_var *= priority;
         //VS_LOG(trace, (boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg B: simulation_atom_var as multiplied: %1%") % simulation_atom_var));
         unit->sim_atom_multiplier = priority;
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double before_execute_ai = realTime();
-#endif
         unit->ExecuteAI();
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double before_reset_threat_level = realTime();
-#endif
         unit->ResetThreatLevel();
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double before_unit_update_physics = realTime();
-#endif
         //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
         unit->UpdatePhysics(identity_transformation,
                 identity_matrix,
@@ -1110,15 +1088,7 @@ void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit) {
                         == 1 ? firstframe : true,
                 &this->gravitationalUnits(),
                 unit);
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double after_unit_update_physics = realTime();
-#endif
         simulation_atom_var = backup;
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        VS_LOG(trace, (boost::format("Time taken by unit->ExecuteAI(): %1%") % (before_reset_threat_level - before_execute_ai)));
-        VS_LOG(trace, (boost::format("Time taken by unit->ResetThreatLevel(): %1%") % (before_unit_update_physics - before_reset_threat_level)));
-        VS_LOG(trace, (boost::format("Time taken by unit->UpdatePhysics with 6 arguments: %1%") % (after_unit_update_physics - before_unit_update_physics)));
-#endif
     } catch (...) {
         simulation_atom_var = backup;
         throw;
