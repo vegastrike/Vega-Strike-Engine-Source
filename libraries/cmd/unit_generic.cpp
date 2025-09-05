@@ -3455,11 +3455,11 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     std::string locking_sound_name = configuration().audio.unit_audio.locking;
     //enables spiffy wc2 torpedo music, default to normal though
     std::string locking_sound_torp_name = configuration().audio.unit_audio.locking_torp;
-    static boost::optional<int> locking_sound;
+    static boost::optional<int> locking_sound{};
     if (locking_sound == boost::none) {
         locking_sound = AUDCreateSoundWAV(locking_sound_name, true);
     }
-    static boost::optional<int> locking_sound_torp;
+    static boost::optional<int> locking_sound_torp{};
     if (locking_sound_torp == boost::none) {
         locking_sound_torp = AUDCreateSoundWAV(locking_sound_torp_name, true);
     }
@@ -3489,7 +3489,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                     const bool torp_lock_trumps_music = configuration().audio.unit_audio.locking_torp_trumps_music;
                     if (mounts[i].type->lock_time > 0) {
                         std::string locked_sound_name = configuration().audio.unit_audio.locked;
-                        static boost::optional<int> locked_sound;
+                        static boost::optional<int> locked_sound{};
                         if (locked_sound == boost::none) {
                             locked_sound = AUDCreateSoundWAV(locked_sound_name, false);
                         }
@@ -3831,7 +3831,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
                 }
             }
             DealPossibleJumpDamage(this);
-            static boost::optional<int> jump_arrive;
+            static boost::optional<int> jump_arrive{};
             if (jump_arrive == boost::none) {
                 jump_arrive = AUDCreateSound(configuration().audio.unit_audio.jump_arrive, false);
             }

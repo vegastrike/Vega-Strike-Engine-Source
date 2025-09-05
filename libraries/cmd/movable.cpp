@@ -754,7 +754,7 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
 
     const bool must_afterburn_to_buzz = configuration().audio.buzzing_needs_afterburner;
     if (unit->IsPlayerShip()) {
-        static boost::optional<int> player_engine;
+        static boost::optional<int> player_engine{};
         if (player_engine == boost::none) {
             player_engine = AUDCreateSound(configuration().audio.unit_audio.player_afterburner, true);
         }
