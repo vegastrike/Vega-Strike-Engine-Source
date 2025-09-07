@@ -662,7 +662,7 @@ bool Cockpit::Update() {
 
                 parentturret.SetUnit(nullptr);
                 respawnunit.at(_Universe->CurrentCockpit()) = 0;
-                std::string savegamefile = mission->getVariable("savegame", "");
+                const std::string savegamefile = mission->getVariable("savegame", "");
                 unsigned int k;
                 for (k = 0; k < _Universe->numPlayers(); ++k) {
                     if (_Universe->AccessCockpit(k) == this) {
@@ -689,7 +689,6 @@ bool Cockpit::Update() {
                 savegame->SetPlayerLocation(QVector(FLT_MAX, FLT_MAX, FLT_MAX));
                 vector<string> packedInfo;
                 ComponentsManager::credits = savegame->ParseSaveGame(savegamefile,
-                        newsystem,
                         newsystem,
                         pos,
                         setplayerXloc,

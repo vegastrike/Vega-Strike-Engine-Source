@@ -908,9 +908,8 @@ namespace UniverseUtil {
         vector<std::string> Ships;
         std::string sillytemp = UniverseUtil::setCurrentSaveGame(filename);
         savegame.SetStarSystem("");
-        creds = savegame.ParseSaveGame(filename,
+        creds = savegame.ParseSaveGameInfo(filename,
                                     system,
-                                    "",
                                     pos,
                                     updatepos,
                                     Ships,
@@ -991,9 +990,6 @@ namespace UniverseUtil {
         return ret_val;
     }
 
-    string getCurrentSaveGame() {
-        return GetCurrentSaveGame();
-    }
 
     string setCurrentSaveGame(const string &newsave) {
         return SetCurrentSaveGame(newsave);

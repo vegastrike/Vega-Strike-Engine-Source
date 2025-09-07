@@ -29,18 +29,24 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-
 #include <Python.h>
-#include "cmd/unit_generic.h"
 #include <float.h>
-#include "root_generic/vsfilesystem.h"
-#include "src/vs_logging.h"
 #include <vector>
 #include <string>
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <iterator>
+#include <boost/filesystem.hpp>
+
+#include "cmd/unit_generic.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+
 #include "root_generic/vs_globals.h"
 #include "root_generic/savegame.h"
 #include "root_generic/load_mission.h"
-#include <algorithm>
+
 #include "cmd/script/mission.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "cmd/fg_util.h"
@@ -50,12 +56,7 @@
 #include "cmd/vega_py_run.h"
 #include "src/vs_exit.h"
 
-#include <iostream>
-#include <fstream>
-#include <iterator>
-#include <vector>
 
-#include <boost/filesystem.hpp>
 
 typedef unsigned char BYTE;
 
@@ -300,17 +301,7 @@ bool isUtf8SaveGame(std::string filename) {
     }
 }
 
-class MissionStringDat {
-public:
-    typedef std::map<string, vector<std::string> > MSD;
-    MSD m;
-};
 
-class MissionFloatDat {
-public:
-    typedef vsUMap<string, vector<float> > MFD;
-    MFD m;
-};
 
 SaveGame::SaveGame(const std::string &pilot) {
     callsign = pilot;
@@ -333,9 +324,6 @@ string SaveGame::GetStarSystem() {
     return ForceStarSystem;
 }
 
-string SaveGame::GetOldStarSystem() {
-    return ForceStarSystem;
-}
 
 void SaveGame::SetPlayerLocation(const QVector &v) {
     if ((FINITE(v.i) && FINITE(v.j) && FINITE(v.k))) {
@@ -347,42 +335,14 @@ void SaveGame::SetPlayerLocation(const QVector &v) {
     }
 }
 
+// This is the bug where when loaded in-game, players start in space.
 QVector SaveGame::GetPlayerLocation() {
     return PlayerLocation;
 }
 
-void SaveGame::RemoveUnitFromSave(long address) // DELETE ? unused function?
-{
-}
 
-string SaveGame::WriteNewsData() {
-    string ret("");
-    gameMessage last;
-    vector<gameMessage> tmp;
-    int i = 0;
-    vector<string> newsvec;
-    newsvec.push_back("news");
-    while ((mission->msgcenter->last(i++, last, newsvec))) {
-        tmp.push_back(last);
-    }
-    ret += XMLSupport::tostring(i) + "\n";
-    for (int j = tmp.size() - 1; j >= 0; j--) {
-        char *msg = strdup(tmp[j].message.get().c_str());
-        int k = 0;
-        while (msg[k]) {
-            if (msg[k] == '\r') {
-                msg[k] = ' ';
-            }
-            if (msg[k] == '\n') {
-                msg[k] = '/';
-            }
-            k++;
-        }
-        ret += string(msg) + "\n";
-        free(msg);
-    }
-    return ret;
-}
+
+
 
 vector<string> parsePipedString(string s) {
     string::size_type loc;
@@ -462,8 +422,10 @@ void WriteSaveGame(Cockpit *cp, bool auto_save) {
         vector<string> packedInfo;
         cp->PackUnitInfo(packedInfo);
 
-        cp->savegame->WriteSaveGame(cp->activeStarSystem->getFileName().c_str(),
-                                    un->LocalPosition(), packedInfo, auto_save ? -1 : player_num);
+        const std::vector<std::string> constPackedInfo = (packedInfo);
+
+        cp->savegame->WriteSaveGame(cp->activeStarSystem->getFileName(),
+                                    un->LocalPosition(), constPackedInfo, auto_save ? -1 : player_num);
         un->WriteUnit(cp->GetUnitModifications().c_str());
         if (GetWritePlayerSaveGame(player_num).length() && !auto_save) {
             cp->savegame->SetStarSystem(cp->activeStarSystem->getFileName());
@@ -517,11 +479,7 @@ void SaveGame::ReadNewsData(char *&buf, bool just_skip) {
     }
 }
 
-void SaveGame::AddUnitToSave(const char *filename, int type, const char *faction, long address) {
-    if (configuration().physics.drone.compare(filename)) {
-        RemoveUnitFromSave(address);
-    }
-}
+
 
 std::vector<float> &SaveGame::getMissionData(const std::string &magic_number) {
     return missiondata->m[magic_number];
@@ -540,7 +498,7 @@ unsigned int SaveGame::getMissionDataLength(const std::string &magic_number) con
 
 const std::vector<string> &SaveGame::readMissionStringData(const std::string &magic_number) const {
     static const std::vector<string> empty;
-    MissionStringDat::MSD::const_iterator it = missionstringdata->m.find(magic_number);
+    auto it = missionstringdata->m.find(magic_number);
     return (it == missionstringdata->m.end()) ? empty : it->second;
 }
 
@@ -549,46 +507,12 @@ std::vector<string> &SaveGame::getMissionStringData(const std::string &magic_num
 }
 
 unsigned int SaveGame::getMissionStringDataLength(const std::string &magic_number) const {
-    MissionStringDat::MSD::const_iterator it = missionstringdata->m.find(magic_number);
+    auto it = missionstringdata->m.find(magic_number);
     return (it == missionstringdata->m.end()) ? 0 : it->second.size();
 }
 
-template<class MContainerType>
-void RemoveEmpty(MContainerType &t) {
-    typename MContainerType::iterator i;
-    for (i = t.begin(); i != t.end();) {
-        if (i->second.empty()) {
-            t.erase(i++);
-        } else {
-            ++i;
-        }
-    }
-}
 
-string SaveGame::WriteMissionData() {
-    string ret(" ");
-    RemoveEmpty<MissionFloatDat::MFD>(missiondata->m);
-    ret += XMLSupport::tostring((int) missiondata->m.size());
-    for (MissionFloatDat::MFD::iterator i = missiondata->m.begin(); i != missiondata->m.end(); i++) {
-        unsigned int siz = (*i).second.size();
 
-        // Escape spaces within the key by replacing them with a special char ¬
-        string k = (*i).first;
-        {
-            for (size_t i = 0, len = k.length(); i < len; ++i) {
-                if (k[i] == ' ') {
-                    k[i] = '`';
-                }
-            }
-        }
-
-        ret += string("\n") + k + string(" ") + XMLSupport::tostring(siz) + " ";
-        for (unsigned int j = 0; j < siz; j++) {
-            ret += XMLSupport::tostring((*i).second[j]) + " ";
-        }
-    }
-    return ret;
-}
 
 std::string scanInString(char *&buf) {
     std::string str;
@@ -782,27 +706,7 @@ static inline void PushBackString(const string &input, vector<char> &ret) {
     PushBackChars(input.c_str(), ret);
 }
 
-void SaveGame::WriteMissionStringData(std::vector<char> &ret) {
-    RemoveEmpty<MissionStringDat::MSD>(missionstringdata->m);
-    PushBackUInt(missionstringdata->m.size(), ret);
-    for (MissionStringDat::MSD::iterator i = missionstringdata->m.begin(); i != missionstringdata->m.end(); i++) {
-        const string &key = (*i).first;
-        unsigned int siz = (*i).second.size();
-        if (key == "mission_descriptions" || key == "mission_scripts" || key == "mission_vars"
-            || key == "mission_names") {
-            //*** BLACKLIST ***
-            //Don't bother to write these out since they waste a lot of space and aren't used.
-            siz = 0; //Not writing them out altogether will cause saved games to break.
-        }
-        PushBackChars("\n", ret);
-        PushBackString(key, ret);
-        PushBackUInt(siz, ret);
-        PushBackChars(" ", ret);
-        for (unsigned int j = 0; j < siz; j++) {
-            PushBackString((*i).second[j], ret);
-        }
-    }
-}
+
 
 void SaveGame::ReadStardate(char *&buf) {
     string stardate(AnyStringScanInString(buf));
@@ -891,9 +795,6 @@ void SaveGame::LoadSavedMissions() {
     getMissionStringData("active_missions") = missions;
 }
 
-string SaveGame::WriteSavedUnit(SavedUnits *su) {
-    return string("\n") + std::to_string(SerializeUnitType(su->type)) + string(" ") + su->filename + " " + su->faction;
-}
 
 extern bool STATIC_VARS_DESTROYED;
 
@@ -909,125 +810,11 @@ static char *tmprealloc(char *var, int &oldlength, int newlength) {
 // Taken from /networking/const.h
 #define MAXBUFFER 16384
 
-string SaveGame::WritePlayerData(const QVector &FP,
-                                 std::vector<std::string> unitname,
-                                 const char *systemname,
-                                 std::string fact) {
-    string playerdata("");
-    int MB = MAXBUFFER;
-    char *tmp = (char *) malloc(MB);
-    memset(tmp, 0, MB);
 
-    QVector FighterPos = PlayerLocation - FP;
-    FighterPos = FP;
-    string pipedunitname = createPipedString(unitname);
-    tmp = tmprealloc(tmp, MB, pipedunitname.length() + strlen(systemname) + 256 /*4 floats*/ );
-    //If we specify no faction, it won't be saved in there
-
-    // Convert to float, otherwise sprintf will save the wrong number.
-    const float credits = ComponentsManager::credits;
-
-    if (fact != "") {
-        sprintf(tmp, "%s^%f^%s %f %f %f %s", systemname, credits,
-                pipedunitname.c_str(), FighterPos.i, FighterPos.j, FighterPos.k, fact.c_str());
-    } else {
-        sprintf(tmp,
-                "%s^%f^%s %f %f %f",
-                systemname,
-                credits,
-                pipedunitname.c_str(),
-                FighterPos.i,
-                FighterPos.j,
-                FighterPos.k);
-    }
-    playerdata = string(tmp);
-    this->playerfaction = fact;
-    free(tmp);
-    tmp = NULL;
-
-    return playerdata;
-}
-
-string SaveGame::WriteDynamicUniverse() {
-    string dyn_univ("");
-    int MB = MAXBUFFER;
-    char *tmp = (char *) malloc(MB);
-    memset(tmp, 0, MB);
-    //Write mission data
-    //we save the stardate
-
-    string stardate = AnyStringWriteString(_Universe->current_stardate.GetFullTrekDate());
-    dyn_univ += "\n0 stardate data " + stardate;
-
-    memset(tmp, 0, MB);
-    sprintf(tmp, "\n%d %s %s", 0, "mission", "data ");
-    dyn_univ += string(tmp);
-    dyn_univ += WriteMissionData();
-    memset(tmp, 0, MB);
-    sprintf(tmp, "\n%d %s %s", 0, "missionstring", "data ");
-    dyn_univ += string(tmp);
-    vector<char> missionstringdata1;
-    WriteMissionStringData(missionstringdata1);
-    dyn_univ += string(&missionstringdata1[0], missionstringdata1.size());
-    if (!STATIC_VARS_DESTROYED) {
-        last_written_pickled_data = PickleAllMissions();
-    }
-    tmp = tmprealloc(tmp, MB, last_written_pickled_data.length() + 256 /*4 floats*/ );
-    sprintf(tmp, "\n%d %s %s %s ", 0, "python", "data", last_written_pickled_data.c_str());
-    dyn_univ += string(tmp);
-
-    //Write news data
-    memset(tmp, 0, MB);
-    sprintf(tmp, "\n%d %s %s", 0, "news", "data ");
-    dyn_univ += string(tmp);
-    dyn_univ += WriteNewsData();
-    //Write faction relationships
-    memset(tmp, 0, MB);
-    sprintf(tmp, "\n%d %s %s", 0, "factions", "begin ");
-    dyn_univ += string(tmp);
-    dyn_univ += FactionUtil::SerializeFaction();
-
-    free(tmp);
-    tmp = NULL;
-
-    return dyn_univ;
-}
 
 using namespace VSFileSystem;
 
-string SaveGame::WriteSaveGame(const char *systemname,
-                               const QVector &FP,
-                               std::vector<std::string> unitname,
-                               int player_num,
-                               std::string fact,
-                               bool write) {
-    savestring = string("");
-    VS_LOG(info, (boost::format("Writing Save Game %1%") % outputsavegame));
-    savestring += WritePlayerData(FP, unitname, systemname, fact);
-    savestring += WriteDynamicUniverse();
-    if (outputsavegame.length() != 0) {
-        if (write) {
-            VSFile f;
-            VSError err = f.OpenCreateWrite(outputsavegame, SaveFile);
-            if (err <= Ok) {
-                //check
-                //WRITE THE SAVEGAME TO THE MISSION SAVENAME
-                f.Write(savestring.c_str(), savestring.length());
-                f.Close();
-                if (player_num != -1) {
-                    //AND THEN COPY IT TO THE SPECIFIED SAVENAME (from save.4.x.txt)
-                    last_pickled_data = last_written_pickled_data;
-                    string sg = GetWritePlayerSaveGame(player_num);
-                    SaveFileCopy(outputsavegame.c_str(), sg.c_str());
-                }
-            } else {
-                //error occured while opening file
-                VS_LOG(error, (boost::format("Error occurred while opening file: %1%") % outputsavegame));
-            }
-        }
-    }
-    return savestring;
-}
+
 
 
 void SaveGame::SetOutputFileName(const string &filename) {
@@ -1038,9 +825,147 @@ void SaveGame::SetOutputFileName(const string &filename) {
     } //empty name?
 }
 
+void finalizeParsing(QVector& PlayerLocation, std::string& ForceStarSystem,
+                     std::string& originalsystem,
+                     std::string &FSS, 
+                     QVector &PP, bool &shouldupdatepos) {
+    if (PlayerLocation.i == FLT_MAX || PlayerLocation.j == FLT_MAX || PlayerLocation.k == FLT_MAX) {
+        shouldupdatepos = false;
+        PlayerLocation = PP;
+    } else {
+        PP = PlayerLocation;
+        shouldupdatepos = true;
+    }
+    if (ForceStarSystem.length() == 0) {
+        ForceStarSystem = FSS;
+        originalsystem = FSS;
+    } else {
+        originalsystem = ForceStarSystem;
+        FSS = ForceStarSystem;
+    }
+}
+
+
+// TODO: move all these return parameters to a struct
 float SaveGame::ParseSaveGame(const string &filename_p,
                              string &FSS,
-                             const string &originalstarsystem,
+                             QVector &PP,
+                             bool &shouldupdatepos,
+                             vector<string> &savedstarship,
+                             int player_num) {
+    float credits = 0.0f;
+    std::string str;
+    string filename;
+
+    //Now leave filename empty, use the default name regardless...
+    shouldupdatepos = !(PlayerLocation.i == FLT_MAX || PlayerLocation.j == FLT_MAX || PlayerLocation.k == FLT_MAX);
+    
+    //WE WILL ALWAYS SAVE THE CURRENT SAVEGAME IN THE MISSION SAVENAME (IT WILL BE COPIED TO THE SPECIFIED SAVENAME)
+    // Why? This calls SetOutputFileName which appends Autosave to the filename
+    // In practice, this means the game autosaves on exit and in main_menu.
+    // TODO: get rid of this and just autosave on exit.
+    SetOutputFileName(filename);
+
+    VSFile f;
+    VSError err = FileNotFound;
+   
+    //TRY TO GET THE SPECIFIED SAVENAME TO LOAD
+    string plsave = GetReadPlayerSaveGame(player_num);
+    if (plsave.length()) {
+        err = f.OpenReadOnly(plsave, SaveFile);
+        if (err > Ok) {                             //failed in SaveFile
+            //Try as an UnknownFile to get a datadir saved game, like New_Game.
+            err = f.OpenReadOnly(plsave, UnknownFile);
+        }
+    } else if (filename.length() > 0) {
+        //IF NONE SIMPLY LOAD THE MISSION DEFAULT ONE
+        err = f.OpenReadOnly(filename, SaveFile);
+    }
+    
+    // Something went wrong
+    if (err > Ok) {
+        finalizeParsing(PlayerLocation, ForceStarSystem, originalsystem, FSS, PP, shouldupdatepos);
+        return credits;
+    }
+        
+    savestring = f.ReadFull();
+
+    if (savestring.length() == 0) {
+        finalizeParsing(PlayerLocation, ForceStarSystem, originalsystem, FSS, PP, shouldupdatepos);
+        return credits;
+    }
+
+    // Try JSON
+    if(ReadJsonSaveGame(savestring, PP, savedstarship)) {
+        finalizeParsing(PlayerLocation, ForceStarSystem, originalsystem, FSS, PP, shouldupdatepos);
+        return credits;
+    }
+
+    char *buf = new char[savestring.length() + 1];
+    buf[savestring.length()] = '\0';
+    memcpy(buf, savestring.c_str(), savestring.length());
+    int headlen = hopto(buf, '\n', '\n', 0);
+    char *deletebuf = buf;
+    char *tmp2 = (char *) malloc(headlen + 2);
+    char *freetmp2 = tmp2;
+    char *factionname = (char *) malloc(headlen + 2);
+    if (headlen > 0 && (buf[headlen - 1] == '\n' || buf[headlen - 1] == ' ' || buf[headlen - 1] == '\r')) {
+        buf[headlen - 1] = '\0';
+    }
+    factionname[headlen + 1] = '\0';
+    QVector tmppos;
+    int res = sscanf(buf, "%s %lf %lf %lf %s", tmp2, &tmppos.i, &tmppos.j, &tmppos.k, factionname);
+    if (res == 4 || res == 5) {
+        //Extract credits & starship
+        for (int j = 0; '\0' != tmp2[j]; j++) {
+            if (tmp2[j] == '^') {
+                sscanf(tmp2 + j + 1, "%f", &credits);
+                tmp2[j] = '\0';
+                for (int k = j + 1; tmp2[k] != '\0'; k++) {
+                    if (tmp2[k] == '^') {
+                        tmp2[k] = '\0';
+                        savedstarship.clear();
+                        savedstarship = parsePipedString(tmp2 + k + 1);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
+        //In networking save we include the faction at the end of the first line
+        if (res == 5) {
+            playerfaction = string(factionname);
+            VS_LOG(info, (boost::format("Found faction in save file : %1%") % playerfaction));
+        } else {
+            //If no faction -> default to privateer
+            playerfaction = string("privateer");
+            VS_LOG(info, "Faction not found assigning default one: privateer");
+        }
+        free(factionname);
+        if (ForceStarSystem.length() == 0) {
+            ForceStarSystem = string(tmp2);
+        }
+        if (PlayerLocation.i == FLT_MAX || PlayerLocation.j == FLT_MAX || PlayerLocation.k == FLT_MAX) {
+            shouldupdatepos = true;
+            PlayerLocation = tmppos; //LaunchUnitNear(tmppos);
+        }
+        buf += headlen;
+        ReadSavedPackets(buf, true, false, false, std::set<std::string>());
+    }
+    free(freetmp2);
+    freetmp2 = NULL;
+    tmp2 = NULL;
+    delete[] deletebuf;
+
+    f.Close();
+    
+    finalizeParsing(PlayerLocation, ForceStarSystem, originalsystem, FSS, PP, shouldupdatepos);
+    return credits;
+}
+
+float SaveGame::ParseSaveGameInfo(const string &filename_p,
+                             string &FSS,
                              QVector &PP,
                              bool &shouldupdatepos,
                              vector<string> &savedstarship,
@@ -1053,14 +978,22 @@ float SaveGame::ParseSaveGame(const string &filename_p,
                              bool select_data,
                              const std::set<std::string> &select_data_filter) {
     float credits = 0.0f;
-    const string &str = save_contents;     //alias
+    std::string str = save_contents;     //alias
     string filename;
+
     //Now leave filename empty, use the default name regardless...
     shouldupdatepos = !(PlayerLocation.i == FLT_MAX || PlayerLocation.j == FLT_MAX || PlayerLocation.k == FLT_MAX);
+    
     //WE WILL ALWAYS SAVE THE CURRENT SAVEGAME IN THE MISSION SAVENAME (IT WILL BE COPIED TO THE SPECIFIED SAVENAME)
+    // Why? This calls SetOutputFileName which appends Autosave to the filename
+    // In practice, this means the game autosaves on exit and in main_menu.
+    // TODO: get rid of this and just autosave on exit.
     SetOutputFileName(filename);
+
     VSFile f;
     VSError err = FileNotFound;
+
+    // Split this to two functions - read and quick_read
     if (read) {
         //TRY TO GET THE SPECIFIED SAVENAME TO LOAD
         string plsave = GetReadPlayerSaveGame(player_num);

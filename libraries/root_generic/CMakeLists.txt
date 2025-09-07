@@ -56,6 +56,8 @@ ADD_LIBRARY(vegastrike_root_generic STATIC
         posh.cpp
         posh.h
         savegame.cpp
+        save_game_json_utils.cpp
+        load_game_json_utils.cpp
         savegame.h
         system_factory.cpp
         system_factory.h
