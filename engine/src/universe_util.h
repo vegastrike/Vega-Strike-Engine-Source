@@ -429,7 +429,6 @@ void addParticle(QVector loc, Vector velocity, GFXColor color, float size);
 
 std::string getSaveDir();
 std::string getSaveInfo(const std::string &filename, bool formatForTextbox);
-std::string getCurrentSaveGame();
 std::string setCurrentSaveGame(const std::string &newsave);
 std::string getNewGameSaveName();
 void loadGame(const std::string &savename);

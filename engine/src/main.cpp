@@ -592,7 +592,7 @@ void bootstrap_main_loop() {
         }
         float credits = XMLSupport::parse_float(mission->getVariable("credits", "0"));
         g_game.difficulty = XMLSupport::parse_float(mission->getVariable("difficulty", "1"));
-        string savegamefile = mission->getVariable("savegame", "");
+        const string savegamefile = mission->getVariable("savegame", "");
         vector<SavedUnits> savedun;
         vector<string> playersaveunit;
         vector<StarSystem *> ss;
@@ -625,7 +625,6 @@ void bootstrap_main_loop() {
 
         if (configuration().general.load_last_savegame) {
             ComponentsManager::credits = _Universe->AccessCockpit(k)->savegame->ParseSaveGame(savegamefile,
-                    mysystem,
                     mysystem,
                     pos,
                     setplayerXloc,

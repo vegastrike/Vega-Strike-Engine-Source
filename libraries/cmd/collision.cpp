@@ -169,7 +169,6 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit) {
         string fac( FactionUtil::GetFaction( unit->faction ) );*/
         unit->Kill();
 
-        //_Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), Vega_UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
         apply_force = true;
         return;
     }
