@@ -50,7 +50,7 @@
 #include "src/config_xml.h"
 #include "cmd/script/mission.h"
 #include "src/audiolib.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 #include "gfx/animation.h"
 #include "gfx/cockpit.h"
