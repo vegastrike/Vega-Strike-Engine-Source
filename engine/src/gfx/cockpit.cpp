@@ -51,9 +51,7 @@
 #include "src/star_system.h"
 #include "cmd/unit_generic.h"
 #include "cmd/movable.h"
-#include "cmd/collection.h"
 #include "cmd/unit_util.h"
-#include "cmd/unit_find.h" //for radar iteration.
 #include "cmd/base_util.h"
 #include "gfx/hud.h"
 #include "gfx/vdu.h"
@@ -75,12 +73,9 @@
 #include "gfx_generic/mesh.h"
 #include "src/universe_util.h"
 #include "src/in_mouse.h"
-#include "gui/glut_support.h"
 #include "src/audiolib.h"
-#include "src/save_util.h"
 #include "cmd/base.h"
 #include "src/in_kb_data.h"
-#include "src/main_loop.h"
 #include <set>
 #include <string>
 #include "cmd/unit_const_cache.h"
@@ -93,7 +88,6 @@
 #include "gfx/cockpit_gfx.h"
 #include "cmd/dock_utils.h"
 #include "vega_cast_utils.h"
-#include "resource/random_utils.h"
 #include "resource/random_utils.h"
 
 #include <cstddef>
@@ -215,7 +209,7 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
     diffvec.Normalize();
 
     static bool haswarned = false;
-    static void *lastwarned = NULL;
+    static void *lastwarned = nullptr;
     static float docktime = -FLT_MAX;
     if (dist < lessthan && haswarned && lastwarned == target) {
         //CrashForceDock(target,un,true);
@@ -230,7 +224,7 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
             un->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(
                     target->Position() + diffvec * (rsize + moveout + un->rSize()),
                     un->rSize() * 1.1));
-            lastwarned = NULL;
+            lastwarned = nullptr;
         }
     } else if (dist < warnless) {
         if (lastwarned != target || !haswarned) {
@@ -275,7 +269,7 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
         }
     } else if (lastwarned == target) {
         haswarned = false;
-        lastwarned = NULL;
+        lastwarned = nullptr;
     }
 }
 
@@ -283,7 +277,7 @@ void GameCockpit::AutoLanding() {
     const bool autolanding_enable = configuration().physics.auto_landing_enable;
     if (autolanding_enable) {
         Unit *player = GetParent();
-        if (player == NULL) {
+        if (player == nullptr) {
             return;
         }
 
@@ -294,7 +288,7 @@ void GameCockpit::AutoLanding() {
             }
 
             Unit *target = it->ref.unit;
-            if (target == NULL) {
+            if (target == nullptr) {
                 continue;
             }
 
@@ -314,7 +308,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     const bool display_in_meters = configuration().physics.display_in_meters;
     const bool lie = configuration().physics.game_speed_lying;
     static float fpsval = 0;
-    const float fpsmax = 1;
+    constexpr float fpsmax = 1;
     static float numtimes = fpsmax;
     Unit *tmpunit;
 
@@ -379,14 +373,14 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 if (go == 0) {
                     static soundContainer ejectstopsound;
                     if (ejectstopsound.sound < 0) {
-                        const std::string str = configuration().cockpit_audio.overload_stopped;
+                        const std::string& str = configuration().cockpit_audio.overload_stopped;
                         ejectstopsound.loadsound(str);
                     }
                     ejectstopsound.playsound();
                 } else {
                     static soundContainer ejectsound;
                     if (ejectsound.sound < 0) {
-                        const std::string str = configuration().cockpit_audio.overload;
+                        const std::string& str = configuration().cockpit_audio.overload;
                         ejectsound.loadsound(str);
                     }
                     ejectsound.playsound();
@@ -531,14 +525,14 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 if (abletoautopilot == 0) {
                     static soundContainer autostopsound;
                     if (autostopsound.sound < 0) {
-                        const std::string str = configuration().cockpit_audio.autopilot_available;
+                        const std::string& str = configuration().cockpit_audio.autopilot_available;
                         autostopsound.loadsound(str);
                     }
                     autostopsound.playsound();
                 } else {
                     static soundContainer autosound;
                     if (autosound.sound < 0) {
-                        const std::string str = configuration().cockpit_audio.autopilot_unavailable;
+                        const std::string& str = configuration().cockpit_audio.autopilot_unavailable;
                         autosound.loadsound(str);
                     }
                     autosound.playsound();
@@ -679,19 +673,19 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
 }
 
 
-GameCockpit::LastState::LastState() {
+GameCockpit::LastState::LastState() : warplooplevel(0), warpskiplevel(0), warpready(false), warpunready(false) {
     processing_time = 0;
 
     jumpok = jumpnotok =
             specon = specoff =
-                    asapon = asapoff =
-                            asap_dockon = asap_dockoff =
-                                    asap_dock_avail =
-                                            dock =
-                                                    dock_avail =
-                                                            lock = missilelock =
-                                                                    eject =
-                                                                            flightcompon = flightcompoff = false;
+            asapon = asapoff =
+            asap_dockon = asap_dockoff =
+            asap_dock_avail =
+            dock =
+            dock_avail =
+            lock = missilelock =
+            eject =
+            flightcompon = flightcompoff = false;
 }
 
 void GameCockpit::TriggerEvents(Unit *un) {
@@ -703,9 +697,9 @@ void GameCockpit::TriggerEvents(Unit *un) {
     }
 
     VS_LOG(trace, "Processing events");
-    for (EVENTID event = EVENTID_FIRST; event < NUM_EVENTS; event = (EVENTID)(event + 1)) {
+    for (EVENTID event = EVENTID_FIRST; event < NUM_EVENTS; event = static_cast<EVENTID>(event + 1)) {
         GameSoundContainer *sound = static_cast<GameSoundContainer *>(GetSoundForEvent(event));
-        if (sound != NULL) {
+        if (sound != nullptr) {
 
             #define MODAL_TRIGGER(name, _triggervalue, _curvalue, lastvar)                                                      \
                 do {                                                                                                            \
@@ -732,7 +726,7 @@ void GameCockpit::TriggerEvents(Unit *un) {
             #define MODAL_RAWIMAGE_TRIGGER(image, itrigger, btrigger, lastvar) \
                 MODAL_TRIGGER(#image, btrigger, LookupUnitStat(UnitImages< void >::image, un) itrigger, lastvar)
 
-            switch ((int) event) {
+            switch (static_cast<int>(event)) {
                 case WARP_READY:
                     MODAL_RAWIMAGE_TRIGGER(MAXWARPFIELDSTRENGTH, >= 2, true, warpready);
                     break;
@@ -806,7 +800,7 @@ void GameCockpit::TriggerEvents(Unit *un) {
                 case WARP_LOOP0 + 9: {
                     float warpfieldstrength = LookupUnitStat(UnitImages<void>::WARPFIELDSTRENGTH, un);
                     int warpreflevel = event - WARP_LOOP0;
-                    int warplevel = int(log(warpfieldstrength) / log(10.f));
+                    int warplevel = static_cast<int>(log(warpfieldstrength) / log(10.0f));
                     MODAL_TRIGGER("WARP_LOOP", warpreflevel, warplevel, warplooplevel);
                 }
                     break;
@@ -822,7 +816,7 @@ void GameCockpit::TriggerEvents(Unit *un) {
                 case WARP_SKIP0 + 9: {
                     float warpfieldstrength = LookupUnitStat(UnitImages<void>::WARPFIELDSTRENGTH, un);
                     int warpreflevel = event - WARP_SKIP0;
-                    int warplevel = int(log(warpfieldstrength) / log(10.0f));
+                    int warplevel = static_cast<int>(log(warpfieldstrength) / log(10.0f));
                     MODAL_TRIGGER("WARP_SKIP", warpreflevel, warplevel, warpskiplevel);
                 }
                     break;
@@ -927,7 +921,7 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
         shake_time(0),
         shake_type(0),
         textcol(1, 1, 1, 1),
-        text(NULL) {
+        text(nullptr) {
     autoMessageTime = 0;
     editingTextMessage = false;
     const int headlag = configuration().graphics.head_lag;
@@ -937,9 +931,9 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
         Identity(headtrans.back());
     }
     for (i = 0; i < UnitImages<void>::NUMGAUGES; i++) {
-        gauges[i] = NULL;
+        gauges[i] = nullptr;
     }
-    radarSprites[0] = radarSprites[1] = Pit[0] = Pit[1] = Pit[2] = Pit[3] = NULL;
+    radarSprites[0] = radarSprites[1] = Pit[0] = Pit[1] = Pit[2] = Pit[3] = nullptr;
 
     draw_all_boxes = configuration().graphics.hud.draw_all_target_boxes;
     draw_line_to_target = configuration().graphics.hud.draw_line_to_target;
@@ -970,7 +964,7 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
     targetting = vs_config->getColor("targetting_ship", GFXColor(.68, .9, 1.0, 1.0)); // light-blue
     planet = vs_config->getColor("planet", GFXColor(1.0, 1.0, .6, 1.0)); //
     soundfile = -1;
-    InitStatic();
+    GameCockpit::InitStatic();
     updateRadar(parent);
 }
 
@@ -992,11 +986,11 @@ void GameCockpit::NavScreen(const KBData &, KBSTATE k) {
     if (k == PRESS) {
         //UniverseUtil::IOmessage(0,"game","all","hit key");
         if ((_Universe->AccessCockpit())->CanDrawNavSystem()) {
-            (_Universe->AccessCockpit())->SetDrawNavSystem(0);
+            (_Universe->AccessCockpit())->SetDrawNavSystem(false);
             //UniverseUtil::IOmessage(0,"game","all","DRAWNAV - OFF");
             RestoreMouse();
         } else {
-            (_Universe->AccessCockpit())->SetDrawNavSystem(1);
+            (_Universe->AccessCockpit())->SetDrawNavSystem(true);
             //UniverseUtil::IOmessage(0,"game","all","DRAWNAV - ON");
 
             winsys_set_mouse_func(BaseInterface::ClickWin);
@@ -1058,10 +1052,10 @@ void GameCockpit::ForceSwitchControl(const KBData &, KBSTATE k) {
 void SuicideKey(const KBData &, KBSTATE k) {
     static int orig = 0;
     if (k == PRESS) {
-        int newtime = time(NULL);
+        int newtime = time(nullptr);
         if (newtime - orig > 8 || orig == 0) {
             orig = newtime;
-            Unit *un = NULL;
+            Unit *un = nullptr;
             if ((un = _Universe->AccessCockpit()->GetParent())) {
 //                float armor[8];                 //short fix
                 un->Destroy();
@@ -1077,7 +1071,7 @@ class UnivMap {
     VSSprite *lr;
 public:
     bool isNull() {
-        return ul == NULL;
+        return ul == nullptr;
     }
 
     UnivMap(VSSprite *ull, VSSprite *url, VSSprite *lll, VSSprite *lrl) {
@@ -1118,12 +1112,12 @@ void MapKey(const KBData &, KBSTATE k) {
         static VSSprite ll("lower-left-map.spr");
         static VSSprite lr("lower-right-map.spr");
         while (univmap.size() <= _Universe->CurrentCockpit()) {
-            univmap.push_back(UnivMap(NULL, NULL, NULL, NULL));
+            univmap.push_back(UnivMap(nullptr, nullptr, nullptr, nullptr));
         }
         if (univmap[_Universe->CurrentCockpit()].isNull()) {
             univmap[_Universe->CurrentCockpit()] = UnivMap(&ul, &ur, &ll, &lr);
         } else {
-            univmap[_Universe->CurrentCockpit()] = UnivMap(NULL, NULL, NULL, NULL);
+            univmap[_Universe->CurrentCockpit()] = UnivMap(nullptr, nullptr, nullptr, nullptr);
         }
     }
 }
@@ -1156,7 +1150,7 @@ int GameCockpit::Autopilot(Unit *target) {
             enableautosound.loadsound(str);
         }
         enableautosound.playsound();
-        Unit *un = NULL;
+        Unit *un = nullptr;
         if ((un = GetParent())) {
             autoMessage = std::string();
             autoMessageTime = UniverseUtil::GetGameTime();
@@ -1216,10 +1210,10 @@ void GameCockpit::Shake(float amt, int dtype) {
 }
 
 static void DrawDamageFlash(int dtype) {
-    const int numtypes = 3;
-    const string shieldflash = configuration().graphics.shield_flash_animation;
-    const string armorflash = configuration().graphics.armor_flash_animation;
-    const string hullflash = configuration().graphics.hull_flash_animation;
+    constexpr int numtypes = 3;
+    const std::string& shieldflash = configuration().graphics.shield_flash_animation;
+    const std::string& armorflash = configuration().graphics.armor_flash_animation;
+    const std::string& hullflash = configuration().graphics.hull_flash_animation;
     string flashes[numtypes];
     flashes[0] = shieldflash;
     flashes[1] = armorflash;
@@ -1240,7 +1234,7 @@ static void DrawDamageFlash(int dtype) {
             if (doflash[i]) {
                 aflashes[i] = new Animation(flashes[i].c_str(), true, .1, BILINEAR, false, false);
             } else {
-                aflashes[i] = NULL;
+                aflashes[i] = nullptr;
             }
         }
     }
@@ -1516,16 +1510,16 @@ void GameCockpit::Draw() {
                         / 10;                 //For small shakes, slower shakes
                 wtheta += warp_shake_speed * GetElapsedTime();                 //SPEC-related shaking
 
-                float self_kps = ((GetParent() != NULL) ? LookupUnitStat(UnitImages<void>::KPS, GetParent()) : 0);
+                float self_kps = ((GetParent() != nullptr) ? LookupUnitStat(UnitImages<void>::KPS, GetParent()) : 0);
                 float self_setkps =
-                        max(1.0f, ((GetParent() != NULL) ? LookupUnitStat(UnitImages<void>::SETKPS, GetParent()) : 0));
+                        max(1.0f, ((GetParent() != nullptr) ? LookupUnitStat(UnitImages<void>::SETKPS, GetParent()) : 0));
                 float warp_strength =
                         max(0.0f,
                                 min(max(0.0f,
                                                 min(1.0f,
                                                         self_kps / self_setkps)),
-                                        ((GetParent() != NULL) ? LookupUnitStat(UnitImages<void>::WARPFIELDSTRENGTH,
-                                                GetParent()) : 0.0f) / warp_shake_ref));
+                                        ((GetParent() != nullptr) ? LookupUnitStat(UnitImages<void>::WARPFIELDSTRENGTH,
+                                                                            GetParent()) : 0.0f) / warp_shake_ref));
                 if (shakin > shake_limit) {
                     shakin = shake_limit;
                 }
@@ -1790,9 +1784,6 @@ void GameCockpit::Draw() {
             die = false;
         }
         if (un->Threat() != nullptr) {
-            if (0 && getTimeCompression() > 1) {
-                reset_time_compression(std::string(), PRESS);
-            }
             un->Threaten(nullptr, 0);
         }
         if (_Universe->CurrentCockpit() < univmap.size()) {
@@ -1953,9 +1944,9 @@ void GameCockpit::Draw() {
 }
 
 int GameCockpit::getScrollOffset(unsigned int whichtype) {
-    for (unsigned int i = 0; i < vdu.size(); i++) {
-        if (vdu[i]->getMode() & whichtype) {
-            return vdu[i]->scrolloffset;
+    for (std::size_t i = 0; i < vdu.size(); ++i) {
+        if (vdu.at(i)->getMode() & whichtype) {
+            return vdu.at(i)->scrolloffset;
         }
     }
     return 0;
@@ -1963,10 +1954,10 @@ int GameCockpit::getScrollOffset(unsigned int whichtype) {
 
 string GameCockpit::getsoundending(int which) {
     static bool gotten = false;
-    static string strs[9];
+    static std::string strs[9];
     if (gotten == false) {
         char tmpstr[2] = {'\0'};
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; ++i) {
             tmpstr[0] = i + '1';
             string vsconfigvar = string("sounds_extension_") + tmpstr;
             strs[i] = vs_config->getVariable("cockpitaudio", vsconfigvar, "\n");
@@ -1984,10 +1975,9 @@ string GameCockpit::getsoundending(int which) {
 
 string GameCockpit::getsoundfile(string sound) {
     bool ok = false;
-    int i;
     string lastsound = "";
     string anothertmpstr = "";
-    for (i = 0; i < 9 && !ok; i++) {
+    for (int i = 0; i < 9 && !ok; ++i) {
         anothertmpstr = getsoundending(i);
         bool foundyet = false;
         while (1) {
@@ -2057,7 +2047,7 @@ void GameCockpit::UpdAutoPilot() {
             Unit *par = GetParent();
             if (par) {
                 Unit *autoun = autopilot_target.GetUnit();
-                autopilot_target.SetUnit(NULL);
+                autopilot_target.SetUnit(nullptr);
                 if (autoun && autopan) {
                     par->AutoPilotTo(autoun, false);
                 }
@@ -2106,9 +2096,9 @@ GameCockpit::~GameCockpit() {
 }
 
 int GameCockpit::getVDUMode(int vdunum) {
-    if (vdunum < (int) vdu.size()) {
-        if (vdu[vdunum]) {
-            return vdu[vdunum]->getMode();
+    if (vdunum < static_cast<int>(vdu.size())) {
+        if (vdu.at(vdunum)) {
+            return vdu.at(vdunum)->getMode();
         }
     }
     return 0;
@@ -2119,9 +2109,9 @@ void GameCockpit::VDUSwitch(int vdunum) {
         //AUDPlay (soundfile, AccessCamera()->GetPosition(), Vector (0,0,0), .5);
         AUDPlay(soundfile, QVector(0, 0, 0), Vector(0, 0, 0), 1);
     }
-    if (vdunum < (int) vdu.size()) {
-        if (vdu[vdunum]) {
-            vdu[vdunum]->SwitchMode(this->parent.GetUnit());
+    if (vdunum < static_cast<int>(vdu.size())) {
+        if (vdu.at(vdunum)) {
+            vdu.at(vdunum)->SwitchMode(this->parent.GetUnit());
         }
     }
 }
@@ -2131,9 +2121,9 @@ void GameCockpit::ScrollVDU(int vdunum, int howmuch) {
         //AUDPlay (soundfile, AccessCamera()->GetPosition(), Vector (0,0,0),.5);
         AUDPlay(soundfile, QVector(0, 0, 0), Vector(0, 0, 0), 1);
     }
-    if (vdunum < (int) vdu.size()) {
-        if (vdu[vdunum]) {
-            vdu[vdunum]->Scroll(howmuch);
+    if (vdunum < static_cast<int>(vdu.size())) {
+        if (vdu.at(vdunum)) {
+            vdu.at(vdunum)->Scroll(howmuch);
         }
     }
 }
@@ -2149,11 +2139,14 @@ void GameCockpit::ScrollAllVDU(int howmuch) {
 }
 
 void GameCockpit::SetStaticAnimation() {
-    const string comm_static = configuration().graphics.comm_static;
-    static Animation Statuc(comm_static.c_str());
+    const std::string& comm_static = configuration().graphics.comm_static;
+    static boost::optional<Animation> Statuc{};
+    if (Statuc == boost::none) {
+        Statuc = Animation(comm_static.c_str());
+    }
     for (unsigned int i = 0; i < vdu.size(); i++) {
         if (vdu[i]->getMode() == VDU::COMM) {
-            vdu[i]->SetCommAnimation(&Statuc, NULL, true);
+            vdu[i]->SetCommAnimation(Statuc.get_ptr(), nullptr, true);
         }
     }
 }
@@ -2178,7 +2171,7 @@ void GameCockpit::SetCommAnimation(Animation *ani, Unit *un) {
 string GameCockpit::getTargetLabel() {
     Unit *par = GetParent();
     if ((!targetLabel.empty())
-            && (!par || ((void *) par->Target()) != labeledTargetUnit)) {
+            && (!par || static_cast<void*>(par->Target()) != labeledTargetUnit)) {
         targetLabel = string();
         if (par) {
             labeledTargetUnit = par->Target();
@@ -2209,7 +2202,7 @@ static void FaceCamTarget(Cockpit *cp, int cam, Unit *un) {
 
 static void ShoveCamBehindUnit(int cam, Unit *un, float zoomfactor) {
     //commented out by chuck_starchaser; --never used
-    QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
+    QVector unpos = un->Position();
     _Universe->AccessCamera(cam)->SetPosition(
             unpos - _Universe->AccessCamera()->GetR().Cast() * (un->rSize() + configuration().graphics.znear_dbl * 2) * zoomfactor,
             un->GetWarpVelocity(), un->GetAngularVelocity(), un->GetAcceleration());
@@ -2255,7 +2248,7 @@ static void translate_as(Vector &p,
 void GameCockpit::SetupViewPort(bool clip) {
     _Universe->AccessCamera()->RestoreViewPort(0, (view == CP_FRONT ? viewport_offset : 0));
     GFXViewPort(0,
-            (int) ((view == CP_FRONT ? viewport_offset : 0) * configuration().graphics.resolution_y),
+            static_cast<int>((view == CP_FRONT ? viewport_offset : 0) * configuration().graphics.resolution_y),
             configuration().graphics.resolution_x,
             configuration().graphics.resolution_y);
     _Universe->AccessCamera()->setCockpitOffset(view < CP_CHASE ? cockpit_offset : 0);
@@ -2318,7 +2311,7 @@ void GameCockpit::SetupViewPort(bool clip) {
                 un->UpdateHudMatrix(CP_VIEWTARGET);
                 bool fixzone = (rr.Dot(p_r) >= padlock_view_lag_fix_cos) && (qq.Dot(p_q) >= padlock_view_lag_fix_cos);
                 float vtphase =
-                        1.0f - (float) std::pow(0.1, GetElapsedTime() * padlock_view_lag_inv * (fixzone ? 0.1f : 1.0f));
+                        1.0f - static_cast<float>(std::pow(0.1, GetElapsedTime() * padlock_view_lag_inv * (fixzone ? 0.1f : 1.0f)));
 
                 //Apply correction
                 _Universe->AccessCamera(CP_VIEWTARGET)->SetOrientation(
@@ -2438,7 +2431,7 @@ void GameCockpit::SetupViewPort(bool clip) {
             st_mult = (1 - st_warpfieldstrength) + st_mult * st_warpfieldstrength;
             sh_mult *= sh_warpfieldstrength * costheta;
             const float fov_smoothing = configuration().warp.fov_link.smoothing_flt;
-            float fov_smoot = std::pow(double(fov_smoothing), GetElapsedTime());
+            float fov_smoot = std::pow(static_cast<double>(fov_smoothing), GetElapsedTime());
             smooth_fov =
                     min(170.0,
                             max(5.0,
@@ -2462,7 +2455,7 @@ Camera *GameCockpit::AccessCamera(int num) {
     if (num < NUM_CAM && num >= 0) {
         return &cam[num];
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 

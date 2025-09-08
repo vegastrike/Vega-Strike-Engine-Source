@@ -3206,7 +3206,7 @@ enum Unit::tractorHow Unit::getTractorability() const {
     static bool tractorability_mask_init = false;
     static unsigned char tractorability_mask;
     if (!tractorability_mask_init) {
-        std::string stractorability_mask = configuration().physics.player_tractorability_mask;
+        const std::string& stractorability_mask = configuration().physics.player_tractorability_mask;
         if (!stractorability_mask.empty()) {
             tractorability_mask = tractorImmune;
             if (stractorability_mask.find_first_of("pP") != string::npos) {
@@ -3471,9 +3471,9 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         Velocity = Velocity * (1 - SPACE_DRAG);
     }
 
-    std::string locking_sound_name = configuration().audio.unit_audio.locking;
+    const std::string& locking_sound_name = configuration().audio.unit_audio.locking;
     //enables spiffy wc2 torpedo music, default to normal though
-    std::string locking_sound_torp_name = configuration().audio.unit_audio.locking_torp;
+    const std::string& locking_sound_torp_name = configuration().audio.unit_audio.locking_torp;
     static boost::optional<int> locking_sound{};
     if (locking_sound == boost::none) {
         locking_sound = AUDCreateSoundWAV(locking_sound_name, true);
