@@ -36,20 +36,21 @@
 namespace vega_disk {
 
     class DiskObject {
-        enum {
-            ERROR_OK=0,
-            ERROR_NO_FILE,
-            ERROR_OPEN_READ_FAILED,
-            ERROR_OPEN_WRITE_FAILED,
-            ERROR_ARCHIVE_READ_FAILED,
-            ERROR_ARCHIVE_CLOSE_FAILED,
-            ERROR_ARCHIVE_FATAL_ERROR,
-        };
-
         public:
+            enum {
+                ERROR_OK=0,
+                ERROR_NO_FILE,
+                ERROR_OPEN_READ_FAILED,
+                ERROR_OPEN_WRITE_FAILED,
+                ERROR_ARCHIVE_READ_FAILED,
+                ERROR_ARCHIVE_CLOSE_FAILED,
+                ERROR_ARCHIVE_FATAL_ERROR,
+            };
+
             DiskObject() {}
             DiskObject(const std::string& _filename): filename(_filename) {}
 
+            inline const std::string GetFilename() const { return filename; }
             inline void SetFilename(const std::string& _filename) { filename = _filename; }
             int ReadEntry(const std::string& entry_name, std::string& data);
             int ListEntries(std::deque<std::string>& entries);
@@ -58,7 +59,7 @@ namespace vega_disk {
             inline int GetError() const { return error_code; }
             inline void ClearError() { error_code = ERROR_OK; error_message.clear(); }
 
-            inline const std::string GetErrorString() { return error_message; }
+            inline const std::string GetErrorString() const { return error_message; }
         protected:
             std::string filename{};
             int error_code{0};
