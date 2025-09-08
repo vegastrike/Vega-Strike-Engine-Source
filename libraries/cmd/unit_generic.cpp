@@ -1401,7 +1401,15 @@ void Unit::ProcessDeleteQueue() {
 #endif
         Unit *mydeleter = unit_delete_queue.back();
         unit_delete_queue.pop_back();
+
+        // Avoid segfault when the unit getting destroyed is the player's current target
+        Unit* parent = _Universe->AccessCockpit()->GetParent();
+        if (parent && parent->Target() == mydeleter) {
+            parent->SetTarget(nullptr);
+        }
+
         delete mydeleter;                        ///might modify unitdeletequeue
+        mydeleter = nullptr;
 
 #ifdef DESTRUCTDEBUG
         VS_LOG_AND_FLUSH(trace, (boost::format("Completed %1$d") % unit_delete_queue.size()));
