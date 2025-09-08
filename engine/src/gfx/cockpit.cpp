@@ -307,6 +307,9 @@ void GameCockpit::AutoLanding() {
 
 
 float GameCockpit::LookupUnitStat(int stat, Unit *target) {
+    if (!target) {
+        return 0.0f;
+    }
     const float game_speed = configuration().physics.game_speed_flt;
     const bool display_in_meters = configuration().physics.display_in_meters;
     const bool lie = configuration().physics.game_speed_lying;
@@ -396,7 +399,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             float distance;
             const float locklight_time = configuration().graphics.locklight_time_flt;
             bool res = false;
-            if (tmpunit = target->Threat()) {
+            if ((tmpunit = target->Threat())) {
                 res = tmpunit->cosAngleTo(target, distance, FLT_MAX, FLT_MAX) > .95;
                 if (res) {
                     last_locktime = UniverseUtil::GetGameTime();
@@ -434,6 +437,12 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::MAXCOMBATKPS:
         case UnitImages<void>::MAXCOMBATABKPS: {
             const bool use_relative_velocity = configuration().graphics.hud.display_relative_velocity;
+            if (!target) {
+                return 0.0f;
+            }
+            if (!target->VelocityReference()) {
+                return 0.0f;
+            }
             Unit *velocity_reference_unit = target->VelocityReference();
             float value;
             switch (stat) {
