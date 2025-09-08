@@ -1,8 +1,12 @@
 /*
  * script_call_unit_generic.cpp
  *
- * Copyright (C) 2001-2025 Daniel Horn, Alexander Rawass, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Alexander Rawass
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -243,7 +247,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             viret = newVarInst(VI_IN_OBJECT);
             viret->type = VAR_OBJECT;
             viret->objectname = "string";
-            viret->object = const_cast<std::string*>(&c.GetCategory());
+            viret->object = const_cast<std::string*>(c.GetCategoryAddress());
             ((olist_t *) vireturn->object)->push_back(viret);
             viret = newVarInst(VI_IN_OBJECT);
             viret->type = VAR_FLOAT;
@@ -550,20 +554,14 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             viret->type = VAR_FLOAT;
             viret->float_val = 0;
             if (mode == SCRIPT_RUN) {
-                Cockpit *tmp;
-                if ((tmp = _Universe->isPlayerStarship(my_unit))) {
-                    viret->float_val = tmp->credits;
-                }
+                viret->float_val = my_unit->credits;  
             }
             return viret;
         } else if (method_id == CMT_UNIT_addCredits) {
             missionNode *nr_node = getArgument(node, mode, 1);
             float credits = doFloatVar(nr_node, mode);
             if (mode == SCRIPT_RUN) {
-                Cockpit *tmp;
-                if ((tmp = _Universe->isPlayerStarship(my_unit))) {
-                    tmp->credits += credits;
-                }
+               my_unit->credits += credits;
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
@@ -759,9 +757,10 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             int quantity = getIntArg(node, mode, 2);
             bool erasezero = getBoolArg(node, mode, 3);
             if (mode == SCRIPT_RUN) {
-                unsigned int index;
-                if (my_unit->GetCargo(s, index)) {
-                    quantity = my_unit->RemoveCargo(index, quantity, erasezero);
+                int index = my_unit->cargo_hold.GetIndex(s);
+                if (index != -1) {
+                    Cargo removed_cargo = my_unit->cargo_hold.RemoveCargo(my_unit, index, quantity);
+                    quantity = removed_cargo.GetQuantity();
                 } else {
                     quantity = 0;
                 }
@@ -779,12 +778,12 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             carg.SetVolume(getFloatArg(node, mode, 6));
             if (mode == SCRIPT_RUN) {
                 int i;
-                for (i = carg.GetQuantity(); i > 0 && !my_unit->CanAddCargo(carg); i--) {
+                for (i = carg.GetQuantity(); i > 0 && !my_unit->cargo_hold.CanAddCargo(carg); i--) {
                     carg.SetQuantity(i);
                 }
                 if (i > 0) {
                     carg.SetQuantity(i);
-                    my_unit->AddCargo(carg);
+                    my_unit->cargo_hold.AddCargo(my_unit, carg);
                 } else {
                     carg.SetQuantity(0);
                 }
@@ -832,11 +831,11 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 if (my_unit->numCargo() > 0) {
                     unsigned int index;
                     index = rand() % my_unit->numCargo();
-                    Cargo c(my_unit->GetCargo(index));
+                    Cargo c(my_unit->cargo_hold.GetCargo(index));
                     c.SetQuantity(quantity);
-                    if (my_unit->CanAddCargo(c)) {
-                        my_unit->AddCargo(c);
-                        my_unit->GetCargo(index).SetPrice(my_unit->GetCargo(index).GetPrice() * percentagechange);
+                    if (my_unit->cargo_hold.CanAddCargo(c)) {
+                        my_unit->cargo_hold.AddCargo(my_unit, c);
+                        my_unit->cargo_hold.GetCargo(index).SetPrice(my_unit->cargo_hold.GetCargo(index).GetPrice() * percentagechange);
                     }
                 }
             }
@@ -849,9 +848,9 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 if (my_unit->numCargo() > 0) {
                     unsigned int index;
                     index = rand() % my_unit->numCargo();
-                    if (my_unit->RemoveCargo(index, 1, false)) {
-                        my_unit->GetCargo(index).SetPrice(my_unit->GetCargo(index).GetPrice() * percentagechange);
-                    }
+                    // if (my_unit->cargo_hold.RemoveCargo(index, 1, false)) {
+                    //     my_unit->cargo_hold.GetCargo(index).SetPrice(my_unit->GetCargo(index).GetPrice() * percentagechange);
+                    // }
                 }
             }
             viret = newVarInst(VI_TEMP);
@@ -950,7 +949,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
 
 extern BLENDFUNC parse_alpha(const char *);
 
-Unit *Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &destinations) {
+Unit *Mission::call_unit_launch(CreateFlightgroup *fg, Vega_UnitType type, const string &destinations) {
     int faction_nr = FactionUtil::GetFactionIndex(fg->fg->faction);
     Unit **units = new Unit *[fg->nr_ships];
     int u;

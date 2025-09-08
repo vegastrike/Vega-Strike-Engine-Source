@@ -1,8 +1,12 @@
 /*
  * ship.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,17 +23,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "cmd/ship.h"
 
-Ship::Ship()
-{
-
-}
+Ship::Ship() = default;
 
 Ship::Ship(const char *filename,
         bool SubU,
@@ -39,3 +40,5 @@ Ship::Ship(const char *filename,
         int fg_subnumber)
         : Unit(filename, SubU, faction, unitModifications, flightgrp, fg_subnumber)
 {}
+
+Ship::~Ship() = default;

@@ -56,10 +56,8 @@
 #ifndef NO_GFX
 #include "gfx/cockpit.h"
 #endif
-const Unit *makeTemplateUpgrade(string name, int faction); //for percentoperational
 const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0); //for percentoperational
 extern const char *DamagedCategory;  //for percentoperational
-extern bool isWeapon(std::string name); //for percentoperational
 using std::string;
 extern Unit *getTopLevelOwner();
 
@@ -116,18 +114,14 @@ bool hasDockingUnits(const Unit *my_unit) {
 }
 
 int getPhysicsPriority(Unit *un) {
-    static bool FORCE_TOP_PRIORITY = XMLSupport::parse_bool(
-            vs_config->getVariable("physics", "priorities", "force_top_priority", "false"));
+    const bool FORCE_TOP_PRIORITY = configuration().physics.priorities.force_top_priority;
     if (FORCE_TOP_PRIORITY) {
         return 1;
     }
     //Some other comment mentions these need special treatment for subunit scheduling
-    static int PLAYER_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "player", "1"));
-    static int MISSILE_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "missile", "1"));
-    static int DOCKABLE_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "dockable", "1"));
+    const int PLAYER_PRIORITY = configuration().physics.priorities.player;
+    const int MISSILE_PRIORITY = configuration().physics.priorities.missile;
+    const int DOCKABLE_PRIORITY = configuration().physics.priorities.dockable;
 
     float rad = un->rSize();
     Vega_UnitType untype = un->getUnitType();
@@ -135,10 +129,9 @@ int getPhysicsPriority(Unit *un) {
     float tooclose = 0;
     unsigned int np = _Universe->numPlayers();
     Cockpit *cockpit = _Universe->AccessCockpit();
-    //static float     fixed_system_orbit_priorities =
-    //    XMLSupport::parse_float( vs_config->getVariable( "physics", "fixed_system_priority_velocity_cutoff", "3" ) );
-    static int SYSTEM_INSTALLATION_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "system_installation", "3"));
+    //const float     fixed_system_orbit_priorities =
+    //    configuration().physics.fixed_system_priority_velocity_cutoff;
+    const int SYSTEM_INSTALLATION_PRIORITY = configuration().physics.priorities.system_installation;
     bool system_installation = un->owner == getTopLevelOwner();
     bool force_system_installation_priority = true;
     //if (system_installation && un->Velocity.MagnitudeSquared() > fixed_system_orbit_priorities*fixed_system_orbit_priorities)
@@ -197,41 +190,24 @@ int getPhysicsPriority(Unit *un) {
     if (hasDockingUnits(un)) {
         return DOCKABLE_PRIORITY;
     }
-    static int ASTEROID_PARENT_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "asteroid_parent", "1"));
-    static int ASTEROID_HIGH_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "asteroid_high", "2"));
-    //static int   ASTEROID_LOW_PRIORITY    = XMLSupport::parse_int(
-    //    vs_config->getVariable( "physics", "priorities", "asteroid.low", "32" ) );
-    static int HIGH_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "high", "2"));
-    static int MEDIUMHIGH_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "mediumhigh", "4"));
-    static int MEDIUM_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "medium", "8"));
-    static int LOW_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "low", "32"));
-    static int NOT_VISIBLE_COMBAT_HIGH = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "notvisible_combat_high", "10"));
-    static int NOT_VISIBLE_COMBAT_MEDIUM = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "notvisible_combat_medium", "20"));
-    static int NOT_VISIBLE_COMBAT_LOW = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "notvisible_combat_low", "40"));
-    static int NO_ENEMIES = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "no_enemies", "64"));
-    static int INERT_PRIORITY = XMLSupport::parse_int(
-            vs_config->getVariable("physics", "priorities", "inert", "64"));
-    static double _PLAYERTHREAT_DISTANCE_FACTOR = XMLSupport::parse_float(
-            vs_config->getVariable("physics", "priorities", "playerthreat_distance_factor", "2"));
-    static double _THREAT_DISTANCE_FACTOR = XMLSupport::parse_float(
-            vs_config->getVariable("physics", "priorities", "threat_distance_factor", "1"));
-    static double DYNAMIC_THROTTLE_MINFACTOR = XMLSupport::parse_float(
-            vs_config->getVariable("physics", "priorities", "dynamic_throttle.mindistancefactor", "0.25"));
-    static double DYNAMIC_THROTTLE_MAXFACTOR = XMLSupport::parse_float(
-            vs_config->getVariable("physics", "priorities", "dynamic_throttle.maxdistancefactor", "4"));
-    static double DYNAMIC_THROTTLE_TARGETFPS = XMLSupport::parse_float(
-            vs_config->getVariable("physics", "priorities", "dynamic_throttle.targetfps", "30"));
-    static double DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.0 / DYNAMIC_THROTTLE_TARGETFPS;
+    const int ASTEROID_PARENT_PRIORITY = configuration().physics.priorities.asteroid_parent;
+    const int ASTEROID_HIGH_PRIORITY = configuration().physics.priorities.asteroid_high;
+    //const int ASTEROID_LOW_PRIORITY = configuration().physics.priorities.asteroid_low;
+    const int HIGH_PRIORITY = configuration().physics.priorities.high;
+    const int MEDIUMHIGH_PRIORITY = configuration().physics.priorities.medium_high;
+    const int MEDIUM_PRIORITY = configuration().physics.priorities.medium;
+    const int LOW_PRIORITY = configuration().physics.priorities.low;
+    const int NOT_VISIBLE_COMBAT_HIGH = configuration().physics.priorities.not_visible_combat_high;
+    const int NOT_VISIBLE_COMBAT_MEDIUM = configuration().physics.priorities.not_visible_combat_medium;
+    const int NOT_VISIBLE_COMBAT_LOW = configuration().physics.priorities.not_visible_combat_low;
+    const int NO_ENEMIES = configuration().physics.priorities.no_enemies;
+    const int INERT_PRIORITY = configuration().physics.priorities.inert;
+    const double _PLAYERTHREAT_DISTANCE_FACTOR = configuration().physics.priorities.player_threat_distance_factor_dbl;
+    const double _THREAT_DISTANCE_FACTOR = configuration().physics.priorities.threat_distance_factor_dbl;
+    const double DYNAMIC_THROTTLE_MINFACTOR = configuration().physics.priorities.dynamic_throttle.min_distance_factor_dbl;
+    const double DYNAMIC_THROTTLE_MAXFACTOR = configuration().physics.priorities.dynamic_throttle.max_distance_factor_dbl;
+    const double DYNAMIC_THROTTLE_TARGETFPS = configuration().physics.priorities.dynamic_throttle.target_fps_dbl;
+    const double DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.0 / DYNAMIC_THROTTLE_TARGETFPS;
     static double DYNAMIC_THROTTLE_FACTOR = 1.0;
     static double lastThrottleAdjust = 0.0;
     if (UniverseUtil::GetGameTime() != lastThrottleAdjust) {
@@ -240,8 +216,8 @@ int getPhysicsPriority(Unit *un) {
         newfactor = mymax(DYNAMIC_THROTTLE_MINFACTOR, mymin(DYNAMIC_THROTTLE_MAXFACTOR, newfactor));
         DYNAMIC_THROTTLE_FACTOR = (newfactor * GetElapsedTime() + DYNAMIC_THROTTLE_FACTOR) / (1.0 + GetElapsedTime());
     }
-    static double PLAYERTHREAT_DISTANCE_FACTOR = _PLAYERTHREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
-    static double THREAT_DISTANCE_FACTOR = _THREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
+    const double PLAYERTHREAT_DISTANCE_FACTOR = _PLAYERTHREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
+    const double THREAT_DISTANCE_FACTOR = _THREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
     Unit *parent = cockpit->GetParent();
     float gun_range = 0;
     float missile_range = 0;
@@ -250,7 +226,7 @@ int getPhysicsPriority(Unit *un) {
         float speed = 0;
         parent->getAverageGunSpeed(speed, gun_range, missile_range);
     }
-    static int cargofac = FactionUtil::GetFactionIndex("cargo");
+    const int cargofac = FactionUtil::GetFactionIndex("cargo");
     int upfac = FactionUtil::GetUpgradeFaction();
     int neutral = FactionUtil::GetNeutralFaction();
     if (un->schedule_priority != Unit::scheduleDefault) {
@@ -273,7 +249,7 @@ int getPhysicsPriority(Unit *un) {
     }
     if (UnitUtil::isAsteroid(un)) {
         //some mods don't do the scheduling--still want correctness
-        static std::string blah = vs_config->getVariable("physics", "priorities", "min_asteroid_distance", "none");
+        const std::string blah = configuration().physics.priorities.min_asteroid_distance;
         //static float too_close_asteroid = (blah == "none") ? tooclose : XMLSupport::parse_float( blah );
         //if (dist < too_close_asteroid)
         return ASTEROID_HIGH_PRIORITY;
@@ -281,7 +257,7 @@ int getPhysicsPriority(Unit *un) {
         //return ASTEROID_LOW_PRIORITY;
     }
     Unit *targ = un->Target();
-    if (_Universe->isPlayerStarship(targ)) {
+    if (targ && targ->IsPlayerShip()) {
         if (un->isJumppoint()) {
             return PLAYER_PRIORITY;
         } else if (UnitUtil::getDistance(targ, un) <= PLAYERTHREAT_DISTANCE_FACTOR * mymax(gun_range, missile_range)) {
@@ -291,12 +267,8 @@ int getPhysicsPriority(Unit *un) {
         }
     }
     if (un->graphicOptions.WarpRamping || un->graphicOptions.RampCounter != 0) {
-        static float compwarprampuptime =
-                XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "computerwarprampuptime",
-                        "10")); //for the heck of it.  NOTE, variable also in unit_generic.cpp
-        static float warprampdowntime =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "warprampdowntime", "0.5"));
+        const float compwarprampuptime = configuration().physics.computer_warp_ramp_up_time_flt; //for the heck of it.  NOTE, variable also in unit_generic.cpp
+        const float warprampdowntime = configuration().physics.warp_ramp_down_time_flt;
         float lowest_priority_time = SIM_QUEUE_SIZE * SIMULATION_ATOM;
 
         float time_ramped = compwarprampuptime - un->graphicOptions.RampCounter;
@@ -359,19 +331,19 @@ int getPhysicsPriority(Unit *un) {
 void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVector center) {
     if (my_unit) {
         my_unit->PrimeOrders(new PlanetaryOrbit(my_unit,
-                speed / (3.1415926536 * (S.Magnitude() + R.Magnitude())),
-                0,
-                R,
-                S,
-                center,
-                orbitee));
+                                                speed / (M_PI * (S.Magnitude() + R.Magnitude())),
+                                                0,
+                                                R,
+                                                S,
+                                                center,
+                                                orbitee));
         if (orbitee) {
             if (orbitee->getUnitType() == Vega_UnitType::planet) {
                 ((Planet *) orbitee)->AddSatellite(my_unit);
             }
         }
         if (my_unit->faction != FactionUtil::GetFactionIndex("neutral")) {
-            Order *tmp = new Orders::FireAt(configuration()->ai.firing.aggressivity);
+            Order *tmp = new Orders::FireAt(configuration().ai.firing.aggressivity_flt);
             my_unit->EnqueueAI(tmp);
             my_unit->SetTurretAI();
         }
@@ -472,22 +444,16 @@ float getCredits(const Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
-    Cockpit *tmp;
-    float viret = 0;
-    if ((tmp = _Universe->isPlayerStarship(my_unit))) {
-        viret = tmp->credits;
-    }
-    return viret;
+
+    return my_unit->credits;;
 }
 
 void addCredits(const Unit *my_unit, float credits) {
     if (!my_unit) {
         return;
     }
-    Cockpit *tmp;
-    if ((tmp = _Universe->isPlayerStarship(my_unit))) {
-        tmp->credits += credits;
-    }
+
+    my_unit->credits += credits;
 }
 
 const string &getFlightgroupNameCR(const Unit *my_unit) {
@@ -566,64 +532,16 @@ int getFgSubnumber(Unit *my_unit) {
     return my_unit->getFgSubnumber();
 }
 
+// erasezero not used anymore, but keeping it for compatibility
 int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero) {
     if (!my_unit) {
         return 0;
     }
-    unsigned int index;
-    if (my_unit->GetCargo(s, index)) {
-        quantity = my_unit->RemoveCargo(index, quantity, erasezero);
-    } else {
-        quantity = 0;
-    }
-    return quantity;
+
+    Cargo c = my_unit->cargo_hold.RemoveCargo(my_unit, s, quantity);
+    return c.GetQuantity();
 }
 
-void RecomputeUnitUpgrades(Unit *un) {
-    if (un == NULL) {
-        return;
-    }
-    un->ReduceToTemplate();
-    unsigned int i;
-    for (i = 0; i < un->numCargo(); ++i) {
-        Cargo *c = &un->GetCargo(i);
-        if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
-            if(c->GetCategory().find("upgrades/integral") == 0) {
-                continue;
-            }
-            if (c->GetName().find("mult_") != 0
-                    && c->GetName().find("add_") != 0) {
-                un->Upgrade(c->GetName(), 0, 0, true, false);
-            }
-        }
-    }
-    for (i = 0; i < un->numCargo(); ++i) {
-        Cargo *c = &un->GetCargo(i);
-        if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
-            if(c->GetCategory().find("upgrades/integral") == 0) {
-                continue;
-            }
-            if (c->GetName().find("add_") == 0) {
-                for (int j = 0; j < c->GetQuantity(); ++j) {
-                    un->Upgrade(c->GetName(), 0, 0, true, false);
-                }
-            }
-        }
-    }
-    for (i = 0; i < un->numCargo(); ++i) {
-        Cargo *c = &un->GetCargo(i);
-        if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
-            if(c->GetCategory().find("upgrades/integral") == 0) {
-                continue;
-            }
-            if (c->GetName().find("mult_") == 0) {
-                for (int j = 0; j < c->GetQuantity(); ++j) {
-                    un->Upgrade(c->GetName(), 0, 0, true, false);
-                }
-            }
-        }
-    }
-}
 
 bool repair(Unit *my_unit) {
     if (!my_unit) {
@@ -663,16 +581,15 @@ int addCargo(Unit *my_unit, Cargo carg) {
     if (!my_unit) {
         return 0;
     }
-    int i;
-    for (i = carg.GetQuantity(); i > 0 && !my_unit->CanAddCargo(carg); i--) {
+
+    for (int i = carg.GetQuantity(); i > 0; i--) {
         carg.SetQuantity(i);
+        if(my_unit->cargo_hold.CanAddCargo(carg)) {
+            my_unit->cargo_hold.AddCargo(my_unit, carg);
+            break;
+        }
     }
-    if (i > 0) {
-        carg.SetQuantity(i);
-        my_unit->AddCargo(carg);
-    } else {
-        carg.SetQuantity(0);
-    }
+
     return carg.GetQuantity();
 }
 
@@ -680,7 +597,10 @@ int forceAddCargo(Unit *my_unit, Cargo carg) {
     if (!my_unit) {
         return 0;
     }
-    my_unit->AddCargo(carg);
+
+    // Force add cargo even if it exceeds the cargo hold capacity
+    // This is used for missions and other special cases
+    my_unit->cargo_hold.AddCargo(my_unit, carg);
     return carg.GetQuantity();
 }
 
@@ -688,12 +608,18 @@ int hasCargo(const Unit *my_unit, string mycarg) {
     if (!my_unit) {
         return 0;
     }
-    unsigned int i;
-    const Cargo *c = my_unit->GetCargo(mycarg, i);
-    if (c == NULL) {
+
+    if(!my_unit->cargo_hold.HasCargo(mycarg)) {
         return 0;
     }
-    return c->GetQuantity();
+
+    int index = my_unit->cargo_hold.GetIndex(mycarg);
+    if(index == -1) {
+        return 0;
+    }
+
+    Cargo c = my_unit->cargo_hold.GetCargo(index);
+    return c.GetQuantity();
 }
 
 bool JumpTo(Unit *unit, string system) {
@@ -712,64 +638,30 @@ string getUnitSystemFile(const Unit *un) {
     return ss->getFileName();
 }
 
-bool incrementCargo(Unit *my_unit, float percentagechange, int quantity) {
-    if (!my_unit) {
-        return false;
-    }
-    if (my_unit->numCargo() > 0) {
-        unsigned int index;
-        index = rand() % my_unit->numCargo();
-        Cargo c(my_unit->GetCargo(index));
-        c.SetQuantity(quantity);
-        if (c.GetPrice() != 0) {
-            if (my_unit->CanAddCargo(c)) {
-                my_unit->AddCargo(c);
-                my_unit->GetCargo(index).SetPrice(
-                            my_unit->GetCargo(index).GetPrice() * percentagechange);
-                return true;
-            }
-        }
-    }
-    return false;
-}
 
-bool decrementCargo(Unit *my_unit, float percentagechange) {
-    if (!my_unit) {
-        return false;
-    }
-    if (my_unit->numCargo() > 0) {
-        unsigned int index;
-        index = rand() % my_unit->numCargo();
-        if (my_unit->RemoveCargo(index, 1, false)) {
-            my_unit->GetCargo(index).SetPrice(my_unit->GetCargo(index).GetPrice() * percentagechange);
-        }
-        return true;
-    }
-    return false;
-}
 
 Cargo GetCargoIndex(const Unit *my_unit, int index) {
-    if (my_unit) {
-        if (index >= 0 && (unsigned int) index < my_unit->numCargo()) {
-            return my_unit->GetCargo(index);
-        }
+    if (!my_unit) {
+        return Cargo();
     }
-    Cargo ret;
-    ret.SetQuantity(0);
-    return ret;
+
+    if (index < 0 || index >= my_unit->cargo_hold.Size()) {
+        return Cargo();
+    }
+    return my_unit->cargo_hold.GetCargo(index);
 }
 
-Cargo GetCargo(const Unit *my_unit, std::string cargname) {
-    if (my_unit) {
-        unsigned int indx = (~(unsigned int) 0);
-        const Cargo *cargptr = my_unit->GetCargo(cargname, indx);
-        if (cargptr && indx != (~(unsigned int) 0)) {
-            return *cargptr;
-        }
+Cargo GetCargo(const Unit *my_unit, std::string cargo_name) {
+    if (!my_unit) {
+        return Cargo();
     }
-    Cargo ret;
-    ret.SetQuantity(0);
-    return ret;
+
+    int index = my_unit->cargo_hold.GetIndex(cargo_name);
+    if (index == -1) {
+        return Cargo();
+    }
+
+    return my_unit->cargo_hold.GetCargo(index);
 }
 
 bool isDockableUnit(const Unit *my_unit) {
@@ -790,8 +682,7 @@ bool isDockableUnit(const Unit *my_unit) {
 }
 
 bool isCloseEnoughToDock(const Unit *my_unit, const Unit *un) {
-    static bool
-            superdock = XMLSupport::parse_bool(vs_config->getVariable("physics", "dock_within_base_shield", "false"));
+    const bool superdock = configuration().physics.dock_within_base_shield;
     float dis =
             (un->getUnitType() == Vega_UnitType::planet || superdock) ? UnitUtil::getSignificantDistance(my_unit, un)
                     : UnitUtil::getDistance(
@@ -913,7 +804,7 @@ void performDockingOperations(Unit *un, Unit *unitToDockWith, int actually_dock)
     }
 }
 
-float PercentOperational(Unit *un, std::string name, std::string category, bool countHullAndArmorAsFull) {
+float PercentOperational(const Cargo item, Unit *un, std::string name, std::string category, bool countHullAndArmorAsFull) {
     if (!un) {
         return 0;
     }
@@ -928,6 +819,7 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
         unit_key = name + "__upgrades";
     }
 
+    // TODO: remove this code. We now have GetComponentByType.
     const std::string upgrade_category = UnitCSVFactory::GetVariable(unit_key, "Upgrade_Type", std::string());
     if(upgrade_category == "Hull") {
         return un->hull.PercentOperational();
@@ -997,7 +889,7 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
     if (!upgrade) {
         return 1.0f;
     }
-    if (isWeapon(category)) {
+    if (item.IsWeapon()) {
         static std::string loadfailed("LOAD_FAILED");
         if (upgrade->getNumMounts()) {
             const Mount *mnt = &upgrade->mounts[0];
@@ -1012,20 +904,6 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
                     }
                 }
             }
-        }
-    } else if (name.find("add_") != 0 && name.find("mult_") != 0) {
-        double percent = 0;
-        if (un->canUpgrade(upgrade, -1, -1, 0, true, percent, makeTemplateUpgrade(un->name, un->faction), false)) {
-            if (percent > 0 && percent < 1) {
-                return percent;
-            } else if (percent
-                    >= 1) { //FIXME workaround for sensors -- see below comment, not sure why sensors report erroneous functional percentage
-                return 1.0;
-            } else {
-                return .5;
-            } //FIXME does not interact well with radar type
-        } else if (percent > 0) {
-            return percent;
         }
     }
     return 1.0;

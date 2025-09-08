@@ -34,6 +34,8 @@
 #include "root_generic/xml_support.h"
 #include <assert.h>
 #include "root_generic/configxml.h"
+
+#include "configuration/configuration.h"
 #include "root_generic/easydom.h"
 #include "src/vs_logging.h"
 #include "src/vs_exit.h"
@@ -290,7 +292,7 @@ string VegaConfig::getVariable(configNode *section, string name, string defaultv
     static bool shouldwarn = true;
     if (!foundshouldwarn) {
         if (name != "debug_config") {
-            shouldwarn = XMLSupport::parse_bool(getVariable("general", "debug_config", "true"));
+            shouldwarn = configuration().general.debug_config;
             foundshouldwarn = true;
         }
     }

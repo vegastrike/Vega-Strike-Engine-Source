@@ -1,6 +1,13 @@
 /*
- * Copyright (C) 2001-2025 hellcatv, ace123, surfdargent, klaussfreire,
- * jacks, pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
+ * navscreen.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically:
+ * hellcatv, ace123, surfdargent, klaussfreire, jacks, pyramid3d
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +24,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -141,8 +148,8 @@ void NavigationSystem::Setup() {
     center_z = 0.0;     //updated after a pass
 
     path_view = PATH_ON;
-    const bool start_sys_ortho = configuration()->graphics.system_map_ortho_view;
-    const bool start_sec_ortho = configuration()->graphics.sector_map_ortho_view;
+    const bool start_sys_ortho = configuration().graphics.system_map_ortho_view;
+    const bool start_sec_ortho = configuration().graphics.sector_map_ortho_view;
     system_view = start_sys_ortho ? VIEW_ORTHO : VIEW_2D;
     galaxy_view = start_sec_ortho ? VIEW_ORTHO : VIEW_2D;
     system_multi_dimensional = 1;
@@ -167,10 +174,10 @@ void NavigationSystem::Setup() {
     mouse_wentdown[2] = 0;
     mouse_wentdown[3] = 0;
     mouse_wentdown[4] = 0;
-    mouse_x_previous = (-1 + float(mousex) / (.5 * configuration()->graphics.resolution_x));
-    mouse_y_previous = (1 + float(-1 * mousey) / (.5 * configuration()->graphics.resolution_y));
+    mouse_x_previous = (-1 + float(mousex) / (.5 * configuration().graphics.resolution_x));
+    mouse_y_previous = (1 + float(-1 * mousey) / (.5 * configuration().graphics.resolution_y));
 
-    static int max_map_nodes = XMLSupport::parse_int(vs_config->getVariable("graphics", "max_map_nodes", "256000"));
+    const int max_map_nodes = configuration().graphics.max_map_nodes;
     systemIter.init(UniverseUtil::getSystemFile(), max_map_nodes);
     sectorIter.init(systemIter);
     systemselectionindex = 0;
@@ -179,8 +186,7 @@ void NavigationSystem::Setup() {
     currentsystemindex = 0;
     setFocusedSystemIndex(0);
 
-    static int time_to_helpscreen =
-            XMLSupport::parse_int(vs_config->getVariable("general", "times_to_show_help_screen", "3"));
+    const int time_to_helpscreen = configuration().general.times_to_show_help_screen;
     buttonstates = 0;
     if (getSaveData(0, "436457r1K3574r7uP71m35", 0) <= time_to_helpscreen) {
         whattodraw = 0;
@@ -347,15 +353,15 @@ void NavigationSystem::Setup() {
     ScreenToCoord(buttonskipby4_7[2]);
     ScreenToCoord(buttonskipby4_7[3]);
 
-//reverse = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
+    reverse = configuration().joystick.reverse_mouse_spr ? 1 : -1;
 
-    reverse = -1;
+    // reverse = -1;
     if ((screenskipby4[1] - screenskipby4[0]) < (screenskipby4[3] - screenskipby4[2])) {
         system_item_scale *= (screenskipby4[1] - screenskipby4[0]);            //is actually over 1, which is itself
     } else {
         system_item_scale *= (screenskipby4[3] - screenskipby4[2]);
     }
-    screenoccupation = new navscreenoccupied(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], 1);
+    screenoccupation = new navscreenoccupied(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], true);
 
     //Get special colors from the config
     currentcol = vs_config->getColor("nav", "current_system",
@@ -384,10 +390,8 @@ void NavigationSystem::Draw() {
     //DRAW THE SCREEN MODEL
     //**********************************
     Vector p, q, r;
-    static float zrange =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_nav_zrange", "10"));
-    static float zfloor =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_nav_zfloor", "0.1"));
+    const float zrange = configuration().graphics.cockpit_nav_zrange_flt;
+    const float zfloor = configuration().graphics.cockpit_nav_zfloor_flt;
     _Universe->AccessCamera()->GetOrientation(p, q, r);
     _Universe->AccessCamera()->UpdateGFX(GFXTRUE,
             GFXTRUE,
@@ -447,8 +451,8 @@ void NavigationSystem::Draw() {
 
     //Save current mouse location
     //**********************************
-    mouse_x_current = (-1 + float(mousex) / (.5 * configuration()->graphics.resolution_x));
-    mouse_y_current = (1 + float(-1 * mousey) / (.5 * configuration()->graphics.resolution_y));
+    mouse_x_current = (-1 + float(mousex) / (.5 * configuration().graphics.resolution_x));
+    mouse_y_current = (1 + float(-1 * mousey) / (.5 * configuration().graphics.resolution_y));
     //**********************************
 
     //Set Mouse
@@ -528,8 +532,8 @@ void NavigationSystem::Draw() {
 
     //Save current mouse location as previous for next cycle
     //**********************************
-    mouse_x_previous = (-1 + float(mousex) / (.5 * configuration()->graphics.resolution_x));
-    mouse_y_previous = (1 + float(-1 * mousey) / (.5 * configuration()->graphics.resolution_y));
+    mouse_x_previous = (-1 + float(mousex) / (.5 * configuration().graphics.resolution_x));
+    mouse_y_previous = (1 + float(-1 * mousey) / (.5 * configuration().graphics.resolution_y));
     //**********************************
 
     GFXEnable(TEXTURE0);
@@ -572,8 +576,8 @@ void NavigationSystem::DrawMission() {
     size_t i = 0;
     string factionname = "factionname";
     float relation = 0.0;
-    static string disallowedFactions = vs_config->getVariable("graphics", "unprintable_factions", "");
-    static string disallowedExtension = vs_config->getVariable("graphics", "unprintable_faction_extension", "citizen");
+    const string disallowedFactions = configuration().graphics.unprintable_factions;
+    const string disallowedExtension = configuration().graphics.unprintable_faction_extension;
     int totkills = 0;
     size_t fac_loc_before = 0, fac_loc = 0, fac_loc_after = 0;
     for (; i < numfactions; ++i) {
@@ -698,7 +702,7 @@ void NavigationSystem::DrawShip() {
     displayname.SetPos(originx - (.1 * deltax), originy /*+(1*deltay)*/ );
     displayname.SetText(writethis);
     displayname.SetCharSize(1, 1);
-    const float background_alpha = configuration()->graphics.hud.text_background_alpha;
+    const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     GFXColor tpbg = displayname.bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
@@ -1020,10 +1024,8 @@ void NavigationSystem::setFocusedSystemIndex(unsigned newSystemIndex) {
 
 void NavigationSystem::setCurrentSystemIndex(unsigned newSystemIndex) {
     currentsystemindex = newSystemIndex;
-    static bool AlwaysUpdateNavMap =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                    "update_nav_after_jump",
-                    "false"));                          //causes occasional crash--only may have tracked it down
+    //causes occasional crash--only may have tracked it down
+    const bool AlwaysUpdateNavMap = configuration().graphics.update_nav_after_jump;
     if (AlwaysUpdateNavMap) {
         pathman->updatePaths(PathManager::CURRENT);
     }
@@ -1116,10 +1118,9 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
     float yl = (y1 + y2) / 2.0;
     a_label.SetPos((xl - offset) - (checkbit(buttonstates, button_number - 1) ? 0.006 : 0), (yl + 0.025));
     a_label.SetText(label);
-    static bool nav_button_labels =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_nav_button_labels", "true"));
+    const bool nav_button_labels = configuration().graphics.draw_nav_button_labels;
     if (nav_button_labels) {
-        const float background_alpha = configuration()->graphics.hud.text_background_alpha;
+        const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
         GFXColor tpbg = a_label.bgcol;
         bool automatte = (0 == tpbg.a);
         if (automatte) {
@@ -1578,8 +1579,7 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
     if (((mouse_previous_state[1] == 1)
             && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
                     mouse_y_current)) || (mouse_wentdown[3] || mouse_wentdown[4])) {
-        static float wheel_zoom_level =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "wheel_zoom_amount", "0.1"));
+        const float wheel_zoom_level = configuration().graphics.wheel_zoom_amount_flt;
         if (system_vs_galaxy) {
             if (mouse_wentdown[3]) {
                 zoom_s += wheel_zoom_level;
@@ -1588,9 +1588,6 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
             } else {
                 zoom_s = zoom_s + ( /*1.0 +*/ 8 * (mouse_y_current - mouse_y_previous));
             }
-            //if(zoom < 1.0)
-            //zoom = 1.0;
-//static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));
             if (zoom_s < 1.2) {
                 zoom_s = 1.2;
             }
@@ -1605,9 +1602,6 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
             } else {
                 zoom = zoom + ( /*1.0 +*/ 8 * (mouse_y_current - mouse_y_previous));
             }
-            //if(zoom < 1.0)
-            //zoom = 1.0;
-//static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));
             if (zoom < .5) {
                 zoom = .5;
             }

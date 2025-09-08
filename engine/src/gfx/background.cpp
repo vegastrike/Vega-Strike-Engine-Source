@@ -1,15 +1,20 @@
 /*
  * background.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
  * This file is part of Vega Strike.
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -47,22 +52,17 @@ Background::Background(const char *file,
         bool degamma_)
         : Enabled(true), degamma(degamma_), color(color_), stars(NULL) {
     string temp;
-    static string starspritetextures = vs_config->getVariable("graphics", "far_stars_sprite_texture", "");
-    static float starspritesize =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "far_stars_sprite_size", "2"));
+    const string starspritetextures = configuration().graphics.far_stars_sprite_texture;
+    const float starspritesize = configuration().graphics.far_stars_sprite_size_flt;
     if (starspritetextures.length() == 0) {
         stars =
                 new PointStarVlist(numstars, 200 /*spread*/,
-                        XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                "use_star_coords",
-                                "true")) ? filename : "");
+                        configuration().graphics.use_star_coords ? filename : "");
     } else {
         stars =
                 new SpriteStarVlist(numstars,
                         200 /*spread*/,
-                        XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                "use_star_coords",
-                                "true")) ? filename : "",
+                        configuration().graphics.use_star_coords ? filename : "",
                         starspritetextures,
                         starspritesize);
     }
@@ -71,7 +71,7 @@ Background::Background(const char *file,
     SphereBackground = NULL;
 
 #ifndef NV_CUBE_MAP
-    static int max_cube_size = XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_cubemap_size", "1024" ) );
+    static int max_cube_size = configuration().graphics.max_cubemap_size;
     string     suffix = ".image";
     temp = string( file )+"_up.image";
     up   = new Texture( temp.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE, max_cube_size );
@@ -370,8 +370,7 @@ void Background::Draw() {
                     tex = _Universe->getLightMap();
                 }
                 const int numpasses = 1;
-                static float edge_fixup =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "background_edge_fixup", "0"));
+                const float edge_fixup = configuration().graphics.background_edge_fixup_flt;
                 const float ms = 0.f, Ms = 1.f - edge_fixup / tex->boundSizeX;
                 const float mt = 0.f, Mt = 1.f - edge_fixup / tex->boundSizeY;
                 const float _stca[] = {-1.f, -Ms, ms, Ms, +1.f}, _ttca[] = {-1.f, -Mt, mt, Mt, +1.f};
@@ -388,7 +387,7 @@ void Background::Draw() {
                 int   numpasses = tex->numPasses();
                 float ms = tex->mintcoord.i, Ms = tex->maxtcoord.i;
                 float mt = tex->mintcoord.j, Mt = tex->maxtcoord.j;
-                if (!gl_options.ext_clamp_to_edge) {
+                if (!configuration().graphics.ext_clamp_to_edge) {
                     ms += 1.0/tex->boundSizeX;
                     Ms -= 1.0/tex->boundSizeX;
                     mt += 1.0/tex->boundSizeY;
@@ -485,8 +484,7 @@ void Background::Draw() {
     GFXDisable(TEXTURE1);
     GFXDisable(DEPTHWRITE);
     GFXBlendMode(ONE, ONE);
-    static float background_velocity_scale =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "background_star_streak_velocity_scale", "0"));
+    const float background_velocity_scale = configuration().graphics.background_star_streak_velocity_scale_flt;
     stars->DrawAll(QVector(0, 0, 0), _Universe->AccessCamera()->GetVelocity().Scale(
             background_velocity_scale), _Universe->AccessCamera()->GetAngularVelocity(), true, true);
     GFXBlendMode(ONE, ZERO);

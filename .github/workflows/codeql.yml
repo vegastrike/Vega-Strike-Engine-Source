@@ -4,6 +4,10 @@
 # You may wish to alter this file to override the set of languages analyzed,
 # or to provide custom queries or build logic.
 name: CodeQL
+permissions:
+    contents: read
+    pull-requests: read
+    security-events: write
 
 on:
   push:
@@ -21,7 +25,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 2
 
@@ -42,9 +46,8 @@ jobs:
       - name: Bootstrap and Build the Code
         run: |
           sudo script/bootstrap
-          script/build
+          script/build --preset-name=linux-unix-makefiles-pie-enabled-glvnd-debug
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@4b6aa0b07da05d6e43d0e5f9c8596a6532ce1c85 #v2.15.3
-        with:
-          tools: codeql-bundle.tar.gz
+

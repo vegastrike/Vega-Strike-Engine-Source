@@ -1,17 +1,13 @@
-#====================================
-# @file   : CMakeLists.txt
-# @brief  : cmake configuration file for VegaStrike
-#====================================
-# create a build directory somewhere outside of this source tree
-# > cd .. && mkdir build && cd build
-# run > cmake <path to source tree>
-# run > make
-# to change build target (in Release, RelWithDebInfo, Debug, Profiler)
-# > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
-#====================================
-# Copyright (C) 2001-2025 safemode, Anth0rx, pyramid, Roy Falk,
-# Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
-# Evert Vorster, and other Vega Strike contributors.
+##
+# CMakeLists.txt
+#
+# Vega Strike - Space Simulation, Combat and Trading
+# Copyright (C) 2001-2025 The Vega Strike Contributors:
+# Project creator: Daniel Horn
+# Original development team: As listed in the AUTHORS file. Specifically:
+# safemode, Anth0rx, pyramid, Nachum Barcohen, Rune Morling
+# Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+#
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -24,11 +20,12 @@
 #
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+#
 
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -226,8 +223,6 @@ SET(LIBDAMAGE
 
 SET(LIBRESOURCE
     src/resource/resource.cpp
-    src/resource/store.cpp
-    src/resource/product.cpp
     src/resource/cargo.cpp
     src/resource/manifest.cpp
     src/resource/json_utils.cpp
@@ -256,6 +251,7 @@ SET(LIBCOMPONENT
     src/components/afterburner_upgrade.cpp
     src/components/computer.cpp
     src/components/cloak.cpp
+    src/components/cargo_hold.cpp
     src/components/drive.cpp
     src/components/drive_upgrade.cpp
     src/components/ftl_drive.cpp
@@ -363,7 +359,6 @@ SET(LIBCMDSERVER_SOURCES
     src/cmd/unit_functions_server.cpp
     src/cmd/unit_util_server.cpp
     src/cmd/unit_server.cpp
-    src/cmd/pilot_server.cpp
     src/cmd/images_server.cpp
     src/cmd/faction_xml_server.cpp
 )
@@ -639,6 +634,7 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/nebula.cpp
     src/cmd/planet.cpp
     src/cmd/ship.cpp
+    src/cmd/reload_utils.cpp
     src/cmd/script/c_alike/c_alike.tab.cpp
     src/cmd/script/c_alike/lex.yy.cpp
     src/cmd/script/director.cpp
@@ -696,6 +692,11 @@ IF (NOT DISABLE_CLIENT)
         TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC LOG_TIME_TAKEN_DETAILS)
     ENDIF ()
 
+    OPTION (JUMP_DEBUG "Whether to log details when warping between systems" OFF)
+    IF (JUMP_DEBUG)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC JUMP_DEBUG)
+    ENDIF ()
+
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine PRIVATE
             # VS engine headers
@@ -739,7 +740,7 @@ IF (NOT DISABLE_CLIENT)
 ENDIF (NOT DISABLE_CLIENT)
 
 # Vssetup Sub build file
-ADD_SUBDIRECTORY(setup)
+#ADD_SUBDIRECTORY(setup)
 
 # Add other utilities here
 ADD_SUBDIRECTORY(objconv)
@@ -943,117 +944,29 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "bullseye")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.9")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
+                ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "trixie")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.13")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.74.0")
+                        SET(BOOST_VER "1.83.0")
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "buster")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.7")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.67.0")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "stretch")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.5")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.62.0")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-2.0-0, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSE ()
                     MESSAGE(WARNING "!! Unsupported Debian version.")
                 ENDIF ()
 
             ELSE (USE_DEBIAN_VERSION)
                 # Ubuntu Dependency Chain
-                IF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bionic")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.7")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.65.1")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, ${VEGA_STRIKE_GLU_DEPENDENCY}, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER} libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "focal")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.8")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.67.0")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER} libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bookworm") # Apparently some versions of Debian have lsb_release after all
+                IF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bookworm") # Apparently some versions of Debian have lsb_release after all
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.11")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "1.81.0")
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bullseye")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.9")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.74.0")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER} libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "buster")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.7")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.67.0")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER} libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "stretch")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.5")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.62.0")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "groovy")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.9")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.71.0")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "hirsute")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.9")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.74.0")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "ulyana")  # Linux Mint 20 codename "ulyana"
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.8")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.67.0")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "vanessa")  # Linux Mint 20 codename "vanessa"
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.10")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.74.0")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "wilma")  # Linux Mint 22 codename "wilma"
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.12-stdlib")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1061,23 +974,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx-1.0-0, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "impish")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.10")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.74.0")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
-                ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "jammy")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.10")
-                    IF (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "1.74.0")
-                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx-1.0-0, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "noble")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.12-stdlib")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1085,7 +982,15 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg-turbo8, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx-1.0-0, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-program-options${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg-turbo8, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx-1.0-0, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-program-options${BOOST_VER}")
+                ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "trixie")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.13")
+                    IF (Boost_DERIVED_VERSION STREQUAL "")
+                        SET(BOOST_VER "1.83.0")
+                    ELSE (Boost_DERIVED_VERSION STREQUAL "")
+                        SET(BOOST_VER "${Boost_DERIVED_VERSION}")
+                    ENDIF (Boost_DERIVED_VERSION STREQUAL "")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-2.0-0, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSE ()
                     MESSAGE(WARNING "!! Unsupported Debian derivative.")
                 ENDIF ()
@@ -1104,10 +1009,8 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
         SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
         SET(CPACK_GENERATOR "DEB")
-    ENDIF (VS_CAN_BUILD_DEB)
-
-    #  "RPM"
-    IF (VS_CAN_BUILD_RPM)
+    # "RPM"
+    ELSEIF (VS_CAN_BUILD_RPM)
         MESSAGE(STATUS "Configuring RPM Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
         SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
@@ -1126,81 +1029,55 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         # TODO: Finish porting the script/package script over for RPM-based distros
         # Detect whether SuSe or RH/CentOS/Fedora as deps may change
         IF (LINUX_ID STREQUAL opensuse-leap)
-            IF (LINUX_VERSION_ID VERSION_EQUAL 15.2 OR LINUX_VERSION_ID VERSION_EQUAL 15.3)
-                SET(CPACK_RPM_PACKAGE_REQUIRES "libboost_python-py3-1_66_0, libpython3_6m1_0")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libSDL-1_2-0, libglvnd, expat, libboost_log1_66_0, libboost_system1_66_0, libboost_filesystem1_66_0, libboost_thread1_66_0, libboost_regex1_66_0, libboost_chrono1_66_0, libboost_atomic1_66_0, libboost_program_options1_66_0")
-            ELSEIF (LINUX_VERSION_ID VERSION_EQUAL 15.4)
-                IF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(BOOST_VER "1.75.0")
-                ELSE (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(BOOST_VER "${Boost_DERIVED_VERSION}")
-                ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "libboost_python-py3-${BOOST_VER}, libpython3_10-1_0")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libSDL-1_2-0, libglvnd, expat, libboost_log${BOOST_VER}, libboost_system${BOOST_VER}, libboost_filesystem${BOOST_VER}, libboost_thread${BOOST_VER}, libboost_regex${BOOST_VER}, libboost_chrono${BOOST_VER}, libboost_atomic${BOOST_VER}, libboost_json${BOOST_VER}, libboost_program_options${BOOST_VER}")
-            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 15.5 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 15.6)
+            IF (LINUX_VERSION_ID VERSION_EQUAL 15.6)
                 IF (Boost_DERIVED_VERSION STREQUAL "")
                     SET(BOOST_VER "1.75.0")
                 ELSE (Boost_DERIVED_VERSION STREQUAL "")
                     SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                 ENDIF (Boost_DERIVED_VERSION STREQUAL "")
                 SET(CPACK_RPM_PACKAGE_REQUIRES "libboost_python-py3-${BOOST_VER}, python311-base")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libSDL-1_2-0, libglvnd, expat, libboost_log${BOOST_VER}, libboost_system${BOOST_VER}, libboost_filesystem${BOOST_VER}, libboost_thread${BOOST_VER}, libboost_regex${BOOST_VER}, libboost_chrono${BOOST_VER}, libboost_atomic${BOOST_VER}, libboost_program_options${BOOST_VER}")
-            ELSE (LINUX_VERSION_ID VERSION_EQUAL 15.2 OR LINUX_VERSION_ID VERSION_EQUAL 15.3)
-                MESSAGE (SEND_WARNING "!! Unsupported version of openSUSE")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libglvnd, expat, libboost_log${BOOST_VER}, libboost_filesystem${BOOST_VER}, libboost_thread${BOOST_VER}, libboost_regex${BOOST_VER}, libboost_chrono${BOOST_VER}, libboost_atomic${BOOST_VER}, libboost_program_options${BOOST_VER}")
+            ELSEIF (LINUX_VERSION_ID VERSION_EQUAL 16.0)
+                IF (Boost_DERIVED_VERSION STREQUAL "")
+                    SET(BOOST_VER "1.86.0")
+                ELSE (Boost_DERIVED_VERSION STREQUAL "")
+                    SET(BOOST_VER "${Boost_DERIVED_VERSION}")
+                ENDIF (Boost_DERIVED_VERSION STREQUAL "")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "libboost_python-py3-${BOOST_VER}, libpython3_13-1_0")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libglvnd, expat, libboost_log${BOOST_VER}, libboost_filesystem${BOOST_VER}, libboost_thread${BOOST_VER}, libboost_regex${BOOST_VER}, libboost_chrono${BOOST_VER}, libboost_atomic${BOOST_VER}, libboost_json${BOOST_VER}, libboost_program_options${BOOST_VER}")
+            ELSE ()
+                MESSAGE (WARNING "Unsupported version of openSUSE")
                 SET(CPACK_RPM_PACKAGE_REQUIRES "")
-            ENDIF (LINUX_VERSION_ID VERSION_EQUAL 15.2 OR LINUX_VERSION_ID VERSION_EQUAL 15.3)
-        ELSEIF (LINUX_ID STREQUAL fedora AND LINUX_VERSION_ID VERSION_GREATER_EQUAL 30 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 41)
-            IF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 34)
+            ENDIF ()
+        ELSEIF (LINUX_ID STREQUAL fedora)
+            IF (LINUX_VERSION_ID VERSION_EQUAL 41)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python3, boost-python3")
-            ELSEIF (LINUX_VERSION_ID VERSION_EQUAL 32 OR LINUX_VERSION_ID VERSION_EQUAL 33)
-                SET(CPACK_RPM_PACKAGE_REQUIRES "python38, boost-python3")       # python39
-            ELSEIF (LINUX_VERSION_ID VERSION_EQUAL 31)
-                SET(CPACK_RPM_PACKAGE_REQUIRES "python38, boost-python3")
-            ELSE (LINUX_VERSION_ID VERSION_GREATER_EQUAL 34)
-                SET(CPACK_RPM_PACKAGE_REQUIRES "python37, boost-python3")
-            ENDIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 34)
-            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL2, libglvnd, expat, boost-log, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
+            # Fedora 42 only includes SDL3, it seems, which is not backwards-compatible.
+            ELSE ()
+                MESSAGE (WARNING "Unsupported version of Fedora")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "")
+            ENDIF ()
         ELSEIF (LINUX_ID STREQUAL centos)
-            IF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 8.7)
-                SET(CPACK_RPM_PACKAGE_REQUIRES "python39, boost-python3")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
-            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.8 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 8.9)
-                SET(CPACK_RPM_PACKAGE_REQUIRES "python3.11, boost-python3")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
-            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 9.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 9.3)
+            IF (LINUX_VERSION_ID VERSION_EQUAL 9.5)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python3, boost-python3")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL2, libglvnd, expat, boost-log, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
             ELSE ()
                 MESSAGE(WARNING "We do not currently support this version of CentOS.")
                 SET(CPACK_RPM_PACKAGE_REQUIRES "")
             ENDIF ()
         ELSEIF (LINUX_ID STREQUAL rhel OR LINUX_ID STREQUAL redhat)
-            IF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 8.7)
-                SET(CPACK_RPM_PACKAGE_REQUIRES "python39, boost-python3")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
-            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.8 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 8.9)
-                SET(CPACK_RPM_PACKAGE_REQUIRES "python3.11, boost-python3")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
-            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 9.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 9.3)
+            IF (LINUX_VERSION_ID VERSION_EQUAL 9.5)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python3, boost-python3")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL2, libglvnd, expat, boost-log, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
             ELSE ()
                 MESSAGE(WARNING "This version of Red Hat is not currently supported.")
                 SET(CPACK_RPM_PACKAGE_REQUIRES "")
             ENDIF ()
         ELSEIF (LINUX_ID STREQUAL rocky)
-            IF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 8.7)
-                SET(CPACK_RPM_PACKAGE_REQUIRES "python39, boost-python3")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
-            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.8 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 8.9)
-                SET(CPACK_RPM_PACKAGE_REQUIRES "python3.11, boost-python3")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
-            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 9.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 9.3)
+            IF (LINUX_VERSION_ID VERSION_EQUAL 9.5)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python3, boost-python3")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
-            ELSEIF (LINUX_VERSION_ID VERSION_EQUAL 9.5)
-                SET(CPACK_RPM_PACKAGE_REQUIRES "python3, boost-python3")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL2, libglvnd, expat, boost-log, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
             ELSE ()
                 MESSAGE(WARNING "This version of Rocky Linux is not currently supported.")
                 SET(CPACK_RPM_PACKAGE_REQUIRES "")
@@ -1208,10 +1085,10 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         ELSE (LINUX_ID STREQUAL opensuse-leap)
             MESSAGE(WARNING "!! Unrecognized RPM-based Linux distribution. RPM Dependencies may be wrong for this platform.")
             SET(CPACK_RPM_PACKAGE_REQUIRES "python3")
-            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg, libpng, freeglut, gtk3, libvorbis, openal, SDL_mixer")
+            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg, libpng, freeglut, gtk3, libvorbis, openal, SDL2")
         ENDIF (LINUX_ID STREQUAL opensuse-leap)
         SET(CPACK_GENERATOR "RPM")
-    ENDIF (VS_CAN_BUILD_RPM)
+    ENDIF ()
 ELSE ()
     MESSAGE(STATUS "Configuring Packaging for Unknown Platform - \"${CMAKE_SYSTEM_NAME}\"")
     # Unknown Platform --> Just do the various compressed tarballs
@@ -1229,6 +1106,7 @@ IF (USE_GTEST)
         src/configuration/tests/configuration_tests.cpp
         src/damage/tests/layer_tests.cpp
         src/damage/tests/object_tests.cpp
+        src/resource/tests/cargo_tests.cpp
         src/resource/tests/buy_sell.cpp
         src/resource/tests/resource_test.cpp
         src/resource/tests/manifest_tests.cpp
@@ -1310,6 +1188,7 @@ IF (USE_GTEST)
             gtest_main
             $<TARGET_OBJECTS:vegastrike-testing>
             vegastrike_cmd
+            vegastrike_gfx_generic
             Boost::log
             Boost::log_setup
             Boost::json

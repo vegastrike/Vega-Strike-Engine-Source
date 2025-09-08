@@ -1,8 +1,12 @@
 /*
  * manifest.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "resource/manifest.h"
@@ -40,13 +44,6 @@ Manifest::Manifest() {
     _items = std::vector<Cargo>();
 }
 
-Manifest::Manifest(std::string category) {
-    Manifest& mpl = Manifest::MPL();
-
-    auto predicate = [&category](Cargo c) {return c.GetCategory() == category;};
-    std::copy_if(mpl._items.begin(), mpl._items.end(),
-             std::back_inserter(_items), predicate);
-}
 
 // Called by MPL if it is empty
 Manifest::Manifest(int dummy) {
@@ -78,15 +75,7 @@ Manifest::Manifest(int dummy) {
             try {
                 boost::json::object item = item_value.get_object();
 
-                std::string name = JsonGetStringWithDefault(item, "file", "");
-                std::string category = JsonGetStringWithDefault(item, "categoryname", "");
-                int price = std::stoi(JsonGetStringWithDefault(item, "price", "0"));
-                double mass = std::stod(JsonGetStringWithDefault(item, "mass", "0.0"));
-                double volume = std::stod(JsonGetStringWithDefault(item, "volume", "0.0"));
-                std::string description = JsonGetStringWithDefault(item, "description", "");
-
-                Cargo cargo = Cargo(name, category, price, 1, mass, volume);
-                cargo.SetDescription(description);
+                Cargo cargo = Cargo(item);
                 _items.push_back(cargo);
             } catch (...) {
                 std::cerr << "Failed to parse " << item_value << std::endl;
@@ -96,13 +85,20 @@ Manifest::Manifest(int dummy) {
     }
 }
 
+// For testing
+void Manifest::AddManifest(const std::vector<Cargo>& cargo_items) {
+    _items = cargo_items;
+}
+
 Manifest& Manifest::MPL() {
     static Manifest mpl = Manifest(1);
 
     return mpl;
 }
 
-Cargo Manifest::GetCargoByName(const std::string name) {
+
+
+Cargo Manifest::GetCargoByName(const std::string name) const {
     const std::string upgrades_suffix = "__upgrades";
     std::string filename;
 
@@ -114,16 +110,16 @@ Cargo Manifest::GetCargoByName(const std::string name) {
     }
 
 
-    for(const Cargo& c : getItems()) {
+    for(const Cargo& c : _items) {
         if(c.name == filename) {
             return c;
         }
     }
 
-    return Cargo();
+    throw std::runtime_error("Cargo with name '" + name + "' not found in manifest.");
 }
 
-Cargo Manifest::GetRandomCargo(int quantity) {
+Cargo Manifest::GetRandomCargo(int quantity) const {
     // TODO: Need to figure a better solution here
     if(_items.empty()) {
         return Cargo();
@@ -137,7 +133,7 @@ Cargo Manifest::GetRandomCargo(int quantity) {
 
 
 
-Cargo Manifest::GetRandomCargoFromCategory(std::string category, int quantity) {
+Cargo Manifest::GetRandomCargoFromCategory(std::string category, int quantity) const {
     Manifest manifest = GetCategoryManifest(category);
 
     // If category is empty, return randomly from MPL itself.
@@ -151,7 +147,7 @@ Cargo Manifest::GetRandomCargoFromCategory(std::string category, int quantity) {
     return manifest.GetRandomCargo(quantity);
 }
 
-Manifest Manifest::GetCategoryManifest(std::string category) {
+Manifest Manifest::GetCategoryManifest(std::string category) const {
     Manifest manifest;
 
     std::copy_if(_items.begin(), _items.end(), back_inserter(manifest._items),
@@ -162,23 +158,72 @@ Manifest Manifest::GetCategoryManifest(std::string category) {
     return manifest;
 }
 
-Manifest Manifest::GetMissionManifest() {
+
+
+Manifest Manifest::GetMissionManifest() const {
     Manifest manifest;
 
     std::copy_if(_items.begin(), _items.end(), back_inserter(manifest._items),
             [](Cargo c) {
-        return c.name.find("mission") != std::string::npos;
+        return c.IsMissionFlag();
     });
 
     return manifest;
 }
 
-const std::string Manifest::GetShipDescription(const std::string unit_key) {
-    for(const Cargo& cargo : _items) {
-        if(cargo.name == unit_key) {
-            return cargo.description;
+std::vector<Cargo> Manifest::GetItems() const { 
+    return _items; 
+}
+
+bool Manifest::Empty() const { 
+    return _items.empty(); 
+}
+
+int Manifest::Size() const { 
+    return _items.size(); 
+}
+
+
+// This is not as efficient as a hashtable
+// TODO: think about this
+int Manifest::GetIndex(const Cargo& cargo) const {
+    int index = 0;
+    for(Cargo c : _items) {
+        if(cargo.name == c.name && cargo.category == c.category) {
+            return index;
+        }
+
+        index++;
+    }
+
+    return -1;
+}
+
+
+int Manifest::GetIndex(const std::string& name, const std::string& category) const {
+    int index = 0;
+    for(Cargo c : _items) {
+        if(name == c.name && category == c.category) {
+            return index;
+        } else if(name == c.name && category.empty()) {
+            // If no category is specified, we match by name only
+            return index;
+        }
+
+        index++;
+    }
+
+    return -1; // Not found
+}
+
+
+// Consider deleting this. It's almost exactly the same as GetIndex
+bool Manifest::HasCargo(const std::string& name) const {
+    for(const Cargo& c : _items) {
+        if(c.name == name) {
+            return true;
         }
     }
 
-    return "";
+    return false;
 }

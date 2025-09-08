@@ -1,8 +1,12 @@
 /*
  * firekeyboard.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -59,6 +63,7 @@
 #include "cmd/weapon_info.h"
 #include "src/vs_logging.h"
 #include "cmd/unit_util.h"
+#include "resource/cargo.h"
 
 extern bool toggle_pause();
 
@@ -189,7 +194,7 @@ void FireKeyboard::SetShieldsOneThird(const KBData &, KBSTATE k) {
         float pow = 1. / 3;
         static soundContainer sc;
         if (sc.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "shield", "vdu_d");
+            static string str = configuration().cockpit_audio.shield;
             sc.loadsound(str);
         }
         sc.playsound();
@@ -206,7 +211,7 @@ void FireKeyboard::SetShieldsOff(const KBData &, KBSTATE k) {
         float pow = 0;
         static soundContainer sc;
         if (sc.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "shield", "vdu_d");
+            static string str = configuration().cockpit_audio.shield;
             sc.loadsound(str);
         }
         sc.playsound();
@@ -223,7 +228,7 @@ void FireKeyboard::SetShieldsTwoThird(const KBData &, KBSTATE k) {
         float pow = 2. / 3;
         static soundContainer sc;
         if (sc.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "shield", "vdu_d");
+            static string str = configuration().cockpit_audio.shield;
             sc.loadsound(str);
         }
         sc.playsound();
@@ -1013,7 +1018,7 @@ bool TargMission(Unit *me, Unit *target) {
 }
 
 bool TargAll(Unit *me, Unit *target) {
-    static bool can_target_sun = XMLSupport::parse_bool(vs_config->getVariable("graphics", "can_target_sun", "false"));
+    const bool can_target_sun = configuration().graphics.can_target_sun;
     return (me->InRange(target, true,
             false)
             || me->InRange(target, true, true)) && (can_target_sun || !UnitUtil::isSun(target)) && isNotTurretOwner(
@@ -1022,8 +1027,7 @@ bool TargAll(Unit *me, Unit *target) {
 }
 
 bool TargSig(Unit *me, Unit *target) {
-    static bool can_target_asteroid =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "can_target_asteroid", "true"));
+    const bool can_target_asteroid = configuration().graphics.can_target_asteroid;
 
     bool ret =
             me->InRange(target, false,
@@ -1041,8 +1045,7 @@ bool TargSig(Unit *me, Unit *target) {
 extern Unit *getTopLevelOwner();
 
 bool TargUn(Unit *me, Unit *target) {
-    static bool
-            can_target_cargo = XMLSupport::parse_bool(vs_config->getVariable("graphics", "can_target_cargo", "false"));
+    const bool can_target_cargo = configuration().graphics.can_target_cargo;
     int up = FactionUtil::GetUpgradeFaction();
     return me->InRange(target, true,
             false)
@@ -1093,7 +1096,7 @@ bool TargThreat(Unit *me, Unit *target) {
 }
 
 bool TargNear(Unit *me, Unit *target) {
-    static bool can_target_sun = XMLSupport::parse_bool(vs_config->getVariable("graphics", "can_target_sun", "false"));
+    const bool can_target_sun = configuration().graphics.can_target_sun;
     return (me->getRelation(target) < 0
             || TargThreat(me,
                     target)
@@ -1202,14 +1205,14 @@ bool ChooseTargets(Unit *me, bool (*typeofunit)(Unit *, Unit *), bool reverse) {
                     if (reverse) {
                         static soundContainer foosound;
                         if (foosound.sound < 0) {
-                            static string str = vs_config->getVariable("cockpitaudio", "target", "vdu_b");
+                            static string str = configuration().cockpit_audio.target;
                             foosound.loadsound(str);
                         }
                         foosound.playsound();
                     } else {
                         static soundContainer foobersound;
                         if (foobersound.sound < 0) {
-                            static string str = vs_config->getVariable("cockpitaudio", "target_reverse", "vdu_a");
+                            static string str = configuration().cockpit_audio.target_reverse;
                             foobersound.loadsound(str);
                         }
                         foobersound.playsound();
@@ -1291,14 +1294,12 @@ static bool UnDockNow(Unit *me, Unit *targ) {
     return ret;
 }
 
-void Enslave(Unit *, bool);
-
 void PlayDockingSound(int dock) {
     switch (dock) {
         case 5: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "undocking_complete", "undocking_complete");
+                static string str = configuration().cockpit_audio.undocking_complete;
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1307,7 +1308,7 @@ void PlayDockingSound(int dock) {
         case 4: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "undocking_failed", "undocking_failed");
+                static string str = configuration().cockpit_audio.undocking_failed;
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1315,14 +1316,13 @@ void PlayDockingSound(int dock) {
         }
         case 3: {
             static soundContainer reqsound;
-            static string
-                    otherstr = vs_config->getVariable("audio", "automatic_docking_zone", "automatic_landing_zone.wav");
+            std::string otherstr = configuration().audio.automatic_docking_zone;
             if (otherstr != "" && rand() < RAND_MAX / 2) {
                 static int s = AUDCreateSoundWAV(otherstr, false);
                 AUDPlay(s, QVector(0, 0, 0), Vector(0, 0, 0), 1);
             } else {
                 if (reqsound.sound == -2) {
-                    static string str = vs_config->getVariable("cockpitaudio", "docking_complete", "docking_complete");
+                    static string str = configuration().cockpit_audio.docking_complete;
                     reqsound.loadsound(str);
                 }
                 reqsound.playsound();
@@ -1332,7 +1332,7 @@ void PlayDockingSound(int dock) {
         case 2: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "docking_failed", "docking_failed");
+                static string str = configuration().cockpit_audio.docking_failed;
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1341,7 +1341,7 @@ void PlayDockingSound(int dock) {
         case 1: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "docking_granted", "request_granted");
+                static string str = configuration().cockpit_audio.docking_granted;
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1350,7 +1350,7 @@ void PlayDockingSound(int dock) {
         case 0: {
             static soundContainer reqsound;
             if (reqsound.sound == -2) {
-                static string str = vs_config->getVariable("cockpitaudio", "docking_denied", "request_denied");
+                static string str = configuration().cockpit_audio.docking_denied;
                 reqsound.loadsound(str);
             }
             reqsound.playsound();
@@ -1373,11 +1373,9 @@ static bool SuperDock(Unit *parent, Unit *target) {
 }
 
 static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity) {
-    static float min_docking_relationship =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "min_docking_relationship", "-.002"));
-    static bool can_dock_to_enemy_base =
-            XMLSupport::parse_bool(vs_config->getVariable("AI", "can_dock_to_enemy_base", "true"));
-    static bool nojumpinSPEC = XMLSupport::parse_bool(vs_config->getVariable("physics", "noSPECJUMP", "true"));
+    const float min_docking_relationship = configuration().ai.min_docking_relationship_flt;
+    const bool can_dock_to_enemy_base = configuration().ai.can_dock_to_enemy_base;
+    const bool nojumpinSPEC = configuration().physics.no_spec_jump;
     bool SPEC_interference = targ && parent && nojumpinSPEC
             && (targ->ftl_drive.Enabled() || parent->ftl_drive.Enabled());
     unsigned char gender = 0;
@@ -1427,7 +1425,7 @@ static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
             endt->graphicOptions.WarpRamping = 1;
         }
         endt->ftl_drive.Disable();
-        static float clearencetime = (XMLSupport::parse_float(vs_config->getVariable("general", "dockingtime", "20")));
+        const float clearencetime = configuration().general.docking_time_flt;
         endt->EnqueueAIFirst(new Orders::ExecuteFor(new Orders::MatchVelocity(Vector(0, 0, 0),
                 Vector(0, 0, 0),
                 true,
@@ -1438,7 +1436,7 @@ static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
 }
 
 static void DoDockingOps(Unit *parent, Unit *targ, unsigned char playa, unsigned char gender) {
-    static int maxseverity = XMLSupport::parse_bool(vs_config->getVariable("AI", "dock_to_area", "false")) ? 2 : 1;
+    const int maxseverity = configuration().ai.dock_to_area ? 2 : 1;
     Unit *endt = targ;
     bool wasdock = vectorOfKeyboardInput[playa].doc;
     if (vectorOfKeyboardInput[playa].doc) {
@@ -1526,7 +1524,7 @@ unsigned int FireKeyboard::DoSpeechAndAni(Unit *un, Unit *parent, class Communic
 
 static void MyFunction() {
     //quit it--he's dead all ready
-    static string comm_static = vs_config->getVariable("graphics", "comm_static", "static.ani");
+    const string comm_static = configuration().graphics.comm_static;
     //dead dead dead dead
     static Animation Statuc(comm_static.c_str());
     //yep really dead
@@ -1589,7 +1587,7 @@ extern std::set<Unit *> arrested_list_do_not_dereference;
 void Arrested(Unit *parent) {
     std::string fac = UniverseUtil::GetGalaxyFaction(UniverseUtil::getSystemFile());
     int own = FactionUtil::GetFactionIndex(fac);
-    static string po = vs_config->getVariable("galaxy", "police_faction", "homeland-security");
+    std::string po = configuration().galaxy.police_faction;
     int police = FactionUtil::GetFactionIndex(po);
     int police2 = FactionUtil::GetFactionIndex(po + "_" + fac);
     float ownrel = UnitUtil::getRelationFromFaction(parent, own);
@@ -1597,14 +1595,11 @@ void Arrested(Unit *parent) {
     if (!attack) {
         Unit *contra = FactionUtil::GetContraband(own);
         if (contra) {
-            for (unsigned int i = 0; (!attack) && i < parent->numCargo(); ++i) {
-                Cargo *ci = &parent->GetCargo(i);
-                for (unsigned int j = 0; j < contra->numCargo(); ++j) {
-                    Cargo *cj = &contra->GetCargo(j);
-                    if (ci->GetName() == cj->GetName()) {
-                        attack = true;
-                        break;
-                    }
+            for(Cargo& contraband : contra->cargo_hold.GetItems()) {
+                if (parent->cargo_hold.HasCargo(contraband.GetName())) {
+                    // Parent has contraband cargo
+                    attack = true;
+                    break;
                 }
             }
         }
@@ -1627,7 +1622,7 @@ void Arrested(Unit *parent) {
         }
     }
     if (attack) {
-        static std::string prison_system = vs_config->getVariable("galaxy", "PrisonSystem", "Sol/Nu_Pheonix");
+        std::string prison_system = configuration().galaxy.prison_system;
         std::string psys = prison_system + "_" + fac;
         if (UnitUtil::getUnitSystemFile(parent) != psys) {
             UnitUtil::JumpTo(parent, psys);
@@ -1659,9 +1654,8 @@ void Arrested(Unit *parent) {
                 parent->aistate = NULL;
                 parent->PrimeOrders(new Orders::DockingOps(owner, tmp, true, true));
                 arrested_list_do_not_dereference.insert(parent);
-                for (int i = parent->numCargo() - 1; i >= 0; --i) {
-                    parent->RemoveCargo(i, parent->GetCargo((unsigned int) i).GetQuantity(), true);
-                }
+                parent->cargo_hold.Clear();
+                
                 UniverseUtil::IOmessage(
                         0,
                         "game",
@@ -1679,8 +1673,7 @@ void Arrested(Unit *parent) {
 static void ForceChangeTarget(Unit *parent) {
     Unit *curtarg = parent->Target();
     ChooseTargets(parent, TargUn, false);
-    static bool force_change_only_unit =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "target_null_if_no_unit", "false"));
+    const bool force_change_only_unit = configuration().graphics.target_null_if_no_unit;
     if (parent->Target() == curtarg) {
         if (force_change_only_unit) {
             parent->Target(NULL);
@@ -1697,8 +1690,7 @@ int SelectDockPort(Unit *utdw, Unit *parent);
 
 void FireKeyboard::SetParent(Unit *parent1) {
     this->Order::SetParent(parent1);
-    static bool allow_special_with_weapons =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "special_and_normal_gun_combo", "true"));
+    const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
     if (!allow_special_with_weapons) {
         parent->ToggleWeapon(false, true /*reverse*/ );
         parent->ToggleWeapon(false, false /*reverse*/ );
@@ -1737,8 +1729,7 @@ void FireKeyboard::Execute() {
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if (!_Universe->AccessCockpit()->CanDrawNavSystem()) {
-            static bool allow_special_with_weapons =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "special_and_normal_gun_combo", "true"));
+            const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
             if (!allow_special_with_weapons) {
                 bool special = false;
                 bool normal = false;
@@ -1819,8 +1810,7 @@ void FireKeyboard::Execute() {
     }
     if (f().targetukey == PRESS) {
         f().targetukey = DOWN;
-        static bool smart_targetting =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "smart_targetting_key", "true"));
+        const bool smart_targetting = configuration().graphics.smart_targetting_key;
         Unit *tmp = parent->Target();
         bool sysobj = false;
         if (tmp) {
@@ -1900,8 +1890,7 @@ void FireKeyboard::Execute() {
     }
     if (f().rtargetukey == PRESS) {
         f().rtargetukey = DOWN;
-        static bool smart_targetting =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "smart_targetting_key", "true"));
+        const bool smart_targetting = configuration().graphics.smart_targetting_key;
         Unit *tmp = parent->Target();
         bool sysobj = false;
         if (tmp) {
@@ -1923,7 +1912,7 @@ void FireKeyboard::Execute() {
         parent->TargetTurret(parent->Target());
         f().turretaikey = DOWN;
     }
-    static bool noturretai = XMLSupport::parse_bool(vs_config->getVariable("AI", "no_turret_ai", "false"));
+    const bool noturretai = configuration().ai.no_turret_ai;
     static int taicounter = 0;
     if (f().turretoffkey == PRESS || (noturretai && taicounter++ % 128 == 0)) {
         parent->DisableTurretAI();
@@ -2012,7 +2001,7 @@ void FireKeyboard::Execute() {
         parent->ToggleWeapon(false, forward);
         static soundContainer weapsound;
         if (weapsound.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "weapon_switch", "vdu_d");
+            static string str = configuration().cockpit_audio.weapon_switch;
             weapsound.loadsound(str);
         }
         weapsound.playsound();
@@ -2049,7 +2038,7 @@ void FireKeyboard::Execute() {
         parent->ToggleWeapon(true, forward);
         static soundContainer missound;
         if (missound.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "missile_switch", "vdu_d");
+            static string str = configuration().cockpit_audio.missile_switch;
             missound.loadsound(str);
         }
         missound.playsound();
@@ -2132,9 +2121,12 @@ void FireKeyboard::Execute() {
             _Universe->AccessCockpit()->communication_choices = "\nNo Communication\nLink\nEstablished";
         }
     }
-    if (f().enslave == PRESS || f().freeslave == PRESS) {
-        Enslave(parent, f().enslave == PRESS);
+    if (f().enslave == PRESS) {
+        parent->cargo_hold.Enslave();
         f().enslave = RELEASE;
+    }
+    if (f().freeslave == PRESS) {
+        parent->cargo_hold.Free();
         f().freeslave = RELEASE;
     }
     if (f().ejectcargo == PRESS || f().ejectnonmissioncargo == PRESS) {
@@ -2148,8 +2140,8 @@ void FireKeyboard::Execute() {
             offset -= 3;
         }
         for (; offset < static_cast<int>(parent->numCargo()); ++offset) {
-            Cargo *tmp = &parent->GetCargo(offset);
-            if (tmp->GetCategory().find("upgrades") == string::npos && (missiontoo || tmp->GetMissionFlag() == false)) {
+            Cargo tmp = parent->cargo_hold.GetCargo(offset);
+            if (missiontoo || !tmp.IsMissionFlag()) {
                 parent->EjectCargo(offset);
                 break;
             }
@@ -2178,7 +2170,7 @@ void FireKeyboard::Execute() {
             cp->EjectDock();
         }              //use specialized ejectdock in the future
     }
-    static bool actually_arrest = XMLSupport::parse_bool(vs_config->getVariable("AI", "arrest_energy_zero", "false"));
+    const bool actually_arrest = configuration().ai.arrest_energy_zero;
     if (actually_arrest && parent->reactor.Capacity() == 0) {
         Arrested(parent);
     }

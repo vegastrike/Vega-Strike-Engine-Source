@@ -1,9 +1,12 @@
 /*
  * navigation.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -43,6 +46,8 @@
 #include "src/universe.h"
 
 using namespace Orders;
+
+constexpr float M_PI_FLT = M_PI;
 
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
@@ -136,12 +141,12 @@ void MoveTo::SetDest(const QVector &target) {
 }
 
 bool MoveToParent::OptimizeSpeed(Unit *parent, float v, float &a, float max_speed) {
-    v += (a / parent->getMass()) * simulation_atom_var;
+    v += (a / parent->GetMass()) * simulation_atom_var;
     if ((!max_speed) || fabs(v) <= max_speed) {
         return true;
     }
     float deltaa =
-            parent->getMass() * (fabs(v) - max_speed) / simulation_atom_var;       //clamping should take care of it
+            parent->GetMass() * (fabs(v) - max_speed) / simulation_atom_var;       //clamping should take care of it
     a += (v > 0) ? -deltaa : deltaa;
     return false;
 }
@@ -198,7 +203,7 @@ bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation) {
             }
             return done;
         }
-        thrust = (-parent->getMass() / simulation_atom_var) * last_velocity;
+        thrust = (-parent->GetMass() / simulation_atom_var) * last_velocity;
     } else {
         float div = 1.0f;
         float vdiv = 1.0f;
@@ -222,7 +227,7 @@ bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation) {
         }
         //start with Forward/Reverse:
         float t =
-                CalculateDecelTime(heading.k, last_velocity.k, thrust.k, parent->drive.retro / div, parent->getMass());
+                CalculateDecelTime(heading.k, last_velocity.k, thrust.k, parent->drive.retro / div, parent->GetMass());
         if (t < THRESHOLD) {
             thrust.k =
                     (thrust.k > 0 ? -parent->drive.retro
@@ -237,14 +242,14 @@ bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation) {
                             / simulation_atom_var;
         }
         OptimizeSpeed(parent, last_velocity.k, thrust.k, max_velocity.k / vdiv);
-        t = CalculateBalancedDecelTime(heading.i, last_velocity.i, thrust.i, parent->getMass());
+        t = CalculateBalancedDecelTime(heading.i, last_velocity.i, thrust.i, parent->GetMass());
         if (t < THRESHOLD) {
             thrust.i = -thrust.i;
         } else if (t < simulation_atom_var) {
             thrust.i *= (t - (simulation_atom_var - t)) / simulation_atom_var;
         }
         OptimizeSpeed(parent, last_velocity.i, thrust.i, max_velocity.i / vdiv);
-        t = CalculateBalancedDecelTime(heading.j, last_velocity.j, thrust.j, parent->getMass());
+        t = CalculateBalancedDecelTime(heading.j, last_velocity.j, thrust.j, parent->GetMass());
         if (t < THRESHOLD) {
             thrust.j = -thrust.j;
         } else if (t < simulation_atom_var) {
@@ -345,18 +350,17 @@ void ChangeHeading::Execute() {
             ((local_heading.i > 0) != (last_velocity.i > 0) || (!local_heading.i)) && last_velocity.i != 0 ? 1 : 0;
     char yswitch =
             ((local_heading.j > 0) != (last_velocity.j > 0) || (!local_heading.j)) && last_velocity.j != 0 ? 1 : 0;
-    static bool AICheat = XMLSupport::parse_bool(vs_config->getVariable("AI", "turn_cheat", "true"));
+    const bool AICheat = configuration().ai.turn_cheat;
     bool cheater = false;
-    static float min_for_no_oversteer =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "min_angular_accel_cheat", "50"));
-    if (AICheat && ((parent->drive.yaw + parent->drive.pitch) * 180 / (PI * parent->getMass()) > min_for_no_oversteer)
+    const float min_for_no_oversteer = configuration().ai.min_angular_accel_cheat_flt;
+    if (AICheat && ((parent->drive.yaw + parent->drive.pitch) * 180 / (PI * parent->GetMass()) > min_for_no_oversteer)
             && !parent->isSubUnit()) {
         if (xswitch || yswitch) {
             Vector P, Q, R;
             parent->GetOrientation(P, Q, R);
             Vector desiredR = (final_heading - parent->Position()).Cast();
             desiredR.Normalize();
-            static float cheatpercent = XMLSupport::parse_float(vs_config->getVariable("AI", "ai_cheat_dot", ".99"));
+            const float cheatpercent = configuration().ai.ai_cheat_dot_flt;
             if (desiredR.Dot(R) > cheatpercent) {
                 P = Q.Cross(desiredR);
                 Q = desiredR.Cross(P);
@@ -432,7 +436,7 @@ FaceTargetITTS::FaceTargetITTS(bool fini, int accuracy) : ChangeHeading(QVector(
     subtype = STARGET;
     speed = float(.00001);
     useitts = true;
-    static bool alwaysuseitts = XMLSupport::parse_bool(vs_config->getVariable("AI", "always_use_itts", "false"));
+    const bool alwaysuseitts = configuration().ai.always_use_itts;
     if (!alwaysuseitts) {
         if (rand() >= g_game.difficulty * RAND_MAX) {
             useitts = false;
@@ -502,8 +506,7 @@ AutoLongHaul::AutoLongHaul(bool fini, int accuracy) : ChangeHeading(QVector(0, 0
 
 void AutoLongHaul::MakeLinearVelocityOrder() {
     eraseType(MOVEMENT);
-    static float combat_mode_mult =
-            XMLSupport::parse_float(vs_config->getVariable("auto_physics", "auto_docking_speed_boost", "20"));
+    const float combat_mode_mult = configuration().physics.auto_docking_speed_boost_flt;
 
     float speed =
             parent->computer.combat_mode ? parent->drive.speed
@@ -556,10 +559,7 @@ inline void CautiousWarpRampOn(Unit *un) {
 }
 
 bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
-    static float specInterdictionLimit =
-            XMLSupport::parse_float(vs_config->getVariable("physics",
-                    "min_spec_interdiction_for_jittery_autopilot",
-                    ".05"));
+    const float specInterdictionLimit = configuration().physics.min_spec_interdiction_for_jittery_autopilot_flt;
     if (target->isPlanet() == false
             && (target->graphicOptions.specInterdictionOnline == 0
                     || fabs(target->ship_functions.Value(Function::ftl_interdiction)) < specInterdictionLimit)) {
@@ -569,12 +569,8 @@ bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
         return true;
     }
     float maxspeed = parent->afterburner.speed;
-    static float accel_auto_limit =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "max_accel_for_smooth_autopilot", "10"));
-    static float speed_auto_limit =
-            XMLSupport::parse_float(vs_config->getVariable("physics",
-                    "max_over_combat_speed_for_smooth_autopilot",
-                    "2"));
+    const float accel_auto_limit = configuration().physics.max_accel_for_smooth_autopilot_flt;
+    const float speed_auto_limit = configuration().physics.max_over_combat_speed_for_smooth_autopilot_flt;
     if (minaccel < accel_auto_limit || parent->Velocity.MagnitudeSquared() > maxspeed * maxspeed * speed_auto_limit
             * speed_auto_limit) {
         return true;
@@ -583,8 +579,7 @@ bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
 }
 
 bool AutoLongHaul::InsideLandingPort(const Unit *obstacle) const {
-    static float landing_port_limit =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "auto_landing_port_unclamped_seconds", "120"));
+    const float landing_port_limit = configuration().physics.auto_landing_port_unclamped_seconds_flt;
     return UnitUtil::getSignificantDistance(parent,
             obstacle)
             < -landing_port_limit * parent->afterburner.speed;
@@ -598,19 +593,12 @@ void AutoLongHaul::Execute() {
         parent->autopilotactive = false;
         return;
     }
-    static bool compensate_for_interdiction =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "autopilot_compensate_for_interdiction", "false"));
-    static float enough_warp_for_cruise =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "enough_warp_for_cruise", "1000"));
-    static float go_perpendicular_speed =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "warp_perpendicular", "80"));
-    static float min_warp_orbit_radius =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "min_warp_orbit_radius", "100000000"));
-    static float warp_orbit_multiplier =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "warp_orbit_multiplier", "4"));
-    static float warp_behind_angle =
-            cos(3.1415926536 * XMLSupport::parse_float(vs_config->getVariable("physics", "warp_behind_angle", "150"))
-                    / 180.);
+    const bool compensate_for_interdiction = configuration().physics.auto_pilot_compensate_for_interdiction;
+    const float enough_warp_for_cruise = configuration().physics.enough_warp_for_cruise_flt;
+    const float go_perpendicular_speed = configuration().physics.warp_perpendicular_flt;
+    const float min_warp_orbit_radius = configuration().physics.min_warp_orbit_radius_flt;
+    const float warp_orbit_multiplier = configuration().physics.warp_orbit_multiplier_flt;
+    const float warp_behind_angle = cos(M_PI_FLT * configuration().physics.warp_behind_angle_flt / 180.0F);
     QVector myposition = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();     //get unit pos
     QVector destination = target->isSubUnit() ? target->Position() : target->LocalPosition();     //get destination
     QVector destinationdirection = (destination - myposition);       //find vector from us to destination
@@ -683,7 +671,7 @@ void AutoLongHaul::Execute() {
     if (!parent->ftl_drive.Enabled() && parent->graphicOptions.RampCounter == 0) {
         deactivatewarp = false;
     }
-    double mass = parent->getMass();
+    double mass = parent->GetMass();
     double minaccel =
             mymin(parent->drive.lateral,
                     mymin(parent->drive.vertical, mymin(parent->drive.forward, parent->drive.retro)));
@@ -696,16 +684,12 @@ void AutoLongHaul::Execute() {
         if (speed > .01) {
             cfacing = cfacing * (1. / speed);
         }
-        static float dotLimit =
-                cos(3.1415926536 * XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "autopilot_spec_lining_up_angle",
-                        "3")) / 180.);
+        const float dotLimit = cos(M_PI_FLT * configuration().physics.auto_pilot_spec_lining_up_angle_flt / 180.0F);
         if (cfacing.Dot(destinationdirection) < dotLimit) {          //if wanting to face target but overshooting.
             deactivatewarp = true;
         }              //turn off drive
     }
-    static float min_warpfield_to_enter_warp =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "min_warp_to_try", "1.5"));
+    const float min_warpfield_to_enter_warp = configuration().ai.min_warp_to_try_flt;
     if (parent->GetMaxWarpFieldStrength() < min_warpfield_to_enter_warp) {
         deactivatewarp = true;
     }
@@ -714,10 +698,8 @@ void AutoLongHaul::Execute() {
     double dis = UnitUtil::getSignificantDistance(parent, target);
     float time_to_destination = dis / maxspeed;
 
-    static bool
-            rampdown = XMLSupport::parse_bool(vs_config->getVariable("physics", "autopilot_ramp_warp_down", "true"));
-    static float
-            warprampdowntime = XMLSupport::parse_float(vs_config->getVariable("physics", "warprampdowntime", "0.5"));
+    const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
+    const float warprampdowntime = configuration().physics.warp_ramp_down_time_flt;
     float time_to_stop = simulation_atom_var;
     if (rampdown) {
         time_to_stop += warprampdowntime;
@@ -740,14 +722,9 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    static float distance_to_stop =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance", "6000"));
-    static float enemy_distance_to_stop =
-            XMLSupport::parse_float(vs_config->getVariable("physics",
-                    "auto_pilot_termination_distance_enemy",
-                    "24000"));
-    static bool
-            do_auto_finish = XMLSupport::parse_bool(vs_config->getVariable("physics", "autopilot_terminate", "true"));
+    const float distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt;
+    const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
+    const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
     bool stopnow = false;
     maxspeed = parent->afterburner.speed;
     if (maxspeed && parent->drive.retro) {
@@ -828,7 +805,7 @@ void FormUp::Execute() {
     Unit *targ = group.GetUnit();
     if (targ) {
         MoveTo::SetDest(Transform(targ->GetTransformation(), Pos));
-        static bool can_warp_to = XMLSupport::parse_bool(vs_config->getVariable("AI", "warp_to_wingmen", "true"));
+        const bool can_warp_to = configuration().ai.warp_to_wingmen;
         if (rand() % 64 == 0 && (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
             WarpToP(parent, targ, true);
         }
@@ -868,7 +845,7 @@ void FormUpToOwner::Execute() {
     Unit *targ = group.GetUnit();
     if (targ) {
         MoveTo::SetDest(Transform(targ->GetTransformation(), Pos));
-        static bool can_warp_to = XMLSupport::parse_bool(vs_config->getVariable("AI", "warp_to_wingmen", "true"));
+        const bool can_warp_to = configuration().ai.warp_to_wingmen;
         if (rand() % 64 == 0 && (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
             WarpToP(parent, targ, true);
         }

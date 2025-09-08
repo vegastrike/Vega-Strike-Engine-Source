@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * cockpit_xml.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -269,7 +275,7 @@ using namespace CockpitXML;
 
 string getRes(string inp) {
     string::size_type where = inp.rfind(".");
-    int x = configuration()->graphics.resolution_x;
+    int x = configuration().graphics.resolution_x;
     if (x < 700) {
         x = 640;
     } else if (x < 840) {
@@ -292,12 +298,9 @@ string getRes(string inp) {
 }
 
 void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
-    static bool cockpit_smooth =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "cockpit_smooth_texture", "false"));
-    static bool panel_smooth =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "panel_smooth_texture", "true"));
-    static bool crosshair_smooth =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "crosshair_smooth_texture", "true"));
+    const bool cockpit_smooth = configuration().graphics.cockpit_smooth_texture;
+    const bool panel_smooth = configuration().graphics.panel_smooth_texture;
+    const bool crosshair_smooth = configuration().graphics.crosshair_smooth_texture;
     AttributeList::const_iterator iter;
     Gauge::DIRECTION tmpdir = Gauge::GAUGE_UP;
     VSSprite **newsprite = NULL;

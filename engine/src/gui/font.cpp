@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, Mike Byron, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * font.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Mike Byron
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "src/vegastrike.h"
@@ -42,11 +48,7 @@ static const double GLUT_WIDTH_HACK = 0.6;
 static const char SPACE_CHAR = ' ';
 
 bool useStroke() {
-    static bool tmp =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font_computer",
-                    vs_config->getVariable("graphics",
-                            "high_quality_font",
-                            "false")));
+    const bool tmp = configuration().graphics.high_quality_font_computer;
     return !tmp;
 }
 
@@ -65,7 +67,7 @@ void Font::calcMetrics(void) {
     const double minimumStrokeWidth = 1.0;
 
     const double nonClippedStrokeWidth = size() * referenceStrokeWidth * strokeWeight()
-            * (configuration()->graphics.resolution_x / referenceStrokeWidthResolution);
+            * (configuration().graphics.resolution_x / referenceStrokeWidthResolution);
 
     m_strokeWidth = guiMax(minimumStrokeWidth, nonClippedStrokeWidth);
     m_needMetrics = false;
@@ -77,13 +79,13 @@ void Font::calcMetrics(void) {
     //resolution.  Otherwise the fonts are slightly stretched horizontally -- there
     //are more pixels horizontally than vertically per unit in the identity coord space.
     if (useStroke()) {
-        m_horizontalScaling = (m_verticalScaling * configuration()->graphics.resolution_y) / configuration()->graphics.resolution_x;
+        m_horizontalScaling = (m_verticalScaling * configuration().graphics.resolution_y) / configuration().graphics.resolution_x;
     } else {
         //Calculation above seems broken... this seems to work for most sizes with bitmap.
-        m_horizontalScaling = m_verticalScaling / (1.6 * configuration()->graphics.resolution_x / 1000);
+        m_horizontalScaling = m_verticalScaling / (1.6 * configuration().graphics.resolution_x / 1000);
     }
     //The size of a horizontal pixel in reference space.
-    const double horizPixelInRefSpace = REFERENCE_LINE_SPACING / (configuration()->graphics.resolution_x / 2) / size();
+    const double horizPixelInRefSpace = REFERENCE_LINE_SPACING / (configuration().graphics.resolution_x / 2) / size();
 
     //Recalculate the extra char width.
     m_extraCharWidth = horizPixelInRefSpace * m_strokeWidth;

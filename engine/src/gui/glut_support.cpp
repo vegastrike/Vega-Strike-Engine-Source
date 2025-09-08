@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 David Ranger, Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * glut_support.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: David Ranger
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <png.h>
@@ -85,7 +91,7 @@ float word_length(const char *str) {
 }
 
 void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
-    static float rescale_font = XMLSupport::parse_float(vs_config->getVariable("graphics", "gui_font_scale", ".75"));
+    const float rescale_font = configuration().graphics.gui_font_scale_flt;
     float font_size_float = rescale_font * 5. / 100;
 
     int cur;
@@ -97,7 +103,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 
     glDisable(GL_TEXTURE_2D);
     glLoadIdentity();
-    if (gl_options.smooth_lines) {
+    if (configuration().graphics.smooth_lines) {
         glEnable(GL_LINE_SMOOTH);
     }
     glLineWidth(wid);
@@ -121,7 +127,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
             } else {
                 width = 0;
                 glLoadIdentity();
-                if (gl_options.smooth_lines) {
+                if (configuration().graphics.smooth_lines) {
                     glEnable(GL_LINE_SMOOTH);
                 }
                 glLineWidth(wid);
@@ -136,7 +142,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
         }
     }
     glLoadIdentity();
-    if (gl_options.smooth_lines) {
+    if (configuration().graphics.smooth_lines) {
         glDisable(GL_LINE_SMOOTH);
     }
 }
@@ -159,7 +165,7 @@ void SetSoftwareMousePosition(int x, int y) {
  */
 void StartGUIFrame(GFXBOOL clr) {
     //glutSetCursor(GLUT_CURSOR_INHERIT);
-    //GFXViewPort (0,0,configuration()->graphics.resolution_x,configuration()->graphics.resolution_y);
+    //GFXViewPort (0,0,configuration().graphics.resolution_x,configuration().graphics.resolution_y);
     GFXHudMode(true);
     GFXColor4f(1, 1, 1, 1);
 
@@ -186,7 +192,7 @@ void DrawGlutMouse(int mousex, int mousey, VSSprite *spr) {
     float tempx = 0, tempy = 0;
     spr->GetPosition(tempx, tempy);
     spr->SetPosition(tempx + -1 + .5 * sizex + float(mousex)
-            / (.5 * configuration()->graphics.resolution_x), tempy + 1 + .5 * sizey - float(mousey) / (.5 * configuration()->graphics.resolution_y));
+            / (.5 * configuration().graphics.resolution_x), tempy + 1 + .5 * sizey - float(mousey) / (.5 * configuration().graphics.resolution_y));
     spr->Draw();
     GFXDisable(TEXTURE0);
     GFXEnable(TEXTURE0);

@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * gl_state.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Alan Shieh
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #define GL_STATE_CPP
 #include "gl_globals.h"
@@ -27,6 +33,8 @@
 #include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
 #include <stack>
+
+#include "configuration/configuration.h"
 
 #ifndef GL_CONSTANT_ALPHA
 #define GL_CONSTANT_ALPHA 0x8003
@@ -157,10 +165,10 @@ void /*GFXDRVAPI*/ GFXEnable(const STATE state) {
             glEnable(GL_CULL_FACE);
             break;
         case SMOOTH:
-            if (gl_options.smooth_lines) {
+            if (configuration().graphics.smooth_lines) {
                 glEnable(GL_LINE_SMOOTH);
             }
-            if (gl_options.smooth_points) {
+            if (configuration().graphics.smooth_points) {
                 glEnable(GL_POINT_SMOOTH);
             }
             break;

@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * force_feedback.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Alexander Rawass
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -199,12 +205,13 @@ void ForceFeedback::stopEffect( unsigned int eff_nr )
 
 void ForceFeedback::init()
 {
-    if (!game_options()->force_feedback) {
+    if (!configuration().joystick.force_feedback) {
         VS_LOG(info, "force feedback disabled in config file");
         return;
     }
-    char devname[200];
-    sprintf( devname, "/dev/input/event%d", game_options()->ff_device );
+    constexpr size_t BUFFER_SIZE = 200;
+    char devname[BUFFER_SIZE];
+    snprintf( devname, BUFFER_SIZE - 1, "/dev/input/event%d", configuration().joystick.ff_device );
 
     ff_fd = open( devname, O_RDWR );
     if (ff_fd == -1) {

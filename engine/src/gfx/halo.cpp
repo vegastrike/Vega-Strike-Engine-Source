@@ -1,10 +1,12 @@
-/**
+/*
  * halo.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -21,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -65,14 +67,12 @@ Halo::~Halo() {
 void Halo::Draw(const Transformation &quat, const Matrix &m, float alpha) {
     Vector p, q, r;
     QVector pos;
-    static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable("graphics", "HaloOffset", ".1"));
+    const double HaloOffset = configuration().graphics.halo_offset_dbl;
     pos = position.Transform(m);
     float wid = sizex;
     float hei = sizey;
-    static bool far_shine =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_star_glow_halo",
-                    "false")) || XMLSupport::parse_bool(
-                    vs_config->getVariable("graphics", "HaloFarDraw", "false"));
+    const bool far_shine =
+            configuration().graphics.draw_star_glow_halo || configuration().graphics.halo_far_draw;
     CalculateOrientation(pos, p, q, r, wid, hei, HaloOffset, far_shine, NULL);
     p = p * wid;
     r = -r;

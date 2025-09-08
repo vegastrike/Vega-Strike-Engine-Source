@@ -64,8 +64,7 @@ void Unit::RemoveFromSystem() {
                 VS_LOG(error, "NONFATAL NULL activeStarSystem detected...please fix");
                 activeStarSystem = _Universe->activeStarSystem();
             }
-            static bool collidemap_sanity_check =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "collidemap_sanity_check", "false"));
+            const bool collidemap_sanity_check = configuration().physics.collidemap_sanity_check;
             if (collidemap_sanity_check) {
                 if (0) {
                     CollideMap::iterator i;
@@ -75,11 +74,11 @@ void Unit::RemoveFromSystem() {
                     for (i = activeStarSystem->collide_map[locind]->begin();
                             i != activeStarSystem->collide_map[locind]->end(); ++i) {
                         if (i == this->location[locind]) {
-                            VS_LOG(info, (boost::format("hussah %1$b") % (*i == *this->location[locind])));
+                            VS_LOG(info, (boost::format("hussah %1%") % (*i == *this->location[locind])));
                             found = true;
                         }
                         if (**i < **j) {
-                            VS_LOG(warning, (boost::format("(%1$f %2$f %3$f) and (%4$f %5$f %6$f) %7$f < %8$f %9$b!!!")
+                            VS_LOG(warning, (boost::format("(%1$f %2$f %3$f) and (%4$f %5$f %6$f) %7$f < %8$f %9%!!!")
                                     % (**i).GetPosition().i
                                     % (**i).GetPosition().j
                                     % (**i).GetPosition().k
@@ -93,7 +92,7 @@ void Unit::RemoveFromSystem() {
                         }
                         j = i;
                     }
-                    VS_LOG(info, (boost::format("fin %1$p %2$b ") % (*(int *) &i) % found));
+                    VS_LOG(info, (boost::format("fin %1$p %2% ") % (*(int *) &i) % found));
                     activeStarSystem->collide_map[locind]->checkSet();
                     assert(0);
                 }
@@ -128,7 +127,7 @@ void Unit::UpdateCollideQueue(StarSystem *ss, CollideMap::iterator hint[NUM_COLL
 }
 
 void Unit::CollideAll() {
-    if (isSubUnit() || killed || configuration()->physics.no_unit_collisions) {
+    if (isSubUnit() || killed || configuration().physics.no_unit_collisions) {
         return;
     }
     for (unsigned int locind = 0; locind < NUM_COLLIDE_MAPS; ++locind) {
@@ -241,8 +240,7 @@ bool Unit::InsideCollideTree(Unit *smaller,
         }
     }
     un_iter i;
-    static float
-            rsizelim = XMLSupport::parse_float(vs_config->getVariable("physics", "smallest_subunit_to_collide", ".2"));
+    const float rsizelim = configuration().physics.smallest_subunit_to_collide_flt;
     Vega_UnitType bigtype = bigasteroid ? Vega_UnitType::asteroid : bigger->getUnitType();
     Vega_UnitType smalltype = smallasteroid ? Vega_UnitType::asteroid : smaller->getUnitType();
     if (bigger->SubUnits.empty() == false
@@ -305,8 +303,7 @@ bool Unit::Collide(Unit *target) {
     }
     Vega_UnitType targetisUnit = target->isUnit();
     Vega_UnitType thisisUnit = this->isUnit();
-    static float
-            NEBULA_SPACE_DRAG = XMLSupport::parse_float(vs_config->getVariable("physics", "nebula_space_drag", "0.01"));
+    const float NEBULA_SPACE_DRAG = configuration().physics.nebula_space_drag_flt;
     if (targetisUnit == Vega_UnitType::nebula) {
         //why? why not?
         this->Velocity *= (1 - NEBULA_SPACE_DRAG);
@@ -438,7 +435,7 @@ Unit *Unit::rayCollide(const QVector &start, const QVector &end, Vector &norm, f
     }
     QVector st(InvTransform(cumulative_transformation_matrix, start));
     QVector ed(InvTransform(cumulative_transformation_matrix, end));
-    static bool sphere_test = XMLSupport::parse_bool(vs_config->getVariable("physics", "sphere_collision", "true"));
+    const bool sphere_test = configuration().physics.sphere_collision;
     distance = querySphereNoRecurse(start, end);
     if (distance > 0.0f || (this->colTrees && this->colTrees->colTree(this, this->GetWarpVelocity()) && !sphere_test)) {
         Vector coord;

@@ -1,8 +1,12 @@
 /*
  * drive_upgrade.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef VEGA_STRIKE_ENGINE_COMPONENTS_DRIVE_UPGRADE_H
@@ -32,9 +36,9 @@ class Drive;
 /** A DriveUpgrade applies a modifier to Drive class.
  *  This is a unique use case from other components, as allowing a slow
  *  ship (e.g. cargo) to upgrade to a fighter engine would break both
- *  game balance and believability. 
+ *  game balance and believability.
  *  The game previously supported both additive and multiplicative upgrades.
- *  I've removed the additive one for simplicity's sake. 
+ *  I've removed the additive one for simplicity's sake.
  */
 class DriveUpgrade : public Component {
 public:
@@ -64,7 +68,7 @@ public:
 // Computer
     //Computers limitation of speed
     double speed;
-    
+
     //Computer's restrictions of YPR to limit space combat maneuvers
     double max_yaw_left;
     double max_yaw_right;
@@ -76,11 +80,11 @@ public:
     double fuel_consumption;
 
 // Constructors
-    DriveUpgrade(Drive *drive = nullptr);
+    explicit DriveUpgrade(Drive *drive = nullptr);
 
     // Component Methods
-    void Load(std::string unit_key) override;      
-    
+    void Load(std::string unit_key) override;
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;
@@ -90,6 +94,8 @@ public:
     bool CanUpgrade(const std::string upgrade_key) const override;
 
     bool Upgrade(const std::string upgrade_key) override;
+
+    ~DriveUpgrade() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_DRIVE_UPGRADE_H

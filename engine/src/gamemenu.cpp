@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * gamemenu.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -125,12 +131,12 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
 
     GroupControl *acctConnGroup = new GroupControl;
     acctConnGroup->setId("MultiPlayerAccountServer");
-    acctConnGroup->setHidden(!game_options()->use_account_server);
+    acctConnGroup->setHidden(!configuration().network.use_account_server);
     serverConnGroup->addChild(acctConnGroup);
 
     GroupControl *hostConnGroup = new GroupControl;
     hostConnGroup->setId("MultiPlayerHostPort");
-    hostConnGroup->setHidden(game_options()->use_account_server);
+    hostConnGroup->setHidden(configuration().network.use_account_server);
     serverConnGroup->addChild(hostConnGroup);
     StaticDisplay *mplayTitle = new StaticDisplay;
     mplayTitle->setRect(Rect(-.7, .6, 1, .1));
@@ -151,7 +157,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     serverInputText->setTextColor(GUI_OPAQUE_WHITE());
     serverInputText->setTextMargins(Size(.02, .01));
     serverInputText->setId("VegaserverHost");
-    serverInputText->setText(game_options()->server_ip);
+    serverInputText->setText(configuration().network.server_ip);
     hostConnGroup->addChild(serverInputText);
 
     mplayTitle = new StaticDisplay;
@@ -173,7 +179,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     portInputText->setTextColor(GUI_OPAQUE_WHITE());
     portInputText->setTextMargins(Size(.02, .01));
     portInputText->setId("VegaserverPort");
-    portInputText->setText(game_options()->server_port);
+    portInputText->setText(configuration().network.server_port);
     hostConnGroup->addChild(portInputText);
 
     mplayTitle = new StaticDisplay;
@@ -194,7 +200,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     acctserverInput->setTextColor(GUI_OPAQUE_WHITE());
     acctserverInput->setTextMargins(Size(.02, .01));
     acctserverInput->setId("AccountServer");
-    acctserverInput->setText(game_options()->account_server_url);
+    acctserverInput->setText(configuration().network.account_server_url);
     acctConnGroup->addChild(acctserverInput);
 
     mplayTitle = new StaticDisplay;
@@ -215,8 +221,8 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     usernameInput->setTextColor(GUI_OPAQUE_WHITE());
     usernameInput->setTextMargins(Size(.02, .01));
     usernameInput->setId("Username");
-    if (!game_options()->password.empty()) {
-        usernameInput->setText(game_options()->callsign);
+    if (!configuration().player.password.empty()) {
+        usernameInput->setText(configuration().player.callsign);
     }
     serverConnGroup->addChild(usernameInput);
 
@@ -248,7 +254,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     passwordInput->setTextColor(GUI_OPAQUE_WHITE());
     passwordInput->setTextMargins(Size(.02, .01));
     passwordInput->setId("Password");
-    passwordInput->setText(game_options()->password);
+    passwordInput->setText(configuration().player.password);
     serverConnGroup->addChild(passwordInput);
 
     NewButton *multiStart = new NewButton;

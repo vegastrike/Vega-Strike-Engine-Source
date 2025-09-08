@@ -10,12 +10,25 @@
       "name": "default",
       "hidden": true,
       "displayName": "Default Config",
-      "description": "Default build using Ninja generator",
-      "generator": "Ninja",
+      "description": "Default build",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "debug": {
         "output": true
       }
+    },
+    {
+      "name": "ninja",
+      "hidden": true,
+      "displayName": "Use Ninja generator",
+      "generator": "Ninja",
+      "inherits": "default"
+    },
+    {
+      "name": "unix-makefiles",
+      "hidden": true,
+      "displayName": "Use Unix Makefiles generator",
+      "generator": "Unix Makefiles",
+      "inherits": "default"
     },
     {
       "name": "debug",
@@ -98,13 +111,14 @@
       }
     },
     {
-      "name": "linux-pie-enabled-glvnd-debug",
+      "name": "linux-ninja-pie-enabled-glvnd-debug",
       "inherits": [
         "pie-enabled",
         "glvnd",
-        "debug"
+        "debug",
+        "ninja"
       ],
-      "displayName": "PIE Enabled, GLVND, Debug",
+      "displayName": "Linux, Ninja, PIE Enabled, GLVND, Debug",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -112,13 +126,14 @@
       }
     },
     {
-      "name": "linux-pie-enabled-glvnd-release",
+      "name": "linux-ninja-pie-enabled-glvnd-release",
       "inherits": [
         "pie-enabled",
         "glvnd",
-        "release"
+        "release",
+        "ninja"
       ],
-      "displayName": "PIE Enabled, GLVND, Release",
+      "displayName": "Linux, Ninja, PIE Enabled, GLVND, Release",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -126,13 +141,14 @@
       }
     },
     {
-      "name": "linux-pie-enabled-glvnd-RelWithDebInfo",
+      "name": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
       "inherits": [
         "pie-enabled",
         "glvnd",
-        "RelWithDebInfo"
+        "RelWithDebInfo",
+        "ninja"
       ],
-      "displayName": "PIE Enabled, GLVND, RelWithDebInfo",
+      "displayName": "Linux, Ninja, PIE Enabled, GLVND, RelWithDebInfo",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -140,13 +156,14 @@
       }
     },
     {
-      "name": "linux-pie-enabled-legacy-gl-debug",
+      "name": "linux-ninja-pie-enabled-legacy-gl-debug",
       "inherits": [
         "pie-enabled",
         "legacy-gl",
-        "debug"
+        "debug",
+        "ninja"
       ],
-      "displayName": "PIE Enabled, Legacy OpenGL, Debug",
+      "displayName": "Linux, Ninja, PIE Enabled, Legacy OpenGL, Debug",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -154,13 +171,14 @@
       }
     },
     {
-      "name": "linux-pie-enabled-legacy-gl-release",
+      "name": "linux-ninja-pie-enabled-legacy-gl-release",
       "inherits": [
         "pie-enabled",
         "legacy-gl",
-        "release"
+        "release",
+        "ninja"
       ],
-      "displayName": "PIE Enabled, Legacy OpenGL, Release",
+      "displayName": "Linux, Ninja, PIE Enabled, Legacy OpenGL, Release",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -168,13 +186,14 @@
       }
     },
     {
-      "name": "linux-pie-enabled-legacy-gl-RelWithDebInfo",
+      "name": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
       "inherits": [
         "pie-enabled",
         "legacy-gl",
-        "RelWithDebInfo"
+        "RelWithDebInfo",
+        "ninja"
       ],
-      "displayName": "PIE Enabled, Legacy OpenGL, RelWithDebInfo",
+      "displayName": "Linux, Ninja, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -182,13 +201,14 @@
       }
     },
     {
-      "name": "linux-pie-disabled-glvnd-debug",
+      "name": "linux-ninja-pie-disabled-glvnd-debug",
       "inherits": [
         "pie-disabled",
         "glvnd",
-        "debug"
+        "debug",
+        "ninja"
       ],
-      "displayName": "PIE Disabled, GLVND, Debug",
+      "displayName": "Linux, Ninja, PIE Disabled, GLVND, Debug",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -196,13 +216,14 @@
       }
     },
     {
-      "name": "linux-pie-disabled-glvnd-release",
+      "name": "linux-ninja-pie-disabled-glvnd-release",
       "inherits": [
         "pie-disabled",
         "glvnd",
-        "release"
+        "release",
+        "ninja"
       ],
-      "displayName": "PIE Disabled, GLVND, Release",
+      "displayName": "Linux, Ninja, PIE Disabled, GLVND, Release",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -210,13 +231,14 @@
       }
     },
     {
-      "name": "linux-pie-disabled-glvnd-RelWithDebInfo",
+      "name": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
       "inherits": [
         "pie-disabled",
         "glvnd",
-        "RelWithDebInfo"
+        "RelWithDebInfo",
+        "ninja"
       ],
-      "displayName": "PIE Disabled, GLVND, RelWithDebInfo",
+      "displayName": "Linux, Ninja, PIE Disabled, GLVND, RelWithDebInfo",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -224,13 +246,14 @@
       }
     },
     {
-      "name": "linux-pie-disabled-legacy-gl-debug",
+      "name": "linux-ninja-pie-disabled-legacy-gl-debug",
       "inherits": [
         "pie-disabled",
         "legacy-gl",
-        "debug"
+        "debug",
+        "ninja"
       ],
-      "displayName": "PIE Disabled, Legacy OpenGL, Debug",
+      "displayName": "Linux, Ninja, PIE Disabled, Legacy OpenGL, Debug",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -238,13 +261,14 @@
       }
     },
     {
-      "name": "linux-pie-disabled-legacy-gl-release",
+      "name": "linux-ninja-pie-disabled-legacy-gl-release",
       "inherits": [
         "pie-disabled",
         "legacy-gl",
-        "release"
+        "release",
+        "ninja"
       ],
-      "displayName": "PIE Disabled, Legacy OpenGL, Release",
+      "displayName": "Linux, Ninja, PIE Disabled, Legacy OpenGL, Release",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -252,13 +276,194 @@
       }
     },
     {
-      "name": "linux-pie-disabled-legacy-gl-RelWithDebInfo",
+      "name": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
       "inherits": [
         "pie-disabled",
         "legacy-gl",
-        "RelWithDebInfo"
+        "RelWithDebInfo",
+        "ninja"
       ],
-      "displayName": "PIE Disabled, Legacy OpenGL, RelWithDebInfo",
+      "displayName": "Linux, Ninja, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-glvnd-debug",
+      "inherits": [
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "unix-makefiles"
+      ],
+      "displayName": "UNIX Makefiles, PIE Enabled, GLVND, Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-glvnd-release",
+      "inherits": [
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "unix-makefiles"
+      ],
+      "displayName": "UNIX Makefiles, PIE Enabled, GLVND, Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo",
+      "inherits": [
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "unix-makefiles"
+      ],
+      "displayName": "UNIX Makefiles, PIE Enabled, GLVND, RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-legacy-gl-debug",
+      "inherits": [
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "unix-makefiles"
+      ],
+      "displayName": "UNIX Makefiles, PIE Enabled, Legacy OpenGL, Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-legacy-gl-release",
+      "inherits": [
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "unix-makefiles"
+      ],
+      "displayName": "UNIX Makefiles, PIE Enabled, Legacy OpenGL, Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo",
+      "inherits": [
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "unix-makefiles"
+      ],
+      "displayName": "UNIX Makefiles, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-glvnd-debug",
+      "inherits": [
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "unix-makefiles"
+      ],
+      "displayName": "UNIX Makefiles, PIE Disabled, GLVND, Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-glvnd-release",
+      "inherits": [
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "unix-makefiles"
+      ],
+      "displayName": "UNIX Makefiles, PIE Disabled, GLVND, Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo",
+      "inherits": [
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "unix-makefiles"
+      ],
+      "displayName": "UNIX Makefiles, PIE Disabled, GLVND, RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-legacy-gl-debug",
+      "inherits": [
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "unix-makefiles"
+      ],
+      "displayName": "UNIX Makefiles, PIE Disabled, Legacy OpenGL, Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-legacy-gl-release",
+      "inherits": [
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "unix-makefiles"
+      ],
+      "displayName": "UNIX Makefiles, PIE Disabled, Legacy OpenGL, Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo",
+      "inherits": [
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "unix-makefiles"
+      ],
+      "displayName": "UNIX Makefiles, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -489,8 +694,8 @@
       "displayName": "Windows Default",
       "description": "Default build for Windows",
       "environment": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows-win10",
-        "VCPKG_HOST_TRIPLET": "x64-windows-win10",
+        "VCPKG_TARGET_TRIPLET": "x64-win10",
+        "VCPKG_HOST_TRIPLET": "x64-win10",
         "X_VCPKG_APPLOCAL_DEPS_INSTALL": "ON"
       },
       "cacheVariables": {
@@ -498,8 +703,9 @@
           "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
           "type": "FILEPATH"
         },
-        "VCPKG_TARGET_TRIPLET": "x64-windows-win10",
-        "VCPKG_HOST_TRIPLET": "x64-windows-win10"
+        "VCPKG_TARGET_TRIPLET": "x64-win10",
+        "VCPKG_HOST_TRIPLET": "x64-win10",
+        "VCPKG_INSTALL_OPTIONS": "--x-buildtrees-root=C:\\Projects\\vbuild"
       },
       "debug": {
         "output": true,
@@ -804,9 +1010,9 @@
   ],
   "buildPresets": [
     {
-      "name": "build-linux-pie-enabled-glvnd-debug",
-      "configurePreset": "linux-pie-enabled-glvnd-debug",
-      "displayName": "Linux, PIE Enabled, GLVND, Debug",
+      "name": "build-linux-ninja-pie-enabled-glvnd-debug",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-debug",
+      "displayName": "Linux, Ninja,  PIE Enabled, GLVND, Debug",
       "configuration": "Debug",
       "condition": {
         "type": "equals",
@@ -815,9 +1021,9 @@
       }
     },
     {
-      "name": "build-linux-pie-enabled-glvnd-release",
-      "configurePreset": "linux-pie-enabled-glvnd-release",
-      "displayName": "Linux, PIE Enabled, GLVND, Release",
+      "name": "build-linux-ninja-pie-enabled-glvnd-release",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-release",
+      "displayName": "Linux, Ninja,  PIE Enabled, GLVND, Release",
       "configuration": "Release",
       "condition": {
         "type": "equals",
@@ -826,9 +1032,9 @@
       }
     },
     {
-      "name": "build-linux-pie-enabled-glvnd-RelWithDebInfo",
-      "configurePreset": "linux-pie-enabled-glvnd-RelWithDebInfo",
-      "displayName": "Linux, PIE Enabled, GLVND, RelWithDebInfo",
+      "name": "build-linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, Ninja,  PIE Enabled, GLVND, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
@@ -837,9 +1043,9 @@
       }
     },
     {
-      "name": "build-linux-pie-enabled-legacy-gl-debug",
-      "configurePreset": "linux-pie-enabled-legacy-gl-debug",
-      "displayName": "Linux, PIE Enabled, Legacy OpenGL, Debug",
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-debug",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-debug",
+      "displayName": "Linux, Ninja,  PIE Enabled, Legacy OpenGL, Debug",
       "configuration": "Debug",
       "condition": {
         "type": "equals",
@@ -848,9 +1054,9 @@
       }
     },
     {
-      "name": "build-linux-pie-enabled-legacy-gl-release",
-      "configurePreset": "linux-pie-enabled-legacy-gl-release",
-      "displayName": "Linux, PIE Enabled, Legacy OpenGL, Release",
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-release",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-release",
+      "displayName": "Linux, Ninja,  PIE Enabled, Legacy OpenGL, Release",
       "configuration": "Release",
       "condition": {
         "type": "equals",
@@ -859,9 +1065,9 @@
       }
     },
     {
-      "name": "build-linux-pie-enabled-legacy-gl-RelWithDebInfo",
-      "configurePreset": "linux-pie-enabled-legacy-gl-RelWithDebInfo",
-      "displayName": "Linux, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, Ninja,  PIE Enabled, Legacy OpenGL, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
@@ -870,9 +1076,9 @@
       }
     },
     {
-      "name": "build-linux-pie-disabled-glvnd-debug",
-      "configurePreset": "linux-pie-disabled-glvnd-debug",
-      "displayName": "Linux, PIE Disabled, GLVND, Debug",
+      "name": "build-linux-ninja-pie-disabled-glvnd-debug",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-debug",
+      "displayName": "Linux, Ninja,  PIE Disabled, GLVND, Debug",
       "configuration": "Debug",
       "condition": {
         "type": "equals",
@@ -881,9 +1087,9 @@
       }
     },
     {
-      "name": "build-linux-pie-disabled-glvnd-release",
-      "configurePreset": "linux-pie-disabled-glvnd-release",
-      "displayName": "Linux, PIE Disabled, GLVND, Release",
+      "name": "build-linux-ninja-pie-disabled-glvnd-release",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-release",
+      "displayName": "Linux, Ninja,  PIE Disabled, GLVND, Release",
       "configuration": "Release",
       "condition": {
         "type": "equals",
@@ -892,9 +1098,9 @@
       }
     },
     {
-      "name": "build-linux-pie-disabled-glvnd-RelWithDebInfo",
-      "configurePreset": "linux-pie-disabled-glvnd-RelWithDebInfo",
-      "displayName": "Linux, PIE Disabled, GLVND, RelWithDebInfo",
+      "name": "build-linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, Ninja,  PIE Disabled, GLVND, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
@@ -903,9 +1109,9 @@
       }
     },
     {
-      "name": "build-linux-pie-disabled-legacy-gl-debug",
-      "configurePreset": "linux-pie-disabled-legacy-gl-debug",
-      "displayName": "Linux, PIE Disabled, Legacy OpenGL, Debug",
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-debug",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-debug",
+      "displayName": "Linux, Ninja,  PIE Disabled, Legacy OpenGL, Debug",
       "configuration": "Debug",
       "condition": {
         "type": "equals",
@@ -914,9 +1120,9 @@
       }
     },
     {
-      "name": "build-linux-pie-disabled-legacy-gl-release",
-      "configurePreset": "linux-pie-disabled-legacy-gl-release",
-      "displayName": "Linux, PIE Disabled, Legacy OpenGL, Release",
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-release",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-release",
+      "displayName": "Linux, Ninja,  PIE Disabled, Legacy OpenGL, Release",
       "configuration": "Release",
       "condition": {
         "type": "equals",
@@ -925,9 +1131,141 @@
       }
     },
     {
-      "name": "build-linux-pie-disabled-legacy-gl-RelWithDebInfo",
-      "configurePreset": "linux-pie-disabled-legacy-gl-RelWithDebInfo",
-      "displayName": "Linux, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, Ninja,  PIE Disabled, Legacy OpenGL, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-glvnd-debug",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-debug",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, GLVND, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-glvnd-release",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-release",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, GLVND, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, GLVND, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-legacy-gl-debug",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-debug",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, Legacy OpenGL, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-legacy-gl-release",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-release",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, Legacy OpenGL, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-glvnd-debug",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-debug",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, GLVND, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-glvnd-release",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-release",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, GLVND, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, GLVND, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-legacy-gl-debug",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-debug",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, Legacy OpenGL, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-legacy-gl-release",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-release",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, Legacy OpenGL, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
@@ -1268,9 +1606,9 @@
   ],
   "testPresets": [
     {
-      "name": "test-linux-pie-enabled-glvnd-debug",
-      "configurePreset": "linux-pie-enabled-glvnd-debug",
-      "displayName": "Linux, PIE Enabled, GLVND, Debug",
+      "name": "test-linux-ninja-pie-enabled-glvnd-debug",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-debug",
+      "displayName": "Linux, Ninja, PIE Enabled, GLVND, Debug",
       "configuration": "Debug",
       "condition": {
         "type": "equals",
@@ -1279,9 +1617,9 @@
       }
     },
     {
-      "name": "test-linux-pie-enabled-glvnd-release",
-      "configurePreset": "linux-pie-enabled-glvnd-release",
-      "displayName": "Linux, PIE Enabled, GLVND, Release",
+      "name": "test-linux-ninja-pie-enabled-glvnd-release",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-release",
+      "displayName": "Linux, Ninja, PIE Enabled, GLVND, Release",
       "configuration": "Release",
       "condition": {
         "type": "equals",
@@ -1290,9 +1628,9 @@
       }
     },
     {
-      "name": "test-linux-pie-enabled-glvnd-RelWithDebInfo",
-      "configurePreset": "linux-pie-enabled-glvnd-RelWithDebInfo",
-      "displayName": "Linux, PIE Enabled, GLVND, RelWithDebInfo",
+      "name": "test-linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, Ninja, PIE Enabled, GLVND, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
@@ -1301,9 +1639,9 @@
       }
     },
     {
-      "name": "test-linux-pie-enabled-legacy-gl-debug",
-      "configurePreset": "linux-pie-enabled-legacy-gl-debug",
-      "displayName": "Linux, PIE Enabled, Legacy OpenGL, Debug",
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-debug",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-debug",
+      "displayName": "Linux, Ninja, PIE Enabled, Legacy OpenGL, Debug",
       "configuration": "Debug",
       "condition": {
         "type": "equals",
@@ -1312,9 +1650,9 @@
       }
     },
     {
-      "name": "test-linux-pie-enabled-legacy-gl-release",
-      "configurePreset": "linux-pie-enabled-legacy-gl-release",
-      "displayName": "Linux, PIE Enabled, Legacy OpenGL, Release",
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-release",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-release",
+      "displayName": "Linux, Ninja, PIE Enabled, Legacy OpenGL, Release",
       "configuration": "Release",
       "condition": {
         "type": "equals",
@@ -1323,9 +1661,9 @@
       }
     },
     {
-      "name": "test-linux-pie-enabled-legacy-gl-RelWithDebInfo",
-      "configurePreset": "linux-pie-enabled-legacy-gl-RelWithDebInfo",
-      "displayName": "Linux, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, Ninja, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
@@ -1334,9 +1672,9 @@
       }
     },
     {
-      "name": "test-linux-pie-disabled-glvnd-debug",
-      "configurePreset": "linux-pie-disabled-glvnd-debug",
-      "displayName": "Linux, PIE Disabled, GLVND, Debug",
+      "name": "test-linux-ninja-pie-disabled-glvnd-debug",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-debug",
+      "displayName": "Linux, Ninja, PIE Disabled, GLVND, Debug",
       "configuration": "Debug",
       "condition": {
         "type": "equals",
@@ -1345,9 +1683,9 @@
       }
     },
     {
-      "name": "test-linux-pie-disabled-glvnd-release",
-      "configurePreset": "linux-pie-disabled-glvnd-release",
-      "displayName": "Linux, PIE Disabled, GLVND, Release",
+      "name": "test-linux-ninja-pie-disabled-glvnd-release",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-release",
+      "displayName": "Linux, Ninja, PIE Disabled, GLVND, Release",
       "configuration": "Release",
       "condition": {
         "type": "equals",
@@ -1356,9 +1694,9 @@
       }
     },
     {
-      "name": "test-linux-pie-disabled-glvnd-RelWithDebInfo",
-      "configurePreset": "linux-pie-disabled-glvnd-RelWithDebInfo",
-      "displayName": "Linux, PIE Disabled, GLVND, RelWithDebInfo",
+      "name": "test-linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, Ninja, PIE Disabled, GLVND, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
@@ -1367,9 +1705,9 @@
       }
     },
     {
-      "name": "test-linux-pie-disabled-legacy-gl-debug",
-      "configurePreset": "linux-pie-disabled-legacy-gl-debug",
-      "displayName": "Linux, PIE Disabled, Legacy OpenGL, Debug",
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-debug",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-debug",
+      "displayName": "Linux, Ninja, PIE Disabled, Legacy OpenGL, Debug",
       "configuration": "Debug",
       "condition": {
         "type": "equals",
@@ -1378,9 +1716,9 @@
       }
     },
     {
-      "name": "test-linux-pie-disabled-legacy-gl-release",
-      "configurePreset": "linux-pie-disabled-legacy-gl-release",
-      "displayName": "Linux, PIE Disabled, Legacy OpenGL, Release",
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-release",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-release",
+      "displayName": "Linux, Ninja, PIE Disabled, Legacy OpenGL, Release",
       "configuration": "Release",
       "condition": {
         "type": "equals",
@@ -1389,9 +1727,141 @@
       }
     },
     {
-      "name": "test-linux-pie-disabled-legacy-gl-RelWithDebInfo",
-      "configurePreset": "linux-pie-disabled-legacy-gl-RelWithDebInfo",
-      "displayName": "Linux, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, Ninja, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-glvnd-debug",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-debug",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, GLVND, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-glvnd-release",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-release",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, GLVND, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, GLVND, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-legacy-gl-debug",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-debug",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, Legacy OpenGL, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-legacy-gl-release",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-release",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, Legacy OpenGL, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-glvnd-debug",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-debug",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, GLVND, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-glvnd-release",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-release",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, GLVND, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, GLVND, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-legacy-gl-debug",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-debug",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, Legacy OpenGL, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-legacy-gl-release",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-release",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, Legacy OpenGL, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
@@ -1732,10 +2202,12 @@
   ],
   "packagePresets": [
     {
-      "name": "package-linux-pie-enabled-glvnd-debug",
-      "configurePreset": "linux-pie-enabled-glvnd-debug",
-      "displayName": "Linux, PIE Enabled, GLVND, Debug",
-      "configurations": [ "Debug" ],
+      "name": "package-linux-ninja-pie-enabled-glvnd-debug",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-debug",
+      "displayName": "Linux, Ninja, PIE Enabled, GLVND, Debug",
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1743,10 +2215,12 @@
       }
     },
     {
-      "name": "package-linux-pie-enabled-glvnd-release",
-      "configurePreset": "linux-pie-enabled-glvnd-release",
-      "displayName": "Linux, PIE Enabled, GLVND, Release",
-      "configurations": [ "Release" ],
+      "name": "package-linux-ninja-pie-enabled-glvnd-release",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-release",
+      "displayName": "Linux, Ninja, PIE Enabled, GLVND, Release",
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1754,10 +2228,12 @@
       }
     },
     {
-      "name": "package-linux-pie-enabled-glvnd-RelWithDebInfo",
-      "configurePreset": "linux-pie-enabled-glvnd-RelWithDebInfo",
-      "displayName": "Linux, PIE Enabled, GLVND, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "name": "package-linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, Ninja, PIE Enabled, GLVND, RelWithDebInfo",
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1765,10 +2241,12 @@
       }
     },
     {
-      "name": "package-linux-pie-enabled-legacy-gl-debug",
-      "configurePreset": "linux-pie-enabled-legacy-gl-debug",
-      "displayName": "Linux, PIE Enabled, Legacy OpenGL, Debug",
-      "configurations": [ "Debug" ],
+      "name": "package-linux-ninja-pie-enabled-legacy-gl-debug",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-debug",
+      "displayName": "Linux, Ninja, PIE Enabled, Legacy OpenGL, Debug",
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1776,10 +2254,12 @@
       }
     },
     {
-      "name": "package-linux-pie-enabled-legacy-gl-release",
-      "configurePreset": "linux-pie-enabled-legacy-gl-release",
-      "displayName": "Linux, PIE Enabled, Legacy OpenGL, Release",
-      "configurations": [ "Release" ],
+      "name": "package-linux-ninja-pie-enabled-legacy-gl-release",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-release",
+      "displayName": "Linux, Ninja, PIE Enabled, Legacy OpenGL, Release",
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1787,10 +2267,12 @@
       }
     },
     {
-      "name": "package-linux-pie-enabled-legacy-gl-RelWithDebInfo",
-      "configurePreset": "linux-pie-enabled-legacy-gl-RelWithDebInfo",
-      "displayName": "Linux, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "name": "package-linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, Ninja, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1798,10 +2280,12 @@
       }
     },
     {
-      "name": "package-linux-pie-disabled-glvnd-debug",
-      "configurePreset": "linux-pie-disabled-glvnd-debug",
-      "displayName": "Linux, PIE Disabled, GLVND, Debug",
-      "configurations": [ "Debug" ],
+      "name": "package-linux-ninja-pie-disabled-glvnd-debug",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-debug",
+      "displayName": "Linux, Ninja, PIE Disabled, GLVND, Debug",
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1809,10 +2293,12 @@
       }
     },
     {
-      "name": "package-linux-pie-disabled-glvnd-release",
-      "configurePreset": "linux-pie-disabled-glvnd-release",
-      "displayName": "Linux, PIE Disabled, GLVND, Release",
-      "configurations": [ "Release" ],
+      "name": "package-linux-ninja-pie-disabled-glvnd-release",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-release",
+      "displayName": "Linux, Ninja, PIE Disabled, GLVND, Release",
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1820,10 +2306,12 @@
       }
     },
     {
-      "name": "package-linux-pie-disabled-glvnd-RelWithDebInfo",
-      "configurePreset": "linux-pie-disabled-glvnd-RelWithDebInfo",
-      "displayName": "Linux, PIE Disabled, GLVND, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "name": "package-linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, Ninja, PIE Disabled, GLVND, RelWithDebInfo",
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1831,10 +2319,12 @@
       }
     },
     {
-      "name": "package-linux-pie-disabled-legacy-gl-debug",
-      "configurePreset": "linux-pie-disabled-legacy-gl-debug",
-      "displayName": "Linux, PIE Disabled, Legacy OpenGL, Debug",
-      "configurations": [ "Debug" ],
+      "name": "package-linux-ninja-pie-disabled-legacy-gl-debug",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-debug",
+      "displayName": "Linux, Ninja, PIE Disabled, Legacy OpenGL, Debug",
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1842,10 +2332,12 @@
       }
     },
     {
-      "name": "package-linux-pie-disabled-legacy-gl-release",
-      "configurePreset": "linux-pie-disabled-legacy-gl-release",
-      "displayName": "Linux, PIE Disabled, Legacy OpenGL, Release",
-      "configurations": [ "Release" ],
+      "name": "package-linux-ninja-pie-disabled-legacy-gl-release",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-release",
+      "displayName": "Linux, Ninja, PIE Disabled, Legacy OpenGL, Release",
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1853,10 +2345,168 @@
       }
     },
     {
-      "name": "package-linux-pie-disabled-legacy-gl-RelWithDebInfo",
-      "configurePreset": "linux-pie-disabled-legacy-gl-RelWithDebInfo",
-      "displayName": "Linux, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "name": "package-linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, Ninja, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
+      "configurations": [
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-unix-makefiles-pie-enabled-glvnd-debug",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-debug",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, GLVND, Debug",
+      "configurations": [
+        "Debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-unix-makefiles-pie-enabled-glvnd-release",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-release",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, GLVND, Release",
+      "configurations": [
+        "Release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, GLVND, RelWithDebInfo",
+      "configurations": [
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-unix-makefiles-pie-enabled-legacy-gl-debug",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-debug",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, Legacy OpenGL, Debug",
+      "configurations": [
+        "Debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-unix-makefiles-pie-enabled-legacy-gl-release",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-release",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, Legacy OpenGL, Release",
+      "configurations": [
+        "Release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, UNIX Makefiles, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
+      "configurations": [
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-unix-makefiles-pie-disabled-glvnd-debug",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-debug",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, GLVND, Debug",
+      "configurations": [
+        "Debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-unix-makefiles-pie-disabled-glvnd-release",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-release",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, GLVND, Release",
+      "configurations": [
+        "Release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, GLVND, RelWithDebInfo",
+      "configurations": [
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-unix-makefiles-pie-disabled-legacy-gl-debug",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-debug",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, Legacy OpenGL, Debug",
+      "configurations": [
+        "Debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-unix-makefiles-pie-disabled-legacy-gl-release",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-release",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, Legacy OpenGL, Release",
+      "configurations": [
+        "Release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, UNIX Makefiles, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1867,7 +2517,9 @@
       "name": "package-macos-pie-enabled-debug",
       "configurePreset": "macos-pie-enabled-debug",
       "displayName": "macOS, PIE Enabled, Debug",
-      "configurations": [ "Debug" ],
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1878,7 +2530,9 @@
       "name": "package-macos-pie-enabled-release",
       "configurePreset": "macos-pie-enabled-release",
       "displayName": "macOS, PIE Enabled, Release",
-      "configurations": [ "Release" ],
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1889,7 +2543,9 @@
       "name": "package-macos-pie-enabled-RelWithDebInfo",
       "configurePreset": "macos-pie-enabled-RelWithDebInfo",
       "displayName": "macOS, PIE Enabled, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1900,7 +2556,9 @@
       "name": "package-macos-pie-disabled-debug",
       "configurePreset": "macos-pie-disabled-debug",
       "displayName": "macOS, PIE Disabled, Debug",
-      "configurations": [ "Debug" ],
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1911,7 +2569,9 @@
       "name": "package-macos-pie-disabled-release",
       "configurePreset": "macos-pie-disabled-release",
       "displayName": "macOS, PIE Disabled, Release",
-      "configurations": [ "Release" ],
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1922,7 +2582,9 @@
       "name": "package-macos-pie-disabled-RelWithDebInfo",
       "configurePreset": "macos-pie-disabled-RelWithDebInfo",
       "displayName": "macOS, PIE Disabled, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1933,7 +2595,9 @@
       "name": "package-macOS-MacPorts-pie-enabled-debug",
       "configurePreset": "macOS-MacPorts-pie-enabled-debug",
       "displayName": "macOS (MacPorts), PIE Enabled, Debug",
-      "configurations": [ "Debug" ],
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1944,7 +2608,9 @@
       "name": "package-macOS-MacPorts-pie-enabled-release",
       "configurePreset": "macOS-MacPorts-pie-enabled-release",
       "displayName": "macOS (MacPorts), PIE Enabled, Release",
-      "configurations": [ "Release" ],
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1955,7 +2621,9 @@
       "name": "package-macOS-MacPorts-pie-enabled-RelWithDebInfo",
       "configurePreset": "macOS-MacPorts-pie-enabled-RelWithDebInfo",
       "displayName": "macOS (MacPorts), PIE Enabled, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1966,7 +2634,9 @@
       "name": "package-macOS-MacPorts-pie-disabled-debug",
       "configurePreset": "macOS-MacPorts-pie-disabled-debug",
       "displayName": "macOS (MacPorts), PIE Disabled, Debug",
-      "configurations": [ "Debug" ],
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1977,7 +2647,9 @@
       "name": "package-macOS-MacPorts-pie-disabled-release",
       "configurePreset": "macOS-MacPorts-pie-disabled-release",
       "displayName": "macOS (MacPorts), PIE Disabled, Release",
-      "configurations": [ "Release" ],
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1988,7 +2660,9 @@
       "name": "package-macOS-MacPorts-pie-disabled-RelWithDebInfo",
       "configurePreset": "macOS-MacPorts-pie-disabled-RelWithDebInfo",
       "displayName": "macOS (MacPorts), PIE Disabled, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1999,7 +2673,9 @@
       "name": "package-windows-ninja-pie-enabled-debug",
       "configurePreset": "windows-ninja-pie-enabled-debug",
       "displayName": "Windows, Ninja, PIE Enabled, Debug",
-      "configurations": [ "Debug" ],
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2010,7 +2686,9 @@
       "name": "package-windows-ninja-pie-enabled-release",
       "configurePreset": "windows-ninja-pie-enabled-release",
       "displayName": "Windows, Ninja, PIE Enabled, Release",
-      "configurations": [ "Release" ],
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2021,7 +2699,9 @@
       "name": "package-windows-ninja-pie-enabled-RelWithDebInfo",
       "configurePreset": "windows-ninja-pie-enabled-RelWithDebInfo",
       "displayName": "Windows, Ninja, PIE Enabled, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2032,7 +2712,9 @@
       "name": "package-windows-ninja-pie-disabled-debug",
       "configurePreset": "windows-ninja-pie-disabled-debug",
       "displayName": "Windows, Ninja, PIE Disabled, Debug",
-      "configurations": [ "Debug" ],
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2043,7 +2725,9 @@
       "name": "package-windows-ninja-pie-disabled-release",
       "configurePreset": "windows-ninja-pie-disabled-release",
       "displayName": "Windows, Ninja, PIE Disabled, Release",
-      "configurations": [ "Release" ],
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2054,7 +2738,9 @@
       "name": "package-windows-ninja-pie-disabled-RelWithDebInfo",
       "configurePreset": "windows-ninja-pie-disabled-RelWithDebInfo",
       "displayName": "Windows, Ninja, PIE Disabled, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2065,7 +2751,9 @@
       "name": "package-VS2019Win64-pie-enabled-debug",
       "configurePreset": "VS2019Win64-pie-enabled-debug",
       "displayName": "VS2019Win64, PIE Enabled, Debug",
-      "configurations": [ "Debug" ],
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2076,7 +2764,9 @@
       "name": "package-VS2019Win64-pie-enabled-release",
       "configurePreset": "VS2019Win64-pie-enabled-release",
       "displayName": "VS2019Win64, PIE Enabled, Release",
-      "configurations": [ "Release" ],
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2087,7 +2777,9 @@
       "name": "package-VS2019Win64-pie-enabled-RelWithDebInfo",
       "configurePreset": "VS2019Win64-pie-enabled-RelWithDebInfo",
       "displayName": "VS2019Win64, PIE Enabled, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2098,7 +2790,9 @@
       "name": "package-VS2019Win64-pie-disabled-debug",
       "configurePreset": "VS2019Win64-pie-disabled-debug",
       "displayName": "VS2019Win64, PIE Disabled, Debug",
-      "configurations": [ "Debug" ],
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2109,7 +2803,9 @@
       "name": "package-VS2019Win64-pie-disabled-release",
       "configurePreset": "VS2019Win64-pie-disabled-release",
       "displayName": "VS2019Win64, PIE Disabled, Release",
-      "configurations": [ "Release" ],
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2120,7 +2816,9 @@
       "name": "package-VS2019Win64-pie-disabled-RelWithDebInfo",
       "configurePreset": "VS2019Win64-pie-disabled-RelWithDebInfo",
       "displayName": "VS2019Win64, PIE Disabled, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2131,7 +2829,9 @@
       "name": "package-VS2022Win64-pie-enabled-debug",
       "configurePreset": "VS2022Win64-pie-enabled-debug",
       "displayName": "VS2022Win64, PIE Enabled, Debug",
-      "configurations": [ "Debug" ],
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2142,7 +2842,9 @@
       "name": "package-VS2022Win64-pie-enabled-release",
       "configurePreset": "VS2022Win64-pie-enabled-release",
       "displayName": "VS2022Win64, PIE Enabled, Release",
-      "configurations": [ "Release" ],
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2153,7 +2855,9 @@
       "name": "package-VS2022Win64-pie-enabled-RelWithDebInfo",
       "configurePreset": "VS2022Win64-pie-enabled-RelWithDebInfo",
       "displayName": "VS2022Win64, PIE Enabled, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2164,7 +2868,9 @@
       "name": "package-VS2022Win64-pie-disabled-debug",
       "configurePreset": "VS2022Win64-pie-disabled-debug",
       "displayName": "VS2022Win64, PIE Disabled, Debug",
-      "configurations": [ "Debug" ],
+      "configurations": [
+        "Debug"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2175,7 +2881,9 @@
       "name": "package-VS2022Win64-pie-disabled-release",
       "configurePreset": "VS2022Win64-pie-disabled-release",
       "displayName": "VS2022Win64, PIE Disabled, Release",
-      "configurations": [ "Release" ],
+      "configurations": [
+        "Release"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -2186,7 +2894,9 @@
       "name": "package-VS2022Win64-pie-disabled-RelWithDebInfo",
       "configurePreset": "VS2022Win64-pie-disabled-RelWithDebInfo",
       "displayName": "VS2022Win64, PIE Disabled, RelWithDebInfo",
-      "configurations": [ "RelWithDebInfo" ],
+      "configurations": [
+        "RelWithDebInfo"
+      ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",

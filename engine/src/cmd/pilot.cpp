@@ -1,9 +1,12 @@
 /*
  * pilot.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -36,8 +39,8 @@
 #include <vector>
 
 Pilot::Pilot(int faction) {
-    static float reaction = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "ReactionTime", ".2"));
-    static float ran = XMLSupport::parse_float(vs_config->getVariable("AI", "DefaultRank", ".01"));
+    const float reaction = configuration().ai.firing.reaction_time_flt;
+    const float ran = configuration().ai.default_rank_flt;
     this->rank = ran;
 
     this->reaction_time = reaction;
@@ -58,24 +61,22 @@ float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float fac
         float rel = UnitUtil::getRelationToFaction(parent, faction);         /* What the bloody hell? */
         bool abovezero = (*i).second + rel < 0;
         if (!abovezero) {
-            static float
-                    slowrel = XMLSupport::parse_float(vs_config->getVariable("AI", "SlowDiplomacyForEnemies", ".25"));
+            const float slowrel = configuration().ai.slow_diplomacy_for_enemies_flt;
             factor *= slowrel;
         }
         (*i).second += factor;
-        if (rel + factor < 0 && parent->Target() == NULL && parent->aistate) {
+        if (rel + factor < 0 && parent->Target() == nullptr && parent->aistate) {
             parent->aistate->ChooseTarget();
         }
     } else {
-        static float lessrel = XMLSupport::parse_float(vs_config->getVariable("AI", "UnknownRelationEnemy", "-.05"));
+        const float lessrel = configuration().ai.unknown_relation_enemy_flt;
         bool abovezero = (*i).second < lessrel;
         if (!abovezero) {
-            static float
-                    slowrel = XMLSupport::parse_float(vs_config->getVariable("AI", "SlowDiplomacyForEnemies", ".25"));
+            const float slowrel = configuration().ai.slow_diplomacy_for_enemies_flt;
             factor *= slowrel;
         }
         (*i).second += factor;
-        if ((*i).second < lessrel && parent->Target() == NULL && parent->aistate) {
+        if ((*i).second < lessrel && parent->Target() == nullptr && parent->aistate) {
             parent->aistate->ChooseTarget();
         }
     }
@@ -83,7 +84,7 @@ float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float fac
 }
 
 void Pilot::DoHit(Unit *parent, void *aggressor, int faction) {
-    static float hitcost = XMLSupport::parse_float(vs_config->getVariable("AI", "UnknownRelationHitCost", ".01"));
+    const float hitcost = configuration().ai.unknown_relation_hit_cost_flt;
     if (hitcost) {
         adjustSpecificRelationship(parent, aggressor, hitcost, faction);
         int whichCp = _Universe->whichPlayerStarship(parent);
@@ -115,24 +116,22 @@ float Pilot::getAnger(const Unit *parent, const Unit *target) const {
     if (iter != effective_relationship.end()) {
         rel = iter->second;
     }
-    if (_Universe->isPlayerStarship(target)) {
+    if (target->IsPlayerShip()) {
         if (FactionUtil::GetFactionName(faction).find("pirates") != std::string::npos) {
             static unsigned int cachedCargoNum = 0;
-            static bool good = true;
-            if (cachedCargoNum != target->numCargo()) {
-                cachedCargoNum = target->numCargo();
-                good = true;
-                for (unsigned int i = 0; i < cachedCargoNum; ++i) {
-                    Cargo *c = const_cast<Cargo *>(&target->cargo[i]);
-                    if (c->GetQuantity() != 0 && c->GetCategory().find("upgrades") == string::npos) {
-                        good = false;
-                        break;
-                    }
+            static bool empty_cargo_hold = true;
+            if (cachedCargoNum != target->cargo_hold.Size()) {
+                cachedCargoNum = target->cargo_hold.Size();
+
+                // Check if pirates 
+                if(cachedCargoNum == 0) {
+                    empty_cargo_hold = true;
+                } else {
+                    empty_cargo_hold = false;
                 }
             }
-            if (good) {
-                static float goodness_for_nocargo =
-                        XMLSupport::parse_float(vs_config->getVariable("AI", "pirate_bonus_for_empty_hold", ".75"));
+            if (empty_cargo_hold) {
+                const float goodness_for_nocargo = configuration().ai.pirate_bonus_for_empty_hold_flt;
                 rel += goodness_for_nocargo;
             }
         }

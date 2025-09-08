@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, Alan Shieh, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * gl_misc.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Alan Shieh
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -47,12 +53,12 @@ bool GFXMultiTexAvailable() {
 
 void GFXCircle(float x, float y, float wid, float hei) {
     float segmag =
-            (Vector(wid * configuration()->graphics.resolution_x, 0,
+            (Vector(wid * configuration().graphics.resolution_x, 0,
                     0)
-                    - Vector(static_cast<double>(wid) * configuration()->graphics.resolution_x * cos(2.0 * M_PI / 360.0),
-                            static_cast<double>(hei) * configuration()->graphics.resolution_y * sin(2.0 * M_PI / 360.0),
+                    - Vector(static_cast<double>(wid) * configuration().graphics.resolution_x * cos(2.0 * M_PI / 360.0),
+                            static_cast<double>(hei) * configuration().graphics.resolution_y * sin(2.0 * M_PI / 360.0),
                             0)).Magnitude();
-    int accuracy = (int) (360.0f * game_options()->circle_accuracy * (1.0f < segmag ? 1.0 : segmag));
+    int accuracy = (int) (360.0f * configuration().graphics.circle_accuracy_flt * (1.0f < segmag ? 1.0f : segmag));
     if (accuracy < 4) {
         accuracy = 4;
     }
@@ -355,7 +361,7 @@ void GFXDeleteList(int list) {
 void GFXSubwindow(int x, int y, int xsize, int ysize) {
     glViewport(x, y, xsize, ysize);
     glScissor(x, y, xsize, ysize);
-    if (x == 0 && y == 0 && xsize == configuration()->graphics.resolution_x && ysize == configuration()->graphics.resolution_y) {
+    if (x == 0 && y == 0 && xsize == configuration().graphics.resolution_x && ysize == configuration().graphics.resolution_y) {
         glDisable(GL_SCISSOR_TEST);
     } else {
         glEnable(GL_SCISSOR_TEST);
@@ -363,15 +369,15 @@ void GFXSubwindow(int x, int y, int xsize, int ysize) {
 }
 
 void GFXSubwindow(float x, float y, float xsize, float ysize) {
-    GFXSubwindow(int(x * configuration()->graphics.resolution_x), int(y * configuration()->graphics.resolution_y), int(xsize * configuration()->graphics.resolution_x),
-            int(ysize * configuration()->graphics.resolution_y));
+    GFXSubwindow(int(x * configuration().graphics.resolution_x), int(y * configuration().graphics.resolution_y), int(xsize * configuration().graphics.resolution_x),
+            int(ysize * configuration().graphics.resolution_y));
 }
 
 Vector GFXDeviceToEye(int x, int y) {
     float l, r, b, t, n, f;
     GFXGetFrustumVars(true, &l, &r, &b, &t, &n, &f);
-    return Vector((l + (r - l) * float(x) / configuration()->graphics.resolution_x),
-            (t + (b - t) * float(y) / configuration()->graphics.resolution_y),
+    return Vector((l + (r - l) * float(x) / configuration().graphics.resolution_x),
+            (t + (b - t) * float(y) / configuration().graphics.resolution_y),
             n);
 }
 

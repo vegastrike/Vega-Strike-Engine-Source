@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, Roy Falk, pyramid3d,
- * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
+ * unit_physics.h
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_PHYSICS_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_PHYSICS_H
@@ -106,24 +112,23 @@ void GameUnit::Thrust(const Vector &amt1, bool afterburn) {
     }
     Unit::Thrust(amt1, afterburn);
 
-    static bool must_afterburn_to_buzz =
-            XMLSupport::parse_bool(vs_config->getVariable("audio", "buzzing_needs_afterburner", "false"));
-    if (_Universe->isPlayerStarship(this) != NULL) {
-        static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
-                "player_afterburner",
-                "sfx10.wav"), true);
-        static float enginegain = XMLSupport::parse_float(vs_config->getVariable("audio", "afterburner_gain", ".5"));
-        if (afterburn != AUDIsPlaying(playerengine)) {
+    const bool must_afterburn_to_buzz = configuration().audio.buzzing_needs_afterburner;
+    if (isPlayerStarship()) {
+        static boost::optional<int> player_engine{};
+        if (player_engine == boost::none) {
+            player_engine = AUDCreateSound(configuration().audio.unit_audio.player_afterburner, true);
+        }
+        const float engine_gain = configuration().audio.engine_gain;
+        if (afterburn != AUDIsPlaying(player_engine)) {
             if (afterburn) {
-                AUDPlay(playerengine, QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
+                AUDPlay(player_engine, QVector(0, 0, 0), Vector(0, 0, 0), engine_gain);
             } else {
-                AUDStopPlaying(playerengine);
+                AUDStopPlaying(player_engine);
             }
         }
     } else if (afterburn || !must_afterburn_to_buzz) {
-        static float buzzingtime = XMLSupport::parse_float(vs_config->getVariable("audio", "buzzing_time", "5"));
-        static float
-                buzzingdistance = XMLSupport::parse_float(vs_config->getVariable("audio", "buzzing_distance", "5"));
+        const float buzzingtime = configuration().audio.buzzing_time_flt;
+        const float buzzingdistance = configuration().audio.buzzing_distance_flt;
         static float lastbuzz = getNewTime();
         Unit *playa = _Universe->AccessCockpit()->GetParent();
         if (playa) {

@@ -1,8 +1,12 @@
 /*
  * bolt.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2021-2025 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -35,7 +39,6 @@
 #include "src/gfxlib_struct.h"
 #include "gfx/aux_texture.h"
 #include "gfx/animation.h"
-#include "src/audiolib.h"
 #include "src/config_xml.h"
 #include "gfx/camera.h"
 #include "root_generic/options.h"
@@ -55,11 +58,11 @@ inline void BlendTrans(Matrix &drawmat, const QVector &cur_position, const QVect
 
 // Bolts have texture
 int Bolt::AddTexture(BoltDrawManager *q, std::string file) {
-    int decal = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
-    if (decal >= (int) q->bolts.size()) {
+    size_t decal = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
+    if (decal >= q->bolts.size()) {
         q->bolts.push_back(vector<Bolt>());
-        int blargh = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
-        if (blargh >= (int) q->bolts.size()) {
+        size_t blargh = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
+        if (blargh >= q->bolts.size()) {
             q->bolts.push_back(vector<Bolt>());
         }
     }
@@ -105,7 +108,7 @@ void Bolt::DrawAllBolts() {
     GFXTextureCoordGenMode(0, NO_GEN, nullptr, nullptr);
 
     BLENDFUNC bsrc, bdst;
-    if (configuration()->graphics.blend_guns) {
+    if (configuration().graphics.blend_guns) {
         GFXBlendMode(bsrc = ONE, bdst = ONE);
     } else {
         GFXBlendMode(bsrc = ONE, bdst = ZERO);
@@ -179,11 +182,12 @@ void Bolt::DrawBolt(GFXVertexList *qmesh) {
 
     BlendTrans(drawmat, cur_position, prev_position);
     Matrix drawmat(this->drawmat);
-    if (game_options()->StretchBolts > 0) {
+    if (configuration().graphics.stretch_bolts_flt > 0) {
         ScaleMatrix(drawmat,
-                Vector(1,
-                        1,
-                        type->speed * BoltDrawManager::elapsed_time * game_options()->StretchBolts / type->length));
+                    Vector(1,
+                           1,
+                           static_cast<double>(type->speed) * BoltDrawManager::elapsed_time * configuration().graphics.
+                           stretch_bolts_dbl / type->length));
     }
     GFXLoadMatrixModel(drawmat);
     GFXColor4f(wt->r, wt->g, wt->b, wt->a);
@@ -387,14 +391,12 @@ bool Bolt::Collide(Unit *target) {
         }
         enum Vega_UnitType type = target->getUnitType();
         if (type == Vega_UnitType::nebula || type == Vega_UnitType::asteroid) {
-            static bool collideroids =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "AsteroidWeaponCollision", "false"));
+            const bool collideroids = configuration().physics.asteroid_weapon_collision;
             if (type != Vega_UnitType::asteroid || (!collideroids)) {
                 return false;
             }
         }
-        static bool
-                collidejump = XMLSupport::parse_bool(vs_config->getVariable("physics", "JumpWeaponCollision", "false"));
+        const bool collidejump = configuration().physics.jump_weapon_collision;
         if (type == Vega_UnitType::planet && (!collidejump) && !target->GetDestinations().empty()) {
             return false;
         }

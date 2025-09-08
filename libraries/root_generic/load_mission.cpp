@@ -273,7 +273,7 @@ void LoadMission(const char *nission_name, const std::string &script, bool loadF
         friendly_mission_name++;
     }
     if (mission_name.empty()) {
-        mission_name = configuration()->general.empty_mission;
+        mission_name = configuration().general.empty_mission;
     }
     VS_LOG(info, (boost::format("%1%") % script));
     VSFile f;

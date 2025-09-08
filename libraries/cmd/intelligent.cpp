@@ -269,12 +269,12 @@ void Intelligent::SetTurretAI() {
     Unit *unit = static_cast<Unit *>(this);
 
     unit->turretstatus = 2;
-    static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI", "independent_turrets", "false"));
+    const bool talkinturrets = configuration().ai.independent_turrets;
     if (talkinturrets) {
         Unit *un;
         for (un_iter iter = unit->getSubUnits(); (un = *iter); ++iter) {
             if (!CheckAccessory(un)) {
-                un->EnqueueAIFirst(new Orders::FireAt(configuration()->ai.firing.aggressivity));
+                un->EnqueueAIFirst(new Orders::FireAt(configuration().ai.firing.aggressivity_flt));
                 un->EnqueueAIFirst(new Orders::FaceTarget(false, 3));
             }
             un->SetTurretAI();

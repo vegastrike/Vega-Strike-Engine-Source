@@ -308,9 +308,8 @@ CityLights::CityLights(float radius,
     setConvex(true);
     wrapx = zzwrapx;
     wrapy = zzwrapy;
-    FILTER filter =
-            (FILTER) XMLSupport::parse_int(vs_config->getVariable("graphics", "CityLightFilter",
-                    XMLSupport::tostring(((int) TRILINEAR))));
+    static FILTER filter =
+            static_cast<FILTER>(configuration().graphics.city_light_filter);
     InitSphere(radius,
             stacks,
             slices,

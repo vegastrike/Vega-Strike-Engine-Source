@@ -1,4 +1,7 @@
 name: 'MacOS-Release'
+permissions:
+    contents: write
+    pull-requests: read
 
 on:
   release:
@@ -22,29 +25,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          # x86-64
-          - macos-13
-          # M1 processor
-          #- macos-14
-        python-version:
-          #- 3.12.8
-          - 3.13.3
-        compiler:
-          - AppleClang
-          #- clang
-          #- gcc
-        homebrew-gl:
-          - true
-          #- false
-        homebrew-al:
-          - true
-          #- false
-        ENABLE_PIE:
-          - 'ON'
-          #- 'OFF'
-        build-type:
-          - RelWithDebInfo
+        include:
+          - os: macOS-13
+            build-type: RelWithDebInfo
+            preset-name: macos-pie-enabled-RelWithDebInfo
+            python-version: 3.13.5
 
     steps:
       - name: Setup Python
@@ -54,11 +39,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
           update-environment: false
 
+      - name: Install dependencies using homebrew
+        run: brew install boost-python3 gtk+3 gtkglext sdl libvorbis
+
       - name: Install the latest version of Bash so we can rely on it
         run: brew install bash
 
       - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 2
           submodules: false
@@ -80,21 +68,17 @@ jobs:
         env:
           MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
-          FLAGS:      "-DCMAKE_BUILD_TYPE=${{ matrix.build-type }} -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ steps.vega-py-setup.outputs.python-path }}"
-          OPENALDIR:  "$(brew --prefix)/opt/openal-soft"
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
           PYTHONHOME: ""
           PYTHONPATH: ""
           IS_RELEASE: 1
-        run: |
-          cmake --preset macos-pie-enabled-RelWithDebInfo
-          cmake --build --preset build-macos-pie-enabled-RelWithDebInfo
+        run: script/cibuild --preset-name=${{ matrix.preset-name }}
 
       - name: Package it
-        working-directory: ${{github.workspace}}/build
-        run: cpack -V
+        working-directory: ${{github.workspace}}
+        run: cpack -V --preset-name="package-${{ matrix.preset-name }}"
 
       - name: Upload the artifacts
         uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8

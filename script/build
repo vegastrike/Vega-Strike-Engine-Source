@@ -2,12 +2,12 @@
 #====================================
 # @file   : build
 # @brief  : build VegaStrike
-# @usage  : ./script/build
-# @param  : none
+# @usage  : ./script/build --preset-name=VS2022Win64-pie-enabled-RelWithDebInfo
+# @param  : preset-name=, build-type=
 #====================================
 
 #============ DESCRIPTION ===========
-# This script is making a clean build of VegaStrike.
+# This script builds VegaStrike.
 # After this, it copies the relevant files to the 'bin' directory.
 # The steps for creating this script were taken from the projects wiki:
 # https://github.com/Taose/Vegastrike-taose/wiki/How-to-Build
@@ -36,12 +36,35 @@
 set -e
 
 echo "--------------------------"
-echo "--- build | 2025-01-10 ---"
+echo "--- build | 2025-06-27 ---"
 echo "--------------------------"
 
 #----------------------------------
 # validate parameters
 #----------------------------------
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --preset_name=*)
+      preset_name="${1#*=}"
+      ;;
+    --preset-name=*)
+      preset_name="${1#*=}"
+      ;;
+    --build_type=*)
+      build_type="${1#*=}"
+      ;;
+    --build-type=*)
+      build_type="${1#*=}"
+      ;;
+    *)
+      printf "***************************\n"
+      printf "* Error: Invalid argument.*\n"
+      printf "***************************\n"
+      exit 1
+  esac
+  shift
+done
 
 ROOT_DIR=$(pwd)
 echo "ROOT_DIR: ${ROOT_DIR}"
@@ -51,32 +74,25 @@ BIN_DIR="${ROOT_DIR}/bin"
 COMMAND=""
 
 # -p creates if the target doesn't exist, noop otherwise
-mkdir -pv "${BUILD_DIR}" && cd "${BUILD_DIR}"
+mkdir -pv "${BUILD_DIR}"
 
-# configure libraries and prepare for the Debug build having -Werror set,
-# thus gating VS commits on being warning-free at some point in the near
-# future -- see https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/50
-cmake $@ "${ROOT_DIR}"
-
-# for a clean build only
-# mut we can do it manually
-#make clean
+cmake --preset "$preset_name"
 
 MAX_THREADS_TO_BUILD_WITH=8
-NUM_THREADS_TO_BUILD_WITH=$(getconf _NPROCESSORS_ONLN)
-if [ ${NUM_THREADS_TO_BUILD_WITH} -gt ${MAX_THREADS_TO_BUILD_WITH} ]
+num_threads_to_build_with=$(getconf _NPROCESSORS_ONLN)
+if [ ${num_threads_to_build_with} -gt ${MAX_THREADS_TO_BUILD_WITH} ]
 then
-    NUM_THREADS_TO_BUILD_WITH=${MAX_THREADS_TO_BUILD_WITH}
+    num_threads_to_build_with=${MAX_THREADS_TO_BUILD_WITH}
 fi
 
-VERBOSE=1 cmake --build "${BUILD_DIR}" -j ${NUM_THREADS_TO_BUILD_WITH}
+VERBOSE=1 cmake --build --preset="build-${preset_name}" -j ${num_threads_to_build_with}
 
 cd "${ROOT_DIR}"
 
 mkdir -pv "${BIN_DIR}"
 
 declare -a files_to_copy_if_they_exist=("${BUILD_DIR}/vegastrike-engine" "${BUILD_DIR}/setup/vegasettings" "${BUILD_DIR}/objconv/vega-meshtool")
-declare -a directories_to_copy_if_they_exist=("${BUILD_DIR}/vegastrike-engine.app", "${BUILD_DIR}/setup/vegasettings.app")
+declare -a directories_to_copy_if_they_exist=("${BUILD_DIR}/vegastrike-engine.app" "${BUILD_DIR}/setup/vegasettings.app")
 
 for i in "${files_to_copy_if_they_exist[@]}"
 do

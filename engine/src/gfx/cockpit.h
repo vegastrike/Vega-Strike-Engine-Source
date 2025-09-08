@@ -1,12 +1,13 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-/**
+/*
  * cockpit.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022-2025 Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -158,7 +159,7 @@ class GameCockpit : public Cockpit {
 
     /// Used to display the arrow pointing to the currently selected target.
     float projection_limit_x, projection_limit_y;
-    float inv_screen_aspect_ratio; //Precomputed division 1 / configuration()->graphics.aspect.
+    float inv_screen_aspect_ratio; //Precomputed division 1 / configuration().graphics.aspect.
     void SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc) override;
     void LoadXML(const char *file) override;
     void LoadXML(VSFileSystem::VSFile &f) override;

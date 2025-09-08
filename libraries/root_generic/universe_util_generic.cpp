@@ -65,6 +65,8 @@
 #include "src/universe.h"
 #include "cmd/vega_py_run.h"
 #include "src/vs_exit.h"
+#include "cmd/unit_type.h"
+
 
 #include <boost/filesystem.hpp>
 #include <boost/chrono/time_point.hpp>
@@ -177,14 +179,8 @@ namespace UniverseUtil {
                           QVector pos,
                           string squadlogo,
                           string destinations) {
-        int clstype = Vega_UnitType::unit;
-        if (unittype_string == "planet") {
-            clstype = Vega_UnitType::planet;
-        } else if (unittype_string == "asteroid") {
-            clstype = Vega_UnitType::asteroid;
-        } else if (unittype_string == "nebula") {
-            clstype = Vega_UnitType::nebula;
-        }
+        Vega_UnitType clstype = DeserializeUnitType(unittype_string);
+
         CreateFlightgroup cf;
         cf.fg = Flightgroup::newFlightgroup(name_string,
                                             type_string,
@@ -634,7 +630,7 @@ namespace UniverseUtil {
     }
 
     void IOmessage(int delay, string from, string to, string message) {
-        if (to == "news" && (!game_options()->news_from_cargolist)) {
+        if (to == "news" && (!configuration().cargo.news_from_cargo_list)) {
             for (unsigned int i = 0; i < _Universe->numPlayers(); i++) {
                 pushSaveString(i, "news", string("#") + message);
             }
@@ -678,7 +674,7 @@ namespace UniverseUtil {
 
     QVector SafeStarSystemEntrancePoint(StarSystem *sts, QVector pos, float radial_size) {
         if (radial_size < 0) {
-            radial_size = game_options()->respawn_unit_size;
+            radial_size = configuration().physics.respawn_unit_size_flt;
         }
         for (unsigned int k = 0; k < 10; ++k) {
             Unit *un;
@@ -785,7 +781,7 @@ namespace UniverseUtil {
         securepythonstr(cmd);
         securepythonstr(args);
         securepythonstr(id);
-        string pythonCode = configuration()->general.custom_python + "(" + (trusted ? "True" : "False")
+        string pythonCode = configuration().general.custom_python + "(" + (trusted ? "True" : "False")
                             + ", r\'" + cmd + "\', r\'" + args + "\', r\'" + id + "\')\n";
         VS_LOG(info, "Executing python command: ");
         VS_LOG(info, (boost::format("    %1%") % pythonCode));
@@ -808,7 +804,7 @@ namespace UniverseUtil {
     }
 
     float getPlanetRadiusPercent() {
-        return configuration()->physics.auto_pilot_planet_radius_percent;
+        return configuration().physics.auto_pilot_planet_radius_percent_flt;
     }
 
     std::string getVariable(std::string section, std::string name, std::string def) {
@@ -895,12 +891,12 @@ namespace UniverseUtil {
         static bool campaign_score_vars_init = false;
         if (!campaign_score_vars_init) {
 
-            string::size_type where = 0, when = game_options()->campaigns.find(' ');
+            string::size_type where = 0, when = configuration().game_start.campaigns.find(' ');
             while (where != string::npos) {
-                campaign_score_vars.insert(game_options()->campaigns
+                campaign_score_vars.insert(configuration().game_start.campaigns
                                                    .substr(where, ((when == string::npos) ? when : when - where)));
                 where = (when == string::npos) ? when : when + 1;
-                when = game_options()->campaigns.find(' ', where);
+                when = configuration().game_start.campaigns.find(' ', where);
             }
             campaign_score_vars_init = true;
         }
@@ -912,21 +908,21 @@ namespace UniverseUtil {
         vector<std::string> Ships;
         std::string sillytemp = UniverseUtil::setCurrentSaveGame(filename);
         savegame.SetStarSystem("");
-        savegame.ParseSaveGame(filename,
-                               system,
-                               "",
-                               pos,
-                               updatepos,
-                               creds,
-                               Ships,
-                               _Universe->CurrentCockpit(),
-                               "",
-                               true,
-                               false,
-                               configuration()->general.quick_savegame_summaries,
-                               true,
-                               true,
-                               campaign_score_vars);
+        creds = savegame.ParseSaveGame(filename,
+                                    system,
+                                    "",
+                                    pos,
+                                    updatepos,
+                                    Ships,
+                                    _Universe->CurrentCockpit(),
+                                    "",
+                                    true,
+                                    false,
+                                    configuration().general.quick_savegame_summaries,
+                                    true,
+                                    true,
+                                    campaign_score_vars);
+
         UniverseUtil::setCurrentSaveGame(sillytemp);
         std::ostringstream ss{};
         ss << "Savegame: " << filename << lf;
@@ -974,7 +970,7 @@ namespace UniverseUtil {
                 }
             }
         }
-        if (!configuration()->general.quick_savegame_summaries) {
+        if (!configuration().general.quick_savegame_summaries) {
             bool hit = false;
             for (set<string>::const_iterator it = campaign_score_vars.begin(); it != campaign_score_vars.end(); ++it) {
                 string var = *it;

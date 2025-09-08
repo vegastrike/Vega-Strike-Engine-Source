@@ -1,9 +1,12 @@
 /*
  * flykeyboard.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -118,7 +121,7 @@ static vector<StarShipControlKeyboard> starshipcontrolkeys;
 
 static StarShipControlKeyboard &g() {
     while (starshipcontrolkeys.size() <= (unsigned int) _Universe->CurrentCockpit()) {
-        starshipcontrolkeys.push_back(StarShipControlKeyboard());
+        starshipcontrolkeys.emplace_back();
     }
     return starshipcontrolkeys[_Universe->CurrentCockpit()];
 }
@@ -129,15 +132,15 @@ FlyByKeyboard::FlyByKeyboard(unsigned int whichplayer) : FlyByWire(), axis_key(0
     this->last_jumped = 0;
     this->whichplayer = whichplayer;
     while (starshipcontrolkeys.size() <= whichplayer) {
-        starshipcontrolkeys.push_back(StarShipControlKeyboard());
+        starshipcontrolkeys.emplace_back();
     }
-    autopilot = NULL;
+    autopilot = nullptr;
     inauto = false;
 
     //Initial Joystick Mode
     //NOTE: Perhaps it should be handled by FlyByJoystick, but it was cumbersome to do that
     //since it handled mainly keystrokes - Any ideas?
-    static string initialJoyMode = vs_config->getVariable("joystick", "initial_mode", "normal");
+    const string initialJoyMode = configuration().joystick.initial_mode;
     joy_mode = 0;
     if (initialJoyMode == "inertialxy") {
         joy_mode = joyModeInertialXY;
@@ -159,10 +162,8 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
         Unit *t = parent->Target();
         int neu = FactionUtil::GetNeutralFaction();
         int upg = FactionUtil::GetUpgradeFaction();
-        static bool allowanyreference =
-                XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowAnySpeedReference", "false"));
-        static bool onlyupgraderef =
-                XMLSupport::parse_bool(vs_config->getVariable("AI", "OnlyUpgradeSpeedReference", "false"));
+        const bool allowanyreference = configuration().ai.allow_any_speed_reference;
+        const bool onlyupgraderef = configuration().ai.only_upgrade_speed_reference;
         if (t) {
             if ((t->getRelation(parent) >= 0
                     && !onlyupgraderef) || t->faction == neu || t->faction == upg || allowanyreference) {
@@ -172,7 +173,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
     }
     if (SSCK.setnulvel) {
         SSCK.setnulvel = false;
-        parent->VelocityReference(NULL);
+        parent->VelocityReference(nullptr);
     }
     if (SSCK.switch_combat_mode) {
         SSCK.switch_combat_mode = false;
@@ -190,16 +191,15 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             }
         } else {
             // Use AutoDocker if docking clearance on target, otherwise use AutoPilot
-            static bool autodock =
-                    XMLSupport::parse_bool(vs_config->getVariable("test", "autodocker", "false"));
-            Order *autoNavigator = NULL;
+            const bool autodock = configuration().test.autodocker;
+            Order *autoNavigator = nullptr;
             if (autodock) {
                 Unit *station = parent->Target();
                 if (Orders::AutoDocking::CanDock(parent, station)) {
                     autoNavigator = new Orders::AutoDocking(station);
                 }
             }
-            if (autoNavigator == NULL) {
+            if (autoNavigator == nullptr) {
                 autoNavigator = new Orders::AutoLongHaul();
                 autoNavigator->SetParent(parent);
             }
@@ -223,8 +223,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
     if (resetangvelocity) {
         desired_ang_velocity = Vector(0, 0, 0);
     }
-    static bool initial_inertial_mode =
-            XMLSupport::parse_bool(vs_config->getVariable("flight", "inertial::initial", "false"));
+    const bool initial_inertial_mode = configuration().flight.inertial.initial;
     if (SSCK.dirty) {
         //go with what's last there: no frames since last physics frame
         if (SSCK.uppress <= 0 && SSCK.downpress <= 0) {
@@ -288,13 +287,13 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             KeyboardUp(0);
         } else {
             if (SSCK.uppress != 0 && SSCK.downpress == 0) {
-                KeyboardUp(((float) FBWABS(SSCK.uppress)) / (FBWABS(SSCK.uppress) + SSCK.uprelease));
+                KeyboardUp(static_cast<float>(FBWABS(SSCK.uppress)) / (FBWABS(SSCK.uppress) + SSCK.uprelease));
             } else {
                 if (SSCK.downpress != 0 && SSCK.uppress == 0) {
-                    KeyboardUp(-((float) FBWABS(SSCK.downpress)) / (FBWABS(SSCK.downpress) + SSCK.downrelease));
+                    KeyboardUp(-static_cast<float>(FBWABS(SSCK.downpress)) / (FBWABS(SSCK.downpress) + SSCK.downrelease));
                 } else {
-                    KeyboardUp(((float) FBWABS(SSCK.uppress)
-                            - (float) FBWABS(SSCK.downpress))
+                    KeyboardUp((static_cast<float>(FBWABS(SSCK.uppress))
+                            - static_cast<float>(FBWABS(SSCK.downpress)))
                             / (FBWABS(SSCK.downpress) + SSCK.downrelease + FBWABS(SSCK.uppress)
                                     + SSCK.uprelease));
                 }
@@ -304,13 +303,13 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             KeyboardRight(0);
         } else {
             if (SSCK.rightpress != 0 && SSCK.leftpress == 0) {
-                KeyboardRight(((float) FBWABS(SSCK.rightpress)) / (FBWABS(SSCK.rightpress) + SSCK.rightrelease));
+                KeyboardRight(static_cast<float>(FBWABS(SSCK.rightpress)) / (FBWABS(SSCK.rightpress) + SSCK.rightrelease));
             } else {
                 if (SSCK.leftpress != 0 && SSCK.rightpress == 0) {
-                    KeyboardRight(-((float) FBWABS(SSCK.leftpress)) / (FBWABS(SSCK.leftpress) + SSCK.leftrelease));
+                    KeyboardRight(-static_cast<float>(FBWABS(SSCK.leftpress)) / (FBWABS(SSCK.leftpress) + SSCK.leftrelease));
                 } else {
-                    KeyboardRight(((float) FBWABS(SSCK.rightpress)
-                            - (float) FBWABS(SSCK.leftpress))
+                    KeyboardRight((static_cast<float>(FBWABS(SSCK.rightpress))
+                            - static_cast<float>(FBWABS(SSCK.leftpress)))
                             / (FBWABS(SSCK.leftpress) + SSCK.leftrelease + FBWABS(SSCK.rightpress)
                                     + SSCK.rightrelease));
                 }
@@ -320,15 +319,15 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             KeyboardRollRight(0);
         } else {
             if (SSCK.rollrightpress != 0 && SSCK.rollleftpress == 0) {
-                KeyboardRollRight(((float) FBWABS(SSCK.rollrightpress))
+                KeyboardRollRight(static_cast<float>(FBWABS(SSCK.rollrightpress))
                         / (FBWABS(SSCK.rollrightpress) + SSCK.rollrightrelease));
             } else {
                 if (SSCK.rollleftpress != 0 && SSCK.rollrightpress == 0) {
-                    KeyboardRollRight(-((float) FBWABS(SSCK.rollleftpress))
+                    KeyboardRollRight(-static_cast<float>(FBWABS(SSCK.rollleftpress))
                             / (FBWABS(SSCK.rollleftpress) + SSCK.rollleftrelease));
                 } else {
-                    KeyboardRollRight(((float) FBWABS(SSCK.rollrightpress)
-                            - (float) FBWABS(SSCK.rollleftpress))
+                    KeyboardRollRight((static_cast<float>(FBWABS(SSCK.rollrightpress))
+                            - static_cast<float>(FBWABS(SSCK.rollleftpress)))
                             / (FBWABS(SSCK.rollleftpress) + SSCK.rollleftrelease
                                     + FBWABS(SSCK.rollrightpress)
                                     + SSCK.rollrightrelease));
@@ -336,10 +335,10 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             }
         }
         if (SSCK.accelpress != 0) {
-            Accel(((float) FBWABS(SSCK.accelpress)) / (FBWABS(SSCK.accelpress) + SSCK.accelrelease));
+            Accel(static_cast<float>(FBWABS(SSCK.accelpress)) / (FBWABS(SSCK.accelpress) + SSCK.accelrelease));
         }
         if (SSCK.decelpress != 0) {
-            Accel(-((float) FBWABS(SSCK.decelpress)) / (FBWABS(SSCK.decelpress) + SSCK.decelrelease));
+            Accel(-static_cast<float>(FBWABS(SSCK.decelpress)) / (FBWABS(SSCK.decelpress) + SSCK.decelrelease));
         }
         if (SSCK.ABpress || SSCK.ABrelease) {
             Afterburn((SSCK.ABpress >= 1) ? 1 : 0);
@@ -433,7 +432,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
     if (SSCK.autopilot || SSCK.terminateauto) {
         if (autopilot) {
             autopilot->Destroy();
-            autopilot = NULL;
+            autopilot = nullptr;
         }
         SSCK.autopilot = false;
         SSCK.terminateauto = false;
@@ -448,15 +447,14 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
     static unsigned int counter = 0;
     counter++;
     if (SSCK.jumpkey) {
-        static float
-                jump_key_delay = XMLSupport::parse_float(vs_config->getVariable("general", "jump_key_delay", ".125"));
+        const float jump_key_delay = configuration().general.jump_key_delay_flt;
         if ((counter - last_jumped) > static_cast<unsigned>(jump_key_delay / SIMULATION_ATOM) || last_jumped == 0) {
             last_jumped = counter;
             parent->ActivateJumpDrive();
             if (parent->jump_drive.IsDestinationSet()) {
                 static soundContainer foobar;
                 if (foobar.sound == -2) {
-                    static string str = vs_config->getVariable("cockpitaudio", "jump_engaged", "jump");
+                    static string str = configuration().cockpit_audio.jump_engaged;
                     foobar.loadsound(str);
                 }
                 foobar.playsound();
@@ -470,7 +468,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
 #undef SSCK
     if (queryType(FACING | MOVEMENT)) {
         Order::Execute();
-        if (queryType(FACING | MOVEMENT) == NULL) {
+        if (queryType(FACING | MOVEMENT) == nullptr) {
             FlyByKeyboard::inauto = false;
         }
         done = false;

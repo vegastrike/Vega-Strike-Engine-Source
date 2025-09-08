@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, Alexander Rawass, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * in_joystick.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Alexander Rawass
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -73,12 +79,11 @@ void modifyDeadZone(JoyStick *j) {
 }
 
 void modifyExponent(JoyStick *j) {
-    if ((game_options()->joystick_exponent != 1.0) && (game_options()->joystick_exponent > 0)) {
+    if ((configuration().joystick.joystick_exponent_flt != 1.0F) && (configuration().joystick.joystick_exponent_flt > 0.0F)) {
         for (int a = 0; a < j->nr_of_axes; a++) {
             j->joy_axis[a] =
-                    ((j->joy_axis[a] < 0) ? -std::pow(-j->joy_axis[a], game_options()->joystick_exponent) : std::pow(j->joy_axis[a],
-                            game_options()->
-                                    joystick_exponent));
+                    ((j->joy_axis[a] < 0) ? -std::pow(-j->joy_axis[a], configuration().joystick.joystick_exponent_flt) : std::pow(j->joy_axis[a],
+                            configuration().joystick.joystick_exponent_flt));
         }
     }
 }
@@ -147,7 +152,7 @@ JoyStick::JoyStick() {
 }
 
 int JoystickPollingRate() {
-    return game_options()->polling_rate;
+    return configuration().joystick.polling_rate;
 }
 
 void InitJoystick() {
@@ -176,7 +181,7 @@ void InitJoystick() {
     VS_LOG(info, "The names of the joysticks are:\n");
 #else
     //use glut
-    if (glutDeviceGet( GLUT_HAS_JOYSTICK ) || game_options()->force_use_of_joystick) {
+    if (glutDeviceGet( GLUT_HAS_JOYSTICK ) || configuration().joystick.force_use_of_joystick) {
         VS_LOG(info, "setting joystick functionality:: joystick online");
         glutJoystickFunc( myGlutJoystickCallback, JoystickPollingRate() );
         num_joysticks = 1;
@@ -214,11 +219,11 @@ JoyStick::JoyStick(int which) : mouse(which == MOUSE_JOYSTICK) {
     joy_buttons = 0;
 
     player = which;     //by default bind players to whichever joystick it is
-    debug_digital_hatswitch = game_options()->debug_digital_hatswitch;
+    debug_digital_hatswitch = configuration().joystick.debug_digital_hatswitch;
     if (which != MOUSE_JOYSTICK) {
-        deadzone = game_options()->deadband;
+        deadzone = configuration().joystick.deadband_flt;
     } else {
-        deadzone = game_options()->mouse_deadband;
+        deadzone = configuration().joystick.mouse_deadband_flt;
     };
     joy_available = 0;
     joy_x = joy_y = joy_z = 0;
@@ -299,15 +304,15 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     int _mx, _my;
     GetMouseXY(_mx, _my);
     GetMouseDelta(_dx, _dy);
-    if (!game_options()->warp_mouse) {
-        fdx = (float) (_dx = _mx - configuration()->graphics.resolution_x / 2.0f);
+    if (!configuration().joystick.warp_mouse) {
+        fdx = (float) (_dx = _mx - configuration().graphics.resolution_x / 2.0f);
         def_mouse_sens = 25;
-        fdy = (float) (_dy = _my - configuration()->graphics.resolution_y / 2.0f);
+        fdy = (float) (_dy = _my - configuration().graphics.resolution_y / 2.0f);
     } else {
         static std::list<mouseData> md;
         std::list<mouseData>::iterator i = md.begin();
         float ttime = getNewTime();
-        float lasttime = ttime - game_options()->mouse_blur;
+        float lasttime = ttime - configuration().joystick.mouse_blur_flt;
         int avg = (_dx || _dy) ? 1 : 0;
         float valx = _dx;
         float valy = _dy;
@@ -341,16 +346,16 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
             _dx = float_to_int(valx / avg);
             _dy = float_to_int(valy / avg);
         }
-        fdx = float(valx) / game_options()->mouse_blur;
-        fdy = float(valy) / game_options()->mouse_blur;
+        fdx = float(valx) / configuration().joystick.mouse_blur_flt;
+        fdy = float(valy) / configuration().joystick.mouse_blur_flt;
     }
-    joy_axis[0] = fdx / (configuration()->graphics.resolution_x * def_mouse_sens / game_options()->mouse_sensitivity);
-    joy_axis[1] = fdy / (configuration()->graphics.resolution_y * def_mouse_sens / game_options()->mouse_sensitivity);
-    if (!game_options()->warp_mouse) {
+    joy_axis[0] = fdx / (configuration().graphics.resolution_x * def_mouse_sens / configuration().joystick.mouse_sensitivity_flt);
+    joy_axis[1] = fdy / (configuration().graphics.resolution_y * def_mouse_sens / configuration().joystick.mouse_sensitivity_flt);
+    if (!configuration().joystick.warp_mouse) {
         modifyDeadZone(this);
     }
-    joy_axis[0] *= game_options()->mouse_exponent;
-    joy_axis[1] *= game_options()->mouse_exponent;
+    joy_axis[0] *= configuration().joystick.mouse_exponent_flt;
+    joy_axis[1] *= configuration().joystick.mouse_exponent_flt;
     x = joy_axis[0];
     y = joy_axis[1];
 

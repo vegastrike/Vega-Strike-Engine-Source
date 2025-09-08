@@ -1,8 +1,12 @@
 /*
  * gfxlib_struct.h
  *
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * Benjamen R. Meyer, and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef VEGA_STRIKE_ENGINE_GFXLIB_STRUCT_H
@@ -697,16 +701,16 @@ public:
     int target;
 ///last is w for positional, otherwise 3 for spec
     int options;
-    float vect[3];
-    float diffuse[4];
-    float specular[4];
-    float ambient[4];
-    float attenuate[3];
-    float direction[3];
+    float vect[3]{};
+    float diffuse[4]{};
+    float specular[4]{};
+    float ambient[4]{};
+    float attenuate[3]{};
+    float direction[3]{};
     float exp;
     float cutoff;
     float size;
-    float occlusion;
+    float occlusion{};
 
 public:
     GFXLight() {
@@ -768,6 +772,8 @@ public:
         occlusion = other.occlusion;
         options = other.options;
     };
+
+    virtual ~GFXLight() = default;
 
     void SetProperties(enum LIGHT_TARGET light_target, const GFXColor &color);
     void SetProperties(enum LIGHT_TARGET light_target, const Vector &vector);

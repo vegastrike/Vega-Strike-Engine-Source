@@ -1,9 +1,12 @@
 /*
  * flybywire.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -68,7 +71,7 @@ using Orders::MatchAngularVelocity;
 
 #define MATCHLINVELEXECUTE()                                                                         \
     do {                                                                                             \
-        parent->Thrust( (parent->getMass()                                                           \
+        parent->Thrust( (parent->GetMass()                                                           \
                          *(parent->ClampVelocity( desired,                                           \
                                                   afterburn )+FrameOfRef-velocity)/simulation_atom_var), \
                        afterburn );                                                                  \
@@ -169,9 +172,7 @@ MatchVelocity::~MatchVelocity() {
 }
 
 static bool getControlType() {
-    static bool control = XMLSupport::parse_bool(vs_config->getVariable("physics", "CarControl",
-            "false"
-    ));
+    const bool control = configuration().physics.car_control;
     return control;
 }
 
@@ -183,10 +184,8 @@ FlyByWire::FlyByWire() : MatchVelocity(Vector(0, 0, 0), Vector(0, 0, 0), true, f
     stolen_setspeed = false;
     stolen_setspeed_value = 0;
 
-    static bool static_inertial_flight_model =
-            XMLSupport::parse_bool(vs_config->getVariable("flight", "inertial::initial", "false"));
-    static bool static_inertial_flight_enable =
-            XMLSupport::parse_bool(vs_config->getVariable("flight", "inertial::enable", "true"));
+    const bool static_inertial_flight_model = configuration().flight.inertial.initial;
+    const bool static_inertial_flight_enable = configuration().flight.inertial.enable;
     inertial_flight_model = static_inertial_flight_model;
     inertial_flight_enable = static_inertial_flight_enable;
 }
@@ -266,8 +265,7 @@ void FlyByWire::Accel(float per) {
     if (cpu->set_speed > parent->MaxSpeed()) {
         cpu->set_speed = parent->MaxSpeed();
     }
-    static float reverse_speed_limit =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "reverse_speed_limit", "1.0"));
+    const float reverse_speed_limit = configuration().physics.reverse_speed_limit_flt;
     if (cpu->set_speed < -parent->MaxSpeed() * reverse_speed_limit) {
         cpu->set_speed = -parent->MaxSpeed() * reverse_speed_limit;
     }
@@ -353,8 +351,7 @@ void FlyByWire::Execute() {
         parent->computer.set_speed = stolen_setspeed_value;
         stolen_setspeed = false;
     }
-    static double collidepanic =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "collision_inertial_time", "1.25"));
+    const double collidepanic = configuration().physics.collision_inertial_time_dbl;
     Cockpit *tempcp = _Universe->isPlayerStarship(parent);
     if (((sheltonslide || inertial_flight_model
             || !controltype)

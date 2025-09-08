@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * guidefs.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Mike Byron
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "src/vegastrike.h"
@@ -26,8 +32,10 @@
 #include "src/config_xml.h"
 #include "guidefs.h"
 
+#include "configuration/configuration.h"
+
 GFXColor SaturatedColor(float r, float g, float b, float a) {
-    static float Saturation = XMLSupport::parse_float(vs_config->getVariable("graphics", "base_saturation", "1.0"));
+    const float Saturation = configuration().graphics.base_saturation_flt;
 
     return GFXColor((r * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3,
             (g * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3,

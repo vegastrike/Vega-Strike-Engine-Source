@@ -41,34 +41,36 @@
 #include "root_generic/configxml.h"
 
 
-#include <iostream>
 #include <string>
 #include "src/vega_cast_utils.h"
-#include <limits.h>
+#include <climits>
+#include <utility>
+
+#include "resource/random_utils.h"
 
 float accelStarHandler(float &input) {
-    return input / (configuration()->physics.game_speed * configuration()->physics.game_accel);
+    return input / (configuration().physics.game_speed_flt * configuration().physics.game_accel_flt);
 }
 
 float speedStarHandler(float &input) {
-    return input / configuration()->physics.game_speed;
+    return input / configuration().physics.game_speed_flt;
 }
 
-Movable::Movable() : cumulative_transformation_matrix(identity_matrix),
-        sim_atom_multiplier(1),
+Movable::Movable() : sim_atom_multiplier(1),
         predicted_priority(1),
         last_processed_sqs(0),
         docked(NOT_DOCKED),
+        cumulative_transformation_matrix(identity_matrix),
         corner_min(Vector(FLT_MAX, FLT_MAX, FLT_MAX)),
         corner_max(Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX)),
         radial_size(0),
         Momentofinertia(0.01) {
     cur_sim_queue_slot = rand() % SIM_QUEUE_SIZE;
-    const Vector default_angular_velocity(configuration()->general.pitch,
-            configuration()->general.yaw,
-            configuration()->general.roll);
-    cutsqr = configuration()->warp.warp_stretch_cutoff * configuration()->warp.warp_stretch_cutoff;
-    outcutsqr = configuration()->warp.warp_stretch_decel_cutoff * configuration()->warp.warp_stretch_decel_cutoff;
+    const Vector default_angular_velocity(configuration().general.pitch_flt,
+            configuration().general.yaw_flt,
+            configuration().general.roll_flt);
+    cutsqr = configuration().warp.warp_stretch_cutoff_flt * configuration().warp.warp_stretch_cutoff_flt;
+    outcutsqr = configuration().warp.warp_stretch_decel_cutoff_flt * configuration().warp.warp_stretch_decel_cutoff_flt;
 
     Identity(cumulative_transformation_matrix);
     cumulative_transformation = identity_transformation;
@@ -104,11 +106,12 @@ void Movable::GetOrientation(Vector &p, Vector &q, Vector &r) const {
 }
 
 Vector Movable::GetNetAcceleration() const {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     Vector p, q, r;
     GetOrientation(p, q, r);
     Vector res(NetLocalForce.i * p + NetLocalForce.j * q + NetLocalForce.k * r);
     res += NetForce;
-    return res / Mass;
+    return res / static_cast<float>(unit->GetMass());
 }
 
 Vector Movable::GetNetAngularAcceleration() const {
@@ -124,13 +127,13 @@ float Movable::GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn
 
     Vector p, q, r;
     GetOrientation(p, q, r);
-    Vector lref(ref * p, ref * q, ref * r);
-    float tp = (lref.i == 0) ? 0 : fabs(unit->drive.lateral.Value() / lref.i);
-    float tq = (lref.j == 0) ? 0 : fabs(unit->drive.vertical.Value() / lref.j);
-    float tr = (lref.k == 0) ? 0 : fabs(((lref.k > 0) ? unit->drive.forward.Value() : unit->drive.retro.Value()) / lref.k);
-    float trqmin = (tr < tq) ? tr : tq;
-    float tm = tp < trqmin ? tp : trqmin;
-    return lref.Magnitude() * tm / Mass;
+    const Vector lref(ref * p, ref * q, ref * r);
+    const double tp = (lref.i == 0) ? 0 : fabs(unit->drive.lateral.Value() / lref.i);
+    const double tq = (lref.j == 0) ? 0 : fabs(unit->drive.vertical.Value() / lref.j);
+    const double tr = (lref.k == 0) ? 0 : fabs(((lref.k > 0) ? unit->drive.forward.Value() : unit->drive.retro.Value()) / lref.k);
+    const double trqmin = (tr < tq) ? tr : tq;
+    const double tm = tp < trqmin ? tp : trqmin;
+    return lref.Magnitude() * tm / unit->GetMass();
 }
 
 void Movable::SetVelocity(const Vector &v) {
@@ -146,18 +149,18 @@ void Movable::SetResolveForces(bool ys) {
     resolveforces = ys;
 }
 
-void Movable::UpdatePhysics(const Transformation &trans,
-        const Matrix &transmat,
-        const Vector &cum_vel,
-        bool lastframe,
-        UnitCollection *uc,
-        Unit *superunit) {
+void Movable::UpdatePhysics(const Transformation& trans,
+                            const Matrix& transmat,
+                            const Vector& cum_vel,
+                            bool lastframe,
+                            UnitCollection* uc,
+                            Unit* superunit) {
     //Save information about when this happened
-    unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+    const unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
     //Well, wasn't skipped actually, but...
     this->last_processed_sqs = cur_sim_frame;
     this->cur_sim_queue_slot = (cur_sim_frame + this->sim_atom_multiplier) % SIM_QUEUE_SIZE;
-    Transformation old_physical_state = curr_physical_state;
+    const Transformation old_physical_state = curr_physical_state;
 
     UpdatePhysics3(trans, transmat, lastframe, uc, superunit);
 
@@ -165,7 +168,7 @@ void Movable::UpdatePhysics(const Transformation &trans,
         //clamp velocity
         // TODO: use resource class to do this more elegantly
         ResolveForces(trans, transmat);
-        float velocity_max = configuration()->physics.velocity_max;
+        float velocity_max = configuration().physics.velocity_max_flt;
         if (Velocity.i > velocity_max) {
             Velocity.i = velocity_max;
         } else if (Velocity.i < -velocity_max) {
@@ -185,28 +188,25 @@ void Movable::UpdatePhysics(const Transformation &trans,
 
     // The 1.0 difficulty is a hack based on the hack in GetVelocityDifficultyMult
     this->UpdatePhysics2(trans, old_physical_state, Vector(), 1.0, transmat, cum_vel, lastframe, uc);
-
 }
 
 void Movable::AddVelocity(float difficulty) {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     float lastWarpField = graphicOptions.WarpFieldStrength;
 
-    bool playa = isPlayerShip();
-
-    float warprampuptime = playa ? configuration()->warp.warp_ramp_up_time : configuration()->warp.computer_warp_ramp_up_time;
+    float warprampuptime = unit->IsPlayerShip() ? configuration().warp.warp_ramp_up_time_flt : configuration().warp.computer_warp_ramp_up_time_flt;
     //Warp Turning on/off
     if (graphicOptions.WarpRamping) {
         float oldrampcounter = graphicOptions.RampCounter;
         if (unit->ftl_drive.Enabled()) {             //Warp Turning on
             graphicOptions.RampCounter = warprampuptime;
         } else {                                        //Warp Turning off
-            graphicOptions.RampCounter = configuration()->warp.warp_ramp_down_time;
+            graphicOptions.RampCounter = configuration().warp.warp_ramp_down_time_flt;
         }
         //switched mid - ramp time; we also know old mode's ramptime != 0, or there won't be ramping
         if (oldrampcounter != 0 && graphicOptions.RampCounter != 0) {
             if (unit->ftl_drive.Enabled()) {             //Warp is turning on before it turned off
-                graphicOptions.RampCounter *= (1 - oldrampcounter / configuration()->warp.warp_ramp_down_time);
+                graphicOptions.RampCounter *= (1 - oldrampcounter / configuration().warp.warp_ramp_down_time_flt);
             } else {                                        //Warp is turning off before it turned on
                 graphicOptions.RampCounter *= (1 - oldrampcounter / warprampuptime);
             }
@@ -220,8 +220,8 @@ void Movable::AddVelocity(float difficulty) {
             if (graphicOptions.RampCounter <= 0) {
                 graphicOptions.RampCounter = 0;
             }
-            if (!unit->ftl_drive.Enabled() && graphicOptions.RampCounter > configuration()->warp.warp_ramp_down_time) {
-                graphicOptions.RampCounter = (1 - graphicOptions.RampCounter / warprampuptime) * configuration()->warp.warp_ramp_down_time;
+            if (!unit->ftl_drive.Enabled() && graphicOptions.RampCounter > configuration().warp.warp_ramp_down_time_flt) {
+                graphicOptions.RampCounter = (1 - graphicOptions.RampCounter / warprampuptime) * configuration().warp.warp_ramp_down_time_flt;
             }
             if (unit->ftl_drive.Enabled() && graphicOptions.RampCounter > warprampuptime) {
                 graphicOptions.RampCounter = warprampuptime;
@@ -231,13 +231,13 @@ void Movable::AddVelocity(float difficulty) {
                             / warprampuptime)
                             * (graphicOptions.RampCounter
                                     / warprampuptime)) : (graphicOptions.RampCounter
-                    / configuration()->warp.warp_ramp_down_time) * (graphicOptions.RampCounter / configuration()->warp.warp_ramp_down_time);
+                    / configuration().warp.warp_ramp_down_time_flt) * (graphicOptions.RampCounter / configuration().warp.warp_ramp_down_time_flt);
         }
         graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult);
     } else {
         graphicOptions.WarpFieldStrength = 1;
     }
-    //not any more? lastWarpField=1;
+    //not anymore? lastWarpField=1;
     Vector v;
     if (graphicOptions.WarpFieldStrength != 1.0) {
         v = unit->GetWarpVelocity();
@@ -246,10 +246,10 @@ void Movable::AddVelocity(float difficulty) {
     }
 
     graphicOptions.WarpFieldStrength =
-            lastWarpField * configuration()->warp.warp_memory_effect + (1.0 - configuration()->warp.warp_memory_effect) * graphicOptions.WarpFieldStrength;
+            lastWarpField * configuration().warp.warp_memory_effect_flt + (1.0 - configuration().warp.warp_memory_effect_flt) * graphicOptions.WarpFieldStrength;
     curr_physical_state.position = curr_physical_state.position + (v * simulation_atom_var * difficulty).Cast();
     //now we do this later in update physics
-    //I guess you have to, to be robust}
+    //I guess you have to, to be robust
 }
 
 void Movable::UpdatePhysics2(const Transformation &trans,
@@ -291,6 +291,8 @@ void Movable::Rotate(const Vector &axis) {
 }
 
 Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transmat) {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+
     //First, save theoretical instantaneous acceleration (not time-quantized) for GetAcceleration()
     SavedAccel = GetNetAcceleration();
     SavedAngAccel = GetNetAngularAcceleration();
@@ -312,10 +314,10 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     AngularVelocity += temp;
 
     float caprate;
-    if (isPlayerShip()) {         //clamp to avoid vomit-comet effects
-        caprate = configuration()->physics.max_player_rotation_rate;
+    if (unit->IsPlayerShip()) {         //clamp to avoid vomit-comet effects
+        caprate = configuration().physics.max_player_rotation_rate_flt;
     } else {
-        caprate = configuration()->physics.max_non_player_rotation_rate;
+        caprate = configuration().physics.max_non_player_rotation_rate_flt;
     }
     if (AngularVelocity.MagnitudeSquared() > caprate * caprate) {
         AngularVelocity = AngularVelocity.Normalize() * caprate;
@@ -328,7 +330,7 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     if (NetForce.i || NetForce.j || NetForce.k) {
         temp2 += InvTransformNormal(transmat, NetForce);
     }
-    temp2 = temp2 / Mass;
+    temp2 = temp2 / static_cast<float>(unit->GetMass());
     temp = temp2 * simulation_atom_var;
     if (!(FINITE(temp2.i) && FINITE(temp2.j) && FINITE(temp2.k))) {
         VS_LOG(info, "NetForce transform skrewed");
@@ -345,8 +347,8 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     bool newoutbig = newmagsquared > outcutsqr;
     if ((newbig && !oldbig) || (oldoutbig && !newoutbig)) {
         static bool docache = true;
-        if (docache && !configuration()->graphics.in_system_jump_animation.empty()) {
-            UniverseUtil::cacheAnimation(configuration()->graphics.in_system_jump_animation);
+        if (docache && !configuration().graphics.in_system_jump_animation.empty()) {
+            UniverseUtil::cacheAnimation(configuration().graphics.in_system_jump_animation);
             docache = false;
         }
         Vector v(GetVelocity());
@@ -354,8 +356,8 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
         Vector p, q, r;
         GetOrientation(p, q, r);
 
-        float tmpsec = oldbig ? configuration()->warp.warp_stretch_decel_cutoff : configuration()->warp.warp_stretch_cutoff;
-        UniverseUtil::playAnimationGrow(configuration()->graphics.in_system_jump_animation,
+        float tmpsec = oldbig ? configuration().warp.warp_stretch_decel_cutoff_flt : configuration().warp.warp_stretch_cutoff_flt;
+        UniverseUtil::playAnimationGrow(configuration().graphics.in_system_jump_animation,
                 realPosition().Cast() + Velocity * tmpsec + v * radial_size,
                 radial_size * 8,
                 1);
@@ -366,9 +368,9 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     lateral_air_res_coef = XMLSupport::parse_floatf(active_missions[0]->getVariable("lateral_air_resistance", "0"));
 
     if (air_res_coef != 0.0F || lateral_air_res_coef != 0.0F) {
-        float velmag = Velocity.Magnitude();
+        double velmag = Velocity.Magnitude();
         Vector AirResistance = Velocity
-                * (air_res_coef * velmag / Mass) * (corner_max.i - corner_min.i) * (corner_max.j - corner_min.j);
+                * (air_res_coef * velmag / unit->GetMass()) * (corner_max.i - corner_min.i) * (corner_max.j - corner_min.j);
         if (AirResistance.Magnitude() > velmag) {
             Velocity.Set(0, 0, 0);
         } else {
@@ -379,7 +381,7 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
                 Vector lateralVel = p * Velocity.Dot(p) + q * Velocity.Dot(q);
                 AirResistance = lateralVel
                         * (lateral_air_res_coef * velmag
-                                / Mass) * (corner_max.i - corner_min.i) * (corner_max.j - corner_min.j);
+                                / unit->GetMass()) * (corner_max.i - corner_min.i) * (corner_max.j - corner_min.j);
                 if (AirResistance.Magnitude() > lateralVel.Magnitude()) {
                     Velocity = r * Velocity.Dot(r);
                 } else {
@@ -410,7 +412,7 @@ void Movable::SetOrientation(QVector p, QVector q, QVector r) {
 }
 
 void Movable::SetOrientation(Quaternion Q) {
-    curr_physical_state.orientation = Q;
+    curr_physical_state.orientation = std::move(Q);
 }
 
 #define MM(A, B) m.r[B*3+A]
@@ -454,11 +456,11 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
 //    QVector qv = v.Cast();
 
     //inverse fractional effect of ship vs real big object
-    float minimum_multiplier = configuration()->warp.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
+    float minimum_multiplier = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     Unit *nearest_unit = nullptr;
     minimum_multiplier = unit->CalculateNearestWarpUnit(minimum_multiplier, &nearest_unit, true);
-    float minWarp = configuration()->warp.warp_multiplier_min * graphicOptions.MinWarpMultiplier;
-    float maxWarp = configuration()->warp.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
+    float minWarp = configuration().warp.warp_multiplier_min_flt * graphicOptions.MinWarpMultiplier;
+    float maxWarp = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     if (minimum_multiplier < minWarp) {
         minimum_multiplier = minWarp;
     }
@@ -473,7 +475,7 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     float vmag = sqrt(v.i * v.i + v.j * v.j + v.k * v.k);
 //    static float default_max_warp_effective_velocity = static_cast<float>(M_PI * M_PI * 300000000.0);
 //    const float warp_max_effective_velocity = vega_config::GetGameConfig().GetFloat("physics.warpMaxEfVel", default_max_warp_effective_velocity);
-    const float warp_max_effective_velocity = configuration()->warp.max_effective_velocity;
+    const float warp_max_effective_velocity = configuration().warp.max_effective_velocity_flt;
     if (vmag > warp_max_effective_velocity) {
         v *= warp_max_effective_velocity / vmag; //HARD LIMIT
         minimum_multiplier *= warp_max_effective_velocity / vmag;
@@ -485,7 +487,7 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
 void Movable::FireEngines(const Vector &Direction /*unit vector... might default to "r"*/,
         float FuelSpeed,
         float FMass) {
-    NetForce += Direction * ((double)FuelSpeed * (double)FMass / GetElapsedTime());
+    NetForce += Direction * (static_cast<double>(FuelSpeed) * static_cast<double>(FMass) / GetElapsedTime());
 }
 
 //applies a force for the whole gameturn upon the center of mass
@@ -507,8 +509,9 @@ void Movable::ApplyLocalForce(const Vector &Vforce) {
 }
 
 void Movable::Accelerate(const Vector &Vforce) {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     if (FINITE(Vforce.i) && FINITE(Vforce.j) && FINITE(Vforce.k)) {
-        NetForce += Vforce * Mass;
+        NetForce += Vforce * unit->GetMass();
     } else {
         VS_LOG(error, "fatal force");
     }
@@ -547,7 +550,7 @@ Vector Movable::ClampTorque(const Vector &amt1) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     Vector Res = amt1;
 
-    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->components.fuel.no_fuel_thrust : 1;
+    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration().components.fuel.no_fuel_thrust_flt : 1;
     if (fabs(amt1.i) > fuelclamp * unit->drive.pitch) {
         Res.i = copysign(fuelclamp * unit->drive.pitch, amt1.i);
     }
@@ -572,9 +575,9 @@ Vector Movable::ClampVelocity(const Vector &velocity, const bool afterburn) {
     // If we're using afterburn and have enough energy
     // TODO: Need to make sure somewhere that damage to Afterburner.speed does not
     // reduce it below Drive.speed
-    if(afterburn && (unit->afterburner.CanConsume() || configuration()->components.fuel.no_fuel_afterburn)) {
+    if(afterburn && (unit->afterburner.CanConsume() || configuration().components.fuel.no_fuel_afterburn_flt)) {
         max_speed = unit->MaxAfterburnerSpeed();
-    } else if(unit->drive.CanConsume() ) { //|| configuration()->components.fuel.no_fuel_thrust) {
+    } else if(unit->drive.CanConsume() ) { //|| configuration().components.fuel.no_fuel_thrust) {
         max_speed = unit->MaxSpeed();
     } else {
         max_speed = 0;
@@ -633,7 +636,8 @@ Vector Movable::MaxThrust(const Vector &amt1) {
 Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    const bool finegrainedFuelEfficiency = configuration()->components.fuel.variable_fuel_consumption;
+    // TODO: Figure out why this constant isn't used, and either use it or delete it
+    const bool finegrainedFuelEfficiency = configuration().components.fuel.variable_fuel_consumption;
 
 
     if(!unit->afterburner.CanConsume()) {
@@ -643,8 +647,8 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
 
     Vector Res = amt1;
 
-    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->components.fuel.no_fuel_thrust : 1;
-    float abfuelclamp = (unit->fuel.Level() <= 0) ? configuration()->components.fuel.no_fuel_afterburn : 1;
+    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration().components.fuel.no_fuel_thrust_flt : 1;
+    float abfuelclamp = (unit->fuel.Level() <= 0) ? configuration().components.fuel.no_fuel_afterburn_flt : 1;
     if (fabs(amt1.i) > fabs(fuelclamp * unit->drive.lateral)) {
         Res.i = copysign(fuelclamp * unit->drive.lateral, amt1.i);
     }
@@ -748,24 +752,23 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
         ApplyLocalForce(amt);
     }
 
-    static bool must_afterburn_to_buzz =
-            XMLSupport::parse_bool(vs_config->getVariable("audio", "buzzing_needs_afterburner", "false"));
-    if (_Universe->isPlayerStarship(unit) != NULL) {
-        static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
-                "player_afterburner",
-                "sfx10.wav"), true);
-        static float enginegain = XMLSupport::parse_float(vs_config->getVariable("audio", "afterburner_gain", ".5"));
-        if (afterburn != AUDIsPlaying(playerengine)) {
+    const bool must_afterburn_to_buzz = configuration().audio.buzzing_needs_afterburner;
+    if (unit->IsPlayerShip()) {
+        static boost::optional<int> player_engine{};
+        if (player_engine == boost::none) {
+            player_engine = AUDCreateSound(configuration().audio.unit_audio.player_afterburner, true);
+        }
+        const float enginegain = configuration().audio.afterburner_gain_flt;
+        if (afterburn != AUDIsPlaying(player_engine.get())) {
             if (afterburn) {
-                AUDPlay(playerengine, QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
+                AUDPlay(player_engine.get(), QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
             } else {
-                AUDStopPlaying(playerengine);
+                AUDStopPlaying(player_engine.get());
             }
         }
     } else if (afterburn || !must_afterburn_to_buzz) {
-        static float buzzingtime = XMLSupport::parse_float(vs_config->getVariable("audio", "buzzing_time", "5"));
-        static float
-                buzzingdistance = XMLSupport::parse_float(vs_config->getVariable("audio", "buzzing_distance", "5"));
+        const float buzzingtime = configuration().audio.buzzing_time_flt;
+        const float buzzingdistance = configuration().audio.buzzing_distance_flt;
         static float lastbuzz = getNewTime();
         Unit *playa = _Universe->AccessCockpit()->GetParent();
         if (playa) {
@@ -793,14 +796,14 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
 
 // If in Travel mode (non-combat), speed limit is multiplied by a power of 10.
 double Movable::MaxSpeed() const {
-    const double combat_mode_multiplier = configuration()->components.drive.non_combat_mode_multiplier; // configuration()->physics.combat_mode_multiplier
+    const double combat_mode_multiplier = configuration().components.drive.non_combat_mode_multiplier; // configuration().physics.combat_mode_multiplier
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     return (unit->computer.combat_mode) ? unit->drive.speed.AdjustedValue() : combat_mode_multiplier * unit->drive.speed.AdjustedValue();
 }
 
 // Same as comment above. It makes less sense to limit travel speed with afterburners to afterburner speed multiplied by a power of 10.
 double Movable::MaxAfterburnerSpeed() const {
-    const double combat_mode_multiplier = configuration()->components.drive.non_combat_mode_multiplier; // configuration()->physics.combat_mode_multiplier
+    const double combat_mode_multiplier = configuration().components.drive.non_combat_mode_multiplier; // configuration().physics.combat_mode_multiplier
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
     //same capped big speed as combat...else different

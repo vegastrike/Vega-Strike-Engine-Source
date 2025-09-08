@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * staticdisplay.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Mike Byron
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "src/vegastrike.h"
@@ -26,6 +32,7 @@
 
 #include "guidefs.h"
 #include "scroller.h"
+#include "configuration/configuration.h"
 
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
@@ -90,7 +97,7 @@ bool StaticDisplay::processCommand(const EventCommandId &command, Control *contr
 
 //Process wheel events for scrolling.
 bool StaticDisplay::processMouseDown(const InputEvent &event) {
-    static int zoominc = XMLSupport::parse_int(vs_config->getVariable("general", "wheel_increment_lines", "3"));
+    const int zoominc = configuration().general.wheel_increment_lines;
     if (m_scroller) {
         if (event.code == WHEELUP_MOUSE_BUTTON) {
             if (hitTest(event.loc)) {

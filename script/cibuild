@@ -2,8 +2,8 @@
 #====================================
 # @file   : cibuild
 # @brief  : Builds Vega Strike for purposes of CI/CD (GitHub Actions)
-# @usage  : ./script/cibuild
-# @param  : none
+# @usage  : ./script/cibuild --preset-name=VS2022Win64-pie-enabled-RelWithDebInfo
+# @param  : preset-name=, build-type=
 #====================================
 ##
 # cibuild
@@ -25,10 +25,41 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 #
 
 set -e
+
+echo "----------------------------"
+echo "--- cibuild | 2025-06-27 ---"
+echo "----------------------------"
+
+#----------------------------------
+# validate parameters
+#----------------------------------
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --preset_name=*)
+      preset_name="${1#*=}"
+      ;;
+    --preset-name=*)
+      preset_name="${1#*=}"
+      ;;
+    --build_type=*)
+      build_type="${1#*=}"
+      ;;
+    --build-type=*)
+      build_type="${1#*=}"
+      ;;
+    *)
+      printf "***************************\n"
+      printf "* Error: Invalid argument.*\n"
+      printf "***************************\n"
+      exit 1
+  esac
+  shift
+done
 
 if [ "$COMPILER" == "gcc" ]
 then
@@ -54,18 +85,19 @@ then
     SRC_DOCKER_IMG_NAME="vegastrike/vega-strike-build-env:$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
     DST_DOCKER_IMG_NAME="building-vega-strike:$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
     DOCKER_CONTAINER_NAME="building-vega-strike_$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
+    PRESET_NAME="${preset_name}"
     echo "Building docker image for $FROM / $COMPILER"
     docker build --build-arg from=$SRC_DOCKER_IMG_NAME -t $DST_DOCKER_IMG_NAME .
     echo "Running docker image for $FROM / $COMPILER"
-    docker run --env CC=$CC --env CXX=$CXX --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env TAG_NAME=$TAG_NAME --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA=$SHORT_SHA --env FLAGS="$FLAGS" --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME
-    docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/bin .
+    docker run --env CC="$CC" --env CXX="$CXX" --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env TAG_NAME="$TAG_NAME" --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA="$SHORT_SHA" --env PRESET_NAME="$PRESET_NAME" --name "$DOCKER_CONTAINER_NAME" "$DST_DOCKER_IMG_NAME"
+    docker cp "$DOCKER_CONTAINER_NAME":/usr/src/Vega-Strike-Engine-Source/bin .
     if [ $IS_RELEASE -eq 1 ]
     then
-        docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/packages .
+        docker cp "$DOCKER_CONTAINER_NAME":/usr/src/Vega-Strike-Engine-Source/packages .
     else
-        docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/build/test-results .
+        docker cp "$DOCKER_CONTAINER_NAME":/usr/src/Vega-Strike-Engine-Source/test-results .
     fi
-    docker rm $DOCKER_CONTAINER_NAME
+    docker rm "$DOCKER_CONTAINER_NAME"
 elif [ "$MY_OS_NAME" == "macos" ]
 then
     # setup the environment for Homebrew
@@ -123,12 +155,11 @@ then
     echo "                   CFlags: ${CFLAGS}"
     echo "                  LDFlags: ${LDFLAGS}"
 
-    script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo $@
+    script/build --preset-name="${preset_name}"
     # On macOS, the following is done by the calling CI workflow
     # ctest -V
-    # Not building successfully yet, so shouldn't try to package it
 else
-    script/docker-entrypoint.sh
+    script/docker-entrypoint.sh --preset-name="${preset_name}"
 fi
 
 echo "cibuild Done!"

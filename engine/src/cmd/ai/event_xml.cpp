@@ -1,9 +1,12 @@
 /*
  * event_xml.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -64,7 +67,7 @@ AIEvresult::AIEvresult(int type,
 
     this->script = aiscript;
     if (!validateHardCodedScript(this->script)) {
-        static int aidebug = XMLSupport::parse_int(vs_config->getVariable("AI", "debug_level", "0"));
+        const int aidebug = configuration().ai.debug_level;
         if (aidebug) {
             for (int i = 0; i < 20; ++i) {
                 VS_LOG(serious_warning, (boost::format("SERIOUS WARNING %1%") % this->script.c_str()));
@@ -179,10 +182,7 @@ void GeneralAIEventEnd(void *userData, const XML_Char *name) {
 void LoadAI(const char *filename, ElemAttrMap &result, const string &faction) {
     //returns obedience
     using namespace VSFileSystem;
-    static float cfg_obedience = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "Targetting",
-            "obedience",
-            ".99"));
+    const float cfg_obedience = configuration().ai.targeting.obedience_flt;
     result.obedience = cfg_obedience;
     result.maxtime = 10;
     VSFile f;

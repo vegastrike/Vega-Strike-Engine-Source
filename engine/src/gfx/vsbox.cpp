@@ -1,10 +1,12 @@
-/**
+/*
  * vsbox.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- *  contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -26,6 +28,8 @@
 
 
 #include "vsbox.h"
+
+#include "vega_cast_utils.h"
 #include "root_generic/xml_support.h"
 
 /*
@@ -45,8 +49,8 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
     blendSrc = ONE;
     blendDst = ONE;
     Box *oldmesh;
-    string hash_key = string("@@Box") + "#" + tostring(corner1) + "#" + tostring(corner2);
-    if (0 != (oldmesh = (Box *) meshHashTable.Get(hash_key))) {
+    const string hash_key = string("@@Box") + "#" + tostring(corner1) + "#" + tostring(corner2);
+    if (nullptr != (oldmesh = vega_dynamic_cast_ptr<Box>(meshHashTable.Get(hash_key)))) {
         *this = *oldmesh;
         oldmesh->refcount++;
         orig = oldmesh;
@@ -112,7 +116,7 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
 }
 
 void Box::ProcessDrawQueue(int) {
-    if (!draw_queue[0].size()) {
+    if (draw_queue[0].empty()) {
         return;
     }
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -125,8 +129,8 @@ void Box::ProcessDrawQueue(int) {
 
     unsigned vnum = 24 * draw_queue[0].size();
     std::vector<float> verts(vnum * (3 + 4));
-    std::vector<float>::iterator v = verts.begin();
-    while (draw_queue[0].size()) {
+    auto v = verts.begin();
+    while (!draw_queue[0].empty()) {
         GFXLoadMatrixModel(draw_queue[0].back().mat);
         draw_queue[0].pop_back();
         *v++ = corner_max.i;
@@ -301,4 +305,6 @@ void Box::ProcessDrawQueue(int) {
     GFXDraw(GFXQUAD, &verts[0], vnum, 3, 4);
     GFXEnable(DEPTHWRITE);
 }
+
+Box::~Box() = default;
 

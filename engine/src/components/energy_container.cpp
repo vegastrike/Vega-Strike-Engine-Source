@@ -1,9 +1,12 @@
 /*
  * energy_container.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2025 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -20,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
@@ -114,15 +117,15 @@ void EnergyContainer::Load(std::string unit_key) {
 
     switch(type) {
         case ComponentType::Fuel:
-        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FUEL_CAPACITY, std::string("0.0")), configuration()->components.fuel.factor);
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FUEL_CAPACITY, std::string("0.0")), configuration().components.fuel.factor);
         break;
 
         case ComponentType::Capacitor:
-        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, CAPACITOR, std::string("0.0")), configuration()->components.energy.factor);
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, CAPACITOR, std::string("0.0")), configuration().components.energy.factor);
         break;
 
         case ComponentType::FtlCapacitor:
-        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FTL_CAPACITOR, std::string("0.0")), configuration()->components.ftl_energy.factor);
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FTL_CAPACITOR, std::string("0.0")), configuration().components.ftl_energy.factor_dbl);
         break;
 
         default: // This really can't happen
@@ -139,15 +142,15 @@ void EnergyContainer::Load(std::string unit_key) {
 void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const {
     switch(type) {
         case ComponentType::Fuel:
-        unit[FUEL_CAPACITY] = level.Serialize(configuration()->components.fuel.factor);
+        unit[FUEL_CAPACITY] = level.Serialize(configuration().components.fuel.factor);
         break;
 
         case ComponentType::Capacitor:
-        unit[CAPACITOR] = level.Serialize(configuration()->components.energy.factor);
+        unit[CAPACITOR] = level.Serialize(configuration().components.energy.factor);
         break;
 
         case ComponentType::FtlCapacitor:
-        unit[FTL_CAPACITOR] = level.Serialize(configuration()->components.ftl_energy.factor);
+        unit[FTL_CAPACITOR] = level.Serialize(configuration().components.ftl_energy.factor_dbl);
         break;
 
         default: // This really can't happen
@@ -232,3 +235,5 @@ bool EnergyContainer::Damaged() const {
 bool EnergyContainer::Installed() const {
     return level > 0.0;
 }
+
+EnergyContainer::~EnergyContainer() = default;

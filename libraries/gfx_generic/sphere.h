@@ -70,12 +70,12 @@ public:
         setConvex(true);
     }
 
-    virtual int MeshType() const {
+    int MeshType() const override {
         return 1;
     }
 
-    virtual void SelectCullFace(int whichdrawqueue);
-    virtual void RestoreCullFace(int whichdrawqueue);
+    void SelectCullFace(int whichdrawqueue) override;
+    void RestoreCullFace(int whichdrawqueue) override;
 
     SphereMesh(float radius,
             int stacks,
@@ -113,6 +113,8 @@ public:
 
     void Draw(float lod, bool centered = false, const Matrix &m = identity_matrix);
     virtual void ProcessDrawQueue(int whichpass, int which, bool zsort, const QVector &sortctr);
+
+    ~SphereMesh() override;
 };
 
 class CityLights : public SphereMesh {
@@ -121,10 +123,11 @@ class CityLights : public SphereMesh {
     static float wrapx;
     static float wrapy;
 protected:
-    virtual float GetT(float rho, float rho_min, float rho_max) const;
-    virtual float GetS(float theta, float theta_min, float theta_max) const;
+    float GetT(float rho, float rho_min, float rho_max) const override;
 
-    virtual Mesh *AllocNewMeshesEachInSizeofMeshSpace(int num) {
+    float GetS(float theta, float theta_min, float theta_max) const override;
+
+    Mesh *AllocNewMeshesEachInSizeofMeshSpace(int num) override {
         assert(sizeof(Mesh) == sizeof(*this));
         return new CityLights[num];
     }
@@ -148,7 +151,9 @@ public:
             float theta_min = 0.0,
             float theta_max = 2 * M_PI,
             bool inside_out = true);
-    virtual void ProcessDrawQueue(int whichpass, int which, bool zsort, const QVector &sortctr);
+    void ProcessDrawQueue(int whichpass, int which, bool zsort, const QVector &sortctr) override;
+
+    ~CityLights() override;
 };
 
 #endif //VEGA_STRIKE_ENGINE_GFX_SPHERE_H

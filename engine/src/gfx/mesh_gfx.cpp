@@ -1,9 +1,13 @@
 /*
  * mesh_gfx.cpp
  *
- * Copyright (C) 2001-2025 Daniel Horn, surfdargent, hellcatv, ace123,
- * klaussfreire, dan_w, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically:
+ * surfdargent, hellcatv, ace123, klaussfreire, dan_w, pyramid3d
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -16,11 +20,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 //====================================
@@ -247,10 +251,9 @@ OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE];
 
 Texture *Mesh::TempGetTexture(MeshXML *xml, std::string filename, std::string factionname, GFXBOOL detail) const {
     static FILTER fil =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "detail_texture_trilinear", "true")) ? TRILINEAR
+            configuration().graphics.detail_texture_trilinear ? TRILINEAR
                     : MIPMAP;
-    static bool factionalize_textures =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "faction_dependant_textures", "true"));
+    const bool factionalize_textures = configuration().graphics.faction_dependent_textures;
     string faction_prefix = (factionalize_textures ? (factionname + "_") : string());
     Texture *ret = NULL;
     string facplus = faction_prefix + filename;
@@ -313,8 +316,7 @@ void Mesh::setTextureCumulativeTime(double d) {
 }
 
 Texture *Mesh::TempGetTexture(MeshXML *xml, int index, std::string factionname) const {
-    static bool factionalize_textures =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "faction_dependant_textures", "true"));
+    const bool factionalize_textures = configuration().graphics.faction_dependent_textures;
     string faction_prefix = (factionalize_textures ? (factionname + "_") : string());
     Texture *tex = NULL;
     assert(index < (int) xml->decals.size());
@@ -490,7 +492,7 @@ void Mesh::Draw(float lod,
         c.SpecialFX = &LocalFX;
         c.damage = hulldamage;
 
-        c.mesh_seq = ((toofar + rSize()) > configuration()->graphics.zfar) ? NUM_ZBUF_SEQ : draw_sequence;
+        c.mesh_seq = ((toofar + rSize()) > configuration().graphics.zfar_flt) ? NUM_ZBUF_SEQ : draw_sequence;
 
         // Cloaking and Nebula
         c.cloaked = MeshDrawContext::NONE;
@@ -609,9 +611,9 @@ void Mesh::ProcessZFarMeshes(bool nocamerasetup) {
         //clear Z buffer
         GFXClear(GFXFALSE, GFXTRUE, GFXFALSE);
 
-        static float far_margin = XMLSupport::parse_float(vs_config->getVariable("graphics", "mesh_far_percent", ".8"));
+        const float far_margin = configuration().graphics.mesh_far_percent_flt;
         if (!nocamerasetup) {
-            _Universe->AccessCamera()->UpdateGFXFrustum(GFXTRUE, configuration()->graphics.zfar * far_margin, 0);
+            _Universe->AccessCamera()->UpdateGFXFrustum(GFXTRUE, configuration().graphics.zfar_flt * far_margin, 0);
         }
 
         std::sort(undrawn_meshes[a].begin(), undrawn_meshes[a].end());
@@ -667,7 +669,7 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects, bool nocamerasetup) {
             // The bug was introduced in (svn r13722)
             //} else if (!nocamerasetup) {
         } else { // less correct (svn r13721) but working on nav computer
-            _Universe->AccessCamera()->UpdateGFXFrustum(GFXTRUE, configuration()->graphics.znear, configuration()->graphics.zfar);
+            _Universe->AccessCamera()->UpdateGFXFrustum(GFXTRUE, configuration().graphics.znear_flt, configuration().graphics.zfar_flt);
         }
         std::sort(undrawn_meshes[a].begin(), undrawn_meshes[a].end());
         for (OrigMeshVector::iterator it = undrawn_meshes[a].begin(); it < undrawn_meshes[a].end(); ++it) {
@@ -811,12 +813,11 @@ bool SetupSpecMapFirstPass(Texture **decal,
     GFXPushBlendMode();
 
     static bool separatespec =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "separatespecularcolor", "false")) ? GFXTRUE
+            configuration().graphics.separate_specular_color ? GFXTRUE
                     : GFXFALSE;
     GFXSetSeparateSpecularColor(separatespec);
 
-    static bool multitex_glowpass =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "multitexture_glowmaps", "true"));
+    const bool multitex_glowpass = configuration().graphics.multi_texture_glow_maps;
     if (polygon_offset) {
         float a, b;
         GFXGetPolygonOffset(&a, &b);
@@ -935,7 +936,7 @@ void SetupEnvmapPass(Texture *decal, unsigned int mat, int passno) {
 
 void RestoreEnvmapState() {
     static bool separatespec =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "separatespecularcolor", "false")) ? GFXTRUE
+            configuration().graphics.separate_specular_color ? GFXTRUE
                     : GFXFALSE;
     GFXSetSeparateSpecularColor(separatespec);
     GFXEnable(LIGHTING);
@@ -1028,10 +1029,7 @@ void SetupDamageMapThirdPass(Texture *decal, unsigned int mat, float polygon_off
 
 void RestoreGlowMapState(bool write_to_depthmap, float polygonoffset, float NOT_USED_BUT_BY_HELPER = 3) {
     GFXDepthFunc(LEQUAL);     //By Klauss - restore original depth function
-    static bool force_write_to_depthmap =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                    "force_glowmap_restore_write_to_depthmap",
-                    "true"));
+    const bool force_write_to_depthmap = configuration().graphics.force_glowmap_restore_write_to_depthmap;
     if (force_write_to_depthmap || write_to_depthmap) {
         GFXEnable(DEPTHWRITE);
     }
@@ -1056,9 +1054,8 @@ void RestoreSpecMapState(bool envMap, bool detailMap, bool write_to_depthmap, fl
             GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
         }
     } else {
-        static bool separatespec =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "separatespecularcolor",
-                        "false")) ? GFXTRUE : GFXFALSE;
+        const bool separatespec =
+                configuration().graphics.separate_specular_color ? GFXTRUE : GFXFALSE;
         GFXSetSeparateSpecularColor(separatespec);
     }
     if (detailMap) {
@@ -1730,8 +1727,7 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
         GFXDisable(TEXTURE1);
     }
     const GFXMaterial &mat = GFXGetMaterial(myMatNum);
-    static bool wantsplitpass1 =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "specmap_with_reflection", "false"));
+    const bool wantsplitpass1 = configuration().graphics.specmap_with_reflection;
     bool splitpass1 =
             (wantsplitpass1 && getEnvMap()
                     && ((mat.sr != 0) || (mat.sg != 0)
@@ -2050,14 +2046,13 @@ void Mesh::initTechnique(const std::string &xmltechnique) {
         if (Decal.size() > 1 || getEnvMap()) {
             //Use shader-ified technique for multitexture or environment-mapped meshes
 #if defined(__APPLE__) && defined (__MACH__)
-            static string shader_technique = vs_config->getVariable( "graphics", "default_full_technique", "mac" );
+            static string shader_technique = configuration().graphics.default_full_technique;
 #else
-            static string shader_technique = vs_config->getVariable("graphics", "default_full_technique", "default");
+            const string shader_technique = configuration().graphics.default_full_technique;
 #endif
             effective = shader_technique;
         } else {
-            static string
-                    fixed_technique = vs_config->getVariable("graphics", "default_simple_technique", "fixed_simple");
+            const string fixed_technique = configuration().graphics.default_simple_technique;
             effective = fixed_technique;
         }
         technique = Technique::getTechnique(effective);

@@ -1,8 +1,12 @@
 /*
  * gl_light.h
  *
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_GLDRV_GL_LIGHT_H
 #define VEGA_STRIKE_ENGINE_GLDRV_GL_LIGHT_H
@@ -49,7 +53,10 @@ public:
     gfx_light() : GFXLight() {
     }
 
+    ~gfx_light() override = default;
+
     ///assigns a GFXLight to a gfx_light
+    ///TODO: Fix this to make it conform more to usual C++ conventions
     GFXLight operator=(const GFXLight &tmp);
 
     ///Returns the number this light is in the _llights list

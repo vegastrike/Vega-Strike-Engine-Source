@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * ani_texture.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -385,9 +391,9 @@ Texture *AnimatedTexture::Clone() {
 
 AnimatedTexture::~AnimatedTexture() {
     Destroy();
-    data = NULL;
+    data = nullptr;
     active = 0;
-    palette = NULL;
+    palette = nullptr;
 }
 
 AnimatedTexture::AnimatedTexture() {
@@ -398,16 +404,15 @@ void AnimatedTexture::Destroy() {
     anis.erase(this);
     if (vidSource) {
         delete vidSource;
-        vidSource = 0;
+        vidSource = nullptr;
     }
     if (Decal) {
-        int i, nf;
-        nf = vidMode ? 1 : numframes;
-        for (i = 0; i < nf; i++) {
+        const int nf = vidMode ? 1 : numframes;
+        for (int i = 0; i < nf; i++) {
             delete Decal[i];
         }
         delete[] Decal;
-        Decal = NULL;
+        Decal = nullptr;
     }
 }
 
@@ -458,7 +463,7 @@ void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile &f) {
 
     try {
         vidSource = new ::VidFile();
-        vidSource->open(wrapper_file_path, gl_options.max_movie_dimension, gl_options.pot_video_textures);
+        vidSource->open(wrapper_file_path, configuration().graphics.max_movie_dimension, configuration().graphics.pot_video_textures);
 
         physicsactive = vidSource->getDuration();
         timeperframe = 1.0 / vidSource->getFrameRate();
@@ -474,7 +479,7 @@ void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile &f) {
         sizeY = vidSource->getHeight();
         mode = _24BIT;
         data = (unsigned char *) vidSource->getFrameBuffer();
-        if ((ismipmapped == BILINEAR || ismipmapped == NEAREST) && gl_options.rect_textures) {
+        if ((ismipmapped == BILINEAR || ismipmapped == NEAREST) && configuration().graphics.rect_textures) {
             texture_target = TEXTURERECT;
             image_target = TEXTURE_RECTANGLE;
         }

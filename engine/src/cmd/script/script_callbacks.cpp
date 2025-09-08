@@ -1,9 +1,13 @@
 /*
  * script_callbacks.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, alexannika, ace123, surfdargent,
- * khepri, klaussfriere, pyramid3d, dan_w, pheonixstorm, Roy Falk,
- * Stephen G. Tuggy, and other Vega Strike Contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically:
+ * alexannika, ace123, surfdargent, khepri, klaussfriere, pyramid3d, dan_w, pheonixstorm
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,16 +15,16 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -876,8 +880,6 @@ void Mission::initCallbackMaps() {
     module_unit_map["setPosition"] = CMT_UNIT_setPosition;
     module_unit_map["addCargo"] = CMT_UNIT_addCargo;
     module_unit_map["removeCargo"] = CMT_UNIT_removeCargo;
-    module_unit_map["incrementCargo"] = CMT_UNIT_incrementCargo;
-    module_unit_map["decrementCargo"] = CMT_UNIT_decrementCargo;
     module_unit_map["getThreat"] = CMT_UNIT_getThreat;
     module_unit_map["getDistance"] = CMT_UNIT_getDistance;
     module_unit_map["getMinDis"] = CMT_UNIT_getMinDis;

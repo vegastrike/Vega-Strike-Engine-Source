@@ -62,15 +62,15 @@ float WeaponInfo::Refire() const {
             != 't' || name[len - 2] != 'e' || name[len - 1] != 'r') {
         return refire_rate;
     }
-    return this->refire_rate * (game_options()->refire_difficulty_scaling
-            / (1.0f + (game_options()->refire_difficulty_scaling - 1.0f) * g_game.difficulty));
+    return this->refire_rate * (configuration().physics.refire_difficulty_scaling_flt
+            / (1.0f + (configuration().physics.refire_difficulty_scaling_flt - 1.0f) * g_game.difficulty));
 }
 
 bool WeaponInfo::isMissile() const {
-    if (configuration()->graphics.hud.projectile_means_missile && this->type == WEAPON_TYPE::PROJECTILE) {
+    if (configuration().graphics.hud.projectile_means_missile && this->type == WEAPON_TYPE::PROJECTILE) {
         return true;
     }
-    if (!configuration()->graphics.hud.projectile_means_missile && this->size >= MOUNT_SIZE::LIGHTMISSILE) {
+    if (!configuration().graphics.hud.projectile_means_missile && this->size >= MOUNT_SIZE::LIGHTMISSILE) {
         return true;
     }
     return false;

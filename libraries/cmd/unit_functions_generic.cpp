@@ -104,11 +104,11 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
     int killedCp = _Universe->whichPlayerStarship(killedUnit);
     int killerCp = killedCp;
     if (killedCp != -1) {
-        UniverseUtil::adjustRelationModifierInt(killedCp, un->faction, configuration()->ai.kill_factor);
+        UniverseUtil::adjustRelationModifierInt(killedCp, un->faction, configuration().ai.kill_factor_flt);
     } else {
         killerCp = _Universe->whichPlayerStarship(un);
         if (killerCp != -1) {
-            UniverseUtil::adjustRelationModifierInt(killerCp, killedUnit->faction, configuration()->ai.kill_factor);
+            UniverseUtil::adjustRelationModifierInt(killerCp, killedUnit->faction, configuration().ai.kill_factor_flt);
         }
     }
     int faction = killedUnit->faction;
@@ -121,7 +121,7 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
             }
             if (relation != 0.0F) {
                 if (killerCp != -1) {
-                    UniverseUtil::adjustRelationModifierInt(killerCp, i, configuration()->ai.friend_factor * relation);
+                    UniverseUtil::adjustRelationModifierInt(killerCp, i, configuration().ai.friend_factor_flt * relation);
                 }
             }
         }
@@ -158,13 +158,13 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
 
 
 float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false) {
-    const float friendly_autodist = configuration()->physics.friendly_auto_radius;
-    const float neutral_autodist = configuration()->physics.neutral_auto_radius;
-    const float hostile_autodist = configuration()->physics.hostile_auto_radius;
+    const float friendly_autodist = configuration().physics.friendly_auto_radius_flt;
+    const float neutral_autodist = configuration().physics.neutral_auto_radius_flt;
+    const float hostile_autodist = configuration().physics.hostile_auto_radius_flt;
     int upgradefaction = FactionUtil::GetUpgradeFaction();
     int neutral = FactionUtil::GetNeutralFaction();
     if (un->getUnitType() == Vega_UnitType::asteroid) {
-        return configuration()->physics.min_asteroid_distance;
+        return configuration().physics.min_asteroid_distance_flt;
     }
     if (un->getUnitType() == Vega_UnitType::planet
             || (un->getFlightgroup() == orig->getFlightgroup() && orig->getFlightgroup())) {
@@ -242,9 +242,8 @@ int parseMountSizes(const char *str) {
 }
 
 void DealPossibleJumpDamage(Unit *un) {
-    static double jump_damage_multiplier =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "jump_damage_multiplier", ".1"));
-    static double max_damage = XMLSupport::parse_float(vs_config->getVariable("physics", "max_jump_damage", "100"));
+    const double jump_damage_multiplier = configuration().physics.jump_damage_multiplier_dbl;
+    const double max_damage = configuration().physics.max_jump_damage_dbl;
 
     // Also damage multiplier
     double chance_to_damage = randomDouble() - 0.01;
@@ -272,37 +271,4 @@ void DealPossibleJumpDamage(Unit *un) {
                         ((float) (rand() % 100)) / 100), nullptr);
 }
 
-void Enslave(Unit *parent, bool enslave) {
-    unsigned int i;
-    vector<Cargo> ToBeChanged;
-    unsigned int numcargo = parent->numCargo();
-    for (i = numcargo; i > 0;) {
-        Cargo *carg = &parent->GetCargo(--i);
-        if (enslave) {
-            if (carg->GetCategory().find("Passengers") != string::npos && carg->GetName() != "Hitchhiker") {
-                ToBeChanged.push_back(*carg);
-                parent->RemoveCargo(i, carg->GetQuantity(), true);
-            }
-        } else if (carg->GetName() == "Slaves" || carg->GetName() == "Pilot") {
-            ToBeChanged.push_back(*carg);
-            parent->RemoveCargo(i, carg->GetQuantity(), true);
-        }
-    }
-    unsigned int dummy;
-    Cargo *newCarg = UniverseUtil::GetMasterPartList()->GetCargo(enslave ? "Slaves" : "Hitchhiker", dummy);
-    if (newCarg) {
-        Cargo slave = *newCarg;
-        for (i = 0; i < ToBeChanged.size(); ++i) {
-            slave.SetQuantity(ToBeChanged[i].GetQuantity());
-
-            while (parent->CanAddCargo(slave) == false && (slave.reduce()) > 0) {
-            }
-            if (slave.GetQuantity()) {
-                if (parent->CanAddCargo(slave)) {
-                    parent->AddCargo(slave, true);
-                }
-            }
-        }
-    }
-}
 

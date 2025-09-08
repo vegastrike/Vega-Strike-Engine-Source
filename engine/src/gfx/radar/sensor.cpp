@@ -1,12 +1,13 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
-/**
+/*
  * sensor.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -14,7 +15,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -23,7 +24,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -139,9 +140,9 @@ public:
         assert(player);
         assert(target);
 
-        const bool draw_significant_blips = configuration()->graphics.hud.draw_significant_blips;
-        const bool untarget_out_cone = configuration()->graphics.hud.untarget_beyond_cone;
-        const float min_radar_blip_size = configuration()->graphics.hud.min_radar_blip_size;
+        const bool draw_significant_blips = configuration().graphics.hud.draw_significant_blips;
+        const bool untarget_out_cone = configuration().graphics.hud.untarget_beyond_cone;
+        const float min_radar_blip_size = configuration().graphics.hud.min_radar_blip_size_flt;
 
         if (target != player) {
             const bool isCurrentTarget = (player->Target() == target);
@@ -163,7 +164,7 @@ public:
             if (target->rSize() > min_radar_blip_size) {
                 collection->push_back(sensor->CreateTrack(target));
             }
-            if (target->isPlanet() == Vega_UnitType::planet && target->radial_size > 0) {
+            if (target->isPlanet() && target->radial_size > 0) {
                 const Unit *sub = NULL;
                 for (un_kiter i = target->viewSubUnits(); (sub = *i) != NULL; ++i) {
                     if (target->rSize() > min_radar_blip_size) {
@@ -188,8 +189,8 @@ const Sensor::TrackCollection &Sensor::FindTracksInRange() const {
     collection.clear();
 
     // Find all units within range
-    const float kMaxUnitRadius = configuration()->graphics.hud.radar_search_extra_radius;
-    const bool kDrawGravitationalObjects = configuration()->graphics.hud.draw_gravitational_objects;
+    const float kMaxUnitRadius = configuration().graphics.hud.radar_search_extra_radius_flt;
+    const bool kDrawGravitationalObjects = configuration().graphics.hud.draw_gravitational_objects;
 
     UnitWithinRangeLocator<CollectRadarTracks> unitLocator(GetMaxRange(), kMaxUnitRadius);
     unitLocator.action.init(this, &collection, player);

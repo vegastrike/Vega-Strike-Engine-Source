@@ -1,8 +1,12 @@
 /*
  * hard_coded_scripts.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,16 +14,16 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -46,19 +50,15 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 bool useAfterburner() {
-    static bool useafterburner = XMLSupport::parse_bool(vs_config->getVariable("AI", "use_afterburner", "true"));
-    return useafterburner;
+    return configuration().ai.use_afterburner;
 }
 
 bool useAfterburnerToRun() {
-    static bool useafterburner = XMLSupport::parse_bool(vs_config->getVariable("AI", "use_afterburner_to_run", "true"));
-    return useafterburner;
+    return configuration().ai.use_afterburner_to_run;
 }
 
 bool useAfterburnerToFollow() {
-    static bool
-            useafterburner = XMLSupport::parse_bool(vs_config->getVariable("AI", "use_afterburner_to_follow", "true"));
-    return useafterburner;
+    return configuration().ai.use_afterburner_to_follow;
 }
 
 void AddOrd(Order *aisc, Unit *un, Order *ord) {
@@ -183,7 +183,7 @@ public:
         FlyByWire::Execute();
         Vector P, Q, R;
         parent->GetOrientation(P, Q, R);
-        static float ang = cos(XMLSupport::parse_float(vs_config->getVariable("AI", "evasion_angle", "45")));
+        const float ang = cos(configuration().ai.evasion_angle_flt);
         if (R.Dot(facing) < ang
                 || (desired_ang_velocity.i == 0 && desired_ang_velocity.j == 0 && desired_ang_velocity.k == 0)) {
             SetOppositeDir();
@@ -291,14 +291,11 @@ public:
         this->afterburn = afterburn;
         this->force_afterburn = force_afterburn;
 
-        static float loopdis = XMLSupport::parse_float(vs_config->getVariable("AI", "loop_around_distance", "1"));
+        const float loopdis = configuration().ai.loop_around_distance_flt;
         qq = pp = 0;
-        static float loopdisd =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "loop_around_destination_distance", "20.0"));
-        static float loopdisv =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "loop_around_destination_vertical", "4.0"));
-        static float loopdisl =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "loop_around_destination_lateral", "4.0"));
+        const float loopdisd = configuration().ai.loop_around_destination_distance_flt;
+        const float loopdisv = configuration().ai.loop_around_destination_vertical_flt;
+        const float loopdisl = configuration().ai.loop_around_destination_lateral_flt;
         rr.Set(loopdisl * vsr.uniformInc(-1, 1),
                 loopdisv * vsr.uniformInc(-1, 1),
                 1.0 + loopdisd * vsr.uniformInc(0, 1));
@@ -337,15 +334,11 @@ public:
             float spseed, grange = 0, mrange = 0;
             parent->getAverageGunSpeed(spseed, grange, mrange);
             if (r.Dot(relloc) < 0) {
-                static float gun_range_pct =
-                        XMLSupport::parse_float(vs_config->getVariable("AI", "gun_range_percent_ok", ".66"));
+                const float gun_range_pct = configuration().ai.gun_range_percent_ok_flt;
                 FaceTargetITTS::Execute();
                 float dist = UnitUtil::getDistance(parent, targ);
                 if (dist < grange * gun_range_pct || (grange == 0 && dist < mrange)) {
-                    static float velocity_adjustment_pct =
-                            XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "loop_around_pursuit_velocity_percent",
-                                    ".9"));
+                    const float velocity_adjustment_pct = configuration().ai.loop_around_pursuit_velocity_percent_flt;
                     m.SetDesiredVelocity(Vector(0, 0, targ->cumulative_velocity.Magnitude() * velocity_adjustment_pct),
                             true);
                 }
@@ -389,14 +382,11 @@ public:
         this->afterburn = afterburn;
         this->force_afterburn = force_afterburn;
         this->aggressive = aggressive;
-        static float loopdis = XMLSupport::parse_float(vs_config->getVariable("AI", "loop_around_distance", "1"));
+        const float loopdis = configuration().ai.loop_around_distance_flt;
         qq = pp = 0;
-        static float loopdisd =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "loop_around_destination_distance", "20.0"));
-        static float loopdisv =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "loop_around_destination_vertical", "4.0"));
-        static float loopdisl =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "loop_around_destination_lateral", "4.0"));
+        const float loopdisd = configuration().ai.loop_around_destination_distance_flt;
+        const float loopdisv = configuration().ai.loop_around_destination_vertical_flt;
+        const float loopdisl = configuration().ai.loop_around_destination_lateral_flt;
         rr.Set(loopdisl * vsr.uniformInc(-1, 1),
                 loopdisv * vsr.uniformInc(-1, 1),
                 1.0 + loopdisd * vsr.uniformInc(0, 1));
@@ -488,14 +478,11 @@ public:
         this->afterburn = afterburn;
         this->force_afterburn = force_afterburn;
 
-        static float loopdis = XMLSupport::parse_float(vs_config->getVariable("AI", "loop_around_distance", "1"));
+        const float loopdis = configuration().ai.loop_around_distance_flt;
         qq = pp = 0;
-        static float loopdisd =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "loop_around_destination_distance", "20.0"));
-        static float loopdisv =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "loop_around_destination_vertical", "4.0"));
-        static float loopdisl =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "loop_around_destination_lateral", "4.0"));
+        const float loopdisd = configuration().ai.loop_around_destination_distance_flt;
+        const float loopdisv = configuration().ai.loop_around_destination_vertical_flt;
+        const float loopdisl = configuration().ai.loop_around_destination_lateral_flt;
         rr.Set(loopdisl * vsr.uniformInc(-1, 1),
                 loopdisv * vsr.uniformInc(-1, 1),
                 1.0 + loopdisd * vsr.uniformInc(0, 1));
@@ -521,8 +508,7 @@ public:
     }
 
     void Execute() {
-        static float
-                gun_range_pct = XMLSupport::parse_float(vs_config->getVariable("AI", "gun_range_percent_ok", ".66"));
+        const float gun_range_pct = configuration().ai.gun_range_percent_ok_flt;
         Unit *targ = parent->Target();
         if (targ) {
             Vector relloc = parent->Position() - targ->Position();
@@ -539,10 +525,7 @@ public:
                 FaceTargetITTS::Execute();
                 float dist = UnitUtil::getDistance(parent, targ);
                 if (dist < grange * gun_range_pct || (grange == 0 && dist < mrange)) {
-                    static float velocity_adjustment_pct =
-                            XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "loop_around_pursuit_velocity_percent",
-                                    ".9"));
+                    const float velocity_adjustment_pct = configuration().ai.loop_around_pursuit_velocity_percent_flt;
                     m.SetDesiredVelocity(Vector(0, 0, targ->cumulative_velocity.Magnitude() * velocity_adjustment_pct),
                             true);
                 }
@@ -596,7 +579,7 @@ void RollRight(Order *aisc, Unit *un) {
 }
 
 void RollLeftHard(Order *aisc, Unit *un) {
-    static float durvar = XMLSupport::parse_float(vs_config->getVariable("AI", "roll_order_duration", "5.0"));
+    const float durvar = configuration().ai.roll_order_duration_flt;
     if (un->aistate) {
         AddOrd(un->aistate,
                 un,
@@ -605,7 +588,7 @@ void RollLeftHard(Order *aisc, Unit *un) {
 }
 
 void RollRightHard(Order *aisc, Unit *un) {
-    static float durvar = XMLSupport::parse_float(vs_config->getVariable("AI", "roll_order_duration", "5.0"));
+    const float durvar = configuration().ai.roll_order_duration_flt;
     if (un->aistate) {
         AddOrd(un->aistate,
                 un,

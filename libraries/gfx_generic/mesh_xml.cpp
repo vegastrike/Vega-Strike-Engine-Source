@@ -304,8 +304,7 @@ bool shouldreflect(string r) {
 }
 
 void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &attributes) {
-    static bool use_detail_texture =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "use_detail_texture", "true"));
+    const bool use_detail_texture = configuration().graphics.use_detail_texture;
     //static bool flatshadeit=false;
     AttributeList::const_iterator iter;
     float flotsize = 1;
@@ -336,8 +335,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                             break;
                     }
                 }
-                static float detailscale =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "detail_texture_scale", "1"));
+                const float detailscale = configuration().graphics.detail_texture_scale_flt;
                 if (detailPlanes.size() < 6) {
                     detailPlanes.push_back(vec * detailscale);
                 }
@@ -361,9 +359,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                         setEnvMap(shouldreflect((*iter).value));
                         break;
                     case MeshXML::LIGHTINGON:
-                        setLighting(XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                "ForceLighting",
-                                "true"))
+                        setLighting(configuration().graphics.force_lighting
                                 || XMLSupport::parse_bool((*iter).value));
                         break;
                     case MeshXML::CULLFACE:
@@ -474,9 +470,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                     case MeshXML::SHAREVERT:
                         xml->sharevert =
                                 (XMLSupport::parse_bool((*iter).value)
-                                        && XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                "SharedVertexArrays",
-                                                "true")));
+                                        && configuration().graphics.shared_vertex_arrays);
                         break;
                     case MeshXML::POLYGONOFFSET:
                         this->polygon_offset = XMLSupport::parse_float((*iter).value);
@@ -535,10 +529,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                             if (!ind.empty()) {
                                 texindex = XMLSupport::parse_int(ind);
                             }
-                            static bool per_pixel_lighting =
-                                    XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                            "per_pixel_lighting",
-                                            "true"));
+                            const bool per_pixel_lighting = configuration().graphics.per_pixel_lighting;
                             if ((texindex == 0) || per_pixel_lighting) {
                                 while (xml->decals.size() <= texindex) {
                                     xml->decals.push_back(MeshXML::ZeTexture());
@@ -2064,10 +2055,10 @@ void Mesh::PostProcessLoading(MeshXML *xml, const vector<string> &textureOverrid
                 (poly_offsets.size() ? &poly_offsets[0] : 0), false,
                 (ind.size() ? &ind[0] : 0));
     } else {
-        static bool usopttmp =
-                (XMLSupport::parse_bool(vs_config->getVariable("graphics", "OptimizeVertexArrays", "false")));
-        static float optvertexlimit =
-                (XMLSupport::parse_float(vs_config->getVariable("graphics", "OptimizeVertexCondition", "1.0")));
+        const bool usopttmp =
+                (configuration().graphics.optimize_vertex_arrays);
+        const float optvertexlimit =
+                (configuration().graphics.optimize_vertex_condition_flt);
         bool cachunk = false;
         if (usopttmp && (vertexlist.size() > 0)) {
             int numopt = totalvertexsize;

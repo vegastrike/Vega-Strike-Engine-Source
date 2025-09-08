@@ -330,7 +330,7 @@ ENDIF (Python3_FOUND)
 # Note: we now use Cmake 3.21 and Boost 1.75.
 MESSAGE(STATUS "From now on, always using System Boost (ver. 1.75 or higher)")
 SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
-FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_time system filesystem thread chrono atomic program_options REQUIRED)
+FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_time filesystem thread chrono atomic program_options REQUIRED)
 MESSAGE(STATUS "Found System Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
 SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
 

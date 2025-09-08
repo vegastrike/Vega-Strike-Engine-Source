@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * missile.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -223,7 +229,7 @@ void Missile::Discharge() {
 }
 
 float Missile::ExplosionRadius() {
-    return radial_effect * (configuration()->graphics.missile_explosion_radius_mult);
+    return radial_effect * (configuration().graphics.missile_explosion_radius_mult_flt);
 }
 
 void Missile::Kill(bool erase) {
@@ -334,7 +340,7 @@ bool Missile::proximityFuse(Unit *target) {
 
         //spiritplumber assumes that the missile is hitting a much larger object than itself
         // It seems spiritplumber is a former dev of the project.
-        Velocity += configuration()->physics.percent_missile_match_target_velocity * (target->Velocity - Velocity);
+        Velocity += configuration().physics.percent_missile_match_target_velocity_flt * (target->Velocity - Velocity);
 
         Discharge();
         time = -1;
@@ -349,7 +355,7 @@ bool Missile::useFuel(Unit *target, bool had_target) {
     // If we had a target but it's now gone, limit the missile's fuel
     // If we didn't have a target (dumbfire?), keep original fuel
     if (had_target && target == nullptr) {
-        time = std::min(static_cast<double>(time), configuration()->physics.max_lost_target_live_time);
+        time = std::min(static_cast<double>(time), configuration().physics.max_lost_target_live_time_dbl);
     }
 
     // Reduce missile TTL/Fuel by tick
@@ -365,3 +371,5 @@ bool Missile::useFuel(Unit *target, bool had_target) {
 
     return false;
 }
+
+Missile::~Missile() = default;

@@ -1,9 +1,12 @@
 /*
  * order.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -38,7 +41,7 @@ using std::list;
 
 //#define ORDERDEBUG  // FIXME ?
 void Order::Execute() {
-    static float airesptime = XMLSupport::parse_float(vs_config->getVariable("AI", "CommResponseTime", "3"));
+    const float airesptime = configuration().ai.comm_response_time_flt;
     ProcessCommunicationMessages(airesptime, true);
     int completed = 0;
     unsigned int i = 0;

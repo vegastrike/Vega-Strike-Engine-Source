@@ -80,7 +80,7 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
 
     // Planet Code
     if (dock->getUnitType() == Vega_UnitType::planet) {
-        range -= dock->rSize() * (configuration()->dock.dock_planet_radius_percent - 1);
+        range -= dock->rSize() * (configuration().dock.dock_planet_radius_percent_dbl - 1.0);
         if (range < 0) {
             return 0;
         } else {
@@ -88,8 +88,8 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
         }
     }
 
-    if (configuration()->dock.simple_dock) {
-        if (range < configuration()->dock.simple_dock_range) {
+    if (configuration().dock.simple_dock) {
+        if (range < configuration().dock.simple_dock_range_dbl) {
             return 0;
         } else {
             return -1;
@@ -150,18 +150,18 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
             unit->hull.Destroy();
         }
 
-        range -= target->rSize() * (configuration()->dock.dock_planet_radius_percent - 1);
+        range -= target->rSize() * (configuration().dock.dock_planet_radius_percent_dbl - 1.0);
         if (range < 0) {
             return std::string("Docking: Ready");
         } else if (range < target->rSize()) {
             return std::string("Docking: ") + PrettyDistanceString(range);
         }
-    } else if (configuration()->dock.simple_dock && !target->pImage->dockingports.empty() &&
-        range < configuration()->dock.count_to_dock_range) {
-        if (range <= configuration()->dock.simple_dock_range) {
+    } else if (configuration().dock.simple_dock && !target->pImage->dockingports.empty() &&
+        range < configuration().dock.count_to_dock_range_dbl) {
+        if (range <= configuration().dock.simple_dock_range_dbl) {
             return std::string("Docking: Ready");
         } else {
-            return std::string("Docking: ") + PrettyDistanceString(range - configuration()->dock.simple_dock_range);
+            return std::string("Docking: ") + PrettyDistanceString(range - configuration().dock.simple_dock_range_dbl);
         }
     } else if (CanDock(target, unit, false) >= 0) {
         return std::string("Docking: Ready");
@@ -174,8 +174,8 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
 
 
 std::string PrettyDistanceString(double distance) {
-    if (configuration()->physics.game_speed_lying) {
-        distance /= configuration()->physics.game_speed;
+    if (configuration().physics.game_speed_lying) {
+        distance /= configuration().physics.game_speed_dbl;
     }
 
     // Distance in km

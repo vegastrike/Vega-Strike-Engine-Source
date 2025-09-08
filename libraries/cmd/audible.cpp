@@ -45,13 +45,15 @@ Audible::Audible() {
         sounds[soundType] = -1;
     }
 
-    defaultSoundNames[SoundType::engine] = vs_config->getVariable("unitaudio", "afterburner", "sfx10.wav");
-    defaultSoundNames[SoundType::shield] = vs_config->getVariable("unitaudio", "shield", "sfx09.wav");
-    defaultSoundNames[SoundType::armor] = vs_config->getVariable("unitaudio", "armor", "sfx08.wav");
-    defaultSoundNames[SoundType::hull] = vs_config->getVariable("unitaudio", "armor", "sfx08.wav");
-    defaultSoundNames[SoundType::explosion] = vs_config->getVariable("unitaudio", "explode", "explosion.wav");
-    defaultSoundNames[SoundType::cloaking] = vs_config->getVariable("unitaudio", "cloak", "sfx43.wav");
+    defaultSoundNames[SoundType::engine] = configuration().audio.unit_audio.afterburner;
+    defaultSoundNames[SoundType::shield] = configuration().audio.unit_audio.shield;
+    defaultSoundNames[SoundType::armor] = configuration().audio.unit_audio.armor;
+    defaultSoundNames[SoundType::hull] = configuration().audio.unit_audio.armor;
+    defaultSoundNames[SoundType::explosion] = configuration().audio.unit_audio.explode;
+    defaultSoundNames[SoundType::cloaking] = configuration().audio.unit_audio.cloak;
 }
+
+Audible::~Audible() = default;
 
 void Audible::addDefaultSounds() {
     for (const SoundType &soundType : typesArray) {
@@ -98,24 +100,33 @@ void Audible::playSound(SoundType type) {
 }
 
 void Audible::playShieldDamageSound(const Vector &pnt) {
-    const int shieldSound = sounds[SoundType::shield];
-    static int playerShieldSound = AUDCreateSoundWAV(game_options()->player_shield_hit);
-    int currentPlayerSound = playerShieldSound != -1 ? playerShieldSound : shieldSound;
-    playSound(pnt, shieldSound, currentPlayerSound);
+    const int shield_sound = sounds[SoundType::shield];
+    static boost::optional<int> player_shield_sound{};
+    if (player_shield_sound == boost::none) {
+        player_shield_sound = AUDCreateSoundWAV(configuration().audio.unit_audio.player_shield_hit);
+    }
+    int current_player_sound = (player_shield_sound != -1 ? player_shield_sound : shield_sound).get();
+    playSound(pnt, shield_sound, current_player_sound);
 }
 
 void Audible::playArmorDamageSound(const Vector &pnt) {
-    const int armorSound = sounds[SoundType::armor];
-    static int playerArmorSound = AUDCreateSoundWAV(game_options()->player_armor_hit);
-    int currentPlayerSound = playerArmorSound != -1 ? playerArmorSound : armorSound;
-    playSound(pnt, armorSound, currentPlayerSound);
+    const int armor_sound = sounds[SoundType::armor];
+    static boost::optional<int> player_armor_sound{};
+    if (player_armor_sound == boost::none) {
+        player_armor_sound = AUDCreateSoundWAV(configuration().audio.unit_audio.player_armor_hit);
+    }
+    int current_player_sound = (player_armor_sound != -1 ? player_armor_sound : armor_sound).get();
+    playSound(pnt, armor_sound, current_player_sound);
 }
 
 void Audible::playHullDamageSound(const Vector &pnt) {
-    const int hullSound = sounds[SoundType::hull];
-    static int playerHullSound = AUDCreateSoundWAV(game_options()->player_hull_hit);
-    int currentPlayerSound = playerHullSound != -1 ? playerHullSound : hullSound;
-    playSound(pnt, hullSound, currentPlayerSound);
+    const int hull_sound = sounds[SoundType::hull];
+    static boost::optional<int> player_hull_sound{};
+    if (player_hull_sound == boost::none) {
+        player_hull_sound = AUDCreateSoundWAV(configuration().audio.unit_audio.player_hull_hit);
+    }
+    int current_player_sound = (player_hull_sound != -1 ? player_hull_sound : hull_sound).get();
+    playSound(pnt, hull_sound, current_player_sound);
 }
 
 void Audible::playEngineSound() {
@@ -144,8 +155,8 @@ void Audible::playSound(const Vector &pnt, int sound, int playerSound) {
         AUDStopPlaying(sound);
     }
 
-    if (!_Universe->isPlayerStarship(unit)) {
-        if (game_options()->ai_sound) {
+    if (!unit->IsPlayerShip()) {
+        if (configuration().audio.ai_sound) {
             playDopplerSound(pnt, sound);
         }
     } else {

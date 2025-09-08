@@ -1,8 +1,12 @@
 /*
  * unit_wrapper.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -100,29 +104,28 @@ BOOST_PYTHON_MODULE(VS) {
 #undef voidEXPORT_UTIL
 #undef EXPORT_FACTION
 #undef voidEXPORT_FACTION
-    PYTHON_BASE_BEGIN_CLASS(VS, Cargo, "Cargo")
-                , boost::python::init<std::string, std::string, float, int, float, float>());
-        PYTHON_DEFINE_METHOD(Class, &Cargo::SetPrice, "SetPrice");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::GetPrice, "GetPrice");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::SetMass, "SetMass");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::GetMass, "GetMass");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::SetVolume, "SetVolume");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::GetVolume, "GetVolume");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::SetQuantity, "SetQuantity");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::GetQuantity, "GetQuantity");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::SetContent, "SetContent");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::GetContentPython, "GetContent");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::SetCategory, "SetCategory");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::GetCategoryPython, "GetCategory");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::SetMissionFlag, "SetMissionFlag");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::GetMissionFlag, "GetMissionFlag");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::GetDescriptionPython, "GetDescription");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::SetFunctionality, "SetFunctionality");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::GetFunctionality, "GetFunctionality");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::SetMaxFunctionality, "SetMaxFunctionality");
-        PYTHON_DEFINE_METHOD(Class, &Cargo::GetMaxFunctionality, "GetMaxFunctionality");
-
-    PYTHON_END_CLASS(VS, Cargo)
+    boost::python::class_<Cargo>("Cargo")
+        .def(boost::python::init<>())
+        // Dedicated constructor for python, as primary constructor has default values
+        // for some parameters, which is not supported by boost::python.
+        .def(boost::python::init<std::string, std::string, float, int, float, float>())
+        .def("SetPrice", &Cargo::SetPrice)
+        .def("GetPrice", &Cargo::GetPrice)
+        .def("SetMass", &Cargo::SetMass)
+        .def("GetMass", &Cargo::GetMass)
+        .def("SetVolume", &Cargo::SetVolume)
+        .def("GetVolume", &Cargo::GetVolume)
+        .def("SetQuantity", &Cargo::SetQuantity)
+        .def("GetQuantity", &Cargo::GetQuantity)
+        .def("SetContent", &Cargo::SetName)
+        .def("GetContent", &Cargo::GetContentPython)
+        .def("SetCategory", &Cargo::SetCategory)
+        .def("GetCategory", &Cargo::GetCategoryPython)
+        .def("SetMissionFlag", &Cargo::SetMissionFlag)
+        .def("GetMissionFlag", &Cargo::IsMissionFlag)
+        .def("GetDescription", &Cargo::GetDescriptionPython)
+        .def("SetFunctionality", &Cargo::SetFunctionality);
+        
     PYTHON_BEGIN_CLASS(VS, UnitWrapper, "Unit")
         PYTHON_DEFINE_METHOD(Class, &UnitWrapper::getSubUnits, "getSubUnits");
         ExportUnit(Class);

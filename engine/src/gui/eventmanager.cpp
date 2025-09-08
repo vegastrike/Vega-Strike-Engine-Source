@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, Mike Byron, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * eventmanager.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically: Mike Byron
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -213,7 +219,7 @@ static float MouseXTo2dX(int x) {
     //Multiply by 2 first to reduce division error in the multiply.
     //Do everything in double to minimize calc error and because it's faster.
     //Result in float to round-off at the end.  Gets prettier numbers. :-)
-    return (2.0 * ((double) x + 0.5)) / configuration()->graphics.resolution_x - 1.0;
+    return (2.0 * ((double) x + 0.5)) / configuration().graphics.resolution_x - 1.0;
 }
 
 static float MouseYTo2dY(int y) {
@@ -221,7 +227,7 @@ static float MouseYTo2dY(int y) {
     //This is a bit different from x because the mouse coords increase top-
     //to-bottom, and the drawing surface y increases bottom-to-top.
     //So we need to reflect the mouse coords around the y origin.
-    return 1.0 - (2.0 * ((double) y + 0.5)) / configuration()->graphics.resolution_y;
+    return 1.0 - (2.0 * ((double) y + 0.5)) / configuration().graphics.resolution_y;
 }
 
 void EventManager::ProcessMouseClick(int button, int state, int x, int y) {

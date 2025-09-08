@@ -1,9 +1,12 @@
 /*
  * communication.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -209,7 +212,7 @@ void FSM::Node::AddSound(std::string soundfile, unsigned char sex, float gain) {
             gains[index] = gain;
 
             // Preload sound if configured to do so
-            if (game_options()->comm_preload) {
+            if (configuration().cockpit_audio.comm_preload) {
                 GetSound(sex, multiple, gain);
             }
 
@@ -244,12 +247,8 @@ int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, floa
 #endif
     vector<unsigned int> g;
     vector<unsigned int> b;
-    static float pos_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "LowestPositiveCommChoice",
-            "0"));
-    static float neg_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "LowestNegativeCommChoice",
-            "-.00001"));
+    const float pos_limit = configuration().ai.lowest_positive_comm_choice_flt;
+    const float neg_limit = configuration().ai.lowest_negative_comm_choice_flt;
     for (unsigned int i = 0; i < n->edges.size(); i++) {
         float md = nodes[n->edges[i]].messagedelta;
         if (md >= pos_limit) {
@@ -313,7 +312,7 @@ std::string FSM::GetEdgesString(unsigned int curstate) {
     for (unsigned int i = 0; i < nodes[curstate].edges.size(); i++) {
         retval += tostring((int) ((i + 1) % 10)) + "." + nodes[nodes[curstate].edges[i]].messages[0] + "\n";
     }
-    if (configuration()->graphics.hud.print_request_docking) {
+    if (configuration().graphics.hud.print_request_docking) {
         retval += "0. Request Docking Clearance";
     }
     return retval;
@@ -489,7 +488,7 @@ RGBstring GetRelationshipRGBstring(float rel) {
 }
 
 unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &node) {
-    const float scale_rel_color = configuration()->graphics.hud.scale_relationship_color;
+    const float scale_rel_color = configuration().graphics.hud.scale_relationship_color_flt;
     static std::string
             ownname_RGBstr = colToString(vs_config->getColor("player_name", GFXColor(0.0, 0.2, 1.0))).str; // bluish
     unsigned int dummy = 0;
@@ -531,7 +530,7 @@ void LeadMe(Unit *un, string directive, string speech, bool changetarget) {
         Flightgroup *fg = un->getFlightgroup();
         if (fg) {
             if (fg->leader.GetUnit() != un) {
-                if ((!_Universe->isPlayerStarship(fg->leader.GetUnit())) || _Universe->isPlayerStarship(un)) {
+                if (!(fg->leader.GetUnit()->IsPlayerShip()) || un->IsPlayerShip()) {
                     fg->leader.SetUnit(un);
                 }
             }

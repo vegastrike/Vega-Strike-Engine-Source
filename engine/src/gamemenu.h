@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors.
+ * gamemenu.h
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_GAME_MENU_H
 #define VEGA_STRIKE_ENGINE_GAME_MENU_H
@@ -28,11 +34,13 @@
 class GameMenu : public WctlBase<GameMenu> {
     friend class WctlBase<GameMenu>;
 public:
-    virtual void init(void);
-    virtual void run(void);
+    void init(void) override;
 
-    GameMenu(bool firsttime);
-    virtual ~GameMenu(void);
+    void run(void) override;
+
+    explicit GameMenu(bool firsttime);
+
+    ~GameMenu(void) override;
 
 protected:
     bool m_firstTime;
@@ -71,14 +79,14 @@ public:
             player(pnum), m_parent(w), netAction(action) {
     }
 
-    virtual ~NetActionConfirm(void) {
+    ~NetActionConfirm(void) override {
     }
 
 //Set up the window and get everything ready.
-    virtual void init(void);
+    void init(void) override;
 
 //Process a command event from the window.
-    virtual bool processWindowCommand(const EventCommandId &command, Control *control);
+    bool processWindowCommand(const EventCommandId &command, Control *control) override;
 
     virtual bool finalizeJoinGame(int launchShip = 0);
     virtual bool confirmedJoinGame();

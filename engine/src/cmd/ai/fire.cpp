@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * fire.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -48,8 +54,7 @@ extern int numprocessed;
 extern double targetpick;
 
 static bool NoDockWithClear() {
-    static bool nodockwithclear =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "dock_with_clear_planets", "true"));
+    const bool nodockwithclear = configuration().physics.dock_with_clear_planets;
     return nodockwithclear;
 }
 
@@ -137,12 +142,12 @@ bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix) {
 
 void FireAt::ReInit(float aggressivitylevel) {
     lastmissiletime = UniverseUtil::GetGameTime() - 65536.;
-    missileprobability = configuration()->ai.firing.missile_probability;
+    missileprobability = configuration().ai.firing.missile_probability_flt;
     delay = 0;
     agg = aggressivitylevel;
     distance = 1;
     //JS --- spreading target switch times
-    lastchangedtarg = 0.0 - targrand.uniformInc(0, 1) * configuration()->ai.targeting.min_time_to_switch_targets;
+    lastchangedtarg = 0.0F - targrand.uniformInc(0, 1) * configuration().ai.targeting.min_time_to_switch_targets_flt;
     had_target = false;
 }
 
@@ -151,7 +156,7 @@ FireAt::FireAt(float aggressivitylevel) : CommunicatingAI(WEAPON, STARGET) {
 }
 
 FireAt::FireAt() : CommunicatingAI(WEAPON, STARGET) {
-    ReInit(configuration()->ai.firing.aggressivity);
+    ReInit(configuration().ai.firing.aggressivity_flt);
 }
 
 void FireAt::SignalChosenTarget() {
@@ -292,34 +297,25 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
         rangetotarget = .5 * gunrange;
     }
     if (gunrange <= 0) {
-        static float mountless_gunrange =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MountlessGunRange", "300000000"));
+        const float mountless_gunrange = configuration().ai.targeting.mountless_gun_range_flt;
         gunrange = mountless_gunrange;
     }     //probably a mountless capship. 50000 is chosen arbitrarily
     float inertial_priority = 0;
     {
-        static float mass_inertial_priority_cutoff =
-                XMLSupport::parse_float(vs_config->getVariable("AI",
-                        "Targetting",
-                        "MassInertialPriorityCutoff",
-                        "5000"));
-        if (me->getMass() > mass_inertial_priority_cutoff) {
-            static float mass_inertial_priority_scale =
-                    XMLSupport::parse_float(vs_config->getVariable("AI",
-                            "Targetting",
-                            "MassInertialPriorityScale",
-                            ".0000001"));
+        const float mass_inertial_priority_cutoff = configuration().ai.targeting.mass_inertial_priority_cutoff_flt;
+        if (me->GetMass() > mass_inertial_priority_cutoff) {
+            const float mass_inertial_priority_scale =
+                    configuration().ai.targeting.mass_inertial_priority_scale_flt;
             Vector normv(me->GetVelocity());
             float Speed = me->GetVelocity().Magnitude();
             normv *= Speed ? 1.0f / Speed : 1.0f;
             Vector ourToThem = targ->Position() - me->Position();
             ourToThem.Normalize();
             inertial_priority =
-                    mass_inertial_priority_scale * (.5 + .5 * (normv.Dot(ourToThem))) * me->getMass() * Speed;
+                    mass_inertial_priority_scale * (.5 + .5 * (normv.Dot(ourToThem))) * me->GetMass() * Speed;
         }
     }
-    static float
-            threat_weight = XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "ThreatWeight", ".5"));
+    const float threat_weight = configuration().ai.targeting.threat_weight_flt;
     float threat_priority = (me->Threat() == targ) ? threat_weight : 0;
     threat_priority += (targ->Target() == me) ? threat_weight : 0;
     float role_priority01 = ((float) *rolepriority) / 31.;
@@ -486,29 +482,20 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     float gunspeed, gunrange, missilerange;
     parent->getAverageGunSpeed(gunspeed, gunrange, missilerange);
     static float targettimer = UniverseUtil::GetGameTime();    //timer used to determine passage of physics frames
-    static float mintimetoswitch =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MinTimeToSwitchTargets", "3"));
-    static float minnulltimetoswitch =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MinNullTimeToSwitchTargets", "5"));
-    static int minnumpollers =
-            float_to_int(XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Targetting",
-                    "MinNumberofpollersperframe",
-                    "5")));                    //maximum number of vessels allowed to search for a target in a given physics frame
-    static int maxnumpollers =
-            float_to_int(XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Targetting",
-                    "MaxNumberofpollersperframe",
-                    "49")));                    //maximum number of vessels allowed to search for a target in a given physics frame
-    static int numpollers[2] = {maxnumpollers, maxnumpollers};
+    const float mintimetoswitch = configuration().ai.targeting.min_time_to_switch_targets_flt;
+    const float minnulltimetoswitch = configuration().ai.targeting.min_null_time_to_switch_targets_flt;
+    const int minnumpollers = configuration().ai.targeting.min_number_of_pollers_per_frame;
+    //maximum number of vessels allowed to search for a target in a given physics frame
+    const int maxnumpollers = configuration().ai.targeting.max_number_of_pollers_per_frame;
+    int numpollers[2] = {maxnumpollers, maxnumpollers};
 
-    static int nextframenumpollers[2] = {maxnumpollers, maxnumpollers};
+    int nextframenumpollers[2] = {maxnumpollers, maxnumpollers};
     if (lastchangedtarg + mintimetoswitch > 0) {
         return;
     }          //don't switch if switching too soon
 
     Unit *curtarg = parent->Target();
-    int hastarg = (curtarg == NULL) ? 0 : 1;
+    int hastarg = (curtarg == nullptr) ? 0 : 1;
     //Following code exists to limit the number of craft polling for a target in a given frame - this is an expensive operation, and needs to be spread out, or there will be pauses.
     if ((UniverseUtil::GetGameTime()) - targettimer >= SIMULATION_ATOM * .99) {
         //Check if one or more physics frames have passed
@@ -554,8 +541,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     for (; (su = *subun) != NULL; ++subun) {
         static unsigned int inert = ROLES::getRole("INERT");
         static unsigned int pointdef = ROLES::getRole("POINTDEF");
-        static bool assignpointdef =
-                XMLSupport::parse_bool(vs_config->getVariable("AI", "Targetting", "AssignPointDef", "true"));
+        const bool assignpointdef = configuration().ai.targeting.assign_point_def;
         if ((su->getAttackPreferenceChar() != pointdef) || assignpointdef) {
             if (su->getAttackPreferenceChar() != inert) {
                 AssignTBin(su, tbin);
@@ -570,17 +556,9 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     std::sort(tbin.begin(), tbin.end());
     float efrel = 0;
     float mytargrange = FLT_MAX;
-    static float unitRad =
-            XMLSupport::parse_float(vs_config->getVariable("AI",
-                    "Targetting",
-                    "search_extra_radius",
-                    "1000"));                 //Maximum target radius that is guaranteed to be detected
-    static char maxrolepriority =
-            XMLSupport::parse_int(vs_config->getVariable("AI", "Targetting", "search_max_role_priority", "16"));
-    static int maxtargets = XMLSupport::parse_int(vs_config->getVariable("AI",
-            "Targetting",
-            "search_max_candidates",
-            "64"));   //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
+    const float unitRad = configuration().ai.targeting.search_extra_radius_flt;                 //Maximum target radius that is guaranteed to be detected
+    const char maxrolepriority = configuration().ai.targeting.search_max_role_priority;
+    const int maxtargets = configuration().ai.targeting.search_max_candidates;   //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
     UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->radar.GetMaxRange(), unitRad);
     StaticTuple<float, 2> maxranges{};
 
@@ -592,8 +570,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     double pretable = queryTime();
     unitLocator.action.init(this, parent, gunrange, &tbin, maxranges, maxrolepriority, maxtargets);
     static int gcounter = 0;
-    static int
-            min_rechoose_interval = XMLSupport::parse_int(vs_config->getVariable("AI", "min_rechoose_interval", "128"));
+    const int min_rechoose_interval = configuration().ai.targeting.min_rechoose_interval;
     if (curtarg) {
         if (gcounter++ < min_rechoose_interval || rand() / 8 < RAND_MAX / 9) {
             //in this case only look at potentially *interesting* units rather than huge swaths of nearby units...including target, threat, players, and leader's target
@@ -684,12 +661,12 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
     if (targ == parent->Target()) {
         distance = dist;
     }
-    const float firewhen = configuration()->ai.firing.in_weapon_range;
+    const float firewhen = configuration().ai.firing.in_weapon_range_flt;
     const float fireangle_minagg =
-            (float) cos(M_PI * configuration()->ai.firing.maximum_firing_angle.minagg
+            (float) cos(M_PI * configuration().ai.firing.maximum_firing_angle.minagg
                     / 180.0);                                                                      //Roughly 10 degrees
     const float fireangle_maxagg =
-            (float) cos(M_PI * configuration()->ai.firing.maximum_firing_angle.maxagg
+            (float) cos(M_PI * configuration().ai.firing.maximum_firing_angle.maxagg
                     / 180.0);                                                                      //Roughly 18 degrees
     float temp = parent->TrackingGuns(missilelock);
     bool isjumppoint = targ->getUnitType() == Vega_UnitType::planet && ((Planet *) targ)->GetDestinations().empty() == false;
@@ -704,11 +681,11 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
             Cockpit *player = _Universe->isPlayerStarship(targ);
             if (player) {
                 VS_LOG(trace, (boost::format("%1%: player is not null") % __FUNCTION__));
-                const int max_attackers = configuration()->ai.max_player_attackers;
+                const int max_attackers = configuration().ai.max_player_attackers;
                 int attackers = player->number_of_attackers;
                 if (attackers > max_attackers && max_attackers > 0) {
                     VS_LOG(trace, (boost::format("%1%: attackers > max_attackers && max_attackers > 0") % __FUNCTION__));
-                    const float attacker_switch_time = configuration()->ai.attacker_switch_time;
+                    const float attacker_switch_time = configuration().ai.attacker_switch_time_flt;
                     int curtime =
                             (int) fmod(floor(UniverseUtil::GetGameTime() / attacker_switch_time), (float) (1 << 24));
                     int seed = ((((size_t) parent) & 0xffffffff) ^ curtime);
@@ -737,8 +714,7 @@ unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile) {
     if (un) {
         firebitm = (1 << un->getUnitRoleChar());
 
-        static bool AlwaysFireAutotrackers =
-                XMLSupport::parse_bool(vs_config->getVariable("AI", "AlwaysFireAutotrackers", "true"));
+        const bool AlwaysFireAutotrackers = configuration().ai.always_fire_autotrackers;
         if (shouldfire) {
             firebitm |= ROLES::FIRE_GUNS;
         }
@@ -754,7 +730,7 @@ unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile) {
 }
 
 void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
-    const float missiledelay = configuration()->ai.missile_gun_delay;
+    const float missiledelay = configuration().ai.missile_gun_delay_flt;
     //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
     bool fire_missile = lockmissile && randomInt(RAND_MAX) < RAND_MAX * missileprobability * SIMULATION_ATOM;
     delay += SIMULATION_ATOM; //simulation_atom_var?
@@ -783,8 +759,7 @@ bool FireAt::isJumpablePlanet(Unit *targ) {
 using std::string;
 
 void FireAt::PossiblySwitchTarget(bool unused) {
-    static float
-            targettime = XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "TimeUntilSwitch", "20"));
+    const float targettime = configuration().ai.targeting.time_until_switch_flt;
     if ((targettime <= 0) || (vsrandom.uniformInc(0, 1) < simulation_atom_var / targettime)) {
         bool ct = true;
         Flightgroup *fg;
@@ -807,19 +782,19 @@ void FireAt::Execute() {
     done = tmp;
     Unit *targ;
     if (parent->getUnitType() == Vega_UnitType::unit) {
-        const float cont_update_time = configuration()->ai.contraband_update_time;
+        const float cont_update_time = configuration().ai.contraband_update_time_flt;
         //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
         if (rand() < RAND_MAX * SIMULATION_ATOM / cont_update_time) {
             UpdateContrabandSearch();
         }
-        const float cont_initiate_time = configuration()->ai.comm_initiate_time;
+        const float cont_initiate_time = configuration().ai.comm_initiate_time_flt;
         //Or here?
         if (static_cast<float>(rand()) < (static_cast<float>(RAND_MAX) * (SIMULATION_ATOM / cont_initiate_time))) {
-            const float contraband_initiate_time = configuration()->ai.contraband_initiate_time;
-            const float comm_to_player = configuration()->ai.comm_to_player_percent;
-            const float comm_to_target = configuration()->ai.comm_to_target_percent;
-            const float contraband_to_player = configuration()->ai.contraband_to_player_percent;
-            const float contraband_to_target = configuration()->ai.contraband_to_target_percent;
+            const float contraband_initiate_time = configuration().ai.contraband_initiate_time_flt;
+            const float comm_to_player = configuration().ai.comm_to_player_percent_flt;
+            const float comm_to_target = configuration().ai.comm_to_target_percent_flt;
+            const float contraband_to_player = configuration().ai.contraband_to_player_percent_flt;
+            const float contraband_to_target = configuration().ai.contraband_to_target_percent_flt;
 
             unsigned int modulo = static_cast<unsigned int>(contraband_initiate_time / cont_initiate_time);
             if (modulo < 1) {

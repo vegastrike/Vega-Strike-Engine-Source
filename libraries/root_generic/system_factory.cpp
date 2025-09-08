@@ -55,6 +55,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "vega_cast_utils.h"
+
 namespace pt = boost::property_tree;
 namespace alg = boost::algorithm;
 
@@ -216,7 +218,7 @@ void SystemFactory::processRing(Star_XML *xml, Object &object, Planet *owner) {
     initializeAlpha(object, blend_source, blend_destination);
 
     // Get the planet the ring will encircle
-    Unit *unit = static_cast<Unit *>(owner);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(owner);
     if (owner == nullptr) {
         return;
     }
@@ -353,8 +355,8 @@ Planet *SystemFactory::processPlanet(Star_XML *xml, Object &object, Planet *owne
     // Adjust speed and rotation
     // Discussion - the original value (day/year) needs to be adjusted to velocity
     // by multiplying
-    float float_pi = static_cast<float>(M_PI);
-    float float_year_scale = static_cast<float>(game_options()->YearScale);
+    float float_pi = M_PI;
+    float float_year_scale = configuration().physics.year_scale_flt;
     // TODO: turn floating point comparisons into a function
     if (std::fabs(rotational_velocity) > .00001f) {
         rotational_velocity = 2.0f * float_pi / (float_year_scale * rotational_velocity);
@@ -432,7 +434,7 @@ void SystemFactory::processSpaceElevator(Object &object, Planet *owner) {
     string varname = getStringAttribute(object, "varname");
     float varvalue = getFloatAttribute(object, "varvalue", 0.0f);
 
-    Unit *unit = static_cast<Unit *>(owner);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(owner);
 
     if (owner == nullptr || unit->getUnitType() != Vega_UnitType::planet) {
         return;
@@ -459,7 +461,7 @@ void SystemFactory::processSpaceElevator(Object &object, Planet *owner) {
 }
 
 void SystemFactory::processFog(Star_XML *xml, Object &object, Planet *owner) {
-    if (!game_options()->usePlanetFog) {
+    if (!configuration().graphics.use_planet_fog) {
         return;
     }
 
@@ -523,8 +525,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
     int faction = 0;
     int neutralfaction = FactionUtil::GetNeutralFaction();
 
-    float scalex = getFloatAttribute(object, "difficulty",
-            static_cast<float>(game_options()->AsteroidDifficulty));
+    float scalex = getFloatAttribute(object, "difficulty", configuration().physics.asteroid_difficulty_flt);
     float absolute_scalex = std::fabs(scalex);
     double velocity = getDoubleAttribute(object, "year", 0.0);
     float rotational_velocity = getFloatAttribute(object, "day", 0.0f);
@@ -559,14 +560,14 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
     // I assume negative means counter movement and therefore fabs
     // TODO: this code is repeated. Refactor into function
     float float_pi = static_cast<float>(M_PI);
-    float float_year_scale = static_cast<float>(game_options()->YearScale);
+    float float_year_scale = configuration().physics.year_scale_flt;
     // TODO: turn floating point comparisons into a function
     if (std::fabs(rotational_velocity) > .00001f) {
         rotational_velocity = 2.0f * float_pi / (float_year_scale * rotational_velocity);
     }
 
     if (std::fabs(velocity) > .00001) {
-        velocity = 2.0 * M_PI / (game_options()->YearScale * velocity);
+        velocity = 2.0 * M_PI / (configuration().physics.year_scale_flt * velocity);
     }
 
     if (boost::iequals(element, "nebula")) {
@@ -591,11 +592,11 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
 
         if (unit->faction != neutralfaction) {
             unit->SetTurretAI(); //FIXME un de-referenced before allocation
-            unit->EnqueueAI(new Orders::FireAt(configuration()->ai.firing.aggressivity)); //FIXME un de-referenced before allocation
+            unit->EnqueueAI(new Orders::FireAt(configuration().ai.firing.aggressivity_flt)); //FIXME un de-referenced before allocation
         }
     } else if (boost::iequals(element, "asteroid")) {
         Flightgroup *fg = getStaticAsteroidFlightgroup(faction);
-        unit = static_cast<Unit *>(
+        unit = vega_dynamic_cast_ptr<Unit>(
                 new Asteroid(filename.c_str(),
                         faction, fg, fg->nr_ships - 1,
                         absolute_scalex));
@@ -604,7 +605,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
         } //FIXME un de-referenced before allocation
 
     } else if (boost::iequals(element, "enhancement")) {
-        unit = static_cast<Unit *>(
+        unit = vega_dynamic_cast_ptr<Unit>(
                 new Enhancement(filename.c_str(), faction, string("")));
 
     } else if (boost::iequals(element, "building") ||
@@ -620,6 +621,11 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
 
         unit->EnqueueAI(new Orders::AggressiveAI("default.agg.xml"));
         unit->SetTurretAI(); // This was only applied to ct in original code
+    }
+
+    if (unit == nullptr) {
+        VS_LOG(error, (boost::format("%1%: unit is null!") % __FUNCTION__));
+        return;
     }
 
     for (auto &destination : destinations) {

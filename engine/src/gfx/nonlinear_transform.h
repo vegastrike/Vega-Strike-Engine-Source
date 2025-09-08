@@ -1,10 +1,12 @@
-/**
+/*
  * nonlinear_transform.h
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +14,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -21,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H
 #define VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H
@@ -37,9 +39,8 @@
  */
 class IdentityTransform {
 public:
-    virtual ~IdentityTransform() {
-        // dtor
-    }
+    /// dtor
+    virtual ~IdentityTransform() = default;
 
 ///Transforms in a possibly nonlinear way the point to some new space
     virtual QVector Transform(const QVector &v) const {
@@ -100,23 +101,23 @@ public:
         return M_PI / scalez;
     }
 
-    QVector Transform(const QVector &v) const {
+    QVector Transform(const QVector &v) const override {
         Vector T(v.i * scalex, r + v.j, v.k * scalez - .5 * M_PI);
         double cosphi = cos(T.k);
         return QVector(T.j * cosphi * cos(T.i), static_cast<double>(T.j) * sin(T.k), T.j * cosphi * sin(T.i));
     }
 
-    QVector TransformNormal(const QVector &point, const QVector &n) const {
+    QVector TransformNormal(const QVector &point, const QVector &n) const override {
         return SphericalTransform::Transform(n + point) - Transform(point);
     }
 
-    QVector InvTransform(const QVector &v) const {
+    QVector InvTransform(const QVector &v) const override {
         float rplusy = v.Magnitude();
         //float lengthxypln = sqrtf (rplusy*rplusy-v.j*v.j);//pythagorus
         return QVector((atan2(-v.k, -v.i) + M_PI) / scalex, rplusy - r, (asin(v.j / rplusy) + M_PI * .5) / scalez);
     }
 
-    CLIPSTATE BoxInFrustum(Vector &min, Vector &max, const Vector &campos) const {
+    CLIPSTATE BoxInFrustum(Vector &min, Vector &max, const Vector &campos) const override {
         const float rendermin = 3;
         /*
          *  float tmpx = fabs(campos.i-min.i);float maxx = fabs(campos.i-max.i);
@@ -133,7 +134,10 @@ public:
 
         return GFXSpherePartiallyInFrustum(tmax, rad);
     }
+
+    ~SphericalTransform() override = default;
 };
+
 /*
  *  class PlanetaryTransform:public SphericalTransform {
  *  Vector Origin;

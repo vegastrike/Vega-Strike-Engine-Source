@@ -1,8 +1,12 @@
 /*
  * manifest.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef MANIFEST_H
@@ -33,31 +37,37 @@
 /**
  * A manifest is a list of items in a cargo hold.
  * The master part list is a special, singleton instance holding all items
- * in the game. It is read only (const). Its short is MPL.
+ * in the game. Its shorthand is MPL.
+ * To prevent corruption of the MPL, Manifest is read-only.
+ * All write functions are moved to the CargoHold class.
  **/
 class Manifest {
+protected:
     std::vector<Cargo> _items;
 
+private:
     Manifest(int dummy); // Create the MPL singleton.
 public:
     Manifest();
-    Manifest(std::string category); // Create a subset of the MPL for a category
+    
+    void AddManifest(const std::vector<Cargo>& cargo_items); // For testing
 
     static Manifest& MPL(); // Get the master part list singleton
-    Cargo GetCargoByName(const std::string name);
-    Cargo GetRandomCargo(int quantity = 0);
-    Cargo GetRandomCargoFromCategory(std::string category, int quantity = 0);
-    Manifest GetCategoryManifest(std::string category);
-    Manifest GetMissionManifest();
+    Cargo GetCargoByName(const std::string name) const;
+    Cargo GetRandomCargo(int quantity = 0) const;
+    Cargo GetRandomCargoFromCategory(std::string category, int quantity = 0) const;
+    Manifest GetCategoryManifest(std::string category) const;
+    Manifest GetMissionManifest() const;
+    
+    std::vector<Cargo> GetItems() const;
+    bool Empty() const;
+    int Size() const;
 
-    std::vector<Cargo> getItems() { return _items; }
-    bool empty() { return _items.empty(); }
-    int size() { return _items.size(); }
+    int GetIndex(const Cargo& cargo) const;
+    int GetIndex(const std::string& name, const std::string& category = "") const;
 
-    const std::string GetShipDescription(const std::string unit_key);
+    bool HasCargo(const std::string& name) const;
 };
 
-
-
-
 #endif //MANIFEST_H
+

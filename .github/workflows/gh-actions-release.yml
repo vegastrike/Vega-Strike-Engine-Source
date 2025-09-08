@@ -1,4 +1,7 @@
 name: 'GH Actions - Release'
+permissions:
+    contents: write
+    pull-requests: read
 
 on:
   release:
@@ -22,39 +25,45 @@ jobs:
         include:
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'deb'
           # Source tarballs only
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'tar.[xb]z*'
           - FROM:     'linuxmintd/mint22-amd64'
             COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            ARTIFACT_EXT: 'deb'
+          - FROM:     'debian:trixie'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'deb'
           - FROM:     'debian:bookworm'
             COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'deb'
+          - FROM:     'fedora:42'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:41'
             COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:40'
             COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            ARTIFACT_EXT: 'rpm'
+          - FROM:     'opensuse/leap:16.0'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'rpm'
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 2
           submodules: false
@@ -72,10 +81,9 @@ jobs:
         env:
           FROM:       ${{ matrix.FROM }}
           COMPILER:   ${{ matrix.COMPILER }}
-          FLAGS:      '-DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }} -DENABLE_PIE=${{ matrix.ENABLE_PIE }}'
           MY_OS_NAME: linux
           IS_RELEASE: 1
-        run: script/cibuild $FLAGS
+        run: script/cibuild --preset-name=${{ matrix.preset-name }}
       - name: Upload the artifacts
         uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
         env:

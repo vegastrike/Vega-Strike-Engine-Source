@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * star_system_jump.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "src/vegastrike.h"
@@ -41,10 +47,15 @@
 #include "root_generic/options.h"
 
 void CacheJumpStar(bool destroy) {
-    static Animation *cachedani = new Animation(game_options()->jumpgate.c_str(), true, .1, MIPMAP, false);
+    static Animation* cached_ani = nullptr;
+    static bool initialized = false;
+    if (!initialized) {
+        initialized = true;
+        cached_ani = new Animation(configuration().graphics.jump_gate.c_str(), true, 0.1, MIPMAP, false);
+    }
     if (destroy) {
-        delete cachedani;
-        cachedani = nullptr;
+        delete cached_ani;
+        cached_ani = nullptr;
     }
 }
 
@@ -94,63 +105,66 @@ unsigned int AddAnimation(const QVector &pos,
 }
 
 static unsigned int AddJumpAnimation(const QVector &pos, const float size, bool mvolatile = false) {
-    return AddAnimation(pos, size, mvolatile, game_options()->jumpgate, .95);
+    return AddAnimation(pos, size, mvolatile, configuration().graphics.jump_gate, .95);
 }
 
 void StarSystem::VolitalizeJumpAnimation(const int ani) {
     if (ani != -1) {
-        VolatileJumpAnimations.push_back(ResizeAni(JumpAnimations[ani].a, game_options()->jumpanimationshrink));
-        JumpAnimations[ani].a = NULL;
+        VolatileJumpAnimations.emplace_back(JumpAnimations[ani].a, configuration().graphics.jump_animation_shrink_flt);
+        JumpAnimations[ani].a = nullptr;
         AnimationNulls.push_back(ani);
     }
 }
 
 void StarSystem::DrawJumpStars() {
-    for (unsigned int kk = 0; kk < pendingjump.size(); ++kk) {
-        int k = pendingjump[kk]->animation;
+    for (const auto& jump : pendingjump) {
+        const int k = jump->animation;
         if (k != -1) {
-            Unit *un = pendingjump[kk]->un.GetUnit();
+            const Unit* un = jump->un.GetUnit();
             if (un) {
                 Vector p, q, r;
                 un->GetOrientation(p, q, r);
 
                 JumpAnimations[k].a
-                        ->SetPosition(
-                                un->Position() + r.Cast() * un->rSize() * (pendingjump[kk]->delay + .25));
+                                 ->SetPosition(
+                                     un->Position() + r.Cast() * un->rSize() * (jump->delay + .25));
                 JumpAnimations[k].a->SetOrientation(p, q, r);
-                float dd = un->rSize() * game_options()->jumpgatesize
-                        * (un->jump_drive.Delay() - pendingjump[kk]->delay) / (float) un->jump_drive.Delay();
+                const float dd = un->rSize() * configuration().graphics.jump_gate_size_dbl
+                        * (un->jump_drive.Delay() - jump->delay) / un->jump_drive.Delay();
                 JumpAnimations[k].a->SetDimensions(dd, dd);
             }
         }
     }
-    for (size_t i = 0; i < JumpAnimations.size(); ++i) {
-        if (JumpAnimations[i].a) {
-            JumpAnimations[i].a->Draw();
+    for (const auto& jump_animation : JumpAnimations) {
+        if (jump_animation.a) {
+            jump_animation.a->Draw();
         }
     }
-    for (size_t i = 0; i < VolatileJumpAnimations.size(); ++i) {
-        if (VolatileJumpAnimations[i].a) {
-            float hei, wid;
-            VolatileJumpAnimations[i].a->GetDimensions(hei, wid);
-            VolatileJumpAnimations[i].a->SetDimensions(VolatileJumpAnimations[i].percent * hei,
-                    VolatileJumpAnimations[i].percent * wid);
-            if (VolatileJumpAnimations[i].a->Done()) {
-                delete VolatileJumpAnimations[i].a;
-                VolatileJumpAnimations[i].a = nullptr;
-                VolatileJumpAnimations.erase(VolatileJumpAnimations.begin() + i);
-                --i;
-            } else {
-                VolatileJumpAnimations[i].a->Draw();
+    for (const auto& jump_animation : VolatileJumpAnimations) {
+        if (jump_animation.a) {
+            float width;
+            float height;
+            jump_animation.a->GetDimensions(width, height);
+            jump_animation.a->SetDimensions(jump_animation.percent * width, jump_animation.percent * height);
+            if (!jump_animation.a->Done()) {
+                jump_animation.a->Draw();
             }
         }
     }
+    const auto first_to_remove = std::stable_partition(VolatileJumpAnimations.begin(), VolatileJumpAnimations.end(),
+                                                 [](ResizeAni& ani) -> bool {
+                                                     return !ani.a->Done();
+                                                 });
+    for (auto iter = first_to_remove; iter != VolatileJumpAnimations.end(); ++iter) {
+        delete iter->a;
+    }
+    VolatileJumpAnimations.erase(first_to_remove, VolatileJumpAnimations.end());
 }
 
 void StarSystem::DoJumpingComeSightAndSound(Unit *un) {
     Vector p, q, r;
     un->GetOrientation(p, q, r);
-    unsigned int myani = AddJumpAnimation(un->LocalPosition(), un->rSize() * game_options()->jumpgatesize, true);
+    unsigned int myani = AddJumpAnimation(un->LocalPosition(), un->rSize() * configuration().graphics.jump_gate_size_flt, true);
     VolatileJumpAnimations[myani].a->SetOrientation(p, q, r);
 }
 
@@ -160,8 +174,11 @@ int StarSystem::DoJumpingLeaveSightAndSound(Unit *un) {
     un->GetOrientation(p, q, r);
     ani = AddJumpAnimation(un->Position() + r.Cast() * un->rSize() * (un->jump_drive.Delay() + .25),
             10 * un->rSize());
-    static int jumpleave = AUDCreateSound(game_options()->jumpleave, false);
-    AUDPlay(jumpleave, un->LocalPosition(), un->GetVelocity(), 1);
+    static boost::optional<int> jump_leave{};
+    if (jump_leave == boost::none) {
+        jump_leave = AUDCreateSound(configuration().audio.unit_audio.jump_leave, false);
+    }
+    AUDPlay(jump_leave.get(), un->LocalPosition(), un->GetVelocity(), 1);
     return ani;
 }
 

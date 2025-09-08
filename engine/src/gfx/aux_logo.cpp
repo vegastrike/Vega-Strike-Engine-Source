@@ -1,7 +1,13 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
- * jacks, dan_w, ashieh, griwodz, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * aux_logo.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file. Specifically:
+ * ace123, surfdargent, klaussfreire, jacks, dan_w, ashieh, griwodz, pyramid3d
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -18,7 +24,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -151,8 +157,8 @@ void Logo::ProcessDrawQueue() {
     if (!g_game.use_logos || draw_queue->empty()) {
         return;
     }
-    static float offs = XMLSupport::parse_float(vs_config->getVariable("graphics", "LogoOffset", "-1"));
-    static float scl = XMLSupport::parse_float(vs_config->getVariable("graphics", "LogoOffsetScale", "-4.0"));
+    const float offs = configuration().graphics.logo_offset_flt;
+    const float scl = configuration().graphics.logo_offset_scale_flt;
 
     GFXEnable(TEXTURE0);
     GFXEnable(TEXTURE1);

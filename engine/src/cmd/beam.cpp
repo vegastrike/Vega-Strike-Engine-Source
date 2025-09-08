@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * beam.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "src/vegastrike.h"
@@ -43,7 +49,6 @@ using std::vector;
  */
 extern double interpolation_blend_factor;
 extern void AdjustMatrixToTrackTarget(Matrix &mat, const Vector &vel, Unit *target, float speed, bool lead, float cone);
-extern Cargo *GetMasterPartList(const char *);
 extern bool AdjustMatrix(Matrix &mat, const Vector &velocity, Unit *target, float speed, bool lead, float cone);
 
 /*
@@ -94,21 +99,15 @@ static bool beamCheckCollision(QVector pos, float len, const Collidable &un) {
 
 void Beam::RecalculateVertices(const Matrix &trans) {
     GFXColorVertex *beam = (vlist->BeginMutate(0))->colors;
-    static float fadelocation = XMLSupport::parse_float(vs_config->getVariable("graphics", "BeamFadeoutLength", ".8"));
-    static float hitfadelocation =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "BeamFadeoutHitLength", ".95"));
-    static float scoopangle =
-            //In radians - the /2 is because of the way in which we check against the cone.
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.scoop_fov", "0.5")) / 2;
-    static float scooptanangle = (float) tan(scoopangle);
-    static bool scoop = XMLSupport::parse_bool(vs_config->getVariable("graphics", "tractor.scoop", "true"));
-    static float scoopa =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "tractor.scoop_alpha_multiplier", "2.5"));
-    static int radslices =
-            XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_rad_slices", "10"))
-                    | 1;         //Must be odd
-    static int longslices =
-            XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_long_slices", "10"));
+    const float fadelocation = configuration().graphics.beam_fadeout_length_flt;
+    const float hitfadelocation = configuration().graphics.beam_fadeout_hit_length_flt;
+    //In radians - the /2 is because of the way in which we check against the cone.
+    const float scoopangle = configuration().physics.tractor.scoop_fov_flt / 2.0F;
+    const float scooptanangle = (float) tan(scoopangle);
+    const bool scoop = configuration().physics.tractor.scoop;
+    const float scoopa = configuration().physics.tractor.scoop_alpha_multiplier_flt;
+    const int radslices = configuration().physics.tractor.scoop_rad_slices;
+    const int longslices = configuration().physics.tractor.scoop_long_slices;
     const float fadeinlength = 4;
     const bool tractor = (damagerate < 0 && phasedamage > 0);
     const bool repulsor = (damagerate > 0 && phasedamage < 0);
@@ -358,10 +357,8 @@ Beam::Beam(const Transformation &trans, const WeaponInfo &clne, void *own, Unit 
     impact = ALIVE;
     owner = own;
     numframes = 0;
-    static int radslices = XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_rad_slices", "10"))
-            | 1;    //Must be odd
-    static int
-            longslices = XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_long_slices", "10"));
+    const int radslices = configuration().physics.tractor.scoop_rad_slices | 1;    //Must be odd
+    const int longslices = configuration().physics.tractor.scoop_long_slices;
     lastlength = 0;
     curlength = simulation_atom_var * speed;
     lastthick = 0;
@@ -407,10 +404,8 @@ void Beam::Reinitialize() {
 
     impact = ALIVE;
     numframes = 0;
-    static int radslices = XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_rad_slices", "10"))
-            | 1;    //Must be odd
-    static int
-            longslices = XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_long_slices", "10"));
+    const int radslices = configuration().physics.tractor.scoop_rad_slices | 1;    //Must be odd
+    const int longslices = configuration().physics.tractor.scoop_long_slices;
     lastlength = 0;
     curlength = simulation_atom_var * speed;
     lastthick = 0;
@@ -450,57 +445,46 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
     QVector end(center + direction.Scale(curlength));
     enum Vega_UnitType type = target->getUnitType();
     if (target == owner || type == Vega_UnitType::nebula || type == Vega_UnitType::asteroid) {
-        static bool collideroids =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "AsteroidWeaponCollision", "false"));
+        const bool collideroids = configuration().physics.asteroid_weapon_collision;
         if (type != Vega_UnitType::asteroid || (!collideroids)) {
             return false;
         }
     }
-    static bool collidejump = XMLSupport::parse_bool(vs_config->getVariable("physics", "JumpWeaponCollision", "false"));
+    const bool collidejump = configuration().physics.jump_weapon_collision;
     if (type == Vega_UnitType::planet && (!collidejump) && !target->GetDestinations().empty()) {
         return false;
     }
     //A bunch of needed config variables - its best to have them here, so that they're loaded the
     //very first time Collide() is called. That way, we avoid hiccups.
-    static float nbig = XMLSupport::parse_float(vs_config->getVariable("physics", "percent_to_tractor", ".1"));
+    const float nbig = configuration().physics.tractor.percent_to_tractor_flt;
     int upgradesfaction = FactionUtil::GetUpgradeFaction();
     static int cargofaction = FactionUtil::GetFactionIndex("cargo");
-    static bool c_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.cargo.force_push", "true"));
-    static bool c_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.cargo.force_in", "true"));
-    static bool u_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.upgrade.force_push", "true"));
-    static bool u_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.upgrade.force_in", "true"));
-    static bool f_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.faction.force_push", "true"));
-    static bool f_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.faction.force_in", "true"));
-    static bool d_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.disabled.force_push", "true"));
-    static bool d_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.disabled.force_in", "true"));
-    static bool o_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.others.force_push", "false"));
-    static bool o_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.others.force_in", "false"));
-    static bool scoop = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.scoop", "true"));
-    static float scoopangle =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.scoop_angle", "0.5"));     //In radians
-    static float scoopcosangle = (float) cos(scoopangle);
-    static float maxrelspeed =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.max_relative_speed", "150"));
-    static float c_ors_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.cargo.distance_own_rsize", "1.5"));
-    static float c_trs_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.cargo.distance_tgt_rsize", "1.1"));
-    static float c_o = XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.cargo.distance", "0"));
-    static float u_ors_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.ugprade.distance_own_rsize", "1.5"));
-    static float u_trs_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.upgrade.distance_tgt_rsize", "1.1"));
-    static float u_o = XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.upgrade.distance", "0"));
-    static float f_ors_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.faction.distance_own_rsize", "2.2"));
-    static float f_trs_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.faction.distance_tgt_rsize", "2.2"));
-    static float f_o = XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.faction.distance", "0"));
-    static float o_ors_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.others.distance_own_rsize", "1.1"));
-    static float o_trs_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.others.distance_tgt_rsize", "1.1"));
-    static float o_o = XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.others.distance", "0"));
+    const bool c_fp = configuration().physics.tractor.cargo.force_push;
+    const bool c_fi = configuration().physics.tractor.cargo.force_in;
+    const bool u_fp = configuration().physics.tractor.upgrade.force_push;
+    const bool u_fi = configuration().physics.tractor.upgrade.force_in;
+    const bool f_fp = configuration().physics.tractor.faction.force_push;
+    const bool f_fi = configuration().physics.tractor.faction.force_in;
+    const bool d_fp = configuration().physics.tractor.disabled.force_push;
+    const bool d_fi = configuration().physics.tractor.disabled.force_in;
+    const bool o_fp = configuration().physics.tractor.others.force_push;
+    const bool o_fi = configuration().physics.tractor.others.force_in;
+    const bool scoop = configuration().physics.tractor.scoop;
+    const float scoopangle = configuration().physics.tractor.scoop_angle_flt;     //In radians
+    const float scoopcosangle = cos(scoopangle);
+    const float maxrelspeed = configuration().physics.tractor.max_relative_speed;
+    const float c_ors_m = configuration().physics.tractor.cargo.distance_own_rsize_flt;
+    const float c_trs_m = configuration().physics.tractor.cargo.distance_tgt_rsize_flt;
+    const float c_o = configuration().physics.tractor.cargo.distance_flt;
+    const float u_ors_m = configuration().physics.tractor.upgrade.distance_own_rsize_flt;
+    const float u_trs_m = configuration().physics.tractor.upgrade.distance_tgt_rsize_flt;
+    const float u_o = configuration().physics.tractor.upgrade.distance_flt;
+    const float f_ors_m = configuration().physics.tractor.faction.distance_own_rsize_flt;
+    const float f_trs_m = configuration().physics.tractor.faction.distance_tgt_rsize_flt;
+    const float f_o = configuration().physics.tractor.faction.distance_flt;
+    const float o_ors_m = configuration().physics.tractor.others.distance_own_rsize_flt;
+    const float o_trs_m = configuration().physics.tractor.others.distance_tgt_rsize_flt;
+    const float o_o = configuration().physics.tractor.others.distance_flt;
     bool tractor = (damagerate < 0 && phasedamage > 0);
     bool repulsor = (damagerate > 0 && phasedamage < 0);
     if (scoop && (tractor || repulsor)) {
@@ -553,7 +537,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                             * (appldam
                                     / sqrt( /*(target->sim_atom_multiplier
                                                  > 0) ? target->sim_atom_multiplier : */ 1.0)
-                                    * std::min(1.0f, target->getMass())));
+                                    * std::min(1.0, target->GetMass())));
                 }
             }
             float ors_m = o_ors_m, trs_m = o_trs_m, ofs = o_o;
@@ -572,11 +556,17 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                 if (target->faction == upgradesfaction || owner_rsize * nbig > target->rSize()) {
                     //we have our man!
                     //lets add our cargo to him
-                    Cargo *c = GetMasterPartList(target->name.get().c_str());
+
+                    Cargo *c = nullptr;
+                    try {
+                        Cargo cargo = Manifest::MPL().GetCargoByName(target->name.get());
+                        c = &cargo;
+                    } catch (const std::exception& e) {}
+                     
                     Cargo tmp;
                     bool isnotcargo = (c == NULL);
                     if (!isnotcargo) {
-                        if (c->GetCategory().find("upgrades") == 0) {
+                        if (c->IsComponent()) {
                             isnotcargo = true;
                         }
                     }
@@ -585,7 +575,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         c = &tmp;
                         tmp.SetName("Space_Salvage");
                         tmp.SetCategory("Uncategorized_Cargo");
-                        static float spacejunk = parse_float(vs_config->getVariable("cargo", "space_junk_price", "10"));
+                        const float spacejunk = configuration().cargo.space_junk_price_flt;
                         tmp.SetPrice(spacejunk);
                         tmp.SetQuantity(1);
                         tmp.SetMass(.001);
@@ -593,18 +583,9 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         if (target->faction != upgradesfaction) {
                             tmp.SetName(target->name);
                             tmp.SetCategory("starships");
-                            static float starshipprice =
-                                    XMLSupport::parse_float(vs_config->getVariable("cargo",
-                                            "junk_starship_price",
-                                            "100000"));
-                            static float starshipmass =
-                                    XMLSupport::parse_float(vs_config->getVariable("cargo",
-                                            "junk_starship_mass",
-                                            "50"));
-                            static float starshipvolume =
-                                    XMLSupport::parse_float(vs_config->getVariable("cargo",
-                                            "junk_starship_volume",
-                                            "1500"));
+                            const float starshipprice = configuration().cargo.junk_starship_price_flt;
+                            const float starshipmass = configuration().cargo.junk_starship_mass_flt;
+                            const float starshipvolume = configuration().cargo.junk_starship_volume_flt;
                             tmp.SetPrice(starshipprice);
                             tmp.SetQuantity(1);
                             tmp.SetMass(starshipmass);
@@ -614,25 +595,27 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                     if (c != NULL) {
                         Cargo adder = *c;
                         adder.SetQuantity(1);
-                        if (un->CanAddCargo(adder)) {
-                            un->AddCargo(adder);
-                            if (_Universe->isPlayerStarship(un)) {
-                                static int tractor_onboard =
-                                        AUDCreateSoundWAV(vs_config->getVariable("unitaudio", "player_tractor_cargo",
-                                                "tractor_onboard.wav"));
-                                AUDPlay(tractor_onboard, QVector(0, 0, 0), Vector(0, 0, 0), 1);
+                        if (un->cargo_hold.CanAddCargo(adder)) {
+                            un->cargo_hold.AddCargo(un, adder);
+                            if (un->IsPlayerShip()) {
+                                static boost::optional<int> tractor_onboard{};
+                                if (tractor_onboard == boost::none) {
+                                    tractor_onboard = AUDCreateSoundWAV(configuration().audio.unit_audio.player_tractor_cargo);
+                                }
+                                AUDPlay(tractor_onboard.get(), QVector(0, 0, 0), Vector(0, 0, 0), 1);
                             } else {
                                 Unit *tmp = _Universe->AccessCockpit()->GetParent();
                                 if (tmp && tmp->owner == un) {
                                     //Subunit of player (a turret)
-                                    static int tractor_onboard_fromturret =
-                                            AUDCreateSoundWAV(vs_config->getVariable("unitaudio",
-                                                    "player_tractor_cargo_fromturret",
-                                                    "tractor_onboard.wav"));
-                                    AUDPlay(tractor_onboard_fromturret, QVector(0, 0, 0), Vector(0, 0, 0), 1);
+                                    static boost::optional<int> tractor_onboard_fromturret{};
+                                    if (tractor_onboard_fromturret == boost::none) {
+                                        tractor_onboard_fromturret = AUDCreateSoundWAV(configuration().audio.unit_audio.player_tractor_cargo_fromturret);
+                                    }
+                                    AUDPlay(tractor_onboard_fromturret.get(), QVector(0, 0, 0), Vector(0, 0, 0), 1);
                                 }
                             }
                             target->Kill();
+                            target = nullptr;
                         }
                     }
                 }
@@ -688,7 +671,7 @@ void Beam::ProcessDrawQueue() {
     GFXDisable(CULLFACE);     //don't want lighting on this baby
     GFXDisable(DEPTHWRITE);
     GFXPushBlendMode();
-    const bool blendbeams = configuration()->graphics.blend_guns;
+    const bool blendbeams = configuration().graphics.blend_guns;
     GFXBlendMode(ONE, blendbeams ? ONE : ZERO);
 
     GFXEnable(TEXTURE0);
@@ -756,6 +739,7 @@ void Beam::UpdatePhysics(const Transformation &trans,
         if (AUDIsPlaying(sound) && refiretime >= simulation_atom_var) {
             AUDStopPlaying(sound);
         }
+        refiretime += simulation_atom_var;
         return;
     }
     if (stability && numframes * simulation_atom_var > stability) {
@@ -767,8 +751,7 @@ void Beam::UpdatePhysics(const Transformation &trans,
     cumulative_transformation.Compose(trans, m);
     cumulative_transformation.to_matrix(cumulative_transformation_matrix);
     bool possible = AdjustMatrix(cumulative_transformation_matrix, Vector(0, 0, 0), targ, speed, false, tracking_cone);
-    static bool firemissingautotrackers =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "fire_missing_autotrackers", "true"));
+    const bool firemissingautotrackers = configuration().physics.fire_missing_autotrackers;
     if (targ && possible == false && !firemissingautotrackers) {
         Destabilize();
     }

@@ -152,6 +152,7 @@ void Cockpit::SetParent(Unit *unit, const char *filename, const char *unitmodnam
     }
     activeStarSystem = _Universe->activeStarSystem();          //cannot switch to units in other star systems.
     parent.SetUnit(unit);
+    unit->SetPlayerShip(); // This is the place to set it.
     savegame->SetPlayerLocation(pos);
     if (filename[0] != '\0') {
         this->GetUnitFileName() = std::string(filename);
@@ -168,7 +169,7 @@ void Cockpit::Delete() {
 }
 
 void Cockpit::RestoreGodliness() {
-    static float maxgodliness = XMLSupport::parse_float(vs_config->getVariable("physics", "player_godliness", "0"));
+    const float maxgodliness = configuration().physics.player_godliness_flt;
     godliness = maxgodliness;
     if (godliness > maxgodliness) {
         godliness = maxgodliness;
@@ -181,8 +182,7 @@ void Cockpit::InitStatic() {
 }
 
 bool Cockpit::unitInAutoRegion(Unit *un) {
-    static float autopilot_term_distance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance", "6000"));
+    const float autopilot_term_distance = configuration().physics.auto_pilot_termination_distance_flt;
     Unit *targ = autopilot_target.GetUnit();
     if (targ) {
         return UnitUtil::getSignificantDistance(un, targ)
@@ -193,7 +193,7 @@ bool Cockpit::unitInAutoRegion(Unit *un) {
 }
 
 static float getInitialZoomFactor() {
-    static float inizoom = XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+    const float inizoom = configuration().graphics.initial_zoom_factor_flt;
     return inizoom;
 }
 
@@ -204,54 +204,18 @@ Cockpit::Cockpit(const char *file, Unit *parent, const std::string &pilot_name)
         viewport_offset(0),
         zoomfactor(getInitialZoomFactor()),
         savegame(new SaveGame(pilot_name)) {
-    //static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
-    //int i;
     partial_number_of_attackers = -1;
     number_of_attackers = 0;
     fg = NULL;
     jumpok = 0;
     TimeOfLastCollision = -200;
-    /*
-     *  for (i=0;i<headlag;i++) {
-     *  headtrans.push_back (Matrix());
-     *  Identity(headtrans.back());
-     *  }
-     *  for (i=0;i<UnitImages::NUMGAUGES;i++) {
-     *  gauges[i]=NULL;
-     *  }
-     */
     activeStarSystem = NULL;
     InitStatic();
     //mesh=NULL;
     ejecting = false;
     currentcamera = 0;
     going_to_dock_screen = false;
-    //Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
     RestoreGodliness();
-
-    /*
-     *  draw_all_boxes=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAllTargetBoxes","false"));
-     *  draw_line_to_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTarget","false"));
-     *  draw_line_to_targets_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTargetsTarget","false"));
-     *  draw_line_to_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToITTS","false"));
-     *  always_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAlwaysITTS","false"));
-     *  radar_type=vs_config->getVariable("graphics","hud","radarType","WC");
-     *
-     *  friendly=GFXColor(-1,-1,-1,-1);
-     *  enemy=GFXColor(-1,-1,-1,-1);
-     *  neutral=GFXColor(-1,-1,-1,-1);
-     *  targeted=GFXColor(-1,-1,-1,-1);
-     *  targetting=GFXColor(-1,-1,-1,-1);
-     *  planet=GFXColor(-1,-1,-1,-1);
-     *  if (friendly.r==-1) {
-     *  vs_config->getColor ("enemy",&enemy.r);
-     *  vs_config->getColor ("friend",&friendly.r);
-     *  vs_config->getColor ("neutral",&neutral.r);
-     *  vs_config->getColor("target",&targeted.r);
-     *  vs_config->getColor("targetting_ship",&targetting.r);
-     *  vs_config->getColor("planet",&planet.r);
-     *  }
-     */
 
     Init(file);
 }
@@ -315,15 +279,14 @@ int Cockpit::Autopilot(Unit *target) {
                 //can he even start to autopilot
                 //SetView (CP_PAN);
                 un->AutoPilotTo(target, false);
-                static bool face_target_on_auto =
-                        XMLSupport::parse_bool(vs_config->getVariable("physics", "face_on_auto", "false"));
+                const bool face_target_on_auto = configuration().physics.face_target_on_auto;
                 if (face_target_on_auto) {
                     FaceTarget(un);
                 }
                 static double averagetime = GetElapsedTime() / getTimeCompression();
                 static double numave = 1.0;
                 averagetime += GetElapsedTime() / getTimeCompression();
-                //static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
+                //const float autospeed = configuration().physics.autospeed;//10 seconds for auto to kick in;
                 numave++;
                 /*
                  *  AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
@@ -331,12 +294,9 @@ int Cockpit::Autopilot(Unit *target) {
                  *                                                     _Universe->AccessCamera()->R,
                  *                                                     averagetime*autospeed/(numave));
                  */
-                static float initialzoom =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+                const float initialzoom = configuration().graphics.initial_zoom_factor_flt;
                 zoomfactor = initialzoom;
-                static float autotime = XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "autotime",
-                        "10"));                 //10 seconds for auto to kick in;
+                const float autotime = configuration().physics.auto_time_in_seconds_flt;                 //10 seconds for auto to kick in;
 
                 autopilot_time = autotime;
                 autopilot_target.SetUnit(target);
@@ -372,8 +332,7 @@ void SwitchUnits(Unit *ol, Unit *nw) {
 }
 
 static void SwitchUnitsTurret(Unit *ol, Unit *nw) {
-    static bool FlyStraightInTurret =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "ai_pilot_when_in_turret", "true"));
+    const bool FlyStraightInTurret = configuration().physics.ai_pilot_when_in_turret;
     if (FlyStraightInTurret) {
         SwitchUnits(ol, nw);
     } else {
@@ -435,7 +394,7 @@ bool Cockpit::tooManyAttackers() {
 }
 
 void Cockpit::updateAttackers() {
-    static int max_attackers = XMLSupport::parse_int(vs_config->getVariable("AI", "max_player_attackers", "0"));
+    const int max_attackers = configuration().ai.max_player_attackers;
     if (max_attackers == 0) {
         return;
     }
@@ -523,7 +482,7 @@ bool Cockpit::Update() {
                     tmpgot = true;
                     Unit *un;
                     for (un_iter ui = par->getSubUnits(); (un = *ui);) {
-                        if (_Universe->isPlayerStarship(un)) {
+                        if (un->IsPlayerShip()) {
                             ++ui;
                             continue;
                         }
@@ -548,7 +507,7 @@ bool Cockpit::Update() {
                         index = 0;
                     }
                     Unit *un = parentturret.GetUnit();
-                    if (un && (!_Universe->isPlayerStarship(un))) {
+                    if (un && !un->IsPlayerShip()) {
                         SetParent(un,
                                 GetUnitFileName().c_str(),
                                 this->unitmodname.c_str(),
@@ -562,14 +521,11 @@ bool Cockpit::Update() {
             }
         }
     }
-    static bool autoclear = XMLSupport::parse_bool(vs_config->getVariable("AI", "autodock", "false"));
+    const bool autoclear = configuration().ai.auto_dock;
     if (autoclear && par) {
         Unit *targ = par->Target();
         if (targ) {
-            static float autopilot_term_distance =
-                    XMLSupport::parse_float(vs_config->getVariable("physics",
-                            "auto_pilot_termination_distance",
-                            "6000"));
+            const float autopilot_term_distance = configuration().physics.auto_pilot_termination_distance_flt;
             float doubled = dockingdistance(targ, par);
             if (((targ->getUnitType() != Vega_UnitType::planet
                     && doubled < autopilot_term_distance)
@@ -598,15 +554,13 @@ bool Cockpit::Update() {
         if (switchunit[_Universe->CurrentCockpit()]) {
             parentturret.SetUnit(NULL);
 
-            static float initialzoom =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+            const float initialzoom = configuration().graphics.initial_zoom_factor_flt;
             zoomfactor = initialzoom;
             static int index = 0;
             switchunit[_Universe->CurrentCockpit()] = 0;
-            static bool switch_nonowned_units =
-                    XMLSupport::parse_bool(vs_config->getVariable("AI", "switch_nonowned_units", "true"));
+            const bool switch_nonowned_units = configuration().ai.switch_nonowned_units;
 //switch_nonowned_units = true;
-            //static bool switch_to_fac=XMLSupport::parse_bool(vs_config->getVariable("AI","switch_to_whole_faction","true"));
+            //const bool switch_to_fac=configuration().ai.switch_to_whole_faction;
 
             Unit *un;
             bool found = false;
@@ -619,7 +573,7 @@ bool Cockpit::Update() {
 //stealing a ship from a hired wingman.
                     if ((((par != NULL)
                             && (i++) >= index)
-                            || par == NULL) && (!_Universe->isPlayerStarship(un))
+                            || par == NULL) && (!un->IsPlayerShip())
                             && (switch_nonowned_units
                                     || (par != NULL
                                             && un->owner == par->owner)
@@ -701,13 +655,13 @@ bool Cockpit::Update() {
     }
     if (!par) {
         if (respawnunit.size() > _Universe->CurrentCockpit()) {
-            if (respawnunit[_Universe->CurrentCockpit()]) {
-                static float initialzoom =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+            if (respawnunit.at(_Universe->CurrentCockpit())) {
+                VS_LOG(debug, "respawnunit.at(_Universe->CurrentCockpit()) is truthy");
+                const float initialzoom = configuration().graphics.initial_zoom_factor_flt;
                 zoomfactor = initialzoom;
 
-                parentturret.SetUnit(NULL);
-                respawnunit[_Universe->CurrentCockpit()] = 0;
+                parentturret.SetUnit(nullptr);
+                respawnunit.at(_Universe->CurrentCockpit()) = 0;
                 std::string savegamefile = mission->getVariable("savegame", "");
                 unsigned int k;
                 for (k = 0; k < _Universe->numPlayers(); ++k) {
@@ -734,12 +688,11 @@ bool Cockpit::Update() {
                 QVector tmpoldpos = savegame->GetPlayerLocation();
                 savegame->SetPlayerLocation(QVector(FLT_MAX, FLT_MAX, FLT_MAX));
                 vector<string> packedInfo;
-                savegame->ParseSaveGame(savegamefile,
+                ComponentsManager::credits = savegame->ParseSaveGame(savegamefile,
                         newsystem,
                         newsystem,
                         pos,
                         setplayerXloc,
-                        this->credits,
                         packedInfo,
                         k);
                 UnpackUnitInfo(packedInfo);
@@ -749,8 +702,7 @@ bool Cockpit::Update() {
                 savegame->SetPlayerLocation(pos);
                 CopySavedShips(savegame->GetCallsign(), whichcp, packedInfo, true);
                 bool actually_have_save = false;
-                static bool persistent_on_load =
-                        XMLSupport::parse_bool(vs_config->getVariable("physics", "persistent_on_load", "true"));
+                const bool persistent_on_load = configuration().physics.persistent_on_load;
                 if (savegame->GetStarSystem() != "") {
                     actually_have_save = true;
                     newsystem = savegame->GetStarSystem() + ".system";
@@ -804,7 +756,6 @@ bool Cockpit::Update() {
 
                 this->SetParent(un, GetUnitFileName().c_str(), unitmodname.c_str(), savegame->GetPlayerLocation());
                 SwitchUnits(NULL, un);
-                this->credits = savegame->GetSavedCredits();
                 DoCockpitKeys();
                 _Universe->popActiveStarSystem();
                 _Universe->pushActiveStarSystem(ss);
@@ -846,7 +797,7 @@ void Cockpit::visitSystem(string systemname) {
 }
 
 Cockpit::~Cockpit() {
-    Delete();
+    Cockpit::Delete();
     if (savegame != nullptr) {
         delete savegame;
         savegame = nullptr;

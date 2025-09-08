@@ -78,7 +78,7 @@ void UncheckUnit( class Unit*un );
 #include "cmd/role_bitmask.h"
 #include "cmd/upgradeable_unit.h"
 #include "components/cloak.h"
-
+#include "cmd/unit_type.h"
 
 
 #include "configuration/configuration.h"
@@ -113,15 +113,6 @@ class AsteroidGeneric;
  * Needed by star system to determine whether current unit
  * is orbitable
  */
-enum Vega_UnitType {
-    unit,
-    planet,
-    building,
-    nebula,
-    asteroid,
-    enhancement,
-    missile
-};
 
 class VDU;
 //template
@@ -161,15 +152,8 @@ protected:
 
 public:
     /// Repair
-    float next_repair_time;
-    unsigned int next_repair_cargo;    //(~0 : select randomly)
-
-    /// Volume
-    // This isn't mass. Denser materials translate to more mass
-    // TODO: move this to ship class
-    float UpgradeVolume = 0;
-    float CargoVolume = 0;     ///mass just makes you turn worse
-    float HiddenCargoVolume = 0;
+    float next_repair_time{};
+    unsigned int next_repair_cargo{};    //(~0 : select randomly)
 
 //The name (type) of this unit shouldn't be public
     StringPool::Reference name;
@@ -236,8 +220,8 @@ public:
     bool GettingDestroyed() const;
 
 
-   
-    
+
+
 
 /*
  **************************************************************************************
@@ -331,10 +315,8 @@ public:
     int RepairUpgrade();                 //returns how many things were repaired
 //returns percentOperational,maxPercentOperational,and whether mount is damaged (1 is damaged, 0 is fine, -1 is invalid mount)
     bool RepairUpgradeCargo(Cargo *item,
-            Unit *baseUnit,
-            float *credits);           //item must not be NULL but baseUnit/credits are only used for pricing.
+            Unit *baseUnit, double repair_price);           //item must not be NULL but baseUnit/credits are only used for pricing.
     Vector MountPercentOperational(int whichmount);
-    bool ReduceToTemplate();
     double Upgrade(const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
     bool canDowngrade(const Unit *downgradeor,
             int mountoffset,
@@ -499,11 +481,6 @@ public:
     void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes);
     void endElement(const std::string &name);
 
-protected:
-    static std::string massSerializer(const struct XMLType &input, void *mythis);
-    static std::string mountSerializer(const struct XMLType &input, void *mythis);
-    static std::string subunitSerializer(const struct XMLType &input, void *mythis);
-
 public:
 //tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
     void WriteUnit(const char *modificationname = "");
@@ -549,7 +526,6 @@ public:
             bool lastframe,
             UnitCollection *uc,
             Unit *superunit) override;
-    bool isPlayerShip() override;
 
 //The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
     void *owner = nullptr;   //void ensures that it won't be referenced by accident
@@ -571,7 +547,7 @@ public:
 public:
     //BUCO! Must add shield tightness back into units.csv for great justice.
     //are shields tight to the hull.  zero means bubble
-    float shieldtight = configuration()->physics.default_shield_tightness;
+    float shieldtight = configuration().physics.default_shield_tightness_flt;
 
 public:
     // TODO: move to jump_capable?
@@ -988,7 +964,7 @@ public:
     // Example:
     // MACRO_FUNCTION(field_a, object_a, object_b)
     // object_a->field_a = object_b->field_b;
-    float temporary_upgrade_float_variable;
+    float temporary_upgrade_float_variable{};
 };
 
 Unit *findUnitInStarsystem(const void *unitDoNotDereference);
