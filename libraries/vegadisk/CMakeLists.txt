@@ -79,7 +79,7 @@ IF (USE_GTEST)
         ${TEST_NAME}
         tests/diskobject_tests.cpp
     )
-    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${VSE_TST_INCLUDES})
+    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PRIVATE
             # VS engine headers
             ${Vega_Strike_SOURCE_DIR}
@@ -113,6 +113,7 @@ IF (USE_GTEST)
             ${Python3_LIBRARIES}
             gtest_main
             #$<TARGET_OBJECTS:vegastrike-testing>
+            LibArchive::LibArchive
             vegastrike_cmd
             vegastrike_gfx_generic
             Boost::log
