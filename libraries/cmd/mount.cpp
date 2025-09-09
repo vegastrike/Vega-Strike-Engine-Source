@@ -43,7 +43,7 @@
 #include "src/force_feedback.h"
 #include "cmd/ai/aggressive.h"
 #include "root_generic/lin_time.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/star_system.h"
 #include "src/universe.h"
 #include "cmd/weapon_info.h"

@@ -35,7 +35,7 @@
 #endif
 #include "cmd/basecomputer.h"
 using VSFileSystem::SaveFile;
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/universe_util.h"
 #include "src/save_util.h"
 #include <algorithm>                //For std::sort.

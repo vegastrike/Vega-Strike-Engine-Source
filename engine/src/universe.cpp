@@ -48,7 +48,7 @@
 #if defined (__APPLE__)
 #import <sys/param.h>
 #endif
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "gfx/screenshot.h"
 #include "src/universe_util.h"
 #include "src/star_system.h"

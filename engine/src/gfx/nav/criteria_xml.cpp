@@ -40,7 +40,7 @@
 
 #include "criteria.h"
 #include "root_generic/xml_support.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 
 using XMLSupport::AttributeList;

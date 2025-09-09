@@ -33,7 +33,7 @@
 #include "src/vegastrike.h"
 #include "communication.h"
 #include <assert.h>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 
 static int unitlevel;

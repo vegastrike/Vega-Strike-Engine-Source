@@ -34,7 +34,7 @@
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
 #include "gfx/vsimage.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "gldrv/gl_globals.h"
 #include "configuration/configuration.h"

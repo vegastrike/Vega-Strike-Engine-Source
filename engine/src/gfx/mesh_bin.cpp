@@ -34,7 +34,7 @@
 #include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
 #include "src/file_main.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "src/vs_exit.h"
 

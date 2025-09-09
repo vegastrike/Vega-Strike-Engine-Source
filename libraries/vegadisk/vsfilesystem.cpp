@@ -28,7 +28,7 @@
  */
 
 
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 
 #include <cstdio>
 #include <cassert>
@@ -60,7 +60,7 @@ struct dirent
 #include "src/vegastrike.h"
 #include "common/common.h"
 #include "root_generic/galaxy_gen.h"
-#include "root_generic/pk3.h"
+#include "vegadisk/pk3.h"
 
 #include "src/gnuhash.h"
 

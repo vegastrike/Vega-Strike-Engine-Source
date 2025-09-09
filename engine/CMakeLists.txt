@@ -559,7 +559,7 @@ ADD_LIBRARY(vegastrike-engine_com OBJECT
 SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_STANDARD 14)
 SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_STANDARD_REQUIRED TRUE)
 SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_EXTENSIONS ON)
-set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
 TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
@@ -716,16 +716,22 @@ IF (NOT DISABLE_CLIENT)
         TARGET_LINK_LIBRARIES(vegastrike-engine m)
     ENDIF()
 
+    TARGET_LINK_DIRECTORIES(vegastrike-engine BEFORE
+            PRIVATE ${LibArchive_LIBRARY})
+
     TARGET_LINK_LIBRARIES(vegastrike-engine
             OpenGL::GL
             OpenGL::GLU
             GLUT::GLUT
+            LibArchive::LibArchive
             ${VSE_TST_LIBS}
             ${Boost_LIBRARIES}
             ${Python3_LIBRARIES}
             $<TARGET_OBJECTS:vegastrike-engine_com>
             vegastrike_gfx_generic
             vegastrike_root_generic
+            vegastrike_vegadisk
+            vegastrike_posh
             vegastrike_cmd
             vegastrike-OPcollide
     )

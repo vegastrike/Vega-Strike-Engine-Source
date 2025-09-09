@@ -41,7 +41,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 
 #ifndef BUFFER_SIZE
 // in samples

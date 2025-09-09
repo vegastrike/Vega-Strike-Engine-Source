@@ -40,13 +40,13 @@
 #include "src/universe.h"
 #include "src/hashtable.h"
 #include "root_generic/load_mission.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "cmd/drawable.h"
 #include "root_generic/options.h"
 #include "root_generic/configxml.h"
 #include "src/vs_random.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/universe_util.h" //get galaxy faction, dude
 
 #include "cmd/planet.h"

@@ -57,7 +57,7 @@
 #include "root_generic/lin_time.h"
 #include "cmd/collection.h"
 #include "cmd/unit_generic.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "cmd/music.h"
 #include "cmd/base.h"

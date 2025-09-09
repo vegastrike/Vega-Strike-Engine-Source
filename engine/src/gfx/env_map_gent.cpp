@@ -34,7 +34,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "gfx/vsimage.h"
 #include "gfx/aux_texture.h"

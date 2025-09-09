@@ -59,7 +59,7 @@
 #include "mission.h"
 
 #include "root_generic/vs_globals.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "msgcenter.h"
 #include "cmd/briefing.h"
 #include "pythonmission.h"

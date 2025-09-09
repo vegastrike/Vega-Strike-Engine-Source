@@ -35,7 +35,7 @@
 
 #include <string>
 //#include "gfx/vsimage.h"
-//#include "root_generic/vsfilesystem.h" this is included by gfxlib.h
+//#include "vegadisk/vsfilesystem.h" this is included by gfxlib.h
 
 /**
  *  The texture class defines a method of loading bitmap textures

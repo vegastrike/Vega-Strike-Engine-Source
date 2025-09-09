@@ -30,7 +30,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_VSIMAGE_H
 #define VEGA_STRIKE_ENGINE_GFX_VSIMAGE_H
 
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 
 extern int PNG_HAS_PALETTE;
 extern int PNG_HAS_COLOR;

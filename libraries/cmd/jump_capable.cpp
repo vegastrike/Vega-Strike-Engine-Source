@@ -33,7 +33,7 @@
 #include "src/universe.h"
 #include "src/universe_util.h"
 #include "gfx/warptrail.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_exit.h"
 #include "src/vega_cast_utils.h"
 #include "root_generic/configxml.h"

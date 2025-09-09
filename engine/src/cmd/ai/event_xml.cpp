@@ -36,7 +36,7 @@
 #include <float.h>
 #include <assert.h>
 #include "src/vegastrike.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/configxml.h"

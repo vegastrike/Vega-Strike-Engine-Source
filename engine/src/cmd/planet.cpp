@@ -55,7 +55,7 @@
 #include "gfx/ring.h"
 #include "cmd/alphacurve.h"
 #include "gfx/vsimage.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "gfx/camera.h"
 #include "src/universe.h"

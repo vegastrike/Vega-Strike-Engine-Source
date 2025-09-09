@@ -37,7 +37,7 @@
 #endif
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/python/init.h"
 #include "src/universe_util.h"
 #include "src/in_kb_data.h"

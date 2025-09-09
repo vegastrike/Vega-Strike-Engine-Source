@@ -41,7 +41,7 @@
 #include <boost/python/objects.hpp>
 #endif
 
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "root_generic/vs_globals.h"
 #include "src/vegastrike.h"
@@ -70,7 +70,7 @@
 #include "cmd/ai/autodocking.h"
 #include "src/main_loop.h"
 #include <assert.h>     //needed for assert() calls
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "gfx/animation.h"
 #include "gfx_generic/mesh.h"
 #include "src/universe_util.h"
