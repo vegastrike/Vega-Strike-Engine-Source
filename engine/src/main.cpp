@@ -534,11 +534,7 @@ void bootstrap_first_loop() {
     bootstrap_draw("Vegastrike Loading...", SplashScreen);
     if (i++ > 4) {
         if (_Universe) {
-            if (configuration().graphics.main_menu) {
-                UniverseUtil::startMenuInterface(true);
-            } else {
-                _Universe->Loop(bootstrap_main_loop);
-            }
+            _Universe->Loop(bootstrap_main_loop);
         }
     }
 }

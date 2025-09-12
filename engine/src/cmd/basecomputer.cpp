@@ -58,7 +58,6 @@ using VSFileSystem::SaveFile;
 #include "cmd/unit_xml.h"
 #include "gfx/sprite.h"
 #include "gfx/aux_texture.h"
-#include "src/gamemenu.h" //network menu.
 #include "src/audiolib.h"
 #include "src/vs_math.h"
 #include "cmd/damageable.h"
@@ -285,8 +284,7 @@ static const ModeInfo modeInfo[] = {
         ModeInfo("Missions BBS  ", "Missions", "MissionsMode", "MissionsGroup"),
         ModeInfo("GNN News  ", "News", "NewsMode", "NewsGroup"),
         ModeInfo("Info/Stats  ", "Info", "InfoMode", "InfoGroup"),
-        ModeInfo("Load / Save ", "LoadSave", "LoadSaveMode", "LoadSaveGroup"),
-        ModeInfo("Network ", "Network", "NetworkMode", "NetworkGroup")
+        ModeInfo("Load / Save ", "LoadSave", "LoadSaveMode", "LoadSaveGroup")
 };
 
 bool BaseComputer::actionDone(const EventCommandId &command, Control *control) {
@@ -320,7 +318,6 @@ const BaseComputer::WctlTableEntry WctlBase<BaseComputer>::WctlCommandTable[] = 
         BaseComputer::WctlTableEntry(modeInfo[BaseComputer::MISSIONS].command, "", &BaseComputer::changeToMissionsMode),
         BaseComputer::WctlTableEntry(modeInfo[BaseComputer::INFO].command, "", &BaseComputer::changeToInfoMode),
         BaseComputer::WctlTableEntry(modeInfo[BaseComputer::LOADSAVE].command, "", &BaseComputer::changeToLoadSaveMode),
-        BaseComputer::WctlTableEntry(modeInfo[BaseComputer::NETWORK].command, "", &BaseComputer::changeToNetworkMode),
         BaseComputer::WctlTableEntry("BuyCargo", "", &BaseComputer::buyCargo),
         BaseComputer::WctlTableEntry("Buy10Cargo", "", &BaseComputer::buy10Cargo),
         BaseComputer::WctlTableEntry("BuyAllCargo", "", &BaseComputer::buyAllCargo),
@@ -342,13 +339,6 @@ const BaseComputer::WctlTableEntry WctlBase<BaseComputer>::WctlCommandTable[] = 
         BaseComputer::WctlTableEntry("Load", "", &BaseComputer::actionLoadGame),
         BaseComputer::WctlTableEntry("New", "", &BaseComputer::actionNewGame),
         BaseComputer::WctlTableEntry("Save", "", &BaseComputer::actionSaveGame),
-        BaseComputer::WctlTableEntry("ShowNetworkMenu", "", &BaseComputer::changeToNetworkMode),
-        BaseComputer::WctlTableEntry("HideNetworkStatus", "", &BaseComputer::hideNetworkStatus),
-        BaseComputer::WctlTableEntry("ShowJoinAccount", "", &BaseComputer::actionShowAccountMenu),
-        BaseComputer::WctlTableEntry("ShowJoinServer", "", &BaseComputer::actionShowServerMenu),
-        BaseComputer::WctlTableEntry("JoinGame", "", &BaseComputer::actionJoinGame),
-        BaseComputer::WctlTableEntry("NetworkSaveGame", "", &BaseComputer::actionNetSaveGame),
-        BaseComputer::WctlTableEntry("NetworkDie", "", &BaseComputer::actionNetDie),
         BaseComputer::WctlTableEntry("DoneComputer", "", &BaseComputer::actionDone),
 
         BaseComputer::WctlTableEntry("", "", NULL)
@@ -528,8 +518,6 @@ GFXColor BaseComputer::getColorForGroup(std::string id) {
             return GFXColor(faction_color_darkness, faction_color_darkness, 0);
         } else if (id == "LoadSaveGroup") {
             return GFXColor(0, faction_color_darkness, faction_color_darkness);
-        } else if (id == "NetworkGroup") {
-            return GFXColor(0, faction_color_darkness, faction_color_darkness);
         } else {
             return GFXColor(0, 0, 0);
         }
@@ -552,7 +540,7 @@ void BaseComputer::constructControls(void) {
         return;
     }
 
-    if (m_displayModes.size() != 1 || m_displayModes.at(0) != NETWORK) {
+    if (m_displayModes.size() != 1) {
         //Base info title.
         StaticDisplay *baseTitle = (StaticDisplay*)getControl(controls["baseTitle"]);
         window()->addControl(baseTitle);
@@ -904,7 +892,6 @@ void BaseComputer::constructControls(void) {
 
         loadSaveGroup->addChild(inputTextScroller); //Want scroller "over" description box.
         //Accept button.
-        //no save in network mode!
         NewButton *buy10 = new NewButton;
         buy10->setRect(Rect(-.11, 0, .22, .12));
         buy10->setColor(GFXColor(0, 1, 1, .1));
@@ -953,22 +940,6 @@ void BaseComputer::constructControls(void) {
         quit->setCommand("Quit");
         loadSaveGroup->addChild(quit);
 
-        NewButton *net = new NewButton;
-        net->setRect(Rect(.7, -.9, .25, .1));
-        net->setColor(GFXColor(1, .5, .1, .1));
-        net->setTextColor(GUI_OPAQUE_WHITE());
-        net->setDownColor(GFXColor(1, .5, .1, .4));
-        net->setDownTextColor(GFXColor(.2, .2, .2));
-        net->setVariableBorderCycleTime(1.0);
-        net->setBorderColor(GFXColor(.2, .5, .2));
-        net->setEndBorderColor(GFXColor(.4, .7, .4));
-        net->setShadowWidth(2.0);
-        net->setFont(Font(.07, 1));
-        net->setId("CommitAll");
-        net->setLabel("Net Play");
-        net->setCommand("ShowNetworkMenu");
-        loadSaveGroup->addChild(net);
-
         NewButton *newgame = new NewButton;
         newgame->setRect(Rect(-.11, -.4, .22, .12));
         newgame->setColor(GFXColor(0, 1, 1, .1));
@@ -984,55 +955,6 @@ void BaseComputer::constructControls(void) {
         newgame->setLabel("New");
         newgame->setCommand("New");
         loadSaveGroup->addChild(newgame);
-    }
-    {
-        GroupControl *networkGroup = new GroupControl;
-        networkGroup->setId("NetworkGroup");
-        window()->addControl(networkGroup);
-        GroupControl *netJoinGroup = new GroupControl;
-        netJoinGroup->setId("NetworkJoinGroup");
-        networkGroup->addChild(netJoinGroup);
-        GroupControl *netStatGroup = new GroupControl;
-        netStatGroup->setId("NetworkStatGroup");
-        netStatGroup->setHidden(true);
-        networkGroup->addChild(netStatGroup);
-
-        //GameMenu::createNetworkControls( netJoinGroup, &base_keyboard_queue );
-
-        if (m_displayModes.size() != 1 || m_displayModes.at(0) != NETWORK) {
-            NewButton *loadsave = new NewButton;
-            loadsave->setRect(Rect(.7, -.9, .25, .1));
-            loadsave->setColor(GFXColor(1, .5, .1, .1));
-            loadsave->setTextColor(GUI_OPAQUE_WHITE());
-            loadsave->setDownColor(GFXColor(1, .5, .1, .4));
-            loadsave->setDownTextColor(GFXColor(.2, .2, .2));
-            loadsave->setVariableBorderCycleTime(1.0);
-            loadsave->setBorderColor(GFXColor(.2, .5, .2));
-            loadsave->setEndBorderColor(GFXColor(.4, .7, .4));
-            loadsave->setShadowWidth(2.0);
-            loadsave->setFont(Font(.07, 1));
-            loadsave->setId("CommitAll");
-            loadsave->setLabel("Save/Load");
-            loadsave->setCommand("ShowOptionsMenu");
-            networkGroup->addChild(loadsave);
-        }
-        if ((m_displayModes.size() == 1 && m_displayModes.at(0) == NETWORK)) {
-            NewButton *quit = new NewButton;
-            quit->setRect(Rect(-.95, -.9, .3, .1));
-            quit->setColor(GFXColor(.8, 1, .1, .1));
-            quit->setTextColor(GUI_OPAQUE_WHITE());
-            quit->setDownColor(GFXColor(.8, 1, .1, .4));
-            quit->setDownTextColor(GFXColor(.2, .2, .2));
-            quit->setVariableBorderCycleTime(1.0);
-            quit->setBorderColor(GFXColor(.5, .2, .2));
-            quit->setEndBorderColor(GFXColor(.7, .4, .4));
-            quit->setShadowWidth(2.0);
-            quit->setFont(Font(.07, BOLD_STROKE));
-            quit->setId("CommitAll");
-            quit->setLabel("Quit Game");
-            quit->setCommand("Quit");
-            networkGroup->addChild(quit);
-        }
     }
     {
         //MISSIONS group control.
@@ -1327,9 +1249,6 @@ void BaseComputer::switchToControls(DisplayMode mode) {
         if (mode == LOADSAVE) {
             window()->setTexture("basecomputer_loadsave.png");
         }
-        if (mode == NETWORK) {
-            window()->setTexture("basecomputer_network.png");
-        }
         if (m_currentDisplay != NULL_DISPLAY) {
             //Get the old controls out of the window.
             Control *oldControls = window()->findControlById(modeInfo[m_currentDisplay].groupId);
@@ -1370,30 +1289,7 @@ bool BaseComputer::changeToLoadSaveMode(const EventCommandId &command, Control *
     return true;
 }
 
-void BaseComputer::showNetworkStatus(bool show) {
-    Control *group = window()->findControlById("NetworkJoinGroup");
-    if (group) {
-        group->setHidden(show);
-    }
-    group = window()->findControlById("NetworkStatGroup");
-    if (group) {
-        group->setHidden(!show);
-    }
-}
 
-bool BaseComputer::hideNetworkStatus(const EventCommandId &command, Control *control) {
-    showNetworkStatus(false);
-    return true;
-}
-
-bool BaseComputer::changeToNetworkMode(const EventCommandId &command, Control *control) {
-    if (m_currentDisplay != NETWORK) {
-        switchToControls(NETWORK);
-    }
-    showNetworkStatus(false);
-    loadNetworkControls();
-    return true;
-}
 
 //Set up the window and get everything ready.
 void BaseComputer::init(void) {
@@ -2776,7 +2672,6 @@ void BaseComputer::loadMissionsMasterList(TransactionList &tlist) {
     //Number of strings to look at.  And make sure they match!
     const size_t stringCount = getSaveStringLength(playerNum, MISSION_NAMES_LABEL);
 
-    //these aren't sent over the network.
     assert(stringCount == getSaveStringLength(playerNum, MISSION_SCRIPTS_LABEL));
     assert(stringCount == getSaveStringLength(playerNum, MISSION_DESC_LABEL));
     //Make sure we have different names for all the missions.
@@ -4771,32 +4666,5 @@ bool BaseComputer::actionLoadGame(const EventCommandId &command, Control *contro
     return true;
 }
 
-void BaseComputer::loadNetworkControls() {
-}
 
-bool BaseComputer::actionShowServerMenu(const EventCommandId &command, Control *control) {
-    window()->findControlById("MultiPlayerAccountServer")->setHidden(true);
-    window()->findControlById("MultiPlayerHostPort")->setHidden(false);
-    return true;
-}
-
-bool BaseComputer::actionShowAccountMenu(const EventCommandId &command, Control *control) {
-    window()->findControlById("MultiPlayerAccountServer")->setHidden(false);
-    window()->findControlById("MultiPlayerHostPort")->setHidden(true);
-    return true;
-}
-
-bool BaseComputer::actionNetDie(const EventCommandId &command, Control *control) {
-    return true;
-}
-
-bool BaseComputer::actionNetSaveGame(const EventCommandId &command, Control *control) {
-    return true;
-}
-
-bool BaseComputer::actionJoinGame(const EventCommandId &command, Control *control) {
-    NetActionConfirm *nak = new NetActionConfirm(0, window(), NetActionConfirm::JOINGAME);
-    nak->confirmedJoinGame();
-    return true;
-}
 //Process a command event from the Options Menu window.

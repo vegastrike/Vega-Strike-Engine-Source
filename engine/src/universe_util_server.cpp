@@ -152,11 +152,6 @@ bool isSplashScreenShowing() {
     return false;
 }
 
-void startMenuInterface(bool firstTime, string error) {
-    //Critical game error... enough to bring you back to the game menu!
-    printf("GAME ERROR: %s\n", error.c_str());
-}
-
 void sendCustom(int cp, string cmd, string args, string id) {
     if (cp < 0 || (unsigned int) cp >= _Universe->numPlayers()) {
         fprintf(stderr, "sendCustom %s with invalid player %d\n", cmd.c_str(), cp);
