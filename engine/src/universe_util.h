@@ -441,10 +441,6 @@ void showSplashMessage(const std::string &text);
 void showSplashProgress(float progress);
 void hideSplashScreen();
 bool isSplashScreenShowing();
-
-//Defined in gamemenu.cpp for vegastrike, universe_util_server.cpp for vegaserver.
-void startMenuInterface(bool firsttime,
-        string alert = string());         //If game fails, bring it back to a common starting point.
 }
 
 #endif //VEGA_STRIKE_ENGINE_UNIVERSE_UTIL_GENERIC_H

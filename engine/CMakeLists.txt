@@ -457,7 +457,6 @@ SET(LIBROOTCLIENT_SOURCES
     src/debug_vs.cpp
     src/faction_util.cpp
     src/force_feedback.cpp
-    src/gamemenu.cpp
     src/gfxlib_struct.cpp
     src/in_joystick.cpp
     src/in_kb.cpp
