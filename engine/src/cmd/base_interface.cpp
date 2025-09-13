@@ -914,7 +914,6 @@ void BaseInterface::Click(int xint, int yint, int button, int state) {
 }
 
 void BaseInterface::ClickWin(int button, int state, int x, int y) {
-    ModifyMouseSensitivity(x, y);
     if (state == WS_MOUSE_DOWN) {
         getMouseButtonMask() |= (1 << (button - 1));
     } else if (state == WS_MOUSE_UP) {
