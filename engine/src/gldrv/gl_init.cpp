@@ -736,7 +736,7 @@ void GFXInit(int argc, char **argv) {
         winsys_swap_buffers();
     }
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-    winsys_show_cursor(false);
+    winsys_show_cursor(true);
 }
 
 void GFXLoop(void main_loop()) {

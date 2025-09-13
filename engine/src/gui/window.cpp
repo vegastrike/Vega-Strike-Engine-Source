@@ -219,7 +219,7 @@ void WindowManager::draw() {
     GFXEnable(TEXTURE0);
     GFXDisable(DEPTHTEST);
     GFXDisable(TEXTURE1);
-    MouseVSSprite.Draw();
+    //MouseVSSprite.Draw();
 
     GFXHudMode(false);
     GFXEnable(CULLFACE);

@@ -1921,40 +1921,7 @@ void GameCockpit::Draw() {
         if ((view == CP_PAN
                 && !mousecursor_pancam)
                 || (view == CP_PANTARGET && !mousecursor_pantgt) || (view == CP_CHASE && !mousecursor_chasecam)) {
-        } else {
-            GFXBlendMode(SRCALPHA, INVSRCALPHA);
-            GFXColor4f(1, 1, 1, 1);
-            GFXEnable(TEXTURE0);
-            //GFXDisable (DEPTHTEST);
-            //GFXDisable(TEXTURE1);
-            const float deadband = configuration().joystick.mouse_deadband_flt;
-            const int reverse_spr = configuration().joystick.reverse_mouse_spr ? 1 : -1;
-            const std::string& blah = configuration().joystick.mouse_crosshair;
-            // Needs to be static for performance reasons
-            static boost::optional<VSSprite> mouse_vs_sprite{};
-            if (mouse_vs_sprite == boost::none) {
-                mouse_vs_sprite = VSSprite(blah.c_str(), BILINEAR, GFXTRUE);
-            }
-            float xcoord = (-1.0F + static_cast<float>(mousex) / (0.5F * configuration().graphics.resolution_x));
-            float ycoord = (-reverse_spr + static_cast<float>(reverse_spr * mousey) / (0.5F * configuration().graphics.resolution_y));
-            mouse_vs_sprite.get().SetPosition(xcoord * (1 - fabs(crosscenx)) + crosscenx,
-                    ycoord * (1 - fabs(crossceny)) + crossceny);
-            float xs, ys;
-            mouse_vs_sprite.get().GetSize(xs, ys);
-            if (xcoord < deadband && ycoord < deadband && xcoord > -deadband && ycoord > -deadband) {
-                //The other option would be to place it in the center.
-                //but it's sometimes useful to know where the mouse actually is.
-                mouse_vs_sprite.get().SetSize(xs / 2, ys / 2);
-            } else if (xcoord < deadband && xcoord > -deadband) {
-                mouse_vs_sprite.get().SetSize(xs / 2, ys * 5 / 6);
-            } else if (ycoord < deadband && ycoord > -deadband) {
-                mouse_vs_sprite.get().SetSize(xs * 5 / 6, ys / 2);
-            }
-            mouse_vs_sprite.get().Draw();
-            mouse_vs_sprite.get().SetSize(xs, ys);
-            //DrawGlutMouse(mousex,mousey,&mouse_vs_sprite.get());
-            //DrawGlutMouse(mousex,mousey,&mouse_vs_sprite.get());
-        }
+        } 
     }
     if (view < CP_CHASE && damage_flash_first == false && getNewTime() - shake_time < damage_flash_length) {
         DrawDamageFlash(shake_type);

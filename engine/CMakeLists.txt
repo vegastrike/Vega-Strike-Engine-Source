@@ -83,19 +83,27 @@ IF (NOT DISABLE_CLIENT) ##########
         MESSAGE(FATAL_ERROR "Failed to find required library OpenAL for sound functionality")
     ENDIF (OPENAL_FOUND)
 
-    IF (NOT BEOS)
-        #Find SDL
-        FIND_PACKAGE(SDL2 REQUIRED)
-        IF (SDL2_FOUND)
-            LIST(APPEND VSE_TST_INCLUDES ${SDL2_INCLUDE_DIRS})
-            LIST(APPEND VSE_TST_LIBS ${SDL2_LIBRARIES})
-            MESSAGE(STATUS "SDL2 Found")
-            SET(HAVE_SDL 1)
-            SET(SDL_WINDOWING 1)
-        ELSE (SDL2_FOUND)
-            MESSAGE(FATAL_ERROR "Failed to find required library SDL2")
-        ENDIF (SDL2_FOUND)
-    ENDIF (NOT BEOS)
+
+    #Find SDL
+    FIND_PACKAGE(SDL2 REQUIRED)
+    IF (SDL2_FOUND)
+        LIST(APPEND VSE_TST_INCLUDES ${SDL2_INCLUDE_DIRS})
+        LIST(APPEND VSE_TST_LIBS ${SDL2_LIBRARIES})
+        MESSAGE(STATUS "SDL2 Found")
+        SET(HAVE_SDL 1)
+        SET(SDL_WINDOWING 1)
+    ELSE (SDL2_FOUND)
+        MESSAGE(FATAL_ERROR "Failed to find required library SDL2")
+    ENDIF (SDL2_FOUND)
+
+    #Find SDL_image
+    FIND_PACKAGE(SDL2_IMAGE REQUIRED)
+    IF (SDL2_IMAGE_FOUND)
+        LIST(APPEND VSE_TST_LIBS SDL2_image::SDL2_image)
+        MESSAGE(STATUS "SDL2_image Found")
+    ELSE (SDL2_IMAGE_FOUND)
+       MESSAGE(FATAL_ERROR "Failed to find required library SDL2_image")
+    ENDIF (SDL2_IMAGE_FOUND)
 
     #find Vorbis
     FIND_PACKAGE(Vorbis REQUIRED)
@@ -659,6 +667,7 @@ SET(VEGASTRIKE_SOURCES
     src/gldrv/gl_material.cpp
     src/gldrv/gl_matrix.cpp
     src/gldrv/gl_misc.cpp
+    src/gldrv/mouse_cursor.cpp
     src/gldrv/gl_quad_list.cpp
     src/gldrv/gl_sphere_list.cpp
     src/gldrv/gl_state.cpp

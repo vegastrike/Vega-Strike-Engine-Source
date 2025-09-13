@@ -67,6 +67,7 @@
 
 #include "cmd/ai/communication.h"
 #include "audio/SceneManager.h"
+#include "gldrv/mouse_cursor.h"
 
 // shows the offset on the lower edge of the screen (for the text line there)
 constexpr double kYLower = -0.9;
@@ -837,9 +838,10 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
             while (count++ < links.size()) {
                 Link *curlink = links[base->curlinkindex++ % links.size()];
                 if (curlink) {
-                    int x = static_cast<int>((((curlink->x + (curlink->wid / 2)) + 1) / 2) * configuration().graphics.resolution_x);
-                    int y = -static_cast<int>((((curlink->y + (curlink->hei / 2)) - 1) / 2) * configuration().graphics.resolution_y);
-                    biModifyMouseSensitivity(x, y, true);
+                    const std::pair<int,int> pair = CalculateAbsoluteXY(curlink->x, curlink->y);
+                    const int x = pair.first;
+                    const int y = pair.second;
+
                     winsys_warp_pointer(x, y);
                     PassiveMouseOverWin(x, y);
                     break;
@@ -907,13 +909,11 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
 }
 
 void BaseInterface::Click(int xint, int yint, int button, int state) {
-    float x, y;
-    CalculateRealXAndY(xint, yint, &x, &y);
-    rooms[curroom]->Click(this, x, y, button, state);
+    std::pair<float,float> pair = CalculateRelativeXY(xint, yint);
+    rooms[curroom]->Click(this, pair.first, pair.second, button, state);
 }
 
 void BaseInterface::ClickWin(int button, int state, int x, int y) {
-    ModifyMouseSensitivity(x, y);
     if (state == WS_MOUSE_DOWN) {
         getMouseButtonMask() |= (1 << (button - 1));
     } else if (state == WS_MOUSE_UP) {

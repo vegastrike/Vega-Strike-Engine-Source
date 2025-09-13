@@ -31,6 +31,7 @@
 
 #include "eventmanager.h"
 #include "src/vs_logging.h"
+#include "gldrv/mouse_cursor.h"
 
 #include <algorithm>
 
@@ -231,7 +232,9 @@ static float MouseYTo2dY(int y) {
 }
 
 void EventManager::ProcessMouseClick(int button, int state, int x, int y) {
-    ModifyMouseSensitivity(x, y);
+    std::pair<float,float> pair = CalculateRelativeXY(x,y);
+    Point point(pair.first, pair.second);
+
     //Make sure we are working with the same "button" constants.
     assert(LEFT_MOUSE_BUTTON == WS_LEFT_BUTTON);
     assert(RIGHT_MOUSE_BUTTON == WS_RIGHT_BUTTON);
@@ -239,10 +242,10 @@ void EventManager::ProcessMouseClick(int button, int state, int x, int y) {
     assert(WHEELUP_MOUSE_BUTTON == WS_WHEEL_UP);
     assert(WHEELDOWN_MOUSE_BUTTON == WS_WHEEL_DOWN);
     if (state == WS_MOUSE_DOWN) {
-        InputEvent event(MOUSE_DOWN_EVENT, button, 0, Point(MouseXTo2dX(x), MouseYTo2dY(y)));
+        InputEvent event(MOUSE_DOWN_EVENT, button, 0, point);
         globalEventManager().sendInputEvent((event));
     } else {
-        InputEvent event(MOUSE_UP_EVENT, button, 0, Point(MouseXTo2dX(x), MouseYTo2dY(y)));
+        InputEvent event(MOUSE_UP_EVENT, button, 0, point);
         globalEventManager().sendInputEvent((event));
     }
     clearDeleteQueue();
@@ -265,6 +268,7 @@ void EventManager::ProcessMousePassive(int x, int y) {
 
 //Called to grab event management from old system.
 void EventManager::takeOverEventManagement(void) {
+    // Here we change to base computer
     winsys_set_mouse_func(EventManager::ProcessMouseClick);
     winsys_set_motion_func(EventManager::ProcessMouseActive);
     winsys_set_passive_motion_func(EventManager::ProcessMousePassive);

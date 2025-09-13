@@ -525,11 +525,6 @@ void NavigationSystem::Draw() {
     DrawButton(buttonskipby4_7[0], buttonskipby4_7[1], buttonskipby4_7[2], buttonskipby4_7[3], 7, outlinebuttons);
     //**********************************
 
-    //Draw the screen basics
-    //**********************************
-    DrawCursor(mouse_x_current, mouse_y_current, .1, .2, GFXColor(1, 1, 1, 0.5));
-    //**********************************
-
     //Save current mouse location as previous for next cycle
     //**********************************
     mouse_x_previous = (-1 + float(mousex) / (.5 * configuration().graphics.resolution_x));
