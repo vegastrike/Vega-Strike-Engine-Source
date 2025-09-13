@@ -43,95 +43,9 @@ public:
     ~vs_options() {
     }
 
-    void init();
-
-    /* Audio Options */
-
-    /* Cockpit Audio Options */
-
-    std::string comm;
-    std::string scanning;
-    std::string objective;
-    std::string examine;
-    std::string view;
-    std::string repair;
-    std::string manifest;
-    int compress_max{};
-    std::string compress_loop;
-    std::string compress_change;
-    std::string compress_stop;
-    int compress_interval{};
-
-    bool comm_preload{};
-
-    /* Unit Audio Options */
-
-    std::string jumpleave;
-    std::string player_armor_hit;
-    std::string player_hull_hit;
-    std::string player_shield_hit;
-
-    /* AI Options */
-
-    bool AllowCivilWar{};
-    bool CappedFactionRating{};
-    bool AllowNonplayerFactionChange{};
-    double min_relationship{};
-    std::string startDockedTo;
-    bool dockOnLoad{};
-
-    /* Data Options */
-
-    std::string universe_path;
-    std::string sectors;
-    std::string techniquesBasePath;
     std::string unitCSV;
-    std::string modUnitCSV;
-    std::string cockpits;
-    std::string animations;
-    std::string movies;
-    std::string sprites;
-    std::string serialized_xml;
-    std::string sharedtextures;
-    std::string sharedsounds;
-    std::string sharedmeshes;
-    std::string sharedunits;
-    std::string ai_directory;
-    std::string datadir;
-    std::string hqtextures;
-    std::string volume_format;
-
-    /* Galaxy Options */
-
-    bool PushValuesToMean{};
-    float AmbientLightFactor{};
-    float StarRadiusScale{};
-    std::string DefaultAtmosphereTexture;
-    float AtmosphereProbability{};
-    float RingProbability{};
-    float DoubleRingProbability{};
-    float InnerRingRadius{};
-    float OuterRingRadius{};
-    std::string DefaultRingTexture;
-    float SecondRingDifference{};
-    float MoonRelativeToPlanet{};
-    float MoonRelativeToMoon{};
-    float RockyRelativeToPrimary{};
-    float CompactnessScale{};
-    float JumpCompactnessScale{};
-    int MeanNaturalPhenomena{};
-    int MeanStarBases{};
-//    float    SmallUnitsMultiplier;  not used
-
 
     /* Network Options */
-
-    bool force_client_connect{};
-    bool use_account_server{};
-    std::string server_ip;
-    std::string server_port;
-    std::string account_server_url;
-    bool chat_only_in_network{};
 
     // TODO: Refactor / move these
     std::string getCallsign(int);

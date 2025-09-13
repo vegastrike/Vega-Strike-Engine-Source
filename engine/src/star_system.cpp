@@ -40,13 +40,13 @@
 #include "src/universe.h"
 #include "src/hashtable.h"
 #include "root_generic/load_mission.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "cmd/drawable.h"
 #include "root_generic/options.h"
 #include "root_generic/configxml.h"
 #include "src/vs_random.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/universe_util.h" //get galaxy faction, dude
 
 #include "cmd/planet.h"
@@ -322,18 +322,9 @@ void StarSystem::Draw(bool DrawCockpit) {
                    after_update_all_frame - b4_update_all_frame)));
 #endif
     }
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double b4_continuous_terrain_adjust_terrain = realTime();
-#endif
     for (auto& continuous_terrain : continuous_terrains) {
         continuous_terrain->AdjustTerrain(this);
     }
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double after_continuous_terrain_adjust_terrain = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by continuous_terrain->AdjustTerrain(this) loop: %2%") % __FUNCTION__ % (
-               after_continuous_terrain_adjust_terrain - b4_continuous_terrain_adjust_terrain)));
-#endif
     Unit* par;
     if ((par = _Universe->AccessCockpit()->GetParent()) == nullptr) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
@@ -462,14 +453,10 @@ void StarSystem::Draw(bool DrawCockpit) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
     drawtime = realTime() - drawtime;
     VS_LOG(trace, (boost::format("%1%: Time taken by drawing: %2%") % __FUNCTION__ % drawtime));
-    const double b4_warp_trail_draw = realTime();
 #endif
     WarpTrailDraw();
 #if defined(LOG_TIME_TAKEN_DETAILS)
     const double after_warp_trail_draw = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by WarpTrailDraw(): %2%") % __FUNCTION__ % (after_warp_trail_draw -
-               b4_warp_trail_draw)));
 #endif
     GFXFogMode(FOG_OFF);
 #if defined(LOG_TIME_TAKEN_DETAILS)
@@ -1089,17 +1076,8 @@ void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit) {
         simulation_atom_var *= priority;
         //VS_LOG(trace, (boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg B: simulation_atom_var as multiplied: %1%") % simulation_atom_var));
         unit->sim_atom_multiplier = priority;
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double before_execute_ai = realTime();
-#endif
         unit->ExecuteAI();
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double before_reset_threat_level = realTime();
-#endif
         unit->ResetThreatLevel();
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double before_unit_update_physics = realTime();
-#endif
         //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
         unit->UpdatePhysics(identity_transformation,
                 identity_matrix,
@@ -1110,15 +1088,7 @@ void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit) {
                         == 1 ? firstframe : true,
                 &this->gravitationalUnits(),
                 unit);
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double after_unit_update_physics = realTime();
-#endif
         simulation_atom_var = backup;
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        VS_LOG(trace, (boost::format("Time taken by unit->ExecuteAI(): %1%") % (before_reset_threat_level - before_execute_ai)));
-        VS_LOG(trace, (boost::format("Time taken by unit->ResetThreatLevel(): %1%") % (before_unit_update_physics - before_reset_threat_level)));
-        VS_LOG(trace, (boost::format("Time taken by unit->UpdatePhysics with 6 arguments: %1%") % (after_unit_update_physics - before_unit_update_physics)));
-#endif
     } catch (...) {
         simulation_atom_var = backup;
         throw;
@@ -1431,12 +1401,11 @@ void StarSystem::ProcessPendingJumps() {
                 float dist = delta.Magnitude();
                 if (pendingjump[kk]->delay > 0) {
                     float speed = dist / pendingjump[kk]->delay;
-                    bool player = (_Universe->isPlayerStarship(un) != nullptr);
-                    if (dist > 10 && player) {
+                    if (dist > 10 && un->IsPlayerShip()) {
                         if (un->activeStarSystem == pendingjump[kk]->orig) {
                             un->SetCurPosition(un->LocalPosition() + simulation_atom_var * delta * (speed / dist));
                         }
-                    } else if (!player) {
+                    } else if (!un->IsPlayerShip()) {
                         un->SetVelocity(Vector(0, 0, 0));
                     }
                     if (configuration().physics.jump_disables_shields) {
@@ -1470,7 +1439,7 @@ void StarSystem::ProcessPendingJumps() {
             --kk;
             continue;
         }
-        bool dosightandsound = ((pendingjump[kk]->dest == savedStarSystem) || _Universe->isPlayerStarship(un));
+        bool dosightandsound = ((pendingjump[kk]->dest == savedStarSystem) || un->IsPlayerShip());
         _Universe->setActiveStarSystem(pendingjump[kk]->orig);
         if (un->TransferUnitToSystem(kk, savedStarSystem, dosightandsound)) {
             un->jump_drive.Consume();
@@ -1574,7 +1543,7 @@ bool StarSystem::JumpTo(Unit *un, Unit *jumppoint, const std::string &system, bo
 #ifdef JUMP_DEBUG
         VS_LOG(debug, "Pushing back to pending queue!");
 #endif
-        bool dosightandsound = ((this == _Universe->getActiveStarSystem(0)) || _Universe->isPlayerStarship(un));
+        bool dosightandsound = ((this == _Universe->getActiveStarSystem(0)) || un->IsPlayerShip());
         int ani = -1;
         if (dosightandsound) {
             ani = _Universe->activeStarSystem()->DoJumpingLeaveSightAndSound(un);

@@ -125,18 +125,18 @@ void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction,
         if (strcmp(factions[Myfaction]->factionname, "upgrades") != 0) {
             if (strcmp(factions[TheirFaction]->factionname, "neutral") != 0) {
                 if (strcmp(factions[TheirFaction]->factionname, "upgrades") != 0) {
-                    if (isPlayerFaction(TheirFaction) || game_options()->AllowNonplayerFactionChange) {
-                        if (game_options()->AllowCivilWar || Myfaction != TheirFaction) {
+                    if (isPlayerFaction(TheirFaction) || configuration().ai.allow_nonplayer_faction_change) {
+                        if (configuration().ai.allow_civil_war || Myfaction != TheirFaction) {
                             factions[Myfaction]->faction[TheirFaction].relationship += factor * rank;
                             if (factions[Myfaction]->faction[TheirFaction].relationship > 1
-                                    && game_options()->CappedFactionRating) {
+                                    && configuration().ai.capped_faction_rating) {
                                 factions[Myfaction]->faction[TheirFaction].relationship = 1;
                             }
                             if (factions[Myfaction]->faction[TheirFaction].relationship
                                     < configuration().ai.min_relationship_flt) {
                                 factions[Myfaction]->faction[TheirFaction].relationship = configuration().ai.min_relationship_flt;
                             }
-                            if (!game_options()->AllowNonplayerFactionChange) {
+                            if (!configuration().ai.allow_nonplayer_faction_change) {
                                 factions[TheirFaction]->faction[Myfaction].relationship =
                                         factions[Myfaction]->faction[TheirFaction].relationship;
                             }                                                                                     //reflect if player

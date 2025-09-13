@@ -32,7 +32,7 @@
 #include <map>
 #include <vector>
 #include "gfx_generic/vec.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 
 void ComputeSerials(std::vector<std::string> &stak);
 

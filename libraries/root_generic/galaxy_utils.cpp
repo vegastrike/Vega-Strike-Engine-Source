@@ -77,16 +77,16 @@ string RemoveDotSystem(const char *input) {
 
 string getUniversePath() {
     char del[] = {'/', '\0'};
-    return game_options()->universe_path + string(del);
+    return configuration().data.universe_path + string(del);
 }
 
 string getVarEitherSectionOrSub(Galaxy *galaxy, string section, string subsection, string variable, string defaultst) {
     string d3fault = galaxy->getVariable(section, subsection, variable,
             galaxy->getVariable(section, variable, defaultst));
-    if (d3fault.length() == 0) {
+    if (d3fault.empty()) {
         d3fault = galaxy->getVariable(section, variable, defaultst);
     }
-    if (d3fault.length() == 0) {
+    if (d3fault.empty()) {
         return defaultst;
     }
     return d3fault;     //this code will prevent the empty planet lists from interfering
@@ -237,7 +237,7 @@ void MakeStarSystem(string file, Galaxy *galaxy, string origin, int forcerandom)
     si.nebulaelist = getVarEitherSectionOrSub(galaxy, si.sector, si.name, "nebulalist", Ave.nebulaelist);
     si.backgrounds = getVarEitherSectionOrSub(galaxy, si.sector, si.name, "backgroundlist", Ave.backgrounds);
     si.force = parse_bool(getVarEitherSectionOrSub(galaxy, si.sector, si.name, "force", Ave.force ? "true" : "false"));
-    if (game_options()->PushValuesToMean) {
+    if (configuration().galaxy.push_values_to_mean) {
         si.force = true;
     }
     string dest = galaxy->getVariable(si.sector, si.name, "jumps", "");

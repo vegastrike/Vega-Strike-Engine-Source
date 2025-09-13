@@ -48,7 +48,7 @@
 #if defined (__APPLE__)
 #import <sys/param.h>
 #endif
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "gfx/screenshot.h"
 #include "src/universe_util.h"
 #include "src/star_system.h"
@@ -140,22 +140,22 @@ inline void loadsounds(const string &str, const int max, soundArray &snds, bool 
 
 static void UpdateTimeCompressionSounds() {
     static int lasttimecompress = 0;
-    if ((timecount != lasttimecompress) && (game_options()->compress_max > 0)) {
+    if ((timecount != lasttimecompress) && (configuration().cockpit_audio.compress_max > 0)) {
         static bool inittimecompresssounds = false;
         static soundArray loop_snds;
         static soundArray burst_snds;
         static soundArray end_snds;
         if (inittimecompresssounds == false) {
-            loadsounds(game_options()->compress_loop, game_options()->compress_max, loop_snds, true);
-            loadsounds(game_options()->compress_stop, game_options()->compress_max, end_snds);
-            loadsounds(game_options()->compress_change, game_options()->compress_max, burst_snds);
+            loadsounds(configuration().cockpit_audio.compress_loop, configuration().cockpit_audio.compress_max, loop_snds, true);
+            loadsounds(configuration().cockpit_audio.compress_stop, configuration().cockpit_audio.compress_max, end_snds);
+            loadsounds(configuration().cockpit_audio.compress_change, configuration().cockpit_audio.compress_max, burst_snds);
             inittimecompresssounds = true;
         }
-        int soundfile = (timecount - 1) / game_options()->compress_interval;
-        int lastsoundfile = (lasttimecompress - 1) / game_options()->compress_interval;
+        int soundfile = (timecount - 1) / configuration().cockpit_audio.compress_interval;
+        int lastsoundfile = (lasttimecompress - 1) / configuration().cockpit_audio.compress_interval;
         if (timecount > 0 && lasttimecompress >= 0) {
-            if ((soundfile + 1) >= game_options()->compress_max) {
-                burst_snds.ptr[game_options()->compress_max - 1].playsound();
+            if ((soundfile + 1) >= configuration().cockpit_audio.compress_max) {
+                burst_snds.ptr[configuration().cockpit_audio.compress_max - 1].playsound();
             } else {
                 if (lasttimecompress > 0 && loop_snds.ptr[lastsoundfile].sound >= 0
                         && AUDIsPlaying(loop_snds.ptr[lastsoundfile].sound)) {
@@ -165,13 +165,13 @@ static void UpdateTimeCompressionSounds() {
                 burst_snds.ptr[soundfile].playsound();
             }
         } else if (lasttimecompress > 0 && timecount == 0) {
-            for (int i = 0; i < game_options()->compress_max; ++i) {
+            for (int i = 0; i < configuration().cockpit_audio.compress_max; ++i) {
                 if (loop_snds.ptr[i].sound >= 0 && AUDIsPlaying(loop_snds.ptr[i].sound)) {
                     AUDStopPlaying(loop_snds.ptr[i].sound);
                 }
             }
-            if (lastsoundfile >= game_options()->compress_max) {
-                end_snds.ptr[game_options()->compress_max - 1].playsound();
+            if (lastsoundfile >= configuration().cockpit_audio.compress_max) {
+                end_snds.ptr[configuration().cockpit_audio.compress_max - 1].playsound();
             } else {
                 end_snds.ptr[lastsoundfile].playsound();
             }
@@ -181,7 +181,7 @@ static void UpdateTimeCompressionSounds() {
 }
 
 Unit *DockToSavedBases(int playernum, QVector &safevec) {
-    string str = game_options()->startDockedTo;
+    string str = configuration().ai.start_docked_to;
     Unit *plr = _Universe->AccessCockpit(playernum)->GetParent();
     if (!plr || !plr->getStarSystem()) {
         safevec = QVector(0, 0, 0);
@@ -278,7 +278,7 @@ static void AppendUnitTables(const string &csvfiles) {
 
 void InitUnitTables() {
     // Old Init
-    AppendUnitTables(game_options()->modUnitCSV);
+    AppendUnitTables(configuration().data.mod_unit_csv);
 
     // New Init
     // Try to open units.json
@@ -383,71 +383,29 @@ void Universe::StartDraw() {
 #ifndef WIN32
     RESETTIME();
 #endif
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double gfx_begin_scene_start_time = realTime();
-#endif
     GFXBeginScene();
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double gfx_begin_scene_end_time = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by GFXBeginScene(): %2%") % __FUNCTION__ % (gfx_begin_scene_end_time -
-               gfx_begin_scene_start_time)));
-#endif
     size_t i;
     StarSystem* lastStarSystem = nullptr;
     for (i = 0; i < _cockpits.size(); ++i) {
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double set_active_cockpit_start_time = realTime();
-#endif
         SetActiveCockpit(i);
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double set_active_cockpit_end_time = realTime();
-        VS_LOG(trace,
-               (boost::format("%1%: Time taken by SetActiveCockpit(i): %2%") % __FUNCTION__ % (
-                   set_active_cockpit_end_time - set_active_cockpit_start_time)));
-#endif
         float x{};
         float y{};
         float w{};
         float h{};
         CalculateCoords(i, _cockpits.size(), x, y, w, h);
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double calculate_coords_end_time = realTime();
-        VS_LOG(trace,
-               (boost::format("%1%: Time taken by CalculateCoords(...): %2%") % __FUNCTION__ % (
-                   calculate_coords_end_time - set_active_cockpit_end_time)));
-#endif
         AccessCamera()->SetSubwindow(x, y, w, h);
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double set_subwindow_end_time = realTime();
-        VS_LOG(trace,
-               (boost::format("%1%: Time taken by AccessCamera()->SetSubwindow(...): %2%") % __FUNCTION__ % (
-                   set_subwindow_end_time - calculate_coords_end_time)));
-#endif
         if (_cockpits.size() > 1 && AccessCockpit(i)->activeStarSystem != lastStarSystem) {
             _active_star_systems[0]->SwapOut();
             lastStarSystem = AccessCockpit()->activeStarSystem;
             _active_star_systems[0] = lastStarSystem;
             lastStarSystem->SwapIn();
         }
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double select_proper_camera_start_time = realTime();
-#endif
         AccessCockpit()->SelectProperCamera();
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double select_proper_camera_end_time = realTime();
-        VS_LOG(trace,
-               (boost::format("%1%: Time taken by AccessCockpit()->SelectProperCamera(): %2%") % __FUNCTION__ % (
-                   select_proper_camera_end_time - select_proper_camera_start_time)));
-#endif
         if (!_cockpits.empty()) {
             AccessCamera()->UpdateGFX();
         }
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double update_gfx_end_time = realTime();
-        VS_LOG(trace,
-               (boost::format("%1%: Time taken by AccessCamera()->UpdateGFX(): %2%") % __FUNCTION__ % (
-                   update_gfx_end_time - select_proper_camera_end_time)));
 #endif
         if (!RefreshGUI() && !UniverseUtil::isSplashScreenShowing()) {
             activeStarSystem()->Draw();
@@ -459,37 +417,10 @@ void Universe::StartDraw() {
                    draw_active_star_system_end_time - update_gfx_end_time)));
 #endif
         AccessCamera()->SetSubwindow(0, 0, 1, 1);
-#if defined(LOG_TIME_TAKEN_DETAILS)
-        const double access_camera_set_subwindow_end_time = realTime();
-        VS_LOG(trace,
-               (boost::format("%1%: Time taken by AccessCamera()->SetSubwindow(...): %2%") % __FUNCTION__ % (
-                   access_camera_set_subwindow_end_time - draw_active_star_system_end_time)));
-#endif
     }
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double update_time_start_time = realTime();
-#endif
     UpdateTime();
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double update_time_end_time = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by UpdateTime(): %2%") % __FUNCTION__ % (update_time_end_time -
-               update_time_start_time)));
-#endif
     UpdateTimeCompressionSounds();
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double update_time_compression_sounds_end_time = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by UpdateTimeCompressionSounds(): %2%") % __FUNCTION__ % (
-               update_time_compression_sounds_end_time - update_time_end_time)));
-#endif
     _Universe->SetActiveCockpit(randomInt(_cockpits.size() - 1, 0));
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double universe_set_active_cockpit_end_time = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by _Universe->SetActiveCockpit(...): %2%") % __FUNCTION__ % (
-               universe_set_active_cockpit_end_time - update_time_compression_sounds_end_time)));
-#endif
     for (i = 0; i < star_system.size() && i < configuration().physics.num_running_systems; ++i) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double update_star_system_start_time = realTime();

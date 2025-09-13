@@ -162,16 +162,7 @@ void Movable::UpdatePhysics(const Transformation& trans,
     this->cur_sim_queue_slot = (cur_sim_frame + this->sim_atom_multiplier) % SIM_QUEUE_SIZE;
     const Transformation old_physical_state = curr_physical_state;
 
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double b4_update_physics_3 = realTime();
-#endif
     UpdatePhysics3(trans, transmat, lastframe, uc, superunit);
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double after_update_physics_3 = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by UpdatePhysics3: %2%") % __FUNCTION__ % (after_update_physics_3 -
-               b4_update_physics_3)));
-#endif
 
     if (resolveforces) {
         //clamp velocity
@@ -195,31 +186,15 @@ void Movable::UpdatePhysics(const Transformation& trans,
         }
     }
 
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double after_resolve_forces = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by ResolveForces: %2%") % __FUNCTION__ % (after_resolve_forces -
-               after_update_physics_3)));
-#endif
-
     // The 1.0 difficulty is a hack based on the hack in GetVelocityDifficultyMult
     this->UpdatePhysics2(trans, old_physical_state, Vector(), 1.0, transmat, cum_vel, lastframe, uc);
-
-#if defined(LOG_TIME_TAKEN_DETAILS)
-    const double after_update_physics_2 = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by UpdatePhysics2: %2%") % __FUNCTION__ % (after_update_physics_2 -
-               after_resolve_forces)));
-#endif
 }
 
 void Movable::AddVelocity(float difficulty) {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     float lastWarpField = graphicOptions.WarpFieldStrength;
 
-    bool playa = isPlayerShip();
-
-    float warprampuptime = playa ? configuration().warp.warp_ramp_up_time_flt : configuration().warp.computer_warp_ramp_up_time_flt;
+    float warprampuptime = unit->IsPlayerShip() ? configuration().warp.warp_ramp_up_time_flt : configuration().warp.computer_warp_ramp_up_time_flt;
     //Warp Turning on/off
     if (graphicOptions.WarpRamping) {
         float oldrampcounter = graphicOptions.RampCounter;
@@ -339,7 +314,7 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     AngularVelocity += temp;
 
     float caprate;
-    if (isPlayerShip()) {         //clamp to avoid vomit-comet effects
+    if (unit->IsPlayerShip()) {         //clamp to avoid vomit-comet effects
         caprate = configuration().physics.max_player_rotation_rate_flt;
     } else {
         caprate = configuration().physics.max_non_player_rotation_rate_flt;
@@ -778,16 +753,17 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
     }
 
     const bool must_afterburn_to_buzz = configuration().audio.buzzing_needs_afterburner;
-    if (_Universe->isPlayerStarship(unit) != nullptr) {
-        static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
-                "player_afterburner",
-                "sfx10.wav"), true);
+    if (unit->IsPlayerShip()) {
+        static boost::optional<int> player_engine{};
+        if (player_engine == boost::none) {
+            player_engine = AUDCreateSound(configuration().audio.unit_audio.player_afterburner, true);
+        }
         const float enginegain = configuration().audio.afterburner_gain_flt;
-        if (afterburn != AUDIsPlaying(playerengine)) {
+        if (afterburn != AUDIsPlaying(player_engine.get())) {
             if (afterburn) {
-                AUDPlay(playerengine, QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
+                AUDPlay(player_engine.get(), QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
             } else {
-                AUDStopPlaying(playerengine);
+                AUDStopPlaying(player_engine.get());
             }
         }
     } else if (afterburn || !must_afterburn_to_buzz) {

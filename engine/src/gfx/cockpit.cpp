@@ -41,7 +41,7 @@
 #include <boost/python/objects.hpp>
 #endif
 
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "root_generic/vs_globals.h"
 #include "src/vegastrike.h"
@@ -70,7 +70,7 @@
 #include "cmd/ai/autodocking.h"
 #include "src/main_loop.h"
 #include <assert.h>     //needed for assert() calls
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "gfx/animation.h"
 #include "gfx_generic/mesh.h"
 #include "src/universe_util.h"
@@ -235,9 +235,9 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
     } else if (dist < warnless) {
         if (lastwarned != target || !haswarned) {
             if (autoLandingExcludeWarningList.count(target->name) == 0) {
-                static string str = vs_config->getVariable("cockpitaudio", "automatic_landing_zone", "als");
-                static string str1 = vs_config->getVariable("cockpitaudio", "automatic_landing_zone1", "als");
-                static string str2 = vs_config->getVariable("cockpitaudio", "automatic_landing_zone2", "als");
+                static string str = configuration().cockpit_audio.automatic_landing_zone;
+                static string str1 = configuration().cockpit_audio.automatic_landing_zone1;
+                static string str2 = configuration().cockpit_audio.automatic_landing_zone2;
                 const string autolandinga = configuration().graphics.automatic_landing_zone_warning;
                 const string autolandinga1 = configuration().graphics.automatic_landing_zone_warning1;
                 const string autolandinga2 = configuration().graphics.automatic_landing_zone_warning2;
@@ -1143,7 +1143,7 @@ int GameCockpit::Autopilot(Unit *target) {
     int retauto = 0;
     if (target) {
         if (enableautosound.sound < 0) {
-            static string str = vs_config->getVariable("cockpitaudio", "autopilot_enabled", "autopilot");
+            static string str = configuration().cockpit_audio.autopilot_enabled;
             enableautosound.loadsound(str);
         }
         enableautosound.playsound();
@@ -1400,8 +1400,8 @@ void GameCockpit::Draw() {
     GFXDisable(DEPTHTEST);
     GFXDisable(DEPTHWRITE);
     GFXColor4f(1, 1, 1, 1);
-    std::string nav_current = AccessNavSystem()->getCurrentSystem();
-    std::string universe_current = _Universe->activeStarSystem()->getFileName();
+    const std::string & nav_current = AccessNavSystem()->getCurrentSystem();
+    const std::string & universe_current = _Universe->activeStarSystem()->getFileName();
     if (nav_current != universe_current) {
         AccessNavSystem()->Setup();
     }
@@ -1421,8 +1421,8 @@ void GameCockpit::Draw() {
             }
         }
         if (draw_star_destination_arrow) {
-            std::string destination_system = AccessNavSystem()->getSelectedSystem();
-            std::string current_system = _Universe->activeStarSystem()->getFileName();
+            const std::string & destination_system = AccessNavSystem()->getSelectedSystem();
+            const std::string & current_system = _Universe->activeStarSystem()->getFileName();
             if (destination_system != current_system) {
                 QVector cur = SystemLocation(current_system);
                 QVector dest = SystemLocation(destination_system);
@@ -1681,7 +1681,7 @@ void GameCockpit::Draw() {
         if (vdu[vd]->getMode() == VDU::TARGET) {
             if ((un = parent.GetUnit())) {
                 Unit *target = parent.GetUnit()->Target();
-                if (target != NULL) {
+                if (target != nullptr) {
                     if (view == CP_FRONT
                             || (view == CP_CHASE
                                     && drawChaseVDU)
@@ -1791,8 +1791,8 @@ void GameCockpit::Draw() {
         }
         //Draw the arrow to the target.
         {
-            Unit *parent = NULL;
-            if (configuration().graphics.hud.draw_arrow_to_target && (parent = this->parent.GetUnit())) {
+            Unit *parent = nullptr;
+            if (configuration().graphics.hud.draw_arrow_to_target && ((parent = this->parent.GetUnit()))) {
                 Radar::Sensor sensor(parent);
                 if ((view == CP_PAN
                         && !configuration().graphics.hud.draw_arrow_on_pan_cam)
@@ -1877,7 +1877,7 @@ void GameCockpit::Draw() {
 
                 const float min_die_time = configuration().graphics.death_scene_time_flt;
                 if (dietime > min_die_time) {
-                    static std::string death_menu_script = configuration().graphics.death_menu_script;
+                    const std::string& death_menu_script = configuration().graphics.death_menu_script;
                     if (death_menu_script.empty()) {
                         static VSSprite DieSprite("died.sprite", BILINEAR, GFXTRUE);
                         static VSSprite DieCompatSprite("died.spr", BILINEAR, GFXTRUE);
@@ -1928,29 +1928,32 @@ void GameCockpit::Draw() {
             //GFXDisable (DEPTHTEST);
             //GFXDisable(TEXTURE1);
             const float deadband = configuration().joystick.mouse_deadband_flt;
-            const int reverse_spr = configuration().joystick.reverse_mouse_spr;
-            const string blah = configuration().joystick.mouse_crosshair;
+            const int reverse_spr = configuration().joystick.reverse_mouse_spr ? 1 : -1;
+            const std::string& blah = configuration().joystick.mouse_crosshair;
             // Needs to be static for performance reasons
-            static VSSprite MouseVSSprite(blah.c_str(), BILINEAR, GFXTRUE);
-            float xcoord = (-1.0F + float(mousex) / (0.5 * configuration().graphics.resolution_x));
-            float ycoord = (-reverse_spr + float(reverse_spr * mousey) / (.5 * configuration().graphics.resolution_y));
-            MouseVSSprite.SetPosition(xcoord * (1 - fabs(crosscenx)) + crosscenx,
+            static boost::optional<VSSprite> mouse_vs_sprite{};
+            if (mouse_vs_sprite == boost::none) {
+                mouse_vs_sprite = VSSprite(blah.c_str(), BILINEAR, GFXTRUE);
+            }
+            float xcoord = (-1.0F + static_cast<float>(mousex) / (0.5F * configuration().graphics.resolution_x));
+            float ycoord = (-reverse_spr + static_cast<float>(reverse_spr * mousey) / (0.5F * configuration().graphics.resolution_y));
+            mouse_vs_sprite.get().SetPosition(xcoord * (1 - fabs(crosscenx)) + crosscenx,
                     ycoord * (1 - fabs(crossceny)) + crossceny);
             float xs, ys;
-            MouseVSSprite.GetSize(xs, ys);
+            mouse_vs_sprite.get().GetSize(xs, ys);
             if (xcoord < deadband && ycoord < deadband && xcoord > -deadband && ycoord > -deadband) {
                 //The other option would be to place it in the center.
                 //but it's sometimes useful to know where the mouse actually is.
-                MouseVSSprite.SetSize(xs / 2, ys / 2);
+                mouse_vs_sprite.get().SetSize(xs / 2, ys / 2);
             } else if (xcoord < deadband && xcoord > -deadband) {
-                MouseVSSprite.SetSize(xs / 2, ys * 5 / 6);
+                mouse_vs_sprite.get().SetSize(xs / 2, ys * 5 / 6);
             } else if (ycoord < deadband && ycoord > -deadband) {
-                MouseVSSprite.SetSize(xs * 5 / 6, ys / 2);
+                mouse_vs_sprite.get().SetSize(xs * 5 / 6, ys / 2);
             }
-            MouseVSSprite.Draw();
-            MouseVSSprite.SetSize(xs, ys);
-            //DrawGlutMouse(mousex,mousey,&MouseVSSprite);
-            //DrawGlutMouse(mousex,mousey,&MouseVSSprite);
+            mouse_vs_sprite.get().Draw();
+            mouse_vs_sprite.get().SetSize(xs, ys);
+            //DrawGlutMouse(mousex,mousey,&mouse_vs_sprite.get());
+            //DrawGlutMouse(mousex,mousey,&mouse_vs_sprite.get());
         }
     }
     if (view < CP_CHASE && damage_flash_first == false && getNewTime() - shake_time < damage_flash_length) {
@@ -2066,7 +2069,7 @@ void GameCockpit::UpdAutoPilot() {
         if (autopilot_time <= 0) {
             AccessCamera(CP_FIXED)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
             if (disableautosound.sound < 0) {
-                static string str = vs_config->getVariable("cockpitaudio", "autopilot_disabled", "autopilot_disabled");
+                static string str = configuration().cockpit_audio.autopilot_disabled;
                 disableautosound.loadsound(str);
             }
             disableautosound.playsound();
@@ -2238,7 +2241,7 @@ static void ShoveCamBehindUnit(int cam, Unit *un, float zoomfactor) {
 
 static void ShoveCamBelowUnit(int cam, Unit *un, float zoomfactor) {
     //commented out by chuck_starchaser; --never used
-    QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
+    QVector unpos = un->Position();
     Vector p, q, r;
     _Universe->AccessCamera(cam)->GetOrientation(p, q, r);
     const float ammttoshovecam = configuration().graphics.shove_camera_down_flt;
@@ -2542,19 +2545,19 @@ void GameCockpit::SetParent(Unit *unit, const char *filename, const char *unitmo
 }
 
 void GameCockpit::OnDockEnd(Unit *station, Unit *ship) {
-    if (_Universe->isPlayerStarship(ship)) {
+    if (ship->IsPlayerShip()) {
         updateRadar(ship);
     }
 }
 
 void GameCockpit::OnJumpBegin(Unit *ship) {
-    if (_Universe->isPlayerStarship(ship)) {
+    if (ship->IsPlayerShip()) {
         radarDisplay->OnJumpBegin();
     }
 }
 
 void GameCockpit::OnJumpEnd(Unit *ship) {
-    if (_Universe->isPlayerStarship(ship)) {
+    if (ship->IsPlayerShip()) {
         radarDisplay->OnJumpEnd();
     }
 }

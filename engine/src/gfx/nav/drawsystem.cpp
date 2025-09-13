@@ -28,7 +28,7 @@
 
 
 #include <set>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 #include "src/vegastrike.h"
 #include "gfx/gauge.h"
@@ -50,7 +50,7 @@
 #include "cmd/ai/aggressive.h"
 #include "src/main_loop.h"
 #include <assert.h>     //needed for assert() calls
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "gfx/animation.h"
 #include "gfx_generic/mesh.h"
 #include "src/universe_util.h"
@@ -334,7 +334,7 @@ void NavigationSystem::DrawSystem() {
                  * ++blah;
                  *       continue;
                  *  }*/
-                if (UnitUtil::isPlayerStarship(*blah) > -1) {
+                if (_Universe->whichPlayerStarship(*blah) > -1) {
                     //is THE PLAYER
                     insert_type = navfighter;
                     insert_size = navfightersize;

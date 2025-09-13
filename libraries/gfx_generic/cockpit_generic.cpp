@@ -28,7 +28,7 @@
 
 
 #include "src/in.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 #include "src/vegastrike.h"
 #include "gfx_generic/cockpit_generic.h"
@@ -41,7 +41,7 @@
 #include "cmd/script/mission.h"
 #include "cmd/ai/aggressive.h"
 #include <assert.h>     //needed for assert() calls
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/universe_util.h"
 #include "cmd/ai/fire.h"
 #include "gfx/background.h"
@@ -152,6 +152,7 @@ void Cockpit::SetParent(Unit *unit, const char *filename, const char *unitmodnam
     }
     activeStarSystem = _Universe->activeStarSystem();          //cannot switch to units in other star systems.
     parent.SetUnit(unit);
+    unit->SetPlayerShip(); // This is the place to set it.
     savegame->SetPlayerLocation(pos);
     if (filename[0] != '\0') {
         this->GetUnitFileName() = std::string(filename);
@@ -393,7 +394,7 @@ bool Cockpit::tooManyAttackers() {
 }
 
 void Cockpit::updateAttackers() {
-    static int max_attackers = XMLSupport::parse_int(vs_config->getVariable("AI", "max_player_attackers", "0"));
+    const int max_attackers = configuration().ai.max_player_attackers;
     if (max_attackers == 0) {
         return;
     }
@@ -481,7 +482,7 @@ bool Cockpit::Update() {
                     tmpgot = true;
                     Unit *un;
                     for (un_iter ui = par->getSubUnits(); (un = *ui);) {
-                        if (_Universe->isPlayerStarship(un)) {
+                        if (un->IsPlayerShip()) {
                             ++ui;
                             continue;
                         }
@@ -506,7 +507,7 @@ bool Cockpit::Update() {
                         index = 0;
                     }
                     Unit *un = parentturret.GetUnit();
-                    if (un && (!_Universe->isPlayerStarship(un))) {
+                    if (un && !un->IsPlayerShip()) {
                         SetParent(un,
                                 GetUnitFileName().c_str(),
                                 this->unitmodname.c_str(),
@@ -520,7 +521,7 @@ bool Cockpit::Update() {
             }
         }
     }
-    static bool autoclear = XMLSupport::parse_bool(vs_config->getVariable("AI", "autodock", "false"));
+    const bool autoclear = configuration().ai.auto_dock;
     if (autoclear && par) {
         Unit *targ = par->Target();
         if (targ) {
@@ -557,10 +558,9 @@ bool Cockpit::Update() {
             zoomfactor = initialzoom;
             static int index = 0;
             switchunit[_Universe->CurrentCockpit()] = 0;
-            static bool switch_nonowned_units =
-                    XMLSupport::parse_bool(vs_config->getVariable("AI", "switch_nonowned_units", "true"));
+            const bool switch_nonowned_units = configuration().ai.switch_nonowned_units;
 //switch_nonowned_units = true;
-            //static bool switch_to_fac=XMLSupport::parse_bool(vs_config->getVariable("AI","switch_to_whole_faction","true"));
+            //const bool switch_to_fac=configuration().ai.switch_to_whole_faction;
 
             Unit *un;
             bool found = false;
@@ -573,7 +573,7 @@ bool Cockpit::Update() {
 //stealing a ship from a hired wingman.
                     if ((((par != NULL)
                             && (i++) >= index)
-                            || par == NULL) && (!_Universe->isPlayerStarship(un))
+                            || par == NULL) && (!un->IsPlayerShip())
                             && (switch_nonowned_units
                                     || (par != NULL
                                             && un->owner == par->owner)

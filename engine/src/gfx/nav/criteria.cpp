@@ -39,7 +39,7 @@
 #include "root_generic/vs_globals.h"
 #include "gfx/cockpit.h"
 #include "root_generic/galaxy_xml.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/universe_util.h"
 #include "src/universe.h"
 

@@ -39,8 +39,8 @@
 #include <vector>
 
 Pilot::Pilot(int faction) {
-    static float reaction = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "ReactionTime", ".2"));
-    static float ran = XMLSupport::parse_float(vs_config->getVariable("AI", "DefaultRank", ".01"));
+    const float reaction = configuration().ai.firing.reaction_time_flt;
+    const float ran = configuration().ai.default_rank_flt;
     this->rank = ran;
 
     this->reaction_time = reaction;
@@ -61,24 +61,22 @@ float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float fac
         float rel = UnitUtil::getRelationToFaction(parent, faction);         /* What the bloody hell? */
         bool abovezero = (*i).second + rel < 0;
         if (!abovezero) {
-            static float
-                    slowrel = XMLSupport::parse_float(vs_config->getVariable("AI", "SlowDiplomacyForEnemies", ".25"));
+            const float slowrel = configuration().ai.slow_diplomacy_for_enemies_flt;
             factor *= slowrel;
         }
         (*i).second += factor;
-        if (rel + factor < 0 && parent->Target() == NULL && parent->aistate) {
+        if (rel + factor < 0 && parent->Target() == nullptr && parent->aistate) {
             parent->aistate->ChooseTarget();
         }
     } else {
-        static float lessrel = XMLSupport::parse_float(vs_config->getVariable("AI", "UnknownRelationEnemy", "-.05"));
+        const float lessrel = configuration().ai.unknown_relation_enemy_flt;
         bool abovezero = (*i).second < lessrel;
         if (!abovezero) {
-            static float
-                    slowrel = XMLSupport::parse_float(vs_config->getVariable("AI", "SlowDiplomacyForEnemies", ".25"));
+            const float slowrel = configuration().ai.slow_diplomacy_for_enemies_flt;
             factor *= slowrel;
         }
         (*i).second += factor;
-        if ((*i).second < lessrel && parent->Target() == NULL && parent->aistate) {
+        if ((*i).second < lessrel && parent->Target() == nullptr && parent->aistate) {
             parent->aistate->ChooseTarget();
         }
     }
@@ -86,7 +84,7 @@ float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float fac
 }
 
 void Pilot::DoHit(Unit *parent, void *aggressor, int faction) {
-    static float hitcost = XMLSupport::parse_float(vs_config->getVariable("AI", "UnknownRelationHitCost", ".01"));
+    const float hitcost = configuration().ai.unknown_relation_hit_cost_flt;
     if (hitcost) {
         adjustSpecificRelationship(parent, aggressor, hitcost, faction);
         int whichCp = _Universe->whichPlayerStarship(parent);
@@ -118,7 +116,7 @@ float Pilot::getAnger(const Unit *parent, const Unit *target) const {
     if (iter != effective_relationship.end()) {
         rel = iter->second;
     }
-    if (_Universe->isPlayerStarship(target)) {
+    if (target->IsPlayerShip()) {
         if (FactionUtil::GetFactionName(faction).find("pirates") != std::string::npos) {
             static unsigned int cachedCargoNum = 0;
             static bool empty_cargo_hold = true;
@@ -133,8 +131,7 @@ float Pilot::getAnger(const Unit *parent, const Unit *target) const {
                 }
             }
             if (empty_cargo_hold) {
-                static float goodness_for_nocargo =
-                        XMLSupport::parse_float(vs_config->getVariable("AI", "pirate_bonus_for_empty_hold", ".75"));
+                const float goodness_for_nocargo = configuration().ai.pirate_bonus_for_empty_hold_flt;
                 rel += goodness_for_nocargo;
             }
         }

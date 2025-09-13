@@ -33,12 +33,12 @@
 #include <Python.h>
 #include "cmd/unit_generic.h"
 #include <float.h>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include <vector>
 #include <string>
 #include "root_generic/vs_globals.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "root_generic/load_mission.h"
 #include <algorithm>
 #include "cmd/script/mission.h"

@@ -99,7 +99,7 @@ void ComponentsManager::SetPlayerShip() {
     player_ship = true;
 }
 
-bool ComponentsManager::PlayerShip() {
+bool ComponentsManager::IsPlayerShip() const {
     return player_ship;
 }
 

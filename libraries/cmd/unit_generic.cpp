@@ -41,7 +41,7 @@
 #include "cmd/beam.h"
 #include "root_generic/lin_time.h"
 #include "root_generic/xml_serializer.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "src/file_main.h"
 #include "src/universe_util.h"
@@ -82,7 +82,7 @@
 #include "cmd/base_util.h"
 #include "cmd/unit_csv_factory.h"
 #include "cmd/unit_json_factory.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "resource/manifest.h"
 #include "cmd/dock_utils.h"
 #include "vega_cast_utils.h"
@@ -984,8 +984,8 @@ void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
 bool Unit::jumpReactToCollision(Unit *smalle) {
     const bool ai_jump_cheat = configuration().ai.jump_without_energy;
     const bool nojumpinSPEC = configuration().physics.no_spec_jump;
-    bool SPEC_interference = (nullptr != _Universe->isPlayerStarship(smalle)) ? smalle->ftl_drive.Enabled()
-            && nojumpinSPEC : (nullptr != _Universe->isPlayerStarship(this)) && ftl_drive.Enabled()
+    bool SPEC_interference = (smalle->IsPlayerShip()) ? smalle->ftl_drive.Enabled()
+            && nojumpinSPEC : (this->IsPlayerShip()) && ftl_drive.Enabled()
             && nojumpinSPEC;
     //only allow big with small
     if (!GetDestinations().empty()) {
@@ -1046,7 +1046,7 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
 Cockpit *Unit::GetVelocityDifficultyMult(float &difficulty) const {
     difficulty = 1;
     Cockpit *player_cockpit = _Universe->isPlayerStarship(this);
-    if ((player_cockpit) == nullptr) {
+    if (IsPlayerShip()) {
         difficulty = std::pow(g_game.difficulty, configuration().physics.difficulty_speed_exponent_flt);
     }
     return player_cockpit;
@@ -1315,7 +1315,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
 
             dockedun.back()->UnDock(this);
 
-            if (randomInt(INT_MAX) <= (UnitUtil::isPlayerStarship(dockedun.back()) ? i_player_survival : i_survival)) {
+            if (randomInt(INT_MAX) <= (dockedun.back()->IsPlayerShip()) ? i_player_survival : i_survival) {
                 dockedun.back()->Kill();
             }
             dockedun.pop_back();
@@ -1526,7 +1526,7 @@ void Unit::Target(Unit *targ) {
                         }
                     }
                 }
-                if (!found && !_Universe->isPlayerStarship(this)) {
+                if (!found && !IsPlayerShip()) {
                     WarpPursuit(this, _Universe->activeStarSystem(), targ->getStarSystem()->getFileName());
                 }
             } else {
@@ -1664,7 +1664,7 @@ bool Unit::Explode(bool drawit, float timeit) {
                         static double lasttime = 0;
                         double newtime = getNewTime();
                         if (newtime - lasttime > configuration().audio.time_between_music_flt
-                                || (_Universe->isPlayerStarship(this) && this->getUnitType() != Vega_UnitType::missile
+                                || (IsPlayerShip() && this->getUnitType() != Vega_UnitType::missile
                                         && this->faction
                                                 != upgradesfaction)) {
                             //No victory for missiles or spawned explosions
@@ -1953,7 +1953,7 @@ int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
         this->RestoreGodliness();
     }
 
-    unsigned int cockpit = UnitUtil::isPlayerStarship(this);
+    unsigned int cockpit = _Universe->whichPlayerStarship(this);
 
     // Refuel and recharge and charge docking/refueling fees
     rechargeShip(this, cockpit);
@@ -3202,7 +3202,7 @@ enum Unit::tractorHow Unit::getTractorability() const {
         tractorability_mask_init = true;
     }
     unsigned char tflags;
-    if (_Universe->isPlayerStarship(this) != nullptr) {
+    if (IsPlayerShip()) {
         tflags = tractorability_flags & tractorability_mask;
     } else {
         tflags = tractorability_flags;
@@ -3386,14 +3386,10 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         adjustSound(SoundType::cloaking, cumulative_transformation.position, cumulative_velocity);
     }
 
-
-
-    bool is_player_ship = _Universe->isPlayerStarship(this);
-
     reactor.Generate();
     drive.Consume();
 
-    shield.Regenerate(is_player_ship);
+    shield.Regenerate(IsPlayerShip());
     ecm.Consume();
     DecreaseWarpEnergyInWarp();
 
@@ -3456,11 +3452,17 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         Velocity = Velocity * (1 - SPACE_DRAG);
     }
 
-    static string LockingSoundName = vs_config->getVariable("unitaudio", "locking", "locking.wav");
+    std::string locking_sound_name = configuration().audio.unit_audio.locking;
     //enables spiffy wc2 torpedo music, default to normal though
-    static string LockingSoundTorpName = vs_config->getVariable("unitaudio", "locking_torp", "locking.wav");
-    static int LockingSound = AUDCreateSoundWAV(LockingSoundName, true);
-    static int LockingSoundTorp = AUDCreateSoundWAV(LockingSoundTorpName, true);
+    std::string locking_sound_torp_name = configuration().audio.unit_audio.locking_torp;
+    static boost::optional<int> locking_sound{};
+    if (locking_sound == boost::none) {
+        locking_sound = AUDCreateSoundWAV(locking_sound_name, true);
+    }
+    static boost::optional<int> locking_sound_torp{};
+    if (locking_sound_torp == boost::none) {
+        locking_sound_torp = AUDCreateSoundWAV(locking_sound_torp_name, true);
+    }
 
     bool locking = false;
     bool touched = false;
@@ -3479,45 +3481,42 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                         mounts[i].time_to_lock = -1;
                     }
                 } else {
-                    int LockingPlay = LockingSound;
+                    int locking_play = locking_sound.get();
 
                     //enables spiffy wc2 torpedo music, default to normal though
-                    static bool LockTrumpsMusic =
-                            XMLSupport::parse_bool(vs_config->getVariable("unitaudio",
-                                    "locking_trumps_music",
-                                    "false"));
+                    const bool lock_trumps_music = configuration().audio.unit_audio.locking_trumps_music;
                     //enables spiffy wc2 torpedo music, default to normal though
-                    static bool TorpLockTrumpsMusic =
-                            XMLSupport::parse_bool(vs_config->getVariable("unitaudio",
-                                    "locking_torp_trumps_music",
-                                    "false"));
+                    const bool torp_lock_trumps_music = configuration().audio.unit_audio.locking_torp_trumps_music;
                     if (mounts[i].type->lock_time > 0) {
-                        static string LockedSoundName = vs_config->getVariable("unitaudio", "locked", "locked.wav");
-                        static int LockedSound = AUDCreateSoundWAV(LockedSoundName, false);
+                        std::string locked_sound_name = configuration().audio.unit_audio.locked;
+                        static boost::optional<int> locked_sound{};
+                        if (locked_sound == boost::none) {
+                            locked_sound = AUDCreateSoundWAV(locked_sound_name, false);
+                        }
                         if (mounts[i].type->size == MOUNT_SIZE::SPECIALMISSILE) {
-                            LockingPlay = LockingSoundTorp;
+                            locking_play = locking_sound_torp.get();
                         } else {
-                            LockingPlay = LockingSound;
+                            locking_play = locking_sound.get();
                         }
                         if (mounts[i].time_to_lock > -SIMULATION_ATOM && mounts[i].time_to_lock <= 0) {
-                            if (!AUDIsPlaying(LockedSound)) {
+                            if (!AUDIsPlaying(locked_sound.get())) {
                                 UniverseUtil::musicMute(false);
-                                AUDStartPlaying(LockedSound);
-                                AUDStopPlaying(LockingSound);
-                                AUDStopPlaying(LockingSoundTorp);
+                                AUDStartPlaying(locked_sound.get());
+                                AUDStopPlaying(locking_sound.get());
+                                AUDStopPlaying(locking_sound_torp.get());
                             }
-                            AUDAdjustSound(LockedSound, Position(), GetVelocity());
+                            AUDAdjustSound(locked_sound.get(), Position(), GetVelocity());
                         } else if (mounts[i].time_to_lock > 0) {
                             locking = true;
-                            if (!AUDIsPlaying(LockingPlay)) {
-                                if (LockingPlay == LockingSoundTorp) {
-                                    UniverseUtil::musicMute(TorpLockTrumpsMusic);
+                            if (!AUDIsPlaying(locking_play)) {
+                                if (locking_play == locking_sound_torp) {
+                                    UniverseUtil::musicMute(torp_lock_trumps_music);
                                 } else {
-                                    UniverseUtil::musicMute(LockTrumpsMusic);
+                                    UniverseUtil::musicMute(lock_trumps_music);
                                 }
-                                AUDStartPlaying(LockingSound);
+                                AUDStartPlaying(locking_sound.get());
                             }
-                            AUDAdjustSound(LockingSound, Position(), GetVelocity());
+                            AUDAdjustSound(locking_sound.get(), Position(), GetVelocity());
                         }
                     }
                 }
@@ -3596,13 +3595,13 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         }
     }
     if (locking == false && touched == true) {
-        if (AUDIsPlaying(LockingSound)) {
+        if (AUDIsPlaying(locking_sound.get())) {
             UniverseUtil::musicMute(false);
-            AUDStopPlaying(LockingSound);
+            AUDStopPlaying(locking_sound.get());
         }
-        if (AUDIsPlaying(LockingSoundTorp)) {
+        if (AUDIsPlaying(locking_sound_torp.get())) {
             UniverseUtil::musicMute(false);
-            AUDStopPlaying(LockingSoundTorp);
+            AUDStopPlaying(locking_sound_torp.get());
         }
     }
 
@@ -3664,10 +3663,6 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     }
 }
 
-
-bool Unit::isPlayerShip() {
-    return _Universe->isPlayerStarship(this) ? true : false;
-}
 
 ///Updates the collide Queue with any possible change in sectors
 ///Queries if this unit is within a given frustum
@@ -3836,10 +3831,12 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
                 }
             }
             DealPossibleJumpDamage(this);
-            static int
-                    jumparrive = AUDCreateSound(vs_config->getVariable("unitaudio", "jumparrive", "sfx43.wav"), false);
+            static boost::optional<int> jump_arrive{};
+            if (jump_arrive == boost::none) {
+                jump_arrive = AUDCreateSound(configuration().audio.unit_audio.jump_arrive, false);
+            }
             if (dosightandsound) {
-                AUDPlay(jumparrive, this->LocalPosition(), this->GetVelocity(), 1);
+                AUDPlay(jump_arrive.get(), this->LocalPosition(), this->GetVelocity(), 1);
             }
         } else {
 #ifdef JUMP_DEBUG

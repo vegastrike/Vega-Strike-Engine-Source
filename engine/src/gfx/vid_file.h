@@ -32,7 +32,7 @@
 //
 
 #include <string>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include <exception>
 
 class VidFileImpl;

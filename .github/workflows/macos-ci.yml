@@ -41,9 +41,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           update-environment: false
 
-      - name: Install dependencies using homebrew
-        run: brew install boost-python3 gtk+3 gtkglext sdl libvorbis
-
       # The following dependencies are already present within macos-* images:
       # MacOS has a Developers Tools package from Apple that gets installed which
       # provides some minimal functionality:
@@ -53,7 +50,7 @@ jobs:
         run: brew install bash
 
       - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 2
           submodules: false

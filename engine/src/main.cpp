@@ -50,12 +50,12 @@
 #include "src/config_xml.h"
 #include "cmd/script/mission.h"
 #include "src/audiolib.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 #include "gfx/animation.h"
 #include "gfx/cockpit.h"
 #include "src/python/init.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/force_feedback.h"
 #include "gfx/hud.h"
 #include "gldrv/winsys.h"
@@ -335,7 +335,7 @@ int main(int argc, char *argv[]) {
     VegaStrikeLogging::VegaStrikeLogger::instance().InitLoggingPart2(g_game.vsdebug, home_subdir_path);
 
     // can use the vegastrike config variable to read in the default mission
-    if (game_options()->force_client_connect) {
+    if (configuration().network.force_client_connect) {
         ignore_network = false;
     }
 
@@ -669,7 +669,7 @@ void bootstrap_main_loop() {
 
         if (mission->getVariable("savegame",
                 "").length() != 0
-                && game_options()->dockOnLoad) {
+                && configuration().ai.dock_on_load) {
             for (size_t i = 0; i < _Universe->numPlayers(); i++) {
                 QVector vec;
                 DockToSavedBases(i, vec);

@@ -76,7 +76,7 @@ void Carrier::EjectCargo(unsigned int index) {
     Cargo ejectedPilot;
     Cargo dockedPilot;
     string name;
-    bool isplayer = false;
+    bool isplayer = unit->IsPlayerShip();
     //if (index==((unsigned int)-1)) { is ejecting normally
     //if (index==((unsigned int)-2)) { is ejecting for eject-dock
 
@@ -85,9 +85,7 @@ void Carrier::EjectCargo(unsigned int index) {
 //        _Universe->CurrentCockpit();
         //this calls the unit's existence, by the way.
         name = "return_to_cockpit";
-        if (nullptr != (cp = _Universe->isPlayerStarship(unit))) {
-            isplayer = true;
-        }
+        
         //we will have to check for this on undock to return to the parent unit!
         dockedPilot.SetName("return_to_cockpit");
         dockedPilot.SetMass(.1);
@@ -185,8 +183,7 @@ void Carrier::EjectCargo(unsigned int index) {
                         cargo->owner = unit;
                     }
                     arot = erot;
-                    static bool eject_attacks =
-                            XMLSupport::parse_bool(vs_config->getVariable("AI", "eject_attacks", "false"));
+                    const bool eject_attacks = configuration().ai.eject_attacks;
                     if (eject_attacks) {
                         cargo->PrimeOrders();
                         //generally fraidycat AI

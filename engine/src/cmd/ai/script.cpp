@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <vector>
 #include <stack>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "tactics.h"
 #include "cmd/unit_generic.h"
@@ -779,7 +779,7 @@ void AIScript::endElement(const string &name) {
 }
 
 void AIScript::LoadXML() {
-    static int aidebug = XMLSupport::parse_int(vs_config->getVariable("AI", "debug_level", "0"));
+    const int aidebug = configuration().ai.debug_level;
     using namespace AiXml;
     using namespace VSFileSystem;
     string full_filename = filename;
@@ -812,7 +812,7 @@ void AIScript::LoadXML() {
                     % parent->name
                     % parent->computer.threatlevel));
         }
-        if (_Universe->isPlayerStarship(parent->Target())) {
+        if (parent->Target()->IsPlayerShip()) {
             double value;
             const double game_speed = configuration().physics.game_speed_dbl;
             const double game_accel = configuration().physics.game_accel_dbl;

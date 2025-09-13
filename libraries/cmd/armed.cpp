@@ -206,11 +206,9 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (unit->cloak.Active() && !configuration().weapons.can_fire_in_cloak) {
-        VS_LOG(trace, (boost::format("%1%: can't fire while cloaked") % __FUNCTION__));
         UnFire();
         return;
     } else if (unit->ftl_drive.Enabled() && !configuration().weapons.can_fire_in_spec) {
-        VS_LOG(trace, (boost::format("%1%: can't fire while in SPEC flight") % __FUNCTION__));
         UnFire();
         return;
     }
@@ -223,7 +221,6 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
         unsigned int index = counter;
         Mount *i = &mounts[index];
         if (i->status != Mount::ACTIVE) {
-            VS_LOG(trace, (boost::format("%1%: mount %2% is inactive") % __FUNCTION__ % counter));
             continue;
         }
         if (i->bank == true) {
@@ -431,7 +428,7 @@ bool Armed::TargetTracked(const Unit *checktarget) {
     const bool must_lock_to_autotrack = configuration().physics.must_lock_to_autotrack;
 
     bool we_do_track = unit->radar.tracking_active
-            && (!_Universe->isPlayerStarship(unit) || TargetLocked() || !must_lock_to_autotrack);
+            && (!unit->IsPlayerShip() || TargetLocked() || !must_lock_to_autotrack);
     if (!we_do_track) {
         return false;
     }

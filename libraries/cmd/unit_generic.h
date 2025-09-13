@@ -72,7 +72,7 @@ void UncheckUnit( class Unit*un );
 #include "cmd/script/flightgroup.h"
 #include "root_generic/faction_generic.h"
 #include "gfx_generic/cockpit_generic.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "cmd/collide_map.h"
 #include "src/SharedPool.h"
 #include "cmd/role_bitmask.h"
@@ -526,7 +526,6 @@ public:
             bool lastframe,
             UnitCollection *uc,
             Unit *superunit) override;
-    bool isPlayerShip() override;
 
 //The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
     void *owner = nullptr;   //void ensures that it won't be referenced by accident

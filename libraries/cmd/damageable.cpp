@@ -121,9 +121,10 @@ void Damageable::ApplyDamage(const Vector &pnt,
         return;
     }
 
+    // TODO: get rid of isPlayerStarshipVoid
     Cockpit *shooter_cockpit = _Universe->isPlayerStarshipVoid(ownerDoNotDereference);
     bool shooter_is_player = (shooter_cockpit != nullptr);
-    bool shot_at_is_player = _Universe->isPlayerStarship(unit);
+    bool shot_at_is_player = unit->IsPlayerShip();
     Vector localpnt(InvTransform(unit->cumulative_transformation_matrix, pnt));
     Vector localnorm(unit->ToLocalCoordinates(normal));
     CoreVector attack_vector(localpnt.i, localpnt.j, localpnt.k);

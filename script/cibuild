@@ -101,7 +101,7 @@ then
 elif [ "$MY_OS_NAME" == "macos" ]
 then
     # setup the environment for Homebrew
-    BUILD_WITH_PYTHON_VERSION="3.12"
+    BUILD_WITH_PYTHON_VERSION="3.13"
 
     HOMEBREW_PREFIX="$(brew --prefix)"
     HOMEBREW_BIN="${HOMEBREW_PREFIX}/bin"
@@ -129,9 +129,29 @@ then
     echo "   Homebrew Python CFlags: ${HOMEBREW_PYTHON3_CLFLAGS}"
     echo "  Homebrew Python LDFlags: ${HOMEBREW_PYTHON3_LDFLAGS}"
 
+    export HOMEBREW_LIBARCHIVE_PREFIX="$(brew --prefix libarchive)"
+    export PKG_CONFIG_PATH="${HOMEBREW_LIBARCHIVE_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
+    export HOMEBREW_LIBARCHIVE_CFLAGS="-I${HOMEBREW_LIBARCHIVE_PREFIX}/include"
+    export HOMEBREW_LIBARCHIVE_LDFLAGS="-L${HOMEBREW_LIBARCHIVE_PREFIX}/lib"
+    echo "   Homebrew LibArchive CFlags: ${HOMEBREW_LIBARCHIVE_CFLAGS}"
+    echo "  Homebrew LibArchive LDFlags: ${HOMEBREW_LIBARCHIVE_LDFLAGS}"
+
+    echo " ========================================================================"
+    echo " LIBARCHIVE DIAGNOSTIC"
+    echo " LIBARCHIVE path prefix: ${HOMEBREW_LIBARCHIVE_PREFIX}"
+    ls ${HOMEBREW_LIBARCHIVE_PREFIX}
+
+    echo " LIBARCHIVE include: ${HOMEBREW_LIBARCHIVE_PREFIX}/include contents:"
+    ls ${HOMEBREW_LIBARCHIVE_PREFIX}/include
+
+    echo " LIBARCHIVE lib: ${HOMEBREW_LIBARCHIVE_PREFIX}/lib contents:"
+    ls ${HOMEBREW_LIBARCHIVE_PREFIX}/lib
+    echo " ========================================================================"
+
+
     # Homebrew needs certain flags set so its installation parts are found
-    export CFLAGS="-I${HOMEBREW_PREFIX}/include ${HOMEBREW_PYTHON3_CFLAGS} ${CFLAGS}"
-    export LDFLAGS="-L${HOMEBREW_PREFIX}/lib ${HOMEBREW_PYTHON3_LDFLAGS} ${LDFLAGS}"
+    export CFLAGS="-I${HOMEBREW_PREFIX}/include ${HOMEBREW_PYTHON3_CFLAGS} ${HOMEBREW_LIBARCHIVE_CFLAGS} ${CFLAGS}"
+    export LDFLAGS="-L${HOMEBREW_PREFIX}/lib ${HOMEBREW_PYTHON3_LDFLAGS} ${HOMEBREW_LIBARCHIVE_LDFLAGS} ${LDFLAGS}"
     echo "                   CFlags: ${CFLAGS}"
     echo "                  LDFlags: ${LDFLAGS}"
 

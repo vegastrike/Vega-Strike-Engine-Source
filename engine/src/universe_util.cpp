@@ -46,7 +46,7 @@
 #include "cmd/base.h"
 #include "root_generic/options.h"
 #include "src/universe.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/vs_logging.h"
 
 extern unsigned int AddAnimation(const QVector &pos,

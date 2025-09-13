@@ -59,6 +59,7 @@ options_cpp_path: Path = Path('libraries/root_generic/options.cpp').resolve()
 regex_flags_single_line: int = RegexFlag.UNICODE
 regex_flags_single_line_case_insensitive: int = RegexFlag.UNICODE + RegexFlag.IGNORECASE
 regex_flags_multiline: int = RegexFlag.MULTILINE + RegexFlag.UNICODE
+regex_flags_multiline_case_insensitive: int = RegexFlag.MULTILINE + RegexFlag.UNICODE + RegexFlag.IGNORECASE
 
 parse_keys: list[ParseKey] = []
 options_section_header_parse_key_1 = ParseKey()
@@ -415,14 +416,14 @@ def build_game_options_parse_keys(parse_keys_list: list[ParseKey], config_items:
         this_setting: VegaSetting = config_items[each_key]
         if this_setting:
             new_parse_key = ParseKey()
-            new_parse_key.pattern = re.compile(r'\bgame_options\(\)->' + this_setting.name + r'\b', regex_flags_multiline)
+            new_parse_key.pattern = re.compile(r'\bgame_options\(\)->' + this_setting.name + r'\b', regex_flags_multiline_case_insensitive)
             new_parse_key.substitution = this_setting.replacement_expression
             new_parse_key.leave_as_is = ''
             if new_parse_key.pattern and new_parse_key.substitution:
                 parse_keys_list.append(new_parse_key)
 
             new_parse_key_1 = ParseKey()
-            new_parse_key_1.pattern = re.compile(r'\bg_game\.' + this_setting.name + r'\b', regex_flags_multiline)
+            new_parse_key_1.pattern = re.compile(r'\bg_game\.' + this_setting.name + r'\b', regex_flags_multiline_case_insensitive)
             new_parse_key_1.substitution = this_setting.replacement_expression
             new_parse_key_1.leave_as_is = ''
             if new_parse_key_1.pattern and new_parse_key_1.substitution:
@@ -619,7 +620,7 @@ def build_gl_options_parse_keys(parse_keys_list: list[ParseKey], config_items: d
         this_setting: VegaSetting = config_items[each_key]
         if this_setting:
             new_parse_key = ParseKey()
-            new_parse_key.pattern = re.compile(r'\bgl_options\.' + this_setting.name + r'\b', regex_flags_multiline)
+            new_parse_key.pattern = re.compile(r'\bgl_options\.' + this_setting.name + r'\b', regex_flags_multiline_case_insensitive)
             new_parse_key.substitution = this_setting.replacement_expression
             new_parse_key.leave_as_is = ''
             if new_parse_key.pattern and new_parse_key.substitution:

@@ -29,7 +29,7 @@
 
 #include <stdlib.h>
 #include <iostream>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "cmd/unit_generic.h"
 #include "gfx/aux_texture.h"

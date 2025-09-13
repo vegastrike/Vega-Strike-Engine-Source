@@ -101,18 +101,13 @@ void Beam::RecalculateVertices(const Matrix &trans) {
     GFXColorVertex *beam = (vlist->BeginMutate(0))->colors;
     const float fadelocation = configuration().graphics.beam_fadeout_length_flt;
     const float hitfadelocation = configuration().graphics.beam_fadeout_hit_length_flt;
-    static float scoopangle =
-            //In radians - the /2 is because of the way in which we check against the cone.
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.scoop_fov", "0.5")) / 2;
-    static float scooptanangle = (float) tan(scoopangle);
-    static bool scoop = XMLSupport::parse_bool(vs_config->getVariable("graphics", "tractor.scoop", "true"));
-    static float scoopa =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "tractor.scoop_alpha_multiplier", "2.5"));
-    static int radslices =
-            XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_rad_slices", "10"))
-                    | 1;         //Must be odd
-    static int longslices =
-            XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_long_slices", "10"));
+    //In radians - the /2 is because of the way in which we check against the cone.
+    const float scoopangle = configuration().physics.tractor.scoop_fov_flt / 2.0F;
+    const float scooptanangle = (float) tan(scoopangle);
+    const bool scoop = configuration().physics.tractor.scoop;
+    const float scoopa = configuration().physics.tractor.scoop_alpha_multiplier_flt;
+    const int radslices = configuration().physics.tractor.scoop_rad_slices;
+    const int longslices = configuration().physics.tractor.scoop_long_slices;
     const float fadeinlength = 4;
     const bool tractor = (damagerate < 0 && phasedamage > 0);
     const bool repulsor = (damagerate > 0 && phasedamage < 0);
@@ -362,10 +357,8 @@ Beam::Beam(const Transformation &trans, const WeaponInfo &clne, void *own, Unit 
     impact = ALIVE;
     owner = own;
     numframes = 0;
-    static int radslices = XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_rad_slices", "10"))
-            | 1;    //Must be odd
-    static int
-            longslices = XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_long_slices", "10"));
+    const int radslices = configuration().physics.tractor.scoop_rad_slices | 1;    //Must be odd
+    const int longslices = configuration().physics.tractor.scoop_long_slices;
     lastlength = 0;
     curlength = simulation_atom_var * speed;
     lastthick = 0;
@@ -411,10 +404,8 @@ void Beam::Reinitialize() {
 
     impact = ALIVE;
     numframes = 0;
-    static int radslices = XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_rad_slices", "10"))
-            | 1;    //Must be odd
-    static int
-            longslices = XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_long_slices", "10"));
+    const int radslices = configuration().physics.tractor.scoop_rad_slices | 1;    //Must be odd
+    const int longslices = configuration().physics.tractor.scoop_long_slices;
     lastlength = 0;
     curlength = simulation_atom_var * speed;
     lastthick = 0;
@@ -606,20 +597,21 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         adder.SetQuantity(1);
                         if (un->cargo_hold.CanAddCargo(adder)) {
                             un->cargo_hold.AddCargo(un, adder);
-                            if (_Universe->isPlayerStarship(un)) {
-                                static int tractor_onboard =
-                                        AUDCreateSoundWAV(vs_config->getVariable("unitaudio", "player_tractor_cargo",
-                                                "tractor_onboard.wav"));
-                                AUDPlay(tractor_onboard, QVector(0, 0, 0), Vector(0, 0, 0), 1);
+                            if (un->IsPlayerShip()) {
+                                static boost::optional<int> tractor_onboard{};
+                                if (tractor_onboard == boost::none) {
+                                    tractor_onboard = AUDCreateSoundWAV(configuration().audio.unit_audio.player_tractor_cargo);
+                                }
+                                AUDPlay(tractor_onboard.get(), QVector(0, 0, 0), Vector(0, 0, 0), 1);
                             } else {
                                 Unit *tmp = _Universe->AccessCockpit()->GetParent();
                                 if (tmp && tmp->owner == un) {
                                     //Subunit of player (a turret)
-                                    static int tractor_onboard_fromturret =
-                                            AUDCreateSoundWAV(vs_config->getVariable("unitaudio",
-                                                    "player_tractor_cargo_fromturret",
-                                                    "tractor_onboard.wav"));
-                                    AUDPlay(tractor_onboard_fromturret, QVector(0, 0, 0), Vector(0, 0, 0), 1);
+                                    static boost::optional<int> tractor_onboard_fromturret{};
+                                    if (tractor_onboard_fromturret == boost::none) {
+                                        tractor_onboard_fromturret = AUDCreateSoundWAV(configuration().audio.unit_audio.player_tractor_cargo_fromturret);
+                                    }
+                                    AUDPlay(tractor_onboard_fromturret.get(), QVector(0, 0, 0), Vector(0, 0, 0), 1);
                                 }
                             }
                             target->Kill();

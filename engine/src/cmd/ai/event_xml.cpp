@@ -36,7 +36,7 @@
 #include <float.h>
 #include <assert.h>
 #include "src/vegastrike.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/configxml.h"
@@ -67,7 +67,7 @@ AIEvresult::AIEvresult(int type,
 
     this->script = aiscript;
     if (!validateHardCodedScript(this->script)) {
-        static int aidebug = XMLSupport::parse_int(vs_config->getVariable("AI", "debug_level", "0"));
+        const int aidebug = configuration().ai.debug_level;
         if (aidebug) {
             for (int i = 0; i < 20; ++i) {
                 VS_LOG(serious_warning, (boost::format("SERIOUS WARNING %1%") % this->script.c_str()));
@@ -182,10 +182,7 @@ void GeneralAIEventEnd(void *userData, const XML_Char *name) {
 void LoadAI(const char *filename, ElemAttrMap &result, const string &faction) {
     //returns obedience
     using namespace VSFileSystem;
-    static float cfg_obedience = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "Targetting",
-            "obedience",
-            ".99"));
+    const float cfg_obedience = configuration().ai.targeting.obedience_flt;
     result.obedience = cfg_obedience;
     result.maxtime = 10;
     VSFile f;

@@ -50,7 +50,7 @@
 
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "src/python/init.h"
 #include "src/python/python_compile.h"
@@ -86,8 +86,8 @@ void Python::initpaths() {
      *               pwd[i]=DELIM;
      *  }
      */
-    std::string moduledir(vs_config->getVariable("data", "python_modules", "modules"));
-    std::string basesdir(vs_config->getVariable("data", "python_bases", "bases"));
+    std::string moduledir(configuration().data.python_modules);
+    std::string basesdir(configuration().data.python_bases);
 
     /*
      *  std::string changepath ("import sys\nprint sys.path\nsys.path = ["

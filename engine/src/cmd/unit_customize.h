@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "gfx/cockpit.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "src/config_xml.h"
 #include "root_generic/xml_serializer.h"
 #include "src/audiolib.h"

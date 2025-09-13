@@ -29,7 +29,7 @@
 
 #include "src/audiolib.h"
 #include "src/hashtable.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include <string>
 #include "al_globals.h"
@@ -38,7 +38,7 @@
 #include "cmd/unit_generic.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "root_generic/options.h"
-#include "root_generic/posh.h"
+#include "posh/posh.h"
 #include "src/universe.h"
 
 #ifdef HAVE_AL

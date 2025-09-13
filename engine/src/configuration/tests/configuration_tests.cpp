@@ -136,7 +136,7 @@ TEST(configuration, const_Performance) {
 TEST(configuration, static_optional_Performance) {
     VS_LOG_AND_FLUSH(important_info, "Starting test of static optional setting variable");
     const auto start_time = std::chrono::steady_clock::now();
-    static boost::optional<double> setting;
+    static boost::optional<double> setting{};
     for (int i = 0; i < kIterations; ++i) {
         if (setting == boost::none) {
             setting = configuration().physics.asteroid_difficulty_dbl;
@@ -150,7 +150,7 @@ TEST(configuration, static_optional_Performance) {
 TEST(configuration, Performance_of_static_optional_with_get) {
     VS_LOG_AND_FLUSH(important_info, "Starting test of static optional setting variable with .get()");
     const auto start_time = std::chrono::steady_clock::now();
-    static boost::optional<double> setting;
+    static boost::optional<double> setting{};
     for (int i = 0; i < kIterations; ++i) {
         if (setting == boost::none) {
             setting = configuration().physics.asteroid_difficulty_dbl;

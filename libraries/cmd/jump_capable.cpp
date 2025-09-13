@@ -33,7 +33,7 @@
 #include "src/universe.h"
 #include "src/universe_util.h"
 #include "gfx/warptrail.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_exit.h"
 #include "src/vega_cast_utils.h"
 #include "root_generic/configxml.h"
@@ -357,7 +357,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                                         followermessage,
                                         recursive_level - 1);
                                 if (leadah) {
-                                    if (nullptr == _Universe->isPlayerStarship(other)) {
+                                    if (other->IsPlayerShip()) {
                                         other->SetPosition(AutoSafeEntrancePoint(unit->LocalPosition(),
                                                 other->rSize() * 1.5,
                                                 other));

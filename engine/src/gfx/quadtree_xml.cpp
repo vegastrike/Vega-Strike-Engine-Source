@@ -32,7 +32,7 @@
 #include "src/gfxlib.h"
 #include "gfx/ani_texture.h"
 #include <assert.h>
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "gfx/vsimage.h"
 
 using namespace VSFileSystem;

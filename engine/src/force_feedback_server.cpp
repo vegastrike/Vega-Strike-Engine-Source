@@ -33,7 +33,7 @@
 #include "src/force_feedback.h"
 
 #include "src/vegastrike.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 
 #define FF_DOIT 1

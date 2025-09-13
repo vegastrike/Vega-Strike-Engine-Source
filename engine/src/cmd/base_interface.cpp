@@ -37,7 +37,7 @@
 #include "cmd/vega_py_run.h"
 #include "cmd/base.h"
 #include "gldrv/winsys.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "root_generic/lin_time.h"
 #include "src/audiolib.h"
@@ -1187,8 +1187,8 @@ BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
     if (base && un) {
         vector<string> vec;
         vec.push_back(base->name);
-        int cpt = UnitUtil::isPlayerStarship(un);
-        if (cpt >= 0) {
+        int cpt = _Universe->whichPlayerStarship(un);
+        if (un->IsPlayerShip()) {
             saveStringList(cpt, mission_key, vec);
         }
     }
@@ -1258,7 +1258,7 @@ void BaseInterface::Terminate() {
         terminate_scheduled = true;
     } else {
         Unit *un = caller.GetUnit();
-        int cpt = UnitUtil::isPlayerStarship(un);
+        int cpt = _Universe->whichPlayerStarship(un);
         if (un && cpt >= 0) {
             vector<string> vec;
             vec.push_back(string());

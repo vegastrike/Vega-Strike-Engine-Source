@@ -37,7 +37,7 @@
 #include "gfx_generic/cockpit_generic.h"
 #include "src/universe_util.h"
 #include "cmd/ai/docking.h"
-#include "root_generic/savegame.h"
+#include "vegadisk/savegame.h"
 #include "cmd/planet.h"
 #include "root_generic/faction_generic.h"
 #include "cmd/ai/fire.h"
@@ -257,7 +257,7 @@ int getPhysicsPriority(Unit *un) {
         //return ASTEROID_LOW_PRIORITY;
     }
     Unit *targ = un->Target();
-    if (_Universe->isPlayerStarship(targ)) {
+    if (targ && targ->IsPlayerShip()) {
         if (un->isJumppoint()) {
             return PLAYER_PRIORITY;
         } else if (UnitUtil::getDistance(targ, un) <= PLAYERTHREAT_DISTANCE_FACTOR * mymax(gun_range, missile_range)) {

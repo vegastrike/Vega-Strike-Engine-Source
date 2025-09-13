@@ -162,10 +162,8 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
         Unit *t = parent->Target();
         int neu = FactionUtil::GetNeutralFaction();
         int upg = FactionUtil::GetUpgradeFaction();
-        static bool allowanyreference =
-                XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowAnySpeedReference", "false"));
-        static bool onlyupgraderef =
-                XMLSupport::parse_bool(vs_config->getVariable("AI", "OnlyUpgradeSpeedReference", "false"));
+        const bool allowanyreference = configuration().ai.allow_any_speed_reference;
+        const bool onlyupgraderef = configuration().ai.only_upgrade_speed_reference;
         if (t) {
             if ((t->getRelation(parent) >= 0
                     && !onlyupgraderef) || t->faction == neu || t->faction == upg || allowanyreference) {
@@ -225,8 +223,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
     if (resetangvelocity) {
         desired_ang_velocity = Vector(0, 0, 0);
     }
-    static bool initial_inertial_mode =
-            XMLSupport::parse_bool(vs_config->getVariable("flight", "inertial::initial", "false"));
+    const bool initial_inertial_mode = configuration().flight.inertial.initial;
     if (SSCK.dirty) {
         //go with what's last there: no frames since last physics frame
         if (SSCK.uppress <= 0 && SSCK.downpress <= 0) {
@@ -457,7 +454,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             if (parent->jump_drive.IsDestinationSet()) {
                 static soundContainer foobar;
                 if (foobar.sound == -2) {
-                    static string str = vs_config->getVariable("cockpitaudio", "jump_engaged", "jump");
+                    static string str = configuration().cockpit_audio.jump_engaged;
                     foobar.loadsound(str);
                 }
                 foobar.playsound();

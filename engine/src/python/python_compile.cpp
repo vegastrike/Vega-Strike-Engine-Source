@@ -37,7 +37,7 @@
 #endif
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/python/init.h"
 #include "src/universe_util.h"
 #include "src/in_kb_data.h"
@@ -111,7 +111,7 @@ void CompileRunPython(const std::string &filename) {
     InterpretPython(filename);
     Python::reseterrors();
 #else
-    static bool ndebug_libs = XMLSupport::parse_bool(vs_config->getVariable("AI", "compile_python", "true"));
+    const bool ndebug_libs = configuration().ai.compile_python;
     if (ndebug_libs) {
         Python::reseterrors();
         PyObject * CompiledProgram = CompilePython(filename);

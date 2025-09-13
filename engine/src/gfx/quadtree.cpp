@@ -33,7 +33,7 @@
 #include "src/universe.h"
 #include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 
 const GFXVertex InitialVertices[4] = {

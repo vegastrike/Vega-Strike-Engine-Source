@@ -212,7 +212,7 @@ void FSM::Node::AddSound(std::string soundfile, unsigned char sex, float gain) {
             gains[index] = gain;
 
             // Preload sound if configured to do so
-            if (game_options()->comm_preload) {
+            if (configuration().cockpit_audio.comm_preload) {
                 GetSound(sex, multiple, gain);
             }
 
@@ -247,12 +247,8 @@ int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, floa
 #endif
     vector<unsigned int> g;
     vector<unsigned int> b;
-    static float pos_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "LowestPositiveCommChoice",
-            "0"));
-    static float neg_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "LowestNegativeCommChoice",
-            "-.00001"));
+    const float pos_limit = configuration().ai.lowest_positive_comm_choice_flt;
+    const float neg_limit = configuration().ai.lowest_negative_comm_choice_flt;
     for (unsigned int i = 0; i < n->edges.size(); i++) {
         float md = nodes[n->edges[i]].messagedelta;
         if (md >= pos_limit) {
@@ -534,7 +530,7 @@ void LeadMe(Unit *un, string directive, string speech, bool changetarget) {
         Flightgroup *fg = un->getFlightgroup();
         if (fg) {
             if (fg->leader.GetUnit() != un) {
-                if ((!_Universe->isPlayerStarship(fg->leader.GetUnit())) || _Universe->isPlayerStarship(un)) {
+                if (!(fg->leader.GetUnit()->IsPlayerShip()) || un->IsPlayerShip()) {
                     fg->leader.SetUnit(un);
                 }
             }

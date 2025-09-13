@@ -57,7 +57,7 @@
 #include "root_generic/lin_time.h"
 #include "cmd/collection.h"
 #include "cmd/unit_generic.h"
-#include "root_generic/vsfilesystem.h"
+#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "cmd/music.h"
 #include "cmd/base.h"
@@ -232,9 +232,8 @@ int Music::SelectTracks(int layer) {
         return 0;
     }
     const bool random = configuration().audio.shuffle_songs;
-    static size_t maxrecent =
-            XMLSupport::parse_int(vs_config->getVariable("audio", "shuffle_songs.history_depth", MAX_RECENT_HISTORY));
-    static std::string dj_script = vs_config->getVariable("sound", "dj_script", "modules/dj.py");
+    const size_t maxrecent = configuration().audio.shuffle_songs_section.history_depth;
+    std::string dj_script = configuration().audio.dj_script;
     if ((BaseInterface::CurrentBase || loopsleft > 0) && lastlist < (int) playlist.size() && lastlist >= 0) {
         if (loopsleft > 0) {
             loopsleft--;
