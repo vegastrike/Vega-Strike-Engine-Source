@@ -28,10 +28,32 @@
 
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-#FILE(GLOB VS_LIBRARIES LIST_DIRECTORIES true RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
-SET(VS_LIBRARIES "collide2" "gfx_generic" "root_generic" "cmd" "vegadisk" "posh" 
-    "imgui" "gui")
-FOREACH(VS_LIBDIR IN LISTS VS_LIBRARIES)
-    MESSAGE(STATUS "Found Library Directory " ${VS_LIBDIR})
-    ADD_SUBDIRECTORY(${VS_LIBDIR})
-ENDFOREACH(VS_LIBDIR)
+ADD_LIBRARY(vegastrike_imgui STATIC
+    imgui.cpp
+    imgui_draw.cpp
+    imgui_tables.cpp
+    imgui_widgets.cpp
+    
+    backends/imgui_impl_sdl2.cpp
+    backends/imgui_impl_sdlrenderer2.cpp
+)
+
+SET_PROPERTY(TARGET vegastrike_imgui PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vegastrike_imgui PROPERTY CXX_STANDARD_REQUIRED TRUE)
+SET_PROPERTY(TARGET vegastrike_imgui PROPERTY CXX_EXTENSIONS ON)
+SET_PROPERTY(TARGET vegastrike_imgui PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+
+
+message("libs: ${TST_INCLUDES} ${Vega_Strike_SOURCE_DIR}")
+
+TARGET_INCLUDE_DIRECTORIES(vegastrike_imgui 
+    PUBLIC ${Vega_Strike_SOURCE_DIR}/libraries/imgui
+    PUBLIC ${Vega_Strike_SOURCE_DIR}/libraries/imgui/backends
+    SYSTEM PRIVATE ${TST_INCLUDES})
+
+IF (NEED_LINKING_AGAINST_LIBM)
+    TARGET_LINK_LIBRARIES(vegastrike_imgui PRIVATE m)
+ENDIF()
+
+
+

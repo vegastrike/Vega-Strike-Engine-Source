@@ -743,8 +743,6 @@ void GFXLoop(void main_loop()) {
     winsys_set_display_func(main_loop);
     winsys_set_idle_func(main_loop);
 
-    //glutDisplayFunc(main_loop);
-    //glutIdleFunc (main_loop);
     static bool are_we_looping = false;
     /// so we can call this function multiple times to change the display and idle functions
     if (!are_we_looping) {
