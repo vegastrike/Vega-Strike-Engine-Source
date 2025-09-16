@@ -46,6 +46,8 @@ class NavigationSystem;
 #include "gfx/camera.h"
 #include "src/physics.h"
 #include "nav/navscreen.h"
+#include "nav/navigation_system.h"
+
 using namespace XMLSupport;   // DONT PUT THIS ABOVE HEADERS
 #define NUM_CAM CP_NUMVIEWS
 /**
