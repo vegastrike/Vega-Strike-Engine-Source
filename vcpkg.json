@@ -27,6 +27,7 @@
     "openal-soft",
     "opengl",
     "sdl2",
+    "sdl2-image",
     "zlib"
   ]
 }

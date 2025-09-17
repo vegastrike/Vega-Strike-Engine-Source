@@ -64,6 +64,7 @@ brew install \
     gtk+3 \
     gtkglext \
     sdl2 \
+    sdl2_image \
     ninja
 
 # Reinstall some key items because it might be problematic otherwise
