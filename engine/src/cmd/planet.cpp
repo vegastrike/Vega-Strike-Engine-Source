@@ -417,7 +417,6 @@ void Planet::InitPlanet(QVector x,
     }
 
     curr_physical_state.position = prev_physical_state.position = cumulative_transformation.position = orbitcent + x;
-    Init();
     //static int neutralfaction=FactionUtil::GetFaction("neutral");
     //this->faction = neutralfaction;
     killed = false;

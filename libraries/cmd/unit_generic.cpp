@@ -515,10 +515,6 @@ void Unit::Init(const char *filename,
         SetAniSpeed(0.05);
         StartAnimation();
     }
-
-    AddLayer(&hull);
-    AddLayer(&armor);
-    AddLayer(&shield);
 }
 
 
