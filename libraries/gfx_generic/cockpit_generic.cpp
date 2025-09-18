@@ -447,7 +447,7 @@ bool Cockpit::Update() {
     if (jumpok) {
         jumpok++;
     }
-    if (jumpok > 5) {
+    if (jumpok > 10) {
         jumpok = 0;
     }
     UpdAutoPilot();

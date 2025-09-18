@@ -87,6 +87,7 @@
 #include "cmd/dock_utils.h"
 #include "vega_cast_utils.h"
 #include "resource/random_utils.h"
+#include "gldrv/mouse_cursor.h"
 
 #include <math.h>
 #include <cmath>
@@ -1968,6 +1969,12 @@ int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
             }
         }
     }
+
+    // Change mouse pointer to arrow
+    if(IsPlayerShip()) {
+        changeCursor(CursorType::arrow);
+    }
+
     return whichdockport + 1;
 }
 
@@ -2069,6 +2076,12 @@ bool Unit::UnDock(Unit *utdw) {
             }
             // Send notification that a ship has undocked from a station
             _Universe->AccessCockpit()->OnDockEnd(utdw, this);
+
+            // Change mouse cursor to crosshairs
+            if(IsPlayerShip()) {
+                changeCursor(CursorType::crosshairs);
+            }
+
             return true;
         }
     }

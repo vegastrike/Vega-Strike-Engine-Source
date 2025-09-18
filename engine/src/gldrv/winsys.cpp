@@ -55,6 +55,8 @@
 
 #include "SDL2/SDL_video.h"
 
+#include "gldrv/mouse_cursor.h"
+
 /*
  * Windowing System Abstraction Layer
  * Abstracts creation of windows, handling of events, etc.
@@ -330,6 +332,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         if (configuration().graphics.gl_accelerated_visual) {
             VS_LOG_AND_FLUSH(error, "GDI Generic software driver reported, trying to reset.");
             SDL_ClearError();
+            freeMouseCursors();
             SDL_Quit();
             (const_cast<vega_config::Configuration &>(configuration())).graphics.gl_accelerated_visual = false;
             return false;
@@ -384,6 +387,10 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
         exit(1);              // stephengtuggy 2020-07-27 - I would use VSExit here, but that calls winsys_exit, which I'm not sure will work if winsys_init hasn't finished yet.
     }
 
+    // Init Mouse
+    initMouseCursors();
+    changeCursor(CursorType::arrow);
+
     //signal( SIGSEGV, SIG_DFL );
     SDL_Surface *icon = nullptr;
     if (icon_title) {
@@ -420,6 +427,7 @@ void winsys_cleanup() {
     static bool cleanup = false;
     if (!cleanup) {
         cleanup = true;
+        freeMouseCursors();
         SDL_Quit();
     }
 }

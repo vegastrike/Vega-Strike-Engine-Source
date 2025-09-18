@@ -83,6 +83,7 @@ function bootstrapOnDebian()
                             libglvnd-dev \
                             libgl1-mesa-dev \
                             libsdl2-dev \
+                            libsdl2-image-dev \
                             libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
@@ -122,6 +123,7 @@ function bootstrapOnDebian()
                             libglvnd-dev \
                             libgl1-mesa-dev \
                             libsdl2-dev \
+                            libsdl2-image-dev \
                             libpostproc-dev \
                             freeglut3-dev \
                             libboost-python1.81-dev \
@@ -176,6 +178,7 @@ function bootstrapOnUbuntu()
                             libglvnd-dev \
                             libgl1-mesa-dev \
                             libsdl2-dev \
+                            libsdl2-image-dev \
                             libopengl0 \
                             libpostproc-dev \
                             freeglut3-dev \
@@ -235,6 +238,7 @@ function bootstrapOnPopOS ()
                             libglvnd-dev \
                             libgl1-mesa-dev \
                             libsdl2-dev \
+                            libsdl2-image-dev \
                             libopengl0 \
                             libpostproc-dev \
                             freeglut3-dev \
@@ -286,6 +290,7 @@ function bootstrapOnLinuxMint ()
                             libglvnd-dev \
                             libgl1-mesa-dev \
                             libsdl2-dev \
+                            libsdl2-image-dev \
                             libopengl0 \
                             libpostproc-dev \
                             freeglut3-dev \
@@ -335,6 +340,7 @@ function bootstrapOnOpenSuseLeap ()
                                     libopenal0 \
                                     openal-soft-devel \
                                     libSDL2-devel \
+                                    libSDL2_image-devel \
                                     libvorbis-devel \
                                     libglvnd-devel \
                                     libjpeg-turbo \
@@ -351,6 +357,7 @@ function bootstrapOnOpenSuseLeap ()
                                     clang
             ;;
         "16.0")
+            zypper --non-interactive refresh
             zypper --non-interactive install -y \
                                     libboost_log1_86_0-devel \
                                     libboost_python-py3-1_86_0-devel \
@@ -369,6 +376,7 @@ function bootstrapOnOpenSuseLeap ()
                                     libopenal0 \
                                     openal-soft-devel \
                                     libSDL2-devel \
+                                    libSDL2_image-devel \
                                     libvorbis-devel \
                                     libglvnd-devel \
                                     libjpeg-turbo \
@@ -407,6 +415,7 @@ function bootstrapOnFedora ()
                                 gcc-c++ \
                                 openal-soft-devel \
                                 SDL2-devel \
+                                SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -428,6 +437,7 @@ function bootstrapOnFedora ()
                                 gcc-c++ \
                                 openal-soft-devel \
                                 SDL2-devel \
+                                SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -449,6 +459,7 @@ function bootstrapOnFedora ()
                                 gcc-c++ \
                                 openal-soft-devel \
                                 SDL2-devel \
+                                SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -485,6 +496,63 @@ function bootstrapOnCentOS ()
                                 gcc-c++ \
                                 openal-soft-devel \
                                 SDL2-devel \
+                                SDL2_image-devel \
+                                libvorbis-devel \
+                                libglvnd-devel \
+                                libjpeg-turbo-devel \
+                                libpng-devel \
+                                expat-devel \
+                                gtk3-devel \
+                                python3-devel \
+                                libarchive-devel \
+                                rpm-build \
+                                make \
+                                clang
+            ;;
+        "9.6")
+            dnf -y install dnf-plugins-core
+            dnf config-manager --set-enabled devel
+            dnf -y update
+            dnf -y install \
+                                git \
+                                cmake \
+                                boost-devel \
+                                boost-python3-devel \
+                                boost-json \
+                                freeglut-devel \
+                                gcc-c++ \
+                                openal-soft-devel \
+                                SDL2-devel \
+                                SDL2_image-devel \
+                                libvorbis-devel \
+                                libglvnd-devel \
+                                libjpeg-turbo-devel \
+                                libpng-devel \
+                                expat-devel \
+                                gtk3-devel \
+                                python3-devel \
+                                libarchive-devel \
+                                rpm-build \
+                                make \
+                                clang
+            ;;
+        "10.0")
+            dnf -y upgrade --refresh
+            dnf -y install 'dnf-command(config-manager)'
+            dnf -y config-manager --set-enabled crb
+            dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+            dnf -y update
+            dnf -y install \
+                                git \
+                                cmake \
+                                boost-devel \
+                                boost-python3-devel \
+                                boost-json \
+                                freeglut-devel \
+                                gcc-c++ \
+                                openal-soft-devel \
+                                SDL2-devel \
+                                SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -520,6 +588,63 @@ function bootstrapOnRedHat ()
                                 gcc-c++ \
                                 openal-soft-devel \
                                 SDL2-devel \
+                                SDL2_image-devel \
+                                libvorbis-devel \
+                                libglvnd-devel \
+                                libjpeg-turbo-devel \
+                                libpng-devel \
+                                expat-devel \
+                                gtk3-devel \
+                                python3-devel \
+                                libarchive-devel \
+                                rpm-build \
+                                make \
+                                clang
+            ;;
+        "9.6")
+            dnf -y install dnf-plugins-core
+            dnf config-manager --set-enabled devel
+            dnf -y update
+            dnf -y install \
+                                git \
+                                cmake \
+                                boost-devel \
+                                boost-python3-devel \
+                                boost-json \
+                                freeglut-devel \
+                                gcc-c++ \
+                                openal-soft-devel \
+                                SDL2-devel \
+                                SDL2_image-devel \
+                                libvorbis-devel \
+                                libglvnd-devel \
+                                libjpeg-turbo-devel \
+                                libpng-devel \
+                                expat-devel \
+                                gtk3-devel \
+                                python3-devel \
+                                libarchive-devel \
+                                rpm-build \
+                                make \
+                                clang
+            ;;
+        "10.0")
+            dnf -y upgrade --refresh
+            dnf -y install 'dnf-command(config-manager)'
+            dnf -y config-manager --set-enabled crb
+            dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+            dnf -y update
+            dnf -y install \
+                                git \
+                                cmake \
+                                boost-devel \
+                                boost-python3-devel \
+                                boost-json \
+                                freeglut-devel \
+                                gcc-c++ \
+                                openal-soft-devel \
+                                SDL2-devel \
+                                SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -544,7 +669,9 @@ function bootstrapOnRockyLinux ()
     case "${LINUX_VERSION_ID}" in
         "9.5")
             dnf -y install dnf-plugins-core
-            dnf config-manager --set-enabled devel
+            dnf config-manager --set-enabled crb
+            dnf config-manager --set-enabled devel 
+            dnf -y install epel-release
             dnf -y update
             dnf -y install \
                                 git \
@@ -556,6 +683,65 @@ function bootstrapOnRockyLinux ()
                                 gcc-c++ \
                                 openal-soft-devel \
                                 SDL2-devel \
+                                SDL2_image-devel \
+                                libvorbis-devel \
+                                libglvnd-devel \
+                                libjpeg-turbo-devel \
+                                libpng-devel \
+                                expat-devel \
+                                gtk3-devel \
+                                python3-devel \
+                                libarchive-devel \
+                                rpm-build \
+                                make \
+                                clang
+            ;;
+        "9.6")
+            dnf -y install dnf-plugins-core
+            dnf config-manager --set-enabled crb
+            dnf config-manager --set-enabled devel
+            dnf -y install epel-release
+            dnf -y update
+            dnf -y install \
+                                git \
+                                cmake \
+                                boost-devel \
+                                boost-python3-devel \
+                                boost-json \
+                                freeglut-devel \
+                                gcc-c++ \
+                                openal-soft-devel \
+                                SDL2-devel \
+                                SDL2_image-devel \
+                                libvorbis-devel \
+                                libglvnd-devel \
+                                libjpeg-turbo-devel \
+                                libpng-devel \
+                                expat-devel \
+                                gtk3-devel \
+                                python3-devel \
+                                libarchive-devel \
+                                rpm-build \
+                                make \
+                                clang
+            ;;
+        "10.0")
+            dnf -y upgrade --refresh
+            dnf -y install 'dnf-command(config-manager)'
+            dnf -y config-manager --set-enabled crb
+            dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+            dnf -y update
+            dnf -y install \
+                                git \
+                                cmake \
+                                boost-devel \
+                                boost-python3-devel \
+                                boost-json \
+                                freeglut-devel \
+                                gcc-c++ \
+                                openal-soft-devel \
+                                SDL2-devel \
+                                SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -583,6 +769,7 @@ function bootstrapOnManjaro ()
                          gcc \
                          gcc-libs \
                          sdl2 \
+                         sdl2_image \
                          expat \
                          gtk3 \
                          libglvnd \
@@ -611,6 +798,7 @@ function bootstrapOnFuntoo ()
               cmake \
               boost \
               libsdl2 \
+              libsdl2-image \
               expat \
               gtk3 \
               libglvnd \
@@ -643,6 +831,7 @@ function bootstrapOnArch ()
               gcc \
               gcc12 \
               sdl2 \
+              sdl2_image \
               expat \
               gtk3 \
               libglvnd \
