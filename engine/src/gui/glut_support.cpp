@@ -222,8 +222,6 @@ void EndGUIFrame(MousePointerStyle pointerStyle) {
                 return;
         }
 
-        DrawGlutMouse(mmx, mmy, whichSprite);
-
         //GFXEndScene();bad things...only call this once
         GFXHudMode(false);
         GFXEnable(CULLFACE);
