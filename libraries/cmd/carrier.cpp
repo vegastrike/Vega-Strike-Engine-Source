@@ -219,7 +219,8 @@ void Carrier::EjectCargo(unsigned int index) {
                                     ejectcargotime,
                                     1,
                                     1,
-                                    1);
+                                    1, 
+                                    unit->IsPlayerShip());
                         }
                     }
                     arot = erot;
@@ -242,7 +243,8 @@ void Carrier::EjectCargo(unsigned int index) {
                             cargotime,
                             1,
                             1,
-                            1);
+                            1, 
+                            unit->IsPlayerShip());
                     arot = rot;
                 }
             }
@@ -255,7 +257,8 @@ void Carrier::EjectCargo(unsigned int index) {
                         cargotime,
                         1,
                         1,
-                        1);
+                        1, 
+                        unit->IsPlayerShip());
                 arot = grot;
             }
             Vector rotation

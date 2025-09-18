@@ -68,7 +68,8 @@ public:
             Damage damage,
             Unit *affected_unit,
             const GFXColor &color,
-            void *ownerDoNotDereference);
+            void *ownerDoNotDereference,
+            bool shooter_is_player = false);
     void DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector);
     void DamageCargo(InflictedDamage inflicted_damage);
     void Destroy() override; //explodes then deletes

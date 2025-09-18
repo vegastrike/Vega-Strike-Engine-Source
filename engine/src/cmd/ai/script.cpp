@@ -812,23 +812,21 @@ void AIScript::LoadXML() {
                     % parent->name
                     % parent->computer.threatlevel));
         }
-        if (parent->Target()->IsPlayerShip()) {
+
+        Unit* target = parent->Target();
+        if (target && target->IsPlayerShip()) {
             double value;
             const double game_speed = configuration().physics.game_speed_dbl;
             const double game_accel = configuration().physics.game_accel_dbl;
             {
-                Unit *targ = parent->Target();
-                if (targ) {
-                    Vector PosDifference = (targ->Position() - parent->Position()).Cast();
-                    double pdmag = PosDifference.Magnitude();
-                    value = (pdmag - parent->rSize() - targ->rSize());
-                    double myvel =
-                            pdmag > 0 ? PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / pdmag : 0;
-                    if (myvel > 0) {
-                        value -= myvel * myvel / (2 * (parent->drive.retro / parent->GetMass()));
-                    }
-                } else {
-                    value = 10000;
+                
+                Vector PosDifference = (target->Position() - parent->Position()).Cast();
+                double pdmag = PosDifference.Magnitude();
+                value = (pdmag - parent->rSize() - target->rSize());
+                double myvel =
+                        pdmag > 0 ? PosDifference.Dot(parent->GetVelocity() - target->GetVelocity()) / pdmag : 0;
+                if (myvel > 0) {
+                    value -= myvel * myvel / (2 * (parent->drive.retro / parent->GetMass()));
                 }
                 value /= game_speed * game_accel;
             }

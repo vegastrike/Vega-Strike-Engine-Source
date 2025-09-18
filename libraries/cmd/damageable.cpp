@@ -89,14 +89,15 @@ float Damageable::DealDamageToShield(const Vector &pnt, float &damage) {
 }
 
 // TODO: deal with this
-extern void ScoreKill(Cockpit *cp, Unit *killer, Unit *killedUnit);
+extern void ScoreKill(bool killer_is_player, Unit *killer, Unit *killedUnit);
 
 void Damageable::ApplyDamage(const Vector &pnt,
         const Vector &normal,
         Damage damage,
         Unit *affected_unit,
         const GFXColor &color,
-        void *ownerDoNotDereference) {
+        void *ownerDoNotDereference,
+        bool shooter_is_player) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     InflictedDamage inflicted_damage(3);
@@ -121,9 +122,6 @@ void Damageable::ApplyDamage(const Vector &pnt,
         return;
     }
 
-    // TODO: get rid of isPlayerStarshipVoid
-    Cockpit *shooter_cockpit = _Universe->isPlayerStarshipVoid(ownerDoNotDereference);
-    bool shooter_is_player = (shooter_cockpit != nullptr);
     bool shot_at_is_player = unit->IsPlayerShip();
     Vector localpnt(InvTransform(unit->cumulative_transformation_matrix, pnt));
     Vector localnorm(unit->ToLocalCoordinates(normal));
@@ -145,8 +143,11 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
         // If we damage the armor, we do this 10 times by default
         for (int i = 0; i < anger; ++i) {
+            Cockpit* shooter_cockpit = _Universe->AccessCockpit();
+            Unit* player_unit = shooter_cockpit->GetParent();
+
             //now we can dereference it because we checked it against the parent
-            CommunicationMessage c(reinterpret_cast< Unit * > (ownerDoNotDereference), unit, nullptr, 0);
+            CommunicationMessage c(player_unit, unit, nullptr, 0);
             c.SetCurrentState(c.fsm->GetHitNode(), nullptr, 0);
             if (unit->getAIState()) {
                 unit->getAIState()->Communicate(c);
@@ -169,16 +170,13 @@ void Damageable::ApplyDamage(const Vector &pnt,
         unit->ClearMounts();
 
         if (shooter_is_player) {
-            ScoreKill(shooter_cockpit, reinterpret_cast< Unit * > (ownerDoNotDereference), unit);
+            Cockpit* shooter_cockpit = _Universe->AccessCockpit();
+            Unit* player_unit = shooter_cockpit->GetParent();
+            ScoreKill(true, player_unit, unit);
         } else {
-            Unit *tmp;
-            if ((tmp = findUnitInStarsystem(ownerDoNotDereference)) != nullptr) {
-                if ((nullptr != (shooter_cockpit = _Universe->isPlayerStarshipVoid(tmp->owner)))
-                        && (shooter_cockpit->GetParent() != nullptr)) {
-                    ScoreKill(shooter_cockpit, shooter_cockpit->GetParent(), unit);
-                } else {
-                    ScoreKill(NULL, tmp, unit);
-                }
+            Unit *tmp = findUnitInStarsystem(ownerDoNotDereference);
+            if (tmp  != nullptr) {
+                ScoreKill(false, tmp, unit);
             }
         }
 
@@ -285,11 +283,14 @@ void Damageable::ApplyDamage(const Vector &pnt,
             (shooter_is_player || shot_at_is_player)) {
         Unit *computer_ai = nullptr;
         Unit *player = nullptr;
+        Cockpit* shooter_cockpit = nullptr;
         if (shot_at_is_player) {
             computer_ai = findUnitInStarsystem(ownerDoNotDereference);
             player = unit;
         } else {
+            // Shooter is player
             computer_ai = unit;
+            shooter_cockpit = _Universe->AccessCockpit();
             player = shooter_cockpit->GetParent();
         }
 

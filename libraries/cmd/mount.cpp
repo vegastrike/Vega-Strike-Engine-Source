@@ -308,13 +308,14 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                         mat,
                         velocity,
                         owner,
+                        caller->IsPlayerShip(),
                         hint[Unit::UNIT_BOLT]).location;             //FIXME turrets won't work! Velocity
                 break;
 
             case WEAPON_TYPE::BALL: {
                 caller->energy.Deplete(true, type->energy_rate);
-                hint[Unit::UNIT_BOLT] =
-                        BoltDrawManager::GetInstance().AddBall(type, mat, velocity, owner, hint[Unit::UNIT_BOLT]);
+                hint[Unit::UNIT_BOLT] = BoltDrawManager::GetInstance().AddBall(
+                    type, mat, velocity, owner, caller->IsPlayerShip(), hint[Unit::UNIT_BOLT]);
                 break;
             }
             case WEAPON_TYPE::PROJECTILE:
@@ -331,7 +332,8 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                             type->range / type->speed,
                             type->radius,
                             type->radial_speed,
-                            type->pulse_speed /*detonation_radius*/);
+                            type->pulse_speed, /*detonation_radius*/
+                            caller->IsPlayerShip());
                     if (!match_speed_with_target) {
                         temp->drive.speed = type->speed + velocity.Magnitude();
                         temp->afterburner.speed = type->speed + velocity.Magnitude();

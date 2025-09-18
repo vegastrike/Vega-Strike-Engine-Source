@@ -75,6 +75,7 @@ private:
     unsigned char impact;
     bool listen_to_owner;
     void *owner; //may be a dead pointer...never dereferenced
+    bool player_fired;
     QVector center; //in world coordinates as of last physics frame...
     Vector direction;
 

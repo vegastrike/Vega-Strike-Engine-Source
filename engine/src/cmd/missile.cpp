@@ -53,13 +53,14 @@
 ////////////////////////////////////////////////////////////////
 /// MissileEffect
 ////////////////////////////////////////////////////////////////
-MissileEffect::MissileEffect(const QVector &pos, float dam, float pdam, float radius, float radmult, void *owner) : pos(
+MissileEffect::MissileEffect(const QVector &pos, float dam, float pdam, float radius, float radmult, void *owner, bool player_fired) : pos(
         pos) {
     damage = dam;
     phasedamage = pdam;
     this->radius = radius;
     radialmultiplier = radmult;
     this->ownerDoNotDereference = owner;
+    this->player_fired = player_fired;
 }
 
 void MissileEffect::ApplyDamage(Unit *smaller) {
@@ -185,7 +186,7 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
         Damage damage(this->damage * damage_fraction * damage_left,
                 phasedamage * damage_fraction * damage_left);
         parent->ApplyDamage(pos.Cast(), norm, damage, un, GFXColor(1, 1, 1, 1),
-                ownerDoNotDereference);
+                ownerDoNotDereference, player_fired);
     }
 }
 
@@ -203,7 +204,8 @@ Missile::Missile(const char *filename,
         float time,
         float radialeffect,
         float radmult,
-        float detonation_radius) :
+        float detonation_radius,
+        bool player_fired) :
         Unit(filename, false, faction, modifications),
         time(time),
         damage(damage),
@@ -213,7 +215,8 @@ Missile::Missile(const char *filename,
         detonation_radius(detonation_radius),
         discharged(false),
         retarget(-1),
-        had_target(false) {
+        had_target(false),
+        player_fired(player_fired) {
 }
 
 void Missile::Discharge() {
@@ -223,7 +226,7 @@ void Missile::Discharge() {
                 % ((target != NULL) ? target->name.get() : "NULL")));
         _Universe->activeStarSystem()->AddMissileToQueue(
                 new MissileEffect(Position(), damage, phasedamage,
-                        radial_effect, radial_multiplier, owner));
+                        radial_effect, radial_multiplier, owner, player_fired));
         discharged = true;
     }
 }

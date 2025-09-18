@@ -125,8 +125,10 @@ CollideMap::iterator BoltDrawManager::AddBall(const WeaponInfo *typ,
         const Matrix &orientationpos,
         const Vector &shipspeed,
         void *owner,
+        bool player_fired,
         CollideMap::iterator hint) {
-    Bolt ball = Bolt(typ, orientationpos, shipspeed, owner, hint);             //FIXME turrets won't work! Velocity
+    //FIXME turrets won't work! Velocity
+    Bolt ball = Bolt(typ, orientationpos, shipspeed, owner, player_fired, hint);
     _balls.push_back(ball);
     return _balls[_balls.size() - 1].location;
 }

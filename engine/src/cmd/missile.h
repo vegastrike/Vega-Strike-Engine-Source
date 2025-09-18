@@ -39,9 +39,10 @@ private:
     float radius;
     float radialmultiplier;
     void *ownerDoNotDereference;
+    bool player_fired;
 
 public:
-    MissileEffect(const QVector &pos, float dam, float pdam, float radius, float radmult, void *owner);
+    MissileEffect(const QVector &pos, float dam, float pdam, float radius, float radmult, void *owner, bool player_fired);
     void ApplyDamage(Unit *);
     const QVector &GetCenter() const;
     float GetRadius() const;
@@ -61,6 +62,7 @@ protected:
     bool discharged;
     bool had_target;
     signed char retarget;
+    bool player_fired;
 public:
     Missile(const char *filename,
             int faction,
@@ -70,7 +72,8 @@ public:
             float time,
             float radialeffect,
             float radmult,
-            float detonation_radius);
+            float detonation_radius,
+            bool player_fired);
 
     Missile(std::vector<Mesh *> m, bool b, int i) : Unit(m, b, i), time(0.0F), damage(0.0F), phasedamage(0.0F), radial_effect(0.0F),
                                                     radial_multiplier(0.0F),

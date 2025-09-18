@@ -97,7 +97,7 @@ Unit *CreateGameTurret(std::string tur, int faction) {
 }
 
 //un scored a faction kill
-void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
+void ScoreKill(bool killer_is_player, Unit *un, Unit *killedUnit) {
     if (un->getUnitType() != Vega_UnitType::unit || killedUnit->getUnitType() != Vega_UnitType::unit) {
         return;
     }
@@ -128,8 +128,11 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
     }
     int upgrades = FactionUtil::GetUpgradeFaction();
     int planets = FactionUtil::GetPlanetFaction();
-    if (cp != NULL) {
-        vector<float> *killlist = &cp->savegame->getMissionData(string("kills"));
+
+    // Killer is player
+    if (killer_is_player) {
+        Cockpit* cockpit = _Universe->AccessCockpit();
+        vector<float> *killlist = &cockpit->savegame->getMissionData(string("kills"));
         while (killlist->size() <= FactionUtil::GetNumFactions()) {
             killlist->push_back((float) 0.0);
         }

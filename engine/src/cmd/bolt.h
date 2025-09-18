@@ -50,6 +50,7 @@ private:
     Vector ShipSpeed;
     QVector prev_position;//beams don't change heading.
     void *owner;
+    bool player_fired;
     float curdist;
     int decal;//which image it uses
     float bolt_size; // actually squared
@@ -82,6 +83,7 @@ public:
             const Matrix &orientationpos,
             const Vector &ShipSpeed,
             void *owner,
+            bool player_fired,
             CollideMap::iterator hint);//makes a bolt
     void Destroy(unsigned int index);
     //static void Draw();
