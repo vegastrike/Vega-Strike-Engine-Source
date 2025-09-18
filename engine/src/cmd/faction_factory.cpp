@@ -30,6 +30,7 @@
 #include "faction_factory.h"
 #include "root_generic/faction_generic.h"
 #include "gfx/animation.h"
+#include "vs_logging.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -61,7 +62,6 @@ FactionFactory::FactionFactory(std::string filename) {
 }
 
 void FactionFactory::parse(ptree tree) {
-    int counter = 0;
     for (const auto &iterator : tree) {
         if (iterator.first != "Faction") {
             continue;
@@ -82,11 +82,18 @@ void FactionFactory::parse(ptree tree) {
         string contraband = inner.get("<xmlattr>.contraband", "");
 
         // Parse spark colors
-        std::string colors[] = {"Red", "Green", "Blue", "Alpha"};
+        const std::string colors[] = {"red", "green", "blue", "alpha"};
         int i = 0;
         for (const auto &color : colors) {
-            if (boost::optional<float> spark = inner.get_optional<float>("<xmlattr>.Spark" + color)) {
-                faction->sparkcolor[i++] = *spark;
+            const std::string key = "<xmlattr>.spark"+color;
+            const std::string spark_string = inner.get(key, "");
+            if(spark_string.empty()) {
+                continue;
+            }
+            try {
+                faction->sparkcolor[i++] = std::stof(spark_string);
+            } catch (const std::invalid_argument& e) {
+                VS_LOG(error, (boost::format("Error: Invalid color %1% for key %2%") % spark_string % key));
             }
         }
 
@@ -125,3 +132,4 @@ void FactionFactory::parse(ptree tree) {
         factions.push_back(faction);
     }
 }
+
