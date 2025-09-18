@@ -65,14 +65,12 @@
 #include "gfx/masks.h"
 #include "gfx/nav/navscreenoccupied.h"
 
-using std::string;
-using std::vector;
+#include "drawgalaxy.h"
 
 float SYSTEM_DEFAULT_SIZE = 0.02;
 GFXColor GrayColor(.5, .5, .5, .5);
 
-
-static void DrawNodeDescription(string text,
+void DrawNodeDescription(string text,
         float x_,
         float y_,
         float size_x,
@@ -148,9 +146,9 @@ void DrawNode(int type,
         navscreenoccupied *screenoccupation,
         bool moused,
         GFXColor race,
-        bool mouseover = false,
-        bool willclick = false,
-        string insector = "") {
+        bool mouseover,
+        bool willclick,
+        string insector) {
     char color = GetSystemColor(source);
     if (moused) {
         return;
@@ -202,56 +200,9 @@ bool testandset(bool &b, bool val) {
     return tmp;
 }
 
-float screensmash = 1; //arbitrary constant used in calculating position below
 
-NavigationSystem::SystemIterator::SystemIterator(string current_system, unsigned int max) {
-    count = 0;
-    maxcount = max;
-    vstack.push_back(current_system);
-    visited[current_system] = true;
-    which = 0;
-}
 
-bool NavigationSystem::SystemIterator::done() const {
-    return which >= vstack.size();
-}
 
-QVector NavigationSystem::SystemIterator::Position() {
-    if (done()) {
-        return QVector(0, 0, 0);
-    }
-    string currentsystem = (**this);
-    string xyz = _Universe->getGalaxyProperty(currentsystem, "xyz");
-    QVector pos;
-    if (xyz.size() && (sscanf(xyz.c_str(), "%lf %lf %lf", &pos.i, &pos.j, &pos.k) >= 3)) {
-        pos.j = -pos.j;
-        return pos;
-    } else {
-        float ratio = ((float) count) / maxcount;
-        float locatio = ((float) which) / vstack.size();
-        unsigned int k = 0;
-        std::string::const_iterator start = vstack[which].begin();
-        std::string::const_iterator end = vstack[which].end();
-        for (; start != end; start++) {
-            k += (k * 128) + *start;
-        }
-        k %= 200000;
-//float y = (k-100000)/(200000.);
-        return QVector(ratio * cos(locatio * 2 * M_PI), ratio * sin(locatio * 2 * M_PI), 0)
-                * screensmash;
-    }
-}
-
-string NavigationSystem::SystemIterator::operator*() {
-    if (which < vstack.size()) {
-        return vstack[which];
-    }
-    return "-";
-}
-
-NavigationSystem::SystemIterator &NavigationSystem::SystemIterator::next() {
-    return ++(*this);
-}
 
 bool checkedVisited(const std::string &n) {
     const bool dontbothervisiting =

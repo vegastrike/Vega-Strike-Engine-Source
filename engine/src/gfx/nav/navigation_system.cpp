@@ -32,15 +32,10 @@
 #include "system_draw_node.h"
 #include "universe.h"
 #include "universe_util.h"
+#include "drawgalaxy.h"
 
 #include "root_generic/vs_globals.h"
 
-// Can't include because drawgalaxy.cpp doesn't have a header file
-extern bool checkedVisited(const std::string &n);
-extern void DrawNode(int type, float size, float x, float y,
-        std::string source, navscreenoccupied *screenoccupation, bool moused,
-        GFXColor race, bool mouseover = false, bool willclick = false, std::string insector = "");
-extern float SYSTEM_DEFAULT_SIZE;
 
 void NavigationSystem::CachedSystemIterator::SystemInfo::UpdateColor() {
     const float GrayColorArray[4] = {.5, .5, .5, .5};
@@ -792,5 +787,59 @@ void NavigationSystem::DrawGalaxy() {
 
     mouselist.clear();          //whipe mouse over'd list
     //**********************************
+}
+
+
+
+
+NavigationSystem::SystemIterator::SystemIterator(string current_system, unsigned int max) {
+    count = 0;
+    maxcount = max;
+    vstack.push_back(current_system);
+    visited[current_system] = true;
+    which = 0;
+}
+
+bool NavigationSystem::SystemIterator::done() const {
+    return which >= vstack.size();
+}
+
+QVector NavigationSystem::SystemIterator::Position() {
+    if (done()) {
+        return QVector(0, 0, 0);
+    }
+    string currentsystem = (**this);
+    string xyz = _Universe->getGalaxyProperty(currentsystem, "xyz");
+    QVector pos;
+    if (xyz.size() && (sscanf(xyz.c_str(), "%lf %lf %lf", &pos.i, &pos.j, &pos.k) >= 3)) {
+        pos.j = -pos.j;
+        return pos;
+    } else {
+        float ratio = ((float) count) / maxcount;
+        float locatio = ((float) which) / vstack.size();
+        unsigned int k = 0;
+        std::string::const_iterator start = vstack[which].begin();
+        std::string::const_iterator end = vstack[which].end();
+        for (; start != end; start++) {
+            k += (k * 128) + *start;
+        }
+        k %= 200000;
+        float screensmash = 1; //arbitrary constant used in calculating position below
+
+        //float y = (k-100000)/(200000.);
+        return QVector(ratio * cos(locatio * 2 * M_PI), ratio * sin(locatio * 2 * M_PI), 0)
+                * screensmash;
+    }
+}
+
+string NavigationSystem::SystemIterator::operator*() {
+    if (which < vstack.size()) {
+        return vstack[which];
+    }
+    return "-";
+}
+
+NavigationSystem::SystemIterator &NavigationSystem::SystemIterator::next() {
+    return ++(*this);
 }
 

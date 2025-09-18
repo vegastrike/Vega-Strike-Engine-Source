@@ -28,14 +28,7 @@
  */
 
 #include "system_draw_node.h"
-
-// Can't include header because drawgalaxy.cpp doesn't have one
-extern void DrawNode(int type, float size, float x, float y,
-        std::string source, navscreenoccupied *screenoccupation, bool moused,
-        GFXColor race, bool mouseover = false, bool willclick = false, std::string insector = "");
-extern char GetSystemColor(std::string source);
-extern float SYSTEM_DEFAULT_SIZE;
-extern GFXColor GrayColor;
+#include "drawgalaxy.h"
 
 SystemDrawNode::SystemDrawNode(int type,
         float size,
