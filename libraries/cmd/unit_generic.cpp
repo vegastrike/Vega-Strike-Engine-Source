@@ -1609,7 +1609,7 @@ bool Unit::Explode(bool drawit, float timeit) {
                     this->ExplosionRadius()
                             * configuration().physics.explosion_damage_center_flt
                             * configuration().physics.explosion_damage_edge_flt,
-                    NULL));
+                    NULL, false));
         }
         QVector exploc = this->cumulative_transformation.position;
         bool sub = this->isSubUnit();

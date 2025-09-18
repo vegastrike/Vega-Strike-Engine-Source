@@ -252,11 +252,13 @@ Bolt::Bolt(const WeaponInfo *typ,
         const Matrix &orientationpos,
         const Vector &shipspeed,
         void *owner,
+        bool player_fired,
         CollideMap::iterator hint) : cur_position(orientationpos.p), ShipSpeed(shipspeed) {
     VSCONSTRUCT2('t')
     BoltDrawManager &q = BoltDrawManager::GetInstance();
     prev_position = cur_position;
     this->owner = owner;
+    this->player_fired = player_fired;
     this->type = typ;
     bolt_name = typ->file;
     curdist = 0;
@@ -412,7 +414,7 @@ bool Bolt::Collide(Unit *target) {
                 damage,
                 affectedSubUnit,
                 coltmp,
-                owner);
+                owner, player_fired);
         return true;
     }
     return false;
