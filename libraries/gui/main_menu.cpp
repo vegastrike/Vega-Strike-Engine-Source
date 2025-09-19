@@ -1,4 +1,11 @@
 #include "SDL2/SDL.h"
+#include <SDL2/SDL_image.h>
+
+// Must come before imgui.h
+#define IMGUI_DEFINE_MATH_OPERATORS
+
+#include "clickable_text.h"
+#include "credits.h"
 #include "imgui.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
@@ -20,9 +27,51 @@ void setBackgroundColor(float red, float green, float blue, float transparent) {
     colors[ImGuiCol_WindowBg] = newBgColor;
 }
 
+SDL_Texture* createBackgroundImage(SDL_Renderer* renderer, const std::string& filename) {
+    SDL_Texture* background_texture = nullptr;
+
+    SDL_Surface* imageSurface = IMG_Load(filename.c_str());
+    if (!imageSurface) {
+        std::cerr << "Failed to load image: " << filename << " Error: " << IMG_GetError() << std::endl;
+        return nullptr;
+    }
+
+    background_texture = SDL_CreateTextureFromSurface(renderer, imageSurface);
+    SDL_FreeSurface(imageSurface);
+
+    if (!background_texture) {
+        std::cerr << "Failed to create texture from image: " << filename << " Error: " << SDL_GetError() << std::endl;
+        return nullptr;
+    }
+
+    return background_texture;
+}
+
+// Helper to render the background image (call at the start of your render loop)
+void renderBackgroundImage(SDL_Renderer* renderer, SDL_Window* window, SDL_Texture* background_texture) {
+    if (!background_texture) return;
+
+    int w, h;
+    SDL_GetWindowSize(window, &w, &h);
+    SDL_Rect destRect = {0, 0, w, h};
+    SDL_RenderCopy(renderer, background_texture, nullptr, &destRect);
+}
+
+void destroyBackgroundImage(SDL_Texture* background_texture) {
+    // Free texture if any
+    if (background_texture) {
+        SDL_DestroyTexture(background_texture);
+        background_texture = nullptr;
+    }
+}
+
+
+
 // Show Menu
 void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
     std::cout << "Begin showMenu\n";
+
+    SDL_Texture* background_texture = createBackgroundImage(renderer, "main_menu.png");
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -39,6 +88,17 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
 
     setBackgroundColor(0.0f,0.0f,0.0f,1.0f);
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
+
+    ImFont* font_large = io.Fonts->AddFontFromFileTTF("FrontPageNeue.otf", 36.0f);
+    // Build the font atlas after adding all fonts
+    io.Fonts->Build(); 
+
+    ClickableText new_game("New Game");
+    ClickableText load_game("Load Game");
+    ClickableText credits("Credits");
+    ClickableText help("Help");
+    ClickableText settings("Settings");
+    ClickableText quit("Quit");
 
     bool done = false;
     while (!done)
@@ -80,26 +140,21 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
-            static float f = 0.0f;
-            static int counter = 0;
-
             ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
             ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
 
             ImGui::Begin("Hello, world!", nullptr, window_flags);                          // Create a window called "Hello, world!" and append into it.
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Another Window", &show_another_window);
+            ImGui::PushFont(font_large);
 
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            new_game.RenderText();
+            load_game.RenderText();
+            credits.RenderText();
+            help.RenderText();
+            settings.RenderText();
+            quit.RenderText();
+            
+            ImGui::PopFont();
             ImGui::End();
         }
 
@@ -118,11 +173,17 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
         SDL_RenderSetScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
         SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
         SDL_RenderClear(renderer);
+        renderBackgroundImage(renderer, window, background_texture);
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);
+
+        if(credits.GetClickAndReset()) {
+            ShowCredits(renderer, window, font_large);
+        }
     }
 
     // Cleanup
+    
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
