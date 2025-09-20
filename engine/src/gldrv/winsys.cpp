@@ -251,6 +251,33 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     width = configuration().graphics.resolution_x;
     height = configuration().graphics.resolution_y;
     const int screen_number = configuration().graphics.screen;
+
+    // Fix display in fullscreen
+    if(configuration().graphics.full_screen) {
+        // Get the native resolution of the selected screen.
+        SDL_DisplayMode currentDisplayMode;
+    
+        // Get the current display mode for display 0 (the primary display)
+        if (SDL_GetCurrentDisplayMode(screen_number, &currentDisplayMode) != 0) {
+            SDL_Quit();
+            const std::string error = (boost::format("Could not get display mode for display %1%!\nSDL_Error:\n%2%\n") % screen_number % SDL_GetError()).str();
+            VS_LOG_FLUSH_EXIT(fatal, error, -1);
+        }
+
+        VS_LOG(info, (boost::format("Running in full screen. Overriding requested screen resolution with native one: %1%x%2%\n") % currentDisplayMode.w % currentDisplayMode.h).str());
+        width = currentDisplayMode.w;
+        height = currentDisplayMode.h;
+        int* ptr_x = const_cast<int*>(&configuration().graphics.resolution_x);
+        int* ptr_y = const_cast<int*>(&configuration().graphics.resolution_y);
+        *ptr_x = width;
+        *ptr_y = height;
+        ptr_x = const_cast<int*>(&configuration().graphics.bases.max_width);
+        ptr_y = const_cast<int*>(&configuration().graphics.bases.max_height);
+        *ptr_x = width;
+        *ptr_y = height;
+    }
+
+
     SDL_Window *window = nullptr;
     if(screen_number == 0) {
         window = SDL_CreateWindow("Vega Strike",
