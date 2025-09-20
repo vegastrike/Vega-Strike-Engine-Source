@@ -669,7 +669,6 @@ void bootstrap_main_loop() {
 
             for(const std::string& line : intro_lines) {
                 UniverseUtil::IOmessage(0, "game", "all", line);
-                std::cout << line << std::endl;
             }
         }
 
