@@ -36,6 +36,6 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 
-void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, ImFont* font_large);
+void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*>fonts);
 
 #endif //VEGA_STRIKE_LIBRARIES_GUI_CERDITS_H

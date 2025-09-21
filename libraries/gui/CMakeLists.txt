@@ -64,11 +64,17 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike_gui
 TARGET_LINK_LIBRARIES(vegastrike_gui
     ${SDL2_LIBRARIES}
     vegastrike_imgui
+    Boost::log
+    Boost::log_setup
+    Boost::json
 )
 
 TARGET_LINK_LIBRARIES(test_gui
     ${SDL2_LIBRARIES}
     vegastrike_imgui
     vegastrike_gui
+    Boost::log
+    Boost::log_setup
+    Boost::json
 )
     

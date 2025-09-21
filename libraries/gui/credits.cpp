@@ -29,28 +29,172 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <boost/json.hpp>
+#include <boost/system/error_code.hpp>
 
 #include "imgui.h"
 #include "clickable_text.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
 
-// Show Credits Screen
-void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, ImFont* font_large) {
-    // TODO: different background
+struct Section {
+    std::string title;
+    std::vector<std::string> lines;
+};
 
-    ImGuiIO& io{ImGui::GetIO()};
-    // ImFont* font_small = io.Fonts->AddFontFromFileTTF("FrontPageNeue.otf", 16.0f);
-    // ImFont* font_medium = io.Fonts->AddFontFromFileTTF("FrontPageNeue.otf", 18.0f);
-    // ImFont* font_large = io.Fonts->AddFontFromFileTTF("FrontPageNeue.otf", 36.0f);
-    // // Build the font atlas after adding all fonts
-    // io.Fonts->Build(); 
+struct Credits {
+    std::string title;
+    std::string subtitle;
+    std::vector<Section> sections;
+};
+
+
+Credits ParseJSON(const std::string& filename) {
+    Credits credits;
+
+    // Open and read the file
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return credits;
+    }
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    std::string json_content = buffer.str();
+
+    // Parse JSON using Boost.JSON
+    boost::json::error_code ec;
+    boost::json::value jv = boost::json::parse(json_content, ec);
+    if (ec) {
+        std::cerr << "JSON parse error: " << ec.message() << std::endl;
+        return credits;
+    }
+    const boost::json::object& obj = jv.as_object();
+
+    credits.title = obj.at("title").as_string().c_str();
+    credits.subtitle = obj.at("subtitle").as_string().c_str();
+
+    if (obj.contains("sections") && obj.at("sections").is_array()) {
+        for (const auto& sec_val : obj.at("sections").as_array()) {
+            const auto& sec_obj = sec_val.as_object();
+            Section section;
+            section.title = sec_obj.at("title").as_string().c_str();
+            if (sec_obj.contains("lines") && sec_obj.at("lines").is_array()) {
+                for (const auto& line_val : sec_obj.at("lines").as_array()) {
+                    section.lines.push_back(line_val.as_string().c_str());
+                }
+            }
+            credits.sections.push_back(std::move(section));
+        }
+    }
+
+    // For demonstration, print parsed data
+    std::cout << "Title: " << credits.title << std::endl;
+    std::cout << "Subtitle: " << credits.subtitle << std::endl;
+    for (const auto& section : credits.sections) {
+        std::cout << "Section: " << section.title << std::endl;
+        for (const auto& line : section.lines) {
+            std::cout << "  " << line << std::endl;
+        }
+    }
+
+    return credits;
+}
+
+void RenderTitle(ImGuiWindowFlags window_flags, std::vector<ImFont*> fonts) {
+    ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
+
+    ImGui::Begin("Title", nullptr, window_flags);                          // Create a window called "Hello, world!" and append into it.
+    ImGui::PushFont(fonts[2]);
+
+    ImVec2 window_size = ImGui::GetWindowSize();
+    ImVec2 text_size = ImGui::CalcTextSize("Vega Strike Credits");
+    float x = (window_size.x - text_size.x) * 0.5f;
+    ImGui::SetCursorPosX(x);
+    ImGui::Text("Vega Strike Credits");    
+
+    ImGui::PopFont();
+    ImGui::End();
+}
+
+void RenderCredits(Credits credits, std::vector<ImFont*> fonts, ClickableText& back) {
+    if (ImGui::BeginTable("MyTable", 3, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY)) {
+        // Title
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::TableNextColumn();
+        ImGui::PushFont(fonts[2]);
+        ImGui::Text(credits.title.c_str());
+        ImGui::PopFont();
+
+        // Subtitle
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::TableNextColumn();
+        ImGui::PushFont(fonts[1]);
+        ImGui::Text(credits.subtitle.c_str());
+        ImGui::PopFont();
+
+        // Space row
+        ImGui::TableNextRow();
+
+        for(const Section& section : credits.sections) {
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::PushFont(fonts[1]);
+            ImGui::Text(section.title.c_str());
+            ImGui::PopFont();
+
+            ImGui::PushFont(fonts[3]);
+            int column = 0;
+            for(const std::string& name : section.lines) {
+                if(column == 0) {
+                    ImGui::TableNextRow();
+                }
+
+                ImGui::TableNextColumn();
+                ImGui::Text(name.c_str());
+
+                column++;
+                if(column == 3) {
+                    column = 0;
+                }
+            }
+            ImGui::PopFont();
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::Text("");
+        }
+    
+        // Space row
+        ImGui::TableNextRow();
+        ImGui::TableNextRow();
+        // 3rd column
+        ImGui::TableNextColumn();
+        ImGui::TableNextColumn();
+        ImGui::TableNextColumn();
+        //ImGui::Text("Back");
+        back.RenderText();
+
+        ImGui::EndTable();
+    }
+}
+
+// Show Credits Screen
+void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*> fonts) {
+    Credits credits = ParseJSON("credits.json");
+    // TODO: different background
 
     ClickableText back("Back");
     
     bool done = false;
+
     while (!done)
     {
         // Poll and handle events (inputs, window resize, etc.)
@@ -94,13 +238,15 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, ImFont* font_large)
             ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
             ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
 
-            ImGui::Begin("Hello, world!", nullptr, window_flags);                          // Create a window called "Hello, world!" and append into it.
+            ImGui::Begin("Hello, world!", nullptr, window_flags); // Create a window called "Hello, world!" and append into it.
+            //RenderTitle(window_flags, fonts);
+            RenderCredits(credits, fonts, back);
 
             // ImGui::PushFont(font_small);
             // ImGui::PushFont(font_medium);
-            ImGui::PushFont(font_large);
+            ImGui::PushFont(fonts[2]);
 
-            back.RenderText();
+            //back.RenderText();
             
             // ImGui::PopFont();
             // ImGui::PopFont();
@@ -110,6 +256,7 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, ImFont* font_large)
 
         // Rendering
         ImGui::Render();
+        ImGuiIO& io{ImGui::GetIO()};
         SDL_RenderSetScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
         SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
         SDL_RenderClear(renderer);

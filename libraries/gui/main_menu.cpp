@@ -1,3 +1,5 @@
+#include <iostream>
+#include <vector>
 #include "SDL2/SDL.h"
 #include <SDL2/SDL_image.h>
 
@@ -10,7 +12,7 @@
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
 
-#include <iostream>
+
 
 void setBackgroundColor(float red, float green, float blue, float transparent) {
     // Get a reference to the ImGui style
@@ -66,6 +68,22 @@ void destroyBackgroundImage(SDL_Texture* background_texture) {
 }
 
 
+std::vector<ImFont*> GenerateFonts() {
+    ImGuiIO& io{ImGui::GetIO()};
+    std::vector<ImFont*> fonts;
+    ImFont* font_small = io.Fonts->AddFontFromFileTTF("FrontPageNeue.otf", 16.0f);
+    fonts.push_back(font_small);
+    ImFont* font_medium = io.Fonts->AddFontFromFileTTF("FrontPageNeue.otf", 18.0f);
+    fonts.push_back(font_medium);
+    ImFont* font_large = io.Fonts->AddFontFromFileTTF("FrontPageNeue.otf", 36.0f);
+    fonts.push_back(font_large);
+    ImFont* open_sans_16 = io.Fonts->AddFontFromFileTTF("OpenSans-VariableFont_wdth,wght.ttf", 16.0f);
+    fonts.push_back(open_sans_16);
+    io.Fonts->Build(); 
+    return fonts;
+}
+
+
 
 // Show Menu
 void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
@@ -89,9 +107,7 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
     setBackgroundColor(0.0f,0.0f,0.0f,1.0f);
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
 
-    ImFont* font_large = io.Fonts->AddFontFromFileTTF("FrontPageNeue.otf", 36.0f);
-    // Build the font atlas after adding all fonts
-    io.Fonts->Build(); 
+    std::vector<ImFont*> fonts = GenerateFonts();
 
     ClickableText new_game("New Game");
     ClickableText load_game("Load Game");
@@ -123,8 +139,6 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
             continue;
         }
 
-        bool show_another_window;
-
         ImGuiWindowFlags window_flags = 
             ImGuiWindowFlags_NoTitleBar |
             ImGuiWindowFlags_NoResize |
@@ -145,7 +159,7 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
 
             ImGui::Begin("Hello, world!", nullptr, window_flags);                          // Create a window called "Hello, world!" and append into it.
 
-            ImGui::PushFont(font_large);
+            ImGui::PushFont(fonts[2]);
 
             new_game.RenderText();
             load_game.RenderText();
@@ -158,16 +172,6 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
             ImGui::End();
         }
 
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            // ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            // ImGui::Text("Hello from another window!");
-            // if (ImGui::Button("Close Me"))
-            //     show_another_window = false;
-            // ImGui::End();
-        }
-
         // Rendering
         ImGui::Render();
         SDL_RenderSetScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
@@ -178,7 +182,11 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
         SDL_RenderPresent(renderer);
 
         if(credits.GetClickAndReset()) {
-            ShowCredits(renderer, window, font_large);
+            ShowCredits(renderer, window, fonts);
+        }
+
+        if(quit.GetClickAndReset()) {
+            done = true;
         }
     }
 
