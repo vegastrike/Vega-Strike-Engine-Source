@@ -70,7 +70,7 @@
  *******************************---------------------------------------------------------------------------
  */
 
-//static SDL_Window *window = nullptr;
+static SDL_Window *window = nullptr;
 static SDL_Surface *screen = nullptr;
 
 static winsys_display_func_t display_func = nullptr;
@@ -263,22 +263,18 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
             const std::string error = (boost::format("Could not get display mode for display %1%!\nSDL_Error:\n%2%\n") % screen_number % SDL_GetError()).str();
             VS_LOG_FLUSH_EXIT(fatal, error, -1);
         }
-
-        VS_LOG(info, (boost::format("Running in full screen. Overriding requested screen resolution with native one: %1%x%2%\n") % currentDisplayMode.w % currentDisplayMode.h).str());
-        width = currentDisplayMode.w;
-        height = currentDisplayMode.h;
-        int* ptr_x = const_cast<int*>(&configuration().graphics.resolution_x);
-        int* ptr_y = const_cast<int*>(&configuration().graphics.resolution_y);
-        *ptr_x = width;
-        *ptr_y = height;
-        ptr_x = const_cast<int*>(&configuration().graphics.bases.max_width);
-        ptr_y = const_cast<int*>(&configuration().graphics.bases.max_height);
+        
+        // Change base resolution to match screen resolution
+        width = configuration().graphics.resolution_x;//currentDisplayMode.w;
+        height = configuration().graphics.resolution_y;//currentDisplayMode.h;
+        int* ptr_x = const_cast<int*>(&configuration().graphics.bases.max_width);
+        int* ptr_y = const_cast<int*>(&configuration().graphics.bases.max_height);
         *ptr_x = width;
         *ptr_y = height;
     }
 
 
-    SDL_Window *window = nullptr;
+    window = nullptr;
     if(screen_number == 0) {
         window = SDL_CreateWindow("Vega Strike",
                 SDL_WINDOWPOS_UNDEFINED,
@@ -615,6 +611,9 @@ void winsys_atexit(winsys_atexit_func_t func) {
  *  \date    Modified: 2000-10-20
  */
 void winsys_exit(int code) {
+    // Reverting resolution by exiting fullscreen
+    SDL_SetWindowFullscreen(window, 0);
+
     winsys_shutdown();
     if (atexit_func) {
         (*atexit_func)();
