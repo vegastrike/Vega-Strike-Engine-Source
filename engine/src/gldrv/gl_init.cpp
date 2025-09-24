@@ -587,8 +587,11 @@ void GFXInit(int argc, char **argv) {
     char vsicon[9] = "vega.ico";
     winsys_init(&argc, argv, &vsname[0], &vsicon[0]);
 
-
-    glViewport(0, 0, configuration().graphics.resolution_x, configuration().graphics.resolution_y);
+    SDL_Window* currentGLWindow = SDL_GL_GetCurrentWindow();
+    int drawableWidth, drawableHeight;
+    SDL_GL_GetDrawableSize(currentGLWindow, &drawableWidth, &drawableHeight);
+    glViewport(0, 0, drawableWidth, drawableHeight);
+    
     static GFXColor clearcol = vs_config->getColor("space_background");;
     gl_options.wireframe = configuration().graphics.use_wireframe;
     (const_cast<vega_config::Configuration &>(configuration())).graphics.max_texture_dimension = configuration().graphics.max_texture_dimension;

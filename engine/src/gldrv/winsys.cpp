@@ -209,7 +209,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     int bpp = 0; // Bits per pixel?
     int width, height;
     if (configuration().graphics.full_screen) {
-        video_flags |= SDL_WINDOW_FULLSCREEN;
+        video_flags |= SDL_WINDOW_BORDERLESS;
     } else {
         video_flags |= SDL_WINDOW_RESIZABLE;
     }
@@ -254,16 +254,6 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 
     // Fix display in fullscreen
     if(configuration().graphics.full_screen) {
-        // Get the native resolution of the selected screen.
-        SDL_DisplayMode currentDisplayMode;
-    
-        // Get the current display mode for display 0 (the primary display)
-        if (SDL_GetCurrentDisplayMode(screen_number, &currentDisplayMode) != 0) {
-            SDL_Quit();
-            const std::string error = (boost::format("Could not get display mode for display %1%!\nSDL_Error:\n%2%\n") % screen_number % SDL_GetError()).str();
-            VS_LOG_FLUSH_EXIT(fatal, error, -1);
-        }
-        
         // Change base resolution to match screen resolution
         width = configuration().graphics.resolution_x;//currentDisplayMode.w;
         height = configuration().graphics.resolution_y;//currentDisplayMode.h;
@@ -287,9 +277,25 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
                                 0, 0, video_flags);
     }
 
-
     if(!window) {
         VS_LOG_FLUSH_EXIT(fatal, "No window", 1);
+    }
+
+    if(screen_number > 0) {
+        // Get bounds of the secondary monitor
+        SDL_Rect displayBounds;
+        if (SDL_GetDisplayBounds(screen_number, &displayBounds) != 0) {
+            SDL_Log("Failed to get display bounds: %s", SDL_GetError());
+            // Fallback to primary monitor
+            SDL_GetDisplayBounds(0, &displayBounds);
+        }
+
+        // Move to secondary monitor
+        SDL_SetWindowPosition(window, displayBounds.x, displayBounds.y);
+    }
+
+    if (configuration().graphics.full_screen) {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
     }
 
     if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {

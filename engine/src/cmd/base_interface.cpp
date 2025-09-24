@@ -146,15 +146,10 @@ static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float
 #define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
 
 static void SetupViewport() {
-    const int base_max_width = configuration().graphics.bases.max_width;
-    const int base_max_height = configuration().graphics.bases.max_height;
-    if (base_max_width && base_max_height) {
-        int xrez = mymin(configuration().graphics.resolution_x, base_max_width);
-        int yrez = mymin(configuration().graphics.resolution_y, base_max_height);
-        int offsetx = (configuration().graphics.resolution_x - xrez) / 2;
-        int offsety = (configuration().graphics.resolution_y - yrez) / 2;
-        glViewport(offsetx, offsety, xrez, yrez);
-    }
+    SDL_Window* currentGLWindow = SDL_GL_GetCurrentWindow();
+    int drawableWidth, drawableHeight;
+    SDL_GL_GetDrawableSize(currentGLWindow, &drawableWidth, &drawableHeight);
+    glViewport(0, 0, drawableWidth, drawableHeight);
 }
 
 #undef mymin
@@ -1496,7 +1491,10 @@ void BaseInterface::Draw() {
     AnimationDraw();
 
     float x, y;
-    glViewport(0, 0, configuration().graphics.resolution_x, configuration().graphics.resolution_y);
+    SDL_Window* currentGLWindow = SDL_GL_GetCurrentWindow();
+    int drawableWidth, drawableHeight;
+    SDL_GL_GetDrawableSize(currentGLWindow, &drawableWidth, &drawableHeight);
+    glViewport(0, 0, drawableWidth, drawableHeight);
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
 
     curtext.GetCharSize(x, y);
@@ -1524,7 +1522,11 @@ void BaseInterface::Draw() {
     }
     SetupViewport();
     EndGUIFrame(mousePointerStyle);
-    glViewport(0, 0, configuration().graphics.resolution_x, configuration().graphics.resolution_y);
+
+    currentGLWindow = SDL_GL_GetCurrentWindow();
+    SDL_GL_GetDrawableSize(currentGLWindow, &drawableWidth, &drawableHeight);
+    glViewport(0, 0, drawableWidth, drawableHeight);
+
     Unit *un = caller.GetUnit();
     Unit *base = baseun.GetUnit();
     if (un && (!base)) {
