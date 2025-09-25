@@ -34,7 +34,8 @@
 
 #include "imgui.h"
 
-class Label;
+
+class Widget;
 
 enum class LayoutType {
     horizontal, vertical, cell
@@ -48,20 +49,21 @@ private:
     LayoutType type;
     bool root;
     std::vector<Layout*> cells;
-    //std::vector<Label*> widget;
+    std::vector<Widget*> widgets;
     ImVec2 size;
     ImVec2 layout_start;
     ImVec2 layout_end;
-    ImVec2 (*custom_draw_func)() = nullptr;
 
 
     ImU32 border_color;
     ImU32 fill_color;
 
 public:
-    Layout(LayoutType type, bool root = false, ImVec2 (*custom_draw_func)() = nullptr, 
-           ImU32 border_color = IM_COL32(0,0,0,0), ImU32 fill_color = IM_COL32(0,0,0,0));
+    Layout(LayoutType type, bool root = false,
+           ImU32 border_color = IM_COL32(0,0,0,0), 
+           ImU32 fill_color = IM_COL32(0,0,0,0));
     void AddChildLayout(Layout* child_layout);
+    void AddWidget(Widget* widget);
     ImVec2 Draw();
     void DrawBorder() const;
 };

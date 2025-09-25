@@ -38,9 +38,9 @@ ADD_LIBRARY(vegastrike_gui STATIC
     main_menu.cpp
 
     layout/layout.cpp
-    layout/row.cpp
 
     widgets/label.cpp
+    widgets/widget.cpp
 )
 
 
@@ -66,6 +66,7 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike_gui
     PUBLIC 
         ${Vega_Strike_SOURCE_DIR}/libraries/gui
         ${Vega_Strike_SOURCE_DIR}/libraries/gui/layout
+        ${Vega_Strike_SOURCE_DIR}/libraries/gui/widgets
     SYSTEM PRIVATE 
         ${Vega_Strike_SOURCE_DIR}/libraries/imgui
         ${SDL2_INCLUDE_DIRS})

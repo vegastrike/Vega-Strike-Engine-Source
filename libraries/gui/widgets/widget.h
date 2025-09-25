@@ -32,5 +32,9 @@
 #include <vector>
 #include <string>
 
+class Widget {
+public:
+    virtual void Draw() const = 0;
+};
 
 #endif //VEGA_STRIKE_LIBRARIES_GUI_LAYOUT_ROW_H

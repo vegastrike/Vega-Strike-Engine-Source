@@ -31,19 +31,34 @@
 #include <iostream>
 
 #include "layout.h"
+#include "widgets/widget.h"
 #include "imgui.h"
 
 std::vector<ImFont*> *Layout::fonts = nullptr;
 
-Layout::Layout(LayoutType type, bool root, ImVec2 (*custom_draw_func)(), 
+Layout::Layout(LayoutType type, bool root,  
                ImU32 border_color, ImU32 fill_color): 
-               type(type), root(root), custom_draw_func(custom_draw_func), 
+               type(type), root(root), 
                border_color(border_color), fill_color(fill_color) {
 
 }
 
 void Layout::AddChildLayout(Layout* child_layout) {
-    cells.push_back(child_layout);
+    if(type != LayoutType::cell) {
+        cells.push_back(child_layout);
+    } else {
+        std::cerr << "Tried to add a child layout to a cell. Exiting.\n" << std::flush;
+        assert(0);
+    }
+}
+
+void Layout::AddWidget(Widget* widget) {
+    if(type == LayoutType::cell) {
+        widgets.push_back(widget);
+    } else {
+        std::cerr << "Tried to add a widget to a non-cell layout. Exiting.\n" << std::flush;
+        assert(0);
+    }
 }
 
 ImVec2 Layout::Draw() {
@@ -53,8 +68,11 @@ ImVec2 Layout::Draw() {
     if(root) {
         size = ImGui::GetContentRegionAvail();
     }
-    if(type == LayoutType::cell && custom_draw_func) {
-        layout_end = custom_draw_func();
+    if(type == LayoutType::cell) {
+        for(const auto& widget : widgets) {
+            widget->Draw();
+            layout_end = ImGui::GetCursorScreenPos();
+        }   
     }
 
     if(type == LayoutType::vertical) {

@@ -38,6 +38,7 @@
 #include <boost/system/error_code.hpp>
 
 #include "imgui.h"
+#include "widgets/label.h"
 #include "clickable_text.h"
 #include "toggleable_text.h"
 #include "layout.h"
@@ -142,16 +143,33 @@ ImVec2 DrawRightColumn() {
 }
 
 void ShowLayoutNew(std::vector<ImFont*> fonts) {
+    const std::string header_text = "Top content...";
+    const std::string left_text = "Left content...";
+    const std::string right_text = "Right content...";
+
+    const ImU32 light_yellow = IM_COL32(255,255,224,255);
+
+    // TODO: move this into layout or layout_factory
+    ImVec2 size = ImGui::GetContentRegionAvail();
+
     Layout::fonts = &fonts;
 
-    Layout left_column(LayoutType::cell, false, DrawLeftColumn, IM_COL32(144,238,144,255));
-    Layout right_column(LayoutType::cell, false, DrawRightColumn, IM_COL32(144,238,255,255));
+    Label header_label(header_text,size.x, fonts[2], &light_yellow, TextAlignment::center);
+    Label left_label(left_text,size.x/2, fonts[1], &light_yellow, TextAlignment::left);
+    Label right_label(right_text,size.x/2, fonts[0], &light_yellow, TextAlignment::right);
+
+    Layout left_column(LayoutType::cell, false, IM_COL32(144,238,144,255));
+    left_column.AddWidget(&left_label);
+
+    Layout right_column(LayoutType::cell, false, IM_COL32(144,238,255,255));
+    right_column.AddWidget(&right_label);
     
     Layout row(LayoutType::horizontal, false);
     row.AddChildLayout(&left_column);
     row.AddChildLayout(&right_column);
 
-    Layout header(LayoutType::cell, false, DrawHeader);
+    Layout header(LayoutType::cell, false);
+    header.AddWidget(&header_label);
 
     Layout root(LayoutType::vertical, true);
     root.AddChildLayout(&header);
