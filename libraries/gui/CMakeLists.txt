@@ -32,7 +32,15 @@ MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 ADD_LIBRARY(vegastrike_gui STATIC
     clickable_text.cpp
     credits.cpp
+    selection_group.cpp
+    toggleable_text.cpp
+    load_game.cpp
     main_menu.cpp
+
+    layout/layout.cpp
+    layout/row.cpp
+
+    widgets/label.cpp
 )
 
 
@@ -57,6 +65,7 @@ ENDIF (SDL2_FOUND)
 TARGET_INCLUDE_DIRECTORIES(vegastrike_gui 
     PUBLIC 
         ${Vega_Strike_SOURCE_DIR}/libraries/gui
+        ${Vega_Strike_SOURCE_DIR}/libraries/gui/layout
     SYSTEM PRIVATE 
         ${Vega_Strike_SOURCE_DIR}/libraries/imgui
         ${SDL2_INCLUDE_DIRS})

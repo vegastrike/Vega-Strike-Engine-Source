@@ -69,7 +69,7 @@ void ClickableText::RenderText() {
                                             text.c_str());
     } else {
         ImGui::GetWindowDrawList()->AddText(ImGui::GetItemRectMin(), 
-                                            ImGui::ColorConvertFloat4ToU32(off_white_color),
+                                            ImGui::ColorConvertFloat4ToU32(color),
                                             text.c_str());
     }
 
@@ -81,4 +81,8 @@ bool ClickableText::GetClickAndReset() {
     bool c = clicked;
     clicked = false;
     return c;
+}
+
+void ClickableText::SetColor(const ImVec4 new_color) {
+    color = new_color;
 }

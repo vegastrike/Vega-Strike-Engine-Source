@@ -8,6 +8,7 @@
 
 #include "clickable_text.h"
 #include "credits.h"
+#include "load_game.h"
 #include "imgui.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
@@ -180,6 +181,10 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
         renderBackgroundImage(renderer, window, background_texture);
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);
+
+        if(load_game.GetClickAndReset()) {
+            ShowLoadScreen(renderer, window, fonts);
+        }
 
         if(credits.GetClickAndReset()) {
             ShowCredits(renderer, window, fonts);

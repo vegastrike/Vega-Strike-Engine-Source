@@ -36,12 +36,13 @@
 #include "imgui.h"
 
 class ClickableText {
+protected:
     std::string text;
     bool clicked = false;
     int click_counter = 0;
 
     ImVec4 transparent_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f); 
-    ImVec4 off_white_color = ImVec4(0.98f, 0.97f, 0.96f, 1.0f); // Of-white
+    ImVec4 color = ImVec4(0.98f, 0.97f, 0.96f, 1.0f); // Of-white
     ImVec4 hovered_color = ImVec4(0.56f, 0.93f, 0.56f, 1.0f); // Light Green
     ImVec4 click_color = ImVec4(1.0f, 0.72f, 0.72f, 1.0f); 
 
@@ -49,6 +50,7 @@ public:
     ClickableText(const std::string& text);
     void RenderText();
     bool GetClickAndReset();
+    void SetColor(const ImVec4 new_color);
 };
 
 #endif //VEGA_STRIKE_LIBRARIES_GUI_CLICKABLE_TEXT_H

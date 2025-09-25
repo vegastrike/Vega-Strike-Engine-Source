@@ -1,5 +1,5 @@
 /*
- * credits.h
+ * layout.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,17 +26,44 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_LIBRARIES_GUI_CREDITS_H
-#define VEGA_STRIKE_LIBRARIES_GUI_CREDITS_H
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_LAYOUT_LAYOUT_H
+#define VEGA_STRIKE_LIBRARIES_GUI_LAYOUT_LAYOUT_H
 
 #include <vector>
 #include <string>
-#include <SDL2/SDL.h>
 
-// Must come before imgui.h
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 
-void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*>fonts);
+class Label;
 
-#endif //VEGA_STRIKE_LIBRARIES_GUI_CREDITS_H
+enum class LayoutType {
+    horizontal, vertical, cell
+};
+
+class Layout {
+public:
+    static std::vector<ImFont*> *fonts;
+
+private:
+    LayoutType type;
+    bool root;
+    std::vector<Layout*> cells;
+    //std::vector<Label*> widget;
+    ImVec2 size;
+    ImVec2 layout_start;
+    ImVec2 layout_end;
+    ImVec2 (*custom_draw_func)() = nullptr;
+
+
+    ImU32 border_color;
+    ImU32 fill_color;
+
+public:
+    Layout(LayoutType type, bool root = false, ImVec2 (*custom_draw_func)() = nullptr, 
+           ImU32 border_color = IM_COL32(0,0,0,0), ImU32 fill_color = IM_COL32(0,0,0,0));
+    void AddChildLayout(Layout* child_layout);
+    ImVec2 Draw();
+    void DrawBorder() const;
+};
+
+#endif //VEGA_STRIKE_LIBRARIES_GUI_LAYOUT_LAYOUT_H

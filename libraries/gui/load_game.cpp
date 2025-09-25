@@ -1,5 +1,5 @@
 /*
- * credits.cpp
+ * load_game.cpp
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -39,134 +39,58 @@
 
 #include "imgui.h"
 #include "clickable_text.h"
+#include "toggleable_text.h"
+#include "layout.h"
+#include "selection_group.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
 
-struct Section {
-    std::string title;
-    std::vector<std::string> lines;
+
+
+struct DummySaveGame {
+    std::string name;
+    long time_date_saved;
+    int credits;
+    std::string sector;
+    std::string system;
+    DummySaveGame(const std::string& name, const long time_stamp, const int credits,
+        const std::string& sector, const std::string& system):
+        name(name), time_date_saved(time_stamp), credits(credits), 
+        sector(sector), system(system) {}
 };
 
-struct Credits {
-    std::string title;
-    std::string subtitle;
-    std::vector<Section> sections;
+std::vector<DummySaveGame> dummy_save_games = {
+    {"save1.sav", 1719878400, 5000, "Sol", "Earth"},
+    {"save2.sav", 1719964800, 12000, "Alpha Centauri", "Proxima"},
+    {"save3.sav", 1720051200, 800, "Sirius", "Sirius A"},
+    {"save4.sav", 1720137600, 25000, "Vega", "Vega Prime"},
+    {"save5.sav", 1720224000, 1500, "Barnard's Star", "Barnard I"}
 };
 
 
-Credits ParseJSON(const std::string& filename) {
-    Credits credits;
-
-    // Open and read the file
-    std::ifstream file(filename);
-    if (!file) {
-        std::cerr << "Failed to open file: " << filename << std::endl;
-        return credits;
-    }
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    std::string json_content = buffer.str();
-
-    // Parse JSON using Boost.JSON
-    boost::json::error_code ec;
-    boost::json::value jv = boost::json::parse(json_content, ec);
-    if (ec) {
-        std::cerr << "JSON parse error: " << ec.message() << std::endl;
-        return credits;
-    }
-    const boost::json::object& obj = jv.as_object();
-
-    credits.title = obj.at("title").as_string().c_str();
-    credits.subtitle = obj.at("subtitle").as_string().c_str();
-
-    if (obj.contains("sections") && obj.at("sections").is_array()) {
-        for (const auto& sec_val : obj.at("sections").as_array()) {
-            const auto& sec_obj = sec_val.as_object();
-            Section section;
-            section.title = sec_obj.at("title").as_string().c_str();
-            if (sec_obj.contains("lines") && sec_obj.at("lines").is_array()) {
-                for (const auto& line_val : sec_obj.at("lines").as_array()) {
-                    section.lines.push_back(line_val.as_string().c_str());
-                }
-            }
-            credits.sections.push_back(std::move(section));
-        }
-    }
-
-    // For demonstration, print parsed data
-    std::cout << "Title: " << credits.title << std::endl;
-    std::cout << "Subtitle: " << credits.subtitle << std::endl;
-    for (const auto& section : credits.sections) {
-        std::cout << "Section: " << section.title << std::endl;
-        for (const auto& line : section.lines) {
-            std::cout << "  " << line << std::endl;
-        }
-    }
-
-    return credits;
-}
-
-void RenderTitle(ImGuiWindowFlags window_flags, std::vector<ImFont*> fonts) {
-    ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
-
-    ImGui::Begin("Title", nullptr, window_flags);                          // Create a window called "Hello, world!" and append into it.
-    ImGui::PushFont(fonts[2]);
-
-    ImVec2 window_size = ImGui::GetWindowSize();
-    ImVec2 text_size = ImGui::CalcTextSize("Vega Strike Credits");
-    float x = (window_size.x - text_size.x) * 0.5f;
-    ImGui::SetCursorPosX(x);
-    ImGui::Text("Vega Strike Credits");    
-
-    ImGui::PopFont();
-    ImGui::End();
-}
-
-void RenderCredits(Credits credits, std::vector<ImFont*> fonts, ClickableText& back) {
+void RenderLoadScreen(std::vector<ImFont*> fonts, SelectionGroup& selection_group,
+                      ClickableText& load, ClickableText& back) {
     if (ImGui::BeginTable("MyTable", 3, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY)) {
         // Title
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
         ImGui::TableNextColumn();
         ImGui::PushFont(fonts[2]);
-        ImGui::Text(credits.title.c_str());
-        ImGui::PopFont();
-
-        // Subtitle
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        ImGui::PushFont(fonts[1]);
-        ImGui::Text(credits.subtitle.c_str());
+        ImGui::Text("Load Save Game");
         ImGui::PopFont();
 
         // Space row
         ImGui::TableNextRow();
 
-        for(const Section& section : credits.sections) {
+        int index = 0; // For right column preview
+        for(DummySaveGame& save_game : dummy_save_games) {
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::PushFont(fonts[1]);
-            ImGui::Text(section.title.c_str());
+            selection_group.Render(index);
+            index++;
             ImGui::PopFont();
 
-            ImGui::PushFont(fonts[3]);
-            int column = 0;
-            for(const std::string& name : section.lines) {
-                if(column == 0) {
-                    ImGui::TableNextRow();
-                }
-
-                ImGui::TableNextColumn();
-                ImGui::Text(name.c_str());
-
-                column++;
-                if(column == 3) {
-                    column = 0;
-                }
-            }
-            ImGui::PopFont();
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::Text("");
@@ -182,15 +106,109 @@ void RenderCredits(Credits credits, std::vector<ImFont*> fonts, ClickableText& b
         //ImGui::Text("Back");
         back.RenderText();
 
+        
+
         ImGui::EndTable();
     }
 }
 
+
+ImVec2 DrawHeader() {
+    ImVec2 header_start = ImGui::GetCursorScreenPos(); // top-left of child
+
+    ImGui::PushFont(Layout::fonts->at(2));
+    ImGui::Text("Load Save Game");
+    ImGui::PopFont();
+
+    ImVec2 textSize = ImGui::CalcTextSize("Top content...");
+    ImVec2 header_end(header_start.x + textSize.x, header_start.y + textSize.y);
+    return header_end;
+}
+
+ImVec2 DrawLeftColumn() {
+    ImVec2 header_start = ImGui::GetCursorScreenPos(); // top-left of child
+    ImGui::Text("Left content...");
+    ImVec2 textSize = ImGui::CalcTextSize("Left content...");
+    ImVec2 header_end(header_start.x + textSize.x, header_start.y + textSize.y);
+    return header_end;
+}
+
+ImVec2 DrawRightColumn() {
+    ImVec2 header_start = ImGui::GetCursorScreenPos(); // top-left of child
+    ImGui::Text("Right content...");
+    ImVec2 textSize = ImGui::CalcTextSize("Right content...");
+    ImVec2 header_end(header_start.x + textSize.x, header_start.y + textSize.y);
+    return header_end;
+}
+
+void ShowLayoutNew(std::vector<ImFont*> fonts) {
+    Layout::fonts = &fonts;
+
+    Layout left_column(LayoutType::cell, false, DrawLeftColumn, IM_COL32(144,238,144,255));
+    Layout right_column(LayoutType::cell, false, DrawRightColumn, IM_COL32(144,238,255,255));
+    
+    Layout row(LayoutType::horizontal, false);
+    row.AddChildLayout(&left_column);
+    row.AddChildLayout(&right_column);
+
+    Layout header(LayoutType::cell, false, DrawHeader);
+
+    Layout root(LayoutType::vertical, true);
+    root.AddChildLayout(&header);
+    root.AddChildLayout(&row);
+
+    root.Draw();
+}
+
+
+void ShowLayout() {
+    ImDrawList* dl = ImGui::GetWindowDrawList();
+    ImVec2 avail = ImGui::GetContentRegionAvail();
+    float padding = 20; //ImGui::GetStyle().ItemSpacing.x;
+    float col_w = (avail.x - padding) * 0.5f; // two equal columns
+
+    // Header Child
+    ImVec2 header_start = ImGui::GetCursorScreenPos(); // top-left of child
+    ImGui::BeginChild("##header", ImVec2(col_w, 0), /*border*/ false);
+
+    ImGui::Text("Top content...");
+    ImVec2 textSize = ImGui::CalcTextSize("Top content...");
+
+    ImGui::EndChild();
+    ImVec2 header_end(header_start.x + textSize.x, header_start.y + textSize.y);
+
+    // LEFT child
+    ImGui::BeginChild("##col_left", ImVec2(col_w, 0), /*border*/ false);
+    ImVec2 left_pos  = ImGui::GetWindowPos();  // child window top-left in screen coords
+    ImVec2 left_size = ImGui::GetWindowSize(); // child window size
+    ImGui::Text("Left content...");
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    // RIGHT child
+    ImGui::BeginChild("##col_right", ImVec2(col_w, 0), /*border*/ false);
+    ImVec2 right_pos  = ImGui::GetWindowPos();
+    ImVec2 right_size = ImGui::GetWindowSize();
+    ImGui::Text("Right content...");
+    ImGui::EndChild();
+
+    // Draw outlines AFTER EndChild() so the parent window is current again.
+    ImU32 outline_col = IM_COL32(144,238,144,255);
+    dl->AddRect(header_start, header_end,  outline_col, 4.0f, 0, 2.0f);
+    dl->AddRect(left_pos,  ImVec2(left_pos.x  + left_size.x,  left_pos.y  + left_size.y),  outline_col, 4.0f, 0, 2.0f);
+    dl->AddRect(right_pos, ImVec2(right_pos.x + right_size.x, right_pos.y + right_size.y), outline_col, 4.0f, 0, 2.0f);
+}
+
 // Show Credits Screen
-void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*> fonts) {
-    Credits credits = ParseJSON("credits.json");
+void ShowLoadScreen(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*> fonts) {
     // TODO: different background
 
+    SelectionGroup selection_group;
+    for(const DummySaveGame save_game : dummy_save_games) {
+        selection_group.Add(save_game.name);
+    }
+    ClickableText load("Load");
     ClickableText back("Back");
     
     bool done = false;
@@ -240,7 +258,8 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*
 
             ImGui::Begin("Hello, world!", nullptr, window_flags); // Create a window called "Hello, world!" and append into it.
             //RenderTitle(window_flags, fonts);
-            RenderCredits(credits, fonts, back);
+            //RenderLoadScreen(fonts, selection_group, load, back);
+            ShowLayoutNew(fonts);
 
             // ImGui::PushFont(font_small);
             // ImGui::PushFont(font_medium);

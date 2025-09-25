@@ -1,5 +1,5 @@
 /*
- * credits.h
+ * label.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,17 +26,29 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_LIBRARIES_GUI_CREDITS_H
-#define VEGA_STRIKE_LIBRARIES_GUI_CREDITS_H
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_LABEL_H
+#define VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_LABEL_H
 
 #include <vector>
 #include <string>
-#include <SDL2/SDL.h>
 
-// Must come before imgui.h
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 
-void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*>fonts);
+enum class TextAlignment {
+    left, right, center
+};
 
-#endif //VEGA_STRIKE_LIBRARIES_GUI_CREDITS_H
+class Label {
+    const std::string text;
+    const int width;
+    ImFont* font; // Can't be const because PushFont wants non-const.
+    const ImU32* color;
+    TextAlignment alignment;
+
+public:
+    Label(const std::string& text, int width, ImFont* font = nullptr, 
+          const ImU32* color = nullptr, TextAlignment alignment = TextAlignment::left);
+    void Draw() const;
+};
+
+#endif //VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_LABEL_H

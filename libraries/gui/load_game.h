@@ -1,5 +1,5 @@
 /*
- * credits.h
+ * load_game.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,8 +26,8 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_LIBRARIES_GUI_CREDITS_H
-#define VEGA_STRIKE_LIBRARIES_GUI_CREDITS_H
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_LOAD_GAME_H
+#define VEGA_STRIKE_LIBRARIES_GUI_LOAD_GAME_H
 
 #include <vector>
 #include <string>
@@ -37,6 +37,6 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 
-void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*>fonts);
+void ShowLoadScreen(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*>fonts);
 
-#endif //VEGA_STRIKE_LIBRARIES_GUI_CREDITS_H
+#endif //VEGA_STRIKE_LIBRARIES_GUI_LOAD_GAME_H

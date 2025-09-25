@@ -1,5 +1,5 @@
 /*
- * credits.h
+ * label.cpp
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,17 +26,40 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_LIBRARIES_GUI_CREDITS_H
-#define VEGA_STRIKE_LIBRARIES_GUI_CREDITS_H
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include <vector>
-#include <string>
-#include <SDL2/SDL.h>
+#include "label.h"
 
-// Must come before imgui.h
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 
-void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*>fonts);
+Label::Label(const std::string& text, int width, ImFont* font, 
+             const ImU32* color, TextAlignment alignment):
+             text(text), width(width), font(font), color(color), alignment(alignment) {}
+    
+void Label::Draw() const {
+    const ImVec2 cell_start = ImGui::GetCursorScreenPos(); // top-left of child
+    const ImVec2 text_size = ImGui::CalcTextSize(text.c_str());
 
-#endif //VEGA_STRIKE_LIBRARIES_GUI_CREDITS_H
+    if(alignment == TextAlignment::center) {
+        ImGui::SetCursorScreenPos(ImVec2(
+            cell_start.x + (width - text_size.x) * 0.5f,
+            cell_start.y
+        ));
+    } else if(alignment == TextAlignment::right) {
+        ImGui::SetCursorScreenPos(ImVec2(
+            cell_start.x + (width - text_size.x),
+            cell_start.y
+        ));
+    }
+
+    if(font) {
+        ImGui::PushFont(font);
+    }
+
+    ImGui::Text("%s", text.c_str());
+
+    if(font) {
+        ImGui::PopFont();
+    }
+}
+
