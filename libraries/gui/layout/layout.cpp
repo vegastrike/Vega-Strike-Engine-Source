@@ -37,9 +37,9 @@
 std::vector<ImFont*> *Layout::fonts = nullptr;
 
 Layout::Layout(LayoutType type, bool root,  
-               ImU32 border_color, ImU32 fill_color): 
+               ColorCollection colors): 
                type(type), root(root), 
-               border_color(border_color), fill_color(fill_color) {
+               colors(colors) {
 
 }
 
@@ -105,14 +105,14 @@ void Layout::DrawBorder() const {
     float thickness = 4.0f;
 
     ImDrawList* dl = ImGui::GetWindowDrawList();
-    if(fill_color != 0) {
+    if(colors.background_color != 0) {
         ImVec2 fill_start(layout_start.x+1, layout_start.y+1);
         ImVec2 fill_end(layout_end.x-1, layout_end.y-1);
-        dl->AddRectFilled(fill_start, fill_end, fill_color, corner_radius, 0);
+        dl->AddRectFilled(fill_start, fill_end, colors.background_color, corner_radius, 0);
     } 
     
-    if(border_color != 0) {
-        dl->AddRect(layout_start, layout_end, border_color, corner_radius, 0, thickness);
+    if(colors.border_color != 0) {
+        dl->AddRect(layout_start, layout_end, colors.border_color, corner_radius, 0, thickness);
     }
 }
 

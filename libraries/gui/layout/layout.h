@@ -33,7 +33,7 @@
 #include <string>
 
 #include "imgui.h"
-
+#include "collections.h"
 
 class Widget;
 
@@ -48,20 +48,16 @@ public:
 private:
     LayoutType type;
     bool root;
+    ColorCollection colors;
     std::vector<Layout*> cells;
     std::vector<Widget*> widgets;
     ImVec2 size;
     ImVec2 layout_start;
     ImVec2 layout_end;
 
-
-    ImU32 border_color;
-    ImU32 fill_color;
-
 public:
     Layout(LayoutType type, bool root = false,
-           ImU32 border_color = IM_COL32(0,0,0,0), 
-           ImU32 fill_color = IM_COL32(0,0,0,0));
+           ColorCollection colors = ColorCollection());
     void AddChildLayout(Layout* child_layout);
     void AddWidget(Widget* widget);
     ImVec2 Draw();

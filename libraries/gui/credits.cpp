@@ -32,13 +32,16 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <memory>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <boost/json.hpp>
 #include <boost/system/error_code.hpp>
 
 #include "imgui.h"
+#include "label.h"
 #include "clickable_text.h"
+#include "layout.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
 
@@ -123,26 +126,76 @@ void RenderTitle(ImGuiWindowFlags window_flags, std::vector<ImFont*> fonts) {
     ImGui::End();
 }
 
-void RenderCredits(Credits credits, std::vector<ImFont*> fonts, ClickableText& back) {
-    if (ImGui::BeginTable("MyTable", 3, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY)) {
-        // Title
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        ImGui::PushFont(fonts[2]);
-        ImGui::Text("%s", credits.title.c_str());
-        ImGui::PopFont();
+void RenderCredits(Credits credits, std::vector<ImFont*> fonts, bool& done, int width) {
+    ColorCollection colors;
+    Layout layout(LayoutType::vertical, true);
+           
+    // Title
+    Label title(credits.title, width, colors, fonts[2], TextAlignment::center);
+    Layout title_row(LayoutType::cell, false);
+    title_row.AddWidget(&title);
+    layout.AddChildLayout(&title_row);
 
-        // Subtitle
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        ImGui::PushFont(fonts[1]);
-        ImGui::Text("%s", credits.subtitle.c_str());
-        ImGui::PopFont();
+    // Subtitle
+    Label subtitle(credits.subtitle, width, colors, fonts[1], TextAlignment::center);
+    Layout subtitle_row(LayoutType::cell, false);
+    subtitle_row.AddWidget(&subtitle);
+    layout.AddChildLayout(&subtitle_row);
 
-        // Space row
-        ImGui::TableNextRow();
+    // Spacer
+    Layout spacer_row(LayoutType::cell, false);
+    layout.AddChildLayout(&spacer_row);
+
+    std::vector<Layout*> layouts;
+    std::vector<Widget*> widgets;
+    for(const Section& section : credits.sections) {
+        // Section Title section_title
+        Label* label = new Label(section.title, width/3, colors, fonts[1], TextAlignment::center);
+        widgets.push_back(label);
+
+        Layout* child_layout = new Layout(LayoutType::cell, false);
+        layouts.push_back(child_layout);
+        child_layout->AddWidget(label);
+        layout.AddChildLayout(child_layout);
+
+        int column = 0;
+        
+        Layout* row = nullptr;
+        Layout* cell = nullptr;
+        for(const std::string& name : section.lines) {
+            if(column == 0) {
+                row = new Layout(LayoutType::horizontal, false);
+                layouts.push_back(row);
+                layout.AddChildLayout(row);
+            }
+
+            cell = new Layout(LayoutType::cell, false);
+            layouts.push_back(cell);
+            row->AddChildLayout(cell);
+
+            label = new Label(name, width/3, colors, fonts[0], TextAlignment::left);
+            widgets.push_back(label);
+            cell->AddWidget(label);
+
+            column++;
+            if(column == 3) {
+                column = 0;
+            }
+        }
+    }
+
+    layout.Draw();
+
+    // Cleanup
+    for(Layout* child_layout : layouts) {
+        delete child_layout;
+    }
+
+    for(Widget* widget : widgets) {
+        delete widget;
+    }
+
+    /*
 
         for(const Section& section : credits.sections) {
             ImGui::TableNextRow();
@@ -183,11 +236,11 @@ void RenderCredits(Credits credits, std::vector<ImFont*> fonts, ClickableText& b
         //back.RenderText();
 
         ImGui::EndTable();
-    }
+    }*/
 }
 
 // Show Credits Screen
-void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*> fonts) {
+void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*> fonts, int width) {
     Credits credits = ParseJSON("credits.json");
     // TODO: different background
 
@@ -240,7 +293,7 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*
 
             ImGui::Begin("Hello, world!", nullptr, window_flags); // Create a window called "Hello, world!" and append into it.
             //RenderTitle(window_flags, fonts);
-            //RenderCredits(credits, fonts, back);
+            RenderCredits(credits, fonts, done, width);
 
             // ImGui::PushFont(font_small);
             // ImGui::PushFont(font_medium);

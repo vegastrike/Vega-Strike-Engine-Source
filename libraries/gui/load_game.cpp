@@ -86,10 +86,10 @@ void ShowLayoutNew(std::vector<ImFont*> fonts) {
     Label left_label(left_text,size.x/2, colors, fonts[1], TextAlignment::left);
     Label right_label(right_text,size.x/2, colors, fonts[0], TextAlignment::right);
 
-    Layout left_column(LayoutType::cell, false, IM_COL32(144,238,144,255));
+    Layout left_column(LayoutType::cell, false, colors);
     left_column.AddWidget(&left_label);
 
-    Layout right_column(LayoutType::cell, false, IM_COL32(144,238,255,255));
+    Layout right_column(LayoutType::cell, false, colors);
     right_column.AddWidget(&right_label);
     
     Layout row(LayoutType::horizontal, false);

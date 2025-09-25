@@ -194,17 +194,17 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);
 
-        // if(load_game.GetClickAndReset()) {
-        //     ShowLoadScreen(renderer, window, fonts);
-        // }
+        if(load_game_label.GetClickAndReset()) {
+            ShowLoadScreen(renderer, window, fonts);
+        }
 
-        // if(credits.GetClickAndReset()) {
-        //     ShowCredits(renderer, window, fonts);
-        // }
+        if(credits_label.GetClickAndReset()) {
+            ShowCredits(renderer, window, fonts, size.x);
+        }
 
-        // if(quit.GetClickAndReset()) {
-        //     done = true;
-        // }
+        if(quit_label.GetClickAndReset()) {
+            done = true;
+        }
     }
 
     // Cleanup

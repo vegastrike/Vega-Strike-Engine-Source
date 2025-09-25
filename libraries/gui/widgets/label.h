@@ -52,6 +52,7 @@ public:
     Label(const std::string& text, int width = 0, ColorCollection colors = ColorCollection(), 
           ImFont* font = nullptr, 
           TextAlignment alignment = TextAlignment::left);
+    ~Label() override {}
     void Draw() override;
 };
 
