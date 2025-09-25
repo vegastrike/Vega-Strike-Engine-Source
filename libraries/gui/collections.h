@@ -1,5 +1,5 @@
 /*
- * clickable_text.h
+ * collections.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,31 +26,20 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_LIBRARIES_GUI_CLICKABLE_TEXT_H
-#define VEGA_STRIKE_LIBRARIES_GUI_CLICKABLE_TEXT_H
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_COLLECTIONS_H
+#define VEGA_STRIKE_LIBRARIES_GUI_COLLECTIONS_H
 
-#include <string>
-
-// Must come before imgui.h
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 
-class ClickableText {
-protected:
-    std::string text;
-    bool clicked = false;
-    int click_counter = 0;
-
-    ImVec4 transparent_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f); 
-    ImVec4 color = ImVec4(0.98f, 0.97f, 0.96f, 1.0f); // Of-white
-    ImVec4 hovered_color = ImVec4(0.56f, 0.93f, 0.56f, 1.0f); // Light Green
-    ImVec4 click_color = ImVec4(1.0f, 0.72f, 0.72f, 1.0f); 
-
-public:
-    ClickableText(const std::string& text);
-    void RenderText();
-    bool GetClickAndReset();
-    void SetColor(const ImVec4 new_color);
+struct ColorCollection {
+    ImU32 color = IM_COL32(255,255,224,255); // Light yellow
+    ImU32 background_color;
+    ImU32 border_color;
+    ImU32 hover_color = IM_COL32(144, 238, 144, 255); // Light Green
+    ImU32 click_color = IM_COL32(255, 204, 203, 255); // Light red
+    ImU32 toggle_color;
+    ImU32 non_toggle_color;
+    ImU32 transparent_color = IM_COL32(0,0,0,0); 
 };
 
-#endif //VEGA_STRIKE_LIBRARIES_GUI_CLICKABLE_TEXT_H
+#endif //VEGA_STRIKE_LIBRARIES_GUI_COLLECTIONS_H

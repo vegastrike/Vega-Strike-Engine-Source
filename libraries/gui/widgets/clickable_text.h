@@ -1,5 +1,5 @@
 /*
- * selection_group.h
+ * clickable_text.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,26 +26,30 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_LIBRARIES_GUI_SELECTION_GROUP_H
-#define VEGA_STRIKE_LIBRARIES_GUI_SELECTION_GROUP_H
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_CLICKABLE_TEXT_H
+#define VEGA_STRIKE_LIBRARIES_GUI_CLICKABLE_TEXT_H
 
 #include <string>
-#include <vector>
 
+// Must come before imgui.h
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
-#include "toggleable_text.h"
+#include "label.h"
+#include "collections.h"
 
-class SelectionGroup {
-    std::vector<ToggleableText> toggleable_texts;
-    int selected = -1;
+class ClickableText: public Label {
+protected:
+    bool clicked = false;
+    bool hovering = false;
+    int click_counter = 0;
+    ImColor color;
 
 public:
-    SelectionGroup();
-    SelectionGroup(const std::vector<std::string>& texts);
-    void Add(const std::string& text);
-    void SetSelected(const int index);
-    ToggleableText& GetText(const int index);
-    void Render(const int index);
+    ClickableText(const std::string& text, int width, ColorCollection colors, 
+          ImFont* font = nullptr, 
+          TextAlignment alignment = TextAlignment::left);
+    void Draw() override;
+    bool GetClickAndReset();
 };
 
-#endif //VEGA_STRIKE_LIBRARIES_GUI_SELECTION_GROUP_H
+#endif //VEGA_STRIKE_LIBRARIES_GUI_CLICKABLE_TEXT_H

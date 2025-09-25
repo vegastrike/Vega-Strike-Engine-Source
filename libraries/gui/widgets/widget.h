@@ -1,5 +1,5 @@
 /*
- * row.h
+ * widget.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,15 +26,15 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_LIBRARIES_GUI_LAYOUT_ROW_H
-#define VEGA_STRIKE_LIBRARIES_GUI_LAYOUT_ROW_H
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_WIDGET_H
+#define VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_WIDGET_H
 
 #include <vector>
 #include <string>
 
 class Widget {
 public:
-    virtual void Draw() const = 0;
+    virtual void Draw() = 0;
 };
 
-#endif //VEGA_STRIKE_LIBRARIES_GUI_LAYOUT_ROW_H
+#endif //VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_WIDGET_H

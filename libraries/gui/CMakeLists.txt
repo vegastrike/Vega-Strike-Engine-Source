@@ -30,16 +30,18 @@ MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 
 ADD_LIBRARY(vegastrike_gui STATIC
-    clickable_text.cpp
+    
     credits.cpp
-    selection_group.cpp
-    toggleable_text.cpp
+    
     load_game.cpp
     main_menu.cpp
 
     layout/layout.cpp
 
+    widgets/clickable_text.cpp
     widgets/label.cpp
+    widgets/selection_group.cpp
+    widgets/toggleable_text.cpp
     widgets/widget.cpp
 )
 

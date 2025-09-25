@@ -32,15 +32,26 @@
 
 #include <iostream>
 
-ClickableText::ClickableText(const std::string& text): text(text), click_counter(0) {}
 
-void ClickableText::RenderText() {
+ClickableText::ClickableText(const std::string& text, int width,
+                             ColorCollection colors, ImFont* font, 
+                             TextAlignment alignment): 
+                             Label(text, width, colors, font, alignment) {}
+
+void ClickableText::Draw() {
+    // Hover is passed to the next cycle
+    ImU32 button_text_color = hovering ? colors.hover_color : colors.color;
+    if(click_counter > 0) {
+        button_text_color = colors.click_color;
+    }
+
     // Button Style
-    ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0)); // Transparent background
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(0, 0, 0, 0)); // Transparent on hover
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(0, 0, 0, 0)); // Transparent on active
+    ImGui::PushStyleColor(ImGuiCol_Button, colors.transparent_color); 
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colors.transparent_color); 
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, colors.transparent_color); 
+    ImGui::PushStyleColor(ImGuiCol_Text, button_text_color); // White text
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f); // Remove border
-    ImGui::PushStyleColor(ImGuiCol_Text, transparent_color);
+    //ImGui::PushStyleColor(ImGuiCol_Text, transparent_color);
 
     const ImGuiStyle& style = ImGui::GetStyle();
     const ImVec2 label_size = ImGui::CalcTextSize(text.c_str(), nullptr, true);
@@ -51,27 +62,13 @@ void ClickableText::RenderText() {
 
     if(clicked) {
         click_counter = 10;
-        std::cout << text << " clicked\n";
+    } else {
+        hovering = ImGui::IsItemHovered();
     } 
     
     if(click_counter > 0) {
-        ImGui::GetWindowDrawList()->AddText(ImGui::GetItemRectMin(), 
-                                            ImGui::ColorConvertFloat4ToU32(click_color),
-                                            text.c_str());
-        
-        if(click_counter >0) {
-            click_counter--;
-        }
-    }
-    else if (ImGui::IsItemHovered()) {
-        ImGui::GetWindowDrawList()->AddText(ImGui::GetItemRectMin(), 
-                                            ImGui::ColorConvertFloat4ToU32(hovered_color),
-                                            text.c_str());
-    } else {
-        ImGui::GetWindowDrawList()->AddText(ImGui::GetItemRectMin(), 
-                                            ImGui::ColorConvertFloat4ToU32(color),
-                                            text.c_str());
-    }
+        click_counter--;
+    } 
 
     ImGui::PopStyleVar();
     ImGui::PopStyleColor(4);
@@ -83,6 +80,3 @@ bool ClickableText::GetClickAndReset() {
     return c;
 }
 
-void ClickableText::SetColor(const ImVec4 new_color) {
-    color = new_color;
-}

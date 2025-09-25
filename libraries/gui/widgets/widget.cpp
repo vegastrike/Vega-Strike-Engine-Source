@@ -1,5 +1,5 @@
 /*
- * row.cpp
+ * widget.cpp
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:

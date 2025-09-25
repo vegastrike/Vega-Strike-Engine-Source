@@ -36,19 +36,22 @@
 #include "imgui.h"
 
 #include "clickable_text.h"
+#include "collections.h"
 
 class SelectionGroup;
 
-class ToggleableText : ClickableText {
+class ToggleableText : public ClickableText {
     bool toggled = false;
-    bool in_group = false;
-    int group_index = -1;
-    SelectionGroup* group = nullptr;
+    bool in_group;
+    int group_index;
+    SelectionGroup* group;
+    
 
     friend class SelectionGroup;
 public:
-    ToggleableText(const std::string& text);
-    ToggleableText(const std::string& text, int index, SelectionGroup *group);
+    ToggleableText(const std::string& text, int width, ColorCollection colors, 
+                   ImFont* font = nullptr, TextAlignment alignment = TextAlignment::left, 
+                   int group_index = -1, SelectionGroup *group = nullptr);
     void RenderText();
     bool Toggled() const;
 };

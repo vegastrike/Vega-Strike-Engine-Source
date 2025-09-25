@@ -69,94 +69,22 @@ std::vector<DummySaveGame> dummy_save_games = {
 };
 
 
-void RenderLoadScreen(std::vector<ImFont*> fonts, SelectionGroup& selection_group,
-                      ClickableText& load, ClickableText& back) {
-    if (ImGui::BeginTable("MyTable", 3, ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY)) {
-        // Title
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        ImGui::PushFont(fonts[2]);
-        ImGui::Text("Load Save Game");
-        ImGui::PopFont();
-
-        // Space row
-        ImGui::TableNextRow();
-
-        int index = 0; // For right column preview
-        for(DummySaveGame& save_game : dummy_save_games) {
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::PushFont(fonts[1]);
-            selection_group.Render(index);
-            index++;
-            ImGui::PopFont();
-
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::Text("");
-        }
-    
-        // Space row
-        ImGui::TableNextRow();
-        ImGui::TableNextRow();
-        // 3rd column
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        //ImGui::Text("Back");
-        back.RenderText();
-
-        
-
-        ImGui::EndTable();
-    }
-}
-
-
-ImVec2 DrawHeader() {
-    ImVec2 header_start = ImGui::GetCursorScreenPos(); // top-left of child
-
-    ImGui::PushFont(Layout::fonts->at(2));
-    ImGui::Text("Load Save Game");
-    ImGui::PopFont();
-
-    ImVec2 textSize = ImGui::CalcTextSize("Top content...");
-    ImVec2 header_end(header_start.x + textSize.x, header_start.y + textSize.y);
-    return header_end;
-}
-
-ImVec2 DrawLeftColumn() {
-    ImVec2 header_start = ImGui::GetCursorScreenPos(); // top-left of child
-    ImGui::Text("Left content...");
-    ImVec2 textSize = ImGui::CalcTextSize("Left content...");
-    ImVec2 header_end(header_start.x + textSize.x, header_start.y + textSize.y);
-    return header_end;
-}
-
-ImVec2 DrawRightColumn() {
-    ImVec2 header_start = ImGui::GetCursorScreenPos(); // top-left of child
-    ImGui::Text("Right content...");
-    ImVec2 textSize = ImGui::CalcTextSize("Right content...");
-    ImVec2 header_end(header_start.x + textSize.x, header_start.y + textSize.y);
-    return header_end;
-}
 
 void ShowLayoutNew(std::vector<ImFont*> fonts) {
     const std::string header_text = "Top content...";
     const std::string left_text = "Left content...";
     const std::string right_text = "Right content...";
 
-    const ImU32 light_yellow = IM_COL32(255,255,224,255);
+    ColorCollection colors;
 
     // TODO: move this into layout or layout_factory
     ImVec2 size = ImGui::GetContentRegionAvail();
 
     Layout::fonts = &fonts;
 
-    Label header_label(header_text,size.x, fonts[2], &light_yellow, TextAlignment::center);
-    Label left_label(left_text,size.x/2, fonts[1], &light_yellow, TextAlignment::left);
-    Label right_label(right_text,size.x/2, fonts[0], &light_yellow, TextAlignment::right);
+    Label header_label(header_text,size.x, colors, fonts[2], TextAlignment::center);
+    Label left_label(left_text,size.x/2, colors, fonts[1], TextAlignment::left);
+    Label right_label(right_text,size.x/2, colors, fonts[0], TextAlignment::right);
 
     Layout left_column(LayoutType::cell, false, IM_COL32(144,238,144,255));
     left_column.AddWidget(&left_label);
@@ -179,55 +107,16 @@ void ShowLayoutNew(std::vector<ImFont*> fonts) {
 }
 
 
-void ShowLayout() {
-    ImDrawList* dl = ImGui::GetWindowDrawList();
-    ImVec2 avail = ImGui::GetContentRegionAvail();
-    float padding = 20; //ImGui::GetStyle().ItemSpacing.x;
-    float col_w = (avail.x - padding) * 0.5f; // two equal columns
-
-    // Header Child
-    ImVec2 header_start = ImGui::GetCursorScreenPos(); // top-left of child
-    ImGui::BeginChild("##header", ImVec2(col_w, 0), /*border*/ false);
-
-    ImGui::Text("Top content...");
-    ImVec2 textSize = ImGui::CalcTextSize("Top content...");
-
-    ImGui::EndChild();
-    ImVec2 header_end(header_start.x + textSize.x, header_start.y + textSize.y);
-
-    // LEFT child
-    ImGui::BeginChild("##col_left", ImVec2(col_w, 0), /*border*/ false);
-    ImVec2 left_pos  = ImGui::GetWindowPos();  // child window top-left in screen coords
-    ImVec2 left_size = ImGui::GetWindowSize(); // child window size
-    ImGui::Text("Left content...");
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    // RIGHT child
-    ImGui::BeginChild("##col_right", ImVec2(col_w, 0), /*border*/ false);
-    ImVec2 right_pos  = ImGui::GetWindowPos();
-    ImVec2 right_size = ImGui::GetWindowSize();
-    ImGui::Text("Right content...");
-    ImGui::EndChild();
-
-    // Draw outlines AFTER EndChild() so the parent window is current again.
-    ImU32 outline_col = IM_COL32(144,238,144,255);
-    dl->AddRect(header_start, header_end,  outline_col, 4.0f, 0, 2.0f);
-    dl->AddRect(left_pos,  ImVec2(left_pos.x  + left_size.x,  left_pos.y  + left_size.y),  outline_col, 4.0f, 0, 2.0f);
-    dl->AddRect(right_pos, ImVec2(right_pos.x + right_size.x, right_pos.y + right_size.y), outline_col, 4.0f, 0, 2.0f);
-}
-
 // Show Credits Screen
 void ShowLoadScreen(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*> fonts) {
     // TODO: different background
 
-    SelectionGroup selection_group;
-    for(const DummySaveGame save_game : dummy_save_games) {
-        selection_group.Add(save_game.name);
-    }
-    ClickableText load("Load");
-    ClickableText back("Back");
+    // SelectionGroup selection_group;
+    // for(const DummySaveGame save_game : dummy_save_games) {
+    //     selection_group.Add(save_game.name);
+    // }
+    // ClickableText load("Load");
+    // ClickableText back("Back");
     
     bool done = false;
 
@@ -301,8 +190,8 @@ void ShowLoadScreen(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFo
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);
 
-        if(back.GetClickAndReset()) {
-            done = true;
-        }
+        // if(back.GetClickAndReset()) {
+        //     done = true;
+        // }
     }
 }

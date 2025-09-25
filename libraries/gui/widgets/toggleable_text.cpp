@@ -34,42 +34,29 @@
 
 #include "selection_group.h"
 
-ToggleableText::ToggleableText(const std::string& text): ClickableText(text) {
-    std::cout << "ToggleableText::ToggleableText("<<text<<")\n";
-}
 
-ToggleableText::ToggleableText(const std::string& text, int index, SelectionGroup *group):
-    ClickableText(text), in_group(true), group_index(index), group(group) {
-    std::cout << "ToggleableText::ToggleableText("<<text<<","<<index<<")\n";
-}
+ToggleableText::ToggleableText(const std::string& text, int width, 
+                ColorCollection colors, 
+                ImFont* font, TextAlignment alignment, 
+                int group_index, SelectionGroup *group): 
+                ClickableText(text, width, colors, font, alignment),
+                in_group(group_index != -1), group_index(group_index), group(group) {}
 
 void ToggleableText::RenderText() {
-    ImVec4 color = ImVec4(0.98f, 0.97f, 0.96f, 1.0f); // Of-white
-    ImVec4 toggle_color = ImVec4(0.1f, 0.1f, 0.56f, 1.0f); // Light blue
-
     if(toggled) {
-        SetColor(toggle_color);
+        color = colors.toggle_color;
     } else {
-        SetColor(color);
+        color = colors.non_toggle_color;
     }
 
-    ClickableText::RenderText();
+    //ClickableText::RenderText();
 
     if(clicked) {
-        std::cout << this << " " << toggled << std::endl;
         toggled = !toggled;
         clicked = false;
 
-        if(in_group || group) {
-            std::cout << this << "Index " << group_index << " toggled to " << toggled << std::endl;
-        }
-
         if(in_group && group) {
             group->SetSelected(group_index);
-        }
-
-        if(in_group || group) {
-            std::cout << this << "Index " << group_index << " still toggled to " << toggled << std::endl << std::flush;
         }
     }
 }

@@ -32,18 +32,25 @@
 
 #include <iostream>
 
-SelectionGroup::SelectionGroup() {}
+SelectionGroup::SelectionGroup(int width, ColorCollection colors, 
+          ImFont* font, TextAlignment alignment):
+          width(width), colors(colors), 
+          font(font), alignment(alignment) {}
 
-SelectionGroup::SelectionGroup(const std::vector<std::string>& texts) {
+SelectionGroup::SelectionGroup(const std::vector<std::string>& texts, int width, ColorCollection colors, 
+          ImFont* font, TextAlignment alignment):
+          width(width), colors(colors), 
+          font(font), alignment(alignment) {
     int index = 0;
     for(const std::string& text : texts) {
-        toggleable_texts.push_back(ToggleableText(text, index, this));
+        toggleable_texts.push_back(ToggleableText(text, width, colors, font, alignment,
+             index, this));
         index++;
     }
 }
 
 void SelectionGroup::Add(const std::string& text) {
-    toggleable_texts.push_back(ToggleableText(text, toggleable_texts.size(), this));
+    toggleable_texts.push_back(ToggleableText(text, width, colors, font, alignment, toggleable_texts.size(), this));
 }
     
 void SelectionGroup::SetSelected(const int index) {

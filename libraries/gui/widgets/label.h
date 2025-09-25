@@ -34,22 +34,25 @@
 
 #include "imgui.h"
 #include "widget.h"
+#include "collections.h"
 
 enum class TextAlignment {
     left, right, center
 };
 
 class Label: public Widget {
+protected:
     const std::string text;
     const int width;
-    ImFont* font; // Can't be const because PushFont wants non-const.
-    const ImU32* color;
+    ColorCollection colors;
+    ImFont* font;
     TextAlignment alignment;
 
 public:
-    Label(const std::string& text, int width, ImFont* font = nullptr, 
-          const ImU32* color = nullptr, TextAlignment alignment = TextAlignment::left);
-    void Draw() const override;
+    Label(const std::string& text, int width = 0, ColorCollection colors = ColorCollection(), 
+          ImFont* font = nullptr, 
+          TextAlignment alignment = TextAlignment::left);
+    void Draw() override;
 };
 
 #endif //VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_LABEL_H

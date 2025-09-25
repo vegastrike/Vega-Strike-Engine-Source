@@ -10,6 +10,8 @@
 #include "credits.h"
 #include "load_game.h"
 #include "imgui.h"
+#include "layout.h"
+#include "collections.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
 
@@ -88,6 +90,10 @@ std::vector<ImFont*> GenerateFonts() {
 
 // Show Menu
 void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
+    int window_width = 0, window_height = 0;
+    SDL_GetWindowSize(window, &window_width, &window_height);
+    ImVec2 size(window_width, window_height);
+
     std::cout << "Begin showMenu\n";
 
     SDL_Texture* background_texture = createBackgroundImage(renderer, "main_menu.png");
@@ -110,12 +116,23 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
 
     std::vector<ImFont*> fonts = GenerateFonts();
 
-    ClickableText new_game("New Game");
-    ClickableText load_game("Load Game");
-    ClickableText credits("Credits");
-    ClickableText help("Help");
-    ClickableText settings("Settings");
-    ClickableText quit("Quit");
+    Layout layout(LayoutType::cell, true);
+    ColorCollection colors;
+
+    ClickableText new_game_label("New Game", size.x, colors);
+    ClickableText load_game_label("Load Game", size.x, colors);
+    ClickableText credits_label("Credits", size.x, colors);
+    ClickableText help_label("Help", size.x, colors);
+    ClickableText settings_label("Settings", size.x, colors);
+    ClickableText quit_label("Quit", size.x, colors);
+
+    layout.AddWidget(&new_game_label);
+    layout.AddWidget(&load_game_label);
+    layout.AddWidget(&credits_label);
+    layout.AddWidget(&help_label);
+    layout.AddWidget(&settings_label);
+    layout.AddWidget(&quit_label);
+
 
     bool done = false;
     while (!done)
@@ -162,12 +179,7 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
 
             ImGui::PushFont(fonts[2]);
 
-            new_game.RenderText();
-            load_game.RenderText();
-            credits.RenderText();
-            help.RenderText();
-            settings.RenderText();
-            quit.RenderText();
+            layout.Draw();
             
             ImGui::PopFont();
             ImGui::End();
@@ -182,17 +194,17 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);
 
-        if(load_game.GetClickAndReset()) {
-            ShowLoadScreen(renderer, window, fonts);
-        }
+        // if(load_game.GetClickAndReset()) {
+        //     ShowLoadScreen(renderer, window, fonts);
+        // }
 
-        if(credits.GetClickAndReset()) {
-            ShowCredits(renderer, window, fonts);
-        }
+        // if(credits.GetClickAndReset()) {
+        //     ShowCredits(renderer, window, fonts);
+        // }
 
-        if(quit.GetClickAndReset()) {
-            done = true;
-        }
+        // if(quit.GetClickAndReset()) {
+        //     done = true;
+        // }
     }
 
     // Cleanup

@@ -130,7 +130,7 @@ void RenderCredits(Credits credits, std::vector<ImFont*> fonts, ClickableText& b
         ImGui::TableNextColumn();
         ImGui::TableNextColumn();
         ImGui::PushFont(fonts[2]);
-        ImGui::Text(credits.title.c_str());
+        ImGui::Text("%s", credits.title.c_str());
         ImGui::PopFont();
 
         // Subtitle
@@ -138,7 +138,7 @@ void RenderCredits(Credits credits, std::vector<ImFont*> fonts, ClickableText& b
         ImGui::TableNextColumn();
         ImGui::TableNextColumn();
         ImGui::PushFont(fonts[1]);
-        ImGui::Text(credits.subtitle.c_str());
+        ImGui::Text("%s", credits.subtitle.c_str());
         ImGui::PopFont();
 
         // Space row
@@ -148,7 +148,7 @@ void RenderCredits(Credits credits, std::vector<ImFont*> fonts, ClickableText& b
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::PushFont(fonts[1]);
-            ImGui::Text(section.title.c_str());
+            ImGui::Text("%s", section.title.c_str());
             ImGui::PopFont();
 
             ImGui::PushFont(fonts[3]);
@@ -159,7 +159,7 @@ void RenderCredits(Credits credits, std::vector<ImFont*> fonts, ClickableText& b
                 }
 
                 ImGui::TableNextColumn();
-                ImGui::Text(name.c_str());
+                ImGui::Text("%s", name.c_str());
 
                 column++;
                 if(column == 3) {
@@ -169,7 +169,7 @@ void RenderCredits(Credits credits, std::vector<ImFont*> fonts, ClickableText& b
             ImGui::PopFont();
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            ImGui::Text("");
+            ImGui::Text("%s", "");
         }
     
         // Space row
@@ -180,7 +180,7 @@ void RenderCredits(Credits credits, std::vector<ImFont*> fonts, ClickableText& b
         ImGui::TableNextColumn();
         ImGui::TableNextColumn();
         //ImGui::Text("Back");
-        back.RenderText();
+        //back.RenderText();
 
         ImGui::EndTable();
     }
@@ -191,7 +191,7 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*
     Credits credits = ParseJSON("credits.json");
     // TODO: different background
 
-    ClickableText back("Back");
+    //ClickableText back("Back");
     
     bool done = false;
 
@@ -240,7 +240,7 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*
 
             ImGui::Begin("Hello, world!", nullptr, window_flags); // Create a window called "Hello, world!" and append into it.
             //RenderTitle(window_flags, fonts);
-            RenderCredits(credits, fonts, back);
+            //RenderCredits(credits, fonts, back);
 
             // ImGui::PushFont(font_small);
             // ImGui::PushFont(font_medium);
@@ -264,8 +264,8 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);
 
-        if(back.GetClickAndReset()) {
-            done = true;
-        }
+        // if(back.GetClickAndReset()) {
+        //     done = true;
+        // }
     }
 }
