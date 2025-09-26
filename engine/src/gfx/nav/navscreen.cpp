@@ -110,8 +110,6 @@ void NavigationSystem::mouseMotion(int x, int y) {
 }
 
 void NavigationSystem::mouseClick(int button, int state, int x, int y) {
-    std::cout << "1 x: " << x << " y: " << y << std::endl;
-
     // For fullscreen, convert real coordinates (native resolution) to 
     // relative coordinates
     if(native_resolution_x != configuration().graphics.resolution_x ||

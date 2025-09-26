@@ -301,7 +301,9 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         // Get bounds of the secondary monitor
         SDL_Rect displayBounds;
         if (SDL_GetDisplayBounds(screen_number, &displayBounds) != 0) {
-            SDL_Log("Failed to get display bounds: %s", SDL_GetError());
+            const std::string error_message = (boost::format("Failed to get display bounds: %1%") % SDL_GetError()).str();
+            VS_LOG_AND_FLUSH(error, error_message);
+
             // Fallback to primary monitor
             SDL_GetDisplayBounds(0, &displayBounds);
         }
