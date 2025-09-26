@@ -38,6 +38,7 @@
 
 #include "vs_logging.h"
 #include "configuration/configuration.h"
+#include "winsys.h"
 
 // Mouse Cursors
 static SDL_Cursor* arrow_cursor = nullptr;
@@ -92,8 +93,8 @@ void changeCursor(const CursorType type) {
 // mouse cursor behavior to the standard operating system one.
 std::pair<float, float> CalculateRelativeXY(int orig_x, int orig_y) {
     // Center of the window
-    float center_x = configuration().graphics.resolution_x / 2;
-    float center_y = configuration().graphics.resolution_y / 2;
+    float center_x = native_resolution_x / 2;
+    float center_y = native_resolution_y / 2;
 
     // Location of mouse relative to the center
     float relative_x = orig_x - center_x;
@@ -107,8 +108,8 @@ std::pair<float, float> CalculateRelativeXY(int orig_x, int orig_y) {
 }
 
 std::pair<int, int> CalculateAbsoluteXY(float fraction_x, float fraction_y) {
-    float center_x = configuration().graphics.resolution_x / 2;
-    float center_y = configuration().graphics.resolution_y / 2;
+    float center_x = native_resolution_x / 2;
+    float center_y = native_resolution_y / 2;
 
     int orig_x = static_cast<int>(center_x + fraction_x * center_x);
     int orig_y = static_cast<int>(center_y - fraction_y * center_y);

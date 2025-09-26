@@ -146,10 +146,7 @@ static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float
 #define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
 
 static void SetupViewport() {
-    SDL_Window* currentGLWindow = SDL_GL_GetCurrentWindow();
-    int drawableWidth, drawableHeight;
-    SDL_GL_GetDrawableSize(currentGLWindow, &drawableWidth, &drawableHeight);
-    glViewport(0, 0, drawableWidth, drawableHeight);
+    glViewport(0, 0, native_resolution_x, native_resolution_y);
 }
 
 #undef mymin
@@ -1491,10 +1488,7 @@ void BaseInterface::Draw() {
     AnimationDraw();
 
     float x, y;
-    SDL_Window* currentGLWindow = SDL_GL_GetCurrentWindow();
-    int drawableWidth, drawableHeight;
-    SDL_GL_GetDrawableSize(currentGLWindow, &drawableWidth, &drawableHeight);
-    glViewport(0, 0, drawableWidth, drawableHeight);
+    glViewport(0, 0, native_resolution_x, native_resolution_y);
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
 
     curtext.GetCharSize(x, y);
@@ -1523,9 +1517,7 @@ void BaseInterface::Draw() {
     SetupViewport();
     EndGUIFrame(mousePointerStyle);
 
-    currentGLWindow = SDL_GL_GetCurrentWindow();
-    SDL_GL_GetDrawableSize(currentGLWindow, &drawableWidth, &drawableHeight);
-    glViewport(0, 0, drawableWidth, drawableHeight);
+    glViewport(0, 0, native_resolution_x, native_resolution_y);
 
     Unit *un = caller.GetUnit();
     Unit *base = baseun.GetUnit();

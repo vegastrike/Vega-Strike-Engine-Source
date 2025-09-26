@@ -197,6 +197,11 @@ void winsys_warp_pointer(int x, int y) {
     SDL_WarpMouseInWindow(current_window, x, y);
 }
 
+// Store real resolution
+int native_resolution_x;
+int native_resolution_y;
+
+
 /*---------------------------------------------------------------------------*/
 /*!
  *  Sets up the SDL OpenGL rendering context
@@ -210,8 +215,19 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     int width, height;
     if (configuration().graphics.full_screen) {
         video_flags |= SDL_WINDOW_BORDERLESS;
+
+        SDL_DisplayMode currentDisplayMode;
+        if (SDL_GetCurrentDisplayMode(0, &currentDisplayMode) != 0) {
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_GetCurrentDisplayMode failed: %1%") % SDL_GetError()), -1);
+        } else {
+            native_resolution_x = currentDisplayMode.w;
+            native_resolution_y = currentDisplayMode.h;
+        }
     } else {
         video_flags |= SDL_WINDOW_RESIZABLE;
+
+        native_resolution_x = configuration().graphics.resolution_x;
+        native_resolution_y = configuration().graphics.resolution_y;
     }
     bpp = gl_options.color_depth;
 
