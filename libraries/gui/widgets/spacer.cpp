@@ -1,5 +1,5 @@
 /*
- * label.cpp
+ * spacer.cpp
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -28,38 +28,19 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "label.h"
+#include <iostream>
+
+#include "spacer.h"
 #include "imgui.h"
 
-Label::Label(const std::string& text, int width,
-             ColorCollection colors, ImFont* font, TextAlignment alignment):
-             text(text), width(width), colors(colors), 
-             font(font), alignment(alignment) {}
+Spacer::Spacer(int x, int y):
+             x(x), y(y) {}
     
-void Label::Draw() {
-    const ImVec2 cell_start = ImGui::GetCursorScreenPos(); // top-left of child
-    const ImVec2 text_size = ImGui::CalcTextSize(text.c_str());
-
-    if(alignment == TextAlignment::center) {
-        ImGui::SetCursorScreenPos(ImVec2(
-            cell_start.x + (width - text_size.x) * 0.5f,
-            cell_start.y
-        ));
-    } else if(alignment == TextAlignment::right) {
-        ImGui::SetCursorScreenPos(ImVec2(
-            cell_start.x + (width - text_size.x),
-            cell_start.y
-        ));
-    }
-
-    if(font) {
-        ImGui::PushFont(font);
-    }
-
-    ImGui::Text("%s", text.c_str());
-
-    if(font) {
-        ImGui::PopFont();
-    }
+void Spacer::Draw() {
+    //std::cout << "Spacer=" << x << "," << y << std::endl;
+    ImVec2 cursor_position = ImGui::GetCursorScreenPos(); 
+    cursor_position.x += x;
+    cursor_position.y += y;
+    ImGui::SetCursorPos(cursor_position);
 }
 

@@ -41,6 +41,7 @@ ADD_LIBRARY(vegastrike_gui STATIC
     widgets/clickable_text.cpp
     widgets/label.cpp
     widgets/selection_group.cpp
+    widgets/spacer.cpp
     widgets/toggleable_text.cpp
     widgets/widget.cpp
 )

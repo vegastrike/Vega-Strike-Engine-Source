@@ -70,13 +70,18 @@ ImVec2 Layout::Draw() {
     }
     if(type == LayoutType::cell) {
         for(const auto& widget : widgets) {
+            ImVec2 cursor_position = ImGui::GetCursorPos();
+            //std::cout << "Draw widget at " << cursor_position.x << "," << cursor_position.y << std::endl;
             widget->Draw();
             layout_end = ImGui::GetCursorScreenPos();
+            layout_end.x = size.x;
         }   
     }
 
     if(type == LayoutType::vertical) {
         for(Layout* cell : cells) {
+            ImVec2 cursor_position = ImGui::GetCursorPos();
+            //std::cout << "Vertical layout at " << cursor_position.x << "," << cursor_position.y << std::endl;
             layout_end = cell->Draw();
         }
     }
@@ -84,12 +89,18 @@ ImVec2 Layout::Draw() {
     if(type == LayoutType::horizontal) {
         size = ImGui::GetContentRegionAvail();
         int column_width = size.x / cells.size();
-        ImVec2 cursor_position = ImGui::GetCursorPos();
+        ImVec2 original_cursor_position = ImGui::GetCursorPos();
+        ImVec2 cursor_position = original_cursor_position;
         for(Layout* cell : cells) {
-             layout_end = cell->Draw();
-             cursor_position.x += column_width;
-             ImGui::SetCursorPos(cursor_position);
+            //std::cout << "Horizontal layout at " << cursor_position.x << "," << cursor_position.y << std::endl;
+            layout_end = cell->Draw();
+            cursor_position.x += column_width;
+            ImGui::SetCursorPos(cursor_position);
         }
+
+        // Move the cursor back left, like a typewriter
+        cursor_position = ImVec2(original_cursor_position.x, layout_end.y);
+        ImGui::SetCursorPos(cursor_position);
     }
 
     if(type == LayoutType::cell) {
@@ -101,8 +112,8 @@ ImVec2 Layout::Draw() {
 
 void Layout::DrawBorder() const {
     // TODO: turn into style
-    float corner_radius = 4.0f;
-    float thickness = 4.0f;
+    float corner_radius = 0.0f;
+    float thickness = 1.0f;
 
     ImDrawList* dl = ImGui::GetWindowDrawList();
     if(colors.background_color != 0) {

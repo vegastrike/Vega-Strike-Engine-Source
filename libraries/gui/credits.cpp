@@ -40,6 +40,7 @@
 
 #include "imgui.h"
 #include "label.h"
+#include "spacer.h"
 #include "clickable_text.h"
 #include "layout.h"
 #include "backends/imgui_impl_sdl2.h"
@@ -96,67 +97,58 @@ Credits ParseJSON(const std::string& filename) {
         }
     }
 
-    // For demonstration, print parsed data
-    std::cout << "Title: " << credits.title << std::endl;
-    std::cout << "Subtitle: " << credits.subtitle << std::endl;
-    for (const auto& section : credits.sections) {
-        std::cout << "Section: " << section.title << std::endl;
-        for (const auto& line : section.lines) {
-            std::cout << "  " << line << std::endl;
-        }
-    }
-
     return credits;
 }
 
-void RenderTitle(ImGuiWindowFlags window_flags, std::vector<ImFont*> fonts) {
-    ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
 
-    ImGui::Begin("Title", nullptr, window_flags);                          // Create a window called "Hello, world!" and append into it.
-    ImGui::PushFont(fonts[2]);
 
-    ImVec2 window_size = ImGui::GetWindowSize();
-    ImVec2 text_size = ImGui::CalcTextSize("Vega Strike Credits");
-    float x = (window_size.x - text_size.x) * 0.5f;
-    ImGui::SetCursorPosX(x);
-    ImGui::Text("Vega Strike Credits");    
-
-    ImGui::PopFont();
-    ImGui::End();
-}
-
-void RenderCredits(Credits credits, std::vector<ImFont*> fonts, bool& done, int width) {
+void RenderCredits(Credits credits, std::vector<Layout*>& layouts,
+                   std::vector<Widget*>& widgets, std::vector<ImFont*> fonts, 
+                   int width) {
     ColorCollection colors;
-    Layout layout(LayoutType::vertical, true);
+    Layout* layout = new Layout(LayoutType::vertical, true);
+    layouts.push_back(layout);
            
     // Title
-    Label title(credits.title, width, colors, fonts[2], TextAlignment::center);
-    Layout title_row(LayoutType::cell, false);
-    title_row.AddWidget(&title);
-    layout.AddChildLayout(&title_row);
+    Label* title = new Label(credits.title, width, colors, fonts[2], TextAlignment::center);
+    Layout* title_row = new Layout(LayoutType::cell, false);
+    title_row->AddWidget(title);
+    layout->AddChildLayout(title_row);
+    layouts.push_back(title_row);
+    widgets.push_back(title);
 
     // Subtitle
-    Label subtitle(credits.subtitle, width, colors, fonts[1], TextAlignment::center);
-    Layout subtitle_row(LayoutType::cell, false);
-    subtitle_row.AddWidget(&subtitle);
-    layout.AddChildLayout(&subtitle_row);
+    Label* subtitle = new Label(credits.subtitle, width, colors, fonts[1], TextAlignment::center);
+    Layout* subtitle_row = new Layout(LayoutType::cell, false);
+    subtitle_row->AddWidget(subtitle);
+    layout->AddChildLayout(subtitle_row);
+    layouts.push_back(subtitle_row);
+    widgets.push_back(subtitle);
 
     // Spacer
-    Layout spacer_row(LayoutType::cell, false);
-    layout.AddChildLayout(&spacer_row);
+    Layout* spacer_row = new Layout(LayoutType::cell, false);
+    layout->AddChildLayout(spacer_row);
+    Spacer* spacer = new Spacer(0,40);
+    spacer_row->AddWidget(spacer);
+    layouts.push_back(spacer_row);
+    widgets.push_back(spacer);
 
-    std::vector<Layout*> layouts;
-    std::vector<Widget*> widgets;
+    colors.border_color = IM_COL32(255,255,224,255);
     for(const Section& section : credits.sections) {
+        if(colors.border_color == IM_COL32(255,255,224,255)) {
+            colors.border_color = IM_COL32(255,0,0,255);
+        } else {
+            colors.border_color = IM_COL32(255,255,224,255);
+        }
         // Section Title section_title
         Label* label = new Label(section.title, width/3, colors, fonts[1], TextAlignment::center);
         widgets.push_back(label);
-
-        Layout* child_layout = new Layout(LayoutType::cell, false);
+        
+        Layout* child_layout = new Layout(LayoutType::cell, false, colors);
         layouts.push_back(child_layout);
         child_layout->AddWidget(label);
-        layout.AddChildLayout(child_layout);
+        
+        layout->AddChildLayout(child_layout);
 
         int column = 0;
         
@@ -166,7 +158,7 @@ void RenderCredits(Credits credits, std::vector<ImFont*> fonts, bool& done, int 
             if(column == 0) {
                 row = new Layout(LayoutType::horizontal, false);
                 layouts.push_back(row);
-                layout.AddChildLayout(row);
+                layout->AddChildLayout(row);
             }
 
             cell = new Layout(LayoutType::cell, false);
@@ -184,64 +176,19 @@ void RenderCredits(Credits credits, std::vector<ImFont*> fonts, bool& done, int 
         }
     }
 
-    layout.Draw();
-
-    // Cleanup
-    for(Layout* child_layout : layouts) {
-        delete child_layout;
-    }
-
-    for(Widget* widget : widgets) {
-        delete widget;
-    }
-
-    /*
-
-        for(const Section& section : credits.sections) {
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::PushFont(fonts[1]);
-            ImGui::Text("%s", section.title.c_str());
-            ImGui::PopFont();
-
-            ImGui::PushFont(fonts[3]);
-            int column = 0;
-            for(const std::string& name : section.lines) {
-                if(column == 0) {
-                    ImGui::TableNextRow();
-                }
-
-                ImGui::TableNextColumn();
-                ImGui::Text("%s", name.c_str());
-
-                column++;
-                if(column == 3) {
-                    column = 0;
-                }
-            }
-            ImGui::PopFont();
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::Text("%s", "");
-        }
     
-        // Space row
-        ImGui::TableNextRow();
-        ImGui::TableNextRow();
-        // 3rd column
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        //ImGui::Text("Back");
-        //back.RenderText();
-
-        ImGui::EndTable();
-    }*/
 }
 
 // Show Credits Screen
 void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*> fonts, int width) {
     Credits credits = ParseJSON("credits.json");
+
+    std::vector<Layout*> layouts;
+    std::vector<Widget*> widgets;
+
+    RenderCredits(credits, layouts, widgets, fonts, width);
+
+
     // TODO: different background
 
     //ClickableText back("Back");
@@ -277,7 +224,6 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*
             ImGuiWindowFlags_NoTitleBar |
             ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoScrollbar |
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoBackground;   // makes it transparent
 
@@ -292,18 +238,18 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*
             ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
 
             ImGui::Begin("Hello, world!", nullptr, window_flags); // Create a window called "Hello, world!" and append into it.
-            //RenderTitle(window_flags, fonts);
-            RenderCredits(credits, fonts, done, width);
+            float scroll_y = ImGui::GetScrollY();
+            float max_y = ImGui::GetScrollMaxY();
+            ImGui::Text("Scroll: %.1f / %.1f", scroll_y, max_y);
 
-            // ImGui::PushFont(font_small);
-            // ImGui::PushFont(font_medium);
-            ImGui::PushFont(fonts[2]);
-
-            //back.RenderText();
+            if(scroll_y != 0) {
+                std::cout << "Stop\n";
+            }
             
-            // ImGui::PopFont();
-            // ImGui::PopFont();
-            ImGui::PopFont();
+            layouts[0]->Draw();
+
+            
+
             ImGui::End();
         }
 
@@ -320,5 +266,15 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*
         // if(back.GetClickAndReset()) {
         //     done = true;
         // }
+
+    }
+
+    // Cleanup
+    for(Layout* child_layout : layouts) {
+        delete child_layout;
+    }
+
+    for(Widget* widget : widgets) {
+        delete widget;
     }
 }

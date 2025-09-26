@@ -1,5 +1,5 @@
 /*
- * label.cpp
+ * spacer.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,40 +26,26 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_SPACER_H
+#define VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_SPACER_H
 
-#include "label.h"
+#include <vector>
+#include <string>
+
 #include "imgui.h"
+#include "widget.h"
 
-Label::Label(const std::string& text, int width,
-             ColorCollection colors, ImFont* font, TextAlignment alignment):
-             text(text), width(width), colors(colors), 
-             font(font), alignment(alignment) {}
-    
-void Label::Draw() {
-    const ImVec2 cell_start = ImGui::GetCursorScreenPos(); // top-left of child
-    const ImVec2 text_size = ImGui::CalcTextSize(text.c_str());
 
-    if(alignment == TextAlignment::center) {
-        ImGui::SetCursorScreenPos(ImVec2(
-            cell_start.x + (width - text_size.x) * 0.5f,
-            cell_start.y
-        ));
-    } else if(alignment == TextAlignment::right) {
-        ImGui::SetCursorScreenPos(ImVec2(
-            cell_start.x + (width - text_size.x),
-            cell_start.y
-        ));
-    }
+/** This widget moves the cursor in x and y */
+class Spacer: public Widget {
+protected:
+    const int x;
+    const int y; 
 
-    if(font) {
-        ImGui::PushFont(font);
-    }
+public:
+    Spacer(int x, int y);
+    ~Spacer() override {}
+    void Draw() override;
+};
 
-    ImGui::Text("%s", text.c_str());
-
-    if(font) {
-        ImGui::PopFont();
-    }
-}
-
+#endif //VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_SPACER_H
