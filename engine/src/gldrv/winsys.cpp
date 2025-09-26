@@ -210,6 +210,7 @@ int native_resolution_y;
  *  \date    Modified: 2025-01-10 - stephengtuggy
  */
 static bool setup_sdl_video_mode(int *argc, char **argv) {
+    const int screen_number = configuration().graphics.screen;
     Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
     int bpp = 0; // Bits per pixel?
     int width, height;
@@ -217,7 +218,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         video_flags |= SDL_WINDOW_BORDERLESS;
 
         SDL_DisplayMode currentDisplayMode;
-        if (SDL_GetCurrentDisplayMode(0, &currentDisplayMode) != 0) {
+        if (SDL_GetCurrentDisplayMode(screen_number, &currentDisplayMode) != 0) {
             VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_GetCurrentDisplayMode failed: %1%") % SDL_GetError()), -1);
         } else {
             native_resolution_x = currentDisplayMode.w;
@@ -266,7 +267,6 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     }
     width = configuration().graphics.resolution_x;
     height = configuration().graphics.resolution_y;
-    const int screen_number = configuration().graphics.screen;
 
     // Fix display in fullscreen
     if(configuration().graphics.full_screen) {
