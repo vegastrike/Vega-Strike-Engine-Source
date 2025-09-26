@@ -203,20 +203,20 @@ void LocationSelect::Draw() {
                 zvalueXY = -1000;
             }
             LocalPosition.i = fabs(zvalueXY)
-                    * (((2.0 * DeltaPosition.i / configuration().graphics.resolution_x
+                    * (((2.0 * DeltaPosition.i / native_resolution_x
                             - 1.0) * g_game.MouseSensitivityX * GFXGetXInvPerspective()
                             * tP.i)
                             - (1.0
                                     - (2.0 * DeltaPosition.j
-                                            / configuration().graphics.resolution_y) * g_game.MouseSensitivityY * GFXGetYInvPerspective()
+                                            / native_resolution_y) * g_game.MouseSensitivityY * GFXGetYInvPerspective()
                                             * tP.j));
             LocalPosition.j = fabs(zvalueXY)
-                    * (((2.0 * DeltaPosition.i / configuration().graphics.resolution_x
+                    * (((2.0 * DeltaPosition.i / native_resolution_x
                             - 1.0) * g_game.MouseSensitivityX * GFXGetXInvPerspective()
                             * tQ.i)
                             - (1.0
                                     - (2.0 * DeltaPosition.j
-                                            / configuration().graphics.resolution_y) * tQ.j * g_game.MouseSensitivityY
+                                            / native_resolution_y) * tQ.j * g_game.MouseSensitivityY
                                             * GFXGetYInvPerspective()));
             DeltaPosition = Vector(0, 0, 0);
             //Vector TransPQR (t[0]*i+t[4]*LocalPosition.j+t[8]*LocalPosition.k+t[12],t[1]*LocalPosition.i+t[5]*LocalPosition.j+t[9]*LocalPosition.k+t[13],t[2]*LocalPosition.i+t[6]*LocalPosition.j+t[10]*LocalPosition.k+t[14]);
