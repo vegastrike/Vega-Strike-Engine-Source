@@ -63,6 +63,11 @@ extern "C"
 {
 #endif
 
+// Store real resolution
+extern int native_resolution_x;
+extern int native_resolution_y;
+
+
 /* Keysyms */
 
 #if defined( SDL_WINDOWING ) && defined (HAVE_SDL)

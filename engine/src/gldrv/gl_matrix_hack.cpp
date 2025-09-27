@@ -48,6 +48,7 @@
 #include "root_generic/vs_globals.h"
 #include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
+#include "gldrv/winsys.h"
 
 //#include <GL/glu.h>
 
@@ -340,7 +341,9 @@ void /*GFXDRVAPI*/ GFXLoadMatrix(const MATRIXMODE mode, const Matrix matrix) {
 }
 
 void GFXViewPort(int minx, int miny, int maxx, int maxy) {
-    glViewport(minx, miny, maxx, maxy);
+    // Ignore parameters and just get the real resolution
+    // TODO: remove parameters
+    glViewport(0, 0, native_resolution_x, native_resolution_y);
 }
 
 void GFXHudMode(const bool Enter) {

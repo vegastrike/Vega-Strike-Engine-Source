@@ -50,6 +50,7 @@
 #include "root_generic/options.h"
 #include <SDL2/SDL_joystick.h>
 #include "configuration/configuration.h"
+#include "gldrv/mouse_cursor.h"
 
 
 //Used for storing the max and min values of the tree Joystick Axes - Okona
@@ -295,70 +296,17 @@ struct mouseData {
         time = ttime;
     }
 };
+
+
 extern void GetMouseXY(int &mousex, int &mousey);
 
 void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
-    int def_mouse_sens = 1;
-    int _dx, _dy;
-    float fdx, fdy;
-    int _mx, _my;
-    GetMouseXY(_mx, _my);
-    GetMouseDelta(_dx, _dy);
-    if (!configuration().joystick.warp_mouse) {
-        fdx = (float) (_dx = _mx - configuration().graphics.resolution_x / 2.0f);
-        def_mouse_sens = 25;
-        fdy = (float) (_dy = _my - configuration().graphics.resolution_y / 2.0f);
-    } else {
-        static std::list<mouseData> md;
-        std::list<mouseData>::iterator i = md.begin();
-        float ttime = getNewTime();
-        float lasttime = ttime - configuration().joystick.mouse_blur_flt;
-        int avg = (_dx || _dy) ? 1 : 0;
-        float valx = _dx;
-        float valy = _dy;
-        for (; i != md.end();) {
-            if ((*i).time >= lasttime) {
-                bool found = false;
-                int ldx = (*i).dx;
-                int ldy = (*i).dy;
-                if ((ldx >= 0) * _dx * ldx == (_dx >= 0) * _dx * ldx) {
-                    //make sure same sign or zero
-                    valx += (*i).dx;
-                    found = true;
-                }
-                if ((ldy >= 0) * _dy * ldy == (_dy >= 0) * _dy * ldy) {
-                    //make sure same sign or zero
-                    valy += (*i).dy;
-                    found = true;
-                }
-                if (found) {
-                    avg++;
-                }
-                ++i;
-            } else if ((i = md.erase(i)) == md.end()) {
-                break;
-            }
-        }
-        if (_dx || _dy) {
-            md.push_back(mouseData(_dx, _dy, ttime));
-        }
-        if (avg) {
-            _dx = float_to_int(valx / avg);
-            _dy = float_to_int(valy / avg);
-        }
-        fdx = float(valx) / configuration().joystick.mouse_blur_flt;
-        fdy = float(valy) / configuration().joystick.mouse_blur_flt;
-    }
-    joy_axis[0] = fdx / (configuration().graphics.resolution_x * def_mouse_sens / configuration().joystick.mouse_sensitivity_flt);
-    joy_axis[1] = fdy / (configuration().graphics.resolution_y * def_mouse_sens / configuration().joystick.mouse_sensitivity_flt);
-    if (!configuration().joystick.warp_mouse) {
-        modifyDeadZone(this);
-    }
-    joy_axis[0] *= configuration().joystick.mouse_exponent_flt;
-    joy_axis[1] *= configuration().joystick.mouse_exponent_flt;
-    x = joy_axis[0];
-    y = joy_axis[1];
-
+    std::pair<double, double> pair = GetJoystickFromMouse();
+    x = pair.first;
+    y = pair.second;
+    z = 0;
+    joy_axis[0] = x;
+    joy_axis[1] = y;
     joy_axis[2] = z = 0;
     buttons = getMouseButtonStatus();
 }
