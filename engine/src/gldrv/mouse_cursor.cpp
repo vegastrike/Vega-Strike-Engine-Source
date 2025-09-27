@@ -117,6 +117,36 @@ std::pair<int, int> CalculateAbsoluteXY(float fraction_x, float fraction_y) {
     return std::make_pair(orig_x, orig_y);
 }
 
+double GetRelativeJoystickCoordinatesForAxis(const int x, const int max_x) {
+    // 30% around center is reported as 0,0
+    const double dead_zone = 0.15;
+
+    // Convert x to double
+    const double x_dbl = static_cast<double>(x);
+    const double max_x_dbl = static_cast<double>(max_x);
+    // Make the range from -1 to 1
+    const double relative_x = (x_dbl/max_x_dbl-.5)*2;
+
+    // Nullify dead zone
+    if(relative_x < dead_zone && relative_x > -dead_zone) {
+        return 0;
+    }
+
+    return relative_x;
+}
+
+std::pair<double, double> GetJoystickFromMouse() {
+    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    int x, y;
+    double x_dbl, y_dbl;
+
+    SDL_GetMouseState(&x, &y);
+
+    x_dbl = GetRelativeJoystickCoordinatesForAxis(x, native_resolution_x);
+    y_dbl = GetRelativeJoystickCoordinatesForAxis(y, native_resolution_y);
+    return std::pair<double, double>(x_dbl, y_dbl);
+}
+
 void SetMousePosition(int x, int y) {
     SDL_Window *window = SDL_GL_GetCurrentWindow();
     SDL_WarpMouseInWindow(window, x,y);
