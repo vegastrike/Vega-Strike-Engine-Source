@@ -147,6 +147,13 @@ std::pair<double, double> GetJoystickFromMouse() {
     return std::pair<double, double>(x_dbl, y_dbl);
 }
 
+std::pair<int, int> GetMousePosition() {
+    SDL_Window *window = SDL_GL_GetCurrentWindow();
+    int x, y;
+    SDL_GetMouseState(&x, &y);
+    return std::pair<int,int>(x,y);
+}
+
 void SetMousePosition(int x, int y) {
     SDL_Window *window = SDL_GL_GetCurrentWindow();
     SDL_WarpMouseInWindow(window, x,y);

@@ -138,10 +138,6 @@ bool BaseInterface::Room::BaseTalk::hastalked = false;
 using namespace VSFileSystem;
 std::vector<unsigned int> base_keyboard_queue;
 
-static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float *y) {
-    (*x) = (((float) (xbeforecalc * 2)) / configuration().graphics.resolution_x) - 1;
-    (*y) = -(((float) (ybeforecalc * 2)) / configuration().graphics.resolution_y) + 1;
-}
 
 #define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
 
@@ -845,7 +841,10 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
 
 void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
     float x, y;
-    CalculateRealXAndY(xbeforecalc, ybeforecalc, &x, &y);
+    std::pair<float,float> pair = CalculateRelativeXY(xbeforecalc, ybeforecalc);
+    x = pair.first;
+    y = pair.second;
+
     int i = rooms[curroom]->MouseOver(this,
             x,
             y); //FIXME Whatever this is, it shouldn't be named just "i"; & possibly should be size_t

@@ -43,6 +43,7 @@ void changeCursor(const CursorType type);
 std::pair<float, float> CalculateRelativeXY(int orig_x, int orig_y);
 std::pair<int, int> CalculateAbsoluteXY(float fraction_x, float fraction_y);
 std::pair<double, double> GetJoystickFromMouse();
+std::pair<int, int> GetMousePosition();
 void SetMousePosition(int x, int y);
 
 #endif //VEGA_STRIKE_ENGINE_GLDRV_MOUSE_CURSOR_H
