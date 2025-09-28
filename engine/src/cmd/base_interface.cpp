@@ -830,10 +830,9 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
             while (count++ < links.size()) {
                 Link *curlink = links[base->curlinkindex++ % links.size()];
                 if (curlink) {
-                    const std::pair<int,int> pair = CalculateAbsoluteXY(curlink->x, curlink->y);
+                    const std::pair<int,int> pair = CalculateAbsoluteXY(curlink->x + curlink->wid/2, curlink->y + curlink->hei/2);
                     const int x = pair.first;
-                    const int y = pair.second;
-
+                    const int y = pair.second;                    
                     winsys_warp_pointer(x, y);
                     PassiveMouseOverWin(x, y);
                     break;
