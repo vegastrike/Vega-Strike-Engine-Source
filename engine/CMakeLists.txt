@@ -221,7 +221,6 @@ SET(LIBVS_LOGGING
 SET(LIBCONFIG
     src/configuration/configuration.cpp
     src/configuration/game_config.cpp
-    src/configuration/graphics_config.cpp
 )
 
 SET(LIBDAMAGE
