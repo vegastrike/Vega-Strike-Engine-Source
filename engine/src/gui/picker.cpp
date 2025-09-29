@@ -37,6 +37,7 @@
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
 #include "root_generic/xml_support.h"
+#include "gldrv/mouse_cursor.h"
 
 #include <list>
 
@@ -135,6 +136,9 @@ void Picker::draw(void) {
 
     const float cellHeight = totalCellHeight();
 
+    std::pair<int,int> mouse_position = GetMousePosition();
+    std::pair<float,float> mouse_position_flt = CalculateRelativeXY(mouse_position.first, mouse_position.second);
+
     //This is the current cell rect.  Start with control rect and adjust y.
     Rect rect(m_rect);
     rect.origin.y += m_rect.size.height - cellHeight;
@@ -155,8 +159,13 @@ void Picker::draw(void) {
                 textColor = m_selectionTextColor;
             }
         }
+
+        // Check if we're hovering on this cell
+        bool highlighted = rect.inside(Point(mouse_position_flt.first, mouse_position_flt.second));
+
+
         //Selection color might be clear, or might be highlighted cell.
-        if (isClear(backgroundColor) && cell == m_highlightedCell) {
+        if (isClear(backgroundColor) && highlighted) {
             //Highlighted cell.
             backgroundColor = m_highlightColor;
             if (isClear(textColor)) {
@@ -222,7 +231,7 @@ PickerCell *Picker::cellForMouse(const Point &point) {
         }
     }
     //Didn't find anything.
-    return NULL;
+    return nullptr;
 }
 
 //Actually cause a cell to be selected.

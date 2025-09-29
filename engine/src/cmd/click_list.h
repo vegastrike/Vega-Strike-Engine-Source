@@ -34,6 +34,8 @@
 #include "src/star_system.h"
 Vector MouseCoordinate(int x, int y); //FIXME
 
+// Possible: This may be a list of options in flight
+// Basically, iterating between targets in front of you
 class ClickList {
 private:
     UnitCollection *parentIter;

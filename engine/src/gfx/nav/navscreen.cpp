@@ -68,6 +68,7 @@
 #include "gfx/nav/navparse.h"
 #include "gfx/nav/navcomputer.h"
 #include "gfx/nav/navpath.h"
+#include "gldrv/winsys.h"
 
 //This sets up the items in the navscreen
 //**********************************
@@ -109,6 +110,20 @@ void NavigationSystem::mouseMotion(int x, int y) {
 }
 
 void NavigationSystem::mouseClick(int button, int state, int x, int y) {
+    // For fullscreen, convert real coordinates (native resolution) to 
+    // relative coordinates
+    if(native_resolution_x != configuration().graphics.resolution_x ||
+       native_resolution_y != configuration().graphics.resolution_y) {
+        double native_resolution_x_dbl = native_resolution_x;
+        double native_resolution_y_dbl = native_resolution_y;
+        double resolution_x_dbl = configuration().graphics.resolution_x;
+        double resolution_y_dbl = configuration().graphics.resolution_y;
+        double x_factor = resolution_x_dbl / native_resolution_x_dbl;
+        double y_factor = resolution_y_dbl / native_resolution_y_dbl;
+        x *= x_factor;
+        y *= y_factor;
+    }
+
     mousex = x;
     mousey = y;
     if (state == WS_MOUSE_DOWN) {

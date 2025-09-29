@@ -38,6 +38,7 @@
 
 #include "vs_logging.h"
 #include "configuration/configuration.h"
+#include "winsys.h"
 
 // Mouse Cursors
 static SDL_Cursor* arrow_cursor = nullptr;
@@ -92,8 +93,8 @@ void changeCursor(const CursorType type) {
 // mouse cursor behavior to the standard operating system one.
 std::pair<float, float> CalculateRelativeXY(int orig_x, int orig_y) {
     // Center of the window
-    float center_x = configuration().graphics.resolution_x / 2;
-    float center_y = configuration().graphics.resolution_y / 2;
+    float center_x = native_resolution_x / 2;
+    float center_y = native_resolution_y / 2;
 
     // Location of mouse relative to the center
     float relative_x = orig_x - center_x;
@@ -107,13 +108,50 @@ std::pair<float, float> CalculateRelativeXY(int orig_x, int orig_y) {
 }
 
 std::pair<int, int> CalculateAbsoluteXY(float fraction_x, float fraction_y) {
-    float center_x = configuration().graphics.resolution_x / 2;
-    float center_y = configuration().graphics.resolution_y / 2;
+    float center_x = native_resolution_x / 2;
+    float center_y = native_resolution_y / 2;
 
     int orig_x = static_cast<int>(center_x + fraction_x * center_x);
     int orig_y = static_cast<int>(center_y - fraction_y * center_y);
 
     return std::make_pair(orig_x, orig_y);
+}
+
+double GetRelativeJoystickCoordinatesForAxis(const int x, const int max_x) {
+    // 30% around center is reported as 0,0
+    const double dead_zone = 0.15;
+
+    // Convert x to double
+    const double x_dbl = static_cast<double>(x);
+    const double max_x_dbl = static_cast<double>(max_x);
+    // Make the range from -1 to 1
+    const double relative_x = (x_dbl/max_x_dbl-.5)*2;
+
+    // Nullify dead zone
+    if(relative_x < dead_zone && relative_x > -dead_zone) {
+        return 0;
+    }
+
+    return relative_x;
+}
+
+std::pair<double, double> GetJoystickFromMouse() {
+    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    int x, y;
+    double x_dbl, y_dbl;
+
+    SDL_GetMouseState(&x, &y);
+
+    x_dbl = GetRelativeJoystickCoordinatesForAxis(x, native_resolution_x);
+    y_dbl = GetRelativeJoystickCoordinatesForAxis(y, native_resolution_y);
+    return std::pair<double, double>(x_dbl, y_dbl);
+}
+
+std::pair<int, int> GetMousePosition() {
+    SDL_Window *window = SDL_GL_GetCurrentWindow();
+    int x, y;
+    SDL_GetMouseState(&x, &y);
+    return std::pair<int,int>(x,y);
 }
 
 void SetMousePosition(int x, int y) {

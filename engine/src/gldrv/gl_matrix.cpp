@@ -47,6 +47,7 @@
 #endif
 #include "gl_matrix.h"
 #include "root_generic/vs_globals.h"
+#include "gldrv/winsys.h"
 
 using namespace GFXMatrices;  //causes problems with g_game
 
@@ -208,7 +209,7 @@ void /*GFXDRVAPI*/ GFXLoadMatrixProjection(const float matrix[16]) {
 }
 
 void /*GFXDRVAPI*/ GFXViewPort(int minx, int miny, int maxx, int maxy) {
-    glViewport(minx, miny, maxx, maxy);
+    glViewport(0, 0, native_resolution_x, native_resolution_y);
 }
 
 void /*GFXDRVAPI*/ GFXCenterCamera(bool Enter) {

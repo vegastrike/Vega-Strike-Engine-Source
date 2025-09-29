@@ -34,44 +34,26 @@
 struct Point {
     float x, y;
 
-    //OPERATORS
-    bool operator==(const Point &other) {
-        return x == other.x && y == other.y;
-    }
+    // Operators
+    bool operator==(const Point &other);
+    bool operator!=(const Point &other);
 
-    bool operator!=(const Point &other) {
-        return !(*this == other);
-    }
-
-    //CONSTRUCTION
-    Point() : x(0.0), y(0.0) {
-    }
-
-    Point(float cx, float cy) :
-            x(cx), y(cy) {
-    }
+    // Constructors
+    Point();
+    Point(float cx, float cy);
 };
 
 //Extent of an area in 2d.  This is not the same as a point.
 struct Size {
     float width, height;
 
-    //OPERATORS
-    bool operator==(const Size &other) {
-        return width == other.width && height == other.height;
-    }
+    // Operators
+    bool operator==(const Size &other);
+    bool operator!=(const Size &other);
 
-    bool operator!=(const Size &other) {
-        return !(*this == other);
-    }
-
-    //CONSTRUCTION
-    Size() : width(0.0), height(0.0) {
-    }
-
-    Size(float cwidth, float cheight) :
-            width(cwidth), height(cheight) {
-    }
+    // Constructors
+    Size();
+    Size(float cwidth, float cheight);
 };
 
 //Rectangle in 2d.
@@ -81,67 +63,32 @@ public:
     Point origin;
     Size size;
 
-    float left(void) const {
-        return origin.x;
-    }
+// Constructors
+    Rect();
+    Rect(Point &p, Size &s);
+    Rect(float x, float y, float width, float height);
 
-    float right(void) const {
-        return origin.x + size.width;
-    }
+// Methods
+    float left(void) const;
+    float right(void) const;
+    float bottom(void) const;
+    float top(void) const;
 
-    float bottom(void) const {
-        return origin.y;
-    }
+    //The center of this rectangle.
+    Point center(void) const;
 
-    float top(void) const {
-        return origin.y + size.height;
-    }
+    //Whether a Point is inside this Rect.
+    bool inside(const Point &p) const;
 
-//The center of this rectangle.
-    Point center(void) const {
-        return Point(origin.x + size.width / 2, origin.y + size.height / 2);
-    }
+    //Make a new Rect that is inset by the specified margins.
+    void inset(const Size &s);
 
-//Whether a Point is inside this Rect.
-    bool inside(const Point &p) const {
-        return p.x >= left() && p.x < right() && p.y >= bottom() && p.y < top();
-    }
+    //Return a copy of the rect inset by specified margins.
+    Rect copyAndInset(const Size &s);
 
-//Make a new Rect that is inset by the specified margins.
-    void inset(const Size &s) {
-        origin.x += s.width;
-        origin.y += s.height;
-        size.width -= s.width * 2;
-        size.height -= s.height * 2;
-    }
-
-//Return a copy of the rect inset by specified margins.
-    Rect copyAndInset(const Size &s) {
-        Rect result = *this;
-        result.inset(s);
-        return result;
-    }
-
-//OPERATORS
-    bool operator==(const Rect &other) {
-        return origin == other.origin && size == other.size;
-    }
-
-    bool operator!=(const Rect &other) {
-        return !(*this == other);
-    }
-
-//CONSTRUCTION
-    Rect() {
-    }
-
-    Rect(Point &p, Size &s) :
-            origin(p), size(s) {
-    }
-
-    Rect(float x, float y, float width, float height) :
-            origin(x, y), size(width, height) {
-    }
+// Operators
+    bool operator==(const Rect &other);
+    bool operator!=(const Rect &other);
 };
 
 //Rect that describes the coordinates of a full screen.

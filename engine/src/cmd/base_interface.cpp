@@ -138,23 +138,11 @@ bool BaseInterface::Room::BaseTalk::hastalked = false;
 using namespace VSFileSystem;
 std::vector<unsigned int> base_keyboard_queue;
 
-static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float *y) {
-    (*x) = (((float) (xbeforecalc * 2)) / configuration().graphics.resolution_x) - 1;
-    (*y) = -(((float) (ybeforecalc * 2)) / configuration().graphics.resolution_y) + 1;
-}
 
 #define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
 
 static void SetupViewport() {
-    const int base_max_width = configuration().graphics.bases.max_width;
-    const int base_max_height = configuration().graphics.bases.max_height;
-    if (base_max_width && base_max_height) {
-        int xrez = mymin(configuration().graphics.resolution_x, base_max_width);
-        int yrez = mymin(configuration().graphics.resolution_y, base_max_height);
-        int offsetx = (configuration().graphics.resolution_x - xrez) / 2;
-        int offsety = (configuration().graphics.resolution_y - yrez) / 2;
-        glViewport(offsetx, offsety, xrez, yrez);
-    }
+    glViewport(0, 0, native_resolution_x, native_resolution_y);
 }
 
 #undef mymin
@@ -838,10 +826,9 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
             while (count++ < links.size()) {
                 Link *curlink = links[base->curlinkindex++ % links.size()];
                 if (curlink) {
-                    const std::pair<int,int> pair = CalculateAbsoluteXY(curlink->x, curlink->y);
+                    const std::pair<int,int> pair = CalculateAbsoluteXY(curlink->x + curlink->wid/2, curlink->y + curlink->hei/2);
                     const int x = pair.first;
-                    const int y = pair.second;
-
+                    const int y = pair.second;                    
                     winsys_warp_pointer(x, y);
                     PassiveMouseOverWin(x, y);
                     break;
@@ -854,7 +841,10 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
 
 void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
     float x, y;
-    CalculateRealXAndY(xbeforecalc, ybeforecalc, &x, &y);
+    std::pair<float,float> pair = CalculateRelativeXY(xbeforecalc, ybeforecalc);
+    x = pair.first;
+    y = pair.second;
+
     int i = rooms[curroom]->MouseOver(this,
             x,
             y); //FIXME Whatever this is, it shouldn't be named just "i"; & possibly should be size_t
@@ -1496,7 +1486,7 @@ void BaseInterface::Draw() {
     AnimationDraw();
 
     float x, y;
-    glViewport(0, 0, configuration().graphics.resolution_x, configuration().graphics.resolution_y);
+    glViewport(0, 0, native_resolution_x, native_resolution_y);
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
 
     curtext.GetCharSize(x, y);
@@ -1524,7 +1514,9 @@ void BaseInterface::Draw() {
     }
     SetupViewport();
     EndGUIFrame(mousePointerStyle);
-    glViewport(0, 0, configuration().graphics.resolution_x, configuration().graphics.resolution_y);
+
+    glViewport(0, 0, native_resolution_x, native_resolution_y);
+
     Unit *un = caller.GetUnit();
     Unit *base = baseun.GetUnit();
     if (un && (!base)) {
