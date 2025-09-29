@@ -126,7 +126,6 @@ void NavigationSystem::mouseClick(int button, int state, int x, int y) {
 
     mousex = x;
     mousey = y;
-    std::cout << "2 x: " << x << " y: " << y << std::endl;
     if (state == WS_MOUSE_DOWN) {
         mousestat |= (1 << lookupMouseButton(button));
     } else if (button != WS_WHEEL_UP && button != WS_WHEEL_DOWN) {
