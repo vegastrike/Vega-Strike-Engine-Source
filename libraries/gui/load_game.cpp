@@ -40,6 +40,8 @@
 #include "imgui.h"
 #include "widgets/label.h"
 #include "clickable_text.h"
+#include "selection_group.h"
+#include "spacer.h"
 #include "toggleable_text.h"
 #include "layout.h"
 #include "selection_group.h"
@@ -70,45 +72,63 @@ std::vector<DummySaveGame> dummy_save_games = {
 
 
 
-void ShowLayoutNew(std::vector<ImFont*> fonts) {
-    const std::string header_text = "Top content...";
-    const std::string left_text = "Left content...";
-    const std::string right_text = "Right content...";
-
+static void GenerateLoadLayout(std::vector<DummySaveGame> dummy_save_games, 
+                               std::vector<Layout*>& layouts,
+                               std::vector<Widget*>& widgets, 
+                               std::vector<ImFont*> fonts, int width) {
     ColorCollection colors;
+    Layout* layout = new Layout(LayoutType::vertical, true);
+    layouts.push_back(layout);
+           
+    // Title
+    Label* title = new Label("Load Game", width, colors, fonts[2], TextAlignment::center);
+    Layout* title_row = new Layout(LayoutType::cell, false);
+    title_row->AddWidget(title);
+    layout->AddChildLayout(title_row);
+    layouts.push_back(title_row);
+    widgets.push_back(title);
 
-    // TODO: move this into layout or layout_factory
-    ImVec2 size = ImGui::GetContentRegionAvail();
+    // Spacer
+    Layout* spacer_row = new Layout(LayoutType::cell, false);
+    layout->AddChildLayout(spacer_row);
+    Spacer* spacer = new Spacer(0,40);
+    spacer_row->AddWidget(spacer);
+    layouts.push_back(spacer_row);
+    widgets.push_back(spacer);
 
-    Layout::fonts = &fonts;
+    // Two columns row
+    Layout* row = new Layout(LayoutType::horizontal, false);
+    layouts.push_back(row);
+    layout->AddChildLayout(row);
 
-    Label header_label(header_text,size.x, colors, fonts[2], TextAlignment::center);
-    Label left_label(left_text,size.x/2, colors, fonts[1], TextAlignment::left);
-    Label right_label(right_text,size.x/2, colors, fonts[0], TextAlignment::right);
+    Layout* left_cell = new Layout(LayoutType::cell, false);
+    layouts.push_back(left_cell);
+    row->AddChildLayout(left_cell);
 
-    Layout left_column(LayoutType::cell, false, colors);
-    left_column.AddWidget(&left_label);
+    // Iterate over save games
+    SelectionGroup* group = new SelectionGroup(width/2, colors);
+    left_cell->AddWidget(group);
+    widgets.push_back(group);
+    for(const DummySaveGame& game : dummy_save_games) {
+        group->Add(game.name);
+    }
 
-    Layout right_column(LayoutType::cell, false, colors);
-    right_column.AddWidget(&right_label);
-    
-    Layout row(LayoutType::horizontal, false);
-    row.AddChildLayout(&left_column);
-    row.AddChildLayout(&right_column);
 
-    Layout header(LayoutType::cell, false);
-    header.AddWidget(&header_label);
+    Layout* right_cell = new Layout(LayoutType::cell, false);
+    layouts.push_back(right_cell);
+    row->AddChildLayout(right_cell);
+        
 
-    Layout root(LayoutType::vertical, true);
-    root.AddChildLayout(&header);
-    root.AddChildLayout(&row);
-
-    root.Draw();
 }
 
 
 // Show Credits Screen
-void ShowLoadScreen(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*> fonts) {
+void ShowLoadScreen(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*> fonts, int width) {
+    std::vector<Layout*> layouts;
+    std::vector<Widget*> widgets;
+
+    GenerateLoadLayout(dummy_save_games, layouts, widgets, fonts, width);
+
     // TODO: different background
 
     // SelectionGroup selection_group;
@@ -164,9 +184,8 @@ void ShowLoadScreen(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFo
             ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
 
             ImGui::Begin("Hello, world!", nullptr, window_flags); // Create a window called "Hello, world!" and append into it.
-            //RenderTitle(window_flags, fonts);
-            //RenderLoadScreen(fonts, selection_group, load, back);
-            ShowLayoutNew(fonts);
+            layouts[0]->Draw();
+
 
             // ImGui::PushFont(font_small);
             // ImGui::PushFont(font_medium);

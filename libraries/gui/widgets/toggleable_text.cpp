@@ -40,25 +40,27 @@ ToggleableText::ToggleableText(const std::string& text, int width,
                 ImFont* font, TextAlignment alignment, 
                 int group_index, SelectionGroup *group): 
                 ClickableText(text, width, colors, font, alignment),
-                in_group(group_index != -1), group_index(group_index), group(group) {}
+                in_group(group_index != -1), group_index(group_index), 
+                group(group), backup_color(colors.color) {
+                }
 
-void ToggleableText::RenderText() {
-    if(toggled) {
-        color = colors.toggle_color;
-    } else {
-        color = colors.non_toggle_color;
-    }
-
-    //ClickableText::RenderText();
-
+void ToggleableText::Draw() {
     if(clicked) {
         toggled = !toggled;
         clicked = false;
+
+        if(toggled) {
+            colors.color = colors.toggle_color;
+        } else {
+            colors.color = backup_color;
+        }
 
         if(in_group && group) {
             group->SetSelected(group_index);
         }
     }
+
+    ClickableText::Draw();
 }
 
 bool ToggleableText::Toggled() const {

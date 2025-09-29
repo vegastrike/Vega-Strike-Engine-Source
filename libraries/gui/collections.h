@@ -34,10 +34,10 @@
 struct ColorCollection {
     ImU32 color = IM_COL32(255,255,224,255); // Light yellow
     ImU32 background_color;
-    ImU32 border_color;
+    ImU32 border_color = IM_COL32(255,255,224,255); // Light yellow
     ImU32 hover_color = IM_COL32(144, 238, 144, 255); // Light Green
     ImU32 click_color = IM_COL32(255, 204, 203, 255); // Light red
-    ImU32 toggle_color;
+    ImU32 toggle_color = IM_COL32(144, 213, 255, 255); // Light blue
     ImU32 non_toggle_color;
     ImU32 transparent_color = IM_COL32(0,0,0,0); 
 };

@@ -55,7 +55,7 @@ public:
     void Add(const std::string& text);
     void SetSelected(const int index);
     ToggleableText& GetText(const int index);
-    void Render(const int index);
+    void Draw() override;
 };
 
 #endif //VEGA_STRIKE_LIBRARIES_GUI_SELECTION_GROUP_H

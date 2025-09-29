@@ -45,14 +45,14 @@ class ToggleableText : public ClickableText {
     bool in_group;
     int group_index;
     SelectionGroup* group;
-    
+    ImU32 backup_color;
 
     friend class SelectionGroup;
 public:
     ToggleableText(const std::string& text, int width, ColorCollection colors, 
                    ImFont* font = nullptr, TextAlignment alignment = TextAlignment::left, 
                    int group_index = -1, SelectionGroup *group = nullptr);
-    void RenderText();
+    void Draw() override;
     bool Toggled() const;
 };
 

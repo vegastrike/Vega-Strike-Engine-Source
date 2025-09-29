@@ -195,7 +195,7 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
         SDL_RenderPresent(renderer);
 
         if(load_game_label.GetClickAndReset()) {
-            ShowLoadScreen(renderer, window, fonts);
+            ShowLoadScreen(renderer, window, fonts, size.x);
         }
 
         if(credits_label.GetClickAndReset()) {

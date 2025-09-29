@@ -37,10 +37,8 @@ Spacer::Spacer(int x, int y):
              x(x), y(y) {}
     
 void Spacer::Draw() {
-    //std::cout << "Spacer=" << x << "," << y << std::endl;
-    ImVec2 cursor_position = ImGui::GetCursorScreenPos(); 
-    cursor_position.x += x;
-    cursor_position.y += y;
-    ImGui::SetCursorPos(cursor_position);
+    // TODO: remove this
+    // TODO: implement configurable 
+    ImGui::Spacing();
 }
 

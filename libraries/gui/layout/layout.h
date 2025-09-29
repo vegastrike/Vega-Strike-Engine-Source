@@ -54,6 +54,8 @@ private:
     ImVec2 size;
     ImVec2 layout_start;
     ImVec2 layout_end;
+    int columns = -1;
+    float border_width = 0;
 
 public:
     Layout(LayoutType type, bool root = false,
@@ -62,6 +64,8 @@ public:
     void AddWidget(Widget* widget);
     ImVec2 Draw();
     void DrawBorder() const;
+    void SetColumns(const int columns);
+    void SetBorder(const float border_width);
 };
 
 #endif //VEGA_STRIKE_LIBRARIES_GUI_LAYOUT_LAYOUT_H

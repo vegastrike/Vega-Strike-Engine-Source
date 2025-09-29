@@ -74,7 +74,7 @@ ImVec2 Layout::Draw() {
             //std::cout << "Draw widget at " << cursor_position.x << "," << cursor_position.y << std::endl;
             widget->Draw();
             layout_end = ImGui::GetCursorScreenPos();
-            layout_end.x = size.x;
+            layout_end.x += size.x;
         }   
     }
 
@@ -88,22 +88,29 @@ ImVec2 Layout::Draw() {
 
     if(type == LayoutType::horizontal) {
         size = ImGui::GetContentRegionAvail();
-        int column_width = size.x / cells.size();
+        int column_width = size.x / columns;
         ImVec2 original_cursor_position = ImGui::GetCursorPos();
         ImVec2 cursor_position = original_cursor_position;
+        float horizontal_offset = 0;
+      
         for(Layout* cell : cells) {
             //std::cout << "Horizontal layout at " << cursor_position.x << "," << cursor_position.y << std::endl;
             layout_end = cell->Draw();
             cursor_position.x += column_width;
-            ImGui::SetCursorPos(cursor_position);
+            horizontal_offset += column_width;
+            
+            if(cell != cells.back()) {
+                ImGui::SameLine(horizontal_offset);
+            }
         }
+
+        layout_end = ImGui::GetCursorPos();
 
         // Move the cursor back left, like a typewriter
         cursor_position = ImVec2(original_cursor_position.x, layout_end.y);
-        ImGui::SetCursorPos(cursor_position);
     }
 
-    if(type == LayoutType::cell) {
+    if(border_width > 0) {
         DrawBorder();
     }
 
@@ -113,7 +120,6 @@ ImVec2 Layout::Draw() {
 void Layout::DrawBorder() const {
     // TODO: turn into style
     float corner_radius = 0.0f;
-    float thickness = 1.0f;
 
     ImDrawList* dl = ImGui::GetWindowDrawList();
     if(colors.background_color != 0) {
@@ -123,7 +129,15 @@ void Layout::DrawBorder() const {
     } 
     
     if(colors.border_color != 0) {
-        dl->AddRect(layout_start, layout_end, colors.border_color, corner_radius, 0, thickness);
+        dl->AddRect(layout_start, layout_end, colors.border_color, corner_radius, 0, border_width);
     }
+}
+
+void Layout::SetColumns(const int columns) {
+    this->columns = columns;
+}
+
+void Layout::SetBorder(const float border_width) {
+    this->border_width = border_width;
 }
 

@@ -157,6 +157,8 @@ void RenderCredits(Credits credits, std::vector<Layout*>& layouts,
         for(const std::string& name : section.lines) {
             if(column == 0) {
                 row = new Layout(LayoutType::horizontal, false);
+                row->SetBorder(1);
+                row->SetColumns(3);
                 layouts.push_back(row);
                 layout->AddChildLayout(row);
             }
@@ -234,17 +236,14 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
-            ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-            ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
+            ImVec2 starting_position(20,20);
+            ImVec2 window_size = ImGui::GetIO().DisplaySize;
+            window_size.x -= 20;
+            window_size.y -= 20;
+            ImGui::SetNextWindowPos(starting_position, ImGuiCond_Always);
+            ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
 
             ImGui::Begin("Hello, world!", nullptr, window_flags); // Create a window called "Hello, world!" and append into it.
-            float scroll_y = ImGui::GetScrollY();
-            float max_y = ImGui::GetScrollMaxY();
-            ImGui::Text("Scroll: %.1f / %.1f", scroll_y, max_y);
-
-            if(scroll_y != 0) {
-                std::cout << "Stop\n";
-            }
             
             layouts[0]->Draw();
 

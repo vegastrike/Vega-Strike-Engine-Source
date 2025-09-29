@@ -58,6 +58,7 @@ void SelectionGroup::SetSelected(const int index) {
         if(toggleable_text.group_index != index && toggleable_text.toggled) {
             std::cout << "nullifying " << toggleable_text.group_index << std::endl;
             toggleable_text.toggled = false;
+            toggleable_text.colors.color = toggleable_text.backup_color;
         }
     }
 }
@@ -66,8 +67,10 @@ ToggleableText& SelectionGroup::GetText(const int index) {
     return toggleable_texts[index];
 }
 
-void SelectionGroup::Render(const int index) {
-    ToggleableText& toggleable_text = toggleable_texts[index];
-    toggleable_text.RenderText();
+void SelectionGroup::Draw() {
+    for(ToggleableText& toggleable_text : toggleable_texts) {
+        toggleable_text.Draw();
+    }
+    
 }
 
