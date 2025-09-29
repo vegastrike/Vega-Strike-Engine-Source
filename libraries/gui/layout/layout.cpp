@@ -36,90 +36,75 @@
 
 std::vector<ImFont*> *Layout::fonts = nullptr;
 
-Layout::Layout(LayoutType type, bool root,  
-               ColorCollection colors): 
-               type(type), root(root), 
-               colors(colors) {
-
-}
-
-void Layout::AddChildLayout(Layout* child_layout) {
-    if(type != LayoutType::cell) {
-        cells.push_back(child_layout);
-    } else {
-        std::cerr << "Tried to add a child layout to a cell. Exiting.\n" << std::flush;
-        assert(0);
-    }
+Layout::Layout(LayoutType type, 
+               ColorCollection colors, int columns): 
+               type(type),
+               colors(colors), columns(columns) {
+    name = std::to_string((unsigned long long)this);
 }
 
 void Layout::AddWidget(Widget* widget) {
-    if(type == LayoutType::cell) {
-        widgets.push_back(widget);
-    } else {
-        std::cerr << "Tried to add a widget to a non-cell layout. Exiting.\n" << std::flush;
-        assert(0);
+    // Don't allow widgets other than layouts in horizontal layout
+    if(type == LayoutType::horizontal) {
+        Layout* child_layout = dynamic_cast<Layout*>(widget);
+        if(!child_layout) {
+            return;
+        }
     }
-}
 
-ImVec2 Layout::Draw() {
-    layout_start = ImGui::GetCursorPos();
+    widgets.push_back(widget);
+}
+    
+void Layout::Draw() {
     // TODO: margin and padding
 
-    if(root) {
-        size = ImGui::GetContentRegionAvail();
-    }
-    if(type == LayoutType::cell) {
-        for(const auto& widget : widgets) {
-            ImVec2 cursor_position = ImGui::GetCursorPos();
-            //std::cout << "Draw widget at " << cursor_position.x << "," << cursor_position.y << std::endl;
-            widget->Draw();
-            layout_end = ImGui::GetCursorScreenPos();
-            layout_end.x += size.x;
-        }   
-    }
-
     if(type == LayoutType::vertical) {
-        for(Layout* cell : cells) {
-            ImVec2 cursor_position = ImGui::GetCursorPos();
-            //std::cout << "Vertical layout at " << cursor_position.x << "," << cursor_position.y << std::endl;
-            layout_end = cell->Draw();
+        for(Widget* widget : widgets) {
+            widget->Draw();
         }
     }
+    
 
     if(type == LayoutType::horizontal) {
-        size = ImGui::GetContentRegionAvail();
-        int column_width = size.x / columns;
-        ImVec2 original_cursor_position = ImGui::GetCursorPos();
-        ImVec2 cursor_position = original_cursor_position;
-        float horizontal_offset = 0;
-      
-        for(Layout* cell : cells) {
-            //std::cout << "Horizontal layout at " << cursor_position.x << "," << cursor_position.y << std::endl;
-            layout_end = cell->Draw();
-            cursor_position.x += column_width;
-            horizontal_offset += column_width;
-            
-            if(cell != cells.back()) {
-                ImGui::SameLine(horizontal_offset);
+        ImVec2 size = ImGui::GetContentRegionAvail();
+
+        size.x /= columns;
+        size.y = 0;
+        int i=0;
+        for(Widget* widget : widgets) {
+            Layout* child_layout = dynamic_cast<Layout*>(widget);
+            if(!child_layout) {
+                return;
             }
+
+            if (ImGui::BeginChild(child_layout->name.c_str(), size, true, ImGuiWindowFlags_None)) {
+                child_layout->Draw();
+
+                if(child_layout->border_width > 0) {
+                    DrawBorder();
+                }
+            }
+
+            ImGui::EndChild(); 
+            i++;
+
+            if(widget != widgets.back()) {
+                ImGui::SameLine((size.x+20) * i);
+            }
+
+            
         }
-
-        layout_end = ImGui::GetCursorPos();
-
-        // Move the cursor back left, like a typewriter
-        cursor_position = ImVec2(original_cursor_position.x, layout_end.y);
     }
-
-    if(border_width > 0) {
-        DrawBorder();
-    }
-
-    return layout_end;
 }
 
 void Layout::DrawBorder() const {
     // TODO: turn into style
     float corner_radius = 0.0f;
+
+    ImVec2 layout_start = ImGui::GetWindowPos();
+    ImVec2 size = ImGui::GetWindowSize();
+    
+    ImVec2 layout_end(layout_start.x + size.x, layout_start.y + size.y);
 
     ImDrawList* dl = ImGui::GetWindowDrawList();
     if(colors.background_color != 0) {

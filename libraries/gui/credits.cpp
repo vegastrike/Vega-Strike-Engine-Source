@@ -106,28 +106,28 @@ void RenderCredits(Credits credits, std::vector<Layout*>& layouts,
                    std::vector<Widget*>& widgets, std::vector<ImFont*> fonts, 
                    int width) {
     ColorCollection colors;
-    Layout* layout = new Layout(LayoutType::vertical, true);
+    Layout* layout = new Layout();
     layouts.push_back(layout);
            
     // Title
     Label* title = new Label(credits.title, width, colors, fonts[2], TextAlignment::center);
-    Layout* title_row = new Layout(LayoutType::cell, false);
+    Layout* title_row = new Layout();
     title_row->AddWidget(title);
-    layout->AddChildLayout(title_row);
+    layout->AddWidget(title_row);
     layouts.push_back(title_row);
     widgets.push_back(title);
 
     // Subtitle
     Label* subtitle = new Label(credits.subtitle, width, colors, fonts[1], TextAlignment::center);
-    Layout* subtitle_row = new Layout(LayoutType::cell, false);
+    Layout* subtitle_row = new Layout();
     subtitle_row->AddWidget(subtitle);
-    layout->AddChildLayout(subtitle_row);
+    layout->AddWidget(subtitle_row);
     layouts.push_back(subtitle_row);
     widgets.push_back(subtitle);
 
     // Spacer
-    Layout* spacer_row = new Layout(LayoutType::cell, false);
-    layout->AddChildLayout(spacer_row);
+    Layout* spacer_row = new Layout();
+    layout->AddWidget(spacer_row);
     Spacer* spacer = new Spacer(0,40);
     spacer_row->AddWidget(spacer);
     layouts.push_back(spacer_row);
@@ -144,33 +144,40 @@ void RenderCredits(Credits credits, std::vector<Layout*>& layouts,
         Label* label = new Label(section.title, width/3, colors, fonts[1], TextAlignment::center);
         widgets.push_back(label);
         
-        Layout* child_layout = new Layout(LayoutType::cell, false, colors);
+        Layout* child_layout = new Layout(LayoutType::vertical, colors);
         layouts.push_back(child_layout);
         child_layout->AddWidget(label);
+        child_layout->SetBorder(1.0);
         
-        layout->AddChildLayout(child_layout);
+        layout->AddWidget(child_layout);
 
         int column = 0;
         
-        Layout* row = nullptr;
-        Layout* cell = nullptr;
+        Layout* row = new Layout(LayoutType::horizontal, colors, 3);
+        row->SetBorder(1);
+        layouts.push_back(row);
+        layout->AddWidget(row);
+
+        Layout* cell_1 = new Layout();
+        layouts.push_back(cell_1);
+        row->AddWidget(cell_1);
+        Layout* cell_2 = new Layout();
+        layouts.push_back(cell_2);
+        row->AddWidget(cell_2);
+        Layout* cell_3 = new Layout();
+        layouts.push_back(cell_3);
+        row->AddWidget(cell_3);
+
         for(const std::string& name : section.lines) {
-            if(column == 0) {
-                row = new Layout(LayoutType::horizontal, false);
-                row->SetBorder(1);
-                row->SetColumns(3);
-                layouts.push_back(row);
-                layout->AddChildLayout(row);
-            }
-
-            cell = new Layout(LayoutType::cell, false);
-            layouts.push_back(cell);
-            row->AddChildLayout(cell);
-
-            label = new Label(name, width/3, colors, fonts[0], TextAlignment::left);
+            label = new Label(name, 0, colors, fonts[0], TextAlignment::left);
             widgets.push_back(label);
-            cell->AddWidget(label);
 
+            switch(column) {
+                case 0: cell_1->AddWidget(label); break;
+                case 1: cell_2->AddWidget(label); break;
+                case 2: cell_3->AddWidget(label); break;
+            }
+            
             column++;
             if(column == 3) {
                 column = 0;
@@ -181,6 +188,38 @@ void RenderCredits(Credits credits, std::vector<Layout*>& layouts,
     
 }
 
+void RenderCredits2(Credits credits, std::vector<Layout*>& layouts,
+                   std::vector<Widget*>& widgets, std::vector<ImFont*> fonts, 
+                   int width) {
+    ColorCollection colors;
+    Layout* layout = new Layout(LayoutType::horizontal, colors, 3);
+    layouts.push_back(layout);
+
+    Layout* cell_1 = new Layout();
+    cell_1->SetBorder(1.0);
+    layouts.push_back(cell_1);
+    layout->AddWidget(cell_1);
+    Label* label_1 = new Label("Label_1", 0, colors, fonts[0], TextAlignment::left);
+    cell_1->AddWidget(label_1);
+    widgets.push_back(label_1);
+    
+    Layout* cell_2 = new Layout();
+    cell_2->SetBorder(1.0);
+    layouts.push_back(cell_2);
+    layout->AddWidget(cell_2);
+    Label* label_2 = new Label("Label_2", 0, colors, fonts[0], TextAlignment::left);
+    cell_2->AddWidget(label_2);
+    widgets.push_back(label_2);
+    
+    Layout* cell_3 = new Layout();
+    cell_3->SetBorder(1.0);
+    layouts.push_back(cell_3);
+    layout->AddWidget(cell_3);
+    Label* label_3 = new Label("Label_3", 0, colors, fonts[0], TextAlignment::left);
+    cell_3->AddWidget(label_3);
+    widgets.push_back(label_3);
+}
+
 // Show Credits Screen
 void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*> fonts, int width) {
     Credits credits = ParseJSON("credits.json");
@@ -188,7 +227,7 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*
     std::vector<Layout*> layouts;
     std::vector<Widget*> widgets;
 
-    RenderCredits(credits, layouts, widgets, fonts, width);
+    RenderCredits2(credits, layouts, widgets, fonts, width);
 
 
     // TODO: different background

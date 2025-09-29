@@ -33,36 +33,32 @@
 #include <string>
 
 #include "imgui.h"
+#include "widget.h"
 #include "collections.h"
 
-class Widget;
 
 enum class LayoutType {
-    horizontal, vertical, cell
+    horizontal, vertical
 };
 
-class Layout {
+class Layout : public Widget {
 public:
     static std::vector<ImFont*> *fonts;
 
 private:
     LayoutType type;
-    bool root;
     ColorCollection colors;
-    std::vector<Layout*> cells;
     std::vector<Widget*> widgets;
-    ImVec2 size;
-    ImVec2 layout_start;
-    ImVec2 layout_end;
-    int columns = -1;
+    int columns;
+    std::string name;
     float border_width = 0;
 
 public:
-    Layout(LayoutType type, bool root = false,
-           ColorCollection colors = ColorCollection());
-    void AddChildLayout(Layout* child_layout);
+    Layout(LayoutType type = LayoutType::vertical, 
+           ColorCollection colors = ColorCollection(),
+           int columns = -1);
     void AddWidget(Widget* widget);
-    ImVec2 Draw();
+    void Draw() override;
     void DrawBorder() const;
     void SetColumns(const int columns);
     void SetBorder(const float border_width);

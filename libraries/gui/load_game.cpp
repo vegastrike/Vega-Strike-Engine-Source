@@ -77,33 +77,33 @@ static void GenerateLoadLayout(std::vector<DummySaveGame> dummy_save_games,
                                std::vector<Widget*>& widgets, 
                                std::vector<ImFont*> fonts, int width) {
     ColorCollection colors;
-    Layout* layout = new Layout(LayoutType::vertical, true);
+    Layout* layout = new Layout();
     layouts.push_back(layout);
            
     // Title
     Label* title = new Label("Load Game", width, colors, fonts[2], TextAlignment::center);
-    Layout* title_row = new Layout(LayoutType::cell, false);
+    Layout* title_row = new Layout();
     title_row->AddWidget(title);
-    layout->AddChildLayout(title_row);
+    layout->AddWidget(title_row);
     layouts.push_back(title_row);
     widgets.push_back(title);
 
     // Spacer
-    Layout* spacer_row = new Layout(LayoutType::cell, false);
-    layout->AddChildLayout(spacer_row);
+    Layout* spacer_row = new Layout();
+    layout->AddWidget(spacer_row);
     Spacer* spacer = new Spacer(0,40);
     spacer_row->AddWidget(spacer);
     layouts.push_back(spacer_row);
     widgets.push_back(spacer);
 
     // Two columns row
-    Layout* row = new Layout(LayoutType::horizontal, false);
+    Layout* row = new Layout(LayoutType::horizontal);
     layouts.push_back(row);
-    layout->AddChildLayout(row);
+    layout->AddWidget(row);
 
-    Layout* left_cell = new Layout(LayoutType::cell, false);
+    Layout* left_cell = new Layout();
     layouts.push_back(left_cell);
-    row->AddChildLayout(left_cell);
+    row->AddWidget(left_cell);
 
     // Iterate over save games
     SelectionGroup* group = new SelectionGroup(width/2, colors);
@@ -114,9 +114,9 @@ static void GenerateLoadLayout(std::vector<DummySaveGame> dummy_save_games,
     }
 
 
-    Layout* right_cell = new Layout(LayoutType::cell, false);
+    Layout* right_cell = new Layout();
     layouts.push_back(right_cell);
-    row->AddChildLayout(right_cell);
+    row->AddWidget(right_cell);
         
 
 }

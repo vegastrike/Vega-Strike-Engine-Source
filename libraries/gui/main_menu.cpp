@@ -116,7 +116,7 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
 
     std::vector<ImFont*> fonts = GenerateFonts();
 
-    Layout layout(LayoutType::cell, true);
+    Layout layout(LayoutType::vertical);
     ColorCollection colors;
 
     ClickableText new_game_label("New Game", size.x, colors);
