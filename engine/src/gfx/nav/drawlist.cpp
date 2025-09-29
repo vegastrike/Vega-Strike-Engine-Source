@@ -40,6 +40,7 @@
 #include "src/config_xml.h"
 
 #include "gfx/nav/drawlist.h"
+#include "gfx/nav/navigation_system.h"
 #include "gfx/masks.h"
 
 navdrawnode::navdrawnode()      //new undefined node, check for these values if wondering if assignment didnt happen.
