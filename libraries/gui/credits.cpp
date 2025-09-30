@@ -102,35 +102,26 @@ Credits ParseJSON(const std::string& filename) {
 
 
 
-void RenderCredits(Credits credits, std::vector<Layout*>& layouts,
+void RenderCredits(Credits credits, 
                    std::vector<Widget*>& widgets, std::vector<ImFont*> fonts, 
                    int width) {
     ColorCollection colors;
     Layout* layout = new Layout();
-    layouts.push_back(layout);
+    widgets.push_back(layout);
            
     // Title
     Label* title = new Label(credits.title, width, colors, fonts[2], TextAlignment::center);
-    Layout* title_row = new Layout();
-    title_row->AddWidget(title);
-    layout->AddWidget(title_row);
-    layouts.push_back(title_row);
+    layout->AddWidget(title);
     widgets.push_back(title);
 
     // Subtitle
     Label* subtitle = new Label(credits.subtitle, width, colors, fonts[1], TextAlignment::center);
-    Layout* subtitle_row = new Layout();
-    subtitle_row->AddWidget(subtitle);
-    layout->AddWidget(subtitle_row);
-    layouts.push_back(subtitle_row);
+    layout->AddWidget(subtitle);
     widgets.push_back(subtitle);
 
     // Spacer
-    Layout* spacer_row = new Layout();
-    layout->AddWidget(spacer_row);
     Spacer* spacer = new Spacer(0,40);
-    spacer_row->AddWidget(spacer);
-    layouts.push_back(spacer_row);
+    layout->AddWidget(spacer);
     widgets.push_back(spacer);
 
     colors.border_color = IM_COL32(255,255,224,255);
@@ -140,32 +131,28 @@ void RenderCredits(Credits credits, std::vector<Layout*>& layouts,
         } else {
             colors.border_color = IM_COL32(255,255,224,255);
         }
+
         // Section Title section_title
         Label* label = new Label(section.title, width/3, colors, fonts[1], TextAlignment::center);
+        layout->AddWidget(label);
         widgets.push_back(label);
-        
-        Layout* child_layout = new Layout(LayoutType::vertical, colors);
-        layouts.push_back(child_layout);
-        child_layout->AddWidget(label);
-        child_layout->SetBorder(1.0);
-        
-        layout->AddWidget(child_layout);
 
         int column = 0;
         
         Layout* row = new Layout(LayoutType::horizontal, colors, 3);
-        row->SetBorder(1);
-        layouts.push_back(row);
+        row->SetBorder(2.0f);
+        widgets.push_back(row);
         layout->AddWidget(row);
 
         Layout* cell_1 = new Layout();
-        layouts.push_back(cell_1);
+        cell_1->SetBorder(2.0f);
+        widgets.push_back(cell_1);
         row->AddWidget(cell_1);
         Layout* cell_2 = new Layout();
-        layouts.push_back(cell_2);
+        widgets.push_back(cell_2);
         row->AddWidget(cell_2);
         Layout* cell_3 = new Layout();
-        layouts.push_back(cell_3);
+        widgets.push_back(cell_3);
         row->AddWidget(cell_3);
 
         for(const std::string& name : section.lines) {
@@ -188,46 +175,15 @@ void RenderCredits(Credits credits, std::vector<Layout*>& layouts,
     
 }
 
-void RenderCredits2(Credits credits, std::vector<Layout*>& layouts,
-                   std::vector<Widget*>& widgets, std::vector<ImFont*> fonts, 
-                   int width) {
-    ColorCollection colors;
-    Layout* layout = new Layout(LayoutType::horizontal, colors, 3);
-    layouts.push_back(layout);
 
-    Layout* cell_1 = new Layout();
-    cell_1->SetBorder(1.0);
-    layouts.push_back(cell_1);
-    layout->AddWidget(cell_1);
-    Label* label_1 = new Label("Label_1", 0, colors, fonts[0], TextAlignment::left);
-    cell_1->AddWidget(label_1);
-    widgets.push_back(label_1);
-    
-    Layout* cell_2 = new Layout();
-    cell_2->SetBorder(1.0);
-    layouts.push_back(cell_2);
-    layout->AddWidget(cell_2);
-    Label* label_2 = new Label("Label_2", 0, colors, fonts[0], TextAlignment::left);
-    cell_2->AddWidget(label_2);
-    widgets.push_back(label_2);
-    
-    Layout* cell_3 = new Layout();
-    cell_3->SetBorder(1.0);
-    layouts.push_back(cell_3);
-    layout->AddWidget(cell_3);
-    Label* label_3 = new Label("Label_3", 0, colors, fonts[0], TextAlignment::left);
-    cell_3->AddWidget(label_3);
-    widgets.push_back(label_3);
-}
 
 // Show Credits Screen
 void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*> fonts, int width) {
     Credits credits = ParseJSON("credits.json");
 
-    std::vector<Layout*> layouts;
     std::vector<Widget*> widgets;
 
-    RenderCredits2(credits, layouts, widgets, fonts, width);
+    RenderCredits(credits, widgets, fonts, width);
 
 
     // TODO: different background
@@ -284,7 +240,7 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*
 
             ImGui::Begin("Hello, world!", nullptr, window_flags); // Create a window called "Hello, world!" and append into it.
             
-            layouts[0]->Draw();
+            widgets[0]->Draw();
 
             
 
@@ -308,10 +264,6 @@ void ShowCredits(SDL_Renderer* renderer, SDL_Window *window, std::vector<ImFont*
     }
 
     // Cleanup
-    for(Layout* child_layout : layouts) {
-        delete child_layout;
-    }
-
     for(Widget* widget : widgets) {
         delete widget;
     }

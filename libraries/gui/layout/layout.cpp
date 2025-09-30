@@ -67,6 +67,10 @@ void Layout::Draw() {
 
     if(type == LayoutType::horizontal) {
         ImVec2 size = ImGui::GetContentRegionAvail();
+        if (!ImGui::BeginChild(name.c_str(), size, false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar)) {
+            ImGui::EndChild();
+            return;            
+        }
 
         size.x /= columns;
         size.y = 0;
@@ -77,23 +81,30 @@ void Layout::Draw() {
                 return;
             }
 
-            if (ImGui::BeginChild(child_layout->name.c_str(), size, true, ImGuiWindowFlags_None)) {
-                child_layout->Draw();
+            if (!ImGui::BeginChild(child_layout->name.c_str(), size, false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar)) {
+                ImGui::EndChild();
+                continue;
+            }
+                
+            child_layout->Draw();
 
-                if(child_layout->border_width > 0) {
-                    DrawBorder();
-                }
+            if(child_layout->border_width > 0) {
+                DrawBorder();
             }
 
-            ImGui::EndChild(); 
+            ImGui::EndChild();
             i++;
 
             if(widget != widgets.back()) {
                 ImGui::SameLine((size.x+20) * i);
             }
-
-            
         }
+
+        if(border_width > 0) {
+            DrawBorder();
+        }
+
+        ImGui::EndChild();
     }
 }
 
