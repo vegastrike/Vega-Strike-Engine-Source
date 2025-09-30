@@ -964,7 +964,8 @@ void VDU::DrawComm() {
 
 void VDU::DrawManifest(Unit *parent, Unit *target) {
     //zadeVDUmanifest
-    const std::string manifest_heading = configuration().graphics.hud.manifest_heading;
+    const std::string manifest_heading = boost::algorithm::replace_all_copy(
+                configuration().graphics.hud.manifest_heading, "\\n", "\n");
     const bool simple_manifest = configuration().graphics.hud.simple_manifest;
     std::string retval(manifest_heading);
     if (target != parent && simple_manifest == false) {
