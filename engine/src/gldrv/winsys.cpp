@@ -52,6 +52,9 @@
 #include "root_generic/options.h"
 #include "src/vs_exit.h"
 #include "configuration/configuration.h"
+#include "libraries/gui/gui.h"
+#include "libraries/gui/widgets/splash_screen.h"
+#include "image_utils.h"
 
 #include "SDL2/SDL_video.h"
 
@@ -349,6 +352,11 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_ClearError();
     }
 
+    // Initialize imgui
+    InitGui();
+    LoadSpashTextures();
+    displayTexturePtr = &DisplayTexture;
+
     return true;
 }
 
@@ -426,6 +434,7 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
 void winsys_cleanup() {
     static bool cleanup = false;
     if (!cleanup) {
+        CleanupGui();
         cleanup = true;
         freeMouseCursors();
         SDL_Quit();
