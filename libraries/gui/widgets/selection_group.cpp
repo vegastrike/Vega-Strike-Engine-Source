@@ -56,7 +56,6 @@ void SelectionGroup::Add(const std::string& text) {
 void SelectionGroup::SetSelected(const int index) {
     for(ToggleableText& toggleable_text : toggleable_texts) {
         if(toggleable_text.group_index != index && toggleable_text.toggled) {
-            std::cout << "nullifying " << toggleable_text.group_index << std::endl;
             toggleable_text.toggled = false;
             toggleable_text.colors.color = toggleable_text.backup_color;
         }

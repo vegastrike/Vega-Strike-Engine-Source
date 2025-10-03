@@ -94,8 +94,6 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
     SDL_GetWindowSize(window, &window_width, &window_height);
     ImVec2 size(window_width, window_height);
 
-    std::cout << "Begin showMenu\n";
-
     SDL_Texture* background_texture = createBackgroundImage(renderer, "main_menu.png");
 
     IMGUI_CHECKVERSION();
@@ -103,13 +101,9 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
     ImGuiIO& io{ImGui::GetIO()};
     ImGui::StyleColorsDark();
 
-    std::cout << "Finished init\n";
-
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
-
-    std::cout << "Finished setup\n";
 
     setBackgroundColor(0.0f,0.0f,0.0f,1.0f);
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);

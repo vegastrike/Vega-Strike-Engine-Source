@@ -37,6 +37,7 @@
 
 #include "imgui/imgui.h"
 #include "vs_logging.h"
+#include "configuration/configuration.h"
 
 // Globals
 std::vector<ImageData> splash_images;
@@ -73,7 +74,6 @@ ImageData LoadTexture(const std::string& filename)
 void LoadSpashTextures() {
     const std::string backgrounds_folder = "animations/splash_screen";
     for (auto const& entry : boost::filesystem::directory_iterator("animations/splash_screen")) {
-        std::cout << entry.path().relative_path() << std::endl;
         const std::string relative_path = entry.path().relative_path().generic_string();
         ImageData image_data = LoadTexture(relative_path);
         if(image_data.texture_id) {
@@ -82,12 +82,26 @@ void LoadSpashTextures() {
     }
 }
 
-void DisplayTexture(int index) {
+// Returns index of actual image displayed
+int DisplayTexture(int index, int margin) {
+    if(index < 0 || index >= static_cast<int>(splash_images.size())) {
+        index = 0;
+    }
+ 
+    float x = ImGui::GetCursorPosX();
+    x = margin;
+    ImGui::SetCursorPosX(x);
+
+    float y = ImGui::GetCursorPosY();
+    y = margin;
+    ImGui::SetCursorPosY(y);
+
     ImageData image_data = splash_images[index];
     GLuint texture_id = image_data.texture_id;
-    int width = image_data.width;
-    int height = image_data.height;
+    int width = configuration().graphics.resolution_x - margin * 2;
+    int height = configuration().graphics.resolution_y - margin * 4;
     ImGui::Image((ImTextureID)(intptr_t)texture_id, ImVec2(width, height));
+    return index;
 }
 
 void DeleteTextures(std::vector<unsigned int> textures) {

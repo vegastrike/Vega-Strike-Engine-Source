@@ -37,7 +37,7 @@
 #include <string>
 #include "SDL2/SDL.h"
 
-extern void (*displayTexturePtr)(int);
+extern int (*displayTexturePtr)(int,int);
 void RenderSplashScreen(const std::string message, int width, int height);
 
 #endif // VEGA_STRIKE_LIBRARIES_GUI_SPLASH_SCREEN_H

@@ -47,6 +47,6 @@ struct ImageData {
 extern std::vector<ImageData> splash_images;
 
 void LoadSpashTextures();
-void DisplayTexture(int index = 0);
+int DisplayTexture(int index = 0, int margin = 0);
 
 #endif // VEGA_STRIKE_ENGINE_GLDRV_IMAGE_UTILS_H

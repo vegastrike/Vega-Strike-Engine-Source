@@ -46,7 +46,7 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
 
-void (*displayTexturePtr)(int) = nullptr;
+int (*displayTexturePtr)(int, int) = nullptr;
 
 static const ImGuiWindowFlags window_flags = 
         ImGuiWindowFlags_NoTitleBar |
@@ -56,6 +56,17 @@ static const ImGuiWindowFlags window_flags =
         ImGuiWindowFlags_NoCollapse;   // makes it transparent
 
 static ColorCollection colors;
+
+// Image to display out of std::vector<ImageData> splash_images 
+// in image_utils.cpp
+int splash_index = 0;   
+
+// A counter of times to run RenderSplashScreen before switching images.
+int splash_counter = 0;
+
+// Sets when to switch images.
+// TODO: move to configuration
+int splash_counter_max = 150;
 
 void RenderSplashScreen(const std::string message, int width, int height) {
     if(!gui_initialized) {
@@ -71,7 +82,6 @@ void RenderSplashScreen(const std::string message, int width, int height) {
     // while (SDL_PollEvent(&e)) {
     //     ImGui_ImplSDL2_ProcessEvent(&e);
     // }
-    ImGuiIO& io = ImGui::GetIO();
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
@@ -83,12 +93,24 @@ void RenderSplashScreen(const std::string message, int width, int height) {
 
     ImGui::Begin(window_name.c_str(), nullptr, window_flags);
 
-    //ImGui::PushFont(fonts[2]);
+    // Set margin so image will be slightly smaller and 
+    // leave room for the text at the bottom.
+    float margin = 10;
 
-    ImGui::Text("%s", message.c_str());
+    // This displays the background image.
     if(displayTexturePtr) {
-        displayTexturePtr(0);
+        splash_index = displayTexturePtr(splash_index, 10);
     }
+
+    splash_counter++;
+    if(splash_counter == splash_counter_max) {
+        splash_index++;
+        splash_counter = 0;
+    }
+
+    //ImGui::PushFont(fonts[2]);
+    ImGui::SetCursorPosX(margin * 2);
+    ImGui::Text("%s", message.c_str());
     
     //ImGui::PopFont();
     ImGui::End();
