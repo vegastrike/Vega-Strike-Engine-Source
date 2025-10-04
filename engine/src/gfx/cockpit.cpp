@@ -2140,13 +2140,13 @@ void GameCockpit::ScrollAllVDU(int howmuch) {
 
 void GameCockpit::SetStaticAnimation() {
     const std::string& comm_static = configuration().graphics.comm_static;
-    static boost::optional<Animation> Statuc{};
-    if (Statuc == boost::none) {
-        Statuc = Animation(comm_static.c_str());
+    static boost::optional<Animation> static_animation{};
+    if (static_animation == boost::none) {
+        static_animation = Animation(comm_static.c_str());
     }
-    for (unsigned int i = 0; i < vdu.size(); i++) {
-        if (vdu[i]->getMode() == VDU::COMM) {
-            vdu[i]->SetCommAnimation(Statuc.get_ptr(), nullptr, true);
+    for (const auto & each_vdu : vdu) {
+        if (each_vdu->getMode() == VDU::COMM) {
+            each_vdu->SetCommAnimation(static_animation.get_ptr(), nullptr, true);
         }
     }
 }
