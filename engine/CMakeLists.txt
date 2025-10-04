@@ -221,7 +221,6 @@ SET(LIBVS_LOGGING
 SET(LIBCONFIG
     src/configuration/configuration.cpp
     src/configuration/game_config.cpp
-    src/configuration/graphics_config.cpp
 )
 
 SET(LIBDAMAGE
@@ -405,6 +404,8 @@ SET(LIBGFXCLIENT_SOURCES
     src/gfx/nav/navpath.cpp
     src/gfx/nav/navscreen.cpp
     src/gfx/nav/navscreenoccupied.cpp
+    src/gfx/nav/system_draw_node.cpp
+    src/gfx/nav/navigation_system.cpp
     src/gfx/radar/bubble_display.cpp
     src/gfx/radar/bubble_display.h
     src/gfx/radar/dual_display.cpp

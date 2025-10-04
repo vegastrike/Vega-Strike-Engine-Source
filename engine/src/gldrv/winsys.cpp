@@ -73,7 +73,7 @@
  *******************************---------------------------------------------------------------------------
  */
 
-//static SDL_Window *window = nullptr;
+static SDL_Window *window = nullptr;
 static SDL_Surface *screen = nullptr;
 
 static winsys_display_func_t display_func = nullptr;
@@ -200,6 +200,11 @@ void winsys_warp_pointer(int x, int y) {
     SDL_WarpMouseInWindow(current_window, x, y);
 }
 
+// Store real resolution
+int native_resolution_x;
+int native_resolution_y;
+
+
 /*---------------------------------------------------------------------------*/
 /*!
  *  Sets up the SDL OpenGL rendering context
@@ -208,13 +213,25 @@ void winsys_warp_pointer(int x, int y) {
  *  \date    Modified: 2025-01-10 - stephengtuggy
  */
 static bool setup_sdl_video_mode(int *argc, char **argv) {
+    const int screen_number = configuration().graphics.screen;
     Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
     int bpp = 0; // Bits per pixel?
     int width, height;
     if (configuration().graphics.full_screen) {
-        video_flags |= SDL_WINDOW_FULLSCREEN;
+        video_flags |= SDL_WINDOW_BORDERLESS;
+
+        SDL_DisplayMode currentDisplayMode;
+        if (SDL_GetCurrentDisplayMode(screen_number, &currentDisplayMode) != 0) {
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_GetCurrentDisplayMode failed: %1%") % SDL_GetError()), -1);
+        } else {
+            native_resolution_x = currentDisplayMode.w;
+            native_resolution_y = currentDisplayMode.h;
+        }
     } else {
         video_flags |= SDL_WINDOW_RESIZABLE;
+
+        native_resolution_x = configuration().graphics.resolution_x;
+        native_resolution_y = configuration().graphics.resolution_y;
     }
     bpp = gl_options.color_depth;
 
@@ -253,8 +270,20 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     }
     width = configuration().graphics.resolution_x;
     height = configuration().graphics.resolution_y;
-    const int screen_number = configuration().graphics.screen;
-    SDL_Window *window = nullptr;
+
+    // Fix display in fullscreen
+    if(configuration().graphics.full_screen) {
+        // Change base resolution to match screen resolution
+        width = configuration().graphics.resolution_x;//currentDisplayMode.w;
+        height = configuration().graphics.resolution_y;//currentDisplayMode.h;
+        int* ptr_x = const_cast<int*>(&configuration().graphics.bases.max_width);
+        int* ptr_y = const_cast<int*>(&configuration().graphics.bases.max_height);
+        *ptr_x = width;
+        *ptr_y = height;
+    }
+
+
+    window = nullptr;
     if(screen_number == 0) {
         window = SDL_CreateWindow("Vega Strike",
                 SDL_WINDOWPOS_UNDEFINED,
@@ -267,9 +296,27 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
                                 0, 0, video_flags);
     }
 
-
     if(!window) {
         VS_LOG_FLUSH_EXIT(fatal, "No window", 1);
+    }
+
+    if(screen_number > 0) {
+        // Get bounds of the secondary monitor
+        SDL_Rect displayBounds;
+        if (SDL_GetDisplayBounds(screen_number, &displayBounds) != 0) {
+            const std::string error_message = (boost::format("Failed to get display bounds: %1%") % SDL_GetError()).str();
+            VS_LOG_AND_FLUSH(error, error_message);
+
+            // Fallback to primary monitor
+            SDL_GetDisplayBounds(0, &displayBounds);
+        }
+
+        // Move to secondary monitor
+        SDL_SetWindowPosition(window, displayBounds.x, displayBounds.y);
+    }
+
+    if (configuration().graphics.full_screen) {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
     }
 
     if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {
@@ -597,6 +644,9 @@ void winsys_atexit(winsys_atexit_func_t func) {
  *  \date    Modified: 2000-10-20
  */
 void winsys_exit(int code) {
+    // Reverting resolution by exiting fullscreen
+    SDL_SetWindowFullscreen(window, 0);
+
     winsys_shutdown();
     if (atexit_func) {
         (*atexit_func)();

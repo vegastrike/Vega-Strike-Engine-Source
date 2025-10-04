@@ -46,6 +46,7 @@ DamageableObject::DamageableObject(std::vector<DamageableLayer*> layers):
 void DamageableObject::AddLayer(DamageableLayer* layer) {
     number_of_layers++;
     layers.push_back(layer);
+    assert(number_of_layers<=3);
 }
 
 InflictedDamage DamageableObject::DealDamage(const CoreVector &attack_vector, Damage &damage) {

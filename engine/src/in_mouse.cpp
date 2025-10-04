@@ -94,38 +94,13 @@ void AddDelta(int dx, int dy) {
 
 int warpallowage = 2;
 
-void DealWithWarp(int x, int y) {
-    if (configuration().joystick.warp_mouse) {
-        if (joystick[MOUSE_JOYSTICK]->player < _Universe->numPlayers()) {
-            if (x < configuration().joystick.warp_mouse_zone || y < configuration().joystick.warp_mouse_zone
-                    || x > configuration().graphics.resolution_x - configuration().joystick.warp_mouse_zone || y
-                    > configuration().graphics.resolution_y - configuration().joystick.warp_mouse_zone) {
-
-                int delx = -x + configuration().graphics.resolution_x / 2;
-                int dely = -y + configuration().graphics.resolution_y / 2;
-                mousex += delx;
-                mousey += dely;
-                deque<MouseEvent>::iterator i;
-                for (i = eventQueue.begin(); i != eventQueue.end(); i++) {
-                    i->x += delx;
-                    i->y += dely;
-                }
-                if (warpallowage-- >= 0) {
-                    winsys_warp_pointer(configuration().graphics.resolution_x / 2, configuration().graphics.resolution_y / 2);
-                }
-            }
-        }
-    }
-}
 
 void mouseDragQueue(int x, int y) {
     eventQueue.push_back(MouseEvent(MouseEvent::DRAG, -1, -1, -1, x, y));
-    DealWithWarp(x, y);
 }
 
 void mouseMotionQueue(int x, int y) {
     eventQueue.push_back(MouseEvent(MouseEvent::MOTION, -1, -1, -1, x, y));
-    DealWithWarp(x, y);
 }
 
 int lookupMouseButton(int b) {

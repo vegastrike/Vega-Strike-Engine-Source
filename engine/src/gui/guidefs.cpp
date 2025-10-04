@@ -26,6 +26,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "guidefs.h"
 #include "src/vegastrike.h"
 #include "root_generic/xml_support.h"
 #include "root_generic/vs_globals.h"
@@ -33,6 +34,109 @@
 #include "guidefs.h"
 
 #include "configuration/configuration.h"
+#include "gldrv/mouse_cursor.h"
+
+// Point
+bool Point::operator==(const Point &other) {
+    return x == other.x && y == other.y;
+}
+
+bool Point::operator!=(const Point &other) {
+    return !(*this == other);
+}
+
+Point::Point() : x(0.0), y(0.0) {
+}
+
+Point::Point(float cx, float cy) :
+        x(cx), y(cy) {
+}
+
+// Size
+bool Size::operator==(const Size &other) {
+    return width == other.width && height == other.height;
+}
+
+bool Size::operator!=(const Size &other) {
+    return !(*this == other);
+}
+
+// Constructors
+Size::Size() : width(0.0), height(0.0) {
+}
+
+Size::Size(float cwidth, float cheight) :
+        width(cwidth), height(cheight) {
+}
+
+// Rect
+// Constructors
+Rect::Rect() {
+}
+
+Rect::Rect(Point &p, Size &s) :
+        origin(p), size(s) {
+}
+
+Rect::Rect(float x, float y, float width, float height) :
+        origin(x, y), size(width, height) {
+}
+
+float Rect::left(void) const {
+    return origin.x;
+}
+
+float Rect::right(void) const {
+    return origin.x + size.width;
+}
+
+float Rect::bottom(void) const {
+    return origin.y;
+}
+
+float Rect::top(void) const {
+    return origin.y + size.height;
+}
+
+//The center of this rectangle.
+Point Rect::center(void) const {
+    return Point(origin.x + size.width / 2, origin.y + size.height / 2);
+}
+
+//Whether a Point is inside this Rect.
+bool Rect::inside(const Point &p) const {
+    return p.x >= left() && p.x < right() && p.y >= bottom() && p.y < top();
+}
+
+//Make a new Rect that is inset by the specified margins.
+void Rect::inset(const Size &s) {
+    origin.x += s.width;
+    origin.y += s.height;
+    size.width -= s.width * 2;
+    size.height -= s.height * 2;
+}
+
+//Return a copy of the rect inset by specified margins.
+Rect Rect::copyAndInset(const Size &s) {
+    Rect result = *this;
+    result.inset(s);
+    return result;
+}
+
+// Operators
+bool Rect::operator==(const Rect &other) {
+    return origin == other.origin && size == other.size;
+}
+
+bool Rect::operator!=(const Rect &other) {
+    return !(*this == other);
+}
+
+
+
+
+// Other
+
 
 GFXColor SaturatedColor(float r, float g, float b, float a) {
     const float Saturation = configuration().graphics.base_saturation_flt;

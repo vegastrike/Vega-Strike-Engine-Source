@@ -1,5 +1,5 @@
 /*
- * graphics_config.cpp
+ * drawgalaxy.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -25,25 +25,49 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
+/// Nav computer functions
+/// Draws in-system map, and  galaxy map of known sectors and systems
+
+#ifndef VEGA_STRIKE_ENGINE_GFX_NAV_DRAW_GALAXY_H
+#define VEGA_STRIKE_ENGINE_GFX_NAV_DRAW_GALAXY_H
+
 #include <string>
-#include <iostream>
-#include <boost/json.hpp>
-#include <boost/filesystem.hpp>
 
-#include "graphics_config.h"
-#include "resource/json_utils.h"
+#include "gfxlib_struct.h"
 
+extern float SYSTEM_DEFAULT_SIZE;
+extern GFXColor GrayColor;
 
-// TODO: delete this. Graphics2Config should be generated automatically from config.json
-Graphics2Config::Graphics2Config(boost::json::object object) {
-    if (object.if_contains("graphics")) {
-        boost::json::object graphics = object.at("graphics").get_object();
-        ConditionalJsonGet(graphics, screen, "screen");
-        ConditionalJsonGet(graphics, resolution_x, "resolution_x");
-        ConditionalJsonGet(graphics, resolution_y, "resolution_y");
-    }
-}
+class navscreenoccupied;
 
+void DrawNodeDescription(std::string text,
+        float x_,
+        float y_,
+        float size_x,
+        float size_y,
+        bool ignore_occupied_areas,
+        const GFXColor &col,
+        navscreenoccupied *screenoccupation);
 
 
+char GetSystemColor(std::string source);
+
+void DrawNode(int type,
+        float size,
+        float x,
+        float y,
+        std::string source,
+        navscreenoccupied *screenoccupation,
+        bool moused,
+        GFXColor race,
+        bool mouseover = false,
+        bool willclick = false,
+        std::string insector = "");
+
+bool checkedVisited(const std::string &n);
+
+
+#endif //VEGA_STRIKE_ENGINE_GFX_NAV_DRAW_GALAXY_H
 

@@ -359,7 +359,7 @@ void GFXDeleteList(int list) {
 }
 
 void GFXSubwindow(int x, int y, int xsize, int ysize) {
-    glViewport(x, y, xsize, ysize);
+    glViewport(0, 0, native_resolution_x, native_resolution_y);
     glScissor(x, y, xsize, ysize);
     if (x == 0 && y == 0 && xsize == configuration().graphics.resolution_x && ysize == configuration().graphics.resolution_y) {
         glDisable(GL_SCISSOR_TEST);
