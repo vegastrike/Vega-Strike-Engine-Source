@@ -38,8 +38,13 @@
 #include "cmd/base.h"
 //#include "glut.h"
 #include "src/universe.h"
+#include "gldrv/mouse_cursor.h"
 
 #include "gldrv/gl_globals.h"
+
+#include "libraries/gui/gui.h"
+#include "imgui/imgui.h"
+
 
 static bool isInside() {
     if (BaseInterface::CurrentBase) {
@@ -229,7 +234,18 @@ bool doNewLine(string::const_iterator begin,
 }
 
 int TextPlane::Draw(const string &newText, int offset, bool startlower, bool force_highquality, bool automatte) {
-    int retval = 1;
+    std::pair<int,int> pair = CalculateAbsoluteXY(myDims.k, myFontMetrics.k);
+
+
+    //ImGui::PushFont(fonts[2]);
+    ImGui::GetForegroundDrawList()->AddText(ImVec2(pair.first, pair.second),
+                                            IM_COL32(255, 255, 255, 255),newText.c_str());
+    //ImGui::PopFont();      
+    
+    return 1;
+
+    // Edit here!
+    /*int retval = 1;
     bool drawbg = (bgcol.a != 0);
     static unsigned int *display_lists = CreateLists();
     //some stuff to draw the text stuff
@@ -413,6 +429,6 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
 
     GFXPopBlendMode();
     GFXColorf(this->col);
-    return retval;
+    return retval;*/
 }
 

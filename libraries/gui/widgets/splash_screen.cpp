@@ -123,6 +123,6 @@ void RenderSplashScreen(const std::string message, int width, int height) {
     //renderBackgroundImage(renderer, current_window, background_texture);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_GL_SwapWindow(current_window);       
+    SDL_GL_SwapWindow(current_window);
 }
 
