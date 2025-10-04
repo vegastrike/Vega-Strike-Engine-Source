@@ -310,7 +310,6 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     static float fpsval = 0;
     constexpr float fpsmax = 1;
     static float numtimes = fpsmax;
-    Unit *tmpunit;
 
     // TODO: lib_damage
     // make sure the enums are in the right order as our
@@ -390,11 +389,12 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return go;
         }
         case UnitImages<void>::LOCK: {
-            float distance;
             const float locklight_time = configuration().graphics.locklight_time_flt;
-            bool res = false;
-            if ((tmpunit = target->Threat())) {
-                res = tmpunit->cosAngleTo(target, distance, FLT_MAX, FLT_MAX) > .95;
+            bool        res            = false;
+            const Unit* tmp_unit       = target->Threat();
+            if (tmp_unit) {
+                float distance;
+                res = tmp_unit->cosAngleTo(target, distance, FLT_MAX, FLT_MAX) > .95;
                 if (res) {
                     last_locktime = UniverseUtil::GetGameTime();
                 }
@@ -1944,9 +1944,9 @@ void GameCockpit::Draw() {
 }
 
 int GameCockpit::getScrollOffset(unsigned int whichtype) {
-    for (std::size_t i = 0; i < vdu.size(); ++i) {
-        if (vdu.at(i)->getMode() & whichtype) {
-            return vdu.at(i)->scrolloffset;
+    for (const auto & each_vdu : vdu) {
+        if (each_vdu->getMode() & whichtype) {
+            return each_vdu->scrolloffset;
         }
     }
     return 0;
