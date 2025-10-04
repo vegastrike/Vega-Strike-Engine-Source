@@ -40,6 +40,7 @@ ADD_LIBRARY(vegastrike_gui STATIC
 
     widgets/clickable_text.cpp
     widgets/label.cpp
+    widgets/multi_color_text.cpp
     widgets/selection_group.cpp
     widgets/spacer.cpp
     widgets/splash_screen.cpp

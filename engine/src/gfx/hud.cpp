@@ -43,6 +43,7 @@
 #include "gldrv/gl_globals.h"
 
 #include "libraries/gui/gui.h"
+#include "libraries/gui/widgets/multi_color_text.h"
 #include "imgui/imgui.h"
 
 
@@ -238,8 +239,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
 
 
     //ImGui::PushFont(fonts[2]);
-    ImGui::GetForegroundDrawList()->AddText(ImVec2(pair.first, pair.second),
-                                            IM_COL32(255, 255, 255, 255),newText.c_str());
+    DrawText(newText, pair.first, pair.second);
     //ImGui::PopFont();      
     
     return 1;
