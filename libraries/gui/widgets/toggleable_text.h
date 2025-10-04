@@ -1,5 +1,5 @@
 /*
- * libserver.cpp
+ * toggleable_text.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,48 +26,34 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "root_generic/vs_globals.h"
-#include "root_generic/configxml.h"
-#include "cmd/unit_generic.h"
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_TOGGLEABLE_TEXT_H
+#define VEGA_STRIKE_LIBRARIES_GUI_TOGGLEABLE_TEXT_H
 
-VegaConfig *createVegaConfig(const char *file) {
-    return new VegaConfig(file);
-}
+#include <string>
 
-class Music;
-class Unit;
-class Animation;
+// Must come before imgui.h
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "imgui.h"
 
-void UpdateAnimatedTexture() {
-}
+#include "clickable_text.h"
+#include "collections.h"
 
-void TerrainCollide() {
-}
+class SelectionGroup;
 
-void UpdateTerrain() {
-}
+class ToggleableText : public ClickableText {
+    bool toggled = false;
+    bool in_group;
+    int group_index;
+    SelectionGroup* group;
+    ImU32 backup_color;
 
-void UpdateCameraSnds() {
-}
+    friend class SelectionGroup;
+public:
+    ToggleableText(const std::string& text, int width, ColorCollection colors, 
+                   ImFont* font = nullptr, TextAlignment alignment = TextAlignment::left, 
+                   int group_index = -1, SelectionGroup *group = nullptr);
+    void Draw() override;
+    bool Toggled() const;
+};
 
-void NebulaUpdate(StarSystem *ss) {
-}
-
-void SwitchUnits2(Unit *nw) {
-}
-
-void DoCockpitKeys() {
-}
-
-void createObjects(std::vector<std::string> &playersaveunit,
-        std::vector<StarSystem *> &ssys,
-        std::vector<QVector> &savedloc,
-        vector<vector<string> > &savefiles) {
-}
-
-void disableTerrainDraw(ContinuousTerrain *ct) {
-}
-
-void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GFXColor &color) {
-}
-
+#endif //VEGA_STRIKE_LIBRARIES_GUI_TOGGLEABLE_TEXT_H

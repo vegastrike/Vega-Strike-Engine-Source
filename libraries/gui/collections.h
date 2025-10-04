@@ -1,5 +1,5 @@
 /*
- * libserver.cpp
+ * collections.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,48 +26,20 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "root_generic/vs_globals.h"
-#include "root_generic/configxml.h"
-#include "cmd/unit_generic.h"
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_COLLECTIONS_H
+#define VEGA_STRIKE_LIBRARIES_GUI_COLLECTIONS_H
 
-VegaConfig *createVegaConfig(const char *file) {
-    return new VegaConfig(file);
-}
+#include "imgui.h"
 
-class Music;
-class Unit;
-class Animation;
+struct ColorCollection {
+    ImU32 color = IM_COL32(255,255,224,255); // Light yellow
+    ImU32 background_color = IM_COL32(0,0,0,0);
+    ImU32 border_color = IM_COL32(255,255,224,255); // Light yellow
+    ImU32 hover_color = IM_COL32(144, 238, 144, 255); // Light Green
+    ImU32 click_color = IM_COL32(255, 204, 203, 255); // Light red
+    ImU32 toggle_color = IM_COL32(144, 213, 255, 255); // Light blue
+    ImU32 non_toggle_color;
+    ImU32 transparent_color = IM_COL32(0,0,0,0); 
+};
 
-void UpdateAnimatedTexture() {
-}
-
-void TerrainCollide() {
-}
-
-void UpdateTerrain() {
-}
-
-void UpdateCameraSnds() {
-}
-
-void NebulaUpdate(StarSystem *ss) {
-}
-
-void SwitchUnits2(Unit *nw) {
-}
-
-void DoCockpitKeys() {
-}
-
-void createObjects(std::vector<std::string> &playersaveunit,
-        std::vector<StarSystem *> &ssys,
-        std::vector<QVector> &savedloc,
-        vector<vector<string> > &savefiles) {
-}
-
-void disableTerrainDraw(ContinuousTerrain *ct) {
-}
-
-void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GFXColor &color) {
-}
-
+#endif //VEGA_STRIKE_LIBRARIES_GUI_COLLECTIONS_H

@@ -1,5 +1,5 @@
 /*
- * libserver.cpp
+ * clickable_text.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,48 +26,30 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "root_generic/vs_globals.h"
-#include "root_generic/configxml.h"
-#include "cmd/unit_generic.h"
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_CLICKABLE_TEXT_H
+#define VEGA_STRIKE_LIBRARIES_GUI_CLICKABLE_TEXT_H
 
-VegaConfig *createVegaConfig(const char *file) {
-    return new VegaConfig(file);
-}
+#include <string>
 
-class Music;
-class Unit;
-class Animation;
+// Must come before imgui.h
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "imgui.h"
+#include "label.h"
+#include "collections.h"
 
-void UpdateAnimatedTexture() {
-}
+class ClickableText: public Label {
+protected:
+    bool clicked = false;
+    bool hovering = false;
+    int click_counter = 0;
+    ImColor color;
 
-void TerrainCollide() {
-}
+public:
+    ClickableText(const std::string& text, int width, ColorCollection colors, 
+          ImFont* font = nullptr, 
+          TextAlignment alignment = TextAlignment::left);
+    void Draw() override;
+    bool GetClickAndReset();
+};
 
-void UpdateTerrain() {
-}
-
-void UpdateCameraSnds() {
-}
-
-void NebulaUpdate(StarSystem *ss) {
-}
-
-void SwitchUnits2(Unit *nw) {
-}
-
-void DoCockpitKeys() {
-}
-
-void createObjects(std::vector<std::string> &playersaveunit,
-        std::vector<StarSystem *> &ssys,
-        std::vector<QVector> &savedloc,
-        vector<vector<string> > &savefiles) {
-}
-
-void disableTerrainDraw(ContinuousTerrain *ct) {
-}
-
-void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GFXColor &color) {
-}
-
+#endif //VEGA_STRIKE_LIBRARIES_GUI_CLICKABLE_TEXT_H
