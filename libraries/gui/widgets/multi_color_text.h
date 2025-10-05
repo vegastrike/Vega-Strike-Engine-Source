@@ -31,6 +31,8 @@
 
 #include <string>
 
-void DrawText(const std::string& text, int x, int y);
+#include "imgui.h"
+
+void DrawText(const std::string& text, int x, int y, ImU32 color);
 
 #endif //VEGA_STRIKE_LIBRARIES_GUI_MULTI_COLOR_TEXT_H

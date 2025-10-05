@@ -65,12 +65,10 @@ ImU32 GetColor(const std::string& color_string) {
 // Note: this function does not support printing the character #
 // as it is used to denote a color.
 // Error checking, as in the original code is limited.
-void DrawText(const std::string& text, int x, int y) {
+void DrawText(const std::string& text, int x, int y, ImU32 color) {
     if(x<0 || x>4000) assert(0);
     if(y<0 || y>2200) assert(0);
-    //std::cout << (boost::format("%1% x=%2% y=%3%\n") % text % x % y).str();
     const int original_x = x;
-    ImU32 color = default_color;
     std::vector<std::string> text_sections;
     boost::split(text_sections, text, boost::is_any_of("#"));
     bool first = true; // To deal with the edge case where there are no color notations
@@ -93,7 +91,6 @@ void DrawText(const std::string& text, int x, int y) {
         boost::split(lines, text_section, boost::is_any_of("\n"));
         for(std::string& line : lines) {
             ImVec2 line_size = ImGui::CalcTextSize(line.c_str(), nullptr, true);
-            std::cout << "y=" << line_size.y << std::endl;
             ImGui::GetForegroundDrawList()->AddText(ImVec2(x,y),color,line.c_str());
 
             if(lines.size() > 1) {

@@ -237,9 +237,9 @@ bool doNewLine(string::const_iterator begin,
 int TextPlane::Draw(const string &newText, int offset, bool startlower, bool force_highquality, bool automatte) {
     std::pair<int,int> pair = CalculateAbsoluteXY(myDims.k, myFontMetrics.k);
 
-
+    ImU32 color = IM_COL32(this->col.r * 255,this->col.g * 255,this->col.b * 255,this->col.a * 255);
     //ImGui::PushFont(fonts[2]);
-    DrawText(newText, pair.first, pair.second);
+    DrawText(newText, pair.first, pair.second, color);
     //ImGui::PopFont();      
     
     return 1;
