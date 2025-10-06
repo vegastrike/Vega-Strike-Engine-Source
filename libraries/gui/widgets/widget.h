@@ -35,7 +35,7 @@
 class Widget {
 public:
     virtual void Draw() = 0;
-    virtual ~Widget() {}
+    virtual ~Widget() = default;
 };
 
 #endif //VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_WIDGET_H

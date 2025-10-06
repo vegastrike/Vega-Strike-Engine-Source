@@ -75,8 +75,9 @@ void RenderSplashScreen(const std::string message, int width, int height) {
 
     // This is used to generate a random name for the ImGui window,
     // in order to prevent collisions.
-    const std::string* message_ptr = &message;
-    const std::string window_name = std::to_string((unsigned long long)message_ptr);
+    const std::string* message_pointer = &message;
+    uintptr_t pointer_address = reinterpret_cast<uintptr_t>(message_pointer);
+    const std::string window_name = std::to_string(pointer_address);
 
     // SDL_Event e;
     // while (SDL_PollEvent(&e)) {
