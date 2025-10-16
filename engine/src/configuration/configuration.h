@@ -1989,7 +1989,7 @@ namespace vega_config {
             bool completed_objectives_last = true;
             bool crosshairs_on_chase_cam = false;
             bool crosshairs_on_padlock = false;
-            std::string damage_report_heading = "#00ff00DAMAGE REPORT\n\n";
+            std::string damage_report_heading = "#00ff00DAMAGE REPORT";
             bool debug_position = false;
             double diamond_line_thickness_dbl = 1.0;
         float diamond_line_thickness_flt = 1.0;
