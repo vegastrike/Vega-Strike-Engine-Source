@@ -1,5 +1,5 @@
 /*
- * libserver.cpp
+ * selection_group.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,48 +26,36 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "root_generic/vs_globals.h"
-#include "root_generic/configxml.h"
-#include "cmd/unit_generic.h"
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_SELECTION_GROUP_H
+#define VEGA_STRIKE_LIBRARIES_GUI_SELECTION_GROUP_H
 
-VegaConfig *createVegaConfig(const char *file) {
-    return new VegaConfig(file);
-}
+#include <string>
+#include <vector>
 
-class Music;
-class Unit;
-class Animation;
+#include "imgui.h"
+#include "widget.h"
+#include "toggleable_text.h"
 
-void UpdateAnimatedTexture() {
-}
+class SelectionGroup: public Widget {
+    std::vector<ToggleableText> toggleable_texts;
+    int selected = -1;
 
-void TerrainCollide() {
-}
+    const int width;
+    ColorCollection colors;
+    ImFont* font;
+    TextAlignment alignment;
 
-void UpdateTerrain() {
-}
+public:
+    SelectionGroup(int width, ColorCollection colors, 
+          ImFont* font = nullptr, 
+          TextAlignment alignment = TextAlignment::left);
+    SelectionGroup(const std::vector<std::string>& texts, int width, ColorCollection colors, 
+          ImFont* font = nullptr, 
+          TextAlignment alignment = TextAlignment::left);
+    void Add(const std::string& text);
+    void SetSelected(const int index);
+    ToggleableText& GetText(const int index);
+    void Draw() override;
+};
 
-void UpdateCameraSnds() {
-}
-
-void NebulaUpdate(StarSystem *ss) {
-}
-
-void SwitchUnits2(Unit *nw) {
-}
-
-void DoCockpitKeys() {
-}
-
-void createObjects(std::vector<std::string> &playersaveunit,
-        std::vector<StarSystem *> &ssys,
-        std::vector<QVector> &savedloc,
-        vector<vector<string> > &savefiles) {
-}
-
-void disableTerrainDraw(ContinuousTerrain *ct) {
-}
-
-void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GFXColor &color) {
-}
-
+#endif //VEGA_STRIKE_LIBRARIES_GUI_SELECTION_GROUP_H

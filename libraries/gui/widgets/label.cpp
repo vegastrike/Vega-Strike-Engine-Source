@@ -1,5 +1,5 @@
 /*
- * libserver.cpp
+ * label.cpp
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,48 +26,40 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "root_generic/vs_globals.h"
-#include "root_generic/configxml.h"
-#include "cmd/unit_generic.h"
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-VegaConfig *createVegaConfig(const char *file) {
-    return new VegaConfig(file);
-}
+#include "label.h"
+#include "imgui.h"
 
-class Music;
-class Unit;
-class Animation;
+Label::Label(const std::string& text, int width,
+             ColorCollection colors, ImFont* font, TextAlignment alignment):
+             text(text), width(width), colors(colors), 
+             font(font), alignment(alignment) {}
+    
+void Label::Draw() {
+    const ImVec2 cell_start = ImGui::GetCursorScreenPos(); // top-left of child
+    const ImVec2 text_size = ImGui::CalcTextSize(text.c_str());
 
-void UpdateAnimatedTexture() {
-}
+    if(alignment == TextAlignment::center) {
+        ImGui::SetCursorScreenPos(ImVec2(
+            cell_start.x + (width - text_size.x) * 0.5f,
+            cell_start.y
+        ));
+    } else if(alignment == TextAlignment::right) {
+        ImGui::SetCursorScreenPos(ImVec2(
+            cell_start.x + (width - text_size.x),
+            cell_start.y
+        ));
+    }
 
-void TerrainCollide() {
-}
+    if(font) {
+        ImGui::PushFont(font);
+    }
 
-void UpdateTerrain() {
-}
+    ImGui::Text("%s", text.c_str());
 
-void UpdateCameraSnds() {
-}
-
-void NebulaUpdate(StarSystem *ss) {
-}
-
-void SwitchUnits2(Unit *nw) {
-}
-
-void DoCockpitKeys() {
-}
-
-void createObjects(std::vector<std::string> &playersaveunit,
-        std::vector<StarSystem *> &ssys,
-        std::vector<QVector> &savedloc,
-        vector<vector<string> > &savefiles) {
-}
-
-void disableTerrainDraw(ContinuousTerrain *ct) {
-}
-
-void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GFXColor &color) {
+    if(font) {
+        ImGui::PopFont();
+    }
 }
 

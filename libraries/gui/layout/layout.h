@@ -1,5 +1,5 @@
 /*
- * libserver.cpp
+ * layout.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,48 +26,42 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "root_generic/vs_globals.h"
-#include "root_generic/configxml.h"
-#include "cmd/unit_generic.h"
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_LAYOUT_LAYOUT_H
+#define VEGA_STRIKE_LIBRARIES_GUI_LAYOUT_LAYOUT_H
 
-VegaConfig *createVegaConfig(const char *file) {
-    return new VegaConfig(file);
-}
+#include <vector>
+#include <string>
 
-class Music;
-class Unit;
-class Animation;
+#include "imgui.h"
+#include "widget.h"
+#include "collections.h"
 
-void UpdateAnimatedTexture() {
-}
 
-void TerrainCollide() {
-}
+enum class LayoutType {
+    horizontal, vertical
+};
 
-void UpdateTerrain() {
-}
+class Layout : public Widget {
+public:
+    static std::vector<ImFont*> *fonts;
 
-void UpdateCameraSnds() {
-}
+private:
+    LayoutType type;
+    ColorCollection colors;
+    std::vector<Widget*> widgets;
+    int columns;
+    std::string name;
+    float border_width = 0;
 
-void NebulaUpdate(StarSystem *ss) {
-}
+public:
+    Layout(LayoutType type = LayoutType::vertical, 
+           ColorCollection colors = ColorCollection(),
+           int columns = -1);
+    void AddWidget(Widget* widget);
+    void Draw() override;
+    void DrawBorder() const;
+    void SetColumns(const int columns);
+    void SetBorder(const float border_width);
+};
 
-void SwitchUnits2(Unit *nw) {
-}
-
-void DoCockpitKeys() {
-}
-
-void createObjects(std::vector<std::string> &playersaveunit,
-        std::vector<StarSystem *> &ssys,
-        std::vector<QVector> &savedloc,
-        vector<vector<string> > &savefiles) {
-}
-
-void disableTerrainDraw(ContinuousTerrain *ct) {
-}
-
-void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GFXColor &color) {
-}
-
+#endif //VEGA_STRIKE_LIBRARIES_GUI_LAYOUT_LAYOUT_H

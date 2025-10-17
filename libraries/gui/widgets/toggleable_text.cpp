@@ -1,5 +1,5 @@
 /*
- * libserver.cpp
+ * toggleable_text.cpp
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,48 +26,43 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "root_generic/vs_globals.h"
-#include "root_generic/configxml.h"
-#include "cmd/unit_generic.h"
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-VegaConfig *createVegaConfig(const char *file) {
-    return new VegaConfig(file);
+#include "toggleable_text.h"
+
+#include <iostream>
+
+#include "selection_group.h"
+
+
+ToggleableText::ToggleableText(const std::string& text, int width, 
+                ColorCollection colors, 
+                ImFont* font, TextAlignment alignment, 
+                int group_index, SelectionGroup *group): 
+                ClickableText(text, width, colors, font, alignment),
+                in_group(group_index != -1), group_index(group_index), 
+                group(group), backup_color(colors.color) {
+                }
+
+void ToggleableText::Draw() {
+    if(clicked) {
+        toggled = !toggled;
+        clicked = false;
+
+        if(toggled) {
+            colors.color = colors.toggle_color;
+        } else {
+            colors.color = backup_color;
+        }
+
+        if(in_group && group) {
+            group->SetSelected(group_index);
+        }
+    }
+
+    ClickableText::Draw();
 }
 
-class Music;
-class Unit;
-class Animation;
-
-void UpdateAnimatedTexture() {
+bool ToggleableText::Toggled() const {
+    return toggled;
 }
-
-void TerrainCollide() {
-}
-
-void UpdateTerrain() {
-}
-
-void UpdateCameraSnds() {
-}
-
-void NebulaUpdate(StarSystem *ss) {
-}
-
-void SwitchUnits2(Unit *nw) {
-}
-
-void DoCockpitKeys() {
-}
-
-void createObjects(std::vector<std::string> &playersaveunit,
-        std::vector<StarSystem *> &ssys,
-        std::vector<QVector> &savedloc,
-        vector<vector<string> > &savefiles) {
-}
-
-void disableTerrainDraw(ContinuousTerrain *ct) {
-}
-
-void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GFXColor &color) {
-}
-
