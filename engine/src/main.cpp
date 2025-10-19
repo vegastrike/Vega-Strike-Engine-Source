@@ -637,8 +637,13 @@ void bootstrap_main_loop() {
         UpdateTime();
         FactionUtil::LoadContrabandLists();
         {
+            const std::string intro_text = boost::algorithm::replace_all_copy(
+                configuration().game_start.introduction, "\\n", "\n");
             std::vector<std::string> intro_lines;
-            boost::split(intro_lines, configuration().game_start.introduction, boost::is_any_of("\n"));
+
+            boost::split(intro_lines, intro_text, [](char c){
+                return c == '\n';
+            });
 
             for(const std::string& line : intro_lines) {
                 UniverseUtil::IOmessage(0, "game", "all", line);
