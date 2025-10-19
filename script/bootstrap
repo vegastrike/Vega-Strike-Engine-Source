@@ -2034,50 +2034,82 @@ function bootstrapOnArch ()
         make
 }
 
+
+function bootstrapOnEndeavourOS ()
+{
+    # NOTE: Arch requires GCC 12 right now
+    # also installing latest GCC.
+    pacman -Sy --noconfirm \
+              base-devel \
+              cmake \
+              boost \
+              llvm \
+              clang \
+              gcc \
+              sdl2 \
+              sdl2_image \
+              expat \
+              gtk3 \
+              libglvnd \
+              mesa \
+              python \
+              freeglut \
+              git \
+              libjpeg-turbo \
+              libpng \
+              libvorbis \
+              libxmu \
+              openal \
+              libarchive \
+              make
+}
 case "${LINUX_ID}" in
-  "debian")
-    bootstrapOnDebian
-    ;;
-  "ubuntu")
-    bootstrapOnUbuntu
-    ;;
-  "pop")
-    bootstrapOnPopOS
-    ;;
-  "linuxmint")
-    bootstrapOnLinuxMint
-    ;;
-  "opensuse-leap")
-    bootstrapOnOpenSuseLeap
-    ;;
-  "fedora")
-    bootstrapOnFedora
-    ;;
-  "centos")
-    bootstrapOnCentOS
-    ;;
-  "rhel")
-    bootstrapOnRedHat
-    ;;
-  "redhat")
-    bootstrapOnRedHat
-    ;;
-  "rocky")
-    bootstrapOnRockyLinux
-    ;;
-  "manjaro")
-    bootstrapOnManjaro
-    ;;
-  "funtoo")
-    bootstrapOnFuntoo
-    ;;
-  "arch")
-    bootstrapOnArch
-    ;;
-  *)
-    echo "Sorry, unrecognized/unsupported Linux distribution"
-    exit 2
-    ;;
+    "debian")
+        bootstrapOnDebian
+        ;;
+    "ubuntu")
+        bootstrapOnUbuntu
+        ;;
+    "pop")
+        bootstrapOnPopOS
+        ;;
+    "linuxmint")
+        bootstrapOnLinuxMint
+        ;;
+    "opensuse-leap")
+        bootstrapOnOpenSuseLeap
+        ;;
+    "fedora")
+        bootstrapOnFedora
+        ;;
+    "centos")
+        bootstrapOnCentOS
+        ;;
+    "rhel")
+        bootstrapOnRedHat
+        ;;
+    "redhat")
+        bootstrapOnRedHat
+        ;;
+    "rocky")
+        bootstrapOnRockyLinux
+        ;;
+    "manjaro")
+        bootstrapOnManjaro
+        ;;
+    "funtoo")
+        bootstrapOnFuntoo
+        ;;
+    "arch")
+        bootstrapOnArch
+        ;;
+    "endeavouros")
+        bootstrapOnEndeavourOS
+        ;;
+    *)
+        echo "Sorry, unrecognized/unsupported Linux distribution"
+        exit 2
+        ;;
 esac
 
 mkdir -p /usr/src/Vega-Strike-Engine-Source
