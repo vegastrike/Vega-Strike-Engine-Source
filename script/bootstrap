@@ -848,6 +848,35 @@ function bootstrapOnArch ()
               make
 }
 
+
+function bootstrapOnEndeavourOS ()
+{
+    # NOTE: Arch requires GCC 12 right now
+    # also installing latest GCC.
+    pacman -Sy --noconfirm \
+              base-devel \
+              cmake \
+              boost \
+              llvm \
+              clang \
+              gcc \
+              sdl2 \
+              sdl2_image \
+              expat \
+              gtk3 \
+              libglvnd \
+              mesa \
+              python \
+              freeglut \
+              git \
+              libjpeg-turbo \
+              libpng \
+              libvorbis \
+              libxmu \
+              openal \
+              libarchive \
+              make
+}
 case "${LINUX_ID}" in
     "debian")
         bootstrapOnDebian
@@ -887,6 +916,9 @@ case "${LINUX_ID}" in
         ;;
     "arch")
         bootstrapOnArch
+        ;;
+    "endeavouros")
+        bootstrapOnEndeavourOS
         ;;
     *)
         echo "Sorry, unrecognized/unsupported Linux distribution"
