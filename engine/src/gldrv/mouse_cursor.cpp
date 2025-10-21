@@ -31,10 +31,12 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <cmath>
+
 #include <boost/format.hpp>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 
 #include "vs_logging.h"
 #include "configuration/configuration.h"
@@ -51,12 +53,12 @@ static SDL_Cursor* initMouseCursor(const std::string& filename, int hot_x = 0, i
     if (!surface) {
         // TODO: figure out error code
         VS_LOG_FLUSH_EXIT(fatal, 
-                         (boost::format("IMG_Load failed: %1%\n") % IMG_GetError()).str(), -1);
+                         (boost::format("IMG_Load failed: %1%\n") % SDL_GetError()).str(), -1);
     }
 
     // Create a color cursor with transparency support
     SDL_Cursor* cursor = SDL_CreateColorCursor(surface, hot_x, hot_y);
-    SDL_FreeSurface(surface);
+    SDL_DestroySurface(surface);
 
     return cursor;
 }
@@ -68,17 +70,17 @@ void initMouseCursors() {
 }
 
 void freeMouseCursors() {
-    SDL_FreeCursor(arrow_cursor);
-    SDL_FreeCursor(over_arrow_cursor);
-    SDL_FreeCursor(cross_hairs_cursor);
+    SDL_DestroyCursor(arrow_cursor);
+    SDL_DestroyCursor(over_arrow_cursor);
+    SDL_DestroyCursor(cross_hairs_cursor);
 }
 
 void showCursor() {
-    SDL_ShowCursor(SDL_ENABLE);
+    SDL_ShowCursor();
 }
 
 void hideCursor() {
-    SDL_ShowCursor(SDL_DISABLE);
+    SDL_HideCursor();
 }
 
 void changeCursor(const CursorType type) {
@@ -117,12 +119,12 @@ std::pair<int, int> CalculateAbsoluteXY(float fraction_x, float fraction_y) {
     return std::make_pair(orig_x, orig_y);
 }
 
-double GetRelativeJoystickCoordinatesForAxis(const int x, const int max_x) {
+double GetRelativeJoystickCoordinatesForAxis(const double x_dbl, const int max_x) {
     // 30% around center is reported as 0,0
     const double dead_zone = 0.15;
 
     // Convert x to double
-    const double x_dbl = static_cast<double>(x);
+    // const double x_dbl = static_cast<double>(x);
     const double max_x_dbl = static_cast<double>(max_x);
     // Make the range from -1 to 1
     const double relative_x = (x_dbl/max_x_dbl-.5)*2;
@@ -137,7 +139,7 @@ double GetRelativeJoystickCoordinatesForAxis(const int x, const int max_x) {
 
 std::pair<double, double> GetJoystickFromMouse() {
     SDL_Window* current_window = SDL_GL_GetCurrentWindow();
-    int x, y;
+    float x, y;
     double x_dbl, y_dbl;
 
     SDL_GetMouseState(&x, &y);
@@ -149,9 +151,10 @@ std::pair<double, double> GetJoystickFromMouse() {
 
 std::pair<int, int> GetMousePosition() {
     SDL_Window *window = SDL_GL_GetCurrentWindow();
-    int x, y;
+    float x, y;
     SDL_GetMouseState(&x, &y);
-    return std::pair<int,int>(x,y);
+    return std::pair<int,int>(static_cast<int>(std::rint(x)),
+                              static_cast<int>(std::rint(y)));
 }
 
 void SetMousePosition(int x, int y) {

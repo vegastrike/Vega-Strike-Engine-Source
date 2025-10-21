@@ -34,14 +34,14 @@
 #include "src/in_kb_data.h"
 
 #if defined (HAVE_SDL)
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #endif //defined (HAVE_SDL)
 
 #include "src/vegastrike.h"
 //#include "glob.h"
 //#include "dbg.h"
 #include "src/in_kb.h"
-#define NUMJBUTTONS 32
+#define NUMJBUTTONS 128
 
 class JoyStick;
 
@@ -53,7 +53,7 @@ extern void DeInitJoystick();
 
 const int MAX_JOYSTICKS = 16;
 const int MOUSE_JOYSTICK = MAX_JOYSTICKS - 1;
-const int MAX_BUTTONS = 48;
+const int MAX_BUTTONS = 128;
 const int MAX_DIGITAL_HATSWITCHES = 4;
 const int MAX_DIGITAL_VALUES = 9;
 
@@ -77,7 +77,7 @@ class JoyStick {
     void GetMouse(float &x, float &y, float &z, int &buttons);
 public:
 //initializes the joystick
-    JoyStick(int);
+    JoyStick(int, SDL_JoystickID);
 //engine calls GetJoyStick to get coordinates and buttons
     void GetJoyStick(float &x, float &y, float &z, int &buttons);
     bool isAvailable(void);
@@ -85,7 +85,8 @@ public:
     int NumButtons();
 
 #if defined (HAVE_SDL)
-    SDL_Joystick *joy;
+    SDL_JoystickID  instanceID;
+    SDL_Joystick    *joy;
 #else //defined (HAVE_SDL)
     void   *otherdata; //bad form to have an ifdef in a struct
 #endif //defined (HAVE_SDL)

@@ -101,9 +101,9 @@ void setActiveModifiers(unsigned int mask) {
 
 void setActiveModifiersSDL(SDL_Keymod mask) {
     setActiveModifiers(
-            ((mask & (KMOD_LSHIFT | KMOD_RSHIFT)) ? KB_MOD_SHIFT : 0)
-                    | ((mask & (KMOD_LCTRL | KMOD_RCTRL)) ? KB_MOD_CTRL : 0)
-                    | ((mask & (KMOD_LALT | KMOD_RALT)) ? KB_MOD_ALT : 0));
+            ((mask & (SDL_KMOD_LSHIFT | SDL_KMOD_RSHIFT)) ? KB_MOD_SHIFT : 0)
+                    | ((mask & (SDL_KMOD_LCTRL | SDL_KMOD_RCTRL)) ? KB_MOD_CTRL : 0)
+                    | ((mask & (SDL_KMOD_LALT | SDL_KMOD_RALT)) ? KB_MOD_ALT : 0));
 }
 
 #endif

@@ -113,7 +113,7 @@ void ProcessJoystick(int whichplayer) {
     int buttons;
 #ifdef HAVE_SDL
 #ifndef NO_SDL_JOYSTICK
-    SDL_JoystickUpdate();     //FIXME isn't this supposed to be called already by SDL?
+    SDL_UpdateJoysticks();     //FIXME isn't this supposed to be called already by SDL?
 #endif
 #endif
     for (int i = whichplayer; i < whichplayer + 1 && i < MAX_JOYSTICKS; i++) {
