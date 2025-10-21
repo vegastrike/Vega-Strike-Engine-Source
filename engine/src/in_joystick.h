@@ -41,7 +41,7 @@
 //#include "dbg.h"
 
 #include "src/in_kb.h"
-#define NUMJBUTTONS 128
+#define NUMJBUTTONS 64
 
 class JoyStick;
 
@@ -53,7 +53,7 @@ extern void DeInitJoystick();
 
 const int MAX_JOYSTICKS = 16;
 const int MOUSE_JOYSTICK = MAX_JOYSTICKS - 1;
-const int MAX_BUTTONS = 128;
+const int MAX_BUTTONS = 64;
 const int MAX_DIGITAL_HATSWITCHES = 4;
 const int MAX_DIGITAL_VALUES = 9;
 
@@ -79,7 +79,7 @@ public:
 //initializes the joystick
     JoyStick(int, SDL_JoystickID);
 //engine calls GetJoyStick to get coordinates and buttons
-    void GetJoyStick(float &x, float &y, float &z, int &buttons);
+    void GetJoyStick(float &x, float &y, float &z, long long &buttons);
     bool isAvailable(void);
     bool is_around(float axe, float hswitch);
     int NumButtons();
@@ -106,7 +106,7 @@ public:
 
     bool debug_digital_hatswitch;
 
-    int joy_buttons;
+    long long joy_buttons;  // 64 bits = 64 buttons
     bool joy_available;
     float joy_xmin, joy_xmax, joy_ymin, joy_ymax, joy_zmin, joy_zmax;
     float joy_x, joy_y, joy_z;
