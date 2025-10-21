@@ -356,6 +356,7 @@ Beam::Beam(const Transformation &trans, const WeaponInfo &clne, void *own, Unit 
     Col.a = clne.a;
     impact = ALIVE;
     owner = own;
+    player_fired = firer->IsPlayerShip();
     numframes = 0;
     const int radslices = configuration().physics.tractor.scoop_rad_slices | 1;    //Must be odd
     const int longslices = configuration().physics.tractor.scoop_long_slices;
@@ -622,7 +623,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
             }
         } else {
             Damage damage(appldam, phasdam);
-            target->ApplyDamage(center.Cast() + direction * curlength, normal, damage, colidee, coltmp, owner);
+            target->ApplyDamage(center.Cast() + direction * curlength, normal, damage, colidee, coltmp, owner, player_fired);
         }
         return true;
     }
