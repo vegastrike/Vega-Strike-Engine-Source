@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef VEGA_STRIKE_ENGINE_GLDRV_WINSYS_H
 #define VEGA_STRIKE_ENGINE_GLDRV_WINSYS_H
 #define WINSYS_H 1
@@ -31,8 +32,10 @@
 #undef SDL_WINDOWING
 #endif
 
+
 #if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
-#   include "SDL2/SDL.h"
+// #if defined (HAVE_SDL)
+#include <SDL3/SDL.h>
 #elif defined( HAVE_GLUT )
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #   include <glut.h>
@@ -133,22 +136,23 @@ typedef enum {
     WSK_LMETA = SDLK_LGUI,
     WSK_BREAK = SDLK_PAUSE,
     WSK_PAUSE = SDLK_PAUSE,
-    WSK_LAST = SDL_NUM_SCANCODES // Could be an issue. Needs investigating. See https://wiki.libsdl.org/SDL2/MigrationGuide.
+    WSK_LAST = 512 // SDL_SCANCODE_COUNT // Could be an issue. Needs investigating. See https://wiki.libsdl.org/SDL2/MigrationGuide.
 
 } winsys_keysym_t;
+
 typedef enum {
-    WSK_MOD_NONE = KMOD_NONE,
-    WSK_MOD_LSHIFT = KMOD_LSHIFT,
-    WSK_MOD_RSHIFT = KMOD_RSHIFT,
-    WSK_MOD_LCTRL = KMOD_LCTRL,
-    WSK_MOD_RCTRL = KMOD_RCTRL,
-    WSK_MOD_LALT = KMOD_LALT,
-    WSK_MOD_RALT = KMOD_RALT,
-    WSK_MOD_LMETA = SDLK_LGUI, // This is an issue for these two entries. We are ignoring the modifier.
-    WSK_MOD_RMETA = SDLK_RGUI, // Need to figure out how to do modifier in sdl2.
-    WSK_MOD_NUM = KMOD_NUM,
-    WSK_MOD_CAPS = KMOD_CAPS,
-    WSK_MOD_MODE = KMOD_MODE
+    WSK_MOD_NONE = 0x0000u, //SDL_KMOD_NONE,
+    WSK_MOD_LSHIFT = 0x0001u, // SDL_KMOD_LSHIFT,
+    WSK_MOD_RSHIFT = 0x0002, // SDL_KMOD_RSHIFT,
+    WSK_MOD_LCTRL = 0x0040u, // SDL_KMOD_LCTRL,
+    WSK_MOD_RCTRL = 0x0080u, // SDL_KMOD_RCTRL,
+    WSK_MOD_LALT = 0x0100, // SDL_KMOD_LALT,
+    WSK_MOD_RALT = 0x0200u, // SDL_KMOD_RALT,
+    WSK_MOD_LMETA = 0x0400, // SDL_KMOD_LGUI, // This is an issue for these two entries. We are ignoring the modifier.
+    WSK_MOD_RMETA = 0x0800, // SDL_KMOD_RGUI, // Need to figure out how to do modifier in sdl2.
+    WSK_MOD_NUM = 0x1000u, // SDL_KMOD_NUM,
+    WSK_MOD_CAPS = 0x2000u, // SDL_KMOD_CAPS,
+    WSK_MOD_MODE = 0x4000 // SDL_KMOD_MODE // AltGr
 } winsys_modifiers;
 
 // mouse wheel events are only available with SDL 1.2.5 or later
@@ -167,8 +171,8 @@ typedef enum {
 } winsys_mouse_button_t;
 
 typedef enum {
-    WS_MOUSE_DOWN = SDL_PRESSED,
-    WS_MOUSE_UP = SDL_RELEASED
+    WS_MOUSE_DOWN = true,
+    WS_MOUSE_UP = false
 } winsys_button_state_t;
 
 #else

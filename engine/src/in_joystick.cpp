@@ -47,8 +47,14 @@
 #endif
 #endif
 
-#include "options.h"
-#include "SDL2/SDL_joystick.h"
+
+#include "root_generic/options.h"
+#ifdef HAVE_SDL
+#include <SDL3/SDL_joystick.h>
+#include <SDL3/SDL_error.h>
+#endif
+#include "configuration/configuration.h"
+#include "gldrv/mouse_cursor.h"
 
 
 //Used for storing the max and min values of the tree Joystick Axes - Okona
@@ -149,6 +155,7 @@ JoyStick::JoyStick() {
         joy_axis[j] = axis_axis[j] = 0;
     }
     joy_buttons = 0;
+    instanceID  = 0; // SDL3
 }
 
 int JoystickPollingRate() {
@@ -174,52 +181,63 @@ void InitJoystick() {
             }
         }
     }
+    num_joysticks = 0;
+
 #ifndef NO_SDL_JOYSTICK
 #ifdef HAVE_SDL
-    num_joysticks = SDL_NumJoysticks();
+    // if (!SDL_InitSubSystem(SDL_INIT_JOYSTICK)) {
+    //     char errstr[128] = {0};
+    //     SDL_strlcpy(errstr, SDL_GetError(), 128);
+    //     VS_LOG(error, (boost::format("Can't initialize SDL3 joystick subsystem.\n\n")));
+    //     return;
+    // }
+
+    SDL_JoystickID *joysticks = SDL_GetJoysticks(&num_joysticks);
     VS_LOG(info, (boost::format("%1% joysticks were found.\n\n") % num_joysticks));
     VS_LOG(info, "The names of the joysticks are:\n");
+    if (joysticks) {
+        for (int i = 0; i<MAX_JOYSTICKS; i++) {
+            SDL_JoystickID instance_id = joysticks[i];
+            VS_LOG(info, (boost::format("    %1%\n") % SDL_GetJoystickNameForID(instance_id)));
+            joystick[i] = new JoyStick(i, instance_id);  
+        }
+    }
+    SDL_free(joysticks);
+
 #else
     //use glut
     if (glutDeviceGet( GLUT_HAS_JOYSTICK ) || vs_options::instance().force_use_of_joystick) {
         VS_LOG(info, "setting joystick functionality:: joystick online");
         glutJoystickFunc( myGlutJoystickCallback, JoystickPollingRate() );
         num_joysticks = 1;
+        VS_LOG(info, (boost::format("Glut detects %1% joystick") % (i+1)));
+        joystick[0] = new JoyStick(0, 0); 
     }
 #endif
 #endif
-    for (i = 0; i < MAX_JOYSTICKS; i++) {
-#ifndef NO_SDL_JOYSTICK
-#ifdef HAVE_SDL
-        if (i < num_joysticks) {
-            VS_LOG(info, (boost::format("    %1%\n") % SDL_JoystickNameForIndex(i)));
-        }
-#else
-        if (i < num_joysticks) {
-            VS_LOG(info, (boost::format("Glut detects %1% joystick") % (i+1)));
-        }
-#endif
-#endif
-        joystick[i] = new JoyStick(i);         //SDL_Init is done in main.cpp
-    }
 }
 
 void DeInitJoystick() {
     for (int i = 0; i < MAX_JOYSTICKS; i++) {
         delete joystick[i];
     }
+    num_joysticks = 0;
+#if HAVE_SDL
+    // SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+#endif
 }
 
-JoyStick::JoyStick(int which) : mouse(which == MOUSE_JOYSTICK) {
+JoyStick::JoyStick(int which, SDL_JoystickID instanceID) : mouse(which == MOUSE_JOYSTICK) {
     for (int j = 0; j < MAX_AXES; ++j) {
         axis_axis[j] = -1;
         axis_inverse[j] = false;
         joy_axis[j] = 0;
     }
-    joy_buttons = 0;
+    instanceID = instanceID;
 
-    player = which;     //by default bind players to whichever joystick it is
-    debug_digital_hatswitch = vs_options::instance().debug_digital_hatswitch;
+    joy_buttons = 0;
+    player = 0; //which;     //by default bind players to whichever joystick it is
+    debug_digital_hatswitch = configuration().joystick.debug_digital_hatswitch;
     if (which != MOUSE_JOYSTICK) {
         deadzone = vs_options::instance().deadband;
     } else {
@@ -235,23 +253,28 @@ JoyStick::JoyStick(int which) : mouse(which == MOUSE_JOYSTICK) {
 
 #else
 #ifdef HAVE_SDL
-    num_joysticks = SDL_NumJoysticks();
+    // num_joysticks = SDL_NumJoysticks();  // pmx-20251020 Commented : already done in the init strage, and num_joysticks is a global.
     if (which >= num_joysticks) {
         if (which != MOUSE_JOYSTICK) {
             joy_available = false;
         }
         return;
     }
-    joy = SDL_JoystickOpen(which);     //joystick nr should be configurable
+    
+    joy = SDL_OpenJoystick(instanceID);     //joystick nr should be configurable
     if (joy == nullptr) {
         VS_LOG(warning, (boost::format("warning: no joystick nr %1%\n") % which));
         joy_available = false;
         return;
     }
     joy_available = true;
-    nr_of_axes = SDL_JoystickNumAxes(joy);
-    nr_of_buttons = SDL_JoystickNumButtons(joy);
-    nr_of_hats = SDL_JoystickNumHats(joy);
+    nr_of_axes = SDL_GetNumJoystickAxes(joy);
+    nr_of_buttons = SDL_GetNumJoystickButtons(joy);
+    nr_of_hats = SDL_GetNumJoystickHats(joy);
+
+    nr_of_axes = std::min(nr_of_axes, MAX_AXES);
+    nr_of_buttons = std::min(nr_of_buttons, MAX_BUTTONS);
+    nr_of_hats = std::min(nr_of_hats, MAX_DIGITAL_HATSWITCHES);
 #else
     //WE HAVE GLUT
     if (which > 0 && which != MOUSE_JOYSTICK) {
@@ -379,23 +402,22 @@ void JoyStick::GetJoyStick(float &x, float &y, float &z, int &buttons) {
     int a;
 #ifndef NO_SDL_JOYSTICK
 #if defined (HAVE_SDL)
-    int numaxes = SDL_JoystickNumAxes(joy) < MAX_AXES ? SDL_JoystickNumAxes(joy) : MAX_AXES;
-    std::vector<Sint16> axi(numaxes);
-    for (a = 0; a < numaxes; a++) {
-        axi[a] = SDL_JoystickGetAxis(joy, a);
+    std::vector<Sint16> axi(nr_of_axes);
+    for (a = 0; a < nr_of_axes; a++) {
+        axi[a] = SDL_GetJoystickAxis(joy, a);
     }
     joy_buttons = 0;
-    nr_of_buttons = SDL_JoystickNumButtons(joy);
+    // nr_of_buttons = SDL_JoystickNumButtons(joy); 
     for (int i = 0; i < nr_of_buttons; i++) {
-        int butt = SDL_JoystickGetButton(joy, i);
+        int butt = SDL_GetJoystickButton(joy, i);
         if (butt == 1) {
             joy_buttons |= (1 << i);
         }
     }
     for (int h = 0; h < nr_of_hats; h++) {
-        digital_hat[h] = SDL_JoystickGetHat(joy, h);
+        digital_hat[h] = SDL_GetJoystickHat(joy, h);
     }
-    for (a = 0; a < numaxes; a++) {
+    for (a = 0; a < nr_of_axes; a++) {
         joy_axis[a] = ((float) axi[a] / 32768.0);
     }
     modifyDeadZone(this);

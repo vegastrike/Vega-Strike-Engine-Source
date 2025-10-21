@@ -371,9 +371,15 @@ Technique::Technique(const string &name) :
     } else {
         filename = sub_technique_filename;
     }
-
+    
     pt::ptree tree;
-    pt::read_xml(filename, tree);
+    try {
+        pt::read_xml(filename, tree);
+    } catch (boost::property_tree::ptree_error &e) {
+        VS_LOG(error, (boost::format("Error building technique '%1%': '%2%'") % filename % e.what()));
+    } catch (boost::property_tree::xml_parser_error &e) {
+        VS_LOG(error, (boost::format("Error building technique '%1%': '%2%'") % filename % e.what()));
+    }
 
     for (const auto &iterator : tree) {
         parseTechniqueXML(iterator.second);
