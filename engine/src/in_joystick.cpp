@@ -331,17 +331,20 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     buttons = getMouseButtonStatus();
 }
 
-void JoyStick::GetJoyStick(float &x, float &y, float &z, int &buttons) {
+void JoyStick::GetJoyStick(float &x, float &y, float &z, long long &buttons) {
     //int status;
     if (!joy_available) {
         for (int a = 0; a < MAX_AXES; a++) {
             joy_axis[a] = 0;
         }
         x = y = z = 0;
-        joy_buttons = buttons = 0;
+        joy_buttons = 0;
+        buttons = 0;
         return;
     } else if (mouse) {
-        GetMouse(x, y, z, buttons);
+        int btn;
+        GetMouse(x, y, z, btn);
+        buttons = btn;
         return;
     }
     int a;
@@ -356,7 +359,7 @@ void JoyStick::GetJoyStick(float &x, float &y, float &z, int &buttons) {
     for (int i = 0; i < nr_of_buttons; i++) {
         int butt = SDL_GetJoystickButton(joy, i);
         if (butt == 1) {
-            joy_buttons |= (1 << i);
+            joy_buttons |= ((long long)(1) << i);
         }
     }
     for (int h = 0; h < nr_of_hats; h++) {

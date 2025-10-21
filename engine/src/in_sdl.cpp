@@ -110,10 +110,10 @@ void BindDigitalHatswitchKey(int joystick, int key, int dir, KBHandler handler, 
 
 void ProcessJoystick(int whichplayer) {
     float x, y, z;
-    int buttons;
+    long long buttons;
 #ifdef HAVE_SDL
 #ifndef NO_SDL_JOYSTICK
-    SDL_UpdateJoysticks();     //FIXME isn't this supposed to be called already by SDL?
+    //SDL_UpdateJoysticks();     //FIXME isn't this supposed to be called already by SDL? 
 #endif
 #endif
     for (int i = whichplayer; i < whichplayer + 1 && i < MAX_JOYSTICKS; i++) {
@@ -126,7 +126,7 @@ void ProcessJoystick(int whichplayer) {
 #else
                 unsigned char
 #endif
-                        hsw = joystick[i]->digital_hat[h];
+                hsw = joystick[i]->digital_hat[h];
                 if (joystick[i]->debug_digital_hatswitch) {
                     VS_LOG(debug, (boost::format("hsw: %1$d") % hsw));
                 }
@@ -187,18 +187,24 @@ void ProcessJoystick(int whichplayer) {
                     (*handler->function)(handler->data, *state);
                 }
             }             //digital_hatswitch
+
             for (int j = 0; j < NUMJBUTTONS; j++) {
                 KBSTATE *state = &JoystickState[JOYSTICK_SWITCH][i][j];
                 JSHandlerCall *handler = &JoystickBindings[JOYSTICK_SWITCH][i][j];
-                if ((buttons & (1 << j))) {
+                if ((buttons & ((long long)(1) << j))) {
                     if (*state == UP) {
                         (*handler->function)
                                 (handler->data, PRESS);
                         *state = DOWN;
+                        std::cerr << "Player ["<< std::to_string(i)
+                        << "] JS Button DOWN " << std::to_string(j) << std::endl;
                     }
                 } else {
                     if (*state == DOWN) {
                         (*handler->function)(handler->data, RELEASE);
+                        std::cerr << "Player ["<< std::to_string(i)
+                        << "] JS Button UP " << std::to_string(j) << std::endl;
+
                     }
                     *state = UP;
                 }
