@@ -201,35 +201,24 @@ void winsys_warp_pointer(int x, int y) {
  *  \date    Created:  2000-10-20
  *  \date    Modified: 2021-09-07 - stephengtuggy
  */
-<<<<<<< HEAD
-static bool setup_sdl_video_mode() {
-    Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN; // | SDL_WINDOW_ALLOW_HIGHDPI;
-    int bpp = 0; // Bits per pixel?
-    int width, height;
-    if (gl_options.fullscreen) {
-        video_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    }
-    else
-    {
+
 #ifndef _WIN32
-=======
-static bool setup_sdl_video_mode(int *argc, char **argv) {
-    const int screen_number = configuration().graphics.screen;
+static bool setup_sdl_video_mode() {
+    const int screen_number = 0;
     Uint32 video_flags = SDL_WINDOW_OPENGL;
     int bpp = 0; // Bits per pixel?
     int width, height;
-    if (configuration().graphics.full_screen) {
+    if (gl_options.fullscreen) {
         video_flags |= SDL_WINDOW_FULLSCREEN;
 
         const SDL_DisplayMode * currentDisplayMode =  SDL_GetCurrentDisplayMode(screen_number);
         if (currentDisplayMode == NULL) {
             VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_GetCurrentDisplayMode failed: %1%") % SDL_GetError()), -1);
         } else {
-            native_resolution_x = currentDisplayMode->w;
-            native_resolution_y = currentDisplayMode->h;
+            // native_resolution_x = currentDisplayMode->w;
+            // native_resolution_y = currentDisplayMode->h;
         }
     } else {
->>>>>>> cb0558df7 (SDL. Erreur while compiling  shader FireGlass.)
         video_flags |= SDL_WINDOW_RESIZABLE;
 #endif
     }
@@ -268,21 +257,22 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     }
 
-    if (configuration().graphics.gl_accelerated_visual) {
+    if (vs_options::instance().gl_accelerated_visual) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
-    width = configuration().graphics.resolution_x;
-    height = configuration().graphics.resolution_y;
+    width = g_game.x_resolution;
+    height = g_game.y_resolution;
 
     // Fix display in fullscreen
-    if(configuration().graphics.full_screen) {
+    if(gl_options.fullscreen) {
         // Change base resolution to match screen resolution
-        width = configuration().graphics.resolution_x;//currentDisplayMode.w;
-        height = configuration().graphics.resolution_y;//currentDisplayMode.h;
-        int* ptr_x = const_cast<int*>(&configuration().graphics.bases.max_width);
-        int* ptr_y = const_cast<int*>(&configuration().graphics.bases.max_height);
-        *ptr_x = width;
-        *ptr_y = height;
+        width = g_game.x_resolution;
+        height = g_game.y_resolution;
+// pmx-202451022 Commented the following lines, thgat origins from version 0.10.x. Pb with bases display in full screen ?
+        // int* ptr_x = const_cast<int*>(&g_game..bases.max_width);
+        // int* ptr_y = const_cast<int*>(&cg_game.bases.max_height);
+        // *ptr_x = width;
+        // *ptr_y = height;
     }
 
 
@@ -319,7 +309,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     width = g_game.x_resolution;
     height = g_game.y_resolution;
 
-    if (configuration().graphics.full_screen) {
+    if (gl_options.fullscreen) {
         SDL_SetWindowFullscreenMode(window, NULL);
     }
 
@@ -418,15 +408,6 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title) {
     keepRunning = true;
 
-<<<<<<< HEAD
-#if defined(WIN32)
-    if (SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2")) {
-        VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, ...) succeeded");
-    } else {
-        VS_LOG_AND_FLUSH(warning, "SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, ...) failed");
-        SDL_ClearError();
-    }
-=======
     // pmx-20251021 hDPI changed in SDL3
     // https://discourse.libsdl.org/t/question-regarding-sdl3-high-pixel-density-w-opengl/50964
     // if (SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2")) {
@@ -441,10 +422,9 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     constexpr Uint32 sdl_flags = SDL_INIT_VIDEO;
 #else
     constexpr Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_JOYSTICK;
->>>>>>> cb0558df7 (SDL. Erreur while compiling  shader FireGlass.)
 #endif
 
-    Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
+    // Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
     g_game.x_resolution = vs_options::instance().x_resolution;
     g_game.y_resolution = vs_options::instance().y_resolution;
 //    gl_options.fullscreen = vs_options::instance().fullscreen;
@@ -569,18 +549,9 @@ void winsys_process_events() {
                         SDL_GetMouseState(&x, &y);
 
                         //Send the event
-                        (*keyboard_func)(event.key.keysym.sym, event.key.keysym.mod,
+                        (*keyboard_func)(event.key.key, event.key.mod,
                                          state,
                                          x, y);
-                    }
-                    break;
-                case SDL_KEYDOWN:
-
-                    if (keyboard_func && (event.key.repeat == 0)) {
-                        SDL_GetMouseState(&x, &y);
-
-                        //Send the event
-                        (*keyboard_func)(event.key.key, event.key.mod, event.key.down, x, y);
                     }
                     break;
 
@@ -617,7 +588,7 @@ void winsys_process_events() {
                 case SDL_EVENT_WINDOW_RESIZED:
 #if !(defined (_WIN32) && defined (SDL_WINDOWING ))
                     int width, height;
-                    SDL_GL_GetDrawableSize(window, &width, &height);
+                    SDL_GetWindowSizeInPixels(window, &width, &height);
                     g_game.x_resolution = width;
                     g_game.y_resolution = height;
                     g_game.aspect = static_cast<float>(width) / static_cast<float>(height);

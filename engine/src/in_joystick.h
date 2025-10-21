@@ -40,7 +40,7 @@
 //#include "glob.h"
 //#include "dbg.h"
 
-#include "src/in_kb.h"
+#include "in_kb.h"
 #define NUMJBUTTONS 64
 
 class JoyStick;

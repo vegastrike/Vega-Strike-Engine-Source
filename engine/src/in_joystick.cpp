@@ -48,13 +48,12 @@
 #endif
 
 
-#include "root_generic/options.h"
+#include "options.h"
 #ifdef HAVE_SDL
 #include <SDL3/SDL_joystick.h>
 #include <SDL3/SDL_error.h>
 #endif
 #include "configuration/configuration.h"
-#include "gldrv/mouse_cursor.h"
 
 
 //Used for storing the max and min values of the tree Joystick Axes - Okona
@@ -237,7 +236,7 @@ JoyStick::JoyStick(int which, SDL_JoystickID instanceID) : mouse(which == MOUSE_
 
     joy_buttons = 0;
     player = 0; //which;     //by default bind players to whichever joystick it is
-    debug_digital_hatswitch = configuration().joystick.debug_digital_hatswitch;
+    // debug_digital_hatswitch = configuration().joystick.debug_digital_hatswitch;
     if (which != MOUSE_JOYSTICK) {
         deadzone = vs_options::instance().deadband;
     } else {
