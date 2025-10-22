@@ -266,13 +266,8 @@ static bool setup_sdl_video_mode() {
     // Fix display in fullscreen
     if(gl_options.fullscreen) {
         // Change base resolution to match screen resolution
-        width = g_game.x_resolution;
+        width  = g_game.x_resolution;
         height = g_game.y_resolution;
-// pmx-202451022 Commented the following lines, thgat origins from version 0.10.x. Pb with bases display in full screen ?
-        // int* ptr_x = const_cast<int*>(&g_game..bases.max_width);
-        // int* ptr_y = const_cast<int*>(&cg_game.bases.max_height);
-        // *ptr_x = width;
-        // *ptr_y = height;
     }
 
 

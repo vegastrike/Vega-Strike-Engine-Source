@@ -365,13 +365,6 @@ int main(int argc, char *argv[]) {
 #endif
 
     std::vector<std::vector<char> > temp = ROLES::getAllRolePriorities();
-#if defined(HAVE_SDL)
-#ifndef NO_SDL_JOYSTICK
-    if (SDL_InitSubSystem(SDL_INIT_JOYSTICK)) {
-        VS_LOG_FLUSH_EXIT(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()), 1);
-    }
-#endif
-#endif
     
     InitTime();
     UpdateTime();

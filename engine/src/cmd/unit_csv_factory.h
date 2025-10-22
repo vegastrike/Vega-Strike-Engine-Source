@@ -209,7 +209,8 @@ inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &
     }
     try {
         return std::stoi(result);
-    } catch (std::invalid_argument &) {
+    // } catch (std::invalid_argument &) {
+    } catch (...) {
         return default_value;
     }
 }
