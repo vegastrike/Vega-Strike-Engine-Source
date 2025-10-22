@@ -830,8 +830,8 @@ function bootstrapOnArch ()
               clang \
               gcc \
               gcc12 \
-              sdl2 \
-              sdl2_image \
+              sdl3 \
+              sdl3_image \
               expat \
               gtk3 \
               libglvnd \
@@ -860,8 +860,8 @@ function bootstrapOnEndeavourOS ()
               llvm \
               clang \
               gcc \
-              sdl2 \
-              sdl2_image \
+              sdl3 \
+              sdl3_image \
               expat \
               gtk3 \
               libglvnd \
