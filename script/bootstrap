@@ -29,7 +29,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2024-12-31 ---"
+echo "--- bootstrap | 2025-10-22 ---"
 echo "------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -352,215 +352,58 @@ function bootstrapOnPopOS ()
 
 function bootstrapOnLinuxMint ()
 {
-  apt-get update
+    apt-get update
 
-  if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
-  then
-    apt-get -qy upgrade
-  fi
+    if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
+    then
+        apt-get -qy upgrade
+    fi
 
-  case "$LINUX_CODENAME" in
-    "wilma")
-      apt-get -qy install \
-                      git \
-                      cmake \
-                      python3-dev \
-                      build-essential \
-                      automake \
-                      autoconf \
-                      libpng16-16 \
-                      libpng-dev \
-                      libpng-tools \
-                      libjpeg-turbo8-dev \
-                      libexpat1-dev \
-                      libgdk-pixbuf-2.0-dev \
-                      libgtk-3-dev \
-                      libopenal-dev \
-                      libogg-dev \
-                      libvorbis-dev \
-                      libglvnd-dev \
-                      libgl1-mesa-dev \
-                      libsdl1.2-compat-dev \
-                      libsdl2-dev \
-                      libopengl0 \
-                      libpostproc-dev \
-                      freeglut3-dev \
-                      libboost-python-dev \
-                      libboost-log-dev \
-                      libboost-regex-dev \
-                      libboost-program-options-dev \
-                      libxmu-dev \
-                      clang \
-                      lsb-release
-      ;;
-    "virginia")
-      apt-get -qy install \
-                      git \
-                      cmake \
-                      python3-dev \
-                      build-essential \
-                      automake \
-                      autoconf \
-                      libpng16-16 \
-                      libpng-dev \
-                      libpng-tools \
-                      libjpeg-turbo8-dev \
-                      libexpat1-dev \
-                      libgdk-pixbuf-2.0-dev \
-                      libgtk-3-dev \
-                      libopenal-dev \
-                      libogg-dev \
-                      libvorbis-dev \
-                      libglvnd-dev \
-                      libgl1-mesa-dev \
-                      libsdl1.2-compat-dev \
-                      libsdl2-dev \
-                      libopengl0 \
-                      libpostproc-dev \
-                      freeglut3-dev \
-                      libboost-python-dev \
-                      libboost-log-dev \
-                      libboost-regex-dev \
-                      libboost-program-options-dev \
-                      libxmu-dev \
-                      clang \
-                      lsb-release
-      ;;
-    "victoria")
-      apt-get -qy install \
-                      git \
-                      cmake \
-                      python3-dev \
-                      build-essential \
-                      automake \
-                      autoconf \
-                      libpng16-16 \
-                      libpng-dev \
-                      libpng-tools \
-                      libjpeg-turbo8-dev \
-                      libexpat1-dev \
-                      libgdk-pixbuf-2.0-dev \
-                      libgtk-3-dev \
-                      libopenal-dev \
-                      libogg-dev \
-                      libvorbis-dev \
-                      libglvnd-dev \
-                      libgl1-mesa-dev \
-                      libsdl1.2-compat-dev \
-                      libsdl2-dev \
-                      libopengl0 \
-                      libpostproc-dev \
-                      freeglut3-dev \
-                      libboost-python-dev \
-                      libboost-log-dev \
-                      libboost-regex-dev \
-                      libboost-program-options-dev \
-                      libxmu-dev \
-                      clang \
-                      lsb-release
-      ;;
-    "vera")
-      apt-get -qy install \
-                      git \
-                      cmake \
-                      python3-dev \
-                      build-essential \
-                      automake \
-                      autoconf \
-                      libpng16-16 \
-                      libpng-dev \
-                      libpng-tools \
-                      libjpeg-turbo8-dev \
-                      libexpat1-dev \
-                      libgdk-pixbuf-2.0-dev \
-                      libgtk-3-dev \
-                      libopenal-dev \
-                      libogg-dev \
-                      libvorbis-dev \
-                      libglvnd-dev \
-                      libgl1-mesa-dev \
-                      libsdl1.2-compat-dev \
-                      libsdl2-dev \
-                      libopengl0 \
-                      libpostproc-dev \
-                      freeglut3-dev \
-                      libboost-python-dev \
-                      libboost-log-dev \
-                      libboost-regex-dev \
-                      libboost-program-options-dev \
-                      libxmu-dev \
-                      clang \
-                      lsb-release
-      ;;
-    "vanessa")
-      apt-get -qy install \
-                      git \
-                      cmake \
-                      python3-dev \
-                      build-essential \
-                      automake \
-                      autoconf \
-                      libpng16-16 \
-                      libpng-dev \
-                      libpng-tools \
-                      libjpeg-turbo8-dev \
-                      libexpat1-dev \
-                      libgdk-pixbuf-2.0-dev \
-                      libgtk-3-dev \
-                      libopenal-dev \
-                      libogg-dev \
-                      libvorbis-dev \
-                      libglvnd-dev \
-                      libgl1-mesa-dev \
-                      libsdl1.2-dev \
-                      libsdl2-dev \
-                      libopengl0 \
-                      libpostproc-dev \
-                      freeglut3-dev \
-                      libboost-python-dev \
-                      libboost-log-dev \
-                      libboost-regex-dev \
-                      libboost-program-options-dev \
-                      libxmu-dev \
-                      clang \
-                      lsb-release
-      ;;
-    "ulyana")
-      apt-get -qy install \
-                      git \
-                      cmake \
-                      build-essential \
-                      automake \
-                      autoconf \
-                      libpng16-16 \
-                      libpng-dev \
-                      libpng-tools \
-                      libjpeg62-dev \
-                      libexpat1-dev \
-                      libgtk-3-dev \
-                      libopenal-dev \
-                      libogg-dev \
-                      libvorbis-dev \
-                      libglvnd-dev \
-                      libgl1-mesa-dev \
-                      libsdl1.2-dev \
-                      libsdl2-dev \
-                      libopengl0 \
-                      libpostproc-dev \
-                      freeglut3-dev \
-                      libboost-python-dev \
-                      libboost-log-dev \
-                      libboost-regex-dev \
-                      libboost-program-options-dev \
-                      libxmu-dev \
-                      clang \
-                      lsb-release
-      ;;
-    *)
-      echo "This version of Linux Mint is not directly supported. You may be able to use the corresponding Ubuntu installation package"
-      exit 2
-      ;;
-  esac
+    case "$LINUX_CODENAME" in
+        "wilma")
+            apt-get -qy install \
+                            git \
+                            cmake \
+                            python3-dev \
+                            build-essential \
+                            automake \
+                            autoconf \
+                            libarchive-dev \
+                            libpng16-16 \
+                            libpng-dev \
+                            libpng-tools \
+                            libjpeg-turbo8-dev \
+                            libexpat1-dev \
+                            libgdk-pixbuf-2.0-dev \
+                            libgtk-3-dev \
+                            libopenal-dev \
+                            libogg-dev \
+                            libvorbis-dev \
+                            libglvnd-dev \
+                            libgl1-mesa-dev \
+                            libsdl3-dev \
+                            libsdl3-image-dev \
+                            libopengl0 \
+                            libpostproc-dev \
+                            freeglut3-dev \
+                            libboost-python-dev \
+                            libboost-log-dev \
+                            libboost-regex-dev \
+                            libboost-json-dev \
+                            libboost-program-options-dev \
+                            libxmu-dev \
+                            clang \
+                            lsb-release
+            ;;
+        "virginia"|"victoria"|"vera"|"vanessa"|"ulyana")
+            echo "Sorry, Linux Mint ${LINUX_CODENAME} is no longer supported"
+            exit 2
+            ;;
+        *)
+            echo "This version of Linux Mint is not directly supported. You may be able to use the corresponding Ubuntu installation package"
+            exit 2
+            ;;
+    esac
 }
 
 function bootstrapOnOpenSuseLeap ()
