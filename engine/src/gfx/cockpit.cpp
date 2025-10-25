@@ -310,9 +310,13 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     const float game_speed = configuration().physics.game_speed_flt;
     const bool display_in_meters = configuration().physics.display_in_meters;
     const bool lie = configuration().physics.game_speed_lying;
-    static float fpsval = 0;
-    const float fpsmax = 1;
-    static float numtimes = fpsmax;
+    static float fps_cumulative_avg_time = 0;
+    const float FPS_AVG_INTERVAL = 0.5;
+    static float fps_avg_time_countdown = FPS_AVG_INTERVAL;
+    static float fps_avg = 0;
+    static unsigned int fps_frames_count = 0;
+    static float fps_smoothing = 0.01;
+
     Unit *tmpunit;
 
     // TODO: lib_damage
@@ -538,17 +542,29 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             }
             return abletoautopilot;
         }
-        case UnitImages<void>::COCKPIT_FPS:
-            if (fpsval >= 0 && fpsval < .5 * FLT_MAX) {
-                numtimes -= 0.1F + fpsval;
+        case UnitImages<void>::COCKPIT_FPS:  {
+            float dt = GetElapsedTime(); 
+#if 0 // pmx-20251025  Basic first order smoothing filter.   
+            if (dt > 0.0) {
+                fps_avg += (1.0 / dt - fps_avg) * fps_smoothing;
             }
-            if (numtimes <= 0) {
-                numtimes = fpsmax;
-                fpsval = GetElapsedTime();
+#else   // pmx-20251025 FPS averaged over a fixed time period. Best visual resultsfor me : 0.5s period. 
+        // Should be a configuation parameter ?
+            fps_avg_time_countdown -= dt;          // fps_avg_time_countdown is the remaining time in the averaging time frame (in s)
+            fps_cumulative_avg_time += dt;         // fps_cumulative_avg_time is the cummuled time in the averaging time frame (in s)
+            fps_frames_count++;                    // cumulated frames count
+            if (fps_avg_time_countdown <= 0) {     // end of average time frame
+                float actual_avg_time = (FPS_AVG_INTERVAL - fps_avg_time_countdown); // Adds "minus fps_avg_time_countdown" to include the residual extra time  
+                if (actual_avg_time > 0.0) {
+                    fps_avg =  fps_frames_count / actual_avg_time;
+                }
+                fps_cumulative_avg_time = 0; 
+                fps_frames_count = 0;
+                fps_avg_time_countdown = FPS_AVG_INTERVAL;
             }
-            if (fpsval) {
-                return 1.0F / fpsval;
-            }
+#endif
+            return fps_avg;
+        }
         case UnitImages<void>::AUTOPILOT_MODAL:
             if (target->autopilotactive) {
                 return static_cast<float>(UnitImages<void>::ACTIVE);
