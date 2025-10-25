@@ -258,6 +258,8 @@ function bootstrapOnPopOS ()
     esac
 }
 
+
+
 function bootstrapOnLinuxMint ()
 {
     apt-get update
@@ -268,7 +270,7 @@ function bootstrapOnLinuxMint ()
     fi
 
     case "$LINUX_CODENAME" in
-        "wilma")
+        "wilma"|"zara")
             apt-get -qy install \
                             git \
                             cmake \
@@ -289,8 +291,6 @@ function bootstrapOnLinuxMint ()
                             libvorbis-dev \
                             libglvnd-dev \
                             libgl1-mesa-dev \
-                            libsdl2-dev \
-                            libsdl2-image-dev \
                             libopengl0 \
                             libpostproc-dev \
                             freeglut3-dev \
@@ -300,8 +300,12 @@ function bootstrapOnLinuxMint ()
                             libboost-json-dev \
                             libboost-program-options-dev \
                             libxmu-dev \
-                            clang \
+                            gcc \
+                            g++ \
                             lsb-release
+                            
+                            # clang \
+                            
             ;;
         "virginia"|"victoria"|"vera"|"vanessa"|"ulyana")
             echo "Sorry, Linux Mint ${LINUX_CODENAME} is no longer supported"
