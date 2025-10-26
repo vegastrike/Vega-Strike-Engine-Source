@@ -311,13 +311,16 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
             SDL_DisplayMode *mode = nullptr;
             for (int i = 0; i < num_modes; ++i) {
                 mode = modes[i];
-                std::cerr << "Display "<<instance_ID<<" Mode "<< i << ": "<< mode->w<<"x"<<mode->h<<"@"
-                << mode->refresh_rate << "Hz" <<std::endl;
+                SDL_GetDisplayBounds(instance_ID, &display_bounds);                                                                               
+                std::cerr << "Screen "<< screen_number << " Display "<<instance_ID<<" Mode "<< i << ": "<< mode->w<<"x"<<mode->h<<"@"
+                << mode->refresh_rate << "Hz" 
+                << "x,y = "<<display_bounds.x<<","<<display_bounds.y
+                <<" w,h = "<<display_bounds.w<<","<<display_bounds.h
+                <<std::endl;
                 if ((mode->w == width) && (mode->h == height)) {
                     found = true;
                     std::memcpy(mode_for_ID, mode, sizeof(SDL_DisplayMode)); // pmx-20251026 NI'm not sure of the life length of the data pointed
                                                                               // by 'mode', for ther time being, I prefer to copy. May recheck later.
-                    SDL_GetDisplayBounds(instance_ID, &display_bounds);                                                                               
                     break;
                 }
             }
@@ -350,7 +353,12 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     } else { // Not full screen
         video_flags |= SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
         const SDL_DisplayMode *desktop_mode = SDL_GetDesktopDisplayMode(instance_ID);
-        SDL_GetDisplayBounds(instance_ID, &display_bounds);
+        SDL_GetDisplayBounds(instance_ID, &display_bounds);                                                                               
+        std::cerr << "Screen "<< screen_number << " Display "<<instance_ID<<" Mode "<< instance_ID << ": "<< desktop_mode->w<<"x"<<desktop_mode->h<<"@"
+        << desktop_mode->refresh_rate << "Hz" 
+        << "x,y = "<<display_bounds.x<<","<<display_bounds.y
+        <<" w,h = "<<display_bounds.w<<","<<display_bounds.h
+        <<std::endl;
         if (desktop_mode != nullptr) {
             std::memcpy(mode_for_ID, desktop_mode, sizeof(SDL_DisplayMode));
         } else {
@@ -372,6 +380,9 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     result = SDL_CreateWindowAndRenderer("Vega Strike", width, height, video_flags, &window, &renderer);
     // window = SDL_CreateWindow("Vega Strike", width, height, video_flags);
     SDL_SetWindowSize(window, width, height);
+    int refx = display_bounds.x + display_bounds.w/2 - width/2;
+    int refy = display_bounds.y + display_bounds.h/2 - height/2;
+    SDL_SetWindowPosition(window,refx, refy);
     SDL_WINDOWPOS_CENTERED;
     // if (result == false) {
     //     VS_LOG_FLUSH_EXIT(fatal, "SDL_CreateWindowAndRender(...) error", 1);
@@ -382,6 +393,8 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_SetWindowFullscreenMode(window, mode_for_ID);
     } else {
         SDL_WINDOWPOS_CENTERED_DISPLAY(instance_ID);
+
+
     }
    
     // if(screen_number > 0) {
@@ -398,8 +411,6 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     //     // Move to secondary monitor
     //     SDL_SetWindowPosition(window, displayBounds.x, displayBounds.y);
     // }
-
-    SDL_ShowWindow(window);
 
     
     SDL_GetWindowSizeInPixels(window, &width, &height);
@@ -477,6 +488,9 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     }
 
 
+    SDL_ShowWindow(window);
+    SDL_SyncWindow(window);
+    
     return true;
 }
 
