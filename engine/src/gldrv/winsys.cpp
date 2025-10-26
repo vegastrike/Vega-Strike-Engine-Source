@@ -203,6 +203,34 @@ int native_resolution_y;
 
 
 /*---------------------------------------------------------------------------*/
+// pmx-20251026
+bool get_sdl_display_name_by_nr(int screen_number, std::string &screen_name, SDL_DisplayID &id) {
+    std::ostringstream display_names;
+    int num_displays = 0;
+    bool found = false;
+    std::cerr << "===============================================================" << std::endl;
+    SDL_DisplayID *displays = SDL_GetDisplays(&num_displays);
+    if (displays) {
+        int i;
+        for (i = 0; i < num_displays; ++i) {
+            SDL_DisplayID instance_id = displays[i];
+            const char *name = SDL_GetDisplayName(instance_id);
+            display_names << "Display "<< i << ": " << (name ? name : "Unknown") << "\n";
+            if (i == screen_number) {
+                screen_name = name ? name : "Unknown";
+                id = instance_id;
+                found = true;
+            }
+            std::cerr << "Display "<< i << ": " << name << std::endl;
+        }
+        SDL_free(displays);
+    }
+    std::cerr << "===============================================================" << std::endl;
+ 
+    return found;
+} 
+
+/*---------------------------------------------------------------------------*/
 /*!
  *  Sets up the SDL OpenGL rendering context
  *  \author  jfpatry
@@ -210,32 +238,29 @@ int native_resolution_y;
  *  \date    Modified: 2025-01-10 - stephengtuggy
  */
 static bool setup_sdl_video_mode(int *argc, char **argv) {
-    const int screen_number = configuration().graphics.screen;
-    Uint32 video_flags = SDL_WINDOW_OPENGL;
+    int screen_number=0;
+    Uint32 video_flags = 0;
     int bpp = 0; // Bits per pixel?
-    int width, height;
-    if (configuration().graphics.full_screen) {
-        video_flags |= SDL_WINDOW_FULLSCREEN;
+    int width;
+    int height;
+    bool full_screen;
+    SDL_Rect display_bounds;
+    bool result;
 
-        const SDL_DisplayMode * currentDisplayMode =  SDL_GetCurrentDisplayMode(screen_number);
-        if (currentDisplayMode == NULL) {
-            VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_GetCurrentDisplayMode failed: %1%") % SDL_GetError()), -1);
-        } else {
-            native_resolution_x = currentDisplayMode->w;
-            native_resolution_y = currentDisplayMode->h;
-        }
-    } else {
-        video_flags |= SDL_WINDOW_RESIZABLE;
-
-        native_resolution_x = configuration().graphics.resolution_x;
-        native_resolution_y = configuration().graphics.resolution_y;
+    std:string screen_name ="";
+    SDL_DisplayID instance_ID;
+    SDL_DisplayMode *mode_for_ID = (SDL_DisplayMode*)std::calloc(sizeof(SDL_DisplayMode), 1); 
+    if (mode_for_ID == nullptr) {
+        VS_LOG_FLUSH_EXIT(fatal, "Memory allocation error", 1);
     }
+
+
     bpp = gl_options.color_depth;
 
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
     if (configuration().graphics.rgb_pixel_format == "undefined") {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
+        (const_cast<vega_config::Configuration &>(configuration()).graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888"));
     }
     if ((configuration().graphics.rgb_pixel_format.length() == 3) && isdigit(configuration().graphics.rgb_pixel_format[0])
             && isdigit(configuration().graphics.rgb_pixel_format[1]) && isdigit(configuration().graphics.rgb_pixel_format[2])) {
@@ -265,59 +290,78 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     if (configuration().graphics.gl_accelerated_visual) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
-    width = configuration().graphics.resolution_x;
-    height = configuration().graphics.resolution_y;
 
-    // Fix display in fullscreen
-    if(configuration().graphics.full_screen) {
-        // Change base resolution to match screen resolution
-        width = configuration().graphics.resolution_x;//currentDisplayMode.w;
-        height = configuration().graphics.resolution_y;//currentDisplayMode.h;
-        int* ptr_x = const_cast<int*>(&configuration().graphics.bases.max_width);
-        int* ptr_y = const_cast<int*>(&configuration().graphics.bases.max_height);
-        *ptr_x = width;
-        *ptr_y = height;
+    width  = configuration().graphics.resolution_x;
+    height = configuration().graphics.resolution_y;
+    screen_number = configuration().graphics.screen;
+    full_screen = configuration().graphics.full_screen;
+
+    result = get_sdl_display_name_by_nr(screen_number, screen_name, instance_ID);
+    // TODO : Warn and exit if result is 'false'.
+
+    // width and height are from the config file. We check if tis resolution 
+    // is supported in full screen mode.
+
+    if (full_screen) {    
+        video_flags |= SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_HIDDEN;
+        int num_modes = 0;
+        bool found = false;
+        SDL_DisplayMode **modes = SDL_GetFullscreenDisplayModes(instance_ID, &num_modes);
+        if (modes) {
+            SDL_DisplayMode *mode = nullptr;
+            for (int i = 0; i < num_modes; ++i) {
+                mode = modes[i];
+                std::cerr << "Display "<<instance_ID<<" Mode "<< i << ": "<< mode->w<<"x"<<mode->h<<"@"
+                << mode->refresh_rate << "Hz" <<std::endl;
+                if ((mode->w == width) && (mode->h == height)) {
+                    found = true;
+                    std::memcpy(mode_for_ID, mode, sizeof(SDL_DisplayMode)); // pmx-20251026 NI'm not sure of the life length of the data pointed
+                                                                              // by 'mode', for ther time being, I prefer to copy. May recheck later.
+                    SDL_GetDisplayBounds(instance_ID, &display_bounds);                                                                               
+                    break;
+                }
+            }
+        }
+        if (found == false) {
+            // pmx-20251026 Try to find the closest resolution.or no,
+            // Normally, the setup app will only offer existing resolution, so we should only get
+            // there when changing the hardware configuration.
+            SDL_DisplayMode *mode = nullptr;
+            bool result = SDL_GetClosestFullscreenDisplayMode(instance_ID, width, height, 0, true, mode);
+            if (result == true) {
+                std::memcpy(mode_for_ID, mode, sizeof(SDL_DisplayMode));
+            } else {
+            // Fallback to the desktop display mode for the display
+                VS_LOG_AND_FLUSH(error, (boost::format(
+                "Requested fullscreen resolution %1%x%2x%3 not available on display %4% (%5%). Using desktop resolution instead.") 
+                % width % height % bpp % screen_number % screen_name));
+                SDL_ClearError();
+                const SDL_DisplayMode *desktop_mode = SDL_GetDesktopDisplayMode(instance_ID);
+                SDL_GetDisplayBounds(instance_ID, &display_bounds);
+
+                if (desktop_mode != nullptr) {
+                    std::memcpy(mode_for_ID, desktop_mode, sizeof(SDL_DisplayMode));
+                } else {
+                    VS_LOG_FLUSH_EXIT(fatal, "Could not get desktop display mode", 1); // Sorry, we have tried everything...
+                }
+            }
+        }
+        SDL_free(modes);    
+    } else { // Not full screen
+        video_flags |= SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
+        const SDL_DisplayMode *desktop_mode = SDL_GetDesktopDisplayMode(instance_ID);
+        SDL_GetDisplayBounds(instance_ID, &display_bounds);
+        if (desktop_mode != nullptr) {
+            std::memcpy(mode_for_ID, desktop_mode, sizeof(SDL_DisplayMode));
+        } else {
+            VS_LOG_FLUSH_EXIT(fatal, "Could not get desktop display mode", 1);
+        }
     }
 
 
     window = nullptr;
-    if(screen_number == 0) {
-        window = SDL_CreateWindow("Vega Strike",
-                // SDL_WINDOWPOS_UNDEFINED,
-                // SDL_WINDOWPOS_UNDEFINED,
-                width, height, video_flags);
-    } else {
-        // pmx-20251021  // for the time being, only dc=create on display .
-        // Screen numbers are replaced by displayID in SDL3, a bit moe complicated (but not that much)
-        window = SDL_CreateWindow("Vega Strike",
-                                // SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number),
-                                // SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number),
-                                width, height, video_flags);
-    }
-
-    if(!window) {
-        VS_LOG_FLUSH_EXIT(fatal, "No window", 1);
-    }
-
-    if(screen_number > 0) {
-        // Get bounds of the secondary monitor
-        SDL_Rect displayBounds;
-        if (SDL_GetDisplayBounds(screen_number, &displayBounds) != 0) {
-            const std::string error_message = (boost::format("Failed to get display bounds: %1%") % SDL_GetError()).str();
-            VS_LOG_AND_FLUSH(error, error_message);
-
-            // Fallback to primary monitor
-            SDL_GetDisplayBounds(0, &displayBounds);
-        }
-
-        // Move to secondary monitor
-        SDL_SetWindowPosition(window, displayBounds.x, displayBounds.y);
-    }
-
-    if (configuration().graphics.full_screen) {
-        SDL_SetWindowFullscreenMode(window, NULL);
-    }
-
+    SDL_Renderer* renderer = nullptr;
+    
     if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {
         VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) succeeded");
     } else {
@@ -325,6 +369,39 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_ClearError();
     }
 
+    result = SDL_CreateWindowAndRenderer("Vega Strike", width, height, video_flags, &window, &renderer);
+    // window = SDL_CreateWindow("Vega Strike", width, height, video_flags);
+    SDL_SetWindowSize(window, width, height);
+    SDL_WINDOWPOS_CENTERED;
+    // if (result == false) {
+    //     VS_LOG_FLUSH_EXIT(fatal, "SDL_CreateWindowAndRender(...) error", 1);
+    // }
+    
+    if (full_screen) {
+        SDL_SetWindowPosition(window, display_bounds.x, display_bounds.y);
+        SDL_SetWindowFullscreenMode(window, mode_for_ID);
+    } else {
+        SDL_WINDOWPOS_CENTERED_DISPLAY(instance_ID);
+    }
+   
+    // if(screen_number > 0) {
+    //     // Get bounds of the secondary monitor
+    //     SDL_Rect displayBounds;
+    //     if (SDL_GetDisplayBounds(screen_number, &displayBounds) != 0) {
+    //         const std::string error_message = (boost::format("Failed to get display bounds: %1%") % SDL_GetError()).str();
+    //         VS_LOG_AND_FLUSH(error, error_message);
+
+    //         // Fallback to primary monitor
+    //         SDL_GetDisplayBounds(0, &displayBounds);
+    //     }
+
+    //     // Move to secondary monitor
+    //     SDL_SetWindowPosition(window, displayBounds.x, displayBounds.y);
+    // }
+
+    SDL_ShowWindow(window);
+
+    
     SDL_GetWindowSizeInPixels(window, &width, &height);
 
     SDL_GLContext context = SDL_GL_CreateContext(window);
@@ -343,29 +420,29 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     }
 
     // TODO : Vsync...  pmx-20251021
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
-    if (renderer == nullptr) {
-        VS_LOG_AND_FLUSH(error, (boost::format(
-            "SDL_CreateRenderer(...) with VSync option failed; trying again without VSync option. Error was: %1%") %
-            SDL_GetError()));
-        SDL_ClearError();
+    // SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
+    // if (renderer == nullptr) {
+    //     VS_LOG_AND_FLUSH(error, (boost::format(
+    //         "SDL_CreateRenderer(...) with VSync option failed; trying again without VSync option. Error was: %1%") %
+    //         SDL_GetError()));
+    //     SDL_ClearError();
 
-        renderer = SDL_CreateRenderer(window, NULL);
-        if (renderer == nullptr) {
-            VS_LOG_AND_FLUSH(error, (boost::format(
-                "SDL_CreateRenderer(...) with SDL_RENDERER_ACCELERATED failed; trying again with software rendering option. Error was: %1%") %
-                SDL_GetError()));
-            SDL_ClearError();
+    //     renderer = SDL_CreateRenderer(window, NULL);
+    //     if (renderer == nullptr) {
+    //         VS_LOG_AND_FLUSH(error, (boost::format(
+    //             "SDL_CreateRenderer(...) with SDL_RENDERER_ACCELERATED failed; trying again with software rendering option. Error was: %1%") %
+    //             SDL_GetError()));
+    //         SDL_ClearError();
 
-            renderer = SDL_CreateRenderer(window, NULL);  // -1, SDL_RENDERER_SOFTWARE);
-            if (renderer == nullptr) {
-                VS_LOG_FLUSH_EXIT(fatal, (boost::format(
-                    "SDL_CreateRenderer(...) failed on the third try, with software rendering! Error: %1%") %
-                    SDL_GetError()),
-                    1);
-            }
-        }
-    }
+    //         renderer = SDL_CreateRenderer(window, NULL);  // -1, SDL_RENDERER_SOFTWARE);
+    //         if (renderer == nullptr) {
+    //             VS_LOG_FLUSH_EXIT(fatal, (boost::format(
+    //                 "SDL_CreateRenderer(...) failed on the third try, with software rendering! Error: %1%") %
+    //                 SDL_GetError()),
+    //                 1);
+    //         }
+    //     }
+    // }
 
     if (SDL_SetRenderLogicalPresentation(renderer, width, height, SDL_LOGICAL_PRESENTATION_DISABLED) < 0) {
         VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_RenderSetLogicalSize(...) failed! Error: %1%") % SDL_GetError()),
@@ -398,6 +475,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         VS_LOG_AND_FLUSH(error, "SDL_GL_SetSwapInterval(1) failed");
         SDL_ClearError();
     }
+
 
     return true;
 }
