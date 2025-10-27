@@ -214,22 +214,22 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     Uint32 video_flags = SDL_WINDOW_OPENGL;
     int bpp = 0; // Bits per pixel?
     int width, height;
-    if (configuration().graphics.full_screen) {
-        video_flags |= SDL_WINDOW_FULLSCREEN;
+    // if (configuration().graphics.full_screen) {
+    //     video_flags |= SDL_WINDOW_FULLSCREEN;
 
-        const SDL_DisplayMode * currentDisplayMode =  SDL_GetCurrentDisplayMode(screen_number);
-        if (currentDisplayMode == NULL) {
-            VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_GetCurrentDisplayMode failed: %1%") % SDL_GetError()), -1);
-        } else {
-            native_resolution_x = currentDisplayMode->w;
-            native_resolution_y = currentDisplayMode->h;
-        }
-    } else {
+    //     const SDL_DisplayMode * currentDisplayMode =  SDL_GetCurrentDisplayMode(screen_number);
+    //     if (currentDisplayMode == NULL) {
+    //         VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_GetCurrentDisplayMode failed: %1%") % SDL_GetError()), -1);
+    //     } else {
+    //         native_resolution_x = currentDisplayMode->w;
+    //         native_resolution_y = currentDisplayMode->h;
+    //     }
+    // } else {
         video_flags |= SDL_WINDOW_RESIZABLE;
 
         native_resolution_x = configuration().graphics.resolution_x;
         native_resolution_y = configuration().graphics.resolution_y;
-    }
+    // }
     bpp = gl_options.color_depth;
 
     int rs, gs, bs;
@@ -268,55 +268,55 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     width = configuration().graphics.resolution_x;
     height = configuration().graphics.resolution_y;
 
-    // Fix display in fullscreen
-    if(configuration().graphics.full_screen) {
-        // Change base resolution to match screen resolution
-        width = configuration().graphics.resolution_x;//currentDisplayMode.w;
-        height = configuration().graphics.resolution_y;//currentDisplayMode.h;
-        int* ptr_x = const_cast<int*>(&configuration().graphics.bases.max_width);
-        int* ptr_y = const_cast<int*>(&configuration().graphics.bases.max_height);
-        *ptr_x = width;
-        *ptr_y = height;
-    }
+    // // Fix display in fullscreen
+    // if(configuration().graphics.full_screen) {
+    //     // Change base resolution to match screen resolution
+    //     width = configuration().graphics.resolution_x;//currentDisplayMode.w;
+    //     height = configuration().graphics.resolution_y;//currentDisplayMode.h;
+    //     int* ptr_x = const_cast<int*>(&configuration().graphics.bases.max_width);
+    //     int* ptr_y = const_cast<int*>(&configuration().graphics.bases.max_height);
+    //     *ptr_x = width;
+    //     *ptr_y = height;
+    // }
 
 
     window = nullptr;
-    if(screen_number == 0) {
+    // if(screen_number == 0) {
         window = SDL_CreateWindow("Vega Strike",
                 // SDL_WINDOWPOS_UNDEFINED,
                 // SDL_WINDOWPOS_UNDEFINED,
                 width, height, video_flags);
-    } else {
-        // pmx-20251021  // for the time being, only dc=create on display .
-        // Screen numbers are replaced by displayID in SDL3, a bit moe complicated (but not that much)
-        window = SDL_CreateWindow("Vega Strike",
-                                // SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number),
-                                // SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number),
-                                width, height, video_flags);
-    }
+    // } else {
+    //     // pmx-20251021  // for the time being, only dc=create on display .
+    //     // Screen numbers are replaced by displayID in SDL3, a bit moe complicated (but not that much)
+    //     window = SDL_CreateWindow("Vega Strike",
+    //                             // SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number),
+    //                             // SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number),
+    //                             width, height, video_flags);
+    // }
 
     if(!window) {
         VS_LOG_FLUSH_EXIT(fatal, "No window", 1);
     }
 
-    if(screen_number > 0) {
-        // Get bounds of the secondary monitor
-        SDL_Rect displayBounds;
-        if (SDL_GetDisplayBounds(screen_number, &displayBounds) != 0) {
-            const std::string error_message = (boost::format("Failed to get display bounds: %1%") % SDL_GetError()).str();
-            VS_LOG_AND_FLUSH(error, error_message);
+    // if(screen_number > 0) {
+    //     // Get bounds of the secondary monitor
+    //     SDL_Rect displayBounds;
+    //     if (SDL_GetDisplayBounds(screen_number, &displayBounds) != 0) {
+    //         const std::string error_message = (boost::format("Failed to get display bounds: %1%") % SDL_GetError()).str();
+    //         VS_LOG_AND_FLUSH(error, error_message);
 
-            // Fallback to primary monitor
-            SDL_GetDisplayBounds(0, &displayBounds);
-        }
+    //         // Fallback to primary monitor
+    //         SDL_GetDisplayBounds(0, &displayBounds);
+    //     }
 
-        // Move to secondary monitor
-        SDL_SetWindowPosition(window, displayBounds.x, displayBounds.y);
-    }
+    //     // Move to secondary monitor
+    //     SDL_SetWindowPosition(window, displayBounds.x, displayBounds.y);
+    // }
 
-    if (configuration().graphics.full_screen) {
-        SDL_SetWindowFullscreenMode(window, NULL);
-    }
+    // if (configuration().graphics.full_screen) {
+    //     SDL_SetWindowFullscreenMode(window, NULL);
+    // }
 
     if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {
         VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) succeeded");
@@ -394,10 +394,10 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 #endif
 
     // This makes our buffer swap synchronized with the monitor's vertical refresh
-    if (SDL_GL_SetSwapInterval(1) < 0) {
-        VS_LOG_AND_FLUSH(error, "SDL_GL_SetSwapInterval(1) failed");
-        SDL_ClearError();
-    }
+    // if (SDL_GL_SetSwapInterval(1) < 0) {
+    //     VS_LOG_AND_FLUSH(error, "SDL_GL_SetSwapInterval(1) failed");
+    //     SDL_ClearError();
+    // }
 
     return true;
 }
