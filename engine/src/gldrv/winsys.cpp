@@ -366,9 +366,6 @@ std:string screen_name = "";
                 << " x,y = " << display_bounds.x << "," << display_bounds.y
                 << " w,h = " << display_bounds.w << "," << display_bounds.h
                 << std::endl;
-
-            width = desktop_mode->w;
-            height = desktop_mode->h;
         } else {
             VS_LOG_FLUSH_EXIT(fatal, "Could not get desktop display mode", 1);
         }
@@ -410,7 +407,6 @@ std:string screen_name = "";
     std::cerr << "SDL_GetWindowSizeInPixels() resolution. "
         << " w,h = " << native_resolution_x << "," << native_resolution_y
         << std::endl;
-    // SDL_GetWindowSizeInPixels(window, &width, &height);
 
     SDL_GLContext context = SDL_GL_CreateContext(window);
 
@@ -453,13 +449,6 @@ std:string screen_name = "";
     }
 #endif
 
-    // This makes our buffer swap synchronized with the monitor's vertical refresh
-    // if (SDL_GL_SetSwapInterval(1) < 0) {
-    //     VS_LOG_AND_FLUSH(error, "SDL_GL_SetSwapInterval(1) failed");
-    //     SDL_ClearError();
-    // }
-
-
     SDL_ShowWindow(window);
     SDL_SyncWindow(window);
 
@@ -478,16 +467,6 @@ std:string screen_name = "";
 void winsys_init(int* argc, char** argv, char const* window_title, char const* icon_title) {
     keepRunning = true;
 
-    // pmx-20251021 hDPI changed in SDL3
-    // https://discourse.libsdl.org/t/question-regarding-sdl3-high-pixel-density-w-opengl/50964
-    // if (SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2")) {
-    //     VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, ...) succeeded");
-    // } else {
-    //     VS_LOG_AND_FLUSH(warning, "SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, ...) failed");
-    //     SDL_ClearError();
-    // }
-
-    //SDL_INIT_AUDIO|
 #if defined(NO_SDL_JOYSTICK)
     constexpr Uint32 sdl_flags = SDL_INIT_VIDEO;
 #else
@@ -550,6 +529,7 @@ void winsys_cleanup() {
 
 void winsys_shutdown() {
     keepRunning = false;
+    winsys_cleanup();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -596,8 +576,6 @@ void winsys_process_events() {
         memset(keysym_to_unicode, 0, sizeof(keysym_to_unicode));
     }
     while (keepRunning) {
-        // SDL_LockAudio();
-        // SDL_UnlockAudio();
         while (SDL_PollEvent(&event)) {
 
             state = false;
@@ -608,14 +586,6 @@ void winsys_process_events() {
             case SDL_EVENT_KEY_DOWN:
                 if (keyboard_func) {
                     SDL_GetMouseState(&x, &y);
-                    //                        VS_LOG(debug, (boost::format("Kbd: %1$s mod:%2$x sym:%3$x scan:%4$x")
-                    //                                       % ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN")
-                    //                                       % event.key.keysym.mod
-                    //                                       % event.key.keysym.sym
-                    //                                       % event.key.keysym.scancode
-                    //                                      ));
-
-                                            //Send the event
                     (*keyboard_func)(event.key.key, event.key.mod, event.key.down, x, y);
                 }
                 break;
@@ -669,8 +639,7 @@ void winsys_process_events() {
             default:
                 break;
             }
-            // SDL_LockAudio();
-            // SDL_UnlockAudio();
+
         }
         if (redisplay && display_func) {
             redisplay = false;
@@ -709,9 +678,6 @@ void winsys_atexit(winsys_atexit_func_t func) {
  *  \date    Modified: 2000-10-20
  */
 void winsys_exit(int code) {
-    // Reverting resolution by exiting fullscreen
-    SDL_SetWindowFullscreen(window, 0);
-
     winsys_shutdown();
     if (atexit_func) {
         (*atexit_func)();
