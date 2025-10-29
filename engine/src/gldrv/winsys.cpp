@@ -296,8 +296,8 @@ std:string screen_name = "";
     width = g_game.x_resolution;
     height = g_game.y_resolution;
 
-    screen_number = 1; // configuration().graphics.screen;
-    full_screen = 1; // gl_options.fullscreen;
+    full_screen = vs_options::instance().fullscreen;
+    screen_number = vs_options::instance().screen_number;
 
     result = get_sdl_display_name_by_nr(screen_number, screen_name, instance_ID);
     // width and height are from the config file. We check if tis resolution 
@@ -485,7 +485,7 @@ void winsys_init(int* argc, char** argv, char const* window_title, char const* i
     constexpr Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_JOYSTICK;
 #endif
 
-    // Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
+    // pmx-20251029 Should I add 'screen_number' in gl_options ? Not needed with SDL, but GLUT ???    
     g_game.x_resolution = vs_options::instance().x_resolution;
     g_game.y_resolution = vs_options::instance().y_resolution;
     gl_options.fullscreen = vs_options::instance().fullscreen;
