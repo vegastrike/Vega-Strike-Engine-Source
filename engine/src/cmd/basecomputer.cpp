@@ -540,7 +540,7 @@ void BaseComputer::constructControls(void) {
         return;
     }
 
-    if (m_displayModes.size() != 1) {
+    // if (m_displayModes.size() != 1) {
         //Base info title.
         StaticDisplay *baseTitle = (StaticDisplay*)getControl(controls["baseTitle"]);
         window()->addControl(baseTitle);
@@ -552,7 +552,7 @@ void BaseComputer::constructControls(void) {
         //Options button.
         NewButton *options = (NewButton*)getControl(controls["saveLoad"]);
         window()->addControl(options);
-    }
+    // }
 
     NewButton *done = (NewButton*)getControl(controls["done"]);
     window()->addControl(done);
