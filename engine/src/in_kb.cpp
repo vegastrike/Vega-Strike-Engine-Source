@@ -52,7 +52,7 @@ static void kbGetInput(int key, int modifiers, bool release, int x, int y) {
     if ((keyBindings[map_key].state == DOWN || keyBindings[map_key].state == RESET) && release) {
         keyBindings[map_key].function(keyBindings[map_key].data, RELEASE);
     }
-    keyBindings[map_key].state = release ? UP : DOWN;
+    // keyBindings[map_key].state = release ? UP : DOWN;
     _Universe->SetActiveCockpit(i);
 }
 
@@ -176,7 +176,6 @@ void glut_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, in
                 if (keyBindings[shiftdown_key].state == DOWN) {
                     kbGetInput(shiftdown(ch), i, release, x, y);
                 }
-
                 if (keyBindings[shiftup_key].state == DOWN) {
                     kbGetInput(shiftup(ch), i, release, x, y);
                 }
