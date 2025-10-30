@@ -527,6 +527,34 @@ bool Unit::GettingDestroyed() const {
     return hull.Destroyed();
 }
 
+// This creates a nearly destroyed unit to float in space
+void Unit::Derelict() {
+    hull.Set(hull.TotalMaxLayerValue() * 0.05);
+
+    // Downgrade ship
+    reactor.Downgrade();
+    fuel.Downgrade();
+    energy.Downgrade();
+    ftl_energy.Downgrade();
+    
+    afterburner.Downgrade();
+    afterburner_upgrade.Downgrade();
+    armor.Downgrade();
+    cloak.Downgrade();
+    computer.Downgrade();
+    drive.Downgrade();
+    drive_upgrade.Downgrade();
+    ecm.Downgrade();
+    ftl_drive.Downgrade();
+    jump_drive.Downgrade();
+    radar.Downgrade();
+    repair_bot.Downgrade();
+    shield.Downgrade();
+    ship_functions.Downgrade();
+
+    // Change texture
+}
+
 vector<Mesh *> Unit::StealMeshes() {
     vector<Mesh *> ret;
 
