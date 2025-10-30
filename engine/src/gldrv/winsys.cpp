@@ -208,24 +208,20 @@ bool get_sdl_display_name_by_nr(int screen_number, std::string& screen_name, SDL
     std::ostringstream display_names;
     int num_displays = 0;
     bool found = false;
-    std::cerr << "===============================================================" << std::endl;
     SDL_DisplayID* displays = SDL_GetDisplays(&num_displays);
     if (displays) {
         int i;
         for (i = 0; i < num_displays; ++i) {
             SDL_DisplayID instance_id = displays[i];
             const char* name = SDL_GetDisplayName(instance_id);
-            display_names << "Display " << i << ": " << (name ? name : "Unknown") << "\n";
             if (i == screen_number) {
                 screen_name = name ? name : "Unknown";
                 id = instance_id;
                 found = true;
             }
-            std::cerr << "Display " << i << ": " << name << std::endl;
         }
         SDL_free(displays);
     }
-    std::cerr << "===============================================================" << std::endl;
 
     return found;
 }
@@ -311,12 +307,6 @@ std:string screen_name = "";
             for (int i = 0; i < num_modes; ++i) {
                 mode = modes[i];
                 SDL_GetDisplayBounds(instance_ID, &display_bounds);
-                std::cerr << "Screen " << screen_number << " Display " << instance_ID << " Mode " << i << ": " << mode->w << "x" << mode->h << "@"
-                    << mode->refresh_rate << "Hz"
-                    << " Display bounds :"
-                    << " x,y = " << display_bounds.x << "," << display_bounds.y
-                    << " w,h = " << display_bounds.w << "," << display_bounds.h
-                    << std::endl;
                 if ((mode->w == width) && (mode->h == height)) {
                     found = true;
                     std::memcpy(mode_for_ID, mode, sizeof(SDL_DisplayMode)); // pmx-20251026 NI'm not sure of the life length of the data pointed
@@ -340,12 +330,6 @@ std:string screen_name = "";
                 if (desktop_mode != nullptr) {
                     std::memcpy(mode_for_ID, desktop_mode, sizeof(SDL_DisplayMode));
                     SDL_GetDisplayBounds(instance_ID, &display_bounds);
-                    std::cerr << "Fallback to desktop resolution."
-                        << screen_number << " Display " << instance_ID << " Mode " << instance_ID << ": " << desktop_mode->w << "x" << desktop_mode->h << "@"
-                        << desktop_mode->refresh_rate << "Hz"
-                        << " x,y = " << display_bounds.x << "," << display_bounds.y
-                        << " w,h = " << display_bounds.w << "," << display_bounds.h
-                        << std::endl;
                     width = desktop_mode->w;
                     height = desktop_mode->h;
                 } else {
@@ -360,12 +344,6 @@ std:string screen_name = "";
         if (desktop_mode != nullptr) {
             std::memcpy(mode_for_ID, desktop_mode, sizeof(SDL_DisplayMode));
             SDL_GetDisplayBounds(instance_ID, &display_bounds);
-            std::cerr << "Screen "
-                << screen_number << " Display " << instance_ID << " Mode " << instance_ID << ": " << desktop_mode->w << "x" << desktop_mode->h << "@"
-                << desktop_mode->refresh_rate << "Hz"
-                << " x,y = " << display_bounds.x << "," << display_bounds.y
-                << " w,h = " << display_bounds.w << "," << display_bounds.h
-                << std::endl;
         } else {
             VS_LOG_FLUSH_EXIT(fatal, "Could not get desktop display mode", 1);
         }
@@ -404,14 +382,10 @@ std:string screen_name = "";
 
     // pmx-2025-1027 SHould even work with HDPi displays; I've no way to test that.
     SDL_GetWindowSizeInPixels(window, &native_resolution_x, &native_resolution_y);
-    std::cerr << "SDL_GetWindowSizeInPixels() resolution. "
-        << " w,h = " << native_resolution_x << "," << native_resolution_y
-        << std::endl;
-
+    
     SDL_GLContext context = SDL_GL_CreateContext(window);
 
     if (!context) {
-        std::cerr << "No GL context\n" << std::flush;
         VS_LOG_FLUSH_EXIT(fatal, "No GL context", 1);
     }
 
@@ -598,11 +572,6 @@ void winsys_process_events() {
                         event.button.x,
                         event.button.y);
                 }
-                std::cerr << "Btn " << std::to_string(event.button.button)
-                    << "; Down ? " << std::to_string(event.button.down)
-                    << "; x " << std::to_string(event.button.x)
-                    << "; y " << std::to_string(event.button.y)
-                    << std::endl;
                 break;
 
             case SDL_EVENT_MOUSE_MOTION:
