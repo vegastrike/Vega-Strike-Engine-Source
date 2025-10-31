@@ -511,7 +511,7 @@ GFXColor BaseComputer::getColorForGroup(std::string id) {
 
 //Hack that constructs controls in code.
 void BaseComputer::constructControls(void) {
-    if (m_displayModes.size() != 1 || m_displayModes[0] != NETWORK) {
+    // if (m_displayModes.size() != 1 || m_displayModes[0] != NETWORK) {
         //Base info title.
         StaticDisplay *baseTitle = new StaticDisplay;
         baseTitle->setRect(Rect(-.96, .76, 1.9, .08));
@@ -549,7 +549,7 @@ void BaseComputer::constructControls(void) {
         options->setFont(Font(.08));
         //Put the button on the window.
         window()->addControl(options);
-    }
+    // }
     static GFXColor doneColor = vs_config->getColor("base_done_color", GFXColor(.75, 0, 0));
     //Done button.
     NewButton *done = new NewButton;
