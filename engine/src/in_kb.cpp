@@ -200,7 +200,7 @@ void RestoreKB() {
         if (it->second.state == DOWN) {
             it->second.function(keyBindings[it->first].data, RELEASE);
         }
-        it->second.state = RESET;  // Could be UP
+        it->second.state = UP;  // Could be RESET ?
     }
     // for (int i = 0; i < LAST_MODIFIER; ++i) {
     //     for (int a = 0; a < KEYMAP_SIZE; a++) {
