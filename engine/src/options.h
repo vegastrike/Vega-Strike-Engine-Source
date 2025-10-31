@@ -195,6 +195,7 @@ public:
     int x_resolution{};
     int y_resolution{};
     bool fullscreen{};
+    int screen_number{};
     int colordepth{};
     bool glut_stencil{};
     std::string mac_shader_name;

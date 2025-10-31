@@ -48,25 +48,26 @@
 #include "options.h"
 #include "vs_exit.h"
 
-#include "SDL2/SDL_video.h"
+#include "SDL3/SDL_video.h"
 
-/*
- * Windowing System Abstraction Layer
- * Abstracts creation of windows, handling of events, etc.
- */
-
+// #include "gldrv/mouse_cursor.h"
 #if defined (SDL_WINDOWING) && defined (HAVE_SDL)
 
-/*
- * *---------------------------------------------------------------------------
- * *---------------------------------------------------------------------------
- * SDL version
- *******************************---------------------------------------------------------------------------
- *******************************---------------------------------------------------------------------------
- */
+ /*
+  * Windowing System Abstraction Layer
+  * Abstracts creation of windows, handling of events, etc.
+  */
 
-static SDL_Window *window = nullptr;
-//static SDL_Surface *screen = nullptr;
+  /*
+   * *---------------------------------------------------------------------------
+   * *---------------------------------------------------------------------------
+   * SDL version
+   *******************************---------------------------------------------------------------------------
+   *******************************---------------------------------------------------------------------------
+   */
+
+static SDL_Window* window = nullptr;
+static SDL_Surface* screen = nullptr;
 
 static winsys_display_func_t display_func = nullptr;
 static winsys_idle_func_t idle_func = nullptr;
@@ -194,6 +195,40 @@ void winsys_warp_pointer(int x, int y) {
     SDL_WarpMouseInWindow(current_window, x, y);
 }
 
+// Store real resolution
+int native_resolution_x;
+int native_resolution_y;
+
+
+/*---------------------------------------------------------------------------*/
+// pmx-20251026
+bool get_sdl_display_name_by_nr(int screen_number, std::string& screen_name, SDL_DisplayID& id) {
+    std::ostringstream display_names;
+    int num_displays = 0;
+    bool found = false;
+    std::cerr << "===============================================================" << std::endl;
+    SDL_DisplayID* displays = SDL_GetDisplays(&num_displays);
+    if (displays) {
+        int i;
+        for (i = 0; i < num_displays; ++i) {
+            SDL_DisplayID instance_id = displays[i];
+            const char* name = SDL_GetDisplayName(instance_id);
+            display_names << "Display " << i << " Instance ID "<< instance_id<<" " << (name ? name : "Unknown") << "\n";
+            if (i == screen_number) {
+                screen_name = name ? name : "Unknown";
+                id = instance_id;
+                found = true;
+                std::cerr<<"Found screen "<< screen_number << " Display ID "<< instance_id<<" "<< name<<std::endl;
+            }
+            std::cerr << "Display " << i << ": " << name << std::endl;
+        }
+        SDL_free(displays);
+    }
+    std::cerr << "===============================================================" << std::endl;
+
+    return found;
+}
+
 /*---------------------------------------------------------------------------*/
 /*!
  *  Sets up the SDL OpenGL rendering context
@@ -202,18 +237,22 @@ void winsys_warp_pointer(int x, int y) {
  *  \date    Modified: 2021-09-07 - stephengtuggy
  */
 static bool setup_sdl_video_mode() {
-    Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN; // | SDL_WINDOW_ALLOW_HIGHDPI;
-    int bpp = 0; // Bits per pixel?
-    int width, height;
-    if (gl_options.fullscreen) {
-        video_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+    int screen_number = 0;
+    Uint32 video_flags = 0;
+    int bpp = 0;
+    int width;
+    int height;
+    bool full_screen;
+    SDL_Rect display_bounds;
+    bool result;
+
+std:string screen_name = "";
+    SDL_DisplayID instance_ID;
+    SDL_DisplayMode* mode_for_ID = (SDL_DisplayMode*)std::calloc(sizeof(SDL_DisplayMode), 1);
+    if (mode_for_ID == nullptr) {
+        VS_LOG_FLUSH_EXIT(fatal, "Memory allocation error", 1);
     }
-    else
-    {
-#ifndef _WIN32
-        video_flags |= SDL_WINDOW_RESIZABLE;
-#endif
-    }
+
     bpp = gl_options.color_depth;
 
     int rs, gs, bs;
@@ -248,19 +287,99 @@ static bool setup_sdl_video_mode() {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, vs_options::instance().z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     }
+
     if (vs_options::instance().gl_accelerated_visual) {
-        if (SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1) < 0) {
-            VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, ...) failed! Error: %1%") % SDL_GetError()), 1);
-        }
+        SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
+
+
     width = g_game.x_resolution;
     height = g_game.y_resolution;
 
-    window = SDL_CreateWindow("Vega Strike", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, video_flags);
+    full_screen = vs_options::instance().fullscreen;
+    screen_number = vs_options::instance().screen_number;
 
-    if (!window) {
-        VS_LOG_FLUSH_EXIT(fatal, "No window", 1);
+    result = get_sdl_display_name_by_nr(screen_number, screen_name, instance_ID);
+    // width and height are from the config file. We check if tis resolution 
+    // is supported in full screen mode.
+    if (full_screen) {
+        video_flags |= SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_HIDDEN;
+        int num_modes = 0;
+        bool found = false;
+        SDL_DisplayMode** modes = SDL_GetFullscreenDisplayModes(instance_ID, &num_modes);
+        if (modes) {
+            SDL_DisplayMode* mode = nullptr;
+            for (int i = 0; i < num_modes; ++i) {
+                mode = modes[i];
+                SDL_GetDisplayBounds(instance_ID, &display_bounds);
+                std::cerr << "Screen " << screen_number << " Display " << instance_ID << " Mode " << i << ": " << mode->w << "x" << mode->h << "@"
+                    << mode->refresh_rate << "Hz"
+                    << " Display bounds :"
+                    << " x,y = " << display_bounds.x << "," << display_bounds.y
+                    << " w,h = " << display_bounds.w << "," << display_bounds.h
+                    << std::endl;
+                if ((mode->w == width) && (mode->h == height)) {
+                    found = true;
+                    std::memcpy(mode_for_ID, mode, sizeof(SDL_DisplayMode)); // pmx-20251026 NI'm not sure of the life length of the data pointed
+                    // by 'mode', for ther time being, I prefer to copy. May recheck later.
+                    break;
+                }
+            }
+        }
+        if (found == false) {
+            // pmx-20251026 Try to find the closest resolution.or no,
+            // Normally, the setup app will only offer existing resolution, so we should only get
+            // there when changing the hardware configuration.
+            SDL_DisplayMode* mode = nullptr;
+            bool result = SDL_GetClosestFullscreenDisplayMode(instance_ID, width, height, 0, true, mode);
+            if (result == true) {
+                std::memcpy(mode_for_ID, mode, sizeof(SDL_DisplayMode));
+            } else {
+                // Fallback to the desktop display mode for the display
+                SDL_ClearError();
+                const SDL_DisplayMode* desktop_mode = SDL_GetDesktopDisplayMode(instance_ID);
+                if (desktop_mode != nullptr) {
+                    std::memcpy(mode_for_ID, desktop_mode, sizeof(SDL_DisplayMode));
+                    SDL_GetDisplayBounds(instance_ID, &display_bounds);
+                    std::cerr << "Fallback to desktop resolution."
+                        << screen_number << " Display " << instance_ID << " Mode " << instance_ID << ": " << desktop_mode->w << "x" << desktop_mode->h << "@"
+                        << desktop_mode->refresh_rate << "Hz"
+                        << " x,y = " << display_bounds.x << "," << display_bounds.y
+                        << " w,h = " << display_bounds.w << "," << display_bounds.h
+                        << std::endl;
+                    width = desktop_mode->w;
+                    height = desktop_mode->h;
+                } else {
+                    VS_LOG_FLUSH_EXIT(fatal, "Could not get desktop display mode", 1); // Sorry, we have tried everything...
+                }
+            }
+        }
+        SDL_free(modes);
+    } else { // Not full screen
+        video_flags |= SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
+        const SDL_DisplayMode* desktop_mode = SDL_GetDesktopDisplayMode(instance_ID);
+        if (desktop_mode != nullptr) {
+            std::memcpy(mode_for_ID, desktop_mode, sizeof(SDL_DisplayMode));
+            SDL_GetDisplayBounds(instance_ID, &display_bounds);
+            std::cerr << "Screen "
+                << screen_number << " Display " << instance_ID << " Mode " << instance_ID << ": " << desktop_mode->w << "x" << desktop_mode->h << "@"
+                << desktop_mode->refresh_rate << "Hz"
+                << " x,y = " << display_bounds.x << "," << display_bounds.y
+                << " w,h = " << display_bounds.w << "," << display_bounds.h
+                << std::endl;
+
+            // width = desktop_mode->w;
+            // height = desktop_mode->h;
+        } else {
+            VS_LOG_FLUSH_EXIT(fatal, "Could not get desktop display mode", 1);
+        }
     }
+
+    g_game.x_resolution = width;
+    g_game.y_resolution = height;
+    
+    window = nullptr;
+    SDL_Renderer* renderer = nullptr;
 
     if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {
         VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) succeeded");
@@ -271,13 +390,37 @@ static bool setup_sdl_video_mode() {
         SDL_ClearError();
     }
 
-    SDL_GL_GetDrawableSize(window, &width, &height);
+    result = SDL_CreateWindowAndRenderer("Vega Strike", width, height, video_flags, &window, &renderer);
+    if (result == false) {
+        VS_LOG_FLUSH_EXIT(fatal, "SDL_CreateWindowAndRender(...) error", 1);
+    }
+    SDL_SetWindowSize(window, width, height);
+    int refx = display_bounds.x + display_bounds.w / 2 - width / 2;
+    int refy = display_bounds.y + display_bounds.h / 2 - height / 2;
+    SDL_SetWindowPosition(window, refx, refy);
+    SDL_WINDOWPOS_CENTERED;
+
+
+    if (full_screen) {
+        SDL_SetWindowPosition(window, display_bounds.x, display_bounds.y);
+        SDL_SetWindowFullscreenMode(window, mode_for_ID);
+    } else {
+        SDL_WINDOWPOS_CENTERED_DISPLAY(instance_ID);
+    }
+
+    // pmx-2025-1027 SHould even work with HDPi displays; I've no way to test that.
+    SDL_GetWindowSizeInPixels(window, &native_resolution_x, &native_resolution_y);
+    std::cerr << "SDL_GetWindowSizeInPixels() resolution. "
+        << " w,h = " << native_resolution_x << "," << native_resolution_y
+        << std::endl;
+    // SDL_GetWindowSizeInPixels(window, &width, &height);
 
     SDL_GLContext context = SDL_GL_CreateContext(window);
     if (!context) {
         VS_LOG_FLUSH_EXIT(fatal, "No GL context", 1);
     }
 
+    
     VS_LOG_AND_FLUSH(important_info, (boost::format("GL Vendor: %1%") % glGetString(GL_VENDOR)));
     VS_LOG_AND_FLUSH(important_info, (boost::format("GL Renderer: %1%") % glGetString(GL_RENDERER)));
     VS_LOG_AND_FLUSH(important_info, (boost::format("GL Version: %1%") % glGetString(GL_VERSION)));
@@ -286,31 +429,7 @@ static bool setup_sdl_video_mode() {
         VS_LOG_FLUSH_EXIT(fatal, "Failed to make window context current", 1);
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (renderer == nullptr) {
-        VS_LOG_AND_FLUSH(error, (boost::format(
-            "SDL_CreateRenderer(...) with VSync option failed; trying again without VSync option. Error was: %1%") %
-            SDL_GetError()));
-        SDL_ClearError();
-
-        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-        if (renderer == nullptr) {
-            VS_LOG_AND_FLUSH(error, (boost::format(
-                "SDL_CreateRenderer(...) with SDL_RENDERER_ACCELERATED failed; trying again with software rendering option. Error was: %1%") %
-                SDL_GetError()));
-            SDL_ClearError();
-
-            renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
-            if (renderer == nullptr) {
-                VS_LOG_FLUSH_EXIT(fatal, (boost::format(
-                    "SDL_CreateRenderer(...) failed on the third try, with software rendering! Error: %1%") %
-                    SDL_GetError()),
-                    1);
-            }
-        }
-    }
-
-    if (SDL_RenderSetLogicalSize(renderer, width, height) < 0) {
+    if (SDL_SetRenderLogicalPresentation(renderer, width, height, SDL_LOGICAL_PRESENTATION_DISABLED) < 0) {
         VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_RenderSetLogicalSize(...) failed! Error: %1%") % SDL_GetError()),
             8);
     }
@@ -336,10 +455,14 @@ static bool setup_sdl_video_mode() {
 #endif
 
     // This makes our buffer swap synchronized with the monitor's vertical refresh
-    if (SDL_GL_SetSwapInterval(1) < 0) {
-        VS_LOG_AND_FLUSH(error, "SDL_GL_SetSwapInterval(1) failed");
-        SDL_ClearError();
-    }
+    // if (SDL_GL_SetSwapInterval(1) < 0) {
+    //     VS_LOG_AND_FLUSH(error, "SDL_GL_SetSwapInterval(1) failed");
+    //     SDL_ClearError();
+    // }
+
+
+    SDL_ShowWindow(window);
+    SDL_SyncWindow(window);
 
     return true;
 }
@@ -353,23 +476,20 @@ static bool setup_sdl_video_mode() {
  *  \date    Modified: 2020-07-27 stephengtuggy
  */
 
-void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title) {
+void winsys_init(int* argc, char** argv, char const* window_title, char const* icon_title) {
     keepRunning = true;
 
-#if defined(WIN32)
-    if (SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2")) {
-        VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, ...) succeeded");
-    } else {
-        VS_LOG_AND_FLUSH(warning, "SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, ...) failed");
-        SDL_ClearError();
-    }
+#if defined(NO_SDL_JOYSTICK)
+    constexpr Uint32 sdl_flags = SDL_INIT_VIDEO;
+#else
+    constexpr Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_JOYSTICK;
 #endif
 
-    Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
+    // pmx-20251029 Should I add 'screen_number' in gl_options ? Not needed with SDL, but GLUT ???    
     g_game.x_resolution = vs_options::instance().x_resolution;
     g_game.y_resolution = vs_options::instance().y_resolution;
-//    gl_options.fullscreen = vs_options::instance().fullscreen;
-//    gl_options.color_depth = vs_options::instance().colordepth;
+    gl_options.fullscreen = vs_options::instance().fullscreen;
+    gl_options.color_depth = vs_options::instance().colordepth;
     /*
      * Initialize SDL
      */
@@ -393,18 +513,17 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     }
 
     //signal( SIGSEGV, SIG_DFL );
-    SDL_Surface *icon = nullptr;
+    SDL_Surface* icon = nullptr;
     if (icon_title) {
         icon = SDL_LoadBMP(icon_title);
     }
     if (icon) {
-//        SDL_BlitSurface(i)
-        SDL_SetColorKey(icon, SDL_TRUE, ((Uint32 *) (icon->pixels))[0]);
+        SDL_SetSurfaceColorKey(icon, true, ((Uint32*)(icon->pixels))[0]);
     }
 
 #if defined (USE_STENCIL_BUFFER)
     /* Not sure if this is sufficient to activate stencil buffer  */
-    SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 #endif
 
     if (!setup_sdl_video_mode()) {
@@ -431,6 +550,7 @@ void winsys_cleanup() {
 
 void winsys_shutdown() {
     keepRunning = false;
+    winsys_cleanup();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -443,7 +563,10 @@ void winsys_shutdown() {
 void winsys_show_cursor(bool visible) {
     static bool vis = true;
     if (visible != vis) {
-        SDL_ShowCursor(visible);
+        if (visible)
+            SDL_ShowCursor();
+        else
+            SDL_HideCursor();
         vis = visible;
     }
 }
@@ -464,7 +587,7 @@ extern int shiftup(int);
 
 void winsys_process_events() {
     SDL_Event event;
-    int x, y;
+    float x, y;
     bool state;
 
     static unsigned int keysym_to_unicode[256];
@@ -474,80 +597,81 @@ void winsys_process_events() {
         memset(keysym_to_unicode, 0, sizeof(keysym_to_unicode));
     }
     while (keepRunning) {
-        SDL_LockAudio();
-        SDL_UnlockAudio();
+        // SDL_LockAudio();
+        // SDL_UnlockAudio();
         while (SDL_PollEvent(&event)) {
 
             state = false;
             switch (event.type) {
-                case SDL_KEYUP:
-                    state = true;
-                    if (keyboard_func) {
-                        SDL_GetMouseState(&x, &y);
+            case SDL_EVENT_KEY_UP:
+                state = true;
+                //does same thing as KEYDOWN, but with different state.
+            case SDL_EVENT_KEY_DOWN:
+                if (keyboard_func) {
+                    SDL_GetMouseState(&x, &y);
+                    //                        VS_LOG(debug, (boost::format("Kbd: %1$s mod:%2$x sym:%3$x scan:%4$x")
+                    //                                       % ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN")
+                    //                                       % event.key.keysym.mod
+                    //                                       % event.key.keysym.sym
+                    //                                       % event.key.keysym.scancode
+                    //                                      ));
 
-                        //Send the event
-                        (*keyboard_func)(event.key.keysym.sym, event.key.keysym.mod,
-                                         state,
-                                         x, y);
+                                            //Send the event
+                    (*keyboard_func)(event.key.key, event.key.mod, event.key.down, x, y);
+                }
+                break;
+
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+                if (mouse_func) {
+                    (*mouse_func)(event.button.button,
+                        event.button.down,
+                        event.button.x,
+                        event.button.y);
+                }
+                std::cerr << "Btn " << std::to_string(event.button.button)
+                    << "; Down ? " << std::to_string(event.button.down)
+                    << "; x " << std::to_string(event.button.x)
+                    << "; y " << std::to_string(event.button.y)
+                    << std::endl;
+                break;
+
+            case SDL_EVENT_MOUSE_MOTION:
+                if (event.motion.state) {
+                    /* buttons are down */
+                    if (motion_func) {
+                        (*motion_func)(event.motion.x,
+                            event.motion.y);
                     }
-                    break;
-                case SDL_KEYDOWN:
-
-                    if (keyboard_func && (event.key.repeat == 0)) {
-                        SDL_GetMouseState(&x, &y);
-
-                        //Send the event
-                        (*keyboard_func)(event.key.keysym.sym, event.key.keysym.mod,
-                                state,
-                                x, y);
-                    }
-                    break;
-
-                case SDL_MOUSEBUTTONDOWN:
-                case SDL_MOUSEBUTTONUP:
-                    if (mouse_func) {
-                        (*mouse_func)(event.button.button,
-                                event.button.state,
-                                event.button.x,
-                                event.button.y);
-                    }
-                    break;
-
-                case SDL_MOUSEMOTION:
-                    if (event.motion.state) {
-                        /* buttons are down */
-                        if (motion_func) {
-                            (*motion_func)(event.motion.x,
-                                    event.motion.y);
-                        }
-                    } else
-                        /* no buttons are down */
+                } else
+                    /* no buttons are down */
                     if (passive_motion_func) {
                         (*passive_motion_func)(event.motion.x,
-                                event.motion.y);
+                            event.motion.y);
                     }
-                    break;
+                break;
 
-                case SDL_WINDOWEVENT_RESIZED:
+            case SDL_EVENT_WINDOW_RESIZED:
 #if !(defined (_WIN32) && defined (SDL_WINDOWING ))
-                    int width, height;
-                    SDL_GL_GetDrawableSize(window, &width, &height);
-                    g_game.x_resolution = width;
-                    g_game.y_resolution = height;
-                    g_game.aspect = static_cast<float>(width) / static_cast<float>(height);
-                    if (reshape_func) {
-                        (*reshape_func)(width, height);
-                    }
+                g_game.x_resolution = event.window.data1;
+                g_game.y_resolution = event.window.data2;
+                //setup_sdl_video_mode(argc, argv);
+                if (reshape_func) {
+                    (*reshape_func)(event.window.data1,
+                        event.window.data2);
+                }
 #endif
-                    break;
+                break;
 
-                case SDL_QUIT:
-                    cleanexit = true;
-                    keepRunning = false;
-                    break;
+            case SDL_EVENT_QUIT:
+                cleanexit = true;
+                keepRunning = false;
+                break;
+            default:
+                break;
             }
-            SDL_LockAudio();
-            SDL_UnlockAudio();
+            // SDL_LockAudio();
+            // SDL_UnlockAudio();
         }
         if (redisplay && display_func) {
             redisplay = false;
@@ -591,7 +715,7 @@ void winsys_exit(int code) {
     if (atexit_func) {
         (*atexit_func)();
     }
-    exit( code );
+    exit(code);
 }
 
 #else

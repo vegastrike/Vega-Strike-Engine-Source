@@ -33,9 +33,7 @@
 #include "vs_globals.h"
 
 #include <glh/glh_extensions.h>
-// #include <iostream>
-#include <string>
-#include <shared/data_path.h>
+g#include <shared/data_path.h>
 
 #include "vs_logging.h"
 

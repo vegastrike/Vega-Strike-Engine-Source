@@ -199,6 +199,7 @@ void vs_options::init() {
     x_resolution = XMLSupport::parse_int(vs_config->getVariable("graphics", "x_resolution", "1024"));
     y_resolution = XMLSupport::parse_int(vs_config->getVariable("graphics", "y_resolution", "768"));
     fullscreen = XMLSupport::parse_bool(vs_config->getVariable("graphics", "fullscreen", "false"));
+    screen_number = XMLSupport::parse_int(vs_config->getVariable("graphics", "screen_number", "0"));
     colordepth = XMLSupport::parse_int(vs_config->getVariable("graphics", "colordepth", "32"));
     glut_stencil = XMLSupport::parse_bool(vs_config->getVariable("graphics", "glut_stencil", "true"));
     // The Following makes no sense.   Why differentiate mac and pc shaders if they have unique names anyway?
