@@ -478,7 +478,7 @@ std:string screen_name = "";
 
 void winsys_init(int* argc, char** argv, char const* window_title, char const* icon_title) {
     keepRunning = true;
-|
+
 #if defined(NO_SDL_JOYSTICK)
     constexpr Uint32 sdl_flags = SDL_INIT_VIDEO;
 #else
