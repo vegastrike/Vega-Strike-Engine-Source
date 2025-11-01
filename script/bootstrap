@@ -62,7 +62,8 @@ function bootstrapOnDebian()
     fi
 
     case "$LINUX_CODENAME" in
-        "trixie")
+
+       "trixie")
             apt-get -qy install \
                             git \
                             cmake \
@@ -82,8 +83,8 @@ function bootstrapOnDebian()
                             libvorbis-dev \
                             libglvnd-dev \
                             libgl1-mesa-dev \
-                            libsdl2-dev \
-                            libsdl2-image-dev \
+                            libsdl3-dev \
+                            libsdl3-image-dev \
                             libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
@@ -92,7 +93,7 @@ function bootstrapOnDebian()
                             libboost-json-dev \
                             libboost-program-options-dev \
                             libxmu-dev \
-                            clang \
+                            gcc \
                             lsb-release \
                             opentelemetry-cpp-dev \
                             libprotobuf-dev

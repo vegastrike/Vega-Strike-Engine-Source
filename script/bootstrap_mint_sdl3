@@ -28,90 +28,166 @@
 
 set -e
 
-echo "------------------------------"
-echo "--- bootstrap | 2025-09-02 ---"
-echo "------------------------------"
+echo "----------------------------------------------------------------"
+echo "Part of the Vegastrike build system. https://www.vega-strike.org"
+echo "---- bootstrap for locally compiled libraries | 2025-09-02  ----"
+echo "----------------------------------------------------------------"
 
-CMAKE_BUILD_TYPE="$1"
+## bash : get options without getopts
+## https://mywiki.wooledge.org/BashFAQ/035
 
-echo "Bootstrapping Vega Strike build environment for Linux Mint 22.x with SDL3 support..."
-echo "Linux 22.3 'zara' doesn't have SDL3 packages yet, so we build SDL3 from source."
-echo "Usage: sudo script/bootstrap_mint_sdl3 [CMake Build Type]"
-echo "Supported CMake Build Types: Debug, Release, RelWithDebInfo, MinSizeRel"
-echo "----------------------------------------"
-if [ -z "$CMAKE_BUILD_TYPE" ]; then
-    CMAKE_BUILD_TYPE="None"
-    echo "No CMake Build Type specified."
-    echo "Supported CMake Build Types: Debug, Release, RelWithDebInfo, MinSizeRel"
-    exit 1
-else
-    echo "CMake Build Type: ${CMAKE_BUILD_TYPE}"
-        case "$CMAKE_BUILD_TYPE" in
-            "Debug"|"Release"|"RelWithDebInfo"|"MinSizeRel")
-                echo "Valid CMake Build Type specified: ${CMAKE_BUILD_TYPE}"
-                ;;
-            *)
-                echo "Invalid CMake Build Type specified: ${CMAKE_BUILD_TYPE}"
-                echo "Supported CMake Build Types: Debug, Release, RelWithDebInfo, MinSizeRel"
-                exit 1
-                ;;
-        esac 
-fi
-echo "----------------------------------------"     
 
-function bootstrapSDL3LinuxMint() {
+
+function usage_args() {
+    cat << EOF
+    -r      A git repository adress
+            This argument is MANDATIRY.
+
+    -d      Name of a subdirectory where the git source tree will reside.
+            This subdirectory will be created by 'git clone'.
+            This argument is MANDATIRY.
+
+    -b      An OPTIONAL CMAke build type
+            CMake Build Types: Debug, Release, RelWithDebInfo, MinSizeRel
+            Defaults to 'Debug'
+
+    -n      An OPTIONAL git revision number, SHA1 hash or tag
+            Used to fix the revision compiled.
+
+    -p      An OPTIONAL patch file name. 
+            Best used in conjunction with the -n option.
+            The patch file must be applicable from the top project directory
+
+    -h      This help.
+
+Example :
+${0} -r https://github.com/libsdl-org/SDL.git -d SDL3-src -b RelWithDebInfo
+
+EOF                
+}
+
+
+function usage_top() {
+    cat << EOF
+Usage: ${0} -r git repo -d destdir [-b build type] [-n revision] [-p patch file] -h help
+Part of the Vegastrike build system. https://www.vega-strike.org
+Locally buid a library and makes it available to the Vegastrike build system.
+
+Clones or updates a git repository. Uuses CMake to build and install it in-place.
+
+EOF
+
+usage_args()
+}
+
+CMAKE_BUILD_TYPE="Debug"
+GIT_HASH=""            
+GIT_PATCH_NAME=""
+GIT_DEST_DIR=""
+GIT_REPO=""
+
+function get_arguments() {
+    while getopts r:d:b:n:p: options; do
+        case $opt in
+            r)  GIT_REPO=$OPTARG ;;
+
+            d)  GIT_DEST_DIR=$OPTARG ;;
+
+            b)  CMAKE_BUILD_TYPE=$OPTARG ;;
+
+            n)  GIT_HASH=$OPTARG ;;
+
+            p)  GIT_PATCH_NAME=$OPTARG ;;
+
+            h)  usage_top() ;;
+
+            *) usage_top() ;;
+
+        esac
+    done
+
+     if [ -z ${GIT_REPO} ]; then
+        echo "ERROR repository adress is mandatory (option -n)"
+        echo ""
+        usage_args().
+        exit(0)
+    fi 
+
+     if [ -z ${GIT_DEST_DIR} ]; then
+        echo "ERROR detination directory is mandatory (option -d)"
+        echo ""
+        usage_args().
+        exit(0)
+    fi 
+}
+
+function get_and_build() {
     # Install SDL3 from source, as Linux Mint does not yet have SDL3 packages
     # INSTALL_DIR="${HOME}/.local"
-    INSTALL_DIR="/usr/local/"
     # Install dependencies, Linux Mint 22.x
-    sudo apt-get -qy install build-essential git make \
-    pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
-    libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
-    libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
-    libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-    libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
-    libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+    # sudo apt-get -qy install build-essential git make \
+    # pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
+    # libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+    # libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+    # libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+    # libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+    # libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
     
-    # As of 2025.11.24, the SDL3 version is 3.2.24
-    # SDL3 Core
-    if [ ! -d "SDL3-source" ]; then
-        git clone https://github.com/libsdl-org/SDL.git SDL3-source
+
+    VS_ENGINE_SRC=$(pwd)
+    cd ..
+    TOP_DEV_DIR=$(pwd)
+
+    INSTALL_DIR=${TOP_DEV_DIR}"/private_rootdir"  
+    cd ${INSTALL_DIR}              
+
+    if [ ! -d ${GIT_DEST_DIR} ]; then
+        git clone ${GIT_REPO} ${GIT_DEST_DIR}
+        cd ${GIT_DEST_DIR}
+    else
+        cd ${GIT_DEST_DIR}
+        git reset --hard            ## Just in case somebody played being God here...
+        git pull
     fi 
-    cd SDL3-source
-    git checkout
-    mkdir -p  build-${CMAKE_BUILD_TYPE}
+
+    git checkout ${GIT_HASH}
+    if [ ! -z ${GIT_PATCH_NAME} ]; then
+        patch -p ${GIT_PATCH_NAME}
+    fi
+
+    mkdir -p build-${CMAKE_BUILD_TYPE}
     cmake -G Ninja -S ./ -B build-${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_DIR} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DSDL_EXAMPLES=OFF -DSDL_STATIC=OFF -DSDL_SHARED=ON
     ninja -C build-${CMAKE_BUILD_TYPE}
      
     echo "INSTALL INTO ${INSTALL_DIR}"
-    sudo ninja -C build-${CMAKE_BUILD_TYPE} install
-    sudo sudo ldconfig
-    cd ..
+    ninja -C build-${CMAKE_BUILD_TYPE} install
 
+    ## back to the top source directory
+    cd ${VS_ENGINE_SRC}
      
 
-    # SDL3_image
-    if [ ! -d "SDL3_image-source" ]; then
-        git clone https://github.com/libsdl-org/SDL_image.git SDL3_image-source
-    fi
-    cd SDL3_image-source
-    git checkout
-    mkdir -p build-${CMAKE_BUILD_TYPE}
-    # export CMAKE_MODULES_LOCAL_DIR="${INSTALL_DIR}/lib/cmake"
-    # echo "export CMAKE_MODULE_PATH set to ${CMAKE_MODULES_LOCAL_DIR}"
-    #-DCMAKE_MODULE_PATH=:PATH${CMAKE_MODULES_LOCAL_DIR} 
-    cmake -G Ninja -S ./ -B build-${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_DIR} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} 
-    ninja -C build-${CMAKE_BUILD_TYPE}
-    sudo ninja -C build-${CMAKE_BUILD_TYPE} install
-    sudo ldconfig
-    cd ..
+    # # SDL3_image
+    # if [ ! -d "SDL3_image-source" ]; then
+    #     git clone https://github.com/libsdl-org/SDL_image.git SDL3_image-source
+    # fi
+    # cd SDL3_image-source
+    # git checkout
+    # mkdir -p build-${CMAKE_BUILD_TYPE}
+    # # export CMAKE_MODULES_LOCAL_DIR="${INSTALL_DIR}/lib/cmake"
+    # # echo "export CMAKE_MODULE_PATH set to ${CMAKE_MODULES_LOCAL_DIR}"
+    # #-DCMAKE_MODULE_PATH=:PATH${CMAKE_MODULES_LOCAL_DIR} 
+    # cmake -G Ninja -S ./ -B build-${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_DIR} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} 
+    # ninja -C build-${CMAKE_BUILD_TYPE}
+    # sudo ninja -C build-${CMAKE_BUILD_TYPE} install
+    # sudo ldconfig
+    # cd ..
 
 }
 
 
-bootstrapSDL3LinuxMint
+get_arguments() 
+get_and_build() 
 
 echo "----------------------------------------"
 echo "Bootstrap completed successfully."
-echo "You can now proceed to build Vega Strike with SDL3 support."
-echo "----------------------------------------" 
+echo "----------------------------------------"

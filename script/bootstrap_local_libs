@@ -1,11 +1,11 @@
 #!/bin/bash
 ###!/usr/bin/env bash
 #====================================
-# @file   : bootstrap_mint_sdl3
-# @brief  : installs dependencies for building SDL3 on Linux Mint 22.x
-# @usage  : sudo script/bootstrap_mint_sdl3 Release (to build in Release mode)
-#     or  : sudo script/bootstrap_mint_sdl3 Debug (to build in Release mode
-# @param  : CMake build types Debug, Release, RelWithDebInfo and MinSizeReL
+# @file   : bootstrap_local_libs
+# @brief  : clones, configures and build lovcally SDL3 on Linux
+# @usage  : DO not run as root !
+#     or  : 
+# @param  : 
 # @note   : Tested on Linux Mint 22.2 "zara" as of 2025-10.24
 #====================================
 # Copyright (C) 2025 pmx
@@ -28,30 +28,26 @@
 
 set -e
 
-
-## bash : get options without getopts
-## https://mywiki.wooledge.org/BashFAQ/035
-
-
-
 function usage_args {
 cat << EOF
-    -r      A git repository adress.
+    Usage: ${0} -r git repo -d destdir [-b build type] [-n revision] [-p patch file] [-c CMake args] -h help
+
+    -r      A git repository address suitable for git clone.
             This argument is MANDATIRY.
 
     -d      Name of a subdirectory where the git source tree will reside.
             This subdirectory will be created by 'git clone'.
             This argument is MANDATIRY.
 
-    -c      Optional CMake extra parameters, one string between double quotes.
-            Example: -c =OFF -DSDL_STATIC=ON"
+    -c      OPTIONAL CMake extra parameters, one string between double quotes.
+            Example: -c "-DSDL_STATIC=ON"
 
-    -b      An OPTIONAL CMAke build type.
+    -b      OPTIONAL CMake build type.
             CMake Build Types: Debug, Release, RelWithDebInfo, MinSizeRel
-            Defaults to 'Debug'
+            Defaults to "Debug"
 
     -n      An OPTIONAL git commit reference: SHA1 hash or tag.
-            Used to fix the revision compiled.
+            Can be used to fix the git revision.
 
     -p      An OPTIONAL patch file name. 
             Best used in conjunction with the -n option.
@@ -59,21 +55,21 @@ cat << EOF
 
     -h      This help.
 
-Example :
-${0} -r https://github.com/libsdl-org/SDL.git -d SDL3-src -b RelWithDebInfo
+    Example :
+
+    ${0} -r https://github.com/libsdl-org/SDL_image.git -d SDL3_image-src -c "-DSDL_STATIC=ON"
 
 EOF
-
 }
 
 
 function usage_top {
 cat << EOF
-Usage: ${0} -r git repo -d destdir [-b build type] [-n revision] [-p patch file] -h help
-Part of the Vegastrike build system. https://www.vega-strike.org
-Locally buid a library and makes it available to the Vegastrike build system.
-
-Clones or updates a git repository. Uuses CMake to build and install it in-place.
+    
+    Part of the Vegastrike build system. https://www.vega-strike.org
+    Clones a git repository. Uses CMake to build and install in-place.
+    Locally buid a library and makes it available to the Vegastrike build system.
+    This script MUST be run from the top of the Vegastrike source directory.
 
 EOF
 
@@ -85,8 +81,9 @@ usage_args
 # }
 
 function get_and_build {
-    # Install SDL3 from source, as Linux Mint does not yet have SDL3 packages
-    # Install dependencies, Linux Mint 22.x
+    ## NOTE 11-22025 ##
+    # To install SDL3 from source, as Linux Mint 22.2 "zara",
+    # innstall the following dependencies :
     # sudo apt-get -qy install build-essential git make \
     # pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
     # libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
@@ -94,7 +91,6 @@ function get_and_build {
     # libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
     # libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
     # libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
-    
 
     VS_ENGINE_SRC="$(pwd)"
     cd ..
@@ -144,9 +140,9 @@ function get_and_build {
 
 ## Commands to produce static libraries. Not the same CMake variable / behaviour for SDL3 core and SDL3_image. WTF ??? 
 ## SDL3 :
-## script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_.git -d SDL3-src -c "-DSDL_STATIC=ON -DSDL_EXAMPLE=OFF -DSDL_TESTS=OFF -DSDL_TEST_LIBRARY=OFF"
+##  script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_.git -d SDL3-src -c "-DSDL_STATIC=ON -DSDL_EXAMPLE=OFF -DSDL_TESTS=OFF -DSDL_TEST_LIBRARY=OFF"
 ## SDL3_image :
-## script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_image.git -d SDL3_image-src -c "-DBUILD_SHARED_LIBS=OFF"
+##  script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_image.git -d SDL3_image-src -c "-DSDL_STATIC=ON"
 
 CMAKE_BUILD_TYPE="Debug"
 EXTRA_CMAKE_ARGS=""
@@ -155,7 +151,8 @@ GIT_PATCH_NAME=""
 GIT_DEST_DIR=""
 GIT_REPO=""
 
-# get_arguments
+## bash : get options with getopts
+## https://mywiki.wooledge.org/BashFAQ/035
 
 ## pmx-20251030 The following code doen't work inside a function. What did I miss ???
 while getopts "r:d:b:c:n:p:h" option; do
@@ -186,6 +183,7 @@ while getopts "r:d:b:c:n:p:h" option; do
 
         h)  
             usage_top
+        
             exit 0 
             ;;
 
