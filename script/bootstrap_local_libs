@@ -1,0 +1,227 @@
+#!/bin/bash
+###!/usr/bin/env bash
+#====================================
+# @file   : bootstrap_mint_sdl3
+# @brief  : installs dependencies for building SDL3 on Linux Mint 22.x
+# @usage  : sudo script/bootstrap_mint_sdl3 Release (to build in Release mode)
+#     or  : sudo script/bootstrap_mint_sdl3 Debug (to build in Release mode
+# @param  : CMake build types Debug, Release, RelWithDebInfo and MinSizeReL
+# @note   : Tested on Linux Mint 22.2 "zara" as of 2025-10.24
+#====================================
+# Copyright (C) 2025 pmx
+#
+# This file is part of Vega Strike.
+#
+# Vega Strike is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Vega Strike is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+
+
+set -e
+
+
+## bash : get options without getopts
+## https://mywiki.wooledge.org/BashFAQ/035
+
+
+
+function usage_args {
+cat << EOF
+    -r      A git repository adress.
+            This argument is MANDATIRY.
+
+    -d      Name of a subdirectory where the git source tree will reside.
+            This subdirectory will be created by 'git clone'.
+            This argument is MANDATIRY.
+
+    -c      Optional CMake extra parameters, one string between double quotes.
+            Example: -c =OFF -DSDL_STATIC=ON"
+
+    -b      An OPTIONAL CMAke build type.
+            CMake Build Types: Debug, Release, RelWithDebInfo, MinSizeRel
+            Defaults to 'Debug'
+
+    -n      An OPTIONAL git commit reference: SHA1 hash or tag.
+            Used to fix the revision compiled.
+
+    -p      An OPTIONAL patch file name. 
+            Best used in conjunction with the -n option.
+            The patch file must be applicable from the top project directory
+
+    -h      This help.
+
+Example :
+${0} -r https://github.com/libsdl-org/SDL.git -d SDL3-src -b RelWithDebInfo
+
+EOF
+
+}
+
+
+function usage_top {
+cat << EOF
+Usage: ${0} -r git repo -d destdir [-b build type] [-n revision] [-p patch file] -h help
+Part of the Vegastrike build system. https://www.vega-strike.org
+Locally buid a library and makes it available to the Vegastrike build system.
+
+Clones or updates a git repository. Uuses CMake to build and install it in-place.
+
+EOF
+
+usage_args
+}
+
+# function get_arguments {
+# ;
+# }
+
+function get_and_build {
+    # Install SDL3 from source, as Linux Mint does not yet have SDL3 packages
+    # Install dependencies, Linux Mint 22.x
+    # sudo apt-get -qy install build-essential git make \
+    # pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
+    # libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+    # libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+    # libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+    # libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+    # libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+    
+
+    VS_ENGINE_SRC="$(pwd)"
+    cd ..
+    TOP_DEV_DIR="$(pwd)"
+
+    INSTALL_DIR="${TOP_DEV_DIR}/private_rootdir"  
+    mkdir -p "${INSTALL_DIR}" 
+    cd "${INSTALL_DIR}"              
+
+    if [ ! -d "${GIT_DEST_DIR}" ]; then
+        git clone "${GIT_REPO}" "${GIT_DEST_DIR}"
+        cd "${GIT_DEST_DIR}"
+    else
+        cd "${GIT_DEST_DIR}"
+        git reset --hard            ## Just in case somebody played being God here...
+        git pull
+    fi 
+
+    git checkout ${GIT_HASH}
+    if [ ! -z "${GIT_PATCH_NAME}" ]; then
+        patch -p "${GIT_PATCH_NAME}"
+    fi
+
+    rm -fRv build-${CMAKE_BUILD_TYPE}
+    mkdir -p build-${CMAKE_BUILD_TYPE}
+    export _IMPORT_PREFIX="${INSTALL_DIR}"
+    cmake -G Ninja -S ./ -B build-${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX:PATH="${INSTALL_DIR}" -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_PREFIX_PATH:PATH="${INSTALL_DIR}"  "${EXTRA_CMAKE_ARGS}" 
+    ninja -C build-${CMAKE_BUILD_TYPE}
+     
+    echo "INSTALL INTO ${INSTALL_DIR}"
+    ninja -C build-${CMAKE_BUILD_TYPE} install
+
+    ## back to the top source directory
+    cd "${VS_ENGINE_SRC}"
+     
+
+     
+
+}
+
+## SDL3
+## https://github.com/libsdl-org/SDL.git  --> SDL3-source
+##
+## SDL3_image
+## https://github.com/libsdl-org/SDL_image.git --> SDL3_image-source
+
+
+## Commands to produce static libraries. Not the same CMake variable / behaviour for SDL3 core and SDL3_image. WTF ??? 
+## SDL3 :
+## script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_.git -d SDL3-src -c "-DSDL_STATIC=ON -DSDL_EXAMPLE=OFF -DSDL_TESTS=OFF -DSDL_TEST_LIBRARY=OFF"
+## SDL3_image :
+## script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_image.git -d SDL3_image-src -c "-DBUILD_SHARED_LIBS=OFF"
+
+CMAKE_BUILD_TYPE="Debug"
+EXTRA_CMAKE_ARGS=""
+GIT_HASH=""            
+GIT_PATCH_NAME=""
+GIT_DEST_DIR=""
+GIT_REPO=""
+
+# get_arguments
+
+## pmx-20251030 The following code doen't work inside a function. What did I miss ???
+while getopts "r:d:b:c:n:p:h" option; do
+    case "$option" in
+        r)  
+            GIT_REPO="${OPTARG}"
+            ;;
+
+        d)  
+            GIT_DEST_DIR="${OPTARG}"
+            ;;
+
+        b)  
+            CMAKE_BUILD_TYPE="${OPTARG}"
+            ;;
+
+        c)
+            EXTRA_CMAKE_ARGS="${OPTARG}"
+            ;;
+
+        n)  
+            GIT_HASH="${OPTARG}"
+            ;;
+
+        p)  
+            GIT_PATCH_NAME="${OPTARG}"
+            ;;
+
+        h)  
+            usage_top
+            exit 0 
+            ;;
+
+        \?) 
+            echo "unknown option -$OPTARG"
+            exit 1
+            ;;
+
+        :) 
+            usage_top
+            exit 1 
+            ;;
+    esac
+done
+
+if [ -z "${GIT_REPO}" ]; then
+    echo "ERROR repository adress is mandatory (option -r)"
+    echo "${GIT_REPO}"
+    usage_args
+    exit 
+fi 
+
+if [ -z "${GIT_DEST_DIR}" ]; then
+    echo "ERROR detination directory is mandatory (option -d)"
+    echo "${GIT_DEST_DIR}"
+    usage_args
+    exit 1
+fi
+
+echo "----------------------------------------------------------------"
+echo "Part of the Vegastrike build system. https://www.vega-strike.org"
+echo "---- bootstrap for locally compiled libraries | 2025-09-02  ----"
+echo "----------------------------------------------------------------"
+
+get_and_build 
+
+echo "----------------------------------------"
+echo "Bootstrap completed successfully."
+echo "----------------------------------------"
