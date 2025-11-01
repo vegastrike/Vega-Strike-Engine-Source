@@ -35,6 +35,28 @@ echo "------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
 
+get_and_build_sdl3() {
+    # These scripts builds static libraries of SDL3 and SDL3_image locally, 
+    # from the official SDL3 github repo.
+
+    # As the top bootstrap script is necessarily executed as root, 
+    # we have to revert to our humble self before we clone and build SDL3 locally.
+    # At this point, we are necessarily running in a sub shell as root (su command...). 
+    # If this is not the case, logname will thow an error if there were no "parent" shell.
+    # If we run logname in a **login** shell (root ?), logname returns "" and there is an error.
+    # Just in case, be prepared to catch the error and use the real login name.
+
+    REAL_USER="$(logname 2>/dev/null)" 
+    if [ $? -ne 0 ] ; then REAL_USER=$USER; fi
+
+    # SDL3 :
+    sudo -u $REAL_USER script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_.git -d SDL3-src -c "-DSDL_STATIC=ON -DSDL_EXAMPLE=OFF -DSDL_TESTS=OFF -DSDL_TEST_LIBRARY=OFF"
+    
+    # SDL3_image :
+    sudo -u $REAL_USER script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_image.git -d SDL3_image-src -c "-DBUILD_SHARED_LIBS=OFF"
+}
+
+
 if [ -f /etc/os-release ]
 then
     OS_RELEASE_LOCATION="/etc/os-release"
@@ -94,6 +116,7 @@ function bootstrapOnDebian()
                             libboost-program-options-dev \
                             libxmu-dev \
                             gcc \
+                            ninja-build \
                             lsb-release \
                             opentelemetry-cpp-dev \
                             libprotobuf-dev
@@ -302,27 +325,8 @@ function bootstrapOnLinuxMint ()
                             libboost-program-options-dev \
                             libxmu-dev \
                             gcc \
-                            g++ \
-                            lsb-release
-
-            # Install SDL3 from source, as Linux Mint does not yet have SDL3 packages
-            # Install SDL3 dependencies, Linux Mint 22.x
-            apt-get -qy install build-essential git make \
-                pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
-                libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
-                libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
-                libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-                libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
-                libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev      
-
-            # These scripts builds static libraries of SDL3 and SDL3_image locally, 
-            # from the ufficial SDL3 github repo.
-            # As bootstrap is executed as root, revert to our humble self to clone and build SDL3
-            # SDL3 :
-            sudo -u $SUDO_USER script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_.git -d SDL3-src -c "-DSDL_STATIC=ON -DSDL_EXAMPLE=OFF -DSDL_TESTS=OFF -DSDL_TEST_LIBRARY=OFF"
-            # SDL3_image :
-            sudo -u $SUDO_USER script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_image.git -d SDL3_image-src -c "-DBUILD_SHARED_LIBS=OFF"
-                            
+                            ninja-build \
+                            lsb-release                            
             ;;
         "virginia"|"victoria"|"vera"|"vanessa"|"ulyana")
             echo "Sorry, Linux Mint ${LINUX_CODENAME} is no longer supported"
@@ -331,6 +335,25 @@ function bootstrapOnLinuxMint ()
         *)
             echo "This version of Linux Mint is not directly supported. You may be able to use the corresponding Ubuntu installation package"
             exit 2
+            ;;
+    esac
+
+    # pmx-20251101
+    # Install SDL3 from source, as Linux Mint does not yet have SDL3 packages
+    # Install SDL3 dependencies tested on Linux Mint 22.2 "zara". 
+    # May work for Linux Mint 21.x too (TBD).
+    case "$LINUX_CODENAME" in
+        "wilma"|"zara"|"virginia")
+
+            apt-get -qy install build-essential git make \
+                pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
+                libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+                libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+                libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+                libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+                libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev      
+            
+            get_and_build_sdl3
             ;;
     esac
 }
