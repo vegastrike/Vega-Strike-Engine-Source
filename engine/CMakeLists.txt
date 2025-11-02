@@ -83,27 +83,52 @@ IF (NOT DISABLE_CLIENT) ##########
         MESSAGE(FATAL_ERROR "Failed to find required library OpenAL for sound functionality")
     ENDIF (OPENAL_FOUND)
 
+    ## pmx20251101 - add the local cmake macros. But dont change CMAKE_PREFIX_PATH 
+    ## All locally compileds libs, currently SDL3 and SDL3_image, ared installed
+    ## in ../private_rootdir
+    cmake_path(GET CMAKE_SOURCE_DIR PARENT_PATH local_install_top_dir)
+    cmake_path(APPEND local_install_top_dir "private_rootdir" OUTPUT_VARIABLE local_install_top_dir)
+    # cmake_path(SET local_install_top_dir NORMALIZE local_install_top_dir)
 
-    #Find SDL
-    find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
-    IF (SDL3_FOUND)
-        LIST(APPEND VSE_TST_INCLUDES SDL3::Headers)
-        LIST(APPEND VSE_TST_LIBS SDL3::SDL3-shared)
-        MESSAGE(STATUS "SDL3 Found")
+    # Try with CMAKE_MODULE_PATH. Doesn't work (scrip mode ? )
+    # list(APPEND CMAKE_MODULE_PATH "${local_install_top_dir}/lib/cmake")    
+    # MESSAGE(STATUS "CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
+
+
+    IF (EXISTS "${local_install_top_dir}/lib/libSDL3.a")
+        include_directories(BEFORE "${local_install_top_dir}/include") # DOesn't work ??
+        LIST(APPEND VSE_TST_INCLUDES "${local_install_top_dir}/include")
+        LIST(APPEND VSE_TST_LIBS "${local_install_top_dir}/lib/libSDL3.a")
+        MESSAGE(STATUS "SDL3 Found [static]")
         SET(HAVE_SDL 1)
         SET(SDL_WINDOWING 1)
-    ELSE (SDL3_FOUND)
-        MESSAGE(FATAL_ERROR "Failed to find required library SDL3")
-    ENDIF (SDL3_FOUND)
+    ELSE()
+        find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
+        IF (SDL3_FOUND)
+            LIST(APPEND VSE_TST_INCLUDES SDL3::Headers)
+            LIST(APPEND VSE_TST_LIBS SDL3::SDL3-shared)
+            MESSAGE(STATUS "SDL3 Image Found [static]")
+            SET(HAVE_SDL 1)
+            SET(SDL_WINDOWING 1)
+        ELSE (SDL3_FOUND)
+            MESSAGE(FATAL_ERROR "Failed to find required library SDL3")
+        ENDIF (SDL3_FOUND)
+    ENDIF(EXISTS "${local_install_top_dir}/lib/libSDL3.a")
+
 
     #Find SDL_image
-    FIND_PACKAGE(SDL3_image REQUIRED)
-    IF (SDL3_image_FOUND)
-        LIST(APPEND VSE_TST_LIBS SDL3_image::SDL3_image)
-        MESSAGE(STATUS "SDL3_image Found")
-    ELSE (SDL3_IMAGE_FOUND)
-       MESSAGE(FATAL_ERROR "Failed to find required library SDL3_image")
-    ENDIF (SDL3_image_FOUND)
+    IF (EXISTS "${local_install_top_dir}/lib/libSDL3_image.a")
+       LIST(APPEND VSE_TST_LIBS "${local_install_top_dir}/lib/libSDL3_image.a")
+        MESSAGE(STATUS "SDL3 Found [static]")
+    ELSE()
+        FIND_PACKAGE(SDL3_image REQUIRED)
+        IF (SDL3_image_FOUND)
+            LIST(APPEND VSE_TST_LIBS SDL3_image::SDL3_image)
+            MESSAGE(STATUS "SDL3_image Found")
+        ELSE (SDL3_IMAGE_FOUND)
+        MESSAGE(FATAL_ERROR "Failed to find required library SDL3_image")
+        ENDIF (SDL3_image_FOUND)
+    ENDIF(EXISTS "${local_install_top_dir}/lib/libSDL3_image.a")
 
     #find Vorbis
     FIND_PACKAGE(Vorbis REQUIRED)
@@ -755,12 +780,13 @@ ENDIF (NOT DISABLE_CLIENT)
 ADD_SUBDIRECTORY(objconv)
 
 ## show debug output
-#GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-#MESSAGE(STATUS "Default build type is RelWithDebInfo, no cpu opts enabled. ")
-#MESSAGE(STATUS "Building with BUILD_OPT: ${BUILD_OPT}")
-#MESSAGE(STATUS "Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-#MESSAGE("Linking with : ${VSE_TST_LIBS}")
-#MESSAGE("including : ${TEMP_DIRECTORY}")
+GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY VSE_TST_INCLUDES)
+MESSAGE(STATUS "Default build type is RelWithDebInfo, no cpu opts enabled. ")
+MESSAGE(STATUS "Building with BUILD_OPT: ${BUILD_OPT}")
+MESSAGE(STATUS "Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+MESSAGE("Linking with : ${VSE_TST_LIBS}")
+MESSAGE("including : ${VSE_TST_INCLUDES}")
+MESSAGE("including : ${TEMP_DIRECTORY}")
 ## end debug output
 
 MARK_AS_ADVANCED(FORCE
