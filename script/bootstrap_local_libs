@@ -51,7 +51,11 @@ cat << EOF
 
     -p      An OPTIONAL patch file name. 
             Best used in conjunction with the -n option.
-            The patch file must be applicable from the top project directory
+            The patch file must reside in the vegastrike-engine /patch sub-directory
+            The patch file must be applicable from the target's top source directory
+
+    -k      Keep the compilation folder available for successive runs.
+            The default behaviour is to clan all compilation artifacts before each run.
 
     -h      This help.
 
@@ -103,21 +107,31 @@ function get_and_build {
     if [ ! -d "${GIT_DEST_DIR}" ]; then
         git clone "${GIT_REPO}" "${GIT_DEST_DIR}"
         cd "${GIT_DEST_DIR}"
+        git checkout
     else
         cd "${GIT_DEST_DIR}"
-        git reset --hard            ## Just in case somebody played being God here...
+        git reset --hard HEAD           ## Just in case somebody played being God here...
         git pull
     fi 
 
-    git checkout ${GIT_HASH}
-    if [ ! -z "${GIT_PATCH_NAME}" ]; then
-        patch -p "${GIT_PATCH_NAME}"
+
+    if [ ! -z "${GIT_HASH}" ]; then
+        git reset --hard "${GIT_HASH}"
     fi
 
-    rm -fRv build-${CMAKE_BUILD_TYPE}
+    if [ ! -z "${GIT_PATCH_NAME}" ]; then
+        echo "Patchig from file ${VS_ENGINE_SRC}/${GIT_PATCH_NAME}"
+        patch  < "${VS_ENGINE_SRC}/patches/${GIT_PATCH_NAME}"
+    fi
+
+    if [ KEEP_COMPILE_ARTEFACTS != 1 ]; then
+        rm -fR build-${CMAKE_BUILD_TYPE}
+    fi
+
     mkdir -p build-${CMAKE_BUILD_TYPE}
     # export _IMPORT_PREFIX="${INSTALL_DIR}"
-    cmake -G Ninja -S ./ -B build-${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX:PATH="${INSTALL_DIR}" -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_PREFIX_PATH:PATH="${INSTALL_DIR}"  "${EXTRA_CMAKE_ARGS}" 
+    
+    cmake --fresh -G Ninja -S ./ -B build-${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX:PATH="${INSTALL_DIR}" -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_PREFIX_PATH:PATH="${INSTALL_DIR}"  "${EXTRA_CMAKE_ARGS}" 
     ninja -C build-${CMAKE_BUILD_TYPE}
      
     echo "INSTALL INTO ${INSTALL_DIR}"
@@ -132,11 +146,11 @@ function get_and_build {
 ##
 ## SDL3_image
 ## https://github.com/libsdl-org/SDL_image.git --> SDL3_image-source
-
-
+##
+##
 ## Commands to produce static libraries. Not the same CMake variable / behaviour for SDL3 core and SDL3_image. WTF ??? 
 ## SDL3 :
-##  script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_.git -d SDL3-src -c "-DSDL_STATIC=ON -DSDL_EXAMPLE=OFF -DSDL_TESTS=OFF -DSDL_TEST_LIBRARY=OFF"
+##  script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL.git -d SDL3-src -c "-DSDL_STATIC=ON -DSDL_EXAMPLE=OFF -DSDL_TESTS=OFF -DSDL_TEST_LIBRARY=OFF"
 ## SDL3_image :
 ##  script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_image.git -d SDL3_image-src -c "-DSDL_STATIC=ON"
 
@@ -146,12 +160,13 @@ GIT_HASH=""
 GIT_PATCH_NAME=""
 GIT_DEST_DIR=""
 GIT_REPO=""
+KEEP_COMPILE_ARTEFACTS=0
 
 ## bash : get options with getopts
 ## https://mywiki.wooledge.org/BashFAQ/035
 
 ## pmx-20251030 The following code doen't work inside a function. What did I miss ???
-while getopts "r:d:b:c:n:p:h" option; do
+while getopts "r:d:b:c:n:p:hk" option; do
     case "$option" in
         r)  
             GIT_REPO="${OPTARG}"
@@ -177,9 +192,11 @@ while getopts "r:d:b:c:n:p:h" option; do
             GIT_PATCH_NAME="${OPTARG}"
             ;;
 
+        k)  
+            KEEP_COMPILE_ARTEFACTS=1
+            ;;
         h)  
             usage_top
-        
             exit 0 
             ;;
 
@@ -216,6 +233,6 @@ echo "----------------------------------------------------------------"
 
 get_and_build 
 
-echo "----------------------------------------"
-echo "Bootstrap completed successfully."
-echo "----------------------------------------"
+echo "------------------------------------------------"
+echo "Local libraies bootstrap completed successfully."
+echo "------------------------------------------------"
