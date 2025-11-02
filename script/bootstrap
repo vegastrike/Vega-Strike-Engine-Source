@@ -49,11 +49,20 @@ get_and_build_sdl3() {
     REAL_USER="$(logname 2>/dev/null)" 
     if [ $? -ne 0 ] ; then REAL_USER=$USER; fi
 
+    echo "-= Install SDL3 locally from github sources. =-"
+
     # SDL3 :
     sudo -u $REAL_USER script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_.git -d SDL3-src -c "-DSDL_STATIC=ON -DSDL_EXAMPLE=OFF -DSDL_TESTS=OFF -DSDL_TEST_LIBRARY=OFF"
     
     # SDL3_image :
-    sudo -u $REAL_USER script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_image.git -d SDL3_image-src -c "-DBUILD_SHARED_LIBS=OFF"
+    sudo -u $REAL_USER script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_image.git -d SDL3_image-src -c "-DSDL_STATIC=ON -DBUILD_SHARED_LIBS=OFF"
+    # Have to run twice to get both the static and shard libs ? Not what is advertised on the SDL3 official manual
+    # https://wiki.libsdl.org/SDL3/README-cmake
+    sudo -u $REAL_USER script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_image.git -d SDL3_image-src -c "-DSDL_SHARED=ON"
+
+    # Core SDL3 seems to alway build the shared libs, even when we ask only for the static lib.
+    ## Remove all shared libs, keep only the static one.
+    # rm -fv ../private_rootdir/lib/libSDL3.so*
 }
 
 

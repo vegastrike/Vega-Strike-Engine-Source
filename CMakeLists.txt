@@ -178,6 +178,8 @@ ELSE (ENABLE_PIE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 ENDIF (ENABLE_PIE)
 
+
+
 INCLUDE(CheckIncludeFile)
 INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckTypeSize)
@@ -192,7 +194,55 @@ SET(CMAKE_FIND_FRAMEWORK "LAST")
 SET(TST_INCLUDES "")
 SET(TST_LIBS "")
 
+## pmx20251101 
+    ## Add the localy compiled/installes cmake macros.
+    ## All locally compileds libs, includes and cmake macros (currently SDL3 and SDL3_image), 
+    ## ared in ../private_rootdir
+    cmake_path(GET CMAKE_SOURCE_DIR PARENT_PATH local_install_top_dir)  # One directory UP
+    cmake_path(APPEND local_install_top_dir "private_rootdir" OUTPUT_VARIABLE local_install_top_dir) # Donwn into "private_rootdir"
+    # cmake_path(SET local_install_top_dir NORMALIZE local_install_top_dir)
+
+    # Try with CMAKE_MODULE_PATH. Doesn't work (script mode ? )
+    # list(APPEND CMAKE_MODULE_PATH "${local_install_top_dir}/lib/cmake")    
+    # MESSAGE(STATUS "CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
+    set(SDL3_includes_dir)
+    set (local_sdl3  ((EXISTS "${local_install_top_dir}/lib/libSDL3.a") AND
+        (EXISTS "${local_install_top_dir}/lib/libSDL3_image.a")))
+
+    IF(local_sdl3)
+        MESSAGE(STATUS "SDL3 Found")
+        SET(HAVE_SDL 1)
+        SET(SDL_WINDOWING 1)
+        set(SDL3_includes_dir "${local_install_top_dir}/include") 
+        LIST(APPEND TST_INCLUDES "${SDL3_includes_dir}")
+        LIST(APPEND TST_LIBS "${local_install_top_dir}/lib/libSDL3.a")
+        LIST(APPEND TST_LIBS "${local_install_top_dir}/lib/libSDL3_image.a")
+        MESSAGE(STATUS "[LOCAL STATIC] SDL3 Found")
+        MESSAGE(STATUS "[LOCAL STATIC] Include dir ${SDL3_includes_dir}")
+    ELSE()
+        find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
+        IF (SDL3_FOUND)
+            LIST(APPEND VSE_TST_INCLUDES SDL3::Headers)
+            LIST(APPEND TST_LIBS SDL3::SDL3-shared)
+            MESSAGE(STATUS "SDL3 Found")
+            SET(HAVE_SDL 1)
+            SET(SDL_WINDOWING 1)
+        ELSE (SDL3_FOUND)
+            MESSAGE(FATAL_ERROR "Failed to find required library SDL3")
+        ENDIF (SDL3_FOUND)
+
+        FIND_PACKAGE(SDL3_image REQUIRED)
+        IF (SDL3_image_FOUND)
+            LIST(APPEND TST_LIBS SDL3_image::SDL3_image-shared)
+            MESSAGE(STATUS "SDL3_image Found")
+        ELSE (SDL3_IMAGE_FOUND)
+        MESSAGE(FATAL_ERROR "Failed to find required library SDL3_image")
+        ENDIF (SDL3_image_FOUND)
+    endif(local_sdl3)
+
+    
 #find Zlib
+
 FIND_PACKAGE(ZLIB REQUIRED)
 IF (ZLIB_FOUND)
     LIST(APPEND TST_INCLUDES ${ZLIB_INCLUDE_DIR})

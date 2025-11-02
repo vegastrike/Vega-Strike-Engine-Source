@@ -116,7 +116,7 @@ function get_and_build {
 
     rm -fRv build-${CMAKE_BUILD_TYPE}
     mkdir -p build-${CMAKE_BUILD_TYPE}
-    export _IMPORT_PREFIX="${INSTALL_DIR}"
+    # export _IMPORT_PREFIX="${INSTALL_DIR}"
     cmake -G Ninja -S ./ -B build-${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX:PATH="${INSTALL_DIR}" -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_PREFIX_PATH:PATH="${INSTALL_DIR}"  "${EXTRA_CMAKE_ARGS}" 
     ninja -C build-${CMAKE_BUILD_TYPE}
      
@@ -125,10 +125,6 @@ function get_and_build {
 
     ## back to the top source directory
     cd "${VS_ENGINE_SRC}"
-     
-
-     
-
 }
 
 ## SDL3
