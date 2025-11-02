@@ -94,33 +94,60 @@ IF (NOT DISABLE_CLIENT) ##########
     # list(APPEND CMAKE_MODULE_PATH "${local_install_top_dir}/lib/cmake")    
     # MESSAGE(STATUS "CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
 
+    set (local_sdl3  ((EXISTS "${local_install_top_dir}/lib/libSDL3.a") AND
+        (EXISTS "${local_install_top_dir}/lib/libSDL3_image.a")))
 
-    IF (EXISTS "${local_install_top_dir}/lib/libSDL3.a")
-        include_directories(BEFORE "${local_install_top_dir}/include") # DOesn't work ??
-        LIST(APPEND VSE_TST_INCLUDES "${local_install_top_dir}/include")
-        LIST(APPEND VSE_TST_LIBS "${local_install_top_dir}/lib/libSDL3.a")
-        MESSAGE(STATUS "SDL3 Found [static]")
+    IF (local_sdl3)
+        # set (SDL3_DIR "${local_install_top_dir}}")
+
+        MESSAGE(STATUS "### SDL3 local static libs found ###")
+
+        # Save prevous state.
+        set(SAVE_CMAKE_PREFIX_PATH CMAKE_PREFIX_PATH)
+        list(APPEND CMAKE_PREFIX_PATH "${local_install_top_dir}")
+
+        MESSAGE(STATUS "[LOCAL BUILD] SDL3 Found [static]")
         SET(HAVE_SDL 1)
         SET(SDL_WINDOWING 1)
-    ELSE()
-        find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
+        # pmx-20251002 Hack : SDL3 findpackage() absolutly wants to see 
+        # the shared libs in the repertory, otherwise the script returns
+        # "not found".
+        # Also, the "CONFIGURE REQUIRED" part fails. 
+        # I let the explication to CMake gurus...
+        find_package(SDL3 REQUIRED CONFIGURE REQUIRED COMPONENTS SDL3)
+        # find_package(SDL3 REQUIRED COMPONENTS SDL3)
         IF (SDL3_FOUND)
             LIST(APPEND VSE_TST_INCLUDES SDL3::Headers)
-            LIST(APPEND VSE_TST_LIBS SDL3::SDL3-shared)
-            MESSAGE(STATUS "SDL3 Image Found [static]")
+            LIST(APPEND VSE_TST_LIBS SDL3::SDL3-static)
+            MESSAGE(STATUS "SDL3 Found [static]")
             SET(HAVE_SDL 1)
             SET(SDL_WINDOWING 1)
         ELSE (SDL3_FOUND)
             MESSAGE(FATAL_ERROR "Failed to find required library SDL3")
         ENDIF (SDL3_FOUND)
-    ENDIF(EXISTS "${local_install_top_dir}/lib/libSDL3.a")
+        
+        FIND_PACKAGE(SDL3_image REQUIRED)
+        IF (SDL3_image_FOUND)
+            LIST(APPEND VSE_TST_LIBS SDL3_image::SDL3_image-static)
+            MESSAGE(STATUS "SDL3_image Found [static]")
+        ELSE (SDL3_IMAGE_FOUND)
+            MESSAGE(FATAL_ERROR "Failed to find required library SDL3_image")
+        ENDIF (SDL3_image_FOUND)
+        
+        # Restore previous state
+        set(CMAKE_PREFIX_PATH SAVE_CMAKE_PREFIX_PATH)
+    ELSE() # System packages installed.
+        find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
+        IF (SDL3_FOUND)
+            LIST(APPEND VSE_TST_INCLUDES SDL3::Headers) # Doesn't work... Why ?
+            LIST(APPEND VSE_TST_LIBS SDL3::SDL3-static)
+            MESSAGE(STATUS "SDL3 Found")
+            SET(HAVE_SDL 1)
+            SET(SDL_WINDOWING 1)
+        ELSE (SDL3_FOUND)
+            MESSAGE(FATAL_ERROR "Failed to find required library SDL3")
+        ENDIF (SDL3_FOUND)
 
-
-    #Find SDL_image
-    IF (EXISTS "${local_install_top_dir}/lib/libSDL3_image.a")
-       LIST(APPEND VSE_TST_LIBS "${local_install_top_dir}/lib/libSDL3_image.a")
-        MESSAGE(STATUS "SDL3 Found [static]")
-    ELSE()
         FIND_PACKAGE(SDL3_image REQUIRED)
         IF (SDL3_image_FOUND)
             LIST(APPEND VSE_TST_LIBS SDL3_image::SDL3_image)
@@ -128,7 +155,8 @@ IF (NOT DISABLE_CLIENT) ##########
         ELSE (SDL3_IMAGE_FOUND)
         MESSAGE(FATAL_ERROR "Failed to find required library SDL3_image")
         ENDIF (SDL3_image_FOUND)
-    ENDIF(EXISTS "${local_install_top_dir}/lib/libSDL3_image.a")
+
+    ENDIF(local_sdl3)
 
     #find Vorbis
     FIND_PACKAGE(Vorbis REQUIRED)
@@ -780,13 +808,13 @@ ENDIF (NOT DISABLE_CLIENT)
 ADD_SUBDIRECTORY(objconv)
 
 ## show debug output
-GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY VSE_TST_INCLUDES)
+# GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY VSE_TST_INCLUDES)
 MESSAGE(STATUS "Default build type is RelWithDebInfo, no cpu opts enabled. ")
 MESSAGE(STATUS "Building with BUILD_OPT: ${BUILD_OPT}")
 MESSAGE(STATUS "Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 MESSAGE("Linking with : ${VSE_TST_LIBS}")
-MESSAGE("including : ${VSE_TST_INCLUDES}")
-MESSAGE("including : ${TEMP_DIRECTORY}")
+MESSAGE("including 1 : ${VSE_TST_INCLUDES}")
+# MESSAGE("including 2 : ${TEMP_DIRECTORY}")
 ## end debug output
 
 MARK_AS_ADVANCED(FORCE
