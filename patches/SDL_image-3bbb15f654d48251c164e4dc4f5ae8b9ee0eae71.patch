@@ -1,0 +1,18 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5157470b..dcccc136 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -82,8 +82,11 @@ if(EMSCRIPTEN OR VITA OR PSP OR PS2 OR N3DS OR RISCOS)
+ endif()
+ 
+ option(CMAKE_POSITION_INDEPENDENT_CODE "Build static libraries with -fPIC" ${PLATFORM_SUPPORTS_SHARED})
+-cmake_dependent_option(BUILD_SHARED_LIBS "Build the library as a shared library" ON PLATFORM_SUPPORTS_SHARED OFF)
+-
++if(SDL_STATIC) 
++    set(BUILD_SHARED_LIBS OFF)
++else()
++    cmake_dependent_option(BUILD_SHARED_LIBS "Build the library as a shared library" ON PLATFORM_SUPPORTS_SHARED ${SDL_STATIC})
++endif(SDL_STATIC)
+ cmake_dependent_option(SDLIMAGE_INSTALL "Enable SDL3_image install target" ${SDLIMAGE_ROOTPROJECT} "${sdlimage_install_enableable}" OFF)
+ cmake_dependent_option(SDLIMAGE_INSTALL_CPACK "Create binary SDL3_image archive using CPack" ${SDLIMAGE_ROOTPROJECT} "SDLIMAGE_INSTALL" OFF)
+ cmake_dependent_option(SDLIMAGE_INSTALL_MAN "Install man pages for SDL3_image" OFF "SDLIMAGE_INSTALL" OFF)
