@@ -84,6 +84,7 @@ get_and_build_sdl3() {
 }
 
 debian_based_sdl3_prequisites() {
+## https://wiki.libsdl.org/SDL3/README-linux    
     apt-get -qy install build-essential git make \
         pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
         libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
@@ -91,6 +92,14 @@ debian_based_sdl3_prequisites() {
         libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
         libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
         libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev        
+}
+
+opensuse_sdl3_prequisites() {
+## https://wiki.libsdl.org/SDL3/README-linux    
+    zypper --non-interactive install -y \
+    libunwind-devel libusb-1_0-devel Mesa-libGL-devel libxkbcommon-devel libdrm-devel \
+    libgbm-devel pipewire-devel libpulse-devel sndio-devel Mesa-libEGL-devel alsa-devel xwayland-devel \
+    wayland-devel wayland-protocols-devel
 }
 
 if [ -f /etc/os-release ]
@@ -490,8 +499,6 @@ function bootstrapOnOpenSuseLeap ()
                                     freeglut-devel \
                                     libopenal0 \
                                     openal-soft-devel \
-                                    libSDL2-devel \
-                                    libSDL2_image-devel \
                                     libvorbis-devel \
                                     libglvnd-devel \
                                     libjpeg-turbo \
@@ -506,6 +513,8 @@ function bootstrapOnOpenSuseLeap ()
                                     git \
                                     rpm-build \
                                     clang
+
+
             ;;
         "16.0")
             zypper --non-interactive refresh
@@ -526,8 +535,6 @@ function bootstrapOnOpenSuseLeap ()
                                     freeglut-devel \
                                     libopenal0 \
                                     openal-soft-devel \
-                                    libSDL2-devel \
-                                    libSDL2_image-devel \
                                     libvorbis-devel \
                                     libglvnd-devel \
                                     libjpeg-turbo \
@@ -548,6 +555,16 @@ function bootstrapOnOpenSuseLeap ()
             exit 2
             ;;
     esac
+
+    ## SDL3 local compilation
+    case "${LINUX_VERSION_ID}" in
+        "16.0"|"15.6")
+            ## Compile SDL3 locally
+            opensuse_sdl3_prequisites 
+            get_and_build_sdl3
+        ;;
+    esac
+    
 }
 
 function bootstrapOnFedora ()
@@ -941,8 +958,8 @@ function bootstrapOnManjaro ()
                          clang \
                          gcc \
                          gcc-libs \
-                         sdl2 \
-                         sdl2_image \
+                         sdl3 \
+                         sdl3_image \
                          expat \
                          gtk3 \
                          libglvnd \
