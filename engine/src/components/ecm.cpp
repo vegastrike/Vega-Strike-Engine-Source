@@ -162,6 +162,9 @@ void ECM::_upgrade(const std::string key) {
     boost::split(result, ecm_string, boost::is_any_of("/"));
     int max_ecm = 0;
     int current_ecm = 0;
+    
+    // pmx-20251103 str::stod() fails on the decimal point on french locale (decimal separator is ',')
+    const char* loc = std::setlocale(LC_NUMERIC, "en_US.UTF-8");
 
     try {
         switch(result.size()) {
@@ -182,4 +185,7 @@ void ECM::_upgrade(const std::string key) {
 
     ecm = Resource<int>(current_ecm, 0, max_ecm);
     installed = true;
+
+    // Restore locale
+    std::setlocale(LC_NUMERIC, loc);
 }
