@@ -623,6 +623,28 @@ function bootstrapOnFedora ()
                                 make \
                                 clang
             ;;
+        43)
+            dnf install -y \
+                                git \
+                                cmake \
+                                boost-devel \
+                                freeglut-devel \
+                                gcc-c++ \
+                                openal-soft-devel \
+                                SDL3-devel \
+                                SDL3_image-devel \
+                                libvorbis-devel \
+                                libglvnd-devel \
+                                libjpeg-turbo-devel \
+                                libpng-devel \
+                                expat-devel \
+                                gtk3-devel \
+                                python3-devel \
+                                libarchive-devel \
+                                rpm-build \
+                                make \
+                                clang
+            ;;
         *)
             echo "Sorry, this version of Fedora is unsupported"
             exit 2
