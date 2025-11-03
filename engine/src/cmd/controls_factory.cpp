@@ -97,11 +97,17 @@ static std::vector<double> splitAndConvert (const std::string &s, char delim) {
     std::vector<double> result;
     std::stringstream ss (s);
     std::string item;
-
-    while (getline (ss, item, delim)) {
-        result.push_back (std::stod(item));
+    
+    // pmx-20251103 str::stod() fails on the decimal point on french locale (decimal separator is ',')
+    const char* loc = std::setlocale(LC_NUMERIC, "en_US.UTF-8");
+    
+    while (std::getline (ss, item, delim)) {
+        double d=std::stod(item);
+        result.push_back (d);
     }
-
+    
+    // Restore locale
+    std::setlocale(LC_NUMERIC, loc);
     return result;
 }
 

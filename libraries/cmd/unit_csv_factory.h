@@ -194,6 +194,9 @@ template<>
 inline double UnitCSVFactory::GetVariable(std::string unit_key,
         std::string const &attribute_key,
         double default_value) {
+// pmx-20251103 str::stod() fails on the decimal point on french locale (decimal separator is ',')
+    const char* loc = std::setlocale(LC_NUMERIC, "en_US.UTF-8");
+
     std::string result = _GetVariable(unit_key, attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
@@ -201,8 +204,13 @@ inline double UnitCSVFactory::GetVariable(std::string unit_key,
     try {
         return std::stod(result);
     } catch (std::invalid_argument &) {
-        return default_value;
     }
+
+    // Restore locale
+    std::setlocale(LC_NUMERIC, loc);   
+ 
+    return default_value;
+
 }
 
 template<>

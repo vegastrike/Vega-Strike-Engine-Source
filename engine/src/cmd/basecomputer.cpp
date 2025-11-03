@@ -552,6 +552,7 @@ void BaseComputer::constructControls(void) {
         //Options button.
         NewButton *options = (NewButton*)getControl(controls["saveLoad"]);
         window()->addControl(options);
+        
     // }
 
     NewButton *done = (NewButton*)getControl(controls["done"]);
