@@ -1,0 +1,357 @@
+digraph "Vega_Strike" {
+node [
+  fontsize = "12"
+];
+subgraph clusterLegend {
+  label = "Legend";
+  color = black;
+  edge [ style = invis ];
+  legendNode0 [ label = "Executable", shape = egg ];
+  legendNode1 [ label = "Static Library", shape = octagon ];
+  legendNode2 [ label = "Shared Library", shape = doubleoctagon ];
+  legendNode3 [ label = "Module Library", shape = tripleoctagon ];
+  legendNode4 [ label = "Interface Library", shape = pentagon ];
+  legendNode5 [ label = "Object Library", shape = hexagon ];
+  legendNode6 [ label = "Unknown Library", shape = septagon ];
+  legendNode7 [ label = "Custom Target", shape = box ];
+  legendNode0 -> legendNode1 [ style = solid ];
+  legendNode0 -> legendNode2 [ style = solid ];
+  legendNode0 -> legendNode3;
+  legendNode1 -> legendNode4 [ label = "Interface", style = dashed ];
+  legendNode2 -> legendNode5 [ label = "Private", style = dotted ];
+  legendNode3 -> legendNode6 [ style = solid ];
+  legendNode0 -> legendNode7;
+}
+    "node0" [ label = "Vega_Strike_tests", shape = egg ];
+    "node1" [ label = "/usr/lib/x86_64-linux-gnu/libjpeg.so", shape = septagon ];
+    "node0" -> "node1" [ style = dotted ] // Vega_Strike_tests -> /usr/lib/x86_64-linux-gnu/libjpeg.so
+    "node2" [ label = "/usr/lib/x86_64-linux-gnu/libogg.so", shape = septagon ];
+    "node0" -> "node2" [ style = dotted ] // Vega_Strike_tests -> /usr/lib/x86_64-linux-gnu/libogg.so
+    "node3" [ label = "/usr/lib/x86_64-linux-gnu/libopenal.so", shape = septagon ];
+    "node0" -> "node3" [ style = dotted ] // Vega_Strike_tests -> /usr/lib/x86_64-linux-gnu/libopenal.so
+    "node4" [ label = "/usr/lib/x86_64-linux-gnu/libpng.so", shape = septagon ];
+    "node0" -> "node4" [ style = dotted ] // Vega_Strike_tests -> /usr/lib/x86_64-linux-gnu/libpng.so
+    "node5" [ label = "/usr/lib/x86_64-linux-gnu/libpython3.12.so", shape = septagon ];
+    "node0" -> "node5" [ style = dotted ] // Vega_Strike_tests -> /usr/lib/x86_64-linux-gnu/libpython3.12.so
+    "node6" [ label = "/usr/lib/x86_64-linux-gnu/libvorbis.so", shape = septagon ];
+    "node0" -> "node6" [ style = dotted ] // Vega_Strike_tests -> /usr/lib/x86_64-linux-gnu/libvorbis.so
+    "node7" [ label = "/usr/lib/x86_64-linux-gnu/libvorbisfile.so", shape = septagon ];
+    "node0" -> "node7" [ style = dotted ] // Vega_Strike_tests -> /usr/lib/x86_64-linux-gnu/libvorbisfile.so
+    "node8" [ label = "/usr/lib/x86_64-linux-gnu/libz.so", shape = septagon ];
+    "node0" -> "node8" [ style = dotted ] // Vega_Strike_tests -> /usr/lib/x86_64-linux-gnu/libz.so
+    "node9" [ label = "Boost::atomic", shape = doubleoctagon ];
+    "node10" [ label = "Boost::headers", shape = pentagon ];
+    "node9" -> "node10" [ style = dashed ] // Boost::atomic -> Boost::headers
+    "node0" -> "node9" [ style = dotted ] // Vega_Strike_tests -> Boost::atomic
+    "node11" [ label = "Boost::chrono", shape = doubleoctagon ];
+    "node11" -> "node10" [ style = dashed ] // Boost::chrono -> Boost::headers
+    "node0" -> "node11" [ style = dotted ] // Vega_Strike_tests -> Boost::chrono
+    "node12" [ label = "Boost::date_time", shape = doubleoctagon ];
+    "node12" -> "node10" [ style = dashed ] // Boost::date_time -> Boost::headers
+    "node0" -> "node12" [ style = dotted ] // Vega_Strike_tests -> Boost::date_time
+    "node13" [ label = "Boost::filesystem", shape = doubleoctagon ];
+    "node13" -> "node9" [ style = dashed ] // Boost::filesystem -> Boost::atomic
+    "node13" -> "node10" [ style = dashed ] // Boost::filesystem -> Boost::headers
+    "node0" -> "node13" [ style = dotted ] // Vega_Strike_tests -> Boost::filesystem
+    "node14" [ label = "Boost::json", shape = doubleoctagon ];
+    "node15" [ label = "Boost::container", shape = doubleoctagon ];
+    "node15" -> "node10" [ style = dashed ] // Boost::container -> Boost::headers
+    "node14" -> "node15" [ style = dashed ] // Boost::json -> Boost::container
+    "node14" -> "node10" [ style = dashed ] // Boost::json -> Boost::headers
+    "node0" -> "node14" [ style = dotted ] // Vega_Strike_tests -> Boost::json
+    "node16" [ label = "Boost::log", shape = doubleoctagon ];
+    "node16" -> "node9" [ style = dashed ] // Boost::log -> Boost::atomic
+    "node16" -> "node11" [ style = dashed ] // Boost::log -> Boost::chrono
+    "node16" -> "node13" [ style = dashed ] // Boost::log -> Boost::filesystem
+    "node16" -> "node10" [ style = dashed ] // Boost::log -> Boost::headers
+    "node17" [ label = "Boost::regex", shape = doubleoctagon ];
+    "node17" -> "node10" [ style = dashed ] // Boost::regex -> Boost::headers
+    "node16" -> "node17" [ style = dashed ] // Boost::log -> Boost::regex
+    "node18" [ label = "Boost::thread", shape = doubleoctagon ];
+    "node18" -> "node9" [ style = dashed ] // Boost::thread -> Boost::atomic
+    "node18" -> "node10" [ style = dashed ] // Boost::thread -> Boost::headers
+    "node19" [ label = "Threads::Threads", shape = pentagon ];
+    "node18" -> "node19" [ style = dashed ] // Boost::thread -> Threads::Threads
+    "node16" -> "node18" [ style = dashed ] // Boost::log -> Boost::thread
+    "node0" -> "node16" [ style = dotted ] // Vega_Strike_tests -> Boost::log
+    "node20" [ label = "Boost::log_setup", shape = doubleoctagon ];
+    "node20" -> "node9" [ style = dashed ] // Boost::log_setup -> Boost::atomic
+    "node20" -> "node11" [ style = dashed ] // Boost::log_setup -> Boost::chrono
+    "node20" -> "node13" [ style = dashed ] // Boost::log_setup -> Boost::filesystem
+    "node20" -> "node10" [ style = dashed ] // Boost::log_setup -> Boost::headers
+    "node20" -> "node16" [ style = dashed ] // Boost::log_setup -> Boost::log
+    "node20" -> "node17" [ style = dashed ] // Boost::log_setup -> Boost::regex
+    "node20" -> "node18" [ style = dashed ] // Boost::log_setup -> Boost::thread
+    "node0" -> "node20" [ style = dotted ] // Vega_Strike_tests -> Boost::log_setup
+    "node21" [ label = "Boost::program_options", shape = doubleoctagon ];
+    "node21" -> "node10" [ style = dashed ] // Boost::program_options -> Boost::headers
+    "node0" -> "node21" [ style = dotted ] // Vega_Strike_tests -> Boost::program_options
+    "node22" [ label = "Boost::python", shape = doubleoctagon ];
+    "node22" -> "node10" [ style = dashed ] // Boost::python -> Boost::headers
+    "node0" -> "node22" [ style = dotted ] // Vega_Strike_tests -> Boost::python
+    "node0" -> "node18" [ style = dotted ] // Vega_Strike_tests -> Boost::thread
+    "node0" -> "node0"  // Vega_Strike_tests -> Vega_Strike_tests
+    "node23" [ label = "gtest_main\n(GTest::gtest_main)", shape = octagon ];
+    "node23" -> "node19"  // gtest_main -> Threads::Threads
+    "node24" [ label = "gtest\n(GTest::gtest)", shape = octagon ];
+    "node24" -> "node19"  // gtest -> Threads::Threads
+    "node23" -> "node24"  // gtest_main -> gtest
+    "node0" -> "node23" [ style = dotted ] // Vega_Strike_tests -> gtest_main
+    "node25" [ label = "vegastrike-testing", shape = hexagon ];
+    "node0" -> "node25"  // Vega_Strike_tests -> vegastrike-testing
+    "node26" [ label = "vegastrike_cmd", shape = octagon ];
+    "node27" [ label = "/usr/lib/x86_64-linux-gnu/libXi.so", shape = septagon ];
+    "node26" -> "node27"  // vegastrike_cmd -> /usr/lib/x86_64-linux-gnu/libXi.so
+    "node28" [ label = "/usr/lib/x86_64-linux-gnu/libXmu.so", shape = septagon ];
+    "node26" -> "node28"  // vegastrike_cmd -> /usr/lib/x86_64-linux-gnu/libXmu.so
+    "node29" [ label = "/usr/lib/x86_64-linux-gnu/libexpat.so", shape = septagon ];
+    "node26" -> "node29"  // vegastrike_cmd -> /usr/lib/x86_64-linux-gnu/libexpat.so
+    "node30" [ label = "/usr/lib/x86_64-linux-gnu/libglut.so", shape = septagon ];
+    "node26" -> "node30"  // vegastrike_cmd -> /usr/lib/x86_64-linux-gnu/libglut.so
+    "node26" -> "node5"  // vegastrike_cmd -> /usr/lib/x86_64-linux-gnu/libpython3.12.so
+    "node26" -> "node8"  // vegastrike_cmd -> /usr/lib/x86_64-linux-gnu/libz.so
+    "node26" -> "node9" [ style = dotted ] // vegastrike_cmd -> Boost::atomic
+    "node26" -> "node11" [ style = dotted ] // vegastrike_cmd -> Boost::chrono
+    "node26" -> "node12" [ style = dotted ] // vegastrike_cmd -> Boost::date_time
+    "node26" -> "node13" [ style = dotted ] // vegastrike_cmd -> Boost::filesystem
+    "node26" -> "node14" [ style = dotted ] // vegastrike_cmd -> Boost::json
+    "node26" -> "node16" [ style = dotted ] // vegastrike_cmd -> Boost::log
+    "node26" -> "node20" [ style = dotted ] // vegastrike_cmd -> Boost::log_setup
+    "node26" -> "node21" [ style = dotted ] // vegastrike_cmd -> Boost::program_options
+    "node26" -> "node22" [ style = dotted ] // vegastrike_cmd -> Boost::python
+    "node26" -> "node18" [ style = dotted ] // vegastrike_cmd -> Boost::thread
+    "node31" [ label = "SDL3::SDL3-static", shape = octagon ];
+    "node32" [ label = "SDL3::Headers", shape = pentagon ];
+    "node31" -> "node32" [ style = dashed ] // SDL3::SDL3-static -> SDL3::Headers
+    "node26" -> "node31" [ style = dotted ] // vegastrike_cmd -> SDL3::SDL3-static
+    "node33" [ label = "SDL3_image::SDL3_image-static", shape = octagon ];
+    "node33" -> "node32" [ style = dashed ] // SDL3_image::SDL3_image-static -> SDL3::Headers
+    "node26" -> "node33" [ style = dotted ] // vegastrike_cmd -> SDL3_image::SDL3_image-static
+    "node0" -> "node26" [ style = dotted ] // Vega_Strike_tests -> vegastrike_cmd
+    "node34" [ label = "vegastrike_gfx_generic", shape = octagon ];
+    "node34" -> "node27"  // vegastrike_gfx_generic -> /usr/lib/x86_64-linux-gnu/libXi.so
+    "node34" -> "node28"  // vegastrike_gfx_generic -> /usr/lib/x86_64-linux-gnu/libXmu.so
+    "node34" -> "node29"  // vegastrike_gfx_generic -> /usr/lib/x86_64-linux-gnu/libexpat.so
+    "node34" -> "node30"  // vegastrike_gfx_generic -> /usr/lib/x86_64-linux-gnu/libglut.so
+    "node34" -> "node5"  // vegastrike_gfx_generic -> /usr/lib/x86_64-linux-gnu/libpython3.12.so
+    "node34" -> "node8"  // vegastrike_gfx_generic -> /usr/lib/x86_64-linux-gnu/libz.so
+    "node34" -> "node9" [ style = dotted ] // vegastrike_gfx_generic -> Boost::atomic
+    "node34" -> "node11" [ style = dotted ] // vegastrike_gfx_generic -> Boost::chrono
+    "node34" -> "node12" [ style = dotted ] // vegastrike_gfx_generic -> Boost::date_time
+    "node34" -> "node13" [ style = dotted ] // vegastrike_gfx_generic -> Boost::filesystem
+    "node34" -> "node14" [ style = dotted ] // vegastrike_gfx_generic -> Boost::json
+    "node34" -> "node16" [ style = dotted ] // vegastrike_gfx_generic -> Boost::log
+    "node34" -> "node20" [ style = dotted ] // vegastrike_gfx_generic -> Boost::log_setup
+    "node34" -> "node21" [ style = dotted ] // vegastrike_gfx_generic -> Boost::program_options
+    "node34" -> "node22" [ style = dotted ] // vegastrike_gfx_generic -> Boost::python
+    "node34" -> "node18" [ style = dotted ] // vegastrike_gfx_generic -> Boost::thread
+    "node35" [ label = "GLUT::GLUT", shape = septagon ];
+    "node36" [ label = "GLUT::Xi", shape = septagon ];
+    "node35" -> "node36" [ style = dashed ] // GLUT::GLUT -> GLUT::Xi
+    "node37" [ label = "GLUT::Xmu", shape = septagon ];
+    "node35" -> "node37" [ style = dashed ] // GLUT::GLUT -> GLUT::Xmu
+    "node34" -> "node35" [ style = dotted ] // vegastrike_gfx_generic -> GLUT::GLUT
+    "node34" -> "node31" [ style = dotted ] // vegastrike_gfx_generic -> SDL3::SDL3-static
+    "node34" -> "node33" [ style = dotted ] // vegastrike_gfx_generic -> SDL3_image::SDL3_image-static
+    "node38" [ label = "vegastrike_root_generic", shape = octagon ];
+    "node38" -> "node27"  // vegastrike_root_generic -> /usr/lib/x86_64-linux-gnu/libXi.so
+    "node38" -> "node28"  // vegastrike_root_generic -> /usr/lib/x86_64-linux-gnu/libXmu.so
+    "node38" -> "node29"  // vegastrike_root_generic -> /usr/lib/x86_64-linux-gnu/libexpat.so
+    "node38" -> "node30"  // vegastrike_root_generic -> /usr/lib/x86_64-linux-gnu/libglut.so
+    "node38" -> "node5"  // vegastrike_root_generic -> /usr/lib/x86_64-linux-gnu/libpython3.12.so
+    "node38" -> "node8"  // vegastrike_root_generic -> /usr/lib/x86_64-linux-gnu/libz.so
+    "node38" -> "node9" [ style = dotted ] // vegastrike_root_generic -> Boost::atomic
+    "node38" -> "node11" [ style = dotted ] // vegastrike_root_generic -> Boost::chrono
+    "node38" -> "node12" [ style = dotted ] // vegastrike_root_generic -> Boost::date_time
+    "node38" -> "node13" [ style = dotted ] // vegastrike_root_generic -> Boost::filesystem
+    "node38" -> "node14" [ style = dotted ] // vegastrike_root_generic -> Boost::json
+    "node38" -> "node16" [ style = dotted ] // vegastrike_root_generic -> Boost::log
+    "node38" -> "node20" [ style = dotted ] // vegastrike_root_generic -> Boost::log_setup
+    "node38" -> "node21" [ style = dotted ] // vegastrike_root_generic -> Boost::program_options
+    "node38" -> "node22" [ style = dotted ] // vegastrike_root_generic -> Boost::python
+    "node38" -> "node18" [ style = dotted ] // vegastrike_root_generic -> Boost::thread
+    "node38" -> "node35" [ style = dotted ] // vegastrike_root_generic -> GLUT::GLUT
+    "node38" -> "node31" [ style = dotted ] // vegastrike_root_generic -> SDL3::SDL3-static
+    "node38" -> "node33" [ style = dotted ] // vegastrike_root_generic -> SDL3_image::SDL3_image-static
+    "node34" -> "node38"  // vegastrike_gfx_generic -> vegastrike_root_generic
+    "node0" -> "node34" [ style = dotted ] // Vega_Strike_tests -> vegastrike_gfx_generic
+    "node39" [ label = "Vega_Strike_vegadisk_tests", shape = egg ];
+    "node39" -> "node5" [ style = dotted ] // Vega_Strike_vegadisk_tests -> /usr/lib/x86_64-linux-gnu/libpython3.12.so
+    "node39" -> "node9" [ style = dotted ] // Vega_Strike_vegadisk_tests -> Boost::atomic
+    "node39" -> "node11" [ style = dotted ] // Vega_Strike_vegadisk_tests -> Boost::chrono
+    "node39" -> "node12" [ style = dotted ] // Vega_Strike_vegadisk_tests -> Boost::date_time
+    "node39" -> "node13" [ style = dotted ] // Vega_Strike_vegadisk_tests -> Boost::filesystem
+    "node39" -> "node14" [ style = dotted ] // Vega_Strike_vegadisk_tests -> Boost::json
+    "node39" -> "node16" [ style = dotted ] // Vega_Strike_vegadisk_tests -> Boost::log
+    "node39" -> "node20" [ style = dotted ] // Vega_Strike_vegadisk_tests -> Boost::log_setup
+    "node39" -> "node21" [ style = dotted ] // Vega_Strike_vegadisk_tests -> Boost::program_options
+    "node39" -> "node22" [ style = dotted ] // Vega_Strike_vegadisk_tests -> Boost::python
+    "node39" -> "node18" [ style = dotted ] // Vega_Strike_vegadisk_tests -> Boost::thread
+    "node40" [ label = "LibArchive::LibArchive", shape = septagon ];
+    "node39" -> "node40" [ style = dotted ] // Vega_Strike_vegadisk_tests -> LibArchive::LibArchive
+    "node39" -> "node39"  // Vega_Strike_vegadisk_tests -> Vega_Strike_vegadisk_tests
+    "node39" -> "node23" [ style = dotted ] // Vega_Strike_vegadisk_tests -> gtest_main
+    "node39" -> "node26" [ style = dotted ] // Vega_Strike_vegadisk_tests -> vegastrike_cmd
+    "node39" -> "node34" [ style = dotted ] // Vega_Strike_vegadisk_tests -> vegastrike_gfx_generic
+    "node41" [ label = "gmock\n(GTest::gmock)", shape = octagon ];
+    "node41" -> "node19"  // gmock -> Threads::Threads
+    "node41" -> "node24"  // gmock -> gtest
+    "node42" [ label = "gmock_main\n(GTest::gmock_main)", shape = octagon ];
+    "node42" -> "node19"  // gmock_main -> Threads::Threads
+    "node42" -> "node41"  // gmock_main -> gmock
+    "node43" [ label = "vega-meshtool", shape = egg ];
+    "node43" -> "node29" [ style = dotted ] // vega-meshtool -> /usr/lib/x86_64-linux-gnu/libexpat.so
+    "node44" [ label = "vegastrike-OPcollide", shape = octagon ];
+    "node44" -> "node27"  // vegastrike-OPcollide -> /usr/lib/x86_64-linux-gnu/libXi.so
+    "node44" -> "node28"  // vegastrike-OPcollide -> /usr/lib/x86_64-linux-gnu/libXmu.so
+    "node44" -> "node29"  // vegastrike-OPcollide -> /usr/lib/x86_64-linux-gnu/libexpat.so
+    "node44" -> "node30"  // vegastrike-OPcollide -> /usr/lib/x86_64-linux-gnu/libglut.so
+    "node44" -> "node5"  // vegastrike-OPcollide -> /usr/lib/x86_64-linux-gnu/libpython3.12.so
+    "node44" -> "node8"  // vegastrike-OPcollide -> /usr/lib/x86_64-linux-gnu/libz.so
+    "node44" -> "node9" [ style = dotted ] // vegastrike-OPcollide -> Boost::atomic
+    "node44" -> "node11" [ style = dotted ] // vegastrike-OPcollide -> Boost::chrono
+    "node44" -> "node12" [ style = dotted ] // vegastrike-OPcollide -> Boost::date_time
+    "node44" -> "node13" [ style = dotted ] // vegastrike-OPcollide -> Boost::filesystem
+    "node44" -> "node14" [ style = dotted ] // vegastrike-OPcollide -> Boost::json
+    "node44" -> "node16" [ style = dotted ] // vegastrike-OPcollide -> Boost::log
+    "node44" -> "node20" [ style = dotted ] // vegastrike-OPcollide -> Boost::log_setup
+    "node44" -> "node21" [ style = dotted ] // vegastrike-OPcollide -> Boost::program_options
+    "node44" -> "node22" [ style = dotted ] // vegastrike-OPcollide -> Boost::python
+    "node44" -> "node18" [ style = dotted ] // vegastrike-OPcollide -> Boost::thread
+    "node44" -> "node35" [ style = dotted ] // vegastrike-OPcollide -> GLUT::GLUT
+    "node44" -> "node31" [ style = dotted ] // vegastrike-OPcollide -> SDL3::SDL3-static
+    "node44" -> "node33" [ style = dotted ] // vegastrike-OPcollide -> SDL3_image::SDL3_image-static
+    "node44" -> "node34"  // vegastrike-OPcollide -> vegastrike_gfx_generic
+    "node45" [ label = "vegastrike-engine", shape = egg ];
+    "node45" -> "node27" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libXi.so
+    "node45" -> "node28" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libXmu.so
+    "node45" -> "node29" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libexpat.so
+    "node45" -> "node30" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libglut.so
+    "node45" -> "node1" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libjpeg.so
+    "node45" -> "node2" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libogg.so
+    "node45" -> "node3" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libopenal.so
+    "node45" -> "node4" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libpng.so
+    "node45" -> "node5" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libpython3.12.so
+    "node46" [ label = "/usr/lib/x86_64-linux-gnu/libutil.a", shape = septagon ];
+    "node45" -> "node46" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libutil.a
+    "node45" -> "node6" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libvorbis.so
+    "node45" -> "node7" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libvorbisfile.so
+    "node45" -> "node8" [ style = dotted ] // vegastrike-engine -> /usr/lib/x86_64-linux-gnu/libz.so
+    "node45" -> "node9" [ style = dotted ] // vegastrike-engine -> Boost::atomic
+    "node45" -> "node11" [ style = dotted ] // vegastrike-engine -> Boost::chrono
+    "node45" -> "node12" [ style = dotted ] // vegastrike-engine -> Boost::date_time
+    "node45" -> "node13" [ style = dotted ] // vegastrike-engine -> Boost::filesystem
+    "node45" -> "node14" [ style = dotted ] // vegastrike-engine -> Boost::json
+    "node45" -> "node16" [ style = dotted ] // vegastrike-engine -> Boost::log
+    "node45" -> "node20" [ style = dotted ] // vegastrike-engine -> Boost::log_setup
+    "node45" -> "node21" [ style = dotted ] // vegastrike-engine -> Boost::program_options
+    "node45" -> "node22" [ style = dotted ] // vegastrike-engine -> Boost::python
+    "node45" -> "node18" [ style = dotted ] // vegastrike-engine -> Boost::thread
+    "node45" -> "node35" [ style = dotted ] // vegastrike-engine -> GLUT::GLUT
+    "node45" -> "node40" [ style = dotted ] // vegastrike-engine -> LibArchive::LibArchive
+    "node47" [ label = "OpenGL::GL", shape = pentagon ];
+    "node48" [ label = "OpenGL::GLX", shape = septagon ];
+    "node49" [ label = "OpenGL::OpenGL", shape = septagon ];
+    "node48" -> "node49" [ style = dashed ] // OpenGL::GLX -> OpenGL::OpenGL
+    "node47" -> "node48" [ style = dashed ] // OpenGL::GL -> OpenGL::GLX
+    "node47" -> "node49" [ style = dashed ] // OpenGL::GL -> OpenGL::OpenGL
+    "node45" -> "node47" [ style = dotted ] // vegastrike-engine -> OpenGL::GL
+    "node50" [ label = "OpenGL::GLU", shape = septagon ];
+    "node50" -> "node47" [ style = dashed ] // OpenGL::GLU -> OpenGL::GL
+    "node45" -> "node50" [ style = dotted ] // vegastrike-engine -> OpenGL::GLU
+    "node45" -> "node31" [ style = dotted ] // vegastrike-engine -> SDL3::SDL3-static
+    "node45" -> "node33" [ style = dotted ] // vegastrike-engine -> SDL3_image::SDL3_image-static
+    "node45" -> "node44" [ style = dotted ] // vegastrike-engine -> vegastrike-OPcollide
+    "node51" [ label = "vegastrike-engine_com", shape = hexagon ];
+    "node51" -> "node27"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libXi.so
+    "node51" -> "node28"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libXmu.so
+    "node51" -> "node29"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libexpat.so
+    "node51" -> "node30"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libglut.so
+    "node51" -> "node1"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libjpeg.so
+    "node51" -> "node2"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libogg.so
+    "node51" -> "node3"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libopenal.so
+    "node51" -> "node4"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libpng.so
+    "node51" -> "node5"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libpython3.12.so
+    "node51" -> "node46"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libutil.a
+    "node51" -> "node6"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libvorbis.so
+    "node51" -> "node7"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libvorbisfile.so
+    "node51" -> "node8"  // vegastrike-engine_com -> /usr/lib/x86_64-linux-gnu/libz.so
+    "node51" -> "node9" [ style = dotted ] // vegastrike-engine_com -> Boost::atomic
+    "node51" -> "node11" [ style = dotted ] // vegastrike-engine_com -> Boost::chrono
+    "node51" -> "node12" [ style = dotted ] // vegastrike-engine_com -> Boost::date_time
+    "node51" -> "node13" [ style = dotted ] // vegastrike-engine_com -> Boost::filesystem
+    "node51" -> "node14" [ style = dotted ] // vegastrike-engine_com -> Boost::json
+    "node51" -> "node16" [ style = dotted ] // vegastrike-engine_com -> Boost::log
+    "node51" -> "node20" [ style = dotted ] // vegastrike-engine_com -> Boost::log_setup
+    "node51" -> "node21" [ style = dotted ] // vegastrike-engine_com -> Boost::program_options
+    "node51" -> "node22" [ style = dotted ] // vegastrike-engine_com -> Boost::python
+    "node51" -> "node18" [ style = dotted ] // vegastrike-engine_com -> Boost::thread
+    "node51" -> "node35" [ style = dotted ] // vegastrike-engine_com -> GLUT::GLUT
+    "node51" -> "node47" [ style = dotted ] // vegastrike-engine_com -> OpenGL::GL
+    "node51" -> "node50" [ style = dotted ] // vegastrike-engine_com -> OpenGL::GLU
+    "node51" -> "node31" [ style = dotted ] // vegastrike-engine_com -> SDL3::SDL3-static
+    "node51" -> "node33" [ style = dotted ] // vegastrike-engine_com -> SDL3_image::SDL3_image-static
+    "node45" -> "node51"  // vegastrike-engine -> vegastrike-engine_com
+    "node45" -> "node26" [ style = dotted ] // vegastrike-engine -> vegastrike_cmd
+    "node45" -> "node34" [ style = dotted ] // vegastrike-engine -> vegastrike_gfx_generic
+    "node52" [ label = "vegastrike_posh", shape = octagon ];
+    "node52" -> "node27"  // vegastrike_posh -> /usr/lib/x86_64-linux-gnu/libXi.so
+    "node52" -> "node28"  // vegastrike_posh -> /usr/lib/x86_64-linux-gnu/libXmu.so
+    "node52" -> "node29"  // vegastrike_posh -> /usr/lib/x86_64-linux-gnu/libexpat.so
+    "node52" -> "node30"  // vegastrike_posh -> /usr/lib/x86_64-linux-gnu/libglut.so
+    "node52" -> "node5"  // vegastrike_posh -> /usr/lib/x86_64-linux-gnu/libpython3.12.so
+    "node52" -> "node8"  // vegastrike_posh -> /usr/lib/x86_64-linux-gnu/libz.so
+    "node52" -> "node9" [ style = dotted ] // vegastrike_posh -> Boost::atomic
+    "node52" -> "node11" [ style = dotted ] // vegastrike_posh -> Boost::chrono
+    "node52" -> "node12" [ style = dotted ] // vegastrike_posh -> Boost::date_time
+    "node52" -> "node13" [ style = dotted ] // vegastrike_posh -> Boost::filesystem
+    "node52" -> "node14" [ style = dotted ] // vegastrike_posh -> Boost::json
+    "node52" -> "node16" [ style = dotted ] // vegastrike_posh -> Boost::log
+    "node52" -> "node20" [ style = dotted ] // vegastrike_posh -> Boost::log_setup
+    "node52" -> "node21" [ style = dotted ] // vegastrike_posh -> Boost::program_options
+    "node52" -> "node22" [ style = dotted ] // vegastrike_posh -> Boost::python
+    "node52" -> "node18" [ style = dotted ] // vegastrike_posh -> Boost::thread
+    "node52" -> "node35" [ style = dotted ] // vegastrike_posh -> GLUT::GLUT
+    "node52" -> "node31" [ style = dotted ] // vegastrike_posh -> SDL3::SDL3-static
+    "node52" -> "node33" [ style = dotted ] // vegastrike_posh -> SDL3_image::SDL3_image-static
+    "node52" -> "node38"  // vegastrike_posh -> vegastrike_root_generic
+    "node45" -> "node52" [ style = dotted ] // vegastrike-engine -> vegastrike_posh
+    "node45" -> "node38" [ style = dotted ] // vegastrike-engine -> vegastrike_root_generic
+    "node53" [ label = "vegastrike_vegadisk", shape = octagon ];
+    "node53" -> "node27"  // vegastrike_vegadisk -> /usr/lib/x86_64-linux-gnu/libXi.so
+    "node53" -> "node28"  // vegastrike_vegadisk -> /usr/lib/x86_64-linux-gnu/libXmu.so
+    "node53" -> "node29"  // vegastrike_vegadisk -> /usr/lib/x86_64-linux-gnu/libexpat.so
+    "node53" -> "node30"  // vegastrike_vegadisk -> /usr/lib/x86_64-linux-gnu/libglut.so
+    "node53" -> "node5"  // vegastrike_vegadisk -> /usr/lib/x86_64-linux-gnu/libpython3.12.so
+    "node53" -> "node8"  // vegastrike_vegadisk -> /usr/lib/x86_64-linux-gnu/libz.so
+    "node53" -> "node9" [ style = dotted ] // vegastrike_vegadisk -> Boost::atomic
+    "node53" -> "node11" [ style = dotted ] // vegastrike_vegadisk -> Boost::chrono
+    "node53" -> "node12" [ style = dotted ] // vegastrike_vegadisk -> Boost::date_time
+    "node53" -> "node13" [ style = dotted ] // vegastrike_vegadisk -> Boost::filesystem
+    "node53" -> "node14" [ style = dotted ] // vegastrike_vegadisk -> Boost::json
+    "node53" -> "node16" [ style = dotted ] // vegastrike_vegadisk -> Boost::log
+    "node53" -> "node20" [ style = dotted ] // vegastrike_vegadisk -> Boost::log_setup
+    "node53" -> "node21" [ style = dotted ] // vegastrike_vegadisk -> Boost::program_options
+    "node53" -> "node22" [ style = dotted ] // vegastrike_vegadisk -> Boost::python
+    "node53" -> "node18" [ style = dotted ] // vegastrike_vegadisk -> Boost::thread
+    "node53" -> "node35" [ style = dotted ] // vegastrike_vegadisk -> GLUT::GLUT
+    "node53" -> "node31" [ style = dotted ] // vegastrike_vegadisk -> SDL3::SDL3-static
+    "node53" -> "node33" [ style = dotted ] // vegastrike_vegadisk -> SDL3_image::SDL3_image-static
+    "node53" -> "node38"  // vegastrike_vegadisk -> vegastrike_root_generic
+    "node45" -> "node53" [ style = dotted ] // vegastrike-engine -> vegastrike_vegadisk
+    "node54" [ label = "vegastrike_python", shape = doubleoctagon ];
+    "node54" -> "node5"  // vegastrike_python -> /usr/lib/x86_64-linux-gnu/libpython3.12.so
+    "node54" -> "node9"  // vegastrike_python -> Boost::atomic
+    "node54" -> "node11"  // vegastrike_python -> Boost::chrono
+    "node54" -> "node12"  // vegastrike_python -> Boost::date_time
+    "node54" -> "node13"  // vegastrike_python -> Boost::filesystem
+    "node54" -> "node14"  // vegastrike_python -> Boost::json
+    "node54" -> "node16"  // vegastrike_python -> Boost::log
+    "node54" -> "node20"  // vegastrike_python -> Boost::log_setup
+    "node54" -> "node21"  // vegastrike_python -> Boost::program_options
+    "node54" -> "node22"  // vegastrike_python -> Boost::python
+    "node54" -> "node18"  // vegastrike_python -> Boost::thread
+    "node55" [ label = "vs-buildenv-asteroidgen", shape = egg ];
+    "node56" [ label = "vs-buildenv-replace", shape = egg ];
+    "node57" [ label = "vs-buildenv-trisort", shape = egg ];
+}
