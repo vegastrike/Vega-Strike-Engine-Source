@@ -102,6 +102,17 @@ opensuse_sdl3_prequisites() {
     wayland-devel wayland-protocols-devel
 }
 
+opensuse_sdl3_add_repo() {
+    ## pmx20251104 References
+    ## https://software.opensuse.org/download/package?package=SDL3&project=games
+    ## https://en.opensuse.org/User:Tsu2/BASH_zypper
+    zypper --gpg-auto-import-keys ref
+    zypper addrepo https://download.opensuse.org/repositories/games/${1}/games.repo
+    zypper refresh
+    zypper install SDL3-devel
+    zypper install SDL3_image-devel
+}
+
 if [ -f /etc/os-release ]
 then
     OS_RELEASE_LOCATION="/etc/os-release"
