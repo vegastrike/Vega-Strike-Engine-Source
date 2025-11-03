@@ -258,6 +258,8 @@ function bootstrapOnPopOS ()
     esac
 }
 
+
+
 function bootstrapOnLinuxMint ()
 {
     apt-get update
@@ -268,7 +270,7 @@ function bootstrapOnLinuxMint ()
     fi
 
     case "$LINUX_CODENAME" in
-        "wilma")
+        "wilma"|"zara")
             apt-get -qy install \
                             git \
                             cmake \
@@ -289,8 +291,6 @@ function bootstrapOnLinuxMint ()
                             libvorbis-dev \
                             libglvnd-dev \
                             libgl1-mesa-dev \
-                            libsdl2-dev \
-                            libsdl2-image-dev \
                             libopengl0 \
                             libpostproc-dev \
                             freeglut3-dev \
@@ -300,8 +300,12 @@ function bootstrapOnLinuxMint ()
                             libboost-json-dev \
                             libboost-program-options-dev \
                             libxmu-dev \
-                            clang \
+                            gcc \
+                            g++ \
                             lsb-release
+                            
+                            # clang \
+                            
             ;;
         "virginia"|"victoria"|"vera"|"vanessa"|"ulyana")
             echo "Sorry, Linux Mint ${LINUX_CODENAME} is no longer supported"
@@ -830,8 +834,8 @@ function bootstrapOnArch ()
               clang \
               gcc \
               gcc12 \
-              sdl2 \
-              sdl2_image \
+              sdl3 \
+              sdl3_image \
               expat \
               gtk3 \
               libglvnd \
@@ -848,6 +852,35 @@ function bootstrapOnArch ()
               make
 }
 
+
+function bootstrapOnEndeavourOS ()
+{
+    # NOTE: Arch requires GCC 12 right now
+    # also installing latest GCC.
+    pacman -Sy --noconfirm \
+              base-devel \
+              cmake \
+              boost \
+              llvm \
+              clang \
+              gcc \
+              sdl3 \
+              sdl3_image \
+              expat \
+              gtk3 \
+              libglvnd \
+              mesa \
+              python \
+              freeglut \
+              git \
+              libjpeg-turbo \
+              libpng \
+              libvorbis \
+              libxmu \
+              openal \
+              libarchive \
+              make
+}
 case "${LINUX_ID}" in
     "debian")
         bootstrapOnDebian
@@ -887,6 +920,9 @@ case "${LINUX_ID}" in
         ;;
     "arch")
         bootstrapOnArch
+        ;;
+    "endeavouros")
+        bootstrapOnEndeavourOS
         ;;
     *)
         echo "Sorry, unrecognized/unsupported Linux distribution"
