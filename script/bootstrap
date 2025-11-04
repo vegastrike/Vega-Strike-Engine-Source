@@ -494,6 +494,7 @@ function bootstrapOnOpenSuseLeap ()
             exit 2
             ;;
         "15.6")
+            zypper --non-interactive refresh
             zypper --non-interactive install -y \
                                     libboost_log1_75_0-devel \
                                     libboost_python-py3-1_75_0-devel \
