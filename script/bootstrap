@@ -495,6 +495,9 @@ function bootstrapOnOpenSuseLeap ()
             ;;
         "15.6")
             zypper --non-interactive refresh
+## pmx20251104 The following 2 lines (busybox) may only be relevant to the docker image I use for testing (?)
+            zypper --non-interactive remove busybox-which
+            zypper --non-interactive remove busybox-xz 
             zypper --non-interactive install -y \
                                     libboost_log1_75_0-devel \
                                     libboost_python-py3-1_75_0-devel \
@@ -531,6 +534,9 @@ function bootstrapOnOpenSuseLeap ()
             ;;
         "16.0")
             zypper --non-interactive refresh
+## pmx20251104 The following 2 lines (busybox) may only be relevant to the docker image I use for testing (?)
+            zypper --non-interactive remove busybox-which
+            zypper --non-interactive remove busybox-xz             
             zypper --non-interactive install -y \
                                     libboost_log1_86_0-devel \
                                     libboost_python-py3-1_86_0-devel \
