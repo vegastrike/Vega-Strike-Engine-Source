@@ -218,7 +218,7 @@ SET(TST_LIBS "")
 
 
 
-    MESSAGE(STATUS"##### local_sdl3 =  ${local_sdl3} #####")
+    MESSAGE(STATUS "##### local_sdl3 =  ${local_sdl3} #####")
     
     IF(local_sdl3)
         set(SDL3_includes_dir "${local_install_top_dir}/include") 
