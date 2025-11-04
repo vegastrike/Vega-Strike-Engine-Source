@@ -108,7 +108,7 @@ opensuse_sdl3_add_repo() {
     ## https://software.opensuse.org/download/package?package=SDL3&project=games
     ## https://en.opensuse.org/User:Tsu2/BASH_zypper
     zypper --gpg-auto-import-keys ref
-    zypper addrepo https://download.opensuse.org/repositories/games/${1}/games.repo
+    zypper --no-gpg-checks addrepo https://download.opensuse.org/repositories/games/${1}/games.repo
     zypper refresh
     zypper --no-gpg-checks --non-interactive install -y  SDL3-devel
     zypper --no-gpg-checks --non-interactive install -y  SDL3_image-devel
