@@ -103,7 +103,8 @@ opensuse_sdl3_prequisites() {
 }
 
 opensuse_sdl3_add_repo() {
-    ## pmx20251104 References
+    ## pmx20251104 References, november 2025
+    ## https://software.opensuse.org/package/SDL3
     ## https://software.opensuse.org/download/package?package=SDL3&project=games
     ## https://en.opensuse.org/User:Tsu2/BASH_zypper
     zypper --gpg-auto-import-keys ref
@@ -571,8 +572,9 @@ function bootstrapOnOpenSuseLeap ()
     case "${LINUX_VERSION_ID}" in
         "16.0"|"15.6")
             ## Compile SDL3 locally
-            opensuse_sdl3_prequisites 
-            get_and_build_sdl3
+            # opensuse_sdl3_prequisites 
+            # get_and_build_sdl3
+            opensuse_sdl3_add_repo(${LINUX_VERSION_ID}")
         ;;
     esac
     
