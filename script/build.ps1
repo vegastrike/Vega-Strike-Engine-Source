@@ -28,8 +28,8 @@
 
 
 param(
-    [String]$PresetName = "VS2022Win64-pie-enabled-RelWithDebInfo",
-    [String]$BuildType = "RelWithDebInfo", # You can also specify "Debug" or "Release"
+    [String]$PresetName = "VS2022Win64-pie-enabled-debug",
+    [String]$BuildType = "Debug", # You can also specify "Debug" or "Release"
     [Boolean]$IsRelease = $false,
     [String]$GitTag = "not-applicable", # Git Tag, default empty string for PR builds
     [String]$GitSha = "not-applicable"  # Git Short SHA Reference, default empty string for PR builds
