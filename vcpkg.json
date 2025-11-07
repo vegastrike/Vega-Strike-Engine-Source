@@ -27,7 +27,9 @@
     "openal-soft",
     "opengl",
     "sdl3",
-    "sdl3-image",
+    {"name": "sdl3-image",
+      "features": ["png", "jpeg"] 
+    },
     "zlib"
   ]
 }
