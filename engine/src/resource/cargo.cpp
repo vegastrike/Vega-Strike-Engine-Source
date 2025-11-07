@@ -87,6 +87,9 @@ Cargo::Cargo(std::string& cargo_text) {
     std::vector<std::string> cargo_parts;
     boost::split(cargo_parts,cargo_text,boost::is_any_of(";"));
 
+    // pmx-20251103 str::stod() fails on the decimal point on french locale (decimal separator is ',')
+    const char* loc = std::setlocale(LC_NUMERIC, "en_US.UTF-8");
+
     for(long unsigned int i=0;i<cargo_parts.size();i++) {
         switch (i) {
         case 0: name = cargo_parts[0]; break;
@@ -110,6 +113,9 @@ Cargo::Cargo(std::string& cargo_text) {
             break;
         }
     }
+
+    // Restore locale
+    std::setlocale(LC_NUMERIC, loc);    
 }
 
 Cargo::Cargo(boost::json::object json): 

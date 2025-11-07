@@ -26,8 +26,10 @@
     "libvorbis",
     "openal-soft",
     "opengl",
-    "sdl2",
-    "sdl2-image",
+    "sdl3",
+    {"name": "sdl3-image",
+      "features": ["png", "jpeg"] 
+    },
     "zlib"
   ]
 }

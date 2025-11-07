@@ -714,6 +714,10 @@ float SystemFactory::getFloatAttribute(Object object, string key, float default_
 
 double SystemFactory::getDoubleAttribute(Object object, string key, double default_value,
         double multiplier, double default_multiplier) {
+
+    // pmx-20251103 str::stod() fails on the decimal point on french locale (decimal separator is ',')
+    const char* loc = std::setlocale(LC_NUMERIC, "en_US.UTF-8");
+
     alg::to_lower(key);
     if (object.attributes.count(key)) {
         try {
@@ -722,6 +726,9 @@ double SystemFactory::getDoubleAttribute(Object object, string key, double defau
             return default_value * default_multiplier;
         }
     }
+
+    // Restore locale
+    std::setlocale(LC_NUMERIC, loc);  
     return default_value * default_multiplier;
 }
 

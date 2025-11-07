@@ -17,7 +17,7 @@ engine/.idea/
 .idea/
 .venv/
 .editorconfig
-
+./*.sh
 engine/src/version.h
 engine/setup/src/include/version.h
 

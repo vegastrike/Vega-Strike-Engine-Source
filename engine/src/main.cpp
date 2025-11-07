@@ -34,7 +34,8 @@
 #include <boost/program_options.hpp>
 #include "audio/test.h"
 #if defined (HAVE_SDL)
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 #endif
 #include "cmd/role_bitmask.h"
 #if defined (WITH_MACOSX_BUNDLE)

@@ -53,12 +53,21 @@ float _convert<float>(const std::string input, const float modifier) {
 
 template<>
 double _convert<double>(const std::string input, const double modifier) {
+    
+// pmx-20251103 str::stod() fails on the decimal point on french locale (decimal separator is ',')
+    const char* loc = std::setlocale(LC_NUMERIC, "en_US.UTF-8");
+
     try {
         return std::stod(input) * modifier;
     } catch(...) {
-        return 0.0;
     }
+
+    // Restore locale
+    std::setlocale(LC_NUMERIC, loc);    
+
+    return 0.0;
 }
+
 
 template<>
 int _convert<int>(const std::string input, const int modifier) {
