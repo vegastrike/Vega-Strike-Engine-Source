@@ -261,6 +261,7 @@ voidEXPORT_UTIL1( setName, std::string, name
 )
 voidEXPORT_UTIL1( SetHull,
 float, hull )
+voidWRAPPED0( Derelict)
 EXPORT_UTIL0( std::string, getFlightgroupName
 )
 EXPORT_UTIL0( UnitWrapper, getFlightgroupLeader
