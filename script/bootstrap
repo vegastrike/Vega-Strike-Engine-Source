@@ -112,6 +112,7 @@ opensuse_sdl3_add_repo() {
     zypper refresh
     zypper --no-gpg-checks --non-interactive install -y  SDL3-devel
     zypper --no-gpg-checks --non-interactive install -y  SDL3_image-devel
+}
 
 if [ -f /etc/os-release ]
 then
