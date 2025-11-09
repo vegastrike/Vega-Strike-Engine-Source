@@ -34,6 +34,8 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <clocale>
+
 #include <boost/json.hpp>
 
 #include "cmd/drawable.h"

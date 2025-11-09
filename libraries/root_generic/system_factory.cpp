@@ -54,6 +54,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <clocale>
 
 #include "vega_cast_utils.h"
 

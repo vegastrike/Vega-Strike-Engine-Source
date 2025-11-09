@@ -35,6 +35,7 @@
 #include "damage/damage.h"
 
 #include <boost/format.hpp>
+#include <clocale>
 
 int Shield::front = 0;
 int Shield::back = 1;

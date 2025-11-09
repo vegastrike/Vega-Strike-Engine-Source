@@ -39,6 +39,8 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
+#include <clocale>
+
 static const std::string default_product_name("DEFAULT_PRODUCT_NAME");
 
 // A simple utility function to parse a boolean value

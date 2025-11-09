@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <clocale>
 
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>

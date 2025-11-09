@@ -33,6 +33,7 @@
 #include <utility>
 #include <boost/algorithm/string.hpp>
 #include <iostream>
+#include <clocale>
 
 const std::string keys[] = {"Key", "Directory",	"Name",	"Object_Type",
                             "Combat_Role",	"Textual_Description",	"Hud_image",	"Unit_Scale",	"Cockpit",
