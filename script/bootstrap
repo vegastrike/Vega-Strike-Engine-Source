@@ -456,6 +456,7 @@ function bootstrapOnLinuxMint ()
                             libboost-program-options-dev \
                             libxmu-dev \
                             gcc \
+                            clang \
                             ninja-build \
                             lsb-release                            
             ;;
