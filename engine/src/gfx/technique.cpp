@@ -370,8 +370,10 @@ Technique::Technique(const string &name) :
     } else {
         filename = sub_technique_filename;
     }
-
-    pt::ptree tree;
+    
+    // if (!boost::filesystem::exists(filename)) {return;}
+    
+        pt::ptree tree;
     try {
         pt::read_xml(filename, tree);
     } catch (boost::property_tree::ptree_error &e) {

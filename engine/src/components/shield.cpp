@@ -35,6 +35,7 @@
 #include "damage/damage.h"
 
 #include <boost/format.hpp>
+#include <clocale>
 
 int Shield::front = 0;
 int Shield::back = 1;
@@ -161,8 +162,11 @@ void Shield::Load(std::string unit_key) {
             if(string_value.empty()) {
                 break;
             }
-
+// pmx-20251103 str::stod() fails on the decimal point on french locale (decimal separator is ',')
+            const char* loc = std::setlocale(LC_NUMERIC, "en_US.UTF-8");
             double value = std::stod(string_value);
+// Restore locale
+            std::setlocale(LC_NUMERIC, loc);    
             shield_values.push_back(Resource<double>(value, 0.0, value));
             ++shield_count;
         }
