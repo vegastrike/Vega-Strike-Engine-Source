@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macOS-13
+          - os: macOS-15-intel
             build-type: RelWithDebInfo
             preset-name: macos-pie-enabled-RelWithDebInfo
             python-version: 3.13.5
