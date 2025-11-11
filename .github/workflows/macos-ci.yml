@@ -24,14 +24,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macOS-13
+          - os: macOS-15-intel
             build-type: Debug
             preset-name: macos-pie-enabled-debug
-            python-version: 3.12.10
-          - os: macOS-13
+            python-version: 3.14.0
+          - os: macOS-15-intel
             build-type: RelWithDebInfo
             preset-name: macos-pie-enabled-RelWithDebInfo
-            python-version: 3.13.5
+            python-version: 3.14.0
 
     steps:
       - name: Setup Python
