@@ -971,8 +971,9 @@ function bootstrapOnEndeavourOS ()
 {
     # NOTE: Arch requires GCC 12 right now
     # also installing latest GCC.
-    pacman -Sy --noconfirm \
+    pacman -Sy --refresh --noconfirm \
               base-devel \
+              icu \
               cmake \
               boost \
               llvm \
