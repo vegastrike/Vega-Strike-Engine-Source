@@ -23,6 +23,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - FROM:     'ubuntu:questing'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            ARTIFACT_EXT: 'deb'
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
@@ -32,6 +36,10 @@ jobs:
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'tar.[xb]z*'
+          - FROM:     'linuxmintd/mint22.2-amd64'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            ARTIFACT_EXT: 'deb'
           - FROM:     'linuxmintd/mint22-amd64'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
@@ -44,6 +52,10 @@ jobs:
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'deb'
+          - FROM:     'fedora:43'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:42'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
