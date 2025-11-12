@@ -1,5 +1,5 @@
 /*
- * libserver.cpp
+ * label.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,48 +26,34 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "root_generic/vs_globals.h"
-#include "root_generic/configxml.h"
-#include "cmd/unit_generic.h"
+#ifndef VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_LABEL_H
+#define VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_LABEL_H
 
-VegaConfig *createVegaConfig(const char *file) {
-    return new VegaConfig(file);
-}
+#include <vector>
+#include <string>
 
-class Music;
-class Unit;
-class Animation;
+#include "imgui.h"
+#include "widget.h"
+#include "collections.h"
 
-void UpdateAnimatedTexture() {
-}
+enum class TextAlignment {
+    left, right, center
+};
 
-void TerrainCollide() {
-}
+class Label: public Widget {
+protected:
+    const std::string text;
+    const int width;
+    ColorCollection colors;
+    ImFont* font;
+    TextAlignment alignment;
 
-void UpdateTerrain() {
-}
+public:
+    Label(const std::string& text, int width = 0, ColorCollection colors = ColorCollection(), 
+          ImFont* font = nullptr, 
+          TextAlignment alignment = TextAlignment::left);
+    ~Label() override {}
+    void Draw() override;
+};
 
-void UpdateCameraSnds() {
-}
-
-void NebulaUpdate(StarSystem *ss) {
-}
-
-void SwitchUnits2(Unit *nw) {
-}
-
-void DoCockpitKeys() {
-}
-
-void createObjects(std::vector<std::string> &playersaveunit,
-        std::vector<StarSystem *> &ssys,
-        std::vector<QVector> &savedloc,
-        vector<vector<string> > &savefiles) {
-}
-
-void disableTerrainDraw(ContinuousTerrain *ct) {
-}
-
-void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GFXColor &color) {
-}
-
+#endif //VEGA_STRIKE_LIBRARIES_GUI_WIDGETS_LABEL_H
