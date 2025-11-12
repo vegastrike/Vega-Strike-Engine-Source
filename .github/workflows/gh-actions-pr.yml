@@ -67,10 +67,6 @@ jobs:
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             allow_failure: false
-          - FROM:     'manjarolinux/base'
-            COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
-            allow_failure: true
           - FROM:     'alex5402/endeavouros'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
