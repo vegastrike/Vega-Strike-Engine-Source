@@ -7,6 +7,8 @@ Group: 'Import'
 Tooltip: 'Import VegaStrike Models (.xmesh)'
 """
 
+from __future__ import print_function
+
 __author__	= "Alex 'CubOfJudahsLion' Feterman"
 __url__		= ("blender", "http://www.blender.org", "Author's homepage, http://geocities.com/cubofjudahslion")
 __version__	= "0.1.2"
@@ -37,7 +39,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	Generates UV mappings, but for the texture to be activated, go to
 	the texture buttons and 
 """
-from __future__ import print_function
 try:
 	range = xrange
 except:
