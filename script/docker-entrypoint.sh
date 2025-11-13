@@ -28,7 +28,7 @@
 set -e
 
 echo "-----------------------------------------"
-echo "--- docker-entrypoint.sh | 2025-06-27 ---"
+echo "--- docker-entrypoint.sh | 2025-11-13 ---"
 echo "-----------------------------------------"
 
 #----------------------------------
@@ -57,9 +57,6 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-
-echo "Re-run bootstrap"
-script/bootstrap
 
 if [ "$COMPILER" == "gcc" ]
 then
