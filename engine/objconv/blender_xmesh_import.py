@@ -7,8 +7,6 @@ Group: 'Import'
 Tooltip: 'Import VegaStrike Models (.xmesh)'
 """
 
-from __future__ import print_function
-
 __author__	= "Alex 'CubOfJudahsLion' Feterman"
 __url__		= ("blender", "http://www.blender.org", "Author's homepage, http://geocities.com/cubofjudahslion")
 __version__	= "0.1.2"
