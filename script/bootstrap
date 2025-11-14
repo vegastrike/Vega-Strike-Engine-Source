@@ -35,6 +35,84 @@ echo "------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
 
+get_and_build_sdl3() {
+    # These scripts builds static libraries of SDL3 and SDL3_image locally, 
+    # from the official SDL3 github repo.
+
+    # As the top bootstrap script is necessarily executed as root, 
+    # we have to revert to our humble self before we clone and build SDL3 locally.
+    # At this point, we are necessarily running in a sub shell as root (su command...). 
+    # If this is not the case, logname will thow an error if there were no "parent" shell.
+    # If we run logname in a **login** shell (root ?), logname returns "" and there is an error.
+    # Just in case, be prepared to catch the error and use the real login name.
+
+    REAL_USER="$(logname 2>/dev/null)" 
+    if [ $? -ne 0 ] ; then REAL_USER=$USER; fi
+
+    echo "-= Install SDL3 locally from github sources. =-"
+
+    # The SDL3 CMake scripts rely on the presence of the shared libraries to detect the install dir,
+    # and retuen "not found" if there is none, even if there is a static lib here.
+    
+    # SDL3 :
+
+    sudo -u $REAL_USER script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL.git -d SDL3-src \
+                    -c "-DSDL_STATIC=ON -DSDL_EXAMPLE=OFF -DSDL_TESTS=OFF -DSDL_TEST_LIBRARY=OFF"
+    
+    # SDL3_image :
+
+    # We have to patch the SDL3 image CMakeLists.txt to be able to build the static library
+    # Contrarily to what is said on the SDL webpage, SDL_STATIC is not defined and there is no way to build the static libs
+    # See bottom of https://wiki.libsdl.org/SDL3/README-cmake
+
+    # As the patch applies only to an almost immutabe part of the CMakeList.txt file, 
+    # it is not really necessary to fix the git commit revision.
+    # If it becomes necessary, add :
+    #     -n "3bbb15f654d48251c164e4dc4f5ae8b9ee0eae71" 
+    # to the following command
+    # This is the HSHA1 of EAD revision of SDL3 image, on 2 november 2025, source of the  patch file.
+
+    sudo -u $REAL_USER script/bootstrap_local_libs -r https://github.com/libsdl-org/SDL_image.git \
+                        -d SDL3_image-src -c "-DSDL_STATIC=ON" -p "SDL_image-3bbb15f654d48251c164e4dc4f5ae8b9ee0eae71.patch"
+   
+    # We have to run the istall twice to get both the static and the shared libs.
+    # Contrarily to what is said on the SDL webpage, SDL_SHARED is not defined,.
+    # The default is to build the shared library.
+    # https://wiki.libsdl.org/SDL3/README-cmake
+    
+    sudo -u $REAL_USER script/bootstrap_local_libs -k -r https://github.com/libsdl-org/SDL_image.git -d SDL3_image-src 
+}
+
+debian_based_sdl3_prequisites() {
+## https://wiki.libsdl.org/SDL3/README-linux    
+    apt-get -qy install build-essential git make \
+        pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
+        libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+        libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+        libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+        libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+        libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev        
+}
+
+opensuse_sdl3_prequisites() {
+## https://wiki.libsdl.org/SDL3/README-linux    
+    zypper --non-interactive install -y \
+    libunwind-devel libusb-1_0-devel Mesa-libGL-devel libxkbcommon-devel libdrm-devel \
+    libgbm-devel pipewire-devel libpulse-devel sndio-devel Mesa-libEGL-devel alsa-devel xwayland-devel \
+    wayland-devel wayland-protocols-devel
+}
+
+opensuse_sdl3_add_repo() {
+    ## pmx20251104 References, november 2025
+    ## https://software.opensuse.org/package/SDL3
+    ## https://software.opensuse.org/download/package?package=SDL3&project=games
+    ## https://en.opensuse.org/User:Tsu2/BASH_zypper
+    zypper --gpg-auto-import-keys ref
+    zypper --no-gpg-checks  --non-interactive addrepo https://download.opensuse.org/repositories/games/${1}/games.repo
+    zypper refresh
+    zypper --no-gpg-checks --non-interactive install -y  SDL3-devel
+    zypper --no-gpg-checks --non-interactive install -y  SDL3_image-devel
+
 if [ -f /etc/os-release ]
 then
     OS_RELEASE_LOCATION="/etc/os-release"
@@ -62,7 +140,8 @@ function bootstrapOnDebian()
     fi
 
     case "$LINUX_CODENAME" in
-        "trixie")
+
+       "trixie")
             apt-get -qy install \
                             git \
                             cmake \
@@ -82,8 +161,8 @@ function bootstrapOnDebian()
                             libvorbis-dev \
                             libglvnd-dev \
                             libgl1-mesa-dev \
-                            libsdl2-dev \
-                            libsdl2-image-dev \
+                            libsdl3-dev \
+                            libsdl3-image-dev \
                             libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
@@ -92,7 +171,8 @@ function bootstrapOnDebian()
                             libboost-json-dev \
                             libboost-program-options-dev \
                             libxmu-dev \
-                            clang \
+                            gcc \
+                            ninja-build \
                             lsb-release \
                             opentelemetry-cpp-dev \
                             libprotobuf-dev
@@ -156,6 +236,76 @@ function bootstrapOnUbuntu()
     fi
 
     case "$LINUX_CODENAME" in
+        "questing")
+            apt-get -qy install \
+                            git \
+                            cmake \
+                            python3-dev \
+                            build-essential \
+                            automake \
+                            autoconf \
+                            libarchive-dev \
+                            libpng16-16 \
+                            libpng-dev \
+                            libpng-tools \
+                            libjpeg-turbo8-dev \
+                            libexpat1-dev \
+                            libgdk-pixbuf-2.0-dev \
+                            libgtk-3-dev \
+                            libopenal-dev \
+                            libogg-dev \
+                            libvorbis-dev \
+                            libglvnd-dev \
+                            libgl1-mesa-dev \
+                            libsdl3-dev \
+                            libsdl3-image-dev \
+                            libopengl0 \
+                            libpostproc-dev \
+                            freeglut3-dev \
+                            libboost-python-dev \
+                            libboost-log-dev \
+                            libboost-regex-dev \
+                            libboost-json-dev \
+                            libboost-program-options-dev \
+                            libxmu-dev \
+                            clang \
+                            lsb-release
+            ;;
+        "plucky")
+            apt-get -qy install \
+                            git \
+                            cmake \
+                            python3-dev \
+                            build-essential \
+                            automake \
+                            autoconf \
+                            libarchive-dev \
+                            libpng16-16 \
+                            libpng-dev \
+                            libpng-tools \
+                            libjpeg-turbo8-dev \
+                            libexpat1-dev \
+                            libgdk-pixbuf-2.0-dev \
+                            libgtk-3-dev \
+                            libopenal-dev \
+                            libogg-dev \
+                            libvorbis-dev \
+                            libglvnd-dev \
+                            libgl1-mesa-dev \
+                            libsdl3-dev \
+                            libsdl3-image-dev \
+                            libopengl0 \
+                            libpostproc-dev \
+                            freeglut3-dev \
+                            libboost-python-dev \
+                            libboost-log-dev \
+                            libboost-regex-dev \
+                            libboost-json-dev \
+                            libboost-program-options-dev \
+                            libxmu-dev \
+                            clang \
+                            lsb-release
+            ;;        
         "noble")
             apt-get -qy install \
                             git \
@@ -177,8 +327,6 @@ function bootstrapOnUbuntu()
                             libvorbis-dev \
                             libglvnd-dev \
                             libgl1-mesa-dev \
-                            libsdl2-dev \
-                            libsdl2-image-dev \
                             libopengl0 \
                             libpostproc-dev \
                             freeglut3-dev \
@@ -190,6 +338,11 @@ function bootstrapOnUbuntu()
                             libxmu-dev \
                             clang \
                             lsb-release
+
+            ## Compile SDL3 locally
+            debian_based_sdl3_prequisites 
+            get_and_build_sdl3
+
             ;;
         "jammy"|"hirsute"|"impish"|"focal"|"bionic"|"xenial")
             echo "Sorry, Ubuntu ${LINUX_CODENAME} is no longer supported"
@@ -200,6 +353,7 @@ function bootstrapOnUbuntu()
             exit 2
             ;;
     esac
+
 }
 
 function bootstrapOnPopOS ()
@@ -258,6 +412,8 @@ function bootstrapOnPopOS ()
     esac
 }
 
+
+
 function bootstrapOnLinuxMint ()
 {
     apt-get update
@@ -268,7 +424,7 @@ function bootstrapOnLinuxMint ()
     fi
 
     case "$LINUX_CODENAME" in
-        "wilma")
+        "wilma"|"zara")
             apt-get -qy install \
                             git \
                             cmake \
@@ -289,8 +445,6 @@ function bootstrapOnLinuxMint ()
                             libvorbis-dev \
                             libglvnd-dev \
                             libgl1-mesa-dev \
-                            libsdl2-dev \
-                            libsdl2-image-dev \
                             libopengl0 \
                             libpostproc-dev \
                             freeglut3-dev \
@@ -300,8 +454,9 @@ function bootstrapOnLinuxMint ()
                             libboost-json-dev \
                             libboost-program-options-dev \
                             libxmu-dev \
-                            clang \
-                            lsb-release
+                            gcc \
+                            ninja-build \
+                            lsb-release                            
             ;;
         "virginia"|"victoria"|"vera"|"vanessa"|"ulyana")
             echo "Sorry, Linux Mint ${LINUX_CODENAME} is no longer supported"
@@ -310,6 +465,22 @@ function bootstrapOnLinuxMint ()
         *)
             echo "This version of Linux Mint is not directly supported. You may be able to use the corresponding Ubuntu installation package"
             exit 2
+            ;;
+    esac
+
+    # pmx-20251101
+    # Install SDL3 from source, as Linux Mint does not yet have SDL3 packages
+    # Install SDL3 dependencies tested on Linux Mint 22.2 "zara". 
+    # May work for Linux Mint 21.x "virginia" and/or "victoria" too (TBD).
+
+    case "$LINUX_CODENAME" in
+        "wilma"|"zara")
+            ## Compile SDL3 locally
+            debian_based_sdl3_prequisites 
+            get_and_build_sdl3
+            ;;
+            "virginia"|"victoria")
+                # Nothing for the time being. May SDL3 version work ?
             ;;
     esac
 }
@@ -322,6 +493,10 @@ function bootstrapOnOpenSuseLeap ()
             exit 2
             ;;
         "15.6")
+            zypper --non-interactive refresh
+## pmx20251104 The following 2 lines (busybox) may only be relevant to the docker image I use for testing (?)
+            zypper --non-interactive remove busybox-which
+            zypper --non-interactive remove busybox-xz 
             zypper --non-interactive install -y \
                                     libboost_log1_75_0-devel \
                                     libboost_python-py3-1_75_0-devel \
@@ -339,8 +514,6 @@ function bootstrapOnOpenSuseLeap ()
                                     freeglut-devel \
                                     libopenal0 \
                                     openal-soft-devel \
-                                    libSDL2-devel \
-                                    libSDL2_image-devel \
                                     libvorbis-devel \
                                     libglvnd-devel \
                                     libjpeg-turbo \
@@ -355,9 +528,16 @@ function bootstrapOnOpenSuseLeap ()
                                     git \
                                     rpm-build \
                                     clang
+
+
             ;;
         "16.0")
             zypper --non-interactive refresh
+## pmx20251104 The following 2 lines (busybox) may only be relevant to the docker image I use for testing (?)
+            set -o errexit
+            zypper --non-interactive remove busybox-which
+            zypper --non-interactive remove busybox-xz    
+            set +o errexit         
             zypper --non-interactive install -y \
                                     libboost_log1_86_0-devel \
                                     libboost_python-py3-1_86_0-devel \
@@ -375,8 +555,6 @@ function bootstrapOnOpenSuseLeap ()
                                     freeglut-devel \
                                     libopenal0 \
                                     openal-soft-devel \
-                                    libSDL2-devel \
-                                    libSDL2_image-devel \
                                     libvorbis-devel \
                                     libglvnd-devel \
                                     libjpeg-turbo \
@@ -397,6 +575,17 @@ function bootstrapOnOpenSuseLeap ()
             exit 2
             ;;
     esac
+
+    ## SDL3 local compilation
+    case "${LINUX_VERSION_ID}" in
+        "16.0"|"15.6")
+            ## Compile SDL3 locally
+            # opensuse_sdl3_prequisites 
+            # get_and_build_sdl3
+            opensuse_sdl3_add_repo "${LINUX_VERSION_ID}"
+        ;;
+    esac
+    
 }
 
 function bootstrapOnFedora ()
@@ -458,8 +647,30 @@ function bootstrapOnFedora ()
                                 freeglut-devel \
                                 gcc-c++ \
                                 openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
+                                SDL3-devel \
+                                SDL3_image-devel \
+                                libvorbis-devel \
+                                libglvnd-devel \
+                                libjpeg-turbo-devel \
+                                libpng-devel \
+                                expat-devel \
+                                gtk3-devel \
+                                python3-devel \
+                                libarchive-devel \
+                                rpm-build \
+                                make \
+                                clang
+            ;;
+        43)
+            dnf install -y \
+                                git \
+                                cmake \
+                                boost-devel \
+                                freeglut-devel \
+                                gcc-c++ \
+                                openal-soft-devel \
+                                SDL3-devel \
+                                SDL3_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -768,8 +979,8 @@ function bootstrapOnManjaro ()
                          clang \
                          gcc \
                          gcc-libs \
-                         sdl2 \
-                         sdl2_image \
+                         sdl3 \
+                         sdl3_image \
                          expat \
                          gtk3 \
                          libglvnd \
@@ -830,8 +1041,8 @@ function bootstrapOnArch ()
               clang \
               gcc \
               gcc12 \
-              sdl2 \
-              sdl2_image \
+              sdl3 \
+              sdl3_image \
               expat \
               gtk3 \
               libglvnd \
@@ -848,6 +1059,35 @@ function bootstrapOnArch ()
               make
 }
 
+
+function bootstrapOnEndeavourOS ()
+{
+    # NOTE: Arch requires GCC 12 right now
+    # also installing latest GCC.
+    pacman -Sy --noconfirm \
+              base-devel \
+              cmake \
+              boost \
+              llvm \
+              clang \
+              gcc \
+              sdl3 \
+              sdl3_image \
+              expat \
+              gtk3 \
+              libglvnd \
+              mesa \
+              python \
+              freeglut \
+              git \
+              libjpeg-turbo \
+              libpng \
+              libvorbis \
+              libxmu \
+              openal \
+              libarchive \
+              make
+}
 case "${LINUX_ID}" in
     "debian")
         bootstrapOnDebian
@@ -887,6 +1127,9 @@ case "${LINUX_ID}" in
         ;;
     "arch")
         bootstrapOnArch
+        ;;
+    "endeavouros")
+        bootstrapOnEndeavourOS
         ;;
     *)
         echo "Sorry, unrecognized/unsupported Linux distribution"

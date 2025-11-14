@@ -35,7 +35,8 @@
 #include "src/in_kb_data.h"
 
 //#ifdef HAVE_SDL
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_keycode.h>
 //const int KEYMAP_SIZE =SDLK_LAST;
 //const int KEY_SPECIAL_OFFSET=0;
 //#else //HAVE_SDL
