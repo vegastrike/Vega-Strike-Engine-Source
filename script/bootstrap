@@ -30,7 +30,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2025-11-11 ---"
+echo "--- bootstrap | 2025-11-14 ---"
 echo "------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -587,105 +587,14 @@ function bootstrapOnFedora ()
     esac
 }
 
-function bootstrapOnCentOS ()
-{
-    case "${LINUX_VERSION_ID}" in
-        "9.5")
-            dnf -y install dnf-plugins-core
-            dnf config-manager --set-enabled devel
-            dnf -y update
-            dnf -y install \
-                                git \
-                                cmake \
-                                boost-devel \
-                                boost-python3-devel \
-                                boost-json \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang
-            ;;
-        "9.6")
-            dnf -y install dnf-plugins-core
-            dnf config-manager --set-enabled devel
-            dnf -y update
-            dnf -y install \
-                                git \
-                                cmake \
-                                boost-devel \
-                                boost-python3-devel \
-                                boost-json \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang
-            ;;
-        "10.0")
-            dnf -y upgrade --refresh
-            dnf -y install 'dnf-command(config-manager)'
-            dnf -y config-manager --set-enabled crb
-            dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
-            dnf -y update
-            dnf -y install \
-                                git \
-                                cmake \
-                                boost-devel \
-                                boost-python3-devel \
-                                boost-json \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang
-            ;;
-        *)
-            echo "Sorry, this version of CentOS is unsupported"
-            exit 2
-            ;;
-    esac
-}
-
 function bootstrapOnRedHat ()
 {
     case "${LINUX_VERSION_ID}" in
         "9.5")
             dnf -y install dnf-plugins-core
+            dnf config-manager --set-enabled crb
             dnf config-manager --set-enabled devel
+            dnf -y install epel-release
             dnf -y update
             dnf -y install \
                                 git \
@@ -711,7 +620,9 @@ function bootstrapOnRedHat ()
             ;;
         "9.6")
             dnf -y install dnf-plugins-core
+            dnf config-manager --set-enabled crb
             dnf config-manager --set-enabled devel
+            dnf -y install epel-release
             dnf -y update
             dnf -y install \
                                 git \
@@ -740,6 +651,7 @@ function bootstrapOnRedHat ()
             dnf -y upgrade --refresh
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
+            dnf -y config-manager --set-enabled devel
             dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
             dnf -y update
             dnf -y install \
@@ -753,6 +665,7 @@ function bootstrapOnRedHat ()
                                 openal-soft-devel \
                                 SDL2-devel \
                                 SDL2_image-devel \
+                                SDL3-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -837,6 +750,7 @@ function bootstrapOnRockyLinux ()
             dnf -y upgrade --refresh
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
+            dnf -y config-manager --set-enabled devel
             dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
             dnf -y update
             dnf -y install \
@@ -850,6 +764,7 @@ function bootstrapOnRockyLinux ()
                                 openal-soft-devel \
                                 SDL2-devel \
                                 SDL2_image-devel \
+                                SDL3-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -872,7 +787,13 @@ function bootstrapOnRockyLinux ()
 function bootstrapOnManjaro ()
 {
         pacman -Sy --noconfirm archlinux-keyring manjaro-keyring
-        pacman -S --refresh --noconfirm cmake \
+
+        if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
+        then
+            pacman -Syyu --refresh --noconfirm
+        fi
+
+        pacman -Sy --noconfirm cmake \
                          boost \
                          clang \
                          gcc \
@@ -937,6 +858,11 @@ function bootstrapOnFuntoo ()
 
 function bootstrapOnArch ()
 {
+    if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
+    then
+        pacman -Syyu --refresh --noconfirm
+    fi
+
     # NOTE: Arch requires GCC 12 right now
     # also installing latest GCC.
     pacman -Sy --noconfirm \
@@ -969,9 +895,14 @@ function bootstrapOnArch ()
 
 function bootstrapOnEndeavourOS ()
 {
+    if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
+    then
+        pacman -Syyu --refresh --noconfirm
+    fi
+
     # NOTE: Arch requires GCC 12 right now
     # also installing latest GCC.
-    pacman -Sy --refresh --noconfirm \
+    pacman -Sy --noconfirm \
               base-devel \
               icu \
               cmake \
@@ -1016,9 +947,6 @@ case "${LINUX_ID}" in
         ;;
     "fedora")
         bootstrapOnFedora
-        ;;
-    "centos")
-        bootstrapOnCentOS
         ;;
     "rhel")
         bootstrapOnRedHat
