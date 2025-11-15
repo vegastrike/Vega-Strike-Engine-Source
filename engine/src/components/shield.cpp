@@ -34,6 +34,7 @@
 #include "src/vs_logging.h"
 #include "damage/damage.h"
 #include "src/vega_cast_utils.h"
+#include "src/vegastrike.h"
 
 #include <boost/format.hpp>
 
@@ -119,7 +120,7 @@ void Shield::Load(std::string unit_key) {
             const std::string shield_string_value = UnitCSVFactory::GetVariable(unit_key, shield_keys[i], std::string());
             if (shield_string_value.empty()) {
                 shield_values.push_back(Resource<double>(0.0));
-                    continue;
+                continue;
             }
 
             try {

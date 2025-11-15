@@ -36,6 +36,8 @@
 
 #include "src/vega_cast_utils.h"
 
+#include "vegastrike.h"
+
 const std::string keys[] = {"Key", "Directory",	"Name",	"Object_Type",
                             "Combat_Role",	"Textual_Description",	"Hud_image",	"Unit_Scale",	"Cockpit",
                             "CockpitX", "CockpitY",	"CockpitZ",	"Mesh",	"Shield_Mesh",	
@@ -168,7 +170,7 @@ inline const char* UnitCSVFactory::GetVariable(std::string unit_key, std::string
 }*/
 
 template<>
-inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, bool default_value) {
+inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, const bool default_value) {
     std::string result = _GetVariable(std::move(unit_key), attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
@@ -178,8 +180,8 @@ inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const 
 }
 
 template<>
-inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, float default_value) {
-    std::string result = _GetVariable(std::move(unit_key), attribute_key);
+inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, const float default_value) {
+    const std::string result = _GetVariable(std::move(unit_key), attribute_key);
 
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
@@ -190,8 +192,8 @@ inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const
 template<>
 inline double UnitCSVFactory::GetVariable(std::string unit_key,
         std::string const &attribute_key,
-        double default_value) {
-    std::string result = _GetVariable(std::move(unit_key), attribute_key);
+        const double default_value) {
+    const std::string result = _GetVariable(std::move(unit_key), attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -199,8 +201,8 @@ inline double UnitCSVFactory::GetVariable(std::string unit_key,
 }
 
 template<>
-inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, int default_value) {
-    std::string result = _GetVariable(std::move(unit_key), attribute_key);
+inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, const int default_value) {
+    const std::string result = _GetVariable(std::move(unit_key), attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }

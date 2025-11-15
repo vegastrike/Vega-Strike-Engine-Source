@@ -37,6 +37,7 @@
 #include <boost/range/adaptors.hpp>
 
 #include "src/vega_cast_utils.h"
+#include "vegastrike.h"
 #include "src/vs_logging.h"
 
 using boost::property_tree::ptree;

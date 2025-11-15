@@ -34,7 +34,7 @@
 #include "src/vegastrike.h"
 #include "src/cg_global.h"
 #ifdef HAVE_SDL
-#include "SDL2/SDL.h"
+#include <SDL3/SDL.h>
 #endif
 #include "gfx/hud.h"
 #include "gldrv/winsys.h"
@@ -52,8 +52,8 @@
 
 #ifdef HAVE_SDL
 
-static SDL_mutex *_rtextSDLMutex() {
-    static SDL_mutex *rv = SDL_CreateMutex();
+static SDL_Mutex *_rtextSDLMutex() {
+    static SDL_Mutex *rv = SDL_CreateMutex();
     return rv;
 }
 
@@ -178,7 +178,7 @@ void RText::conoutf(char *in) {
 void RText::conoutf(std::string &s, int a, int b, int c) {
 #ifdef HAVE_SDL
     //NOTE: first call must be single-threaded!
-    SDL_mutex *mymutex = _rtextSDLMutex();
+    SDL_Mutex *mymutex = _rtextSDLMutex();
     SDL_LockMutex(mymutex);
 #endif
     // stephengtuggy 2020-11-22: Leaving for now -- this should perhaps continue to call cout, I'm not sure

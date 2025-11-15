@@ -31,6 +31,7 @@
 #include "cmd/unit_csv_factory.h"
 #include "src/vs_logging.h"
 #include "src/vega_cast_utils.h"
+#include "src/vegastrike.h"
 
 #include <boost/format.hpp>
 
