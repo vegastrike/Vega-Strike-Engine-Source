@@ -139,7 +139,7 @@ struct InputEvent {
     }
 };
 
-//Text justification possibilities.
+//Text justification possibilities. TODO: Convert to enum class
 enum Justification {
     RIGHT_JUSTIFY,
     CENTER_JUSTIFY,

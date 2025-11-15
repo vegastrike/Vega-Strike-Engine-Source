@@ -103,15 +103,11 @@ struct CargoUpgrade {
 
 // TODO: why do we have to use such kludges?!
 unsigned int convert_to_int(std::string s) {
-    if(s.size() == 0) {
+    if(s.empty()) {
         return 0;
     }
 
-    try {
-        return std::stoi(s);
-    } catch(...) {
-        return 0;
-    }
+    return locale_aware_stoi(s, our_numeric_locale, 0);
 }
 
 UpgradeableUnit::UpgradeableUnit()

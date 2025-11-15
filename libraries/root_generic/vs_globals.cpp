@@ -56,3 +56,5 @@ int nb_checks = 1;
 double last_check = 1;
 double cur_check = 1;
 
+std::locale our_numeric_locale = std::locale().combine<std::numpunct<char>>(std::locale("en_US.UTF8"));
+

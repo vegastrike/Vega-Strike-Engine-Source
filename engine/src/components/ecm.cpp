@@ -30,6 +30,7 @@
 #include "configuration/configuration.h"
 #include "cmd/unit_csv_factory.h"
 #include "src/vs_logging.h"
+#include "src/vegastrike.h"
 
 #include <boost/format.hpp>
 
@@ -166,13 +167,17 @@ void ECM::_upgrade(const std::string key) {
     try {
         switch(result.size()) {
         case 1:
-            max_ecm = current_ecm = std::stod(result[0]);
+            max_ecm = current_ecm = static_cast<int>(std::rint(locale_aware_stod(result[0])));
             installed = true;
             break;
         case 2:
-            current_ecm = std::stod(result[0]);
-            max_ecm = std::stod(result[1]);
+            current_ecm = static_cast<int>(std::rint(locale_aware_stod(result[0])));
+            max_ecm = static_cast<int>(std::rint(locale_aware_stod(result[1])));
             installed = true;
+            break;
+        default:
+            VS_LOG(error, (boost::format("%1%: unexpected number of slash-delimited segments in ecm_string (%2%)") % __FUNCTION__ % result.size()));
+            break;
         }
     } catch (std::invalid_argument const& ex) {
         VS_LOG(error, (boost::format("%1%: %2% trying to convert ecm_string '%3%' to int") % __FUNCTION__ % ex.what() % ecm_string));

@@ -206,10 +206,10 @@ void SystemFactory::processSystem(Star_XML *xml, Object &object) {
     xml->backgroundDegamma = getBoolAttribute(object, "backgroundDegamma", xml->backgroundDegamma);
 
 //    Object& backgroundColor = attributes["backgroundColor"];
-//    xml->backgroundColor.r = std::stof(backgroundColor["r"]);
-//    xml->backgroundColor.g = std::stof(backgroundColor["g"]);
-//    xml->backgroundColor.b = std::stof(backgroundColor["b"]);
-//    xml->backgroundColor.a = std::stof(backgroundColor["a"]);
+//    xml->backgroundColor.r = locale_aware_stof(backgroundColor["r"]);
+//    xml->backgroundColor.g = locale_aware_stof(backgroundColor["g"]);
+//    xml->backgroundColor.b = locale_aware_stof(backgroundColor["b"]);
+//    xml->backgroundColor.a = locale_aware_stof(backgroundColor["a"]);
 }
 
 void SystemFactory::processRing(Star_XML *xml, Object &object, Planet *owner) {
@@ -690,11 +690,7 @@ int SystemFactory::getIntAttribute(Object object, string key, int default_value,
         int multiplier, int default_multiplier) {
     alg::to_lower(key);
     if (object.attributes.count(key)) {
-        try {
-            return std::stoi(object.attributes[key]) * multiplier;
-        } catch (std::invalid_argument&) {
-            return default_value * default_multiplier;
-        }
+        return locale_aware_stoi(object.attributes[key], our_numeric_locale, default_value) * multiplier;
     }
     return default_value * default_multiplier;
 }
@@ -703,11 +699,7 @@ float SystemFactory::getFloatAttribute(Object object, string key, float default_
         float multiplier, float default_multiplier) {
     alg::to_lower(key);
     if (object.attributes.count(key)) {
-        try {
-            return std::stof(object.attributes[key]) * multiplier;
-        } catch (std::invalid_argument&) {
-            return default_value * default_multiplier;
-        }
+        return locale_aware_stof(object.attributes[key], our_numeric_locale, default_value) * multiplier;
     }
     return default_value * default_multiplier;
 }
@@ -716,11 +708,7 @@ double SystemFactory::getDoubleAttribute(Object object, string key, double defau
         double multiplier, double default_multiplier) {
     alg::to_lower(key);
     if (object.attributes.count(key)) {
-        try {
-            return std::stod(object.attributes[key]) * multiplier;
-        } catch (std::invalid_argument&) {
-            return default_value * default_multiplier;
-        }
+        return locale_aware_stod(object.attributes[key], our_numeric_locale, default_value) * multiplier;
     }
     return default_value * default_multiplier;
 }

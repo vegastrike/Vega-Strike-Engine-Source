@@ -36,6 +36,7 @@
 
 #include <boost/range/adaptors.hpp>
 
+#include "vegastrike.h"
 #include "src/vs_logging.h"
 
 using boost::property_tree::ptree;
@@ -151,10 +152,10 @@ void Pass::parseParam(ptree tree) {
     std::stringstream ss(floatsString);
     string floatString;
 
-    for (int i = 0; i < 4; i++) {
-        floats[i] = 0;
+    for (float & i : floats) {
+        i = 0;
         std::getline(ss, floatString, ',');
-        floats[i] = std::stof(floatString);
+        i = locale_aware_stof(floatString, our_numeric_locale, 0);
     }
 
     addShaderParam(name, floats, optional);
