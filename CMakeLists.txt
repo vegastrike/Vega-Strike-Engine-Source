@@ -350,22 +350,27 @@ IF (NOT CMAKE_BUILD_TYPE)
 ENDIF (NOT CMAKE_BUILD_TYPE)
 MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 
+INCLUDE(FetchContent)
+
 # Should we install gtest?
 OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
 
 # Should we run gtest?
 OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
 
+OPTION(INSTALL_SDL3 "Should we download and install SDL3?" ON)
+
+OPTION(INSTALL_SDL3_IMAGE "Should we download and install SDL3_image?" ON)
+
 IF (INSTALL_GTEST OR USE_GTEST)
     MESSAGE(STATUS "Configuring Unit Tests")
     ENABLE_TESTING()
 
     IF (INSTALL_GTEST)
-        INCLUDE(FetchContent)
-        FetchContent_Declare(
+        FETCHCONTENT_DECLARE(
             googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
-            GIT_TAG        v1.15.2
+            GIT_TAG        b514bdc898e2951020cbdca1304b75f5950d1f59 # v1.15.2
         )
 
         # Set custom variables, policies, etc.
@@ -373,9 +378,52 @@ IF (INSTALL_GTEST OR USE_GTEST)
         # For Windows: Prevent overriding the parent project's compiler/linker settings
         SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-        FetchContent_MakeAvailable(googletest)
+    ELSE (INSTALL_GTEST)
+        # For Windows: Prevent overriding the parent project's compiler/linker settings
+        SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+        FIND_PACKAGE(GoogleTest REQUIRED)
     ENDIF (INSTALL_GTEST)
 ENDIF (INSTALL_GTEST OR USE_GTEST)
+
+IF (INSTALL_SDL3)
+    FETCHCONTENT_DECLARE(
+            SDL3
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+            GIT_TAG        badbf8da4ee72b3ef599c721ffc9899e8d7c8d90 # release-3.2.26
+            )
+ENDIF ()
+
+IF (INSTALL_SDL3_IMAGE)
+    FETCHCONTENT_DECLARE(
+            SDL3_image
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+            GIT_TAG        11154afb7855293159588b245b446a4ef09e574f # release-3.2.4
+            )
+ENDIF ()
+
+IF (INSTALL_GTEST)
+    FETCHCONTENT_MAKEAVAILABLE(googletest)
+ENDIF ()
+
+IF (INSTALL_SDL3)
+    FETCHCONTENT_MAKEAVAILABLE(SDL3)
+    MESSAGE(STATUS "SDL3 found via FetchContent_MakeAvailable")
+    SET(HAVE_SDL 1)
+    SET(SDL_WINDOWING 1)
+ELSE ()
+    FIND_PACKAGE(SDL3 REQUIRED CONFIG)
+    MESSAGE(STATUS "SDL3 found via FIND_PACKAGE")
+    SET(HAVE_SDL 1)
+    SET(SDL_WINDOWING 1)
+ENDIF ()
+
+
+IF (INSTALL_SDL3_IMAGE)
+    FETCHCONTENT_MAKEAVAILABLE(SDL3_image)
+ELSE ()
+    FIND_PACKAGE(SDL3_image REQUIRED)
+ENDIF ()
 
 INCLUDE(GNUInstallDirs)
 
