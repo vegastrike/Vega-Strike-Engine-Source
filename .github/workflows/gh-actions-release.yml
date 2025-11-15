@@ -26,51 +26,75 @@ jobs:
           - FROM:     'ubuntu:questing'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: false
+            INSTALL_SDL3_IMAGE: false
             ARTIFACT_EXT: 'deb'
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: true
+            INSTALL_SDL3_IMAGE: true
             ARTIFACT_EXT: 'deb'
           # Source tarballs only
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: true
+            INSTALL_SDL3_IMAGE: true
             ARTIFACT_EXT: 'tar.[xb]z*'
           - FROM:     'linuxmintd/mint22.2-amd64'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: true
+            INSTALL_SDL3_IMAGE: true
             ARTIFACT_EXT: 'deb'
           - FROM:     'linuxmintd/mint22-amd64'
             COMPILER: 'clang'
+            INSTALL_SDL3: true
+            INSTALL_SDL3_IMAGE: true
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'deb'
           - FROM:     'debian:trixie'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: false
+            INSTALL_SDL3_IMAGE: false
             ARTIFACT_EXT: 'deb'
           - FROM:     'debian:bookworm'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: true
+            INSTALL_SDL3_IMAGE: true
             ARTIFACT_EXT: 'deb'
           - FROM:     'fedora:43'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: false
+            INSTALL_SDL3_IMAGE: false
             ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:42'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: false
+            INSTALL_SDL3_IMAGE: false
             ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:41'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: true
+            INSTALL_SDL3_IMAGE: true
             ARTIFACT_EXT: 'rpm'
           - FROM:     'opensuse/leap:16.0'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: true
+            INSTALL_SDL3_IMAGE: true
             ARTIFACT_EXT: 'rpm'
           - FROM:     'rockylinux/rockylinux:10.0'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: false
+            INSTALL_SDL3_IMAGE: true
             ARTIFACT_EXT: 'rpm'
 
     steps:
@@ -93,6 +117,10 @@ jobs:
         env:
           FROM:       ${{ matrix.FROM }}
           COMPILER:   ${{ matrix.COMPILER }}
+          INSTALL_GTEST: false
+          USE_GTEST: false
+          INSTALL_SDL3: ${{ matrix.INSTALL_SDL3 }}
+          INSTALL_SDL3_IMAGE: ${{ matrix.INSTALL_SDL3_IMAGE }}
           IS_RELEASE: 1
         run: script/cibuild --preset-name=${{ matrix.preset-name }}
       - name: Upload the artifacts

@@ -54,6 +54,14 @@ jobs:
       - name: Run manual build steps
         if: matrix.build-mode == 'manual'
         shell: bash
+        env:
+          COMPILER: gcc
+          INSTALL_GTEST: false
+          USE_GTEST: false
+          INSTALL_SDL3: true
+          INSTALL_SDL3_IMAGE: true
+          MY_OS_NAME: linux
+          IS_RELEASE: 0
         run: |
           sudo script/bootstrap
           script/build --preset-name=linux-unix-makefiles-pie-enabled-glvnd-debug
