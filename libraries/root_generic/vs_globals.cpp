@@ -29,6 +29,7 @@
 #include "root_generic/vs_globals.h"
 #include <time.h>
 #include <stdio.h>
+#include "src/vega_cast_utils.h"
 
 /*
  * Globals

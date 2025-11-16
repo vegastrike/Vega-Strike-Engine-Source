@@ -42,6 +42,7 @@
 #include <boost/algorithm/string/classification.hpp>
 
 #include "vegastrike.h"
+#include "vega_cast_utils.h"
 
 static const std::string default_product_name("DEFAULT_PRODUCT_NAME");
 
