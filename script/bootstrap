@@ -30,7 +30,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2025-11-14 ---"
+echo "--- bootstrap | 2025-11-16 ---"
 echo "------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -639,10 +639,10 @@ function bootstrapOnFedora ()
                                 freeglut-devel \
                                 gcc-c++ \
                                 openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
                                 SDL3-devel \
                                 SDL3_image-devel \
+                                sdl2-compat-devel \
+                                SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -671,10 +671,10 @@ function bootstrapOnFedora ()
                                 freeglut-devel \
                                 gcc-c++ \
                                 openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
                                 SDL3-devel \
                                 SDL3_image-devel \
+                                sdl2-compat-devel \
+                                SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -794,9 +794,9 @@ function bootstrapOnRedHat ()
                                 freeglut-devel \
                                 gcc-c++ \
                                 openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
                                 SDL3-devel \
+                                SDL2-compat-devel \
+                                SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -917,9 +917,9 @@ function bootstrapOnRockyLinux ()
                                 freeglut-devel \
                                 gcc-c++ \
                                 openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
                                 SDL3-devel \
+                                sdl2-compat-devel \
+                                SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -961,9 +961,9 @@ function bootstrapOnManjaro ()
                          clang \
                          gcc \
                          gcc-libs \
-                         sdl2 \
-                         sdl2_image \
                          sdl3 \
+                         sdl2-compat \
+                         sdl2_image \
                          expat \
                          gtk3 \
                          libglvnd \
@@ -1001,7 +1001,7 @@ function bootstrapOnFuntoo ()
               boost \
               libsdl2 \
               libsdl2-image \
-              libsdl3\
+              libsdl3 \
               libsdl3image \
               expat \
               gtk3 \
@@ -1039,10 +1039,10 @@ function bootstrapOnArch ()
               clang \
               gcc \
               gcc12 \
-              sdl2 \
-              sdl2_image \
               sdl3 \
               sdl3_image \
+              sdl2-compat \
+              sdl2_image \
               expat \
               gtk3 \
               libglvnd \

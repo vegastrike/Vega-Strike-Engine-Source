@@ -56,10 +56,10 @@ jobs:
         shell: bash
         env:
           COMPILER: gcc
-          INSTALL_GTEST: 'OFF'
-          USE_GTEST: 'OFF'
-          INSTALL_SDL3: 'ON'
-          INSTALL_SDL3_IMAGE: 'ON'
+          INSTALL_GTEST: 0
+          USE_GTEST: 0
+          INSTALL_SDL3: 1
+          INSTALL_SDL3_IMAGE: 1
           MY_OS_NAME: linux
           IS_RELEASE: 0
         run: |
