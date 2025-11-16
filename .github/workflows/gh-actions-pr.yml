@@ -112,7 +112,7 @@ jobs:
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
-            INSTALL_SDL3: 0
+            INSTALL_SDL3: 1
             INSTALL_SDL3_IMAGE: 1
             allow_failure: false
 

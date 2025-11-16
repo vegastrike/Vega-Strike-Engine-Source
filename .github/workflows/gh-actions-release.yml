@@ -93,7 +93,7 @@ jobs:
           - FROM:     'rockylinux/rockylinux:10.0'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
-            INSTALL_SDL3: 0
+            INSTALL_SDL3: 1
             INSTALL_SDL3_IMAGE: 1
             ARTIFACT_EXT: 'rpm'
 
