@@ -26,8 +26,8 @@
     "libvorbis",
     "openal-soft",
     "opengl",
-    "sdl2",
-    "sdl2-image",
+    "sdl3",
+    "sdl3-image",
     "zlib"
   ]
 }

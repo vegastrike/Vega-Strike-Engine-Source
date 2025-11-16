@@ -219,7 +219,8 @@ public:
     // When they're done, their destructor is called ;)
     bool GettingDestroyed() const;
 
-
+    // This creates a nearly destroyed unit to float in space
+    void Derelict();
 
 
 

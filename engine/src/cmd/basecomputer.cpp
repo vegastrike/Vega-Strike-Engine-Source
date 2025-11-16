@@ -134,10 +134,10 @@ extern vector<unsigned int> base_keyboard_queue;
 
 // This will break because we have cargo_hold and upgrade_space
 std::string getDisplayCategory(const Cargo &cargo) {
-    std::string::size_type where = cargo.GetDescription().find("<");
+    std::string::size_type where = cargo.GetDescription().find('<');
     if (where != string::npos) {
         std::string category = cargo.GetDescription().substr(where + 1);
-        where = category.find(">");
+        where = category.find('>');
         return category.substr(0, where);
     }
     return cargo.GetCategory();
@@ -246,7 +246,7 @@ extern void RespawnNow(Cockpit *cockpit);
 
 //headers for functions used internally
 //build the previous description for a ship purchase item
-string buildShipDescription(Cargo &item, string &descriptiontexture);
+string buildShipDescription(Cargo &item, string &texture_description);
 //build the previous description from a cargo purchase item
 string buildCargoDescription(const Cargo &item, BaseComputer &computer, float price);
 //put in buffer a pretty prepresentation of the POSITIVE float f (ie 4,732.17)
@@ -540,25 +540,23 @@ void BaseComputer::constructControls(void) {
         return;
     }
 
-    if (m_displayModes.size() != 1) {
-        //Base info title.
-        StaticDisplay *baseTitle = (StaticDisplay*)getControl(controls["baseTitle"]);
-        window()->addControl(baseTitle);
+    //Base info title.
+    StaticDisplay *baseTitle = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["baseTitle"]));
+    window()->addControl(baseTitle);
 
-        //Player info title.
-        StaticDisplay *playerTitle = (StaticDisplay*)getControl(controls["playerTitle"]);
-        window()->addControl(playerTitle);
+    //Player info title.
+    StaticDisplay *playerTitle = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["playerTitle"]));
+    window()->addControl(playerTitle);
 
-        //Options button.
-        NewButton *options = (NewButton*)getControl(controls["saveLoad"]);
-        window()->addControl(options);
-    }
+    //Options button.
+    NewButton *options = vega_dynamic_cast_ptr<NewButton>(getControl(controls["saveLoad"]));
+    window()->addControl(options);
 
-    NewButton *done = (NewButton*)getControl(controls["done"]);
+    NewButton *done = vega_dynamic_cast_ptr<NewButton>(getControl(controls["done"]));
     window()->addControl(done);
 
     //Mode button.
-    NewButton *mode = (NewButton*)getControl(controls["mode"]);
+    NewButton *mode = vega_dynamic_cast_ptr<NewButton>(getControl(controls["mode"]));
     window()->addControl(mode);
     {
         //CARGO group control.
@@ -568,7 +566,7 @@ void BaseComputer::constructControls(void) {
         GFXColor color = getColorForGroup("CargoGroup");
 
         //Seller text display.
-        StaticDisplay *sellLabel = (StaticDisplay*)getControl(controls["seller"]);
+        StaticDisplay *sellLabel = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["seller"]));
         cargoGroup->addChild(sellLabel);
 
         //Player inventory text display.
@@ -579,52 +577,52 @@ void BaseComputer::constructControls(void) {
         cargoGroup->addChild(inv);
 
         //Total price text display.
-        StaticDisplay *totalPrice = (StaticDisplay*)getControl(controls["totalPrice"]);
+        StaticDisplay *totalPrice = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["totalPrice"]));
         cargoGroup->addChild(totalPrice);
 
         //"Max" text display.
-        StaticDisplay *maxForPlayer = (StaticDisplay*)getControl(controls["maxQuantity"]);
+        StaticDisplay *maxForPlayer = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["maxQuantity"]));
         cargoGroup->addChild(maxForPlayer);
 
         //Scroller for seller.
-        Scroller *sellerScroller = (Scroller*)getControl(controls["sellerScroller"]);
+        Scroller *sellerScroller = vega_dynamic_cast_ptr<Scroller>(getControl(controls["sellerScroller"]));
 
 
         //Seller picker.
-        SimplePicker *sellpick = (SimplePicker*)getControl(controls["sellerPicker"]);
+        SimplePicker *sellpick = vega_dynamic_cast_ptr<SimplePicker>(getControl(controls["sellerPicker"]));
         sellpick->setScroller(sellerScroller);
         cargoGroup->addChild(sellpick);
 
         cargoGroup->addChild(sellerScroller);                 //Want this "over" the picker.
 
         //Scroller for inventory.
-        Scroller *inventoryScroller = (Scroller*)getControl(controls["inventoryScroller"]);
+        Scroller *inventoryScroller = vega_dynamic_cast_ptr<Scroller>(getControl(controls["inventoryScroller"]));
 
         //Inventory picker.
-        SimplePicker *inventoryPick = (SimplePicker*)getControl(controls["inventoryPicker"]);
+        SimplePicker *inventoryPick = vega_dynamic_cast_ptr<SimplePicker>(getControl(controls["inventoryPicker"]));
         inventoryPick->setScroller(inventoryScroller);
         cargoGroup->addChild(inventoryPick);
 
         cargoGroup->addChild(inventoryScroller);            //Want this "over" the picker.
 
         //Buy button.
-        NewButton *buy = (NewButton*)getControl(controls["buy"]);
+        NewButton *buy = vega_dynamic_cast_ptr<NewButton>(getControl(controls["buy"]));
         cargoGroup->addChild(buy);
 
         //"Buy 10" button.
-        NewButton *buy10 = (NewButton*)getControl(controls["buy10"]);
+        NewButton *buy10 = vega_dynamic_cast_ptr<NewButton>(getControl(controls["buy10"]));
         cargoGroup->addChild(buy10);
 
         //"Buy 1" button.
-        NewButton *buy1 = (NewButton*)getControl(controls["buy1"]);
+        NewButton *buy1 = vega_dynamic_cast_ptr<NewButton>(getControl(controls["buy1"]));
         cargoGroup->addChild(buy1);
 
         //Scroller for description.
-        Scroller *descScroller = (Scroller*)getControl(controls["descriptionScroller"]);
+        Scroller *descScroller = vega_dynamic_cast_ptr<Scroller>(getControl(controls["descriptionScroller"]));
 
         //Description box.
-        StaticDisplay *ms = (StaticDisplay*)getControl(controls["description"]);
-        StaticImageDisplay *picture = (StaticImageDisplay*)getControl(controls["picture"]);
+        StaticDisplay *ms = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["description"]));
+        StaticImageDisplay *picture = vega_dynamic_cast_ptr<StaticImageDisplay>(getControl(controls["picture"]));
         ms->setScroller(descScroller);
         cargoGroup->addChild(ms);
 
@@ -639,7 +637,7 @@ void BaseComputer::constructControls(void) {
         GFXColor color = getColorForGroup("UpgradeGroup");
 
         //Seller text display.
-        StaticDisplay *sellLabel = (StaticDisplay*)getControl(controls["sellLabel"]);
+        StaticDisplay *sellLabel = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["sellLabel"]));
         upgradeGroup->addChild(sellLabel);
 
         //Player inventory text display.
@@ -650,7 +648,7 @@ void BaseComputer::constructControls(void) {
         upgradeGroup->addChild(inv);
 
         //Scroller for seller.
-        Scroller *sellerScroller = (Scroller*)getControl(controls["sellerScroller"]);
+        Scroller *sellerScroller = vega_dynamic_cast_ptr<Scroller>(getControl(controls["sellerScroller"]));
 
         //Seller picker.
         SimplePicker *sellpick = new SimplePicker;
@@ -847,8 +845,8 @@ void BaseComputer::constructControls(void) {
         Scroller *descScroller = new Scroller;
         descScroller->setRect(Rect(.91, -.7, .05, 1.4));
         descScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        descScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        descScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setThumbColor(UnsaturatedColor(color.r * 0.4F, color.g * 0.4F, color.b * 0.4F), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(UnsaturatedColor(color.r * 0.4F, color.g * 0.4F, color.b * 0.4F));
         descScroller->setTextColor(GUI_OPAQUE_WHITE());
         descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -3708,7 +3706,7 @@ void SwapInNewShipName(Cockpit *cockpit, Unit *base, const std::string &newFileN
     cockpit->GetUnitFileName() = newFileName;
 }
 
-string buildShipDescription(Cargo &item, std::string &texturedescription) {
+string buildShipDescription(Cargo &item, std::string &texture_description) {
     VS_LOG(debug, "Entering buildShipDescription");
     //load the Unit
     string newModifications;
@@ -3739,7 +3737,7 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
             if (delim != string::npos) {
                 sHudImage = sHudImage.substr(delim + 2);
             }
-            texturedescription = "../units/" + sHudImage + "/" + sImage;
+            texture_description = "../units/" + sHudImage + "/" + sImage;
         }
     }
 
@@ -3753,11 +3751,11 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
     // VS_LOG(debug, "buildShipDescription: deleting newPart");
     // delete newPart;
     // newPart = nullptr;
-    if (texturedescription != "" && (string::npos == str.find('@'))) {
-        str = "@" + texturedescription + "@" + str;
+    if (!texture_description.empty() && (string::npos == str.find('@'))) {
+        str = "@" + texture_description + "@" + str;
     }
-    VS_LOG(debug, (boost::format("buildShipDescription: texturedescription == %1%") % texturedescription));
-    VS_LOG(debug, (boost::format("buildShipDescription: return value       == %1%") % str));
+    VS_LOG(debug, (boost::format("buildShipDescription: texture_description == %1%") % texture_description));
+    VS_LOG(debug, (boost::format("buildShipDescription: return value        == %1%") % str));
     VS_LOG(debug, "Leaving buildShipDescription");
     return str;
 }

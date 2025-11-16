@@ -35,7 +35,7 @@
 #include <chrono>
 
 #include "gfxlib_struct.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "configuration/configuration.h"
 #include "gfx/quadsquare.h"
 #include "resource/random_utils.h"

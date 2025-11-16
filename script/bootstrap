@@ -30,7 +30,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2025-09-02 ---"
+echo "--- bootstrap | 2025-11-14 ---"
 echo "------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -84,6 +84,8 @@ function bootstrapOnDebian()
                             libgl1-mesa-dev \
                             libsdl2-dev \
                             libsdl2-image-dev \
+                            libsdl3-dev \
+                            libsdl3-image-dev \
                             libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
@@ -95,9 +97,21 @@ function bootstrapOnDebian()
                             clang \
                             lsb-release \
                             opentelemetry-cpp-dev \
-                            libprotobuf-dev
+                            libprotobuf-dev \
+                            make \
+                            pkg-config \
+                            ninja-build \
+                            gnome-desktop-testing \
+                            libasound2-dev \
+                            libpulse-dev \
+                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
             ;;
         "bookworm")
+            echo "Bookworm does NOT support SDL3"
             apt-get -qy remove \
                             libboost-python-dev \
                             libboost-log-dev \
@@ -133,7 +147,18 @@ function bootstrapOnDebian()
                             libboost-program-options1.81-dev \
                             libxmu-dev \
                             clang \
-                            lsb-release
+                            lsb-release \
+                            make \
+                            pkg-config \
+                            ninja-build \
+                            gnome-desktop-testing \
+                            libasound2-dev \
+                            libpulse-dev \
+                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
             ;;
         "bullseye"|"buster"|"stretch")
             echo "Sorry, Debian ${LINUX_CODENAME} is no longer supported"
@@ -156,7 +181,104 @@ function bootstrapOnUbuntu()
     fi
 
     case "$LINUX_CODENAME" in
+        "questing")
+            apt-get -qy install \
+                            git \
+                            cmake \
+                            python3-dev \
+                            build-essential \
+                            automake \
+                            autoconf \
+                            libarchive-dev \
+                            libpng16-16 \
+                            libpng-dev \
+                            libpng-tools \
+                            libjpeg-turbo8-dev \
+                            libexpat1-dev \
+                            libgdk-pixbuf-2.0-dev \
+                            libgtk-3-dev \
+                            libopenal-dev \
+                            libogg-dev \
+                            libvorbis-dev \
+                            libglvnd-dev \
+                            libgl1-mesa-dev \
+                            libsdl2-dev \
+                            libsdl2-image-dev \
+                            libsdl3-dev \
+                            libsdl3-image-dev \
+                            libopengl0 \
+                            libpostproc-dev \
+                            freeglut3-dev \
+                            libboost-python-dev \
+                            libboost-log-dev \
+                            libboost-regex-dev \
+                            libboost-json-dev \
+                            libboost-program-options-dev \
+                            libxmu-dev \
+                            clang \
+                            lsb-release \
+                            make \
+                            pkg-config \
+                            ninja-build \
+                            gnome-desktop-testing \
+                            libasound2-dev \
+                            libpulse-dev \
+                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+            ;;
+        "plucky")
+            apt-get -qy install \
+                            git \
+                            cmake \
+                            python3-dev \
+                            build-essential \
+                            automake \
+                            autoconf \
+                            libarchive-dev \
+                            libpng16-16 \
+                            libpng-dev \
+                            libpng-tools \
+                            libjpeg-turbo8-dev \
+                            libexpat1-dev \
+                            libgdk-pixbuf-2.0-dev \
+                            libgtk-3-dev \
+                            libopenal-dev \
+                            libogg-dev \
+                            libvorbis-dev \
+                            libglvnd-dev \
+                            libgl1-mesa-dev \
+                            libsdl2-dev \
+                            libsdl2-image-dev \
+                            libsdl3-dev \
+                            libsdl3-image-dev \
+                            libopengl0 \
+                            libpostproc-dev \
+                            freeglut3-dev \
+                            libboost-python-dev \
+                            libboost-log-dev \
+                            libboost-regex-dev \
+                            libboost-json-dev \
+                            libboost-program-options-dev \
+                            libxmu-dev \
+                            clang \
+                            lsb-release \
+                            make \
+                            pkg-config \
+                            ninja-build \
+                            gnome-desktop-testing \
+                            libasound2-dev \
+                            libpulse-dev \
+                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+            ;;
         "noble")
+            echo "Noble does NOT support SDL3"
             apt-get -qy install \
                             git \
                             cmake \
@@ -189,7 +311,18 @@ function bootstrapOnUbuntu()
                             libboost-program-options-dev \
                             libxmu-dev \
                             clang \
-                            lsb-release
+                            lsb-release \
+                            make \
+                            pkg-config \
+                            ninja-build \
+                            gnome-desktop-testing \
+                            libasound2-dev \
+                            libpulse-dev \
+                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
             ;;
         "jammy"|"hirsute"|"impish"|"focal"|"bionic"|"xenial")
             echo "Sorry, Ubuntu ${LINUX_CODENAME} is no longer supported"
@@ -239,6 +372,8 @@ function bootstrapOnPopOS ()
                             libgl1-mesa-dev \
                             libsdl2-dev \
                             libsdl2-image-dev \
+                            libsdl3-dev \
+                            libsdl3-image-dev \
                             libopengl0 \
                             libpostproc-dev \
                             freeglut3-dev \
@@ -249,7 +384,18 @@ function bootstrapOnPopOS ()
                             libboost-program-options-dev \
                             libxmu-dev \
                             clang \
-                            lsb-release
+                            lsb-release \
+                            make \
+                            pkg-config \
+                            ninja-build \
+                            gnome-desktop-testing \
+                            libasound2-dev \
+                            libpulse-dev \
+                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
             ;;
         *)
             echo "Sorry, this version of Pop! OS is not currently supported"
@@ -267,8 +413,9 @@ function bootstrapOnLinuxMint ()
         apt-get -qy upgrade
     fi
 
+    echo "Linux Mint base Distros do NOT support SDL3"
     case "$LINUX_CODENAME" in
-        "wilma")
+        "wilma"|"zara")
             apt-get -qy install \
                             git \
                             cmake \
@@ -301,7 +448,18 @@ function bootstrapOnLinuxMint ()
                             libboost-program-options-dev \
                             libxmu-dev \
                             clang \
-                            lsb-release
+                            lsb-release \
+                            make \
+                            pkg-config \
+                            ninja-build \
+                            gnome-desktop-testing \
+                            libasound2-dev \
+                            libpulse-dev \
+                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
             ;;
         "virginia"|"victoria"|"vera"|"vanessa"|"ulyana")
             echo "Sorry, Linux Mint ${LINUX_CODENAME} is no longer supported"
@@ -322,6 +480,7 @@ function bootstrapOnOpenSuseLeap ()
             exit 2
             ;;
         "15.6")
+            zypper --non-interactive refresh
             zypper --non-interactive install -y \
                                     libboost_log1_75_0-devel \
                                     libboost_python-py3-1_75_0-devel \
@@ -354,7 +513,10 @@ function bootstrapOnOpenSuseLeap ()
                                     python3-devel \
                                     git \
                                     rpm-build \
-                                    clang
+                                    clang \
+                                    libunwind-devel libusb-1_0-devel Mesa-libGL-devel libxkbcommon-devel libdrm-devel \
+                                    libgbm-devel pipewire-devel libpulse-devel sndio-devel Mesa-libEGL-devel alsa-devel xwayland-devel \
+                                    wayland-devel wayland-protocols-devel
             ;;
         "16.0")
             zypper --non-interactive refresh
@@ -390,7 +552,10 @@ function bootstrapOnOpenSuseLeap ()
                                     python3-devel \
                                     git \
                                     rpm-build \
-                                    clang
+                                    clang \
+                                    libunwind-devel libusb-1_0-devel Mesa-libGL-devel libxkbcommon-devel libdrm-devel \
+                                    libgbm-devel pipewire-devel libpulse-devel sndio-devel Mesa-libEGL-devel alsa-devel xwayland-devel \
+                                    wayland-devel wayland-protocols-devel
             ;;
         *)
             echo "Sorry, this version of openSUSE Leap is unsupported"
@@ -426,7 +591,15 @@ function bootstrapOnFedora ()
                                 libarchive-devel \
                                 rpm-build \
                                 make \
-                                clang
+                                clang \
+                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
+                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
+                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
+                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
+                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
+                                pipewire-jack-audio-connection-kit-devel \
+                                liburing-devel
             ;;
         41)
             dnf install -y \
@@ -448,7 +621,15 @@ function bootstrapOnFedora ()
                                 libarchive-devel \
                                 rpm-build \
                                 make \
-                                clang
+                                clang \
+                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
+                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
+                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
+                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
+                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
+                                pipewire-jack-audio-connection-kit-devel \
+                                liburing-devel
             ;;
         42)
             dnf install -y \
@@ -460,6 +641,8 @@ function bootstrapOnFedora ()
                                 openal-soft-devel \
                                 SDL2-devel \
                                 SDL2_image-devel \
+                                SDL3-devel \
+                                SDL3_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -470,103 +653,50 @@ function bootstrapOnFedora ()
                                 libarchive-devel \
                                 rpm-build \
                                 make \
-                                clang
+                                clang \
+                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
+                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
+                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
+                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
+                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
+                                pipewire-jack-audio-connection-kit-devel \
+                                liburing-devel
+            ;;
+        43)
+            dnf install -y \
+                                git \
+                                cmake \
+                                boost-devel \
+                                freeglut-devel \
+                                gcc-c++ \
+                                openal-soft-devel \
+                                SDL2-devel \
+                                SDL2_image-devel \
+                                SDL3-devel \
+                                SDL3_image-devel \
+                                libvorbis-devel \
+                                libglvnd-devel \
+                                libjpeg-turbo-devel \
+                                libpng-devel \
+                                expat-devel \
+                                gtk3-devel \
+                                python3-devel \
+                                libarchive-devel \
+                                rpm-build \
+                                make \
+                                clang \
+                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
+                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
+                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
+                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
+                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
+                                pipewire-jack-audio-connection-kit-devel \
+                                liburing-devel
             ;;
         *)
             echo "Sorry, this version of Fedora is unsupported"
-            exit 2
-            ;;
-    esac
-}
-
-function bootstrapOnCentOS ()
-{
-    case "${LINUX_VERSION_ID}" in
-        "9.5")
-            dnf -y install dnf-plugins-core
-            dnf config-manager --set-enabled devel
-            dnf -y update
-            dnf -y install \
-                                git \
-                                cmake \
-                                boost-devel \
-                                boost-python3-devel \
-                                boost-json \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang
-            ;;
-        "9.6")
-            dnf -y install dnf-plugins-core
-            dnf config-manager --set-enabled devel
-            dnf -y update
-            dnf -y install \
-                                git \
-                                cmake \
-                                boost-devel \
-                                boost-python3-devel \
-                                boost-json \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang
-            ;;
-        "10.0")
-            dnf -y upgrade --refresh
-            dnf -y install 'dnf-command(config-manager)'
-            dnf -y config-manager --set-enabled crb
-            dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
-            dnf -y update
-            dnf -y install \
-                                git \
-                                cmake \
-                                boost-devel \
-                                boost-python3-devel \
-                                boost-json \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang
-            ;;
-        *)
-            echo "Sorry, this version of CentOS is unsupported"
             exit 2
             ;;
     esac
@@ -577,7 +707,9 @@ function bootstrapOnRedHat ()
     case "${LINUX_VERSION_ID}" in
         "9.5")
             dnf -y install dnf-plugins-core
+            dnf config-manager --set-enabled crb
             dnf config-manager --set-enabled devel
+            dnf -y install epel-release
             dnf -y update
             dnf -y install \
                                 git \
@@ -599,11 +731,21 @@ function bootstrapOnRedHat ()
                                 libarchive-devel \
                                 rpm-build \
                                 make \
-                                clang
+                                clang \
+                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
+                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
+                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
+                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
+                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
+                                pipewire-jack-audio-connection-kit-devel \
+                                liburing-devel
             ;;
         "9.6")
             dnf -y install dnf-plugins-core
+            dnf config-manager --set-enabled crb
             dnf config-manager --set-enabled devel
+            dnf -y install epel-release
             dnf -y update
             dnf -y install \
                                 git \
@@ -626,12 +768,21 @@ function bootstrapOnRedHat ()
                                 libarchive-devel \
                                 rpm-build \
                                 make \
-                                clang
+                                clang \
+                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
+                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
+                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
+                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
+                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
+                                pipewire-jack-audio-connection-kit-devel \
+                                liburing-devel
             ;;
         "10.0")
             dnf -y upgrade --refresh
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
+            dnf -y config-manager --set-enabled devel
             dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
             dnf -y update
             dnf -y install \
@@ -645,6 +796,7 @@ function bootstrapOnRedHat ()
                                 openal-soft-devel \
                                 SDL2-devel \
                                 SDL2_image-devel \
+                                SDL3-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -655,7 +807,15 @@ function bootstrapOnRedHat ()
                                 libarchive-devel \
                                 rpm-build \
                                 make \
-                                clang
+                                clang \
+                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
+                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
+                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
+                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
+                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
+                                pipewire-jack-audio-connection-kit-devel \
+                                liburing-devel
             ;;
         *)
             echo "Sorry, this version of Red Hat is unsupported"
@@ -670,7 +830,7 @@ function bootstrapOnRockyLinux ()
         "9.5")
             dnf -y install dnf-plugins-core
             dnf config-manager --set-enabled crb
-            dnf config-manager --set-enabled devel 
+            dnf config-manager --set-enabled devel
             dnf -y install epel-release
             dnf -y update
             dnf -y install \
@@ -694,7 +854,15 @@ function bootstrapOnRockyLinux ()
                                 libarchive-devel \
                                 rpm-build \
                                 make \
-                                clang
+                                clang \
+                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
+                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
+                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
+                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
+                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
+                                pipewire-jack-audio-connection-kit-devel \
+                                liburing-devel
             ;;
         "9.6")
             dnf -y install dnf-plugins-core
@@ -723,12 +891,21 @@ function bootstrapOnRockyLinux ()
                                 libarchive-devel \
                                 rpm-build \
                                 make \
-                                clang
+                                clang \
+                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
+                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
+                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
+                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
+                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
+                                pipewire-jack-audio-connection-kit-devel \
+                                liburing-devel
             ;;
         "10.0")
             dnf -y upgrade --refresh
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
+            dnf -y config-manager --set-enabled devel
             dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
             dnf -y update
             dnf -y install \
@@ -742,6 +919,7 @@ function bootstrapOnRockyLinux ()
                                 openal-soft-devel \
                                 SDL2-devel \
                                 SDL2_image-devel \
+                                SDL3-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -752,7 +930,15 @@ function bootstrapOnRockyLinux ()
                                 libarchive-devel \
                                 rpm-build \
                                 make \
-                                clang
+                                clang \
+                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
+                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
+                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
+                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
+                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
+                                pipewire-jack-audio-connection-kit-devel \
+                                liburing-devel
             ;;
         *)
             echo "Sorry, this version of Rocky Linux is unsupported"
@@ -763,13 +949,21 @@ function bootstrapOnRockyLinux ()
 
 function bootstrapOnManjaro ()
 {
-        pacman -S --refresh --noconfirm cmake \
+        pacman -Sy --noconfirm archlinux-keyring manjaro-keyring
+
+        if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
+        then
+            pacman -Syyu --refresh --noconfirm
+        fi
+
+        pacman -Sy --noconfirm cmake \
                          boost \
                          clang \
                          gcc \
                          gcc-libs \
                          sdl2 \
                          sdl2_image \
+                         sdl3 \
                          expat \
                          gtk3 \
                          libglvnd \
@@ -785,7 +979,15 @@ function bootstrapOnManjaro ()
                          libxmu \
                          openal \
                          libarchive \
-                         make
+                         yay \
+                         make \
+                         alsa-lib hidapi ibus jack libdecor libgl libpulse libusb libx11 libxcursor libxext libxinerama \
+                         libxkbcommon libxrandr libxrender libxss libxtst mesa ninja pipewire sndio vulkan-driver vulkan-headers \
+                         wayland wayland-protocols
+
+        # NOTE: `yay` requires SystemD which isn't available in Docker
+        # AUR related packages that are not in pacman by default
+        # yay -S --noconfirm sdl3_image
 }
 
 function bootstrapOnFuntoo ()
@@ -799,6 +1001,8 @@ function bootstrapOnFuntoo ()
               boost \
               libsdl2 \
               libsdl2-image \
+              libsdl3\
+              libsdl3image \
               expat \
               gtk3 \
               libglvnd \
@@ -820,6 +1024,11 @@ function bootstrapOnFuntoo ()
 
 function bootstrapOnArch ()
 {
+    if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
+    then
+        pacman -Syyu --refresh --noconfirm
+    fi
+
     # NOTE: Arch requires GCC 12 right now
     # also installing latest GCC.
     pacman -Sy --noconfirm \
@@ -832,6 +1041,8 @@ function bootstrapOnArch ()
               gcc12 \
               sdl2 \
               sdl2_image \
+              sdl3 \
+              sdl3_image \
               expat \
               gtk3 \
               libglvnd \
@@ -845,7 +1056,49 @@ function bootstrapOnArch ()
               libxmu \
               openal \
               libarchive \
-              make
+              make \
+              alsa-lib hidapi ibus jack libdecor libgl libpulse libusb libx11 libxcursor libxext libxinerama \
+              libxkbcommon libxrandr libxrender libxss libxtst mesa ninja pipewire sndio vulkan-driver vulkan-headers \
+              wayland wayland-protocols
+}
+
+function bootstrapOnEndeavourOS ()
+{
+    if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
+    then
+        pacman -Syyu --refresh --noconfirm
+    fi
+
+    # NOTE: Arch requires GCC 12 right now
+    # also installing latest GCC.
+    pacman -Sy --noconfirm \
+              base-devel \
+              icu \
+              cmake \
+              boost \
+              llvm \
+              clang \
+              gcc \
+              sdl2 \
+              sdl2_image \
+              sdl3 \
+              expat \
+              gtk3 \
+              libglvnd \
+              mesa \
+              python \
+              freeglut \
+              git \
+              libjpeg-turbo \
+              libpng \
+              libvorbis \
+              libxmu \
+              openal \
+              libarchive \
+              make \
+              alsa-lib hidapi ibus jack libdecor libgl libpulse libusb libx11 libxcursor libxext libxinerama \
+              libxkbcommon libxrandr libxrender libxss libxtst mesa ninja pipewire sndio vulkan-driver vulkan-headers \
+              wayland wayland-protocols
 }
 
 case "${LINUX_ID}" in
@@ -867,9 +1120,6 @@ case "${LINUX_ID}" in
     "fedora")
         bootstrapOnFedora
         ;;
-    "centos")
-        bootstrapOnCentOS
-        ;;
     "rhel")
         bootstrapOnRedHat
         ;;
@@ -887,6 +1137,9 @@ case "${LINUX_ID}" in
         ;;
     "arch")
         bootstrapOnArch
+        ;;
+    "endeavouros")
+        bootstrapOnEndeavourOS
         ;;
     *)
         echo "Sorry, unrecognized/unsupported Linux distribution"

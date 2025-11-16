@@ -105,6 +105,8 @@ IF (USE_GTEST)
 
     TARGET_LINK_LIBRARIES(
             ${TEST_NAME}
+            GLUT::GLUT
+            ${TST_LIBS}
             ${OPENAL_LIBRARY}
             ${Vorbis_LIBRARIES}
             ${JPEG_LIBRARIES}
@@ -116,6 +118,7 @@ IF (USE_GTEST)
             LibArchive::LibArchive
             vegastrike_cmd
             vegastrike_gfx_generic
+            vegastrike_root_generic
             Boost::log
             Boost::log_setup
             Boost::json

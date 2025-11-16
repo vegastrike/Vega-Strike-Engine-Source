@@ -39,7 +39,7 @@
 
 #include <typeinfo>
 // #include <boost/log/trivial.hpp>
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "cmd/planet.h"
 #include "src/vs_logging.h"
 

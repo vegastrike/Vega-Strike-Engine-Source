@@ -48,7 +48,7 @@ class Pass {
     int program;
 
     /** Compiled program version stamp */
-    int programVersion;
+    int programVersion{};
 
     /** Vertex Program file before compilation */
     string vertexProgram;
@@ -279,7 +279,7 @@ public:
      * for sRGB blending if sRGB framebuffers are available. Shaders will be compiled
      * with SRGB_FRAMEBUFFER set to 0 (not supported) or 1 (supported).
      */
-    bool sRGBAware;
+    bool sRGBAware{};
 
     /** Whether to write the color buffer or not */
     bool colorWrite;

@@ -895,8 +895,6 @@ string SaveGame::WriteSavedUnit(SavedUnits *su) {
     return string("\n") + std::to_string(SerializeUnitType(su->type)) + string(" ") + su->filename + " " + su->faction;
 }
 
-extern bool STATIC_VARS_DESTROYED;
-
 static char *tmprealloc(char *var, int &oldlength, int newlength) {
     if (oldlength < newlength) {
         oldlength = newlength;

@@ -37,32 +37,25 @@
 #include "src/vs_logging.h"
 
 void VegaPyRunString(const std::string &py_snippet) {
-    VS_LOG(important_info, (boost::format("running %1%") % py_snippet));
     char * py_snippet_temp = vega_str_dup(py_snippet.c_str());
     VegaPyRunString(py_snippet_temp);
     free(py_snippet_temp);
 }
 
 void VegaPyRunString(char *py_snippet) {
-//#if defined(_WINDOWS) && defined(_DEBUG)
-//    VS_LOG(important_info, (boost::format("Debug mode on Windows; not running %1%") % py_snippet));
-//#else
-    VS_LOG(important_info, (boost::format("running %1%") % py_snippet));
+    VS_LOG(trace, (boost::format("running %1%") % py_snippet));
     PyRun_SimpleString(py_snippet);
-    //Python::reseterrors();
     if (PyErr_Occurred()) {
         VS_LOG_AND_FLUSH(error, "VegaPyRunString: Python error occurred");
         PyErr_Print();
         PyErr_Clear();
         VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     }
-//#endif
 }
 
 void VegaPyRunFile(FILE* fp, std::string file_path_or_description) {
-    VS_LOG(important_info, (boost::format("running file '%1%'") % file_path_or_description));
+    VS_LOG(trace, (boost::format("running file '%1%'") % file_path_or_description));
     PyRun_SimpleFile(fp, file_path_or_description.c_str());
-    //Python::reseterrors();
     if (PyErr_Occurred()) {
         VS_LOG_AND_FLUSH(error, "VegaPyRunFile: Python error occurred");
         PyErr_Print();

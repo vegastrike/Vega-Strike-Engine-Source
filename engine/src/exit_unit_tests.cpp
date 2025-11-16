@@ -28,10 +28,9 @@
 
 #include <cstdlib>
 
+#include "root_generic/vs_globals.h"
 #include "src/vs_exit.h"
 #include "src/vs_logging.h"
-
-bool STATIC_VARS_DESTROYED = false;
 
 void VSExit(int code) {
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
