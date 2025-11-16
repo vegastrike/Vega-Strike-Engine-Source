@@ -57,12 +57,6 @@ int nb_checks = 1;
 double last_check = 1;
 double cur_check = 1;
 
-#if defined (_WIN32)
-const std::string kLocaleName = "en_US";
-#elif defined(__linux__)
-const std::string kLocaleName = "en_US.utf8";
-#else
 const std::string kLocaleName = "C";
-#endif
 std::locale our_numeric_locale = std::locale().combine<std::numpunct<char>>(std::locale(kLocaleName));
 
