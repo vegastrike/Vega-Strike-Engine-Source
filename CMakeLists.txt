@@ -370,7 +370,7 @@ OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
 # and override the option's value if it does.
 # The environment variable should be set to "ON" or "OFF" (case-insensitive).
 IF (DEFINED ENV{USE_GTEST})
-    IF ("$ENV{USE_GTEST}" STREQUAL "ON")
+    IF ("$ENV{USE_GTEST}" STREQUAL "ON" OR "$ENV{USE_GTEST}" STREQUAL "1" OR "$ENV{USE_GTEST}" STREQUAL "TRUE")
         SET(USE_GTEST ON CACHE BOOL "Should we build and run the unit tests using GTest?" FORCE)
     ELSE ()
         SET(USE_GTEST OFF CACHE BOOL "Should we build and run the unit tests using GTest?" FORCE)
@@ -383,7 +383,7 @@ OPTION(INSTALL_SDL3 "Should we download and install SDL3 using FetchContent_Make
 # and override the option's value if it does.
 # The environment variable should be set to "ON" or "OFF" (case-insensitive).
 IF (DEFINED ENV{INSTALL_SDL3})
-    IF ("$ENV{INSTALL_SDL3}" STREQUAL "ON")
+    IF ("$ENV{INSTALL_SDL3}" STREQUAL "ON" OR "$ENV{INSTALL_SDL3}" STREQUAL "1" OR "$ENV{INSTALL_SDL3}" STREQUAL "TRUE")
         SET(INSTALL_SDL3 ON CACHE BOOL "Should we download and install SDL3 using FetchContent_MakeAvailable?" FORCE)
     ELSE ()
         SET(INSTALL_SDL3 OFF CACHE BOOL "Should we download and install SDL3 using FetchContent_MakeAvailable?" FORCE)
@@ -396,9 +396,9 @@ OPTION(INSTALL_SDL3_IMAGE "Should we download and install SDL3_image using Fetch
 # and override the option's value if it does.
 # The environment variable should be set to "ON" or "OFF" (case-insensitive).
 IF (DEFINED ENV{INSTALL_SDL3_IMAGE})
-    IF ("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "ON")
+    IF ("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "ON" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "1" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "TRUE")
         SET(INSTALL_SDL3_IMAGE ON CACHE BOOL "Should we download and install SDL3_image using FetchContent_MakeAvailable?" FORCE)
-    ELSEIF ("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "OFF")
+    ELSE ()
         SET(INSTALL_SDL3_IMAGE OFF CACHE BOOL "Should we download and install SDL3_image using FetchContent_MakeAvailable?" FORCE)
     ENDIF ()
 ENDIF ()
