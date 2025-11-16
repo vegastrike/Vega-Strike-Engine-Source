@@ -908,15 +908,15 @@ function bootstrapOnRockyLinux ()
             dnf -y config-manager --set-enabled devel
             dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
             dnf -y update
-            if dnf list installed | grep -q SDL2; then
-                sudo dnf remove SDL2
-            else
-                echo "Package 'SDL2' is not installed."
-            fi
             if dnf list installed | grep -q SDL2-devel; then
                 sudo dnf remove SDL2-devel
             else
                 echo "Package 'SDL2-devel' is not installed."
+            fi
+            if dnf list installed | grep -q SDL2; then
+                sudo dnf remove SDL2
+            else
+                echo "Package 'SDL2' is not installed."
             fi
             dnf -y install \
                                 git \
