@@ -902,16 +902,16 @@ function bootstrapOnRockyLinux ()
                                 liburing-devel
             ;;
         "10.0")
-            if dnf list installed | grep -qF 'SDL2-devel'; then
-                dnf -y remove SDL2-devel
-            else
-                echo "Package 'SDL2-devel' is not installed."
-            fi
-            if dnf list installed | grep -qF SDL2; then
-                dnf -y remove SDL2
-            else
-                echo "Package 'SDL2' is not installed."
-            fi
+            declare -a pkgs_to_uninstall=('SDL2_image-devel' 'SDL2_image' 'SDL2-devel' 'SDL2')
+            for pkg in "${pkgs_to_uninstall[@]}"
+            do
+                if dnf list installed | grep -qF "$pkg"; then
+                    dnf -y remove "$pkg"
+                else
+                    echo "Package '$pkg' is not installed."
+                fi
+            done
+
             dnf -y upgrade --refresh
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
