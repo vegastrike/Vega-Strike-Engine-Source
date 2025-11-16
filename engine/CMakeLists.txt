@@ -1216,6 +1216,7 @@ IF (USE_GTEST)
             Boost::log
             Boost::log_setup
             Boost::json
+            GLUT::GLUT
     )
     TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
     IF (WIN32)
