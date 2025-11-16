@@ -37,10 +37,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	Generates UV mappings, but for the texture to be activated, go to
 	the texture buttons and 
 """
-from __future__ import print_function
 try:
 	range = xrange
-+except:
+except:
 	pass
 
 import Blender
