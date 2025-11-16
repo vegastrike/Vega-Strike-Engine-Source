@@ -34,14 +34,12 @@
 #include "configuration/configuration.h"
 
 #include <iostream>
-#include <sstream>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
-#include "vegastrike.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 
 static const std::string default_product_name("DEFAULT_PRODUCT_NAME");
 

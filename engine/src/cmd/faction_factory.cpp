@@ -38,7 +38,7 @@
 #include <boost/foreach.hpp>
 #include <boost/optional/optional.hpp>
 
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 
 namespace pt = boost::property_tree;
 namespace alg = boost::algorithm;

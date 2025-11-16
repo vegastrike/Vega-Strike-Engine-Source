@@ -34,8 +34,7 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 
-#include "vegastrike.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 
 const std::string keys[] = {"Key", "Directory",	"Name",	"Object_Type",
                             "Combat_Role",	"Textual_Description",	"Hud_image",	"Unit_Scale",	"Cockpit",
