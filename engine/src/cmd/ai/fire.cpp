@@ -41,7 +41,7 @@
 #include "src/universe_util.h"
 #include <algorithm>
 
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "cmd/unit_find.h"
 #include "src/vs_random.h"
 #include "root_generic/lin_time.h" //DEBUG ONLY

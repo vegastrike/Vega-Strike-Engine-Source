@@ -28,6 +28,7 @@
 
 #include <gtest/gtest.h>
 
+#include "vegastrike.h"
 #include "components/energy_container.h"
 #include "components/reactor.h"
 #include "configuration/game_config.h"

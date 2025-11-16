@@ -701,7 +701,7 @@ IF (NOT DISABLE_CLIENT)
     )
 
     IF (NEED_LINKING_AGAINST_LIBM)
-        TARGET_LINK_LIBRARIES(vegastrike-engine m)
+        TARGET_LINK_LIBRARIES(vegastrike-engine PRIVATE m)
     ENDIF()
 
     TARGET_LINK_DIRECTORIES(vegastrike-engine BEFORE
@@ -717,6 +717,8 @@ IF (NOT DISABLE_CLIENT)
                           ${VSE_TST_LIBS}
                           ${Boost_LIBRARIES}
                           ${Python3_LIBRARIES}
+    )
+    TARGET_LINK_LIBRARIES(vegastrike-engine PUBLIC
                           $<TARGET_OBJECTS:vegastrike-engine_com>
                           vegastrike_gfx_generic
                           vegastrike_root_generic

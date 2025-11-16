@@ -35,9 +35,7 @@
 #include <iostream>
 
 #include "src/vega_cast_utils.h"
-
 #include "vegastrike.h"
-#include "vega_cast_utils.h"
 
 const std::string keys[] = {"Key", "Directory",	"Name",	"Object_Type",
                             "Combat_Role",	"Textual_Description",	"Hud_image",	"Unit_Scale",	"Cockpit",
@@ -187,7 +185,7 @@ inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    return locale_aware_stof(result);
+    return locale_aware_stof(result, default_value);
 }
 
 template<>
@@ -198,7 +196,7 @@ inline double UnitCSVFactory::GetVariable(std::string unit_key,
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    return locale_aware_stod(result);
+    return locale_aware_stod(result, default_value);
 }
 
 template<>
