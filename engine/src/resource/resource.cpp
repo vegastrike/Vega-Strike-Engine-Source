@@ -37,6 +37,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "vegastrike.h"
+#include "vega_cast_utils.h"
 #include "resource/random_utils.h"
 
 

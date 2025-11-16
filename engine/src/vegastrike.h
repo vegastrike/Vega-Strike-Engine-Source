@@ -95,60 +95,6 @@ extern float AUDIO_ATOM;
 
 //#define RANDOMIZE_SIM_ATOMS 1
 
-extern std::locale our_numeric_locale;
-
-inline double locale_aware_stod(const std::string& s, const std::locale& loc = our_numeric_locale, const double default_value = 0.0) {
-    std::istringstream iss(s);
-    iss.imbue(loc);
-    try {
-        double tmp = default_value;
-        iss >> tmp;
-        return tmp;
-    } catch(...) {
-        VS_LOG(error, "locale_aware_stod encountered an error");
-        return default_value;
-    }
-}
-
-inline float locale_aware_stof(const std::string& s, const std::locale& loc = our_numeric_locale, const float default_value = 0.0F) {
-    std::istringstream iss(s);
-    iss.imbue(loc);
-    try {
-        float tmp = default_value;
-        iss >> tmp;
-        return tmp;
-    } catch(...) {
-        VS_LOG(error, "locale_aware_stof encountered an error");
-        return default_value;
-    }
-}
-
-inline int locale_aware_stoi(const std::string& s, const std::locale& loc = our_numeric_locale, const int default_value = 0) {
-    std::istringstream iss(s);
-    iss.imbue(loc);
-    try {
-        int tmp = default_value;
-        iss >> tmp;
-        return tmp;
-    } catch(...) {
-        VS_LOG(error, "locale_aware_stoi encountered an error");
-        return default_value;
-    }
-}
-
-inline long locale_aware_stol(const std::string& s, const std::locale& loc = our_numeric_locale, const long default_value = 0L) {
-    std::istringstream iss(s);
-    iss.imbue(loc);
-    try {
-        long tmp = default_value;
-        iss >> tmp;
-        return tmp;
-    } catch(...) {
-        VS_LOG(error, "locale_aware_stol encountered an error");
-        return default_value;
-    }
-}
-
 #ifdef __cplusplus
 
 #endif //__cplusplus
