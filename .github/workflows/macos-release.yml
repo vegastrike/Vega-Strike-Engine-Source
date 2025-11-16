@@ -74,10 +74,10 @@ jobs:
           PYTHONHOME: ""
           PYTHONPATH: ""
           IS_RELEASE: 1
-          INSTALL_GTEST: false
-          USE_GTEST: false
-          INSTALL_SDL3: false
-          INSTALL_SDL3_IMAGE: false
+          INSTALL_GTEST: 'OFF'
+          USE_GTEST: 'OFF'
+          INSTALL_SDL3: 'OFF'
+          INSTALL_SDL3_IMAGE: 'OFF'
         run: script/cibuild --preset-name=${{ matrix.preset-name }}
 
       - name: Package it

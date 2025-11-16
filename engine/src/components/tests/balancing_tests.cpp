@@ -33,7 +33,7 @@
 #include "components/reactor.h"
 #include "configuration/game_config.h"
 
-extern float simulation_atom_var;
+float simulation_atom_var = 0.1;
 
 bool fairlyEqual(double a, double b);
 
