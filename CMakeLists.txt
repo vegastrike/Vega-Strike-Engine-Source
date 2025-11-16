@@ -353,16 +353,16 @@ MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 INCLUDE(FetchContent)
 
 # Should we install gtest?
-OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
+OPTION(INSTALL_GTEST "Should we download and install GTest and GMock using FetchContent_MakeAvailable?" ON)
 
 # Check if an environment variable with the same name exists
 # and override the option's value if it does.
 # The environment variable should be set to "ON" or "OFF" (case-insensitive).
 if(DEFINED ENV{INSTALL_GTEST})
     if("$ENV{INSTALL_GTEST}" STREQUAL "ON")
-        set(INSTALL_GTEST ON CACHE BOOL "Enable or disable My Feature" FORCE)
+        set(INSTALL_GTEST ON CACHE BOOL "Should we download and install GTest and GMock using FetchContent_MakeAvailable?" FORCE)
     elseif("$ENV{INSTALL_GTEST}" STREQUAL "OFF")
-        set(INSTALL_GTEST OFF CACHE BOOL "Enable or disable My Feature" FORCE)
+        set(INSTALL_GTEST OFF CACHE BOOL "Should we download and install GTest and GMock using FetchContent_MakeAvailable?" FORCE)
     endif()
 endif()
 
@@ -372,39 +372,39 @@ OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
 # Check if an environment variable with the same name exists
 # and override the option's value if it does.
 # The environment variable should be set to "ON" or "OFF" (case-insensitive).
-if(DEFINED ENV{USE_GTEST})
-    if("$ENV{USE_GTEST}" STREQUAL "ON")
-        set(USE_GTEST ON CACHE BOOL "Enable or disable My Feature" FORCE)
-    elseif("$ENV{USE_GTEST}" STREQUAL "OFF")
-        set(USE_GTEST OFF CACHE BOOL "Enable or disable My Feature" FORCE)
-    endif()
-endif()
+IF (DEFINED ENV{USE_GTEST})
+    IF ("$ENV{USE_GTEST}" STREQUAL "ON")
+        SET(USE_GTEST ON CACHE BOOL "Should we build and run the unit tests using GTest?" FORCE)
+    ELSE ()
+        SET(USE_GTEST OFF CACHE BOOL "Should we build and run the unit tests using GTest?" FORCE)
+    ENDIF ()
+ENDIF ()
 
-OPTION(INSTALL_SDL3 "Should we download and install SDL3?" ON)
-
-# Check if an environment variable with the same name exists
-# and override the option's value if it does.
-# The environment variable should be set to "ON" or "OFF" (case-insensitive).
-if(DEFINED ENV{INSTALL_SDL3})
-    if("$ENV{INSTALL_SDL3}" STREQUAL "ON")
-        set(INSTALL_SDL3 ON CACHE BOOL "Enable or disable My Feature" FORCE)
-    elseif("$ENV{INSTALL_SDL3}" STREQUAL "OFF")
-        set(INSTALL_SDL3 OFF CACHE BOOL "Enable or disable My Feature" FORCE)
-    endif()
-endif()
-
-OPTION(INSTALL_SDL3_IMAGE "Should we download and install SDL3_image?" ON)
+OPTION(INSTALL_SDL3 "Should we download and install SDL3 using FetchContent_MakeAvailable?" ON)
 
 # Check if an environment variable with the same name exists
 # and override the option's value if it does.
 # The environment variable should be set to "ON" or "OFF" (case-insensitive).
-if(DEFINED ENV{INSTALL_SDL3_IMAGE})
-    if("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "ON")
-        set(INSTALL_SDL3_IMAGE ON CACHE BOOL "Enable or disable My Feature" FORCE)
-    elseif("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "OFF")
-        set(INSTALL_SDL3_IMAGE OFF CACHE BOOL "Enable or disable My Feature" FORCE)
-    endif()
-endif()
+IF (DEFINED ENV{INSTALL_SDL3})
+    IF ("$ENV{INSTALL_SDL3}" STREQUAL "ON")
+        SET(INSTALL_SDL3 ON CACHE BOOL "Should we download and install SDL3 using FetchContent_MakeAvailable?" FORCE)
+    ELSE ()
+        SET(INSTALL_SDL3 OFF CACHE BOOL "Should we download and install SDL3 using FetchContent_MakeAvailable?" FORCE)
+    ENDIF ()
+ENDIF ()
+
+OPTION(INSTALL_SDL3_IMAGE "Should we download and install SDL3_image using FetchContent_MakeAvailable?" ON)
+
+# Check if an environment variable with the same name exists
+# and override the option's value if it does.
+# The environment variable should be set to "ON" or "OFF" (case-insensitive).
+IF (DEFINED ENV{INSTALL_SDL3_IMAGE})
+    IF ("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "ON")
+        SET(INSTALL_SDL3_IMAGE ON CACHE BOOL "Should we download and install SDL3_image using FetchContent_MakeAvailable?" FORCE)
+    ELSEIF ("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "OFF")
+        SET(INSTALL_SDL3_IMAGE OFF CACHE BOOL "Should we download and install SDL3_image using FetchContent_MakeAvailable?" FORCE)
+    ENDIF ()
+ENDIF ()
 
 IF (INSTALL_GTEST OR USE_GTEST)
     MESSAGE(STATUS "Configuring Unit Tests")
@@ -443,6 +443,8 @@ ENDIF ()
 IF (INSTALL_GTEST)
     FETCHCONTENT_MAKEAVAILABLE(googletest)
     MESSAGE(STATUS "GoogleTest found via FetchContent_MakeAvailable")
+    LIST(APPEND TST_INCLUDES "${Vega_Strike_BINARY_DIR}/_deps/googletest-src/googletest/include")
+    LIST(APPEND TST_INCLUDES "${Vega_Strike_BINARY_DIR}/_deps/googletest-src/googlemock/include")
 ELSEIF (USE_GTEST)
     # For Windows: Prevent overriding the parent project's compiler/linker settings
     SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -456,6 +458,7 @@ IF (INSTALL_SDL3)
     MESSAGE(STATUS "SDL3 found via FetchContent_MakeAvailable")
     SET(HAVE_SDL 1)
     SET(SDL_WINDOWING 1)
+    LIST(APPEND TST_INCLUDES "${Vega_Strike_BINARY_DIR}/_deps/sdl3-src/include")
 ELSE ()
     FIND_PACKAGE(SDL3 REQUIRED)
     MESSAGE(STATUS "SDL3 found via FIND_PACKAGE")
@@ -467,6 +470,7 @@ ENDIF ()
 IF (INSTALL_SDL3_IMAGE)
     FETCHCONTENT_MAKEAVAILABLE(SDL3_image)
     MESSAGE(STATUS "SDL3_image found via FetchContent_MakeAvailable")
+    LIST(APPEND TST_INCLUDES "${Vega_Strike_BINARY_DIR}/_deps/sdl3_image-src/include")
 ELSE ()
     FIND_PACKAGE(SDL3_image REQUIRED)
     MESSAGE(STATUS "SDL3_image found via FIND_PACKAGE")

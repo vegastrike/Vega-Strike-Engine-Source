@@ -77,8 +77,8 @@ fi
 
 if [ $IS_RELEASE -eq 1 ]
 then
-    export INSTALL_GTEST=OFF
-    export USE_GTEST=OFF
+    export INSTALL_GTEST=0
+    export USE_GTEST=0
 fi
 
 if [ -z "$from" ] && [ -n "$FROM" ]
