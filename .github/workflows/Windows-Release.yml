@@ -97,10 +97,10 @@ jobs:
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
           PYTHONHOME: ""
           PYTHONPATH: ""
-          INSTALL_GTEST: false
-          USE_GTEST: false
-          INSTALL_SDL3: false
-          INSTALL_SDL3_IMAGE: false
+          INSTALL_GTEST: 'OFF'
+          USE_GTEST: 'OFF'
+          INSTALL_SDL3: 'OFF'
+          INSTALL_SDL3_IMAGE: 'OFF'
         with:
           configurePreset: ${{ matrix.preset-name }}
           buildPreset: "build-${{ matrix.preset-name }}"

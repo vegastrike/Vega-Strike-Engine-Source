@@ -701,13 +701,13 @@ IF (NOT DISABLE_CLIENT)
     )
 
     IF (NEED_LINKING_AGAINST_LIBM)
-        TARGET_LINK_LIBRARIES(vegastrike-engine PRIVATE m)
+        TARGET_LINK_LIBRARIES(vegastrike-engine m)
     ENDIF()
 
     TARGET_LINK_DIRECTORIES(vegastrike-engine BEFORE
             PRIVATE ${LibArchive_LIBRARY})
 
-    TARGET_LINK_LIBRARIES(vegastrike-engine PRIVATE
+    TARGET_LINK_LIBRARIES(vegastrike-engine
                           SDL3::SDL3
                           SDL3_image::SDL3_image
                           OpenGL::GL
@@ -717,8 +717,6 @@ IF (NOT DISABLE_CLIENT)
                           ${VSE_TST_LIBS}
                           ${Boost_LIBRARIES}
                           ${Python3_LIBRARIES}
-    )
-    TARGET_LINK_LIBRARIES(vegastrike-engine PUBLIC
                           $<TARGET_OBJECTS:vegastrike-engine_com>
                           vegastrike_gfx_generic
                           vegastrike_root_generic
@@ -1213,6 +1211,7 @@ IF (USE_GTEST)
             $<TARGET_OBJECTS:vegastrike-testing>
             vegastrike_cmd
             vegastrike_gfx_generic
+            vegastrike_root_generic
             Boost::log
             Boost::log_setup
             Boost::json

@@ -69,10 +69,10 @@ jobs:
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
           PYTHONHOME: ""
           PYTHONPATH: ""
-          INSTALL_GTEST: true
-          USE_GTEST: true
-          INSTALL_SDL3: false
-          INSTALL_SDL3_IMAGE: false
+          INSTALL_GTEST: 'ON'
+          USE_GTEST: 'ON'
+          INSTALL_SDL3: 'OFF'
+          INSTALL_SDL3_IMAGE: 'OFF'
         run: script/cibuild --preset-name=${{ matrix.preset-name }}
 
       - name: Test
