@@ -908,7 +908,7 @@ function bootstrapOnRockyLinux ()
             dnf -y config-manager --set-enabled devel
             dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
             dnf -y update
-            dnf -y install \
+            dnf -y install --allowerasing \
                                 git \
                                 cmake \
                                 boost-devel \
