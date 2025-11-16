@@ -184,7 +184,7 @@ inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    return locale_aware_stof(result, our_numeric_locale, default_value);
+    return locale_aware_stof(result, default_value);
 }
 
 template<>
@@ -195,7 +195,7 @@ inline double UnitCSVFactory::GetVariable(std::string unit_key,
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    return locale_aware_stod(result, our_numeric_locale, default_value);
+    return locale_aware_stod(result, default_value);
 }
 
 template<>
@@ -204,7 +204,7 @@ inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    return locale_aware_stoi(result, our_numeric_locale, default_value);
+    return locale_aware_stoi(result, default_value);
 }
 
 std::string GetUnitKeyFromNameAndFaction(const std::string unit_name, const std::string unit_faction);

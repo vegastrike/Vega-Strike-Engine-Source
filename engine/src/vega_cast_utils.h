@@ -38,7 +38,7 @@
 
 extern std::locale our_numeric_locale;
 
-inline double locale_aware_stod(const std::string& s, const std::locale& loc = our_numeric_locale, const double default_value = 0.0) {
+inline double locale_aware_stod(const std::string& s, const double default_value = 0.0, const std::locale& loc = our_numeric_locale) {
     std::istringstream iss(s);
     iss.imbue(loc);
     try {
@@ -51,7 +51,7 @@ inline double locale_aware_stod(const std::string& s, const std::locale& loc = o
     }
 }
 
-inline float locale_aware_stof(const std::string& s, const std::locale& loc = our_numeric_locale, const float default_value = 0.0F) {
+inline float locale_aware_stof(const std::string& s, const float default_value = 0.0F, const std::locale& loc = our_numeric_locale) {
     std::istringstream iss(s);
     iss.imbue(loc);
     try {
@@ -64,7 +64,7 @@ inline float locale_aware_stof(const std::string& s, const std::locale& loc = ou
     }
 }
 
-inline int locale_aware_stoi(const std::string& s, const std::locale& loc = our_numeric_locale, const int default_value = 0) {
+inline int locale_aware_stoi(const std::string& s, const int default_value = 0, const std::locale& loc = our_numeric_locale) {
     std::istringstream iss(s);
     iss.imbue(loc);
     try {
@@ -77,7 +77,7 @@ inline int locale_aware_stoi(const std::string& s, const std::locale& loc = our_
     }
 }
 
-inline long locale_aware_stol(const std::string& s, const std::locale& loc = our_numeric_locale, const long default_value = 0L) {
+inline long locale_aware_stol(const std::string& s, const long default_value = 0L, const std::locale& loc = our_numeric_locale) {
     std::istringstream iss(s);
     iss.imbue(loc);
     try {

@@ -107,7 +107,7 @@ unsigned int convert_to_int(std::string s) {
         return 0;
     }
 
-    return locale_aware_stoi(s, our_numeric_locale, 0);
+    return locale_aware_stoi(s, 0);
 }
 
 UpgradeableUnit::UpgradeableUnit()

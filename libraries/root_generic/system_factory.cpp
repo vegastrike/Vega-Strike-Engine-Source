@@ -690,7 +690,7 @@ int SystemFactory::getIntAttribute(Object object, string key, int default_value,
         int multiplier, int default_multiplier) {
     alg::to_lower(key);
     if (object.attributes.count(key)) {
-        return locale_aware_stoi(object.attributes[key], our_numeric_locale, default_value) * multiplier;
+        return locale_aware_stoi(object.attributes[key], default_value) * multiplier;
     }
     return default_value * default_multiplier;
 }
@@ -699,7 +699,7 @@ float SystemFactory::getFloatAttribute(Object object, string key, float default_
         float multiplier, float default_multiplier) {
     alg::to_lower(key);
     if (object.attributes.count(key)) {
-        return locale_aware_stof(object.attributes[key], our_numeric_locale, default_value) * multiplier;
+        return locale_aware_stof(object.attributes[key], default_value) * multiplier;
     }
     return default_value * default_multiplier;
 }
@@ -708,7 +708,7 @@ double SystemFactory::getDoubleAttribute(Object object, string key, double defau
         double multiplier, double default_multiplier) {
     alg::to_lower(key);
     if (object.attributes.count(key)) {
-        return locale_aware_stod(object.attributes[key], our_numeric_locale, default_value) * multiplier;
+        return locale_aware_stod(object.attributes[key], default_value) * multiplier;
     }
     return default_value * default_multiplier;
 }

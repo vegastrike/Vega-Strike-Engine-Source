@@ -155,7 +155,7 @@ void Pass::parseParam(ptree tree) {
     for (float & i : floats) {
         i = 0;
         std::getline(ss, floatString, ',');
-        i = locale_aware_stof(floatString, our_numeric_locale, 0);
+        i = locale_aware_stof(floatString, 0);
     }
 
     addShaderParam(name, floats, optional);

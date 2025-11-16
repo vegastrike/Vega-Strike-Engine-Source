@@ -84,7 +84,7 @@ void Shield::Load(std::string unit_key) {
     const std::string shield_facets_string = UnitCSVFactory::GetVariable(unit_key, "shield_facets", std::string());
 
     if(!shield_facets_string.empty()) {
-        number_of_facets = locale_aware_stoi(shield_facets_string, our_numeric_locale, 1);
+        number_of_facets = locale_aware_stoi(shield_facets_string, 1);
     }
 
     // Single value (short form)
