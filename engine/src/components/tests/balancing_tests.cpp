@@ -28,10 +28,11 @@
 
 #include <gtest/gtest.h>
 
-#include "vegastrike.h"
 #include "components/energy_container.h"
 #include "components/reactor.h"
 #include "configuration/game_config.h"
+
+double simulation_atom_var = 0.1;
 
 bool fairlyEqual(double a, double b);
 
