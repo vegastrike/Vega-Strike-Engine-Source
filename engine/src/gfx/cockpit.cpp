@@ -308,11 +308,9 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     const bool          display_in_meters       = configuration().physics.display_in_meters;
     const bool          lie                     = configuration().physics.game_speed_lying;
     static float        fps_cumulative_avg_time = 0.0F;
-    constexpr float     FPS_AVG_INTERVAL        = 0.5F;
     static float        fps_avg_time_countdown  = FPS_AVG_INTERVAL;
     static float        fps_avg                 = 0.0F;
     static unsigned int fps_frames_count        = 0;
-    static float        fps_smoothing           = 0.01F;
 
     // TODO: lib_damage
     // make sure the enums are in the right order as our
