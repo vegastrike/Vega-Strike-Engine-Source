@@ -302,7 +302,7 @@ void GameCockpit::AutoLanding() {
 
 float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     if (!target) {
-        return 0.0f;
+        return 0.0F;
     }
     const float game_speed = configuration().physics.game_speed_flt;
     const bool display_in_meters = configuration().physics.display_in_meters;
@@ -603,35 +603,15 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 return static_cast<float>(UnitImages<void>::TRAVEL);
             }
         case UnitImages<void>::RECIEVINGFIRE_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::RECEIVINGMISSILES_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::RECEIVINGMISSILELOCK_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::RECEIVINGTARGETLOCK_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::COLLISIONWARNING_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::CANJUMP_MODAL:
             if (!target->jump_drive.Installed() || !target->jump_drive.Operational()) {
                 return static_cast<float>(UnitImages<void>::NODRIVE);
