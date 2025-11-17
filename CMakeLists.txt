@@ -359,10 +359,10 @@ OPTION(INSTALL_GTEST "Should we download and install GTest and GMock using Fetch
 # and override the option's value if it does.
 # The environment variable should be set to "ON" or "OFF" (case-insensitive).
 IF (DEFINED ENV{INSTALL_GTEST})
-    IF ("$ENV{INSTALL_GTEST}" STREQUAL "ON" OR "$ENV{INSTALL_GTEST}" STREQUAL "1" OR "$ENV{INSTALL_GTEST}" STREQUAL "TRUE")
-        SET(INSTALL_GTEST ON CACHE BOOL "Should we download and install GTest and GMock using FetchContent_MakeAvailable?")
-    ELSEIF ("$ENV{INSTALL_GTEST}" STREQUAL "OFF" OR "$ENV{INSTALL_GTEST}" STREQUAL "0" OR "$ENV{INSTALL_GTEST}" STREQUAL "FALSE")
-        SET(INSTALL_GTEST OFF CACHE BOOL "Should we download and install GTest and GMock using FetchContent_MakeAvailable?")
+    IF ("$ENV{INSTALL_GTEST}" STREQUAL "ON" OR "$ENV{INSTALL_GTEST}" STREQUAL "1" OR "$ENV{INSTALL_GTEST}" STREQUAL "TRUE" OR $ENV{INSTALL_GTEST} EQUAL 1)
+        SET(INSTALL_GTEST ON)
+    ELSEIF ("$ENV{INSTALL_GTEST}" STREQUAL "OFF" OR "$ENV{INSTALL_GTEST}" STREQUAL "0" OR "$ENV{INSTALL_GTEST}" STREQUAL "FALSE" OR $ENV{INSTALL_GTEST} EQUAL 0)
+        SET(INSTALL_GTEST OFF)
     ENDIF ()
 ENDIF ()
 
@@ -373,10 +373,10 @@ OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
 # and override the option's value if it does.
 # The environment variable should be set to "ON" or "OFF" (case-insensitive).
 IF (DEFINED ENV{USE_GTEST})
-    IF ("$ENV{USE_GTEST}" STREQUAL "ON" OR "$ENV{USE_GTEST}" STREQUAL "1" OR "$ENV{USE_GTEST}" STREQUAL "TRUE")
-        SET(USE_GTEST ON CACHE BOOL "Should we build and run the unit tests using GTest?")
-    ELSEIF ("$ENV{USE_GTEST}" STREQUAL "OFF" OR "$ENV{USE_GTEST}" STREQUAL "0" OR "$ENV{USE_GTEST}" STREQUAL "FALSE")
-        SET(USE_GTEST OFF CACHE BOOL "Should we build and run the unit tests using GTest?")
+    IF ("$ENV{USE_GTEST}" STREQUAL "ON" OR "$ENV{USE_GTEST}" STREQUAL "1" OR "$ENV{USE_GTEST}" STREQUAL "TRUE" OR $ENV{USE_GTEST} EQUAL 1)
+        SET(USE_GTEST ON)
+    ELSEIF ("$ENV{USE_GTEST}" STREQUAL "OFF" OR "$ENV{USE_GTEST}" STREQUAL "0" OR "$ENV{USE_GTEST}" STREQUAL "FALSE" OR $ENV{USE_GTEST} EQUAL 0)
+        SET(USE_GTEST OFF)
     ENDIF ()
 ENDIF ()
 
@@ -386,10 +386,10 @@ OPTION(INSTALL_SDL3 "Should we download and install SDL3 using FetchContent_Make
 # and override the option's value if it does.
 # The environment variable should be set to "ON" or "OFF" (case-insensitive).
 IF (DEFINED ENV{INSTALL_SDL3})
-    IF ("$ENV{INSTALL_SDL3}" STREQUAL "ON" OR "$ENV{INSTALL_SDL3}" STREQUAL "1" OR "$ENV{INSTALL_SDL3}" STREQUAL "TRUE")
-        SET(INSTALL_SDL3 ON CACHE BOOL "Should we download and install SDL3 using FetchContent_MakeAvailable?")
-    ELSEIF ("$ENV{INSTALL_SDL3}" STREQUAL "OFF" OR "$ENV{INSTALL_SDL3}" STREQUAL "0" OR "$ENV{INSTALL_SDL3}" STREQUAL "FALSE")
-        SET(INSTALL_SDL3 OFF CACHE BOOL "Should we download and install SDL3 using FetchContent_MakeAvailable?")
+    IF ("$ENV{INSTALL_SDL3}" STREQUAL "ON" OR "$ENV{INSTALL_SDL3}" STREQUAL "1" OR "$ENV{INSTALL_SDL3}" STREQUAL "TRUE" OR $ENV{INSTALL_SDL3} EQUAL 1)
+        SET(INSTALL_SDL3 ON)
+    ELSEIF ("$ENV{INSTALL_SDL3}" STREQUAL "OFF" OR "$ENV{INSTALL_SDL3}" STREQUAL "0" OR "$ENV{INSTALL_SDL3}" STREQUAL "FALSE" OR $ENV{INSTALL_SDL3} EQUAL 0)
+        SET(INSTALL_SDL3 OFF)
     ENDIF ()
 ENDIF ()
 
@@ -399,10 +399,10 @@ OPTION(INSTALL_SDL3_IMAGE "Should we download and install SDL3_image using Fetch
 # and override the option's value if it does.
 # The environment variable should be set to "ON" or "OFF" (case-insensitive).
 IF (DEFINED ENV{INSTALL_SDL3_IMAGE})
-    IF ("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "ON" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "1" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "TRUE")
-        SET(INSTALL_SDL3_IMAGE ON CACHE BOOL "Should we download and install SDL3_image using FetchContent_MakeAvailable?")
-    ELSEIF ("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "OFF" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "0" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "FALSE")
-        SET(INSTALL_SDL3_IMAGE OFF CACHE BOOL "Should we download and install SDL3_image using FetchContent_MakeAvailable?")
+    IF ("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "ON" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "1" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "TRUE" OR $ENV{INSTALL_SDL3_IMAGE} EQUAL 1)
+        SET(INSTALL_SDL3_IMAGE ON)
+    ELSEIF ("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "OFF" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "0" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "FALSE" OR $ENV{INSTALL_SDL3_IMAGE} EQUAL 0)
+        SET(INSTALL_SDL3_IMAGE OFF)
     ENDIF ()
 ENDIF ()
 
