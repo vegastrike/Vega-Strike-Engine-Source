@@ -302,17 +302,15 @@ void GameCockpit::AutoLanding() {
 
 float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     if (!target) {
-        return 0.0f;
+        return 0.0F;
     }
     const float         game_speed              = configuration().physics.game_speed_flt;
     const bool          display_in_meters       = configuration().physics.display_in_meters;
     const bool          lie                     = configuration().physics.game_speed_lying;
-    static float        fps_cumulative_avg_time = 0;
-    constexpr float     FPS_AVG_INTERVAL        = 0.5;
+    static float        fps_cumulative_avg_time = 0.0F;
     static float        fps_avg_time_countdown  = FPS_AVG_INTERVAL;
-    static float        fps_avg                 = 0;
+    static float        fps_avg                 = 0.0F;
     static unsigned int fps_frames_count        = 0;
-    static float        fps_smoothing           = 0.01;
 
     // TODO: lib_damage
     // make sure the enums are in the right order as our
@@ -434,9 +432,6 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::MAXCOMBATKPS:
         case UnitImages<void>::MAXCOMBATABKPS: {
             const bool use_relative_velocity = configuration().graphics.hud.display_relative_velocity;
-            if (!target) {
-                return 0.0f;
-            }
             if (!target->VelocityReference()) {
                 return 0.0f;
             }
@@ -550,12 +545,12 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 fps_avg_time_countdown -= dt;          // fps_avg_time_countdown is the remaining time in the averaging time frame (in s)
                 fps_cumulative_avg_time += dt;         // fps_cumulative_avg_time is the cumulated time in the averaging time frame (in s)
                 fps_frames_count++;                    // cumulated frames count
-                if (fps_avg_time_countdown <= 0) {     // end of average time frame
+                if (fps_avg_time_countdown <= 0.0F) {     // end of average time frame
                     const float actual_avg_time = (FPS_AVG_INTERVAL - fps_avg_time_countdown); // Adds "minus fps_avg_time_countdown" to include the residual extra time
-                    if (actual_avg_time > 0.0) {
+                    if (actual_avg_time > 0.0F) {
                         fps_avg =  fps_frames_count / actual_avg_time;
                     }
-                    fps_cumulative_avg_time = 0;
+                    fps_cumulative_avg_time = 0.0F;
                     fps_frames_count = 0;
                     fps_avg_time_countdown = FPS_AVG_INTERVAL;
                 }
@@ -615,35 +610,15 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 return static_cast<float>(UnitImages<void>::TRAVEL);
             }
         case UnitImages<void>::RECIEVINGFIRE_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::RECEIVINGMISSILES_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::RECEIVINGMISSILELOCK_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::RECEIVINGTARGETLOCK_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::COLLISIONWARNING_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::CANJUMP_MODAL:
             if (!target->jump_drive.Installed() || !target->jump_drive.Operational()) {
                 return static_cast<float>(UnitImages<void>::NODRIVE);

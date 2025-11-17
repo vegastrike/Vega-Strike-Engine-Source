@@ -178,6 +178,8 @@ ELSE (ENABLE_PIE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 ENDIF (ENABLE_PIE)
 
+SET(FPS_AVG_INTERVAL "0.5" CACHE STRING "Average displayed frame rate over this interval in seconds")
+
 INCLUDE(CheckIncludeFile)
 INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckTypeSize)
