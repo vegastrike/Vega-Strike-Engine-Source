@@ -28,12 +28,11 @@
 
 #include <gtest/gtest.h>
 
-#include "vegastrike.h"
 #include "components/energy_container.h"
 #include "components/reactor.h"
 #include "configuration/game_config.h"
 
-float simulation_atom_var = 0.1;
+double simulation_atom_var = 0.1;
 
 bool fairlyEqual(double a, double b);
 
@@ -116,7 +115,6 @@ FuelBurnResult fuelBurn(EnergyManager& manager,
                 std::vector<EnergyConsumer>& consumers,
                 int seconds,
                 int print_every_n = 1000) {
-    simulation_atom_var = 0.1F;
     int run_time = seconds / simulation_atom_var;
 
     manager.Print(-1);
@@ -148,7 +146,6 @@ FuelBurnResult fuelBurn(EnergyManager& manager,
 
 // This tests a very trivial example
 TEST(FuelBurn, Trivial) {
-    simulation_atom_var = 0.1F;
     EnergySetup setup = EnergySetup(1.0, 1.0, 100.0, 200.0);
     EnergyManager manager = EnergyManager(setup, simulation_atom_var);
     int seconds = 10000;
@@ -170,7 +167,6 @@ TEST(FuelBurn, Trivial) {
 // This tests a fighter ship with level 1 equipment and steady 15MJ energy consumption
 // Ship flies for 22 minutes
 TEST(FuelBurn, RobinNaive_1) {
-    simulation_atom_var = 0.1F;
     EnergySetup setup = {15.0, 3.51, 100.0, 200.0};
     EnergyManager manager = EnergyManager(setup, simulation_atom_var);
     std::vector<EnergyConsumer> consumers = {
@@ -191,7 +187,6 @@ TEST(FuelBurn, RobinNaive_1) {
 // This tests a fighter ship with level 1 equipment and steady 40MJ energy consumption
 // Ship flies for 10 minutes
 TEST(FuelBurn, RobinNaive_2) {
-    simulation_atom_var = 0.1F;
     EnergySetup setup = {44.0, 3.51, 300.0, 200.0};
     EnergyManager manager = EnergyManager(setup, simulation_atom_var);
     std::vector<EnergyConsumer> consumers = {
@@ -211,7 +206,6 @@ TEST(FuelBurn, RobinNaive_2) {
 
 // Use this test to figure out why FTL drive is running out of energy
 /*TEST(FTLDrive, Sanity) {
-    simulation_atom_var = 0.1F;
     EnergySetup setup = {99.0, 25, 1.0, 1.0};
     EnergyManager manager = EnergyManager(setup, simulation_atom_var);
     std::vector<EnergyConsumer> consumers = {

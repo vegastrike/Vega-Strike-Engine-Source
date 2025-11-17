@@ -434,9 +434,6 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::MAXCOMBATKPS:
         case UnitImages<void>::MAXCOMBATABKPS: {
             const bool use_relative_velocity = configuration().graphics.hud.display_relative_velocity;
-            if (!target) {
-                return 0.0f;
-            }
             if (!target->VelocityReference()) {
                 return 0.0f;
             }
