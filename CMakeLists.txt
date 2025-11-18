@@ -119,18 +119,19 @@ SET(CMAKE_C_STANDARD_REQUIRED TRUE)
 SET(CMAKE_C_EXTENSIONS ON)
 
 ADD_COMPILE_DEFINITIONS("NV_CUBE_MAP"
-        "BOOST_PYTHON_NO_PY_SIGNATURES"
-        "BOOST_ALL_DYN_LINK"
-        "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>"
-        "$<$<CXX_COMPILER_ID:MSVC>:__x86_64__>"
-        "$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>"
-        "$<$<CXX_COMPILER_ID:MSVC>:_CRT_NONSTDC_NO_DEPRECATE>"
+                        "BOOST_PYTHON_NO_PY_SIGNATURES"
+                        "BOOST_ALL_DYN_LINK"
+                        "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>"
+                        "$<$<CXX_COMPILER_ID:MSVC>:__x86_64__>"
+                        "$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>"
+                        "$<$<CXX_COMPILER_ID:MSVC>:_CRT_NONSTDC_NO_DEPRECATE>"
 )
 ADD_COMPILE_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/engine/config.h>"
-        "$<$<CXX_COMPILER_ID:MSVC>:/wd4244>"
-        "$<$<CXX_COMPILER_ID:MSVC>:/wd4267>"
-        "$<$<CXX_COMPILER_ID:MSVC>:/wd4305>"
-        "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>"
+                    "$<$<CXX_COMPILER_ID:MSVC>:/wd4244>"
+                    "$<$<CXX_COMPILER_ID:MSVC>:/wd4267>"
+                    "$<$<CXX_COMPILER_ID:MSVC>:/wd4305>"
+                    "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
+                    "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>"
 )
 # for DEBUG remove all optimizations
 ADD_LINK_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
@@ -177,6 +178,8 @@ ELSE (ENABLE_PIE)
     MESSAGE(STATUS "Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
     SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 ENDIF (ENABLE_PIE)
+
+SET(FPS_AVG_INTERVAL "0.5" CACHE STRING "Average displayed frame rate over this interval in seconds")
 
 INCLUDE(CheckIncludeFile)
 INCLUDE(CheckIncludeFileCXX)

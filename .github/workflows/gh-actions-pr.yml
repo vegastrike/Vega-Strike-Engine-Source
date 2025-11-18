@@ -59,11 +59,11 @@ jobs:
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             allow_failure: false
-          - FROM:     'fedora:40'
-            COMPILER: 'clang'
+          - FROM:     'opensuse/leap:16.0'
+            COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             allow_failure: false
-          - FROM:     'opensuse/leap:16.0'
+          - FROM:     'rockylinux/rockylinux:10.0'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             allow_failure: false
