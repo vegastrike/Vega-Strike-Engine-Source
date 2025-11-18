@@ -29,6 +29,7 @@
 
 #include <memory>
 #include <cstddef>
+#include <cstdint>
 
 #if defined(__cpp_lib_assume_aligned)
     #define __alpn(x,a) std::assume_aligned<a>(x)
