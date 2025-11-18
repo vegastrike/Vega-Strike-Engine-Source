@@ -311,7 +311,7 @@ SET(CMAKE_FIND_FRAMEWORK "LAST")
 # so that we can handle the special cases for Xenial and stretch
 FIND_PACKAGE(LinuxDistro REQUIRED)
 
-FIND_PACKAGE(Python3 3.7...<3.14 REQUIRED COMPONENTS Development Interpreter)
+FIND_PACKAGE(Python3 3.7...<3.15 REQUIRED COMPONENTS Development Interpreter)
 
 MESSAGE(STATUS "Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
 MESSAGE(STATUS "Python include dir : ${Python3_INCLUDE_DIRS}")

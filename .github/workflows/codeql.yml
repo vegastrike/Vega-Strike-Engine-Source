@@ -11,7 +11,10 @@ permissions:
 
 on:
   push:
+    branches: [ "master" ]
   pull_request:
+  schedule:
+    - cron: '38 20 * * 0'
 
 jobs:
   analyze:
@@ -21,33 +24,41 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ['cpp', 'python']
+        include:
+          - language: cpp
+            build-mode: manual
+          - language: python
+            build-mode: none
+          - language: actions
+            build-mode: none
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
         with:
           fetch-depth: 2
 
-      - name: Download benchmark bundle
-        env:
-           GH_TOKEN: ${{ github.token }}
-        # download the latest version
-        run: |
-           gh release download -R github/codeql-action --pattern 'codeql-bundle.tar.gz'
-
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@4b6aa0b07da05d6e43d0e5f9c8596a6532ce1c85 #v2.15.3
+        uses: github/codeql-action/init@17783bfb99b07f70fae080b654aed0c514057477 #v4.30.9
         with:
           languages: ${{ matrix.language }}
-          tools: codeql-bundle.tar.gz
+          build-mode: ${{ matrix.build-mode }}
 
-      - name: Bootstrap and Build the Code
+      # If the analyze step fails for one of the languages you are analyzing with
+      # "We were unable to automatically build your code", modify the matrix above
+      # to set the build mode to "manual" for that language. Then modify this step
+      # to build your code.
+      # ℹ️ Command-line programs to run using the OS shell.
+      # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+      - name: Run manual build steps
+        if: matrix.build-mode == 'manual'
+        shell: bash
         run: |
           sudo script/bootstrap
           script/build --preset-name=linux-unix-makefiles-pie-enabled-glvnd-debug
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@4b6aa0b07da05d6e43d0e5f9c8596a6532ce1c85 #v2.15.3
-
+        uses: github/codeql-action/analyze@17783bfb99b07f70fae080b654aed0c514057477 #v4.30.9
+        with:
+          category: "/language:${{matrix.language}}"

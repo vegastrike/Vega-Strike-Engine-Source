@@ -19,12 +19,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - FROM:     'ubuntu:questing'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            allow_failure: false
           - FROM:     'ubuntu:noble'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             allow_failure: false
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            allow_failure: false
+          - FROM:     'linuxmintd/mint22.2-amd64'
+            COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             allow_failure: false
           - FROM:     'linuxmintd/mint22-amd64'
@@ -38,6 +46,10 @@ jobs:
           - FROM:     'debian:bookworm'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            allow_failure: false
+          - FROM:     'fedora:43'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             allow_failure: false
           - FROM:     'fedora:42'
             COMPILER: 'gcc'
@@ -85,7 +97,7 @@ jobs:
         run: script/cibuild --preset-name="${{ matrix.preset-name }}"
 
       - name: Upload test results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()
         with:
           name: test_results_xml
