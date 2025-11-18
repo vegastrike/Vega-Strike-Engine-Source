@@ -48,7 +48,7 @@
 #include "cmd/unit_csv_factory.h"
 
 std::vector<std::string> ParseUnitUpgrades(const std::string &upgrades) {
-    if(upgrades.size() == 0) {
+    if (upgrades.empty()) {
         return std::vector<std::string>();
     }
 
@@ -81,7 +81,7 @@ struct CargoUpgrade {
     std::string name;
     std::string category;
 
-    CargoUpgrade(const std::string upgrade_string) {
+    explicit CargoUpgrade(const std::string upgrade_string) {
         if(upgrade_string.empty()) {
             return;
         }
@@ -103,15 +103,11 @@ struct CargoUpgrade {
 
 // TODO: why do we have to use such kludges?!
 unsigned int convert_to_int(std::string s) {
-    if(s.size() == 0) {
+    if (s.empty()) {
         return 0;
     }
 
-    try {
-        return std::stoi(s);
-    } catch(...) {
-        return 0;
-    }
+    return locale_aware_stoi(s, 0);
 }
 
 UpgradeableUnit::UpgradeableUnit()
@@ -317,7 +313,7 @@ bool UpgradeableUnit::RepairUnit(const std::string upgrade_name) {
             break;*/
 
         default:
-            //std::cout << "Unhandled type for " << upgrade_name << std::endl;
+            VS_LOG(error, (boost::format("Unhandled component type for %1%") % upgrade_name));
             break;
     }
 
@@ -475,7 +471,8 @@ bool UpgradeableUnit::UpgradeMounts(const Unit *up,
 
             bool found = false;                     //we haven't found a matching gun to remove
             ///go through all guns
-            for (unsigned int k = 0; k < (unsigned int) num_mounts; ++k) {
+            const unsigned int num_mounts_tmp = num_mounts;
+            for (unsigned int k = 0; k < num_mounts_tmp; ++k) {
                 //we want to start with bias
                 int jkmod = (jmod + k) % num_mounts;
                 if (Mount::UNCHOSEN == unit->mounts[jkmod].status) {

@@ -34,6 +34,8 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 
+#include "src/vega_cast_utils.h"
+
 const std::string keys[] = {"Key", "Directory",	"Name",	"Object_Type",
                             "Combat_Role",	"Textual_Description",	"Hud_image",	"Unit_Scale",	"Cockpit",
                             "CockpitX", "CockpitY",	"CockpitZ",	"Mesh",	"Shield_Mesh",	
@@ -145,7 +147,7 @@ template<>
 inline std::string UnitCSVFactory::GetVariable(std::string unit_key,
         std::string const &attribute_key,
         std::string default_value) {
-    std::string result = _GetVariable(unit_key, attribute_key);
+    std::string result = _GetVariable(std::move(unit_key), attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -167,7 +169,7 @@ inline const char* UnitCSVFactory::GetVariable(std::string unit_key, std::string
 
 template<>
 inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, bool default_value) {
-    std::string result = _GetVariable(unit_key, attribute_key);
+    std::string result = _GetVariable(std::move(unit_key), attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -177,45 +179,32 @@ inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const 
 
 template<>
 inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, float default_value) {
-    std::string result = _GetVariable(unit_key, attribute_key);
+    std::string result = _GetVariable(std::move(unit_key), attribute_key);
 
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-
-    try {
-        return std::stof(result);
-    } catch (std::invalid_argument &) {
-        return default_value;
-    }
+    return locale_aware_stof(result);
 }
 
 template<>
 inline double UnitCSVFactory::GetVariable(std::string unit_key,
         std::string const &attribute_key,
         double default_value) {
-    std::string result = _GetVariable(unit_key, attribute_key);
+    std::string result = _GetVariable(std::move(unit_key), attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    try {
-        return std::stod(result);
-    } catch (std::invalid_argument &) {
-        return default_value;
-    }
+    return locale_aware_stod(result);
 }
 
 template<>
 inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, int default_value) {
-    std::string result = _GetVariable(unit_key, attribute_key);
+    std::string result = _GetVariable(std::move(unit_key), attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    try {
-        return std::stoi(result);
-    } catch (std::invalid_argument &) {
-        return default_value;
-    }
+    return locale_aware_stoi(result, default_value);
 }
 
 std::string GetUnitKeyFromNameAndFaction(const std::string unit_name, const std::string unit_faction);
