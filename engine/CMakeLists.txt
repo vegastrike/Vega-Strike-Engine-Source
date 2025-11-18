@@ -312,6 +312,7 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/conf
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4244>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4267>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4305>"
+        "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
         "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>"
         )
 add_link_options("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
