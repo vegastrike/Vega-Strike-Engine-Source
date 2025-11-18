@@ -71,7 +71,6 @@ jobs:
           ninjaVersion: 1.11.1
 
       - name: install-vcpkg
-        if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/Microsoft/vcpkg.git ${{ env.VCPKG_ROOT }}
           ${{ env.VCPKG_ROOT }}\bootstrap-vcpkg.bat -disableMetrics
