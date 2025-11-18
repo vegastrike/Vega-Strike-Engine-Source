@@ -22,12 +22,12 @@ jobs:
       matrix:
         os:
           # x86-64
-          - macos-13
+          - macos-15-intel
           # M1 processor
-          #- macos-14
+          #- macos-15
         python-version:
           #- 3.12.8
-          - 3.13.2
+          - 3.13.9
         compiler:
           - AppleClang
           #- clang
