@@ -21,12 +21,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os:              windows-2019
+          - os:              windows-2022
             cmake-generator: VS2022Win64
             enable-pie:      1
             build-type:      RelWithDebInfo
             is-release:      1
-          - os:              windows-2022
+          - os:              windows-2025
             cmake-generator: VS2022Win64
             enable-pie:      1
             build-type:      RelWithDebInfo
