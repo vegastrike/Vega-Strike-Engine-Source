@@ -37,7 +37,7 @@ Set-Variable -Name CMAKE_VERSION -Value "3.28"
 
 New-Item "$VCPKG_PARENT_DIR" -ItemType Directory -Force
 Push-Location "$VCPKG_PARENT_DIR"
-git clone https://github.com/vegastrike/vcpkg-local.git ./v
+git clone https://github.com/Microsoft/vcpkg.git ./v
 .\v\bootstrap-vcpkg.bat -disableMetrics
 
 [Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCPKG_PARENT_DIR\v", 'User')
