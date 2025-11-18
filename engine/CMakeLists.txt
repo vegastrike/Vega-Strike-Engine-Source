@@ -360,7 +360,7 @@ ENDIF (Python3_FOUND)
 # Find Boost with boost_python library
 MESSAGE(STATUS "Always using system Boost now")
 SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
-FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time system filesystem thread chrono atomic program_options REQUIRED)
+FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time filesystem thread chrono atomic program_options REQUIRED)
 IF (Boost_FOUND)
     # VERSION_EQUAL / VERSION_GREATER requires a version in the form X.Y.Z
     # Until CMake v3.15, Boost_VERSION is in the form as written in boost/version.hpp (e.g. 106700)
