@@ -36,6 +36,7 @@
 #include <map>
 #include <boost/json.hpp>
 
+#include "src/vega_cast_utils.h"
 #include "cmd/drawable.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/configxml.h"
@@ -93,13 +94,14 @@ std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFi
 
 
 
+// TODO: CLion informs me that delim is always 44 (','). As such, we could probably eliminate this parameter at some point.
 static std::vector<double> splitAndConvert (const std::string &s, char delim) {
     std::vector<double> result;
     std::stringstream ss (s);
     std::string item;
 
     while (getline (ss, item, delim)) {
-        result.push_back (std::stod(item));
+        result.push_back (locale_aware_stod(item));
     }
 
     return result;
@@ -132,9 +134,9 @@ Control* getControl(std::map<std::string, std::string> attributes) {
         // Justification
         if(attributes.count("justification")) {
             if(attributes["justification"] == "Left") {
-                sd->setJustification(CENTER_JUSTIFY);
+                sd->setJustification(LEFT_JUSTIFY);
             } else if(attributes["justification"] == "Right") {
-                sd->setJustification(CENTER_JUSTIFY);
+                sd->setJustification(RIGHT_JUSTIFY);
             } else if(attributes["justification"] == "Center") {
                 sd->setJustification(CENTER_JUSTIFY);
             }
@@ -201,13 +203,13 @@ Control* getControl(std::map<std::string, std::string> attributes) {
         // Variable Border Cycle Time
         if(attributes.count("cycleTime")) {
             std::string cycleTimeString = attributes["cycleTime"];
-            b->setVariableBorderCycleTime(std::stod(cycleTimeString));
+            b->setVariableBorderCycleTime(locale_aware_stod(cycleTimeString));
         }
 
         // Shadow Width
         if(attributes.count("shadowWidth")) {
             std::string shadowWidth = attributes["shadowWidth"];
-            b->setShadowWidth(std::stod(shadowWidth));
+            b->setShadowWidth(locale_aware_stod(shadowWidth));
         }
     } else if(type == "scroller") {
         Scroller* s = new Scroller;

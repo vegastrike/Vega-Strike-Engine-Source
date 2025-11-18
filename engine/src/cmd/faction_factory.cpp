@@ -31,6 +31,7 @@
 #include "root_generic/faction_generic.h"
 #include "gfx/animation.h"
 #include "vs_logging.h"
+#include "src/vega_cast_utils.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -91,7 +92,7 @@ void FactionFactory::parse(ptree tree) {
                 continue;
             }
             try {
-                faction->sparkcolor[i++] = std::stof(spark_string);
+                faction->sparkcolor[i++] = locale_aware_stof(spark_string);
             } catch (const std::invalid_argument& e) {
                 VS_LOG(error, (boost::format("Error: Invalid color %1% for key %2%") % spark_string % key));
             }

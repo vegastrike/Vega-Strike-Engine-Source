@@ -32,6 +32,7 @@
 #include "resource/random_utils.h"
 #include "json_utils.h"
 #include "configuration/configuration.h"
+#include "src/vega_cast_utils.h"
 
 #include <iostream>
 #include <boost/format.hpp>
@@ -91,11 +92,11 @@ Cargo::Cargo(std::string& cargo_text) {
         switch (i) {
         case 0: name = cargo_parts[0]; break;
         case 1: category = cargo_parts[1]; break;
-        case 2: price = std::stod(cargo_parts[2]); break;
-        case 3: quantity = std::stoi(cargo_parts[3]); break;
-        case 4: mass = std::stod(cargo_parts[4]); break;
-        case 5: volume = std::stod(cargo_parts[5]); break;
-        case 6: functionality = Resource<double>(std::stod(cargo_parts[6]), 0.0, 1.0); break;
+        case 2: price = locale_aware_stod(cargo_parts[2]); break;
+        case 3: quantity = locale_aware_stoi(cargo_parts[3]); break;
+        case 4: mass = locale_aware_stod(cargo_parts[4]); break;
+        case 5: volume = locale_aware_stod(cargo_parts[5]); break;
+        case 6: functionality = Resource<double>(locale_aware_stod(cargo_parts[6]), 0.0, 1.0); break;
         case 7: break; // max_functionality is always 1.0. cargo_parts[6] not used.
         case 8: description = cargo_parts[8]; break;
         case 9: mission = _parse_bool(cargo_parts[9]); break;
@@ -116,15 +117,15 @@ Cargo::Cargo(boost::json::object json):
     name(JsonGetStringWithDefault(json, "file", "")),
     description(JsonGetStringWithDefault(json, "description", "")),
     quantity(1), 
-    price(std::stoi(JsonGetStringWithDefault(json, "price", "0"))), 
+    price(locale_aware_stoi(JsonGetStringWithDefault(json, "price", "0"))),
     category(JsonGetStringWithDefault(json, "categoryname", "")),
-    mass(std::stod(JsonGetStringWithDefault(json, "mass", "0.0"))), 
-    volume(std::stod(JsonGetStringWithDefault(json, "volume", "0.0"))),
+    mass(locale_aware_stod(JsonGetStringWithDefault(json, "mass", "0.0"))),
+    volume(locale_aware_stod(JsonGetStringWithDefault(json, "volume", "0.0"))),
     mission(false), 
     component(GetBool(json, "upgrade", false)),
-    weapon(GetBool(json, "weapon", false)),
-    installed(false), 
+    installed(false),
     integral(false),
+    weapon(GetBool(json, "weapon", false)),
     functionality(Resource<double>(1.0, 0.0, 1.0)) {}
 
 // Getters

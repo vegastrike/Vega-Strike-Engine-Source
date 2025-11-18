@@ -35,6 +35,7 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include "src/vega_cast_utils.h"
 #include "resource/random_utils.h"
 
 
@@ -43,39 +44,23 @@ T _convert(const std::string input, const T modifier);
 
 template<>
 float _convert<float>(const std::string input, const float modifier) {
-    try {
-        return std::stof(input) * modifier;
-    } catch(...) {
-        return 0.0f;
-    }
+    return locale_aware_stof(input, 0.0F) * modifier;
 }
 
 
 template<>
 double _convert<double>(const std::string input, const double modifier) {
-    try {
-        return std::stod(input) * modifier;
-    } catch(...) {
-        return 0.0;
-    }
+    return locale_aware_stod(input, 0.0) * modifier;
 }
 
 template<>
 int _convert<int>(const std::string input, const int modifier) {
-    try {
-        return std::stoi(input) * modifier;
-    } catch(...) {
-        return 0;
-    }
+    return locale_aware_stoi(input, 0) * modifier;
 }
 
 template<>
 long _convert<long>(const std::string input, const long modifier) {
-    try {
-        return std::stol(input) * modifier;
-    } catch(...) {
-        return 0l;
-    }
+    return locale_aware_stol(input, 0L) * modifier;
 }
 
 
