@@ -22,7 +22,7 @@ jobs:
       matrix:
         include:
           - os:              windows-2019
-            cmake-generator: VS2019Win64
+            cmake-generator: VS2022Win64
             enable-pie:      1
             build-type:      RelWithDebInfo
             is-release:      1
