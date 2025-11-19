@@ -536,7 +536,7 @@ void BaseComputer::constructControls(void) {
     if (err <= VSFileSystem::Ok) {
         controls = parseControlsJSON(jsonFile);
     } else {
-        std::cerr << "controls.json not found\n";
+        VS_LOG(error, "controls.json not found");
         return;
     }
 
