@@ -1773,7 +1773,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 if (item.GetCategory().find("My_Fleet") != string::npos) {
                     //This ship is in my fleet -- the price is just the transport cost to get it to
                     //the current base.  "Buying" this ship makes it my current ship.
-                    tempString = (boost::format("#b#Transport cost: %$1.2f#-b#n1.5#") % item.GetPrice()).str();
+                    tempString = (boost::format("#b#Transport cost: %1$.2f#-b#n1.5#") % item.GetPrice()).str();
                 } else {
                     tempString = (boost::format("Price: #b#%1$.2f#-b#n#")
                             % baseUnit->PriceCargo(item.GetName())).str();
@@ -2692,7 +2692,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList &tlist) {
             }
         }
     }
-    //Create an entry for for each mission.
+    //Create an entry for each mission.
     for (size_t i = 0; i < stringCount; i++) {
         CargoColor c;
         //Take any categories out of the name and put them in the cargo.category.
