@@ -31,6 +31,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "vega_string_utils.h"
+
 //Array of textures for the text area
 //GUITexture *Images;
 
@@ -48,11 +50,27 @@ static char EMPTY_STR[] = "";
 TextArea::~TextArea() {
 }
 
-TextArea::TextArea() {
+TextArea::TextArea() : has_scrollbar{0}, do_highlight{0}, do_multiline{0}, xcoord{}, ycoord{}, width{}, height{},
+                       ratio{}, button_ratio{},
+                       scrollbar_ratio{},
+                       text_spacing{0},
+                       horizontal_per_level{0},
+                       horizontal_spacer{0},
+                       vertical_left_of_text{0},
+                       font_size{0},
+                       font_size_float{0}, max_lines{0},
+                       button_pressed{0},
+                       cur_highlighted{0},
+                       item_count{0},
+                       cur_selected{0},
+                       top_item_number{0},
+                       page_size{0},
+                       scroll_start{0}, scroll_cur{0},
+                       ItemList{nullptr} {
     TextArea(0, 0, 1, 1, 1);
 }
 
-//Currently, corners overlap the horizontal and vertical bars. It's only noticable with transparency
+//Currently, corners overlap the horizontal and vertical bars. It's only noticeable with transparency
 TextArea::TextArea(float x, float y, float wid, float hei, int scrollbar) {
     #ifdef DEBUG
     // stephengtuggy 2020-10-30: Leaving these here, since this library is supposed to be
@@ -105,8 +123,8 @@ TextArea::TextArea(float x, float y, float wid, float hei, int scrollbar) {
     vertical_left_of_text = 0.02;
     text_spacing = (font_size_float / 100) + (horizontal_spacer * 2);
 
-    //The parent TextAreaItem. This is the only link where parent == NULL. It is not displayed and handled only internally
-    ItemList = new TextAreaItem("", "", NULL);
+    //The parent TextAreaItem. This is the only link where parent == nullptr. It is not displayed and handled only internally
+    ItemList = MakeShared<TextAreaItem>("", "", nullptr);
     if (wid < 0 || hei < 0) {
         // stephengtuggy 2020-10-30: Leaving this here, since comment at top of
         // file says that this library is supposed to be self-sufficient, so it
@@ -165,8 +183,6 @@ TextArea::TextArea(float x, float y, float wid, float hei, int scrollbar) {
 }
 
 void TextArea::Refresh(void) {
-    // Obscene amounts of commented code removed, check r13553 for content
-
     //Draw the bars to run across the length
 
     if (has_scrollbar != 0) {
@@ -181,7 +197,7 @@ void TextArea::Refresh(void) {
     }
 }
 
-void TextArea::RenderText(void) {
+void TextArea::RenderText() {
     if (item_count == 0) {
         return;
     }
@@ -190,12 +206,9 @@ void TextArea::RenderText(void) {
     RenderTextItem(ItemList, 0);
 }
 
-void TextArea::RenderTextItem(TextAreaItem *current, int level) {
+void TextArea::RenderTextItem(const SharedPtr<TextAreaItem> current, const int level) {
     static int count = 0;
-    float new_y = 0, new_x = 0;
-    int max = 0;
-    int cur = 0;
-    if (current == 0) {
+    if (current == nullptr) {
         return;
     }
     if (level == 0) {
@@ -208,85 +221,80 @@ void TextArea::RenderTextItem(TextAreaItem *current, int level) {
         if (count < top_item_number) {
             count++;
         } else {
-            new_y = ycoord[5] - (text_spacing * (count + 1 - top_item_number)) + horizontal_spacer;
-            new_x = xcoord[5] + (horizontal_per_level * (level - 1));
+            float new_x = 0;
+            float new_y = 0;
+            new_y       = ycoord[5] - (text_spacing * (count + 1 - top_item_number)) + horizontal_spacer;
+            new_x       = xcoord[5] + (horizontal_per_level * (level - 1));
             GFXColorf(current->col);
             ShowText(new_x, new_y, width[5], font_size, current->description, do_multiline);
             count++;
         }
     }
-    max = current->child_count;
-    if (max <= 0) {
+    if (current->child_count() <= 0) {
         return;
     }
-    for (cur = 0; cur < max; cur++) {
-        RenderTextItem(current->child[cur], level + 1);
+    for (const auto& current_child : current->children) {
+        RenderTextItem(current_child, level + 1);
     }
 }
 
 void TextArea::AddTextItem(const char *name, const char *description, const char *parent_name, const GFXColor col) {
-    TextAreaItem *master;
-    master = ItemList->FindChild(parent_name);
-    item_count++;
-    if (master == NULL) {
-        ItemList->AddChild(name, description, col);
-    } else {
+    const SharedPtr<TextAreaItem> master = ItemList->FindChild(parent_name);
+    ++item_count;
+    if (master) {
         master->AddChild(name, description, col);
+    } else {
+        ItemList->AddChild(name, description, col);
     }
 }
 
 void TextArea::ChangeTextItem(const char *name, const char *description, bool wrap) {
-    TextAreaItem *search;
-    search = ItemList->FindChild(name);
-    if (search == 0) {
+    const SharedPtr<TextAreaItem> search = ItemList->FindChild(name);
+    if (!search) {
         return;
     }
-    if (search->description != 0) {
+    if (search->description != nullptr) {
         free(search->description);
+        search->description = nullptr;
     }
-    search->description = strdup(description);
+    search->description = vega_str_dup(description);
 }
 
 void TextArea::ChangeTextItemColor(const char *name, const GFXColor &col) {
-    TextAreaItem *search;
-    search = ItemList->FindChild(name);
-    if (search == 0) {
+    const SharedPtr<TextAreaItem> search = ItemList->FindChild(name);
+    if (!search) {
         return;
     }
     search->col = col;
 }
 
-void TextArea::ClearList(void) {
+void TextArea::ClearList() {
     //Wipe the list clean
-    if (ItemList != nullptr) {
-        delete ItemList;
-        ItemList = nullptr;
-    }
+    ItemList.reset();
     item_count = 0;
     cur_selected = 0;
     top_item_number = 0;
-    ItemList = new TextAreaItem("", "", NULL);
+    ItemList = MakeShared<TextAreaItem>("", "", nullptr);
 }
 
 void TextArea::SetText(const char *text) {
     do_highlight = 0;
     do_multiline = 1;
     ClearList();
-    ChompIntoItems(text, NULL);
+    ChompIntoItems(text, nullptr);
 }
 
-char *TextArea::GetSelectedItemName(void) {
+char *TextArea::GetSelectedItemName() const {
     return GetSelectedItem(1);
 }
 
-char *TextArea::GetSelectedItemDesc(void) {
+char *TextArea::GetSelectedItemDesc() const {
     return GetSelectedItem(2);
 }
 
-char *TextArea::GetSelectedItem(int type) {
-    TextAreaItem *search;
-    search = ItemList->FindCount(cur_selected, 0);
-    if (search == 0) {
+char *TextArea::GetSelectedItem(const int type) const {
+    const SharedPtr<TextAreaItem> search = ItemList->FindCount(cur_selected, 0);
+    if (!search) {
         return EMPTY_STR;
     }
     if (type == 1) {
@@ -296,13 +304,13 @@ char *TextArea::GetSelectedItem(int type) {
     }
 }
 
-void TextArea::SortList(void) {
+void TextArea::SortList() {
     ItemList->Sort();
 }
 
 //The button checks assume that the scroll buttons and scrollbar are on the same x axis
 //If you change the position of the buttons, you'll need to add more checks here
-int TextArea::MouseClick(int button, int state, float x, float y) {
+int TextArea::MouseClick(const int button, const int state, const float x, const float y) {
     if (state == WS_MOUSE_UP && scroll_start != 0) {
         scroll_cur = 0;
         scroll_start = 0;
@@ -342,17 +350,9 @@ int TextArea::MouseClick(int button, int state, float x, float y) {
                 //ShowImage(xcoord[2], ycoord[2], width[2], height[2], Images[IMG_HIGHLIGHT_BUTTON_DOWN], 0, 0);
                 button_pressed = 2;
 
-                top_item_number++;
+                ++top_item_number;
                 if (top_item_number >= (item_count - max_lines)) {
-                    //This is to avoid a compile time warning.
-                    #ifdef NO_WARNINGS
-                    float tmp = item_count - max_lines;
-                    char LINE[10];
-                    sprintf(LINE, "%.0f", tmp);
-                    top_item_number = atoi(LINE);
-                    #else
-                    top_item_number = item_count-max_lines;
-                    #endif    //NO_WARNINGS
+                    top_item_number = static_cast<int>(std::round(item_count-max_lines));
                 }
             }
         }
@@ -374,14 +374,7 @@ int TextArea::MouseClick(int button, int state, float x, float y) {
             //Bottom area
             top_item_number += page_size;
             if (top_item_number >= (item_count - max_lines)) {
-                #ifdef NO_WARNINGS
-                float tmp = item_count - max_lines;
-                char LINE[10];
-                sprintf(LINE, "%.0f", tmp);
-                top_item_number = atoi(LINE);
-                #else
-                top_item_number = item_count-max_lines;
-                #endif    //NO_WARNINGS
+                top_item_number = static_cast<int>(std::round(item_count-max_lines));
             }
         }
     }
@@ -426,7 +419,7 @@ int TextArea::DoMouse(int type, float x, float y, int button, int state) {
     return 0;
 }
 
-int TextArea::Inside(float x, float y, int group) {
+int TextArea::Inside(const float x, const float y, const int group) const {
     if (x < xcoord[group] || y > ycoord[group]) {
         return 0;
     }
@@ -439,7 +432,7 @@ int TextArea::Inside(float x, float y, int group) {
     return 1;
 }
 
-void TextArea::LoadTextures(void) {
+void TextArea::LoadTextures() {
     /*
      *  int cur, max;
      *  static int images_loaded = 0;
@@ -462,31 +455,24 @@ void TextArea::LoadTextures(void) {
 }
 
 //Assumes the mouse is in the text area
-int TextArea::LocateCount(float y) {
+int TextArea::LocateCount(const float y) const {
     float base = ycoord[5] - y - horizontal_spacer;
     if (base < 0) {
         return 0;
     }
     base /= text_spacing;
     base += 0.5;
-    #ifdef NO_WARNINGS
-    char LINE[1024];
-    sprintf(LINE, "%.0f", base);
-    return atoi(LINE);
-
-    #else
-    return base;
-    #endif    //NO_WARNINGS
+    return static_cast<int>(std::round(base));
 }
 
-void TextArea::HighlightCount(int count, int type) {
+void TextArea::HighlightCount(const int count, const int type) const {
     float x = 0, y = 0;
     if (count <= 0 || count > max_lines + 1) {
         return;
     }
     y = ycoord[5] - (text_spacing * (count - 1)) - horizontal_spacer + ((text_spacing - (font_size_float / 100)) / 2);
     x = xcoord[5];
-    if (count <= this->ItemList->child_count) {
+    if (count <= this->ItemList->child_count()) {
         if (type == 1) {
             ShowColor(x, y, width[5], text_spacing, 1, 1, 1, 0.25);
         }
@@ -496,7 +482,7 @@ void TextArea::HighlightCount(int count, int type) {
     }
 }
 
-void TextArea::DisplayScrollbar(void) {
+void TextArea::DisplayScrollbar() {
     float new_y = 0, new_height = 0, item_perc = 0, page_perc = 0, y_dist = 0;
     ShowColor(xcoord[3], ycoord[3], width[3], height[3], 0.51, 0.47, 0.79, 1);
     if (item_count <= max_lines) {
@@ -513,25 +499,14 @@ void TextArea::DisplayScrollbar(void) {
     page_perc /= item_count;
     //If this isn't 0, the scrollbar is being moved
     if (scroll_cur != 0) {
-        float move = ((scroll_cur - scroll_start) / height[3]) / item_perc;
+        const float move = ((scroll_cur - scroll_start) / height[3]) / item_perc;
         int change = 0;
-        #ifdef NO_WARNINGS
-        char LINE[10];
-        sprintf(LINE, "%.0f", move);
-        change = atoi(LINE);
-        #else
-        change = move;
-        #endif    //NO_WARNINGS
+        change = static_cast<int>(std::round(move));
         if (move < 0) {
             change *= -1;
             top_item_number += change;
             if (top_item_number >= (item_count - max_lines)) {
-                #ifdef NO_WARNINGS
-                sprintf(LINE, "%.0f", item_count - max_lines);
-                top_item_number = atoi(LINE);
-                #else
-                top_item_number = item_count-max_lines;
-                #endif    //NO_WARNINGS
+                top_item_number = static_cast<int>(std::round(item_count-max_lines));
             }
         } else {
             top_item_number -= change;
@@ -561,7 +536,7 @@ void TextArea::DisplayScrollbar(void) {
 }
 
 void TextArea::ChompIntoItems(const char *text, const char *parent) {
-    char *temp = strdup(text);
+    char *temp = vega_str_dup(text);
     char *cur = temp, chr = '\0';
     int i = 0, max = strlen(temp);
     float cur_width = 0, wid = 0, end = glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');
@@ -597,24 +572,21 @@ void TextArea::ChompIntoItems(const char *text, const char *parent) {
  *  }*/
 //#include <stdlib.h>
 //#define rnd (((float)rand())/((float)RAND_MAX))
-TextAreaItem::TextAreaItem(const char *new_name, const char *desc, TextAreaItem *parent_class) :
+TextAreaItem::TextAreaItem(const char *new_name, const char *desc, SharedPtr<TextAreaItem> parent_class) :
         col(1, 1, 1, 1) {
-//{	col = GFXColor (rnd,rnd,rnd,1);
-    if (new_name != 0) {
-        name = strdup(new_name);
+    if (new_name != nullptr) {
+        name = vega_str_dup(new_name);
     } else {
-        name = 0;
+        name = nullptr;
     }
-    if (desc != 0) {
-        description = strdup(desc);
+    if (desc != nullptr) {
+        description = vega_str_dup(desc);
     } else {
-        description = 0;
+        description = nullptr;
     }
-    child_count_multiplier = 0;
-    child_count = 0;
-    child = NULL;
-    parent = NULL;
-//if (parent == NULL) { expanded = 1; }
+    children.resize(0);
+    parent.reset();
+    parent = parent_class;
 }
 
 TextAreaItem::~TextAreaItem(void) {
@@ -626,90 +598,61 @@ TextAreaItem::~TextAreaItem(void) {
         free(description);
         description = nullptr;
     }
-    //if there are no children, it won't run through this for
-    for (int cur = 0; cur < child_count; cur++) {
-        if (child[cur] != nullptr) {
-            delete child[cur];
-            child[cur] = nullptr;
-        }
-    }
-    if (child != nullptr) {
-        delete child;
-        child = nullptr;
-    }
+    children.resize(0);
+    parent.reset();
 }
 
-TextAreaItem *TextAreaItem::FindChild(const char *search_name) {
-    int cur = 0;
-    //int max = child_count_multiplier * 10;
-    TextAreaItem *match;
-    if (search_name == NULL) {
-        return this;
+SharedPtr<TextAreaItem> TextAreaItem::FindChild(const char* search_name) {
+    if (search_name == nullptr) {
+        return shared_from_this();
     }
     if (strcmp(name, search_name) == 0) {
-        return this;
+        return shared_from_this();
     }
-    for (cur = 0; cur < child_count; cur++) {
-        match = child[cur]->FindChild(search_name);
-        if (match != NULL) {
+    for (const auto& current_child : children) {
+        SharedPtr<TextAreaItem> match = current_child->FindChild(search_name);
+        if (match) {
             return match;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 void TextAreaItem::Sort(void) {
-    int cur, cur2;
-    TextAreaItem *temp;
-    for (cur = 0; cur < child_count; cur++) {
-        child[cur]->Sort();
-        for (cur2 = 0; cur2 < child_count - 1; cur2++) {
-            if (strcmp(child[cur2]->description, child[cur2 + 1]->description) > 0) {
-                temp = child[cur2];
-                child[cur2] = child[cur2 + 1];
-                child[cur2 + 1] = temp;
-            }
-        }
+    for (const auto& cur : children) {
+        cur->Sort();
     }
+    std::sort(children.begin(), children.end(),
+        [](const SharedPtr<TextAreaItem>& a, const SharedPtr<TextAreaItem>& b) -> bool {
+            return a->description < b->description;
+        });
 }
 
-TextAreaItem *TextAreaItem::FindCount(int count, int cur) {
+SharedPtr<TextAreaItem> TextAreaItem::FindCount(const int count, int cur) {
     static int current = 0;
     if (cur == 0) {
         current = 0;
-    }       //int max = child_count_multiplier * 10;
-    TextAreaItem *match;
-    if (count == current) {
-        return this;
     }
-    current++;
-    for (cur = 0; cur < child_count; cur++) {
-        match = child[cur]->FindCount(count, cur + 1);
-        if (match != NULL) {
+    if (count == current) {
+        return shared_from_this();
+    }
+    ++current;
+    const size_t children_size = child_count();
+    for (cur = 0; cur < children_size; ++cur) {
+        SharedPtr<TextAreaItem> match = children.at(cur)->FindCount(count, cur + 1);
+        if (match != nullptr) {
             return match;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 typedef TextAreaItem *TextAreaItemStr;
 
-void TextAreaItem::AddChild(const char *new_name, const char *desc, const GFXColor col) {
-    TextAreaItem **newlist;
-    int cur = 0;
-    child_count++;
-    if (child_count > child_count_multiplier * 10) {
-        child_count_multiplier++;
-        newlist = new TextAreaItemStr[child_count_multiplier * 10];
-        if (child != NULL) {
-            for (cur = 0; cur < child_count - 1; cur++) {
-                newlist[cur] = child[cur];
-            }
-            delete child;
-        }
-        child = newlist;
-    }
-    child[child_count - 1] = new TextAreaItem(new_name, desc, NULL);
-    child[child_count - 1]->col = col;
+void TextAreaItem::AddChild(const char *new_name, const char *desc, const GFXColor new_col) {
+    SharedPtr<TextAreaItem> new_text_area_item = MakeShared<TextAreaItem>(new_name, desc, nullptr);
+    new_text_area_item->col = new_col;
+    new_text_area_item->parent = shared_from_this();
+    children.emplace_back(new_text_area_item);
 }
 
