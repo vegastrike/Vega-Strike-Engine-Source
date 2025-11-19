@@ -536,21 +536,23 @@ void BaseComputer::constructControls(void) {
     if (err <= VSFileSystem::Ok) {
         controls = parseControlsJSON(jsonFile);
     } else {
-        std::cerr << "controls.json not found\n";
+        VS_LOG(error, "controls.json not found");
         return;
     }
 
-    //Base info title.
-    StaticDisplay *baseTitle = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["baseTitle"]));
-    window()->addControl(baseTitle);
+    if (m_displayModes.size() != 1) {
+        //Base info title.
+        StaticDisplay *baseTitle = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["baseTitle"]));
+        window()->addControl(baseTitle);
 
-    //Player info title.
-    StaticDisplay *playerTitle = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["playerTitle"]));
-    window()->addControl(playerTitle);
+        //Player info title.
+        StaticDisplay *playerTitle = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["playerTitle"]));
+        window()->addControl(playerTitle);
 
-    //Options button.
-    NewButton *options = vega_dynamic_cast_ptr<NewButton>(getControl(controls["saveLoad"]));
-    window()->addControl(options);
+        //Options button.
+        NewButton *options = vega_dynamic_cast_ptr<NewButton>(getControl(controls["saveLoad"]));
+        window()->addControl(options);
+    }
 
     NewButton *done = vega_dynamic_cast_ptr<NewButton>(getControl(controls["done"]));
     window()->addControl(done);
