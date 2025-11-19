@@ -182,7 +182,7 @@ TextArea::TextArea(float x, float y, float wid, float hei, int scrollbar) {
     Refresh();
 }
 
-void TextArea::Refresh(void) {
+void TextArea::Refresh() {
     //Draw the bars to run across the length
 
     if (has_scrollbar != 0) {
@@ -308,7 +308,7 @@ void TextArea::SortList() {
     item_tree_top->Sort();
 }
 
-//The button checks assume that the scroll buttons and scrollbar are on the same x axis
+//The button checks assume that the scroll buttons and scrollbar are on the same x-axis
 //If you change the position of the buttons, you'll need to add more checks here
 int TextArea::MouseClick(const int button, const int state, const float x, const float y) {
     if (state == WS_MOUSE_UP && scroll_start != 0) {
@@ -322,7 +322,7 @@ int TextArea::MouseClick(const int button, const int state, const float x, const
     if (button != WS_LEFT_BUTTON) {
         return 1;
     }                                        //Don't have anything to do with the middle and right button
-    //Check to see if the cursor is in the same x axis as the buttons and scrollbar
+    //Check to see if the cursor is in the same x-axis as the buttons and scrollbar
     if (x > xcoord[1] && x < (xcoord[1] + width[1])) {
         //Find out if the click is on a button, the scrollbar, or nowhere
         if (y < ycoord[1] && y > (ycoord[1] - height[1])) {
@@ -465,7 +465,7 @@ int TextArea::LocateCount(const float y) const {
     return static_cast<int>(std::round(base));
 }
 
-void TextArea::HighlightCount(const int count, const int type) const {
+void TextArea::HighlightCount(const size_t count, const int type) const {
     float x = 0, y = 0;
     if (count <= 0 || count > max_lines + 1) {
         return;
@@ -589,7 +589,7 @@ TextAreaItem::TextAreaItem(const char *new_name, const char *desc, SharedPtr<Tex
     parent = parent_class;
 }
 
-TextAreaItem::~TextAreaItem(void) {
+TextAreaItem::~TextAreaItem() {
     if (name != nullptr) {
         free(name);
         name = nullptr;
@@ -618,7 +618,7 @@ SharedPtr<TextAreaItem> TextAreaItem::FindChild(const char* search_name) {
     return nullptr;
 }
 
-void TextAreaItem::Sort(void) {
+void TextAreaItem::Sort() {
     for (const auto& cur : children) {
         cur->Sort();
     }
@@ -628,7 +628,7 @@ void TextAreaItem::Sort(void) {
         });
 }
 
-SharedPtr<TextAreaItem> TextAreaItem::FindCount(const int count, int cur) {
+SharedPtr<TextAreaItem> TextAreaItem::FindCount(const int count, size_t cur) {
     static int current = 0;
     if (cur == 0) {
         current = 0;

@@ -125,7 +125,7 @@ public:
     void ChangeTextItem(const char *name, const char *description, bool wrap = false);
     void ChangeTextItemColor(const char *name, const GFXColor &col);
     void SetText(const char *text);   //Sets the text. Enables Multiline and disables highlighting
-    void ClearList(void);
+    void ClearList();
 //Returns the char of the currently selected item. NULL if nothing is selected
     char * GetSelectedItemName() const;
     char * GetSelectedItemDesc() const;
@@ -221,7 +221,7 @@ private:
     int LocateCount(float y) const;
 
 //Highlighted text (mouse over, selected item) will only occur at a Refresh()
-    void HighlightCount(int count, int type) const;
+    void HighlightCount(size_t count, int type) const;
 
     void   DisplayScrollbar();
     char * GetSelectedItem(int type) const;
@@ -241,7 +241,7 @@ public:
     //A recursive function. This function will be called to all the children until one of them matches the search_name
     //If no match is found, it will use the main tree.
     SharedPtr<TextAreaItem> FindChild(const char* search_name);
-    SharedPtr<TextAreaItem> FindCount(int count, int cur);
+    SharedPtr<TextAreaItem> FindCount(int count, size_t cur);
 
     void     AddChild(const char *new_name, const char *desc, const GFXColor new_col = GFXColor(1, 1, 1, 1));
     void     ExpandTree();
@@ -259,6 +259,6 @@ public:
     }
 };
 
-void LoadTextures(void);
+void LoadTextures();
 
 #endif    //VEGA_STRIKE_ENGINE_GUI_TEXT_AREA_H
