@@ -24,12 +24,12 @@ jobs:
       matrix:
         os:
           # x86-64
-          - macos-13
+          - macos-15-intel
           # M1 processor
-          #- macos-14
+          #- macos-15
         python-version:
           #- 3.12.8
-          - 3.13.2
+          - 3.13.9
         compiler:
           - AppleClang
           #- clang
@@ -59,11 +59,11 @@ jobs:
       # - ~libvorbis~
       # - python
       - name: Setup Python
-        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
         id: vega-py-setup
         with:
           python-version: ${{ matrix.python-version }}
-          update-environment: true # false
+          update-environment: false
 
       - name: Install dependencies using homebrew
         run: brew install boost-python3 gtk+3 gtkglext sdl libvorbis
@@ -84,7 +84,7 @@ jobs:
         run: brew install openal-soft
 
       - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v8.0.0
         with:
           fetch-depth: 2
           submodules: false
@@ -103,11 +103,11 @@ jobs:
         env:
           MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
-          FLAGS:      "-DCMAKE_BUILD_TYPE=${{ matrix.build-type }} -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ matrix.vega-py-setup.outputs.python-path }} -DPythonInstalledVia=Homebrew"
+          FLAGS:      "-DCMAKE_BUILD_TYPE=${{ matrix.build-type }} -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ steps.vega-py-setup.outputs.python-path }}"
           OPENALDIR:  "$(brew --prefix)/opt/openal-soft"
-          Python3_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
-          Python_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
-          pythonLocation: ${{ matrix.vega-py-setup.outputs.python-path }}
+          Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
+          Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
+          pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
           PYTHONHOME: ""
           PYTHONPATH: ""
           IS_RELEASE: 1
@@ -121,7 +121,7 @@ jobs:
         run: ctest -V
 
       - name: Upload test results
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()
         with:
           name: test_results_xml
@@ -132,7 +132,7 @@ jobs:
         run: cpack -V
 
       - name: Upload the artifacts
-        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

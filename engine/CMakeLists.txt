@@ -42,7 +42,7 @@ SET(CPACK_BUILD_CONFIG ${CMAKE_BUILD_TYPE})
 
 SET(VEGASTRIKE_VERSION_MAJOR "0")
 SET(VEGASTRIKE_VERSION_MINOR "9")
-SET(VEGASTRIKE_VERSION_PATCH "1")
+SET(VEGASTRIKE_VERSION_PATCH "2")
 
 IF (DEFINED ENV{SHORT_SHA} AND NOT "$ENV{SHORT_SHA}" STREQUAL "")
     SET(VEGASTRIKE_VERSION_TWEAK "$ENV{SHORT_SHA}")
@@ -312,6 +312,7 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/conf
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4244>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4267>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4305>"
+        "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
         "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>"
         )
 add_link_options("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
@@ -336,15 +337,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 # so that we can handle the special cases for Xenial and stretch
 FIND_PACKAGE(LinuxDistro REQUIRED)
 
-SET(PythonInstalledVia "" CACHE STRING "How Python was installed, such as via Homebrew or MacPorts")
-
-IF (PythonInstalledVia STREQUAL "Homebrew")
-    FIND_PACKAGE(Python3 3.13.2 EXACT REQUIRED COMPONENTS Development Interpreter)
-ELSEIF (PythonInstalledVia STREQUAL "MacPorts")
-    FIND_PACKAGE(Python3 3.12.8 EXACT REQUIRED COMPONENTS Development Interpreter)
-ELSE ()
-    FIND_PACKAGE(Python3 3.6...<3.14 REQUIRED COMPONENTS Development Interpreter)
-ENDIF ()
+FIND_PACKAGE(Python3 3.7...<3.15 REQUIRED COMPONENTS Development Interpreter)
 
 MESSAGE(STATUS "Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
 MESSAGE(STATUS "Python include dir : ${Python3_INCLUDE_DIRS}")
@@ -359,7 +352,7 @@ ENDIF (Python3_FOUND)
 # Find Boost with boost_python library
 MESSAGE(STATUS "Always using system Boost now")
 SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
-FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time system filesystem thread chrono atomic program_options REQUIRED)
+FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time filesystem thread chrono atomic program_options REQUIRED)
 IF (Boost_FOUND)
     # VERSION_EQUAL / VERSION_GREATER requires a version in the form X.Y.Z
     # Until CMake v3.15, Boost_VERSION is in the form as written in boost/version.hpp (e.g. 106700)
