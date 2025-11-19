@@ -21,12 +21,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os:              windows-2019
-            cmake-generator: VS2019Win64
+          - os:              windows-2022
+            cmake-generator: VS2022Win64
             enable-pie:      1
             build-type:      RelWithDebInfo
             is-release:      1
-          - os:              windows-2022
+          - os:              windows-2025
             cmake-generator: VS2022Win64
             enable-pie:      1
             build-type:      RelWithDebInfo
@@ -38,9 +38,9 @@ jobs:
       # Tells vcpkg where binary packages are stored.
       VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vbincache'
       # Let's use GitHub Action cache as storage for the vcpkg Binary Caching feature.
-      VCPKG_BINARY_SOURCES: 'x-gha,readwrite'
-      VCPKG_DEFAULT_TRIPLET: x64-windows
-      VCPKG_DEFAULT_HOST_TRIPLET: x64-windows
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
+      VCPKG_DEFAULT_TRIPLET: x64-windows-win10
+      VCPKG_DEFAULT_HOST_TRIPLET: x64-windows-win10
       TAG_NAME: '${{ github.ref_name }}'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -48,12 +48,10 @@ jobs:
       # Set env vars needed for vcpkg to leverage the GitHub Action cache as a storage
       # for Binary Caching.
       # Also process the `github.sha` value to produce the SHORT_SHA we'll need later
-      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const git_sha = context.sha.substring(0, 7)
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
             core.exportVariable('SHORT_SHA', git_sha);
 
       - name: Test tag name and short SHA
@@ -63,10 +61,18 @@ jobs:
 
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v8.0.0
+
+      - name: Restore vcpkg cache
+        id: cache-vcpkg-restore
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ github.workspace }}/vcpkg_cache
+          key: vcpkg-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-${{ matrix.os }}-${{ matrix.triplet }}-
 
       - name: Setup Python
-        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
         with:
           python-version: 3.11
 
@@ -75,31 +81,12 @@ jobs:
         shell: bash
 
       - name: install-cmake
-        uses: lukka/get-cmake@acb35cf920333f4dc3fc4f424f1b30d5e7d561b4 #v3.31.4
+        uses: lukka/get-cmake@628dd514bed37cb0a609e84a6186cbbaa2fc0140 # v4.1.2
         with:
           cmakeVersion: 3.31.4
           ninjaVersion: 1.11.1
 
-      # Restore vcpkg from the GitHub Action cache service. Note that packages are restored by vcpkg's binary caching
-      # when it is being run afterward by CMake.
-      - name: restore-vcpkg
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 #v4.2.0
-        with:
-          # The first path is the location of vcpkg: it contains the vcpkg executable and data files, as long as the
-          # built package archives (aka binary cache) which are located by VCPKG_DEFAULT_BINARY_CACHE env var.
-          # The other paths starting with '!' are exclusions: they contain temporary files generated during the build of the installed packages.
-          path: |
-            ${{ env.VCPKG_ROOT }}
-            !${{ env.VCPKG_ROOT }}/buildtrees
-            !${{ env.VCPKG_ROOT }}/packages
-            !${{ env.VCPKG_ROOT }}/downloads
-            !${{ env.VCPKG_ROOT }}/installed
-          # The key is composed in a way that it gets properly invalidated whenever a different version of vcpkg is being used.
-          key: |
-            ${{ matrix.os }}-${{ hashFiles( './engine/vcpkg.json' )}}
-
       - name: install-vcpkg
-        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/Microsoft/vcpkg.git ${{ env.VCPKG_ROOT }}
           ${{ env.VCPKG_ROOT }}\bootstrap-vcpkg.bat -disableMetrics
@@ -107,6 +94,13 @@ jobs:
       - name: run-build-script
         working-directory: ${{ github.workspace }}
         run: .\script\build.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }} -IsRelease  ${{ matrix.is-release }} -GitTag ${{ env.TAG_NAME }} -GitSha ${{ env.SHORT_SHA }}
+
+      - name: Save vcpkg cache
+        id: cache-vcpkg-save
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ github.workspace }}/vcpkg_cache
+          key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
 
       - name: Test
         working-directory: ${{ github.workspace }}
@@ -116,7 +110,7 @@ jobs:
         run: .\script\test.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }}
 
       - name: Upload test results
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()
         with:
           name: test_results_xml
@@ -127,7 +121,7 @@ jobs:
         run: .\script\package.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }} -GitTag ${{ env.TAG_NAME }} -GitSha ${{ env.SHORT_SHA }}
 
       - name: Upload the artifacts
-        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
