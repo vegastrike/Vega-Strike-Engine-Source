@@ -347,32 +347,134 @@ IF (NOT CMAKE_BUILD_TYPE)
 ENDIF (NOT CMAKE_BUILD_TYPE)
 MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 
+INCLUDE(FetchContent)
+
 # Should we install gtest?
-OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
+OPTION(INSTALL_GTEST "Should we download and install GTest and GMock using FetchContent_MakeAvailable?" ON)
+
+# Check if an environment variable with the same name exists
+# and override the option's value if it does.
+# The environment variable should be set to "ON" or "OFF" (case-insensitive).
+IF (DEFINED ENV{INSTALL_GTEST})
+    IF ("$ENV{INSTALL_GTEST}" STREQUAL "ON" OR "$ENV{INSTALL_GTEST}" STREQUAL "1" OR "$ENV{INSTALL_GTEST}" STREQUAL "TRUE" OR $ENV{INSTALL_GTEST} EQUAL 1)
+        SET(INSTALL_GTEST ON)
+    ELSEIF ("$ENV{INSTALL_GTEST}" STREQUAL "OFF" OR "$ENV{INSTALL_GTEST}" STREQUAL "0" OR "$ENV{INSTALL_GTEST}" STREQUAL "FALSE" OR $ENV{INSTALL_GTEST} EQUAL 0)
+        SET(INSTALL_GTEST OFF)
+    ENDIF ()
+ENDIF ()
 
 # Should we run gtest?
 OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
+
+# Check if an environment variable with the same name exists
+# and override the option's value if it does.
+# The environment variable should be set to "ON" or "OFF" (case-insensitive).
+IF (DEFINED ENV{USE_GTEST})
+    IF ("$ENV{USE_GTEST}" STREQUAL "ON" OR "$ENV{USE_GTEST}" STREQUAL "1" OR "$ENV{USE_GTEST}" STREQUAL "TRUE" OR $ENV{USE_GTEST} EQUAL 1)
+        SET(USE_GTEST ON)
+    ELSEIF ("$ENV{USE_GTEST}" STREQUAL "OFF" OR "$ENV{USE_GTEST}" STREQUAL "0" OR "$ENV{USE_GTEST}" STREQUAL "FALSE" OR $ENV{USE_GTEST} EQUAL 0)
+        SET(USE_GTEST OFF)
+    ENDIF ()
+ENDIF ()
+
+OPTION(INSTALL_SDL3 "Should we download and install SDL3 using FetchContent_MakeAvailable?" ON)
+
+# Check if an environment variable with the same name exists
+# and override the option's value if it does.
+# The environment variable should be set to "ON" or "OFF" (case-insensitive).
+IF (DEFINED ENV{INSTALL_SDL3})
+    IF ("$ENV{INSTALL_SDL3}" STREQUAL "ON" OR "$ENV{INSTALL_SDL3}" STREQUAL "1" OR "$ENV{INSTALL_SDL3}" STREQUAL "TRUE" OR $ENV{INSTALL_SDL3} EQUAL 1)
+        SET(INSTALL_SDL3 ON)
+    ELSEIF ("$ENV{INSTALL_SDL3}" STREQUAL "OFF" OR "$ENV{INSTALL_SDL3}" STREQUAL "0" OR "$ENV{INSTALL_SDL3}" STREQUAL "FALSE" OR $ENV{INSTALL_SDL3} EQUAL 0)
+        SET(INSTALL_SDL3 OFF)
+    ENDIF ()
+ENDIF ()
+
+OPTION(INSTALL_SDL3_IMAGE "Should we download and install SDL3_image using FetchContent_MakeAvailable?" ON)
+
+# Check if an environment variable with the same name exists
+# and override the option's value if it does.
+# The environment variable should be set to "ON" or "OFF" (case-insensitive).
+IF (DEFINED ENV{INSTALL_SDL3_IMAGE})
+    IF ("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "ON" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "1" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "TRUE" OR $ENV{INSTALL_SDL3_IMAGE} EQUAL 1)
+        SET(INSTALL_SDL3_IMAGE ON)
+    ELSEIF ("$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "OFF" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "0" OR "$ENV{INSTALL_SDL3_IMAGE}" STREQUAL "FALSE" OR $ENV{INSTALL_SDL3_IMAGE} EQUAL 0)
+        SET(INSTALL_SDL3_IMAGE OFF)
+    ENDIF ()
+ENDIF ()
 
 IF (INSTALL_GTEST OR USE_GTEST)
     MESSAGE(STATUS "Configuring Unit Tests")
     ENABLE_TESTING()
 
     IF (INSTALL_GTEST)
-        INCLUDE(FetchContent)
-        FetchContent_Declare(
+        FETCHCONTENT_DECLARE(
             googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
-            GIT_TAG        v1.15.2
+            GIT_TAG        b514bdc898e2951020cbdca1304b75f5950d1f59 # v1.15.2
         )
 
         # Set custom variables, policies, etc.
 
         # For Windows: Prevent overriding the parent project's compiler/linker settings
         SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-        FetchContent_MakeAvailable(googletest)
     ENDIF (INSTALL_GTEST)
 ENDIF (INSTALL_GTEST OR USE_GTEST)
+
+IF (INSTALL_SDL3)
+    FETCHCONTENT_DECLARE(
+            SDL3
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+            GIT_TAG        badbf8da4ee72b3ef599c721ffc9899e8d7c8d90 # release-3.2.26
+            )
+ENDIF ()
+
+IF (INSTALL_SDL3_IMAGE)
+    FETCHCONTENT_DECLARE(
+            SDL3_image
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+            GIT_TAG        11154afb7855293159588b245b446a4ef09e574f # release-3.2.4
+            )
+ENDIF ()
+
+IF (INSTALL_GTEST)
+    MESSAGE(STATUS "Downloading GoogleTest via FetchContent_MakeAvailable")
+    FETCHCONTENT_MAKEAVAILABLE(googletest)
+    MESSAGE(STATUS "GoogleTest fetched via FetchContent_MakeAvailable")
+    LIST(APPEND TST_INCLUDES "${Vega_Strike_BINARY_DIR}/_deps/googletest-src/googletest/include")
+    LIST(APPEND TST_INCLUDES "${Vega_Strike_BINARY_DIR}/_deps/googletest-src/googlemock/include")
+ELSEIF (USE_GTEST)
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+    FIND_PACKAGE(GoogleTest REQUIRED)
+    MESSAGE(STATUS "GoogleTest found via FIND_PACKAGE")
+ENDIF ()
+
+IF (INSTALL_SDL3)
+    MESSAGE(STATUS "Downloading SDL3 via FetchContent_MakeAvailable")
+    FETCHCONTENT_MAKEAVAILABLE(SDL3)
+    MESSAGE(STATUS "SDL3 fetched via FetchContent_MakeAvailable")
+    SET(HAVE_SDL 1)
+    SET(SDL_WINDOWING 1)
+    LIST(APPEND TST_INCLUDES "${Vega_Strike_BINARY_DIR}/_deps/sdl3-src/include")
+ELSE ()
+    FIND_PACKAGE(SDL3 REQUIRED)
+    MESSAGE(STATUS "SDL3 found via FIND_PACKAGE")
+    SET(HAVE_SDL 1)
+    SET(SDL_WINDOWING 1)
+ENDIF ()
+
+
+IF (INSTALL_SDL3_IMAGE)
+    MESSAGE(STATUS "Downloading SDL3_image via FetchContent_MakeAvailable")
+    FETCHCONTENT_MAKEAVAILABLE(SDL3_image)
+    MESSAGE(STATUS "SDL3_image fetched via FetchContent_MakeAvailable")
+    LIST(APPEND TST_INCLUDES "${Vega_Strike_BINARY_DIR}/_deps/sdl3_image-src/include")
+ELSE ()
+    FIND_PACKAGE(SDL3_image REQUIRED)
+    MESSAGE(STATUS "SDL3_image found via FIND_PACKAGE")
+ENDIF ()
 
 INCLUDE(GNUInstallDirs)
 

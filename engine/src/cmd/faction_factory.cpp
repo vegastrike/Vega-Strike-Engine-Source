@@ -38,6 +38,8 @@
 #include <boost/foreach.hpp>
 #include <boost/optional/optional.hpp>
 
+#include "src/vega_cast_utils.h"
+
 namespace pt = boost::property_tree;
 namespace alg = boost::algorithm;
 
@@ -90,11 +92,7 @@ void FactionFactory::parse(ptree tree) {
             if(spark_string.empty()) {
                 continue;
             }
-            try {
-                faction->sparkcolor[i++] = std::stof(spark_string);
-            } catch (const std::invalid_argument& e) {
-                VS_LOG(error, (boost::format("Error: Invalid color %1% for key %2%") % spark_string % key));
-            }
+            faction->sparkcolor[i++] = locale_aware_stof(spark_string);
         }
 
         string explosion_name = inner.get("Explosion.<xmlattr>.name", "");

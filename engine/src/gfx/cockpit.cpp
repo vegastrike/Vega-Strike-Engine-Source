@@ -87,7 +87,7 @@
 #include "cmd/weapon_info.h"
 #include "gfx/cockpit_gfx.h"
 #include "cmd/dock_utils.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "resource/random_utils.h"
 
 #include <cstddef>
@@ -302,7 +302,7 @@ void GameCockpit::AutoLanding() {
 
 float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     if (!target) {
-        return 0.0f;
+        return 0.0F;
     }
     const float game_speed = configuration().physics.game_speed_flt;
     const bool display_in_meters = configuration().physics.display_in_meters;
@@ -431,9 +431,6 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::MAXCOMBATKPS:
         case UnitImages<void>::MAXCOMBATABKPS: {
             const bool use_relative_velocity = configuration().graphics.hud.display_relative_velocity;
-            if (!target) {
-                return 0.0f;
-            }
             if (!target->VelocityReference()) {
                 return 0.0f;
             }
@@ -606,35 +603,15 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 return static_cast<float>(UnitImages<void>::TRAVEL);
             }
         case UnitImages<void>::RECIEVINGFIRE_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::RECEIVINGMISSILES_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::RECEIVINGMISSILELOCK_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::RECEIVINGTARGETLOCK_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::COLLISIONWARNING_MODAL:
-            if (!target) {          //FIXME
-                return static_cast<float>(UnitImages<void>::WARNING);
-            } else {
-                return static_cast<float>(UnitImages<void>::NOMINAL);
-            }
+            return static_cast<float>(UnitImages<void>::NOMINAL);
         case UnitImages<void>::CANJUMP_MODAL:
             if (!target->jump_drive.Installed() || !target->jump_drive.Operational()) {
                 return static_cast<float>(UnitImages<void>::NODRIVE);
