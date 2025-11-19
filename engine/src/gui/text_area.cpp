@@ -66,7 +66,7 @@ TextArea::TextArea() : has_scrollbar{0}, do_highlight{0}, do_multiline{0}, xcoor
                        top_item_number{0},
                        page_size{0},
                        scroll_start{0}, scroll_cur{0},
-                       ItemList{nullptr} {
+                       item_tree_top{nullptr} {
     TextArea(0, 0, 1, 1, 1);
 }
 
@@ -124,7 +124,7 @@ TextArea::TextArea(float x, float y, float wid, float hei, int scrollbar) {
     text_spacing = (font_size_float / 100) + (horizontal_spacer * 2);
 
     //The parent TextAreaItem. This is the only link where parent == nullptr. It is not displayed and handled only internally
-    ItemList = MakeShared<TextAreaItem>("", "", nullptr);
+    item_tree_top = MakeShared<TextAreaItem>("", "", nullptr);
     if (wid < 0 || hei < 0) {
         // stephengtuggy 2020-10-30: Leaving this here, since comment at top of
         // file says that this library is supposed to be self-sufficient, so it
@@ -203,7 +203,7 @@ void TextArea::RenderText() {
     }
     //There's a bug in glut_support. Can't show a color then text. Have to render an image between colors and text
     //ShowImage(0,0,0,0, Images[0], 0, 0);
-    RenderTextItem(ItemList, 0);
+    RenderTextItem(item_tree_top, 0);
 }
 
 void TextArea::RenderTextItem(const SharedPtr<TextAreaItem> current, const int level) {
@@ -239,17 +239,17 @@ void TextArea::RenderTextItem(const SharedPtr<TextAreaItem> current, const int l
 }
 
 void TextArea::AddTextItem(const char *name, const char *description, const char *parent_name, const GFXColor col) {
-    const SharedPtr<TextAreaItem> master = ItemList->FindChild(parent_name);
+    const SharedPtr<TextAreaItem> master = item_tree_top->FindChild(parent_name);
     ++item_count;
     if (master) {
         master->AddChild(name, description, col);
     } else {
-        ItemList->AddChild(name, description, col);
+        item_tree_top->AddChild(name, description, col);
     }
 }
 
 void TextArea::ChangeTextItem(const char *name, const char *description, bool wrap) {
-    const SharedPtr<TextAreaItem> search = ItemList->FindChild(name);
+    const SharedPtr<TextAreaItem> search = item_tree_top->FindChild(name);
     if (!search) {
         return;
     }
@@ -261,7 +261,7 @@ void TextArea::ChangeTextItem(const char *name, const char *description, bool wr
 }
 
 void TextArea::ChangeTextItemColor(const char *name, const GFXColor &col) {
-    const SharedPtr<TextAreaItem> search = ItemList->FindChild(name);
+    const SharedPtr<TextAreaItem> search = item_tree_top->FindChild(name);
     if (!search) {
         return;
     }
@@ -270,11 +270,11 @@ void TextArea::ChangeTextItemColor(const char *name, const GFXColor &col) {
 
 void TextArea::ClearList() {
     //Wipe the list clean
-    ItemList.reset();
+    item_tree_top.reset();
     item_count = 0;
     cur_selected = 0;
     top_item_number = 0;
-    ItemList = MakeShared<TextAreaItem>("", "", nullptr);
+    item_tree_top = MakeShared<TextAreaItem>("", "", nullptr);
 }
 
 void TextArea::SetText(const char *text) {
@@ -293,7 +293,7 @@ char *TextArea::GetSelectedItemDesc() const {
 }
 
 char *TextArea::GetSelectedItem(const int type) const {
-    const SharedPtr<TextAreaItem> search = ItemList->FindCount(cur_selected, 0);
+    const SharedPtr<TextAreaItem> search = item_tree_top->FindCount(cur_selected, 0);
     if (!search) {
         return EMPTY_STR;
     }
@@ -305,7 +305,7 @@ char *TextArea::GetSelectedItem(const int type) const {
 }
 
 void TextArea::SortList() {
-    ItemList->Sort();
+    item_tree_top->Sort();
 }
 
 //The button checks assume that the scroll buttons and scrollbar are on the same x axis
@@ -472,7 +472,7 @@ void TextArea::HighlightCount(const int count, const int type) const {
     }
     y = ycoord[5] - (text_spacing * (count - 1)) - horizontal_spacer + ((text_spacing - (font_size_float / 100)) / 2);
     x = xcoord[5];
-    if (count <= this->ItemList->child_count()) {
+    if (count <= this->item_tree_top->child_count()) {
         if (type == 1) {
             ShowColor(x, y, width[5], text_spacing, 1, 1, 1, 0.25);
         }

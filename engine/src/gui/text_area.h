@@ -211,7 +211,7 @@ private:
     float scroll_cur;
 
 //Linked list of items that will appear if the text area is a select box (doubles as an expanding tree)
-    SharedPtr<class TextAreaItem> ItemList;
+    SharedPtr<class TextAreaItem> item_tree_top;
 
 //Check if that x,y co-ordinate is inside us
     int  Inside(float x, float y, int group) const;
