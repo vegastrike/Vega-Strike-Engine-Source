@@ -26,7 +26,7 @@
 
 set -e
 
-port install python312 boost181@1.81.0_12+cmake_scripts+no_single+no_static+python312 glib2 +quartz libepoxy +quartz gtk3 +quartz libsdl2 libGLU freeglut openal-soft cmake expat libjpeg-turbo libpng libvorbis ninja libarchive
+port install python313 boost188@1.88.0+cmake_scripts+no_single+no_static+python313 glib2 +quartz libepoxy +quartz gtk3 +quartz SDL3 SDL3_image libGLU freeglut openal-soft cmake expat libjpeg-turbo libpng libvorbis ninja libarchive
 
 export CMAKE_PREFIX_PATH="/opt/local/"
 

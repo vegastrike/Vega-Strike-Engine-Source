@@ -33,7 +33,7 @@
 #include <Python.h>
 #include <algorithm>
 
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "cmd/vega_py_run.h"
 #include "cmd/base.h"
 #include "gldrv/winsys.h"

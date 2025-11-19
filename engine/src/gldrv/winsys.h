@@ -50,7 +50,7 @@
 #endif
 
 #if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
-#   include "SDL2/SDL.h"
+#   include <SDL3/SDL.h>
 #elif defined( HAVE_GLUT )
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #   include <glut.h>
@@ -156,22 +156,23 @@ typedef enum {
     WSK_LMETA = SDLK_LGUI,
     WSK_BREAK = SDLK_PAUSE,
     WSK_PAUSE = SDLK_PAUSE,
-    WSK_LAST = SDL_NUM_SCANCODES // Could be an issue. Needs investigating. See https://wiki.libsdl.org/SDL2/MigrationGuide.
+    WSK_LAST = SDL_SCANCODE_COUNT // Could be an issue. Needs investigating. See https://wiki.libsdl.org/SDL2/MigrationGuide.
 
 } winsys_keysym_t;
+
 typedef enum {
-    WSK_MOD_NONE = KMOD_NONE,
-    WSK_MOD_LSHIFT = KMOD_LSHIFT,
-    WSK_MOD_RSHIFT = KMOD_RSHIFT,
-    WSK_MOD_LCTRL = KMOD_LCTRL,
-    WSK_MOD_RCTRL = KMOD_RCTRL,
-    WSK_MOD_LALT = KMOD_LALT,
-    WSK_MOD_RALT = KMOD_RALT,
+    WSK_MOD_NONE = SDL_KMOD_NONE,
+    WSK_MOD_LSHIFT = SDL_KMOD_LSHIFT,
+    WSK_MOD_RSHIFT = SDL_KMOD_RSHIFT,
+    WSK_MOD_LCTRL = SDL_KMOD_LCTRL,
+    WSK_MOD_RCTRL = SDL_KMOD_RCTRL,
+    WSK_MOD_LALT = SDL_KMOD_LALT,
+    WSK_MOD_RALT = SDL_KMOD_RALT,
     WSK_MOD_LMETA = SDLK_LGUI, // This is an issue for these two entries. We are ignoring the modifier.
     WSK_MOD_RMETA = SDLK_RGUI, // Need to figure out how to do modifier in sdl2.
-    WSK_MOD_NUM = KMOD_NUM,
-    WSK_MOD_CAPS = KMOD_CAPS,
-    WSK_MOD_MODE = KMOD_MODE
+    WSK_MOD_NUM = SDL_KMOD_NUM,
+    WSK_MOD_CAPS = SDL_KMOD_CAPS,
+    WSK_MOD_MODE = SDL_KMOD_MODE
 } winsys_modifiers;
 
 // mouse wheel events are only available with SDL 1.2.5 or later
@@ -190,8 +191,8 @@ typedef enum {
 } winsys_mouse_button_t;
 
 typedef enum {
-    WS_MOUSE_DOWN = SDL_PRESSED,
-    WS_MOUSE_UP = SDL_RELEASED
+    WS_MOUSE_DOWN = true,
+    WS_MOUSE_UP = false
 } winsys_button_state_t;
 
 #else

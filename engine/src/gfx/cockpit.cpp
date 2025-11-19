@@ -87,7 +87,7 @@
 #include "cmd/weapon_info.h"
 #include "gfx/cockpit_gfx.h"
 #include "cmd/dock_utils.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "resource/random_utils.h"
 
 #include <cstddef>
