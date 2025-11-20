@@ -50,24 +50,7 @@ static char EMPTY_STR[] = "";
 TextArea::~TextArea() {
 }
 
-TextArea::TextArea() : has_scrollbar{0}, do_highlight{0}, do_multiline{0}, xcoord{}, ycoord{}, width{}, height{},
-                       ratio{}, button_ratio{},
-                       scrollbar_ratio{},
-                       text_spacing{0},
-                       horizontal_per_level{0},
-                       horizontal_spacer{0},
-                       vertical_left_of_text{0},
-                       font_size{0},
-                       font_size_float{0}, max_lines{0},
-                       button_pressed{0},
-                       cur_highlighted{0},
-                       item_count{0},
-                       cur_selected{0},
-                       top_item_number{0},
-                       page_size{0},
-                       scroll_start{0}, scroll_cur{0},
-                       item_tree_top{nullptr} {
-    TextArea(0, 0, 1, 1, 1);
+TextArea::TextArea() : TextArea(0, 0, 1, 1, 1) {
 }
 
 //Currently, corners overlap the horizontal and vertical bars. It's only noticeable with transparency
