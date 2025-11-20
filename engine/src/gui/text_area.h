@@ -153,19 +153,19 @@ private:
 
 //Array is as follows:
 //Entire box (the border), top scroll button, bottom scroll button, entire scrollbar, active scrollbar, text area
-    float xcoord[6];
-    float ycoord[6];
-    float width[6];
-    float height[6];
+    float xcoord[6]{};
+    float ycoord[6]{};
+    float width[6]{};
+    float height[6]{};
 
 //Percentage of space to allocate for the border. [0] is the thin part, [1] is the scrollbar area (right side)
-    float ratio[2];
+    float ratio[2]{};
 
 //Ratios for the top and button buttons (proportional x,y, height, and width values)
-    float button_ratio[4];
+    float button_ratio[4]{};
 
 //Ratios for the scroll bar area (proportional x,y, height, and width values)
-    float scrollbar_ratio[4];
+    float scrollbar_ratio[4]{};
 
 //Amount of space to display between lines
     float text_spacing;
