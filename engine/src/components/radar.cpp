@@ -99,15 +99,7 @@ void CRadar::Load(std::string unit_key) {
                 RadarCapabilities::OBJECT_RECOGNITION |
                 RadarCapabilities::THREAT_ASSESSMENT;
     } else {
-        std::cout << "Try stoi " << unit_key << std::endl;
-        unsigned int value = stoi(iffval, 0);
-        std::cout << "Success stoi " << unit_key << std::endl;
-        if (value == 0) {
-            // Unknown value
-            capabilities = RadarCapabilities::NONE;
-        } else {
-            capabilities = value;
-        }
+        capabilities = locale_aware_stoi(iffval, RadarCapabilities::NONE);
     }
 
     tracking_active = true;
