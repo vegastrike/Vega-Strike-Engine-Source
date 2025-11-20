@@ -1773,6 +1773,9 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 if (item.GetCategory().find("My_Fleet") != string::npos) {
                     //This ship is in my fleet -- the price is just the transport cost to get it to
                     //the current base.  "Buying" this ship makes it my current ship.
+                    //Note: This is a positional format string, as per the Unix98 Open-group printf precise syntax.
+                    //This is supported by Boost Format; see
+                    //https://www.boost.org/doc/libs/latest/libs/format/doc/format.html#printf_directives .
                     tempString = (boost::format("#b#Transport cost: %1$.2f#-b#n1.5#") % item.GetPrice()).str();
                 } else {
                     tempString = (boost::format("Price: #b#%1$.2f#-b#n#")
