@@ -1200,7 +1200,7 @@ void BaseComputer::createControls(void) {
 
 //Create the mode buttons.
 void BaseComputer::createModeButtons(void) {
-    NewButton *originalButton = static_cast< NewButton * > ( window()->findControlById("ModeButton"));
+    NewButton *originalButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("ModeButton"));
     assert(originalButton != NULL);
     if (m_displayModes.size() > 1) {
         //Create a button for each display mode, copying the original button.
@@ -1312,6 +1312,10 @@ void BaseComputer::run(void) {
 
 //Redo the title strings for the display.
 void BaseComputer::recalcTitle() {
+    if (m_displayModes.size() == 1) {
+        return;
+    }
+
     //Generic base title for the display.
     string baseTitle = modeInfo[m_currentDisplay].title;
 
@@ -1320,7 +1324,7 @@ void BaseComputer::recalcTitle() {
     string baseName;
     if (baseUnit) {
         if (baseUnit->getUnitType() == Vega_UnitType::planet) {
-            string temp = ((Planet *) baseUnit)->getHumanReadablePlanetType() + " Planet";
+            const string temp = vega_dynamic_cast_ptr<Planet>(baseUnit)->getHumanReadablePlanetType() + " Planet";
             // think "<planet type> <name of planet>"
             baseName = temp + " " + baseUnit->name;
         } else {
@@ -1331,19 +1335,18 @@ void BaseComputer::recalcTitle() {
     }
     // at this point, baseName will be e.g. "Agricultural planet Helen" or "mining_base Achilles"
     baseTitle += emergency_downgrade_mode;
-    const bool includebasename = configuration().graphics.bases.include_base_name_on_dock;
-    if (includebasename) {
+    const bool include_base_name = configuration().graphics.bases.include_base_name_on_dock;
+    if (include_base_name) {
         baseTitle += baseName;
 
         //Faction name for base.
-        string baseFaction = FactionUtil::GetFactionName(baseUnit->faction);
+        const std::string baseFaction = FactionUtil::GetFactionName(baseUnit->faction);
         if (!baseFaction.empty()) {
             baseTitle += " [" + baseFaction + ']';
         }
     }
     //Set the string in the base title control.
-    StaticDisplay *baseTitleDisplay = static_cast< StaticDisplay * > ( window()->findControlById("BaseInfoTitle"));
-    assert(baseTitleDisplay != NULL);
+    StaticDisplay *baseTitleDisplay = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("baseTitle"));
     baseTitleDisplay->setText(baseTitle);
 
     //Generic player title for display
@@ -1387,8 +1390,7 @@ void BaseComputer::recalcTitle() {
         }
     }
     //Set the string in the player title control.
-    StaticDisplay *playerTitleDisplay = static_cast< StaticDisplay * > ( window()->findControlById("PlayerInfoTitle"));
-    assert(playerTitleDisplay != NULL);
+    StaticDisplay *playerTitleDisplay = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("PlayerInfoTitle"));
     playerTitleDisplay->setText(playerTitle);
 }
 
@@ -1486,26 +1488,26 @@ bool BaseComputer::scrollToItem(Picker *picker, const Cargo &item, bool select, 
 //Hide the controls that commit transactions.
 void BaseComputer::hideCommitControls(void) {
     //The three buy/sell buttons.
-    NewButton *commitButton = static_cast< NewButton * > ( window()->findControlById("Commit"));
+    NewButton *commitButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit"));
     commitButton->setHidden(true);
-    NewButton *commit10Button = static_cast< NewButton * > ( window()->findControlById("Commit10"));
+    NewButton *commit10Button = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit10"));
     if (commit10Button != NULL) {
         commit10Button->setHidden(true);
     }
-    NewButton *commitAllButton = static_cast< NewButton * > ( window()->findControlById("CommitAll"));
+    NewButton *commitAllButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("CommitAll"));
     if (commitAllButton != NULL) {
         commitAllButton->setHidden(true);
     }
-    NewButton *commitFixButton = static_cast< NewButton * > ( window()->findControlById("CommitFix"));
+    NewButton *commitFixButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("CommitFix"));
     if (commitFixButton != NULL) {
         commitFixButton->setHidden(true);
     }
     //The price and "max" displays.
-    StaticDisplay *totalPrice = static_cast< StaticDisplay * > ( window()->findControlById("TotalPrice"));
+    StaticDisplay *totalPrice = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("TotalPrice"));
     if (totalPrice != NULL) {
         totalPrice->setText("");
     }
-    StaticDisplay *maxForPlayer = static_cast< StaticDisplay * > ( window()->findControlById("MaxQuantity"));
+    StaticDisplay *maxForPlayer = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("MaxQuantity"));
     if (maxForPlayer != NULL) {
         maxForPlayer->setText("");
     }
@@ -1515,21 +1517,21 @@ void BaseComputer::hideCommitControls(void) {
 void BaseComputer::configureCargoCommitControls(const Cargo &item, TransactionType trans) {
     if (trans == BUY_CARGO) {
         //"Buy 1" button.
-        NewButton *commitButton = static_cast< NewButton * > ( window()->findControlById("Commit"));
+        NewButton *commitButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit"));
         assert(commitButton != NULL);
         commitButton->setHidden(false);
         commitButton->setLabel("Buy 1");
         commitButton->setCommand("BuyCargo");
 
         //"Buy 10" button.
-        NewButton *commit10Button = static_cast< NewButton * > ( window()->findControlById("Commit10"));
+        NewButton *commit10Button = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit10"));
         assert(commit10Button != NULL);
         commit10Button->setHidden(false);
         commit10Button->setLabel("Buy 10");
         commit10Button->setCommand("Buy10Cargo");
 
         //"Buy All" button.
-        NewButton *commitAllButton = static_cast< NewButton * > ( window()->findControlById("CommitAll"));
+        NewButton *commitAllButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("CommitAll"));
         assert(commitAllButton != NULL);
         commitAllButton->setHidden(false);
         commitAllButton->setLabel("Buy");
@@ -1540,12 +1542,12 @@ void BaseComputer::configureCargoCommitControls(const Cargo &item, TransactionTy
         //Total price display.
         const double totalPrice = (double)item.GetPrice() * (double)maxQuantity;
         std::string tempString = (boost::format("Total: #b#%1$.2f#-b") % totalPrice).str();
-        StaticDisplay *totalDisplay = static_cast< StaticDisplay * > ( window()->findControlById("TotalPrice"));
+        StaticDisplay *totalDisplay = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("TotalPrice"));
         assert(totalDisplay != NULL);
         totalDisplay->setText(tempString);
 
         //Limit if we have one.
-        StaticDisplay *maxForPlayer = static_cast< StaticDisplay * > ( window()->findControlById("MaxQuantity"));
+        StaticDisplay *maxForPlayer = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("MaxQuantity"));
         assert(maxForPlayer != NULL);
         if (maxQuantity >= item.GetQuantity()) {
             //No limits, so let's not mention anything.
@@ -1558,21 +1560,21 @@ void BaseComputer::configureCargoCommitControls(const Cargo &item, TransactionTy
         assert(trans == SELL_CARGO);
 
         //"Sell" button.
-        NewButton *commitButton = static_cast< NewButton * > ( window()->findControlById("Commit"));
+        NewButton *commitButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit"));
         assert(commitButton != NULL);
         commitButton->setHidden(false);
         commitButton->setLabel(item.IsMissionFlag() ? "Dump 1" : "Sell 1");
         commitButton->setCommand("SellCargo");
 
         //"Sell 10" button.
-        NewButton *commit10Button = static_cast< NewButton * > ( window()->findControlById("Commit10"));
+        NewButton *commit10Button = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit10"));
         assert(commit10Button != NULL);
         commit10Button->setHidden(false);
         commit10Button->setLabel(item.IsMissionFlag() ? "Dump 10" : "Sell 10");
         commit10Button->setCommand("Sell10Cargo");
 
         //"Sell All" button.
-        NewButton *commitAllButton = static_cast< NewButton * > ( window()->findControlById("CommitAll"));
+        NewButton *commitAllButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("CommitAll"));
         assert(commitAllButton != NULL);
         commitAllButton->setHidden(false);
         commitAllButton->setLabel(item.IsMissionFlag() ? "Dump" : "Sell");
@@ -1581,12 +1583,12 @@ void BaseComputer::configureCargoCommitControls(const Cargo &item, TransactionTy
         //Total price display.
         const double totalPrice = (double)item.GetPrice() * (double)item.GetQuantity() * (double)(item.IsMissionFlag() ? 0 : 1);
         std::string tempString = (boost::format("Total: #b#%1$.2f#-b") % totalPrice).str();
-        StaticDisplay *totalDisplay = static_cast< StaticDisplay * > ( window()->findControlById("TotalPrice"));
+        StaticDisplay *totalDisplay = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("TotalPrice"));
         assert(totalDisplay != NULL);
         totalDisplay->setText(tempString);
 
         //No limit.
-        StaticDisplay *maxForPlayer = static_cast< StaticDisplay * > ( window()->findControlById("MaxQuantity"));
+        StaticDisplay *maxForPlayer = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("MaxQuantity"));
         assert(maxForPlayer != NULL);
         maxForPlayer->setText("");
     }
@@ -1598,20 +1600,20 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
     Unit *unit = m_player.GetUnit();
     if (trans == BUY_UPGRADE) {
         //base inventory
-        NewButton *commitButton = static_cast< NewButton * > ( window()->findControlById("Commit"));
+        NewButton *commitButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit"));
         assert(commitButton != NULL);
         commitButton->setHidden(false);
         commitButton->setLabel("Buy");
         commitButton->setCommand("BuyUpgrade");
 
-        NewButton *commitFixButton = static_cast< NewButton * > ( window()->findControlById("CommitFix"));
+        NewButton *commitFixButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("CommitFix"));
         assert(commitButton != NULL);
         commitFixButton->setHidden(true);
         commitFixButton->setLabel("Fix");
         commitFixButton->setCommand("FixUpgrade");
     } else {
         //Sell Upgrade - Local Inventory
-        NewButton *commitButton = static_cast< NewButton * > ( window()->findControlById("Commit"));
+        NewButton *commitButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit"));
         assert(commitButton != NULL);
         if (unit) {
             bool damaged = unit->ShipDamaged();
@@ -1630,7 +1632,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
                 commitButton->setCommand("");
             }
         }
-        NewButton *commitFixButton = static_cast< NewButton * > ( window()->findControlById("CommitFix"));
+        NewButton *commitFixButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("CommitFix"));
         bool unhidden = true;
         if (m_player.GetUnit()
                 && UnitUtil::PercentOperational(item, m_player.GetUnit(), item.GetName(), item.GetCategory(), false) < 1) {
@@ -1666,9 +1668,9 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
 //Update the controls when the selection for a transaction changes.
 void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist) {
     //Get the controls we need.
-    NewButton *commitButton = static_cast< NewButton * > ( window()->findControlById("Commit"));
+    NewButton *commitButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit"));
     assert(commitButton != NULL);
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
     std::string descriptiontexture;
     assert(desc != NULL);
     if (!tlist) {
@@ -1720,7 +1722,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 commitButton->setCommand("BuyShip");
                 if (item.GetCategory().find("My_Fleet") != string::npos) {
                     //note can only sell it if you can afford to ship it over here.
-                    NewButton *commit10Button = static_cast< NewButton * > ( window()->findControlById("Commit10"));
+                    NewButton *commit10Button = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit10"));
                     assert(commit10Button != NULL);
                     commit10Button->setHidden(false);
                     commit10Button->setLabel("Sell");
@@ -1923,7 +1925,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
     //Change the description control.
     string::size_type pic;
     StaticImageDisplay
-            *descimage = static_cast< StaticImageDisplay * > ( window()->findControlById("DescriptionImage"));
+            *descimage = vega_dynamic_cast_ptr<StaticImageDisplay>(window()->findControlById("DescriptionImage"));
     if ((pic = descString.find("@")) != string::npos) {
         std::string texture = descString.substr(pic + 1);
         descString = descString.substr(0, pic);
@@ -2253,7 +2255,7 @@ void BaseComputer::loadCargoControls(void) {
         donttakethis.push_back("starship");
     }
     loadMasterList(m_base.GetUnit(), m_base.GetUnit()->cargo_hold, vector<string>(), donttakethis, true, m_transList1);     //Anything but a mission.
-    SimplePicker *basePicker = static_cast< SimplePicker * > ( window()->findControlById("BaseCargo"));
+    SimplePicker *basePicker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("BaseCargo"));
     assert(basePicker != NULL);
     loadListPicker(m_transList1, *basePicker, BUY_CARGO);
 
@@ -2263,7 +2265,7 @@ void BaseComputer::loadCargoControls(void) {
             donttakethis,
             true,
             m_transList2);     //Anything but a mission.
-    SimplePicker *inventoryPicker = static_cast< SimplePicker * > ( window()->findControlById("PlayerCargo"));
+    SimplePicker *inventoryPicker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("PlayerCargo"));
     assert(inventoryPicker != NULL);
     loadListPicker(m_transList2, *inventoryPicker, SELL_CARGO);
 
@@ -2499,7 +2501,7 @@ bool BaseComputer::newsPickerChangedSelection(const EventCommandId &command, Con
     Picker *picker = static_cast< Picker * > (control);
     PickerCell *cell = picker->selectedCell();
 
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
     assert(desc != NULL);
     if (cell == NULL) {
         //No selection.  Clear desc.  (Not sure how this can happen, but it's easy to cover.)
@@ -2524,8 +2526,8 @@ bool BaseComputer::loadSavePickerChangedSelection(const EventCommandId &command,
     Picker *picker = static_cast< Picker * > (control);
     PickerCell *cell = picker->selectedCell();
 
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
-    StaticDisplay *inputbox = static_cast< StaticDisplay * > ( window()->findControlById("InputText"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
+    StaticDisplay *inputbox = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("InputText"));
     assert(desc != NULL);
     if (cell == NULL) {
         //No selection.  Clear desc.  (Not sure how this can happen, but it's easy to cover.)
@@ -2541,7 +2543,7 @@ bool BaseComputer::loadSavePickerChangedSelection(const EventCommandId &command,
 
 //Load the controls for the News display.
 void BaseComputer::loadNewsControls(void) {
-    SimplePicker *picker = static_cast< SimplePicker * > ( window()->findControlById("NewsPicker"));
+    SimplePicker *picker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("NewsPicker"));
     assert(picker != NULL);
     picker->clear();
 
@@ -2567,7 +2569,7 @@ void BaseComputer::loadNewsControls(void) {
         }
     }
     //Make sure the description is empty.
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
     assert(desc != NULL);
     desc->setText("");
 
@@ -2753,7 +2755,7 @@ void BaseComputer::loadMissionsControls(void) {
 
     //Load up the list of missions.
     loadMissionsMasterList(m_transList1);
-    SimplePicker *picker = static_cast< SimplePicker * > ( window()->findControlById("Missions"));
+    SimplePicker *picker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("Missions"));
     assert(picker != NULL);
     loadListPicker(m_transList1, *picker, ACCEPT_MISSION);
 
@@ -2927,7 +2929,7 @@ void BaseComputer::loadSellUpgradeControls(void) {
     std::sort(tlist.masterList.begin(), tlist.masterList.end(), CargoColorSort());
 
     //Load the upgrade picker form the master list.
-    SimplePicker *basePicker = static_cast< SimplePicker * > ( window()->findControlById("PlayerUpgrades"));
+    SimplePicker *basePicker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("PlayerUpgrades"));
     assert(basePicker != NULL);
     loadListPicker(tlist, *basePicker, SELL_UPGRADE, true);
 }
@@ -4049,7 +4051,7 @@ void BaseComputer::loadShipDealerControls(void) {
         (*it).cargo.SetDescription("");
     }
     //Load the picker from the master list.
-    SimplePicker *basePicker = static_cast< SimplePicker * > ( window()->findControlById("Ships"));
+    SimplePicker *basePicker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("Ships"));
     assert(basePicker != NULL);
     loadListPicker(m_transList1, *basePicker, BUY_SHIP, true);
 
@@ -4334,7 +4336,7 @@ bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *contro
         "player_info.py", args);
 
     //Put this in the description.
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
     assert(desc != NULL);
 
     desc->setText(text);
@@ -4440,7 +4442,7 @@ bool BaseComputer::showShipStats(const EventCommandId &command, Control *control
         }
     }     //picture removed
 
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
     assert(desc != NULL);
     desc->setText(text);
 
@@ -4542,7 +4544,7 @@ bool BaseComputer::actionConfirmedSaveGame() {
         showAlert("Return to a base to save.");
         return false;         //should be false, but causes badness.
     }
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("InputText"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("InputText"));
     if (desc) {
         std::string tmp = desc->text();
         VSFileSystem::VSFile fp;
@@ -4574,7 +4576,7 @@ bool BaseComputer::actionConfirmedSaveGame() {
 
 bool BaseComputer::actionSaveGame(const EventCommandId &command, Control *control) {
     Unit *player = m_player.GetUnit();
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("InputText"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("InputText"));
     bool ok = true;
     std::string tmp;
     if (desc) {
@@ -4611,7 +4613,7 @@ bool BaseComputer::actionSaveGame(const EventCommandId &command, Control *contro
 
 bool BaseComputer::actionConfirmedLoadGame() {
     Unit *player = m_player.GetUnit();
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("InputText"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("InputText"));
     if (desc) {
         std::string tmp = desc->text();
         if (tmp.length() > 0) {
@@ -4641,14 +4643,14 @@ bool BaseComputer::actionConfirmedLoadGame() {
 }
 
 bool BaseComputer::actionNewGame(const EventCommandId &command, Control *control) {
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("InputText"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("InputText"));
     desc->setText(UniverseUtil::getNewGameSaveName());
     return this->actionLoadGame(command, control);
 }
 
 bool BaseComputer::actionLoadGame(const EventCommandId &command, Control *control) {
     Unit *player = m_player.GetUnit();
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("InputText"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("InputText"));
     if (desc) {
         std::string tmp = desc->text();
         if (tmp.length() > 0) {
