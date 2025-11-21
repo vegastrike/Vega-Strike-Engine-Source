@@ -670,6 +670,7 @@ void CompPython(int room,
             EnumMap::Pair("News", BaseComputer::NEWS),
             EnumMap::Pair("Info", BaseComputer::INFO),
             EnumMap::Pair("LoadSave", BaseComputer::LOADSAVE),
+            EnumMap::Pair("Network", BaseComputer::NETWORK),
             EnumMap::Pair("UNKNOWN", BaseComputer::LOADSAVE),
     };
     static const EnumMap modemap(modelist, sizeof(modelist) / sizeof(*modelist));

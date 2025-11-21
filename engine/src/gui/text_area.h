@@ -38,8 +38,8 @@
  * The only external functions it requires that aren't provided by system libs are in glut_support.h
  */
 
-//There are places where a float is converted to an int. This define takes extra steps to convert without a warning (float -> char -> int)
-#define NO_WARNINGS
+#include "audio/Types.h"
+#include <deque>
 
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #if defined (__APPLE__) && defined (__MACH__)
@@ -96,28 +96,28 @@
 
 class TextArea {
 public:
-    TextArea(void);
+    TextArea();
     TextArea(float x, float y, float wid, float hei, int scrollbar);
-    ~TextArea(void);
+    ~TextArea();
 
-    int GetSelectedItem() {
+    int GetSelectedItem() const {
         return cur_selected;
     }
 
-    void SetSelectedItem(int newh) {
+    void SetSelectedItem(const int newh) {
         cur_selected = newh;
     }
 
     void DoHighlight(int yes);        //DoHighlight(0) to disable mouse highlighting. Also disable clicking on entries
-    void DoMultiline(int yes) {
-        do_multiline = yes;
+    void DoMultiline(const int yes) {
+        do_multiline = static_cast<char>(yes);
     }                                                   //DoMultiline(1) to enable multi-line entries
-    void Refresh(void);
-    void RenderText(void);
-    void AddTextItem(const char *name,
-            const char *description,
-            const char *parent_name = NULL,
-            const GFXColor col = GFXColor(
+    void Refresh();
+    void RenderText();
+    void AddTextItem(const char * name,
+            const char *          description,
+            const char *          parent_name = nullptr,
+            const GFXColor        col         = GFXColor(
                     1,
                     1,
                     1,
@@ -125,11 +125,11 @@ public:
     void ChangeTextItem(const char *name, const char *description, bool wrap = false);
     void ChangeTextItemColor(const char *name, const GFXColor &col);
     void SetText(const char *text);   //Sets the text. Enables Multiline and disables highlighting
-    void ClearList(void);
+    void ClearList();
 //Returns the char of the currently selected item. NULL if nothing is selected
-    char *GetSelectedItemName(void);
-    char *GetSelectedItemDesc(void);
-    void SortList(void);
+    char * GetSelectedItemName() const;
+    char * GetSelectedItemDesc() const;
+    void   SortList();
 
 //Returns 1 if the click is inside the text area. 0 if it's outside. Same thing for movement
 //The class requires you convert the x,y co-ordinate to a -1 to 1 float. The class doesn't know the screen dimensions
@@ -147,30 +147,30 @@ private:
 //Flag that enables/disables the scrollbar (It is not shown if it is disabled). This includes the scroll buttons
     char has_scrollbar;
 
-//Flags that enable/disable Highlighting and Mutli-line text
+//Flags that enable/disable Highlighting and Multi-line text
     char do_highlight;
     char do_multiline;
 
 //Array is as follows:
-//Entire box (the border), top scroll button, buttom scroll button, entire scrollbar, active scrollbar, text area
-    float xcoord[6];
-    float ycoord[6];
-    float width[6];
-    float height[6];
+//Entire box (the border), top scroll button, bottom scroll button, entire scrollbar, active scrollbar, text area
+    float xcoord[6]{};
+    float ycoord[6]{};
+    float width[6]{};
+    float height[6]{};
 
 //Percentage of space to allocate for the border. [0] is the thin part, [1] is the scrollbar area (right side)
-    float ratio[2];
+    float ratio[2]{};
 
 //Ratios for the top and button buttons (proportional x,y, height, and width values)
-    float button_ratio[4];
+    float button_ratio[4]{};
 
 //Ratios for the scroll bar area (proportional x,y, height, and width values)
-    float scrollbar_ratio[4];
+    float scrollbar_ratio[4]{};
 
 //Amount of space to display between lines
     float text_spacing;
 
-//Amout of space to allocate to the horizontal bar for each level of text (expanding trees)
+//Amount of space to allocate to the horizontal bar for each level of text (expanding trees)
     float horizontal_per_level;
 
 //Amount of space between the text and the top/bottom border
@@ -211,56 +211,54 @@ private:
     float scroll_cur;
 
 //Linked list of items that will appear if the text area is a select box (doubles as an expanding tree)
-    class TextAreaItem *ItemList;
+    SharedPtr<class TextAreaItem> item_tree_top;
 
 //Check if that x,y co-ordinate is inside us
-    int Inside(float x, float y, int group);
-    void LoadTextures(void);
-    void RenderTextItem(TextAreaItem *current, int level);
+    int  Inside(float x, float y, int group) const;
+    void LoadTextures();
+    void RenderTextItem(SharedPtr<TextAreaItem> current, int level);
 
-    int LocateCount(float y);
+    int LocateCount(float y) const;
 
 //Highlighted text (mouse over, selected item) will only occur at a Refresh()
-    void HighlightCount(int count, int type);
+    void HighlightCount(size_t count, int type) const;
 
-    void DisplayScrollbar(void);
-    char *GetSelectedItem(int type);
+    void   DisplayScrollbar();
+    char * GetSelectedItem(int type) const;
 
-//Takes a line and puts them in as seperate items (line wrapping)
+//Takes a line and puts them in as separate items (line wrapping)
     void ChompIntoItems(const char *text, const char *parent);
 };
 
 //Keep everything public so the TextArea class can get faster access to the elements in this class
-class TextAreaItem {
+class TextAreaItem : public SharedFromThis<TextAreaItem> {
 public:
-//TextAreaItem(void);
-//parent_class is NULL for the master TextAreaItem
-    TextAreaItem(const char *new_name = "blank", const char *desc = "", TextAreaItem *parent_class = 0);
-    ~TextAreaItem(void);
+    //TextAreaItem(void);
+    //parent_class is nullptr for the master TextAreaItem
+    explicit TextAreaItem(const char *new_name = "blank", const char *desc = "", SharedPtr<TextAreaItem> parent_class = nullptr);
+    ~TextAreaItem();
 
-//A recursive function. This function will be called to all the children until one of them matches the search_name
-//If no match is found, it will use the main tree.
-    TextAreaItem *FindChild(const char *search_name);
-    TextAreaItem *FindCount(int count, int cur);
+    //A recursive function. This function will be called to all the children until one of them matches the search_name
+    //If no match is found, it will use the main tree.
+    SharedPtr<TextAreaItem> FindChild(const char* search_name);
+    SharedPtr<TextAreaItem> FindCount(int count, size_t cur);
 
-    void AddChild(const char *new_name, const char *desc, const GFXColor col = GFXColor(1, 1, 1, 1));
-    void ExpandTree(void);
-    void Sort(void);
+    void     AddChild(const char *new_name, const char *desc, const GFXColor new_col = GFXColor(1, 1, 1, 1));
+    void     ExpandTree();
+    void     Sort();
     GFXColor col;
-    char *name;
-    char *description;
+    char *   name;
+    char *   description;
 
-//The size of the array is 10 * child_count_multiplier. Allows for an expanding array
-    int child_count_multiplier;
-    int child_count;
-    TextAreaItem **child;
+    std::deque<SharedPtr<TextAreaItem>> children;
 
-    TextAreaItem *parent;
+    WeakPtr<TextAreaItem> parent;
 
-//seems to be unused, except for the constructor...
-//int expanded;
+    size_t child_count() const {
+        return children.size();
+    }
 };
 
-void LoadTextures(void);
+void LoadTextures();
 
 #endif    //VEGA_STRIKE_ENGINE_GUI_TEXT_AREA_H
