@@ -380,7 +380,7 @@ IF (DEFINED ENV{USE_GTEST})
     ENDIF ()
 ENDIF ()
 
-OPTION(INSTALL_SDL3 "Should we download and install SDL3 using FetchContent_MakeAvailable?" ON)
+OPTION(INSTALL_SDL3 "Should we download and install SDL3 using FetchContent_MakeAvailable?" OFF)
 
 # Check if an environment variable with the same name exists
 # and override the option's value if it does.
@@ -393,7 +393,7 @@ IF (DEFINED ENV{INSTALL_SDL3})
     ENDIF ()
 ENDIF ()
 
-OPTION(INSTALL_SDL3_IMAGE "Should we download and install SDL3_image using FetchContent_MakeAvailable?" ON)
+OPTION(INSTALL_SDL3_IMAGE "Should we download and install SDL3_image using FetchContent_MakeAvailable?" OFF)
 
 # Check if an environment variable with the same name exists
 # and override the option's value if it does.
