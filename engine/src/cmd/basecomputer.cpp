@@ -1376,7 +1376,7 @@ void BaseComputer::run(void) {
 
 //Redo the title strings for the display.
 void BaseComputer::recalcTitle() {
-    if (m_displayModes.size() == 1) {
+    if (m_displayModes.size() == 1 || m_displayModes.at(0) == NETWORK) {
         return;
     }
 
@@ -1410,7 +1410,7 @@ void BaseComputer::recalcTitle() {
         }
     }
     //Set the string in the base title control.
-    StaticDisplay *baseTitleDisplay = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("baseTitle"));
+    StaticDisplay *baseTitleDisplay = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("BaseInfoTitle"));
     baseTitleDisplay->setText(baseTitle);
 
     //Generic player title for display
@@ -1554,25 +1554,25 @@ void BaseComputer::hideCommitControls(void) {
     //The three buy/sell buttons.
     NewButton *commitButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit"));
     commitButton->setHidden(true);
-    NewButton *commit10Button = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit10"));
-    if (commit10Button != NULL) {
+    NewButton *commit10Button = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit10"), true);
+    if (commit10Button != nullptr) {
         commit10Button->setHidden(true);
     }
-    NewButton *commitAllButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("CommitAll"));
-    if (commitAllButton != NULL) {
+    NewButton *commitAllButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("CommitAll"), true);
+    if (commitAllButton != nullptr) {
         commitAllButton->setHidden(true);
     }
-    NewButton *commitFixButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("CommitFix"));
-    if (commitFixButton != NULL) {
+    NewButton *commitFixButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("CommitFix"), true);
+    if (commitFixButton != nullptr) {
         commitFixButton->setHidden(true);
     }
     //The price and "max" displays.
-    StaticDisplay *totalPrice = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("TotalPrice"));
-    if (totalPrice != NULL) {
+    StaticDisplay *totalPrice = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("TotalPrice"), true);
+    if (totalPrice != nullptr) {
         totalPrice->setText("");
     }
-    StaticDisplay *maxForPlayer = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("MaxQuantity"));
-    if (maxForPlayer != NULL) {
+    StaticDisplay *maxForPlayer = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("MaxQuantity"), true);
+    if (maxForPlayer != nullptr) {
         maxForPlayer->setText("");
     }
 }
@@ -1987,33 +1987,37 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
     descString += tailString;
 
     //Change the description control.
-    string::size_type pic;
+    string::size_type pic = descString.find('@');
     StaticImageDisplay
-            *descimage = vega_dynamic_cast_ptr<StaticImageDisplay>(window()->findControlById("DescriptionImage"));
-    if ((pic = descString.find("@")) != string::npos) {
+            *desc_image = vega_dynamic_cast_ptr<StaticImageDisplay>(window()->findControlById("DescriptionImage"), true);
+    if (desc_image == nullptr) {
+        return;
+    }
+    if (pic != string::npos) {
         std::string texture = descString.substr(pic + 1);
         descString = descString.substr(0, pic);
-        string::size_type picend = texture.find("@");
+        string::size_type picend = texture.find('@');
         if (picend != string::npos) {
             descString += texture.substr(picend + 1);
             texture = texture.substr(0, picend);
         }
-        if (descimage) {
-            descimage->setTexture(texture);
+        if (desc_image) {
+            desc_image->setTexture(texture);
         }
     } else {
-        if (descimage && descriptiontexture == "") {
-            descimage->setTexture("blackclear.png");
-        } else if (descimage) {
-            descimage->setTexture(descriptiontexture);
+        if (desc_image && descriptiontexture.empty()) {
+            desc_image->setTexture("blackclear.png");
+        } else if (desc_image) {
+            desc_image->setTexture(descriptiontexture);
         }
     }
     {
-        pic = descString.find("<");
+        pic = descString.find('<');
         if (pic != string::npos) {
             std::string tmp = descString.substr(pic + 1);
             descString = descString.substr(0, pic);
-            if ((pic = tmp.find(">")) != string::npos) {
+            pic = tmp.find('>');
+            if (pic != string::npos) {
                 descString += tmp.substr(pic + 1);
             }
         }
