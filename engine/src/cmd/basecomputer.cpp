@@ -341,7 +341,7 @@ const BaseComputer::WctlTableEntry WctlBase<BaseComputer>::WctlCommandTable[] = 
         BaseComputer::WctlTableEntry("Save", "", &BaseComputer::actionSaveGame),
         BaseComputer::WctlTableEntry("DoneComputer", "", &BaseComputer::actionDone),
 
-        BaseComputer::WctlTableEntry("", "", NULL)
+        BaseComputer::WctlTableEntry("", "", nullptr)
 };
 
 template<typename T>
