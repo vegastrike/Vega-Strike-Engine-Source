@@ -30,6 +30,7 @@
 
 #include "window.h"
 #include "control.h"
+#include "src/vega_cast_utils.h"
 
 //This class is meant to run, or control, a Window.  It probably creates
 //the Window and its Controls, loads the controls with lists if necessary, etc.
@@ -91,13 +92,13 @@ class WctlBase : public WindowController {
 public:
     typedef WindowControllerTableEntry<Subclass> WctlTableEntry;
 
-    virtual bool processWindowCommand(const EventCommandId &command, Control *control) {
+    bool processWindowCommand(const EventCommandId &command, Control *control) override {
         //Iterate through the dispatch table.
-        for (const WctlTableEntry *p = &WctlCommandTable[0]; p->function; p++) {
+        for (const WctlTableEntry *p = &WctlCommandTable[0]; p->function; ++p) {
             if (p->command == command) {
                 if (p->controlId.size() == 0 || p->controlId == control->id()) {
                     //Found a handler for the command.
-                    return ((static_cast< Subclass * > (this))->*(p->function))(command, control);
+                    return (vega_dynamic_cast_ptr<Subclass>(this)->*(p->function))(command, control);
                 }
             }
         }
