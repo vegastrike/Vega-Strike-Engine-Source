@@ -204,10 +204,8 @@ void TextArea::RenderTextItem(const SharedPtr<TextAreaItem> current, const int l
         if (count < top_item_number) {
             count++;
         } else {
-            float new_x = 0;
-            float new_y = 0;
-            new_y       = ycoord[5] - (text_spacing * (count + 1 - top_item_number)) + horizontal_spacer;
-            new_x       = xcoord[5] + (horizontal_per_level * (level - 1));
+            const float new_y = ycoord[5] - (text_spacing * (count + 1 - top_item_number)) + horizontal_spacer;
+            const float new_x = xcoord[5] + (horizontal_per_level * (level - 1));
             GFXColorf(current->col);
             ShowText(new_x, new_y, width[5], font_size, current->description, do_multiline);
             count++;
