@@ -184,13 +184,16 @@ void InitJoystick() {
 #ifndef NO_SDL_JOYSTICK
 #ifdef HAVE_SDL
     SDL_JoystickID *joysticks = SDL_GetJoysticks(&num_joysticks);
+    if (num_joysticks > MAX_JOYSTICKS) {
+        num_joysticks = MAX_JOYSTICKS;
+    }
     VS_LOG(info, (boost::format("%1% joysticks were found.\n\n") % num_joysticks));
     VS_LOG(info, "The names of the joysticks are:\n");
     if (joysticks) {
-        for (int i = 0; i<MAX_JOYSTICKS; i++) {
-            SDL_JoystickID instance_id = joysticks[i];
+        for (int i1 = 0; i1 < num_joysticks; ++i1) {
+            const SDL_JoystickID instance_id = joysticks[i1];
             VS_LOG(info, (boost::format("    %1%\n") % SDL_GetJoystickNameForID(instance_id)));
-            joystick[i] = new JoyStick(i, instance_id);
+            joystick[i1] = new JoyStick(i1, instance_id);
         }
     }
     SDL_free(joysticks);
