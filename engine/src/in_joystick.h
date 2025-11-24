@@ -77,7 +77,7 @@ class JoyStick {
     void GetMouse(float &x, float &y, float &z, int &buttons);
 public:
 //initializes the joystick
-    JoyStick(int which, SDL_JoystickID instanceID);
+    JoyStick(int which, SDL_JoystickID instance_id);
 //engine calls GetJoyStick to get coordinates and buttons
     void GetJoyStick(float &x, float &y, float &z, long long& buttons);
     bool isAvailable(void);

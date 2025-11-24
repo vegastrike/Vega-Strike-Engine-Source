@@ -64,7 +64,7 @@ static int miny = -1;
 static int maxz = 1;
 static int minz = -1;
 
-JoyStick *joystick[MAX_JOYSTICKS]; //until I know where I place it
+JoyStick *joystick[MAX_JOYSTICKS]{}; //until I know where I place it
 int num_joysticks = 0;
 
 void modifyDeadZone(JoyStick *j) {
@@ -187,13 +187,17 @@ void InitJoystick() {
     if (num_joysticks > MAX_JOYSTICKS) {
         num_joysticks = MAX_JOYSTICKS;
     }
-    VS_LOG(info, (boost::format("%1% joysticks were found.\n\n") % num_joysticks));
-    VS_LOG(info, "The names of the joysticks are:\n");
+    VS_LOG(important_info, (boost::format("%1% joysticks were found.\n\n") % num_joysticks));
+    VS_LOG(important_info, "The names of the joysticks are:\n");
     if (joysticks) {
-        for (int i1 = 0; i1 < num_joysticks; ++i1) {
-            const SDL_JoystickID instance_id = joysticks[i1];
-            VS_LOG(info, (boost::format("    %1%\n") % SDL_GetJoystickNameForID(instance_id)));
-            joystick[i1] = new JoyStick(i1, instance_id);
+        for (int i1 = 0; i1 < MAX_JOYSTICKS; ++i1) {
+            if (i1 < num_joysticks) {
+                const SDL_JoystickID instance_id = joysticks[i1];
+                VS_LOG(important_info, (boost::format("    %1%\n") % SDL_GetJoystickNameForID(instance_id)));
+                joystick[i1] = new JoyStick(i1, instance_id);
+            } else {
+                joystick[i1] = new JoyStick(i1, 0);
+            }
         }
     }
     SDL_free(joysticks);
@@ -207,24 +211,27 @@ void InitJoystick() {
         VS_LOG(info, (boost::format("Glut detects %1% joystick(s)") % (i+1)));
         joystick[0] = new JoyStick(0, 0);
     }
+    for (int i2 = 0; i2 < MAX_JOYSTICKS; ++i2) {
+        joystick[i2] = new JoyStick(i2, 0);
+    }
 #endif
 #endif
 }
 
 void DeInitJoystick() {
-    for (int i = 0; i < MAX_JOYSTICKS; i++) {
-        delete joystick[i];
+    for (auto & i : joystick) {
+        delete i;
     }
     num_joysticks = 0;
 }
 
-JoyStick::JoyStick(int which, SDL_JoystickID instanceID) : mouse(which == MOUSE_JOYSTICK) {
+JoyStick::JoyStick(const int which, const SDL_JoystickID instance_id) : mouse(which == MOUSE_JOYSTICK) {
     for (int j = 0; j < MAX_AXES; ++j) {
         axis_axis[j] = -1;
         axis_inverse[j] = false;
         joy_axis[j] = 0;
     }
-    this->instanceID = instanceID;
+    instanceID = instance_id;
 
     joy_buttons = 0;
     player = 0; //which;     //by default bind players to whichever joystick it is
@@ -244,14 +251,13 @@ JoyStick::JoyStick(int which, SDL_JoystickID instanceID) : mouse(which == MOUSE_
 
 #else
 #ifdef HAVE_SDL
-    // num_joysticks = SDL_NumJoysticks(); // pmx-20251020 Commented : already done in the init stage, and num_joysticks is a global.
     if (which >= num_joysticks) {
         if (which != MOUSE_JOYSTICK) {
             joy_available = false;
         }
         return;
     }
-    joy = SDL_OpenJoystick(instanceID);     //joystick nr should be configurable
+    joy = SDL_OpenJoystick(instance_id);     //joystick nr should be configurable
     if (joy == nullptr) {
         VS_LOG(warning, (boost::format("warning: no joystick nr %1%\n") % which));
         joy_available = false;
