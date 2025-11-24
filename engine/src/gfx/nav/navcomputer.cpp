@@ -27,6 +27,7 @@
  */
 
 
+#include "src/vega_cast_utils.h"
 #include "src/vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
 //For WIN32 debugging.
@@ -1035,7 +1036,7 @@ void NavComputer::recalcTitle() {
     baseTitle += ")";
 
     //Set the string in the base title control.
-    StaticDisplay *baseTitleDisplay = static_cast< StaticDisplay * > ( window()->findControlById("NavigationTitle"));
+    StaticDisplay *baseTitleDisplay = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("NavigationTitle"));
     assert(baseTitleDisplay != NULL);
     baseTitleDisplay->setText(baseTitle);
 }
@@ -1110,7 +1111,7 @@ void NavComputer::RenameConfirm::init(void) {
 //Process a command event from the Options Menu window.
 bool NavComputer::RenameConfirm::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Rename") {
-        TextInputDisplay *input = static_cast< TextInputDisplay * > ( window()->findControlById("PathNameBox"));
+        TextInputDisplay *input = vega_dynamic_cast_ptr<TextInputDisplay>(window()->findControlById("PathNameBox"));
         assert(input != NULL);
         m_parent->actionRenameConfirmed(input->text());
         window()->close();
@@ -1123,7 +1124,7 @@ bool NavComputer::RenameConfirm::processWindowCommand(const EventCommandId &comm
 
 //Load the paths to be put in the lister.
 void NavComputer::loadPathLister() {
-    SimplePicker *listPicker = static_cast< SimplePicker * > ( window()->findControlById("PathLister"));
+    SimplePicker *listPicker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("PathLister"));
     assert(listPicker != NULL);
     listPicker->clear();
 
@@ -1132,14 +1133,14 @@ void NavComputer::loadPathLister() {
         listPicker->addCell(new ValuedPickerCell<NavPath *>((*i), (*i)->getName()));
     }
     //Make sure the description is empty.
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
     assert(desc != NULL);
     desc->setText("");
 }
 
 //Load the paths to be put in the lister.
 void NavComputer::loadChainLister() {
-    SimplePicker *chainPicker = static_cast< SimplePicker * > ( window()->findControlById("ChainLister"));
+    SimplePicker *chainPicker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("ChainLister"));
     assert(chainPicker != NULL);
     chainPicker->clear();
     for (vector<NavPath *>::iterator i = pathman->paths.begin(); i < pathman->paths.end(); ++i) {
@@ -1167,7 +1168,7 @@ void NavComputer::loadCriteriaPickerCell(SimplePicker *picker,
 
 //Load the criteria to be put in the lister.
 void NavComputer::loadCriteriaLister() {
-    SimplePicker *picker = static_cast< SimplePicker * > ( window()->findControlById("CriteriaLister"));
+    SimplePicker *picker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("CriteriaLister"));
     assert(picker != NULL);
     picker->clear();
     if (criteria) {
@@ -1181,7 +1182,7 @@ void NavComputer::loadCriteriaLister() {
 
 //Load the absolute button.
 void NavComputer::loadAbsoluteButton() {
-    NewButton *absolute = static_cast< NewButton * > ( window()->findControlById("Absolute"));
+    NewButton *absolute = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Absolute"));
     assert(absolute != NULL);
     absolute->setLabel(navsys->systemIter[navsys->systemselectionindex].GetName());
 }
@@ -1197,7 +1198,7 @@ bool NavComputer::setCurrentNode(PathNode *source) {
 }
 
 void NavComputer::updateDescription() {
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
     assert(desc != NULL);
     if (currentPath) {
         desc->setText(currentPath->getDescription());
@@ -1207,7 +1208,7 @@ void NavComputer::updateDescription() {
 }
 
 void NavComputer::updateNodeDescription() {
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("NodeDescription"));
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("NodeDescription"));
     assert(desc != NULL);
     if (currentNode) {
         desc->setText(currentNode->getDescription());
@@ -1311,13 +1312,13 @@ bool NavComputer::actionAbsolute(const EventCommandId &command, Control *control
 }
 
 bool NavComputer::actionAnd(const EventCommandId &command, Control *control) {
-    Picker *parameterPicker = static_cast< Picker * > ( window()->findControlById("ParameterLister"));
+    Picker *parameterPicker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("ParameterLister"));
     assert(parameterPicker != NULL);
 
-    Picker *criteriaPicker = static_cast< Picker * > ( window()->findControlById("CriteriaLister"));
+    Picker *criteriaPicker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("CriteriaLister"));
     assert(criteriaPicker != NULL);
 
-    TextInputDisplay *input = static_cast< TextInputDisplay * > ( window()->findControlById("ParameterValueBox"));
+    TextInputDisplay *input = vega_dynamic_cast_ptr<TextInputDisplay>(window()->findControlById("ParameterValueBox"));
     assert(input != NULL);
     if (input->text() == "") {
         return true;
@@ -1355,13 +1356,13 @@ bool NavComputer::actionAnd(const EventCommandId &command, Control *control) {
 }
 
 bool NavComputer::actionOr(const EventCommandId &command, Control *control) {
-    Picker *parameterPicker = static_cast< Picker * > ( window()->findControlById("ParameterLister"));
+    Picker *parameterPicker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("ParameterLister"));
     assert(parameterPicker != NULL);
 
-    Picker *criteriaPicker = static_cast< Picker * > ( window()->findControlById("CriteriaLister"));
+    Picker *criteriaPicker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("CriteriaLister"));
     assert(criteriaPicker != NULL);
 
-    TextInputDisplay *input = static_cast< TextInputDisplay * > ( window()->findControlById("ParameterValueBox"));
+    TextInputDisplay *input = vega_dynamic_cast_ptr<TextInputDisplay>(window()->findControlById("ParameterValueBox"));
     assert(input != NULL);
     if (input->text() == "") {
         return true;
@@ -1399,7 +1400,7 @@ bool NavComputer::actionOr(const EventCommandId &command, Control *control) {
 }
 
 bool NavComputer::actionNot(const EventCommandId &command, Control *control) {
-    Picker *criteriaPicker = static_cast< Picker * > ( window()->findControlById("CriteriaLister"));
+    Picker *criteriaPicker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("CriteriaLister"));
     assert(criteriaPicker != NULL);
     ValuedPickerCell<CriteriaNode *> *criteriaCell =
             static_cast< ValuedPickerCell<CriteriaNode *> * > ( criteriaPicker->selectedCell());
@@ -1415,7 +1416,7 @@ bool NavComputer::actionNot(const EventCommandId &command, Control *control) {
 }
 
 bool NavComputer::actionRemoveCriteria(const EventCommandId &command, Control *control) {
-    Picker *criteriaPicker = static_cast< Picker * > ( window()->findControlById("CriteriaLister"));
+    Picker *criteriaPicker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("CriteriaLister"));
     assert(criteriaPicker != NULL);
     ValuedPickerCell<CriteriaNode *> *criteriaCell =
             static_cast< ValuedPickerCell<CriteriaNode *> * > ( criteriaPicker->selectedCell());
@@ -1433,10 +1434,10 @@ bool NavComputer::actionRemoveCriteria(const EventCommandId &command, Control *c
 }
 
 bool NavComputer::actionChain(const EventCommandId &command, Control *control) {
-    Picker *pathPicker = static_cast< Picker * > ( window()->findControlById("ChainLister"));
+    Picker *pathPicker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("ChainLister"));
     assert(pathPicker != NULL);
 
-    Picker *typePicker = static_cast< Picker * > ( window()->findControlById("ChainTypeLister"));
+    Picker *typePicker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("ChainTypeLister"));
     assert(typePicker != NULL);
 
     ValuedPickerCell<NavPath *> *pathCell = static_cast< ValuedPickerCell<NavPath *> * > ( pathPicker->selectedCell());

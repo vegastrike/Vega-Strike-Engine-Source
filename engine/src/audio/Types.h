@@ -40,6 +40,7 @@
 #define WeakPtr boost::weak_ptr
 #define AutoPtr boost::scoped_ptr
 #define SharedFromThis boost::enable_shared_from_this
+#define MakeShared boost::make_shared
 
 #include "Vector.h"
 #include "audio/Matrix.h"
