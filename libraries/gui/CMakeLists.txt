@@ -28,10 +28,45 @@
 
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-#FILE(GLOB VS_LIBRARIES LIST_DIRECTORIES true RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
-SET(VS_LIBRARIES "collide2" "gfx_generic" "root_generic" "cmd" "vegadisk" "posh" 
-    "imgui" "gui")
-FOREACH(VS_LIBDIR IN LISTS VS_LIBRARIES)
-    MESSAGE(STATUS "Found Library Directory " ${VS_LIBDIR})
-    ADD_SUBDIRECTORY(${VS_LIBDIR})
-ENDFOREACH(VS_LIBDIR)
+
+ADD_LIBRARY(vegastrike_gui STATIC
+    main_menu.cpp
+)
+
+
+ADD_EXECUTABLE(test_gui 
+               test_gui.cpp) 
+
+SET_PROPERTY(TARGET vegastrike_gui PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vegastrike_gui PROPERTY CXX_STANDARD_REQUIRED TRUE)
+SET_PROPERTY(TARGET vegastrike_gui PROPERTY CXX_EXTENSIONS ON)
+SET_PROPERTY(TARGET vegastrike_gui PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+
+# SDL
+FIND_PACKAGE(SDL2 REQUIRED)
+IF (SDL2_FOUND)
+    LIST(APPEND VSE_TST_INCLUDES ${SDL2_INCLUDE_DIRS})
+    LIST(APPEND VSE_TST_LIBS ${SDL2_LIBRARIES})
+    MESSAGE(STATUS "Found required library SDL2")
+ELSE (SDL2_FOUND)
+    MESSAGE(FATAL_ERROR "Failed to find required library SDL2")
+ENDIF (SDL2_FOUND)
+
+TARGET_INCLUDE_DIRECTORIES(vegastrike_gui 
+    PUBLIC 
+        ${Vega_Strike_SOURCE_DIR}/libraries/gui
+    SYSTEM PRIVATE 
+        ${Vega_Strike_SOURCE_DIR}/libraries/imgui
+        ${SDL2_INCLUDE_DIRS})
+
+TARGET_LINK_LIBRARIES(vegastrike_gui
+    ${SDL2_LIBRARIES}
+    vegastrike_imgui
+)
+
+TARGET_LINK_LIBRARIES(test_gui
+    ${SDL2_LIBRARIES}
+    vegastrike_imgui
+    vegastrike_gui
+)
+    

@@ -741,6 +741,7 @@ IF (NOT DISABLE_CLIENT)
             vegastrike_root_generic
             vegastrike_vegadisk
             vegastrike_posh
+            vegastrike_imgui
             vegastrike_cmd
             vegastrike-OPcollide
     )
