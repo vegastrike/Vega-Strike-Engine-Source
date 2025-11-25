@@ -59,6 +59,7 @@ public:
             const Matrix &orientationpos,
             const Vector &shipspeed,
             void *owner,
+            bool player_fired,
             CollideMap::iterator hint);
 
     static void Draw();
