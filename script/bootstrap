@@ -29,7 +29,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2024-12-31 ---"
+echo "--- bootstrap | 2025-10-22 ---"
 echo "------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -352,22 +352,23 @@ function bootstrapOnPopOS ()
 
 function bootstrapOnLinuxMint ()
 {
-  apt-get update
+    apt-get update
 
-  if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
-  then
-    apt-get -qy upgrade
-  fi
+    if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
+    then
+        apt-get -qy upgrade
+    fi
 
-  case "$LINUX_CODENAME" in
-    "wilma")
-      apt-get -qy install \
+    case "$LINUX_CODENAME" in
+    "wilma"|"zara")
+            apt-get -qy install \
                       git \
                       cmake \
                       python3-dev \
                       build-essential \
                       automake \
                       autoconf \
+                      libarchive-dev \
                       libpng16-16 \
                       libpng-dev \
                       libpng-tools \
@@ -380,8 +381,8 @@ function bootstrapOnLinuxMint ()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-compat-dev \
-                      libsdl2-dev \
+                      libsdl3 \
+                      libsdl3_image \
                       libopengl0 \
                       libpostproc-dev \
                       freeglut3-dev \
@@ -390,7 +391,7 @@ function bootstrapOnLinuxMint ()
                       libboost-regex-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
-                      clang \
+                      gcc \
                       lsb-release
       ;;
     "virginia")
@@ -425,7 +426,7 @@ function bootstrapOnLinuxMint ()
                       libxmu-dev \
                       clang \
                       lsb-release
-      ;;
+            ;;
     "victoria")
       apt-get -qy install \
                       git \
@@ -555,12 +556,12 @@ function bootstrapOnLinuxMint ()
                       libxmu-dev \
                       clang \
                       lsb-release
-      ;;
-    *)
-      echo "This version of Linux Mint is not directly supported. You may be able to use the corresponding Ubuntu installation package"
-      exit 2
-      ;;
-  esac
+            ;;
+        *)
+            echo "This version of Linux Mint is not directly supported. You may be able to use the corresponding Ubuntu installation package"
+            exit 2
+            ;;
+    esac
 }
 
 function bootstrapOnOpenSuseLeap ()
@@ -2017,8 +2018,8 @@ function bootstrapOnArch ()
         clang \
         gcc \
         gcc12 \
-        sdl \
-        sdl2 \
+        sdl3 \
+        sdl3_image \
         expat \
         gtk3 \
         libglvnd \
@@ -2034,50 +2035,82 @@ function bootstrapOnArch ()
         make
 }
 
+
+function bootstrapOnEndeavourOS ()
+{
+    # NOTE: Arch requires GCC 12 right now
+    # also installing latest GCC.
+    pacman -Sy --noconfirm \
+              base-devel \
+              cmake \
+              boost \
+              llvm \
+              clang \
+              gcc \
+              sdl3 \
+              sdl3_image \
+              expat \
+              gtk3 \
+              libglvnd \
+              mesa \
+              python \
+              freeglut \
+              git \
+              libjpeg-turbo \
+              libpng \
+              libvorbis \
+              libxmu \
+              openal \
+              libarchive \
+              make
+}
 case "${LINUX_ID}" in
-  "debian")
-    bootstrapOnDebian
-    ;;
-  "ubuntu")
-    bootstrapOnUbuntu
-    ;;
-  "pop")
-    bootstrapOnPopOS
-    ;;
-  "linuxmint")
-    bootstrapOnLinuxMint
-    ;;
-  "opensuse-leap")
-    bootstrapOnOpenSuseLeap
-    ;;
-  "fedora")
-    bootstrapOnFedora
-    ;;
-  "centos")
-    bootstrapOnCentOS
-    ;;
-  "rhel")
-    bootstrapOnRedHat
-    ;;
-  "redhat")
-    bootstrapOnRedHat
-    ;;
-  "rocky")
-    bootstrapOnRockyLinux
-    ;;
-  "manjaro")
-    bootstrapOnManjaro
-    ;;
-  "funtoo")
-    bootstrapOnFuntoo
-    ;;
-  "arch")
-    bootstrapOnArch
-    ;;
-  *)
-    echo "Sorry, unrecognized/unsupported Linux distribution"
-    exit 2
-    ;;
+    "debian")
+        bootstrapOnDebian
+        ;;
+    "ubuntu")
+        bootstrapOnUbuntu
+        ;;
+    "pop")
+        bootstrapOnPopOS
+        ;;
+    "linuxmint")
+        bootstrapOnLinuxMint
+        ;;
+    "opensuse-leap")
+        bootstrapOnOpenSuseLeap
+        ;;
+    "fedora")
+        bootstrapOnFedora
+        ;;
+    "centos")
+        bootstrapOnCentOS
+        ;;
+    "rhel")
+        bootstrapOnRedHat
+        ;;
+    "redhat")
+        bootstrapOnRedHat
+        ;;
+    "rocky")
+        bootstrapOnRockyLinux
+        ;;
+    "manjaro")
+        bootstrapOnManjaro
+        ;;
+    "funtoo")
+        bootstrapOnFuntoo
+        ;;
+    "arch")
+        bootstrapOnArch
+        ;;
+    "endeavouros")
+        bootstrapOnEndeavourOS
+        ;;
+    *)
+        echo "Sorry, unrecognized/unsupported Linux distribution"
+        exit 2
+        ;;
 esac
 
 mkdir -p /usr/src/Vega-Strike-Engine-Source

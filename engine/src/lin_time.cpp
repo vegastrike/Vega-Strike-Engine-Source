@@ -47,7 +47,7 @@ static double dblnewtime;
 static double lasttime;
 #else
 #if defined (HAVE_SDL)
-#   include <SDL2/SDL.h>
+#   include <SDL3/SDL.h>
 #endif /* defined( HAVE_SDL ) */
 static double newtime;
 static double lasttime;

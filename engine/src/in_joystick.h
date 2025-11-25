@@ -33,14 +33,15 @@
 #include "in_kb_data.h"
 
 #if defined (HAVE_SDL)
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #endif //defined (HAVE_SDL)
 
 #include "vegastrike.h"
 //#include "glob.h"
 //#include "dbg.h"
+
 #include "in_kb.h"
-#define NUMJBUTTONS 32
+#define NUMJBUTTONS 64
 
 class JoyStick;
 
@@ -52,7 +53,7 @@ extern void DeInitJoystick();
 
 const int MAX_JOYSTICKS = 16;
 const int MOUSE_JOYSTICK = MAX_JOYSTICKS - 1;
-const int MAX_BUTTONS = 48;
+const int MAX_BUTTONS = 64;
 const int MAX_DIGITAL_HATSWITCHES = 4;
 const int MAX_DIGITAL_VALUES = 9;
 
@@ -76,15 +77,16 @@ class JoyStick {
     void GetMouse(float &x, float &y, float &z, int &buttons);
 public:
 //initializes the joystick
-    JoyStick(int);
+    JoyStick(int, SDL_JoystickID);
 //engine calls GetJoyStick to get coordinates and buttons
-    void GetJoyStick(float &x, float &y, float &z, int &buttons);
+    void GetJoyStick(float &x, float &y, float &z, long long &buttons);
     bool isAvailable(void);
     bool is_around(float axe, float hswitch);
     int NumButtons();
 
 #if defined (HAVE_SDL)
-    SDL_Joystick *joy;
+    SDL_JoystickID  instanceID;
+    SDL_Joystick    *joy;
 #else //defined (HAVE_SDL)
     void   *otherdata; //bad form to have an ifdef in a struct
 #endif //defined (HAVE_SDL)
@@ -104,7 +106,7 @@ public:
 
     bool debug_digital_hatswitch;
 
-    int joy_buttons;
+    long long joy_buttons;  // 64 bits = 64 buttons
     bool joy_available;
     float joy_xmin, joy_xmax, joy_ymin, joy_ymax, joy_zmin, joy_zmax;
     float joy_x, joy_y, joy_z;
