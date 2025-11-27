@@ -72,6 +72,7 @@
 
 static SDL_Window *window = nullptr;
 static SDL_Surface *screen = nullptr;
+static SDL_Renderer *renderer = nullptr;
 
 static winsys_display_func_t display_func = nullptr;
 static winsys_idle_func_t idle_func = nullptr;
@@ -201,6 +202,13 @@ void winsys_warp_pointer(int x, int y) {
 int native_resolution_x;
 int native_resolution_y;
 
+SDL_Rect total_display_bounds{};
+SDL_Rect usable_display_bounds{};
+SDL_Rect total_window_size_in_pixels{};
+SDL_Rect usable_window_size_in_pixels{};
+SDL_Rect total_logical_window_size{};
+SDL_Rect usable_logical_window_size{};
+
 /*---------------------------------------------------------------------------*/
 // pmx-20251026
 bool get_sdl_display_name_by_nr(int screen_number, std::string& screen_name, SDL_DisplayID& id) {
@@ -224,6 +232,155 @@ bool get_sdl_display_name_by_nr(int screen_number, std::string& screen_name, SDL
     return found;
 }
 
+static bool try_creating_window_and_renderer(const char *title, const int width, const int height,
+                                             const char *render_driver_hint, const Uint32 video_flags,
+                                             SDL_Window **window, SDL_Renderer **renderer) {
+    *window = nullptr;
+    *renderer = nullptr;
+
+    if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, render_driver_hint)) {
+        VS_LOG_AND_FLUSH(important_info,
+                         (boost::format("SDL_SetHint(SDL_HINT_RENDER_DRIVER, %1%) succeeded") % render_driver_hint));
+    } else {
+        VS_LOG_AND_FLUSH(error, (boost::format("SDL_SetHint(SDL_HINT_RENDER_DRIVER, %1%) failed") % render_driver_hint))
+        ;
+        SDL_ClearError();
+    }
+
+    return SDL_CreateWindowAndRenderer(title, width, height, video_flags, window, renderer);
+}
+
+static bool get_screen_measurements() {
+    total_display_bounds.x = 0;
+    total_display_bounds.y = 0;
+    total_display_bounds.w = 0;
+    total_display_bounds.h = 0;
+    usable_display_bounds.x = 0;
+    usable_display_bounds.y = 0;
+    usable_display_bounds.w = 0;
+    usable_display_bounds.h = 0;
+    total_window_size_in_pixels.x = 0;
+    total_window_size_in_pixels.y = 0;
+    total_window_size_in_pixels.w = 0;
+    total_window_size_in_pixels.h = 0;
+    usable_window_size_in_pixels.x = 0;
+    usable_window_size_in_pixels.y = 0;
+    usable_window_size_in_pixels.w = 0;
+    usable_window_size_in_pixels.h = 0;
+    total_logical_window_size.x = 0;
+    total_logical_window_size.y = 0;
+    total_logical_window_size.w = 0;
+    total_logical_window_size.h = 0;
+    usable_logical_window_size.x = 0;
+    usable_logical_window_size.y = 0;
+    usable_logical_window_size.w = 0;
+    usable_logical_window_size.h = 0;
+
+    std:string screen_name = "";
+    SDL_DisplayID instance_ID;
+    SDL_DisplayMode mode_for_ID;
+    int configured_width = configuration().graphics.resolution_x;
+    int configured_height = configuration().graphics.resolution_y;
+    int screen_number = configuration().graphics.screen;
+    bool full_screen = configuration().graphics.full_screen;
+
+    if (get_sdl_display_name_by_nr(screen_number, screen_name, instance_ID)) {
+        const std::string log_msg = (boost::format("%1%: screen number: %2%; screen name: %3%; instance ID: %4%") % __FUNCTION__ % screen_number % screen_name % instance_ID).str();
+        VS_LOG_AND_FLUSH(important_info, log_msg);
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+    } else {
+        const std::string log_msg = (boost::format("%1%: get_sdl_display_name_by_nr(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
+        VS_LOG_AND_FLUSH(error, log_msg);
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        SDL_ClearError();
+        return false;
+    }
+
+    {
+        const std::string log_msg = (boost::format("%1%: configured width: %2%; configured height: %3%; full screen configured: %4%") % __FUNCTION__ % configured_width % configured_height % full_screen).str();
+        VS_LOG_AND_FLUSH(important_info, log_msg);
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+    }
+
+    if (SDL_GetDisplayBounds(instance_ID, &total_display_bounds)) {
+        const std::string log_msg = (boost::format("%1%: total display bounds: x=%2%, y=%3%, w=%4%, h=%5%") % __FUNCTION__ % total_display_bounds.x % total_display_bounds.y % total_display_bounds.w % total_display_bounds.h).str();
+        VS_LOG_AND_FLUSH(important_info, log_msg);
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+    } else {
+        const std::string log_msg = (boost::format("%1%: SDL_GetDisplayBounds(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
+        VS_LOG_AND_FLUSH(error, log_msg);
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        SDL_ClearError();
+        return false;
+    }
+
+    if (SDL_GetDisplayUsableBounds(instance_ID, &usable_display_bounds)) {
+        const std::string log_msg = (boost::format("%1%: usable display bounds: x=%2%, y=%3%, w=%4%, h=%5%") % __FUNCTION__ % usable_display_bounds.x % usable_display_bounds.y % usable_display_bounds.w % usable_display_bounds.h).str();
+        VS_LOG_AND_FLUSH(important_info, log_msg);
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+    } else {
+        const std::string log_msg = (boost::format("%1%: SDL_GetDisplayUsableBounds(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
+        VS_LOG_AND_FLUSH(error, log_msg);
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        SDL_ClearError();
+        return false;
+    }
+
+    if (SDL_GetWindowSizeInPixels(window, &total_window_size_in_pixels.w, &total_window_size_in_pixels.h)) {
+        const std::string log_msg = (boost::format("%1%: window size in pixels: w=%2%, h=%3%") % __FUNCTION__ % total_window_size_in_pixels.w % total_window_size_in_pixels.h).str();
+        VS_LOG_AND_FLUSH(important_info, log_msg);
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+    } else {
+        const std::string log_msg = (boost::format("%1%: SDL_GetWindowSizeInPixels(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
+        VS_LOG_AND_FLUSH(error, log_msg);
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        SDL_ClearError();
+        return false;
+    }
+
+    if (SDL_GetWindowSize(window, &total_logical_window_size.w, &total_logical_window_size.h)) {
+        const std::string log_msg = (boost::format("%1%: total logical window size: w=%2%, h=%3%") % __FUNCTION__ % total_logical_window_size.w % total_logical_window_size.h).str();
+        VS_LOG_AND_FLUSH(important_info, log_msg);
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+    } else {
+        const std::string log_msg = (boost::format("%1%: SDL_GetWindowSize(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
+        VS_LOG_AND_FLUSH(error, log_msg);
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        SDL_ClearError();
+        return false;
+    }
+
+    if (SDL_GetRenderOutputSize(renderer, &usable_window_size_in_pixels.w, &usable_window_size_in_pixels.h)) {
+        const std::string log_msg = (boost::format("%1%: usable window size in pixels: w=%2%, h=%3%") % __FUNCTION__ % usable_window_size_in_pixels.w % usable_window_size_in_pixels.h).str();
+        VS_LOG_AND_FLUSH(important_info, log_msg);
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        native_resolution_x = usable_window_size_in_pixels.w;
+        native_resolution_y = usable_window_size_in_pixels.h;
+    } else {
+        const std::string log_msg = (boost::format("%1%: SDL_GetRenderOutputSize(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
+        VS_LOG_AND_FLUSH(error, log_msg);
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        SDL_ClearError();
+        return false;
+    }
+
+    if (SDL_GetCurrentRenderOutputSize(renderer, &usable_logical_window_size.w, &usable_logical_window_size.h)) {
+        const std::string log_msg = (boost::format("%1%: usable logical window size: w=%2%, h=%3%") % __FUNCTION__ % usable_logical_window_size.w % usable_logical_window_size.h).str();
+        VS_LOG_AND_FLUSH(important_info, log_msg);
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = usable_logical_window_size.w;
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = usable_logical_window_size.h;
+    } else {
+        const std::string log_msg = (boost::format("%1%: SDL_GetCurrentRenderOutputSize(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
+        VS_LOG_AND_FLUSH(error, log_msg);
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        SDL_ClearError();
+        return false;
+    }
+
+    return true;
+}
+
 /*---------------------------------------------------------------------------*/
 /*!
  *  Sets up the SDL OpenGL rendering context
@@ -236,11 +393,7 @@ static bool setup_sdl_video_mode(int* argc, char** argv) {
     int screen_number = 0;
     Uint32 video_flags = 0;
     int bpp = 0;
-    int width;
-    int height;
-    bool full_screen;
     SDL_Rect display_bounds;
-    bool result;
     std:string screen_name = "";
     SDL_DisplayID instance_ID;
     SDL_DisplayMode* mode_for_ID = static_cast<SDL_DisplayMode*>(std::calloc(sizeof(SDL_DisplayMode), 1));
@@ -283,12 +436,12 @@ static bool setup_sdl_video_mode(int* argc, char** argv) {
     if (configuration().graphics.gl_accelerated_visual) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
-    width = configuration().graphics.resolution_x;
-    height = configuration().graphics.resolution_y;
+    int width = configuration().graphics.resolution_x;
+    int height = configuration().graphics.resolution_y;
     screen_number = configuration().graphics.screen;
-    full_screen = configuration().graphics.full_screen;
+    bool full_screen = configuration().graphics.full_screen;
 
-    result = get_sdl_display_name_by_nr(screen_number, screen_name, instance_ID);
+    bool result = get_sdl_display_name_by_nr(screen_number, screen_name, instance_ID);
 
     // width and height are from the config file. We check if this resolution
     // is supported in full screen mode.
@@ -346,34 +499,49 @@ static bool setup_sdl_video_mode(int* argc, char** argv) {
 
 
     window = nullptr;
-    SDL_Renderer* renderer = nullptr;
+    renderer = nullptr;
 
-    if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {
-        VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) succeeded");
+    if (configuration().graphics.gl_accelerated_visual) {
+        result = try_creating_window_and_renderer("Vega Strike", width, height, "opengl", video_flags, &window, &renderer);
+        if (result == false) {
+            VS_LOG_AND_FLUSH(serious_warning, (boost::format("Creating window and renderer failed with error: %1%") % SDL_GetError()));
+            VS_LOG_AND_FLUSH(serious_warning, "Please make sure a graphics card driver is installed and functioning properly.");
+            SDL_ClearError();
+            (const_cast<vega_config::Configuration &>(configuration())).graphics.gl_accelerated_visual = false;
+
+            result = try_creating_window_and_renderer("Vega Strike", width, height, "software", video_flags, &window, &renderer);
+            if (result == false) {
+                VS_LOG_FLUSH_EXIT(fatal, (boost::format("Creating window and renderer failed even with software rendering! Error message: %1%") % SDL_GetError()), 1);
+            }
+        }
     } else {
-        VS_LOG_AND_FLUSH(error, (boost::format("SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) failed. Error: %1%") % SDL_GetError()));
+        result = try_creating_window_and_renderer("Vega Strike", width, height, "software", video_flags, &window, &renderer);
+        if (result == false) {
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("Creating window and renderer failed even with software rendering! Error message: %1%") % SDL_GetError()), 1);
+        }
+    }
+    if (!SDL_SetWindowSize(window, width, height)) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: SDL_SetWindowSize(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()));
         SDL_ClearError();
     }
 
-    result = SDL_CreateWindowAndRenderer("Vega Strike", width, height, video_flags, &window, &renderer);
-    if (result == false) {
-        VS_LOG_FLUSH_EXIT(fatal, "SDL_CreateWindowAndRender(...) error", 1);
+    if (!SDL_GetCurrentRenderOutputSize(renderer, &native_resolution_x, &native_resolution_y)) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: SDL_GetCurrentRenderOutputSize(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()));
+        SDL_ClearError();
     }
-    SDL_SetWindowSize(window, width, height);
-    int refx = display_bounds.x + display_bounds.w / 2 - width / 2;
-    int refy = display_bounds.y + display_bounds.h / 2 - height / 2;
-    SDL_SetWindowPosition(window, refx, refy);
-    SDL_WINDOWPOS_CENTERED;
+    if (!SDL_GetWindowSize(window, &width, &height)) {
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: SDL_GetWindowSize encountered an error: %2%") % __FUNCTION__ % SDL_GetError()));
+        SDL_ClearError();
+    }
+    const int refx = display_bounds.x + display_bounds.w / 2 - width / 2;
+    const int refy = display_bounds.y + display_bounds.h / 2 - height / 2;
 
     if (full_screen) {
         SDL_SetWindowPosition(window, display_bounds.x, display_bounds.y);
         SDL_SetWindowFullscreenMode(window, mode_for_ID);
     } else {
-        SDL_WINDOWPOS_CENTERED_DISPLAY(instance_ID);
+        SDL_SetWindowPosition(window, refx, refy);
     }
-
-    // pmx-2025-1027 Should even work with HDPi displays; I've no way to test that.
-    SDL_GetWindowSizeInPixels(window, &native_resolution_x, &native_resolution_y);
 
     SDL_GLContext context = SDL_GL_CreateContext(window);
 
@@ -385,38 +553,19 @@ static bool setup_sdl_video_mode(int* argc, char** argv) {
     VS_LOG_AND_FLUSH(important_info, (boost::format("GL Renderer: %1%") % glGetString(GL_RENDERER)));
     VS_LOG_AND_FLUSH(important_info, (boost::format("GL Version: %1%") % glGetString(GL_VERSION)));
 
-    if (SDL_GL_MakeCurrent(window, context) < 0) {
+    if (!SDL_GL_MakeCurrent(window, context)) {
         VS_LOG_FLUSH_EXIT(fatal, "Failed to make window context current", 1);
     }
 
-    if (SDL_SetRenderLogicalPresentation(renderer, width, height, SDL_LOGICAL_PRESENTATION_DISABLED) < 0) {
-        VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_SetRenderLogicalPresentation(...) failed! Error: %1%") % SDL_GetError()),
-            8);
-    }
-
-#if defined (GL_RENDERER)
-    std::string version{};
-    const GLubyte * renderer_string = glGetString(GL_RENDERER);
-    if (renderer_string) {
-        version = reinterpret_cast<const char *>(renderer_string);
-    }
-    if (version == "GDI Generic" || version == "software") {
-        if (configuration().graphics.gl_accelerated_visual) {
-            VS_LOG_AND_FLUSH(error, "GDI Generic software driver reported, trying to reset.");
-            SDL_ClearError();
-            freeMouseCursors();
-            SDL_Quit();
-            (const_cast<vega_config::Configuration &>(configuration())).graphics.gl_accelerated_visual = false;
-            return false;
-        } else {
-            VS_LOG(error, "GDI Generic software driver reported, reset failed.");
-            VS_LOG_AND_FLUSH(error, "Please make sure a graphics card driver is installed and functioning properly.");
-        }
-    }
-#endif
+    // if (!SDL_SetRenderLogicalPresentation(renderer, width, height, SDL_LOGICAL_PRESENTATION_DISABLED)) {
+    //     VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_SetRenderLogicalPresentation(...) failed! Error: %1%") % SDL_GetError()),
+    //         8);
+    // }
 
     SDL_ShowWindow(window);
     SDL_SyncWindow(window);
+
+    get_screen_measurements();
 
     return true;
 }
@@ -444,7 +593,7 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     /*
      * Initialize SDL
      */
-    if (SDL_Init(sdl_flags) < 0) {
+    if (!SDL_Init(sdl_flags)) {
         VS_LOG_AND_FLUSH(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()));
         exit(1);              // stephengtuggy 2020-07-27 - I would use VSExit here, but that calls winsys_exit, which I'm not sure will work if winsys_init hasn't finished yet.
     }
@@ -588,15 +737,12 @@ void winsys_process_events() {
                     break;
 
                 case SDL_EVENT_WINDOW_RESIZED:
-#if !(defined (_WIN32) && defined (SDL_WINDOWING ))
-                    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = event.window.data1;
-                    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = event.window.data2;
+                    get_screen_measurements();
                     //setup_sdl_video_mode(argc, argv);
                     if (reshape_func) {
-                        (*reshape_func)(event.window.data1,
-                                event.window.data2);
+                        (*reshape_func)(native_resolution_x,
+                                native_resolution_y);
                     }
-#endif
                     break;
 
                 case SDL_EVENT_QUIT:
