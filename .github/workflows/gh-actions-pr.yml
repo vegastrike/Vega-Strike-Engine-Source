@@ -92,7 +92,6 @@ jobs:
         env:
           FROM:       ${{ matrix.FROM }}
           COMPILER:   ${{ matrix.COMPILER }}
-          MY_OS_NAME: linux
           IS_RELEASE: 0
         run: script/cibuild --preset-name="${{ matrix.preset-name }}"
 
