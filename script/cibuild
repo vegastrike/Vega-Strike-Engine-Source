@@ -131,7 +131,7 @@ case "$platform" in
         # Homebrew tooling needs to come first in the path search
         export PATH=${HOMEBREW_BIN}:${HOMEBREW_PYTHON_BIN}:${PATH}
 
-        HOMEBREW_PYTHON_VERSION=$(${HOMEBREW_BIN}/python${BUILD_WITH_PYTHON_VERSION} -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+        HOMEBREW_PYTHON_VERSION=$("${HOMEBREW_BIN}"/python${BUILD_WITH_PYTHON_VERSION} -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
         echo "  Detected Python Version: ${HOMEBREW_PYTHON_VERSION}"
 
         # Ensure it uses the correct Python version
