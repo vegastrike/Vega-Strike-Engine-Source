@@ -71,8 +71,7 @@ ADD_LIBRARY(vegastrike_root_generic STATIC
         options.h
 )
 
-#TARGET_COMPILE_FEATURES(vegastrike_root_generic PUBLIC cxx_std_11)
-SET_PROPERTY(TARGET vegastrike_root_generic PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vegastrike_root_generic PROPERTY CXX_STANDARD 17)
 SET_PROPERTY(TARGET vegastrike_root_generic PROPERTY CXX_STANDARD_REQUIRED TRUE)
 SET_PROPERTY(TARGET vegastrike_root_generic PROPERTY CXX_EXTENSIONS ON)
 SET_PROPERTY(TARGET vegastrike_root_generic PROPERTY POSITION_INDEPENDENT_CODE TRUE)
