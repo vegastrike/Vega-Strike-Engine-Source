@@ -30,7 +30,7 @@
 set -e
 
 echo "------------------------------------------"
-echo "--- bootstrap-on-linux.sh | 2025-11-27 ---"
+echo "--- bootstrap-on-linux.sh | 2025-11-29 ---"
 echo "------------------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -778,7 +778,7 @@ function bootstrapOnRedHat ()
                                 pipewire-jack-audio-connection-kit-devel \
                                 liburing-devel
             ;;
-        "10.0")
+        "10.0"|"10.1")
             dnf -y upgrade --refresh
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
@@ -901,7 +901,7 @@ function bootstrapOnRockyLinux ()
                                 pipewire-jack-audio-connection-kit-devel \
                                 liburing-devel
             ;;
-        "10.0")
+        "10.0"|"10.1")
             declare -a pkgs_to_uninstall=('SDL2_image-devel' 'SDL2_image' 'SDL2-devel' 'SDL2')
             for pkg in "${pkgs_to_uninstall[@]}"
             do
