@@ -58,7 +58,7 @@ case "$platform" in
         DST_DOCKER_IMG_NAME="building-vega-strike:$(echo "$FROM" | sed 's/:/_/' | sed 's/\//_/')"
         DOCKER_CONTAINER_NAME="building-vega-strike_$(echo "$FROM" | sed 's/:/_/' | sed 's/\//_/')"
         docker build --build-arg from="$SRC_DOCKER_IMG_NAME" -t "$DST_DOCKER_IMG_NAME" .
-        docker run --env CC="$CC" --env CXX="$CXX" --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env TAG_NAME="$TAG_NAME" --env GITHUB_SHA="$GITHUB_SHA" --env SHORT_SHA="$SHORT_SHA" --env FLAGS="$FLAGS" --name "$DOCKER_CONTAINER_NAME" "$DST_DOCKER_IMG_NAME"
+        docker run --env CC="$CC" --env CXX="$CXX" --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env TAG_NAME="$TAG_NAME" --env GITHUB_SHA="$GITHUB_SHA" --env SHORT_SHA="$SHORT_SHA" --name "$DOCKER_CONTAINER_NAME" "$DST_DOCKER_IMG_NAME"
         docker cp "$DOCKER_CONTAINER_NAME":/usr/src/Vega-Strike-Engine-Source/bin .
         # shellcheck disable=SC2086
         if [ $IS_RELEASE -eq 1 ]
