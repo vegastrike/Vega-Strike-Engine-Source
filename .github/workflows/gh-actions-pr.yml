@@ -147,7 +147,6 @@ jobs:
           FROM:       ${{ matrix.FROM }}
           COMPILER:   ${{ matrix.COMPILER }}
           FLAGS:      '-DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }} -DENABLE_PIE=${{ matrix.ENABLE_PIE }}'
-          MY_OS_NAME: linux
           IS_RELEASE: 0
         run: script/cibuild $FLAGS
 
