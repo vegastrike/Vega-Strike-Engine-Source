@@ -706,7 +706,22 @@ IF (NOT DISABLE_CLIENT)
     TARGET_LINK_DIRECTORIES(vegastrike-engine BEFORE
             PRIVATE ${LibArchive_LIBRARY})
 
-    TARGET_LINK_LIBRARIES(vegastrike-engine
+    IF (USE_OPEN_TELEMETRY)
+        TARGET_LINK_LIBRARIES(vegastrike-engine PRIVATE
+                              opentelemetry-cpp::api
+                              opentelemetry-cpp::common
+                              opentelemetry-cpp::logs
+                              opentelemetry-cpp::metrics
+                              opentelemetry-cpp::resources
+                              opentelemetry-cpp::sdk
+                              opentelemetry-cpp::trace
+                              opentelemetry-cpp::otlp_file_exporter
+                              opentelemetry-cpp::otlp_file_metric_exporter
+                              opentelemetry-cpp::otlp_file_log_record_exporter
+                              )
+    ENDIF ()
+
+    TARGET_LINK_LIBRARIES(vegastrike-engine PRIVATE
                           SDL3::SDL3
                           SDL3_image::SDL3_image
                           OpenGL::GL
