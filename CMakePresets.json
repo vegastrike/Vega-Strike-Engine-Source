@@ -24,11 +24,49 @@
       "inherits": "default"
     },
     {
+     "name": "linux-base",
+      "hidden": true,
+      "inherits": "default",
+      "displayName": "Linux Default",
+      "description": "Default build for Linux",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-ninja",
+      "hidden": true,
+      "inherits": [
+        "linux-base",
+        "ninja"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "unix-makefiles",
       "hidden": true,
       "displayName": "Use Unix Makefiles generator",
       "generator": "Unix Makefiles",
       "inherits": "default"
+    },
+    {
+      "name": "linux-unix-makefiles",
+      "hidden": true,
+      "inherits": [
+        "linux-base",
+        "unix-makefiles"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
     },
     {
       "name": "debug",
@@ -185,6 +223,86 @@
         "CMAKE_FIND_FRAMEWORK": "LAST",
         "INSTALL_GTEST": "OFF",
         "USE_GTEST": "OFF"
+      }
+    },
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "inherits": "default",
+      "displayName": "Windows Default",
+      "description": "Default build for Windows",
+      "environment": {
+        "VCPKG_FEATURE_FLAGS": "manifests,registries",
+        "VCPKG_TARGET_TRIPLET": "x64-win10",
+        "VCPKG_HOST_TRIPLET": "x64-win10"
+      },
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+          "type": "FILEPATH"
+        },
+        "VCPKG_TARGET_TRIPLET": "x64-win10",
+        "VCPKG_HOST_TRIPLET": "x64-win10"
+      },
+      "debug": {
+        "output": true,
+        "find": true
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2019Win64",
+      "hidden": true,
+      "inherits": "windows-base",
+      "displayName": "Visual Studio 2019 on Windows x64",
+      "generator": "Visual Studio 16 2019",
+      "architecture": "X64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2022Win64",
+      "hidden": true,
+      "inherits": "windows-base",
+      "displayName": "Visual Studio 2022 on Windows x64",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "X64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64",
+      "hidden": true,
+      "inherits": "windows-base",
+      "displayName": "Visual Studio 2026 on Windows x64",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "X64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "ninja-windows",
+      "hidden": true,
+      "inherits": "windows-base",
+      "displayName": "Ninja on Windows",
+      "generator": "Ninja Multi-Config",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
       }
     },
     {
