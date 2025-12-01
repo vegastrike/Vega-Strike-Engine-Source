@@ -186,6 +186,4326 @@
         "INSTALL_GTEST": "OFF",
         "USE_GTEST": "OFF"
       }
+    },
+    {
+      "name": "linux-ninja-pie-enabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-glvnd-debug-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-glvnd-debug-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-glvnd-release-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-glvnd-release-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-gl-neither-release-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-gl-neither-release-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-glvnd-debug-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-glvnd-debug-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-glvnd-release-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-glvnd-release-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-gl-neither-release-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-gl-neither-release-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "linux-ninja",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-glvnd-debug-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-glvnd-debug-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-glvnd-release-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-glvnd-release-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-gl-neither-release-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-gl-neither-release-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-glvnd-debug-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-glvnd-debug-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-glvnd-release-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-glvnd-release-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-gl-neither-release-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-gl-neither-release-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "linux-unix-makefiles",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-glvnd-debug-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-glvnd-debug-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-glvnd-release-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-glvnd-release-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-gl-neither-release-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-gl-neither-release-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-glvnd-debug-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-glvnd-debug-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-glvnd-release-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-glvnd-release-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-gl-neither-release-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-gl-neither-release-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "macOS",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-glvnd-debug-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-glvnd-debug-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-glvnd-release-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-glvnd-release-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-gl-neither-release-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-gl-neither-release-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-glvnd-debug-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-glvnd-debug-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-glvnd-release-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-glvnd-release-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-gl-neither-release-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-gl-neither-release-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "macOS-MacPorts",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-glvnd-debug-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-glvnd-debug-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-glvnd-release-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-glvnd-release-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-gl-neither-release-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-gl-neither-release-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-glvnd-debug-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-glvnd-debug-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-glvnd-release-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-glvnd-release-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-gl-neither-release-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-gl-neither-release-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-glvnd-debug-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-glvnd-debug-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-glvnd-release-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-glvnd-release-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-gl-neither-release-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-gl-neither-release-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-glvnd-debug-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-glvnd-debug-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-glvnd-release-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-glvnd-release-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-gl-neither-release-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-gl-neither-release-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-glvnd-debug-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-glvnd-debug-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-glvnd-release-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-glvnd-release-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-gl-neither-release-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-gl-neither-release-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-glvnd-debug-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-glvnd-debug-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-glvnd-release-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-glvnd-release-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-gl-neither-release-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-gl-neither-release-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-glvnd-debug-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-glvnd-debug-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-glvnd-release-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-glvnd-release-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-gl-neither-release-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-gl-neither-release-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-legacy-gl-debug-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-legacy-gl-debug-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "legacy-gl",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-legacy-gl-release-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-legacy-gl-release-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "legacy-gl",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-glvnd-debug-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-glvnd-debug-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-glvnd-debug-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "glvnd",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-glvnd-release-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-glvnd-release-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-glvnd-release-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "glvnd",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-gl-neither-debug-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-gl-neither-debug-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "gl-neither",
+        "debug",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-gl-neither-release-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-gl-neither-release-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-gl-neither-release-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "gl-neither",
+        "release",
+        "fetch-use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "no-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "use-otel"
+      ]
+    },
+    {
+      "name": "ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "gl-neither",
+        "RelWithDebInfo",
+        "fetch-use-otel"
+      ]
     }
   ]
 }
