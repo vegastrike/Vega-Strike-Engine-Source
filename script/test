@@ -62,4 +62,4 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-GTEST_OUTPUT=xml:$(pwd)/test-results ctest -V --preset "test-${preset_name}"
+GTEST_OUTPUT=xml:$(pwd)/test-results ctest -V --preset "${preset_name}"

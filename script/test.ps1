@@ -35,6 +35,6 @@ param(
 [String]$testBaseDir = "$baseDir\build\$PresetName"
 Push-Location $testBaseDir
 
-GTEST_OUTPUT=xml:$testBaseDir/test-results ctest -V --preset "test-$PresetName"
+GTEST_OUTPUT=xml:$testBaseDir/test-results ctest -V --preset "$PresetName"
 
 Pop-Location
