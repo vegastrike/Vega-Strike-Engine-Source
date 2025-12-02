@@ -4625,5 +4625,3465 @@
         "fetch-use-otel"
       ]
     }
+  ],
+  "buildPresets": [
+    {
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-macOS-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "build-ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-ninja-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "linux-unix-makefiles-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-macOS-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "macOS-MacPorts-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2019Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2022Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "VS2026Win64-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-legacy-gl-debug-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-legacy-gl-debug-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-legacy-gl-release-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-legacy-gl-release-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-glvnd-debug-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-glvnd-debug-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-glvnd-release-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-glvnd-release-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-gl-neither-debug-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-gl-neither-debug-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-gl-neither-release-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-gl-neither-release-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-legacy-gl-debug-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-debug-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-legacy-gl-debug-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-debug-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-legacy-gl-debug-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-legacy-gl-release-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-release-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-legacy-gl-release-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-release-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-legacy-gl-release-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-release-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-legacy-gl-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-glvnd-debug-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-debug-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-glvnd-debug-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-debug-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-glvnd-debug-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-glvnd-release-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-release-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-glvnd-release-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-release-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-glvnd-release-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-release-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-glvnd-RelWithDebInfo-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-glvnd-RelWithDebInfo-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-gl-neither-debug-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-debug-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-gl-neither-debug-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-debug-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-gl-neither-debug-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-debug-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-gl-neither-release-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-release-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-gl-neither-release-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-release-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-gl-neither-release-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-release-fetch-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-no-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-no-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-use-otel"
+    },
+    {
+      "name": "test-ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel",
+      "configurePreset": "ninja-windows-pie-disabled-gl-neither-RelWithDebInfo-fetch-use-otel"
+    }
   ]
 }
