@@ -48,7 +48,7 @@ if ($GitSha -ieq "not-applicable" ) {
 [String]$binaryDir = "$baseDir\build\$PresetName"
 Push-Location $baseDir
 cmake --preset $PresetName
-cmake --build --preset "$PresetName" -v
+cmake --build --preset "build-$PresetName" -v
 Pop-Location
 
 New-Item bin -ItemType Directory -Force

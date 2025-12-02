@@ -31,7 +31,7 @@
 set -e
 
 echo "-------------------------"
-echo "--- test | 2025-11-27 ---"
+echo "--- test | 2025-12-01 ---"
 echo "-------------------------"
 
 #----------------------------------
@@ -62,4 +62,4 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-GTEST_OUTPUT=xml:$(pwd)/test-results ctest -V --preset "${preset_name}"
+GTEST_OUTPUT=xml:$(pwd)/test-results ctest -V --preset "test-${preset_name}"
