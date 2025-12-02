@@ -194,6 +194,7 @@ ADD_LINK_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_C
 # Now the source files are listed starting here!
 SET(LIBVS_LOGGING
     src/vs_logging.cpp
+    src/vs_logging.h
 )
 
 SET(LIBCONFIG
@@ -554,6 +555,11 @@ IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
 
+IF (USE_OPEN_TELEMETRY)
+    target_compile_definitions(vegastrike-engine_com PUBLIC HAVE_OPEN_TELEMETRY=1)
+    TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS})
+ENDIF ()
+
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         # VS engine headers
@@ -681,11 +687,6 @@ IF (NOT DISABLE_CLIENT)
     OPTION (JUMP_DEBUG "Whether to log details when warping between systems" OFF)
     IF (JUMP_DEBUG)
         TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC JUMP_DEBUG)
-    ENDIF ()
-
-    IF (USE_OPEN_TELEMETRY)
-        target_compile_definitions(vegastrike-engine PRIVATE USE_OPEN_TELEMETRY=1)
-        TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS})
     ENDIF ()
 
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${VSE_TST_INCLUDES})
@@ -1216,6 +1217,23 @@ IF (USE_GTEST)
         TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC WINVER=0x0A00)
         TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
+
+    IF (USE_OPEN_TELEMETRY)
+        target_compile_definitions(${TEST_NAME} PUBLIC HAVE_OPEN_TELEMETRY=1)
+        TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS})
+        TARGET_LINK_LIBRARIES(vegastrike-engine PRIVATE
+                              opentelemetry-cpp::api
+                              opentelemetry-cpp::common
+                              opentelemetry-cpp::logs
+                              opentelemetry-cpp::metrics
+                              opentelemetry-cpp::resources
+                              opentelemetry-cpp::sdk
+                              opentelemetry-cpp::trace
+                              opentelemetry-cpp::otlp_file_exporter
+                              opentelemetry-cpp::otlp_file_metric_exporter
+                              opentelemetry-cpp::otlp_file_log_record_exporter
+                              )
+    ENDIF ()
 
     TARGET_LINK_LIBRARIES(
             ${TEST_NAME}

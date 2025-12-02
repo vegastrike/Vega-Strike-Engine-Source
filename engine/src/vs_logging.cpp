@@ -46,7 +46,7 @@
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/filesystem.hpp>
 
-#if defined(USE_OPEN_TELEMETRY)
+#if defined(HAVE_OPEN_TELEMETRY)
 #include <functional>
 #include <iostream>
 #include <utility>
@@ -195,7 +195,7 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
 void VegaStrikeLogger::FlushLogs() {
     if (!STATIC_VARS_DESTROYED) {
         logging_core_->flush();
-        #if defined(USE_OPEN_TELEMETRY)
+        #if defined(HAVE_OPEN_TELEMETRY)
         tracer_provider->ForceFlush();
         #endif
     }
@@ -209,7 +209,7 @@ void VegaStrikeLogger::FlushLogs() {
 void VegaStrikeLogger::FlushLogsProgramExiting() {
     if (!STATIC_VARS_DESTROYED) {
         logging_core_->flush();
-        #if defined(USE_OPEN_TELEMETRY)
+        #if defined(HAVE_OPEN_TELEMETRY)
         tracer_provider->ForceFlush();
         #endif
     }
@@ -219,7 +219,7 @@ void VegaStrikeLogger::FlushLogsProgramExiting() {
     fflush(stdout);
     fflush(stderr);
     STATIC_VARS_DESTROYED = true;
-    #if defined(USE_OPEN_TELEMETRY)
+    #if defined(HAVE_OPEN_TELEMETRY)
     CleanupTracer();
     CleanupLogger();
     #endif
@@ -243,12 +243,12 @@ VegaStrikeLogger::VegaStrikeLogger() : slg_(my_logger::get()), file_log_back_end
                             true /*false*/                                                  /*< whether to do the equivalent of fflush(stdout) after every msg >*/
             );
 
-    #if defined(USE_OPEN_TELEMETRY)
+    #if defined(HAVE_OPEN_TELEMETRY)
     otlp::OtlpFileClientFileSystemOptions fs_backend;
-    fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f_trace.jsonl";
+    // fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f_trace.jsonl";
     opts.backend_options    = fs_backend;
     otlp::OtlpFileClientFileSystemOptions logs_fs_backend;
-    logs_fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f_log.jsonl";
+    // logs_fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f_log.jsonl";
     log_opts.backend_options     = logs_fs_backend;
 
     InitTracer();
@@ -261,7 +261,7 @@ VegaStrikeLogger::~VegaStrikeLogger() {
     logging_core_->remove_all_sinks();
 }
 
-#if defined(USE_OPEN_TELEMETRY)
+#if defined(HAVE_OPEN_TELEMETRY)
 logs::Severity translate_severity(vega_log_level level) {
     switch (level) {
     case trace:
@@ -273,9 +273,9 @@ logs::Severity translate_severity(vega_log_level level) {
     case important_info:
         return logs::Severity::kInfo2;
     case warning:
-        return logs::Severity::kWarning;
+        return logs::Severity::kWarn;
     case serious_warning:
-        return logs::Severity::kWarning2;
+        return logs::Severity::kWarn2;
     case error:
         return logs::Severity::kError;
     case fatal:
@@ -297,7 +297,7 @@ void VegaStrikeLogger::Log(const vega_log_level level, const std::string &messag
         slg_.push_record(boost::move(rec));
     }
 
-    #if defined(USE_OPEN_TELEMETRY)
+    #if defined(HAVE_OPEN_TELEMETRY)
     get_logger()->Log(translate_severity(level), message);
     #endif
 }
@@ -326,7 +326,7 @@ void VegaStrikeLogger::Log(const vega_log_level level, const char *message) {
         slg_.push_record(boost::move(rec));
     }
 
-    #if defined(USE_OPEN_TELEMETRY)
+    #if defined(HAVE_OPEN_TELEMETRY)
     get_logger()->Log(translate_severity(level), message);
     #endif
 }
@@ -355,7 +355,7 @@ void VegaStrikeLogger::Log(const vega_log_level level, const boost::basic_format
         slg_.push_record(boost::move(rec));
     }
 
-    #if defined(USE_OPEN_TELEMETRY)
+    #if defined(HAVE_OPEN_TELEMETRY)
     get_logger()->Log(translate_severity(level), message.str());
     #endif
 }
