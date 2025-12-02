@@ -51,8 +51,6 @@ ENDIF ()
 # Tell CMake where to find them
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-SET(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
-
 IF (WIN32)
     SET(VCPKG_MANIFEST_MODE ON)
     SET(VCPKG_MANIFEST_DIR "${CMAKE_SOURCE_DIR}")
@@ -415,6 +413,7 @@ IF (DEFINED ENV{INSTALL_SDL3_IMAGE})
 ENDIF ()
 
 IF (USE_LOCALLY_INSTALLED_PROTOBUF)
+    SET(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
     FIND_PACKAGE(Protobuf)
 ENDIF ()
 
@@ -430,21 +429,6 @@ IF (FETCH_OPEN_TELEMETRY)
     SET(WITH_EXAMPLES OFF CACHE BOOL "")
     SET(WITH_FUNC_TESTS OFF CACHE BOOL "")
     SET(BUILD_TESTING OFF CACHE BOOL "")
-    MESSAGE(STATUS "Downloading opentelemetry-cpp")
-    FETCHCONTENT_MAKEAVAILABLE(opentelemetry-cpp)
-    MESSAGE(STATUS "Finished fetching opentelemetry-cpp")
-ELSEIF (USE_OPEN_TELEMETRY)
-    # Use find_package to include OpenTelemetry C++
-    FIND_PACKAGE(opentelemetry-cpp CONFIG COMPONENTS api sdk exporters_otlp_file)
-    #check whether opentelemetry libraries found
-    IF (opentelemetry-cpp_FOUND)
-        MESSAGE(STATUS "Found opentelemetry libraries; preparing to use them")
-    ELSE ()
-        MESSAGE(WARNING "Did not find opentelemetry libraries; building without")
-        SET(USE_OPEN_TELEMETRY OFF)
-    ENDIF ()
-ELSE ()
-    MESSAGE(STATUS "USE_OPEN_TELEMETRY not set; building without")
 ENDIF ()
 
 IF (INSTALL_GTEST OR USE_GTEST)
@@ -518,6 +502,24 @@ IF (INSTALL_SDL3_IMAGE)
 ELSE ()
     FIND_PACKAGE(SDL3_image REQUIRED)
     MESSAGE(STATUS "SDL3_image found via FIND_PACKAGE")
+ENDIF ()
+
+IF (FETCH_OPEN_TELEMETRY)
+    MESSAGE(STATUS "Downloading opentelemetry-cpp")
+    FETCHCONTENT_MAKEAVAILABLE(opentelemetry-cpp)
+    MESSAGE(STATUS "Finished fetching opentelemetry-cpp")
+ELSEIF (USE_OPEN_TELEMETRY)
+    # Use find_package to include OpenTelemetry C++
+    FIND_PACKAGE(opentelemetry-cpp CONFIG COMPONENTS api sdk exporters_otlp_file)
+    #check whether opentelemetry libraries found
+    IF (opentelemetry-cpp_FOUND)
+        MESSAGE(STATUS "Found opentelemetry libraries; preparing to use them")
+    ELSE ()
+        MESSAGE(WARNING "Did not find opentelemetry libraries; building without")
+        SET(USE_OPEN_TELEMETRY OFF)
+    ENDIF ()
+ELSE ()
+    MESSAGE(STATUS "USE_OPEN_TELEMETRY not set; building without")
 ENDIF ()
 
 INCLUDE(GNUInstallDirs)
