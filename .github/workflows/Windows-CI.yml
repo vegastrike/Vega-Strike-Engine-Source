@@ -24,12 +24,22 @@ jobs:
         include:
           - os:              windows-2022
             triplet:         x64-win10
-            preset-name:     VS2022Win64-pie-enabled-debug
+            preset-name:     VS2022Win64-pie-enabled-gl-neither-debug-fetch-use-otel
             python-version:  3.13.9
             is-release:      0
           - os:              windows-2025
             triplet:         x64-win10
-            preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
+            preset-name:     VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel
+            python-version:  3.13.9
+            is-release:      0
+          - os:              windows-2022
+            triplet:         x64-win10
+            preset-name:     VS2022Win64-pie-enabled-gl-neither-debug-no-otel
+            python-version:  3.13.9
+            is-release:      0
+          - os:              windows-2025
+            triplet:         x64-win10
+            preset-name:     VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel
             python-version:  3.13.9
             is-release:      0
 
@@ -89,8 +99,8 @@ jobs:
           INSTALL_SDL3_IMAGE: 0
         with:
           configurePreset: ${{ matrix.preset-name }}
-          buildPreset: "build-${{ matrix.preset-name }}"
-          testPreset: "test-${{ matrix.preset-name }}"
+          buildPreset: "${{ matrix.preset-name }}"
+          testPreset: "${{ matrix.preset-name }}"
 
       - name: Save vcpkg cache
         id: cache-vcpkg-save
@@ -101,7 +111,7 @@ jobs:
 
       - name: Run the tests
         working-directory: ${{ github.workspace }}
-        run: ctest -V --preset "test-${{ matrix.preset-name }}"
+        run: ctest -V --preset "${{ matrix.preset-name }}"
 
       - name: Upload test results
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
