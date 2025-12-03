@@ -146,10 +146,8 @@ jobs:
         env:
           FROM:       ${{ matrix.FROM }}
           COMPILER:   ${{ matrix.COMPILER }}
-          FLAGS:      '-DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }} -DENABLE_PIE=${{ matrix.ENABLE_PIE }}'
-          MY_OS_NAME: linux
           IS_RELEASE: 0
-        run: script/cibuild $FLAGS
+        run: script/cibuild -DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }} -DENABLE_PIE=${{ matrix.ENABLE_PIE }}
 
       # The tests are run from inside the Docker container, by script/docker-entrypoint.sh.
       # No need to run them explicitly from here.

@@ -101,9 +101,7 @@ jobs:
 
       - name: Build it
         env:
-          MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
-          FLAGS:      "-DCMAKE_BUILD_TYPE=${{ matrix.build-type }} -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ steps.vega-py-setup.outputs.python-path }}"
           OPENALDIR:  "$(brew --prefix)/opt/openal-soft"
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
@@ -111,7 +109,7 @@ jobs:
           PYTHONHOME: ""
           PYTHONPATH: ""
           IS_RELEASE: 1
-        run: script/cibuild $FLAGS
+        run: script/cibuild -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR="${{ steps.vega-py-setup.outputs.python-path }}"
 
       - name: Test
         working-directory: ${{github.workspace}}/build

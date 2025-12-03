@@ -30,20 +30,19 @@
 
 set -e
 
-echo "docker-entrypoint.sh: Flags passed in: $FLAGS"
+echo "docker-entrypoint.sh | 2025-11-29 | Flags passed in: $FLAGS"
 
-# find /usr -iname '*libboost_python*'
-
+# shellcheck disable=SC2086
 if [ $IS_RELEASE -eq 1 ]
 then
-    script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo $FLAGS
-    script/package $FLAGS
+    script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo "$FLAGS"
+    script/package "$FLAGS"
 else
     if [ "$CC" == "clang" ]
     then
-        script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo $FLAGS
+        script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo "$FLAGS"
     else
-        script/build -DCMAKE_BUILD_TYPE=Debug $FLAGS
+        script/build -DCMAKE_BUILD_TYPE=Debug "$FLAGS"
     fi
 fi
 
