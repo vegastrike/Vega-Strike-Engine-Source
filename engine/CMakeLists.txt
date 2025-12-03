@@ -556,8 +556,7 @@ IF (WIN32)
 ENDIF()
 
 IF (USE_OPEN_TELEMETRY)
-    target_compile_definitions(vegastrike-engine_com PUBLIC HAVE_OPEN_TELEMETRY=1)
-    TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS})
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC HAVE_OPEN_TELEMETRY=1)
 ENDIF ()
 
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${VSE_TST_INCLUDES})
@@ -713,6 +712,7 @@ IF (NOT DISABLE_CLIENT)
             PRIVATE ${LibArchive_LIBRARY})
 
     IF (USE_OPEN_TELEMETRY)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC HAVE_OPEN_TELEMETRY=1)
         TARGET_LINK_LIBRARIES(vegastrike-engine PRIVATE
                               opentelemetry-cpp::api
                               opentelemetry-cpp::common
@@ -1219,9 +1219,8 @@ IF (USE_GTEST)
     ENDIF()
 
     IF (USE_OPEN_TELEMETRY)
-        target_compile_definitions(${TEST_NAME} PUBLIC HAVE_OPEN_TELEMETRY=1)
-        TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS})
-        TARGET_LINK_LIBRARIES(vegastrike-engine PRIVATE
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC HAVE_OPEN_TELEMETRY=1)
+        TARGET_LINK_LIBRARIES(${TEST_NAME} PRIVATE
                               opentelemetry-cpp::api
                               opentelemetry-cpp::common
                               opentelemetry-cpp::logs
@@ -1235,8 +1234,7 @@ IF (USE_GTEST)
                               )
     ENDIF ()
 
-    TARGET_LINK_LIBRARIES(
-            ${TEST_NAME}
+    TARGET_LINK_LIBRARIES(${TEST_NAME} PRIVATE
             ${OPENAL_LIBRARY}
             ${Vorbis_LIBRARIES}
             ${JPEG_LIBRARIES}

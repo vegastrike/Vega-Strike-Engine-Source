@@ -32,7 +32,6 @@
 #include "root_generic/vs_globals.h"
 
 #include <string>
-#include <cstdint>
 
 #include <boost/smart_ptr/make_shared_object.hpp>
 #include <boost/log/core.hpp>
@@ -68,31 +67,26 @@
 #include "opentelemetry/sdk/trace/tracer_provider_factory.h"
 #include "opentelemetry/trace/tracer_provider.h"
 
-namespace trace     = opentelemetry::trace;
-namespace nostd     = opentelemetry::nostd;
-namespace otlp      = opentelemetry::exporter::otlp;
-namespace logs_sdk  = opentelemetry::sdk::logs;
-namespace logs      = opentelemetry::logs;
-namespace trace_sdk = opentelemetry::sdk::trace;
+namespace nostd = opentelemetry::nostd;
 
 namespace
 {
-otlp::OtlpFileExporterOptions opts;
-otlp::OtlpFileLogRecordExporterOptions log_opts;
+opentelemetry::exporter::otlp::OtlpFileExporterOptions opts;
+opentelemetry::exporter::otlp::OtlpFileLogRecordExporterOptions log_opts;
 
 std::shared_ptr<opentelemetry::sdk::trace::TracerProvider> tracer_provider;
 std::shared_ptr<opentelemetry::sdk::logs::LoggerProvider> logger_provider;
 
 void InitTracer()
 {
-  // Create OTLP exporter instance
-  std::unique_ptr<opentelemetry::sdk::trace::SpanExporter> exporter   = otlp::OtlpFileExporterFactory::Create(opts);
-  std::unique_ptr<opentelemetry::sdk::trace::SpanProcessor> processor  = trace_sdk::SimpleSpanProcessorFactory::Create(std::move(exporter));
-  tracer_provider = trace_sdk::TracerProviderFactory::Create(std::move(processor));
+    // Create OTLP exporter instance
+    auto exporter   = opentelemetry::exporter::otlp::OtlpFileExporterFactory::Create(opts);
+    auto processor  = opentelemetry::sdk::trace::SimpleSpanProcessorFactory::Create(std::move(exporter));
+    tracer_provider = opentelemetry::sdk::trace::TracerProviderFactory::Create(std::move(processor));
 
-  // Set the global trace provider
-  std::shared_ptr<trace::TracerProvider> api_provider = tracer_provider;
-  trace::Provider::SetTracerProvider(api_provider);
+    // Set the global trace provider
+    std::shared_ptr<opentelemetry::trace::TracerProvider> api_provider = tracer_provider;
+    opentelemetry::trace::Provider::SetTracerProvider(api_provider);
 }
 
 void CleanupTracer()
@@ -104,19 +98,19 @@ void CleanupTracer()
   }
 
   tracer_provider.reset();
-  std::shared_ptr<trace::TracerProvider> none;
-  trace::Provider::SetTracerProvider(none);
+  const nostd::shared_ptr<opentelemetry::trace::TracerProvider> none;
+  opentelemetry::trace::Provider::SetTracerProvider(none);
 }
 
 void InitLogger()
 {
   // Create OTLP exporter instance
-  auto exporter   = otlp::OtlpFileLogRecordExporterFactory::Create(log_opts);
-  auto processor  = logs_sdk::SimpleLogRecordProcessorFactory::Create(std::move(exporter));
-  logger_provider = logs_sdk::LoggerProviderFactory::Create(std::move(processor));
+  auto exporter   = opentelemetry::exporter::otlp::OtlpFileLogRecordExporterFactory::Create(log_opts);
+  auto processor  = opentelemetry::sdk::logs::SimpleLogRecordProcessorFactory::Create(std::move(exporter));
+  logger_provider = opentelemetry::sdk::logs::LoggerProviderFactory::Create(std::move(processor));
 
-  std::shared_ptr<logs::LoggerProvider> api_provider = logger_provider;
-  logs::Provider::SetLoggerProvider(api_provider);
+  std::shared_ptr<opentelemetry::logs::LoggerProvider> api_provider = logger_provider;
+  opentelemetry::logs::Provider::SetLoggerProvider(api_provider);
 }
 
 void CleanupLogger()
@@ -128,20 +122,20 @@ void CleanupLogger()
   }
 
   logger_provider.reset();
-  nostd::shared_ptr<logs::LoggerProvider> none;
-  logs::Provider::SetLoggerProvider(none);
+  nostd::shared_ptr<opentelemetry::logs::LoggerProvider> none;
+  opentelemetry::logs::Provider::SetLoggerProvider(none);
 }
 
-nostd::shared_ptr<trace::Tracer> get_tracer()
+nostd::shared_ptr<opentelemetry::trace::Tracer> get_tracer()
 {
-    const nostd::shared_ptr<trace::TracerProvider> provider = trace::Provider::GetTracerProvider();
-    return provider->GetTracer("py_poc_library");
+    const nostd::shared_ptr<opentelemetry::trace::TracerProvider> provider = opentelemetry::trace::Provider::GetTracerProvider();
+    return provider->GetTracer(__FILE__);
 }
 
-nostd::shared_ptr<logs::Logger> get_logger()
+nostd::shared_ptr<opentelemetry::logs::Logger> get_logger()
 {
-    const nostd::shared_ptr<logs::LoggerProvider> provider = logs::Provider::GetLoggerProvider();
-    return provider->GetLogger("py_poc_library_logger", "py_poc_library");
+    const nostd::shared_ptr<opentelemetry::logs::LoggerProvider> provider = opentelemetry::logs::Provider::GetLoggerProvider();
+    return provider->GetLogger(__FILE__);
 }
 
 }  // namespace
@@ -190,6 +184,18 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
             );
 
     console_log_sink_->set_filter(severity >= important_info);
+
+    #if defined(HAVE_OPEN_TELEMETRY)
+    opentelemetry::exporter::otlp::OtlpFileClientFileSystemOptions fs_backend;
+    fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f_trace.jsonl";
+    opts.backend_options    = fs_backend;
+    opentelemetry::exporter::otlp::OtlpFileClientFileSystemOptions logs_fs_backend;
+    logs_fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f_log.jsonl";
+    log_opts.backend_options     = logs_fs_backend;
+
+    InitTracer();
+    InitLogger();
+    #endif
 }
 
 void VegaStrikeLogger::FlushLogs() {
@@ -197,6 +203,7 @@ void VegaStrikeLogger::FlushLogs() {
         logging_core_->flush();
         #if defined(HAVE_OPEN_TELEMETRY)
         tracer_provider->ForceFlush();
+        logger_provider->ForceFlush();
         #endif
     }
     std::cout << std::flush;
@@ -211,6 +218,7 @@ void VegaStrikeLogger::FlushLogsProgramExiting() {
         logging_core_->flush();
         #if defined(HAVE_OPEN_TELEMETRY)
         tracer_provider->ForceFlush();
+        logger_provider->ForceFlush();
         #endif
     }
     std::cout << std::flush;
@@ -244,10 +252,10 @@ VegaStrikeLogger::VegaStrikeLogger() : slg_(my_logger::get()), file_log_back_end
             );
 
     #if defined(HAVE_OPEN_TELEMETRY)
-    otlp::OtlpFileClientFileSystemOptions fs_backend;
+    opentelemetry::exporter::otlp::OtlpFileClientFileSystemOptions fs_backend;
     // fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f_trace.jsonl";
     opts.backend_options    = fs_backend;
-    otlp::OtlpFileClientFileSystemOptions logs_fs_backend;
+    opentelemetry::exporter::otlp::OtlpFileClientFileSystemOptions logs_fs_backend;
     // logs_fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f_log.jsonl";
     log_opts.backend_options     = logs_fs_backend;
 
@@ -262,24 +270,26 @@ VegaStrikeLogger::~VegaStrikeLogger() {
 }
 
 #if defined(HAVE_OPEN_TELEMETRY)
-logs::Severity translate_severity(vega_log_level level) {
+opentelemetry::logs::Severity translate_severity(vega_log_level level) {
     switch (level) {
     case trace:
-        return logs::Severity::kTrace;
+        return opentelemetry::logs::Severity::kTrace;
     case debug:
-        return logs::Severity::kDebug;
+        return opentelemetry::logs::Severity::kDebug;
     case info:
-        return logs::Severity::kInfo;
+        return opentelemetry::logs::Severity::kInfo;
     case important_info:
-        return logs::Severity::kInfo2;
+        return opentelemetry::logs::Severity::kInfo2;
     case warning:
-        return logs::Severity::kWarn;
+        return opentelemetry::logs::Severity::kWarn;
     case serious_warning:
-        return logs::Severity::kWarn2;
+        return opentelemetry::logs::Severity::kWarn2;
     case error:
-        return logs::Severity::kError;
+        return opentelemetry::logs::Severity::kError;
     case fatal:
-        return logs::Severity::kFatal;
+        return opentelemetry::logs::Severity::kFatal;
+    default:
+        return opentelemetry::logs::Severity::kError;
     }
 }
 #endif
