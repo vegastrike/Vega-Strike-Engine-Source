@@ -47,7 +47,7 @@ constexpr int kIterations = 100000;
 
 TEST(QVector, Cast_Performance) {
     VS_LOG_AND_FLUSH(important_info, "Starting QVector Cast() performance test");
-    const auto start_time = std::chrono::steady_clock::now();
+    const double start_time = realTime();
     for (int i = 0; i < kIterations; ++i) {
         const QVector q_vector(randomDouble(), randomDouble(), randomDouble());
         // ReSharper disable once CppDFAUnreadVariable
@@ -55,15 +55,14 @@ TEST(QVector, Cast_Performance) {
         // ReSharper disable once CppDFAUnusedValue
         const Vector vector = q_vector.Cast();
     }
-    const auto end_time = std::chrono::steady_clock::now();
-    const auto duration = std::chrono::duration<double, std::micro>(end_time - start_time);
-    const auto duration_in_seconds = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished QVector Cast() performance test. Took %1% microseconds (%2% whole seconds) for %3% iterations") % duration.count() % duration_in_seconds.count() % kIterations));
+    const double end_time = realTime();
+    const double duration = end_time - start_time;
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished QVector Cast() performance test. Took %1% for %2% iterations") % duration % kIterations));
 }
 
 TEST(Vector, Cast_Performance) {
     VS_LOG_AND_FLUSH(important_info, "Starting Vector Cast() performance test");
-    const auto start_time = std::chrono::steady_clock::now();
+    const double start_time = realTime();
     for (int i = 0; i < kIterations; ++i) {
         const Vector vector(randomDouble(), randomDouble(), randomDouble());
         // ReSharper disable once CppDeclaratorNeverUsed
@@ -71,10 +70,9 @@ TEST(Vector, Cast_Performance) {
         // ReSharper disable once CppDFAUnusedValue
         const QVector q_vector = vector.Cast();
     }
-    const auto end_time = std::chrono::steady_clock::now();
-    const auto duration = std::chrono::duration<double, std::micro>(end_time - start_time);
-    const auto duration_in_seconds = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished Vector Cast() performance test. Took %1% microseconds (%2% whole seconds) for %3% iterations") % duration.count() % duration_in_seconds.count() % kIterations));
+    const double end_time = realTime();
+    const double duration = end_time - start_time;
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished Vector Cast() performance test. Took %1% for %2% iterations") % duration % kIterations));
 }
 
 class B {
@@ -91,7 +89,7 @@ public:
 
 TEST(vega_dynamic_cast_ptr, Performance) {
     VS_LOG_AND_FLUSH(important_info, "Starting vega_dynamic_cast_ptr performance test");
-    const auto start_time = std::chrono::steady_clock::now();
+    const double start_time = realTime();
     for (int i = 0; i < kIterations; ++i) {
         C child_class_instance;
         // ReSharper disable once CppDFAUnusedValue
@@ -99,14 +97,14 @@ TEST(vega_dynamic_cast_ptr, Performance) {
         // ReSharper disable once CppDFAUnreadVariable
         const B * child_class_instance_as_parent_class = vega_dynamic_cast_ptr<B>(&child_class_instance);
     }
-    const auto end_time = std::chrono::steady_clock::now();
-    const auto duration = std::chrono::duration<double, std::micro>(end_time - start_time);
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished vega_dynamic_cast_ptr performance test. Took %1% microseconds for %2% iterations") % duration.count() % kIterations));
+    const double end_time = realTime();
+    const double duration = end_time - start_time;
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished vega_dynamic_cast_ptr performance test. Took %1% for %2% iterations") % duration % kIterations));
 }
 
 TEST(vega_dynamic_const_cast_ptr, Performance) {
     VS_LOG_AND_FLUSH(important_info, "Starting vega_dynamic_const_cast_ptr performance test");
-    const auto start_time = std::chrono::steady_clock::now();
+    const double start_time = realTime();
     for (int i = 0; i < kIterations; ++i) {
         const C child_class_instance;
         // ReSharper disable once CppDFAUnusedValue
@@ -114,42 +112,42 @@ TEST(vega_dynamic_const_cast_ptr, Performance) {
         // ReSharper disable once CppDFAUnreadVariable
         const B * child_class_instance_as_parent_class = vega_dynamic_const_cast_ptr<const B>(&child_class_instance);
     }
-    const auto end_time = std::chrono::steady_clock::now();
-    const auto duration = std::chrono::duration<double, std::micro>(end_time - start_time);
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished vega_dynamic_const_cast_ptr performance test. Took %1% microseconds for %2% iterations") % duration.count() % kIterations));
+    const double end_time = realTime();
+    const double duration = end_time - start_time;
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished vega_dynamic_const_cast_ptr performance test. Took %1% for %2% iterations") % duration % kIterations));
 }
 
 TEST(configuration, const_Performance) {
     VS_LOG_AND_FLUSH(important_info, "Starting configuration()...._dbl test");
-    const auto start_time = std::chrono::steady_clock::now();
+    const double start_time = realTime();
     for (int i = 0; i < kIterations; ++i) {
         // ReSharper disable once CppDFAUnreadVariable
         // ReSharper disable once CppDeclaratorNeverUsed
         // ReSharper disable once CppDFAUnusedValue
         const double asteroid_difficulty = configuration().physics.asteroid_difficulty_dbl;
     }
-    const auto end_time = std::chrono::steady_clock::now();
-    const auto duration = std::chrono::duration<double, std::micro>(end_time - start_time);
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished configuration()...._dbl test. Took %1% microseconds for %2% iterations") % duration.count() % kIterations));
+    const double end_time = realTime();
+    const double duration = end_time - start_time;
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished configuration()...._dbl test. Took %1% for %2% iterations") % duration % kIterations));
 }
 
 TEST(configuration, static_optional_Performance) {
     VS_LOG_AND_FLUSH(important_info, "Starting test of static optional setting variable");
-    const auto start_time = std::chrono::steady_clock::now();
+    const double start_time = realTime();
     static boost::optional<double> setting{};
     for (int i = 0; i < kIterations; ++i) {
         if (setting == boost::none) {
             setting = configuration().physics.asteroid_difficulty_dbl;
         }
     }
-    const auto end_time = std::chrono::steady_clock::now();
-    const auto duration = std::chrono::duration<double, std::micro>(end_time - start_time);
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable. Took %1% microseconds for %2% iterations") % duration.count() % kIterations));
+    const double end_time = realTime();
+    const double duration = end_time - start_time;
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable. Took %1% for %2% iterations") % duration % kIterations));
 }
 
 TEST(configuration, Performance_of_static_optional_with_get) {
     VS_LOG_AND_FLUSH(important_info, "Starting test of static optional setting variable with .get()");
-    const auto start_time = std::chrono::steady_clock::now();
+    const double start_time = realTime();
     static boost::optional<double> setting{};
     for (int i = 0; i < kIterations; ++i) {
         if (setting == boost::none) {
@@ -157,9 +155,9 @@ TEST(configuration, Performance_of_static_optional_with_get) {
         }
         setting.get();
     }
-    const auto end_time = std::chrono::steady_clock::now();
-    const auto duration = std::chrono::duration<double, std::micro>(end_time - start_time);
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable with .get(). Took %1% microseconds for %2% iterations") % duration.count() % kIterations));
+    const double end_time = realTime();
+    const double duration = end_time - start_time;
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable with .get(). Took %1% for %2% iterations") % duration % kIterations));
 }
 
 TEST(LoadConfig, Sanity) {
@@ -219,13 +217,13 @@ TEST(LoadConfig, Sanity) {
 
 TEST(GameConfig, GetFloat_Performance) {
     VS_LOG_AND_FLUSH(important_info, "Starting GetFloat performance test");
-    const auto start_time = std::chrono::steady_clock::now();
+    const double start_time = realTime();
     for (int i = 0; i < kIterations; ++i) {
         vega_config::GetGameConfig().GetFloat("test.subsection.subsection_float_variable", 11.1F);
     }
-    const auto end_time = std::chrono::steady_clock::now();
-    const auto duration = std::chrono::duration<double, std::micro>(end_time - start_time);
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished GetFloat performance test. Took %1% microseconds for %2% iterations") % duration.count() % kIterations));
+    const double end_time = realTime();
+    const double duration = end_time - start_time;
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished GetFloat performance test. Took %1% for %2% iterations") % duration % kIterations));
 }
 
 TEST(GFXQuadList, GFXVertex) {
