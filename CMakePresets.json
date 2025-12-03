@@ -175,6 +175,7 @@
       "inherits": "default",
       "cacheVariables": {
         "FETCH_OPEN_TELEMETRY": false,
+        "USE_LOCALLY_INSTALLED_PROTOBUF": true,
         "USE_OPEN_TELEMETRY": true
       }
     },
@@ -185,6 +186,7 @@
       "inherits": "default",
       "cacheVariables": {
         "FETCH_OPEN_TELEMETRY": true,
+        "USE_LOCALLY_INSTALLED_PROTOBUF": true,
         "USE_OPEN_TELEMETRY": true
       }
     },

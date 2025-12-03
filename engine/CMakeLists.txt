@@ -707,7 +707,7 @@ IF (NOT DISABLE_CLIENT)
         TARGET_LINK_LIBRARIES(vegastrike-engine m)
     ENDIF()
 
-    TARGET_LINK_DIRECTORIES(vegastrike-engine BEFORE
+    TARGET_LINK_DIRECTORIES(vegastrike-engine
             PRIVATE ${LibArchive_LIBRARY})
 
     IF (USE_OPEN_TELEMETRY)
@@ -733,6 +733,7 @@ IF (NOT DISABLE_CLIENT)
                           OpenGL::GLU
                           GLUT::GLUT
                           LibArchive::LibArchive
+                          PNG::PNG
                           ${VSE_TST_LIBS}
                           ${Boost_LIBRARIES}
                           ${Python3_LIBRARIES}
