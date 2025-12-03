@@ -30,7 +30,7 @@
 set -e
 
 echo "------------------------------------------"
-echo "--- bootstrap-on-linux.sh | 2025-11-29 ---"
+echo "--- bootstrap-on-linux.sh | 2025-12-01 ---"
 echo "------------------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -101,14 +101,9 @@ function bootstrapOnDebian()
                             make \
                             pkg-config \
                             ninja-build \
-                            gnome-desktop-testing \
-                            libasound2-dev \
-                            libpulse-dev \
-                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
-                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
-                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
-                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+                            libaudio-dev \
+                            libfribidi-dev \
+                            libwayland-dev
             ;;
         "bookworm")
             echo "Bookworm does NOT support SDL3"
@@ -151,14 +146,9 @@ function bootstrapOnDebian()
                             make \
                             pkg-config \
                             ninja-build \
-                            gnome-desktop-testing \
-                            libasound2-dev \
-                            libpulse-dev \
-                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
-                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
-                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
-                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+                            libaudio-dev \
+                            libfribidi-dev \
+                            libwayland-dev
             ;;
         "bullseye"|"buster"|"stretch")
             echo "Sorry, Debian ${LINUX_CODENAME} is no longer supported"
@@ -220,14 +210,9 @@ function bootstrapOnUbuntu()
                             make \
                             pkg-config \
                             ninja-build \
-                            gnome-desktop-testing \
-                            libasound2-dev \
-                            libpulse-dev \
-                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
-                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
-                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
-                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+                            libaudio-dev \
+                            libfribidi-dev \
+                            libwayland-dev
             ;;
         "plucky")
             apt-get -qy install \
@@ -268,14 +253,9 @@ function bootstrapOnUbuntu()
                             make \
                             pkg-config \
                             ninja-build \
-                            gnome-desktop-testing \
-                            libasound2-dev \
-                            libpulse-dev \
-                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
-                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
-                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
-                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+                            libaudio-dev \
+                            libfribidi-dev \
+                            libwayland-dev
             ;;
         "noble")
             echo "Noble does NOT support SDL3"
@@ -315,14 +295,9 @@ function bootstrapOnUbuntu()
                             make \
                             pkg-config \
                             ninja-build \
-                            gnome-desktop-testing \
-                            libasound2-dev \
-                            libpulse-dev \
-                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
-                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
-                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
-                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+                            libaudio-dev \
+                            libfribidi-dev \
+                            libwayland-dev
             ;;
         "jammy"|"hirsute"|"impish"|"focal"|"bionic"|"xenial")
             echo "Sorry, Ubuntu ${LINUX_CODENAME} is no longer supported"
@@ -388,14 +363,9 @@ function bootstrapOnPopOS ()
                             make \
                             pkg-config \
                             ninja-build \
-                            gnome-desktop-testing \
-                            libasound2-dev \
-                            libpulse-dev \
-                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
-                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
-                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
-                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+                            libaudio-dev \
+                            libfribidi-dev \
+                            libwayland-dev
             ;;
         *)
             echo "Sorry, this version of Pop! OS is not currently supported"
@@ -452,14 +422,9 @@ function bootstrapOnLinuxMint ()
                             make \
                             pkg-config \
                             ninja-build \
-                            gnome-desktop-testing \
-                            libasound2-dev \
-                            libpulse-dev \
-                            libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
-                            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
-                            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-                            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
-                            libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+                            libaudio-dev \
+                            libfribidi-dev \
+                            libwayland-dev
             ;;
         "virginia"|"victoria"|"vera"|"vanessa"|"ulyana")
             echo "Sorry, Linux Mint ${LINUX_CODENAME} is no longer supported"
@@ -514,9 +479,8 @@ function bootstrapOnOpenSuseLeap ()
                                     git \
                                     rpm-build \
                                     clang \
-                                    libunwind-devel libusb-1_0-devel Mesa-libGL-devel libxkbcommon-devel libdrm-devel \
-                                    libgbm-devel pipewire-devel libpulse-devel sndio-devel Mesa-libEGL-devel alsa-devel xwayland-devel \
-                                    wayland-devel wayland-protocols-devel
+                                    wayland-devel \
+                                    wayland-protocols-devel
             ;;
         "16.0")
             zypper --non-interactive refresh
@@ -553,9 +517,8 @@ function bootstrapOnOpenSuseLeap ()
                                     git \
                                     rpm-build \
                                     clang \
-                                    libunwind-devel libusb-1_0-devel Mesa-libGL-devel libxkbcommon-devel libdrm-devel \
-                                    libgbm-devel pipewire-devel libpulse-devel sndio-devel Mesa-libEGL-devel alsa-devel xwayland-devel \
-                                    wayland-devel wayland-protocols-devel
+                                    wayland-devel \
+                                    wayland-protocols-devel
             ;;
         *)
             echo "Sorry, this version of openSUSE Leap is unsupported"
@@ -592,14 +555,9 @@ function bootstrapOnFedora ()
                                 rpm-build \
                                 make \
                                 clang \
-                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
-                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
-                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
-                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
-                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
-                                pipewire-jack-audio-connection-kit-devel \
-                                liburing-devel
+                                fribidi-devel \
+                                wayland-devel \
+                                wayland-protocols-devel
             ;;
         41)
             dnf install -y \
@@ -622,14 +580,9 @@ function bootstrapOnFedora ()
                                 rpm-build \
                                 make \
                                 clang \
-                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
-                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
-                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
-                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
-                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
-                                pipewire-jack-audio-connection-kit-devel \
-                                liburing-devel
+                                fribidi-devel \
+                                wayland-devel \
+                                wayland-protocols-devel
             ;;
         42)
             dnf install -y \
@@ -654,14 +607,9 @@ function bootstrapOnFedora ()
                                 rpm-build \
                                 make \
                                 clang \
-                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
-                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
-                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
-                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
-                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
-                                pipewire-jack-audio-connection-kit-devel \
-                                liburing-devel
+                                fribidi-devel \
+                                wayland-devel \
+                                wayland-protocols-devel
             ;;
         43)
             dnf install -y \
@@ -686,14 +634,9 @@ function bootstrapOnFedora ()
                                 rpm-build \
                                 make \
                                 clang \
-                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
-                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
-                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
-                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
-                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
-                                pipewire-jack-audio-connection-kit-devel \
-                                liburing-devel
+                                fribidi-devel \
+                                wayland-devel \
+                                wayland-protocols-devel \
             ;;
         *)
             echo "Sorry, this version of Fedora is unsupported"
@@ -732,14 +675,9 @@ function bootstrapOnRedHat ()
                                 rpm-build \
                                 make \
                                 clang \
-                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
-                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
-                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
-                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
-                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
-                                pipewire-jack-audio-connection-kit-devel \
-                                liburing-devel
+                                fribidi-devel \
+                                wayland-devel \
+                                wayland-protocols-devel
             ;;
         "9.6")
             dnf -y install dnf-plugins-core
@@ -769,14 +707,9 @@ function bootstrapOnRedHat ()
                                 rpm-build \
                                 make \
                                 clang \
-                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
-                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
-                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
-                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
-                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
-                                pipewire-jack-audio-connection-kit-devel \
-                                liburing-devel
+                                fribidi-devel \
+                                wayland-devel \
+                                wayland-protocols-devel
             ;;
         "10.0"|"10.1")
             dnf -y upgrade --refresh
@@ -808,14 +741,9 @@ function bootstrapOnRedHat ()
                                 rpm-build \
                                 make \
                                 clang \
-                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
-                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
-                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
-                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
-                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
-                                pipewire-jack-audio-connection-kit-devel \
-                                liburing-devel
+                                fribidi-devel \
+                                wayland-devel \
+                                wayland-protocols-devel
             ;;
         *)
             echo "Sorry, this version of Red Hat is unsupported"
@@ -855,14 +783,9 @@ function bootstrapOnRockyLinux ()
                                 rpm-build \
                                 make \
                                 clang \
-                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
-                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
-                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
-                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
-                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
-                                pipewire-jack-audio-connection-kit-devel \
-                                liburing-devel
+                                fribidi-devel \
+                                wayland-devel \
+                                wayland-protocols-devel
             ;;
         "9.6")
             dnf -y install dnf-plugins-core
@@ -892,14 +815,9 @@ function bootstrapOnRockyLinux ()
                                 rpm-build \
                                 make \
                                 clang \
-                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
-                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
-                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
-                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
-                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
-                                pipewire-jack-audio-connection-kit-devel \
-                                liburing-devel
+                                fribidi-devel \
+                                wayland-devel \
+                                wayland-protocols-devel
             ;;
         "10.0"|"10.1")
             declare -a pkgs_to_uninstall=('SDL2_image-devel' 'SDL2_image' 'SDL2-devel' 'SDL2')
@@ -941,14 +859,9 @@ function bootstrapOnRockyLinux ()
                                 rpm-build \
                                 make \
                                 clang \
-                                alsa-lib-devel fribidi-devel pulseaudio-libs-devel pipewire-devel \
-                                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                                libXi-devel libXScrnSaver-devel libXtst-devel dbus-devel ibus-devel \
-                                mesa-libGL-devel libxkbcommon-devel mesa-libGLES-devel \
-                                mesa-libEGL-devel vulkan-devel wayland-devel wayland-protocols-devel \
-                                libdrm-devel mesa-libgbm-devel libusb1-devel libdecor-devel \
-                                pipewire-jack-audio-connection-kit-devel \
-                                liburing-devel
+                                fribidi-devel \
+                                wayland-devel \
+                                wayland-protocols-devel
             ;;
         *)
             echo "Sorry, this version of Rocky Linux is unsupported"
@@ -991,9 +904,12 @@ function bootstrapOnManjaro ()
                          libarchive \
                          yay \
                          make \
-                         alsa-lib hidapi ibus jack libdecor libgl libpulse libusb libx11 libxcursor libxext libxinerama \
-                         libxkbcommon libxrandr libxrender libxss libxtst mesa ninja pipewire sndio vulkan-driver vulkan-headers \
-                         wayland wayland-protocols
+                         hidapi \
+                         libgl \
+                         libusb \
+                         ninja \
+                         wayland \
+                         wayland-protocols
 
         # NOTE: `yay` requires SystemD which isn't available in Docker
         # AUR related packages that are not in pacman by default
@@ -1067,9 +983,12 @@ function bootstrapOnArch ()
               openal \
               libarchive \
               make \
-              alsa-lib hidapi ibus jack libdecor libgl libpulse libusb libx11 libxcursor libxext libxinerama \
-              libxkbcommon libxrandr libxrender libxss libxtst mesa ninja pipewire sndio vulkan-driver vulkan-headers \
-              wayland wayland-protocols
+              hidapi \
+              libgl \
+              libusb \
+              ninja \
+              wayland \
+              wayland-protocols
 }
 
 function bootstrapOnEndeavourOS ()
@@ -1106,9 +1025,12 @@ function bootstrapOnEndeavourOS ()
               openal \
               libarchive \
               make \
-              alsa-lib hidapi ibus jack libdecor libgl libpulse libusb libx11 libxcursor libxext libxinerama \
-              libxkbcommon libxrandr libxrender libxss libxtst mesa ninja pipewire sndio vulkan-driver vulkan-headers \
-              wayland wayland-protocols
+              hidapi \
+              libgl \
+              libusb \
+              ninja \
+              wayland \
+              wayland-protocols
 }
 
 case "${LINUX_ID}" in
