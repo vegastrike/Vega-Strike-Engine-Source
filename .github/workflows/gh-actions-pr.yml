@@ -144,7 +144,6 @@ jobs:
           USE_GTEST: ${{ matrix.USE_GTEST }}
           INSTALL_SDL3: ${{ matrix.INSTALL_SDL3 }}
           INSTALL_SDL3_IMAGE: ${{ matrix.INSTALL_SDL3_IMAGE }}
-          MY_OS_NAME: linux
           IS_RELEASE: 0
         run: script/cibuild --preset-name="${{ matrix.preset-name }}"
 

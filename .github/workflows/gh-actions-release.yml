@@ -121,7 +121,6 @@ jobs:
           USE_GTEST: 0
           INSTALL_SDL3: ${{ matrix.INSTALL_SDL3 }}
           INSTALL_SDL3_IMAGE: ${{ matrix.INSTALL_SDL3_IMAGE }}
-          MY_OS_NAME: linux
           IS_RELEASE: 1
         run: script/cibuild --preset-name=${{ matrix.preset-name }}
       - name: Upload the artifacts
