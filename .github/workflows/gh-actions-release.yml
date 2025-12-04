@@ -93,7 +93,6 @@ jobs:
         env:
           FROM:       ${{ matrix.FROM }}
           COMPILER:   ${{ matrix.COMPILER }}
-          MY_OS_NAME: linux
           IS_RELEASE: 1
         run: script/cibuild --preset-name=${{ matrix.preset-name }}
       - name: Upload the artifacts
