@@ -31,7 +31,7 @@
 set -e
 
 echo "----------------------------"
-echo "--- cibuild | 2025-06-27 ---"
+echo "--- cibuild | 2025-11-27 ---"
 echo "----------------------------"
 
 #----------------------------------
@@ -52,11 +52,15 @@ while [ $# -gt 0 ]; do
     --build-type=*)
       build_type="${1#*=}"
       ;;
+    --from=*)
+      from="${1#*=}"
+      ;;
     *)
       printf "***************************\n"
       printf "* Error: Invalid argument.*\n"
       printf "***************************\n"
       exit 1
+      ;;
   esac
   shift
 done
@@ -73,90 +77,108 @@ fi
 
 if [ $IS_RELEASE -eq 1 ]
 then
-    export INSTALL_GTEST=0
-    export USE_GTEST=0
-fi
-
-if [ "$MY_OS_NAME" == "linux" ]
-then
-    SRC_DOCKER_IMG_NAME="vegastrike/vega-strike-build-env:$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
-    DST_DOCKER_IMG_NAME="building-vega-strike:$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
-    DOCKER_CONTAINER_NAME="building-vega-strike_$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
-    PRESET_NAME="${preset_name}"
-    echo "Building docker image for $FROM / $COMPILER"
-    docker build --build-arg from=$SRC_DOCKER_IMG_NAME -t $DST_DOCKER_IMG_NAME .
-    echo "Running docker image for $FROM / $COMPILER"
-    docker run --env CC="$CC" --env CXX="$CXX" --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env INSTALL_SDL3=$INSTALL_SDL3 --env INSTALL_SDL3_IMAGE=$INSTALL_SDL3_IMAGE --env TAG_NAME="$TAG_NAME" --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA="$SHORT_SHA" --env PRESET_NAME="$PRESET_NAME" --name "$DOCKER_CONTAINER_NAME" "$DST_DOCKER_IMG_NAME"
-    docker cp "$DOCKER_CONTAINER_NAME":/usr/src/Vega-Strike-Engine-Source/bin .
-    if [ $IS_RELEASE -eq 1 ]
-    then
-        docker cp "$DOCKER_CONTAINER_NAME":/usr/src/Vega-Strike-Engine-Source/packages .
-    else
-        docker cp "$DOCKER_CONTAINER_NAME":/usr/src/Vega-Strike-Engine-Source/test-results .
-    fi
-    docker rm "$DOCKER_CONTAINER_NAME"
-elif [ "$MY_OS_NAME" == "macos" ]
-then
-    # setup the environment for Homebrew
-    BUILD_WITH_PYTHON_VERSION="3.13"
-
-    HOMEBREW_PREFIX="$(brew --prefix)"
-    HOMEBREW_BIN="${HOMEBREW_PREFIX}/bin"
-    HOMEBREW_PYTHON_BIN="$(brew --prefix python)/libexec/bin"
-
-    # NOTE: we do not support builds on MacOS ARM right now as there are some linker errors.
-    #   Any help in making those work would be appreciated.
-
-    echo "Build With Python Version: ${BUILD_WITH_PYTHON_VERSION}"
-    echo "          Homebrew Prefix: ${HOMEBREW_PREFIX}"
-    echo "             Homebrew Bin: ${HOMEBREW_BIN}"
-    echo "      Homebrew Python Bin: ${HOMEBREW_PYTHON_BIN}"
-
-    # Homebrew tooling needs to come first in the path search
-    export PATH=${HOMEBREW_BIN}:${HOMEBREW_PYTHON_BIN}:${PATH}
-
-    HOMEBREW_PYTHON_VERSION=$("${HOMEBREW_BIN}"/python${BUILD_WITH_PYTHON_VERSION} -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-    echo "  Detected Python Version: ${HOMEBREW_PYTHON_VERSION}"
-
-    # Ensure it uses the correct Python version
-    # Do not set PYTHONHOME or PYTHONPATH; otherwise some odd errors will come up as
-    # it's not necessary
-    export HOMEBREW_PYTHON3_CFLAGS="$(${HOMEBREW_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --cflags)"
-    export HOMEBREW_PYTHON3_LDFLAGS="$(${HOMEBREW_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --ldflags)"
-    echo "   Homebrew Python CFlags: ${HOMEBREW_PYTHON3_CFLAGS}"
-    echo "  Homebrew Python LDFlags: ${HOMEBREW_PYTHON3_LDFLAGS}"
-
-    export HOMEBREW_LIBARCHIVE_PREFIX="$(brew --prefix libarchive)"
-    export PKG_CONFIG_PATH="${HOMEBREW_LIBARCHIVE_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
-    export HOMEBREW_LIBARCHIVE_CFLAGS="-I${HOMEBREW_LIBARCHIVE_PREFIX}/include"
-    export HOMEBREW_LIBARCHIVE_LDFLAGS="-L${HOMEBREW_LIBARCHIVE_PREFIX}/lib"
-    echo "   Homebrew LibArchive CFlags: ${HOMEBREW_LIBARCHIVE_CFLAGS}"
-    echo "  Homebrew LibArchive LDFlags: ${HOMEBREW_LIBARCHIVE_LDFLAGS}"
-
-    echo " ========================================================================"
-    echo " LIBARCHIVE DIAGNOSTIC"
-    echo " LIBARCHIVE path prefix: ${HOMEBREW_LIBARCHIVE_PREFIX}"
-    ls "${HOMEBREW_LIBARCHIVE_PREFIX}"
-
-    echo " LIBARCHIVE include: ${HOMEBREW_LIBARCHIVE_PREFIX}/include contents:"
-    ls "${HOMEBREW_LIBARCHIVE_PREFIX}"/include
-
-    echo " LIBARCHIVE lib: ${HOMEBREW_LIBARCHIVE_PREFIX}/lib contents:"
-    ls "${HOMEBREW_LIBARCHIVE_PREFIX}"/lib
-    echo " ========================================================================"
-
-
-    # Homebrew needs certain flags set so its installation parts are found
-    export CFLAGS="-I${HOMEBREW_PREFIX}/include ${HOMEBREW_PYTHON3_CFLAGS} ${HOMEBREW_LIBARCHIVE_CFLAGS} ${CFLAGS}"
-    export LDFLAGS="-L${HOMEBREW_PREFIX}/lib ${HOMEBREW_PYTHON3_LDFLAGS} ${HOMEBREW_LIBARCHIVE_LDFLAGS} ${LDFLAGS}"
-    echo "                   CFlags: ${CFLAGS}"
-    echo "                  LDFlags: ${LDFLAGS}"
-
-    script/build --preset-name="${preset_name}"
-    # On macOS, the following is done by the calling CI workflow
-    # ctest -V
+    export INSTALL_GTEST=OFF
+    export USE_GTEST=OFF
 else
-    script/docker-entrypoint.sh --preset-name="${preset_name}"
+    export INSTALL_GTEST=ON
+    export USE_GTEST=ON
 fi
+
+if [ -z "$from" ] && [ -n "$FROM" ]
+then
+    from="${FROM}"
+fi
+
+if [ -z "$preset_name" ] && [ -n "$PRESET_NAME" ]
+then
+    preset_name="${PRESET_NAME}"
+fi
+
+platform="$(uname | tr '[:upper:]' '[:lower:]')"
+
+case "$platform" in
+    "linux"|"linux-gnu")
+        SRC_DOCKER_IMG_NAME="vegastrike/vega-strike-build-env:$(echo "$from" | sed 's/:/_/' | sed 's/\//_/')"
+        DST_DOCKER_IMG_NAME="building-vega-strike:$(echo "$from" | sed 's/:/_/' | sed 's/\//_/')"
+        DOCKER_CONTAINER_NAME="building-vega-strike_$(echo "$from" | sed 's/:/_/' | sed 's/\//_/')"
+        PRESET_NAME="${preset_name}"
+        echo "Building docker image for $from / $COMPILER"
+        docker build --build-arg from="$SRC_DOCKER_IMG_NAME" -t "$DST_DOCKER_IMG_NAME" .
+        echo "Running docker image for $from / $COMPILER"
+        docker run --env CC="$CC" --env CXX="$CXX" --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env INSTALL_SDL3=$INSTALL_SDL3 --env INSTALL_SDL3_IMAGE=$INSTALL_SDL3_IMAGE --env TAG_NAME="$TAG_NAME" --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA="$SHORT_SHA" --env PRESET_NAME="$PRESET_NAME" --name "$DOCKER_CONTAINER_NAME" "$DST_DOCKER_IMG_NAME"
+        docker cp "$DOCKER_CONTAINER_NAME":/usr/src/Vega-Strike-Engine-Source/bin .
+        if [ $IS_RELEASE -eq 1 ]
+        then
+            docker cp "$DOCKER_CONTAINER_NAME":/usr/src/Vega-Strike-Engine-Source/packages .
+        else
+            docker cp "$DOCKER_CONTAINER_NAME":/usr/src/Vega-Strike-Engine-Source/test-results .
+        fi
+        docker rm "$DOCKER_CONTAINER_NAME"
+        ;;
+    "darwin")
+        # setup the environment for Homebrew
+        BUILD_WITH_PYTHON_VERSION="3.13"
+
+        HOMEBREW_PREFIX="$(brew --prefix)"
+        HOMEBREW_BIN="${HOMEBREW_PREFIX}/bin"
+        HOMEBREW_PYTHON_BIN="$(brew --prefix python)/libexec/bin"
+
+        # NOTE: we do not support builds on MacOS ARM right now as there are some linker errors.
+        #   Any help in making those work would be appreciated.
+
+        echo "Build With Python Version: ${BUILD_WITH_PYTHON_VERSION}"
+        echo "          Homebrew Prefix: ${HOMEBREW_PREFIX}"
+        echo "             Homebrew Bin: ${HOMEBREW_BIN}"
+        echo "      Homebrew Python Bin: ${HOMEBREW_PYTHON_BIN}"
+
+        # Homebrew tooling needs to come first in the path search
+        export PATH=${HOMEBREW_BIN}:${HOMEBREW_PYTHON_BIN}:${PATH}
+
+        HOMEBREW_PYTHON_VERSION=$("${HOMEBREW_BIN}"/python${BUILD_WITH_PYTHON_VERSION} -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+        echo "  Detected Python Version: ${HOMEBREW_PYTHON_VERSION}"
+
+        # Ensure it uses the correct Python version
+        # Do not set PYTHONHOME or PYTHONPATH; otherwise some odd errors will come up as
+        # it's not necessary
+        export HOMEBREW_PYTHON3_CFLAGS="$(${HOMEBREW_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --cflags)"
+        export HOMEBREW_PYTHON3_LDFLAGS="$(${HOMEBREW_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --ldflags)"
+        echo "   Homebrew Python CFlags: ${HOMEBREW_PYTHON3_CFLAGS}"
+        echo "  Homebrew Python LDFlags: ${HOMEBREW_PYTHON3_LDFLAGS}"
+
+        export HOMEBREW_LIBARCHIVE_PREFIX="$(brew --prefix libarchive)"
+        export PKG_CONFIG_PATH="${HOMEBREW_LIBARCHIVE_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
+        export HOMEBREW_LIBARCHIVE_CFLAGS="-I${HOMEBREW_LIBARCHIVE_PREFIX}/include"
+        export HOMEBREW_LIBARCHIVE_LDFLAGS="-L${HOMEBREW_LIBARCHIVE_PREFIX}/lib"
+        echo "   Homebrew LibArchive CFlags: ${HOMEBREW_LIBARCHIVE_CFLAGS}"
+        echo "  Homebrew LibArchive LDFlags: ${HOMEBREW_LIBARCHIVE_LDFLAGS}"
+
+        echo " ========================================================================"
+        echo " LIBARCHIVE DIAGNOSTIC"
+        echo " LIBARCHIVE path prefix: ${HOMEBREW_LIBARCHIVE_PREFIX}"
+        ls "${HOMEBREW_LIBARCHIVE_PREFIX}"
+
+        echo " LIBARCHIVE include: ${HOMEBREW_LIBARCHIVE_PREFIX}/include contents:"
+        ls "${HOMEBREW_LIBARCHIVE_PREFIX}"/include
+
+        echo " LIBARCHIVE lib: ${HOMEBREW_LIBARCHIVE_PREFIX}/lib contents:"
+        ls "${HOMEBREW_LIBARCHIVE_PREFIX}"/lib
+        echo " ========================================================================"
+
+
+        # Homebrew needs certain flags set so its installation parts are found
+        export CFLAGS="-I${HOMEBREW_PREFIX}/include ${HOMEBREW_PYTHON3_CFLAGS} ${HOMEBREW_LIBARCHIVE_CFLAGS} ${CFLAGS}"
+        export LDFLAGS="-L${HOMEBREW_PREFIX}/lib ${HOMEBREW_PYTHON3_LDFLAGS} ${HOMEBREW_LIBARCHIVE_LDFLAGS} ${LDFLAGS}"
+        echo "                   CFlags: ${CFLAGS}"
+        echo "                  LDFlags: ${LDFLAGS}"
+
+        script/build --preset-name="${preset_name}"
+        # On macOS, the following is done by the calling CI workflow
+        # ctest -V
+        ;;
+    *)
+        echo "Sorry, unrecognized or unsupported operating system"
+        exit 2
+        ;;
+esac
 
 echo "cibuild Done!"
