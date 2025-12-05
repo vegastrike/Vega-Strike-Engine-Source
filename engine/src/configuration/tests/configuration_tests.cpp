@@ -57,7 +57,7 @@ TEST(QVector, Cast_Performance) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished QVector Cast() performance test. Took %1% for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished QVector Cast() performance test. Took %1% second(s) for %2% iterations") % duration % kIterations));
 }
 
 TEST(Vector, Cast_Performance) {
@@ -72,7 +72,7 @@ TEST(Vector, Cast_Performance) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished Vector Cast() performance test. Took %1% for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished Vector Cast() performance test. Took %1% second(s) for %2% iterations") % duration % kIterations));
 }
 
 class B {
@@ -99,7 +99,7 @@ TEST(vega_dynamic_cast_ptr, Performance) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished vega_dynamic_cast_ptr performance test. Took %1% for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished vega_dynamic_cast_ptr performance test. Took %1% second(s) for %2% iterations") % duration % kIterations));
 }
 
 TEST(vega_dynamic_const_cast_ptr, Performance) {
@@ -114,7 +114,7 @@ TEST(vega_dynamic_const_cast_ptr, Performance) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished vega_dynamic_const_cast_ptr performance test. Took %1% for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished vega_dynamic_const_cast_ptr performance test. Took %1% second(s) for %2% iterations") % duration % kIterations));
 }
 
 TEST(configuration, const_Performance) {
@@ -128,7 +128,7 @@ TEST(configuration, const_Performance) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished configuration()...._dbl test. Took %1% for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished configuration()...._dbl test. Took %1% second(s) for %2% iterations") % duration % kIterations));
 }
 
 TEST(configuration, static_optional_Performance) {
@@ -142,7 +142,7 @@ TEST(configuration, static_optional_Performance) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable. Took %1% for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable. Took %1% second(s) for %2% iterations") % duration % kIterations));
 }
 
 TEST(configuration, Performance_of_static_optional_with_get) {
@@ -157,7 +157,7 @@ TEST(configuration, Performance_of_static_optional_with_get) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable with .get(). Took %1% for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable with .get(). Took %1% second(s) for %2% iterations") % duration % kIterations));
 }
 
 TEST(LoadConfig, Sanity) {
@@ -223,7 +223,7 @@ TEST(GameConfig, GetFloat_Performance) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished GetFloat performance test. Took %1% for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished GetFloat performance test. Took %1% second(s) for %2% iterations") % duration % kIterations));
 }
 
 TEST(GFXQuadList, GFXVertex) {
