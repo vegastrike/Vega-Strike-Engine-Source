@@ -32,7 +32,6 @@
 #include "root_generic/vs_globals.h"
 
 #include <string>
-#include <cstdint>
 
 #include <boost/smart_ptr/make_shared_object.hpp>
 #include <boost/log/core.hpp>
@@ -45,6 +44,103 @@
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/filesystem.hpp>
+
+#if defined(HAVE_OPEN_TELEMETRY)
+#include <functional>
+#include <iostream>
+#include <utility>
+
+#include "opentelemetry/exporters/otlp/otlp_file_client_options.h"
+#include "opentelemetry/exporters/otlp/otlp_file_exporter_factory.h"
+#include "opentelemetry/exporters/otlp/otlp_file_exporter_options.h"
+#include "opentelemetry/exporters/otlp/otlp_file_log_record_exporter_factory.h"
+#include "opentelemetry/exporters/otlp/otlp_file_log_record_exporter_options.h"
+#include "opentelemetry/logs/logger_provider.h"
+#include "opentelemetry/nostd/shared_ptr.h"
+#include "opentelemetry/sdk/logs/logger_provider.h"
+#include "opentelemetry/sdk/logs/logger_provider_factory.h"
+#include "opentelemetry/logs/provider.h"
+#include "opentelemetry/sdk/logs/simple_log_record_processor_factory.h"
+#include "opentelemetry/trace/provider.h"
+#include "opentelemetry/sdk/trace/simple_processor_factory.h"
+#include "opentelemetry/sdk/trace/tracer_provider.h"
+#include "opentelemetry/sdk/trace/tracer_provider_factory.h"
+#include "opentelemetry/trace/tracer_provider.h"
+
+namespace nostd = opentelemetry::nostd;
+
+namespace
+{
+opentelemetry::exporter::otlp::OtlpFileExporterOptions opts;
+opentelemetry::exporter::otlp::OtlpFileLogRecordExporterOptions log_opts;
+
+std::shared_ptr<opentelemetry::sdk::trace::TracerProvider> tracer_provider;
+std::shared_ptr<opentelemetry::sdk::logs::LoggerProvider> logger_provider;
+
+void InitTracer()
+{
+    // Create OTLP exporter instance
+    auto exporter   = opentelemetry::exporter::otlp::OtlpFileExporterFactory::Create(opts);
+    auto processor  = opentelemetry::sdk::trace::SimpleSpanProcessorFactory::Create(std::move(exporter));
+    tracer_provider = opentelemetry::sdk::trace::TracerProviderFactory::Create(std::move(processor));
+
+    // Set the global trace provider
+    std::shared_ptr<opentelemetry::trace::TracerProvider> api_provider = tracer_provider;
+    opentelemetry::trace::Provider::SetTracerProvider(api_provider);
+}
+
+void CleanupTracer()
+{
+  // We call ForceFlush to prevent to cancel running exportings, It's optional.
+  if (tracer_provider)
+  {
+    tracer_provider->ForceFlush();
+  }
+
+  tracer_provider.reset();
+  const nostd::shared_ptr<opentelemetry::trace::TracerProvider> none;
+  opentelemetry::trace::Provider::SetTracerProvider(none);
+}
+
+void InitLogger()
+{
+  // Create OTLP exporter instance
+  auto exporter   = opentelemetry::exporter::otlp::OtlpFileLogRecordExporterFactory::Create(log_opts);
+  auto processor  = opentelemetry::sdk::logs::SimpleLogRecordProcessorFactory::Create(std::move(exporter));
+  logger_provider = opentelemetry::sdk::logs::LoggerProviderFactory::Create(std::move(processor));
+
+  std::shared_ptr<opentelemetry::logs::LoggerProvider> api_provider = logger_provider;
+  opentelemetry::logs::Provider::SetLoggerProvider(api_provider);
+}
+
+void CleanupLogger()
+{
+  // We call ForceFlush to prevent to cancel running exportings, It's optional.
+  if (logger_provider)
+  {
+    logger_provider->ForceFlush();
+  }
+
+  logger_provider.reset();
+  nostd::shared_ptr<opentelemetry::logs::LoggerProvider> none;
+  opentelemetry::logs::Provider::SetLoggerProvider(none);
+}
+
+nostd::shared_ptr<opentelemetry::trace::Tracer> get_tracer()
+{
+    const nostd::shared_ptr<opentelemetry::trace::TracerProvider> provider = opentelemetry::trace::Provider::GetTracerProvider();
+    return provider->GetTracer(__FILE__);
+}
+
+nostd::shared_ptr<opentelemetry::logs::Logger> get_logger()
+{
+    const nostd::shared_ptr<opentelemetry::logs::LoggerProvider> provider = opentelemetry::logs::Provider::GetLoggerProvider();
+    return provider->GetLogger(__FILE__);
+}
+
+}  // namespace
+
+#endif
 
 namespace VegaStrikeLogging {
 
@@ -88,11 +184,27 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
             );
 
     console_log_sink_->set_filter(severity >= important_info);
+
+    #if defined(HAVE_OPEN_TELEMETRY)
+    opentelemetry::exporter::otlp::OtlpFileClientFileSystemOptions fs_backend;
+    fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f_trace.jsonl";
+    opts.backend_options    = fs_backend;
+    opentelemetry::exporter::otlp::OtlpFileClientFileSystemOptions logs_fs_backend;
+    logs_fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f_log.jsonl";
+    log_opts.backend_options     = logs_fs_backend;
+
+    InitTracer();
+    InitLogger();
+    #endif
 }
 
 void VegaStrikeLogger::FlushLogs() {
     if (!STATIC_VARS_DESTROYED) {
         logging_core_->flush();
+        #if defined(HAVE_OPEN_TELEMETRY)
+        tracer_provider->ForceFlush();
+        logger_provider->ForceFlush();
+        #endif
     }
     std::cout << std::flush;
     std::cerr << std::flush;
@@ -104,6 +216,10 @@ void VegaStrikeLogger::FlushLogs() {
 void VegaStrikeLogger::FlushLogsProgramExiting() {
     if (!STATIC_VARS_DESTROYED) {
         logging_core_->flush();
+        #if defined(HAVE_OPEN_TELEMETRY)
+        tracer_provider->ForceFlush();
+        logger_provider->ForceFlush();
+        #endif
     }
     std::cout << std::flush;
     std::cerr << std::flush;
@@ -111,6 +227,10 @@ void VegaStrikeLogger::FlushLogsProgramExiting() {
     fflush(stdout);
     fflush(stderr);
     STATIC_VARS_DESTROYED = true;
+    #if defined(HAVE_OPEN_TELEMETRY)
+    CleanupTracer();
+    CleanupLogger();
+    #endif
 }
 
 BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, severity_logger_mt<vega_log_level>) {
@@ -130,12 +250,49 @@ VegaStrikeLogger::VegaStrikeLogger() : slg_(my_logger::get()), file_log_back_end
                     boost::log::keywords::auto_flush =
                             true /*false*/                                                  /*< whether to do the equivalent of fflush(stdout) after every msg >*/
             );
+
+    #if defined(HAVE_OPEN_TELEMETRY)
+    opentelemetry::exporter::otlp::OtlpFileClientFileSystemOptions fs_backend;
+    // fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f_trace.jsonl";
+    opts.backend_options    = fs_backend;
+    opentelemetry::exporter::otlp::OtlpFileClientFileSystemOptions logs_fs_backend;
+    // logs_fs_backend.file_pattern = logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f_log.jsonl";
+    log_opts.backend_options     = logs_fs_backend;
+
+    InitTracer();
+    InitLogger();
+    #endif
 }
 
 VegaStrikeLogger::~VegaStrikeLogger() {
     FlushLogsProgramExiting();
     logging_core_->remove_all_sinks();
 }
+
+#if defined(HAVE_OPEN_TELEMETRY)
+opentelemetry::logs::Severity translate_severity(vega_log_level level) {
+    switch (level) {
+    case trace:
+        return opentelemetry::logs::Severity::kTrace;
+    case debug:
+        return opentelemetry::logs::Severity::kDebug;
+    case info:
+        return opentelemetry::logs::Severity::kInfo;
+    case important_info:
+        return opentelemetry::logs::Severity::kInfo2;
+    case warning:
+        return opentelemetry::logs::Severity::kWarn;
+    case serious_warning:
+        return opentelemetry::logs::Severity::kWarn2;
+    case error:
+        return opentelemetry::logs::Severity::kError;
+    case fatal:
+        return opentelemetry::logs::Severity::kFatal;
+    default:
+        return opentelemetry::logs::Severity::kError;
+    }
+}
+#endif
 
 void VegaStrikeLogger::Log(const vega_log_level level, const std::string &message) {
     if (STATIC_VARS_DESTROYED) {
@@ -149,6 +306,10 @@ void VegaStrikeLogger::Log(const vega_log_level level, const std::string &messag
         strm.flush();
         slg_.push_record(boost::move(rec));
     }
+
+    #if defined(HAVE_OPEN_TELEMETRY)
+    get_logger()->Log(translate_severity(level), message);
+    #endif
 }
 
 void VegaStrikeLogger::LogAndFlush(const vega_log_level level, const std::string &message) {
@@ -174,6 +335,10 @@ void VegaStrikeLogger::Log(const vega_log_level level, const char *message) {
         strm.flush();
         slg_.push_record(boost::move(rec));
     }
+
+    #if defined(HAVE_OPEN_TELEMETRY)
+    get_logger()->Log(translate_severity(level), message);
+    #endif
 }
 
 void VegaStrikeLogger::LogAndFlush(const vega_log_level level, const char *message) {
@@ -199,6 +364,10 @@ void VegaStrikeLogger::Log(const vega_log_level level, const boost::basic_format
         strm.flush();
         slg_.push_record(boost::move(rec));
     }
+
+    #if defined(HAVE_OPEN_TELEMETRY)
+    get_logger()->Log(translate_severity(level), message.str());
+    #endif
 }
 
 void VegaStrikeLogger::LogAndFlush(const vega_log_level level, const boost::basic_format<char> &message) {

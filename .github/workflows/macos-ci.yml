@@ -26,16 +26,24 @@ jobs:
         include:
           - os: macOS-15-intel
             build-type: Debug
-            preset-name: macos-pie-enabled-debug
+            preset-name: macOS-pie-enabled-gl-neither-debug-fetch-use-otel
             python-version: 3.14.0
           - os: macOS-15-intel
             build-type: RelWithDebInfo
-            preset-name: macos-pie-enabled-RelWithDebInfo
+            preset-name: macOS-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel
+            python-version: 3.14.0
+          - os: macOS-15-intel
+            build-type: Debug
+            preset-name: macOS-pie-enabled-gl-neither-debug-no-otel
+            python-version: 3.14.0
+          - os: macOS-15-intel
+            build-type: RelWithDebInfo
+            preset-name: macOS-pie-enabled-gl-neither-RelWithDebInfo-no-otel
             python-version: 3.14.0
 
     steps:
       - name: Setup Python
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         id: vega-py-setup
         with:
           python-version: ${{ matrix.python-version }}
@@ -62,7 +70,6 @@ jobs:
       # installed and set it to a GHA variable that can be consumed below
       - name: Build it
         env:
-          MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}

@@ -21,7 +21,7 @@ jobs:
         include:
           - FROM:     'ubuntu:questing'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 0
@@ -29,7 +29,7 @@ jobs:
             allow_failure: false
           - FROM:     'ubuntu:noble'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 1
@@ -37,7 +37,7 @@ jobs:
             allow_failure: false
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 1
@@ -45,7 +45,7 @@ jobs:
             allow_failure: false
           - FROM:     'linuxmintd/mint22.2-amd64'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 1
@@ -53,7 +53,7 @@ jobs:
             allow_failure: false
           - FROM:     'linuxmintd/mint22-amd64'
             COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 1
@@ -61,7 +61,7 @@ jobs:
             allow_failure: false
           - FROM:     'debian:trixie'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 0
@@ -69,7 +69,7 @@ jobs:
             allow_failure: false
           - FROM:     'debian:bookworm'
             COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 1
@@ -77,7 +77,7 @@ jobs:
             allow_failure: false
           - FROM:     'fedora:43'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 0
@@ -85,7 +85,7 @@ jobs:
             allow_failure: false
           - FROM:     'fedora:42'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 0
@@ -93,7 +93,7 @@ jobs:
             allow_failure: false
           - FROM:     'fedora:41'
             COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 1
@@ -101,7 +101,7 @@ jobs:
             allow_failure: false
           - FROM:     'opensuse/leap:16.0'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 1
@@ -109,7 +109,103 @@ jobs:
             allow_failure: false
           - FROM:     'rockylinux/rockylinux:10.0'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 1
+            INSTALL_SDL3_IMAGE: 1
+            allow_failure: false
+          - FROM:     'ubuntu:questing'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-no-otel'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 0
+            INSTALL_SDL3_IMAGE: 0
+            allow_failure: false
+          - FROM:     'ubuntu:noble'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-no-otel'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 1
+            INSTALL_SDL3_IMAGE: 1
+            allow_failure: false
+          - FROM:     'ubuntu:noble'
+            COMPILER: 'clang'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-no-otel'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 1
+            INSTALL_SDL3_IMAGE: 1
+            allow_failure: false
+          - FROM:     'linuxmintd/mint22.2-amd64'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-no-otel'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 1
+            INSTALL_SDL3_IMAGE: 1
+            allow_failure: false
+          - FROM:     'linuxmintd/mint22-amd64'
+            COMPILER: 'clang'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-no-otel'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 1
+            INSTALL_SDL3_IMAGE: 1
+            allow_failure: false
+          - FROM:     'debian:trixie'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-no-otel'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 0
+            INSTALL_SDL3_IMAGE: 0
+            allow_failure: false
+          - FROM:     'debian:bookworm'
+            COMPILER: 'clang'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-no-otel'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 1
+            INSTALL_SDL3_IMAGE: 1
+            allow_failure: false
+          - FROM:     'fedora:43'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-no-otel'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 0
+            INSTALL_SDL3_IMAGE: 0
+            allow_failure: false
+          - FROM:     'fedora:42'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-no-otel'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 0
+            INSTALL_SDL3_IMAGE: 0
+            allow_failure: false
+          - FROM:     'fedora:41'
+            COMPILER: 'clang'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-no-otel'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 1
+            INSTALL_SDL3_IMAGE: 1
+            allow_failure: false
+          - FROM:     'opensuse/leap:16.0'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-no-otel'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 1
+            INSTALL_SDL3_IMAGE: 1
+            allow_failure: false
+          - FROM:     'rockylinux/rockylinux:10.0'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-no-otel'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 1

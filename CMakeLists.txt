@@ -31,7 +31,7 @@
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.25 FATAL_ERROR)
 
 IF (POLICY CMP0087)
     CMAKE_POLICY(SET CMP0087 NEW)
@@ -111,10 +111,10 @@ PROJECT(Vega_Strike
 
 MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_LONG_STR}")
 
-SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 SET(CMAKE_CXX_EXTENSIONS ON)
-SET(CMAKE_C_STANDARD 11)
+SET(CMAKE_C_STANDARD 17)
 SET(CMAKE_C_STANDARD_REQUIRED TRUE)
 SET(CMAKE_C_EXTENSIONS ON)
 
@@ -133,8 +133,10 @@ ADD_COMPILE_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/engi
                     "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
                     "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>"
 )
-# for DEBUG remove all optimizations
-ADD_LINK_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
+ADD_LINK_OPTIONS(
+        "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/DEBUG>"
+        "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:RelWithDebInfo>>:/DEBUG>"
+        )
 ADD_COMPILE_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-pipe>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fvisibility=hidden>"
@@ -178,6 +180,10 @@ ELSE (ENABLE_PIE)
     MESSAGE(STATUS "Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
     SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 ENDIF (ENABLE_PIE)
+
+OPTION(FETCH_OPEN_TELEMETRY "Whether to download opentelemetry-cpp using FetchContent_MakeAvailable" OFF)
+OPTION(USE_OPEN_TELEMETRY "Whether to use opentelemetry-cpp, regardless of how it is installed" OFF)
+OPTION(USE_LOCALLY_INSTALLED_PROTOBUF "Whether to use locally-installed copy of Protobuf" OFF)
 
 SET(FPS_AVG_INTERVAL "0.5" CACHE STRING "Average displayed frame rate over this interval in seconds")
 
@@ -330,7 +336,7 @@ ELSE (Python3_FOUND)
 ENDIF (Python3_FOUND)
 
 # Find Boost with boost_python library
-# Note: we now use Cmake 3.21 and Boost 1.75.
+# Note: we now use Cmake 3.25 and Boost 1.75.
 MESSAGE(STATUS "From now on, always using System Boost (ver. 1.75 or higher)")
 SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
 FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_time filesystem thread chrono atomic program_options REQUIRED)
@@ -406,6 +412,29 @@ IF (DEFINED ENV{INSTALL_SDL3_IMAGE})
     ENDIF ()
 ENDIF ()
 
+IF (USE_LOCALLY_INSTALLED_PROTOBUF)
+    SET(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+    FIND_PACKAGE(abseil)
+    FIND_PACKAGE(Protobuf)
+    FIND_PACKAGE(nlohmann-json)
+ENDIF ()
+
+IF (FETCH_OPEN_TELEMETRY)
+    FETCHCONTENT_DECLARE(
+            opentelemetry-cpp
+            GIT_REPOSITORY      https://github.com/open-telemetry/opentelemetry-cpp.git
+            GIT_TAG             a7b100834dce58c949ab9bdfccdf1613db460d1c                # v1.24.0
+            CMAKE_ARGS          -DBUILD_TESTING=OFF
+            )
+    SET(WITH_OTLP_FILE ON CACHE BOOL "" FORCE)
+    SET(WITH_ABSEIL ON CACHE BOOL "")
+    SET(WITH_STL OFF CACHE BOOL "")
+    SET(WITH_BENCHMARK OFF CACHE BOOL "")
+    SET(WITH_EXAMPLES OFF CACHE BOOL "")
+    SET(WITH_FUNC_TESTS OFF CACHE BOOL "")
+    SET(BUILD_TESTING OFF CACHE BOOL "")
+ENDIF ()
+
 IF (INSTALL_GTEST OR USE_GTEST)
     MESSAGE(STATUS "Configuring Unit Tests")
     ENABLE_TESTING()
@@ -477,6 +506,24 @@ IF (INSTALL_SDL3_IMAGE)
 ELSE ()
     FIND_PACKAGE(SDL3_image REQUIRED)
     MESSAGE(STATUS "SDL3_image found via FIND_PACKAGE")
+ENDIF ()
+
+IF (FETCH_OPEN_TELEMETRY)
+    MESSAGE(STATUS "Downloading opentelemetry-cpp")
+    FETCHCONTENT_MAKEAVAILABLE(opentelemetry-cpp)
+    MESSAGE(STATUS "Finished fetching opentelemetry-cpp")
+ELSEIF (USE_OPEN_TELEMETRY)
+    # Use find_package to include OpenTelemetry C++
+    FIND_PACKAGE(opentelemetry-cpp CONFIG COMPONENTS api sdk exporters_otlp_file)
+    #check whether opentelemetry libraries found
+    IF (opentelemetry-cpp_FOUND)
+        MESSAGE(STATUS "Found opentelemetry libraries; preparing to use them")
+    ELSE ()
+        MESSAGE(WARNING "Did not find opentelemetry libraries; building without")
+        UNDEF(HAVE_OPEN_TELEMETRY)
+    ENDIF ()
+ELSE ()
+    MESSAGE(STATUS "USE_OPEN_TELEMETRY not set; building without")
 ENDIF ()
 
 INCLUDE(GNUInstallDirs)

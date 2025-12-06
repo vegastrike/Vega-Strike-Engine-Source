@@ -194,6 +194,7 @@ ADD_LINK_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_C
 # Now the source files are listed starting here!
 SET(LIBVS_LOGGING
     src/vs_logging.cpp
+    src/vs_logging.h
 )
 
 SET(LIBCONFIG
@@ -509,7 +510,7 @@ ADD_LIBRARY(vegastrike_python SHARED
 )
 # Enable PIE for this library in a cross-platform-compatible way
 set_property(TARGET vegastrike_python PROPERTY POSITION_INDEPENDENT_CODE TRUE)
-SET_PROPERTY(TARGET vegastrike_python PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vegastrike_python PROPERTY CXX_STANDARD 17)
 SET_PROPERTY(TARGET vegastrike_python PROPERTY CXX_STANDARD_REQUIRED TRUE)
 SET_PROPERTY(TARGET vegastrike_python PROPERTY CXX_EXTENSIONS ON)
 TARGET_INCLUDE_DIRECTORIES(vegastrike_python SYSTEM PRIVATE ${VSE_TST_INCLUDES})
@@ -541,8 +542,7 @@ ADD_LIBRARY(vegastrike-engine_com OBJECT
     ${LIBSCRIPT_SOURCES}
 )
 
-#TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
-SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_STANDARD 17)
 SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_STANDARD_REQUIRED TRUE)
 SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_EXTENSIONS ON)
 SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
@@ -554,6 +554,10 @@ IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC WINVER=0x0A00)
     TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
+
+IF (USE_OPEN_TELEMETRY)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC HAVE_OPEN_TELEMETRY=1)
+ENDIF ()
 
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
@@ -661,8 +665,7 @@ SET(VEGASTRIKE_SOURCES
 IF (NOT DISABLE_CLIENT)
     ADD_EXECUTABLE(vegastrike-engine WIN32 MACOSX_BUNDLE ${VEGASTRIKE_SOURCES})
 
-    #    TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_14)
-    SET_PROPERTY(TARGET vegastrike-engine PROPERTY CXX_STANDARD 14)
+    SET_PROPERTY(TARGET vegastrike-engine PROPERTY CXX_STANDARD 17)
     SET_PROPERTY(TARGET vegastrike-engine PROPERTY CXX_STANDARD_REQUIRED TRUE)
     SET_PROPERTY(TARGET vegastrike-engine PROPERTY CXX_EXTENSIONS ON)
 
@@ -704,16 +707,34 @@ IF (NOT DISABLE_CLIENT)
         TARGET_LINK_LIBRARIES(vegastrike-engine m)
     ENDIF()
 
-    TARGET_LINK_DIRECTORIES(vegastrike-engine BEFORE
+    TARGET_LINK_DIRECTORIES(vegastrike-engine
             PRIVATE ${LibArchive_LIBRARY})
 
-    TARGET_LINK_LIBRARIES(vegastrike-engine
+    IF (USE_OPEN_TELEMETRY)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC HAVE_OPEN_TELEMETRY=1)
+        TARGET_LINK_LIBRARIES(vegastrike-engine PRIVATE
+                              opentelemetry-cpp::api
+                              opentelemetry-cpp::common
+                              opentelemetry-cpp::logs
+                              opentelemetry-cpp::metrics
+                              opentelemetry-cpp::resources
+                              opentelemetry-cpp::sdk
+                              opentelemetry-cpp::trace
+                              opentelemetry-cpp::ostream_span_exporter
+                              opentelemetry-cpp::otlp_file_exporter
+                              opentelemetry-cpp::otlp_file_metric_exporter
+                              opentelemetry-cpp::otlp_file_log_record_exporter
+                              )
+    ENDIF ()
+
+    TARGET_LINK_LIBRARIES(vegastrike-engine PRIVATE
                           SDL3::SDL3
                           SDL3_image::SDL3_image
                           OpenGL::GL
                           OpenGL::GLU
                           GLUT::GLUT
                           LibArchive::LibArchive
+                          PNG::PNG
                           ${VSE_TST_LIBS}
                           ${Boost_LIBRARIES}
                           ${Python3_LIBRARIES}
@@ -725,7 +746,7 @@ IF (NOT DISABLE_CLIENT)
                           vegastrike_cmd
                           vegastrike-OPcollide
     )
-    SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
+#    SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 ENDIF (NOT DISABLE_CLIENT)
 
@@ -1159,8 +1180,7 @@ IF (USE_GTEST)
     )
     SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${Vega_Strike_BINARY_DIR}/)
 
-    #TARGET_COMPILE_FEATURES(${TEST_NAME} PUBLIC cxx_std_11)
-    SET_PROPERTY(TARGET ${TEST_NAME} PROPERTY CXX_STANDARD 14)
+    SET_PROPERTY(TARGET ${TEST_NAME} PROPERTY CXX_STANDARD 17)
     SET_PROPERTY(TARGET ${TEST_NAME} PROPERTY CXX_STANDARD_REQUIRED TRUE)
     IF (NEED_LINKING_AGAINST_LIBM)
         TARGET_LINK_LIBRARIES(${TEST_NAME} m)
@@ -1189,7 +1209,7 @@ IF (USE_GTEST)
             ${Vega_Strike_BINARY_DIR}/engine/src
     )
     TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
-    SET_PROPERTY(TARGET vegastrike-testing PROPERTY CXX_STANDARD 14)
+    SET_PROPERTY(TARGET vegastrike-testing PROPERTY CXX_STANDARD 17)
     SET_PROPERTY(TARGET vegastrike-testing PROPERTY CXX_STANDARD_REQUIRED TRUE)
     SET_PROPERTY(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
     IF (WIN32)
@@ -1199,8 +1219,23 @@ IF (USE_GTEST)
         TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
-    TARGET_LINK_LIBRARIES(
-            ${TEST_NAME}
+    IF (USE_OPEN_TELEMETRY)
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC HAVE_OPEN_TELEMETRY=1)
+        TARGET_LINK_LIBRARIES(${TEST_NAME} PRIVATE
+                              opentelemetry-cpp::api
+                              opentelemetry-cpp::common
+                              opentelemetry-cpp::logs
+                              opentelemetry-cpp::metrics
+                              opentelemetry-cpp::resources
+                              opentelemetry-cpp::sdk
+                              opentelemetry-cpp::trace
+                              opentelemetry-cpp::otlp_file_exporter
+                              opentelemetry-cpp::otlp_file_metric_exporter
+                              opentelemetry-cpp::otlp_file_log_record_exporter
+                              )
+    ENDIF ()
+
+    TARGET_LINK_LIBRARIES(${TEST_NAME} PRIVATE
             ${OPENAL_LIBRARY}
             ${Vorbis_LIBRARIES}
             ${JPEG_LIBRARIES}
