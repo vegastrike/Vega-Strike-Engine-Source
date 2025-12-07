@@ -25,26 +25,26 @@ jobs:
         include:
           - FROM:     'ubuntu:questing'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-use-otel'
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'deb'
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-use-otel'
             INSTALL_SDL3: 1
             INSTALL_SDL3_IMAGE: 1
             ARTIFACT_EXT: 'deb'
           # Source tarballs only
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-use-otel'
             INSTALL_SDL3: 1
             INSTALL_SDL3_IMAGE: 1
             ARTIFACT_EXT: 'tar.[xb]z*'
           - FROM:     'linuxmintd/mint22.2-amd64'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-use-otel'
             INSTALL_SDL3: 1
             INSTALL_SDL3_IMAGE: 1
             ARTIFACT_EXT: 'deb'
@@ -52,47 +52,47 @@ jobs:
             COMPILER: 'clang'
             INSTALL_SDL3: 1
             INSTALL_SDL3_IMAGE: 1
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-use-otel'
             ARTIFACT_EXT: 'deb'
           - FROM:     'debian:trixie'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-use-otel'
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'deb'
           - FROM:     'debian:bookworm'
             COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo-use-otel'
             INSTALL_SDL3: 1
             INSTALL_SDL3_IMAGE: 1
             ARTIFACT_EXT: 'deb'
           - FROM:     'fedora:43'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-use-otel'
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:42'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-use-otel'
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:41'
             COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-use-otel'
             INSTALL_SDL3: 1
             INSTALL_SDL3_IMAGE: 1
             ARTIFACT_EXT: 'rpm'
           - FROM:     'opensuse/leap:16.0'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-use-otel'
             INSTALL_SDL3: 1
             INSTALL_SDL3_IMAGE: 1
             ARTIFACT_EXT: 'rpm'
           - FROM:     'rockylinux/rockylinux:10.0'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-fetch-use-otel'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo-use-otel'
             INSTALL_SDL3: 1
             INSTALL_SDL3_IMAGE: 1
             ARTIFACT_EXT: 'rpm'

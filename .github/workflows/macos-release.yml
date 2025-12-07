@@ -28,7 +28,7 @@ jobs:
         include:
           - os: macOS-15-intel
             build-type: RelWithDebInfo
-            preset-name: macOS-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel
+            preset-name: macOS-pie-enabled-gl-neither-RelWithDebInfo-use-otel
             python-version: 3.14.0
           - os: macOS-15-intel
             build-type: RelWithDebInfo

@@ -24,12 +24,12 @@ jobs:
         include:
           - os:              windows-2022
             triplet:         x64-win10
-            preset-name:     VS2022Win64-pie-enabled-gl-neither-debug-fetch-use-otel
+            preset-name:     VS2022Win64-pie-enabled-gl-neither-debug-use-otel
             python-version:  3.13.9
             is-release:      0
           - os:              windows-2025
             triplet:         x64-win10
-            preset-name:     VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-fetch-use-otel
+            preset-name:     VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel
             python-version:  3.13.9
             is-release:      0
           - os:              windows-2022
