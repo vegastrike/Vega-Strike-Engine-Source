@@ -2006,7 +2006,11 @@ int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
 
     // Change mouse pointer to arrow
     if(IsPlayerShip()) {
-        changeCursor(CursorType::arrow);
+        if(configuration().mouse.enabled) {
+            changeCursor(CursorType::arrow);
+        } else {
+            showCursor();
+        }
     }
 
     return whichdockport + 1;
@@ -2113,7 +2117,11 @@ bool Unit::UnDock(Unit *utdw) {
 
             // Change mouse cursor to crosshairs
             if(IsPlayerShip()) {
-                changeCursor(CursorType::crosshairs);
+                if(configuration().mouse.enabled) {
+                    changeCursor(CursorType::crosshairs);
+                } else {
+                    hideCursor();
+                }
             }
 
             return true;
