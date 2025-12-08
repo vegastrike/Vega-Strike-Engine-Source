@@ -1410,7 +1410,7 @@ void BaseComputer::recalcTitle() {
         }
     }
     //Set the string in the base title control.
-    StaticDisplay *baseTitleDisplay = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("baseTitle"));
+    StaticDisplay *baseTitleDisplay = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("BaseInfoTitle"));
     baseTitleDisplay->setText(baseTitle);
 
     //Generic player title for display
