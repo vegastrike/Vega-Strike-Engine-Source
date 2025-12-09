@@ -29,6 +29,19 @@
       "inherits": "default",
       "displayName": "Linux Default",
       "description": "Default build for Linux",
+      "environment": {
+        "VCPKG_FEATURE_FLAGS": "manifests,registries",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-sgt",
+        "VCPKG_HOST_TRIPLET": "x64-linux-sgt"
+      },
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+          "type": "FILEPATH"
+        },
+        "VCPKG_TARGET_TRIPLET": "x64-linux-sgt",
+        "VCPKG_HOST_TRIPLET": "x64-linux-sgt"
+      },
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
