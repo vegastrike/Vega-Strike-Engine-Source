@@ -90,7 +90,8 @@ function bootstrapOnDebian()
                             libwayland-dev \
                             libxkbcommon-dev \
                             wayland-protocols \
-                            libibus-1.0-dev
+                            libibus-1.0-dev \
+                            python3-jinja2
             ;;
         "bullseye"|"buster"|"stretch")
             echo "Sorry, Debian ${LINUX_CODENAME} is no longer supported"
@@ -141,7 +142,8 @@ function bootstrapOnUbuntu()
                             libwayland-dev \
                             libxkbcommon-dev \
                             wayland-protocols \
-                            libibus-1.0-dev
+                            libibus-1.0-dev \
+                            python3-jinja2
             ;;
         "jammy"|"hirsute"|"impish"|"focal"|"bionic"|"xenial")
             echo "Sorry, Ubuntu ${LINUX_CODENAME} is no longer supported"
@@ -193,7 +195,8 @@ function bootstrapOnLinuxMint ()
                             libwayland-dev \
                             libxkbcommon-dev \
                             wayland-protocols \
-                            libibus-1.0-dev
+                            libibus-1.0-dev \
+                            python3-jinja2
             ;;
         "virginia"|"victoria"|"vera"|"vanessa"|"ulyana")
             echo "Sorry, Linux Mint ${LINUX_CODENAME} is no longer supported"
@@ -239,7 +242,8 @@ function bootstrapOnOpenSuseLeap ()
                                     wayland-devel \
                                     libxkbcommon-devel \
                                     wayland-protocols-devel \
-                                    ibus-devel
+                                    ibus-devel \
+                                    python3-Jinja2
             ;;
         "16.0")
             zypper --non-interactive refresh
@@ -267,7 +271,8 @@ function bootstrapOnOpenSuseLeap ()
                                     wayland-devel \
                                     libxkbcommon-devel \
                                     wayland-protocols-devel \
-                                    ibus-devel
+                                    ibus-devel \
+                                    python313-Jinja2
             ;;
         *)
             echo "Sorry, this version of openSUSE Leap is unsupported"
@@ -314,7 +319,8 @@ function bootstrapOnFedora ()
                                 wayland-devel \
                                 libxkbcommon-devel \
                                 wayland-protocols-devel \
-                                ibus-devel
+                                ibus-devel \
+                                python3-jinja2
             ;;
         *)
             echo "Sorry, this version of Fedora is unsupported"
@@ -362,7 +368,8 @@ function bootstrapOnRedHat ()
                                 wayland-devel \
                                 libxkbcommon-devel \
                                 wayland-protocols-devel \
-                                ibus-devel
+                                ibus-devel \
+                                python3-jinja2
             ;;
         "10.0"|"10.1")
             if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
@@ -400,7 +407,8 @@ function bootstrapOnRedHat ()
                                 wayland-devel \
                                 libxkbcommon-devel \
                                 wayland-protocols-devel \
-                                ibus-devel
+                                ibus-devel \
+                                python3-jinja2
             ;;
         *)
             echo "Sorry, this version of Red Hat is unsupported"
@@ -448,7 +456,8 @@ function bootstrapOnRockyLinux ()
                                 wayland-devel \
                                 libxkbcommon-devel \
                                 wayland-protocols-devel \
-                                ibus-devel
+                                ibus-devel \
+                                python3-jinja2
             ;;
         "10.0"|"10.1")
             if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
@@ -486,7 +495,8 @@ function bootstrapOnRockyLinux ()
                                 wayland-devel \
                                 libxkbcommon-devel \
                                 wayland-protocols-devel \
-                                ibus-devel
+                                ibus-devel \
+                                python3-jinja2
             ;;
         *)
             echo "Sorry, this version of Rocky Linux is unsupported"
