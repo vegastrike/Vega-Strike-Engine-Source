@@ -1084,7 +1084,7 @@ esac
 
 mkdir -p /usr/local/src/Vega-Strike-Engine-Source
 
-if [ -z $VCPKG_ROOT ]
+if [ -z "$VCPKG_ROOT" ]
 then
     export VCPKG_ROOT="$(pwd)/../vcpkg"
 fi

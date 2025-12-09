@@ -62,7 +62,7 @@ done
 echo "Re-run bootstrap"
 ./script/bootstrap
 
-if [ -z $VCPKG_ROOT ]
+if [ -z "$VCPKG_ROOT" ]
 then
     export VCPKG_ROOT="$(pwd)/../vcpkg"
 fi

@@ -119,7 +119,7 @@ brew install vorbis-tools
 # The Apple-provided OpenAL is deprecated as of macOS 10.15
 brew install openal-soft freealut
 
-if [ -z $VCPKG_ROOT ]
+if [ -z "$VCPKG_ROOT" ]
 then
     export VCPKG_ROOT="$(pwd)/../vcpkg"
 fi
