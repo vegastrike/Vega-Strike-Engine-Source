@@ -43,14 +43,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
           update-environment: false
 
-      - name: Install dependencies using homebrew
-        run: brew install boost-python3 gtk+3 gtkglext sdl libvorbis
-
       - name: Install the latest version of Bash so we can rely on it
         run: brew install bash
 
       - name: Check out repository
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 2
           submodules: false
@@ -70,18 +67,17 @@ jobs:
 
       - name: Build it
         env:
-          COMPILER:   ${{ matrix.compiler }}
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
           PYTHONHOME: ""
           PYTHONPATH: ""
           IS_RELEASE: 1
-          INSTALL_GTEST: 0
-          USE_GTEST: 0
-          INSTALL_SDL3: 0
-          INSTALL_SDL3_IMAGE: 0
-        run: script/cibuild --preset-name=${{ matrix.preset-name }}
+          INSTALL_GTEST: false
+          USE_GTEST: false
+          INSTALL_SDL3: false
+          INSTALL_SDL3_IMAGE: false
+        run: script/cibuild --from=${{ matrix.FROM }} --preset-name=${{ matrix.preset-name }}
 
       - name: Package it
         working-directory: ${{github.workspace}}

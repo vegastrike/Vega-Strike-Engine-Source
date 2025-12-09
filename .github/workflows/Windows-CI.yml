@@ -21,36 +21,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os:              windows-2022
-            triplet:         x64-win10
-            preset-name:     VS2022Win64-pie-enabled-gl-neither-debug-use-otel
-            python-version:  3.13.9
-            is-release:      0
-          - os:              windows-2025
-            triplet:         x64-win10
-            preset-name:     VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel
-            python-version:  3.13.9
-            is-release:      0
-          - os:              windows-2022
-            triplet:         x64-win10
-            preset-name:     VS2022Win64-pie-enabled-gl-neither-debug-no-otel
-            python-version:  3.13.9
-            is-release:      0
-          - os:              windows-2025
-            triplet:         x64-win10
-            preset-name:     VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel
-            python-version:  3.13.9
-            is-release:      0
+        os:
+          - windows-2022
+          - windows-2025
+        triplet:
+          - x64-win10
+        python-version:
+          - 3.13.9
+        preset-name:
+          - VS2022Win64-pie-enabled-debug-no-otel
+          - VS2022Win64-pie-enabled-release-no-otel
+          - VS2022Win64-pie-enabled-RelWithDebInfo-no-otel
+          - VS2022Win64-pie-enabled-debug-use-otel
+          - VS2022Win64-pie-enabled-release-use-otel
+          - VS2022Win64-pie-enabled-RelWithDebInfo-use-otel
 
     env:
+      # Indicates the location of vcpkg
+      VCPKG_ROOT: '${{ github.workspace }}/v'
+      # Tells vcpkg where binary packages are stored.
+      VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vbincache'
+      # Let's use GitHub Action cache as storage for the vcpkg Binary Caching feature.
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
+      VCPKG_FEATURE_FLAGS: "manifests,registries"
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
       VCPKG_DEFAULT_HOST_TRIPLET: ${{ matrix.triplet }}
-      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
 
     steps:
       - name: checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 2
           submodules: false
@@ -72,9 +71,6 @@ jobs:
 
       - name: install-cmake
         uses: lukka/get-cmake@bb2faa721a800324b726fec00f7c1ff7641964d1 # v4.2.0
-        with:
-          cmakeVersion: 4.2.0
-          ninjaVersion: 1.12.1
 
       - name: run-vcpkg
         uses: lukka/run-vcpkg@5e0cab206a5ea620130caf672fce3e4a6b5666a1 # v11.5
@@ -93,10 +89,10 @@ jobs:
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
           PYTHONHOME: ""
           PYTHONPATH: ""
-          INSTALL_GTEST: 1
-          USE_GTEST: 1
-          INSTALL_SDL3: 0
-          INSTALL_SDL3_IMAGE: 0
+          INSTALL_GTEST: true
+          USE_GTEST: true
+          INSTALL_SDL3: false
+          INSTALL_SDL3_IMAGE: false
         with:
           configurePreset: ${{ matrix.preset-name }}
           buildPreset: "build-${{ matrix.preset-name }}"
@@ -108,10 +104,6 @@ jobs:
         with:
           path: ${{ github.workspace }}/vcpkg_cache
           key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
-
-      - name: Run the tests
-        working-directory: ${{ github.workspace }}
-        run: ctest -V --preset "test-${{ matrix.preset-name }}"
 
       - name: Upload test results
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0

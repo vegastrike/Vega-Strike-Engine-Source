@@ -58,7 +58,7 @@ jobs:
         run: brew install bash
 
       - name: Check out repository
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 2
           submodules: false
@@ -70,24 +70,24 @@ jobs:
       # installed and set it to a GHA variable that can be consumed below
       - name: Build it
         env:
-          COMPILER:   ${{ matrix.compiler }}
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
           PYTHONHOME: ""
           PYTHONPATH: ""
-          INSTALL_GTEST: 1
-          USE_GTEST: 1
-          INSTALL_SDL3: 0
-          INSTALL_SDL3_IMAGE: 0
-        run: script/cibuild --preset-name=${{ matrix.preset-name }}
+          IS_RELEASE: 0
+          INSTALL_GTEST: true
+          USE_GTEST: true
+          INSTALL_SDL3: false
+          INSTALL_SDL3_IMAGE: false
+        run: script/cibuild --from=${{ matrix.FROM }} --preset-name=${{ matrix.preset-name }}
 
       - name: Test
         working-directory: ${{github.workspace}}
         env:
           GTEST_OUTPUT: xml
           GTEST_COLOR: 1
-        run: ctest -V --preset-name=${{ matrix.preset-name }}
+        run: ctest -V --preset-name="test-${{ matrix.preset-name }}"
 
       - name: Upload test results
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
