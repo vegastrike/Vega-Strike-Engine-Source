@@ -34,9 +34,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 #v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 2
+          submodules: false
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
@@ -56,11 +57,20 @@ jobs:
         shell: bash
         env:
           COMPILER: gcc
-          INSTALL_GTEST: 0
-          USE_GTEST: 0
-          INSTALL_SDL3: 1
-          INSTALL_SDL3_IMAGE: 1
+          INSTALL_GTEST: false
+          USE_GTEST: false
+          INSTALL_SDL3: false
+          INSTALL_SDL3_IMAGE: false
           IS_RELEASE: 0
+          # Indicates the location of vcpkg
+          VCPKG_ROOT: '${{ github.workspace }}/v'
+          # Tells vcpkg where binary packages are stored.
+          VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vbincache'
+          # Let's use GitHub Action cache as storage for the vcpkg Binary Caching feature.
+          VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
+          VCPKG_FEATURE_FLAGS: "manifests,registries"
+          VCPKG_DEFAULT_TRIPLET: x64-linux-sgt
+          VCPKG_DEFAULT_HOST_TRIPLET: x64-linux-sgt
         run: |
           sudo script/bootstrap
           script/build --preset-name=linux-unix-makefiles-pie-enabled-glvnd-debug-no-otel
