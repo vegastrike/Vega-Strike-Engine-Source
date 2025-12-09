@@ -1,7 +1,7 @@
 ARG  from
 FROM ${from}
 
-WORKDIR /usr/src/Vega-Strike-Engine-Source
+WORKDIR /usr/local/src/Vega-Strike-Engine-Source
 
 COPY . .
 
