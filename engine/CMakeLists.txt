@@ -73,7 +73,7 @@ IF (NOT DISABLE_CLIENT) ##########
     SET(VSE_TST_INCLUDES ${TST_INCLUDES})
 
     #Find OpenAL
-    FIND_PACKAGE(OpenAL REQUIRED)
+    FIND_PACKAGE(OpenAL CONFIG REQUIRED)
     IF (OPENAL_FOUND)
         MESSAGE(STATUS "Found OpenAL")
         LIST(APPEND VSE_TST_INCLUDES ${OPENAL_INCLUDE_DIR})
@@ -84,14 +84,20 @@ IF (NOT DISABLE_CLIENT) ##########
     ENDIF (OPENAL_FOUND)
 
     #find Vorbis
-    FIND_PACKAGE(Vorbis REQUIRED)
+    FIND_PACKAGE(Vorbis CONFIG)
     IF (Vorbis_FOUND)
         LIST(APPEND VSE_TST_INCLUDES ${Vorbis_INCLUDE_DIRS})
         LIST(APPEND VSE_TST_LIBS ${Vorbis_LIBRARIES})
-        SET(HAVE_OGG 1)
     ELSE (Vorbis_FOUND)
         MESSAGE(WARNING "Can't find Vorbis libs")
     ENDIF (Vorbis_FOUND)
+
+    FIND_PACKAGE(Ogg CONFIG)
+    IF (Ogg_FOUND)
+        SET(HAVE_OGG 1)
+    ELSE ()
+        MESSAGE(WARNING "Can't find Ogg libs")
+    ENDIF ()
 
     #Find JPEG
     FIND_PACKAGE(JPEG REQUIRED)
@@ -734,7 +740,12 @@ IF (NOT DISABLE_CLIENT)
                           GLUT::GLUT
                           LibArchive::LibArchive
                           PNG::PNG
-                          ${VSE_TST_LIBS}
+                          ZLIB::ZLIB
+                          EXPAT::EXPAT
+                          OpenAL::OpenAL
+                          Vorbis::vorbis
+                          Vorbis::vorbisfile
+                          Ogg::ogg
                           ${Boost_LIBRARIES}
                           ${Python3_LIBRARIES}
                           $<TARGET_OBJECTS:vegastrike-engine_com>
