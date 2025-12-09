@@ -720,7 +720,6 @@ IF (NOT DISABLE_CLIENT)
                               opentelemetry-cpp::resources
                               opentelemetry-cpp::sdk
                               opentelemetry-cpp::trace
-                              opentelemetry-cpp::ostream_span_exporter
                               opentelemetry-cpp::otlp_file_exporter
                               opentelemetry-cpp::otlp_file_metric_exporter
                               opentelemetry-cpp::otlp_file_log_record_exporter
