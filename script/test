@@ -62,4 +62,8 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-GTEST_OUTPUT=xml:$(pwd)/test-results ctest -V --preset "test-${preset_name}"
+export BASE_DIR="$(pwd)"
+export TEST_BASE_DIR="${BASE_DIR}/build/${preset_name}"
+pushd "${TEST_BASE_DIR}"
+GTEST_OUTPUT=xml:${TEST_BASE_DIR}/test-results ctest -V --preset "test-${preset_name}"
+popd

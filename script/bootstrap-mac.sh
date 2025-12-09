@@ -1,10 +1,36 @@
 #!/usr/bin/env bash
+#====================================
+# @file   : bootstrap-mac.sh
+# @brief  : installs dependencies for building Vega Strike on macOS X and later
+#====================================
+# Copyright (C) 2020-2025 Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer,
+# and other Vega Strike contributors
+#
+# This file is part of Vega Strike.
+#
+# Vega Strike is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Vega Strike is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+
 set -e
+
+echo "-------------------------------------"
+echo "--- bootstrap-mac.sh | 2025-12-08 ---"
+echo "-------------------------------------"
 
 DETECT_MAC_OS_VERSION=$(sw_vers -productVersion | cut -f 1,2 -d '.')
 echo "Detected Mac OS X Version: ${DETECT_MAC_OS_VERSION}"
 
-MAC_OS_NAME="UNKOWN"
+MAC_OS_NAME="UNKNOWN"
 case "${DETECT_MAC_OS_VERSION}" in
     "10.13")
         MAC_OS_NAME="High_Sierra"
@@ -65,7 +91,11 @@ brew install \
     gtkglext \
     sdl3 \
     sdl3_image \
-    ninja
+    ninja \
+    autoconf \
+    autoconf-archive \
+    automake \
+    libtool
 
 # Reinstall some key items because it might be problematic otherwise
 brew reinstall \
@@ -88,3 +118,15 @@ brew install vorbis-tools
 
 # The Apple-provided OpenAL is deprecated as of macOS 10.15
 brew install openal-soft freealut
+
+if [ -z $VCPKG_ROOT ]
+then
+    export VCPKG_ROOT="$(pwd)/../vcpkg"
+fi
+
+git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+export PATH="$VCPKG_ROOT:$PATH"
+
+pushd "$VCPKG_ROOT"
+./bootstrap-vcpkg.sh
+popd

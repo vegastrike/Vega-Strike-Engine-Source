@@ -28,7 +28,7 @@
 set -e
 
 echo "-----------------------------------------"
-echo "--- docker-entrypoint.sh | 2025-11-27 ---"
+echo "--- docker-entrypoint.sh | 2025-12-08 ---"
 echo "-----------------------------------------"
 
 #----------------------------------
@@ -60,7 +60,12 @@ while [ $# -gt 0 ]; do
 done
 
 echo "Re-run bootstrap"
-script/bootstrap
+./script/bootstrap
+
+if [ -z $VCPKG_ROOT ]
+then
+    export VCPKG_ROOT="$(pwd)/../vcpkg"
+fi
 
 if [ "$COMPILER" == "gcc" ]
 then

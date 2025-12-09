@@ -30,7 +30,7 @@
 set -e
 
 echo "------------------------------------------"
-echo "--- bootstrap-on-linux.sh | 2025-12-01 ---"
+echo "--- bootstrap-on-linux.sh | 2025-12-08 ---"
 echo "------------------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -103,7 +103,13 @@ function bootstrapOnDebian()
                             ninja-build \
                             libaudio-dev \
                             libfribidi-dev \
-                            libwayland-dev
+                            libwayland-dev \
+                            autoconf-archive \
+                            libtool \
+                            curl \
+                            zip \
+                            unzip \
+                            tar
             ;;
         "bookworm")
             echo "Bookworm does NOT support SDL3"
@@ -1052,10 +1058,7 @@ case "${LINUX_ID}" in
     "fedora")
         bootstrapOnFedora
         ;;
-    "rhel")
-        bootstrapOnRedHat
-        ;;
-    "redhat")
+    "rhel"|"redhat")
         bootstrapOnRedHat
         ;;
     "rocky")
@@ -1079,6 +1082,18 @@ case "${LINUX_ID}" in
         ;;
 esac
 
-mkdir -p /usr/src/Vega-Strike-Engine-Source
+mkdir -p /usr/local/src/Vega-Strike-Engine-Source
+
+if [ -z $VCPKG_ROOT ]
+then
+    export VCPKG_ROOT="$(pwd)/../vcpkg"
+fi
+
+git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+export PATH="$VCPKG_ROOT:$PATH"
+
+pushd "$VCPKG_ROOT"
+./bootstrap-vcpkg.sh
+popd
 
 echo "Bootstrapping finished!"

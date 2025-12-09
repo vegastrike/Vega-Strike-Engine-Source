@@ -30,7 +30,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2025-11-27 ---"
+echo "--- bootstrap | 2025-12-08 ---"
 echo "------------------------------"
 
 platform="$(uname | tr '[:upper:]' '[:lower:]')"
@@ -40,10 +40,10 @@ case "$platform" in
         echo "Bootstrapping on Linux..."
         if [ -f ./script/bootstrap-on-linux.sh ] && [ -x ./script/bootstrap-on-linux.sh ]
         then
-            ./script/bootstrap-on-linux.sh "$1"
+            . ./script/bootstrap-on-linux.sh "$1"
         elif [ -f ./bootstrap-on-linux.sh ] && [ -x ./bootstrap-on-linux.sh ]
         then
-            ./bootstrap-on-linux.sh "$1"
+            . ./bootstrap-on-linux.sh "$1"
         else
             echo "Error locating bootstrap-on-linux.sh"
             exit 3
@@ -53,10 +53,10 @@ case "$platform" in
         echo "Bootstrapping on macOS X or later..."
         if [ -f ./script/bootstrap-mac.sh ] && [ -x ./script/bootstrap-mac.sh ]
         then
-            ./script/bootstrap-mac.sh "$1"
+            . ./script/bootstrap-mac.sh "$1"
         elif [ -f ./bootstrap-mac.sh ] && [ -x ./bootstrap-mac.sh ]
         then
-            ./bootstrap-mac.sh "$1"
+            . ./bootstrap-mac.sh "$1"
         else
             echo "Error locating bootstrap-mac.sh"
             exit 3
