@@ -78,7 +78,19 @@ function bootstrapOnDebian()
                             curl \
                             zip \
                             unzip \
-                            tar
+                            tar \
+                            libx11-dev \
+                            libxext-dev \
+                            libxfixes-dev \
+                            libxi-dev \
+                            libxmu-dev \
+                            libxrandr-dev \
+                            libxss-dev \
+                            libxtst-dev \
+                            libwayland-dev \
+                            libxkbcommon-dev \
+                            wayland-protocols \
+                            libibus-1.0-dev
             ;;
         "bullseye"|"buster"|"stretch")
             echo "Sorry, Debian ${LINUX_CODENAME} is no longer supported"
@@ -117,7 +129,19 @@ function bootstrapOnUbuntu()
                             curl \
                             zip \
                             unzip \
-                            tar
+                            tar \
+                            libx11-dev \
+                            libxext-dev \
+                            libxfixes-dev \
+                            libxi-dev \
+                            libxmu-dev \
+                            libxrandr-dev \
+                            libxss-dev \
+                            libxtst-dev \
+                            libwayland-dev \
+                            libxkbcommon-dev \
+                            wayland-protocols \
+                            libibus-1.0-dev
             ;;
         "jammy"|"hirsute"|"impish"|"focal"|"bionic"|"xenial")
             echo "Sorry, Ubuntu ${LINUX_CODENAME} is no longer supported"
@@ -157,7 +181,19 @@ function bootstrapOnLinuxMint ()
                             curl \
                             zip \
                             unzip \
-                            tar
+                            tar \
+                            libx11-dev \
+                            libxext-dev \
+                            libxfixes-dev \
+                            libxi-dev \
+                            libxmu-dev \
+                            libxrandr-dev \
+                            libxss-dev \
+                            libxtst-dev \
+                            libwayland-dev \
+                            libxkbcommon-dev \
+                            wayland-protocols \
+                            libibus-1.0-dev
             ;;
         "virginia"|"victoria"|"vera"|"vanessa"|"ulyana")
             echo "Sorry, Linux Mint ${LINUX_CODENAME} is no longer supported"
@@ -177,7 +213,7 @@ function bootstrapOnOpenSuseLeap ()
             echo "Sorry, openSUSE Leap ${LINUX_VERSION_ID} is no longer supported"
             exit 2
             ;;
-        "15.6"|"16.0")
+        "15.6")
             zypper --non-interactive refresh
             zypper --non-interactive install -y \
                                     cmake \
@@ -191,7 +227,47 @@ function bootstrapOnOpenSuseLeap ()
                                     curl \
                                     zip \
                                     unzip \
-                                    tar
+                                    tar \
+                                    libX11-devel \
+                                    xextproto-devel \
+                                    libXfixes-devel \
+                                    libXi-devel \
+                                    libXmu-devel \
+                                    libXrandr-devel \
+                                    libXss-devel \
+                                    libXtst-devel \
+                                    wayland-devel \
+                                    libxkbcommon-devel \
+                                    wayland-protocols-devel \
+                                    ibus-devel
+            ;;
+        "16.0")
+            zypper --non-interactive refresh
+            zypper --non-interactive install -y \
+                                    cmake \
+                                    gcc-c++ \
+                                    git \
+                                    rpm-build \
+                                    autoconf \
+                                    autoconf-archive \
+                                    automake \
+                                    libtool \
+                                    curl \
+                                    zip \
+                                    unzip \
+                                    tar \
+                                    libX11-devel \
+                                    xorgproto-devel \
+                                    libXfixes-devel \
+                                    libXi-devel \
+                                    libXmu-devel \
+                                    libXrandr-devel \
+                                    libXss-devel \
+                                    libXtst-devel \
+                                    wayland-devel \
+                                    libxkbcommon-devel \
+                                    wayland-protocols-devel \
+                                    ibus-devel
             ;;
         *)
             echo "Sorry, this version of openSUSE Leap is unsupported"
@@ -227,7 +303,18 @@ function bootstrapOnFedora ()
                                 unzip \
                                 tar \
                                 kernel-headers \
-                                perl
+                                perl \
+                                libX11-devel \
+                                Xorg-x11-proto-devel \
+                                libXfixes-devel \
+                                libXi-devel \
+                                libXmu-devel \
+                                libXrandr-devel \
+                                libXtst-devel \
+                                wayland-devel \
+                                libxkbcommon-devel \
+                                wayland-protocols-devel \
+                                ibus-devel
             ;;
         *)
             echo "Sorry, this version of Fedora is unsupported"
@@ -264,7 +351,18 @@ function bootstrapOnRedHat ()
                                 unzip \
                                 tar \
                                 kernel-headers \
-                                perl
+                                perl \
+                                libX11-devel \
+                                Xorg-x11-proto-devel \
+                                libXfixes-devel \
+                                libXi-devel \
+                                libXmu-devel \
+                                libXrandr-devel \
+                                libXtst-devel \
+                                wayland-devel \
+                                libxkbcommon-devel \
+                                wayland-protocols-devel \
+                                ibus-devel
             ;;
         "10.0"|"10.1")
             if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
@@ -291,7 +389,18 @@ function bootstrapOnRedHat ()
                                 unzip \
                                 tar \
                                 kernel-headers \
-                                perl
+                                perl \
+                                libX11-devel \
+                                Xorg-x11-proto-devel \
+                                libXfixes-devel \
+                                libXi-devel \
+                                libXmu-devel \
+                                libXrandr-devel \
+                                libXtst-devel \
+                                wayland-devel \
+                                libxkbcommon-devel \
+                                wayland-protocols-devel \
+                                ibus-devel
             ;;
         *)
             echo "Sorry, this version of Red Hat is unsupported"
@@ -328,7 +437,18 @@ function bootstrapOnRockyLinux ()
                                 unzip \
                                 tar \
                                 kernel-headers \
-                                perl
+                                perl \
+                                libX11-devel \
+                                Xorg-x11-proto-devel \
+                                libXfixes-devel \
+                                libXi-devel \
+                                libXmu-devel \
+                                libXrandr-devel \
+                                libXtst-devel \
+                                wayland-devel \
+                                libxkbcommon-devel \
+                                wayland-protocols-devel \
+                                ibus-devel
             ;;
         "10.0"|"10.1")
             if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
@@ -355,7 +475,18 @@ function bootstrapOnRockyLinux ()
                                 unzip \
                                 tar \
                                 kernel-headers \
-                                perl
+                                perl \
+                                libX11-devel \
+                                Xorg-x11-proto-devel \
+                                libXfixes-devel \
+                                libXi-devel \
+                                libXmu-devel \
+                                libXrandr-devel \
+                                libXtst-devel \
+                                wayland-devel \
+                                libxkbcommon-devel \
+                                wayland-protocols-devel \
+                                ibus-devel
             ;;
         *)
             echo "Sorry, this version of Rocky Linux is unsupported"
