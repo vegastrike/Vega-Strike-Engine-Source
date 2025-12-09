@@ -29,12 +29,12 @@ jobs:
         python-version:
           - 3.13.9
         preset-name:
-          - VS2022Win64-pie-enabled-debug-no-otel
-          - VS2022Win64-pie-enabled-release-no-otel
-          - VS2022Win64-pie-enabled-RelWithDebInfo-no-otel
-          - VS2022Win64-pie-enabled-debug-use-otel
-          - VS2022Win64-pie-enabled-release-use-otel
-          - VS2022Win64-pie-enabled-RelWithDebInfo-use-otel
+          - VS2022Win64-pie-enabled-gl-neither-debug-no-otel
+          - VS2022Win64-pie-enabled-gl-neither-release-no-otel
+          - VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-no-otel
+          - VS2022Win64-pie-enabled-gl-neither-debug-use-otel
+          - VS2022Win64-pie-enabled-gl-neither-release-use-otel
+          - VS2022Win64-pie-enabled-gl-neither-RelWithDebInfo-use-otel
 
     env:
       # Indicates the location of vcpkg
