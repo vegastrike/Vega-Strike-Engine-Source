@@ -32,6 +32,26 @@ jobs:
           - language: actions
             build-mode: none
 
+    env:
+      COMPILER: gcc
+      INSTALL_GTEST: false
+      USE_GTEST: false
+      INSTALL_SDL3: false
+      INSTALL_SDL3_IMAGE: false
+      IS_RELEASE: 0
+      # Indicates the location of vcpkg
+      VCPKG_ROOT: '${{ github.workspace }}/v'
+      # Tells vcpkg where binary packages are stored.
+      VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vbincache'
+      # Let's use GitHub Action cache as storage for the vcpkg Binary Caching feature.
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
+      VCPKG_FEATURE_FLAGS: "manifests,registries"
+      VCPKG_DEFAULT_TRIPLET: x64-linux-sgt
+      VCPKG_DEFAULT_HOST_TRIPLET: x64-linux-sgt
+      PYTHONHOME: ""
+      PYTHONPATH: ""
+
+
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -63,34 +83,34 @@ jobs:
           python-version: ${{ matrix.python-version }}
           update-environment: false
 
-      # If the analyze step fails for one of the languages you are analyzing with
-      # "We were unable to automatically build your code", modify the matrix above
-      # to set the build mode to "manual" for that language. Then modify this step
-      # to build your code.
-      # ℹ️ Command-line programs to run using the OS shell.
-      # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-      - name: Run manual build steps
+      - name: Bootstrap
         if: matrix.build-mode == 'manual'
         shell: bash
+        run: sudo script/bootstrap
+
+      - name: install-cmake
+        if: matrix.build-mode == 'manual'
+        uses: lukka/get-cmake@bb2faa721a800324b726fec00f7c1ff7641964d1 # v4.2.0
+
+      - name: run-vcpkg
+        if: matrix.build-mode == 'manual'
+        uses: lukka/run-vcpkg@5e0cab206a5ea620130caf672fce3e4a6b5666a1 # v11.5
         env:
-          COMPILER: gcc
-          INSTALL_GTEST: false
-          USE_GTEST: false
-          INSTALL_SDL3: false
-          INSTALL_SDL3_IMAGE: false
-          IS_RELEASE: 0
-          # Indicates the location of vcpkg
-          VCPKG_ROOT: '${{ github.workspace }}/v'
-          # Tells vcpkg where binary packages are stored.
-          VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vbincache'
-          # Let's use GitHub Action cache as storage for the vcpkg Binary Caching feature.
-          VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
-          VCPKG_FEATURE_FLAGS: "manifests,registries"
-          VCPKG_DEFAULT_TRIPLET: x64-linux-sgt
-          VCPKG_DEFAULT_HOST_TRIPLET: x64-linux-sgt
-        run: |
-          sudo script/bootstrap
-          script/build --preset-name=linux-unix-makefiles-pie-enabled-glvnd-debug-no-otel
+          Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
+          Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
+          pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
+
+      - name: run-cmake
+        if: matrix.build-mode == 'manual'
+        uses: lukka/run-cmake@af1be47fd7c933593f687731bc6fdbee024d3ff4 # v10.8
+        env:
+          Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
+          Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
+          pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
+        with:
+          configurePreset: "linux-unix-makefiles-pie-enabled-glvnd-debug-no-otel"
+          buildPreset: "build-linux-unix-makefiles-pie-enabled-glvnd-debug-no-otel"
+          #testPreset: "test-linux-unix-makefiles-pie-enabled-glvnd-debug-no-otel"
 
       - name: Save vcpkg cache
         if: matrix.build-mode == 'manual'
