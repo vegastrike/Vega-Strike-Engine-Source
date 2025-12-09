@@ -208,6 +208,18 @@
       "displayName": "macOS Default",
       "inherits": "default",
       "hidden": true,
+      "environment": {
+        "VERBOSE": "ON"
+      },
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "value": "cmake/Homebrew.cmake",
+          "type": "FILEPATH"
+        },
+        "CMAKE_FIND_FRAMEWORK": "LAST",
+        "INSTALL_GTEST": "OFF",
+        "USE_GTEST": "OFF"
+      },
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
