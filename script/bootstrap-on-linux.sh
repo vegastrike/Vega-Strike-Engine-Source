@@ -305,7 +305,7 @@ function bootstrapOnFedora ()
                                 kernel-headers \
                                 perl \
                                 libX11-devel \
-                                Xorg-x11-proto-devel \
+                                xorg-x11-proto-devel \
                                 libXfixes-devel \
                                 libXi-devel \
                                 libXmu-devel \
@@ -353,7 +353,7 @@ function bootstrapOnRedHat ()
                                 kernel-headers \
                                 perl \
                                 libX11-devel \
-                                Xorg-x11-proto-devel \
+                                xorg-x11-proto-devel \
                                 libXfixes-devel \
                                 libXi-devel \
                                 libXmu-devel \
@@ -391,7 +391,7 @@ function bootstrapOnRedHat ()
                                 kernel-headers \
                                 perl \
                                 libX11-devel \
-                                Xorg-x11-proto-devel \
+                                xorg-x11-proto-devel \
                                 libXfixes-devel \
                                 libXi-devel \
                                 libXmu-devel \
@@ -439,7 +439,7 @@ function bootstrapOnRockyLinux ()
                                 kernel-headers \
                                 perl \
                                 libX11-devel \
-                                Xorg-x11-proto-devel \
+                                xorg-x11-proto-devel \
                                 libXfixes-devel \
                                 libXi-devel \
                                 libXmu-devel \
@@ -477,7 +477,7 @@ function bootstrapOnRockyLinux ()
                                 kernel-headers \
                                 perl \
                                 libX11-devel \
-                                Xorg-x11-proto-devel \
+                                xorg-x11-proto-devel \
                                 libXfixes-devel \
                                 libXi-devel \
                                 libXmu-devel \
