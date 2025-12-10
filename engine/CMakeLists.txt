@@ -746,6 +746,7 @@ IF (NOT DISABLE_CLIENT)
                           Vorbis::vorbis
                           Vorbis::vorbisfile
                           Ogg::ogg
+                          ${JPEG_LIBRARIES}
                           ${Boost_LIBRARIES}
                           ${Python3_LIBRARIES}
                           $<TARGET_OBJECTS:vegastrike-engine_com>
