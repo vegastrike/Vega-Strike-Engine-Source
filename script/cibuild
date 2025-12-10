@@ -3,7 +3,7 @@
 # @file   : cibuild
 # @brief  : Builds Vega Strike for purposes of CI/CD (GitHub Actions)
 # @usage  : ./script/cibuild --preset-name=VS2022Win64-pie-enabled-RelWithDebInfo
-# @param  : --preset-name=..., --build-type=...
+# @param  : --preset-name=..., --build-type=..., --from=...
 #====================================
 ##
 # cibuild
@@ -31,7 +31,7 @@
 set -e
 
 echo "----------------------------"
-echo "--- cibuild | 2025-11-27 ---"
+echo "--- cibuild | 2025-12-09 ---"
 echo "----------------------------"
 
 #----------------------------------
@@ -107,10 +107,12 @@ case "$platform" in
         echo "Running docker image for $from / $COMPILER"
         docker run --env CC="$CC" --env CXX="$CXX" --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env INSTALL_SDL3=$INSTALL_SDL3 --env INSTALL_SDL3_IMAGE=$INSTALL_SDL3_IMAGE --env TAG_NAME="$TAG_NAME" --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA="$SHORT_SHA" --env PRESET_NAME="$PRESET_NAME" --name "$DOCKER_CONTAINER_NAME" "$DST_DOCKER_IMG_NAME"
         docker cp "$DOCKER_CONTAINER_NAME":/usr/local/src/Vega-Strike-Engine-Source/bin .
-        if [ $IS_RELEASE -eq 1 ]
+        if docker exec "$DOCKER_CONTAINER_NAME" [ -d /usr/local/src/Vega-Strike-Engine-Source/packages ]
         then
             docker cp "$DOCKER_CONTAINER_NAME":/usr/local/src/Vega-Strike-Engine-Source/packages .
-        else
+        fi
+        if docker exec "$DOCKER_CONTAINER_NAME" [ -d /usr/local/src/Vega-Strike-Engine-Source/test-results ]
+        then
             docker cp "$DOCKER_CONTAINER_NAME":/usr/local/src/Vega-Strike-Engine-Source/test-results .
         fi
         docker rm "$DOCKER_CONTAINER_NAME"
