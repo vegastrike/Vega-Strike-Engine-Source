@@ -72,15 +72,15 @@ jobs:
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ github.workspace }}/vcpkg_cache
-          key: vcpkg-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-${{ matrix.os }}-${{ matrix.triplet }}-
+          key: vcpkg-ubuntu-24.04-x64-linux-sgt-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-ubuntu-24.04-x64-linux-sgt-
 
       - name: Setup Python
         if: matrix.build-mode == 'manual'
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         id: vega-py-setup
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.14.0
           update-environment: false
 
       - name: Bootstrap
@@ -99,6 +99,8 @@ jobs:
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
+          PYTHONHOME: ""
+          PYTHONPATH: ""
 
       - name: run-cmake
         if: matrix.build-mode == 'manual'
@@ -107,6 +109,12 @@ jobs:
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
+          PYTHONHOME: ""
+          PYTHONPATH: ""
+          INSTALL_GTEST: false
+          USE_GTEST: false
+          INSTALL_SDL3: false
+          INSTALL_SDL3_IMAGE: false
         with:
           configurePreset: "linux-unix-makefiles-pie-enabled-glvnd-debug-no-otel"
           buildPreset: "build-linux-unix-makefiles-pie-enabled-glvnd-debug-no-otel"
