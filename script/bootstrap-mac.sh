@@ -60,7 +60,7 @@ case "${DETECT_MAC_OS_VERSION}" in
     "13.0"|"13.1"|"13.2"|"13.3"|"13.4"|"13.5"|"13.6"|"13.7")
         MAC_OS_NAME="Ventura"
         ;;
-    "14.0"|"14.1"|"14.2"|"14.3"|"14.4"|"14.5"|"14.6"|"14.7")
+    "14.0"|"14.1"|"14.2"|"14.3"|"14.4"|"14.5"|"14.6"|"14.7"|"14.8")
         MAC_OS_NAME="Sonoma"
         ;;
     "15.0"|"15.1"|"15.2"|"15.3"|"15.4"|"15.5"|"15.6"|"15.7")
@@ -135,7 +135,10 @@ then
     export VCPKG_ROOT="$(pwd)/../vcpkg"
 fi
 
-git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+if [ ! -d "$VCPKG_ROOT" ]
+then
+  git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+fi
 export PATH="$VCPKG_ROOT:$PATH"
 
 pushd "$VCPKG_ROOT"
