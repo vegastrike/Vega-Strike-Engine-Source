@@ -28,7 +28,7 @@
 set -e
 
 echo "-----------------------------------------"
-echo "--- docker-entrypoint.sh | 2025-12-08 ---"
+echo "--- docker-entrypoint.sh | 2025-12-11 ---"
 echo "-----------------------------------------"
 
 #----------------------------------
@@ -82,11 +82,11 @@ then
   preset_name="${PRESET_NAME}"
 fi
 
-script/build --preset_name="${preset_name}"
+./script/build --preset_name="${preset_name}"
 
 if [ $IS_RELEASE -eq 1 ]
 then
-  script/package --preset_name="${preset_name}"
+  ./script/package --preset_name="${preset_name}"
 else
-  script/test --preset_name="${preset_name}"
+  ./script/test --preset_name="${preset_name}"
 fi

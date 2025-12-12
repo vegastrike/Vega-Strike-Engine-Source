@@ -31,7 +31,7 @@
 set -e
 
 echo "----------------------------"
-echo "--- cibuild | 2025-12-09 ---"
+echo "--- cibuild | 2025-12-11 ---"
 echo "----------------------------"
 
 #----------------------------------
@@ -118,64 +118,7 @@ case "$platform" in
         docker rm "$DOCKER_CONTAINER_NAME"
         ;;
     "darwin")
-        # setup the environment for Homebrew
-        BUILD_WITH_PYTHON_VERSION="3.14.0"
-
-        HOMEBREW_PREFIX="$(brew --prefix)"
-        HOMEBREW_BIN="${HOMEBREW_PREFIX}/bin"
-        HOMEBREW_PYTHON_BIN="$(brew --prefix python)/libexec/bin"
-
-        # NOTE: we do not support builds on MacOS ARM right now as there are some linker errors.
-        #   Any help in making those work would be appreciated.
-
-        echo "Build With Python Version: ${BUILD_WITH_PYTHON_VERSION}"
-        echo "          Homebrew Prefix: ${HOMEBREW_PREFIX}"
-        echo "             Homebrew Bin: ${HOMEBREW_BIN}"
-        echo "      Homebrew Python Bin: ${HOMEBREW_PYTHON_BIN}"
-
-        # Homebrew tooling needs to come first in the path search
-        export PATH=${HOMEBREW_BIN}:${HOMEBREW_PYTHON_BIN}:${PATH}
-
-        HOMEBREW_PYTHON_VERSION=$("${HOMEBREW_BIN}"/python${BUILD_WITH_PYTHON_VERSION} -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-        echo "  Detected Python Version: ${HOMEBREW_PYTHON_VERSION}"
-
-        # Ensure it uses the correct Python version
-        # Do not set PYTHONHOME or PYTHONPATH; otherwise some odd errors will come up as
-        # it's not necessary
-        export HOMEBREW_PYTHON3_CFLAGS="$(${HOMEBREW_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --cflags)"
-        export HOMEBREW_PYTHON3_LDFLAGS="$(${HOMEBREW_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --ldflags)"
-        echo "   Homebrew Python CFlags: ${HOMEBREW_PYTHON3_CFLAGS}"
-        echo "  Homebrew Python LDFlags: ${HOMEBREW_PYTHON3_LDFLAGS}"
-
-        export HOMEBREW_LIBARCHIVE_PREFIX="$(brew --prefix libarchive)"
-        export PKG_CONFIG_PATH="${HOMEBREW_LIBARCHIVE_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
-        export HOMEBREW_LIBARCHIVE_CFLAGS="-I${HOMEBREW_LIBARCHIVE_PREFIX}/include"
-        export HOMEBREW_LIBARCHIVE_LDFLAGS="-L${HOMEBREW_LIBARCHIVE_PREFIX}/lib"
-        echo "   Homebrew LibArchive CFlags: ${HOMEBREW_LIBARCHIVE_CFLAGS}"
-        echo "  Homebrew LibArchive LDFlags: ${HOMEBREW_LIBARCHIVE_LDFLAGS}"
-
-        echo " ========================================================================"
-        echo " LIBARCHIVE DIAGNOSTIC"
-        echo " LIBARCHIVE path prefix: ${HOMEBREW_LIBARCHIVE_PREFIX}"
-        ls "${HOMEBREW_LIBARCHIVE_PREFIX}"
-
-        echo " LIBARCHIVE include: ${HOMEBREW_LIBARCHIVE_PREFIX}/include contents:"
-        ls "${HOMEBREW_LIBARCHIVE_PREFIX}"/include
-
-        echo " LIBARCHIVE lib: ${HOMEBREW_LIBARCHIVE_PREFIX}/lib contents:"
-        ls "${HOMEBREW_LIBARCHIVE_PREFIX}"/lib
-        echo " ========================================================================"
-
-
-        # Homebrew needs certain flags set so its installation parts are found
-        export CFLAGS="-I${HOMEBREW_PREFIX}/include ${HOMEBREW_PYTHON3_CFLAGS} ${HOMEBREW_LIBARCHIVE_CFLAGS} ${CFLAGS}"
-        export LDFLAGS="-L${HOMEBREW_PREFIX}/lib ${HOMEBREW_PYTHON3_LDFLAGS} ${HOMEBREW_LIBARCHIVE_LDFLAGS} ${LDFLAGS}"
-        echo "                   CFlags: ${CFLAGS}"
-        echo "                  LDFlags: ${LDFLAGS}"
-
-        script/build --preset-name="${preset_name}"
-        # On macOS, the following is done by the calling CI workflow
-        # ctest -V
+        script/docker-entrypoint.sh --preset_name="${preset_name}"
         ;;
     *)
         echo "Sorry, unrecognized or unsupported operating system"

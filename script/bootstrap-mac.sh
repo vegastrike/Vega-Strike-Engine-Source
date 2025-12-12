@@ -24,7 +24,7 @@
 set -e
 
 echo "-------------------------------------"
-echo "--- bootstrap-mac.sh | 2025-12-08 ---"
+echo "--- bootstrap-mac.sh | 2025-12-11 ---"
 echo "-------------------------------------"
 
 DETECT_MAC_OS_VERSION=$(sw_vers -productVersion | cut -f 1,2 -d '.')
@@ -92,6 +92,11 @@ brew install \
     sdl3 \
     sdl3_image \
     ninja \
+    abseil \
+    nlohmann-json \
+    protobuf-c \
+    re2 \
+    grpc \
     autoconf \
     autoconf-archive \
     automake \
