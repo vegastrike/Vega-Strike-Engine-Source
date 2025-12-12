@@ -126,7 +126,8 @@ function bootstrapOnDebian()
                             libaudio-dev \
                             libfribidi-dev \
                             libglu1-mesa-dev \
-                            mesa-common-dev
+                            mesa-common-dev \
+                            libltdl-dev
             ;;
         "bookworm")
             echo "Bookworm does NOT support SDL3"
@@ -195,7 +196,8 @@ function bootstrapOnDebian()
                             libaudio-dev \
                             libfribidi-dev \
                             libglu1-mesa-dev \
-                            mesa-common-dev
+                            mesa-common-dev \
+                            libltdl-dev
             ;;
         "bullseye"|"buster"|"stretch")
             echo "Sorry, Debian ${LINUX_CODENAME} is no longer supported"
@@ -282,7 +284,8 @@ function bootstrapOnUbuntu()
                             libaudio-dev \
                             libfribidi-dev \
                             libglu1-mesa-dev \
-                            mesa-common-dev
+                            mesa-common-dev \
+                            libltdl-dev
             ;;
         "noble")
             echo "Noble does NOT support SDL3"
@@ -346,7 +349,8 @@ function bootstrapOnUbuntu()
                             libaudio-dev \
                             libfribidi-dev \
                             libglu1-mesa-dev \
-                            mesa-common-dev
+                            mesa-common-dev \
+                            libltdl-dev
             ;;
         "jammy"|"hirsute"|"impish"|"focal"|"bionic"|"xenial")
             echo "Sorry, Ubuntu ${LINUX_CODENAME} is no longer supported"
@@ -431,7 +435,8 @@ function bootstrapOnLinuxMint ()
                             libaudio-dev \
                             libfribidi-dev \
                             libglu1-mesa-dev \
-                            mesa-common-dev
+                            mesa-common-dev \
+                            libltdl-dev
             ;;
         "virginia"|"victoria"|"vera"|"vanessa"|"ulyana")
             echo "Sorry, Linux Mint ${LINUX_CODENAME} is no longer supported"
@@ -508,7 +513,9 @@ function bootstrapOnOpenSuseLeap ()
                                     python3-devel \
                                     clang \
                                     glu-devel \
-                                    Mesa-devel
+                                    Mesa-devel \
+                                    libtool \
+                                    libltdl7
             ;;
         "16.0")
             zypper --non-interactive refresh
@@ -567,7 +574,9 @@ function bootstrapOnOpenSuseLeap ()
                                     python3-devel \
                                     clang \
                                     glu-devel \
-                                    Mesa-devel
+                                    Mesa-devel \
+                                    libtool \
+                                    libltdl7
             ;;
         *)
             echo "Sorry, this version of openSUSE Leap is unsupported"
@@ -632,7 +641,8 @@ function bootstrapOnFedora ()
                             rpm-build \
                             clang \
                             fribidi-devel \
-                            mesa-libGLU-devel
+                            mesa-libGLU-devel \
+                            libtool-ltdl-devel
     else
         echo "Sorry, Fedora ${LINUX_VERSION_ID} is no longer supported"
         exit 2
@@ -697,7 +707,8 @@ function bootstrapOnRedHat ()
                                 libarchive-devel \
                                 clang \
                                 fribidi-devel \
-                                mesa-libGLU-devel
+                                mesa-libGLU-devel \
+                                libtool-ltdl-devel
             ;;
         "10.0"|"10.1")
             if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
@@ -755,7 +766,8 @@ function bootstrapOnRedHat ()
                                 libarchive-devel \
                                 clang \
                                 fribidi-devel \
-                                mesa-libGLU-devel
+                                mesa-libGLU-devel \
+                                libtool-ltdl-devel
             ;;
         *)
             echo "Sorry, this version of Red Hat is unsupported"
@@ -822,7 +834,8 @@ function bootstrapOnRockyLinux ()
                                 libarchive-devel \
                                 clang \
                                 fribidi-devel \
-                                mesa-libGLU-devel
+                                mesa-libGLU-devel \
+                                libtool-ltdl-devel
             ;;
         "10.0"|"10.1")
             if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
@@ -880,7 +893,8 @@ function bootstrapOnRockyLinux ()
                                 libarchive-devel \
                                 clang \
                                 fribidi-devel \
-                                mesa-libGLU-devel
+                                mesa-libGLU-devel \
+                                libtool-ltdl-devel
             ;;
         *)
             echo "Sorry, this version of Rocky Linux is unsupported"
