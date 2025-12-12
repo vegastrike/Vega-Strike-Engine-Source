@@ -23,23 +23,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: macOS-15-intel
-            build-type: Debug
-            preset-name: macOS-pie-enabled-gl-neither-debug-use-otel
-            python-version: 3.14.0
-          - os: macOS-15-intel
-            build-type: RelWithDebInfo
-            preset-name: macOS-pie-enabled-gl-neither-RelWithDebInfo-use-otel
-            python-version: 3.14.0
-          - os: macOS-15-intel
-            build-type: Debug
-            preset-name: macOS-pie-enabled-gl-neither-debug-no-otel
-            python-version: 3.14.0
-          - os: macOS-15-intel
-            build-type: RelWithDebInfo
-            preset-name: macOS-pie-enabled-gl-neither-RelWithDebInfo-no-otel
-            python-version: 3.14.0
+        os:
+          - macOS-14
+          - macOS-15
+          - macOS-15-intel
+        build-type:
+          - RelWithDebInfo
+        preset-name:
+          - macOS-pie-enabled-gl-neither-RelWithDebInfo-use-otel
+          - macOS-pie-enabled-gl-neither-RelWithDebInfo-no-otel
+        python-version:
+          - 3.13.9
 
     steps:
       - name: Setup Python
@@ -80,7 +74,7 @@ jobs:
           USE_GTEST: true
           INSTALL_SDL3: false
           INSTALL_SDL3_IMAGE: false
-        run: script/cibuild --from=${{ matrix.FROM }} --preset-name=${{ matrix.preset-name }}
+        run: script/cibuild --preset-name=${{ matrix.preset-name }}
 
       - name: Test
         working-directory: ${{github.workspace}}
