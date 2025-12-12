@@ -119,7 +119,7 @@ case "$platform" in
         ;;
     "darwin")
         # setup the environment for Homebrew
-        BUILD_WITH_PYTHON_VERSION="3.13.9"
+        BUILD_WITH_PYTHON_VERSION="3.14.0"
 
         HOMEBREW_PREFIX="$(brew --prefix)"
         HOMEBREW_BIN="${HOMEBREW_PREFIX}/bin"
