@@ -115,8 +115,14 @@ brew ls --versions cmake || brew install cmake
 brew install mesa-glu freeglut
 
 # Keep these lines! Otherwise you will likely get PFNGL... not found errors.
-ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/OpenGL"
-ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/GLUT"
+if [ ! -d "$(brew --prefix)/include/OpenGL" ]
+then
+  ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/OpenGL"
+fi
+if [ ! -d "$(brew --prefix)/include/GLUT" ]
+then
+  ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/GLUT"
+fi
 
 # MacOS 13+ needs Vorbis support
 brew install vorbis-tools
