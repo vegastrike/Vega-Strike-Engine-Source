@@ -63,8 +63,8 @@ brew install \
     libpng \
     gtk+3 \
     gtkglext \
-    sdl2 \
-    sdl2_image \
+    sdl3 \
+    sdl3_image \
     ninja
 
 # Reinstall some key items because it might be problematic otherwise

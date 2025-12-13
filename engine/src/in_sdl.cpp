@@ -110,10 +110,10 @@ void BindDigitalHatswitchKey(int joystick, int key, int dir, KBHandler handler, 
 
 void ProcessJoystick(int whichplayer) {
     float x, y, z;
-    int buttons;
+    long long buttons;
 #ifdef HAVE_SDL
 #ifndef NO_SDL_JOYSTICK
-    SDL_JoystickUpdate();     //FIXME isn't this supposed to be called already by SDL?
+    // SDL_UpdateJoysticks();     //FIXME isn't this supposed to be called already by SDL?
 #endif
 #endif
     for (int i = whichplayer; i < whichplayer + 1 && i < MAX_JOYSTICKS; i++) {
@@ -126,7 +126,7 @@ void ProcessJoystick(int whichplayer) {
 #else
                 unsigned char
 #endif
-                        hsw = joystick[i]->digital_hat[h];
+                hsw = joystick[i]->digital_hat[h];
                 if (joystick[i]->debug_digital_hatswitch) {
                     VS_LOG(debug, (boost::format("hsw: %1$d") % hsw));
                 }
@@ -190,17 +190,19 @@ void ProcessJoystick(int whichplayer) {
             for (int j = 0; j < NUMJBUTTONS; j++) {
                 KBSTATE *state = &JoystickState[JOYSTICK_SWITCH][i][j];
                 JSHandlerCall *handler = &JoystickBindings[JOYSTICK_SWITCH][i][j];
-                if ((buttons & (1 << j))) {
+                if ((buttons & (1LL << j))) {
                     if (*state == UP) {
                         (*handler->function)
                                 (handler->data, PRESS);
                         *state = DOWN;
+                        VS_LOG(trace, (boost::format("Player [%1%] JS Button Down %2%") % i % j));
                     }
                 } else {
                     if (*state == DOWN) {
                         (*handler->function)(handler->data, RELEASE);
                     }
                     *state = UP;
+                    VS_LOG(trace, (boost::format("Player [%1%] JS Button Up %2%") % i % j));
                 }
                 (*handler->function)(handler->data, *state);
             }
