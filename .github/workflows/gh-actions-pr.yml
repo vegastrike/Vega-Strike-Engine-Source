@@ -91,7 +91,7 @@ jobs:
             INSTALL_SDL3: 1
             INSTALL_SDL3_IMAGE: 1
             allow_failure: false
-          - FROM:     'rockylinux/rockylinux:10.1
+          - FROM:     'rockylinux/rockylinux:10.1'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             INSTALL_GTEST: 1
