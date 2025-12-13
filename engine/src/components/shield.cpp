@@ -34,7 +34,6 @@
 #include "src/vs_logging.h"
 #include "damage/damage.h"
 #include "src/vega_cast_utils.h"
-#include "src/vegastrike.h"
 
 #include <boost/format.hpp>
 
