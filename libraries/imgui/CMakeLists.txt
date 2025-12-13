@@ -34,8 +34,8 @@ ADD_LIBRARY(vegastrike_imgui STATIC
     imgui_tables.cpp
     imgui_widgets.cpp
     
-    backends/imgui_impl_sdl2.cpp
-    backends/imgui_impl_sdlrenderer2.cpp
+    backends/imgui_impl_sdl3.cpp
+    backends/imgui_impl_sdlrenderer3.cpp
 )
 
 SET_PROPERTY(TARGET vegastrike_imgui PROPERTY CXX_STANDARD 14)
