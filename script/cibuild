@@ -102,7 +102,7 @@ case "$platform" in
         echo "Building docker image for $from / $COMPILER"
         docker build --build-arg from="$SRC_DOCKER_IMG_NAME" -t "$DST_DOCKER_IMG_NAME" .
         echo "Running docker image for $from / $COMPILER"
-        docker run --env CC="$CC" --env CXX="$CXX" --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env TAG_NAME="$TAG_NAME" --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA="$SHORT_SHA" --env PRESET_NAME="$PRESET_NAME" --name "$DOCKER_CONTAINER_NAME" "$DST_DOCKER_IMG_NAME"
+        docker run --env CC="$CC" --env CXX="$CXX" --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env INSTALL_SDL3=$INSTALL_SDL3 --env INSTALL_SDL3_IMAGE=$INSTALL_SDL3_IMAGE --env TAG_NAME="$TAG_NAME" --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA="$SHORT_SHA" --env PRESET_NAME="$PRESET_NAME" --name "$DOCKER_CONTAINER_NAME" "$DST_DOCKER_IMG_NAME"
         docker cp "$DOCKER_CONTAINER_NAME":/usr/src/Vega-Strike-Engine-Source/bin .
         if [ $IS_RELEASE -eq 1 ]
         then
