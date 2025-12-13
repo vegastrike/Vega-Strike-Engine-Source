@@ -60,12 +60,6 @@ jobs:
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'deb'
-          - FROM:     'debian:bookworm'
-            COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
-            INSTALL_SDL3: 1
-            INSTALL_SDL3_IMAGE: 1
-            ARTIFACT_EXT: 'deb'
           - FROM:     'fedora:43'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
@@ -78,19 +72,13 @@ jobs:
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'rpm'
-          - FROM:     'fedora:41'
-            COMPILER: 'clang'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
-            INSTALL_SDL3: 1
-            INSTALL_SDL3_IMAGE: 1
-            ARTIFACT_EXT: 'rpm'
           - FROM:     'opensuse/leap:16.0'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             INSTALL_SDL3: 1
             INSTALL_SDL3_IMAGE: 1
             ARTIFACT_EXT: 'rpm'
-          - FROM:     'rockylinux/rockylinux:10.0'
+          - FROM:     'rockylinux/rockylinux:10.1'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             INSTALL_SDL3: 1
