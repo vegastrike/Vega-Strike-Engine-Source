@@ -69,6 +69,12 @@
 #include "audio/SceneManager.h"
 #include "gldrv/mouse_cursor.h"
 
+#include "imgui/imgui.h"
+#include "libraries/gui/gui.h"
+#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_sdlrenderer2.h"
+
 // shows the offset on the lower edge of the screen (for the text line there)
 constexpr double kYLower = -0.9;
 
@@ -672,6 +678,15 @@ int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y) {
     return -1;
 }
 
+static const ImGuiWindowFlags window_flags = 
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoBackground |
+        ImGuiWindowFlags_NoDecoration;   // makes it transparent
+
 BaseInterface *BaseInterface::CurrentBase = nullptr;
 
 bool RefreshGUI(void) {
@@ -706,7 +721,31 @@ void base_main_loop() {
         createdbase = false;
         AUDStopAllSounds(createdmusic);
     }
-    if (!RefreshGUI()) {
+
+    // ImGui Init
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+    // End ImGui Init
+
+    ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
+    const ImVec2 window_size(configuration().graphics.resolution_x,
+                             configuration().graphics.resolution_y);
+    ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
+    ImGui::Begin("main_window", nullptr, window_flags);
+    
+    bool refresh_result = RefreshGUI();
+
+    // ImGui End Frame
+    ImGui::End();
+    // Rendering
+    ImGui::Render();
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    SDL_GL_SwapWindow(current_window);
+    // End ImGui
+
+    if (!refresh_result) {
         restore_main_loop();
     } else {
         GFXEndScene();
