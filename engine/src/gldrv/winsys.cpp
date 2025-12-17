@@ -211,7 +211,7 @@ SDL_Rect usable_logical_window_size{};
 
 /*---------------------------------------------------------------------------*/
 // pmx-20251026
-bool get_sdl_display_name_by_nr(int screen_number, std::string& screen_name, SDL_DisplayID& id) {
+bool get_sdl_display_name_by_number(int screen_number, std::string& screen_name, SDL_DisplayID& id) {
     std::ostringstream display_names;
     int num_displays = 0;
     bool found = false;
@@ -232,19 +232,42 @@ bool get_sdl_display_name_by_nr(int screen_number, std::string& screen_name, SDL
     return found;
 }
 
+#define VS_LOG_SDL_ERROR(operation)                                                                                         \
+    do {                                                                                                                    \
+        const std::string log_msg = (boost::format("%1%:%2%: %3%: %4% encountered SDL Error %5%") % __FILE__ % __LINE__    \
+                % __FUNCTION__ % (operation) % SDL_GetError()).str();                                                       \
+        VegaStrikeLogging::VegaStrikeLogger::instance().LogAndFlush(VegaStrikeLogging::vega_log_level::error, log_msg);     \
+        SDL_ClearError();                                                                                                   \
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());                                                  \
+    } while (false)
+#define VS_LOG_SDL_SUCCESS(operation)                                                                                       \
+    do {                                                                                                                    \
+        const std::string log_msg = (boost::format("%1%:%2%: %3%: %4% succeeded") % __FILE__ % __LINE__ % __FUNCTION__      \
+                % (operation)).str();                                                                                       \
+        VegaStrikeLogging::VegaStrikeLogger::instance().LogAndFlush(VegaStrikeLogging::vega_log_level::important_info,      \
+                log_msg);                                                                                                   \
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());                                                   \
+    } while (false)
+#define VS_LOG_SDL_INFO(message)                                                                                            \
+    do {                                                                                                                    \
+        const std::string log_msg = (boost::format("%1%:%2%: %3%: %4%") % __FILE__ % __LINE__ % __FUNCTION__                \
+                % (message)).str();                                                                                         \
+        VegaStrikeLogging::VegaStrikeLogger::instance().LogAndFlush(VegaStrikeLogging::vega_log_level::important_info,      \
+                log_msg);                                                                                                   \
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());                                                   \
+    } while (false)
+
 static bool try_creating_window_and_renderer(const char *title, const int width, const int height,
                                              const char *render_driver_hint, const Uint32 video_flags,
                                              SDL_Window **window, SDL_Renderer **renderer) {
     *window = nullptr;
     *renderer = nullptr;
 
+    const std::string operation_description = (boost::format("SDL_SetHint(SDL_HINT_RENDER_DRIVER, %1%)") % render_driver_hint).str();
     if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, render_driver_hint)) {
-        VS_LOG_AND_FLUSH(important_info,
-                         (boost::format("SDL_SetHint(SDL_HINT_RENDER_DRIVER, %1%) succeeded") % render_driver_hint));
+        VS_LOG_SDL_SUCCESS(operation_description);
     } else {
-        VS_LOG_AND_FLUSH(error, (boost::format("SDL_SetHint(SDL_HINT_RENDER_DRIVER, %1%) failed") % render_driver_hint))
-        ;
-        SDL_ClearError();
+        VS_LOG_SDL_ERROR(operation_description);
     }
 
     return SDL_CreateWindowAndRenderer(title, width, height, video_flags, window, renderer);
@@ -284,97 +307,75 @@ static bool get_screen_measurements() {
     int screen_number = configuration().graphics.screen;
     bool full_screen = configuration().graphics.full_screen;
 
-    if (get_sdl_display_name_by_nr(screen_number, screen_name, instance_ID)) {
-        const std::string log_msg = (boost::format("%1%: screen number: %2%; screen name: %3%; instance ID: %4%") % __FUNCTION__ % screen_number % screen_name % instance_ID).str();
-        VS_LOG_AND_FLUSH(important_info, log_msg);
-        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+    std::string operation_description = (boost::format("get_sdl_display_name_by_number(%1%, screen_name, instance_ID)") % screen_number).str();
+    if (get_sdl_display_name_by_number(screen_number, screen_name, instance_ID)) {
+        VS_LOG_SDL_SUCCESS(operation_description);
     } else {
-        const std::string log_msg = (boost::format("%1%: get_sdl_display_name_by_nr(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
-        VS_LOG_AND_FLUSH(error, log_msg);
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
-        SDL_ClearError();
+        VS_LOG_SDL_ERROR(operation_description);
         return false;
     }
 
     {
-        const std::string log_msg = (boost::format("%1%: configured width: %2%; configured height: %3%; full screen configured: %4%") % __FUNCTION__ % configured_width % configured_height % full_screen).str();
-        VS_LOG_AND_FLUSH(important_info, log_msg);
-        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        VS_LOG_SDL_INFO(
+            (boost::format("configured width: %1%; configured height: %2%; full screen configured: %3%") %
+                configured_width % configured_height % full_screen).str());
     }
 
+    operation_description = (boost::format("SDL_GetDisplayBounds(%1%, &total_display_bounds)") % instance_ID).str();
     if (SDL_GetDisplayBounds(instance_ID, &total_display_bounds)) {
-        const std::string log_msg = (boost::format("%1%: total display bounds: x=%2%, y=%3%, w=%4%, h=%5%") % __FUNCTION__ % total_display_bounds.x % total_display_bounds.y % total_display_bounds.w % total_display_bounds.h).str();
-        VS_LOG_AND_FLUSH(important_info, log_msg);
-        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        VS_LOG_SDL_SUCCESS(operation_description);
+        VS_LOG_SDL_INFO((boost::format("total display bounds: x=%1%, y=%2%, w=%3%, h=%4%") % total_display_bounds.x % total_display_bounds.y % total_display_bounds.w % total_display_bounds.h).str());
     } else {
-        const std::string log_msg = (boost::format("%1%: SDL_GetDisplayBounds(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
-        VS_LOG_AND_FLUSH(error, log_msg);
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
-        SDL_ClearError();
+        VS_LOG_SDL_ERROR(operation_description);
         return false;
     }
 
+    operation_description = (boost::format("SDL_GetDisplayUsableBounds(%1%, &usable_display_bounds)") % instance_ID).str();
     if (SDL_GetDisplayUsableBounds(instance_ID, &usable_display_bounds)) {
-        const std::string log_msg = (boost::format("%1%: usable display bounds: x=%2%, y=%3%, w=%4%, h=%5%") % __FUNCTION__ % usable_display_bounds.x % usable_display_bounds.y % usable_display_bounds.w % usable_display_bounds.h).str();
-        VS_LOG_AND_FLUSH(important_info, log_msg);
-        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        VS_LOG_SDL_SUCCESS(operation_description);
+        VS_LOG_SDL_INFO((boost::format("usable display bounds: x=%1%, y=%2%, w=%3%, h=%4%") % usable_display_bounds.x % usable_display_bounds.y % usable_display_bounds.w % usable_display_bounds.h).str());
     } else {
-        const std::string log_msg = (boost::format("%1%: SDL_GetDisplayUsableBounds(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
-        VS_LOG_AND_FLUSH(error, log_msg);
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
-        SDL_ClearError();
+        VS_LOG_SDL_ERROR(operation_description);
         return false;
     }
 
+    operation_description = (boost::format("SDL_GetWindowSizeInPixels(%1%, &total_window_size_in_pixels.w, &total_window_size_in_pixels.h)") % window).str();
     if (SDL_GetWindowSizeInPixels(window, &total_window_size_in_pixels.w, &total_window_size_in_pixels.h)) {
-        const std::string log_msg = (boost::format("%1%: window size in pixels: w=%2%, h=%3%") % __FUNCTION__ % total_window_size_in_pixels.w % total_window_size_in_pixels.h).str();
-        VS_LOG_AND_FLUSH(important_info, log_msg);
-        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        VS_LOG_SDL_SUCCESS(operation_description);
+        VS_LOG_SDL_INFO((boost::format("window size in pixels: w=%1%, h=%2%") % total_window_size_in_pixels.w % total_window_size_in_pixels.h).str());
     } else {
-        const std::string log_msg = (boost::format("%1%: SDL_GetWindowSizeInPixels(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
-        VS_LOG_AND_FLUSH(error, log_msg);
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
-        SDL_ClearError();
+        VS_LOG_SDL_ERROR(operation_description);
         return false;
     }
 
+    operation_description = (boost::format("SDL_GetWindowSize(%1%, &total_logical_window_size.w, &total_logical_window_size.h)") % window).str();
     if (SDL_GetWindowSize(window, &total_logical_window_size.w, &total_logical_window_size.h)) {
-        const std::string log_msg = (boost::format("%1%: total logical window size: w=%2%, h=%3%") % __FUNCTION__ % total_logical_window_size.w % total_logical_window_size.h).str();
-        VS_LOG_AND_FLUSH(important_info, log_msg);
-        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        VS_LOG_SDL_SUCCESS(operation_description);
+        VS_LOG_SDL_INFO((boost::format("total logical window size: w=%1%, h=%2%") % total_logical_window_size.w % total_logical_window_size.h).str());
     } else {
-        const std::string log_msg = (boost::format("%1%: SDL_GetWindowSize(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
-        VS_LOG_AND_FLUSH(error, log_msg);
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
-        SDL_ClearError();
+        VS_LOG_SDL_ERROR(operation_description);
         return false;
     }
 
+    operation_description = (boost::format("SDL_GetRenderOutputSize(%1%, &usable_window_size_in_pixels.w, &usable_window_size_in_pixels.h)") % renderer).str();
     if (SDL_GetRenderOutputSize(renderer, &usable_window_size_in_pixels.w, &usable_window_size_in_pixels.h)) {
-        const std::string log_msg = (boost::format("%1%: usable window size in pixels: w=%2%, h=%3%") % __FUNCTION__ % usable_window_size_in_pixels.w % usable_window_size_in_pixels.h).str();
-        VS_LOG_AND_FLUSH(important_info, log_msg);
-        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        VS_LOG_SDL_SUCCESS(operation_description);
+        VS_LOG_SDL_INFO((boost::format("usable window size in pixels: w=%1%, h=%2%") % usable_window_size_in_pixels.w % usable_window_size_in_pixels.h).str());
         native_resolution_x = usable_window_size_in_pixels.w;
         native_resolution_y = usable_window_size_in_pixels.h;
     } else {
-        const std::string log_msg = (boost::format("%1%: SDL_GetRenderOutputSize(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
-        VS_LOG_AND_FLUSH(error, log_msg);
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
-        SDL_ClearError();
+        VS_LOG_SDL_ERROR(operation_description);
         return false;
     }
 
+    operation_description = (boost::format("SDL_GetCurrentRenderOutputSize(%1%, &usable_logical_window_size.w, &usable_logical_window_size.h)") % renderer).str();
     if (SDL_GetCurrentRenderOutputSize(renderer, &usable_logical_window_size.w, &usable_logical_window_size.h)) {
-        const std::string log_msg = (boost::format("%1%: usable logical window size: w=%2%, h=%3%") % __FUNCTION__ % usable_logical_window_size.w % usable_logical_window_size.h).str();
-        VS_LOG_AND_FLUSH(important_info, log_msg);
-        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
+        VS_LOG_SDL_SUCCESS(operation_description);
+        VS_LOG_SDL_INFO((boost::format("usable logical window size: w=%1%, h=%2%") % usable_logical_window_size.w % usable_logical_window_size.h).str());
         (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = usable_logical_window_size.w;
         (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = usable_logical_window_size.h;
     } else {
-        const std::string log_msg = (boost::format("%1%: SDL_GetCurrentRenderOutputSize(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()).str();
-        VS_LOG_AND_FLUSH(error, log_msg);
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", log_msg.c_str());
-        SDL_ClearError();
+        VS_LOG_SDL_ERROR(operation_description);
         return false;
     }
 
@@ -386,10 +387,8 @@ static bool get_screen_measurements() {
  *  Sets up the SDL OpenGL rendering context
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2025-01-10 - stephengtuggy
- *  \date    Modified: 2025-11-14 - stephengtuggy in conjunction with pmxy
  */
-static bool setup_sdl_video_mode(int* argc, char** argv) {
+static bool setup_sdl_video_mode() {
     int screen_number = 0;
     Uint32 video_flags = 0;
     int bpp = 0;
@@ -398,7 +397,7 @@ static bool setup_sdl_video_mode(int* argc, char** argv) {
     SDL_DisplayID instance_ID;
     SDL_DisplayMode* mode_for_ID = static_cast<SDL_DisplayMode*>(std::calloc(sizeof(SDL_DisplayMode), 1));
     if (mode_for_ID == nullptr) {
-        VS_LOG_FLUSH_EXIT(fatal, "Memory allocation error", 1);
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("%1%:%2%: Memory allocation error") % __FILE__ % __LINE__), 1);
     }
 
     bpp = gl_options.color_depth;
@@ -441,7 +440,7 @@ static bool setup_sdl_video_mode(int* argc, char** argv) {
     screen_number = configuration().graphics.screen;
     bool full_screen = configuration().graphics.full_screen;
 
-    bool result = get_sdl_display_name_by_nr(screen_number, screen_name, instance_ID);
+    bool result = get_sdl_display_name_by_number(screen_number, screen_name, instance_ID);
 
     // width and height are from the config file. We check if this resolution
     // is supported in full screen mode.
@@ -464,26 +463,7 @@ static bool setup_sdl_video_mode(int* argc, char** argv) {
             }
         }
         if (found == false) {
-            // pmx-20251026 Try to find the closest resolution.or no,
-            // Normally, the setup app will only offer existing resolution, so we should only get
-            // there when changing the hardware configuration.
-            SDL_DisplayMode* mode = nullptr;
-            bool result = SDL_GetClosestFullscreenDisplayMode(instance_ID, width, height, 0, true, mode);
-            if (result == true) {
-                std::memcpy(mode_for_ID, mode, sizeof(SDL_DisplayMode));
-            } else {
-                // Fallback to the desktop display mode for the display
-                SDL_ClearError();
-                const SDL_DisplayMode* desktop_mode = SDL_GetDesktopDisplayMode(instance_ID);
-                if (desktop_mode != nullptr) {
-                    std::memcpy(mode_for_ID, desktop_mode, sizeof(SDL_DisplayMode));
-                    SDL_GetDisplayBounds(instance_ID, &display_bounds);
-                    width = desktop_mode->w;
-                    height = desktop_mode->h;
-                } else {
-                    VS_LOG_FLUSH_EXIT(fatal, "Could not get desktop display mode", 1); // Sorry, we have tried everything...
-                }
-            }
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("Could not find desktop display mode with specified width %1% and specified height %2%") % width % height), -42);
         }
         SDL_free(modes);
     } else { // Not full screen
@@ -520,18 +500,26 @@ static bool setup_sdl_video_mode(int* argc, char** argv) {
             VS_LOG_FLUSH_EXIT(fatal, (boost::format("Creating window and renderer failed even with software rendering! Error message: %1%") % SDL_GetError()), 1);
         }
     }
-    if (!SDL_SetWindowSize(window, width, height)) {
-        VS_LOG_AND_FLUSH(error, (boost::format("%1%: SDL_SetWindowSize(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()));
-        SDL_ClearError();
+    std::string operation_description = (boost::format("SDL_SetWindowSize(%1%, %2%, %3%)") % window % width % height).str();
+    if (SDL_SetWindowSize(window, width, height)) {
+        VS_LOG_SDL_SUCCESS(operation_description);
+    } else {
+        VS_LOG_SDL_ERROR(operation_description);
     }
 
-    if (!SDL_GetCurrentRenderOutputSize(renderer, &native_resolution_x, &native_resolution_y)) {
-        VS_LOG_AND_FLUSH(error, (boost::format("%1%: SDL_GetCurrentRenderOutputSize(...) encountered an error: %2%") % __FUNCTION__ % SDL_GetError()));
-        SDL_ClearError();
+    operation_description = (boost::format("SDL_GetCurrentRenderOutputSize(%1%, &native_resolution_x, &native_resolution_y)") % renderer).str();
+    if (SDL_GetCurrentRenderOutputSize(renderer, &native_resolution_x, &native_resolution_y)) {
+        VS_LOG_SDL_SUCCESS(operation_description);
+        VS_LOG_SDL_INFO((boost::format("native resolution: width=%1%, height=%2%") % native_resolution_x % native_resolution_y).str());
+    } else {
+        VS_LOG_SDL_ERROR(operation_description);
     }
-    if (!SDL_GetWindowSize(window, &width, &height)) {
-        VS_LOG_AND_FLUSH(error, (boost::format("%1%: SDL_GetWindowSize encountered an error: %2%") % __FUNCTION__ % SDL_GetError()));
-        SDL_ClearError();
+    operation_description = (boost::format("SDL_GetWindowSize(%1%, &width, &height)") % window).str();
+    if (SDL_GetWindowSize(window, &width, &height)) {
+        VS_LOG_SDL_SUCCESS(operation_description);
+        VS_LOG_SDL_INFO((boost::format("window size: width=%1%, height=%2%") % width % height).str());
+    } else {
+        VS_LOG_SDL_ERROR(operation_description);
     }
     const int refx = display_bounds.x + display_bounds.w / 2 - width / 2;
     const int refy = display_bounds.y + display_bounds.h / 2 - height / 2;
@@ -543,24 +531,26 @@ static bool setup_sdl_video_mode(int* argc, char** argv) {
         SDL_SetWindowPosition(window, refx, refy);
     }
 
+    operation_description = (boost::format("SDL_GL_CreateContext(%1%)") % window).str();
     SDL_GLContext context = SDL_GL_CreateContext(window);
-
-    if (!context) {
+    if (context) {
+        VS_LOG_SDL_SUCCESS(operation_description);
+    } else {
+        VS_LOG_SDL_ERROR(operation_description);
         VS_LOG_FLUSH_EXIT(fatal, "No GL context", 1);
     }
 
-    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Vendor: %1%") % glGetString(GL_VENDOR)));
-    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Renderer: %1%") % glGetString(GL_RENDERER)));
-    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Version: %1%") % glGetString(GL_VERSION)));
+    VS_LOG_SDL_INFO((boost::format("GL Vendor: %1%") % glGetString(GL_VENDOR)).str());
+    VS_LOG_SDL_INFO((boost::format("GL Renderer: %1%") % glGetString(GL_RENDERER)).str());
+    VS_LOG_SDL_INFO((boost::format("GL Version: %1%") % glGetString(GL_VERSION)).str());
 
-    if (!SDL_GL_MakeCurrent(window, context)) {
+    operation_description = (boost::format("SDL_GL_MakeCurrent(%1%, %2%)") % window % context).str();
+    if (SDL_GL_MakeCurrent(window, context)) {
+        VS_LOG_SDL_SUCCESS(operation_description);
+    } else {
+        VS_LOG_SDL_ERROR(operation_description);
         VS_LOG_FLUSH_EXIT(fatal, "Failed to make window context current", 1);
     }
-
-    // if (!SDL_SetRenderLogicalPresentation(renderer, width, height, SDL_LOGICAL_PRESENTATION_DISABLED)) {
-    //     VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_SetRenderLogicalPresentation(...) failed! Error: %1%") % SDL_GetError()),
-    //         8);
-    // }
 
     SDL_ShowWindow(window);
     SDL_SyncWindow(window);
@@ -576,8 +566,6 @@ static bool setup_sdl_video_mode(int* argc, char** argv) {
  *  sets up fullscreen mode if selected)
  *  \author  jfpatry
  *  \date    Created:  2000-10-19
- *  \date    Modified: 2020-07-27 - stephengtuggy
- *  \date    Modified: 2025-11-14 - stephengtuggy in conjunction with pmxy
  */
 
 void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title) {
@@ -620,7 +608,7 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
 #endif
 
-    if (!setup_sdl_video_mode(argc, argv)) {
+    if (!setup_sdl_video_mode()) {
         winsys_init(argc, argv, window_title, icon_title);
     } else {
         glutInit(argc, argv);
@@ -654,7 +642,6 @@ void winsys_shutdown() {
  *  \author  jfpatry
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
- *  \date    Modified: 2025-11-14 - stephengtuggy in conjunction with pmxy
  */
 void winsys_show_cursor(bool visible) {
     static bool vis = true;
@@ -677,8 +664,6 @@ void winsys_show_cursor(bool visible) {
  *  \date    Modified: 2000-10-19
  *  \date    Modified: 2005-08-16 - Rogue
  *  \date    Modified: 2005-12-24 - ace123
- *  \date    Modified: 2021-09-07 - stephengtuggy
- *  \date    Modified: 2025-11-14 - stephengtuggy in conjunction with pmxy
  */
 extern int shiftdown(int);
 extern int shiftup(int);
@@ -773,7 +758,6 @@ void winsys_process_events() {
  *  function should only be called once.
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2021-09-06 - stephengtuggy
  */
 void winsys_atexit(winsys_atexit_func_t func) {
     static bool called = false;
@@ -789,11 +773,10 @@ void winsys_atexit(winsys_atexit_func_t func) {
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
  *  \date    Modified: 2000-10-20
- *  \date    Modified: 2025-11-14 - stephengtuggy in conjunction with pmxy
  */
 void winsys_exit(int code) {
-    // // Reverting resolution by exiting fullscreen
-    // SDL_SetWindowFullscreen(window, false);
+    // Reverting resolution by exiting fullscreen
+    SDL_SetWindowFullscreen(window, false);
 
     winsys_shutdown();
     if (atexit_func) {
