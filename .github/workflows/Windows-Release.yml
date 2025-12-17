@@ -78,7 +78,7 @@ jobs:
       - name: install-cmake
         uses: lukka/get-cmake@9e07ecdcee1b12e5037e42f410b67f03e2f626e1 # v4.2.1
         with:
-          cmakeVersion: 4.2.0
+          cmakeVersion: 4.2.1
           ninjaVersion: 1.12.1
 
       - name: run-vcpkg
