@@ -29,8 +29,8 @@
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 #FILE(GLOB VS_LIBRARIES LIST_DIRECTORIES true RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
-SET(VS_LIBRARIES "collide2" "gfx_generic" "root_generic" "cmd" "vegadisk" "posh")
-#    "imgui" "gui")
+SET(VS_LIBRARIES "collide2" "gfx_generic" "root_generic" "cmd" "vegadisk" "posh" "imgui")
+#    "gui")
 FOREACH(VS_LIBDIR IN LISTS VS_LIBRARIES)
     MESSAGE(STATUS "Found Library Directory " ${VS_LIBDIR})
     ADD_SUBDIRECTORY(${VS_LIBDIR})
