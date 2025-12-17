@@ -182,7 +182,6 @@ void InitJoystick() {
     num_joysticks = 0;
 
 #ifndef NO_SDL_JOYSTICK
-#ifdef HAVE_SDL
     SDL_JoystickID *joysticks = SDL_GetJoysticks(&num_joysticks);
     if (num_joysticks > MAX_JOYSTICKS) {
         num_joysticks = MAX_JOYSTICKS;
@@ -202,19 +201,6 @@ void InitJoystick() {
     }
     SDL_free(joysticks);
 
-#else
-    //use glut
-    if (glutDeviceGet( GLUT_HAS_JOYSTICK ) || configuration().joystick.force_use_of_joystick) {
-        VS_LOG(info, "setting joystick functionality:: joystick online");
-        glutJoystickFunc( myGlutJoystickCallback, JoystickPollingRate() );
-        num_joysticks = 1;
-        VS_LOG(info, (boost::format("Glut detects %1% joystick(s)") % (i+1)));
-        joystick[0] = new JoyStick(0, 0);
-    }
-    for (int i2 = 0; i2 < MAX_JOYSTICKS; ++i2) {
-        joystick[i2] = new JoyStick(i2, 0);
-    }
-#endif
 #endif
 }
 
