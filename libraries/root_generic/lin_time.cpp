@@ -172,17 +172,20 @@ void InitTime() {
     }
     lasttime = dblnewtime - .0001;
 
-#elif defined (_POSIX_MONOTONIC_CLOCK)
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
+    #elif defined (_POSIX_MONOTONIC_CLOCK)
+    timespec ts{};
+    #if defined(CLOCK_MONOTONIC)
+    if (clock_gettime(CLOCK_MONOTONIC, &ts))
+    #endif
+        clock_gettime(CLOCK_REALTIME, &ts);
     newtime = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
     lasttime = newtime - .0001;
 
 #elif defined (HAVE_GETTIMEOFDAY)
-    struct timeval tv;
-    (void) gettimeofday( &tv, NULL );
+    timeval tv{};
+    (void) gettimeofday( &tv, nullptr );
 
-    newtime  = (double) tv.tv_sec+(double) tv.tv_usec*1.e-6;
+    newtime  = static_cast<double>(tv.tv_sec)+static_cast<double>(tv.tv_usec)*1.e-6;
     lasttime = newtime-.0001;
 
 #elif defined (HAVE_SDL)
@@ -210,15 +213,18 @@ double queryTime() {
         tmpnewtime = static_cast<double>(ticks.QuadPart);
     }
     return tmpnewtime - firsttime;
-#elif defined (_POSIX_MONOTONIC_CLOCK)
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
+    #elif defined (_POSIX_MONOTONIC_CLOCK)
+    timespec ts{};
+    #if defined(CLOCK_MONOTONIC)
+    if (clock_gettime(CLOCK_MONOTONIC, &ts))
+    #endif
+        clock_gettime(CLOCK_REALTIME, &ts);
     double tmpnewtime = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
     return tmpnewtime - firsttime;
 #elif defined (HAVE_GETTIMEOFDAY)
-    struct timeval tv;
-    (void) gettimeofday( &tv, NULL );
-    double tmpnewtime = (double) tv.tv_sec+(double) tv.tv_usec*1.e-6;
+    timeval tv{};
+    (void) gettimeofday( &tv, nullptr);
+    const double tmpnewtime = static_cast<double>(tv.tv_sec)+static_cast<double>(tv.tv_usec)*1.e-6;
     return tmpnewtime-firsttime;
 #elif defined (HAVE_SDL)
     double tmpnewtime = SDL_GetTicks()*1.e-3;
@@ -243,13 +249,16 @@ double realTime() {
         tmpnewtime = 0;
     }
 #elif defined (_POSIX_MONOTONIC_CLOCK)
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    double tmpnewtime = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
+    timespec ts{};
+    #if defined(CLOCK_MONOTONIC)
+    if (clock_gettime(CLOCK_MONOTONIC, &ts))
+    #endif
+        clock_gettime(CLOCK_REALTIME, &ts);
+    const double tmpnewtime = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
 #elif defined (HAVE_GETTIMEOFDAY)
-    struct timeval tv;
-    (void) gettimeofday( &tv, NULL );
-    double tmpnewtime = (double) tv.tv_sec+(double) tv.tv_usec*1.e-6;
+    timeval tv{};
+    (void) gettimeofday( &tv, nullptr);
+    const double tmpnewtime = static_cast<double>(tv.tv_sec)+static_cast<double>(tv.tv_usec)*1.e-6;
 #elif defined (HAVE_SDL)
     double tmpnewtime = SDL_GetTicks()*1.e-3;
 #else
@@ -284,24 +293,28 @@ void UpdateTime() {
     {
         firsttime = dblnewtime;
     }
-#elif defined(_POSIX_MONOTONIC_CLOCK)
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    lasttime = newtime;
-    newtime = (double) ts.tv_sec + ((double) ts.tv_nsec) * 1.e-9;
+#elif defined (_POSIX_MONOTONIC_CLOCK)
+    timespec ts{};
+    #if defined(CLOCK_MONOTONIC)
+    if (clock_gettime(CLOCK_MONOTONIC, &ts))
+    #endif
+        clock_gettime(CLOCK_REALTIME, &ts);
+    lasttime    = newtime;
+    newtime     = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
     elapsedtime = newtime - lasttime;
     // VS_LOG(trace, (boost::format("lin_time.cpp: UpdateTime(): lasttime is %1%; newtime is %2%; elapsedtime before time compression is %3%") % lasttime % newtime % elapsedtime));
     if (first) {
         firsttime = newtime;
     }
 #elif defined (HAVE_GETTIMEOFDAY)
-    struct timeval tv;
-    (void) gettimeofday( &tv, NULL );
+    timeval tv{};
+    (void) gettimeofday( &tv, nullptr);
     lasttime    = newtime;
-    newtime     = (double) tv.tv_sec+(double) tv.tv_usec*1.e-6;
+    newtime     = static_cast<double>(tv.tv_sec)+static_cast<double>(tv.tv_usec)*1.e-6;
     elapsedtime = newtime-lasttime;
-    if (first)
+    if (first) {
         firsttime = newtime;
+    }
 #elif defined (HAVE_SDL)
     lasttime    = newtime;
     newtime     = SDL_GetTicks()*1.e-3;
