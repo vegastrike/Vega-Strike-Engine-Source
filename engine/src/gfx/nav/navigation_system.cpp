@@ -421,7 +421,7 @@ void NavigationSystem::DrawGalaxy() {
 
 //int length = systemnamestring.size();
 //float offset = (float(length)*0.005);
-    systemname.col = GFXColor(1, 1, .7, 1);
+    systemname.color = GFXColor(1, 1, .7, 1);
     systemname.SetPos(screenskipby4[0], screenskipby4[3]);     //Looks ugly when name is too long and goes off the edge.
 //systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
     systemname.SetText(systemnamestring);

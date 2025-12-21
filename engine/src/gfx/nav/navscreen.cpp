@@ -656,7 +656,7 @@ void NavigationSystem::DrawMission() {
 //float love_from_aera = FactionUtil::getRelation(3);
 
     TextPlane displayname;
-    displayname.col = GFXColor(1, 1, 1, 1);
+    displayname.color = GFXColor(1, 1, 1, 1);
     displayname.SetSize(.42, -.7);
     displayname.SetPos(originx + (.1 * deltax) + .37, originy /*+(1*deltay)*/ );
     std::string text;
@@ -707,19 +707,19 @@ void NavigationSystem::DrawShip() {
         writethis = MakeUnitXMLPretty(par->WriteUnitString(), par);
     }
     TextPlane displayname;
-    displayname.col = GFXColor(.3, 1, .3, 1);
+    displayname.color = GFXColor(.3, 1, .3, 1);
     displayname.SetSize(.7, -.8);
     displayname.SetPos(originx - (.1 * deltax), originy /*+(1*deltay)*/ );
     displayname.SetText(writethis);
     displayname.SetCharSize(1, 1);
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg = displayname.bgcol;
+    GFXColor tpbg = displayname.background_color;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
-        displayname.bgcol = GFXColor(0, 0, 0, background_alpha);
+        displayname.background_color = GFXColor(0, 0, 0, background_alpha);
     }
     displayname.Draw(writethis, 0, true, false, automatte);
-    displayname.bgcol = tpbg;
+    displayname.background_color = tpbg;
 
 //factionlist.drawdescription(writethis, (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 1, GFXColor(1,1,1,1));
 
@@ -1121,7 +1121,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
         }
     }
     TextPlane a_label;
-    a_label.col = GFXColor(1, 1, 1, 1);
+    a_label.color = GFXColor(1, 1, 1, 1);
     int length = label.size();
     float offset = (float(length) * 0.0065);
     float xl = (x1 + x2) / 2.0;
@@ -1131,13 +1131,13 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
     const bool nav_button_labels = configuration().graphics.draw_nav_button_labels;
     if (nav_button_labels) {
         const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-        GFXColor tpbg = a_label.bgcol;
+        GFXColor tpbg = a_label.background_color;
         bool automatte = (0 == tpbg.a);
         if (automatte) {
-            a_label.bgcol = GFXColor(0, 0, 0, background_alpha);
+            a_label.background_color = GFXColor(0, 0, 0, background_alpha);
         }
         a_label.Draw(label, 0, true, false, automatte);
-        a_label.bgcol = tpbg;
+        a_label.background_color= tpbg;
     }
     //!!! DEPRESS !!!
     if ((inrange == 1) && (mouse_wentdown[0] == 1)) {

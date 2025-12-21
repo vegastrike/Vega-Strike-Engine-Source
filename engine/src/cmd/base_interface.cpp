@@ -458,15 +458,15 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                             text_pos_y = (y + fabs(text_offset_y)
                                     + text_hei);
                         }                                   //align on top
-                        text_marker.col = GFXColor(text_color_r, text_color_g, text_color_b, links[i]->alpha);
+                        text_marker.color= GFXColor(text_color_r, text_color_g, text_color_b, links[i]->alpha);
                         text_marker.SetPos(text_pos_x, text_pos_y);
                         if (links[i]->pythonfile != "#" && text_marker.GetText().find("XXX") != 0) {
-                            GFXColor tmpbg = text_marker.bgcol;
+                            GFXColor tmpbg = text_marker.background_color;
                             bool automatte = (0 == tmpbg.a);
                             if (automatte)
-                                text_marker.bgcol = GFXColor(0, 0, 0, base_text_background_alpha);
+                                text_marker.background_color= GFXColor(0, 0, 0, base_text_background_alpha);
                             text_marker.Draw(text_marker.GetText(), 0, true, false, automatte);
-                            text_marker.bgcol = tmpbg;
+                            text_marker.background_color = tmpbg;
                         }
                         GFXEnable(TEXTURE0);
                     }                     //if draw_text
@@ -513,17 +513,17 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                     if (enable_markers) {
                         text_pos_y += text_hei;
                     }
-                    text_marker.col = GFXColor(1, 1, 1, 1);
+                    text_marker.color = GFXColor(1, 1, 1, 1);
                     text_marker.SetPos(text_pos_x, text_pos_y);
 
                     GFXDisable(TEXTURE0);
-                    GFXColor tmpbg = text_marker.bgcol;
+                    GFXColor tmpbg = text_marker.background_color;
                     bool automatte = (0 == tmpbg.a);
                     if (automatte) {
-                        text_marker.bgcol = GFXColor(0, 0, 0, base_text_background_alpha);
+                        text_marker.background_color = GFXColor(0, 0, 0, base_text_background_alpha);
                     }
                     text_marker.Draw(text_marker.GetText(), 0, true, false, automatte);
-                    text_marker.bgcol = tmpbg;
+                    text_marker.background_color= tmpbg;
                     GFXEnable(TEXTURE0);
                 }
                 //link border
@@ -573,17 +573,17 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         }
     }
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
-    GFXColor tmpbg = text.bgcol;
+    GFXColor tmpbg = text.background_color;
     bool automatte = (0 == tmpbg.a);
     if (automatte) {
-        text.bgcol = GFXColor(0, 0, 0, base_text_background_alpha);
+        text.background_color = GFXColor(0, 0, 0, base_text_background_alpha);
     }
     if (!automatte && text.GetText().empty()) {
         float posx, posy, wid, hei;
         text.GetPos(posy, posx);
         text.GetSize(wid, hei);
 
-        GFXColorf(text.bgcol);
+        GFXColorf(text.background_color);
         const float verts[4 * 3] = {
                 posx, hei, 0.0f,
                 wid, hei, 0.0f,
@@ -594,7 +594,7 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
     } else {
         text.Draw(text.GetText(), 0, true, false, automatte);
     }
-    text.bgcol = tmpbg;
+    text.background_color= tmpbg;
     (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = tmpx;
     (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = tmpy;
 }
@@ -913,10 +913,10 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
         curtext.SetText(rooms[curroom]->deftext);
     }
     if (link && link->pythonfile != "#") {
-        curtext.col = GFXColor(overcolor[0], overcolor[1], overcolor[2], overcolor[3]);
+        curtext.color = GFXColor(overcolor[0], overcolor[1], overcolor[2], overcolor[3]);
         mousePointerStyle = MOUSE_POINTER_HOVER;
     } else {
-        curtext.col = GFXColor(inactivecolor[0], inactivecolor[1], inactivecolor[2], inactivecolor[3]);
+        curtext.color = GFXColor(inactivecolor[0], inactivecolor[1], inactivecolor[2], inactivecolor[3]);
         mousePointerStyle = MOUSE_POINTER_NORMAL;
     }
     const bool draw_always = configuration().graphics.bases.location_marker_draw_always;
@@ -1532,24 +1532,24 @@ void BaseInterface::Draw() {
     curtext.SetPos(-.99, -1 + (y * 1.5));
 
     if (curtext.GetText().find("XXX") != 0) {
-        GFXColor tmpbg = curtext.bgcol;
+        GFXColor tmpbg = curtext.background_color;
         bool automatte = (0 == tmpbg.a);
         if (automatte) {
-            curtext.bgcol = GFXColor(0, 0, 0, base_text_background_alpha);
+            curtext.background_color = GFXColor(0, 0, 0, base_text_background_alpha);
         }
         curtext.Draw(curtext.GetText(), 0, true, false, automatte);
-        curtext.bgcol = tmpbg;
+        curtext.background_color = tmpbg;
     }
     othtext.SetPos(-.99, 1);
 
     if (othtext.GetText().length() != 0) {
-        GFXColor tmpbg = othtext.bgcol;
+        GFXColor tmpbg = othtext.background_color;
         bool automatte = (0 == tmpbg.a);
         if (automatte) {
-            othtext.bgcol = GFXColor(0, 0, 0, base_text_background_alpha);
+            othtext.background_color = GFXColor(0, 0, 0, base_text_background_alpha);
         }
         othtext.Draw(othtext.GetText(), 0, true, false, automatte);
-        othtext.bgcol = tmpbg;
+        othtext.background_color= tmpbg;
     }
     SetupViewport();
     EndGUIFrame(mousePointerStyle);
