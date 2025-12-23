@@ -56,20 +56,7 @@ static bool isInside() {
     return false;
 }
 
-const std::string &getStringFont(bool &changed, bool force_inside = false, bool whatinside = false) {
-    bool inside = isInside();
-    if (force_inside) {
-        inside = whatinside;
-    }
-    static bool lastinside = inside;
-    if (lastinside != inside) {
-        changed = true;
-        lastinside = inside;
-    } else {
-        changed = false;
-    }
-    return inside ? configuration().graphics.bases.font : configuration().graphics.font;
-}
+
 
 const std::string &getStringFontForHeight(bool &changed) {
     const bool inside = isInside();
@@ -83,32 +70,7 @@ const std::string &getStringFontForHeight(bool &changed) {
     return inside ? configuration().graphics.bases.font : configuration().graphics.font;
 }
 
-void *getFont(bool forceinside = false, bool whichinside = false) {
-    bool changed = false;
-    std::string whichfont = getStringFont(changed, forceinside, whichinside);
-    static void *retval = nullptr;
-    if (changed) {
-        retval = nullptr;
-    }
-    if (retval == nullptr) {
-        if (whichfont == "helvetica10") {
-            retval = GLUT_BITMAP_HELVETICA_10;
-        } else if (whichfont == "helvetica18") {
-            retval = GLUT_BITMAP_HELVETICA_18;
-        } else if (whichfont == "times24") {
-            retval = GLUT_BITMAP_TIMES_ROMAN_24;
-        } else if (whichfont == "times10") {
-            retval = GLUT_BITMAP_TIMES_ROMAN_10;
-        } else if (whichfont == "fixed13") {
-            retval = GLUT_BITMAP_8_BY_13;
-        } else if (whichfont == "fixed15") {
-            retval = GLUT_BITMAP_9_BY_15;
-        } else {
-            retval = GLUT_BITMAP_HELVETICA_12;
-        }
-    }
-    return retval;
-}
+
 
 float getFontHeight() {
     bool changed = false;
@@ -152,29 +114,6 @@ int TextPlane::Draw(int offset) {
     return Draw(myText, offset, true, false, true);
 }
 
-static unsigned int *CreateLists() {
-    static unsigned int lists[256] = {0};
-    void *fnt0 = getFont(true, false);
-    void *fnt1 = getFont(true, true);
-    const bool use_bit = configuration().graphics.high_quality_font;
-    const bool use_display_lists = configuration().graphics.text_display_lists;
-    if (use_display_lists) {
-        for (unsigned int i = 32; i < 256; i++) {
-            if ((i < 128) || (i >= 128 + 32)) {
-                lists[i] = GFXCreateList();
-                if (use_bit) {
-                    glutBitmapCharacter(i < 128 ? fnt0 : fnt1, i % 128);
-                } else {
-                    glutStrokeCharacter(GLUT_STROKE_ROMAN, i % 128);
-                }
-                if (!GFXEndList()) {
-                    lists[i] = 0;
-                }
-            }
-        }
-    }
-    return lists;
-}
 
 static unsigned char HexToChar(char a) {
     if (a >= '0' && a <= '9') {
@@ -195,46 +134,10 @@ static float TwoCharToFloat(char a, char b) {
     return TwoCharToByte(a, b) / 255.;
 }
 
-void DrawSquare(float left, float right, float top, float bot) {
-    float verts[8 * 3] = {
-            left, top, 0,
-            left, bot, 0,
-            right, bot, 0,
-            right, top, 0,
-            right, top, 0,
-            right, bot, 0,
-            left, bot, 0,
-            left, top, 0
-    };
-    GFXDraw(GFXQUAD, verts, 8);
-}
 
-float charWidth(char c, float myFontMetrics) {
-    const bool use_bit = configuration().graphics.high_quality_font;
-    void *fnt = use_bit ? getFont() : GLUT_STROKE_ROMAN;
-    float charwid = use_bit ? glutBitmapWidth(fnt, c) : glutStrokeWidth(fnt, c);
-    float dubyawid = use_bit ? glutBitmapWidth(fnt, 'W') : glutStrokeWidth(fnt, 'W');
-    return charwid * myFontMetrics / dubyawid;
-}
 
-bool doNewLine(string::const_iterator begin,
-        string::const_iterator end,
-        float cur_pos,
-        float end_pos,
-        float metrics,
-        bool last_row) {
-    if (*begin == '\n') {
-        return true;
-    }
-    if (*begin == ' ' && !last_row) {
-        cur_pos += charWidth(*begin, metrics);
-        for (++begin; begin != end && cur_pos <= end_pos && !isspace(*begin); ++begin) {
-            cur_pos += charWidth(*begin, metrics);
-        }
-        return cur_pos > end_pos;
-    }
-    return cur_pos + ((begin + 1 != end) ? charWidth(*begin, metrics) : 0) >= end_pos;
-}
+
+
 
 
 static const ImU32 default_color = IM_COL32(255,255,255,255);
@@ -246,6 +149,7 @@ struct TextSegment {
 };
 
 struct TextLine {
+    float width;
     std::vector<TextSegment> segments;
 };
 
@@ -274,6 +178,7 @@ static std::vector<TextLine> ParseText(const std::string& text) {
 
     ImU32 current_color = default_color;
     std::string buffer;
+    std::string current_line;
 
     // Can't use for-each because we need i to move forward and back
     for (size_t i = 0; i < text.size(); ++i) {
@@ -306,6 +211,7 @@ static std::vector<TextLine> ParseText(const std::string& text) {
             current_color = default_color;
 
             TextLine line;
+            line.width = ImGui::CalcTextSize(current_line.c_str()).x;
             line.segments = segments;
             lines.emplace_back(line);
             segments.clear();
@@ -322,6 +228,7 @@ static std::vector<TextLine> ParseText(const std::string& text) {
 
         // Normal character (includes tabs but not including newline)
         buffer.push_back(c);
+        current_line.push_back(c);
     }
 
     FlushBuffer(segments, buffer, current_color);
@@ -331,22 +238,85 @@ static std::vector<TextLine> ParseText(const std::string& text) {
     return lines;
 }
 
+// TODO: move to gui library/utilities
+bool isTransparent(ImU32 color) {
+    return ((color >> IM_COL32_A_SHIFT) & 0xFF) == 0;
+}
+
+// Draw background
+/*if (!automatte && drawbg) {
+    GFXColorf(this->bgcol);
+    DrawSquare(col, this->myDims.i, row - rowheight * .25, row + rowheight);
+}*/
+
+/*if (!automatte && drawbg) {
+    GFXColorf(this->bgcol);
+    DrawSquare(col, this->myDims.i, row - rowheight * .25, row + rowheight * .75);
+}*/
+
+void drawBackground(ImDrawList* draw_list, ImU32 background_color, 
+                    ImVec2 position, ImVec2 size, bool automatte) {
+    bool transparent = isTransparent(background_color);
+    const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
+}
+
+void drawBackgroundAroundText(ImDrawList* draw_list, ImU32 background_color, 
+                              ImVec2 position, std::string text, bool automatte) {
+    ImVec2 text_size = ImGui::CalcTextSize(text.c_str());                        
+    drawBackground(draw_list, background_color, position, text_size, automatte);
+}
+
+
+
 int TextPlane::Draw(const string &newText, int offset, bool startlower, bool force_highquality, bool automatte) {
     std::pair<int,int> pair = CalculateAbsoluteXY(myDims.k, myFontMetrics.k);
     ImVec2 position(pair.first, pair.second);
 
     std::vector<TextLine> lines = ParseText(newText);
     ImVec2 text_size;
+    ImDrawList* draw_list = ImGui::GetForegroundDrawList();
+    const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
+
+    if(isInside()) {
+        ImGui::PushFont(roboto_18_font);
+    } else {
+        ImGui::PushFont(roboto_18_font);
+    }
+    
 
     for (TextLine& line : lines) {
         for(TextSegment& segment : line.segments) {
-            ImGui::GetForegroundDrawList()->AddText(position, segment.color, segment.text.c_str());
-            text_size = ImGui::CalcTextSize(segment.text.c_str()); 
+            text_size = ImGui::CalcTextSize(segment.text.c_str());
+
+            // Background rectangle
+            if(!isTransparent(background_color) && !automatte) {
+                // Need these because we pass a reference
+                // Need explicit construction because ImVec2 did not overload arithmetic operators
+                // TODO: add this to imgui
+                const ImVec2 start_position(position.x - pad.x, position.y - pad.y);
+                const ImVec2 end_position(position.x +text_size.x + pad.x, position.y +text_size.y + pad.y);
+                draw_list->AddRectFilled(
+                    start_position,
+                    end_position,
+                    background_color,
+                    0.0f // No rounded borders
+                );
+
+            }
+
+            draw_list->AddText(position, segment.color, segment.text.c_str());
+             
             position.x += text_size.x;
         }
 
         position.y += text_size.y;
         position.x = pair.first;
+    }
+
+    if(isInside()) {
+        ImGui::PopFont();
+    } else {
+        ImGui::PopFont();
     }
 
     return 1;

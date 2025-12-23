@@ -30,11 +30,13 @@
 #define VEGA_STRIKE_LIBRARIES_GUI_GUI_H
 
 class SDL_Window;
+class ImFont;
 
 /** Init and cleanup ImGui.
  */
 extern bool gui_initialized;
 extern SDL_Window* current_window;
+extern ImFont* roboto_18_font;
 
 void InitGui();
 void CleanupGui();
