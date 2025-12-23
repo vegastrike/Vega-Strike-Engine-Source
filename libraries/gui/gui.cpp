@@ -59,11 +59,10 @@ void InitGui() {
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     ImGuiIO& io = ImGui::GetIO();
-
-    roboto_18_font = io.Fonts->AddFontFromFileTTF(
-        "fonts/RobotoTTF/Roboto-Regular.ttf", // path to .ttf
-        18.0f                       // pixel size
-    );
+    io.Fonts->Clear();
+    ImFontConfig cfg;
+    cfg.SizePixels = 18.0f;
+    io.FontDefault = io.Fonts->AddFontDefault(&cfg);
 
     gui_initialized = true;
 }

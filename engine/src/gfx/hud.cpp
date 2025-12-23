@@ -256,7 +256,6 @@ bool isTransparent(ImU32 color) {
 
 void drawBackground(ImDrawList* draw_list, ImU32 background_color, 
                     ImVec2 position, ImVec2 size, bool automatte) {
-    bool transparent = isTransparent(background_color);
     const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
 }
 
@@ -276,12 +275,6 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
     ImVec2 text_size;
     ImDrawList* draw_list = ImGui::GetForegroundDrawList();
     const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
-
-    if(isInside()) {
-        ImGui::PushFont(roboto_18_font);
-    } else {
-        ImGui::PushFont(roboto_18_font);
-    }
     
 
     for (TextLine& line : lines) {
@@ -290,11 +283,14 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
 
             // Background rectangle
             if(!isTransparent(background_color) && !automatte) {
+                float width = this->myDims.i * configuration().graphics.resolution_x * 2;
+
                 // Need these because we pass a reference
                 // Need explicit construction because ImVec2 did not overload arithmetic operators
                 // TODO: add this to imgui
+                
                 const ImVec2 start_position(position.x - pad.x, position.y - pad.y);
-                const ImVec2 end_position(position.x +text_size.x + pad.x, position.y +text_size.y + pad.y);
+                const ImVec2 end_position(position.x + width + pad.x, position.y +text_size.y + pad.y);
                 draw_list->AddRectFilled(
                     start_position,
                     end_position,
@@ -311,12 +307,6 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
 
         position.y += text_size.y;
         position.x = pair.first;
-    }
-
-    if(isInside()) {
-        ImGui::PopFont();
-    } else {
-        ImGui::PopFont();
     }
 
     return 1;
