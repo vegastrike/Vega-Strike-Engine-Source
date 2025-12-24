@@ -304,6 +304,10 @@ int TextPlane::Draw(const string &newText, int offset, bool start_lower, bool fo
             position.x += text_size.x;
         }
 
+        if(line.segments.empty()) {
+           text_size = ImGui::CalcTextSize("hello world"); 
+        }
+
         position.y += text_size.y;
         position.x = pair.first;
     }
