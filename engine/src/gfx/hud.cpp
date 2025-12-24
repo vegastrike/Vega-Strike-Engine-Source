@@ -135,13 +135,6 @@ static float TwoCharToFloat(char a, char b) {
 }
 
 
-
-
-
-
-
-static const ImU32 default_color = IM_COL32(255,255,255,255);
-
 // Text in a specific color
 struct TextSegment {
     std::string text;
@@ -172,7 +165,7 @@ static void FlushBuffer(std::vector<TextSegment>& segments, std::string& buffer,
 }
 
 
-static std::vector<TextLine> ParseText(const std::string& text) {
+static std::vector<TextLine> ParseText(const std::string& text, ImU32 default_color) {
     std::vector<TextLine> lines;
     std::vector<TextSegment> segments;
 
@@ -267,15 +260,21 @@ void drawBackgroundAroundText(ImDrawList* draw_list, ImU32 background_color,
 
 
 
-int TextPlane::Draw(const string &newText, int offset, bool startlower, bool force_highquality, bool automatte) {
+int TextPlane::Draw(const string &newText, int offset, bool start_lower, bool force_highquality, bool automatte) {
     std::pair<int,int> pair = CalculateAbsoluteXY(myDims.k, myFontMetrics.k);
     ImVec2 position(pair.first, pair.second);
 
-    std::vector<TextLine> lines = ParseText(newText);
+    std::vector<TextLine> lines = ParseText(newText, color);
     ImVec2 text_size;
     ImDrawList* draw_list = ImGui::GetForegroundDrawList();
     const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
     
+    // Move one line up if not start_lower 
+    if(!start_lower) {
+        // Calculate dummy line, otherwise, text might move several lines down
+        text_size = ImGui::CalcTextSize("hello world");
+        position.y -= text_size.y;
+    }
 
     for (TextLine& line : lines) {
         for(TextSegment& segment : line.segments) {
