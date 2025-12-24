@@ -429,8 +429,7 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
                 modename = "JUMP:";
                 break;
             case UnitImages< void >::CANDOCK_MODAL:
-                modename = "DOCK:";
-                break;
+                return;
             default:
                 modename = "UNK :";
             }

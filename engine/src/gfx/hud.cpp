@@ -282,14 +282,12 @@ int TextPlane::Draw(const string &newText, int offset, bool start_lower, bool fo
 
             // Background rectangle
             if(!isTransparent(background_color) && !automatte) {
-                float width = this->myDims.i * configuration().graphics.resolution_x * 2;
-
                 // Need these because we pass a reference
                 // Need explicit construction because ImVec2 did not overload arithmetic operators
                 // TODO: add this to imgui
                 
                 const ImVec2 start_position(position.x - pad.x, position.y - pad.y);
-                const ImVec2 end_position(position.x + width + pad.x, position.y +text_size.y + pad.y);
+                const ImVec2 end_position(position.x + text_size.x + pad.x, position.y +text_size.y + pad.y);
                 draw_list->AddRectFilled(
                     start_position,
                     end_position,
