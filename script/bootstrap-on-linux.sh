@@ -30,7 +30,7 @@
 set -e
 
 echo "------------------------------------------"
-echo "--- bootstrap-on-linux.sh | 2025-12-13 ---"
+echo "--- bootstrap-on-linux.sh | 2025-12-22 ---"
 echo "------------------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -121,6 +121,8 @@ function bootstrapOnDebian()
                             libboost-json-dev \
                             libboost-program-options-dev \
                             clang \
+                            opentelemetry-cpp-dev \
+                            libprotobuf-dev \
                             libaudio-dev \
                             libfribidi-dev \
                             libglu1-mesa-dev \
@@ -132,6 +134,7 @@ function bootstrapOnDebian()
             apt-get -qy remove \
                             libboost-python-dev \
                             libboost-log-dev \
+                            libboost-program-options-dev \
                             libboost-regex-dev
             apt-get -qy autoremove
             apt-get -qy install \
@@ -190,6 +193,7 @@ function bootstrapOnDebian()
                             libboost-json1.81-dev \
                             libboost-program-options1.81-dev \
                             clang \
+                            libprotobuf-dev \
                             libaudio-dev \
                             libfribidi-dev \
                             libglu1-mesa-dev \
@@ -276,6 +280,8 @@ function bootstrapOnUbuntu()
                             libboost-json-dev \
                             libboost-program-options-dev \
                             clang \
+                            opentelemetry-cpp-dev \
+                            libprotobuf-dev \
                             libaudio-dev \
                             libfribidi-dev \
                             libglu1-mesa-dev \
@@ -340,6 +346,7 @@ function bootstrapOnUbuntu()
                             libboost-json-dev \
                             libboost-program-options-dev \
                             clang \
+                            libprotobuf-dev \
                             libaudio-dev \
                             libfribidi-dev \
                             libglu1-mesa-dev \
@@ -425,6 +432,7 @@ function bootstrapOnLinuxMint ()
                             libboost-json-dev \
                             libboost-program-options-dev \
                             clang \
+                            libprotobuf-dev \
                             libaudio-dev \
                             libfribidi-dev \
                             libglu1-mesa-dev \
@@ -1037,6 +1045,8 @@ function bootstrapOnArch ()
 
 function bootstrapOnEndeavourOS ()
 {
+    pacman -Sy --noconfirm archlinux-keyring
+
     if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
     then
         pacman -Syyu --refresh --noconfirm
@@ -1129,17 +1139,5 @@ case "${LINUX_ID}" in
 esac
 
 mkdir -p /usr/local/src/Vega-Strike-Engine-Source
-
-if [ -z "$VCPKG_ROOT" ]
-then
-    export VCPKG_ROOT="/usr/local/src/vcpkg"
-fi
-
-git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
-export PATH="$VCPKG_ROOT:$PATH"
-
-pushd "$VCPKG_ROOT"
-./bootstrap-vcpkg.sh
-popd
 
 echo "Bootstrapping finished!"
