@@ -46,9 +46,9 @@ bool gui_initialized = false;
 SDL_Window* current_window = nullptr;
 ImFont* roboto_18_font;
 
-void InitGui() {
-    current_window = SDL_GL_GetCurrentWindow();
-    SDL_GLContext gl_context = SDL_GL_GetCurrentContext();
+void InitGui(SDL_Window *window, const SDL_GLContext *context) {
+    current_window = window;
+    SDL_GLContext gl_context = *context;
 
     assert(current_window);
 

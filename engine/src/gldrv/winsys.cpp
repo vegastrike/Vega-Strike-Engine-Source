@@ -559,7 +559,7 @@ static bool setup_sdl_video_mode() {
     get_screen_measurements();
 
     // Initialize imgui
-    InitGui();
+    InitGui(window, &context);
 
     return true;
 }

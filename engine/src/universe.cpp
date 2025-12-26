@@ -385,14 +385,9 @@ void Universe::WriteSaveGame(bool auto_save) {
 }
 
 
-static const ImGuiWindowFlags window_flags = 
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
+static constexpr ImGuiWindowFlags window_flags =
         ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoBackground |
-        ImGuiWindowFlags_NoDecoration;   // makes it transparent
+        ImGuiWindowFlags_NoCollapse;
 
         
 void Universe::StartDraw() {
@@ -424,8 +419,8 @@ void Universe::StartDraw() {
         const double update_gfx_end_time = realTime();
 #endif
         // ImGui Init
-        ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
+        ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
 
         // End ImGui Init

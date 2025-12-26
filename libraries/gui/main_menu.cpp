@@ -76,8 +76,8 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
             ImGuiWindowFlags_NoBackground;   // makes it transparent
 
         // Start the Dear ImGui frame
-        ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
+        ImGui_ImplSDLRenderer3_NewFrame();
         ImGui::NewFrame();
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.

@@ -410,7 +410,7 @@ NavigationSystem::CachedSectorIterator NavigationSystem::CachedSectorIterator::o
 void NavigationSystem::DrawGalaxy() {
     // Obscure cockpit almost completely.
     const ImVec2 start_position(0,0);
-    const ImVec2 end_position(configuration().graphics.resolution_x, 
+    const ImVec2 end_position(configuration().graphics.resolution_x,
                               configuration().graphics.resolution_y);
     const ImU32 background_color = IM_COL32(0,0,0,224);
     ImGui::GetForegroundDrawList()->AddRectFilled(start_position, end_position, background_color,

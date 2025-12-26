@@ -473,18 +473,13 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
         }
     }
 
-    static const ImGuiWindowFlags window_flags = 
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
+    static constexpr ImGuiWindowFlags window_flags =
         ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoBackground |
-        ImGuiWindowFlags_NoDecoration;   // makes it transparent
+        ImGuiWindowFlags_NoCollapse;
 
     // ImGui Init
-    ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
     // End ImGui Init
 
@@ -496,8 +491,8 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     ImGui::Begin("main_window", nullptr, window_flags);
 
 
-    bs_tp->Draw(configuration().graphics.default_boot_message.length() > 0 ?
-            configuration().graphics.default_boot_message : message.length() > 0 ?
+    bs_tp->Draw(!configuration().graphics.default_boot_message.empty() ?
+            configuration().graphics.default_boot_message : !message.empty() ?
                     message : configuration().graphics.initial_boot_message);
 
     // ImGui End Frame

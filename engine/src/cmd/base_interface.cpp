@@ -685,18 +685,13 @@ int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y) {
     return -1;
 }
 
-static const ImGuiWindowFlags window_flags = 
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
+static constexpr ImGuiWindowFlags window_flags =
         ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoBackground |
-        ImGuiWindowFlags_NoDecoration;   // makes it transparent
+        ImGuiWindowFlags_NoCollapse;
 
 BaseInterface *BaseInterface::CurrentBase = nullptr;
 
-bool RefreshGUI(void) {
+bool RefreshGUI() {
     bool retval = false;
     if (_Universe->AccessCockpit()) {
         if (BaseInterface::CurrentBase) {
@@ -730,8 +725,8 @@ void base_main_loop() {
     }
 
     // ImGui Init
-    ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
     // End ImGui Init
 
