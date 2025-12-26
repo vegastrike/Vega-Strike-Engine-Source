@@ -71,9 +71,9 @@
 
 #include "imgui/imgui.h"
 #include "libraries/gui/gui.h"
-#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_sdlrenderer2.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 
 // shows the offset on the lower edge of the screen (for the text line there)
 constexpr double kYLower = -0.9;
@@ -731,7 +731,7 @@ void base_main_loop() {
 
     // ImGui Init
     ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
     // End ImGui Init
 
