@@ -5,7 +5,7 @@
 #include "main_menu.h"
 
 int main(int argc, char* argv[]) {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return 1;
     }
@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, "SDL3 Renderer");
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
 
     if (window && renderer) {
         std::cout << "Created window and renderer\n" << std::flush;
