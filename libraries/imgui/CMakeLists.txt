@@ -28,14 +28,6 @@
 
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-#Find SDL_image
-FIND_PACKAGE(SDL3_IMAGE REQUIRED)
-IF (SDL3_IMAGE_FOUND)
-    MESSAGE(STATUS "SDL3_image Found")
-ELSE (SDL3_IMAGE_FOUND)
-    MESSAGE(FATAL_ERROR "Failed to find required library SDL3_image")
-ENDIF (SDL3_IMAGE_FOUND)
-
 ADD_LIBRARY(vegastrike_imgui STATIC
     imgui.cpp
     imgui_draw.cpp
