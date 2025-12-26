@@ -200,10 +200,10 @@ struct GFXColor {
     }
 
     // Implicit conversion FROM ImU32
-    GFXColor(ImU32 col);
+    explicit GFXColor(ImU32 col);
 
     // Implicit conversion TO ImU32
-    operator ImU32() const;
+    explicit operator ImU32() const;
 };
 
 inline GFXColor operator*(float s, const GFXColor &c) {

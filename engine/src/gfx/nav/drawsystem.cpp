@@ -96,17 +96,19 @@ void NavigationSystem::DrawSystem() {
     //float offset = (float(length)*0.001);
     //systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]); // middle position
     systemname.SetPos(screenskipby4[0] + 0.03, screenskipby4[3] + 0.02);     //left position
-    systemname.color = GFXColor(1, 1, .7, 1);
+    GFXColor temp_color(1, 1, .7, 1);
+    systemname.color = static_cast<ImU32>(temp_color);
     systemname.SetText(systemnamestring);
 //systemname.SetCharSize(1, 1);
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg = systemname.background_color;
+    GFXColor tpbg(systemname.background_color);
     bool automatte = (0 == tpbg.a);
     if (automatte) {
-        systemname.background_color = GFXColor(0, 0, 0, background_alpha);
+        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        systemname.background_color = static_cast<ImU32>(temp_background_color);
     }
     systemname.Draw(systemnamestring, 0, true, false, automatte);
-    systemname.background_color = tpbg;
+    systemname.background_color = static_cast<ImU32>(tpbg);
     //***************************
 
 //navdrawlist mainlist(0, screenoccupation, factioncolours);		//	lists of items to draw

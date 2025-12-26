@@ -660,17 +660,18 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     unitandfg += std::string("\n");
     unitandfg += cp->getTargetLabel();
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg = tp->background_color;
+    GFXColor tpbg(tp->background_color);
     bool automatte = (0 == tpbg.a);
     if (automatte) {
-        tp->background_color = GFXColor(0, 0, 0, background_alpha);
+        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        tp->background_color = static_cast<ImU32>(temp_background_color);
     }
     tp->Draw(MangleString(unitandfg, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
             0,
             true,
             false,
             automatte);
-    tp->background_color = tpbg;
+    tp->background_color = static_cast<ImU32>(tpbg);
     const float auto_message_lim = configuration().graphics.auto_message_time_lim_flt;
     float delautotime = UniverseUtil::GetGameTime() - cp->autoMessageTime;
     bool draw_auto_message = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
@@ -691,17 +692,18 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         newst += GetDockingText(parent, target, actual_range);
         newst += string("\nRange: ") + PrettyDistanceString(actual_range);
         const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-        GFXColor tpbg = tp->background_color;
+        GFXColor tpbg(tp->background_color);
         bool automatte = (0 == tpbg.a);
         if (automatte) {
-            tp->background_color = GFXColor(0, 0, 0, background_alpha);
+            GFXColor temp_background_color( 0, 0, 0, background_alpha );
+            tp->background_color = static_cast<ImU32>(temp_background_color);
         }
         tp->Draw(MangleString(newst, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
                 0,
                 true,
                 false,
                 automatte);
-        tp->background_color = tpbg;
+        tp->background_color = static_cast<ImU32>(tpbg);
         static float ishieldcolor[4] = {.4, .4, 1, 1};
         static float mshieldcolor[4] = {.4, .4, 1, 1};
         static float oshieldcolor[4] = {.4, .4, 1, 1};
@@ -727,10 +729,11 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         GFXColor4f(1, 1, 1, 1);
     } else {
         const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-        GFXColor tpbg = tp->background_color;
+        GFXColor tpbg(tp->background_color);
         bool automatte = (0 == tpbg.a);
         if (automatte) {
-            tp->background_color = GFXColor(0, 0, 0, background_alpha);
+            GFXColor temp_background_color( 0, 0, 0, background_alpha );
+            tp->background_color = static_cast<ImU32>(temp_background_color);
         }
         if (draw_auto_message) {
             tp->Draw(MangleString(std::string("\n") + cp->autoMessage, _Universe->AccessCamera()->GetNebula()
@@ -743,7 +746,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
             tp->Draw(MangleString("\n[OutOfRange]",
                     _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
         }
-        tp->background_color = tpbg;
+        tp->background_color = static_cast<ImU32>(tpbg);
     }
 }
 
@@ -835,10 +838,11 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
     const std::string message_prefix = configuration().graphics.hud.message_prefix;
     fullstr = targetstr + fullstr;
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg = tp->background_color;
+    GFXColor tpbg(tp->background_color);
     bool automatte = (0 == tpbg.a);
     if (automatte) {
-        tp->background_color = GFXColor(0, 0, 0, background_alpha);
+        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        tp->background_color = static_cast<ImU32>(temp_background_color);
     }
     tp->Draw(message_prefix + MangleString(fullstr,
                     _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
@@ -846,7 +850,7 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
             true,
             false,
             automatte);
-    tp->background_color = tpbg;
+    tp->background_color = static_cast<ImU32>(tpbg);
 }
 
 void VDU::DrawScanningMessage() {
@@ -911,10 +915,11 @@ void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
     }
     msg = std::string("\n\n#ffff00     ") + msg;
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg = tp->background_color;
+    GFXColor tpbg(tp->background_color);
     bool automatte = (0 == tpbg.a);
     if (automatte) {
-        tp->background_color = GFXColor(0, 0, 0, background_alpha);
+        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        tp->background_color = static_cast<ImU32>(temp_background_color);
     }
     tp->Draw(MangleString(navdata + (draw_auto_message ? msg : std::string()), _Universe->AccessCamera()->GetNebula()
                     != NULL ? .4 : 0),
@@ -922,7 +927,7 @@ void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
             true,
             true,
             automatte);
-    tp->background_color = tpbg;
+    tp->background_color = static_cast<ImU32>(tpbg);
 }
 
 void VDU::DrawComm() {
@@ -949,16 +954,17 @@ void VDU::DrawComm() {
     } else {
         const string message_prefix = configuration().graphics.hud.message_prefix;
         const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-        GFXColor tpbg = tp->background_color;
+        GFXColor tpbg(tp->background_color);
         bool automatte = (0 == tpbg.a);
         if (automatte) {
-            tp->background_color = GFXColor(0, 0, 0, background_alpha);
+            GFXColor temp_background_color( 0, 0, 0, background_alpha );
+            tp->background_color = static_cast<ImU32>(temp_background_color);
         }
         tp->Draw(message_prefix
                 + MangleString(_Universe->AccessCockpit()->communication_choices.c_str(),
                         _Universe->AccessCamera()->GetNebula()
                                 != NULL ? .4 : 0), scrolloffset, true, false, automatte);
-        tp->background_color = tpbg;
+        tp->background_color = static_cast<ImU32>(tpbg);
     }
 }
 
@@ -1018,10 +1024,11 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
                 + tostring(vol) + string("m3 ") + tostring(cred) + string("Cr.\n");
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg = tp->background_color;
+    GFXColor tpbg(tp->background_color);
     bool automatte = (0 == tpbg.a);
     if (automatte) {
-        tp->background_color = GFXColor(0, 0, 0, background_alpha);
+        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        tp->background_color = static_cast<ImU32>(temp_background_color);
     }
     tp->Draw(MangleString(retval,
                     _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
@@ -1029,7 +1036,7 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
             true,
             false,
             automatte);
-    tp->background_color = tpbg;
+    tp->background_color = static_cast<ImU32>(tpbg);
 }
 
 static void DrawGun(Vector pos, float w, float h, MOUNT_SIZE sz) {
@@ -1209,10 +1216,11 @@ void VDU::DrawDamage(Unit *parent) {
     GFXColor4f(1, 1, 1, 1);
 
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg = tp->background_color;
+    GFXColor tpbg(tp->background_color);
     bool automatte = (0 == tpbg.a);
     if (automatte) {
-        tp->background_color = GFXColor(0, 0, 0, background_alpha);
+        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        tp->background_color = static_cast<ImU32>(temp_background_color);
     }
 
     std::string retval = parent->GetHudText();
@@ -1222,7 +1230,7 @@ void VDU::DrawDamage(Unit *parent) {
             true,
             false,
             automatte);
-    tp->background_color = tpbg;
+    tp->background_color = static_cast<ImU32>(tpbg);
     //*******************************************************
 }
 
@@ -1267,13 +1275,14 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
                 parent->InRange(target, mm, out_of_cone_information || !UnitUtil::isSignificant(target), false, false);
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg = tp->background_color;
+    GFXColor tpbg(tp->background_color);
     bool automatte = (0 == tpbg.a);
     if (automatte) {
-        tp->background_color = GFXColor(0, 0, 0, background_alpha);
+        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        tp->background_color = static_cast<ImU32>(temp_background_color);
     }
     tp->Draw(MangleString(buf, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
-    tp->background_color = tpbg;
+    tp->background_color = static_cast<ImU32>(tpbg);
     if (inrange) {
         int i = 0;
         char st[1024];
@@ -1287,10 +1296,11 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
 //        GFXColor tpbg = tp->background_color;
 //        bool automatte = (0 == tpbg.a);
         if (automatte) {
-            tp->background_color = GFXColor(0, 0, 0, background_alpha);
+            GFXColor temp_background_color( 0, 0, 0, background_alpha );
+            tp->background_color = static_cast<ImU32>(temp_background_color);
         }
         tp->Draw(MangleString(st, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
-        tp->background_color = tpbg;
+        tp->background_color = static_cast<ImU32>(tpbg);
         GFXColor4f(.4, .4, 1, 1);
         GetPosition(x, y);
         GetSize(w, h);
@@ -1306,11 +1316,12 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
 //        GFXColor tpbg = tp->background_color;
 //        bool automatte = (0 == tpbg.a);
         if (automatte) {
-            tp->background_color = GFXColor(0, 0, 0, background_alpha);
+            GFXColor temp_background_color( 0, 0, 0, background_alpha );
+            tp->background_color = static_cast<ImU32>(temp_background_color);
         }
         tp->Draw(MangleString("\n[OutOfRange]",
                 _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
-        tp->background_color = tpbg;
+        tp->background_color = static_cast<ImU32>(tpbg);
     }
     //_Universe->AccessCockpit()->RestoreViewPort();
 }
@@ -1429,13 +1440,14 @@ void VDU::DrawWeapon(Unit *parent) {
         buf += mbuf;
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg = tp->background_color;
+    GFXColor tpbg(tp->background_color);
     bool automatte = (0 == tpbg.a);
     if (automatte) {
-        tp->background_color = GFXColor(0, 0, 0, background_alpha);
+        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        tp->background_color = static_cast<ImU32>(temp_background_color);
     }
     tp->Draw(buf, 0, true, false, automatte);
-    tp->background_color = tpbg;
+    tp->background_color = static_cast<ImU32>(tpbg);
 }
 
 using std::vector;
@@ -1516,13 +1528,14 @@ void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent) {
         }
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg = tp->background_color;
+    GFXColor tpbg(tp->background_color);
     bool automatte = (0 == tpbg.a);
     if (automatte) {
-        tp->background_color = GFXColor(0, 0, 0, background_alpha);
+        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        tp->background_color = static_cast<ImU32>(temp_background_color);
     }
     tp->Draw(rez, scrolloffset, false, false, automatte);
-    tp->background_color = tpbg;
+    tp->background_color = static_cast<ImU32>(tpbg);
 }
 
 void VDU::DrawVDUObjectives(Unit *parent) {
@@ -1550,7 +1563,7 @@ void VDU::DrawWebcam(Unit *parent) {
 }
 
 void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
-    tp->color = color;
+    tp->color = static_cast<ImU32>(color);
     GFXDisable(LIGHTING);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXEnable(TEXTURE0);

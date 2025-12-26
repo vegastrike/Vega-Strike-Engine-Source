@@ -100,8 +100,8 @@ float getFontHeight() {
 }
 
 TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol) {
-    color = c;
-    background_color = bgcol;
+    color = static_cast<ImU32>(c);
+    background_color = static_cast<ImU32>(bgcol);
     myDims.i = 2;
     myDims.j = -2;
     myFontMetrics.Set(.06, .08, 0);

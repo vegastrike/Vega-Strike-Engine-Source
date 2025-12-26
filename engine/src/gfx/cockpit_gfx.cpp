@@ -345,11 +345,12 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
     if (!text)
         return;
     GFXColorf( textcol );
-    GFXColor     origbgcol = text->background_color;
+    GFXColor origbgcol(text->background_color);
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     bool automatte = (0 == origbgcol.a);
     if (automatte) {
-        text->background_color = GFXColor( 0, 0, 0, background_alpha );
+        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        text->background_color = static_cast<ImU32>(temp_background_color);
     }
     for (i = UnitImages< void >::KPS; i < UnitImages< void >::AUTOPILOT_MODAL; i++) {
         if (gauges[i]) {
@@ -489,7 +490,7 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
             text->Draw( modename+modevalue, 0, false, false, automatte );
         }
     }
-    text->background_color = origbgcol;
+    text->background_color = static_cast<ImU32>(origbgcol);
     GFXColor4f( 1, 1, 1, 1 );
 }
 
