@@ -32,6 +32,10 @@
 #include <string>
 #include "gfx_generic/vec.h"
 #include "src/gfxlib_struct.h"
+
+#include <cstdint>
+using ImU32 = std::uint32_t;
+
 class Texture;
 
 class TextPlane {
@@ -47,7 +51,7 @@ class TextPlane {
  *  } myGlyphPos[256];
  */
 public:
-    GFXColor col, bgcol;
+    ImU32 color, background_color;
     TextPlane(const struct GFXColor &col = GFXColor(1, 1, 1, 1), const struct GFXColor &bgcol = GFXColor(0, 0, 0, 0));
     ~TextPlane();
 

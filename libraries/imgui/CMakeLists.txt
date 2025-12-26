@@ -28,6 +28,14 @@
 
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
+#Find SDL_image
+FIND_PACKAGE(SDL3_IMAGE REQUIRED)
+IF (SDL3_IMAGE_FOUND)
+    MESSAGE(STATUS "SDL3_image Found")
+ELSE (SDL3_IMAGE_FOUND)
+    MESSAGE(FATAL_ERROR "Failed to find required library SDL3_image")
+ENDIF (SDL3_IMAGE_FOUND)
+
 ADD_LIBRARY(vegastrike_imgui STATIC
     imgui.cpp
     imgui_draw.cpp
@@ -36,7 +44,10 @@ ADD_LIBRARY(vegastrike_imgui STATIC
     
     backends/imgui_impl_sdl3.cpp
     backends/imgui_impl_sdlrenderer3.cpp
+    backends/imgui_impl_opengl3.cpp
 )
+
+ TARGET_LINK_LIBRARIES(vegastrike_imgui PRIVATE SDL3_image::SDL3_image)
 
 SET_PROPERTY(TARGET vegastrike_imgui PROPERTY CXX_STANDARD 14)
 SET_PROPERTY(TARGET vegastrike_imgui PROPERTY CXX_STANDARD_REQUIRED TRUE)

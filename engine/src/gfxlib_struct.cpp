@@ -36,12 +36,33 @@
 #include "root_generic/vs_globals.h"
 #include "src/vs_random.h"
 #include "src/vs_logging.h"
+#include "imgui.h"
 
 #include "root_generic/options.h"
 
 #include <vector>
 
 #include "configuration/configuration.h"
+
+
+// Implicit conversion FROM ImU32
+GFXColor::GFXColor(ImU32 col) {
+    r = ((col >> IM_COL32_R_SHIFT) & 0xFF) / 255.0f;
+    g = ((col >> IM_COL32_G_SHIFT) & 0xFF) / 255.0f;
+    b = ((col >> IM_COL32_B_SHIFT) & 0xFF) / 255.0f;
+    a = ((col >> IM_COL32_A_SHIFT) & 0xFF) / 255.0f;
+}
+
+// Implicit conversion TO ImU32
+GFXColor::operator ImU32() const {
+    ImU32 R = (ImU32)(r * 255.0f + 0.5f);
+    ImU32 G = (ImU32)(g * 255.0f + 0.5f);
+    ImU32 B = (ImU32)(b * 255.0f + 0.5f);
+    ImU32 A = (ImU32)(a * 255.0f + 0.5f);
+
+    return IM_COL32(R, G, B, A);
+}
+
 
 GLenum PolyLookup(POLYTYPE poly) {
     switch (poly) {

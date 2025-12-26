@@ -52,6 +52,7 @@
 #include "root_generic/options.h"
 #include "src/vs_exit.h"
 #include "configuration/configuration.h"
+#include "libraries/gui/gui.h"
 
 #include <SDL3/SDL_video.h>
 
@@ -557,6 +558,9 @@ static bool setup_sdl_video_mode() {
 
     get_screen_measurements();
 
+    // Initialize imgui
+    InitGui();
+
     return true;
 }
 
@@ -625,6 +629,7 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
 void winsys_cleanup() {
     static bool cleanup = false;
     if (!cleanup) {
+        CleanupGui();
         cleanup = true;
         freeMouseCursors();
         SDL_Quit();

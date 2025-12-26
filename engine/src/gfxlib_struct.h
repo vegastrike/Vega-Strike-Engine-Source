@@ -36,6 +36,9 @@
 #include <iterator>
 #include <functional>
 
+#include <cstdint>
+using ImU32 = std::uint32_t;
+
 #ifndef GFXBOOL
 #define GFXBOOL unsigned char
 #endif //GFXBOOL
@@ -195,6 +198,12 @@ struct GFXColor {
         return GFXColor(((r < 0) ? 0 : ((r > 1) ? 1 : r)), ((g < 0) ? 0 : ((g > 1) ? 1 : g)),
                 ((b < 0) ? 0 : ((b > 1) ? 1 : b)), ((a < 0) ? 0 : ((a > 1) ? 1 : a)));
     }
+
+    // Implicit conversion FROM ImU32
+    explicit GFXColor(ImU32 col);
+
+    // Implicit conversion TO ImU32
+    explicit operator ImU32() const;
 };
 
 inline GFXColor operator*(float s, const GFXColor &c) {
