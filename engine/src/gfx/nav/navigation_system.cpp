@@ -33,7 +33,7 @@
 #include "universe.h"
 #include "universe_util.h"
 #include "drawgalaxy.h"
-
+#include "imgui.h"
 #include "root_generic/vs_globals.h"
 
 
@@ -408,6 +408,15 @@ NavigationSystem::CachedSectorIterator NavigationSystem::CachedSectorIterator::o
 }
 
 void NavigationSystem::DrawGalaxy() {
+    // Obscure cockpit almost completely.
+    const ImVec2 start_position(0,0);
+    const ImVec2 end_position(configuration().graphics.resolution_x, 
+                              configuration().graphics.resolution_y);
+    const ImU32 background_color = IM_COL32(0,0,0,224);
+    ImGui::GetForegroundDrawList()->AddRectFilled(start_position, end_position, background_color,
+                    0.0f // No rounded borders
+    );
+
     // (1, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
     std::vector<SystemDrawNode> mouselist;     
 
@@ -421,7 +430,8 @@ void NavigationSystem::DrawGalaxy() {
 
 //int length = systemnamestring.size();
 //float offset = (float(length)*0.005);
-    systemname.col = GFXColor(1, 1, .7, 1);
+    GFXColor temp_system_color(1, 1, .7, 1);
+    systemname.color = static_cast<ImU32>(temp_system_color);
     systemname.SetPos(screenskipby4[0], screenskipby4[3]);     //Looks ugly when name is too long and goes off the edge.
 //systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
     systemname.SetText(systemnamestring);
