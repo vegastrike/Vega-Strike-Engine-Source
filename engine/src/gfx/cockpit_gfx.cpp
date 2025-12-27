@@ -37,7 +37,6 @@
 #include "cmd/planet.h"
 #include "cmd/unit_util.h"
 #include "cmd/weapon_info.h"
-#include "gfx/vdu.h"
 #include "gfx/camera.h"
 #include "nav/navcomputer.h"
 #include "gfx/gauge.h"

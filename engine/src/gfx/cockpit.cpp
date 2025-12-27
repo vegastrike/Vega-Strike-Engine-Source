@@ -54,7 +54,6 @@
 #include "cmd/unit_util.h"
 #include "cmd/base_util.h"
 #include "gfx/hud.h"
-#include "gfx/vdu.h"
 #include "root_generic/lin_time.h" //for fps
 #include "cmd/beam.h"
 #include "src/config_xml.h"
