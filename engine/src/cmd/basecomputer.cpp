@@ -1990,9 +1990,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
     string::size_type pic = descString.find('@');
     StaticImageDisplay
             *desc_image = vega_dynamic_cast_ptr<StaticImageDisplay>(window()->findControlById("DescriptionImage"), true);
-    if (desc_image == nullptr) {
-        return;
-    }
+    
     if (pic != string::npos) {
         std::string texture = descString.substr(pic + 1);
         descString = descString.substr(0, pic);
