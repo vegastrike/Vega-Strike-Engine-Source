@@ -3362,9 +3362,14 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
             //Remove the item from the base, since we bought it.
             int index = baseUnit->cargo_hold.GetIndex(m_part.GetName());
             Cargo upgrade = baseUnit->cargo_hold.GetCargo(index);
+            upgrade.SetQuantity(1);
             upgrade.SetInstalled(true);
             baseUnit->cargo_hold.RemoveCargo(baseUnit, index, 1);
-            playerUnit->upgrade_space.AddCargo(playerUnit, upgrade);
+
+            bool is_ammo = (string::npos != string(upgrade.GetName()).find("_ammo"));
+            if(!is_ammo) {
+                playerUnit->upgrade_space.AddCargo(playerUnit, upgrade);
+            }
         } else {
             break;
         }
