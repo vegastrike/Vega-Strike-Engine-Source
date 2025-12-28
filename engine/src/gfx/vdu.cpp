@@ -33,7 +33,7 @@
 
 #include "gfx/vdu.h"
 
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "cmd/unit_util.h"
 #include "gfx/hud.h"
 #include "root_generic/vs_globals.h"

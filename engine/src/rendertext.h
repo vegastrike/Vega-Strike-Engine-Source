@@ -54,7 +54,7 @@ private:
     int ndraw;
     int WORDWRAP;
     int conskip;
-    int histpos;
+    int histpos{};
     std::string commandbuf;
 public:
     RText();

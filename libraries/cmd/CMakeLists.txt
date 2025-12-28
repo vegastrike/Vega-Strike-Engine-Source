@@ -151,12 +151,3 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike_cmd PRIVATE
         ${Vega_Strike_BINARY_DIR}/engine
         ${Vega_Strike_BINARY_DIR}/engine/src
 )
-
-IF (NEED_LINKING_AGAINST_LIBM)
-    TARGET_LINK_LIBRARIES(vegastrike_cmd PRIVATE m)
-ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike_cmd PRIVATE
-        ${TST_LIBS}
-        ${Boost_LIBRARIES}
-        ${Python3_LIBRARIES}
-)
