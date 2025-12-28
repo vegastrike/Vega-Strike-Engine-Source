@@ -968,27 +968,7 @@ std::string PrintCargo(const Cargo& cargo, double &total_mass,
 }
 
 void VDU::DrawManifest(Unit *parent, Unit *target) {
-    // Location
-    float x,y;
-    tp->GetPos(y,x);
-    std::pair<int,int> pair = CalculateAbsoluteXY(x,y);
-    ImVec2 position(pair.first, pair.second);
-
     std::vector<std::string> lines;
-
-    // Manifest Title
-    const std::string manifest_heading = boost::algorithm::replace_all_copy(
-                configuration().graphics.hud.manifest_heading, "\\n", "\n");
-    lines.push_back(manifest_heading);
-
-    
-    // Subtitles
-    const bool simple_manifest = configuration().graphics.hud.simple_manifest;
-    if (target != parent && simple_manifest == false) {
-        lines.push_back("Target: " + reformatName(target->name));
-    } else {
-        lines.push_back("Credits: " + std::to_string(ComponentsManager::credits));
-    }
 
     double total_mass = 0;
     double total_volume = 0;
@@ -1009,14 +989,62 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
     lines.push_back("Total: " + std::to_string(total_mass) + "t " + std::to_string(total_volume) + 
                     "m³ " + std::to_string(total_value) + "Cr");
     
+    // Location
+    float rel_x,rel_y, x, y;
+    tp->GetPos(rel_y,rel_x);    // Notice the inconsistent y,x
+    std::pair<int,int> pair = CalculateAbsoluteXY(rel_x,rel_y);
+    ImVec2 position(pair.first, pair.second);
+    x = pair.first;
+    y = pair.second;
 
-    ImDrawList* draw_list = ImGui::GetForegroundDrawList();
-    for(std::string& line : lines) {
-        ImVec2 text_size = ImGui::CalcTextSize(line.c_str());
-        draw_list->AddText(position, tp->color, line.c_str());
-        
-        position.y += text_size.y;
+    // Dimensions
+    float rel_w, rel_h;
+    float h, w;
+    tp->GetSize(rel_w, rel_h);
+    std::pair<int,int> dim_pair = CalculateAbsoluteXY(rel_w, rel_h);
+    w = dim_pair.first - x;
+    h = dim_pair.second - y;
+    ImVec2 size(w,h);
+
+    ImGui::SetCursorPos(position);
+    ImGui::BeginChild("manifest_vdu", size, false, 
+                      ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+    // Manifest Title
+    const std::string manifest_heading = boost::algorithm::replace_all_copy(
+                configuration().graphics.hud.manifest_heading, "\\n", "\n");
+    ImGui::Text("%s", manifest_heading.c_str());
+
+    // Underline
+    // TODO: move this somewhere else
+    ImVec2 min = ImGui::GetItemRectMin();
+    ImVec2 max = ImGui::GetItemRectMax();
+
+    auto* draw_list = ImGui::GetWindowDrawList();
+    draw_list->AddLine(
+        ImVec2(min.x, max.y),
+        ImVec2(max.x, max.y),
+        IM_COL32(255, 255, 255, 255), // color
+        1.0f                          // thickness
+    );
+    
+    // Subtitles
+    const bool simple_manifest = configuration().graphics.hud.simple_manifest;
+    if (target != parent && simple_manifest == false) {
+        ImGui::Text("Target: %s", reformatName(target->name).c_str());
+    } else {
+        ImGui::Text("Credits: %s", std::to_string(ComponentsManager::credits).c_str());
     }
+
+    int i=std::max(0,scrolloffset);
+    int lines_size = static_cast<int>(lines.size());
+
+    // Now the rest of the lines
+    for(;i<lines_size;i++) {
+        ImGui::Text("%s", lines[i].c_str());
+    }
+
+    ImGui::EndChild();
 }
 
 static void DrawGun(Vector pos, float w, float h, MOUNT_SIZE sz) {
