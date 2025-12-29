@@ -341,10 +341,12 @@ bool ComponentsManager::_Buy(CargoHold *hold, ComponentsManager *seller, Cargo *
     int max_affordable_quantity = static_cast<int>(std::floor(credits / price));
     quantity = std::min(max_affordable_quantity, quantity);
 
-    // Check the maximum you can fit in your hold
-    int max_stackable_quantity = static_cast<int>(std::floor(hold->AvailableCapacity() / item->GetVolume()));
-    quantity = std::min(max_stackable_quantity, quantity);
-
+    // Check the maximum you can fit in your hold, but only if volume != 0
+    if(item->GetVolume() > 0) {
+        int max_stackable_quantity = static_cast<int>(std::floor(hold->AvailableCapacity() / item->GetVolume()));
+        quantity = std::min(max_stackable_quantity, quantity);
+    }
+    
     // Sanity check of the quantity - isn't 0 or negative
     if(quantity <= 0) {
         return false;
