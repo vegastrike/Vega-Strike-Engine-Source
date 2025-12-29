@@ -123,6 +123,7 @@ public:
 
     bool ShipDamaged() const;
     bool AllowedUpgrade(const Cargo& upgrade) const;
+    bool UpgradeAlreadyInstalled(const Cargo& upgrade) const;
     void DamageRandomSystem();
     void GenerateHudText(std::string getDamageColor(double));
     std::string GetHudText();
@@ -135,6 +136,7 @@ public:
     bool SellUpgrade(ComponentsManager *seller, Cargo *item, int quantity);
 
     Component* GetComponentByType(const ComponentType type);
+    const Component* GetComponentByType(const ComponentType type) const;
 private:
     bool _Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity);
     bool _Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *item, int quantity);

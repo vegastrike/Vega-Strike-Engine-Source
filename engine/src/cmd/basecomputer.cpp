@@ -2085,6 +2085,7 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
     Unit *baseUnit = m_base.GetUnit();
     bool havemoney = true;
     bool havespace = true;
+    bool upgrade_already_installed = false;
     switch (transType) {
         case BUY_CARGO:
             //Enough credits and room for the item in the ship.
@@ -2132,15 +2133,15 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
             //cargo.mission == true means you can't do the transaction.
             havemoney = item.GetPrice() * quantity <= ComponentsManager::credits;
             havespace = (playerUnit->upgrade_space.CanAddCargo(item) || upgradeNotAddedToCargo(item.GetCategory()));
-
+            upgrade_already_installed = playerUnit->UpgradeAlreadyInstalled(item);
             //UpgradeAllowed must be first -- short circuit && operator
-            if (UpgradeAllowed(item, playerUnit) && havemoney && havespace && !item.IsMissionFlag()) {
+            if (UpgradeAllowed(item, playerUnit) && havemoney && havespace && !upgrade_already_installed &&!item.IsMissionFlag()) {
                 return true;
             } else {
                 if (!havemoney) {
                     color_insufficient_money_flag = true;
                 }
-                if (!havespace) {
+                if (!havespace || upgrade_already_installed) {
                     color_insufficient_space_flag = true;
                 }
             }
