@@ -67,7 +67,7 @@ public:
 //-1 is infinite
 
     // Ammo is candidate for Resource
-    int ammo;                                            //short
+    mutable int ammo;                                            //short
     int volume;                                          //-1 is infinite //short fix
 //The data behind this weapon. May be accordingly damaged as time goes on
     enum MOUNTSTATUS { REQUESTED, ACCEPTED, PROCESSED, UNFIRED, FIRED }
