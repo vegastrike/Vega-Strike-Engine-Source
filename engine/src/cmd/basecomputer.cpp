@@ -121,6 +121,14 @@ std::vector<std::string> getWeapFilterVec() {
 
 std::vector<std::string> weapfiltervec = getWeapFilterVec();
 
+bool upgradeNotAddedToCargo(std::string category) {
+    for (const auto & i : weapfiltervec) {
+        if (i.find(category) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
 
 extern vector<unsigned int> base_keyboard_queue;
 
@@ -2123,7 +2131,7 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
         case BUY_UPGRADE:
             //cargo.mission == true means you can't do the transaction.
             havemoney = item.GetPrice() * quantity <= ComponentsManager::credits;
-            havespace = (playerUnit->upgrade_space.CanAddCargo(item) || item.IsWeapon());
+            havespace = (playerUnit->upgrade_space.CanAddCargo(item) || upgradeNotAddedToCargo(item.GetCategory()));
 
             //UpgradeAllowed must be first -- short circuit && operator
             if (UpgradeAllowed(item, playerUnit) && havemoney && havespace && !item.IsMissionFlag()) {
@@ -3326,7 +3334,7 @@ bool BaseComputer::BuyUpgradeOperation::checkTransaction(void) {
     }
 }
 
-//Finish the transaction - seems only for mounts
+//Finish the transaction.
 void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     Unit *baseUnit = m_parent.m_base.GetUnit();
@@ -3334,35 +3342,38 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
         finish();
         return;
     }
+    //Get the upgrade percentage to calculate the full price.
+    double percent;
+    int numleft = basecargoassets(baseUnit, m_part.GetName());
+    while (numleft > 0
+            && playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, 0, true, percent)) {
+        const float price = m_part.GetPrice();         //* (1-usedValue(percent));
+        if (ComponentsManager::credits >= price) {
+            //Have enough money.  Buy it.
+            ComponentsManager::credits -= price;
 
-    int quantity = 1; // By default, we buy one unit
-    if(m_newPart->mounts[0].IsMissileMount()) {
-        int mount_size = playerUnit->mounts[m_selectedMount].size;
-        const Mount mount = m_newPart->mounts[0];
-        const WeaponInfo* info = mount.type;
-        int missile_size = as_integer(info->size);
-        
-        // This is not as clear as it looks.
-        // Light missile size is 64. Medium is 128. Light and medium is 192.
-        // This hack produces inconsistent but plausible results.
-        quantity = mount_size / missile_size;
-        std::cout << "Buying " << quantity << " missiles. (" 
-                  << missile_size << "/" << mount_size << ")\n";
-    }
-    
-
-    double percent = 0; // Dummy variable. No longer used
-    if(playerUnit->BuyUpgrade(baseUnit, &m_part, quantity)) {
-        // Modify upgrade quantity according to cargo quantity
-        m_newPart->mounts[0].ammo = quantity;
-
-        //Upgrade the ship.
-        playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, 0, true, percent);
-        const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
-        if (!allow_special_with_weapons) {
-            playerUnit->ToggleWeapon(false, /*backwards*/ true);
-            playerUnit->ToggleWeapon(false, /*backwards*/ false);
+            //Upgrade the ship.
+            playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, 0, true, percent);
+            const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
+            if (!allow_special_with_weapons) {
+                playerUnit->ToggleWeapon(false, /*backwards*/ true);
+                playerUnit->ToggleWeapon(false, /*backwards*/ false);
+            }
+            //Remove the item from the base, since we bought it.
+            int index = baseUnit->cargo_hold.GetIndex(m_part.GetName());
+            Cargo upgrade = baseUnit->cargo_hold.GetCargo(index);
+            upgrade.SetInstalled(true);
+            baseUnit->cargo_hold.RemoveCargo(baseUnit, index, 1);
+            playerUnit->upgrade_space.AddCargo(playerUnit, upgrade);
+        } else {
+            break;
         }
+        if (m_newPart->mounts.size() == 0) {
+            break;
+        } else if (m_newPart->mounts.at(0).ammo <= 0) {
+            break;
+        }
+        numleft = basecargoassets(baseUnit, m_part.GetName());
     }
     updateUI();
 
