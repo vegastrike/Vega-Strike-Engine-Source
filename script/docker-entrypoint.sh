@@ -28,7 +28,7 @@
 set -e
 
 echo "-----------------------------------------"
-echo "--- docker-entrypoint.sh | 2025-06-27 ---"
+echo "--- docker-entrypoint.sh | 2025-11-27 ---"
 echo "-----------------------------------------"
 
 #----------------------------------
@@ -54,6 +54,7 @@ while [ $# -gt 0 ]; do
       printf "* Error: Invalid argument.*\n"
       printf "***************************\n"
       exit 1
+      ;;
   esac
   shift
 done

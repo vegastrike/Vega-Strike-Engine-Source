@@ -35,6 +35,7 @@
 #include "cmd/unit_csv_factory.h"
 #include "vs_logging.h"
 #include "resource/manifest.h"
+#include "src/vega_cast_utils.h"
 #include <boost/format.hpp>
 #include <iostream>
 
@@ -57,15 +58,15 @@ void ComponentsManager::Load(std::string unit_key) {
         std::vector<std::string> parts;
         boost::split(parts, upgrade, boost::is_any_of(":"));
         if (parts.size() == 1) {
-            const std::string category = parts[0];
+            const std::string& category = parts[0];
             prohibited_upgrades.emplace_back(category, 0);
         } else if (parts.size() == 2) {
-            const std::string category = parts[0];
-            const int limit = std::stoi(parts[1]);
+            const std::string& category = parts[0];
+            const int limit = locale_aware_stoi(parts[1]);
             //const std::pair<const std::string, const int> pair(category, limit);
             prohibited_upgrades.emplace_back(category, limit);
         } else {
-            std::cerr << "Invalid format in prohibited upgrades string: " << upgrade << std::endl;
+            VS_LOG(error, (boost::format("%1%: Invalid format in prohibited upgrades string: %2%") % __FUNCTION__ % upgrade));
         }
     }
 }
@@ -213,6 +214,18 @@ bool ComponentsManager::AllowedUpgrade(const Cargo& upgrade) const {
         }
     }
 
+    return true;
+}
+
+bool ComponentsManager::UpgradeAlreadyInstalled(const Cargo& upgrade) const {
+    const ComponentType component_type = GetComponentTypeFromName(upgrade.GetName());
+    const Component *component = GetComponentByType(component_type);
+    if(component) {
+        return component->Installed();
+    }
+
+    // Note that this method returns true for error, so we err on the side of caution
+    // and not install an upgrade.
     return true;
 }
 
@@ -410,6 +423,12 @@ bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *
 }
 
 Component* ComponentsManager::GetComponentByType(const ComponentType type) {
+    return const_cast<Component*>(
+        static_cast<const ComponentsManager&>(*this).GetComponentByType(type)
+    );
+}
+
+const Component* ComponentsManager::GetComponentByType(const ComponentType type) const {
     switch(type) {
         case ComponentType::Hull: return &hull;
         case ComponentType::Armor: return &armor;

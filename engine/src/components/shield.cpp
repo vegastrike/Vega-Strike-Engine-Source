@@ -33,6 +33,7 @@
 #include "configuration/configuration.h"
 #include "src/vs_logging.h"
 #include "damage/damage.h"
+#include "src/vega_cast_utils.h"
 
 #include <boost/format.hpp>
 
@@ -83,15 +84,7 @@ void Shield::Load(std::string unit_key) {
     const std::string shield_facets_string = UnitCSVFactory::GetVariable(unit_key, "shield_facets", std::string());
 
     if(!shield_facets_string.empty()) {
-        try {
-            number_of_facets = std::stoi(shield_facets_string);
-        } catch (std::invalid_argument const& ex) {
-            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_facets_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_facets_string));
-            number_of_facets = 1;
-        } catch (std::out_of_range const& ex) {
-            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_facets_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_facets_string));
-            number_of_facets = 1;
-        }
+        number_of_facets = locale_aware_stoi(shield_facets_string, 1);
     }
 
     // Single value (short form)
@@ -126,7 +119,7 @@ void Shield::Load(std::string unit_key) {
             const std::string shield_string_value = UnitCSVFactory::GetVariable(unit_key, shield_keys[i], std::string());
             if (shield_string_value.empty()) {
                 shield_values.push_back(Resource<double>(0.0));
-                continue;
+                    continue;
             }
 
             try {
@@ -162,8 +155,8 @@ void Shield::Load(std::string unit_key) {
                 break;
             }
 
-            double value = std::stod(string_value);
-            shield_values.push_back(Resource<double>(value, 0.0, value));
+            double value = locale_aware_stod(string_value);
+            shield_values.emplace_back(value, 0.0, value);
             ++shield_count;
         }
 

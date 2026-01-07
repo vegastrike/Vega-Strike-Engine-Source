@@ -194,7 +194,7 @@ void drawdescription(string text,
     }
     TextPlane displayname;      //will be used to display shits names
 
-    displayname.col = col;
+    displayname.color = static_cast<ImU32>(col);
 
     int length = text.size();
     float offset = (float(length) * 0.005);
@@ -209,13 +209,14 @@ void drawdescription(string text,
         displayname.SetCharSize(size_x, size_y);
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg = displayname.bgcol;
+    GFXColor tpbg(displayname.background_color);
     bool automatte = (0 == tpbg.a);
     if (automatte) {
-        displayname.bgcol = GFXColor(0, 0, 0, background_alpha);
+        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        displayname.background_color = static_cast<ImU32>(temp_background_color);
     }
     displayname.Draw(text, 0, true, false, automatte);
-    displayname.bgcol = tpbg;
+    displayname.background_color = static_cast<ImU32>(tpbg);
 }
 
 Unit *navdrawlist::gettailunit() {

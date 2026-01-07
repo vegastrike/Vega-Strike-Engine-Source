@@ -457,16 +457,19 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                                 <= kYLower) {                             //check lower screenborder
                             text_pos_y = (y + fabs(text_offset_y)
                                     + text_hei);
-                        }                                   //align on top
-                        text_marker.col = GFXColor(text_color_r, text_color_g, text_color_b, links[i]->alpha);
+                        }   //align on top
+                        GFXColor temp_marker_color(text_color_r, text_color_g, text_color_b, links[i]->alpha);
+                        text_marker.color = static_cast<ImU32>(temp_marker_color);
                         text_marker.SetPos(text_pos_x, text_pos_y);
                         if (links[i]->pythonfile != "#" && text_marker.GetText().find("XXX") != 0) {
-                            GFXColor tmpbg = text_marker.bgcol;
+                            GFXColor tmpbg(text_marker.background_color);
                             bool automatte = (0 == tmpbg.a);
-                            if (automatte)
-                                text_marker.bgcol = GFXColor(0, 0, 0, base_text_background_alpha);
+                            if (automatte) {
+                                GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
+                                text_marker.background_color = static_cast<ImU32>(temp_background_color);
+                            }
                             text_marker.Draw(text_marker.GetText(), 0, true, false, automatte);
-                            text_marker.bgcol = tmpbg;
+                            text_marker.background_color = static_cast<ImU32>(tmpbg);
                         }
                         GFXEnable(TEXTURE0);
                     }                     //if draw_text
@@ -513,17 +516,19 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
                     if (enable_markers) {
                         text_pos_y += text_hei;
                     }
-                    text_marker.col = GFXColor(1, 1, 1, 1);
+                    GFXColor white_color(1, 1, 1, 1);
+                    text_marker.color = static_cast<ImU32>(white_color);
                     text_marker.SetPos(text_pos_x, text_pos_y);
 
                     GFXDisable(TEXTURE0);
-                    GFXColor tmpbg = text_marker.bgcol;
+                    GFXColor tmpbg(text_marker.background_color);
                     bool automatte = (0 == tmpbg.a);
                     if (automatte) {
-                        text_marker.bgcol = GFXColor(0, 0, 0, base_text_background_alpha);
+                        GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
+                        text_marker.background_color = static_cast<ImU32>(temp_background_color);
                     }
                     text_marker.Draw(text_marker.GetText(), 0, true, false, automatte);
-                    text_marker.bgcol = tmpbg;
+                    text_marker.background_color = static_cast<ImU32>(tmpbg);
                     GFXEnable(TEXTURE0);
                 }
                 //link border
@@ -573,17 +578,19 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         }
     }
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
-    GFXColor tmpbg = text.bgcol;
+    GFXColor tmpbg(text.background_color);
     bool automatte = (0 == tmpbg.a);
     if (automatte) {
-        text.bgcol = GFXColor(0, 0, 0, base_text_background_alpha);
+        GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
+        text.background_color = static_cast<ImU32>(temp_background_color);
     }
     if (!automatte && text.GetText().empty()) {
         float posx, posy, wid, hei;
         text.GetPos(posy, posx);
         text.GetSize(wid, hei);
 
-        GFXColorf(text.bgcol);
+        GFXColor tmp_color(text.background_color);
+        GFXColorf(tmp_color);
         const float verts[4 * 3] = {
                 posx, hei, 0.0f,
                 wid, hei, 0.0f,
@@ -594,7 +601,7 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
     } else {
         text.Draw(text.GetText(), 0, true, false, automatte);
     }
-    text.bgcol = tmpbg;
+    text.background_color= static_cast<ImU32>(tmpbg);
     (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = tmpx;
     (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = tmpy;
 }
@@ -678,6 +685,15 @@ int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y) {
     return -1;
 }
 
+static const ImGuiWindowFlags window_flags = 
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoBackground |
+        ImGuiWindowFlags_NoDecoration;   // makes it transparent
+
 BaseInterface *BaseInterface::CurrentBase = nullptr;
 
 bool RefreshGUI(void) {
@@ -721,6 +737,7 @@ void base_main_loop() {
         createdbase = false;
         AUDStopAllSounds(createdmusic);
     }
+
     // ImGui Init
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
@@ -732,8 +749,19 @@ void base_main_loop() {
                              configuration().graphics.resolution_y);
     ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
     ImGui::Begin("main_window", nullptr, window_flags);
+    
+    bool refresh_result = RefreshGUI();
 
-    if (!RefreshGUI()) {
+    // ImGui End Frame
+    ImGui::End();
+    // Rendering
+    ImGui::Render();
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    SDL_GL_SwapWindow(current_window);
+    // End ImGui
+
+    if (!refresh_result) {
         restore_main_loop();
     } else {
         GFXEndScene();
@@ -911,10 +939,12 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
         curtext.SetText(rooms[curroom]->deftext);
     }
     if (link && link->pythonfile != "#") {
-        curtext.col = GFXColor(overcolor[0], overcolor[1], overcolor[2], overcolor[3]);
+        GFXColor temp_link_color(overcolor[0], overcolor[1], overcolor[2], overcolor[3]);
+        curtext.color = static_cast<ImU32>(temp_link_color);
         mousePointerStyle = MOUSE_POINTER_HOVER;
     } else {
-        curtext.col = GFXColor(inactivecolor[0], inactivecolor[1], inactivecolor[2], inactivecolor[3]);
+        GFXColor temp_inactive_color(inactivecolor[0], inactivecolor[1], inactivecolor[2], inactivecolor[3]);
+        curtext.color = static_cast<ImU32>(temp_inactive_color);
         mousePointerStyle = MOUSE_POINTER_NORMAL;
     }
     const bool draw_always = configuration().graphics.bases.location_marker_draw_always;
@@ -1530,24 +1560,26 @@ void BaseInterface::Draw() {
     curtext.SetPos(-.99, -1 + (y * 1.5));
 
     if (curtext.GetText().find("XXX") != 0) {
-        GFXColor tmpbg = curtext.bgcol;
+        GFXColor tmpbg(curtext.background_color);
         bool automatte = (0 == tmpbg.a);
         if (automatte) {
-            curtext.bgcol = GFXColor(0, 0, 0, base_text_background_alpha);
+            GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
+            curtext.background_color = static_cast<ImU32>(temp_background_color);
         }
         curtext.Draw(curtext.GetText(), 0, true, false, automatte);
-        curtext.bgcol = tmpbg;
+        curtext.background_color = static_cast<ImU32>(tmpbg);
     }
     othtext.SetPos(-.99, 1);
 
     if (othtext.GetText().length() != 0) {
-        GFXColor tmpbg = othtext.bgcol;
+        GFXColor tmpbg(othtext.background_color);
         bool automatte = (0 == tmpbg.a);
         if (automatte) {
-            othtext.bgcol = GFXColor(0, 0, 0, base_text_background_alpha);
+            GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
+            othtext.background_color = static_cast<ImU32>(temp_background_color);
         }
         othtext.Draw(othtext.GetText(), 0, true, false, automatte);
-        othtext.bgcol = tmpbg;
+        othtext.background_color= static_cast<ImU32>(tmpbg);
     }
     SetupViewport();
     EndGUIFrame(mousePointerStyle);

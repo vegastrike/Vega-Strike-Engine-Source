@@ -23,6 +23,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - FROM:     'ubuntu:questing'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            ARTIFACT_EXT: 'deb'
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
@@ -32,6 +36,10 @@ jobs:
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'tar.[xb]z*'
+          - FROM:     'linuxmintd/mint22.2-amd64'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            ARTIFACT_EXT: 'deb'
           - FROM:     'linuxmintd/mint22-amd64'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
@@ -44,6 +52,10 @@ jobs:
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'deb'
+          - FROM:     'fedora:43'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:42'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
@@ -52,18 +64,18 @@ jobs:
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'rpm'
-          - FROM:     'fedora:40'
-            COMPILER: 'clang'
+          - FROM:     'opensuse/leap:16.0'
+            COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'rpm'
-          - FROM:     'opensuse/leap:16.0'
+          - FROM:     'rockylinux/rockylinux:10.0'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             ARTIFACT_EXT: 'rpm'
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 2
           submodules: false
@@ -81,7 +93,6 @@ jobs:
         env:
           FROM:       ${{ matrix.FROM }}
           COMPILER:   ${{ matrix.COMPILER }}
-          MY_OS_NAME: linux
           IS_RELEASE: 1
         run: script/cibuild --preset-name=${{ matrix.preset-name }}
       - name: Upload the artifacts

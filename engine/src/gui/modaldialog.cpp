@@ -36,6 +36,7 @@
 #include "simplepicker.h"
 #include "scroller.h"
 #include "eventmanager.h"
+#include "src/vega_cast_utils.h"
 
 //The class that gets called when the window closes.
 void ModalDialog::setCallback(ModalDialogCallback *cb, const std::string &id) {
@@ -241,7 +242,7 @@ void QuestionDialog::init(const std::string &title) {
     setWindow(new Window);
     initControls();
 
-    StaticDisplay *titleControl = static_cast< StaticDisplay * > ( window()->findControlById("Title"));
+    StaticDisplay *titleControl = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Title"));
     assert(titleControl != NULL);
     std::string fixedTitle;
     std::string::size_type lastpos = 0, pos;
@@ -324,7 +325,7 @@ bool ListQuestionDialog::processWindowCommand(const EventCommandId &command, Con
         return true;
     } else if (command == "OK") {
         //The OK button was clicked.
-        Picker *picker = static_cast< Picker * > ( window()->findControlById("Picker"));
+        Picker *picker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("Picker"));
         assert(picker != NULL);
         m_result = picker->selectedItem();
         if (m_result >= 0) {
@@ -343,7 +344,7 @@ bool ListQuestionDialog::processWindowCommand(const EventCommandId &command, Con
 }
 
 SimplePicker *ListQuestionDialog::getPicker() {
-    return static_cast< SimplePicker * > ( window()->findControlById("Picker"));
+    return vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("Picker"));
 }
 
 //Display a modal list of options.

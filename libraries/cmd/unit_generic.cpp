@@ -523,6 +523,34 @@ bool Unit::GettingDestroyed() const {
     return hull.Destroyed();
 }
 
+// This creates a nearly destroyed unit to float in space
+void Unit::Derelict() {
+    hull.Set(hull.TotalMaxLayerValue() * 0.05);
+
+    // Downgrade ship
+    reactor.Downgrade();
+    fuel.Downgrade();
+    energy.Downgrade();
+    ftl_energy.Downgrade();
+    
+    afterburner.Downgrade();
+    afterburner_upgrade.Downgrade();
+    armor.Downgrade();
+    cloak.Downgrade();
+    computer.Downgrade();
+    drive.Downgrade();
+    drive_upgrade.Downgrade();
+    ecm.Downgrade();
+    ftl_drive.Downgrade();
+    jump_drive.Downgrade();
+    radar.Downgrade();
+    repair_bot.Downgrade();
+    shield.Downgrade();
+    ship_functions.Downgrade();
+
+    // Change texture
+}
+
 vector<Mesh *> Unit::StealMeshes() {
     vector<Mesh *> ret;
 
@@ -1397,11 +1425,21 @@ void Unit::ProcessDeleteQueue() {
 #ifdef DESTRUCTDEBUG
         if ( unit_delete_queue.back()->isSubUnit() ) {
             VS_LOG(debug, "Subunit Deleting (related to double dipping)");
+            unit_delete_queue.pop_back();
+            continue;
         }
 #endif
         Unit *mydeleter = unit_delete_queue.back();
         unit_delete_queue.pop_back();
+
+        // Avoid segfault when the unit getting destroyed is the player's current target
+        Unit* parent = _Universe->AccessCockpit()->GetParent();
+        if (parent && parent->Target() == mydeleter) {
+            parent->SetTarget(nullptr);
+        }
+
         delete mydeleter;                        ///might modify unitdeletequeue
+        mydeleter = nullptr;
 
 #ifdef DESTRUCTDEBUG
         VS_LOG_AND_FLUSH(trace, (boost::format("Completed %1$d") % unit_delete_queue.size()));
@@ -1968,7 +2006,11 @@ int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
 
     // Change mouse pointer to arrow
     if(IsPlayerShip()) {
-        changeCursor(CursorType::arrow);
+        if(configuration().mouse.enabled) {
+            changeCursor(CursorType::arrow);
+        } else {
+            showCursor();
+        }
     }
 
     return whichdockport + 1;
@@ -2075,7 +2117,11 @@ bool Unit::UnDock(Unit *utdw) {
 
             // Change mouse cursor to crosshairs
             if(IsPlayerShip()) {
-                changeCursor(CursorType::crosshairs);
+                if(configuration().mouse.enabled) {
+                    changeCursor(CursorType::crosshairs);
+                } else {
+                    hideCursor();
+                }
             }
 
             return true;
@@ -3196,7 +3242,7 @@ enum Unit::tractorHow Unit::getTractorability() const {
     static bool tractorability_mask_init = false;
     static unsigned char tractorability_mask;
     if (!tractorability_mask_init) {
-        std::string stractorability_mask = configuration().physics.player_tractorability_mask;
+        const std::string& stractorability_mask = configuration().physics.player_tractorability_mask;
         if (!stractorability_mask.empty()) {
             tractorability_mask = tractorImmune;
             if (stractorability_mask.find_first_of("pP") != string::npos) {
@@ -3461,9 +3507,9 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         Velocity = Velocity * (1 - SPACE_DRAG);
     }
 
-    std::string locking_sound_name = configuration().audio.unit_audio.locking;
+    const std::string& locking_sound_name = configuration().audio.unit_audio.locking;
     //enables spiffy wc2 torpedo music, default to normal though
-    std::string locking_sound_torp_name = configuration().audio.unit_audio.locking_torp;
+    const std::string& locking_sound_torp_name = configuration().audio.unit_audio.locking_torp;
     static boost::optional<int> locking_sound{};
     if (locking_sound == boost::none) {
         locking_sound = AUDCreateSoundWAV(locking_sound_name, true);

@@ -15,6 +15,7 @@
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
 
+#include <iostream>
 
 
 void setBackgroundColor(float red, float green, float blue, float transparent) {
@@ -90,20 +91,20 @@ std::vector<ImFont*> GenerateFonts() {
 
 // Show Menu
 void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
-    int window_width = 0, window_height = 0;
-    SDL_GetWindowSize(window, &window_width, &window_height);
-    ImVec2 size(window_width, window_height);
-
-    SDL_Texture* background_texture = createBackgroundImage(renderer, "main_menu.png");
+    std::cout << "Begin showMenu\n";
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io{ImGui::GetIO()};
     ImGui::StyleColorsDark();
 
+    std::cout << "Finished init\n";
+
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
+
+    std::cout << "Finished setup\n";
 
     setBackgroundColor(0.0f,0.0f,0.0f,1.0f);
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
@@ -151,6 +152,8 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
             continue;
         }
 
+        bool show_another_window;
+
         ImGuiWindowFlags window_flags = 
             ImGuiWindowFlags_NoTitleBar |
             ImGuiWindowFlags_NoResize |
@@ -166,17 +169,37 @@ void showMenu(SDL_Renderer* renderer, SDL_Window *window) {
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
+            static float f = 0.0f;
+            static int counter = 0;
+
             ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
             ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
 
             ImGui::Begin("Hello, world!", nullptr, window_flags);                          // Create a window called "Hello, world!" and append into it.
 
-            ImGui::PushFont(fonts[2]);
+            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+            ImGui::Checkbox("Another Window", &show_another_window);
 
-            layout.Draw();
-            
-            ImGui::PopFont();
+            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+                counter++;
+            ImGui::SameLine();
+            ImGui::Text("counter = %d", counter);
+
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
+        }
+
+        // 3. Show another simple window.
+        if (show_another_window)
+        {
+            // ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+            // ImGui::Text("Hello from another window!");
+            // if (ImGui::Button("Close Me"))
+            //     show_another_window = false;
+            // ImGui::End();
         }
 
         // Rendering
