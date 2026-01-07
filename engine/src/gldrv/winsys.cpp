@@ -53,8 +53,6 @@
 #include "src/vs_exit.h"
 #include "configuration/configuration.h"
 #include "libraries/gui/gui.h"
-#include "libraries/gui/widgets/splash_screen.h"
-#include "image_utils.h"
 
 #include "SDL2/SDL_video.h"
 
@@ -401,8 +399,6 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 
     // Initialize imgui
     InitGui();
-    LoadSpashTextures();
-    displayTexturePtr = &DisplayTexture;
 
     return true;
 }

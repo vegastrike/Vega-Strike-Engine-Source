@@ -45,6 +45,7 @@
 
 bool gui_initialized = false;
 SDL_Window* current_window = nullptr;
+ImFont* roboto_18_font;
 
 void InitGui() {
     current_window = SDL_GL_GetCurrentWindow();
@@ -57,6 +58,12 @@ void InitGui() {
     ImGui_ImplSDL2_InitForOpenGL(current_window, gl_context);
     const char* glsl_version = "#version 130";
     ImGui_ImplOpenGL3_Init(glsl_version);
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->Clear();
+    ImFontConfig cfg;
+    cfg.SizePixels = 18.0f;
+    io.FontDefault = io.Fonts->AddFontDefault(&cfg);
 
     gui_initialized = true;
 }

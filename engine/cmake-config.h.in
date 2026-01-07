@@ -71,6 +71,7 @@
 #cmakedefine UNIX 1
 #cmakedefine USE_NET_THREAD_NONE 1
 #cmakedefine USE_NET_THREAD_POSIX 1
+#define FPS_AVG_INTERVAL @FPS_AVG_INTERVAL@
 #endif
 
 

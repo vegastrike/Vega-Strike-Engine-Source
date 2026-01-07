@@ -85,6 +85,11 @@
 #include "version.h"
 #include "src/vs_exit.h"
 
+#include "imgui/imgui.h"
+#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_sdlrenderer2.h"
+
 /*
  * Globals
  */
@@ -442,15 +447,46 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
             //ani->DrawNow(tmp);
         }
     }
-    // bs_tp->Draw(configuration().graphics.default_boot_message.length() > 0 ?
-    //         configuration().graphics.default_boot_message : message.length() > 0 ?
-    //                 message : configuration().graphics.initial_boot_message);
-    std::string display_message = configuration().graphics.default_boot_message.length() > 0 ?
-                    configuration().graphics.default_boot_message : message.length() > 0 ?
-                    message : configuration().graphics.initial_boot_message;
-    RenderSplashScreen(display_message, 
-                       configuration().graphics.resolution_x,
-                       configuration().graphics.resolution_y);
+
+    static const ImGuiWindowFlags window_flags = 
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoBackground |
+        ImGuiWindowFlags_NoDecoration;   // makes it transparent
+
+    // ImGui Init
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+    // End ImGui Init
+
+
+    ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
+    const ImVec2 window_size(configuration().graphics.resolution_x,
+                             configuration().graphics.resolution_y);
+    ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
+    ImGui::Begin("main_window", nullptr, window_flags);
+
+
+    bs_tp->Draw(configuration().graphics.default_boot_message.length() > 0 ?
+            configuration().graphics.default_boot_message : message.length() > 0 ?
+                    message : configuration().graphics.initial_boot_message);
+
+    // ImGui End Frame
+    ImGui::End();
+    // Rendering
+    ImGui::Render();
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_GL_SwapWindow(current_window);
+    // End ImGui
+
+    GFXHudMode(GFXFALSE);
+    GFXEndScene();
 
     reentryWatchdog = false;
 }
@@ -637,8 +673,13 @@ void bootstrap_main_loop() {
         UpdateTime();
         FactionUtil::LoadContrabandLists();
         {
+            const std::string intro_text = boost::algorithm::replace_all_copy(
+                configuration().game_start.introduction, "\\n", "\n");
             std::vector<std::string> intro_lines;
-            boost::split(intro_lines, configuration().game_start.introduction, boost::is_any_of("\n"));
+
+            boost::split(intro_lines, intro_text, [](char c){
+                return c == '\n';
+            });
 
             for(const std::string& line : intro_lines) {
                 UniverseUtil::IOmessage(0, "game", "all", line);

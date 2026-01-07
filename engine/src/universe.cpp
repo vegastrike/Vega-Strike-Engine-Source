@@ -71,7 +71,6 @@
 #include "root_generic/options.h"
 
 #include "imgui/imgui.h"
-#include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
@@ -428,8 +427,8 @@ void Universe::StartDraw() {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
-        // End ImGui Init
 
+        // End ImGui Init
         ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
         const ImVec2 window_size(configuration().graphics.resolution_x,
                                 configuration().graphics.resolution_y);
@@ -446,6 +445,7 @@ void Universe::StartDraw() {
         ImGui::Render();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        SDL_Window* current_window = SDL_GL_GetCurrentWindow();
         SDL_GL_SwapWindow(current_window);
         // End ImGui
 #if defined(LOG_TIME_TAKEN_DETAILS)
