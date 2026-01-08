@@ -230,7 +230,6 @@ void /*GFXDRVAPI*/ GFXBeginScene() {
 }
 
 void /*GFXDRVAPI*/ GFXEndScene() {
-    winsys_swap_buffers();     //swap the buffers
 #ifdef NODRAW
     GFXClear( GFXTRUE );
 #endif
