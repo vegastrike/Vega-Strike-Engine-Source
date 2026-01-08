@@ -686,8 +686,13 @@ int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y) {
 }
 
 static constexpr ImGuiWindowFlags window_flags =
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoCollapse;
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoBackground |
+        ImGuiWindowFlags_NoDecoration;   // makes it transparent
 
 BaseInterface *BaseInterface::CurrentBase = nullptr;
 

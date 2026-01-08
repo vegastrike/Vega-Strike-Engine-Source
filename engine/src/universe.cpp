@@ -386,8 +386,13 @@ void Universe::WriteSaveGame(bool auto_save) {
 
 
 static constexpr ImGuiWindowFlags window_flags =
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoCollapse;
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoBackground |
+        ImGuiWindowFlags_NoDecoration;   // makes it transparent
 
         
 void Universe::StartDraw() {

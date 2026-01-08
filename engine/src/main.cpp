@@ -474,8 +474,13 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     }
 
     static constexpr ImGuiWindowFlags window_flags =
-        ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoCollapse;
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoScrollbar |
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoBackground |
+            ImGuiWindowFlags_NoDecoration;   // makes it transparent
 
     // ImGui Init
     ImGui_ImplOpenGL3_NewFrame();
