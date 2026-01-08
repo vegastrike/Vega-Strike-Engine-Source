@@ -39,7 +39,6 @@
 #include "cmd/unit_generic.h"
 #include "cmd/collection.h"
 #include "gfx/hud.h"
-#include "gfx/vdu.h"
 #include "root_generic/lin_time.h" //for fps
 #include "src/config_xml.h"
 #include "root_generic/lin_time.h"
@@ -60,7 +59,6 @@
 #include "cmd/unit_util.h"
 #include "math.h"
 #include "src/save_util.h"
-#include "gfx/vdu.h"
 #include "gfx/nav/navscreen.h"
 #include "gfx/masks.h"
 #include "gfx/nav/navgetxmldata.h"

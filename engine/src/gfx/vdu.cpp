@@ -57,6 +57,8 @@
 #include "components/ship_functions.h"
 #include "cmd/dock_utils.h"
 #include "root_generic/configxml.h"
+#include "gldrv/mouse_cursor.h"
+#include "imgui.h"
 
 template<typename T>
 inline T mymin(T a, T b) {
@@ -319,28 +321,6 @@ void VDU::Scroll(int howmuch) {
 
 #define MangleString(a, b) (a)
 
-/*
-static std::string MangleStrung( std::string in, float probability )
-{
-    //fails with ppc
-    vector< char >str;
-    for (int i = 0; i < (int) in.length(); i++) {
-        if (in[i] != '\n') {
-            str.push_back( in[i] );
-            if (rand() < probability*RAND_MAX)
-                str.back() += rand()%12-6;
-            if (rand() < .1*probability*RAND_MAX)
-                str.push_back( 'a'+rand()%26 );
-        } else {
-            if (rand() < .1*probability*RAND_MAX)
-                while (rand()%5)
-                    str.push_back( 'a'+rand()%26 );
-            str.push_back( in[i] );
-        }
-    }
-    return std::string( str.begin(), str.end() );
-}
-*/
 
 static void DrawShield(float fs,
         float rs,
@@ -968,75 +948,103 @@ void VDU::DrawComm() {
     }
 }
 
+std::string PrintCargo(const Cargo& cargo, double &total_mass, 
+                       double& total_volume, double& total_value) {
+    const double mass = cargo.GetMass();
+    const double volume = cargo.GetVolume();
+    const double value = cargo.GetTotalValue();
+    const std::string name = cargo.GetName();
+
+    total_mass += mass;
+    total_volume += volume;
+    total_value += value;
+
+    const std::string line = (boost::format("%.2ft %.2fm³ %s %.2fCr")
+                            % mass
+                            % volume
+                            % name
+                            % value).str();
+    return line;
+}
+
 void VDU::DrawManifest(Unit *parent, Unit *target) {
-    //zadeVDUmanifest
-    const std::string manifest_heading = boost::algorithm::replace_all_copy(
-                configuration().graphics.hud.manifest_heading, "\\n", "\n");
-    const bool simple_manifest = configuration().graphics.hud.simple_manifest;
-    std::string retval(manifest_heading);
-    if (target != parent && simple_manifest == false) {
-        retval += string("Tgt: ") + reformatName(target->name) + string("\n");
-    } else {
-        retval += string("--------\nCredits: ") + tostring((int) ComponentsManager::credits) + string("\n");
+    std::vector<std::string> lines;
+
+    double total_mass = 0;
+    double total_volume = 0;
+    double total_value = 0;
+
+    lines.push_back("Cargo Hold:");
+    for(Cargo& cargo : target->cargo_hold.GetItems()) {
+        lines.push_back(PrintCargo(cargo, total_mass, total_volume, total_value));
     }
-    unsigned int load = 0;
-    unsigned int cred = 0;
-    unsigned int vol = 0;
-    unsigned int numCargo = target->numCargo();
-    unsigned int maxCargo = 16;
-    string lastCat;
-    for (unsigned int i = 0; i < numCargo; i++) {
-        if ((target->cargo_hold.GetCargo(i).GetCategory().find("upgrades/") != 0)
-                && (target->cargo_hold.GetCargo(i).GetQuantity() > 0)) {
-            Cargo ca = target->cargo_hold.GetCargo(i);
-            int cq = ca.GetQuantity();
-            float cm = ca.GetMass();
-            float cv = ca.GetVolume();
-            float cp = ca.GetPrice();
-            string cc = ca.GetCategory();
-            cred += cq * (int) cp;
-            vol += (int) ((float) cq * cv);
-            load += (int) ((float) cq * cm);
-            if (((target == parent) || (maxCargo + i >= numCargo) || lastCat.compare(cc)) && (maxCargo > 0)) {
-                maxCargo--;
-                lastCat = cc;
-                if (target == parent && !simple_manifest) {
-                    //retval += string("(") + tostring(cq)+string(") "); // show quantity
-                    if (cm >= cv) {
-                        retval += tostring((int) ((float) cq * cm)) + string("t ");
-                    } else {
-                        retval += tostring((int) ((float) cq * cv)) + string("m3 ");
-                    }
-                } else {
-                    retval += tostring((int) cq) + " ";
-                }
-                retval += target->GetManifest(i, parent, parent->GetVelocity());
-                if (!simple_manifest) {
-                    retval += string(" ") + tostring(((target == parent) ? cq : 1) * (int) cp)
-                            + string("Cr.");
-                }
-                retval += "\n";
-            }
+
+    if(!target->hidden_hold.Empty()) {
+        lines.push_back("Cargo Hold:");
+        for(Cargo& cargo : target->hidden_hold.GetItems()) {
+            lines.push_back(PrintCargo(cargo, total_mass, total_volume, total_value));
         }
     }
-    if (target == parent && !simple_manifest) {
-        retval += string("--------\nLoad: ") + tostring(load) + string("t ")
-                + tostring(vol) + string("m3 ") + tostring(cred) + string("Cr.\n");
+
+    lines.push_back("Total: " + std::to_string(total_mass) + "t " + std::to_string(total_volume) + 
+                    "m³ " + std::to_string(total_value) + "Cr");
+    
+    // Location
+    float rel_x,rel_y, x, y;
+    tp->GetPos(rel_y,rel_x);    // Notice the inconsistent y,x
+    std::pair<int,int> pair = CalculateAbsoluteXY(rel_x,rel_y);
+    ImVec2 position(pair.first, pair.second);
+    x = pair.first;
+    y = pair.second;
+
+    // Dimensions
+    float rel_w, rel_h;
+    float h, w;
+    tp->GetSize(rel_w, rel_h);
+    std::pair<int,int> dim_pair = CalculateAbsoluteXY(rel_w, rel_h);
+    w = dim_pair.first - x;
+    h = dim_pair.second - y;
+    ImVec2 size(w,h);
+
+    ImGui::SetCursorPos(position);
+    ImGui::BeginChild("manifest_vdu", size, false, 
+                      ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+    // Manifest Title
+    const std::string manifest_heading = boost::algorithm::replace_all_copy(
+                configuration().graphics.hud.manifest_heading, "\\n", "\n");
+    ImGui::Text("%s", manifest_heading.c_str());
+
+    // Underline
+    // TODO: move this somewhere else
+    ImVec2 min = ImGui::GetItemRectMin();
+    ImVec2 max = ImGui::GetItemRectMax();
+
+    auto* draw_list = ImGui::GetWindowDrawList();
+    draw_list->AddLine(
+        ImVec2(min.x, max.y),
+        ImVec2(max.x, max.y),
+        IM_COL32(255, 255, 255, 255), // color
+        1.0f                          // thickness
+    );
+    
+    // Subtitles
+    const bool simple_manifest = configuration().graphics.hud.simple_manifest;
+    if (target != parent && simple_manifest == false) {
+        ImGui::Text("Target: %s", reformatName(target->name).c_str());
+    } else {
+        ImGui::Text("Credits: %s", std::to_string(ComponentsManager::credits).c_str());
     }
-    const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg(tp->background_color);
-    bool automatte = (0 == tpbg.a);
-    if (automatte) {
-        GFXColor temp_background_color( 0, 0, 0, background_alpha );
-        tp->background_color = static_cast<ImU32>(temp_background_color);
+
+    int i=std::max(0,scrolloffset);
+    int lines_size = static_cast<int>(lines.size());
+
+    // Now the rest of the lines
+    for(;i<lines_size;i++) {
+        ImGui::Text("%s", lines[i].c_str());
     }
-    tp->Draw(MangleString(retval,
-                    _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
-            scrolloffset,
-            true,
-            false,
-            automatte);
-    tp->background_color = static_cast<ImU32>(tpbg);
+
+    ImGui::EndChild();
 }
 
 static void DrawGun(Vector pos, float w, float h, MOUNT_SIZE sz) {

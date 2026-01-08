@@ -1982,9 +1982,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
     string::size_type pic = descString.find('@');
     StaticImageDisplay
             *desc_image = vega_dynamic_cast_ptr<StaticImageDisplay>(window()->findControlById("DescriptionImage"), true);
-    if (desc_image == nullptr) {
-        return;
-    }
+    
     if (pic != string::npos) {
         std::string texture = descString.substr(pic + 1);
         descString = descString.substr(0, pic);
@@ -2075,20 +2073,21 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
     Cargo item = originalItem;
     item.SetQuantity(quantity);
     Unit *baseUnit = m_base.GetUnit();
-    bool havemoney = true;
-    bool havespace = true;
+    bool have_money = true;
+    bool have_space = true;
+    bool upgrade_already_installed = false;
     switch (transType) {
         case BUY_CARGO:
             //Enough credits and room for the item in the ship.
-            havemoney = item.GetPrice() * quantity <= ComponentsManager::credits;
-            havespace = playerUnit->cargo_hold.CanAddCargo(item);
-            if (havemoney && havespace) {
+            have_money = item.GetPrice() * quantity <= ComponentsManager::credits;
+            have_space = playerUnit->cargo_hold.CanAddCargo(item);
+            if (have_money && have_space) {
                 return true;
             } else {
-                if (!havemoney) {
+                if (!have_money) {
                     color_insufficient_money_flag = true;
                 }
-                if (!havespace) {
+                if (!have_space) {
                     color_insufficient_space_flag = true;
                 }
             }
@@ -2121,22 +2120,38 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
             return true;
 
         case BUY_UPGRADE:
-            //cargo.mission == true means you can't do the transaction.
-            havemoney = item.GetPrice() * quantity <= ComponentsManager::credits;
-            havespace = (playerUnit->upgrade_space.CanAddCargo(item) || item.IsWeapon());
-
-            //UpgradeAllowed must be first -- short circuit && operator
-            if (UpgradeAllowed(item, playerUnit) && havemoney && havespace && !item.IsMissionFlag()) {
-                return true;
-            } else {
-                if (!havemoney) {
-                    color_insufficient_money_flag = true;
-                }
-                if (!havespace) {
-                    color_insufficient_space_flag = true;
-                }
+            have_money = item.GetPrice() * quantity <= ComponentsManager::credits;
+            have_space = (playerUnit->upgrade_space.CanAddCargo(item) || item.IsWeapon());
+            upgrade_already_installed = playerUnit->UpgradeAlreadyInstalled(item);
+            
+            // Simply not allowed
+            if (!UpgradeAllowed(item, playerUnit)) {
+                return false;
             }
-            break;
+
+            // Mission cargo can't be bought. Not really possible but for check for completeness sake.
+            if(item.IsMissionFlag()) {
+                return false;
+            }
+
+            // No money
+            if (!have_money) {
+                color_insufficient_money_flag = true;
+                return false;
+            }
+
+            // At this point, we can always upgrade weapons
+            if(item.IsWeapon()) {
+                return true;
+            }
+
+            // No space, but only for non-weapon upgrades. Weapons take no space.
+            if (!have_space || upgrade_already_installed) {
+                color_insufficient_space_flag = true;
+                return false;
+            }
+
+            return true;
         default:
             assert(false);            //Missed an enum in transaction switch statement.
             break;

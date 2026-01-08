@@ -32,7 +32,6 @@
 #include "gfx/gauge.h"
 #include <float.h>
 #include "gfx/hud.h"
-#include "gfx/vdu.h"
 #include "gfx_generic/mesh.h"
 #include "root_generic/configxml.h"
 

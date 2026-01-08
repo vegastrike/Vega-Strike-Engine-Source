@@ -217,6 +217,18 @@ bool ComponentsManager::AllowedUpgrade(const Cargo& upgrade) const {
     return true;
 }
 
+bool ComponentsManager::UpgradeAlreadyInstalled(const Cargo& upgrade) const {
+    const ComponentType component_type = GetComponentTypeFromName(upgrade.GetName());
+    const Component *component = GetComponentByType(component_type);
+    if(component) {
+        return component->Installed();
+    }
+
+    // Note that this method returns true for error, so we err on the side of caution
+    // and not install an upgrade.
+    return true;
+}
+
 /** A convenience struct to hold the data used below */
 struct HudText {
     const Component *component;
@@ -426,6 +438,12 @@ bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *
 }
 
 Component* ComponentsManager::GetComponentByType(const ComponentType type) {
+    return const_cast<Component*>(
+        static_cast<const ComponentsManager&>(*this).GetComponentByType(type)
+    );
+}
+
+const Component* ComponentsManager::GetComponentByType(const ComponentType type) const {
     switch(type) {
         case ComponentType::Hull: return &hull;
         case ComponentType::Armor: return &armor;
