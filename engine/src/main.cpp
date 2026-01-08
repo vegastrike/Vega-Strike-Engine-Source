@@ -478,8 +478,8 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
         ImGuiWindowFlags_NoCollapse;
 
     // ImGui Init
-    ImGui_ImplSDL3_NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
     // End ImGui Init
 
