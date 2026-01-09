@@ -47,10 +47,7 @@ static bool _parse_bool(const std::string& value) {
     return (value == "1" || value == "true");
 }
 
-// A simple utility function to prevent zero or negative mass and volume
-static double at_least_tenth(double input) {
-    return input > 0 ? input : 0.1;
-}
+static const double minimum_mass_and_volume = 0.01;
 
 // Constructors
 
@@ -62,14 +59,16 @@ Cargo::Cargo(std::string name, std::string description, int quantity, double pri
              bool component, bool installed, bool integral, bool weapon, bool passenger, 
              bool slave, double functionality) :
              name(name), description(description), quantity(quantity), price(price), 
-             category(category), mass(at_least_tenth(mass)), volume(at_least_tenth(volume)), mission(mission),
+             category(category), mass(std::max(minimum_mass_and_volume,mass)), 
+             volume(std::max(minimum_mass_and_volume,volume)), mission(mission),
              component(component), installed(installed), integral(integral) {
     this->functionality = functionality;
 }
 
-Cargo::Cargo(std::string name, std::string category, float price, int quantity, 
-          float mass, float volume): name(name), category(category),
-          price(price), quantity(quantity), mass(at_least_tenth(mass)), volume(at_least_tenth(volume)) {}
+Cargo::Cargo(std::string name, std::string category, double price, int quantity, 
+          double mass, double volume): name(name), category(category),
+          price(price), quantity(quantity), mass(std::max(minimum_mass_and_volume,mass)), 
+          volume(std::max(minimum_mass_and_volume,volume)) {}
              
 
 /*  0 name
@@ -99,8 +98,8 @@ Cargo::Cargo(std::string& cargo_text) {
         case 1: category = cargo_parts[1]; break;
         case 2: price = locale_aware_stod(cargo_parts[2]); break;
         case 3: quantity = locale_aware_stoi(cargo_parts[3]); break;
-        case 4: mass = at_least_tenth(locale_aware_stod(cargo_parts[4])); break;
-        case 5: volume = at_least_tenth(locale_aware_stod(cargo_parts[5])); break;
+        case 4: mass = std::max(locale_aware_stod(cargo_parts[4]), minimum_mass_and_volume); break;
+        case 5: volume = std::max(locale_aware_stod(cargo_parts[5]), minimum_mass_and_volume); break;
         case 6: functionality = Resource<double>(locale_aware_stod(cargo_parts[6]), 0.0, 1.0); break;
         case 7: break; // max_functionality is always 1.0. cargo_parts[6] not used.
         case 8: description = cargo_parts[8]; break;
@@ -124,8 +123,8 @@ Cargo::Cargo(boost::json::object json):
     quantity(1), 
     price(locale_aware_stoi(JsonGetStringWithDefault(json, "price", "0"))),
     category(JsonGetStringWithDefault(json, "categoryname", "")),
-    mass(at_least_tenth(locale_aware_stod(JsonGetStringWithDefault(json, "mass", "0.0")))),
-    volume(at_least_tenth(locale_aware_stod(JsonGetStringWithDefault(json, "volume", "0.1")))),
+    mass(std::max(locale_aware_stod(JsonGetStringWithDefault(json, "mass", "0.0")), minimum_mass_and_volume)),
+    volume(std::max(locale_aware_stod(JsonGetStringWithDefault(json, "volume", "0.1")), minimum_mass_and_volume)),
     mission(false), 
     component(GetBool(json, "upgrade", false)),
     installed(false),
@@ -250,7 +249,7 @@ void Cargo::SetMass(double mass) {
 }
 
 void Cargo::SetVolume(double volume) {
-    this->volume = at_least_tenth(volume);
+    this->volume = std::max(minimum_mass_and_volume,volume);
 }
 
 void Cargo::SetMissionFlag(bool flag) {
