@@ -69,8 +69,8 @@ public:
           double mass, double volume, bool mission = false, 
           bool component = false, bool installed = false, bool integral = false, bool weapon = false, 
           bool passenger = false, bool slave = false, double functionality = 1.0);
-    Cargo(std::string name, std::string category, float price, int quantity, 
-          float mass, float volume);
+    Cargo(std::string name, std::string category, double price, int quantity, 
+          double mass, double volume);
 
     // Parse string from save file
     Cargo(std::string& cargo_text);
