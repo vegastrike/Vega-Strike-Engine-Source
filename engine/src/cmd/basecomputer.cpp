@@ -2123,9 +2123,10 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
             have_money = item.GetPrice() * quantity <= ComponentsManager::credits;
             have_space = (playerUnit->upgrade_space.CanAddCargo(item) || item.IsWeapon());
             upgrade_already_installed = playerUnit->UpgradeAlreadyInstalled(item);
-            
+
             // Simply not allowed
             if (!UpgradeAllowed(item, playerUnit)) {
+                color_prohibited_upgrade_flag = true;
                 return false;
             }
 
@@ -3349,7 +3350,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
         finish();
         return;
     }
-
+    
     int quantity = 1; // By default, we buy one unit
     if(m_newPart->mounts[0].IsMissileMount()) {
         int mount_size = playerUnit->mounts[m_selectedMount].size;
@@ -3361,8 +3362,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
         // Light missile size is 64. Medium is 128. Light and medium is 192.
         // This hack produces inconsistent but plausible results.
         quantity = mount_size / missile_size;
-        std::cout << "Buying " << quantity << " missiles. (" 
-                  << missile_size << "/" << mount_size << ")\n";
+        VS_LOG(important_info, (boost::format("Buying %1% missiles (%2%/%3%)") % quantity % missile_size % mount_size));
     }
     
 
@@ -3380,7 +3380,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
         }
     }
     updateUI();
-
+    
     finish();
 }
 
