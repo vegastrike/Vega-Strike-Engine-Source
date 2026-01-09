@@ -61,8 +61,3 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike_posh PRIVATE
         ${Vega_Strike_BINARY_DIR}/engine
         ${Vega_Strike_BINARY_DIR}/engine/src
 )
-IF (NEED_LINKING_AGAINST_LIBM)
-    TARGET_LINK_LIBRARIES(vegastrike_posh PRIVATE m)
-ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike_posh PRIVATE ${TST_LIBS} GLUT::GLUT)
-TARGET_LINK_LIBRARIES(vegastrike_posh PUBLIC vegastrike_root_generic)

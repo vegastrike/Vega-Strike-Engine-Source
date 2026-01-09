@@ -3,7 +3,7 @@
 # @file   : cibuild
 # @brief  : Builds Vega Strike for purposes of CI/CD (GitHub Actions)
 # @usage  : ./script/cibuild --preset-name=VS2022Win64-pie-enabled-RelWithDebInfo
-# @param  : preset-name=, build-type=
+# @param  : --preset-name=..., --build-type=...
 #====================================
 ##
 # cibuild
@@ -77,11 +77,8 @@ fi
 
 if [ $IS_RELEASE -eq 1 ]
 then
-    export INSTALL_GTEST=OFF
-    export USE_GTEST=OFF
-else
-    export INSTALL_GTEST=ON
-    export USE_GTEST=ON
+    export INSTALL_GTEST=0
+    export USE_GTEST=0
 fi
 
 if [ -z "$from" ] && [ -n "$FROM" ]
@@ -105,7 +102,7 @@ case "$platform" in
         echo "Building docker image for $from / $COMPILER"
         docker build --build-arg from="$SRC_DOCKER_IMG_NAME" -t "$DST_DOCKER_IMG_NAME" .
         echo "Running docker image for $from / $COMPILER"
-        docker run --env CC="$CC" --env CXX="$CXX" --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env TAG_NAME="$TAG_NAME" --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA="$SHORT_SHA" --env PRESET_NAME="$PRESET_NAME" --name "$DOCKER_CONTAINER_NAME" "$DST_DOCKER_IMG_NAME"
+        docker run --env CC="$CC" --env CXX="$CXX" --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env INSTALL_SDL3=$INSTALL_SDL3 --env INSTALL_SDL3_IMAGE=$INSTALL_SDL3_IMAGE --env TAG_NAME="$TAG_NAME" --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA="$SHORT_SHA" --env PRESET_NAME="$PRESET_NAME" --name "$DOCKER_CONTAINER_NAME" "$DST_DOCKER_IMG_NAME"
         docker cp "$DOCKER_CONTAINER_NAME":/usr/src/Vega-Strike-Engine-Source/bin .
         if [ $IS_RELEASE -eq 1 ]
         then
@@ -134,7 +131,7 @@ case "$platform" in
         # Homebrew tooling needs to come first in the path search
         export PATH=${HOMEBREW_BIN}:${HOMEBREW_PYTHON_BIN}:${PATH}
 
-        HOMEBREW_PYTHON_VERSION=$(${HOMEBREW_BIN}/python${BUILD_WITH_PYTHON_VERSION} -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+        HOMEBREW_PYTHON_VERSION=$("${HOMEBREW_BIN}"/python${BUILD_WITH_PYTHON_VERSION} -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
         echo "  Detected Python Version: ${HOMEBREW_PYTHON_VERSION}"
 
         # Ensure it uses the correct Python version
