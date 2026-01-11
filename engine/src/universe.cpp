@@ -70,6 +70,8 @@
 #include "resource/random_utils.h"
 #include "root_generic/options.h"
 
+#include "gui/pause_screen.h"
+
 #include "imgui/imgui.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -373,7 +375,7 @@ StarSystem *Universe::Init(string systemfile, const Vector &centr, const string 
 
 // Gameplay Methods
 void Universe::Loop(void main_loop()) {
-    GFXLoop(main_loop);
+     GFXLoop(main_loop);
 }
 
 void Universe::WriteSaveGame(bool auto_save) {
@@ -394,8 +396,18 @@ static const ImGuiWindowFlags window_flags =
         ImGuiWindowFlags_NoBackground |
         ImGuiWindowFlags_NoDecoration;   // makes it transparent
 
-        
 void Universe::StartDraw() {
+    // Handle game pausing -stop the loop and enter a new loop until a key is pressed
+    if(paused) {
+        pauseGame();
+
+        // We need to call this because the game tracks the actual time between frames.
+        // If we pause the game for a second, the game will move ships on the board as is a second has passed.
+        // This means ships will move significantly from where they were when we paused.
+        UpdateTime();
+        paused = false;
+    }
+
 #ifndef WIN32
     RESETTIME();
 #endif
@@ -836,6 +848,9 @@ unsigned int Universe::numPlayers() {
     return _cockpits.size();
 }
 
+void Universe::TogglePause() {
+    paused = !paused;
+}
 
 /////////////////////////////////////////////////////////
 // Unsorted
