@@ -31,12 +31,12 @@
 #include <vector>
 #include <stddef.h>
 
-//#include "src/command.h"
+#include "src/command.h"
 #include "src/vs_exit.h"
 
 class Universe;
 
-//extern commandI *CommandInterpretor;
+extern commandI *CommandInterpretor;
 extern Universe *_Universe;
 
 #ifdef WIN32

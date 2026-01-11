@@ -1,5 +1,5 @@
 /*
- * vs_globals.cpp
+ * ship_commands.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -25,36 +25,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_SHIP_COMMANDS_H
+#define VEGA_STRIKE_ENGINE_SHIP_COMMANDS_H
 
-#include "root_generic/vs_globals.h"
-#include <time.h>
-#include <stdio.h>
+extern void InitShipCommands();
+extern void UninitShipCommands();
 
-/*
- * Globals
- */
-game_data_t g_game;
-ForceFeedback *forcefeedback = nullptr;
-VegaConfig *vs_config = nullptr;
-bool cleanexit = false;
-bool run_only_player_starsystem = true;
-
-FILE *fpread = nullptr;
-
-float simulation_atom_var = (float) (1.0 / 10.0);
-float audio_atom_var = (float) (1.0 / 18.0);
-Mission *mission = nullptr;
-
-double benchmark = -1.0;
-bool STATIC_VARS_DESTROYED = false;
-const char *mission_key = "unit_to_dock_with";
-
-/* for speed test */
-int loop_count = 0;
-double avg_loop = 0;
-int nb_checks = 1;
-double last_check = 1;
-double cur_check = 1;
-
-const std::string kLocaleName = "C";
-std::locale our_numeric_locale = std::locale().combine<std::numpunct<char>>(std::locale(kLocaleName));
+#endif //VEGA_STRIKE_ENGINE_SHIP_COMMANDS_H
