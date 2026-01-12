@@ -46,6 +46,8 @@
  */
 class Universe {
     // Fields
+    bool paused = false;
+
 public:
     StarDate current_stardate;
     vector<StarSystem *> star_system;
@@ -78,6 +80,8 @@ public:
     void SetViewport() {
         AccessCockpit()->SetViewport();
     }
+
+    void TogglePause();
 
     //Update starsystems (for server side)
     void Update();

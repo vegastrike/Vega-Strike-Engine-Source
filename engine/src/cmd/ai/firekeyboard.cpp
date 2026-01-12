@@ -65,8 +65,6 @@
 #include "cmd/unit_util.h"
 #include "resource/cargo.h"
 
-extern bool toggle_pause();
-
 FireKeyboard::FireKeyboard(unsigned int whichplayer, unsigned int whichjoystick) : Order(WEAPON, 0) {
     memset(savedTargets, 0, sizeof(void *) * NUMSAVEDTARGETS);
     this->autotrackingtoggle = 1;
@@ -806,7 +804,7 @@ void FireKeyboard::NearestJumpKey(const KBData &, KBSTATE k) {
 void FireKeyboard::TogglePause(const KBData &, KBSTATE k) {
     if (k == PRESS) {
         VS_LOG(info, "FireKeyboard::TogglePause(): Pause key detected");
-        g().togglepausekey = k;
+        _Universe->TogglePause();
     }
 }
 
@@ -1975,17 +1973,6 @@ void FireKeyboard::Execute() {
         getNearestTargetUnit(parent, 5);
         f().nearestjumpkey = DOWN;
         refresh_target = true;
-    }
-    if (f().togglepausekey == PRESS) {
-        f().togglepausekey = DOWN;
-        VS_LOG(info, "Pause key pressed");
-        if (toggle_pause()) {
-            VS_LOG(info, "Calling _Universe->AccessCockpit()->OnPauseBegin();");
-            _Universe->AccessCockpit()->OnPauseBegin();
-        } else {
-            VS_LOG(info, "Calling _Universe->AccessCockpit()->OnPauseEnd();");
-            _Universe->AccessCockpit()->OnPauseEnd();
-        }
     }
     if (f().weapk == PRESS || f().rweapk == PRESS) {
         bool forward;
