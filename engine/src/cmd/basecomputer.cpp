@@ -121,14 +121,6 @@ std::vector<std::string> getWeapFilterVec() {
 
 std::vector<std::string> weapfiltervec = getWeapFilterVec();
 
-bool upgradeNotAddedToCargo(std::string category) {
-    for (const auto & i : weapfiltervec) {
-        if (i.find(category) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
 
 extern vector<unsigned int> base_keyboard_queue;
 
@@ -2081,21 +2073,21 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
     Cargo item = originalItem;
     item.SetQuantity(quantity);
     Unit *baseUnit = m_base.GetUnit();
-    bool havemoney = true;
-    bool havespace = true;
+    bool have_money = true;
+    bool have_space = true;
     bool upgrade_already_installed = false;
     switch (transType) {
         case BUY_CARGO:
             //Enough credits and room for the item in the ship.
-            havemoney = item.GetPrice() * quantity <= ComponentsManager::credits;
-            havespace = playerUnit->cargo_hold.CanAddCargo(item);
-            if (havemoney && havespace) {
+            have_money = item.GetPrice() * quantity <= ComponentsManager::credits;
+            have_space = playerUnit->cargo_hold.CanAddCargo(item);
+            if (have_money && have_space) {
                 return true;
             } else {
-                if (!havemoney) {
+                if (!have_money) {
                     color_insufficient_money_flag = true;
                 }
-                if (!havespace) {
+                if (!have_space) {
                     color_insufficient_space_flag = true;
                 }
             }
@@ -2128,22 +2120,39 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
             return true;
 
         case BUY_UPGRADE:
-            //cargo.mission == true means you can't do the transaction.
-            havemoney = item.GetPrice() * quantity <= ComponentsManager::credits;
-            havespace = (playerUnit->upgrade_space.CanAddCargo(item) || upgradeNotAddedToCargo(item.GetCategory()));
+            have_money = item.GetPrice() * quantity <= ComponentsManager::credits;
+            have_space = (playerUnit->upgrade_space.CanAddCargo(item) || item.IsWeapon());
             upgrade_already_installed = playerUnit->UpgradeAlreadyInstalled(item);
-            //UpgradeAllowed must be first -- short circuit && operator
-            if (UpgradeAllowed(item, playerUnit) && havemoney && havespace && !upgrade_already_installed &&!item.IsMissionFlag()) {
-                return true;
-            } else {
-                if (!havemoney) {
-                    color_insufficient_money_flag = true;
-                }
-                if (!havespace || upgrade_already_installed) {
-                    color_insufficient_space_flag = true;
-                }
+
+            // Simply not allowed
+            if (!UpgradeAllowed(item, playerUnit)) {
+                color_prohibited_upgrade_flag = true;
+                return false;
             }
-            break;
+
+            // Mission cargo can't be bought. Not really possible but for check for completeness sake.
+            if(item.IsMissionFlag()) {
+                return false;
+            }
+
+            // No money
+            if (!have_money) {
+                color_insufficient_money_flag = true;
+                return false;
+            }
+
+            // At this point, we can always upgrade weapons
+            if(item.IsWeapon()) {
+                return true;
+            }
+
+            // No space, but only for non-weapon upgrades. Weapons take no space.
+            if (!have_space || upgrade_already_installed) {
+                color_insufficient_space_flag = true;
+                return false;
+            }
+
+            return true;
         default:
             assert(false);            //Missed an enum in transaction switch statement.
             break;
@@ -3333,7 +3342,7 @@ bool BaseComputer::BuyUpgradeOperation::checkTransaction(void) {
     }
 }
 
-//Finish the transaction.
+//Finish the transaction - seems only for mounts
 void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     Unit *baseUnit = m_parent.m_base.GetUnit();
@@ -3341,41 +3350,37 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
         finish();
         return;
     }
-    //Get the upgrade percentage to calculate the full price.
-    double percent;
-    int numleft = basecargoassets(baseUnit, m_part.GetName());
-    while (numleft > 0
-            && playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, 0, true, percent)) {
-        const float price = m_part.GetPrice();         //* (1-usedValue(percent));
-        if (ComponentsManager::credits >= price) {
-            //Have enough money.  Buy it.
-            ComponentsManager::credits -= price;
+    
+    int quantity = 1; // By default, we buy one unit
+    if(m_newPart->mounts[0].IsMissileMount()) {
+        int mount_size = playerUnit->mounts[m_selectedMount].size;
+        const Mount mount = m_newPart->mounts[0];
+        const WeaponInfo* info = mount.type;
+        int missile_size = as_integer(info->size);
+        
+        // This is not as clear as it looks.
+        // Light missile size is 64. Medium is 128. Light and medium is 192.
+        // This hack produces inconsistent but plausible results.
+        quantity = mount_size / missile_size;
+        VS_LOG(important_info, (boost::format("Buying %1% missiles (%2%/%3%)") % quantity % missile_size % mount_size));
+    }
+    
 
-            //Upgrade the ship.
-            playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, 0, true, percent);
-            const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
-            if (!allow_special_with_weapons) {
-                playerUnit->ToggleWeapon(false, /*backwards*/ true);
-                playerUnit->ToggleWeapon(false, /*backwards*/ false);
-            }
-            //Remove the item from the base, since we bought it.
-            int index = baseUnit->cargo_hold.GetIndex(m_part.GetName());
-            Cargo upgrade = baseUnit->cargo_hold.GetCargo(index);
-            upgrade.SetInstalled(true);
-            baseUnit->cargo_hold.RemoveCargo(baseUnit, index, 1);
-            playerUnit->upgrade_space.AddCargo(playerUnit, upgrade);
-        } else {
-            break;
+    double percent = 0; // Dummy variable. No longer used
+    if(playerUnit->BuyUpgrade(baseUnit, &m_part, quantity)) {
+        // Modify upgrade quantity according to cargo quantity
+        m_newPart->mounts[0].ammo = quantity;
+
+        //Upgrade the ship.
+        playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, 0, true, percent);
+        const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
+        if (!allow_special_with_weapons) {
+            playerUnit->ToggleWeapon(false, /*backwards*/ true);
+            playerUnit->ToggleWeapon(false, /*backwards*/ false);
         }
-        if (m_newPart->mounts.size() == 0) {
-            break;
-        } else if (m_newPart->mounts.at(0).ammo <= 0) {
-            break;
-        }
-        numleft = basecargoassets(baseUnit, m_part.GetName());
     }
     updateUI();
-
+    
     finish();
 }
 
