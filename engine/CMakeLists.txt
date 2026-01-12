@@ -439,7 +439,6 @@ SET(LIBGFXSERVER_SOURCES
 
 SET(LIBROOTCLIENT_SOURCES
     src/cg_global.cpp
-    src/command.cpp
     src/config_xml.cpp
     src/debug_vs.cpp
     src/faction_util.cpp
@@ -454,7 +453,6 @@ SET(LIBROOTCLIENT_SOURCES
     src/main_loop.cpp
     src/physics.cpp
     src/rendertext.cpp
-    src/ship_commands.cpp
     src/star_system_jump.cpp
     src/star_system.cpp
     src/universe_util.cpp

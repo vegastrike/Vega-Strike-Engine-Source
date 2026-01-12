@@ -30,6 +30,8 @@
 #include <time.h>
 #include <stdio.h>
 #include "src/vega_cast_utils.h"
+#include <string>
+#include <locale>
 
 /*
  * Globals
