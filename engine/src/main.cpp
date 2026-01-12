@@ -63,7 +63,6 @@
 #include "src/universe.h"
 #include "src/save_util.h"
 #include "cmd/music.h"
-#include "src/ship_commands.h"
 #include "audio/SceneManager.h"
 #include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
 #include "configuration/configuration.h"
@@ -378,18 +377,9 @@ int main(int argc, char *argv[]) {
     initALRenderer();
     initScenes();
 
-    //Register commands
-    //COmmand Interpretor Seems to break VC8, so I'm leaving disabled for now - Patrick, Dec 24
-    if (configuration().general.command_interpreter) {
-        CommandInterpretor = new commandI;
-        InitShipCommands();
-    }
     _Universe = new Universe(argc, argv, configuration().game_start.galaxy.c_str());
     TheTopLevelUnit = new Unit(0);
     _Universe->Loop(bootstrap_first_loop);
-
-    //Unregister commands - and cleanup memory
-    UninitShipCommands();
 
     closeRenderer();
 

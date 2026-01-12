@@ -1891,10 +1891,7 @@ void GameCockpit::Draw() {
         QuitAllow = false;
         dietime = 0;
     }
-    //if(CommandInterpretor.console){
-    //GFXColorf(textcol);
-    //CommandInterpretor.renderconsole();
-    //}
+ 
     GFXAlphaTest(ALWAYS, 0);
     const bool mouseCursor = configuration().joystick.mouse_cursor;
     const bool mousecursor_pancam = configuration().joystick.mouse_cursor_pancam;
