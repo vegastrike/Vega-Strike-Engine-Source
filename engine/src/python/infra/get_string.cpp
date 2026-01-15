@@ -35,61 +35,53 @@
 #include <boost/python.hpp>
 #include <boost/filesystem.hpp>
 
-
-
-const std::string GetString(const std::string function_name,
-                            const std::string module_name,
-                            const std::string file_name,
-                            PyObject* args) {
-    PyObject* module = PyImport_ImportModule(module_name.c_str());
-
-    if(!module) {
-        VS_LOG_AND_FLUSH(error, "Error: PyImport_ImportModule failed");
+/** Converts PyObject* raw pointer to RAII managed wrapper. */
+boost::python::object WrapObject(PyObject* raw_object) {
+    if(!raw_object) {
+        VS_LOG_AND_FLUSH(error, "Error: WrapObject raw_object is null");
         PyErr_Print();
         PyErr_Clear();
-        return "Error: PyImport_ImportModule is null";
+        throw std::runtime_error("Error: WrapObject raw_object is null");
     }
+    
+    // Transfer ownership to RAII wrapper
+    return boost::python::object{boost::python::handle<>(raw_object)};
+}
 
-    PyObject* function = PyObject_GetAttrString(module, function_name.c_str());
-    if(!function) {
-        VS_LOG_AND_FLUSH(error, "Error: PyObject_GetAttrString failed");
-        PyErr_Print();
-        PyErr_Clear();
-        return "Error: PyObject_GetAttrString is null";
-    }
-
-    if(args == nullptr) {
-        VS_LOG_AND_FLUSH(error, "Error: args is null");
-        PyErr_Print();
-        PyErr_Clear();
-        return "Error: PyTuple_Pack is null";
-    }
-
-    PyObject* pyResult = PyObject_CallObject(function, args);
-
-    if(!pyResult) {
-        VS_LOG_AND_FLUSH(error, "Error: PyObject_CallObject failed");
-        PyErr_Print();
-        PyErr_Clear();
-        return "Error: PyObject_CallObject is null";
-    }
-
-    std::string result = PyUnicode_AsUTF8(pyResult);
-
+boost::python::object GetPyObject(const std::string& function_name,
+                                  const std::string& module_name,
+                                  const std::string& file_name,
+                                  PyObject* raw_args) {
+    boost::python::object module = WrapObject(PyImport_ImportModule(module_name.c_str()));
+    boost::python::object function = WrapObject(PyObject_GetAttrString(module.ptr(), function_name.c_str()));
+    boost::python::object args = WrapObject(raw_args);
+    boost::python::object result = WrapObject(PyObject_CallObject(function.ptr(), args.ptr()));
+    
     return result;
 }
 
+std::string GetString(const std::string& function_name,
+                     const std::string& module_name,
+                     const std::string& file_name,
+                     PyObject* raw_args) {
+    boost::python::object result = GetPyObject(function_name, module_name, file_name, raw_args);
+    
+    const char* c_str = PyUnicode_AsUTF8(result.ptr());
+    if (!c_str) {
+        VS_LOG_AND_FLUSH(error, "Error: Failed to convert Python object to UTF-8 std::string in GetString");
+        PyErr_Print();
+        PyErr_Clear();
+        throw std::runtime_error("Error: Failed to convert Python object to UTF-8 std::string in GetString");
+    }
+    
+    return std::string(c_str);
+}
 
-const std::string GetString(const std::string function_name,
-                            const std::string module_name,
-                            const std::string file_name,
-                            const std::map<std::string, std::string>& cpp_map) {
+boost::python::object MapToObject(const std::map<std::string, std::string>& cpp_map) {
     boost::python::dict dict;
-    for (auto const& pair : cpp_map) {
+    for (const auto& pair : cpp_map) {
         dict[pair.first] = pair.second;
     }
-
-    PyObject* args = PyTuple_Pack(1, dict.ptr());
-
-    return GetString(function_name, module_name, file_name, args);
+    
+    return WrapObject(PyTuple_Pack(1, dict.ptr()));
 }

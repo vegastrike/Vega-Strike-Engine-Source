@@ -33,6 +33,8 @@
 #include "gui/simplepicker.h"
 #include "cmd/cargo_color.h"
 
+void InitBaseComputer();
+
 //The BaseComputer class displays an interactive screen that supports a
 //number of functions in a base.
 //Current list:
