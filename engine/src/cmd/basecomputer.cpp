@@ -87,6 +87,7 @@ using VSFileSystem::SaveFile;
 #include <sys/types.h>
 #endif
 #include <sys/stat.h>
+#include <locale>
 #include "src/vega_cast_utils.h"
 
 // Can't declare in header because PyObject is problematic
@@ -95,17 +96,12 @@ extern const std::string GetString(const std::string function_name,
                             const std::string file_name,
                             PyObject* args);
 
-using namespace XMLSupport; // FIXME -- Shouldn't include an entire namespace, according to Google Style Guide -- stephengtuggy 2021-09-07
 
 //end for directory thing
 extern const char *DamagedCategory;
 
 int BaseComputer::dirty = 0;
 
-static GFXColor UnsaturatedColor(float r, float g, float b, float a = 1.0f) {
-    GFXColor ret(r, g, b, a);
-    return ret;
-}
 
 std::string emergency_downgrade_mode;
 extern std::string CurrentSaveGameName;
@@ -242,7 +238,6 @@ string buildShipDescription(Cargo &item, string &descriptiontexture);
 //build the previous description from a cargo purchase item
 string buildCargoDescription(const Cargo &item, BaseComputer &computer, float price);
 //put in buffer a pretty prepresentation of the POSITIVE float f (ie 4,732.17)
-void prettyPrintFloat(char *buffer, float f, int digitsBefore, int digitsAfter, int bufferLen = 128);
 string buildUpgradeDescription(Cargo &item, std::map<std::string, std::string> ship_map);
 int basecargoassets(Unit *base, string cargoname);
 
@@ -414,44 +409,24 @@ static float SellPrice(Unit *playerUnit, const Cargo *item) {
 const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0);
 
 
+std::string prettyPrintFloat(float value, int precision = 2) {
+    // TODO: Need to place this somewhere else
+    // Call this once if you want your whole program to follow system locale
 
-#define PRETTY_ADD(str, val, digits)                        \
-    do {                                                      \
-        text += "#n#";                                        \
-        text += prefix;                                       \
-        text += str;                                          \
-        prettyPrintFloat( conversionBuffer, val, 0, digits ); \
-        text += conversionBuffer;                             \
-    }                                                         \
-    while (0)
+    std::locale::global(std::locale(""));
 
-#define PRETTY_ADDN(str, val, digits)                       \
-    do {                                                      \
-        text += str;                                          \
-        prettyPrintFloat( conversionBuffer, val, 0, digits ); \
-        text += conversionBuffer;                             \
-    }                                                         \
-    while (0)
+    std::ostringstream out;
 
-#define PRETTY_ADDU(str, val, digits, unit)                 \
-    do {                                                      \
-        text += "#n#";                                        \
-        text += prefix;                                       \
-        text += str;                                          \
-        prettyPrintFloat( conversionBuffer, val, 0, digits ); \
-        text += conversionBuffer;                             \
-        text += " ";                                          \
-        text += unit;                                         \
-    }                                                         \
-    while (0)
+    // Use the user's global locale (setlocale/std::locale::global)
+    out.imbue(std::locale(""));
 
-#define MODIFIES(mode, playerUnit, blankUnit, what)                                 \
-    (   (((playerUnit) -> what) != 0)                                               \
-     && ( (mode != 0) || (((playerUnit) -> what) != ((blankUnit) -> what)) )   )
+    // Fixed n digits after decimal + locale separators
+    out << std::fixed << std::setprecision(precision) << value;
 
-#define MODIFIES_ALTEMPTY(mode, playerUnit, blankUnit, what, empty)                 \
-    (   (((playerUnit) -> what) != (empty))                                         \
-     && ( (mode != 0) || (((playerUnit) -> what) != ((blankUnit) -> what)) )   )
+    return out.str();
+}
+
+
 
 //CONSTRUCTOR.
 BaseComputer::BaseComputer(Unit *player, Unit *base, const std::vector<DisplayMode> &modes) :
@@ -652,13 +627,13 @@ void BaseComputer::constructControls(void) {
         //Seller picker.
         SimplePicker *sellpick = new SimplePicker;
         sellpick->setRect(Rect(-.96, -.4, .76, .95));
-        sellpick->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
+        sellpick->setColor(GFXColor(color.r, color.g, color.b, .1));
         sellpick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         sellpick->setTextColor(GUI_OPAQUE_WHITE());
         sellpick->setFont(Font(.07));
         sellpick->setTextMargins(Size(0.02, 0.01));
-        sellpick->setSelectionColor(UnsaturatedColor(0, .6, 0, .8));
-        sellpick->setHighlightColor(UnsaturatedColor(0, .6, 0, .35));
+        sellpick->setSelectionColor(GFXColor(0, .6, 0, .8));
+        sellpick->setHighlightColor(GFXColor(0, .6, 0, .35));
         sellpick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         sellpick->setId("BaseUpgrades");
         sellpick->setScroller(sellerScroller);
@@ -669,9 +644,9 @@ void BaseComputer::constructControls(void) {
         //Scroller for inventory.
         Scroller *invScroller = new Scroller;
         invScroller->setRect(Rect(.91, -.4, .05, .95));
-        invScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        invScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        invScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        invScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        invScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        invScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
         invScroller->setTextColor(GUI_OPAQUE_WHITE());
         invScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -681,8 +656,8 @@ void BaseComputer::constructControls(void) {
         ipick->setColor(GFXColor(color.r, color.g, color.b, .1));
         ipick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         ipick->setTextColor(GUI_OPAQUE_WHITE());
-        ipick->setSelectionColor(UnsaturatedColor(0, .6, 0, .8));
-        ipick->setHighlightColor(UnsaturatedColor(0, .6, 0, .35));
+        ipick->setSelectionColor(GFXColor(0, .6, 0, .8));
+        ipick->setHighlightColor(GFXColor(0, .6, 0, .35));
         ipick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         ipick->setFont(Font(.07));
         ipick->setTextMargins(Size(0.02, 0.01));
@@ -725,9 +700,9 @@ void BaseComputer::constructControls(void) {
         //Scroller for description.
         Scroller *descScroller = new Scroller;
         descScroller->setRect(Rect(.91, -.95, .05, .5));
-        descScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        descScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        descScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        descScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
         descScroller->setTextColor(GUI_OPAQUE_WHITE());
         descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -762,9 +737,9 @@ void BaseComputer::constructControls(void) {
         //Scroller for picker.
         Scroller *pickScroller = new Scroller;
         pickScroller->setRect(Rect(.91, 0, .05, .65));
-        pickScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        pickScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        pickScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        pickScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        pickScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        pickScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
         pickScroller->setTextColor(GUI_OPAQUE_WHITE());
         pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -774,8 +749,8 @@ void BaseComputer::constructControls(void) {
         pick->setColor(GFXColor(color.r, color.g, color.b, .1));
         pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         pick->setTextColor(GUI_OPAQUE_WHITE());
-        pick->setSelectionColor(UnsaturatedColor(0, .6, 0, .8));
-        pick->setHighlightColor(UnsaturatedColor(0, .6, 0, .35));
+        pick->setSelectionColor(GFXColor(0, .6, 0, .8));
+        pick->setHighlightColor(GFXColor(0, .6, 0, .35));
         pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         pick->setFont(Font(.07));
         pick->setTextMargins(Size(0.02, 0.01));
@@ -788,9 +763,9 @@ void BaseComputer::constructControls(void) {
         //Scroller for description.
         Scroller *descScroller = new Scroller;
         descScroller->setRect(Rect(.91, -.95, .05, .90));
-        descScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        descScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        descScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        descScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
         descScroller->setTextColor(GUI_OPAQUE_WHITE());
         descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -817,9 +792,9 @@ void BaseComputer::constructControls(void) {
         //Scroller for picker.
         Scroller *pickScroller = new Scroller;
         pickScroller->setRect(Rect(-.20, -.7, .05, 1.4));
-        pickScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        pickScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        pickScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        pickScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        pickScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        pickScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
         pickScroller->setTextColor(GUI_OPAQUE_WHITE());
         pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -829,8 +804,8 @@ void BaseComputer::constructControls(void) {
         pick->setColor(GFXColor(color.r, color.g, color.b, .1));
         pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         pick->setTextColor(GUI_OPAQUE_WHITE());
-        pick->setSelectionColor(UnsaturatedColor(0, .6, 0, .8));
-        pick->setHighlightColor(UnsaturatedColor(0, .6, 0, .35));
+        pick->setSelectionColor(GFXColor(0, .6, 0, .8));
+        pick->setHighlightColor(GFXColor(0, .6, 0, .35));
         pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         pick->setFont(Font(.07));
         pick->setTextMargins(Size(0.02, 0.01));
@@ -843,9 +818,9 @@ void BaseComputer::constructControls(void) {
         //Scroller for description.
         Scroller *descScroller = new Scroller;
         descScroller->setRect(Rect(.91, -.7, .05, 1.4));
-        descScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        descScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        descScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        descScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
         descScroller->setTextColor(GUI_OPAQUE_WHITE());
         descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -867,10 +842,10 @@ void BaseComputer::constructControls(void) {
         //Scroller for description.
         Scroller *inputTextScroller = new Scroller;
         inputTextScroller->setRect(Rect(.61, -0.95, .05, .2));
-        inputTextScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        inputTextScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4),
+        inputTextScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        inputTextScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4),
                 GUI_OPAQUE_WHITE());
-        inputTextScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        inputTextScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
         inputTextScroller->setTextColor(GUI_OPAQUE_WHITE());
         inputTextScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -1013,9 +988,9 @@ void BaseComputer::constructControls(void) {
         //Scroller for picker.
         Scroller *pickScroller = new Scroller;
         pickScroller->setRect(Rect(-.20, -.8, .05, 1.45));
-        pickScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        pickScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        pickScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        pickScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        pickScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        pickScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
         pickScroller->setTextColor(GUI_OPAQUE_WHITE());
         pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -1025,8 +1000,8 @@ void BaseComputer::constructControls(void) {
         pick->setColor(GFXColor(color.r, color.g, color.b, .1));
         pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         pick->setTextColor(GUI_OPAQUE_WHITE());
-        pick->setSelectionColor(UnsaturatedColor(0, .6, 0, .8));
-        pick->setHighlightColor(UnsaturatedColor(0, .6, 0, .35));
+        pick->setSelectionColor(GFXColor(0, .6, 0, .8));
+        pick->setHighlightColor(GFXColor(0, .6, 0, .35));
         pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         pick->setFont(Font(.07));
         pick->setTextMargins(Size(0.02, 0.01));
@@ -1039,9 +1014,9 @@ void BaseComputer::constructControls(void) {
         //Scroller for description.
         Scroller *descScroller = new Scroller;
         descScroller->setRect(Rect(.91, -.8, .05, 1.45));
-        descScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        descScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        descScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        descScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
         descScroller->setTextColor(GUI_OPAQUE_WHITE());
         descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -1085,9 +1060,9 @@ void BaseComputer::constructControls(void) {
         //Scroller for picker.
         Scroller *pickScroller = new Scroller;
         pickScroller->setRect(Rect(-.20, -.8, .05, 1.45));
-        pickScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        pickScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        pickScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        pickScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        pickScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        pickScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
         pickScroller->setTextColor(GUI_OPAQUE_WHITE());
         pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -1097,8 +1072,8 @@ void BaseComputer::constructControls(void) {
         pick->setColor(GFXColor(color.r, color.g, color.b, .1));
         pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         pick->setTextColor(GUI_OPAQUE_WHITE());
-        pick->setSelectionColor(UnsaturatedColor(0, .6, 0, .8));
-        pick->setHighlightColor(UnsaturatedColor(0, .6, 0, .35));
+        pick->setSelectionColor(GFXColor(0, .6, 0, .8));
+        pick->setHighlightColor(GFXColor(0, .6, 0, .35));
         pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         pick->setFont(Font(.07));
         pick->setTextMargins(Size(0.02, 0.01));
@@ -1111,9 +1086,9 @@ void BaseComputer::constructControls(void) {
         //Scroller for description.
         Scroller *descScroller = new Scroller;
         descScroller->setRect(Rect(.91, -.5, .05, 1.15));
-        descScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        descScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        descScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        descScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
         descScroller->setTextColor(GUI_OPAQUE_WHITE());
         descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -1202,9 +1177,9 @@ void BaseComputer::constructControls(void) {
         //Scroller for description.
         Scroller *descScroller = new Scroller;
         descScroller->setRect(Rect(.91, -.95, .05, 1.4));
-        descScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        descScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        descScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        descScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
         descScroller->setTextColor(GUI_OPAQUE_WHITE());
         descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
@@ -1809,7 +1784,6 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
         }
     }
     //The description string.
-    char conversionBuffer[128];
     string text = "";
     string descString;
     string tailString;
@@ -1886,7 +1860,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     //the current base.  "Buying" this ship makes it my current ship.
                     tempString = (boost::format("#b#Transport cost: %1$.2f#-b#n1.5#") % item.GetPrice()).str();
                 } else {
-                    PRETTY_ADDN("", baseUnit->PriceCargo(item.GetName()), 2);
+                    text += prettyPrintFloat(baseUnit->PriceCargo(item.GetName()));
                     tempString = (boost::format("Price: #b#%1%#-b#n#") % text).str();
                     const bool printvolume = configuration().graphics.bases.print_cargo_volume;
                     if (printvolume) {
@@ -2806,7 +2780,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList &tlist) {
     if (!active_missions.empty()) {
         for (unsigned int i = 1; i < active_missions.size(); ++i) {
             CargoColor amission;
-            amission.cargo.SetName(XMLSupport::tostring(i) + " " + active_missions[i]->mission_name);
+            amission.cargo.SetName(std::to_string(i) + " " + active_missions[i]->mission_name);
             amission.cargo.SetPrice(0);
             amission.cargo.SetQuantity(1);
             amission.cargo.SetCategory("Active_Missions");
@@ -2814,7 +2788,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList &tlist) {
             for (unsigned int j = 0; j < active_missions[i]->objectives.size(); ++j) {
                 amission.cargo.SetDescription(
                         amission.cargo.GetDescription() + active_missions[i]->objectives.at(j).objective + ": "
-                                + XMLSupport::tostring((int) (100
+                                + std::to_string((int) (100
                                         * active_missions[i]->objectives.at(j).completeness))
                                 + "%\\");
             }
@@ -4004,7 +3978,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         const vector<float> &recordedLowestPrices = getSaveData(whichplayer, lopricek);
 
         string prefix = "   ";
-        char conversionBuffer[128];
+        
 
         VS_LOG(info, "Tracking data:");
         VS_LOG(info, (boost::format("  highest locs: (%1%)") % recordedHighestLocs.size()));
@@ -4044,7 +4018,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         {
             for (size_t i = 0; i < recordedHighestPrices.size(); ++i) {
                 string &text = highest[i];
-                PRETTY_ADD("", recordedHighestPrices.at(i), 2);
+                text += "#n#" + prefix + prettyPrintFloat(recordedHighestPrices.at(i));
                 text += " (at " + recordedHighestLocs.at(i) + ")";
 
                 VS_LOG(info, (boost::format("Highest item %1%") % text));
@@ -4056,7 +4030,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         {
             for (size_t i = 0; i < recordedLowestPrices.size(); ++i) {
                 string &text = lowest[i];
-                PRETTY_ADD("", recordedLowestPrices.at(i), 2);
+                text += "#n#" + prefix + prettyPrintFloat(recordedLowestPrices.at(i));
                 text += " (at " + recordedLowestLocs.at(i) + ")";
 
                 VS_LOG(info, (boost::format("Lowest item %1%") % text));
@@ -4416,68 +4390,6 @@ bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *contro
     return true;
 }
 
-//does not work with negative numbers!!
-void prettyPrintFloat(char *buffer, float f, int digitsBefore, int digitsAfter, int bufferLen) {
-    int bufferPos = 0;
-    if (!FINITE(f) || ISNAN(f)) {
-        buffer[0] = 'n';
-        buffer[1] = '/';
-        buffer[2] = 'a';
-        buffer[3] = '\0';
-        return;
-    }
-    if (f < 0) {
-        buffer[0] = '-';
-        bufferPos = 1;
-        f = (-f);
-    }
-    float temp = f;
-    int before = 0;
-    while (temp >= 1.0f) {
-        before++;
-        temp /= 10.0f;
-    }
-    while (bufferPos < (bufferLen - 4 - digitsAfter) && before < digitsBefore) {
-        buffer[bufferPos++] = '0';
-        digitsBefore--;
-    }
-    if (before) {
-        for (int p = before; bufferPos < (bufferLen - 4 - digitsAfter) && p > 0; p--) {
-            temp = f;
-            float substractor = 1;
-            for (int i = 0; i < p - 1; i++) {
-                temp /= 10.0f;
-                substractor *= 10.0;
-            }                                                                          //whe cant't cast to int before in case of overflow
-            int digit = ((int) temp) % 10;
-            buffer[bufferPos++] = '0' + digit;
-            //reason for the folowing line: otherwise the  "((int)temp)%10" may overflow when converting
-            f = f - ((float) digit * substractor);
-            if ((p != 1) && (p % 3 == 1)) {
-                buffer[bufferPos++] = ' ';
-            } // thousand separator
-        }
-    } else {
-        buffer[bufferPos++] = '0';
-    }
-    if (digitsAfter == 0) {
-        buffer[bufferPos] = 0;
-        return;
-    }
-
-    if (bufferPos < bufferLen) {
-        buffer[bufferPos++] = '.';
-    }
-
-    temp = f;
-    for (int i = 0; bufferPos < (bufferLen - 1) && i < digitsAfter; i++) {
-        temp *= 10;
-        buffer[bufferPos++] = '0' + (((int) temp) % 10);
-    }
-    if (bufferPos < bufferLen) {
-        buffer[bufferPos] = 0;
-    }
-}
 
 static const char *WeaponTypeStrings[] = {
         "UNKNOWN",
