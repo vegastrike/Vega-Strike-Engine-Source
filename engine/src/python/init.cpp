@@ -58,6 +58,7 @@
 #include "cmd/unit_generic.h"
 #include "src/python/config/python_utils.h"
 #include "cmd/vega_py_run.h"
+#include "cmd/basecomputer.h"
 
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #include <direct.h>
@@ -193,6 +194,7 @@ void Python::init() {
     InitBriefing();
     InitBase();
     InitDirector();
+    InitBaseComputer();
 
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
@@ -210,6 +212,7 @@ void Python::init() {
         Py_ExitStatusException(status);
     }
 
+    boost::python::import("base_computer"); // REQUIRED 
     initpaths();
 
 #if BOOST_VERSION != 102800

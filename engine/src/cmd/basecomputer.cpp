@@ -90,12 +90,44 @@ using VSFileSystem::SaveFile;
 #include <locale>
 #include "src/vega_cast_utils.h"
 
-// Can't declare in header because PyObject is problematic
-extern const std::string GetString(const std::string function_name,
-                            const std::string module_name,
-                            const std::string file_name,
-                            PyObject* args);
 
+/************************************
+ * Boost Python Module
+ ***********************************/
+BOOST_PYTHON_MODULE(base_computer)
+{
+    using namespace boost::python;
+
+    enum_<BaseComputer::TransactionType>("TransactionType")
+        .value("BUY_CARGO", BaseComputer::TransactionType::BUY_CARGO)
+        .value("SELL_CARGO", BaseComputer::TransactionType::SELL_CARGO)
+        .value("BUY_UPGRADE", BaseComputer::TransactionType::BUY_UPGRADE)
+        .value("SELL_UPGRADE", BaseComputer::TransactionType::SELL_UPGRADE)
+        .value("BUY_SHIP", BaseComputer::TransactionType::BUY_SHIP)
+        // We're missing sell ship for some reason
+        .value("ACCEPT_MISSION", BaseComputer::TransactionType::ACCEPT_MISSION)
+        .value("NULL_TRANSACTION", BaseComputer::TransactionType::NULL_TRANSACTION)
+        .export_values();
+}
+
+void InitBaseComputer() {
+    PyImport_AppendInittab("base_computer", PyInit_base_computer);
+}
+
+// Can't declare in header because PyObject is problematic
+extern boost::python::object WrapObject(PyObject* raw_object);
+
+extern boost::python::object GetPyObject(const std::string& function_name,
+                                        const std::string& module_name,
+                                        const std::string& file_name,
+                                        PyObject* raw_args);
+
+extern std::string GetString(const std::string& function_name,
+                            const std::string& module_name,
+                            const std::string& file_name,
+                            PyObject* raw_args);
+
+extern boost::python::object MapToObject(const std::map<std::string, std::string>& cpp_map);
 
 //end for directory thing
 extern const char *DamagedCategory;
@@ -3794,10 +3826,15 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
         }
     }
 
-    std::map<std::string, std::string> ship_map = newPart->UnitToMap();
-    std::string str = GetString("get_ship_description", "ship_view",
-                          "ship_view.py",
-                          ship_map);
+    std::string str;
+    try {
+        std::map<std::string, std::string> ship_map = newPart->UnitToMap();
+        boost::python::object dict = MapToObject(ship_map);
+        str = GetString("get_ship_description", "ship_view", "ship_view.py", dict.ptr());
+    } catch (const std::runtime_error& e) {
+        VS_LOG(error, (boost::format("Error in buildShipDescription: %1%") % e.what()));
+    }
+    
 
     VS_LOG(debug, "buildShipDescription: killing newPart");
     newPart->Kill();
@@ -3817,9 +3854,15 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
 string buildUpgradeDescription(Cargo &item, std::map<std::string, std::string> ship_map) {
     const std::string key = item.GetName() + "__upgrades";
     ship_map["upgrade_key"] = key;
-    const std::string text = GetString("get_upgrade_info", "upgrade_view",
-        "upgrade_view.py", ship_map);
+    try {
+        boost::python::object dict = MapToObject(ship_map);
+        const std::string text = GetString("get_upgrade_info", "upgrade_view",
+                                           "upgrade_view.py", dict.ptr());
     return text;
+    } catch (const std::runtime_error& e) {
+        VS_LOG(error, (boost::format("Error in buildUpgradeDescription: %1%") % e.what()));
+    }
+    return std::string();
 }
 
 class PriceSort {
@@ -4376,10 +4419,14 @@ bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *contro
     boost::python::list relations_list = VectorToList(relations_vector);
     boost::python::list kills_list = VectorToList(kills_vector);
 
-    PyObject* args = PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr());
-
-    const std::string text = GetString("get_player_info", "player_info",
-        "player_info.py", args);
+    std::string text;
+    try {
+        boost::python::object args = WrapObject(PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr()));
+        text = GetString("get_player_info", "player_info", "player_info.py", args.ptr());
+    } catch (const std::runtime_error& e) {
+        VS_LOG(error, (boost::format("Error in showPlayerInfo: %1%") % e.what()));
+    }
+    
 
     //Put this in the description.
     StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
@@ -4411,9 +4458,15 @@ bool BaseComputer::showShipStats(const EventCommandId &command, Control *control
     Cargo uninitcargo;
 
     std::map<std::string, std::string> ship_map = playerUnit->UnitToMap();
-    std::string text = GetString("get_ship_description", "ship_view",
-                          "ship_view.py",
-                          ship_map);
+    std::string text;
+    try {
+        boost::python::object dict = MapToObject(ship_map);
+        text = GetString("get_ship_description", "ship_view",
+                          "ship_view.py", dict.ptr());
+    } catch (const std::runtime_error& e) {
+        VS_LOG(error, (boost::format("Error in showShipStats: %1%") % e.what()));
+    }
+    
 
     //remove picture, if any
     string::size_type pic;
