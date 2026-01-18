@@ -1,7 +1,7 @@
 # norootforbuild
 
 Name:           vegastrike
-Version:        0.10.0
+Version:        0.11.0
 Release:        1
 Summary:        3D OpenGL spaceflight simulator
 Group:          Amusements/Games
@@ -87,6 +87,12 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+
+-------------------------------------------------------------------
+2026-01 18 21:00:00 UTC - benjamenmeyer
+
+- Updated version to 0.11.0 for master development branch
+
 
 -------------------------------------------------------------------
 2024-01 14 14:00:00 UTC - benjamenmeyer
