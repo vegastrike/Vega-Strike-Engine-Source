@@ -47,7 +47,7 @@ jobs:
 
       - name: Restore vcpkg cache
         id: cache-vcpkg-restore
-        uses: actions/cache/restore@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         with:
           path: ${{ github.workspace }}/vcpkg_cache
           key: vcpkg-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
@@ -90,7 +90,7 @@ jobs:
 
       - name: Save vcpkg cache
         id: cache-vcpkg-save
-        uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache/save@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         with:
           path: ${{ github.workspace }}/vcpkg_cache
           key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
