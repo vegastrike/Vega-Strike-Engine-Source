@@ -34,7 +34,8 @@
 #include <boost/program_options.hpp>
 #include "audio/test.h"
 #if defined (HAVE_SDL)
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 #endif
 #include "cmd/role_bitmask.h"
 #if defined (WITH_MACOSX_BUNDLE)
@@ -85,9 +86,9 @@
 #include "src/vs_exit.h"
 
 #include "imgui/imgui.h"
-#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_sdlrenderer2.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 
 /*
  * Globals
@@ -462,18 +463,18 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
         }
     }
 
-    static const ImGuiWindowFlags window_flags = 
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoBackground |
-        ImGuiWindowFlags_NoDecoration;   // makes it transparent
+    static constexpr ImGuiWindowFlags window_flags =
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoScrollbar |
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoBackground |
+            ImGuiWindowFlags_NoDecoration;   // makes it transparent
 
     // ImGui Init
     ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
     // End ImGui Init
 
@@ -485,8 +486,8 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     ImGui::Begin("main_window", nullptr, window_flags);
 
 
-    bs_tp->Draw(configuration().graphics.default_boot_message.length() > 0 ?
-            configuration().graphics.default_boot_message : message.length() > 0 ?
+    bs_tp->Draw(!configuration().graphics.default_boot_message.empty() ?
+            configuration().graphics.default_boot_message : !message.empty() ?
                     message : configuration().graphics.initial_boot_message);
 
     // ImGui End Frame

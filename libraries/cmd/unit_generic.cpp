@@ -85,7 +85,7 @@
 #include "vegadisk/savegame.h"
 #include "resource/manifest.h"
 #include "cmd/dock_utils.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "resource/random_utils.h"
 #include "gldrv/mouse_cursor.h"
 
