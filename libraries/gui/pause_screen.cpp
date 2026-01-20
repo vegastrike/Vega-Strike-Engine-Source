@@ -53,7 +53,7 @@ void pauseGame() {
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL3_ProcessEvent(&event);
             
-            if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.repeat == 0) {
                 done = true;
             }
         }
