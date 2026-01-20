@@ -30,31 +30,31 @@
 
 #include <cassert>
 #include <string>
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 #include "collections.h"
 
 // Must come before imgui.h
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
-#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_sdlrenderer2.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 
 
 bool gui_initialized = false;
 SDL_Window* current_window = nullptr;
 ImFont* roboto_18_font;
 
-void InitGui() {
-    current_window = SDL_GL_GetCurrentWindow();
-    SDL_GLContext gl_context = SDL_GL_GetCurrentContext();
+void InitGui(SDL_Window *window, const SDL_GLContext *context) {
+    current_window = window;
+    SDL_GLContext gl_context = *context;
 
     assert(current_window);
 
     ImGui::CreateContext();
     
-    ImGui_ImplSDL2_InitForOpenGL(current_window, gl_context);
+    ImGui_ImplSDL3_InitForOpenGL(current_window, gl_context);
     const char* glsl_version = "#version 130";
     ImGui_ImplOpenGL3_Init(glsl_version);
 
@@ -70,7 +70,7 @@ void InitGui() {
 void CleanupGui() {
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
+    ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
     gui_initialized = false;
 }

@@ -29,6 +29,7 @@
 #include "root_generic/vs_globals.h"
 #include <time.h>
 #include <stdio.h>
+#include "src/vega_cast_utils.h"
 #include <string>
 #include <locale>
 
@@ -43,9 +44,9 @@ bool run_only_player_starsystem = true;
 
 FILE *fpread = nullptr;
 
-float simulation_atom_var = (float) (1.0 / 10.0);
-float audio_atom_var = (float) (1.0 / 18.0);
-Mission *mission = nullptr;
+float     simulation_atom_var = 1.0 / 10.0;
+float     audio_atom_var      = 1.0 / 18.0;
+Mission * mission             = nullptr;
 
 double benchmark = -1.0;
 bool STATIC_VARS_DESTROYED = false;

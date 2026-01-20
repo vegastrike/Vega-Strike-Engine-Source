@@ -73,9 +73,9 @@
 #include "gui/pause_screen.h"
 
 #include "imgui/imgui.h"
-#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_sdlrenderer2.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 
 // Using
 using namespace VSFileSystem;
@@ -387,7 +387,7 @@ void Universe::WriteSaveGame(bool auto_save) {
 }
 
 
-static const ImGuiWindowFlags window_flags = 
+static constexpr ImGuiWindowFlags window_flags =
         ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove |
@@ -437,7 +437,7 @@ void Universe::StartDraw() {
 #endif
         // ImGui Init
         ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
         // End ImGui Init

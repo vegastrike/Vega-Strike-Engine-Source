@@ -30,6 +30,8 @@
 
 #include <typeinfo>
 #include <cstdlib>
+#include <locale>
+#include <sstream>
 #include "src/vs_logging.h"
 #include "root_generic/vs_globals.h"
 #include "src/vs_exit.h"

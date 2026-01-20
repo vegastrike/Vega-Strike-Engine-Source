@@ -33,7 +33,7 @@
 #include <Python.h>
 #include <algorithm>
 
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "cmd/vega_py_run.h"
 #include "cmd/base.h"
 #include "gldrv/winsys.h"
@@ -71,9 +71,9 @@
 
 #include "imgui/imgui.h"
 #include "libraries/gui/gui.h"
-#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_sdlrenderer2.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 
 // shows the offset on the lower edge of the screen (for the text line there)
 constexpr double kYLower = -0.9;
@@ -685,7 +685,7 @@ int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y) {
     return -1;
 }
 
-static const ImGuiWindowFlags window_flags = 
+static constexpr ImGuiWindowFlags window_flags =
         ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove |
@@ -696,7 +696,7 @@ static const ImGuiWindowFlags window_flags =
 
 BaseInterface *BaseInterface::CurrentBase = nullptr;
 
-bool RefreshGUI(void) {
+bool RefreshGUI() {
     bool retval = false;
     if (_Universe->AccessCockpit()) {
         if (BaseInterface::CurrentBase) {
@@ -731,7 +731,7 @@ void base_main_loop() {
 
     // ImGui Init
     ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
     // End ImGui Init
 

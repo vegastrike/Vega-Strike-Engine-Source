@@ -193,10 +193,10 @@ extern vector<unsigned int> base_keyboard_queue;
 
 // This will break because we have cargo_hold and upgrade_space
 std::string getDisplayCategory(const Cargo &cargo) {
-    std::string::size_type where = cargo.GetDescription().find("<");
+    std::string::size_type where = cargo.GetDescription().find('<');
     if (where != string::npos) {
         std::string category = cargo.GetDescription().substr(where + 1);
-        where = category.find(">");
+        where = category.find('>');
         return category.substr(0, where);
     }
     return cargo.GetCategory();
@@ -242,7 +242,7 @@ extern void RespawnNow(Cockpit *cockpit);
 
 //headers for functions used internally
 //build the previous description for a ship purchase item
-string buildShipDescription(Cargo &item, string &descriptiontexture);
+string buildShipDescription(Cargo &item, string &texture_description);
 //build the previous description from a cargo purchase item
 string buildCargoDescription(const Cargo &item, BaseComputer &computer, float price);
 //put in buffer a pretty prepresentation of the POSITIVE float f (ie 4,732.17)
@@ -1351,7 +1351,7 @@ void BaseComputer::run(void) {
 
 //Redo the title strings for the display.
 void BaseComputer::recalcTitle() {
-    if (m_displayModes.size() == 1) {
+    if (m_displayModes.size() == 1 || m_displayModes.at(0) == NETWORK) {
         return;
     }
 
@@ -3763,7 +3763,7 @@ void SwapInNewShipName(Cockpit *cockpit, Unit *base, const std::string &newFileN
     cockpit->GetUnitFileName() = newFileName;
 }
 
-string buildShipDescription(Cargo &item, std::string &texturedescription) {
+string buildShipDescription(Cargo &item, std::string &texture_description) {
     VS_LOG(debug, "Entering buildShipDescription");
     //load the Unit
     string newModifications;
@@ -3794,7 +3794,7 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
             if (delim != string::npos) {
                 sHudImage = sHudImage.substr(delim + 2);
             }
-            texturedescription = "../units/" + sHudImage + "/" + sImage;
+            texture_description = "../units/" + sHudImage + "/" + sImage;
         }
     }
 
@@ -3813,11 +3813,11 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
     // VS_LOG(debug, "buildShipDescription: deleting newPart");
     // delete newPart;
     // newPart = nullptr;
-    if (texturedescription != "" && (string::npos == str.find('@'))) {
-        str = "@" + texturedescription + "@" + str;
+    if (!texture_description.empty() && (string::npos == str.find('@'))) {
+        str = "@" + texture_description + "@" + str;
     }
-    VS_LOG(debug, (boost::format("buildShipDescription: texturedescription == %1%") % texturedescription));
-    VS_LOG(debug, (boost::format("buildShipDescription: return value       == %1%") % str));
+    VS_LOG(debug, (boost::format("buildShipDescription: texture_description == %1%") % texture_description));
+    VS_LOG(debug, (boost::format("buildShipDescription: return value        == %1%") % str));
     VS_LOG(debug, "Leaving buildShipDescription");
     return str;
 }

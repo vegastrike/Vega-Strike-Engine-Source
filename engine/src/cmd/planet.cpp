@@ -46,7 +46,7 @@
 #include "gfx/planetary_transform.h"
 #endif
 
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "collide2/CSopcodecollider.h"
 #include "cmd/images.h"
 #include "gfx/halo.h"

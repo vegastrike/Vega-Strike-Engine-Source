@@ -34,14 +34,14 @@
 #include "src/in_kb_data.h"
 
 #if defined (HAVE_SDL)
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #endif //defined (HAVE_SDL)
 
 #include "src/vegastrike.h"
 //#include "glob.h"
 //#include "dbg.h"
 #include "src/in_kb.h"
-#define NUMJBUTTONS 32
+#define NUMJBUTTONS 64
 
 class JoyStick;
 
@@ -53,7 +53,7 @@ extern void DeInitJoystick();
 
 const int MAX_JOYSTICKS = 16;
 const int MOUSE_JOYSTICK = MAX_JOYSTICKS - 1;
-const int MAX_BUTTONS = 48;
+const int MAX_BUTTONS = 64;
 const int MAX_DIGITAL_HATSWITCHES = 4;
 const int MAX_DIGITAL_VALUES = 9;
 
@@ -77,35 +77,45 @@ class JoyStick {
     void GetMouse(float &x, float &y, float &z, int &buttons);
 public:
 //initializes the joystick
-    JoyStick(int);
+    JoyStick(int which, SDL_JoystickID instance_id);
 //engine calls GetJoyStick to get coordinates and buttons
-    void GetJoyStick(float &x, float &y, float &z, int &buttons);
+    void GetJoyStick(float &x, float &y, float &z, long long& buttons);
     bool isAvailable(void);
     bool is_around(float axe, float hswitch);
     int NumButtons();
 
 #if defined (HAVE_SDL)
-    SDL_Joystick *joy;
+    SDL_JoystickID  instanceID;
+    SDL_Joystick    *joy;
 #else //defined (HAVE_SDL)
     void   *otherdata; //bad form to have an ifdef in a struct
 #endif //defined (HAVE_SDL)
-    int nr_of_axes, nr_of_buttons, nr_of_hats;
-    int hat_margin;
-    size_t player;
+    int    nr_of_axes{};
+    int    nr_of_buttons{};
+    int    nr_of_hats{};
+    int    hat_margin{};
+    size_t player{};
 #define MAX_AXES 32
-    bool axis_inverse[MAX_AXES];
-    int axis_axis[MAX_AXES];
-    float joy_axis[MAX_AXES];
+    bool axis_inverse[MAX_AXES]{};
+    int axis_axis[MAX_AXES]{};
+    float joy_axis[MAX_AXES]{};
     JoyStick();
-    unsigned char digital_hat[MAX_DIGITAL_HATSWITCHES];
+    unsigned char digital_hat[MAX_DIGITAL_HATSWITCHES]{};
 
-    bool debug_digital_hatswitch;
+    bool debug_digital_hatswitch{};
 
-    int joy_buttons;
-    bool joy_available;
-    float joy_xmin, joy_xmax, joy_ymin, joy_ymax, joy_zmin, joy_zmax;
-    float joy_x, joy_y, joy_z;
-    float deadzone;
+    long long joy_buttons{};
+    bool  joy_available{};
+    float joy_xmin{};
+    float joy_xmax{};
+    float joy_ymin{};
+    float joy_ymax{};
+    float joy_zmin{};
+    float joy_zmax{};
+    float joy_x{};
+    float joy_y{};
+    float joy_z{};
+    float deadzone{};
 };
 
 extern JoyStick *joystick[MAX_JOYSTICKS];

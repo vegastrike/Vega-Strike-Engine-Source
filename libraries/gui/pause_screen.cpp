@@ -2,7 +2,7 @@
  * pause_screen.cpp
  *
  * Vega Strike - Space Simulation, Combat and Trading
- * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Copyright (C) 2001-2026 The Vega Strike Contributors:
  * Project creator: Daniel Horn
  * Original development team: As listed in the AUTHORS file
  * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
@@ -26,11 +26,11 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "SDL2/SDL.h"
+#include "SDL3/SDL.h"
 #include "imgui.h"
-#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_sdlrenderer2.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 
 
 static const ImGuiWindowFlags window_flags = 
@@ -46,15 +46,16 @@ void pauseGame() {
     bool done = false;
     while (!done) {
         ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
     
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            ImGui_ImplSDL2_ProcessEvent(&event);
+            ImGui_ImplSDL3_ProcessEvent(&event);
             
-            if (event.type == SDL_KEYDOWN && event.key.repeat == 0)
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.repeat == 0) {
                 done = true;
+            }
         }
 
         ImGui::Begin("pause_window", nullptr, window_flags);

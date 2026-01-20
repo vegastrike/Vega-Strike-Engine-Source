@@ -55,7 +55,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 
 namespace pt = boost::property_tree;
 namespace alg = boost::algorithm;
