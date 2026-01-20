@@ -162,7 +162,7 @@ protected:
 
     ///this is the parent that Cockpit will read data from
     UnitContainer parent;
-    UnitContainer parentturret;
+    
     int unitfaction;
 
     ///4 views f/r/l/b
@@ -227,6 +227,16 @@ public:
     double TimeOfLastCollision;
     char jumpok;
 
+
+protected:
+    // Turret Variables
+    Unit* parent_unit = nullptr;      // The ship
+    Unit* current_unit = nullptr;     // Either the ship (cockpit) or one of the turrets
+
+    int number_of_turrets = -1;
+    int current_view = -1;            // -1 Cockpit. 0...n turrets
+
+public:
     virtual void setTargetLabel(const std::string &msg) {
     }
 

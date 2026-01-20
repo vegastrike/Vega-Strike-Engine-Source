@@ -957,7 +957,6 @@ void GameCockpit::SelectProperCamera() {
 
 extern vector<int> respawnunit;
 extern vector<int> switchunit;
-extern vector<int> turretcontrol;
 
 void DoCockpitKeys() {
     CockpitKeys::Pan(KBData(), PRESS);
@@ -1105,12 +1104,72 @@ void MapKey(const KBData &, KBSTATE k) {
     }
 }
 
+#include "root_generic/universe_globals.h"
+
 void GameCockpit::TurretControl(const KBData &, KBSTATE k) {
     if (k == PRESS) {
-        while (turretcontrol.size() <= _Universe->CurrentCockpit()) {
-            turretcontrol.push_back(0);
+        VS_LOG(debug, "GameCockpit::TurretControl");
+        GameCockpit *current_cockpit = vega_dynamic_cast_ptr<GameCockpit>(_cockpits[0]);
+        current_cockpit->NextTurret();
+    }
+}
+
+extern void SwitchUnits(Unit *ol, Unit *nw);
+
+void GameCockpit::NextTurret() {
+    if(!current_unit) {
+        VS_LOG(debug, "GameCockpit::NextTurret -  unit is null");
+        return;
+    }
+
+    VS_LOG(debug, (boost::format("GameCockpit::NextTurret - turrets = %1%") % number_of_turrets));
+    if(number_of_turrets == 0) {
+        return;
+    }
+
+    current_view++;
+    VS_LOG(debug, (boost::format("GameCockpit::NextTurret - current_view = %1%") % current_view));
+    if(current_view == number_of_turrets) {
+        current_view = -1;
+    }
+
+    // Return to main cockpit
+    if(current_view == -1) {
+        VS_LOG(debug, "GameCockpit::NextTurret - Switch to cockpit");
+        this->SetParent(parent_unit, GetUnitFileName().c_str(),
+                        this->unitmodname.c_str(), savegame->GetPlayerLocation());
+        current_unit = parent_unit;
+        SwitchUnits(nullptr, current_unit);
+        current_unit->SetTurretAI();
+        current_unit->DisableTurretAI();
+        return;                  
+    }
+
+    int i = 0;
+
+    Unit* un;
+    for (un_iter ui = parent_unit->SubUnits.createIterator(); (un = *ui) != nullptr;ui++) {
+        if(i < current_view) {
+            VS_LOG(debug, (boost::format("GameCockpit::NextTurret - Iterating over %1% turrets. Currently at turret %2%.") % 
+                            number_of_turrets % i));
+            i++;
+            continue;
         }
-        turretcontrol[_Universe->CurrentCockpit()] = 1;
+
+        const bool FlyStraightInTurret = configuration().physics.ai_pilot_when_in_turret;
+        if (FlyStraightInTurret) {
+            SwitchUnits(current_unit, un);
+        } else {
+            current_unit->PrimeOrders();
+            SwitchUnits(nullptr, un);
+        }
+
+        VS_LOG(debug, (boost::format("GameCockpit::NextTurret - Switch to turret %1%.") % 
+                            un->getFullname()));
+        current_unit = un;
+        this->SetParent(current_unit, GetUnitFileName().c_str(),
+                        this->unitmodname.c_str(), savegame->GetPlayerLocation());
+        break;
     }
 }
 
@@ -1581,7 +1640,6 @@ void GameCockpit::Draw() {
     GFXDisable(DEPTHWRITE);
 
     Unit *un;
-    float crosscenx = 0, crossceny = 0;
     const bool crosshairs_on_chasecam = configuration().graphics.hud.crosshairs_on_chase_cam;
     const bool crosshairs_on_padlock = configuration().graphics.hud.crosshairs_on_padlock;
     if ((view == CP_FRONT)
@@ -2494,6 +2552,22 @@ void GameCockpit::updateRadar(Unit *ship) {
 void GameCockpit::SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc) {
     this->Cockpit::SetParent(unit, filename, unitmodname, startloc);
     updateRadar(unit);
+
+    if(unit) {
+        if(unit->isSubUnit()) {
+            current_unit = unit;
+            VS_LOG(debug, (boost::format("GameCockpit::SetParent - Switch to turret %1%.") % 
+                            unit->getFullname()));
+        } else {
+            // This runs every time we change ships AND every time we return to the cockpit from the turrets.
+            parent_unit = current_unit = unit;
+            number_of_turrets = parent_unit->SubUnits.size();   // We update this every time we switch back to cockpit. 
+                                                                // It's not elegant but I couldn't find an alternative.
+                                                                // Except making it a local variable in NextTurret.
+            VS_LOG(debug, (boost::format("GameCockpit::SetParent - %1% has %2% turrets.") % 
+                            unit->getFullname() % number_of_turrets));
+        }
+    }
 }
 
 void GameCockpit::OnDockEnd(Unit *station, Unit *ship) {
