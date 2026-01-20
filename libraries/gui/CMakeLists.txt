@@ -32,6 +32,7 @@ MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 ADD_LIBRARY(vegastrike_gui STATIC
     gui.cpp
     main_menu.cpp
+    pause_screen.cpp
 )
 
 

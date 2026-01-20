@@ -90,12 +90,83 @@ using VSFileSystem::SaveFile;
 #include <locale>
 #include "src/vega_cast_utils.h"
 
-// Can't declare in header because PyObject is problematic
-extern const std::string GetString(const std::string function_name,
-                            const std::string module_name,
-                            const std::string file_name,
-                            PyObject* args);
+enum class Color {
+    prohibited, downgrade, incompatible, no_space, no_money, destroyed, 
+    category, mission, default_upgrade, mount_prohibited, mount_empty, mount_full
+};
 
+GFXColor getColor(Color color) {
+    switch(color) {
+        case Color::prohibited:
+            return vs_config->getColor("prohibited_upgrade", GFXColor(1, .1, 0, 1));
+        case Color::downgrade:
+            return vs_config->getColor("downgrade_or_noncompatible", GFXColor(.75, .5, .5, 1));
+        case Color::incompatible:
+            return vs_config->getColor("downgrade_or_noncompatible", GFXColor(.75, .5, .5, 1));
+        case Color::no_space:
+            return vs_config->getColor("no_room_for_upgrade", GFXColor(1, 0, 1, 1));
+        case Color::no_money:
+            return vs_config->getColor("no_money", GFXColor(1, 1, .3, 1));
+        case Color::destroyed:
+            return vs_config->getColor("upgrade_item_destroyed", GFXColor(0.2, 0.2, 0.2, 1));
+        case Color::category:
+            return vs_config->getColor("base_category_color", GFXColor(0, .75, 0, 1));
+        case Color::mission:
+            return vs_config->getColor("base_mission_color", GFXColor(.66, .2, 0, 1));
+        case Color::default_upgrade:
+            return vs_config->getColor("base_upgrade_color", GFXColor(1, 1, 1, 1));
+        case Color::mount_prohibited:
+            return GFXColor(1, .7, .7);
+        case Color::mount_empty:
+            return GFXColor(.2, 1, .2);
+        case Color::mount_full:
+            return GFXColor(1, 1, 0);
+        default:
+            return GFXColor(0, 0, 0);
+    }
+}
+
+
+static GFXColor transaction_color;
+
+
+/************************************
+ * Boost Python Module
+ ***********************************/
+BOOST_PYTHON_MODULE(base_computer)
+{
+    using namespace boost::python;
+
+    enum_<BaseComputer::TransactionType>("TransactionType")
+        .value("BUY_CARGO", BaseComputer::TransactionType::BUY_CARGO)
+        .value("SELL_CARGO", BaseComputer::TransactionType::SELL_CARGO)
+        .value("BUY_UPGRADE", BaseComputer::TransactionType::BUY_UPGRADE)
+        .value("SELL_UPGRADE", BaseComputer::TransactionType::SELL_UPGRADE)
+        .value("BUY_SHIP", BaseComputer::TransactionType::BUY_SHIP)
+        // We're missing sell ship for some reason
+        .value("ACCEPT_MISSION", BaseComputer::TransactionType::ACCEPT_MISSION)
+        .value("NULL_TRANSACTION", BaseComputer::TransactionType::NULL_TRANSACTION)
+        .export_values();
+}
+
+void InitBaseComputer() {
+    PyImport_AppendInittab("base_computer", PyInit_base_computer);
+}
+
+// Can't declare in header because PyObject is problematic
+extern boost::python::object WrapObject(PyObject* raw_object);
+
+extern boost::python::object GetPyObject(const std::string& function_name,
+                                        const std::string& module_name,
+                                        const std::string& file_name,
+                                        PyObject* raw_args);
+
+extern std::string GetString(const std::string& function_name,
+                            const std::string& module_name,
+                            const std::string& file_name,
+                            PyObject* raw_args);
+
+extern boost::python::object MapToObject(const std::map<std::string, std::string>& cpp_map);
 
 //end for directory thing
 extern const char *DamagedCategory;
@@ -136,74 +207,11 @@ static const char CATEGORY_SEP = '/';
 //Tag that says this is a category not an item.
 static const char CATEGORY_TAG = (-1);
 
-//Color of an item that there isn't enough money to buy.
-//We read this out of the config file (or use a default).
-static bool color_prohibited_upgrade_flag = false;
-static bool color_downgrade_or_noncompatible_flag = false;
-static bool color_insufficient_space_flag = false;
-static bool color_insufficient_money_flag = false;
-
-static GFXColor NO_MONEY_COLOR() {
-    static GFXColor NMC = vs_config->getColor("no_money", GFXColor(1, 1, .3, 1));
-    return NMC;       //Start out with bogus color.
-}
-
-//Make the variable static, so it won't print so many annoying messages!
-static GFXColor PROHIBITED_COLOR() {
-    static GFXColor PU = vs_config->getColor("prohibited_upgrade", GFXColor(1, .1, 0, 1));
-    return PU;
-}
-
-static GFXColor DOWNGRADE_OR_NONCOMPAT_COLOR() {
-    static GFXColor DNC = vs_config->getColor("downgrade_or_noncompatible", GFXColor(.75, .5, .5, 1));
-    return DNC;
-}
-
-static GFXColor NO_ROOM_COLOR() {
-    static GFXColor NRFU = vs_config->getColor("no_room_for_upgrade", GFXColor(1, 0, 1, 1));
-    return NRFU;
-}
-
-static GFXColor ITEM_DESTROYED_COLOR() {
-    static GFXColor IDC = vs_config->getColor("upgrade_item_destroyed", GFXColor(0.2, 0.2, 0.2, 1));
-    return IDC;
-}
-
-//Color of the text of a category.
-static GFXColor CATEGORY_TEXT_COLOR() {
-    static GFXColor CTC = vs_config->getColor("base_category_color", GFXColor(0, .75, 0, 1));
-    return CTC;
-}
-
-static GFXColor MISSION_COLOR() {
-    static GFXColor MiC = vs_config->getColor("base_mission_color", GFXColor(.66, .2, 0, 1));
-    return MiC;
-}
-
 //Space between mode buttons.
 static const float MODE_BUTTON_SPACE = 0.03;
 
-//Default color in CargoColor.
-static GFXColor DEFAULT_UPGRADE_COLOR() {
-    static GFXColor DuC = vs_config->getColor("base_upgrade_color", GFXColor(1, 1, 1, 1));
-    return DuC;
-}
 
-//MOUNT ENTRY COLORS
-//Mount point that cannot be selected.
-static GFXColor MOUNT_POINT_NO_SELECT() {
-    return GFXColor(1, .7, .7);
-}
 
-//Empty mount point.
-static GFXColor MOUNT_POINT_EMPTY() {
-    return GFXColor(.2, 1, .2);
-}
-
-//Mount point that contains weapon.
-static GFXColor MOUNT_POINT_FULL() {
-    return GFXColor(1, 1, 0);
-}
 
 //Some mission declarations.
 //These should probably be in a header file somewhere.
@@ -2021,7 +2029,7 @@ bool BaseComputer::pickerChangedSelection(const EventCommandId &command, Control
 
 bool UpgradeAllowed(const Cargo &item, Unit *playerUnit) {
     if(!playerUnit->AllowedUpgrade(item)) {
-        color_prohibited_upgrade_flag = true;
+        transaction_color = getColor(Color::prohibited);
         return false;
     }
 
@@ -2031,7 +2039,7 @@ bool UpgradeAllowed(const Cargo &item, Unit *playerUnit) {
 //Return whether or not the current item and quantity can be "transacted".
 bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType transType, int quantity) {
     if (originalItem.IsMissionFlag() && transType != SELL_CARGO) {
-        color_downgrade_or_noncompatible_flag = true;
+        transaction_color = getColor(Color::incompatible);
         return false;
     }
     //Make sure we have somewhere to put stuff.
@@ -2059,10 +2067,10 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
                 return true;
             } else {
                 if (!have_money) {
-                    color_insufficient_money_flag = true;
+                    transaction_color = getColor(Color::no_money);
                 }
                 if (!have_space) {
-                    color_insufficient_space_flag = true;
+                    transaction_color = getColor(Color::no_space);
                 }
             }
             break;
@@ -2078,7 +2086,7 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
                 if (item.GetPrice() * quantity <= ComponentsManager::credits) {
                     return true;
                 } else {
-                    color_insufficient_money_flag = true;
+                    transaction_color = getColor(Color::no_money);
                 }
             }
             break;
@@ -2100,7 +2108,7 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
 
             // Simply not allowed
             if (!UpgradeAllowed(item, playerUnit)) {
-                color_prohibited_upgrade_flag = true;
+                transaction_color = getColor(Color::prohibited);
                 return false;
             }
 
@@ -2111,7 +2119,7 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
 
             // No money
             if (!have_money) {
-                color_insufficient_money_flag = true;
+                transaction_color = getColor(Color::no_money);
                 return false;
             }
 
@@ -2122,7 +2130,7 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
 
             // No space, but only for non-weapon upgrades. Weapons take no space.
             if (!have_space || upgrade_already_installed) {
-                color_insufficient_space_flag = true;
+                transaction_color = getColor(Color::no_space);
                 return false;
             }
 
@@ -2163,7 +2171,7 @@ SimplePickerCell *BaseComputer::createCategoryCell(SimplePickerCells &cells,
         //Need to make a new cell for this.
         cells.addCell(new SimplePickerCell(beautify(currentCategory),
                 currentCategory,
-                CATEGORY_TEXT_COLOR(),
+                getColor(Color::category),
                 CATEGORY_TAG));
     }
     SimplePickerCell
@@ -2206,6 +2214,13 @@ void BaseComputer::loadListPicker(TransactionList &tlist,
     for (size_t i = 0; i < tlist.masterList.size(); i++) {
         Cargo &item = tlist.masterList.at(i).cargo;
 
+        // Before we do anything, let's get the default colors straight
+        // Clear color means use the text color in the picker.
+        GFXColor base_color = GUI_CLEAR;
+        if(item.IsMissionFlag()) {
+            base_color = getColor(Color::mission);
+        } 
+
         std::string icategory = getDisplayCategory(item);
         if (icategory != currentCategory) {
             //Create new cell(s) for the new category.
@@ -2215,7 +2230,9 @@ void BaseComputer::loadListPicker(TransactionList &tlist,
         }
         //Construct the cell for this item.
         //JS_NUDGE -- this is where I'll need to do the upgrades colorations goop hooks
-        const bool transOK = isTransactionOK(item, transType);
+        if(!isTransactionOK(item, transType)) {
+            base_color = transaction_color;
+        }
 
         string itemName = beautify(UniverseUtil::LookupUnitStat(item.GetName(), "upgrades", "Name"));
         string originalName = itemName;
@@ -2228,24 +2245,6 @@ void BaseComputer::loadListPicker(TransactionList &tlist,
         }
 //*******************************************************************************
 
-        //Clear color means use the text color in the picker.
-        GFXColor bad_trans_color = NO_MONEY_COLOR();
-        if (color_downgrade_or_noncompatible_flag) {
-            bad_trans_color = DOWNGRADE_OR_NONCOMPAT_COLOR();
-        } else if (color_prohibited_upgrade_flag) {
-            bad_trans_color = PROHIBITED_COLOR();
-        } else if (color_insufficient_space_flag) {
-            bad_trans_color = NO_ROOM_COLOR();
-        } else if (color_insufficient_money_flag) {
-            //Just in case we want to change the default reason for non-purchase
-            bad_trans_color = NO_MONEY_COLOR();
-        }
-        GFXColor base_color = (transOK ? (item.IsMissionFlag() ? MISSION_COLOR() : GUI_CLEAR) : bad_trans_color);
-        //Reset cause-color flags
-        color_prohibited_upgrade_flag = false;
-        color_downgrade_or_noncompatible_flag = false;
-        color_insufficient_space_flag = false;
-        color_insufficient_money_flag = false;
         GFXColor final_color;
         if (transType == SELL_UPGRADE && m_player.GetUnit()) {
             //Adjust the base color if the item is 'damaged'
@@ -2262,7 +2261,7 @@ void BaseComputer::loadListPicker(TransactionList &tlist,
                 final_color = base_color;
             }               //working = normal color
             if (percent_working == 0.0) {
-                final_color = ITEM_DESTROYED_COLOR();
+                final_color = getColor(Color::destroyed);
             }                   //dead = grey
         } else {
             final_color = base_color;
@@ -2792,7 +2791,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList &tlist) {
                                         * active_missions[i]->objectives.at(j).completeness))
                                 + "%\\");
             }
-            amission.color = DEFAULT_UPGRADE_COLOR();
+            amission.color = getColor(Color::default_upgrade);
             tlist.masterList.push_back(amission);
         }
     }
@@ -2897,7 +2896,7 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     tlist.masterList.clear();     //Just in case
 
     //Get all the upgrades.
-    assert(equalColors(CargoColor().color, DEFAULT_UPGRADE_COLOR()));
+    assert(equalColors(CargoColor().color, getColor(Color::default_upgrade)));
     std::vector<std::string> filtervec;
     filtervec.push_back("upgrades");
     loadMasterList(baseUnit, baseUnit->cargo_hold, filtervec, std::vector<std::string>(), true, tlist);
@@ -2905,8 +2904,9 @@ void BaseComputer::loadBuyUpgradeControls(void) {
 
     //Mark all the upgrades that we can't do.
     //cargo.mission == true means we can't upgrade this.
+    // TODO: fix this nonsense. We should get mission status from the colors but the other way around.
     for (auto iter = tlist.masterList.begin(); iter != tlist.masterList.end(); ++iter) {
-        iter->cargo.SetMissionFlag((!equalColors(iter->color, DEFAULT_UPGRADE_COLOR())));
+        iter->cargo.SetMissionFlag((!equalColors(iter->color, getColor(Color::default_upgrade))));
     }
 
     // Filter integral from masterList
@@ -2966,9 +2966,10 @@ void BaseComputer::loadSellUpgradeControls(void) {
     }
     //Mark all the upgrades that we can't do.
     //cargo.mission == true means we can't upgrade this.
+    // TODO: fix this nonsense. We should get mission status from the colors but the other way around.
     vector<CargoColor>::iterator iter;
     for (iter = tlist.masterList.begin(); iter != tlist.masterList.end(); iter++) {
-        iter->cargo.SetMissionFlag((!equalColors(iter->color, DEFAULT_UPGRADE_COLOR())));
+        iter->cargo.SetMissionFlag((!equalColors(iter->color, getColor(Color::default_upgrade))));
     }
     std::vector<std::string> invplayerfiltervec = weapfiltervec;
     std::vector<string> playerfiltervec;
@@ -3272,7 +3273,7 @@ void BaseComputer::BuyUpgradeOperation::selectMount(void) {
         const bool selectable = playerUnit->canUpgrade(m_newPart, i, m_selectedTurret, 0, false, percent);
 
         //Figure color and label based on weapon that is in the slot.
-        GFXColor mountColor = MOUNT_POINT_NO_SELECT();
+        GFXColor mountColor = getColor(Color::mount_prohibited);
         string mountName;
         string ammoexp;
         if (playerUnit->mounts.at(i).status == Mount::ACTIVE || playerUnit->mounts.at(i).status == Mount::INACTIVE) {
@@ -3281,15 +3282,16 @@ void BaseComputer::BuyUpgradeOperation::selectMount(void) {
                     (playerUnit->mounts.at(i).ammo == -1) ? string("") : string((" ammo: "
                             + tostring(playerUnit->mounts.at(i).ammo)));
             mountName += ammoexp;
-            mountColor = MOUNT_POINT_FULL();
+            mountColor = getColor(Color::mount_full);
         } else {
             const std::string temp = getMountSizeString(playerUnit->mounts.at(i).size);
             mountName = tostring(i + 1) + " (Empty) " + temp.c_str();
-            mountColor = MOUNT_POINT_EMPTY();
+            mountColor = getColor(Color::mount_empty);
         }
         //If the mount point won't work with the weapon, don't let user select it.
         if (!selectable) {
-            mountColor = MOUNT_POINT_NO_SELECT();
+            // This is redundant
+            mountColor = getColor(Color::mount_prohibited);
         }
         //Now we add the cell.  Note that "selectable" is stored in the tag property.
         picker->addCell(new SimplePickerCell(mountName, "", mountColor, (selectable ? 1 : 0)));
@@ -3478,7 +3480,9 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
             mountName = tostring(i + 1) + " (Empty) " + temp.c_str();
         }
         //Now we add the cell.  Note that "selectable" is stored in the tag property.
-        const GFXColor mountColor = (selectable ? MOUNT_POINT_FULL() : MOUNT_POINT_NO_SELECT());
+        const GFXColor mountColor = (selectable ? 
+                                     getColor(Color::mount_full) : 
+                                     getColor(Color::mount_prohibited));
         picker->addCell(new SimplePickerCell(mountName, "", mountColor, (selectable ? 1 : 0)));
     }
     assert(selectableCount > 0);              //We should have found at least one unit mounted.
@@ -3794,10 +3798,15 @@ string buildShipDescription(Cargo &item, std::string &texture_description) {
         }
     }
 
-    std::map<std::string, std::string> ship_map = newPart->UnitToMap();
-    std::string str = GetString("get_ship_description", "ship_view",
-                          "ship_view.py",
-                          ship_map);
+    std::string str;
+    try {
+        std::map<std::string, std::string> ship_map = newPart->UnitToMap();
+        boost::python::object dict = MapToObject(ship_map);
+        str = GetString("get_ship_description", "ship_view", "ship_view.py", dict.ptr());
+    } catch (const std::runtime_error& e) {
+        VS_LOG(error, (boost::format("Error in buildShipDescription: %1%") % e.what()));
+    }
+    
 
     VS_LOG(debug, "buildShipDescription: killing newPart");
     newPart->Kill();
@@ -3817,9 +3826,15 @@ string buildShipDescription(Cargo &item, std::string &texture_description) {
 string buildUpgradeDescription(Cargo &item, std::map<std::string, std::string> ship_map) {
     const std::string key = item.GetName() + "__upgrades";
     ship_map["upgrade_key"] = key;
-    const std::string text = GetString("get_upgrade_info", "upgrade_view",
-        "upgrade_view.py", ship_map);
+    try {
+        boost::python::object dict = MapToObject(ship_map);
+        const std::string text = GetString("get_upgrade_info", "upgrade_view",
+                                           "upgrade_view.py", dict.ptr());
     return text;
+    } catch (const std::runtime_error& e) {
+        VS_LOG(error, (boost::format("Error in buildUpgradeDescription: %1%") % e.what()));
+    }
+    return std::string();
 }
 
 class PriceSort {
@@ -4376,10 +4391,14 @@ bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *contro
     boost::python::list relations_list = VectorToList(relations_vector);
     boost::python::list kills_list = VectorToList(kills_vector);
 
-    PyObject* args = PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr());
-
-    const std::string text = GetString("get_player_info", "player_info",
-        "player_info.py", args);
+    std::string text;
+    try {
+        boost::python::object args = WrapObject(PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr()));
+        text = GetString("get_player_info", "player_info", "player_info.py", args.ptr());
+    } catch (const std::runtime_error& e) {
+        VS_LOG(error, (boost::format("Error in showPlayerInfo: %1%") % e.what()));
+    }
+    
 
     //Put this in the description.
     StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
@@ -4411,9 +4430,15 @@ bool BaseComputer::showShipStats(const EventCommandId &command, Control *control
     Cargo uninitcargo;
 
     std::map<std::string, std::string> ship_map = playerUnit->UnitToMap();
-    std::string text = GetString("get_ship_description", "ship_view",
-                          "ship_view.py",
-                          ship_map);
+    std::string text;
+    try {
+        boost::python::object dict = MapToObject(ship_map);
+        text = GetString("get_ship_description", "ship_view",
+                          "ship_view.py", dict.ptr());
+    } catch (const std::runtime_error& e) {
+        VS_LOG(error, (boost::format("Error in showShipStats: %1%") % e.what()));
+    }
+    
 
     //remove picture, if any
     string::size_type pic;
