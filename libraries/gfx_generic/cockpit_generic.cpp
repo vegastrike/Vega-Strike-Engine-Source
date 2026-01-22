@@ -57,7 +57,6 @@
 
 vector<int> respawnunit;
 vector<int> switchunit;
-vector<int> turretcontrol;
 
 void Cockpit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
     ((Cockpit *) userData)->beginElement(name, AttributeList(atts));
@@ -138,15 +137,16 @@ void Cockpit::Init(const char *file, bool isDisabled) {
     f.Close();
 }
 
+// A bad function name. 
+// This function potentially returns the current subunit, so its target can be extracted.
+// See star_system.cpp
 Unit *Cockpit::GetSaveParent() {
-    Unit *un = parentturret.GetUnit();
-    if (!un) {
-        un = parent.GetUnit();
-    }
-    return un;
+    return current_unit;
 }
 
 void Cockpit::SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &pos) {
+    VS_LOG(debug, (boost::format("SetParent: full name: %1% filename: %2% filename (param): %3% unitmodname: %4%")
+                        % unit->getFullname() % unit->getFilename() % filename % unitmodname ));
     if (unit->getFlightgroup() != NULL) {
         fg = unit->getFlightgroup();
     }
@@ -220,37 +220,6 @@ Cockpit::Cockpit(const char *file, Unit *parent, const std::string &pilot_name)
     Init(file);
 }
 
-/*
- *  static vector <int> respawnunit;
- *  static vector <int> switchunit;
- *  static vector <int> turretcontrol;
- *  static vector <int> suicide;
- *  void RespawnNow (Cockpit * cp) {
- *  while (respawnunit.size()<=_Universe->numPlayers())
- *   respawnunit.push_back(0);
- *  for (unsigned int i=0;i<_Universe->numPlayers();i++) {
- *   if (_Universe->AccessCockpit(i)==cp) {
- *     respawnunit[i]=2;
- *   }
- *  }
- *  }
- *  void Cockpit::SwitchControl (const KBData&,KBSTATE k) {
- *  if (k==PRESS) {
- *   while (switchunit.size()<=_Universe->CurrentCockpit())
- *     switchunit.push_back(0);
- *   switchunit[_Universe->CurrentCockpit()]=1;
- *  }
- *
- *  }
- *
- *  void Cockpit::Respawn (const KBData&,KBSTATE k) {
- *  if (k==PRESS) {
- *   while (respawnunit.size()<=_Universe->CurrentCockpit())
- *     respawnunit.push_back(0);
- *   respawnunit[_Universe->CurrentCockpit()]=1;
- *  }
- *  }
- */
 
 void Cockpit::recreate(const std::string &pilot_name) {
     savegame->SetCallsign(pilot_name);
@@ -331,15 +300,6 @@ void SwitchUnits(Unit *ol, Unit *nw) {
     SwitchUnits2(nw);
 }
 
-static void SwitchUnitsTurret(Unit *ol, Unit *nw) {
-    const bool FlyStraightInTurret = configuration().physics.ai_pilot_when_in_turret;
-    if (FlyStraightInTurret) {
-        SwitchUnits(ol, nw);
-    } else {
-        ol->PrimeOrders();
-        SwitchUnits(NULL, nw);
-    }
-}
 
 Unit *GetFinalTurret(Unit *baseTurret) {
     Unit *un = baseTurret;
@@ -453,74 +413,6 @@ bool Cockpit::Update() {
     UpdAutoPilot();
     Unit *par = GetParent();
 
-    if (turretcontrol.size() > _Universe->CurrentCockpit()) {
-        if (turretcontrol[_Universe->CurrentCockpit()]) {
-            turretcontrol[_Universe->CurrentCockpit()] = 0;
-            Unit *par = GetParent();
-            //this being here, it will require poking the turret from the undock script
-            if (par) {
-                if (par->name == "return_to_cockpit") {
-                    //if (par->owner->isUnit()==Vega_UnitType::unit ) this->SetParent(par->owner,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());     // this warps back to the parent unit if we're eject-docking. in this position it also causes badness upon loading a game.
-
-                    Unit *temp = findUnitInStarsystem(par->owner);
-                    if (temp) {
-                        SwitchUnits(NULL, temp);
-                        this->SetParent(temp,
-                                GetUnitFileName().c_str(),
-                                this->unitmodname.c_str(),
-                                temp->Position());                         //this warps back to the parent unit if we're eject-docking. causes badness upon loading a game.
-                    }
-                    par->Kill();
-                }
-            }
-            if (par) {
-                static int index = 0;
-                int i = 0;
-                bool tmp = false;
-                bool tmpgot = false;
-                if (parentturret.GetUnit() == NULL) {
-                    tmpgot = true;
-                    Unit *un;
-                    for (un_iter ui = par->getSubUnits(); (un = *ui);) {
-                        if (un->IsPlayerShip()) {
-                            ++ui;
-                            continue;
-                        }
-                        if (i++ == index) {
-                            //NOTE : this may have been a correction to the conditional bug
-                            ++index;
-                            if (un->name.get().find("accessory") == string::npos) {
-                                tmp = true;
-                                SwitchUnitsTurret(par, un);
-                                parentturret.SetUnit(par);
-                                Unit *finalunit = GetFinalTurret(un);
-                                this->SetParent(finalunit, GetUnitFileName().c_str(),
-                                        this->unitmodname.c_str(), savegame->GetPlayerLocation());
-                                break;
-                            }
-                        }
-                        ++ui;
-                    }
-                }
-                if (tmp == false) {
-                    if (tmpgot) {
-                        index = 0;
-                    }
-                    Unit *un = parentturret.GetUnit();
-                    if (un && !un->IsPlayerShip()) {
-                        SetParent(un,
-                                GetUnitFileName().c_str(),
-                                this->unitmodname.c_str(),
-                                savegame->GetPlayerLocation());
-                        SwitchUnits(NULL, un);
-                        parentturret.SetUnit(NULL);
-                        un->SetTurretAI();
-                        un->DisableTurretAI();
-                    }
-                }
-            }
-        }
-    }
     const bool autoclear = configuration().ai.auto_dock;
     if (autoclear && par) {
         Unit *targ = par->Target();
@@ -552,8 +444,6 @@ bool Cockpit::Update() {
     }
     if (switchunit.size() > _Universe->CurrentCockpit()) {
         if (switchunit[_Universe->CurrentCockpit()]) {
-            parentturret.SetUnit(NULL);
-
             const float initialzoom = configuration().graphics.initial_zoom_factor_flt;
             zoomfactor = initialzoom;
             static int index = 0;
@@ -602,31 +492,19 @@ bool Cockpit::Update() {
                             }
                             //this refers to cockpit
                             if (!(k->name == "return_to_cockpit")) {
+                                VS_LOG(debug, "Cockpit::Update() return_to_cockpit 2");
                                 this->SetParent(un, GetUnitFileName().c_str(),
                                         this->unitmodname.c_str(), savegame->GetPlayerLocation());
                             }
                             if (!(k->name == "return_to_cockpit")) {
                                 k->Kill();
                             }
-                            //un->SetAI(new FireKeyboard ())
                         }
                         if (proceed) {
-                            //k->PrimeOrdersLaunched();
-//k->SetAI (new Orders::AggressiveAI ("interceptor.agg.xml"));
-//k->SetTurretAI();
-
-//Flightgroup * fg = k->getFlightgroup();
-//if (fg!=NULL) {
-//
-//un->SetFg (fg,fg->nr_ships++);
-//fg->nr_ships_left++;
-//fg->leader.SetUnit(un);
-//fg->directive="b";
-//}
                             SwitchUnits(k, un);
+                            VS_LOG(debug, "Cockpit::Update() proceed");
                             this->SetParent(un, GetUnitFileName().c_str(),
                                     this->unitmodname.c_str(), savegame->GetPlayerLocation());
-                            //un->SetAI(new FireKeyboard ())
                         }
                         break;
                     }
@@ -660,7 +538,6 @@ bool Cockpit::Update() {
                 const float initialzoom = configuration().graphics.initial_zoom_factor_flt;
                 zoomfactor = initialzoom;
 
-                parentturret.SetUnit(nullptr);
                 respawnunit.at(_Universe->CurrentCockpit()) = 0;
                 std::string savegamefile = mission->getVariable("savegame", "");
                 unsigned int k;
