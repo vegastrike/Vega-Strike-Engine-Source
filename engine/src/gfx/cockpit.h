@@ -164,7 +164,7 @@ class GameCockpit : public Cockpit {
     /// Used to display the arrow pointing to the currently selected target.
     float projection_limit_x, projection_limit_y;
     float inv_screen_aspect_ratio; //Precomputed division 1 / configuration().graphics.aspect.
-    void SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc) override;
+    void SetParent(Unit *unit, const QVector &startloc) override;
     void LoadXML(const char *file) override;
     void LoadXML(VSFileSystem::VSFile &f) override;
     void beginElement(const string &name, const AttributeList &attributes) override;

@@ -50,6 +50,8 @@
 #include "src/universe.h"
 #include "cmd/mount_size.h"
 #include "cmd/weapon_info.h"
+#include "components/player_ship.h"
+#include "resource/manifest.h"
 
 #include <algorithm>
 
@@ -144,20 +146,19 @@ Unit *Cockpit::GetSaveParent() {
     return current_unit;
 }
 
-void Cockpit::SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &pos) {
-    VS_LOG(debug, (boost::format("SetParent: full name: %1% filename: %2% filename (param): %3% unitmodname: %4%")
-                        % unit->getFullname() % unit->getFilename() % filename % unitmodname ));
-    if (unit->getFlightgroup() != NULL) {
+void Cockpit::SetParent(Unit *unit, const QVector &position) {
+    VS_LOG(debug, (boost::format("SetParent: full name: %1% filename: %2%")
+                        % unit->getFullname() % unit->getFilename() ));
+    
+    if (unit->getFlightgroup() != nullptr) {
         fg = unit->getFlightgroup();
     }
+
     activeStarSystem = _Universe->activeStarSystem();          //cannot switch to units in other star systems.
     parent.SetUnit(unit);
     unit->SetPlayerShip(); // This is the place to set it.
-    savegame->SetPlayerLocation(pos);
-    if (filename[0] != '\0') {
-        this->GetUnitFileName() = std::string(filename);
-        this->unitmodname = std::string(unitmodname);
-    }
+    savegame->SetPlayerLocation(position);
+    
     if (unit) {
         this->unitfaction = unit->faction;
     }
@@ -493,8 +494,7 @@ bool Cockpit::Update() {
                             //this refers to cockpit
                             if (!(k->name == "return_to_cockpit")) {
                                 VS_LOG(debug, "Cockpit::Update() return_to_cockpit 2");
-                                this->SetParent(un, GetUnitFileName().c_str(),
-                                        this->unitmodname.c_str(), savegame->GetPlayerLocation());
+                                this->SetParent(un, savegame->GetPlayerLocation());
                             }
                             if (!(k->name == "return_to_cockpit")) {
                                 k->Kill();
@@ -503,8 +503,7 @@ bool Cockpit::Update() {
                         if (proceed) {
                             SwitchUnits(k, un);
                             VS_LOG(debug, "Cockpit::Update() proceed");
-                            this->SetParent(un, GetUnitFileName().c_str(),
-                                    this->unitmodname.c_str(), savegame->GetPlayerLocation());
+                            this->SetParent(un, savegame->GetPlayerLocation());
                         }
                         break;
                     }
@@ -626,12 +625,14 @@ bool Cockpit::Update() {
                     fg->nr_ships++;
                     fg->nr_ships_left++;
                 }
-                Unit *un = new Unit(
-                        GetUnitFileName().c_str(), false, this->unitfaction, unitmodname, fg, fgsnumber);
+
+                // This code is suspicious. We are creating a new unit while we already have one in fleet.
+                std::string unit_filename = PlayerShip::GetActiveShip().GetName();
+                Unit *un = new Unit(unit_filename.c_str(), false, this->unitfaction, "player", fg, fgsnumber);
                 un->SetCurPosition(UniverseUtil::SafeEntrancePoint(savegame->GetPlayerLocation()));
                 ss->AddUnit(un);
 
-                this->SetParent(un, GetUnitFileName().c_str(), unitmodname.c_str(), savegame->GetPlayerLocation());
+                this->SetParent(un, savegame->GetPlayerLocation());
                 SwitchUnits(NULL, un);
                 DoCockpitKeys();
                 _Universe->popActiveStarSystem();
@@ -692,81 +693,89 @@ void Cockpit::SetInsidePanPitchSpeed(float) {
 void Cockpit::PackUnitInfo(vector<std::string> &info) const {
     info.clear();
 
-    // First entry, current ship
-    if (GetNumUnits() > 0) {
-        info.push_back(GetUnitFileName());
+    // Nothing to pack
+    if(player_fleet.size() == 0) {
+        return;
     }
 
+    // First entry, current ship
+    const std::string active_ship_name = PlayerShip::GetActiveShip().cargo.GetName();
+    info.push_back(active_ship_name);
+
     // Following entries, ship/location pairs
-    for (size_t i = 1, n = GetNumUnits(); i < n; ++i) {
-        info.push_back(GetUnitFileName(i));
-        info.push_back(GetUnitSystemName(i) + "@" + GetUnitBaseName(i));
+    int i=0;
+    for (PlayerShip& ship : player_fleet) {
+        // We already wrote the active ship
+        if(ship.active) {
+            continue;
+        }
+        i++;
+
+        info.push_back(ship.cargo.GetName());
+        info.push_back(ship.system + "@" + ship.base);
     }
 }
 
-void Cockpit::UnpackUnitInfo(vector<std::string> &info) {
-    vector<string> filenames, systemnames, basenames;
 
-    // First entry, current ship
-    if (!info.empty()) {
-        filenames.push_back(info[0]);
-        systemnames.push_back("");
-        basenames.push_back("");
+static void pushShipToFleet(bool active, 
+                            const std::string& filename, 
+                            const std::string& system,
+                            const std::string& base,
+                            const int faction,
+                            Flightgroup *flight_group,
+                            int fgsnumber) {
+    Unit *unit = new Unit(filename.c_str(), false, faction, "player", flight_group, fgsnumber);
+    Cargo cargo;
+    try {
+        cargo = Manifest::MPL().GetCargoByName(filename);
+    } catch (const std::exception &e) {
+        VS_LOG(warning, (boost::format("Failed to load player ship %1%: %2%.\nGenerating dummy cargo entry.") % filename % e.what()));
+        cargo = Cargo(filename, "Spaceship", 1, 1, 1, 1);
     }
+    PlayerShip player_ship(active, unit, "", "", filename, 0, 0, 0);
+    player_fleet.push_back(player_ship);
+}
+
+void Cockpit::UnpackUnitInfo(vector<std::string> &info) {
+    player_fleet.clear();
+
+    // Nothing to unpack
+    if(info.empty()) {
+        return;
+    }
+
+    int fgsnumber = 0;
+    if (fg) {
+        fgsnumber = fg->flightgroup_nr++;
+        fg->nr_ships++;
+        fg->nr_ships_left++;
+    }
+
+    // Parse first
+    std::string filename = info[0];
+    pushShipToFleet(true, filename, "", "", this->unitfaction, fg, fgsnumber);
+    
 
     // Following entries, ship/location pairs
     for (size_t i = 1, n = info.size(); i < n; i += 2) {
-        filenames.push_back(info[i]);
+        if (fg) {
+            fgsnumber = fg->flightgroup_nr++;
+            fg->nr_ships++;
+            fg->nr_ships_left++;
+        }
+
+        std::string filename = info[i];
 
         string location = ((i + 1) < n) ? info[i + 1] : "";
         string::size_type atpos = location.find_first_of('@');
 
-        systemnames.push_back(location.substr(0, atpos));
-        basenames.push_back((atpos != string::npos) ? location.substr(atpos + 1) : "");
-    }
-
-    unitfilename.swap(filenames);
-    unitsystemname.swap(systemnames);
-    unitbasename.swap(basenames);
-}
-
-static const std::string emptystring;
-
-const std::string &Cockpit::GetUnitFileName(unsigned int which) const {
-    if (which >= unitfilename.size()) {
-        return emptystring;
-    } else {
-        return unitfilename[which];
+        std::string system = location.substr(0, atpos);
+        std::string base = ((atpos != string::npos) ? location.substr(atpos + 1) : "");
+        std::cout << std::endl << std::endl << filename << " " << system << " " << base << std::endl << std::endl;
+        pushShipToFleet(false, filename, system, base, this->unitfaction, fg, fgsnumber);
     }
 }
 
-const std::string &Cockpit::GetUnitSystemName(unsigned int which) const {
-    if (which >= unitsystemname.size()) {
-        return emptystring;
-    } else {
-        return unitsystemname[which];
-    }
-}
-
-const std::string &Cockpit::GetUnitBaseName(unsigned int which) const {
-    if (which >= unitbasename.size()) {
-        return emptystring;
-    } else {
-        return unitbasename[which];
-    }
-}
-
-void Cockpit::RemoveUnit(unsigned int which) {
-    if (which < unitfilename.size()) {
-        unitfilename.erase(unitfilename.begin() + which);
-    }
-    if (which < unitsystemname.size()) {
-        unitsystemname.erase(unitsystemname.begin() + which);
-    }
-    if (which < unitbasename.size()) {
-        unitbasename.erase(unitbasename.begin() + which);
-    }
-}
 
 string Cockpit::MakeBaseName(const Unit *base) {
     string name;

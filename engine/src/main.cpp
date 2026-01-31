@@ -67,6 +67,7 @@
 #include "audio/SceneManager.h"
 #include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
 #include "configuration/configuration.h"
+#include "components/player_ship.h"
 #include <time.h>
 #if !defined(_WIN32) && !defined (__HAIKU__)
 #include <signal.h>
@@ -672,7 +673,9 @@ void bootstrap_main_loop() {
 
         _Universe->AccessCockpit(k)->UnpackUnitInfo(packedInfo);
         CopySavedShips(playername[k], k, packedInfo, true);
-        playersaveunit.push_back(_Universe->AccessCockpit(k)->GetUnitFileName());
+        
+        // Pushes the dummy ship unless loading something from the command line
+        playersaveunit.push_back(PlayerShip::GetActiveShip().GetName());
         ss.push_back(_Universe->Init(mysystem, Vector(0, 0, 0), planetname));
         if (setplayerXloc) {
             playerNloc.push_back(pos);

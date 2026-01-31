@@ -464,11 +464,11 @@ void WriteSaveGame(Cockpit *cp, bool auto_save) {
 
         cp->savegame->WriteSaveGame(cp->activeStarSystem->getFileName().c_str(),
                                     un->LocalPosition(), packedInfo, auto_save ? -1 : player_num);
-        un->WriteUnit(cp->GetUnitModifications().c_str());
+        un->WriteUnit("player");
         if (GetWritePlayerSaveGame(player_num).length() && !auto_save) {
             cp->savegame->SetStarSystem(cp->activeStarSystem->getFileName());
             cp->savegame->SetPlayerLocation(un->LocalPosition());
-            CopySavedShips(cp->GetUnitModifications(), player_num, packedInfo, false);
+            CopySavedShips("player", player_num, packedInfo, false);
         }
     }
 }

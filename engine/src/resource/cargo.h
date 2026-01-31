@@ -134,6 +134,9 @@ public:
     
     bool operator==(const Cargo &other) const;
     bool operator<(const Cargo &other) const;
+
+    // For use by PlayerShip
+    int index = 0;
 };
 
 #endif //VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H

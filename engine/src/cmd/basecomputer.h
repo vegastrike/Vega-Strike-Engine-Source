@@ -315,6 +315,6 @@ protected:
     friend class SellUpgradeOperation;
 };
 bool buyShip(Unit *base, Unit *player, std::string, bool myfleet, bool force_base_inventory, BaseComputer *);
-bool sellShip(Unit *base, Unit *player, std::string, BaseComputer *);
+bool sellShip(Unit *base, Unit *player, Cargo* item, BaseComputer *);
 
 #endif   //VEGA_STRIKE_ENGINE_CMD_BASECOMPUTER_H

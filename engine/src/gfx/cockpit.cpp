@@ -1136,8 +1136,7 @@ void GameCockpit::NextTurret() {
     // Return to main cockpit
     if(current_view == -1) {
         VS_LOG(debug, "GameCockpit::NextTurret - Switch to cockpit");
-        this->SetParent(parent_unit, GetUnitFileName().c_str(),
-                        this->unitmodname.c_str(), savegame->GetPlayerLocation());
+        this->SetParent(parent_unit, savegame->GetPlayerLocation());
         current_unit = parent_unit;
         SwitchUnits(nullptr, current_unit);
         current_unit->SetTurretAI();
@@ -1167,8 +1166,7 @@ void GameCockpit::NextTurret() {
         VS_LOG(debug, (boost::format("GameCockpit::NextTurret - Switch to turret %1%.") % 
                             un->getFullname()));
         current_unit = un;
-        this->SetParent(current_unit, GetUnitFileName().c_str(),
-                        this->unitmodname.c_str(), savegame->GetPlayerLocation());
+        this->SetParent(current_unit, savegame->GetPlayerLocation());
         break;
     }
 }
@@ -2549,8 +2547,8 @@ void GameCockpit::updateRadar(Unit *ship) {
     radarDisplay->OnDockEnd();
 }
 
-void GameCockpit::SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc) {
-    this->Cockpit::SetParent(unit, filename, unitmodname, startloc);
+void GameCockpit::SetParent(Unit *unit, const QVector &startloc) {
+    this->Cockpit::SetParent(unit, startloc);
     updateRadar(unit);
 
     if(unit) {

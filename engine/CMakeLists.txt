@@ -243,6 +243,7 @@ SET(LIBPYTHON
 SET(LIBCOMPONENT
     src/components/component.cpp
     src/components/components_manager.cpp
+    src/components/player_ship.cpp
 
     src/components/dummy_component.cpp
     src/components/component_utils.cpp

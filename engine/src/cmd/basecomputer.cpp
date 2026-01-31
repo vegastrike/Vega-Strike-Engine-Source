@@ -74,6 +74,7 @@ using VSFileSystem::SaveFile;
 
 #include <boost/python.hpp>
 #include "configuration/configuration.h"
+#include "components/player_ship.h"
 
 //for directory thing
 #if defined (_WIN32) && !defined (__CYGWIN__)
@@ -1774,7 +1775,6 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 configureUpgradeCommitControls(item, BUY_UPGRADE);
                 break;
             case BUY_SHIP:
-                commitButton->setLabel("Buy");
                 commitButton->setCommand("BuyShip");
                 if (item.GetCategory().find("My_Fleet") != string::npos) {
                     //note can only sell it if you can afford to ship it over here.
@@ -1783,6 +1783,26 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     commit10Button->setHidden(false);
                     commit10Button->setLabel("Sell");
                     commit10Button->setCommand("SellShip");
+
+                    const std::string destination_system = _Universe->activeStarSystem()->getFileName();
+                    const std::string destination_base = Cockpit::MakeBaseName(m_base.GetUnit());
+                    PlayerShip player_ship = PlayerShip::GetShipFromIndex(item.index);
+                    std::cout << player_ship.cargo.GetName() << " " << destination_system << " " << destination_base << std::endl;
+                    if(player_ship.active) {
+                        std::cout << "ship active\n";
+                        commitButton->setHidden(true);      // Can't switch to active ship, obviously.
+                        commit10Button->setHidden(true);    // Can't sell the active ship. Not supported yet. Too many edge cases.
+                    } else if(player_ship.IsShipInSameBase(destination_system, destination_base)) {
+                        std::cout << "same base\n";
+                        commitButton->setLabel("Switch");
+                        commitButton->setHidden(false);
+                    } else {
+                        std::cout << "need transfer\n";
+                        commitButton->setLabel("Transfer");
+                        commitButton->setHidden(false);
+                    }
+                } else {
+                    commitButton->setLabel("Buy");
                 }
                 break;
             case SELL_CARGO:
@@ -3710,60 +3730,26 @@ bool BaseComputer::changeToShipDealerMode(const EventCommandId &command, Control
     return true;
 }
 
-//Create a Cargo for the specified starship.
-Cargo CreateCargoForOwnerStarship(const Cockpit *cockpit, const Unit *base, int i) {
-    Cargo cargo;
-    cargo.SetQuantity(1);
-    cargo.SetVolume(1);
-    cargo.SetPrice(0);
+void UpdateTransportPricesForOwnedShips(const Unit* base) {
+    assert(base);
 
-    string locationSystemName = cockpit->GetUnitSystemName(i);
-    string locationBaseName = cockpit->GetUnitBaseName(i);
-    string destinationSystemName = _Universe->activeStarSystem()->getFileName();
-    string destinationBaseName = (base != NULL) ? Cockpit::MakeBaseName(base) : "";
+    for(PlayerShip& ship : player_fleet) {
+        const std::string destination_system = _Universe->activeStarSystem()->getFileName();
+        const std::string destination_base = Cockpit::MakeBaseName(base);
+        int jumps = 0;
 
-    bool needsJumpTransport = (locationSystemName != destinationSystemName);
-    bool needsInsysTransport = (locationBaseName != destinationBaseName);
-
-    const float shipping_price_base = configuration().economics.shipping_price_base_flt;
-    const float shipping_price_insys = configuration().economics.shipping_price_insys_flt;
-    const float shipping_price_perjump = configuration().economics.shipping_price_perjump_flt;
-
-    cargo.SetPrice(shipping_price_base);
-    cargo.SetName(cockpit->GetUnitFileName(i));
-    cargo.SetCategory("starships/My_Fleet");
-
-    if (needsJumpTransport) {
-        vector<string> jumps;
-        _Universe->getJumpPath(
-                locationSystemName,
-                destinationSystemName,
-                jumps);
-        VS_LOG(trace, (boost::format("Player ship needs transport from %1% to %2% across %3% systems")
-                % locationBaseName % destinationSystemName % jumps.size()));
-        cargo.SetPrice(cargo.GetPrice() + shipping_price_perjump * (jumps.size() - 1));
-    } else if (needsInsysTransport) {
-        VS_LOG(trace, (boost::format("Player ship needs insys transport from %1% to %2%")
-                % locationBaseName % destinationBaseName));
-        cargo.SetPrice(cargo.GetPrice() + shipping_price_insys);
-    }
-
-    return cargo;
-}
-
-//Create a Cargo for an owned starship from the name.
-Cargo CreateCargoForOwnerStarshipName(const Cockpit *cockpit, const Unit *base, std::string name, int &index) {
-    for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i) {
-        if (cockpit->GetUnitFileName(i) == name) {
-            index = i;
-            return CreateCargoForOwnerStarship(cockpit, base, i);
+        if (destination_system != ship.system) {
+            vector<string> jumps_vector;
+            _Universe->getJumpPath(ship.system, destination_system,jumps_vector);
+            jumps = jumps_vector.size()-1;
         }
+        ship.UpdateTransportPrice(destination_system, destination_base, jumps);
+
     }
-    //Didn't find it.
-    return Cargo();
 }
 
-void SwapInNewShipName(Cockpit *cockpit, Unit *base, const std::string &newFileName, int swappingShipsIndex) {
+
+/*void SwapInNewShipName(Cockpit *cockpit, Unit *base, const std::string &newFileName, int swappingShipsIndex) {
     Unit *parent = cockpit->GetParent();
     if (parent) {
         size_t putpos = (swappingShipsIndex >= 0) ? swappingShipsIndex : cockpit->GetNumUnits();
@@ -3783,22 +3769,31 @@ void SwapInNewShipName(Cockpit *cockpit, Unit *base, const std::string &newFileN
         cockpit->RemoveUnit(swappingShipsIndex);
     }
     cockpit->GetUnitFileName() = newFileName;
-}
+}*/
 
 string buildShipDescription(Cargo &item, std::string &texturedescription) {
     VS_LOG(debug, "Entering buildShipDescription");
-    //load the Unit
-    string newModifications;
-    if (item.GetCategory().find("My_Fleet") != string::npos) {
-        //Player owns this starship.
-        newModifications = _Universe->AccessCockpit()->GetUnitModifications();
-    }
+
+    Unit* unit = nullptr;
+    if(item.index > 0) {
+        std::cout << "GetShipFromIndex " << item.index << " " << item.GetName() << std::endl;
+        ComponentsManager* components_manager = PlayerShip::GetShipFromIndex(item.index).unit;
+
+        if(!components_manager) {
+            const std::string error_string = "components_manager is null. exiting buildShipDescription.\n";
+            std::cerr << error_string;
+            return error_string;
+        }
+        unit = vega_dynamic_cast_ptr<Unit>(components_manager);
+    } 
+    
+    // Load the Unit
     Flightgroup *flightGroup = new Flightgroup();
     int fgsNumber = 0;
     current_unit_load_mode = NO_MESH;
 
     VS_LOG(debug, "buildShipDescription: creating newPart");
-    Unit *newPart = new Unit(item.GetName().c_str(), false, 0, newModifications, flightGroup, fgsNumber);
+    Unit *newPart = new Unit(item.GetName().c_str(), false, 0, "", flightGroup, fgsNumber);
     current_unit_load_mode = DEFAULT;
     string sHudImage;
     string sImage;
@@ -3820,7 +3815,14 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
         }
     }
 
-    std::map<std::string, std::string> ship_map = newPart->UnitToMap();
+    std::map<std::string, std::string> ship_map;
+    if(unit) {
+        // This is a player ship
+        ship_map = unit->UnitToMap();
+    } else {
+        // We are building a standard ship from the template
+        ship_map = newPart->UnitToMap();
+    }
     std::string str = GetString("get_ship_description", "ship_view",
                           "ship_view.py",
                           ship_map);
@@ -4100,23 +4102,28 @@ string buildCargoDescription(const Cargo &item, BaseComputer &computer, float pr
     return desc;
 }
 
-//Load the controls for the SHIP_DEALER display.
+// Load the controls for the SHIP_DEALER display.
 void BaseComputer::loadShipDealerControls(void) {
-    //Make sure there's nothing in the transaction lists.
+    // Make sure there's nothing in the transaction lists.
     resetTransactionLists();
 
-    //Set up the base dealer's transaction list.
+    // Set up the base dealer's transaction list.
     std::vector<std::string> filtervec;
     filtervec.push_back("starships");
     loadMasterList(m_base.GetUnit(), m_base.GetUnit()->cargo_hold, filtervec, std::vector<std::string>(), true, m_transList1);
 
-    //Add in the starships owned by this player.
-    Cockpit *cockpit = _Universe->AccessCockpit();
-    for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i) {
+    // Add in the starships owned by this player.
+    for (PlayerShip& ship : player_fleet) {
         CargoColor cargoColor;
-        cargoColor.cargo = CreateCargoForOwnerStarship(cockpit, m_base.GetUnit(), i);
+        cargoColor.cargo = ship.cargo;
+        if(ship.active) {
+            const std::string name = ship.GetName() + " - in use";
+            cargoColor.color = GFXColor(1,1,0,1);
+            cargoColor.cargo.SetName(name);
+        }
         m_transList1.masterList.push_back(cargoColor);
     }
+
     //remove the descriptions, we don't build them all here, it is a time consuming operation
     vector<CargoColor> *items = &m_transList1.masterList;
     for (vector<CargoColor>::iterator it = items->begin(); it != items->end(); it++) {
@@ -4131,32 +4138,24 @@ void BaseComputer::loadShipDealerControls(void) {
     recalcTitle();
 }
 
-bool sellShip(Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseComputer *bcomputer) {
-    Cockpit *cockpit = _Universe->isPlayerStarship(playerUnit);
-    unsigned int tempInt = 1;
+// TODO: move this to ComponentsManager
+bool sellShip(Unit *baseUnit, Unit *playerUnit, Cargo* item, BaseComputer *bcomputer) {
+    PlayerShip& ship = PlayerShip::GetShipFromIndex(item->index);
+    const float purchase_price = ship.purchase_price;
+    const float shipping_price = ship.cargo.GetPrice();
 
-    Cargo shipCargo;
-    try {
-        shipCargo = Manifest::MPL().GetCargoByName(shipname);
-    } catch (const std::exception& e) {
-        VS_LOG(error, (boost::format("Error in GetCargoByName: %1%") % e.what()));
-        return false;
-    }
+    // Transfer the ship to the dealer
+    ComponentsManager::credits -= shipping_price; //transportation cost
 
+    // Sell the ship
+    const float ship_sellback_factor = configuration().economics.ship_sellback_price_flt;
+    ComponentsManager::credits += ship_sellback_factor * purchase_price; //sellback cost
 
-    //now we can actually do the selling
-    for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i) {
-        if (cockpit->GetUnitFileName(i) == shipname) {
-            if (cockpit->GetUnitSystemName(i) == _Universe->activeStarSystem()->getFileName()) {
-                const float shipping_price = configuration().economics.sellback_shipping_price_flt;
-                ComponentsManager::credits -= shipping_price; //transportation cost
-            }
-            cockpit->RemoveUnit(i);
-            const float shipSellback = configuration().economics.ship_sellback_price_flt;
-            ComponentsManager::credits += shipSellback * shipCargo.GetPrice(); //sellback cost
-            break;
-        }
-    }
+    // Remove the ship and add to base
+    // This will strip the ship of any modifications including damage and upgrades.
+    // It will revert to blank or template, depending on the cargo name.
+    Cargo ship_as_cargo = PlayerShip::RemoveShip(item->index);
+    baseUnit->cargo_hold.AddCargo(baseUnit, ship_as_cargo);
 
     if (bcomputer) {
         bcomputer->loadShipDealerControls();
@@ -4169,152 +4168,163 @@ bool BaseComputer::sellShip(const EventCommandId &command, Control *control) {
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
     Cargo *item = selectedItem();
+    std::cout << "index=" <<item->index << std::endl;
     
+    // Some sanity checks
     if (!(playerUnit && baseUnit && item && playerUnit->IsPlayerShip())) {
         return true;
     }
-    return ::sellShip(baseUnit, playerUnit, item->GetName(), this);
+
+    return ::sellShip(baseUnit, playerUnit, item, this);
 }
 
 bool buyShip(Unit *baseUnit,
         Unit *playerUnit,
-        std::string content,
-        bool myfleet,
+        Cargo* item,
         bool force_base_inventory,
         BaseComputer *bcomputer) {
-    Cargo ship_cargo;
+    // Unit Name
+    const std::string ship_name = item->GetName();
 
-    int index = baseUnit->cargo_hold.GetIndex(content);
-    if(index > -1) {
-        ship_cargo = baseUnit->cargo_hold.GetCargo(index);
-    } else {
-        try {
-            ship_cargo = Manifest::MPL().GetCargoByName(content);
-        } catch (const std::exception& e) {
-            VS_LOG(error, (boost::format("Error in GetCargoByName: %1%") % e.what()));
+    if (!baseUnit) {
+        // Log error
+        return false;
+    }
+
+    if (!playerUnit) {
+        // Log error
+        return false;
+    }
+
+    if (!item) {
+        // Log error
+        return false;
+    }
+
+    if (!bcomputer) {
+        // Log error
+        return false;
+    }
+
+    // Already own ship
+    if(item->index > 0) {
+        PlayerShip& ship = PlayerShip::GetShipFromIndex(item->index);
+
+        // Already active ship. We shouldn't be here.
+        if(ship.active) {
             return false;
         }
-    }
 
-    Cargo *shipCargo = &ship_cargo;
-    Cargo myFleetShipCargo;
-    int swappingShipsIndex = -1;
-    if (myfleet) {
-        //Player owns this starship.
-        shipCargo = &myFleetShipCargo;
-        myFleetShipCargo =
-                CreateCargoForOwnerStarshipName(_Universe->AccessCockpit(), baseUnit, content, swappingShipsIndex);
-        if (shipCargo->GetName().empty()) {
-            //Something happened -- can't find ship by name.
-            shipCargo = NULL;
-            swappingShipsIndex = -1;
+        // Sanity check - can we afford to transfer ship
+        if (ship.cargo.GetPrice() > ComponentsManager::credits) {
+            // Log error. We shouldn't get here.
+            return false;
         }
+
+        // Charge credits for transfer
+        ComponentsManager::credits -= ship.cargo.GetPrice();
+
+        PlayerShip::SwitchShips(item->index);
+        
+        
+        
+        return true;
     } else {
-        // This is where we solve the bug where you can't own two ships of the same type
-        Cockpit *cockpit = _Universe->AccessCockpit();
-        for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i) {
-            if (cockpit->GetUnitFileName(i) == content) {
-                return false;
-            }
+        // Sanity check - can we afford said ship
+        if (item->GetPrice() > ComponentsManager::credits) {
+            // Log error. We shouldn't get here.
+            return false;
         }
-        //can't buy a ship you own
-    }
-    if (shipCargo) {
-        if (shipCargo->GetPrice() < ComponentsManager::credits) {
 
-            Flightgroup *flightGroup = playerUnit->getFlightgroup();
-            int fgsNumber = 0;
-            if (flightGroup != NULL) {
-                fgsNumber = flightGroup->nr_ships;
-                flightGroup->nr_ships++;
-                flightGroup->nr_ships_left++;
-            }
-            string newModifications;
-            std::string tmpnam = CurrentSaveGameName;
-            if (swappingShipsIndex != -1) {
-                //if we're swapping not buying load the olde one
-                newModifications = _Universe->AccessCockpit()->GetUnitModifications();
-                CurrentSaveGameName = "~" + CurrentSaveGameName;
-            }
-            WriteSaveGame(_Universe->AccessCockpit(), true);             //oops saved game last time at wrong place
-            UniverseUtil::StopAllSounds();
-            UniverseUtil::playSound("sales/salespitch" + content.substr(0, content.find(".")) + "accept.wav", QVector(0,
-                            0,
-                            0),
-                    Vector(0, 0, 0));
-            Unit *newPart =
-                    new Unit(content.c_str(),
-                            false,
-                            baseUnit->faction,
-                            newModifications,
-                            flightGroup,
-                            fgsNumber);
-            CurrentSaveGameName = tmpnam;
-            newPart->SetFaction(playerUnit->faction);
-            if (newPart->name != LOAD_FAILED) {
-                if (newPart->nummesh() > 0) {
-                    ComponentsManager::credits -= shipCargo->GetPrice();
-                    newPart->curr_physical_state = playerUnit->curr_physical_state;
-                    newPart->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(playerUnit->Position(), newPart->rSize()));
-                    newPart->prev_physical_state = playerUnit->prev_physical_state;
-                    _Universe->activeStarSystem()->AddUnit(newPart);
-                    SwapInNewShipName(_Universe->AccessCockpit(), baseUnit, content, swappingShipsIndex);
-                    for (int j = 0; j < 2; ++j) {
-                        for (int i = playerUnit->cargo_hold.Size() - 1; i >= 0; --i) {
-                            Cargo c = playerUnit->cargo_hold.GetCargo(i);
-                            if ((c.IsMissionFlag() != 0 && j == 0)
-                                    || (c.IsMissionFlag() == 0 && j == 1 && (!myfleet)
-                                            && c.IsComponent())) {
-                                for (int k = c.GetQuantity(); k > 0; --k) {
-                                    c.SetQuantity(k);
-                                    if (newPart->cargo_hold.CanAddCargo(c)) {
-                                        newPart->cargo_hold.AddCargo(newPart, c);
-                                        playerUnit->cargo_hold.RemoveCargo(playerUnit, i, c.GetQuantity());
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    WriteSaveGame(_Universe->AccessCockpit(),
-                            true);                     //oops saved game last time at wrong place
+        
 
-                    _Universe->AccessCockpit()->SetParent(newPart, content.c_str(),
-                            _Universe->AccessCockpit()->GetUnitModifications().c_str(),
-                            playerUnit->curr_physical_state
-                                    .position);                     //absolutely NO NO NO modifications...you got this baby clean off the slate
-
-                    //We now put the player in space.
-                    SwitchUnits(NULL, newPart);
-                    playerUnit->UnDock(baseUnit);
-                    if (bcomputer) {
-                        bcomputer->m_player.SetUnit(newPart);
-                    }
-                    WriteSaveGame(_Universe->AccessCockpit(), true);
-                    if (baseUnit) {
-                        newPart->ForceDock(baseUnit, 0);
-                    }
-                    CurrentBaseUnitSet(newPart);
-                    if (bcomputer) {
-                        bcomputer->m_player.SetUnit(newPart);
-                    }
-                    const bool persistent_missions_across_ship_switch = configuration().general.persistent_mission_across_ship_switch;
-                    if (persistent_missions_across_ship_switch) {
-                        _Universe->AccessCockpit()->savegame->LoadSavedMissions();
-                    }
-                    newPart = NULL;
-                    playerUnit->Kill();
-                    if (bcomputer) {
-                        bcomputer->window()->close();
-                    }
-                    return true;
-                }
-            }
-            newPart->Kill();
-            newPart = NULL;
+        // Get cargo from base, not a pointer
+        int cargo_index = baseUnit->cargo_hold.GetIndex(ship_name, item->GetCategory());
+        if(cargo_index == -1) {
+            // error log
+            return false;
         }
+        Cargo cargo = baseUnit->cargo_hold.RemoveCargo(baseUnit, cargo_index, 1);
+
+        // Flightgroup
+        Flightgroup *flight_group = playerUnit->getFlightgroup();
+        int fgs_number = 0;
+        if (flight_group != nullptr) {
+            fgs_number = flight_group->nr_ships;
+            flight_group->nr_ships++;
+            flight_group->nr_ships_left++;
+        } 
+
+        // Create Unit
+        // Why create a ship with baseUnit faction and then immediately switch to player faction?
+        Unit *new_ship = new Unit(ship_name.c_str(), false, baseUnit->faction, "",
+                                  flight_group,fgs_number);
+
+        new_ship->SetFaction(playerUnit->faction);
+
+        // Some more sanity checks
+        if (new_ship->name == LOAD_FAILED) {
+            // error log
+            return false;
+        }
+
+        if (new_ship->nummesh() == 0) {
+            // error log
+            return false;
+        }
+
+        // Add unit to universe
+        new_ship->curr_physical_state = playerUnit->curr_physical_state;
+        new_ship->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(playerUnit->Position(), new_ship->rSize()));
+        new_ship->prev_physical_state = playerUnit->prev_physical_state;
+        _Universe->activeStarSystem()->AddUnit(new_ship);
+        _Universe->activeStarSystem()->RemoveUnit(playerUnit);
+
+        // Add unit to fleet
+        const std::string current_system = _Universe->activeStarSystem()->getFileName();
+        const std::string current_base = Cockpit::MakeBaseName(baseUnit);
+        PlayerShip player_ship(false, new_ship, current_system, current_base, ship_name, 
+                               item->GetPrice(), item->GetMass(), item->GetVolume());
+        player_fleet.push_back(player_ship);
+        PlayerShip::SwitchShips(player_ship.cargo.index);
+
+        _Universe->AccessCockpit()->SetParent(new_ship, playerUnit->curr_physical_state.position);
+
+        SwitchUnits(nullptr, new_ship);
+        bcomputer->m_player.SetUnit(new_ship);
+        playerUnit->UnDock(baseUnit);
+        new_ship->ForceDock(baseUnit, 0);
+        CurrentBaseUnitSet(new_ship);
+        bcomputer->m_player.SetUnit(new_ship);
+
+        // Charge credits - do this last
+        ComponentsManager::credits -= item->GetPrice();
     }
-    return false;
+
+    // Finalize deal
+    // Play sounds
+    UniverseUtil::StopAllSounds();
+    UniverseUtil::playSound("sales/salespitch" + item->GetName().substr(0, item->GetName().find(".")) + "accept.wav", 
+                            QVector(0,0,0),Vector(0, 0, 0));
+
+    // Save game - currently, we don't save the game here.
+
+
+    // TODO: figure out how to transfer cargo 
+    // This is not as easy as it sounds.
+    // Consider what happens when you switch from a fully laden Ox to a Schroedinger.
+    // Even if you ignored the cargo hold volume restrictions, the mass would make the ship unflyable.
+                    
+    //We now put the player in space.
+    
+    // Swap Missions
+    const bool persistent_missions_across_ship_switch = configuration().general.persistent_mission_across_ship_switch;
+    if (persistent_missions_across_ship_switch) {
+        _Universe->AccessCockpit()->savegame->LoadSavedMissions();
+    }
+
+    bcomputer->window()->close();
+    return true;
 }
 
 //Buy ship from the base.
@@ -4327,8 +4337,7 @@ bool BaseComputer::buyShip(const EventCommandId &command, Control *control) {
     }
     ::buyShip(baseUnit,
             playerUnit,
-            item->GetName(),
-            item->GetCategory().find("My_Fleet") != string::npos,
+            item,
             true,
             this);     //last was false BUCO
     return true;

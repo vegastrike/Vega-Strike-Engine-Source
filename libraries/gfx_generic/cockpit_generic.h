@@ -168,8 +168,6 @@ protected:
     ///4 views f/r/l/b
     float shakin;
 
-    ///Video Display Units (may need more than 2 in future)
-    std::string unitmodname;
 
     ///Color of cockpit default text
     ///The font that the entire cockpit will use. Currently without color
@@ -216,9 +214,6 @@ protected:
     int partial_number_of_attackers;
 
 private:
-    std::vector<std::string> unitfilename;
-    std::vector<std::string> unitsystemname;
-    std::vector<std::string> unitbasename;
     std::vector<SoundContainer *> sounds;
 
 public:
@@ -277,42 +272,8 @@ public:
     virtual void RestoreViewPort() {
     }
 
-    std::string &GetUnitFileName(unsigned int which = 0) {
-        while (which >= unitfilename.size()) {
-            unitfilename.push_back("");
-        }
-        return unitfilename[which];
-    }
-
-    std::string &GetUnitSystemName(unsigned int which = 0) {
-        while (which >= unitsystemname.size()) {
-            unitsystemname.push_back("");
-        }
-        return unitsystemname[which];
-    }
-
-    std::string &GetUnitBaseName(unsigned int which = 0) {
-        while (which >= unitbasename.size()) {
-            unitbasename.push_back("");
-        }
-        return unitbasename[which];
-    }
-
-    const std::string &GetUnitFileName(unsigned int which = 0) const;
-    const std::string &GetUnitSystemName(unsigned int which = 0) const;
-    const std::string &GetUnitBaseName(unsigned int which = 0) const;
-
-    void RemoveUnit(unsigned int which = 0);
 
     static std::string MakeBaseName(const Unit *base);
-
-    std::string GetUnitModifications() {
-        return unitmodname;
-    }
-
-    size_t GetNumUnits() const {
-        return unitfilename.size();
-    }
 
     void PackUnitInfo(vector<std::string> &info) const;
 
@@ -333,7 +294,7 @@ public:
     //unsigned int whichcockpit;//0 is the first player, 1 is the second and so forth
     class Flightgroup *fg;
     class StarSystem *activeStarSystem; //used for context switch in Universe
-    virtual void SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc);
+    virtual void SetParent(Unit *unit, const QVector &position);
 
     Unit *GetParent() {
         return parent.GetUnit();

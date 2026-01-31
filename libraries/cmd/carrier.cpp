@@ -316,7 +316,7 @@ void Carrier::EjectCargo(unsigned int index) {
                     cargo->SetTurretAI();
                     cargo->faction = unit->faction;
                     //changes control to that cockpit
-                    cp->SetParent(cargo, "", "", unit->Position());
+                    cp->SetParent(cargo, unit->Position());
                     if (tmpcontent == "return_to_cockpit") {
                         const bool simulate_while_at_base = configuration().physics.simulate_while_docked;
                         if ((simulate_while_at_base) || (_Universe->numPlayers() > 1)) {
