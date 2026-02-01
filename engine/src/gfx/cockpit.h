@@ -138,6 +138,8 @@ class GameCockpit : public Cockpit {
     //colors of blips/targetting boxes
     GFXColor friendly, enemy, neutral, targeted, targetting, planet;
 
+    void NextTurret();
+
     // Last observed values for edge-triggered events
     struct LastState {
         double processing_time;

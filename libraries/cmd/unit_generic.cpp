@@ -1769,7 +1769,6 @@ void Unit::SetCollisionParent(Unit *name) {
 
 //This function should not be used on server side
 extern vector<Vector> perplines;
-extern vector<int> turretcontrol;
 
 float Unit::querySphereClickList(const QVector &st, const QVector &dir, float err) const {
     float retval = 0;
@@ -2062,7 +2061,6 @@ bool Unit::isDocked(const Unit *d) const {
 }
 
 extern vector<int> switchunit;
-extern vector<int> turretcontrol;
 
 bool Unit::UnDock(Unit *utdw) {
     unsigned int i = 0;
@@ -2106,12 +2104,7 @@ bool Unit::UnDock(Unit *utdw) {
                     }
                 }
             }
-            if (name == "return_to_cockpit" || this->name == "return_to_cockpit") {
-                while (turretcontrol.size() <= _Universe->CurrentCockpit()) {
-                    turretcontrol.push_back(0);
-                }
-                turretcontrol[_Universe->CurrentCockpit()] = 1;
-            }
+           
             // Send notification that a ship has undocked from a station
             _Universe->AccessCockpit()->OnDockEnd(utdw, this);
 
