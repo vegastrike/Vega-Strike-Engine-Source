@@ -732,7 +732,7 @@ static void pushShipToFleet(bool active,
         VS_LOG(warning, (boost::format("Failed to load player ship %1%: %2%.\nGenerating dummy cargo entry.") % filename % e.what()));
         cargo = Cargo(filename, "Spaceship", 1, 1, 1, 1);
     }
-    PlayerShip player_ship(active, unit, "", "", filename, 0, 0, 0);
+    PlayerShip player_ship(active, unit, cargo);
     player_fleet.push_back(player_ship);
 }
 

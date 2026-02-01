@@ -675,7 +675,13 @@ void bootstrap_main_loop() {
         CopySavedShips(playername[k], k, packedInfo, true);
         
         // Pushes the dummy ship unless loading something from the command line
-        playersaveunit.push_back(PlayerShip::GetActiveShip().GetName());
+        std::string ship_name = "Dummy";
+        try {
+            ship_name = PlayerShip::GetActiveShip().GetName();
+        } catch(const std::runtime_error& e) {
+            // Do nothing. This is the default behavior.
+        }
+        playersaveunit.push_back(ship_name);
         ss.push_back(_Universe->Init(mysystem, Vector(0, 0, 0), planetname));
         if (setplayerXloc) {
             playerNloc.push_back(pos);

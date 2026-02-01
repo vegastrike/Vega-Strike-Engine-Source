@@ -43,22 +43,19 @@ struct PlayerShip {
     Cargo cargo;            // The cargo representation of the unit, for display by the ship dealer
     std::string system;     // The system the ship is in
     std::string base;       // The planet/station the ship is docked at
-    double purchase_price;
+    double transfer_price;
 
     PlayerShip(bool active,
-               ComponentsManager* unit, 
-               const std::string& system, 
-               const std::string& base,
-               const std::string& name,
-               const double purchase_price,
-               const double mass,
-               const double volume);
+               ComponentsManager* unit,
+               const Cargo& cargo,
+               const std::string& system = "", 
+               const std::string& base = "");
 
     static PlayerShip& GetActiveShip();
     std::string GetName();
     static PlayerShip& GetShipFromIndex(int index);
     // Caution! Will return first ship to match ship_name
-    static PlayerShip& GetShipFromName(const std::string ship_name);
+    static PlayerShip& GetShipByName(const std::string ship_name);
 
     bool IsShipInSameBase(const std::string& destination_system, 
                           const std::string& destination_base);

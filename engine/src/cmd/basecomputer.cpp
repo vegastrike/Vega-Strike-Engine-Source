@@ -1721,7 +1721,6 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
     return damaged_mode;
 }
 
-//string buildShipDescription(Cargo &item,string & descriptiontexture); //Redundant definition
 //Update the controls when the selection for a transaction changes.
 void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist) {
     //Get the controls we need.
@@ -1759,6 +1758,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
     const PickerCell *cell = tlist->picker->selectedCell();
     assert(cell != NULL);
     Cargo &item = tlist->masterList.at(cell->tag()).cargo;
+    bool is_player_ship = (item.index > 0);
     bool damaged_mode = false;
     if (!isTransactionOK(item, tlist->transaction)) {
         //We can't do the transaction. so hide the transaction button.
@@ -1776,7 +1776,10 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 break;
             case BUY_SHIP:
                 commitButton->setCommand("BuyShip");
-                if (item.GetCategory().find("My_Fleet") != string::npos) {
+                
+                if (is_player_ship) {
+                    PlayerShip player_ship = PlayerShip::GetShipFromIndex(item.index);
+
                     //note can only sell it if you can afford to ship it over here.
                     NewButton *commit10Button = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit10"));
                     assert(commit10Button != NULL);
@@ -1786,18 +1789,14 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
 
                     const std::string destination_system = _Universe->activeStarSystem()->getFileName();
                     const std::string destination_base = Cockpit::MakeBaseName(m_base.GetUnit());
-                    PlayerShip player_ship = PlayerShip::GetShipFromIndex(item.index);
-                    std::cout << player_ship.cargo.GetName() << " " << destination_system << " " << destination_base << std::endl;
-                    if(player_ship.active) {
-                        std::cout << "ship active\n";
+
+                   if(player_ship.active) {
                         commitButton->setHidden(true);      // Can't switch to active ship, obviously.
                         commit10Button->setHidden(true);    // Can't sell the active ship. Not supported yet. Too many edge cases.
                     } else if(player_ship.IsShipInSameBase(destination_system, destination_base)) {
-                        std::cout << "same base\n";
                         commitButton->setLabel("Switch");
                         commitButton->setHidden(false);
                     } else {
-                        std::cout << "need transfer\n";
                         commitButton->setLabel("Transfer");
                         commitButton->setHidden(false);
                     }
@@ -1835,12 +1834,15 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
     string tailString;
     string tempString = "";
     Unit *baseUnit = m_base.GetUnit();
+    
     if (tlist->transaction != ACCEPT_MISSION) {
         //Do the money.
         switch (tlist->transaction) {
             case BUY_CARGO:
                 if (item.GetDescription() == "" || item.GetDescription()[0] != '@') {
+                    // We only call this to get the descriptiontexture
                     buildShipDescription(item, descriptiontexture); //Check for ship
+
                     string temp = item.GetDescription(); //do first, so can override default image, if so desired
                     if ((string::npos != temp.find('@'))
                             && ("" != descriptiontexture)) { //not already pic-annotated, has non-null ship pic
@@ -1848,7 +1850,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     }
                     item.SetDescription(temp);
                 }
-                if (item.GetCategory().find("My_Fleet") != string::npos) {
+                if (is_player_ship) {
                     //This ship is in my fleet -- the price is just the transport cost to get it to
                     //the current base.  "Buying" this ship makes it my current ship.
                     //Note: This is a positional format string, as per the Unix98 Open-group printf precise syntax.
@@ -1862,6 +1864,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     tempString = (boost::format("Cargo volume: %1$.2f cubic meters;  "
                                                 "Mass: %2$.2f metric tons#n1.5#") % item.GetVolume() % item.GetMass()).str();
                 }
+
                 descString += tempString;
                 tailString = buildCargoDescription(item, *this, item.GetPrice());
                 break;
@@ -1887,7 +1890,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 }
                 break;
             case BUY_SHIP:
-                if (item.GetCategory().find("My_Fleet") == string::npos) {
+                if (is_player_ship) {
                     UniverseUtil::StopAllSounds();
                     if (item.GetPrice() < ComponentsManager::credits) {
                         std::string tmp = item.GetName().substr(0, item.GetName().find("."));
@@ -1901,7 +1904,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 if (item.GetDescription() == "" || item.GetDescription()[0] != '@') {
                     item.SetDescription(buildShipDescription(item, descriptiontexture));
                 }
-                if (item.GetCategory().find("My_Fleet") != string::npos) {
+                if (is_player_ship) {
                     //This ship is in my fleet -- the price is just the transport cost to get it to
                     //the current base.  "Buying" this ship makes it my current ship.
                     tempString = (boost::format("#b#Transport cost: %1$.2f#-b#n1.5#") % item.GetPrice()).str();
@@ -3776,7 +3779,6 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
 
     Unit* unit = nullptr;
     if(item.index > 0) {
-        std::cout << "GetShipFromIndex " << item.index << " " << item.GetName() << std::endl;
         ComponentsManager* components_manager = PlayerShip::GetShipFromIndex(item.index).unit;
 
         if(!components_manager) {
@@ -4116,6 +4118,7 @@ void BaseComputer::loadShipDealerControls(void) {
     for (PlayerShip& ship : player_fleet) {
         CargoColor cargoColor;
         cargoColor.cargo = ship.cargo;
+        cargoColor.cargo.SetCategory("starships/My Fleet");
         if(ship.active) {
             const std::string name = ship.GetName() + " - in use";
             cargoColor.color = GFXColor(1,1,0,1);
@@ -4141,8 +4144,8 @@ void BaseComputer::loadShipDealerControls(void) {
 // TODO: move this to ComponentsManager
 bool sellShip(Unit *baseUnit, Unit *playerUnit, Cargo* item, BaseComputer *bcomputer) {
     PlayerShip& ship = PlayerShip::GetShipFromIndex(item->index);
-    const float purchase_price = ship.purchase_price;
-    const float shipping_price = ship.cargo.GetPrice();
+    const float purchase_price = ship.cargo.GetPrice();
+    const float shipping_price = ship.transfer_price;
 
     // Transfer the ship to the dealer
     ComponentsManager::credits -= shipping_price; //transportation cost
@@ -4168,7 +4171,6 @@ bool BaseComputer::sellShip(const EventCommandId &command, Control *control) {
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
     Cargo *item = selectedItem();
-    std::cout << "index=" <<item->index << std::endl;
     
     // Some sanity checks
     if (!(playerUnit && baseUnit && item && playerUnit->IsPlayerShip())) {
@@ -4181,8 +4183,7 @@ bool BaseComputer::sellShip(const EventCommandId &command, Control *control) {
 bool buyShip(Unit *baseUnit,
         Unit *playerUnit,
         Cargo* item,
-        bool force_base_inventory,
-        BaseComputer *bcomputer) {
+        BaseComputer *base_computer) {
     // Unit Name
     const std::string ship_name = item->GetName();
 
@@ -4201,17 +4202,14 @@ bool buyShip(Unit *baseUnit,
         return false;
     }
 
-    if (!bcomputer) {
-        // Log error
-        return false;
-    }
+    Unit* new_ship = nullptr;
 
     // Already own ship
     if(item->index > 0) {
         PlayerShip& ship = PlayerShip::GetShipFromIndex(item->index);
-
         // Already active ship. We shouldn't be here.
         if(ship.active) {
+            // Log error. We shouldn't get here.
             return false;
         }
 
@@ -4225,18 +4223,13 @@ bool buyShip(Unit *baseUnit,
         ComponentsManager::credits -= ship.cargo.GetPrice();
 
         PlayerShip::SwitchShips(item->index);
-        
-        
-        
-        return true;
+        new_ship = vega_dynamic_cast_ptr<Unit>(ship.unit);
     } else {
         // Sanity check - can we afford said ship
         if (item->GetPrice() > ComponentsManager::credits) {
             // Log error. We shouldn't get here.
             return false;
         }
-
-        
 
         // Get cargo from base, not a pointer
         int cargo_index = baseUnit->cargo_hold.GetIndex(ship_name, item->GetCategory());
@@ -4273,33 +4266,40 @@ bool buyShip(Unit *baseUnit,
             return false;
         }
 
-        // Add unit to universe
-        new_ship->curr_physical_state = playerUnit->curr_physical_state;
-        new_ship->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(playerUnit->Position(), new_ship->rSize()));
-        new_ship->prev_physical_state = playerUnit->prev_physical_state;
-        _Universe->activeStarSystem()->AddUnit(new_ship);
-        _Universe->activeStarSystem()->RemoveUnit(playerUnit);
-
         // Add unit to fleet
         const std::string current_system = _Universe->activeStarSystem()->getFileName();
         const std::string current_base = Cockpit::MakeBaseName(baseUnit);
-        PlayerShip player_ship(false, new_ship, current_system, current_base, ship_name, 
-                               item->GetPrice(), item->GetMass(), item->GetVolume());
+        Cargo player_ship_cargo = *item;
+        player_ship_cargo.SetQuantity(1);
+        item->SetQuantity(item->GetQuantity()-1);
+        PlayerShip player_ship(false, new_ship, player_ship_cargo, current_system, current_base);
         player_fleet.push_back(player_ship);
         PlayerShip::SwitchShips(player_ship.cargo.index);
 
-        _Universe->AccessCockpit()->SetParent(new_ship, playerUnit->curr_physical_state.position);
-
-        SwitchUnits(nullptr, new_ship);
-        bcomputer->m_player.SetUnit(new_ship);
-        playerUnit->UnDock(baseUnit);
-        new_ship->ForceDock(baseUnit, 0);
-        CurrentBaseUnitSet(new_ship);
-        bcomputer->m_player.SetUnit(new_ship);
 
         // Charge credits - do this last
         ComponentsManager::credits -= item->GetPrice();
     }
+
+    // Add unit to universe
+    new_ship->curr_physical_state = playerUnit->curr_physical_state;
+    new_ship->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(playerUnit->Position(), new_ship->rSize()));
+    new_ship->prev_physical_state = playerUnit->prev_physical_state;
+    _Universe->activeStarSystem()->AddUnit(new_ship);
+    _Universe->activeStarSystem()->RemoveUnit(playerUnit);
+    
+
+    _Universe->AccessCockpit()->SetParent(new_ship, playerUnit->curr_physical_state.position);
+
+    SwitchUnits(nullptr, new_ship);
+    playerUnit->UnDock(baseUnit);
+    new_ship->ForceDock(baseUnit, 0);
+    CurrentBaseUnitSet(new_ship);
+
+    if (base_computer) {
+        base_computer->m_player.SetUnit(new_ship);
+    }
+    
 
     // Finalize deal
     // Play sounds
@@ -4323,7 +4323,10 @@ bool buyShip(Unit *baseUnit,
         _Universe->AccessCockpit()->savegame->LoadSavedMissions();
     }
 
-    bcomputer->window()->close();
+    if(base_computer) {
+        base_computer->window()->close();
+    }
+    
     return true;
 }
 
@@ -4335,11 +4338,7 @@ bool BaseComputer::buyShip(const EventCommandId &command, Control *control) {
     if (!(playerUnit && baseUnit && item)) {
         return true;
     }
-    ::buyShip(baseUnit,
-            playerUnit,
-            item,
-            true,
-            this);     //last was false BUCO
+    ::buyShip(baseUnit, playerUnit, item, this);
     return true;
 }
 
