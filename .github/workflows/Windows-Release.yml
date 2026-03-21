@@ -54,12 +54,17 @@ jobs:
           - os:              windows-2022
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
-            python-version:  3.13.9
+            python-version:  3.13.12
             is-release:      1
           - os:              windows-2025
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
-            python-version:  3.13.9
+            python-version:  3.13.12
+            is-release:      1
+          - os:              windows-2025-vs2026
+            triplet:         x64-win10
+            preset-name:     VS2026Win64-pie-enabled-RelWithDebInfo
+            python-version:  3.13.12
             is-release:      1
 
     env:
@@ -138,12 +143,7 @@ jobs:
         with:
           configurePreset: ${{ matrix.preset-name }}
           buildPreset: "build-${{ matrix.preset-name }}"
-          testPreset: "test-${{ matrix.preset-name }}"
-
-      - name: Package the installer(s)
-        working-directory: ${{ github.workspace }}
-        run: |
-          cpack -V --preset "package-${{ matrix.preset-name }}"
+          packagePreset: "package-${{ matrix.preset-name }}"
 
       - name: Upload the artifacts
         uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1

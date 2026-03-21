@@ -745,6 +745,19 @@
       }
     },
     {
+      "name": "VS2026Win64",
+      "hidden": true,
+      "inherits": "windows-base",
+      "displayName": "Visual Studio 2026 on Windows x64",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "X64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
       "name": "ninja-windows",
       "hidden": true,
       "inherits": "windows-base",
@@ -999,6 +1012,90 @@
       "displayName": "VS2022Win64, PIE Disabled, RelWithDebInfo",
       "inherits": [
         "VS2022Win64",
+        "pie-disabled",
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-debug",
+      "displayName": "VS2026Win64, PIE Enabled, Debug",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-release",
+      "displayName": "VS2026Win64, PIE Enabled, Release",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Enabled, RelWithDebInfo",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-debug",
+      "displayName": "VS2026Win64, PIE Disabled, Debug",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-release",
+      "displayName": "VS2026Win64, PIE Disabled, Release",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Disabled, RelWithDebInfo",
+      "inherits": [
+        "VS2026Win64",
         "pie-disabled",
         "RelWithDebInfo"
       ],
@@ -1603,6 +1700,72 @@
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
       }
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-debug",
+      "configurePreset": "VS2026Win64-pie-enabled-debug",
+      "displayName": "VS2026Win64, PIE Enabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-release",
+      "configurePreset": "VS2026Win64-pie-enabled-release",
+      "displayName": "VS2026Win64, PIE Enabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-RelWithDebInfo",
+      "configurePreset": "VS2026Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-debug",
+      "configurePreset": "VS2026Win64-pie-disabled-debug",
+      "displayName": "VS2026Win64, PIE Disabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-release",
+      "configurePreset": "VS2026Win64-pie-disabled-release",
+      "displayName": "VS2026Win64, PIE Disabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-RelWithDebInfo",
+      "configurePreset": "VS2026Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
     }
   ],
   "testPresets": [
@@ -2193,6 +2356,72 @@
       "name": "test-VS2022Win64-pie-disabled-RelWithDebInfo",
       "configurePreset": "VS2022Win64-pie-disabled-RelWithDebInfo",
       "displayName": "VS2022Win64, PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-debug",
+      "configurePreset": "VS2026Win64-pie-enabled-debug",
+      "displayName": "VS2026Win64, PIE Enabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-release",
+      "configurePreset": "VS2026Win64-pie-enabled-release",
+      "displayName": "VS2026Win64, PIE Enabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-RelWithDebInfo",
+      "configurePreset": "VS2026Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-debug",
+      "configurePreset": "VS2026Win64-pie-disabled-debug",
+      "displayName": "VS2026Win64, PIE Disabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-release",
+      "configurePreset": "VS2026Win64-pie-disabled-release",
+      "displayName": "VS2026Win64, PIE Disabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-RelWithDebInfo",
+      "configurePreset": "VS2026Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Disabled, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
@@ -2895,6 +3124,84 @@
       "name": "package-VS2022Win64-pie-disabled-RelWithDebInfo",
       "configurePreset": "VS2022Win64-pie-disabled-RelWithDebInfo",
       "displayName": "VS2022Win64, PIE Disabled, RelWithDebInfo",
+      "configurations": [
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2026Win64-pie-enabled-debug",
+      "configurePreset": "VS2026Win64-pie-enabled-debug",
+      "displayName": "VS2026Win64, PIE Enabled, Debug",
+      "configurations": [
+        "Debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2026Win64-pie-enabled-release",
+      "configurePreset": "VS2026Win64-pie-enabled-release",
+      "displayName": "VS2026Win64, PIE Enabled, Release",
+      "configurations": [
+        "Release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2026Win64-pie-enabled-RelWithDebInfo",
+      "configurePreset": "VS2026Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Enabled, RelWithDebInfo",
+      "configurations": [
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2026Win64-pie-disabled-debug",
+      "configurePreset": "VS2026Win64-pie-disabled-debug",
+      "displayName": "VS2026Win64, PIE Disabled, Debug",
+      "configurations": [
+        "Debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2026Win64-pie-disabled-release",
+      "configurePreset": "VS2026Win64-pie-disabled-release",
+      "displayName": "VS2026Win64, PIE Disabled, Release",
+      "configurations": [
+        "Release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2026Win64-pie-disabled-RelWithDebInfo",
+      "configurePreset": "VS2026Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Disabled, RelWithDebInfo",
       "configurations": [
         "RelWithDebInfo"
       ],
