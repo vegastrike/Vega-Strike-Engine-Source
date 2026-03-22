@@ -13,7 +13,7 @@
 # https://github.com/Taose/Vegastrike-taose/wiki/How-to-Build
 #====================================
 
-# Copyright (C) 2020-2025 Stephen G. Tuggy and other Vega Strike contributors.
+# Copyright (C) 2020-2026 Stephen G. Tuggy and other Vega Strike contributors.
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -36,7 +36,7 @@
 set -e
 
 echo "--------------------------"
-echo "--- build | 2025-11-27 ---"
+echo "--- build | 2026-03-11 ---"
 echo "--------------------------"
 
 #----------------------------------
@@ -72,7 +72,6 @@ echo "ROOT_DIR: ${ROOT_DIR}"
 BUILD_DIR="${ROOT_DIR}/build"
 echo "BUILD_DIR: ${BUILD_DIR}"
 BIN_DIR="${ROOT_DIR}/bin"
-COMMAND=""
 
 # -p creates if the target doesn't exist, noop otherwise
 mkdir -pv "${BUILD_DIR}"
@@ -80,11 +79,23 @@ mkdir -pv "${BUILD_DIR}"
 cmake --preset "$preset_name"
 
 MAX_THREADS_TO_BUILD_WITH=8
-num_threads_to_build_with=$(getconf _NPROCESSORS_ONLN)
+if [ -f ./script/num_cpus ] && [ -x ./script/num_cpus ]
+then
+  num_threads_to_build_with=$(./script/num_cpus)
+elif [ -f ./num_cpus ] && [ -x ./num_cpus ]
+then
+  num_threads_to_build_with=$(./num_cpus)
+else
+  echo "Error locating num_cpus script"
+  exit 3
+fi
+
+echo "Number of threads to build with before capping: $num_threads_to_build_with"
 if [ ${num_threads_to_build_with} -gt ${MAX_THREADS_TO_BUILD_WITH} ]
 then
-    num_threads_to_build_with=${MAX_THREADS_TO_BUILD_WITH}
+  num_threads_to_build_with=${MAX_THREADS_TO_BUILD_WITH}
 fi
+echo "Number of threads to build with after capping: $num_threads_to_build_with"
 
 VERBOSE=1 cmake --build --preset="build-${preset_name}" -j ${num_threads_to_build_with}
 
@@ -97,16 +108,16 @@ declare -a directories_to_copy_if_they_exist=("${BUILD_DIR}/vegastrike-engine.ap
 
 for i in "${files_to_copy_if_they_exist[@]}"
 do
-    if [ -f "$i" ]
-    then
-        cp -v "$i" "${BIN_DIR}"/
-    fi
+  if [ -f "$i" ]
+  then
+    cp -v "$i" "${BIN_DIR}"/
+  fi
 done
 
 for i in "${directories_to_copy_if_they_exist[@]}"
 do
-    if [ -d "$i" ]
-    then
-        cp -v "$i" "${BIN_DIR}"/
-    fi
+  if [ -d "$i" ]
+  then
+    cp -v "$i" "${BIN_DIR}"/
+  fi
 done
