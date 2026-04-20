@@ -123,7 +123,6 @@ static void Lighting( RGBColor &Col, const Vector &Norm )
 const int lmwid = 512;
 const int lmwido2 = lmwid / 2;
 const float ooWIDTHo2 = 2. / lmwid;
-const float PIoWIDTHo2 = 2 * 3.1415926535 / lmwid;
 const char bytepp = 3;
 
 struct CubeCoord {

@@ -27,15 +27,12 @@
 
 
 #include "navigation.h"
-#include "root_generic/macosx_math.h"
-#include <math.h>
+#include <cmath>
 #ifndef _WIN32
-#include <assert.h>
+#include <cassert>
 #endif
 #include "cmd/unit_generic.h"
-#include "root_generic/lin_time.h"
 #include "cmd/script/flightgroup.h"
-#include "src/config_xml.h"
 #include "root_generic/vs_globals.h"
 #include "src/vs_logging.h"
 #include "warpto.h"
@@ -45,8 +42,6 @@
 #include "src/universe.h"
 
 using namespace Orders;
-
-constexpr float M_PI_FLT = M_PI;
 
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
@@ -61,9 +56,9 @@ constexpr float M_PI_FLT = M_PI;
  * t = ( -2v0 (+/-) sqrtf (4*v0^2 - 4*(.5*v0^2 - accel*Length) ) / (2*accel))
  * t = -v0/accel (+/-) sqrtf (.5*v0^2 + Length*accel)/accel;
  *
- * 8/15/05 Patched Calulate BalancedDecel time: our previous quantization factor ignored the quantization during ACCEL phase and also ignored the fact that we overestimated the integral rather than underestimated
+ * 8/15/05 Patched Calculate BalancedDecel time: our previous quantization factor ignored the quantization during ACCEL phase and also ignored the fact that we overestimated the integral rather than underestimated
  *         new quantization factor is .5*accel*simulation_atom_var*simulation_atom_var-.5*initialVelocity*simulation_atom_var
- *            also this threshold idea is silly--accelerate if t>SIM_ATOM decel if t<0  still havent fixed t between 0 and SIM_ATOM...have decent approx for now.
+ *            also this threshold idea is silly--accelerate if t>SIM_ATOM decel if t<0  still haven't fixed t between 0 and SIM_ATOM...have decent approx for now.
  * 3/2/02  Patched CalculateBalancedDecel time with the fact that length should be more by a
  * quantity of .5*initialVelocity*simulation_atom_var
  *
@@ -307,7 +302,7 @@ void ChangeHeading::TurnToward(float atancalc, float ang_veli, float &torquei) {
     if (t < 0) {
         //if it can't make it: try the other way
         torquei = fabs(torquei);         //copy sign again
-        t = CalculateBalancedDecelTime(atancalc > 0 ? atancalc - 2 * PI : atancalc + 2 * PI,
+        t = CalculateBalancedDecelTime(atancalc > 0 ? atancalc - 2.0F * kVegaPiFloat : atancalc + 2.0F * kVegaPiFloat,
                 ang_veli,
                 torquei,
                 parent->GetMoment());
@@ -352,7 +347,7 @@ void ChangeHeading::Execute() {
     const bool AICheat = configuration().ai.turn_cheat;
     bool cheater = false;
     const float min_for_no_oversteer = configuration().ai.min_angular_accel_cheat_flt;
-    if (AICheat && ((parent->drive.yaw + parent->drive.pitch) * 180 / (PI * parent->GetMass()) > min_for_no_oversteer)
+    if (AICheat && ((parent->drive.yaw + parent->drive.pitch) * 180.0 / (kVegaPiDouble * parent->GetMass()) > min_for_no_oversteer)
             && !parent->isSubUnit()) {
         if (xswitch || yswitch) {
             Vector P, Q, R;
@@ -597,7 +592,7 @@ void AutoLongHaul::Execute() {
     const float go_perpendicular_speed = configuration().physics.warp_perpendicular_flt;
     const float min_warp_orbit_radius = configuration().physics.min_warp_orbit_radius_flt;
     const float warp_orbit_multiplier = configuration().physics.warp_orbit_multiplier_flt;
-    const float warp_behind_angle = cos(M_PI_FLT * configuration().physics.warp_behind_angle_flt / 180.0F);
+    const float warp_behind_angle = cos(kVegaPiFloat * configuration().physics.warp_behind_angle_flt / 180.0F);
     QVector myposition = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();     //get unit pos
     QVector destination = target->isSubUnit() ? target->Position() : target->LocalPosition();     //get destination
     QVector destinationdirection = (destination - myposition);       //find vector from us to destination
@@ -683,7 +678,7 @@ void AutoLongHaul::Execute() {
         if (speed > .01) {
             cfacing = cfacing * (1. / speed);
         }
-        const float dotLimit = cos(M_PI_FLT * configuration().physics.auto_pilot_spec_lining_up_angle_flt / 180.0F);
+        const float dotLimit = cosf(kVegaPiFloat * configuration().physics.auto_pilot_spec_lining_up_angle_flt / 180.0F);
         if (cfacing.Dot(destinationdirection) < dotLimit) {          //if wanting to face target but overshooting.
             deactivatewarp = true;
         }              //turn off drive

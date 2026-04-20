@@ -28,16 +28,13 @@
 
 #include "gfx_generic/sphere.h"
 #include "gfx/ani_texture.h"
-#include "src/vegastrike.h"
 #include "src/config_xml.h"
 #include "root_generic/vs_globals.h"
 #include "vegadisk/vsfilesystem.h"
 #include "root_generic/xml_support.h"
-#ifndef M_PI
-#define M_PI (3.1415926536F)
-#endif
 #include "gfx/camera.h"
 #include "src/universe.h"
+#include "src/vs_math.h"
 
 extern Texture *createTexture(const char *filename,
         int stage = 0,
@@ -134,7 +131,7 @@ void SphereMesh::InitSphere(float radius,
     vector<MeshDrawContext> *odq = NULL;
     for (int l = 0; l < numspheres; l++) {
         draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ + 1];
-        if (subclass || rho_max != M_PI || rho_min != 0.0 || theta_min != 0.0 || theta_max != 2 * M_PI) {
+        if (subclass || rho_max != kVegaPiFloat || rho_min != 0.0F || theta_min != 0.0F || theta_max != 2.0F * kVegaPiFloat) {
             odq = draw_queue;
         }
         vlist = NULL;

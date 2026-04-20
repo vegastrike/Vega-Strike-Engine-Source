@@ -26,6 +26,8 @@
  */
 
 
+#include <numbers>
+#include "src/vs_math.h"
 #include "ring.h"
 #include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
@@ -112,7 +114,7 @@ void RingMesh::InitRing(float iradius,
                 vertexlist[j * 2 + fir].i = up.i;
                 vertexlist[j * 2 + fir].k = up.j;
                 vertexlist[j * 2 + fir].j = up.k;
-                vertexlist[j * 2 + fir].s = wrapx * theta / (2 * M_PI);
+                vertexlist[j * 2 + fir].s = wrapx * theta / (2.0F * kVegaPiFloat);
                 vertexlist[j * 2 + fir].t = 0;
                 vertexlist[j * 2 + fir].x = unitpos.i * iradius;
                 vertexlist[j * 2 + fir].z = unitpos.j * iradius;
@@ -122,7 +124,7 @@ void RingMesh::InitRing(float iradius,
                 vertexlist[j * 2 + sec].i = unitpos.i;
                 vertexlist[j * 2 + sec].k = unitpos.j;
                 vertexlist[j * 2 + sec].j = unitpos.k;
-                vertexlist[j * 2 + sec].s = wrapx * theta / (2 * M_PI);
+                vertexlist[j * 2 + sec].s = wrapx * theta / (2.0F * kVegaPiFloat);
                 vertexlist[j * 2 + sec].t = wrapy;
                 vertexlist[j * 2 + sec].x = unitpos.i * oradius;
                 vertexlist[j * 2 + sec].z = unitpos.j * oradius;

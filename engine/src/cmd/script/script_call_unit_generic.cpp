@@ -425,7 +425,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 QVector vectothem = QVector(other_unit->Position() - my_unit->Position()).Normalize();
                 my_unit->GetOrientation(p, q, r);
                 angle = acos(vectothem.Dot(r.Cast()));
-                angle = (angle / PI) * 180.0;
+                angle = (angle / kVegaPiFloat) * 180.0;
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_FLOAT;
@@ -438,7 +438,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 QVector vectothem = QVector(other_pos - my_unit->Position()).Normalize();
                 my_unit->GetOrientation(p, q, r);
                 angle = acos(vectothem.Dot(r.Cast()));
-                angle = (angle / PI) * 180.0;
+                angle = (angle / kVegaPiDouble) * 180.0;
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_FLOAT;

@@ -38,13 +38,9 @@ ADD_LIBRARY(vegastrike_imgui STATIC
     backends/imgui_impl_opengl3.cpp
 )
 
- TARGET_LINK_LIBRARIES(vegastrike_imgui PRIVATE SDL3_image::SDL3_image)
+TARGET_LINK_LIBRARIES(vegastrike_imgui PRIVATE SDL3_image::SDL3_image)
 
-SET_PROPERTY(TARGET vegastrike_imgui PROPERTY CXX_STANDARD 14)
-SET_PROPERTY(TARGET vegastrike_imgui PROPERTY CXX_STANDARD_REQUIRED TRUE)
-SET_PROPERTY(TARGET vegastrike_imgui PROPERTY CXX_EXTENSIONS ON)
 SET_PROPERTY(TARGET vegastrike_imgui PROPERTY POSITION_INDEPENDENT_CODE TRUE)
-
 
 message("libs: ${TST_INCLUDES} ${Vega_Strike_SOURCE_DIR}")
 

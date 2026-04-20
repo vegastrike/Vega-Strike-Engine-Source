@@ -31,20 +31,18 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
-#include "root_generic/macosx_math.h"
-#include <math.h>
-#include <time.h>
-#include <assert.h>
+#include <cmath>
+#include <ctime>
+#include <cassert>
 
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
-#include "src/gfxlib.h"
 #include "root_generic/galaxy_xml.h"
 #include "root_generic/galaxy_gen.h"
 #include "src/vs_random.h"
-#include "root_generic/options.h"
 #include "src/universe.h"
 #include "src/vs_logging.h"
+#include "src/vs_math.h"
 
 #ifndef _WIN32
 #include <ctype.h>
@@ -54,9 +52,6 @@
 #define snprintf _snprintf
 #endif
 
-#ifndef M_PI
-#define M_PI 3.1415926536
-#endif
 #include "vegadisk/vsfilesystem.h"
 
 using namespace VSFileSystem;
@@ -186,56 +181,26 @@ public:
                 this->i * v.j - this->j * v.i);
     }
 
-    void Yaw(float rad) //only works with unit vector
+    void Yaw(const float rad) //only works with unit vector
     {
-        float theta = 0;
-        float m = Mag();
-        if (i > 0) {
-            theta = (float) atan(k / i);
-        } else if (i < 0) {
-            theta = M_PI + (float) atan(k / i);
-        } else if (k <= 0 && i == 0) {
-            theta = -M_PI / 2;
-        } else if (k > 0 && i == 0) {
-            theta = M_PI / 2;
-        }
-        theta += rad;
-        i = m * cosf(theta);
-        k = m * sinf(theta);
+        const float theta = std::atan2f(k, i) + rad;
+        const float m = Mag();
+        i = m * std::cosf(theta);
+        k = m * std::sinf(theta);
     }
 
-    void Roll(float rad) {
-        float theta = 0;
-        float m = Mag();
-        if (i > 0) {
-            theta = (float) atan(j / i);
-        } else if (i < 0) {
-            theta = M_PI + (float) atan(j / i);
-        } else if (j <= 0 && i == 0) {
-            theta = -M_PI / 2;
-        } else if (j > 0 && i == 0) {
-            theta = M_PI / 2;
-        }
-        theta += rad;
-        i = m * cosf(theta);
-        j = m * sinf(theta);
+    void Roll(const float rad) {
+        const float theta = std::atan2f(j, i) + rad;
+        const float m = Mag();
+        i = m * std::cosf(theta);
+        j = m * std::sinf(theta);
     }
 
-    void Pitch(float rad) {
-        float theta = 0;
-        float m = Mag();
-        if (k > 0) {
-            theta = (float) atan(j / k);
-        } else if (k < 0) {
-            theta = M_PI + (float) atan(j / k);
-        } else if (j <= 0 && k == 0) {
-            theta = -M_PI / 2;
-        } else if (j > 0 && k == 0) {
-            theta = M_PI / 2;
-        }
-        theta += rad;
-        k = m * cosf(theta);
-        j = m * sinf(theta);
+    void Pitch(const float rad) {
+        const float theta = std::atan2f(j, k) + rad;
+        const float m = Mag();
+        k = m * std::cosf(theta);
+        j = m * std::sinf(theta);
     }
 };
 
@@ -437,9 +402,9 @@ GFXColor getStarColorFromRadius(float radius) {
     return GFXColor(tmp.r, tmp.g, tmp.b, 1);
 }
 
-float LengthOfYear(Vector r, Vector s) {
-    float a = 2 * M_PI * mmax(r.Mag(), s.Mag());
-    float speed = minspeed + (maxspeed - minspeed) * grand();
+float LengthOfYear(const Vector &r, const Vector &s) {
+    const float a = 2.0F * kVegaPiFloat * mmax(r.Mag(), s.Mag());
+    const float speed = minspeed + (maxspeed - minspeed) * grand();
     return a / speed;
 }
 

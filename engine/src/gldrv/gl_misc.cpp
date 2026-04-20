@@ -27,17 +27,16 @@
 
 
 #include <cstring>
+#include <numbers>
+#include "src/vs_math.h"
 #define GL_MISC_CPP
 #include "gl_globals.h"
 #undef GL_MISC_CPP
 #include "src/vegastrike.h"
 #include "src/gfxlib.h"
-#include "root_generic/vs_globals.h"
 #include "gl_light.h"
 #include "winsys.h"
-#include "root_generic/options.h"
 #include "configuration/configuration.h"
-
 
 // disable clientside draw for debugging purposes
 //#define NODRAW 1
@@ -54,21 +53,21 @@ void GFXCircle(float x, float y, float wid, float hei) {
     float segmag =
             (Vector(wid * configuration().graphics.resolution_x, 0,
                     0)
-                    - Vector(static_cast<double>(wid) * configuration().graphics.resolution_x * cos(2.0 * M_PI / 360.0),
-                            static_cast<double>(hei) * configuration().graphics.resolution_y * sin(2.0 * M_PI / 360.0),
+                    - Vector(wid * configuration().graphics.resolution_x * cosf(2.0F * kVegaPiFloat / 360.0F),
+                            hei * configuration().graphics.resolution_y * sinf(2.0F * kVegaPiFloat / 360.0F),
                             0)).Magnitude();
-    int accuracy = (int) (360.0f * configuration().graphics.circle_accuracy_flt * (1.0f < segmag ? 1.0f : segmag));
+    int accuracy = static_cast<int>(360.0F * configuration().graphics.circle_accuracy_flt * (1.0f < segmag ? 1.0f : segmag));
     if (accuracy < 4) {
         accuracy = 4;
     }
-    float iaccuracy = 1.0f / accuracy;
+    const float iaccuracy = 1.0F / accuracy;
 
     std::vector<float> verts(3 * (accuracy + 1));
     float *v = &verts[0];
     for (int i = 0; i <= accuracy; i++) {
-        *v++ = x + wid * cos(i * 2 * M_PI * iaccuracy);
-        *v++ = y + hei * sin(i * 2 * M_PI * iaccuracy);
-        *v++ = 0.0f;
+        *v++ = x + wid * cos(i * 2.0F * kVegaPiFloat * iaccuracy);
+        *v++ = y + hei * sin(i * 2.0F * kVegaPiFloat * iaccuracy);
+        *v++ = 0.0F;
     }
     GFXDraw(GFXLINESTRIP, &verts[0], accuracy + 1);
 }

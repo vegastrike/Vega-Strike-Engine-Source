@@ -5,45 +5,47 @@
  *  \author		Pierre Terdiman
  *  \date		April, 4, 2000
  *
- *  Copyright (C) 1998-2025 Pierre Terdiman, Stephen G. Tuggy, Benjamen R. Meyer
+ *  Copyright (C) 1998-2026 Pierre Terdiman, Stephen G. Tuggy, Benjamen R. Meyer
  *  Public Domain
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TYPES_H
-#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TYPES_H
+#ifndef VEGA_STRIKE_LIBRARIES_COLLIDE2_ICE_ICE_TYPES_H
+#define VEGA_STRIKE_LIBRARIES_COLLIDE2_ICE_ICE_TYPES_H
+
+#include <numbers>
 
 #define USE_HANDLE_MANAGER
 
 // Constants
 #ifndef PI
-#define	PI					3.1415926535897932384626433832795028841971693993751f	//!< PI
+#define	PI                      (std::numbers::pi_v<float>)                                 //!< PI
 #endif
-#define    HALFPI                1.57079632679489661923f                                    //!< 0.5 * PI
-#define    TWOPI                6.28318530717958647692f                                    //!< 2.0 * PI
-#define    INVPI                0.31830988618379067154f                                    //!< 1.0 / PI
+#define    HALFPI               (std::numbers::pi_v<float> / 2.0F)                          //!< 0.5 * PI
+#define    TWOPI                (2.0F * std::numbers::pi_v<float>)                          //!< 2.0 * PI
+#define    INVPI                (std::numbers::inv_pi_v<float>)                             //!< 1.0 / PI
 
-#define    RADTODEG            57.2957795130823208768f                                    //!< 180.0 / PI, convert radians to degrees
-#define    DEGTORAD            0.01745329251994329577f                                    //!< PI / 180.0, convert degrees to radians
+#define    RADTODEG             (180.0F / std::numbers::pi_v<float>)                        //!< 180.0 / PI, convert radians to degrees
+#define    DEGTORAD             (std::numbers::pi_v<float> / 180.0F)                        //!< PI / 180.0, convert degrees to radians
 
-#define    EXP                    2.71828182845904523536f                                    //!< e
-#define    INVLOG2                3.32192809488736234787f                                    //!< 1.0 / log10(2)
-#define    LN2                    0.693147180559945f                                        //!< ln(2)
-#define    INVLN2                1.44269504089f                                            //!< 1.0f / ln(2)
+#define    EXP                  (std::numbers::e_v<float>)                                  //!< e
+#define    INVLOG2              3.32192809488736234787F                                     //!< 1.0 / log10(2)
+#define    LN2                  (std::numbers::ln2_v<float>)                                //!< ln(2)
+#define    INVLN2               (1.0F / std::numbers::ln2_v<float>)                         //!< 1.0f / ln(2)
 
-#define    INV3                0.33333333333333333333f                                    //!< 1/3
-#define    INV6                0.16666666666666666666f                                    //!< 1/6
-#define    INV7                0.14285714285714285714f                                    //!< 1/7
-#define    INV9                0.11111111111111111111f                                    //!< 1/9
-#define    INV255                0.00392156862745098039f                                    //!< 1/255
+#define    INV3                 0.33333333333333333333F                                     //!< 1/3
+#define    INV6                 0.16666666666666666666F                                     //!< 1/6
+#define    INV7                 0.14285714285714285714F                                     //!< 1/7
+#define    INV9                 0.11111111111111111111F                                     //!< 1/9
+#define    INV255               0.00392156862745098039F                                     //!< 1/255
 
-#define    SQRT2                1.41421356237f                                            //!< sqrt(2)
-#define    INVSQRT2            0.707106781188f                                            //!< 1 / sqrt(2)
+#define    SQRT2                (std::numbers::sqrt2_v<float>)                              //!< sqrt(2)
+#define    INVSQRT2             (1.0F / std::numbers::sqrt2_v<float>)                       //!< 1 / sqrt(2)
 
-#define    SQRT3                1.73205080757f                                            //!< sqrt(3)
-#define    INVSQRT3            0.577350269189f                                            //!< 1 / sqrt(3)
+#define    SQRT3                (std::numbers::sqrt3_v<float>)                              //!< sqrt(3)
+#define    INVSQRT3             (std::numbers::inv_sqrt3_v<float>)                          //!< 1 / sqrt(3)
 
 // #define null				0														//!< our own NULL pointer
 
@@ -178,4 +180,4 @@ inline_ void TSetMax(T &a, const T &b) {
 #   define drand48()  ((double) (((double) rand()) / ((double) RAND_MAX)))
 #endif
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TYPES_H
+#endif //VEGA_STRIKE_LIBRARIES_COLLIDE2_ICE_ICE_TYPES_H

@@ -55,6 +55,7 @@
 #include <sstream>
 
 #include "src/vega_cast_utils.h"
+#include "src/vs_math.h"
 
 namespace pt = boost::property_tree;
 namespace alg = boost::algorithm;
@@ -63,7 +64,6 @@ using std::string;
 using std::map;
 using std::vector;
 using std::endl;
-
 
 /* Discussion (Roy Falk)
  * The original xml parsing was not case sensitive
@@ -354,7 +354,7 @@ Planet *SystemFactory::processPlanet(Star_XML *xml, Object &object, Planet *owne
     // Adjust speed and rotation
     // Discussion - the original value (day/year) needs to be adjusted to velocity
     // by multiplying
-    float float_pi = M_PI;
+    float float_pi = kVegaPiFloat;
     float float_year_scale = configuration().physics.year_scale_flt;
     // TODO: turn floating point comparisons into a function
     if (std::fabs(rotational_velocity) > .00001f) {
@@ -558,15 +558,15 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
     // Comparing floating point with == or != is unsafe. Therefore > 0.0001
     // I assume negative means counter movement and therefore fabs
     // TODO: this code is repeated. Refactor into function
-    float float_pi = static_cast<float>(M_PI);
-    float float_year_scale = configuration().physics.year_scale_flt;
+    constexpr float float_pi = kVegaPiFloat;
+    const float float_year_scale = configuration().physics.year_scale_flt;
     // TODO: turn floating point comparisons into a function
     if (std::fabs(rotational_velocity) > .00001f) {
         rotational_velocity = 2.0f * float_pi / (float_year_scale * rotational_velocity);
     }
 
     if (std::fabs(velocity) > .00001) {
-        velocity = 2.0 * M_PI / (configuration().physics.year_scale_flt * velocity);
+        velocity = 2.0 * kVegaPiDouble / (configuration().physics.year_scale_flt * velocity);
     }
 
     if (boost::iequals(element, "nebula")) {

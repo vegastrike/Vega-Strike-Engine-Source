@@ -9,7 +9,7 @@
 # to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
-# Copyright (C) 2001-2025 safemode, Anth0rx, pyramid, Roy Falk,
+# Copyright (C) 2001-2026 safemode, Anth0rx, pyramid, Roy Falk,
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
@@ -111,10 +111,10 @@ PROJECT(Vega_Strike
 
 MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_LONG_STR}")
 
-SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 SET(CMAKE_CXX_EXTENSIONS ON)
-SET(CMAKE_C_STANDARD 11)
+SET(CMAKE_C_STANDARD 17)
 SET(CMAKE_C_STANDARD_REQUIRED TRUE)
 SET(CMAKE_C_EXTENSIONS ON)
 

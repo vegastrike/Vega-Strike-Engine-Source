@@ -482,8 +482,7 @@ public:
     void endElement(const std::string &name);
 
 public:
-
-    const std::map<std::string, std::string> UnitToMap();
+    std::map<std::string, std::string> UnitToMap() const;
     std::string WriteUnitString();
 //Loads a unit from an xml file into a complete datastructure
     void LoadXML(const char *filename, const char *unitModifications = "", std::string *xmlbuffer = NULL);
