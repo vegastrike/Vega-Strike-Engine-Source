@@ -34,7 +34,7 @@
       "name": "debug",
       "hidden": true,
       "displayName": "Debug",
-      "inherits": "default",
+      "inherits": ["default"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "LOG_TIME_TAKEN_DETAILS": true
@@ -44,7 +44,7 @@
       "name": "release",
       "hidden": true,
       "displayName": "Release",
-      "inherits": "default",
+      "inherits": ["default"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
@@ -53,7 +53,7 @@
       "name": "RelWithDebInfo",
       "hidden": true,
       "displayName": "RelWithDebInfo",
-      "inherits": "default",
+      "inherits": ["default"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
@@ -61,7 +61,7 @@
     {
       "name": "pie-enabled",
       "hidden": true,
-      "inherits": "default",
+      "inherits": ["default"],
       "displayName": "PIE Enabled",
       "description": "Enable Position-Independent Executables (PIE)",
       "cacheVariables": {
@@ -71,7 +71,7 @@
     {
       "name": "pie-disabled",
       "hidden": true,
-      "inherits": "default",
+      "inherits": ["default"],
       "displayName": "PIE Disabled",
       "description": "Build with Position-Independent Executables (PIE) turned off",
       "cacheVariables": {
@@ -81,6 +81,7 @@
     {
       "name": "legacy-gl",
       "hidden": true,
+      "inherits": ["default"],
       "displayName": "Legacy OpenGL",
       "cacheVariables": {
         "OpenGL_GL_PREFERENCE": {
@@ -97,6 +98,7 @@
     {
       "name": "glvnd",
       "hidden": true,
+      "inherits": ["default"],
       "displayName": "GLVND",
       "cacheVariables": {
         "OpenGL_GL_PREFERENCE": {
@@ -108,6 +110,14 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Linux"
+      }
+    },
+    {
+      "name": "gl-neither",
+      "hidden": true,
+      "inherits": ["default"],
+      "displayName": "GL-Neither",
+      "cacheVariables": {
       }
     },
     {
@@ -473,7 +483,7 @@
     {
       "name": "macos-default",
       "hidden": true,
-      "inherits": "default",
+      "inherits": ["default"],
       "displayName": "macOS Default",
       "condition": {
         "type": "equals",
@@ -577,7 +587,7 @@
     {
       "name": "macOS-MacPorts-default",
       "hidden": true,
-      "inherits": "default",
+      "inherits": ["default"],
       "displayName": "macOS (MacPorts) Default",
       "condition": {
         "type": "equals",
@@ -690,7 +700,7 @@
     {
       "name": "windows-base",
       "hidden": true,
-      "inherits": "default",
+      "inherits": ["default"],
       "displayName": "Windows Default",
       "description": "Default build for Windows",
       "environment": {

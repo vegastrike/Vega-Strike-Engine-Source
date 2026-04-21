@@ -25,6 +25,8 @@
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+SET(MESHER_LIBRARIES "")
+
 FIND_PACKAGE(EXPAT REQUIRED)
 IF (EXPAT_FOUND)
     SET(MESHER_SOURCES
@@ -81,13 +83,12 @@ IF (EXPAT_FOUND)
     ENDIF()
 
     # OGRE already looked for by parent
-    # USE_SYSTEM_BOOST already set by main script
-    MESSAGE(STATUS "${OGRE_FOUND} ${USE_SYSTEM_BOOST}")
-    IF (OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
+    MESSAGE(STATUS "${OGRE_FOUND}")
+    IF (OGRE_FOUND)
         # Ogre usage in mesher requires boost::system
         ADD_DEPENDENCIES(mesher boost_system)
-        SET(MESHER_LIBRARIES ${MESHER_LIBRARIES} boost_system)
-    ENDIF (OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
+        LIST(APPEND MESHER_LIBRARIES boost_system)
+    ENDIF (OGRE_FOUND)
 
     TARGET_LINK_LIBRARIES(mesher ${MESHER_LIBRARIES} ${EXPAT_LIBRARIES} ${OGRE_LIBRARIES})
     SET_TARGET_PROPERTIES(mesher PROPERTIES LINK_FLAGS "-L/usr/lib")

@@ -120,19 +120,22 @@ IF (WIN32)
 ENDIF()
 
 
+SET(MSH_INCLUDES "")
+SET(MSH_LIBS "")
+
 #find Expat
 FIND_PACKAGE(EXPAT REQUIRED)
 IF (EXPAT_FOUND)
-    SET(MSH_INCLUDES ${MSH_INCLUDES} ${EXPAT_INCLUDE_DIRS})
-    SET(MSH_LIBS ${MSH_LIBS} ${EXPAT_LIBRARIES})
+    LIST(APPEND MSH_INCLUDES ${EXPAT_INCLUDE_DIRS})
+    LIST(APPEND MSH_LIBS ${EXPAT_LIBRARIES})
 ELSE (EXPAT_FOUND)
     MESSAGE(WARNING "We can't find expat for XML crap")
 ENDIF (EXPAT_FOUND)
 
 #ogre already looked for by parent
 IF (OGRE_FOUND)
-    SET(MSH_INCLUDES ${MSH_INCLUDES} ${OGRE_INCLUDE_DIRS})
-    SET(MSH_LIBS ${MSH_LIBS} ${OGRE_LIBRARIES})
+    LIST(APPEND MSH_INCLUDES ${OGRE_INCLUDE_DIRS})
+    LIST(APPEND MSH_LIBS ${OGRE_LIBRARIES})
     MESSAGE(STATUS "Compiling vega-meshtool with OgreMesh support")
 ELSE (OGRE_FOUND)
     MESSAGE(STATUS "Compiling vega-meshtool without OgreMesh support: Ogre not found")
@@ -157,10 +160,10 @@ SET(MESHER_SOURCES
     ${Vega_Strike_SOURCE_DIR}/libraries/root_generic/xml_support.cpp
 )
 
-INCLUDE_DIRECTORIES(${MSH_INCLUDES} mesher)
 ADD_EXECUTABLE(vega-meshtool ${MESHER_SOURCES})
-TARGET_INCLUDE_DIRECTORIES(vega-meshtool SYSTEM PRIVATE ${VSE_TST_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vega-meshtool SYSTEM PRIVATE ${MSH_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vega-meshtool PRIVATE
+        mesher
         # VS engine headers
         ${Vega_Strike_SOURCE_DIR}
         ${Vega_Strike_SOURCE_DIR}/engine
@@ -188,12 +191,11 @@ IF (WIN32)
 ENDIF()
 
 # OGRE already looked for by parent
-# USE_SYSTEM_BOOST already set by main script
-IF (OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
+IF (OGRE_FOUND)
     # Ogre usage in mesher requires boost::system
     ADD_DEPENDENCIES(vega-meshtool boost_system)
-    SET(MSH_LIBS ${MSH_LIBS} boost_system)
-ENDIF (OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
+    LIST(APPEND MSH_LIBS boost_system)
+ENDIF (OGRE_FOUND)
 
 TARGET_LINK_LIBRARIES(vega-meshtool ${MSH_LIBS})
 INSTALL(TARGETS vega-meshtool DESTINATION bin)
