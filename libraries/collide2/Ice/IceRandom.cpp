@@ -23,5 +23,5 @@ uint32_t Rand() {
 }
 
 uint32_t GetRandomIndex(const uint32_t max_index) {
-    return VegaRandom::Instance().RandomUInt32UpTo(max_index - 1);
+    return VegaRandom::Instance().RandomSizeTLessThan(max_index);
 }

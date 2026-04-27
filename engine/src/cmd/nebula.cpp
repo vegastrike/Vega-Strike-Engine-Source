@@ -217,12 +217,12 @@ void Nebula::UpdatePhysics2(const Transformation &trans,
         }
     }
     if (nummesh() > 0) {
-        i = VegaRandom::Instance().RandomUInt32UpTo(nummesh() - 1);
+        i = VegaRandom::Instance().RandomSizeTLessThan(nummesh());
         const Vector random_explosion(VegaRandom::Instance().RandomFloatInRange(-rSize(), rSize()),
                 VegaRandom::Instance().RandomFloatInRange(-rSize(), rSize()),
                 VegaRandom::Instance().RandomFloatInRange(-rSize(), rSize()));
         if (static_cast<int>(explosiontime / simulation_atom_var) != 0) {
-            if (VegaRandom::Instance().RandomUInt32UpTo(static_cast<uint_fast32_t>(explosiontime / simulation_atom_var) - 1) == 0) {
+            if (VegaRandom::Instance().RandomSizeTLessThan(static_cast<uint_fast32_t>(explosiontime / simulation_atom_var)) == 0) {
                 meshdata[i]->AddDamageFX(random_explosion, Vector(0, 0, 0), .00001, color);
             }
         }

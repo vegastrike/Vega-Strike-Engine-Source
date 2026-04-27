@@ -222,3 +222,46 @@ TEST(VegaRandom, RandomUChar) {
         EXPECT_LE(random_uchar, 255);
     }
 }
+
+TEST(VegaRandom, RandomSizeTInRange) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        size_t random_size_t = VegaRandom::Instance().RandomSizeTInRange(50, 100);
+        EXPECT_GE(random_size_t, 50);
+        EXPECT_LE(random_size_t, 100);
+    }
+}
+
+TEST(VegaRandom, RandomSizeTUpTo) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        size_t random_size_t = VegaRandom::Instance().RandomSizeTUpTo(150);
+        EXPECT_GE(random_size_t, 0);
+        EXPECT_LE(random_size_t, 150);
+    }
+}
+
+TEST(VegaRandom, RandomSizeT) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        size_t random_size_t = VegaRandom::Instance().RandomSizeT();
+        EXPECT_GE(random_size_t, 0);
+        EXPECT_LE(random_size_t, std::numeric_limits<size_t>::max());
+    }
+}
+
+TEST(VegaRandom, RandomSizeTLessThan) {
+    // Initialize our test collection
+    std::vector<int> test_vector{};
+    const size_t test_vector_size = VegaRandom::Instance().RandomSizeTInRange(1, 200);
+    for (size_t i = 0; i < test_vector_size; ++i) {
+        test_vector.emplace_back(VegaRandom::Instance().GenRandInt31());
+    }
+    ASSERT_EQ(test_vector.size(), test_vector_size);
+
+    // Repeatedly get random indexes into our test collection, and make sure that none of them are out of range
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        size_t random_index = VegaRandom::Instance().RandomSizeTLessThan(test_vector_size);
+        EXPECT_GE(random_index, 0);
+        EXPECT_LT(random_index, test_vector_size);
+        EXPECT_LT(random_index, test_vector.size());
+        ASSERT_NO_THROW(test_vector.at(random_index));
+    }
+}

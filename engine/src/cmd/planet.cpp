@@ -341,7 +341,7 @@ Planet::Planet(QVector x,
                 shines.emplace_back("shine.ani");
             }
 
-            shine = new Animation(shines[VegaRandom::Instance().RandomUInt32UpTo(shines.size() - 1)].c_str(),
+            shine = new Animation(shines.at(VegaRandom::Instance().RandomSizeTLessThan(shines.size())).c_str(),
                     true,
                     .1,
                     BILINEAR,

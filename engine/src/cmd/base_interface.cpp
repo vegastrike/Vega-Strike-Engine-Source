@@ -1411,7 +1411,7 @@ void BaseInterface::Room::Talk::Click(BaseInterface *base, float x, float y, int
             base->othtext.SetText("");
         } else if (say.size()) {
             curroom = base->curroom;
-            int sayindex = VegaRandom::Instance().RandomUInt32UpTo(say.size() - 1);
+            const size_t sayindex = VegaRandom::Instance().RandomSizeTLessThan(say.size());
             base->rooms[curroom]->objs.push_back(new Room::BaseTalk(say[sayindex], "currentmsg", true));
             if (soundfiles[sayindex].size() > 0) {
                 int sound = AUDCreateSoundWAV(soundfiles[sayindex], false);

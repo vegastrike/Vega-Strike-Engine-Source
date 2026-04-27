@@ -149,7 +149,7 @@ bool nonneg(float i) {
 }
 
 std::string FSM::Node::GetMessage(unsigned int &multiple) const {
-    multiple = VegaRandom::Instance().RandomUInt32UpTo(messages.size() - 1);
+    multiple = VegaRandom::Instance().RandomSizeTLessThan(messages.size());
     return messages[multiple];
 }
 
@@ -241,9 +241,9 @@ int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, floa
         }
     }
     if (g.size() != 0 && (relationship > 0 || (b.size() == 0))) {
-        choice = g.at(VegaRandom::Instance().RandomUInt32UpTo(g.size() - 1));
+        choice = g.at(VegaRandom::Instance().RandomSizeTLessThan(g.size()));
     } else if (b.size()) {
-        choice = b.at(VegaRandom::Instance().RandomUInt32UpTo(b.size() - 1));
+        choice = b.at(VegaRandom::Instance().RandomSizeTLessThan(b.size()));
     }
     return choice;
 }

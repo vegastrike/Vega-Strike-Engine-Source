@@ -150,7 +150,7 @@ void ComponentsManager::DamageRandomSystem() {
         if (randnum >= .65 && randnum < .9) {
             ecm.Damage();
         } else if (getNumMounts()) {
-            unsigned int whichmount = VegaRandom::Instance().RandomUInt32UpTo(getNumMounts() - 1);
+            unsigned int whichmount = VegaRandom::Instance().RandomSizeTLessThan(getNumMounts());
             if (randnum >= .9) {
                 DestroyMount(&mounts[whichmount]);
             } else if (mounts[whichmount].ammo > 0 && randnum >= .75) {

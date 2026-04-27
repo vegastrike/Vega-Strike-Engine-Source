@@ -41,6 +41,7 @@
 #include <limits>
 
 #include "aligned.h"
+#include "root_generic/vega_random.h"
 #include "src/vs_logging.h"
 
 ParticleTrail particleTrail("sparkle", 500, SRCALPHA, ONE, 0.05f, false, true);
@@ -510,7 +511,7 @@ void ParticleTrail::AddParticle(const ParticlePoint &P, const Vector &V, float s
     particle.size = P.size;
 
     if (particles.size() >= max_particles) {
-        size_t off = ((size_t) rand()) % particles.size();
+        const size_t off = VegaRandom::Instance().RandomSizeTLessThan(particles.size());
         particles.at(off) = particle;
     } else {
         particles.push_back(particle);

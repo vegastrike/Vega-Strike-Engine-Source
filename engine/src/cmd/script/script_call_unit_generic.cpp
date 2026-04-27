@@ -830,7 +830,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             if (mode == SCRIPT_RUN) {
                 if (my_unit->numCargo() > 0) {
                     unsigned int index;
-                    index = VegaRandom::Instance().RandomUInt32UpTo(my_unit->numCargo() - 1);
+                    index = VegaRandom::Instance().RandomSizeTLessThan(my_unit->numCargo());
                     Cargo c(my_unit->cargo_hold.GetCargo(index));
                     c.SetQuantity(quantity);
                     if (my_unit->cargo_hold.CanAddCargo(c)) {
@@ -847,7 +847,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             if (mode == SCRIPT_RUN) {
                 if (my_unit->numCargo() > 0) {
                     unsigned int index;
-                    index = VegaRandom::Instance().RandomUInt32UpTo(my_unit->numCargo() - 1);
+                    index = VegaRandom::Instance().RandomSizeTLessThan(my_unit->numCargo());
                     // FIXME: It doesn't look like this code actually decrements cargo like it's supposed to -- Stephen G. Tuggy 2026-04-26
                     // if (my_unit->cargo_hold.RemoveCargo(index, 1, false)) {
                     //     my_unit->cargo_hold.GetCargo(index).SetPrice(my_unit->GetCargo(index).GetPrice() * percentagechange);

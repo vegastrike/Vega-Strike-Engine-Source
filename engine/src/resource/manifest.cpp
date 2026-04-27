@@ -124,7 +124,7 @@ Cargo Manifest::GetRandomCargo(const int quantity) const {
         return Cargo();
     }
 
-    const uint_fast32_t index = VegaRandom::Instance().RandomUInt32UpTo(_items.size() - 1);
+    const size_t index = VegaRandom::Instance().RandomSizeTLessThan(_items.size());
     Cargo c = _items.at(index);
     c.SetQuantity(quantity);
     return c;

@@ -340,7 +340,7 @@ void CommunicatingAI::AdjustRelationTo(Unit *un, float factor) {
 //modified not to check player when hostiles are around--unless player IS the hostile
 Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
     if (VegaRandom::Instance().UniformInclusive(0, 1) < playaprob) {
-        Unit *playa = _Universe->AccessCockpit(VegaRandom::Instance().RandomUInt32UpTo(_Universe->numPlayers() - 1))->GetParent();
+        Unit *playa = _Universe->AccessCockpit(VegaRandom::Instance().RandomSizeTLessThan(_Universe->numPlayers()))->GetParent();
         if (playa) {
             if ((playa->Position() - parent->Position()).Magnitude() - parent->rSize() - playa->rSize()) {
                 return playa;

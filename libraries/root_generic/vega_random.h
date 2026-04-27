@@ -169,6 +169,28 @@ public:
         return RandomUCharInRange(0, 255);
     }
 
+    /// generates a random size_t between min and max, inclusive
+    size_t RandomSizeTInRange(const size_t min, const size_t max) {
+        std::uniform_int_distribution<size_t> dist(min, max);
+        return dist(gen);
+    }
+
+    /// generates a random size_t between 0 and max, inclusive
+    size_t RandomSizeTUpTo(const size_t max) {
+        return RandomSizeTInRange(0, max);
+    }
+
+    /// generates a random size_t between 0 and the maximum possible size_t value, inclusive
+    size_t RandomSizeT() {
+        return RandomSizeTInRange(0, std::numeric_limits<size_t>::max());
+    }
+
+    /// generates a random size_t on [0, upper_bound). Suitable for use in calculating a random index or offset into a
+    /// collection of size upper_bound.
+    size_t RandomSizeTLessThan(const size_t upper_bound) {
+        return RandomSizeTUpTo(upper_bound - 1);
+    }
+
     /// generates a random double between min and max, inclusive
     double RandomRealInRange(const double min, const double max) {
         return UniformInclusive(min, max);
