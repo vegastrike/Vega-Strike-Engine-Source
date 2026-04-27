@@ -155,7 +155,7 @@ public:
 
     /// generates a random unsigned char between min and max, inclusive
     unsigned char RandomUCharInRange(const unsigned char min, const unsigned char max) {
-        std::uniform_int_distribution<unsigned char> dist(min, max);
+        std::uniform_int_distribution<uint_fast16_t> dist(min, max);
         return dist(gen);
     }
 
