@@ -340,7 +340,7 @@ void CommunicatingAI::AdjustRelationTo(Unit *un, float factor) {
 //modified not to check player when hostiles are around--unless player IS the hostile
 Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
     if (VegaRandom::Instance().UniformInclusive(0, 1) < playaprob) {
-        Unit *playa = _Universe->AccessCockpit(rand() % _Universe->numPlayers())->GetParent();
+        Unit *playa = _Universe->AccessCockpit(VegaRandom::Instance().RandomUInt32UpTo(_Universe->numPlayers() - 1))->GetParent();
         if (playa) {
             if ((playa->Position() - parent->Position()).Magnitude() - parent->rSize() - playa->rSize()) {
                 return playa;
@@ -400,21 +400,12 @@ void CommunicatingAI::RandomInitiateCommunication(float playaprob, float targpro
 }
 
 int CommunicatingAI::selectCommunicationMessage(CommunicationMessage &c, Unit *un) {
-    if (0 && mood == 0) {
-        FSM::Node *n = c.getCurrentState();
-        if (n) {
-            return rand() % n->edges.size();
-        } else {
-            return 0;
-        }
-    } else {
-        const float moodmul = configuration().ai.mood_affects_response_flt;
-        const float angermul = configuration().ai.anger_affects_response_flt;
-        const float staticrelmul = configuration().ai.static_relationship_affects_response_flt;
-        return selectCommunicationMessageMood(c, moodmul * mood + angermul * parent->pilot->getAnger(parent,
-                un) + staticrelmul
-                * UnitUtil::getFactionRelation(parent, un));
-    }
+    const float moodmul = configuration().ai.mood_affects_response_flt;
+    const float angermul = configuration().ai.anger_affects_response_flt;
+    const float staticrelmul = configuration().ai.static_relationship_affects_response_flt;
+    return selectCommunicationMessageMood(c, moodmul * mood + angermul * parent->pilot->getAnger(parent,
+            un) + staticrelmul
+            * UnitUtil::getFactionRelation(parent, un));
 }
 
 void CommunicatingAI::ProcessCommMessage(CommunicationMessage &c) {

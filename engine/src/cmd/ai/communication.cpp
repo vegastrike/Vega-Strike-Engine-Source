@@ -227,24 +227,6 @@ int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, floa
     mood += VegaRandom::Instance().RandomFloatInRange(-randomresponse, randomresponse);
 
     int choice = 0;
-#if 0
-    float bestchoice = 4;
-    bool  fitmood    = false;
-    for (unsigned i = 0; i < n->edges.size(); i++) {
-        float md = nodes[n->edges[i]].messagedelta;
-        bool  newfitmood = nonneg( mood ) == nonneg( md );
-        if ( (!fitmood) || newfitmood ) {
-            float newbestchoice = sq( md-mood );
-            if ( (newbestchoice <= bestchoice) || (fitmood == false && newfitmood == true) )
-                if ( (newbestchoice == bestchoice && rand()%2) || newbestchoice < bestchoice ) {
-                    //to make sure some variety happens
-                    fitmood    = newfitmood;
-                    choice     = i;
-                    bestchoice = newbestchoice;
-                }
-        }
-    }
-#endif
     vector<unsigned int> g;
     vector<unsigned int> b;
     const float pos_limit = configuration().ai.lowest_positive_comm_choice_flt;
@@ -259,9 +241,9 @@ int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, floa
         }
     }
     if (g.size() != 0 && (relationship > 0 || (b.size() == 0))) {
-        choice = g[(rand() % g.size())];
+        choice = g.at(VegaRandom::Instance().RandomUInt32UpTo(g.size() - 1));
     } else if (b.size()) {
-        choice = b[rand() % b.size()];
+        choice = b.at(VegaRandom::Instance().RandomUInt32UpTo(b.size() - 1));
     }
     return choice;
 }
@@ -289,7 +271,7 @@ int FSM::getDefaultState(float relationship) const {
         if ((!fitmood) || newfitmood) {
             float newbestchoice = sq(md - mood);
             if ((newbestchoice <= bestchoice) || (fitmood == false && newfitmood == true)) {
-                if ((newbestchoice == bestchoice && rand() % 2) || newbestchoice < bestchoice) {
+                if ((newbestchoice == bestchoice && VegaRandom::Instance().RandomUInt32UpTo(1) == 1) || newbestchoice < bestchoice) {
                     //to make sure some variety happens
                     fitmood = newfitmood;
                     choice = i;

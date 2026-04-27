@@ -131,26 +131,42 @@ public:
         return (a * 67108864.0 + b) * (1.0 / 9007199254740992.0);
     }
 
-    /// generates a random int_fast32_t between min and max
+    /// generates a random int_fast32_t between min and max, inclusive
     int_fast32_t RandomInt32InRange(const int_fast32_t min, const int_fast32_t max) {
         std::uniform_int_distribution<int_fast32_t> int_dist(min, max);
         return int_dist(gen);
     }
 
-    /// generates a random int_fast32_t between 0 and max
+    /// generates a random int_fast32_t between 0 and max, inclusive
     int_fast32_t RandomInt32UpTo(const int_fast32_t max) {
         return RandomInt32InRange(0, max);
     }
 
-    /// generates a random uint_fast32_t between min and max
+    /// generates a random uint_fast32_t between min and max, inclusive
     uint_fast32_t RandomUInt32InRange(const uint_fast32_t min, const uint_fast32_t max) {
         std::uniform_int_distribution<uint_fast32_t> uint_dist(min, max);
         return uint_dist(gen);
     }
 
-    /// generates a random uint_fast32_t between 0 and max
+    /// generates a random uint_fast32_t between 0 and max, inclusive
     uint_fast32_t RandomUInt32UpTo(const uint_fast32_t max) {
         return RandomUInt32InRange(0, max);
+    }
+
+    /// generates a random unsigned char between min and max, inclusive
+    unsigned char RandomUCharInRange(const unsigned char min, const unsigned char max) {
+        std::uniform_int_distribution<unsigned char> dist(min, max);
+        return dist(gen);
+    }
+
+    /// generates a random unsigned char between 0 and max, inclusive
+    unsigned char RandomUCharUpTo(const unsigned char max) {
+        return RandomUCharInRange(0, max);
+    }
+
+    /// generates a random unsigned char between 0 and 255, inclusive
+    unsigned char RandomUChar() {
+        return RandomUCharInRange(0, 255);
     }
 
     /// generates a random double between min and max, inclusive
@@ -186,7 +202,7 @@ public:
         return RandomFloatInRange(0.0F, max);
     }
 
-    /// generates a random float between 0.0F and 1.0F
+    /// generates a random float on [0.0F, 1.0F)
     float RandomFloat() {
         std::uniform_real_distribution<float> real_dist(0.0F, 1.0F);
         return real_dist(gen);

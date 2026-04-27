@@ -862,9 +862,9 @@ void createObjects(std::vector<std::string> &fighter0name,
             pox.j = fg->pos.j + tmp;
             pox.k = fg->pos.k + tmp;
             if (pox.i == pox.j && pox.j == pox.k && pox.k == 0) {
-                pox.i = rand() * 10000. / RAND_MAX - 5000;
-                pox.j = rand() * 10000. / RAND_MAX - 5000;
-                pox.k = rand() * 10000. / RAND_MAX - 5000;
+                pox.i = VegaRandom::Instance().RandomDoubleInRange(-5000.0, 5000.0);
+                pox.j = VegaRandom::Instance().RandomDoubleInRange(-5000.0, 5000.0);
+                pox.k = VegaRandom::Instance().RandomDoubleInRange(-5000.0, 5000.0);
             }
             tmptarget[a] = FactionUtil::GetFactionIndex(fg->faction);             //that should not be in xml?
             int fg_terrain = -1;
@@ -1007,9 +1007,9 @@ void AddUnitToSystem(const SavedUnits *su) {
             un->SetTurretAI();
             if (_Universe->AccessCockpit()->GetParent()) {
                 un->SetPosition(_Universe->AccessCockpit()->GetParent()->Position()
-                        + QVector(rand() * 10000. / RAND_MAX - 5000,
-                                rand() * 10000. / RAND_MAX - 5000,
-                                rand() * 10000. / RAND_MAX - 5000));
+                        + QVector(VegaRandom::Instance().RandomDoubleInRange(-5000.0, 5000.0),
+                                VegaRandom::Instance().RandomDoubleInRange(-5000.0, 5000.0),
+                                VegaRandom::Instance().RandomDoubleInRange(-5000.0, 5000.0)));
             }
             break;
     }

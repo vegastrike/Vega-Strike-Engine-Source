@@ -158,7 +158,7 @@ public:
         this->updown = updown;
         facing = Vector(0, 0, 0);
         desired_ang_velocity = Vector(0, 0, 0);
-        dir = (rand() < RAND_MAX / 2);
+        dir = VegaRandom::Instance().GenRandReal1() < 0.5;
     }
 
     void SetOppositeDir() {
@@ -216,9 +216,9 @@ void AfterburnTurnTowardsITTS(Order *aisc, Unit *un) {
 void BarrelRoll(Order *aisc, Unit *un) {
     FlyByWire *broll = new FlyByWire;
     AddOrd(aisc, un, broll);
-    broll->RollRight(rand() > RAND_MAX / 2 ? 1 : -1);
+    broll->RollRight(VegaRandom::Instance().GenRandReal1() > 0.5 ? 1 : -1);
     float per;
-    if (rand() < RAND_MAX / 2) {
+    if (VegaRandom::Instance().GenRandReal1() < 0.5) {
         per = VegaRandom::Instance().RandomFloat();
         if (per < .5) {
             per -= 1;

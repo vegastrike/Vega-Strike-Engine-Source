@@ -37,6 +37,7 @@
 #include "root_generic/xml_support.h"
 #include "gfx_generic/mesh.h"
 #include "gfx/cockpit.h"
+#include "root_generic/vega_random.h"
 #include "src/universe.h"
 
 #undef BOOST_NO_CWCHAR
@@ -216,11 +217,13 @@ void Nebula::UpdatePhysics2(const Transformation &trans,
         }
     }
     if (nummesh() > 0) {
-        i = rand() % (nummesh());
-        Vector randexpl(rand() % 2 * rSize() - rSize(), rand() % 2 * rSize() - rSize(), rand() % 2 * rSize() - rSize());
-        if (((int) (explosiontime / simulation_atom_var)) != 0) {
-            if (!(rand() % ((int) (explosiontime / simulation_atom_var)))) {
-                meshdata[i]->AddDamageFX(randexpl, Vector(0, 0, 0), .00001, color);
+        i = VegaRandom::Instance().RandomUInt32UpTo(nummesh() - 1);
+        const Vector random_explosion(VegaRandom::Instance().RandomFloatInRange(-rSize(), rSize()),
+                VegaRandom::Instance().RandomFloatInRange(-rSize(), rSize()),
+                VegaRandom::Instance().RandomFloatInRange(-rSize(), rSize()));
+        if (static_cast<int>(explosiontime / simulation_atom_var) != 0) {
+            if (VegaRandom::Instance().RandomUInt32UpTo(static_cast<uint_fast32_t>(explosiontime / simulation_atom_var) - 1) == 0) {
+                meshdata[i]->AddDamageFX(random_explosion, Vector(0, 0, 0), .00001, color);
             }
         }
     }

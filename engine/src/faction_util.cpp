@@ -38,6 +38,7 @@
 #include "gfx/aux_texture.h"
 #include "gfx/animation.h"
 #include "cmd/music.h"
+#include "root_generic/vega_random.h"
 
 // DO NOT PUT INCLUDES AFTER using namespace
 
@@ -102,7 +103,7 @@ std::vector<Animation *> *FactionUtil::GetRandCommAnimation(int faction, Unit *u
     int siz = factions[faction]->comm_faces.size();
     if (siz > 0) {
         for (int i = 0; i < 8 + siz; ++i) {
-            int ind = i < 8 ? rand() % siz : i - 8;
+            const int ind = i < 8 ? VegaRandom::Instance().RandomInt32UpTo(siz - 1) : i - 8;
             Faction::comm_face_t *tmp = &factions[faction]->comm_faces[ind];
             if (tmp->dockable == Faction::comm_face_t::CEITHER
                     || (tmp->dockable == Faction::comm_face_t::CYES && dockable)
@@ -121,8 +122,8 @@ std::vector<Animation *> *FactionUtil::GetRandCommAnimation(int faction, Unit *u
         }
         VS_LOG(error,
                 (boost::format("Error picking comm animation for %1$d faction with base:%2$d dock:%3$d\n") % faction
-                        % ((int) base) % ((int) dockable)));
-        return GetAnimation(faction, rand() % siz, sex);
+                        % static_cast<int>(base) % static_cast<int>(dockable)));
+        return GetAnimation(faction, VegaRandom::Instance().RandomInt32UpTo(siz - 1), sex);
     } else {
         sex = 0;
         return NULL;
@@ -130,14 +131,14 @@ std::vector<Animation *> *FactionUtil::GetRandCommAnimation(int faction, Unit *u
 }
 
 Animation *FactionUtil::GetRandExplosionAnimation(int whichfaction, std::string &which) {
-    if (whichfaction < (int) factions.size()) {
+    if (whichfaction < static_cast<int>(factions.size())) {
         if (factions[whichfaction]->explosion_name.size()) {
-            int whichexp = rand() % factions[whichfaction]->explosion_name.size();
-            which = factions[whichfaction]->explosion_name[whichexp];
-            return factions[whichfaction]->explosion[whichexp].get();
+            const int which_explosion = VegaRandom::Instance().RandomInt32UpTo(factions[whichfaction]->explosion_name.size() - 1);
+            which = factions[whichfaction]->explosion_name[which_explosion];
+            return factions[whichfaction]->explosion[which_explosion].get();
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 void FactionUtil::LoadFactionPlaylists() {

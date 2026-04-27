@@ -35,7 +35,9 @@
 #include <queue>
 #include <iostream>
 #include "objconv/basemaker/sprite.h"
-#include <stdio.h>
+#include <cstdio>
+#include <boost/format.hpp>
+#include "vega_string_utils.h"
 #include "objconv/basemaker/base_maker_texture.h"
 #include "gfx_generic/vec.h"
 #include "gfx_generic/matrix.h"
@@ -682,14 +684,14 @@ void Base::Room::Python::EndXML(FILE *fp) {
 }
 
 void Base::Room::Talk::EndXML(FILE *fp) {
-    char randstr[100];
-    sprintf(randstr, "NEW_SCRIPT_%d.py", (int) (rand()));
+    const std::string python_filename = (boost::format("NEW_SCRIPT_%1%.py") % VegaRandom::Instance().GenRandUInt32()).str();
+    char *randstr = vega_str_dup(python_filename.c_str());
     Indent(fp);
     fprintf(fp, "Base.Python (");
     Link::EndXML(fp);
     fprintf(fp, ", '%s')\n", randstr);
     FILE *py = fopen(randstr, "wt");
-    fprintf(py, "import Base\nimport VS\nimport random\n\nrandnum=random.randrange(0,%d)\n", int(say.size()));
+    fprintf(py, "import Base\nimport VS\nimport random\n\nrandnum=random.randrange(0,%d)\n", static_cast<int>(say.size()));
     for (int i = 0; i < say.size(); i++) {
         fprintf(py, "if (randnum==%d):\n", i);
         for (int j = 0; j < say[i].size(); j++) {

@@ -107,10 +107,10 @@ bool FireAt::PursueTarget(Unit *un, bool leader) {
         return true;
     }
     if (un == parent->Target()) {
-        return rand() < .9 * RAND_MAX;
+        return VegaRandom::Instance().GenRandReal1() < 0.9;
     }
     if (parent->getRelation(un) < 0) {
-        return rand() < .2 * RAND_MAX;
+        return VegaRandom::Instance().GenRandReal1() < 0.2;
     }
     return false;
 }
@@ -141,7 +141,7 @@ bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix) {
 
 void FireAt::ReInit(float aggressivitylevel) {
     lastmissiletime = UniverseUtil::GetGameTime() - 65536.;
-    missileprobability = configuration().ai.firing.missile_probability_flt;
+    missileprobability = configuration().ai.firing.missile_probability_dbl;
     delay = 0;
     agg = aggressivitylevel;
     distance = 1;
@@ -571,7 +571,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     static int gcounter = 0;
     const int min_rechoose_interval = configuration().ai.targeting.min_rechoose_interval;
     if (curtarg) {
-        if (gcounter++ < min_rechoose_interval || rand() / 8 < RAND_MAX / 9) {
+        if (gcounter++ < min_rechoose_interval || VegaRandom::Instance().GenRandUInt32() / 8 < RAND_MAX / 9) {
             //in this case only look at potentially *interesting* units rather than huge swaths of nearby units...including target, threat, players, and leader's target
             unitLocator.action.ShouldTargetUnit(curtarg, UnitUtil::getDistance(parent, curtarg));
             unsigned int np = _Universe->numPlayers();
@@ -729,8 +729,8 @@ unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile) {
 
 void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     const float missiledelay = configuration().ai.missile_gun_delay_flt;
-    //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
-    bool fire_missile = lockmissile && randomInt(RAND_MAX) < RAND_MAX * missileprobability * SIMULATION_ATOM;
+    const bool fire_missile = lockmissile && VegaRandom::Instance().RandomDoubleUpTo(RAND_MAX) <
+                              static_cast<double>(RAND_MAX) * missileprobability * SIMULATION_ATOM;
     delay += SIMULATION_ATOM; //simulation_atom_var?
     if (shouldfire && delay < parent->pilot->getReactionTime()) {
         return;
@@ -780,25 +780,25 @@ void FireAt::Execute() {
     done = tmp;
     Unit *targ;
     if (parent->getUnitType() == Vega_UnitType::unit) {
-        const float cont_update_time = configuration().ai.contraband_update_time_flt;
-        //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
-        if (rand() < RAND_MAX * SIMULATION_ATOM / cont_update_time) {
+        const double contraband_update_time = configuration().ai.contraband_update_time_dbl;
+        if (VegaRandom::Instance().RandomDoubleUpTo(RAND_MAX) <
+                static_cast<double>(RAND_MAX) * SIMULATION_ATOM / contraband_update_time) {
             UpdateContrabandSearch();
         }
-        const float cont_initiate_time = configuration().ai.comm_initiate_time_flt;
-        //Or here?
-        if (static_cast<float>(rand()) < (static_cast<float>(RAND_MAX) * (SIMULATION_ATOM / cont_initiate_time))) {
-            const float contraband_initiate_time = configuration().ai.contraband_initiate_time_flt;
+        const double cont_initiate_time = configuration().ai.comm_initiate_time_dbl;
+        if (VegaRandom::Instance().RandomDoubleUpTo(RAND_MAX) <
+                static_cast<double>(RAND_MAX) * (SIMULATION_ATOM / cont_initiate_time)) {
+            const double contraband_initiate_time = configuration().ai.contraband_initiate_time_dbl;
             const float comm_to_player = configuration().ai.comm_to_player_percent_flt;
             const float comm_to_target = configuration().ai.comm_to_target_percent_flt;
             const float contraband_to_player = configuration().ai.contraband_to_player_percent_flt;
             const float contraband_to_target = configuration().ai.contraband_to_target_percent_flt;
 
             unsigned int modulo = static_cast<unsigned int>(contraband_initiate_time / cont_initiate_time);
-            if (modulo < 1) {
-                modulo = 1;
+            if (modulo < 1U) {
+                modulo = 1U;
             }
-            if (rand() % modulo) {
+            if (VegaRandom::Instance().RandomUInt32UpTo(modulo - 1U)) {
                 RandomInitiateCommunication(comm_to_player, comm_to_target);
             } else {
                 InitiateContrabandSearch(contraband_to_player, contraband_to_target);

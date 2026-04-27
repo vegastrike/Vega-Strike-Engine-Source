@@ -63,6 +63,7 @@
 #include "src/vs_logging.h"
 #include "cmd/unit_util.h"
 #include "resource/cargo.h"
+#include "root_generic/vega_random.h"
 
 FireKeyboard::FireKeyboard(unsigned int whichplayer, unsigned int whichjoystick) : Order(WEAPON, 0) {
     memset(savedTargets, 0, sizeof(void *) * NUMSAVEDTARGETS);
@@ -1314,7 +1315,7 @@ void PlayDockingSound(int dock) {
         case 3: {
             static soundContainer reqsound;
             std::string otherstr = configuration().audio.automatic_docking_zone;
-            if (otherstr != "" && rand() < RAND_MAX / 2) {
+            if (otherstr != "" && VegaRandom::Instance().GenRandReal1() < 0.5) {
                 static int s = AUDCreateSoundWAV(otherstr, false);
                 AUDPlay(s, QVector(0, 0, 0), Vector(0, 0, 0), 1);
             } else {

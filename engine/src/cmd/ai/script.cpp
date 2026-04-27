@@ -45,6 +45,8 @@
 
 #include <assert.h>
 
+#include "root_generic/vega_random.h"
+
 using namespace XMLSupport;
 
 typedef vsUMap<string, CCScript *> HardCodedMap;
@@ -798,7 +800,7 @@ void AIScript::LoadXML() {
         CCScript *myscript = (*iter).second;
         (*myscript)(this, parent);
         if (doroll) {
-            unsigned int val = rand();
+            const uint_fast32_t val = VegaRandom::Instance().GenRandUInt32();
             if (val < RAND_MAX / 4) {
                 RollRightHard(this, parent);
             } else if (val < RAND_MAX / 2) {

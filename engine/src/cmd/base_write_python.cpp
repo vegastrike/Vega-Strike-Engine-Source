@@ -28,7 +28,10 @@
 #include "cmd/base.h"
 #ifdef BASE_MAKER
 //#ifndef BASE_XML
-#include <stdio.h>
+#include <cstdio>
+#include <boost/format.hpp>
+#include "vega_string_utils.h"
+#include "root_generic/vega_random.h"
 
 void BaseInterface::Room::Link::EndXML( FILE *fp )
 {
@@ -51,13 +54,13 @@ void BaseInterface::Room::Python::EndXML( FILE *fp )
 
 void BaseInterface::Room::Talk::EndXML( FILE *fp )
 {
-    char randstr[100];
-    sprintf( randstr, "NEW_SCRIPT_%d.py", (int) ( rand() ) );
+    const std::string python_filename = (boost::format("NEW_SCRIPT_%1%.py") % VegaRandom::Instance().GenRandUInt32()).str();
+    char *randstr = vega_str_dup(python_filename.c_str());
     VSFileSystem::vs_fprintf( fp, "Base.Python (" );
     Link::EndXML( fp );
     VSFileSystem::vs_fprintf( fp, ", '%s')\n", randstr );
     FILE *py = VSFileSystem::vs_open( randstr, "wt" );
-    VSFileSystem::vs_fprintf( py, "import Base\nimport VS\nimport random\n\nrandnum=random.randrange(0,%d)\n", say.size() );
+    VSFileSystem::vs_fprintf( py, "import Base\nimport VS\nimport random\n\nrandnum=random.randrange(0,%d)\n", static_cast<int>(say.size()) );
     for (int i = 0; i < say.size(); i++) {
         VSFileSystem::vs_fprintf( fp, "if (randnum==%d):\n", i );
         for (int j = 0; j < say[i].size(); j++)

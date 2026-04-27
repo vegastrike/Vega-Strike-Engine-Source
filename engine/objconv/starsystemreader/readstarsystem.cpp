@@ -40,6 +40,8 @@
 #endif
 #include <sys/stat.h>
 
+#include "root_generic/vega_random.h"
+
 unsigned long genrand_int32(void);
 void init_genrand(unsigned long s);
 
@@ -773,10 +775,10 @@ string dodad(int which) {
 
 vector<string> shuffle(const vector<string> &inp) {
     vector<string> retval;
-    for (unsigned int i = 0; i < inp.size(); ++i) {
-        int index = rand() % (retval.size() + 1);
-        if (std::find(retval.begin(), retval.end(), inp[i]) == retval.end()) {
-            retval.insert(retval.begin() + index, inp[i]);
+    for (size_t i = 0; i < inp.size(); ++i) {
+        const int index = VegaRandom::Instance().RandomUInt32UpTo(retval.size());
+        if (std::find(retval.begin(), retval.end(), inp.at(i)) == retval.end()) {
+            retval.insert(retval.begin() + index, inp.at(i));
         }
     }
     return retval;

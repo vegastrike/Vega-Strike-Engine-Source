@@ -402,7 +402,7 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
             for (int j = 0; j < numvertices - 1; j += 2) {
                 int i = j;
 //if (SlowStarStreaks)
-//i=((rand()%numvertices)/2)*2;
+// i = (VegaRandom::Instance().RandomInt32UpTo(numvertices - 1) / 2) * 2;
                 Vector vpoint(v[i + 1].x, v[i + 1].y, v[i + 1].z);
                 Vector recenter = (vpoint - center.Cast());
                 if (roll) {

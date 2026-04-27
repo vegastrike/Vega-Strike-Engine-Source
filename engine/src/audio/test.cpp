@@ -328,11 +328,11 @@ void testComplexScene(bool doppler) {
             new EngParticleListener(engpaths, worldsize));
 
     {
-        const double phase_step = 2.0 * M_PI / nengs;
-        for (size_t i = 0; i < nengs; ++i) {
-            double phase = i * phase_step;
-            double speed = 2.0 * phase_step * (double(rand() + RAND_MAX / 2) / RAND_MAX);
-            double radii = worldsize * (1.0 + 0.25 * double(rand() - RAND_MAX / 2) / RAND_MAX);
+        constexpr double phase_step = 2.0 * M_PI / nengs;
+        for (size_t j = 0; j < nengs; ++j) {
+            const double phase = j * phase_step;
+            const double speed = 2.0 * phase_step * VegaRandom::Instance().RandomDoubleInRange(0.5, 1.5); // max 1.0?
+            const double radii = worldsize * (1.0 + 0.25 * VegaRandom::Instance().RandomDoubleInRange(-0.5, 0.5));
 
             engpaths.push_back(LVector3(phase, speed, radii));
         }

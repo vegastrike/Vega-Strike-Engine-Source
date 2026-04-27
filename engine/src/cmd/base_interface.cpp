@@ -1497,13 +1497,12 @@ static void AnimationDraw() {
     static StreamTexture T( 512, 256, NEAREST, NULL );
     BaseColor( *data )[512] = reinterpret_cast< BaseColor(*)[512] > ( T.Map() );
     bool counter = false;
-    srand( time( NULL ) );
     for (int i = 0; i < 256; ++i)
         for (int j = 0; j < 512; ++j) {
-            data[i][j].r = rand()&0xff;
-            data[i][j].g = rand()&0xff;
-            data[i][j].b = rand()&0xff;
-            data[i][j].a = rand()&0xff;
+            data[i][j].r = VegaRandom::Instance().RandomUChar();
+            data[i][j].g = VegaRandom::Instance().RandomUChar();
+            data[i][j].b = VegaRandom::Instance().RandomUChar();
+            data[i][j].a = VegaRandom::Instance().RandomUChar();
         }
     T.UnMap();
     T.MakeActive();

@@ -1451,9 +1451,9 @@ public:
 };
 
 static Vector randVector() {
-    return Vector((rand() / (float) RAND_MAX) * 2 - 1,
-            (rand() / (float) RAND_MAX) * 2 - 1,
-            (rand() / (float) RAND_MAX) * 2 - 1);
+    return Vector(VegaRandom::Instance().RandomFloatInRange(-1.0F, 1.0F),
+            VegaRandom::Instance().RandomFloatInRange(-1.0F, 1.0F),
+            VegaRandom::Instance().RandomFloatInRange(-1.0F, 1.0F));
 }
 
 static void GoTo(AggressiveAI *ai,
@@ -1593,7 +1593,7 @@ volatile Unit *uoi;
 
 void AggressiveAI::Execute() {
     if (parent == uoi) {
-        VS_LOG(info, "kewl");
+        VS_LOG(important_info, "kewl");
     }
     jump_time_check++;     //just so we get a nicely often wrapping var;
     jump_time_check %= 5;
@@ -1601,8 +1601,8 @@ void AggressiveAI::Execute() {
     double firetime = queryTime();
     static int pir = FactionUtil::GetFactionIndex("pirates");
     if (parent->faction == pir) {
-        if (rand() == 0) {
-            VS_LOG(info, "ahoy, a pirates!");
+        if (VegaRandom::Instance().GenRandUInt32() == 0) {
+            VS_LOG(important_info, "ahoy, a pirates!");
         }
     }
     FireAt::Execute();

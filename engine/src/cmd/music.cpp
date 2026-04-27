@@ -46,6 +46,7 @@
 #endif
 
 #include "src/vegastrike.h"
+#include "root_generic/vega_random.h"
 #include "root_generic/vs_globals.h"
 
 #include "src/audiolib.h"
@@ -218,19 +219,17 @@ bool Music::LoadMusic(const char *file) {
     return true;
 }
 
-static int randInt(int max) {
-    int ans = int((((double) rand()) / ((double) RAND_MAX)) * max);
-    if (ans == max) {
-        return max - 1;
-    }
-    return ans;
+// Stephen G. Tuggy 2026-04-26 -- The previous implementation of this function returned an int on [0, max), so I am
+// doing the same. The chances of each value being returned are not identical, but oh well.
+static int randInt(const int max) {
+    return VegaRandom::Instance().RandomInt32UpTo(max - 1);
 }
 
 int Music::SelectTracks(int layer) {
     if (!configuration().audio.music) {
         return 0;
     }
-    const bool random = configuration().audio.shuffle_songs;
+    const bool should_shuffle = configuration().audio.shuffle_songs;
     const size_t maxrecent = configuration().audio.shuffle_songs_section.history_depth;
     std::string dj_script = configuration().audio.dj_script;
     if ((BaseInterface::CurrentBase || loopsleft > 0) && lastlist < (int) playlist.size() && lastlist >= 0) {
@@ -238,12 +237,14 @@ int Music::SelectTracks(int layer) {
             loopsleft--;
         }
         if (!playlist[lastlist].empty() && !playlist[lastlist].haspragma("norepeat")) {
-            int whichsong = (random ? rand() : playlist[lastlist].counter++) % playlist[lastlist].size();
+            int whichsong = should_shuffle
+                    ? VegaRandom::Instance().RandomInt32UpTo(playlist[lastlist].size() - 1)
+                    : playlist[lastlist].counter++ % playlist[lastlist].size();
             int spincount = 10;
             std::list<std::string> &recent = muzak[(layer >= 0) ? layer : 0].recent_songs;
-            while (random && (--spincount > 0)
+            while (should_shuffle && (--spincount > 0)
                     && (std::find(recent.begin(), recent.end(), playlist[lastlist][whichsong]) != recent.end())) {
-                whichsong = (random ? rand() : playlist[lastlist].counter++) % playlist[lastlist].size();
+                whichsong = VegaRandom::Instance().RandomInt32UpTo(playlist[lastlist].size() - 1);
             }
             if (spincount <= 0) {
                 recent.clear();
