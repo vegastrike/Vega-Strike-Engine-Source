@@ -198,3 +198,27 @@ TEST(VegaRandom, GenRandInt31) {
         EXPECT_LT(random_int32, kVegaIntLeast32tMax);
     }
 }
+
+TEST(VegaRandom, RandomUCharInRange) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        unsigned char random_uchar = VegaRandom::Instance().RandomUCharInRange(10, 20);
+        EXPECT_GE(random_uchar, 10);
+        EXPECT_LE(random_uchar, 20);
+    }
+}
+
+TEST(VegaRandom, RandomUCharUpTo) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        unsigned char random_uchar = VegaRandom::Instance().RandomUCharUpTo(30);
+        EXPECT_GE(random_uchar, 0);
+        EXPECT_LE(random_uchar, 30);
+    }
+}
+
+TEST(VegaRandom, RandomUChar) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        unsigned char random_uchar = VegaRandom::Instance().RandomUChar();
+        EXPECT_GE(random_uchar, 0);
+        EXPECT_LE(random_uchar, 255);
+    }
+}
