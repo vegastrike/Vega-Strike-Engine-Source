@@ -71,7 +71,7 @@ jobs:
         uses: lukka/get-cmake@ea83089aa35e08e459464341fe24ad024ee2466f # v4.3.1
 
       - name: Install vcpkg
-        uses: lukka/run-vcpkg@08ab0cc59d3f33647c5dc2b1e8f2093266c7b873 # Node 24 compatible version
+        uses: lukka/run-vcpkg@305c06bd4dee21e23dcf142c85c657a993f7aa1a
 
       - name: Build the code
         run: |
@@ -97,6 +97,7 @@ jobs:
         with:
           path: ${{ github.workspace }}/vcpkg_cache
           key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
+        if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
       - name: Upload test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
