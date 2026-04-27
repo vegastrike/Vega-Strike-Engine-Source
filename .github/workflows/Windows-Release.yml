@@ -85,7 +85,7 @@ jobs:
         uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # v4.3.2
 
       - name: Install vcpkg
-        uses: lukka/run-vcpkg@305c06bd4dee21e23dcf142c85c657a993f7aa1a
+        uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11.6
 
       - name: Build the code
         run: |
