@@ -923,8 +923,10 @@ void Unit::UpdateSubunitPhysics(const Transformation &trans,
                         #if defined(RANDOMIZE_SIM_ATOMS)
                             uint_fast32_t priority = UnitUtil::getPhysicsPriority( su );
                             //Add some scattering
-                            priority = (priority+rand()%priority)/2;
-                            if (priority < 1) priority = 1;
+                            priority = (priority + VegaRandom::Instance().RandomInt32UpTo(priority)) / 2;
+                            if (priority < 1) {
+                                priority = 1
+                            };
                             su->sim_atom_multiplier = this->sim_atom_multiplier*priority;
                             if (su->sim_atom_multiplier > SIM_QUEUE_SIZE)
                                 su->sim_atom_multiplier = (SIM_QUEUE_SIZE/su->sim_atom_multiplier)*su->sim_atom_multiplier;
@@ -3039,7 +3041,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
         c.SetPrice(c.GetPrice() * (price - pricedev));
 
         //stupid way
-        c.SetQuantity(c.GetQuantity() + float_to_int((quantdev * 2 + 1) * static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) + 1)));
+        c.SetQuantity(c.GetQuantity() + float_to_int((quantdev * 2 + 1) * VegaRandom::Instance().GenRandReal2()));
         c.SetPrice(c.GetPrice() + pricedev * 2 * VegaRandom::Instance().RandomFloat());
         c.SetPrice(fabs(c.GetPrice()));
         c.SetPrice((c.GetPrice() + (baseprice * aveweight)) / (aveweight + 1));

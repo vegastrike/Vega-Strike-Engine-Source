@@ -171,11 +171,4 @@ inline_ void TSetMax(T &a, const T &b) {
 
 #define        QUADRAT(x)        ((x)*(x))                        //!< Returns x square
 
-#ifdef _WIN32
-#   define srand48(x) srand((unsigned int) (x))
-#	define srandom(x) srand((unsigned int) (x))
-#	define random()   ((double) rand())
-#   define drand48()  ((double) (((double) rand()) / ((double) RAND_MAX)))
-#endif
-
 #endif //VEGA_STRIKE_LIBRARIES_COLLIDE2_ICE_ICE_TYPES_H

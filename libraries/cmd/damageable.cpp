@@ -199,12 +199,12 @@ void Damageable::ApplyDamage(const Vector &pnt,
         }
 
         // Eject cargo
-        const float cargo_eject_percent = configuration().physics.ejection.eject_cargo_percent_flt;
+        const double cargo_eject_percent = configuration().physics.ejection.eject_cargo_percent_dbl;
         const uint32_t max_dump_cargo = configuration().physics.ejection.max_dumped_cargo;
         uint32_t dumped_cargo = 0;
 
         for (unsigned int i = 0; i < unit->numCargo(); ++i) {
-            if (rand() < (RAND_MAX * cargo_eject_percent) &&
+            if (VegaRandom::Instance().GenRandUInt32() < (RAND_MAX * cargo_eject_percent) &&
                     dumped_cargo++ < max_dump_cargo) {
                 unit->EjectCargo(i);
             }
@@ -214,12 +214,12 @@ void Damageable::ApplyDamage(const Vector &pnt,
         // Eject Pilot
         // Can't use this as we can't reach negative hull damage
 //        const float hull_dam_to_eject = configuration().physics.ejection.hull_damage_to_eject;
-        const float auto_eject_percent = configuration().physics.ejection.auto_eject_percent_flt;
+        const double auto_eject_percent = configuration().physics.ejection.auto_eject_percent_dbl;
         const bool player_autoeject = configuration().physics.ejection.player_auto_eject;
 
         if (shot_at_is_player) {
             if (player_autoeject
-                    && rand() < (RAND_MAX * auto_eject_percent)) {
+                    && VegaRandom::Instance().GenRandUInt32() < (RAND_MAX * auto_eject_percent)) {
                 VS_LOG(debug, "Auto ejecting player");
                 unit->EjectCargo((unsigned int) -1);
             } else {
@@ -227,7 +227,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
             }
         } else {
             if (unit->getUnitType() == Vega_UnitType::unit
-                    && rand() < (RAND_MAX * auto_eject_percent)) {
+                    && VegaRandom::Instance().GenRandUInt32() < (RAND_MAX * auto_eject_percent)) {
                 VS_LOG(debug, "Auto ejecting NPC");
                 unit->EjectCargo((unsigned int) -1);
             } else {
@@ -485,12 +485,13 @@ bool Damageable::flickerDamage() {
     diff = fmod(diff, tmpflicker);
     //we know counter is somewhere between 0 and damage level
     //cast this to an int for fun!
-    unsigned int thus = ((unsigned int) (size_t) this) >> 2;
-    thus = thus % ((unsigned int) tmpflicker);
+    unsigned int thus = static_cast<unsigned int>(reinterpret_cast<size_t>(this)) >> 2;
+    thus = thus % static_cast<unsigned int>(tmpflicker);
     diff = fmod(diff + thus, tmpflicker);
     if (configuration().graphics.glow_flicker.flicker_off_time_flt > diff) {
         if (damagelevel > configuration().graphics.glow_flicker.hull_for_total_dark_flt) {
-            return rand() > RAND_MAX * GetElapsedTime() * configuration().graphics.glow_flicker.num_times_per_second_on_flt;
+            return VegaRandom::Instance().GenRandUInt32() > RAND_MAX * GetElapsedTime()
+                    * configuration().graphics.glow_flicker.num_times_per_second_on_flt;
         } else {
             return true;
         }

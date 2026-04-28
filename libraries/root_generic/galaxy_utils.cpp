@@ -30,6 +30,7 @@
 #include "root_generic/galaxy_xml.h"
 #include "root_generic/galaxy_gen.h"
 #include "root_generic/configxml.h"
+#include "root_generic/vega_random.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
 
@@ -151,28 +152,28 @@ SystemInfo GetSystemMax(Galaxy *galaxy) {
 }
 
 static float av01() {
-    return (float(rand())) / ((((float) RAND_MAX) + 1));
+    return VegaRandom::Instance().GenRandReal2();
 }
 
 static float sqav01() {
-    float tmp = av01();
+    const float tmp = av01();
     return tmp * tmp;
 }
 
-static float fsqav(float in1, float in2) {
+static float fsqav(const float in1, const float in2) {
     return sqav01() * (in2 - in1) + in1;
 }
 
-static int rnd(int in1, int in2) {
-    return (int) (in1 + (in2 - in1) * (float(rand())) / (((float) RAND_MAX) + 1));
+static int rnd(const int in1, const int in2) {
+    return static_cast<int>(in1 + (in2 - in1) * VegaRandom::Instance().GenRandReal2());
 }
 
-static int iav(int in1, int in2) {
+static int iav(const int in1, const int in2) {
     return rnd(in1, in2 + 1);
 }
 
-static int isqav(int in1, int in2) {
-    return (int) (in1 + (in2 + 1 - in1) * sqav01());
+static int isqav(const int in1, const int in2) {
+    return static_cast<int>(in1 + (in2 + 1 - in1) * sqav01());
 }
 
 void AvgSystems(const SystemInfo &a, const SystemInfo &b, SystemInfo &si) {

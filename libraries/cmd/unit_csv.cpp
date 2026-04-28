@@ -386,10 +386,10 @@ static void AddSubUnits(Unit *thus,
         CheckAccessory(xml.units.back());         //turns on the ceerazy rotation for the turr
     }
     for (int a = xml.units.size() - 1; a >= 0; a--) {
-        bool randomspawn = xml.units[a]->name.get().find("randomspawn") != string::npos;
-        if (randomspawn) {
-            int chancetospawn = float_to_int(xml.units[a]->ftl_energy.MaxLevel());
-            if (chancetospawn > rand() % 100) {
+        const bool random_spawn = xml.units[a]->name.get().find("randomspawn") != string::npos;
+        if (random_spawn) {
+            const int chance_to_spawn = float_to_int(xml.units[a]->ftl_energy.MaxLevel());
+            if (chance_to_spawn > VegaRandom::Instance().RandomInt32UpTo(99)) {
                 thus->SubUnits.prepend(xml.units[a]);
             } else {
                 xml.units[a]->Kill();
