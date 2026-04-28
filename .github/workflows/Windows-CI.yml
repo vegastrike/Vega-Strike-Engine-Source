@@ -29,11 +29,11 @@ jobs:
             preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
             python-version:  3.13.12
             is-release:      0
-          - os: windows-2025-vs2026
-            triplet: x64-win10
-            preset-name: VS2026Win64-pie-enabled-RelWithDebInfo
-            python-version: 3.13.12
-            is-release: 0
+          - os:              windows-2025-vs2026
+            triplet:         x64-win10
+            preset-name:     VS2026Win64-pie-enabled-RelWithDebInfo
+            python-version:  3.13.12
+            is-release:      0
 
     env:
       VCPKG_ROOT: ${{ github.workspace }}\\v
