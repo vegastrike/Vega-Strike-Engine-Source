@@ -133,10 +133,6 @@ IF (NOT DISABLE_CLIENT) ##########
 
 ENDIF(NOT DISABLE_CLIENT) ##########
 
-IF (UNIX)
-    LIST(APPEND VSE_TST_INCLUDES /usr/include/harfbuzz)
-ENDIF ()
-
 IF (NOT BEOS)
     FIND_LIBRARY(UTIL_LIB util)
 ELSEIF (WIN32)
