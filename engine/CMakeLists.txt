@@ -721,8 +721,8 @@ IF (NOT DISABLE_CLIENT)
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 ENDIF (NOT DISABLE_CLIENT)
 
-# Vssetup Sub build file
-#ADD_SUBDIRECTORY(setup)
+# vegasettings
+ADD_SUBDIRECTORY(setup)
 
 # Add other utilities here
 ADD_SUBDIRECTORY(objconv)
