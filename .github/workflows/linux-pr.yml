@@ -84,7 +84,7 @@ jobs:
             INSTALL_GTEST: 1
             USE_GTEST: 1
             INSTALL_SDL3: 0
-            INSTALL_SDL3_IMAGE: 1
+            INSTALL_SDL3_IMAGE: 0
             allow_failure: false
 
     steps:

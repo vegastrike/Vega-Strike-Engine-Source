@@ -586,6 +586,7 @@ function bootstrapOnRedHat ()
                                 freeglut-devel \
                                 openal-soft-devel \
                                 SDL3-devel \
+                                SDL3_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
@@ -663,6 +664,7 @@ function bootstrapOnRockyLinux ()
                                 freeglut-devel \
                                 openal-soft-devel \
                                 SDL3-devel \
+                                SDL3_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
                                 libjpeg-turbo-devel \
