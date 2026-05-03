@@ -375,7 +375,7 @@ function bootstrapOnOpenSuseLeap ()
                                     libexpat-devel \
                                     libgtk-3-0 \
                                     gtk3-devel \
-                                    python3-devel \
+                                    python313-devel \
                                     clang \
                                     glu-devel \
                                     Mesa-devel \
