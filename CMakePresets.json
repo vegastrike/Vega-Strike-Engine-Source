@@ -14,7 +14,7 @@
       "binaryDir": "${sourceDir}/build/${presetName}",
       "warnings": {
         "deprecated": true,
-        "uninitialized": true
+        "uninitialized": false
       },
       "debug": {
         "output": true
