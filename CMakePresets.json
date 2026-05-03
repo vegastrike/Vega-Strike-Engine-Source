@@ -10,10 +10,17 @@
       "name": "default",
       "hidden": true,
       "displayName": "Default Config",
-      "description": "Default build",
+      "description": "Default Config",
       "binaryDir": "${sourceDir}/build/${presetName}",
+      "warnings": {
+        "deprecated": true,
+        "uninitialized": true
+      },
       "debug": {
         "output": true
+      },
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     },
     {
@@ -24,11 +31,62 @@
       "inherits": "default"
     },
     {
+      "name": "ninja-multi-config",
+      "hidden": true,
+      "displayName": "Use Ninja Multi-Config generator",
+      "inherits": ["default"],
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo",
+        "CMAKE_CROSS_CONFIGS": "all",
+        "CMAKE_DEFAULT_BUILD_TYPE": "Debug",
+        "CMAKE_DEFAULT_CONFIGS": "Debug"
+      }
+    },
+    {
+      "name": "linux-base",
+      "hidden": true,
+      "inherits": ["default"],
+      "displayName": "Linux Default",
+      "description": "Default build for Linux",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-ninja",
+      "hidden": true,
+      "inherits": [
+        "linux-base",
+        "ninja"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "unix-makefiles",
       "hidden": true,
       "displayName": "Use Unix Makefiles generator",
       "generator": "Unix Makefiles",
       "inherits": "default"
+    },
+    {
+      "name": "linux-unix-makefiles",
+      "hidden": true,
+      "inherits": [
+        "linux-base",
+        "unix-makefiles"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
     },
     {
       "name": "debug",
@@ -46,7 +104,8 @@
       "displayName": "Release",
       "inherits": ["default"],
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "LOG_TIME_TAKEN_DETAILS": false
       }
     },
     {
@@ -55,7 +114,8 @@
       "displayName": "RelWithDebInfo",
       "inherits": ["default"],
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "LOG_TIME_TAKEN_DETAILS": false
       }
     },
     {
@@ -116,8 +176,114 @@
       "name": "gl-neither",
       "hidden": true,
       "inherits": ["default"],
-      "displayName": "GL-Neither",
+      "displayName": "GL-Neither"
+    },
+    {
+      "name": "VisualStudio-base",
+      "hidden": true,
+      "inherits": ["windows-base"],
+      "architecture": "X64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "inherits": ["default"],
+      "displayName": "Windows Default",
+      "description": "Default build for Windows",
+      "environment": {
+        "VCPKG_FEATURE_FLAGS": "manifests,registries",
+        "VCPKG_TARGET_TRIPLET": "x64-win10",
+        "VCPKG_HOST_TRIPLET": "x64-win10"
+      },
       "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+          "type": "FILEPATH"
+        },
+        "VCPKG_TARGET_TRIPLET": "x64-win10",
+        "VCPKG_HOST_TRIPLET": "x64-win10",
+        "VCPKG_INSTALL_OPTIONS": "--x-buildtrees-root=$env{VCPKG_ROOT}\\..\\vbuild"
+      },
+      "debug": {
+        "output": true,
+        "find": true
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2019Win64",
+      "hidden": true,
+      "inherits": ["VisualStudio-base"],
+      "displayName": "Visual Studio 2019 on Windows x64",
+      "generator": "Visual Studio 16 2019",
+      "architecture": "X64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2022Win64",
+      "hidden": true,
+      "inherits": ["VisualStudio-base"],
+      "displayName": "Visual Studio 2022 on Windows x64",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "X64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64",
+      "hidden": true,
+      "inherits": ["VisualStudio-base"],
+      "displayName": "Visual Studio 2026 on Windows x64",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "X64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "ninja-windows",
+      "hidden": true,
+      "inherits": [
+        "windows-base",
+        "ninja"
+      ],
+      "displayName": "Ninja on Windows",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "ninja-multi-config-windows",
+      "hidden": true,
+      "inherits": [
+        "windows-base",
+        "ninja-multi-config"
+      ],
+      "displayName": "Ninja Multi-Config on Windows",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
       }
     },
     {
@@ -481,7 +647,7 @@
       }
     },
     {
-      "name": "macos-default",
+      "name": "macOS-base",
       "hidden": true,
       "inherits": ["default"],
       "displayName": "macOS Default",
@@ -503,7 +669,7 @@
     {
       "name": "macos-pie-enabled-debug",
       "inherits": [
-        "macos-default",
+        "macOS-base",
         "pie-enabled",
         "debug"
       ],
@@ -517,7 +683,7 @@
     {
       "name": "macos-pie-enabled-release",
       "inherits": [
-        "macos-default",
+        "macOS-base",
         "pie-enabled",
         "release"
       ],
@@ -531,7 +697,7 @@
     {
       "name": "macos-pie-enabled-RelWithDebInfo",
       "inherits": [
-        "macos-default",
+        "macOS-base",
         "pie-enabled",
         "RelWithDebInfo"
       ],
@@ -545,7 +711,7 @@
     {
       "name": "macos-pie-disabled-debug",
       "inherits": [
-        "macos-default",
+        "macOS-base",
         "pie-disabled",
         "debug"
       ],
@@ -559,7 +725,7 @@
     {
       "name": "macos-pie-disabled-release",
       "inherits": [
-        "macos-default",
+        "macOS-base",
         "pie-disabled",
         "release"
       ],
@@ -573,7 +739,7 @@
     {
       "name": "macos-pie-disabled-RelWithDebInfo",
       "inherits": [
-        "macos-default",
+        "macOS-base",
         "pie-disabled",
         "RelWithDebInfo"
       ],
@@ -585,7 +751,7 @@
       }
     },
     {
-      "name": "macOS-MacPorts-default",
+      "name": "macOS-MacPorts-base",
       "hidden": true,
       "inherits": ["default"],
       "displayName": "macOS (MacPorts) Default",
@@ -613,7 +779,7 @@
     {
       "name": "macOS-MacPorts-pie-enabled-debug",
       "inherits": [
-        "macOS-MacPorts-default",
+        "macOS-MacPorts-base",
         "pie-enabled",
         "debug"
       ],
@@ -627,7 +793,7 @@
     {
       "name": "macOS-MacPorts-pie-enabled-release",
       "inherits": [
-        "macOS-MacPorts-default",
+        "macOS-MacPorts-base",
         "pie-enabled",
         "release"
       ],
@@ -641,7 +807,7 @@
     {
       "name": "macOS-MacPorts-pie-enabled-RelWithDebInfo",
       "inherits": [
-        "macOS-MacPorts-default",
+        "macOS-MacPorts-base",
         "pie-enabled",
         "RelWithDebInfo"
       ],
@@ -658,7 +824,7 @@
     {
       "name": "macOS-MacPorts-pie-disabled-debug",
       "inherits": [
-        "macOS-MacPorts-default",
+        "macOS-MacPorts-base",
         "pie-disabled",
         "debug"
       ],
@@ -672,7 +838,7 @@
     {
       "name": "macOS-MacPorts-pie-disabled-release",
       "inherits": [
-        "macOS-MacPorts-default",
+        "macOS-MacPorts-base",
         "pie-disabled",
         "release"
       ],
@@ -686,7 +852,7 @@
     {
       "name": "macOS-MacPorts-pie-disabled-RelWithDebInfo",
       "inherits": [
-        "macOS-MacPorts-default",
+        "macOS-MacPorts-base",
         "pie-disabled",
         "RelWithDebInfo"
       ],
@@ -695,87 +861,6 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Darwin"
-      }
-    },
-    {
-      "name": "windows-base",
-      "hidden": true,
-      "inherits": ["default"],
-      "displayName": "Windows Default",
-      "description": "Default build for Windows",
-      "environment": {
-        "VCPKG_TARGET_TRIPLET": "x64-win10",
-        "VCPKG_HOST_TRIPLET": "x64-win10",
-        "X_VCPKG_APPLOCAL_DEPS_INSTALL": "ON"
-      },
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": {
-          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-          "type": "FILEPATH"
-        },
-        "VCPKG_TARGET_TRIPLET": "x64-win10",
-        "VCPKG_HOST_TRIPLET": "x64-win10",
-        "VCPKG_INSTALL_OPTIONS": "--x-buildtrees-root=$env{VCPKG_ROOT}\\..\\vbuild"
-      },
-      "debug": {
-        "output": true,
-        "find": true
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
-    },
-    {
-      "name": "VS2019Win64",
-      "hidden": true,
-      "inherits": "windows-base",
-      "displayName": "Visual Studio 2019 on Windows x64",
-      "generator": "Visual Studio 16 2019",
-      "architecture": "X64",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
-    },
-    {
-      "name": "VS2022Win64",
-      "hidden": true,
-      "inherits": "windows-base",
-      "displayName": "Visual Studio 2022 on Windows x64",
-      "generator": "Visual Studio 17 2022",
-      "architecture": "X64",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
-    },
-    {
-      "name": "VS2026Win64",
-      "hidden": true,
-      "inherits": "windows-base",
-      "displayName": "Visual Studio 2026 on Windows x64",
-      "generator": "Visual Studio 18 2026",
-      "architecture": "X64",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
-    },
-    {
-      "name": "ninja-windows",
-      "hidden": true,
-      "inherits": "windows-base",
-      "displayName": "Ninja on Windows",
-      "generator": "Ninja Multi-Config",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
       }
     },
     {
