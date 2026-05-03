@@ -219,7 +219,71 @@ function bootstrapOnUbuntu()
                             mesa-common-dev \
                             libltdl-dev
             ;;
-        "noble"|"jammy"|"hirsute"|"impish"|"focal"|"bionic"|"xenial")
+        "noble")
+            echo "Noble does NOT support SDL3"
+            apt-get -qy install \
+                            git \
+                            cmake \
+                            build-essential \
+                            lsb-release \
+                            make \
+                            pkg-config \
+                            ninja-build \
+                            autoconf \
+                            autoconf-archive \
+                            automake \
+                            libtool \
+                            curl \
+                            zip \
+                            unzip \
+                            tar \
+                            libx11-dev \
+                            libxext-dev \
+                            libxfixes-dev \
+                            libxi-dev \
+                            libxmu-dev \
+                            libxrandr-dev \
+                            libxss-dev \
+                            libxtst-dev \
+                            libwayland-dev \
+                            libxkbcommon-dev \
+                            wayland-protocols \
+                            libibus-1.0-dev \
+                            python3-jinja2 \
+                            libx11-xcb-dev \
+                            libxcb-dpms0-dev \
+                            libxxf86vm-dev \
+                            libxcb-xv0-dev \
+                            python3-dev \
+                            libarchive-dev \
+                            libpng16-16 \
+                            libpng-dev \
+                            libpng-tools \
+                            libjpeg-turbo8-dev \
+                            libexpat1-dev \
+                            libgtk-3-dev \
+                            libopenal-dev \
+                            libogg-dev \
+                            libvorbis-dev \
+                            libglvnd-dev \
+                            libgl1-mesa-dev \
+                            libsdl2-dev \
+                            libsdl2-image-dev \
+                            freeglut3-dev \
+                            libboost-python-dev \
+                            libboost-log-dev \
+                            libboost-regex-dev \
+                            libboost-json-dev \
+                            libboost-program-options-dev \
+                            clang \
+                            libprotobuf-dev \
+                            libaudio-dev \
+                            libfribidi-dev \
+                            libglu1-mesa-dev \
+                            mesa-common-dev \
+                            libltdl-dev
+            ;;
+        "jammy"|"hirsute"|"impish"|"focal"|"bionic"|"xenial")
             echo "Sorry, Ubuntu ${LINUX_CODENAME} is no longer supported"
             exit 2
             ;;
