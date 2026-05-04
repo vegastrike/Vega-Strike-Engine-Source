@@ -123,8 +123,6 @@ IF (NOT WIN32)
     LIST(APPEND VSE_TST_LIBS ${UTIL_LIB})
 ENDIF (NOT WIN32)
 
-# Still need to add CEGUI and OGRE find packages
-
 # Multiplayer networking option
 OPTION(USE_NET_THREAD_POSIX "Enable Posix net threads" OFF)
 IF (NOT USE_NET_THREAD_POSIX)

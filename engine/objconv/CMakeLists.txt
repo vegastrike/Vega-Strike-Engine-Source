@@ -129,17 +129,10 @@ IF (EXPAT_FOUND)
     LIST(APPEND MSH_INCLUDES ${EXPAT_INCLUDE_DIRS})
     LIST(APPEND MSH_LIBS ${EXPAT_LIBRARIES})
 ELSE (EXPAT_FOUND)
-    MESSAGE(WARNING "We can't find expat for XML crap")
+    MESSAGE(FATAL_ERROR "Failed to find required library expat for XML parsing")
 ENDIF (EXPAT_FOUND)
 
-#ogre already looked for by parent
-IF (OGRE_FOUND)
-    LIST(APPEND MSH_INCLUDES ${OGRE_INCLUDE_DIRS})
-    LIST(APPEND MSH_LIBS ${OGRE_LIBRARIES})
-    MESSAGE(STATUS "Compiling vega-meshtool with OgreMesh support")
-ELSE (OGRE_FOUND)
-    MESSAGE(STATUS "Compiling vega-meshtool without OgreMesh support: Ogre not found")
-ENDIF (OGRE_FOUND)
+MESSAGE(STATUS "Always compiling vega-meshtool without OgreMesh support now")
 
 SET(MESHER_SOURCES
     mesher/Converter.cpp
@@ -147,7 +140,6 @@ SET(MESHER_SOURCES
     mesher/from_obj.cpp
     mesher/main.cpp
     mesher/to_obj.cpp
-    mesher/to_OgreMesh.cpp
     mesher/to_BFXM.cpp
     mesher/Modules/Convert.cpp
     mesher/Modules/OldSyntax.cpp
@@ -155,7 +147,6 @@ SET(MESHER_SOURCES
     mesher/Modules/BFXM_to_Wavefront.cpp
     mesher/Modules/BFXM_to_XMesh.cpp
     mesher/Modules/XMesh_to_BFXM.cpp
-    mesher/Modules/XMesh_to_Ogre.cpp
     mesher/Modules/Wavefront_to_BFXM.cpp
     ${Vega_Strike_SOURCE_DIR}/libraries/root_generic/xml_support.cpp
 )
@@ -189,13 +180,6 @@ IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vega-meshtool PUBLIC WINVER=0x0A00)
     TARGET_COMPILE_DEFINITIONS(vega-meshtool PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
-
-# OGRE already looked for by parent
-IF (OGRE_FOUND)
-    # Ogre usage in mesher requires boost::system
-    ADD_DEPENDENCIES(vega-meshtool boost_system)
-    LIST(APPEND MSH_LIBS boost_system)
-ENDIF (OGRE_FOUND)
 
 TARGET_LINK_LIBRARIES(vega-meshtool ${MSH_LIBS})
 INSTALL(TARGETS vega-meshtool DESTINATION bin)

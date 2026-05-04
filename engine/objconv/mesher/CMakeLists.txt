@@ -36,22 +36,17 @@ IF (EXPAT_FOUND)
         from_BFXM.cpp
         main.cpp
         to_obj.cpp
-        to_OgreMesh.cpp
         Modules/Convert.cpp
         Modules/OldSyntax.cpp
         Modules/Dims.cpp
         Modules/BFXM_to_Wavefront.cpp
         Modules/BFXM_to_XMesh.cpp
         Modules/XMesh_to_BFXM.cpp
-        Modules/XMesh_to_Ogre.cpp
         Modules/Wavefront_to_BFXM.cpp
         PrecompiledHeaders/Converter.cpp
         ${Vega_Strike_SOURCE_DIR}/engine/src/hashtable.cpp
         ${Vega_Strike_SOURCE_DIR}/engine/src/xml_support.cpp
     )
-
-    # Still need to add CEGUI and OGRE find packages
-    #if have OGRE to_OgreMesh.cpp
 
     ADD_EXECUTABLE(mesher ${MESHER_SOURCES})
     TARGET_INCLUDE_DIRECTORIES(mesher SYSTEM PRIVATE ${TST_INCLUDES})
@@ -82,15 +77,9 @@ IF (EXPAT_FOUND)
         TARGET_COMPILE_DEFINITIONS(mesher PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
-    # OGRE already looked for by parent
-    MESSAGE(STATUS "${OGRE_FOUND}")
-    IF (OGRE_FOUND)
-        # Ogre usage in mesher requires boost::system
-        ADD_DEPENDENCIES(mesher boost_system)
-        LIST(APPEND MESHER_LIBRARIES boost_system)
-    ENDIF (OGRE_FOUND)
+    MESSAGE(STATUS "Always building without Ogre support now")
 
-    TARGET_LINK_LIBRARIES(mesher ${MESHER_LIBRARIES} ${EXPAT_LIBRARIES} ${OGRE_LIBRARIES})
+    TARGET_LINK_LIBRARIES(mesher ${MESHER_LIBRARIES} ${EXPAT_LIBRARIES})
     SET_TARGET_PROPERTIES(mesher PROPERTIES LINK_FLAGS "-L/usr/lib")
 ELSE (EXPAT_FOUND)
     MESSAGE(WARNING "Not going to be able to compile mesher, no expat found")
