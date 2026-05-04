@@ -1367,7 +1367,7 @@ void BaseComputer::run(void) {
 
 //Redo the title strings for the display.
 void BaseComputer::recalcTitle() {
-    if (m_displayModes.size() == 1) {
+    if (m_displayModes.size() == 1 && m_displayModes.at(0) == NETWORK) {
         return;
     }
 
