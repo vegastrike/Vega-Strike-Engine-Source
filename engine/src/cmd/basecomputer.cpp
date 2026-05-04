@@ -91,7 +91,7 @@ using VSFileSystem::SaveFile;
 #include "src/vega_cast_utils.h"
 
 enum class Color {
-    prohibited, downgrade, incompatible, no_space, no_money, destroyed, 
+    prohibited, downgrade, incompatible, no_space, no_money, destroyed,
     category, mission, default_upgrade, mount_prohibited, mount_empty, mount_full
 };
 
@@ -1372,7 +1372,7 @@ void BaseComputer::run(void) {
 
 //Redo the title strings for the display.
 void BaseComputer::recalcTitle() {
-    if (m_displayModes.size() == 1 || m_displayModes.at(0) == NETWORK) {
+    if (m_displayModes.size() == 1 && m_displayModes.at(0) == NETWORK) {
         return;
     }
 
@@ -1779,7 +1779,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 break;
             case BUY_SHIP:
                 commitButton->setCommand("BuyShip");
-                
+
                 if (is_player_ship) {
                     PlayerShip player_ship = PlayerShip::GetShipByIndex(item.index);
 
@@ -1836,7 +1836,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
     string tailString;
     string tempString = "";
     Unit *baseUnit = m_base.GetUnit();
-    
+
     if (tlist->transaction != ACCEPT_MISSION) {
         //Do the money.
         switch (tlist->transaction) {
@@ -1910,7 +1910,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     UpdateTransportPricesForOwnedShips(baseUnit);
                     PlayerShip& ship = PlayerShip::GetShipByIndex(item.index);
                     tempString = ship.GetPurchaseHeader();
-                    
+
                 } else {
                     text += prettyPrintFloat(baseUnit->PriceCargo(item.GetName()));
                     tempString = (boost::format("Price: #b#%1%#-b#n#") % text).str();
@@ -2263,7 +2263,7 @@ void BaseComputer::loadListPicker(TransactionList &tlist,
         GFXColor base_color = GUI_CLEAR;
         if(item.IsMissionFlag()) {
             base_color = getColor(Color::mission);
-        } 
+        }
 
         std::string icategory = getDisplayCategory(item);
         if (icategory != currentCategory) {
@@ -3522,8 +3522,8 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
             mountName = tostring(i + 1) + " (Empty) " + temp.c_str();
         }
         //Now we add the cell.  Note that "selectable" is stored in the tag property.
-        const GFXColor mountColor = (selectable ? 
-                                     getColor(Color::mount_full) : 
+        const GFXColor mountColor = (selectable ?
+                                     getColor(Color::mount_full) :
                                      getColor(Color::mount_prohibited));
         picker->addCell(new SimplePickerCell(mountName, "", mountColor, (selectable ? 1 : 0)));
     }
@@ -3767,8 +3767,8 @@ string buildShipDescription(Cargo &item, std::string &texture_description) {
             return error_string;
         }
         unit = vega_dynamic_cast_ptr<Unit>(components_manager);
-    } 
-    
+    }
+
     // Load the Unit
     Flightgroup *flightGroup = new Flightgroup();
     int fgsNumber = 0;
@@ -3998,7 +3998,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         const vector<float> &recordedLowestPrices = getSaveData(whichplayer, lopricek);
 
         string prefix = "   ";
-        
+
 
         VS_LOG(info, "Tracking data:");
         VS_LOG(info, (boost::format("  highest locs: (%1%)") % recordedHighestLocs.size()));
@@ -4237,7 +4237,7 @@ bool buyShip(Unit *baseUnit,
             fgs_number = flight_group->nr_ships;
             flight_group->nr_ships++;
             flight_group->nr_ships_left++;
-        } 
+        }
 
         // Create Unit
         // Why create a ship with baseUnit faction and then immediately switch to player faction?
@@ -4288,24 +4288,24 @@ bool buyShip(Unit *baseUnit,
     if (base_computer) {
         base_computer->m_player.SetUnit(new_ship);
     }
-    
+
 
     // Finalize deal
     // Play sounds
     UniverseUtil::StopAllSounds();
-    UniverseUtil::playSound("sales/salespitch" + item->GetName().substr(0, item->GetName().find(".")) + "accept.wav", 
+    UniverseUtil::playSound("sales/salespitch" + item->GetName().substr(0, item->GetName().find(".")) + "accept.wav",
                             QVector(0,0,0),Vector(0, 0, 0));
 
     // Save game - currently, we don't save the game here.
 
 
-    // TODO: figure out how to transfer cargo 
+    // TODO: figure out how to transfer cargo
     // This is not as easy as it sounds.
     // Consider what happens when you switch from a fully laden Ox to a Schroedinger.
     // Even if you ignored the cargo hold volume restrictions, the mass would make the ship unflyable.
-                    
+
     //We now put the player in space.
-    
+
     // Swap Missions
     const bool persistent_missions_across_ship_switch = configuration().general.persistent_mission_across_ship_switch;
     if (persistent_missions_across_ship_switch) {
@@ -4317,7 +4317,7 @@ bool buyShip(Unit *baseUnit,
     }
 
     UpdateTransportPricesForOwnedShips(baseUnit);
-    
+
     return true;
 }
 
@@ -4377,7 +4377,7 @@ bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *contro
     } catch (const std::runtime_error& e) {
         VS_LOG(error, (boost::format("Error in showPlayerInfo: %1%") % e.what()));
     }
-    
+
 
     //Put this in the description.
     StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
@@ -4409,7 +4409,7 @@ bool BaseComputer::showShipStats(const EventCommandId &command, Control *control
     } catch (const std::runtime_error& e) {
         VS_LOG(error, (boost::format("Error in showShipStats: %1%") % e.what()));
     }
-    
+
 
     //remove picture, if any
     string::size_type pic;
