@@ -246,23 +246,7 @@ ELSE (NOT DISABLE_FFMPEG)
     MESSAGE(STATUS "FFMPEG disabled")
 ENDIF (NOT DISABLE_FFMPEG)
 
-#Find Ogre
-# current OGRE 1.12 is not compatible
-OPTION(DISABLE_OGRE "Disable Ogre-mesh support in mesh tool" ON)
-IF (NOT DISABLE_OGRE)
-    FIND_PACKAGE(OGRE)
-    IF (OGRE_FOUND)
-        LIST(APPEND TST_INCLUDES ${OGRE_INCLUDE_DIR})
-        LIST(APPEND TST_LIBS ${OGRE_LIBRARY})
-        ADD_DEFINITIONS(${OGRE_DEFINITIONS})
-        SET(HAVE_OGRE 1)
-        MESSAGE(STATUS "Found Ogre: ${OGRE_VERSION}")
-    ELSE (OGRE_FOUND)
-        MESSAGE(STATUS "Ogre Not Found: compiling without")
-    ENDIF (OGRE_FOUND)
-ELSE (NOT DISABLE_OGRE)
-    MESSAGE(STATUS "Ogre disabled")
-ENDIF (NOT DISABLE_OGRE)
+MESSAGE(STATUS "Always building without Ogre now")
 
 #Find GL
 SET(CMAKE_FIND_FRAMEWORK "FIRST")
