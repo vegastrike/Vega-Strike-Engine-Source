@@ -2778,11 +2778,11 @@ int Unit::RepairCost() {
     return 0;
 }
 
+// TODO: remove
 // This was called when performing a BASIC_REPAIR
 // This function doesn't do anything anymore
 // Kept for compatibility with python API.
 int Unit::RepairUpgrade() {
-    // TODO: remove
     return 1;
 }
 
