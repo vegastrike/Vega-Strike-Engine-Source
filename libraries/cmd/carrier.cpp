@@ -44,7 +44,7 @@
 
 
 // TODO: find out where this is and maybe refactor
-extern int SelectDockPort(Unit *, Unit *parent);
+extern int SelectDockPort(const Unit *, const Unit *parent);
 extern void SwitchUnits(Unit *, Unit *);
 extern void PlayDockingSound(int dock);
 

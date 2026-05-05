@@ -31,6 +31,7 @@
 
 #include <Python.h>
 #include <algorithm>
+#include <string>
 
 #include "src/vega_cast_utils.h"
 #include "cmd/vega_py_run.h"
@@ -52,15 +53,11 @@
 #include "gfx/cockpit.h"
 #include "gfx/ani_texture.h"
 #include "cmd/music.h"
-#include "root_generic/lin_time.h"
-#include "root_generic/load_mission.h"
 #include "src/universe_util.h"
-#include "gui/guidefs.h"
 #ifdef RENDER_FROM_TEXTURE
 #include "gfx/stream_texture.h"
 #endif
 #include "src/main_loop.h"
-#include "src/in_mouse.h"
 #include "src/in_kb.h"
 #include "src/universe.h"
 
@@ -90,11 +87,11 @@ static void biModifyMouseSensitivity(int &x, int &y, bool invert) {
         x -= configuration().graphics.resolution_x / 2;
         y -= configuration().graphics.resolution_y / 2;
         if (invert) {
-            x = int(x / factor);
-            y = int(y / factor);
+            x = static_cast<int>(x / factor);
+            y = static_cast<int>(y / factor);
         } else {
-            x = int(x * factor);
-            y = int(y * factor);
+            x = static_cast<int>(x * factor);
+            y = static_cast<int>(y * factor);
         }
         x += configuration().graphics.resolution_x / 2;
         y += configuration().graphics.resolution_y / 2;
@@ -185,7 +182,7 @@ BaseInterface::Room::BaseVSSprite::BaseVSSprite(const std::string &spritefile, c
 }
 
 BaseInterface::Room::BaseVSSprite::~BaseVSSprite() {
-    if (soundsource.get() != NULL) {
+    if (soundsource) {
         BaseUtil::DestroyVideoSoundStream(soundsource, soundscene);
     }
     spr.ClearTimeSource();
@@ -232,7 +229,7 @@ void BaseInterface::Room::BaseVSMovie::SetMovie(const std::string &moviefile) {
     new(&spr)VSSprite(AnimatedTexture::CreateVideoTexture(moviefile), x, y, w, h, 0, 0, true);
     spr.SetRotation(rot);
 
-    if (soundsource.get() != NULL) {
+    if (soundsource) {
         BaseUtil::DestroyVideoSoundStream(soundsource, soundscene);
     }
     soundscene = "video";
@@ -262,7 +259,7 @@ void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base) {
     GFXAlphaTest(ALWAYS, 0);
 
     // Play the associated source if it isn't playing
-    if (soundsource.get() != NULL) {
+    if (soundsource) {
         if (!soundsource->isPlaying()) {
             soundsource->startPlaying();
         }
@@ -270,7 +267,7 @@ void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base) {
 }
 
 void BaseInterface::Room::BaseVSMovie::Draw(BaseInterface *base) {
-    if (soundsource.get() == NULL) {
+    if (!soundsource) {
         // If it's not playing, mark as playing, and reset the sprite's animation
         // (it's not automatic without a time source)
         if (!playing) {
@@ -292,7 +289,7 @@ void BaseInterface::Room::BaseVSMovie::Draw(BaseInterface *base) {
 
     BaseInterface::Room::BaseVSSprite::Draw(base);
 
-    if (soundsource.get() == NULL) {
+    if (!soundsource) {
         // If there is no sound source, and the sprite is an animated sprite, and
         // it's finished, then we must invoke the callback
         if (!getCallback().empty() && spr.Done()) {
@@ -303,8 +300,7 @@ void BaseInterface::Room::BaseVSMovie::Draw(BaseInterface *base) {
 }
 
 bool BaseInterface::Room::BaseVSSprite::isPlaying() const {
-    return soundsource.get() != NULL
-            && soundsource->isPlaying();
+    return soundsource && soundsource->isPlaying();
 }
 
 void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
@@ -364,7 +360,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
     }
 }
 
-void BaseInterface::Room::Draw(BaseInterface *base) {
+void BaseInterface::Room::Draw(BaseInterface *base) const {
     size_t i;
     for (i = 0; i < objs.size(); i++) {
         if (objs[i]) {
@@ -631,6 +627,10 @@ void BaseInterface::Room::BasePython::Draw(BaseInterface *base) {
     }
 }
 
+void BaseInterface::Room::BasePython::EndXML(FILE *fp) {
+    BaseObj::EndXML(fp);
+}
+
 void BaseInterface::Room::BasePython::Relink(const std::string &python) {
     pythonfile = python;
 }
@@ -670,7 +670,7 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
     hastalked = true;
 }
 
-int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y) {
+int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y) const {
     for (size_t i = 0; i < links.size(); i++) {
         if (links[i]) {
             if (x >= links[i]->x
@@ -773,15 +773,16 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
 #ifdef BASE_MAKER
         if (state == WS_MOUSE_UP) {
             char  input[201];
-            char *str;
+            std::string input_prompt;
             if (button == WS_RIGHT_BUTTON) {
-                str = "Please create a file named stdin.txt and type\nin the sprite file that you wish to use.";
+                input_prompt = "Please create a file named stdin.txt and type\nin the sprite file that you wish to use.";
             } else if (button == WS_MIDDLE_BUTTON) {
-                str =
+                input_prompt =
                     "Please create a file named stdin.txt and type\nin the type of room followed by arguments for the room followed by text in quotations:\n1 ROOM# \"TEXT\"\n2 \"TEXT\"\n3 vector<MODES>.size vector<MODES> \"TEXT\"";
             } else {
                 return;
             }
+            const char *str = input_prompt.c_str();
 #ifdef _WIN32
             int ret = MessageBox( NULL, str, "Input", MB_OKCANCEL );
 #else
@@ -814,7 +815,7 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
                     {
                     case 1:
                         links.push_back( new Goto( "linkind", "link" ) );
-                        VSFileSystem::vs_fscanf( fp, "%d", &( (Goto*) links.back() )->index );
+                        VSFileSystem::vs_fscanf( fp, "%d", &vega_dynamic_cast_ptr<Goto>(links.back())->index );
                         break;
                     case 2:
                         links.push_back( new Launch( "launchind", "launch" ) );
@@ -824,7 +825,7 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
                         VSFileSystem::vs_fscanf( fp, "%d", &index );
                         for (i = 0; i < index && ( !VSFileSystem::vs_feof( fp ) ); i++) {
                             VSFileSystem::vs_fscanf( fp, "%d", &ret );
-                            ( (Comp*) links.back() )->modes.push_back( (BaseComputer::DisplayMode) ret );
+                            vega_dynamic_cast_ptr<Comp>(links.back())->modes.push_back( static_cast<DisplayMode>(ret) );
                         }
                         break;
                     default:
@@ -845,9 +846,11 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
                 }
                 if (button == WS_RIGHT_BUTTON) {
                     input[200] = input[199] = '\0';
-                    objs.push_back( new BaseVSSprite( input, "tex" ) );
-                    ( (BaseVSSprite*) objs.back() )->texfile = string( input );
-                    ( (BaseVSSprite*) objs.back() )->spr.SetPosition( x, y );
+                    const std::string input_string = input;
+                    const std::string kTex = "tex";
+                    objs.push_back( new BaseVSSprite( input_string, kTex ) );
+                    vega_dynamic_cast_ptr<BaseVSSprite>(objs.back())->texfile = string( input );
+                    vega_dynamic_cast_ptr<BaseVSSprite>(objs.back())->spr.SetPosition( x, y );
                 } else if (button == WS_MIDDLE_BUTTON && makingstate == 0) {
                     links.back()->x   = x;
                     links.back()->y   = y;
@@ -856,11 +859,13 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
                     makingstate = 1;
                 } else if (button == WS_MIDDLE_BUTTON && makingstate == 1) {
                     links.back()->wid = x-links.back()->x;
-                    if (links.back()->wid < 0)
+                    if (links.back()->wid < 0) {
                         links.back()->wid = -links.back()->wid;
+                    }
                     links.back()->hei = y-links.back()->y;
-                    if (links.back()->hei < 0)
+                    if (links.back()->hei < 0) {
                         links.back()->hei = -links.back()->hei;
+                    }
                     makingstate = 0;
                 }
             }
@@ -885,10 +890,9 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
 }
 
 void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
-    float x, y;
-    std::pair<float,float> pair = CalculateRelativeXY(xbeforecalc, ybeforecalc);
-    x = pair.first;
-    y = pair.second;
+    const std::pair<float,float> pair = CalculateRelativeXY(xbeforecalc, ybeforecalc);
+    const float x = pair.first;
+    const float y = pair.second;
 
     int i = rooms[curroom]->MouseOver(this,
             x,
@@ -919,23 +923,21 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
         curtext.SetText(rooms[curroom]->deftext);
     }
     if (link && link->pythonfile != "#") {
-        GFXColor temp_link_color(overcolor[0], overcolor[1], overcolor[2], overcolor[3]);
+        const GFXColor temp_link_color(overcolor[0], overcolor[1], overcolor[2], overcolor[3]);
         curtext.color = static_cast<ImU32>(temp_link_color);
         mousePointerStyle = MOUSE_POINTER_HOVER;
     } else {
-        GFXColor temp_inactive_color(inactivecolor[0], inactivecolor[1], inactivecolor[2], inactivecolor[3]);
+        const GFXColor temp_inactive_color(inactivecolor[0], inactivecolor[1], inactivecolor[2], inactivecolor[3]);
         curtext.color = static_cast<ImU32>(temp_inactive_color);
         mousePointerStyle = MOUSE_POINTER_NORMAL;
     }
     const bool draw_always = configuration().graphics.bases.location_marker_draw_always;
     const float defined_distance = configuration().graphics.bases.location_marker_distance_flt;
     if (!draw_always) {
-        float cx, cy;
-        float dist_cur2link;
         for (i = 0; i < static_cast<int>(rooms[curroom]->links.size()); i++) {
-            cx = (rooms[curroom]->links[i]->x + (rooms[curroom]->links[i]->wid / 2)); //get the x center of the location
-            cy = (rooms[curroom]->links[i]->y + (rooms[curroom]->links[i]->hei / 2)); //get the y center of the location
-            dist_cur2link = sqrt(std::pow((cx - x), 2) + std::pow((cy - y), 2));
+            const float cx = (rooms[curroom]->links[i]->x + (rooms[curroom]->links[i]->wid / 2)); //get the x center of the location
+            const float cy = (rooms[curroom]->links[i]->y + (rooms[curroom]->links[i]->hei / 2)); //get the y center of the location
+            const float dist_cur2link = sqrt(std::pow((cx - x), 2) + std::pow((cy - y), 2));
             if (dist_cur2link < defined_distance) {
                 rooms[curroom]->links[i]->alpha = (1 - (dist_cur2link / defined_distance));
             } else {
@@ -946,7 +948,7 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
 }
 
 void BaseInterface::Click(int xint, int yint, int button, int state) {
-    std::pair<float,float> pair = CalculateRelativeXY(xint, yint);
+    const std::pair<float,float> pair = CalculateRelativeXY(xint, yint);
     rooms[curroom]->Click(this, pair.first, pair.second, button, state);
 }
 
@@ -1010,7 +1012,7 @@ void BaseInterface::ActiveMouseOverWin(int x, int y) {
     }
 }
 
-void BaseInterface::Key(unsigned int ch, unsigned int mod, bool release, int x, int y) {
+void BaseInterface::Key(unsigned int ch, unsigned int mod, bool release, int x, int y) const {
     if (!python_kbhandler.empty()) {
         const std::string *evtype;
         if (release) {
@@ -1105,8 +1107,8 @@ void BaseInterface::InitCallbacks() {
     }
 }
 
-BaseInterface::Room::Talk::Talk(const std::string &ind, const std::string &pythonfile) :
-        BaseInterface::Room::Link(ind, pythonfile), index(-1) {
+BaseInterface::Room::Talk::Talk(const std::string &ind, const std::string &pythonfile) : BaseInterface::Room::Link(
+    ind, pythonfile), index(-1), curroom{-1} {
 #ifndef BASE_MAKER
     gameMessage last;
     int i = 0;

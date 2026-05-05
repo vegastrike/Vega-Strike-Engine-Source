@@ -31,6 +31,43 @@
 #include "cmd/unit_generic.h"
 #include "gui/simplepicker.h"
 #include "cmd/cargo_color.h"
+#include "common/enum_iterator.h"
+
+enum class DisplayMode {
+    CARGO = 0,            //Buy and sell cargo.
+    UPGRADE,            //Buy and sell ship upgrades.
+    SHIP_DEALER,        //Replace current ship.
+    MISSIONS,           //Show available missions.
+    NEWS,               //Show news items.
+    INFO,                           //Show basic info.
+    LOADSAVE,                   //LOAD SAVE
+    NETWORK,                    //Network submenu of Loadsave.
+    DISPLAY_MODE_COUNT, //Number of display modes.
+    NULL_DISPLAY = DISPLAY_MODE_COUNT,     //No display.
+};
+
+inline bool IsEnumValid(const DisplayMode value)
+{
+    switch(value)
+    {
+        case DisplayMode::CARGO:
+        case DisplayMode::UPGRADE:
+        case DisplayMode::SHIP_DEALER:
+        case DisplayMode::MISSIONS:
+        case DisplayMode::NEWS:
+        case DisplayMode::INFO:
+        case DisplayMode::LOADSAVE:
+        case DisplayMode::NETWORK:
+        case DisplayMode::NULL_DISPLAY:
+            return true;
+        default:
+            return false;
+    }
+}
+
+using Iter_DisplayMode = EnumIterator<DisplayMode, DisplayMode::CARGO, DisplayMode::DISPLAY_MODE_COUNT>;
+
+#define RAW_DISPLAY_MODE(d) (static_cast<std::underlying_type_t<DisplayMode>>(d))
 
 void InitBaseComputer();
 
@@ -50,35 +87,22 @@ public:
 
     static int dirty;
 
-//The Computer displays that are possible.
-    enum DisplayMode {
-        CARGO = 0,            //Buy and sell cargo.
-        UPGRADE,            //Buy and sell ship upgrades.
-        SHIP_DEALER,        //Replace current ship.
-        MISSIONS,           //Show available missions.
-        NEWS,               //Show news items.
-        INFO,                           //Show basic info.
-        LOADSAVE,                   //LOAD SAVE
-        NETWORK,                    //Network submenu of Loadsave.
-        DISPLAY_MODE_COUNT, //Number of display modes.
-        NULL_DISPLAY = DISPLAY_MODE_COUNT,     //No display.
-    };
-
 //Set up the window and get everything ready.
-    virtual void init(void);
+    void init(void) override;
 
 //Start it up!
-    virtual void run(void);
+    void run(void) override;
 
 //Check if we are dirty.
-    virtual void draw(void);
+    void draw(void) override;
 
 //Process a command event from the window. Handled in parent class's WctlCommandTable.
 //virtual bool processWindowCommand(const EventCommandId& command, Control* control);
 
 //CONSTRUCTION
     BaseComputer(Unit *player, Unit *base, const vector<DisplayMode> &modes);
-    virtual ~BaseComputer(void);
+
+    ~BaseComputer(void) override;
 
 //These are the transactions that can happen using this object.
 //Transactions are operations that modify the player's state.  Reading news isn't
@@ -100,7 +124,7 @@ protected:
         vector<CargoColor> masterList;          //All the items that could be in the picker.
         Picker *picker;                         //The picker loaded with the list.
         TransactionType transaction;        //The kind of transaction these items will generate.
-        TransactionList() : picker(NULL), transaction(NULL_TRANSACTION) {
+        TransactionList() : picker(nullptr), transaction(NULL_TRANSACTION) {
         }
     };
 
@@ -115,14 +139,14 @@ protected:
                 : m_parent(player), type(confirmtype), text(text) {
         }
 
-        virtual ~LoadSaveQuitConfirm(void) {
+        ~LoadSaveQuitConfirm(void) override {
         }
 
 //Set up the window and get everything ready.
-        virtual void init(void);
+        void init(void) override;
 
 //Process a command event from the window.
-        virtual bool processWindowCommand(const EventCommandId &command, Control *control);
+        bool processWindowCommand(const EventCommandId &command, Control *control) override;
     };
     friend class LoadSaveQuitConfirm;
 //HANDLERS
@@ -198,17 +222,17 @@ protected:
 //Refresh both picker lists and the title.
     void refresh(void);
 
-//Return whether or not this transaction is possible for the player now.
-    bool isTransactionOK(const Cargo &originalItem, TransactionType transType, int quantity = 1);
+//Return whether this transaction is possible for the player now.
+    bool isTransactionOK(const Cargo &original_item, TransactionType transaction_type, int quantity = 1);
 
 //Create whatever cells are needed to add a category to the picker.
-    SimplePickerCell *createCategoryCell(SimplePickerCells &cells, const string &category, bool skipFirstCategory);
+    SimplePickerCell *createCategoryCell(SimplePickerCells &cells, const string &original_category, bool skip_first_category);
 
 //Load a picker with a list of items.
-    void loadListPicker(TransactionList &list,
+    void loadListPicker(TransactionList &transaction_list,
             SimplePicker &picker,
-            TransactionType transType,
-            bool skipFirstCategory = false);
+            TransactionType transaction_type,
+            bool skip_first_category = false);
 
 //Scroll to a specific item in a picker, and optionally select it.
 //Returns true if the specified item is found.
@@ -255,9 +279,10 @@ protected:
 
     void loadLoadSaveControls(void);
 
-    void loadNetworkControls(void);
+    void loadNetworkControls(void) {
+    }
 
-//Load the controls for the MISSIONS display.
+    //Load the controls for the MISSIONS display.
     void loadMissionsControls(void);
 
 //Load the controls for the UPGRADE display.
@@ -266,7 +291,7 @@ protected:
     void loadSellUpgradeControls(void);
 
 //Return a pointer to the selected Cargo struct.
-    Cargo *selectedItem(void);
+    Cargo *selectedItem(void) const;
 
 //Switch to the set of controls used for the specified mode.
     void switchToControls(DisplayMode mode);
@@ -284,13 +309,13 @@ protected:
 
 //Get a filtered list of items from a unit.
     void loadMasterList(Unit *un, CargoHold &hold,
-            const vector<string> &filterthis,
-            const vector<string> &invfilterthis,
-            bool removezero,
-            TransactionList &list);
+            const vector<string> &filter_vec,
+            const vector<string> &inverse_filter_vec,
+            bool remove_zero,
+            TransactionList &transaction_list);
 
 //Load a master list with missions.
-    void loadMissionsMasterList(TransactionList &list);
+    void loadMissionsMasterList(TransactionList &transaction_list);
 
 //VARIABLES
     vector<DisplayMode> m_displayModes;    //List of diaplays to provide.
@@ -303,7 +328,7 @@ protected:
     TransactionList m_transList1;          //The commonly-used list/picker.
     TransactionList m_transList2;          //If there are two pickers, the second one.
     TransactionList *m_selectedList;        //Which transaction list has the selection. NULL = none.
-    Control *m_modeGroups[DISPLAY_MODE_COUNT]; //Array of GroupControls, one for each mode.
+    Control *m_modeGroups[RAW_DISPLAY_MODE(DisplayMode::DISPLAY_MODE_COUNT)]; //Array of GroupControls, one for each mode.
     bool m_playingMuzak;                //True = We are playing muzak for some mode.
 
 //INTERNAL CLASSES.
