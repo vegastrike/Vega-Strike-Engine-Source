@@ -1685,7 +1685,7 @@ static void ForceChangeTarget(Unit *parent) {
     }
 }
 
-int SelectDockPort(Unit *utdw, Unit *parent);
+int SelectDockPort(const Unit *unit_to_dock_with, const Unit *parent);
 
 void FireKeyboard::SetParent(Unit *parent1) {
     this->Order::SetParent(parent1);
