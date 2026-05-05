@@ -374,8 +374,8 @@ static double usedValue(double originalValue) {
 }
 
 
-static float basicRepairPrice(void) {
-    const float price = configuration().economics.repair_price_flt;
+static double basicRepairPrice(void) {
+    const double price = configuration().economics.repair_price_dbl;
     return price * g_game.difficulty;
 }
 
@@ -3676,9 +3676,9 @@ Cargo CreateCargoForOwnerStarship(const Cockpit *cockpit, const Unit *base, int 
     const bool needs_jump_transport = (locationSystemName != destinationSystemName);
     const bool needs_in_system_transport = (locationBaseName != destinationBaseName);
 
-    const float shipping_price_base = configuration().economics.shipping_price_base_flt;
-    const float shipping_price_in_system = configuration().economics.shipping_price_insys_flt;
-    const float shipping_price_per_jump = configuration().economics.shipping_price_perjump_flt;
+    const double shipping_price_base = configuration().economics.shipping_price_base_dbl;
+    const double shipping_price_in_system = configuration().economics.shipping_price_insys_dbl;
+    const double shipping_price_per_jump = configuration().economics.shipping_price_perjump_dbl;
 
     cargo.SetPrice(shipping_price_base);
     cargo.SetName(cockpit->GetUnitFileName(i));
