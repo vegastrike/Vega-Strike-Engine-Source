@@ -627,9 +627,11 @@ void BaseInterface::Room::BasePython::Draw(BaseInterface *base) {
     }
 }
 
+#ifdef BASE_MAKER
 void BaseInterface::Room::BasePython::EndXML(FILE *fp) {
     BaseObj::EndXML(fp);
 }
+#endif
 
 void BaseInterface::Room::BasePython::Relink(const std::string &python) {
     pythonfile = python;
