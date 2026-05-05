@@ -40,8 +40,11 @@ jobs:
             is-release:      0
 
     env:
-      VCPKG_ROOT: ${{ github.workspace }}\\v
-      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_ASSET_SOURCES: ${{ github.workspace }}/vcpkgAssets
+      X_VCPKG_ASSET_SOURCES: clear;x-azurl,file:///${{ github.workspace }}/vcpkgAssets,,readwrite
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkgBin,readwrite
+      VCPKG_BUILD_TREES: ${{ github.workspace }}/vcpkgBuild
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
       VCPKG_DEFAULT_HOST_TRIPLET: ${{ matrix.triplet }}
       VCPKG_OVERLAY_PORTS: ${{ github.workspace }}\\custom-triplets
@@ -61,8 +64,12 @@ jobs:
         id: cache-vcpkg-restore
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
-          path: ${{ github.workspace }}/vcpkg_cache
-          key: vcpkg_cache-${{ github.repository_owner }}-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
+          path:
+            ${{ github.workspace }}/vcpkg
+            ${{ github.workspace }}/vcpkgAssets
+            ${{ github.workspace }}/vcpkgBin
+            ${{ github.workspace }}/vcpkgBuild
+          key: vcpkgCache-${{ github.repository_owner }}-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
 
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -99,7 +106,11 @@ jobs:
         id: cache-vcpkg-save
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
-          path: ${{ github.workspace }}/vcpkg_cache
+          path:
+            ${{ github.workspace }}/vcpkg
+            ${{ github.workspace }}/vcpkgAssets
+            ${{ github.workspace }}/vcpkgBin
+            ${{ github.workspace }}/vcpkgBuild
           key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
         if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
