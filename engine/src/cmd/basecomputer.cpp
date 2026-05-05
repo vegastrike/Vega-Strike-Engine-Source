@@ -399,8 +399,8 @@ static double usedValue(double originalValue) {
 }
 
 
-static float basicRepairPrice(void) {
-    const float price = configuration().economics.repair_price_flt;
+static double basicRepairPrice(void) {
+    const double price = configuration().economics.repair_price_dbl;
     return price * g_game.difficulty;
 }
 
@@ -3683,6 +3683,9 @@ bool BaseComputer::changeToShipDealerMode(const EventCommandId &command, Control
 
 
 
+    const double shipping_price_base = configuration().economics.shipping_price_base_dbl;
+    const double shipping_price_in_system = configuration().economics.shipping_price_insys_dbl;
+    const double shipping_price_per_jump = configuration().economics.shipping_price_perjump_dbl;
 
 /*void SwapInNewShipName(Cockpit *cockpit, Unit *base, const std::string &newFileName, int swappingShipsIndex) {
     Unit *parent = cockpit->GetParent();
