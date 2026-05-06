@@ -34,8 +34,6 @@ param(
 
 New-Item "$VCPKG_PARENT_DIR" -ItemType Directory -Force
 Push-Location "$VCPKG_PARENT_DIR"
-git clone https://github.com/Microsoft/vcpkg.git ./v
-.\v\bootstrap-vcpkg.bat -disableMetrics
 
 [Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCPKG_PARENT_DIR\vcpkg", 'User')
 $env:VCPKG_ROOT = "$VCPKG_PARENT_DIR\vcpkg"
@@ -49,6 +47,9 @@ $env:VCPKG_BINARY_SOURCES = "clear;files,$VCPKG_PARENT_DIR/vcpkgBin,readwrite"
 $env:VCPKG_BUILD_TREES="$VCPKG_PARENT_DIR\vcpkgBuild"
 [Environment]::SetEnvironmentVariable('VCPKG_INSTALL_OPTIONS', "--x-buildtrees-root=$VCPKG_PARENT_DIR\vcpkgBuild", 'User')
 $env:VCPKG_INSTALL_OPTIONS="--x-buildtrees-root=$VCPKG_PARENT_DIR\vcpkgBuild"
+
+git clone https://github.com/Microsoft/vcpkg.git "$env:VCPKG_ROOT"
+& "$env:VCPKG_ROOT\bootstrap-vcpkg.bat" -disableMetrics
 
 Set-Variable -Name CMAKE_WITH_VERSION -Value (Get-ChildItem "$env:VCPKG_ROOT\downloads\tools" -Filter "cmake-*-windows" -Folder | Select-Object -Last 1).Name
 
