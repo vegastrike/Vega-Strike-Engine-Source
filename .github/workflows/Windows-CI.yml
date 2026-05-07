@@ -40,15 +40,15 @@ jobs:
             is-release:      0
 
     env:
-      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-      VCPKG_ASSET_SOURCES: ${{ github.workspace }}/vcpkgAssets
-      X_VCPKG_ASSET_SOURCES: clear;x-azurl,file:///${{ github.workspace }}/vcpkgAssets,,readwrite
-      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkgBin,readwrite
-      VCPKG_BUILD_TREES: ${{ github.workspace }}/vcpkgBuild
-      VCPKG_INSTALL_OPTIONS: "--x-buildtrees-root=${{ github.workspace }}/vcpkgBuild"
+      VCPKG_ROOT: ${{ github.workspace }}\vcpkg
+      VCPKG_ASSET_SOURCES: ${{ github.workspace }}\vcpkgAssets
+      X_VCPKG_ASSET_SOURCES: clear;x-azurl,file:///${{ github.workspace }}\vcpkgAssets,,readwrite
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}\vcpkgBin,readwrite
+      VCPKG_BUILD_TREES: ${{ github.workspace }}\vcpkgBuild
+      VCPKG_INSTALL_OPTIONS: "--x-buildtrees-root=${{ github.workspace }}\vcpkgBuild"
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
       VCPKG_DEFAULT_HOST_TRIPLET: ${{ matrix.triplet }}
-      VCPKG_OVERLAY_PORTS: ${{ github.workspace }}\\custom-triplets
+      VCPKG_OVERLAY_PORTS: ${{ github.workspace }}\custom-triplets
       PYTHONHOME: ""
       PYTHONPATH: ""
       INSTALL_GTEST: 1

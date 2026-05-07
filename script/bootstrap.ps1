@@ -39,10 +39,10 @@ Push-Location "$VCPKG_PARENT_DIR"
 $env:VCPKG_ROOT = "$VCPKG_PARENT_DIR\vcpkg"
 [Environment]::SetEnvironmentVariable('VCPKG_ASSET_SOURCES', "$VCPKG_PARENT_DIR\vcpkgAssets", 'User')
 $env:VCPKG_ASSET_SOURCES="$VCPKG_PARENT_DIR\vcpkgAssets"
-[Environment]::SetEnvironmentVariable('X_VCPKG_ASSET_SOURCES', "clear;x-azurl,file:///$VCPKG_PARENT_DIR/vcpkgAssets,,readwrite", 'User')
-$env:X_VCPKG_ASSET_SOURCES="clear;x-azurl,file:///$VCPKG_PARENT_DIR/vcpkgAssets,,readwrite"
-[Environment]::SetEnvironmentVariable('VCPKG_BINARY_SOURCES', "clear;files,$VCPKG_PARENT_DIR/vcpkgBin,readwrite", 'User')
-$env:VCPKG_BINARY_SOURCES = "clear;files,$VCPKG_PARENT_DIR/vcpkgBin,readwrite"
+[Environment]::SetEnvironmentVariable('X_VCPKG_ASSET_SOURCES', "clear;x-azurl,file:///$VCPKG_PARENT_DIR\vcpkgAssets,,readwrite", 'User')
+$env:X_VCPKG_ASSET_SOURCES="clear;x-azurl,file:///$VCPKG_PARENT_DIR\vcpkgAssets,,readwrite"
+[Environment]::SetEnvironmentVariable('VCPKG_BINARY_SOURCES', "clear;files,$VCPKG_PARENT_DIR\vcpkgBin,readwrite", 'User')
+$env:VCPKG_BINARY_SOURCES = "clear;files,$VCPKG_PARENT_DIR\vcpkgBin,readwrite"
 [Environment]::SetEnvironmentVariable('VCPKG_BUILD_TREES', "$VCPKG_PARENT_DIR\vcpkgBuild", 'User')
 $env:VCPKG_BUILD_TREES="$VCPKG_PARENT_DIR\vcpkgBuild"
 [Environment]::SetEnvironmentVariable('VCPKG_INSTALL_OPTIONS', "--x-buildtrees-root=$VCPKG_PARENT_DIR\vcpkgBuild", 'User')
