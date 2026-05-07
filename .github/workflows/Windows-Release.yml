@@ -15,7 +15,9 @@ env:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  # This workflow contains a single job called "build"
   build:
+    # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -77,11 +79,20 @@ jobs:
         id: cache-vcpkg-restore
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
-          path:
+          path: |
             ${{ github.workspace }}\vcpkgAssets
+            ${{ github.workspace }}\vcpkgBCache
             ${{ github.workspace }}\vcpkgBin
             ${{ github.workspace }}\vcpkgBuild
           key: vcpkgCache-${{ github.repository_owner }}-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
+
+      - name: Create directories on cache miss
+        run: |
+          mkdir -p ${{ github.workspace }}\vcpkgAssets
+          mkdir -p ${{ github.workspace }}\vcpkgBCache
+          mkdir -p ${{ github.workspace }}\vcpkgBin
+          mkdir -p ${{ github.workspace }}\vcpkgBuild
+        if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -95,6 +106,8 @@ jobs:
 
       - name: Install vcpkg
         uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11.6
+        with:
+          binaryCachePath: "${{ github.workspace }}/vcpkgBCache"
 
       - name: Build the code
         run: |
@@ -118,8 +131,9 @@ jobs:
         id: cache-vcpkg-save
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
-          path:
+          path: |
             ${{ github.workspace }}\vcpkgAssets
+            ${{ github.workspace }}\vcpkgBCache
             ${{ github.workspace }}\vcpkgBin
             ${{ github.workspace }}\vcpkgBuild
           key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
