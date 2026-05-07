@@ -3795,61 +3795,64 @@ extern void DealPossibleJumpDamage(Unit *un);
 extern void ActivateAnimation(Unit *);
 void WarpPursuit(Unit *un, StarSystem *sourcess, std::string destination);
 
-bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, bool dosightandsound) {
+bool Unit::TransferUnitToSystem(const unsigned int which_jump_queue, StarSystem *&previously_active_star_system, const bool do_sight_and_sound) {
     bool ret = false;
-    if (pendingjump[kk]->orig == this->activeStarSystem || this->activeStarSystem == nullptr) {
-        if (JumpCapable::TransferUnitToSystem(pendingjump[kk]->dest)) {
+    if (pendingjump[which_jump_queue]->orig == this->activeStarSystem || this->activeStarSystem == nullptr) {
+        // The following for loop needs to happen before we actually call JumpCapable::TransferUnitToSystem. Otherwise,
+        // we get segfaults -- Stephen G. Tuggy 2026-05-06
+        Unit *unit;
+        for (un_iter iter = pendingjump[which_jump_queue]->orig->getUnitList().createIterator(); (unit = *iter); ++iter) {
+            if (unit->Threat() == this) {
+                unit->Threaten(nullptr, 0);
+            }
+            if (unit->VelocityReference() == this) {
+                unit->VelocityReference(nullptr);
+            }
+            if (unit->Target() == this) {
+                if (pendingjump[which_jump_queue]->jumppoint.GetUnit()) {
+                    unit->Target(pendingjump[which_jump_queue]->jumppoint.GetUnit());
+                    unit->ActivateJumpDrive(0);
+                } else {
+                    WarpPursuit(unit, pendingjump[which_jump_queue]->orig, pendingjump[which_jump_queue]->dest->getFileName());
+                }
+            } else {
+                Flightgroup *ff = unit->getFlightgroup();
+                if (ff) {
+                    if (this == ff->leader.GetUnit() && (ff->directive == "f" || ff->directive == "F")) {
+                        unit->Target(pendingjump[which_jump_queue]->jumppoint.GetUnit());
+                        unit->getFlightgroup()->directive = "F";
+                        unit->ActivateJumpDrive(0);
+                    }
+                }
+            }
+        }
+
+        if (JumpCapable::TransferUnitToSystem(pendingjump[which_jump_queue]->dest)) {
             ///eradicating from system, leaving no trace
             ret = true;
 
-            Unit *unit;
-            for (un_iter iter = pendingjump[kk]->orig->getUnitList().createIterator(); (unit = *iter); ++iter) {
-                if (unit->Threat() == this) {
-                    unit->Threaten(nullptr, 0);
-                }
-                if (unit->VelocityReference() == this) {
-                    unit->VelocityReference(nullptr);
-                }
-                if (unit->Target() == this) {
-                    if (pendingjump[kk]->jumppoint.GetUnit()) {
-                        unit->Target(pendingjump[kk]->jumppoint.GetUnit());
-                        unit->ActivateJumpDrive(0);
-                    } else {
-                        WarpPursuit(unit, pendingjump[kk]->orig, pendingjump[kk]->dest->getFileName());
-                    }
-                } else {
-                    Flightgroup *ff = unit->getFlightgroup();
-                    if (ff) {
-                        if (this == ff->leader.GetUnit() && (ff->directive == "f" || ff->directive == "F")) {
-                            unit->Target(pendingjump[kk]->jumppoint.GetUnit());
-                            unit->getFlightgroup()->directive = "F";
-                            unit->ActivateJumpDrive(0);
-                        }
-                    }
-                }
-            }
             if (this == _Universe->AccessCockpit()->GetParent()) {
                 VS_LOG(info, "Unit is the active player character...changing scene graph\n");
-                savedStarSystem->SwapOut();
+                previously_active_star_system->SwapOut();
                 AUDStopAllSounds();
-                savedStarSystem = pendingjump[kk]->dest;
-                pendingjump[kk]->dest->SwapIn();
+                previously_active_star_system = pendingjump[which_jump_queue]->dest;
+                pendingjump[which_jump_queue]->dest->SwapIn();
             }
-            _Universe->setActiveStarSystem(pendingjump[kk]->dest);
+            _Universe->setActiveStarSystem(pendingjump[which_jump_queue]->dest);
             vector<Unit *> possibilities;
-            if (pendingjump[kk]->final_location.i == 0
-                    && pendingjump[kk]->final_location.j == 0
-                    && pendingjump[kk]->final_location.k == 0) {
+            if (pendingjump[which_jump_queue]->final_location.i == 0
+                    && pendingjump[which_jump_queue]->final_location.j == 0
+                    && pendingjump[which_jump_queue]->final_location.k == 0) {
                 Unit *primary;
-                for (un_iter iter = pendingjump[kk]->dest->getUnitList().createIterator(); (primary = *iter); ++iter) {
+                for (un_iter iter = pendingjump[which_jump_queue]->dest->getUnitList().createIterator(); (primary = *iter); ++iter) {
                     vector<Unit *> tmp;
-                    tmp = ComparePrimaries(primary, pendingjump[kk]->orig);
+                    tmp = ComparePrimaries(primary, pendingjump[which_jump_queue]->orig);
                     if (!tmp.empty()) {
                         possibilities.insert(possibilities.end(), tmp.begin(), tmp.end());
                     }
                 }
             } else {
-                this->SetCurPosition(pendingjump[kk]->final_location);
+                this->SetCurPosition(pendingjump[which_jump_queue]->final_location);
             }
             if (!possibilities.empty()) {
                 static int jumpdest = 235034;
@@ -3866,7 +3869,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
                     this->SetPosAndCumPos(pos + Offset);
                     if (is_null(jumpnode->location[Unit::UNIT_ONLY]) == false
                             && is_null(jumpnode->location[Unit::UNIT_BOLT]) == false) {
-                        this->UpdateCollideQueue(pendingjump[kk]->dest, jumpnode->location);
+                        this->UpdateCollideQueue(pendingjump[which_jump_queue]->dest, jumpnode->location);
                     }
                 }
                 jumpdest += 23231;
@@ -3889,7 +3892,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
             if (jump_arrive == boost::none) {
                 jump_arrive = AUDCreateSound(configuration().audio.unit_audio.jump_arrive, false);
             }
-            if (dosightandsound) {
+            if (do_sight_and_sound) {
                 AUDPlay(jump_arrive.get(), this->LocalPosition(), this->GetVelocity(), 1);
             }
         } else {
@@ -3901,7 +3904,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
             for (const auto & docked_unit : this->pImage->dockedunits) {
                 Unit *unut;
                 if (nullptr != (unut = docked_unit->uc.GetUnit())) {
-                    unut->TransferUnitToSystem(kk, savedStarSystem, dosightandsound);
+                    unut->TransferUnitToSystem(which_jump_queue, previously_active_star_system, do_sight_and_sound);
                 }
             }
         }
@@ -3911,7 +3914,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
                 this->docked &= (~(DOCKED | DOCKED_INSIDE));
             } else {
                 const Unit *targ = nullptr;
-                for (un_iter i = pendingjump[kk]->dest->getUnitList().createIterator();
+                for (un_iter i = pendingjump[which_jump_queue]->dest->getUnitList().createIterator();
                         (targ = (*i));
                         ++i) {
                     if (targ == un) {
