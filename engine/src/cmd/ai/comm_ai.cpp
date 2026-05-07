@@ -86,7 +86,7 @@ bool MatchingMood(const CommunicationMessage &c, float mood, float randomrespons
 }
 
 int CommunicatingAI::selectCommunicationMessageMood(CommunicationMessage &c, float mood) {
-    Unit *targ = c.sender.GetUnit();
+    const Unit *targ = c.sender.GetUnit();
     float relationship = 0;
     if (targ) {
         relationship = parent->pilot->GetEffectiveRelationship(parent, targ);
@@ -319,17 +319,17 @@ void CommunicatingAI::AdjustRelationTo(Unit *un, float factor) {
             }
         }
     }
-    if (newrel < anger || (parent->Target() == NULL && newrel + UnitUtil::getFactionRelation(parent, un) < 0)) {
-        if (parent->Target() == NULL
-                || (parent->getFlightgroup() == NULL
-                        || parent->getFlightgroup()->directive.find(".") == string::npos)) {
+    if (newrel < anger || (parent->Target() == nullptr && newrel + UnitUtil::getFactionRelation(parent, un) < 0)) {
+        if (parent->Target() == nullptr
+                || (parent->getFlightgroup() == nullptr
+                        || parent->getFlightgroup()->directive.find('.') == string::npos)) {
             parent->Target(un);             //he'll target you--even if he's friendly
             parent->TargetTurret(un);             //he'll target you--even if he's friendly
         } else if (newrel > appease) {
             if (parent->Target() == un) {
-                if (parent->getFlightgroup() == NULL || parent->getFlightgroup()->directive.find(".") == string::npos) {
-                    parent->Target(NULL);
-                    parent->TargetTurret(NULL);                     //he'll target you--even if he's friendly
+                if (parent->getFlightgroup() == nullptr || parent->getFlightgroup()->directive.find('.') == string::npos) {
+                    parent->Target(nullptr);
+                    parent->TargetTurret(nullptr);                     //he'll target you--even if he's friendly
                 }
             }
         }
