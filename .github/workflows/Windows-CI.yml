@@ -65,7 +65,7 @@ jobs:
         id: cache-vcpkg-restore
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
-          path:
+          path: |
             ${{ github.workspace }}\vcpkgAssets
             ${{ github.workspace }}\vcpkgBCache
             ${{ github.workspace }}\vcpkgBin
@@ -185,7 +185,7 @@ jobs:
         id: cache-vcpkg-save
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
-          path:
+          path: |
             ${{ github.workspace }}\vcpkgAssets
             ${{ github.workspace }}\vcpkgBCache
             ${{ github.workspace }}\vcpkgBin
