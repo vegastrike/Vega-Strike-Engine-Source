@@ -67,6 +67,7 @@ jobs:
         with:
           path:
             ${{ github.workspace }}\vcpkgAssets
+            ${{ github.workspace }}\vcpkgBCache
             ${{ github.workspace }}\vcpkgBin
             ${{ github.workspace }}\vcpkgBuild
           key: vcpkgCache-${{ github.repository_owner }}-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
@@ -74,6 +75,7 @@ jobs:
       - name: Create directories on cache miss
         run: |
           mkdir -p ${{ github.workspace }}\vcpkgAssets
+          mkdir -p ${{ github.workspace }}\vcpkgBCache
           mkdir -p ${{ github.workspace }}\vcpkgBin
           mkdir -p ${{ github.workspace }}\vcpkgBuild
         if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
@@ -185,6 +187,7 @@ jobs:
         with:
           path:
             ${{ github.workspace }}\vcpkgAssets
+            ${{ github.workspace }}\vcpkgBCache
             ${{ github.workspace }}\vcpkgBin
             ${{ github.workspace }}\vcpkgBuild
           key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
