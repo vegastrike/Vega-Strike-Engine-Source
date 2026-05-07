@@ -3,9 +3,11 @@ permissions:
   contents: read
   pull-requests: read
 
+# Controls when the action will run.
 on:
   push:
   pull_request:
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 env:
@@ -13,7 +15,9 @@ env:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  # This workflow contains a single job called "build"
   build:
+    # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -22,17 +26,17 @@ jobs:
           - os: windows-2022
             triplet: x64-win10
             preset-name: VS2022Win64-pie-enabled-debug
-            python-version: 3.13.12
+            python-version: 3.13.13
             is-release: 0
           - os: windows-2025
             triplet: x64-win10
             preset-name: VS2022Win64-pie-enabled-RelWithDebInfo
-            python-version: 3.13.12
+            python-version: 3.13.13
             is-release: 0
           - os: windows-2025-vs2026
             triplet: x64-win10
             preset-name: VS2026Win64-pie-enabled-RelWithDebInfo
-            python-version: 3.13.12
+            python-version: 3.13.13
             is-release: 0
 
     env:
