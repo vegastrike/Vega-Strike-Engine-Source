@@ -165,9 +165,8 @@ void BaseInterface::Room::Comp::EndXML( FILE *fp )
             default:
                 break;
         }
-        const char *mode = mode_string.c_str();
-        if (mode) {
-            midxmlchar( fp, mode, "" );
+        if (!mode_string.empty()) {
+            midxmlchar( fp, mode_string.c_str(), "" );
         }
     }
     endtag( fp, true );
