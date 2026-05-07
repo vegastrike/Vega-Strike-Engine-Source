@@ -34,16 +34,16 @@
 #include "common/enum_iterator.h"
 
 enum class DisplayMode {
-    CARGO = 0,            //Buy and sell cargo.
-    UPGRADE,            //Buy and sell ship upgrades.
-    SHIP_DEALER,        //Replace current ship.
-    MISSIONS,           //Show available missions.
-    NEWS,               //Show news items.
-    INFO,                           //Show basic info.
-    LOADSAVE,                   //LOAD SAVE
-    NETWORK,                    //Network submenu of Loadsave.
-    DISPLAY_MODE_COUNT, //Number of display modes.
-    NULL_DISPLAY = DISPLAY_MODE_COUNT,     //No display.
+    CARGO = 0,                          //Buy and sell cargo.
+    UPGRADE,                            //Buy and sell ship upgrades.
+    SHIP_DEALER,                        //Replace current ship.
+    MISSIONS,                           //Show available missions.
+    NEWS,                               //Show news items.
+    INFO,                               //Show basic info.
+    LOADSAVE,                           //LOAD SAVE
+    NETWORK,                            //Network submenu of Loadsave.
+    DISPLAY_MODE_COUNT,                 //Number of display modes.
+    NULL_DISPLAY = DISPLAY_MODE_COUNT,  //No display.
 };
 
 inline bool IsEnumValid(const DisplayMode value)
