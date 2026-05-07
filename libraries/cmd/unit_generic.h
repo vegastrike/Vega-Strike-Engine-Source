@@ -462,9 +462,9 @@ public:
  */
 
 public:
-    bool TransferUnitToSystem(unsigned int whichJumpQueue,
-            StarSystem *&previouslyActiveStarSystem,
-            bool DoSightAndSound) override;
+    bool TransferUnitToSystem(unsigned int which_jump_queue,
+            StarSystem *&previously_active_star_system,
+            bool do_sight_and_sound) override;
 
     void SwitchCombatFlightMode();
     bool CombatMode();
