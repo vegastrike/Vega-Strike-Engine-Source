@@ -69,6 +69,13 @@ jobs:
             ${{ github.workspace }}\vcpkgBuild
           key: vcpkgCache-${{ github.repository_owner }}-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
 
+      - name: Create directories on cache miss
+        run: |
+          mkdir -p ${{ github.workspace }}\vcpkgAssets
+          mkdir -p ${{ github.workspace }}\vcpkgBin
+          mkdir -p ${{ github.workspace }}\vcpkgBuild
+        if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
+
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         id: vega-py-setup
@@ -81,6 +88,8 @@ jobs:
 
       - name: Install vcpkg
         uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11.6
+        with:
+          binaryCachePath: "${{ github.workspace }}/vcpkgBCache"
 
       - name: Build the code
         run: |
