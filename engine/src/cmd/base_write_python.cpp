@@ -115,9 +115,8 @@ void BaseInterface::Room::Comp::EndXML( FILE *fp )
             default:
                 break;
         }
-        const char * mode = mode_string.c_str();
-        if (mode) {
-            VSFileSystem::vs_fprintf( fp, "%s ", mode );
+        if (!mode_string.empty()) {
+            VSFileSystem::vs_fprintf( fp, "%s ", mode_string.c_str() );
         }
         if (each_mode == modes.at(modes.size() - 1)) {
             VSFileSystem::vs_fprintf( fp, "'" );

@@ -784,12 +784,11 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
             } else {
                 return;
             }
-            const char *str = input_prompt.c_str();
 #ifdef _WIN32
-            int ret = MessageBox( NULL, str, "Input", MB_OKCANCEL );
+            int ret = MessageBox( NULL, input_prompt.c_str(), "Input", MB_OKCANCEL );
 #else
             // 2020-10-29 stephengtuggy: Leaving this here, since it is obviously intended for real-time user interaction when in BASE_MAKER mode
-            printf( "\n%s\n", str );
+            printf( "\n%s\n", input_prompt.c_str() );
             int ret = 1;
 #endif
             int index;
