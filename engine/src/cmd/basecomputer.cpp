@@ -475,10 +475,10 @@ BaseComputer::~BaseComputer(void) {
     m_player.SetUnit(nullptr);
     m_base.SetUnit(nullptr);
     //Delete any group controls that the window doesn't "own".
-    for (Iter_DisplayMode iter; iter != iter.end(); ++iter) {
-        if (m_modeGroups[RAW_DISPLAY_MODE(*iter)] != nullptr) {
-            delete m_modeGroups[RAW_DISPLAY_MODE(*iter)];
-            m_modeGroups[RAW_DISPLAY_MODE(*iter)] = nullptr;
+    for (uint_fast32_t i = 0; i < RAW_DISPLAY_MODE(DisplayMode::DISPLAY_MODE_COUNT); ++i) {
+        if (m_modeGroups[i] != nullptr) {
+            delete m_modeGroups[i];
+            m_modeGroups[i] = nullptr;
         }
     }
     //If we are playing muzak, stop it.
@@ -1236,11 +1236,11 @@ void BaseComputer::createControls(void) {
     //Put all the controls in the window.
     constructControls();
     //Take the mode group controls out of the window.
-    for (Iter_DisplayMode iter; iter != iter.end(); ++iter) {
-        Control *group = window()->findControlById(modeInfo[RAW_DISPLAY_MODE(*iter)].groupId);
+    for (uint_fast32_t i = 0; i < RAW_DISPLAY_MODE(DisplayMode::DISPLAY_MODE_COUNT); ++i) {
+        Control *group = window()->findControlById(modeInfo[i].groupId);
         if (group) {
             window()->removeControlFromWindow(group);
-            m_modeGroups[RAW_DISPLAY_MODE(*iter)] = group;
+            m_modeGroups[i] = group;
         }
     }
     createModeButtons();
