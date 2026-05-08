@@ -40,15 +40,15 @@ jobs:
             is-release:      1
 
     env:
-      VCPKG_ROOT: ${{ github.workspace }}\vcpkg
-      VCPKG_ASSET_SOURCES: ${{ github.workspace }}\vcpkgAssets
-      X_VCPKG_ASSET_SOURCES: clear;x-azurl,file:///${{ github.workspace }}\vcpkgAssets,,readwrite
-      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}\vcpkgBin,readwrite
-      VCPKG_BUILD_TREES: ${{ github.workspace }}\vcpkgBuild
-      VCPKG_INSTALL_OPTIONS: "--x-buildtrees-root=${{ github.workspace }}\\vcpkgBuild"
+      VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
+      VCPKG_ASSET_SOURCES: "${{ github.workspace }}/vcpkgAssets"
+      X_VCPKG_ASSET_SOURCES: clear;x-azurl,file:///${{ github.workspace }}/vcpkgAssets,,readwrite
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkgBin,readwrite
+      VCPKG_BUILD_TREES: "${{ github.workspace }}/vcpkgBuild"
+      VCPKG_INSTALL_OPTIONS: "--x-buildtrees-root=${{ github.workspace }}/vcpkgBuild"
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
       VCPKG_DEFAULT_HOST_TRIPLET: ${{ matrix.triplet }}
-      VCPKG_OVERLAY_PORTS: ${{ github.workspace }}\custom-triplets
+      VCPKG_OVERLAY_PORTS: "${{ github.workspace }}/custom-triplets"
       PYTHONHOME: ""
       PYTHONPATH: ""
       INSTALL_GTEST: 0
@@ -78,18 +78,18 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: |
-            ${{ github.workspace }}\vcpkgAssets
-            ${{ github.workspace }}\vcpkgBCache
-            ${{ github.workspace }}\vcpkgBin
-            ${{ github.workspace }}\vcpkgBuild
+            "${{ github.workspace }}/vcpkgAssets"
+            "${{ github.workspace }}/vcpkgBCache"
+            "${{ github.workspace }}/vcpkgBin"
+            "${{ github.workspace }}/vcpkgBuild"
           key: vcpkgCache-${{ github.repository_owner }}-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
 
       - name: Create directories on cache miss
         run: |
-          mkdir -p ${{ github.workspace }}\vcpkgAssets
-          mkdir -p ${{ github.workspace }}\vcpkgBCache
-          mkdir -p ${{ github.workspace }}\vcpkgBin
-          mkdir -p ${{ github.workspace }}\vcpkgBuild
+          mkdir -p "${{ github.workspace }}/vcpkgAssets"
+          mkdir -p "${{ github.workspace }}/vcpkgBCache"
+          mkdir -p "${{ github.workspace }}/vcpkgBin"
+          mkdir -p "${{ github.workspace }}/vcpkgBuild"
         if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
       - name: Set up Python
@@ -130,10 +130,10 @@ jobs:
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: |
-            ${{ github.workspace }}\vcpkgAssets
-            ${{ github.workspace }}\vcpkgBCache
-            ${{ github.workspace }}\vcpkgBin
-            ${{ github.workspace }}\vcpkgBuild
+            "${{ github.workspace }}/vcpkgAssets"
+            "${{ github.workspace }}/vcpkgBCache"
+            "${{ github.workspace }}/vcpkgBin"
+            "${{ github.workspace }}/vcpkgBuild"
           key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
         if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
