@@ -516,8 +516,8 @@ unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &node) {
     return dummy;
 }
 
-void LeadMe(Unit *un, string directive, string speech, bool changetarget) {
-    if (un != NULL) {
+void LeadMe(Unit *un, string directive, string speech, const bool change_target) {
+    if (un != nullptr) {
         for (unsigned int i = 0; i < _Universe->numPlayers(); i++) {
             Unit *pun = _Universe->AccessCockpit(i)->GetParent();
             if (pun) {
@@ -534,11 +534,11 @@ void LeadMe(Unit *un, string directive, string speech, bool changetarget) {
                 }
             }
             fg->directive = directive;
-            if (changetarget) {
+            if (change_target) {
                 fg->target.SetUnit(un->Target());
             }
-            if ((directive == "")) {
-                fg->target.SetUnit(NULL);
+            if (directive.empty()) {
+                fg->target.SetUnit(nullptr);
             }
         }
     }

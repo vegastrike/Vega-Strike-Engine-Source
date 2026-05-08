@@ -39,12 +39,12 @@
 
 static void DockedScript(Unit *docker, Unit *base) {
     std::string script = configuration().ai.docked_to_script;
-    if (script.length() > 0) {
+    if (!script.empty()) {
         Unit *targ = docker->Target();
         docker->Target(base);
         UniverseUtil::setScratchUnit(docker);
         CompileRunPython(script);
-        UniverseUtil::setScratchUnit(NULL);
+        UniverseUtil::setScratchUnit(nullptr);
         docker->Target(targ);         //should be NULL;
     }
 }

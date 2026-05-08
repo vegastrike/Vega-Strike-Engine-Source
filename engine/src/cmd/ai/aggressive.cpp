@@ -543,20 +543,20 @@ bool AggressiveAI::ProcessLogic(AIEvents::ElemAttrMap &logi, bool inter) {
     return retval;
 }
 
-Unit *GetThreat(Unit *parent, Unit *leader) {
-    Unit *th = NULL;
-    Unit *un = NULL;
+Unit *GetThreat(const Unit *parent, const Unit *leader) {
+    Unit *th = nullptr;
+    Unit *un = nullptr;
     bool targetted = false;
     float mindist = FLT_MAX;
     for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
             (un = *ui);
             ++ui) {
         if (parent->getRelation(un) < 0) {
-            float d = (un->Position() - leader->Position()).Magnitude();
-            bool thistargetted = (un->Target() == leader);
-            if (!th || (thistargetted && !targetted) || ((thistargetted || (!targetted)) && d < mindist)) {
+            const float d = static_cast<float>((un->Position() - leader->Position()).Magnitude());
+            const bool this_targeted = (un->Target() == leader);
+            if (!th || (this_targeted && !targetted) || ((this_targeted || (!targetted)) && d < mindist)) {
                 th = un;
-                targetted = thistargetted;
+                targetted = this_targeted;
                 mindist = d;
             }
         }
@@ -657,7 +657,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                 //a is now used for AI, for backward compatibility. do not use for player
             } else if (fg->directive.find("a") != string::npos || fg->directive.find("A") != string::npos) {
                 Unit *targ = fg->leader.GetUnit();
-                targ = targ != NULL ? targ->Target() : NULL;
+                targ = targ != nullptr ? targ->Target() : nullptr;
                 if (targ) {
                     if (targ->InCorrectStarSystem(_Universe->activeStarSystem())) {
                         CommunicationMessage c(parent, leader, NULL, 0);
@@ -890,7 +890,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                                         true);
                                 ord->SetParent(parent);
                                 ReplaceOrder(ord);
-                                if (parent->Target() != NULL) {
+                                if (parent->Target() != nullptr) {
                                     ord = new Orders::FaceTarget(false, 3);
                                 } else {
                                     ord = new Orders::FaceDirection(-dist * turn_leader);
@@ -1087,7 +1087,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                                                         true);
                                         ord->SetParent(parent);
                                         ReplaceOrder(ord);
-                                        if (parent->Target() != NULL) {
+                                        if (parent->Target() != nullptr) {
                                             ord = new Orders::FaceTarget(false, 3);
                                             ord->SetParent(parent);
                                             ReplaceOrder(ord);
@@ -1150,7 +1150,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                                                         true);
                                         ord->SetParent(parent);
                                         ReplaceOrder(ord);
-                                        if (parent->Target() != NULL) {
+                                        if (parent->Target() != nullptr) {
                                             ord = new Orders::FaceTarget(false, 3);
                                             ord->SetParent(parent);
                                             ReplaceOrder(ord);
@@ -1183,7 +1183,7 @@ static bool overridable(const std::string &s) {
     return (*s.begin()) != toupper(*s.begin());
 }
 
-extern void LeadMe(Unit *un, string directive, string speech, bool changetarget);
+extern void LeadMe(Unit *un, string directive, string speech, bool change_target);
 
 void AggressiveAI::ReCommandWing(Flightgroup *fg) {
     const float time_to_recommand_wing = configuration().ai.targeting.time_to_recommand_wing_flt;
@@ -1445,9 +1445,7 @@ public:
                 WarpToP(parent, un, true);
             } else {
                 Unit *playa = _Universe->AccessCockpit()->GetParent();
-                if (playa == NULL || playa->Target() != parent || 1) {
-                    WarpToP(parent, targetlocation, 0, true);
-                }
+                WarpToP(parent, targetlocation, 0, true);
             }
         }
     }
@@ -1581,12 +1579,12 @@ void AggressiveAI::AfterburnerJumpTurnTowards(const Unit *target) {
     AfterburnTurnTowards(this, parent);
     const float jump_time_limit = configuration().ai.force_jump_after_time_flt;
     if (jump_time_check == 0) {
-        float dist = (target->Position() - parent->Position()).MagnitudeSquared();
+        const float dist = static_cast<float>((target->Position() - parent->Position()).MagnitudeSquared());
         if (last_jump_distance < dist || last_jump_time > jump_time_limit) {
             //force jump
             last_jump_time = 0;
-            if (target->GetDestinations().size()) {
-                string dest = target->GetDestinations()[0];
+            if (!target->GetDestinations().empty()) {
+                const string dest = target->GetDestinations()[0];
                 UnitUtil::JumpTo(parent, dest);
             }
         } else {
