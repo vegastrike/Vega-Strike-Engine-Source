@@ -75,12 +75,6 @@ jobs:
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'rpm'
-          - FROM:     'rockylinux/rockylinux:10.1'
-            COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
-            INSTALL_SDL3: 0
-            INSTALL_SDL3_IMAGE: 0
-            ARTIFACT_EXT: 'rpm'
 
     steps:
       - name: Check out repository
