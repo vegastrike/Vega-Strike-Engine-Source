@@ -3897,7 +3897,7 @@ void trackPrice(int which_player, const Cargo &item, float price, const string &
 
                 if (prev != recordedLowestLocs.end()) {
                     size_t index = prev - recordedLowestLocs.begin();
-                    putSaveData(whichplayer, lopricek, index, price);
+                    putSaveData(which_player, lo_price_k, index, price);
                     resort = true;
                 } else if (recordedLowestPrices.size() < toprank || recordedLowestPrices.back() > price) {
                     // Track new top price

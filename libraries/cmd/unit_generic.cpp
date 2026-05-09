@@ -2733,7 +2733,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
     } else {
         //we are upgrading!
         if (touchme) {
-            for (const Cargo cargo : up->cargo_hold.GetItems()) {
+            for (const Cargo &cargo : up->cargo_hold.GetItems()) {
                 if (upgrade_space.CanAddCargo(cargo)) {
                     upgrade_space.AddCargo(this, cargo, false);
                 }
