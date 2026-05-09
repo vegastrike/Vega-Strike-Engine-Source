@@ -4088,14 +4088,14 @@ void BaseComputer::loadShipDealerControls(void) {
 // TODO: move this to ComponentsManager
 bool sellShip(Unit *baseUnit, Unit *playerUnit, Cargo* item, BaseComputer *bcomputer) {
     PlayerShip& ship = PlayerShip::GetShipByIndex(item->index);
-    const float purchase_price = ship.cargo.GetPrice();
-    const float shipping_price = ship.transfer_price;
+    const double purchase_price = ship.cargo.GetPrice();
+    const double shipping_price = ship.transfer_price;
 
     // Transfer the ship to the dealer
     ComponentsManager::credits -= shipping_price; //transportation cost
 
     // Sell the ship
-    const float ship_sellback_factor = configuration().economics.ship_sellback_price_flt;
+    const double ship_sellback_factor = configuration().economics.ship_sellback_price_dbl;
     ComponentsManager::credits += ship_sellback_factor * purchase_price; //sellback cost
 
     // Remove the ship and add to base
