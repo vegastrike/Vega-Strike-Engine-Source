@@ -49,18 +49,18 @@ $num_threads_to_build_with=[Int32]::Min($num_threads_to_build_with, $MAX_THREADS
 echo "Number of threads to build with after capping: $num_threads_to_build_with"
 
 [String]$baseDir = (Get-Location -PSProvider "FileSystem").Path
-[String]$binaryDir = "$baseDir\build\$PresetName"
+[String]$binaryDir = "$baseDir/build/$PresetName"
 cmake --preset $PresetName "-DNUM_THREADS_TO_BUILD_WITH=$num_threads_to_build_with"
 cmake --build --preset "build-$PresetName" -v
 
 New-Item bin -ItemType Directory -Force
-$aPossibleBinaryDirs = @("$binaryDir","$binaryDir\$BuildType", "$binaryDir\$BuildType\objconv", "$binaryDir\objconv\$BuildType", "$binaryDir\$BuildType\setup", "$binaryDir\setup\$BuildType")
+$aPossibleBinaryDirs = @("$binaryDir","$binaryDir/$BuildType", "$binaryDir/$BuildType/objconv", "$binaryDir/objconv/$BuildType", "$binaryDir/$BuildType/setup", "$binaryDir/setup/$BuildType")
 $aPossibleBinaryDirs | ForEach-Object {
     if (Test-Path $_) {
-        Copy-Item -Force -Verbose $_\*.* .\bin
+        Copy-Item -Force -Verbose $_/*.* ./bin
     }
 }
 
 if ($IsRelease) {
-    Compress-Archive .\bin\* "VegaStrike_${GitTag}_${GitSha}.zip"
+    Compress-Archive ./bin/* "VegaStrike_${GitTag}_${GitSha}.zip"
 }
