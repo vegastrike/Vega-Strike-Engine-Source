@@ -29,21 +29,32 @@
 # You can customize this directory location if desired, but it should be
 # something very short. Otherwise, you will run into problems.
 param(
-    [String]$VCPKG_PARENT_DIR = "C:\Projects"
+    [String]$VCPKG_PARENT_DIR = "C:/Projects"
 )
-
-Set-Variable -Name CMAKE_VERSION -Value "3.29.2"
 
 New-Item "$VCPKG_PARENT_DIR" -ItemType Directory -Force
 Push-Location "$VCPKG_PARENT_DIR"
-git clone https://github.com/Microsoft/vcpkg.git ./v
-.\v\bootstrap-vcpkg.bat -disableMetrics
 
-[Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCPKG_PARENT_DIR\v", 'User')
-$env:VCPKG_ROOT = "$VCPKG_PARENT_DIR\v"
+[Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCPKG_PARENT_DIR/vcpkg", 'User')
+$env:VCPKG_ROOT = "$VCPKG_PARENT_DIR/vcpkg"
+[Environment]::SetEnvironmentVariable('VCPKG_ASSET_SOURCES', "$VCPKG_PARENT_DIR/vcpkgAssets", 'User')
+$env:VCPKG_ASSET_SOURCES="$VCPKG_PARENT_DIR/vcpkgAssets"
+[Environment]::SetEnvironmentVariable('X_VCPKG_ASSET_SOURCES', "clear;x-azurl,file:///$VCPKG_PARENT_DIR/vcpkgAssets,,readwrite", 'User')
+$env:X_VCPKG_ASSET_SOURCES="clear;x-azurl,file:///$VCPKG_PARENT_DIR/vcpkgAssets,,readwrite"
+[Environment]::SetEnvironmentVariable('VCPKG_BINARY_SOURCES', "clear;files,$VCPKG_PARENT_DIR/vcpkgBin,readwrite", 'User')
+$env:VCPKG_BINARY_SOURCES = "clear;files,$VCPKG_PARENT_DIR/vcpkgBin,readwrite"
+[Environment]::SetEnvironmentVariable('VCPKG_BUILD_TREES', "$VCPKG_PARENT_DIR/vcpkgBuild", 'User')
+$env:VCPKG_BUILD_TREES="$VCPKG_PARENT_DIR/vcpkgBuild"
+[Environment]::SetEnvironmentVariable('VCPKG_INSTALL_OPTIONS', "--x-buildtrees-root=$VCPKG_PARENT_DIR/vcpkgBuild", 'User')
+$env:VCPKG_INSTALL_OPTIONS="--x-buildtrees-root=$VCPKG_PARENT_DIR/vcpkgBuild"
+
+git clone https://github.com/Microsoft/vcpkg.git "$env:VCPKG_ROOT"
+& "$env:VCPKG_ROOT/bootstrap-vcpkg.bat" -disableMetrics
+
+Set-Variable -Name CMAKE_WITH_VERSION -Value (Get-ChildItem "$env:VCPKG_ROOT/downloads/tools" -Filter "cmake-*-windows" -Folder | Select-Object -Last 1).Name
 
 $path = [Environment]::GetEnvironmentVariable('PATH', 'User')
-$newPath = $path + ";$VCPKG_PARENT_DIR\v\downloads\tools\cmake-$CMAKE_VERSION-windows\cmake-$CMAKE_VERSION-windows-i386\bin"
+$newPath = $path + ";$env:VCPKG_ROOT/downloads/tools/$CMAKE_WITH_VERSION/$CMAKE_WITH_VERSION-i386/bin"
 [Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
 $env:PATH = $newPath
 

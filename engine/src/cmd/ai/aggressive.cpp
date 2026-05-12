@@ -544,24 +544,24 @@ bool AggressiveAI::ProcessLogic(AIEvents::ElemAttrMap &logi, bool inter) {
 }
 
 Unit *GetThreat(const Unit *parent, const Unit *leader) {
-    Unit *th = nullptr;
-    Unit *un = nullptr;
+    Unit *threat = nullptr;
+    Unit *unit = nullptr;
     bool targetted = false;
     float mindist = FLT_MAX;
     for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
-            (un = *ui);
+            (unit = *ui);
             ++ui) {
-        if (parent->getRelation(un) < 0) {
-            const float d = static_cast<float>((un->Position() - leader->Position()).Magnitude());
-            const bool this_targeted = (un->Target() == leader);
-            if (!th || (this_targeted && !targetted) || ((this_targeted || (!targetted)) && d < mindist)) {
-                th = un;
+        if (parent->getRelation(unit) < 0) {
+            const float d = static_cast<float>((unit->Position() - leader->Position()).Magnitude());
+            const bool this_targeted = (unit->Target() == leader);
+            if (!threat || (this_targeted && !targetted) || ((this_targeted || (!targetted)) && d < mindist)) {
+                threat = unit;
                 targetted = this_targeted;
                 mindist = d;
             }
         }
     }
-    return th;
+    return threat;
 }
 
 bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
@@ -1579,8 +1579,8 @@ void AggressiveAI::AfterburnerJumpTurnTowards(const Unit *target) {
     AfterburnTurnTowards(this, parent);
     const float jump_time_limit = configuration().ai.force_jump_after_time_flt;
     if (jump_time_check == 0) {
-        const float dist = static_cast<float>((target->Position() - parent->Position()).MagnitudeSquared());
-        if (last_jump_distance < dist || last_jump_time > jump_time_limit) {
+        const float distance = static_cast<float>((target->Position() - parent->Position()).MagnitudeSquared());
+        if (last_jump_distance < distance || last_jump_time > jump_time_limit) {
             //force jump
             last_jump_time = 0;
             if (!target->GetDestinations().empty()) {
@@ -1588,7 +1588,7 @@ void AggressiveAI::AfterburnerJumpTurnTowards(const Unit *target) {
                 UnitUtil::JumpTo(parent, dest);
             }
         } else {
-            last_jump_distance = dist;
+            last_jump_distance = distance;
         }
     }
 }

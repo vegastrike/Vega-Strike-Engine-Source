@@ -86,11 +86,11 @@ bool MatchingMood(const CommunicationMessage &c, float mood, float randomrespons
 }
 
 int CommunicatingAI::selectCommunicationMessageMood(CommunicationMessage &c, float mood) {
-    const Unit *targ = c.sender.GetUnit();
+    const Unit *target = c.sender.GetUnit();
     float relationship = 0;
-    if (targ) {
-        relationship = parent->pilot->GetEffectiveRelationship(parent, targ);
-        if (targ == parent->Target() && relationship > -1.0) {
+    if (target) {
+        relationship = parent->pilot->GetEffectiveRelationship(parent, target);
+        if (target == parent->Target() && relationship > -1.0) {
             relationship = -1.0;
         }
         mood += (1 - randomresponse) * relationship;

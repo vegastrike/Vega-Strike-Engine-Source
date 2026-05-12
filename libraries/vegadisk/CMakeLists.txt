@@ -104,10 +104,6 @@ IF (USE_GTEST)
 
     TARGET_LINK_LIBRARIES(
             ${TEST_NAME}
-            ${OPENAL_LIBRARY}
-            ${Vorbis_LIBRARIES}
-            ${JPEG_LIBRARIES}
-            ${PNG_LIBRARIES}
             ${Boost_LIBRARIES}
             ${Python3_LIBRARIES}
             gtest_main

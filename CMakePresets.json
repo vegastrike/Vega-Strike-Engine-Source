@@ -10,10 +10,16 @@
       "name": "default",
       "hidden": true,
       "displayName": "Default Config",
-      "description": "Default build",
       "binaryDir": "${sourceDir}/build/${presetName}",
+      "warnings": {
+        "deprecated": true,
+        "uninitialized": false
+      },
       "debug": {
         "output": true
+      },
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     },
     {
@@ -21,20 +27,71 @@
       "hidden": true,
       "displayName": "Use Ninja generator",
       "generator": "Ninja",
-      "inherits": "default"
+      "inherits": ["default"]
+    },
+    {
+      "name": "ninja-multi-config",
+      "hidden": true,
+      "displayName": "Use Ninja Multi-Config generator",
+      "inherits": ["default"],
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo",
+        "CMAKE_CROSS_CONFIGS": "all",
+        "CMAKE_DEFAULT_BUILD_TYPE": "Debug",
+        "CMAKE_DEFAULT_CONFIGS": "Debug"
+      }
+    },
+    {
+      "name": "linux-base",
+      "hidden": true,
+      "inherits": ["default"],
+      "displayName": "Linux Default",
+      "description": "Default build for Linux",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-ninja",
+      "hidden": true,
+      "inherits": [
+        "linux-base",
+        "ninja"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
     },
     {
       "name": "unix-makefiles",
       "hidden": true,
       "displayName": "Use Unix Makefiles generator",
       "generator": "Unix Makefiles",
-      "inherits": "default"
+      "inherits": ["default"]
+    },
+    {
+      "name": "linux-unix-makefiles",
+      "hidden": true,
+      "inherits": [
+        "linux-base",
+        "unix-makefiles"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
     },
     {
       "name": "debug",
       "hidden": true,
       "displayName": "Debug",
-      "inherits": "default",
+      "inherits": ["default"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "LOG_TIME_TAKEN_DETAILS": true
@@ -44,24 +101,26 @@
       "name": "release",
       "hidden": true,
       "displayName": "Release",
-      "inherits": "default",
+      "inherits": ["default"],
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "LOG_TIME_TAKEN_DETAILS": false
       }
     },
     {
       "name": "RelWithDebInfo",
       "hidden": true,
       "displayName": "RelWithDebInfo",
-      "inherits": "default",
+      "inherits": ["default"],
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "LOG_TIME_TAKEN_DETAILS": false
       }
     },
     {
       "name": "pie-enabled",
       "hidden": true,
-      "inherits": "default",
+      "inherits": ["default"],
       "displayName": "PIE Enabled",
       "description": "Enable Position-Independent Executables (PIE)",
       "cacheVariables": {
@@ -71,7 +130,7 @@
     {
       "name": "pie-disabled",
       "hidden": true,
-      "inherits": "default",
+      "inherits": ["default"],
       "displayName": "PIE Disabled",
       "description": "Build with Position-Independent Executables (PIE) turned off",
       "cacheVariables": {
@@ -81,6 +140,7 @@
     {
       "name": "legacy-gl",
       "hidden": true,
+      "inherits": ["default"],
       "displayName": "Legacy OpenGL",
       "cacheVariables": {
         "OpenGL_GL_PREFERENCE": {
@@ -97,6 +157,7 @@
     {
       "name": "glvnd",
       "hidden": true,
+      "inherits": ["default"],
       "displayName": "GLVND",
       "cacheVariables": {
         "OpenGL_GL_PREFERENCE": {
@@ -108,6 +169,119 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Linux"
+      }
+    },
+    {
+      "name": "gl-neither",
+      "hidden": true,
+      "inherits": ["default"],
+      "displayName": "GL-Neither"
+    },
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "inherits": ["default"],
+      "displayName": "Windows Default",
+      "description": "Default build for Windows",
+      "environment": {
+        "VCPKG_FEATURE_FLAGS": "manifests,registries",
+        "VCPKG_TARGET_TRIPLET": "x64-win10",
+        "VCPKG_HOST_TRIPLET": "x64-win10"
+      },
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+          "type": "FILEPATH"
+        },
+        "VCPKG_TARGET_TRIPLET": "x64-win10",
+        "VCPKG_HOST_TRIPLET": "x64-win10"
+      },
+      "debug": {
+        "output": true,
+        "find": true
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VisualStudio-base",
+      "hidden": true,
+      "inherits": ["windows-base"],
+      "architecture": "X64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2019Win64",
+      "hidden": true,
+      "inherits": ["VisualStudio-base"],
+      "displayName": "Visual Studio 2019 on Windows x64",
+      "generator": "Visual Studio 16 2019",
+      "architecture": "X64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2022Win64",
+      "hidden": true,
+      "inherits": ["VisualStudio-base"],
+      "displayName": "Visual Studio 2022 on Windows x64",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "X64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64",
+      "hidden": true,
+      "inherits": ["VisualStudio-base"],
+      "displayName": "Visual Studio 2026 on Windows x64",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "X64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "ninja-windows",
+      "hidden": true,
+      "inherits": [
+        "windows-base",
+        "ninja"
+      ],
+      "displayName": "Ninja on Windows",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "ninja-multi-config-windows",
+      "hidden": true,
+      "inherits": [
+        "windows-base",
+        "ninja-multi-config"
+      ],
+      "displayName": "Ninja Multi-Config on Windows",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
       }
     },
     {
@@ -471,15 +645,10 @@
       }
     },
     {
-      "name": "macos-default",
-      "hidden": true,
-      "inherits": "default",
+      "name": "macOS-base",
       "displayName": "macOS Default",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Darwin"
-      },
+      "inherits": ["default"],
+      "hidden": true,
       "environment": {
         "VERBOSE": "ON"
       },
@@ -487,13 +656,21 @@
         "CMAKE_TOOLCHAIN_FILE": {
           "value": "cmake/Homebrew.cmake",
           "type": "FILEPATH"
-        }
+        },
+        "CMAKE_FIND_FRAMEWORK": "LAST",
+        "INSTALL_GTEST": "OFF",
+        "USE_GTEST": "OFF"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
       }
     },
     {
       "name": "macos-pie-enabled-debug",
       "inherits": [
-        "macos-default",
+        "macOS-base",
         "pie-enabled",
         "debug"
       ],
@@ -507,7 +684,7 @@
     {
       "name": "macos-pie-enabled-release",
       "inherits": [
-        "macos-default",
+        "macOS-base",
         "pie-enabled",
         "release"
       ],
@@ -521,7 +698,7 @@
     {
       "name": "macos-pie-enabled-RelWithDebInfo",
       "inherits": [
-        "macos-default",
+        "macOS-base",
         "pie-enabled",
         "RelWithDebInfo"
       ],
@@ -535,7 +712,7 @@
     {
       "name": "macos-pie-disabled-debug",
       "inherits": [
-        "macos-default",
+        "macOS-base",
         "pie-disabled",
         "debug"
       ],
@@ -549,7 +726,7 @@
     {
       "name": "macos-pie-disabled-release",
       "inherits": [
-        "macos-default",
+        "macOS-base",
         "pie-disabled",
         "release"
       ],
@@ -563,7 +740,7 @@
     {
       "name": "macos-pie-disabled-RelWithDebInfo",
       "inherits": [
-        "macos-default",
+        "macOS-base",
         "pie-disabled",
         "RelWithDebInfo"
       ],
@@ -575,9 +752,9 @@
       }
     },
     {
-      "name": "macOS-MacPorts-default",
+      "name": "macOS-MacPorts-base",
       "hidden": true,
-      "inherits": "default",
+      "inherits": ["default"],
       "displayName": "macOS (MacPorts) Default",
       "condition": {
         "type": "equals",
@@ -603,7 +780,7 @@
     {
       "name": "macOS-MacPorts-pie-enabled-debug",
       "inherits": [
-        "macOS-MacPorts-default",
+        "macOS-MacPorts-base",
         "pie-enabled",
         "debug"
       ],
@@ -617,7 +794,7 @@
     {
       "name": "macOS-MacPorts-pie-enabled-release",
       "inherits": [
-        "macOS-MacPorts-default",
+        "macOS-MacPorts-base",
         "pie-enabled",
         "release"
       ],
@@ -631,7 +808,7 @@
     {
       "name": "macOS-MacPorts-pie-enabled-RelWithDebInfo",
       "inherits": [
-        "macOS-MacPorts-default",
+        "macOS-MacPorts-base",
         "pie-enabled",
         "RelWithDebInfo"
       ],
@@ -648,7 +825,7 @@
     {
       "name": "macOS-MacPorts-pie-disabled-debug",
       "inherits": [
-        "macOS-MacPorts-default",
+        "macOS-MacPorts-base",
         "pie-disabled",
         "debug"
       ],
@@ -662,7 +839,7 @@
     {
       "name": "macOS-MacPorts-pie-disabled-release",
       "inherits": [
-        "macOS-MacPorts-default",
+        "macOS-MacPorts-base",
         "pie-disabled",
         "release"
       ],
@@ -676,7 +853,7 @@
     {
       "name": "macOS-MacPorts-pie-disabled-RelWithDebInfo",
       "inherits": [
-        "macOS-MacPorts-default",
+        "macOS-MacPorts-base",
         "pie-disabled",
         "RelWithDebInfo"
       ],
@@ -685,74 +862,6 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Darwin"
-      }
-    },
-    {
-      "name": "windows-base",
-      "hidden": true,
-      "inherits": "default",
-      "displayName": "Windows Default",
-      "description": "Default build for Windows",
-      "environment": {
-        "VCPKG_TARGET_TRIPLET": "x64-win10",
-        "VCPKG_HOST_TRIPLET": "x64-win10",
-        "X_VCPKG_APPLOCAL_DEPS_INSTALL": "ON"
-      },
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": {
-          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-          "type": "FILEPATH"
-        },
-        "VCPKG_TARGET_TRIPLET": "x64-win10",
-        "VCPKG_HOST_TRIPLET": "x64-win10",
-        "VCPKG_INSTALL_OPTIONS": "--x-buildtrees-root=$env{VCPKG_ROOT}\\..\\vbuild"
-      },
-      "debug": {
-        "output": true,
-        "find": true
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
-    },
-    {
-      "name": "VS2019Win64",
-      "hidden": true,
-      "inherits": "windows-base",
-      "displayName": "Visual Studio 2019 on Windows x64",
-      "generator": "Visual Studio 16 2019",
-      "architecture": "X64",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
-    },
-    {
-      "name": "VS2022Win64",
-      "hidden": true,
-      "inherits": "windows-base",
-      "displayName": "Visual Studio 2022 on Windows x64",
-      "generator": "Visual Studio 17 2022",
-      "architecture": "X64",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
-    },
-    {
-      "name": "ninja-windows",
-      "hidden": true,
-      "inherits": "windows-base",
-      "displayName": "Ninja on Windows",
-      "generator": "Ninja Multi-Config",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
       }
     },
     {
@@ -998,6 +1107,90 @@
       "displayName": "VS2022Win64, PIE Disabled, RelWithDebInfo",
       "inherits": [
         "VS2022Win64",
+        "pie-disabled",
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-debug",
+      "displayName": "VS2026Win64, PIE Enabled, Debug",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-release",
+      "displayName": "VS2026Win64, PIE Enabled, Release",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Enabled, RelWithDebInfo",
+      "inherits": [
+        "VS2026Win64",
+        "pie-enabled",
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-debug",
+      "displayName": "VS2026Win64, PIE Disabled, Debug",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-release",
+      "displayName": "VS2026Win64, PIE Disabled, Release",
+      "inherits": [
+        "VS2026Win64",
+        "pie-disabled",
+        "release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2026Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Disabled, RelWithDebInfo",
+      "inherits": [
+        "VS2026Win64",
         "pie-disabled",
         "RelWithDebInfo"
       ],
@@ -1602,6 +1795,72 @@
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
       }
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-debug",
+      "configurePreset": "VS2026Win64-pie-enabled-debug",
+      "displayName": "VS2026Win64, PIE Enabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-release",
+      "configurePreset": "VS2026Win64-pie-enabled-release",
+      "displayName": "VS2026Win64, PIE Enabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-VS2026Win64-pie-enabled-RelWithDebInfo",
+      "configurePreset": "VS2026Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-debug",
+      "configurePreset": "VS2026Win64-pie-disabled-debug",
+      "displayName": "VS2026Win64, PIE Disabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-release",
+      "configurePreset": "VS2026Win64-pie-disabled-release",
+      "displayName": "VS2026Win64, PIE Disabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-VS2026Win64-pie-disabled-RelWithDebInfo",
+      "configurePreset": "VS2026Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
     }
   ],
   "testPresets": [
@@ -2192,6 +2451,72 @@
       "name": "test-VS2022Win64-pie-disabled-RelWithDebInfo",
       "configurePreset": "VS2022Win64-pie-disabled-RelWithDebInfo",
       "displayName": "VS2022Win64, PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-debug",
+      "configurePreset": "VS2026Win64-pie-enabled-debug",
+      "displayName": "VS2026Win64, PIE Enabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-release",
+      "configurePreset": "VS2026Win64-pie-enabled-release",
+      "displayName": "VS2026Win64, PIE Enabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2026Win64-pie-enabled-RelWithDebInfo",
+      "configurePreset": "VS2026Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-debug",
+      "configurePreset": "VS2026Win64-pie-disabled-debug",
+      "displayName": "VS2026Win64, PIE Disabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-release",
+      "configurePreset": "VS2026Win64-pie-disabled-release",
+      "displayName": "VS2026Win64, PIE Disabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2026Win64-pie-disabled-RelWithDebInfo",
+      "configurePreset": "VS2026Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Disabled, RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
@@ -2894,6 +3219,84 @@
       "name": "package-VS2022Win64-pie-disabled-RelWithDebInfo",
       "configurePreset": "VS2022Win64-pie-disabled-RelWithDebInfo",
       "displayName": "VS2022Win64, PIE Disabled, RelWithDebInfo",
+      "configurations": [
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2026Win64-pie-enabled-debug",
+      "configurePreset": "VS2026Win64-pie-enabled-debug",
+      "displayName": "VS2026Win64, PIE Enabled, Debug",
+      "configurations": [
+        "Debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2026Win64-pie-enabled-release",
+      "configurePreset": "VS2026Win64-pie-enabled-release",
+      "displayName": "VS2026Win64, PIE Enabled, Release",
+      "configurations": [
+        "Release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2026Win64-pie-enabled-RelWithDebInfo",
+      "configurePreset": "VS2026Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Enabled, RelWithDebInfo",
+      "configurations": [
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2026Win64-pie-disabled-debug",
+      "configurePreset": "VS2026Win64-pie-disabled-debug",
+      "displayName": "VS2026Win64, PIE Disabled, Debug",
+      "configurations": [
+        "Debug"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2026Win64-pie-disabled-release",
+      "configurePreset": "VS2026Win64-pie-disabled-release",
+      "displayName": "VS2026Win64, PIE Disabled, Release",
+      "configurations": [
+        "Release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2026Win64-pie-disabled-RelWithDebInfo",
+      "configurePreset": "VS2026Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2026Win64, PIE Disabled, RelWithDebInfo",
       "configurations": [
         "RelWithDebInfo"
       ],

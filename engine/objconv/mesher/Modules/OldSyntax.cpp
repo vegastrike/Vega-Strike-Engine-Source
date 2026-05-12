@@ -93,9 +93,6 @@ public:
                         case 'o':
                             inf = "Wavefront";
                             break;
-                        case 'm':
-                            inf = "Ogre";
-                            break;
                         case 'b':
                             inf = "BFXM";
                             break;
@@ -108,9 +105,6 @@ public:
                     switch (mMode[1]) {
                         case 'o':
                             outf = "Wavefront";
-                            break;
-                        case 'm':
-                            outf = "Ogre";
                             break;
                         case 'b':
                             outf = "BFXM";

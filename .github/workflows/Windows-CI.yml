@@ -7,7 +7,6 @@ permissions:
 on:
   push:
   pull_request:
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -20,7 +19,6 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
-
     strategy:
       fail-fast: false
       matrix:
@@ -28,26 +26,33 @@ jobs:
           - os:              windows-2022
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-debug
-            python-version:  3.13.12
+            python-version:  3.13.13
             is-release:      0
           - os:              windows-2025
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
-            python-version:  3.13.12
+            python-version:  3.13.13
+            is-release:      0
+          - os:              windows-2025-vs2026
+            triplet:         x64-win10
+            preset-name:     VS2026Win64-pie-enabled-RelWithDebInfo
+            python-version:  3.13.13
             is-release:      0
 
     env:
-      VCPKG_ROOT: ${{ github.workspace }}\\v
-      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg_cache,readwrite
+      VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
+      VCPKG_ASSET_SOURCES: "${{ github.workspace }}/vcpkgAssets"
+      X_VCPKG_ASSET_SOURCES: clear;x-azurl,file:///${{ github.workspace }}/vcpkgAssets,,readwrite
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkgBin,readwrite
+      VCPKG_BUILD_TREES: "${{ github.workspace }}/vcpkgBuild"
+      VCPKG_INSTALL_OPTIONS: "--x-buildtrees-root=${{ github.workspace }}/vcpkgBuild"
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
       VCPKG_DEFAULT_HOST_TRIPLET: ${{ matrix.triplet }}
-      VCPKG_OVERLAY_PORTS: ${{ github.workspace }}\\custom-triplets
+      VCPKG_OVERLAY_PORTS: "${{ github.workspace }}/custom-triplets"
       PYTHONHOME: ""
       PYTHONPATH: ""
       INSTALL_GTEST: 1
       USE_GTEST: 1
-      INSTALL_SDL3: 0
-      INSTALL_SDL3_IMAGE: 0
 
     steps:
       - name: checkout
@@ -58,11 +63,22 @@ jobs:
 
       - name: Restore vcpkg cache
         id: cache-vcpkg-restore
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
-          path: ${{ github.workspace }}/vcpkg_cache
-          key: vcpkg-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-${{ matrix.os }}-${{ matrix.triplet }}-
+          path: |
+            "${{ github.workspace }}/vcpkgAssets"
+            "${{ github.workspace }}/vcpkgBCache"
+            "${{ github.workspace }}/vcpkgBin"
+            "${{ github.workspace }}/vcpkgBuild"
+          key: vcpkgCache-${{ github.repository_owner }}-${{ matrix.os }}-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
+
+      - name: Create directories on cache miss
+        run: |
+          mkdir -p "${{ github.workspace }}/vcpkgAssets"
+          mkdir -p "${{ github.workspace }}/vcpkgBCache"
+          mkdir -p "${{ github.workspace }}/vcpkgBin"
+          mkdir -p "${{ github.workspace }}/vcpkgBuild"
+        if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -72,10 +88,12 @@ jobs:
           update-environment: false
 
       - name: Install CMake
-        uses: lukka/get-cmake@b78306120111dc2522750771cfd09ee7ca723687 # v4.3.0
+        uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # v4.3.2
 
       - name: Install vcpkg
-        uses: lukka/run-vcpkg@08ab0cc59d3f33647c5dc2b1e8f2093266c7b873 # Node 24 compatible version
+        uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11.6
+        with:
+          binaryCachePath: "${{ github.workspace }}/vcpkgBCache"
 
       - name: Build the code
         run: |
@@ -97,10 +115,15 @@ jobs:
 
       - name: Save vcpkg cache
         id: cache-vcpkg-save
-        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
-          path: ${{ github.workspace }}/vcpkg_cache
+          path: |
+            "${{ github.workspace }}/vcpkgAssets"
+            "${{ github.workspace }}/vcpkgBCache"
+            "${{ github.workspace }}/vcpkgBin"
+            "${{ github.workspace }}/vcpkgBuild"
           key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
+        if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
       - name: Upload test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
