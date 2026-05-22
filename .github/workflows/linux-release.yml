@@ -1,7 +1,7 @@
 name: Linux-Release
 permissions:
-    contents: write
-    pull-requests: read
+  contents: write
+  pull-requests: read
 
 on:
   release:
@@ -26,6 +26,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - FROM:     'ubuntu:resolute'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: 0
+            INSTALL_SDL3_IMAGE: 0
+            ARTIFACT_EXT: 'deb'
           - FROM:     'ubuntu:questing'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
@@ -33,8 +39,8 @@ jobs:
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'deb'
           # Source tarballs only
-          - FROM:     'ubuntu:questing'
-            COMPILER: 'clang'
+          - FROM:     'dhi.io/python:3.13-debian13-dev'
+            COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
@@ -45,6 +51,12 @@ jobs:
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'deb'
+          - FROM:     'fedora:44'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: 0
+            INSTALL_SDL3_IMAGE: 0
+            ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:43'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
@@ -52,6 +64,12 @@ jobs:
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:42'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            INSTALL_SDL3: 0
+            INSTALL_SDL3_IMAGE: 0
+            ARTIFACT_EXT: 'rpm'
+          - FROM:     'opensuse/leap:16.0'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             INSTALL_SDL3: 0

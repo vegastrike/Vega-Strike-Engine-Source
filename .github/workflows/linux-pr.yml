@@ -1,7 +1,7 @@
 name: Linux-PR
 permissions:
-    contents: read
-    pull-requests: read
+  contents: read
+  pull-requests: read
 
 on: [ pull_request ]
 
@@ -22,6 +22,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - FROM:     'ubuntu:resolute'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 0
+            INSTALL_SDL3_IMAGE: 0
+            allow_failure: false
           - FROM:     'ubuntu:questing'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
@@ -38,6 +46,14 @@ jobs:
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             allow_failure: false
+          - FROM:     'fedora:44'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 0
+            INSTALL_SDL3_IMAGE: 0
+            allow_failure: false
           - FROM:     'fedora:43'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
@@ -47,6 +63,14 @@ jobs:
             INSTALL_SDL3_IMAGE: 0
             allow_failure: false
           - FROM:     'fedora:42'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            INSTALL_SDL3: 0
+            INSTALL_SDL3_IMAGE: 0
+            allow_failure: false
+          - FROM:     'opensuse/leap:16.0'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             INSTALL_GTEST: 1
