@@ -274,6 +274,51 @@ TEST(GFXColorVertex, SetVtx) {
     }
 }
 
+TEST(GFXColorVertex, SetVtx2) {
+    constexpr int kNumberOfVertices = 4;
+    GFXVertex vertices_original[kNumberOfVertices]{};
+    GFXColorVertex vertices_copied[kNumberOfVertices]{};
+
+    for (auto & vertex : vertices_original) {
+        vertex.s = randomDouble();
+        vertex.t = randomDouble();
+        vertex.i = randomDouble();
+        vertex.j = randomDouble();
+        vertex.k = randomDouble();
+        vertex.x = randomDouble();
+        vertex.y = randomDouble();
+        vertex.z = randomDouble();
+        vertex.tx = randomDouble();
+        vertex.ty = randomDouble();
+        vertex.tz = randomDouble();
+        vertex.tw = randomDouble();
+    }
+
+    for (int i = 0; i < kNumberOfVertices; ++i) {
+        vertices_copied[i].SetVtx2(vertices_original[i]);
+    }
+
+    for (int i = 0; i < kNumberOfVertices; ++i) {
+        EXPECT_EQ(vertices_copied[i].s, vertices_original[i].s);
+        EXPECT_EQ(vertices_copied[i].t, vertices_original[i].t);
+        EXPECT_EQ(vertices_copied[i].i, vertices_original[i].i);
+        EXPECT_EQ(vertices_copied[i].j, vertices_original[i].j);
+        EXPECT_EQ(vertices_copied[i].k, vertices_original[i].k);
+        EXPECT_EQ(vertices_copied[i].x, vertices_original[i].x);
+        EXPECT_EQ(vertices_copied[i].y, vertices_original[i].y);
+        EXPECT_EQ(vertices_copied[i].z, vertices_original[i].z);
+        EXPECT_EQ(vertices_copied[i].tx, vertices_original[i].tx);
+        EXPECT_EQ(vertices_copied[i].ty, vertices_original[i].ty);
+        EXPECT_EQ(vertices_copied[i].tz, vertices_original[i].tz);
+        EXPECT_EQ(vertices_copied[i].tw, vertices_original[i].tw);
+
+        EXPECT_EQ(vertices_copied[i].r, 0.0F);
+        EXPECT_EQ(vertices_copied[i].g, 0.0F);
+        EXPECT_EQ(vertices_copied[i].b, 0.0F);
+        EXPECT_EQ(vertices_copied[i].a, 0.0F);
+    }
+}
+
 // TEST(Resizable, Sanity) {
 //     Resizable<GFXColorVertex> resizable{};
 //     EXPECT_EQ(resizable.size(), 0);
