@@ -118,6 +118,28 @@ public:
         return real_dist(gen);
     }
 
+    /// generates a random double on a normal distribution defined by mean and standard_deviation, and guaranteed to be
+    /// between min and max, inclusive
+    double NormalDistribution(const double mean, const double standard_deviation, const double min, const double max) {
+        std::normal_distribution<double> normal_dist(mean, standard_deviation);
+        double random_double;
+        do {
+            random_double = normal_dist(gen);
+        } while (random_double < min || random_double > max);
+        return random_double;
+    }
+
+    /// generates a random float on a normal distribution defined by mean and standard_deviation, and guaranteed to be
+    /// between min and max, inclusive
+    float NormalDistribution(const float mean, const float standard_deviation, const float min, const float max) {
+        std::normal_distribution<float> normal_dist(mean, standard_deviation);
+        float random_float;
+        do {
+            random_float = normal_dist(gen);
+        } while (random_float < min || random_float > max);
+        return random_float;
+    }
+
     /** generates a random double on (0,1)-real-interval */
     double GenRandReal3() {
         return (static_cast<double>(GenRandUInt32()) + 0.5) * (1.0 / kVegaUInt32tMaxAsDoublePlus1);
