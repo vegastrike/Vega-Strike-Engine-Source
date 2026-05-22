@@ -441,7 +441,7 @@ void FireKeyboard::RestoreTarget10Key(const KBData &, KBSTATE k) {
     }
 }
 
-extern void LeadMe(Unit *un, string directive, string speech, bool changetarget);
+extern void LeadMe(Unit *un, string directive, string speech, bool change_target);
 
 static void LeadMe(string directive, string speech, bool changetarget) {
     Unit *un = _Universe->AccessCockpit()->GetParent();
@@ -808,7 +808,7 @@ void FireKeyboard::TogglePause(const KBData &, KBSTATE k) {
 }
 
 extern unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &convNode);
-extern Unit *GetThreat(Unit *par, Unit *leader);
+extern Unit *GetThreat(const Unit *par, const Unit *leader);
 
 void HelpOut(bool crit, std::string conv) {
     Unit *un = _Universe->AccessCockpit()->GetParent();

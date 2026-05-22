@@ -478,102 +478,101 @@ int pollindex[2] = {1,
         1};   //current count of number of units touched (doesn't need to be precise)  -- used for "fairness" heuristic
 
 void FireAt::ChooseTargets(int numtargs, bool force) {
-    float gunspeed, gunrange, missilerange;
-    parent->getAverageGunSpeed(gunspeed, gunrange, missilerange);
-    static float targettimer = UniverseUtil::GetGameTime();    //timer used to determine passage of physics frames
-    const float mintimetoswitch = configuration().ai.targeting.min_time_to_switch_targets_flt;
-    const float minnulltimetoswitch = configuration().ai.targeting.min_null_time_to_switch_targets_flt;
-    const int minnumpollers = configuration().ai.targeting.min_number_of_pollers_per_frame;
+    float gun_speed, gun_range, missile_range;
+    parent->getAverageGunSpeed(gun_speed, gun_range, missile_range);
+    static float target_timer = UniverseUtil::GetGameTime();    //timer used to determine passage of physics frames
+    const float min_time_to_switch = configuration().ai.targeting.min_time_to_switch_targets_flt;
+    const float min_null_time_to_switch = configuration().ai.targeting.min_null_time_to_switch_targets_flt;
+    const int min_num_pollers = configuration().ai.targeting.min_number_of_pollers_per_frame;
     //maximum number of vessels allowed to search for a target in a given physics frame
-    const int maxnumpollers = configuration().ai.targeting.max_number_of_pollers_per_frame;
-    int numpollers[2] = {maxnumpollers, maxnumpollers};
+    const int max_num_pollers = configuration().ai.targeting.max_number_of_pollers_per_frame;
+    int num_pollers[2] = {max_num_pollers, max_num_pollers};
 
-    int nextframenumpollers[2] = {maxnumpollers, maxnumpollers};
-    if (lastchangedtarg + mintimetoswitch > 0) {
+    int next_frame_num_pollers[2] = {max_num_pollers, max_num_pollers};
+    if (lastchangedtarg + min_time_to_switch > 0) {
         return;
     }          //don't switch if switching too soon
 
-    Unit *curtarg = parent->Target();
-    int hastarg = (curtarg == nullptr) ? 0 : 1;
+    Unit *current_target = parent->Target();
+    int has_target = (current_target == nullptr) ? 0 : 1;
     //Following code exists to limit the number of craft polling for a target in a given frame - this is an expensive operation, and needs to be spread out, or there will be pauses.
-    if ((UniverseUtil::GetGameTime()) - targettimer >= SIMULATION_ATOM * .99) {
+    if ((UniverseUtil::GetGameTime()) - target_timer >= SIMULATION_ATOM * .99) {
         //Check if one or more physics frames have passed
         numpolled[0] = numpolled[1] = 0;         //reset counters
         prevpollindex[0] = pollindex[0];
         prevpollindex[1] = pollindex[1];
-        pollindex[hastarg] = 0;
-        targettimer = UniverseUtil::GetGameTime();
-        numpollers[0] = float_to_int(nextframenumpollers[0]);
-        numpollers[1] = float_to_int(nextframenumpollers[1]);
+        pollindex[has_target] = 0;
+        target_timer = UniverseUtil::GetGameTime();
+        num_pollers[0] = float_to_int(next_frame_num_pollers[0]);
+        num_pollers[1] = float_to_int(next_frame_num_pollers[1]);
     }
-    pollindex[hastarg]++;     //count number of craft touched - will use in the next physics frame to spread out the vessels actually chosen to be processed among all of the vessels being touched
-    if (numpolled[hastarg] > numpollers[hastarg]) {      //over quota, wait until next physics frame
+    pollindex[has_target]++;     //count number of craft touched - will use in the next physics frame to spread out the vessels actually chosen to be processed among all of the vessels being touched
+    if (numpolled[has_target] > num_pollers[has_target]) {      //over quota, wait until next physics frame
         return;
     }
-    if (!(pollindex[hastarg] % ((prevpollindex[hastarg] / numpollers[hastarg])
+    if (!(pollindex[has_target] % ((prevpollindex[has_target] / num_pollers[has_target])
             + 1))) {      //spread out, in modulo fashion, the possibility of changing one's target. Use previous physics frame count of craft to estimate current number of craft
-        numpolled[hastarg]++;          //if a more likely candidate, we're going to search for a target.
+        numpolled[has_target]++;          //if a more likely candidate, we're going to search for a target.
     } else {
         return;
     }          //skipped to achieve better fairness - see comment on modulo distribution above
-    if (curtarg) {
-        if (isJumpablePlanet(curtarg)) {
+    if (current_target) {
+        if (isJumpablePlanet(current_target)) {
             return;
         }
     }
-    bool wasnull = (curtarg == NULL);
-    Flightgroup *fg = parent->getFlightgroup();
-    lastchangedtarg = 0 + targrand.uniformInc(0, 1)
-            * mintimetoswitch;     //spread out next valid time to switch targets - helps to ease per-frame loads.
+    const bool was_null = (current_target == nullptr);
+    const Flightgroup *fg = parent->getFlightgroup();
+    lastchangedtarg = 0.0F + static_cast<float>(targrand.uniformInc(0, 1))
+            * min_time_to_switch;     //spread out next valid time to switch targets - helps to ease per-frame loads.
     if (fg) {
         if (!fg->directive.empty()) {
-            if (curtarg != NULL && (*fg->directive.begin()) == toupper(*fg->directive.begin())) {
+            if (current_target != nullptr && (*fg->directive.begin()) == toupper(*fg->directive.begin())) {
                 return;
             }
         }
     }
     //not   allowed to switch targets
     numprocessed++;
-    vector<TurretBin> tbin;
-    Unit *su = NULL;
-    un_iter subun = parent->getSubUnits();
-    for (; (su = *subun) != NULL; ++subun) {
+    vector<TurretBin> turret_bins;
+    un_iter subunit = parent->getSubUnits();
+    for (Unit *su = nullptr; (su = *subunit) != nullptr; ++subunit) {
         static unsigned int inert = ROLES::getRole("INERT");
-        static unsigned int pointdef = ROLES::getRole("POINTDEF");
-        const bool assignpointdef = configuration().ai.targeting.assign_point_def;
-        if ((su->getAttackPreferenceChar() != pointdef) || assignpointdef) {
+        static unsigned int point_def = ROLES::getRole("POINTDEF");
+        const bool assign_point_def = configuration().ai.targeting.assign_point_def;
+        if ((su->getAttackPreferenceChar() != point_def) || assign_point_def) {
             if (su->getAttackPreferenceChar() != inert) {
-                AssignTBin(su, tbin);
+                AssignTBin(su, turret_bins);
             } else {
-                Unit *ssu = NULL;
-                for (un_iter subturret = su->getSubUnits(); (ssu = (*subturret)); ++subturret) {
-                    AssignTBin(ssu, tbin);
+                Unit *ssu = nullptr;
+                for (un_iter sub_turret = su->getSubUnits(); (ssu = (*sub_turret)); ++sub_turret) {
+                    AssignTBin(ssu, turret_bins);
                 }
             }
         }
     }
-    std::sort(tbin.begin(), tbin.end());
+    std::sort(turret_bins.begin(), turret_bins.end());
     float efrel = 0;
     float mytargrange = FLT_MAX;
     const float unitRad = configuration().ai.targeting.search_extra_radius_flt;                 //Maximum target radius that is guaranteed to be detected
-    const char maxrolepriority = configuration().ai.targeting.search_max_role_priority;
+    const char maxrolepriority = static_cast<char>(configuration().ai.targeting.search_max_role_priority);
     const int maxtargets = configuration().ai.targeting.search_max_candidates;   //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
     UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->radar.GetMaxRange(), unitRad);
     StaticTuple<float, 2> maxranges{};
 
-    maxranges[0] = gunrange;
-    maxranges[1] = missilerange;
-    if (tbin.size()) {
-        maxranges[0] = (tbin[0].maxrange > gunrange ? tbin[0].maxrange : gunrange);
+    maxranges[0] = gun_range;
+    maxranges[1] = missile_range;
+    if (turret_bins.size()) {
+        maxranges[0] = (turret_bins[0].maxrange > gun_range ? turret_bins[0].maxrange : gun_range);
     }
     double pretable = queryTime();
-    unitLocator.action.init(this, parent, gunrange, &tbin, maxranges, maxrolepriority, maxtargets);
+    unitLocator.action.init(this, parent, gun_range, &turret_bins, maxranges, maxrolepriority, maxtargets);
     static int gcounter = 0;
     const int min_rechoose_interval = configuration().ai.targeting.min_rechoose_interval;
-    if (curtarg) {
+    if (current_target) {
         if (gcounter++ < min_rechoose_interval || rand() / 8 < RAND_MAX / 9) {
             //in this case only look at potentially *interesting* units rather than huge swaths of nearby units...including target, threat, players, and leader's target
-            unitLocator.action.ShouldTargetUnit(curtarg, UnitUtil::getDistance(parent, curtarg));
+            unitLocator.action.ShouldTargetUnit(current_target, UnitUtil::getDistance(parent, current_target));
             unsigned int np = _Universe->numPlayers();
             for (unsigned int i = 0; i < np; ++i) {
                 Unit *playa = _Universe->AccessCockpit(i)->GetParent();
@@ -606,33 +605,33 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
         mytargrange = UnitUtil::getDistance(parent, mytarg);
     }
     TargetAndRange my_target(mytarg, mytargrange, efrel);
-    for (vector<TurretBin>::iterator k = tbin.begin(); k != tbin.end(); ++k) {
+    for (vector<TurretBin>::iterator k = turret_bins.begin(); k != turret_bins.end(); ++k) {
         k->AssignTargets(my_target, parent->cumulative_transformation_matrix);
     }
     parent->radar.Unlock();
-    if (wasnull) {
+    if (was_null) {
         if (mytarg) {
-            nextframenumpollers[hastarg] += 2;
-            if (nextframenumpollers[hastarg] > maxnumpollers) {
-                nextframenumpollers[hastarg] = maxnumpollers;
+            next_frame_num_pollers[has_target] += 2;
+            if (next_frame_num_pollers[has_target] > max_num_pollers) {
+                next_frame_num_pollers[has_target] = max_num_pollers;
             }
         } else {
-            lastchangedtarg += targrand.uniformInc(0, 1) * minnulltimetoswitch;
-            nextframenumpollers[hastarg] -= .05;
-            if (nextframenumpollers[hastarg] < minnumpollers) {
-                nextframenumpollers[hastarg] = minnumpollers;
+            lastchangedtarg += targrand.uniformInc(0, 1) * min_null_time_to_switch;
+            next_frame_num_pollers[has_target] -= .05;
+            if (next_frame_num_pollers[has_target] < min_num_pollers) {
+                next_frame_num_pollers[has_target] = min_num_pollers;
             }
         }
     } else {
         if (parent->Target() != mytarg) {
-            nextframenumpollers[hastarg] += 2;
-            if (nextframenumpollers[hastarg] > maxnumpollers) {
-                nextframenumpollers[hastarg] = maxnumpollers;
+            next_frame_num_pollers[has_target] += 2;
+            if (next_frame_num_pollers[has_target] > max_num_pollers) {
+                next_frame_num_pollers[has_target] = max_num_pollers;
             }
         } else {
-            nextframenumpollers[hastarg] -= .01;
-            if (nextframenumpollers[hastarg] < minnumpollers) {
-                nextframenumpollers[hastarg] = minnumpollers;
+            next_frame_num_pollers[has_target] -= .01;
+            if (next_frame_num_pollers[has_target] < min_num_pollers) {
+                next_frame_num_pollers[has_target] = min_num_pollers;
             }
         }
     }
