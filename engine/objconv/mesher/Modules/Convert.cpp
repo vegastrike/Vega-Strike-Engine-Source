@@ -154,7 +154,7 @@ public:
             if (params.size() < 3) {
                 cerr << "Fatal: " << command << " needs three arguments:\n"
                         << "\tmesher <...> " << command
-                        << " {XMesh|BFXM|Wavefront} (XMesh|BFXM|Wafefront|Ogre) (create|append|optimize)\n"
+                        << " {XMesh|BFXM|Wavefront} (XMesh|BFXM|Wafefront) (create|append|optimize)\n"
                         << "\n"
                         << "Do \"mesher --help convert\" for details" << endl;
                 return 1;
