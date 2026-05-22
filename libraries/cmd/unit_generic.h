@@ -286,7 +286,7 @@ public:
             const Unit *downgrade_min,
             bool force_change_on_nothing,
             bool gen_downgrade_list);
-    void ImportPartList(const std::string &category, float price, float pricedev, float quantity, float quantdev);
+    void ImportPartList(const std::string &category, float price, float price_deviation, float quantity, float quantity_deviation);
 
     void ClearMounts();
 //Loads a user interface for the user to upgrade his ship
