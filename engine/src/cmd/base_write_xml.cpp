@@ -28,60 +28,61 @@
 #include "cmd/base.h"
 #ifdef BASE_MAKER
 #ifdef BASE_XML
-#include <stdio.h>
+#include <cstdio>
 
 void begintag( FILE *Fp, const char *tag, int indent )
 {
-    int i;
-    for (i = 0; i < indent; i++)
-        VSFileSystem::Write( "\t", sizeof (char), 1, Fp );
-    VSFileSystem::Write( "<", sizeof (char), 1, Fp );
-    VSFileSystem::Write( tag, sizeof (char)*strlen( tag ), 1, Fp );
+    for (int i = 0; i < indent; i++) {
+        VSFileSystem::vs_write("\t", sizeof(char), 1, Fp);
+    }
+    VSFileSystem::vs_write( "<", sizeof (char), 1, Fp );
+    VSFileSystem::vs_write( tag, sizeof (char)*strlen( tag ), 1, Fp );
 }
 void midxmltag( FILE *Fp, const char *tag, const float value )
 {
     char value2[100] = {0};       //new char [100];
     sprintf( value2, "%g", value );
-    VSFileSystem::Write( " ", sizeof (char), 1, Fp );
-    VSFileSystem::Write( tag, sizeof (char)*strlen( tag ), 1, Fp );
-    VSFileSystem::Write( "=\"", sizeof (char)*2, 1, Fp );
-    VSFileSystem::Write( value2, sizeof (char)*strlen( value2 ), 1, Fp );
-    VSFileSystem::Write( "\"", sizeof (char)*1, 1, Fp );
+    VSFileSystem::vs_write( " ", sizeof (char), 1, Fp );
+    VSFileSystem::vs_write( tag, sizeof (char)*strlen( tag ), 1, Fp );
+    VSFileSystem::vs_write( "=\"", sizeof (char)*2, 1, Fp );
+    VSFileSystem::vs_write( value2, sizeof (char)*strlen( value2 ), 1, Fp );
+    VSFileSystem::vs_write( "\"", sizeof (char)*1, 1, Fp );
 //delete value2;
 }
 void midxmlchar( FILE *Fp, const char *tag, const char *value )
 {
-    VSFileSystem::Write( " ", sizeof (char), 1, Fp );
-    VSFileSystem::Write( tag, sizeof (char)*strlen( tag ), 1, Fp );
-    VSFileSystem::Write( "=\"", sizeof (char)*2, 1, Fp );
-    VSFileSystem::Write( value, sizeof (char)*strlen( value ), 1, Fp );
-    VSFileSystem::Write( "\"", sizeof (char)*1, 1, Fp );
+    VSFileSystem::vs_write( " ", sizeof (char), 1, Fp );
+    VSFileSystem::vs_write( tag, sizeof (char)*strlen( tag ), 1, Fp );
+    VSFileSystem::vs_write( "=\"", sizeof (char)*2, 1, Fp );
+    VSFileSystem::vs_write( value, sizeof (char)*strlen( value ), 1, Fp );
+    VSFileSystem::vs_write( "\"", sizeof (char)*1, 1, Fp );
 }
 void midxmlint( FILE *Fp, const char *tag, const int value )
 {
     char value2[100] = {0};
     sprintf( value2, "%d", value );
-    VSFileSystem::Write( " ", sizeof (char), 1, Fp );
-    VSFileSystem::Write( tag, sizeof (char)*strlen( tag ), 1, Fp );
-    VSFileSystem::Write( "=\"", sizeof (char)*2, 1, Fp );
-    VSFileSystem::Write( value2, sizeof (char)*strlen( value2 ), 1, Fp );
-    VSFileSystem::Write( "\"", sizeof (char)*1, 1, Fp );
+    VSFileSystem::vs_write( " ", sizeof (char), 1, Fp );
+    VSFileSystem::vs_write( tag, sizeof (char)*strlen( tag ), 1, Fp );
+    VSFileSystem::vs_write( "=\"", sizeof (char)*2, 1, Fp );
+    VSFileSystem::vs_write( value2, sizeof (char)*strlen( value2 ), 1, Fp );
+    VSFileSystem::vs_write( "\"", sizeof (char)*1, 1, Fp );
 }
 void midxmlbool( FILE *Fp, const char *tag, const bool value )
 {
     char value2[6];
     strcpy( value2, value == true ? "true" : "false" );
-    VSFileSystem::Write( " ", sizeof (char), 1, Fp );
-    VSFileSystem::Write( tag, sizeof (char)*strlen( tag ), 1, Fp );
-    VSFileSystem::Write( "=\"", sizeof (char)*2, 1, Fp );
-    VSFileSystem::Write( value2, sizeof (char)*strlen( value2 ), 1, Fp );
-    VSFileSystem::Write( "\"", sizeof (char)*1, 1, Fp );
+    VSFileSystem::vs_write( " ", sizeof (char), 1, Fp );
+    VSFileSystem::vs_write( tag, sizeof (char)*strlen( tag ), 1, Fp );
+    VSFileSystem::vs_write( "=\"", sizeof (char)*2, 1, Fp );
+    VSFileSystem::vs_write( value2, sizeof (char)*strlen( value2 ), 1, Fp );
+    VSFileSystem::vs_write( "\"", sizeof (char)*1, 1, Fp );
 }
 void endtag( FILE *Fp, bool end = false )
 {
-    if (end == true)
-        VSFileSystem::Write( "/", sizeof (char), 1, Fp );
-    VSFileSystem::Write( ">\n", sizeof (char)*2, 1, Fp );
+    if (end == true) {
+        VSFileSystem::vs_write( "/", sizeof (char), 1, Fp );
+    }
+    VSFileSystem::vs_write( ">\n", sizeof (char)*2, 1, Fp );
 }
 
 void BaseInterface::Room::Link::EndXML( FILE *fp )
@@ -97,7 +98,7 @@ void BaseInterface::Room::Python::EndXML( FILE *fp )
 {
     begintag( fp, "Python", 2 );
     Link::EndXML( fp );
-    midxmlchar( fp, "pythonfile", file.c_str() );
+    midxmlchar( fp, "pythonfile", pythonfile.c_str() );
     endtag( fp, true );
 }
 
@@ -116,9 +117,11 @@ void BaseInterface::Room::Talk::EndXML( FILE *fp )
     endtag( fp, false );
     for (int i = 0; i < say.size(); i++) {
         begintag( fp, "say", 3 );
-        for (int j = 0; j < say[i].size(); j++)
-            if (say[i][j] == '\n')
+        for (int j = 0; j < say[i].size(); j++) {
+            if (say[i][j] == '\n') {
                 say[i][j] = '\\';
+            }
+        }
         midxmlchar( fp, "text", say[i].c_str() );
         midxmlchar( fp, "soundfile", soundfiles[i].c_str() );
         endtag( fp, true );
@@ -138,31 +141,33 @@ void BaseInterface::Room::Comp::EndXML( FILE *fp )
 {
     begintag( fp, "Comp", 2 );
     Link::EndXML( fp );
-    for (int i = 0; i < modes.size(); i++) {
-        char *mode = NULL;
-        switch (modes[i])
-        {
-        case BaseComputer::CARGO:
-            mode = "Cargo";
-            break;
-        case BaseComputer::UPGRADE:
-            mode = "Upgrade";
-            break;
-        case BaseComputer::SHIP_DEALER:
-            mode = "ShipDealer";
-            break;
-        case BaseComputer::MISSIONS:
-            mode = "Missions";
-            break;
-        case BaseComputer::NEWS:
-            mode = "News";
-            break;
-        case BaseComputer::INFO:
-            mode = "Info";
-            break;
+    for (const auto each_mode : modes) {
+        std::string mode_string;
+        switch (each_mode) {
+            case DisplayMode::CARGO:
+                mode_string = "Cargo";
+                break;
+            case DisplayMode::UPGRADE:
+                mode_string = "Upgrade";
+                break;
+            case DisplayMode::SHIP_DEALER:
+                mode_string = "ShipDealer";
+                break;
+            case DisplayMode::MISSIONS:
+                mode_string = "Missions";
+                break;
+            case DisplayMode::NEWS:
+                mode_string = "News";
+                break;
+            case DisplayMode::INFO:
+                mode_string = "Info";
+                break;
+            default:
+                break;
         }
-        if (mode)
-            midxmlchar( fp, mode, "" );
+        if (!mode_string.empty()) {
+            midxmlchar( fp, mode_string.c_str(), "" );
+        }
     }
     endtag( fp, true );
 }
@@ -198,24 +203,26 @@ void BaseInterface::Room::BaseVSSprite::EndXML( FILE *fp )
     endtag( fp, true );
 }
 
-void BaseInterface::Room::EndXML( FILE *fp )
-{
+void BaseInterface::Room::EndXML( FILE *fp ) const {
     begintag( fp, "Room", 1 );
     midxmlchar( fp, "Text", deftext.c_str() );
     endtag( fp, false );
     int i;
-    for (i = 0; i < links.size(); i++)
-        if (links[i])
+    for (i = 0; i < links.size(); i++) {
+        if (links[i]) {
             links[i]->EndXML( fp );
-    for (i = 0; i < objs.size(); i++)
-        if (objs[i])
+        }
+    }
+    for (i = 0; i < objs.size(); i++) {
+        if (objs[i]) {
             objs[i]->EndXML( fp );
+        }
+    }
     begintag( fp, "/Room", 1 );
     endtag( fp, false );
 }
 
-void BaseInterface::EndXML( FILE *fp )
-{
+void BaseInterface::EndXML( FILE *fp ) const {
     begintag( fp, "Base", 0 );
     endtag( fp, false );
     for (int i = 0; i < rooms.size(); i++)
