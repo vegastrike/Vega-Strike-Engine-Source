@@ -67,8 +67,8 @@ Cargo::Cargo(std::string name, std::string description, int quantity, double pri
 }
 
 Cargo::Cargo(std::string name, std::string category, double price, int quantity, 
-          double mass, double volume): name(name), category(category),
-          price(price), quantity(quantity), mass(std::max(minimum_mass_and_volume,mass)), 
+          double mass, double volume): name(name), quantity(quantity),
+          price(price), category(category), mass(std::max(minimum_mass_and_volume,mass)),
           volume(std::max(minimum_mass_and_volume,volume)) {}
              
 
