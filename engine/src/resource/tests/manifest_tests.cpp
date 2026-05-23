@@ -26,13 +26,10 @@
  */
 
 
-#include <gtest/gtest.h>
-#include <iostream>
-
-#include "resource/manifest.h"
-
 #include <cassert>
-#include <iostream>
+#include <gtest/gtest.h>
+#include "resource/manifest.h"
+#include "cmd/unit_generic.h"
 
 extern std::vector<Cargo> init(const std::string& cargo_string);
 
@@ -110,3 +107,28 @@ TEST(Manifest, Singleton) {
     // assert(&mpl1 == &mpl2);
 }
 
+// TEST(Unit, GetCargoQtyAndPriceImplementations) {
+//     const Manifest manifest = createManifest();
+//     const Manifest category_manifest = manifest.GetCategoryManifest("upgrades/Armor");
+//
+//     const std::vector<Cargo> cargo_list = category_manifest.GetItems();
+//     Unit test_unit{};
+//
+//     // Find the minimum and maximum prices in the cargo list
+//     // We start with extreme values but at the end, min < max
+//     float min_cargo_price = std::numeric_limits<float>::max();
+//     float max_cargo_price = 0.0F;
+//     for (const Cargo& cargo : cargo_list) {
+//         const float price1 = cargo.GetPrice();
+//         if (price1 < min_cargo_price) {
+//             min_cargo_price = price1;
+//         }
+//         if (price1 > max_cargo_price) {
+//             max_cargo_price = price1;
+//         }
+//     }
+//
+//     for (const Cargo& cargo : cargo_list) {
+//         Cargo cargo_old_way = Unit::GetCargoQtyAndPriceOldWay();
+//     }
+// }
