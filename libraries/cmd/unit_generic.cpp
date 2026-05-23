@@ -3013,15 +3013,69 @@ bool myless(const Cargo &a, const Cargo &b) {
     return a < b;
 }
 
+Cargo Unit::GetCargoQtyAndPriceOldWay(const double price, const double price_deviation, const double quantity, const double quantity_deviation, const double
+                                         min_cargo_price, const double max_cargo_price, const Cargo &cargo) {
+    Cargo return_value = cargo; // Copy the cargo item
+    const double average_weight = abs(configuration().cargo.price_recenter_factor_dbl);
+    return_value.SetQuantity(double_to_int(quantity - quantity_deviation));
+    const double base_price = return_value.GetPrice();
+    return_value.SetPrice(return_value.GetPrice() * (price - price_deviation));
 
-void Unit::ImportPartList(const std::string &category, const float price, const float price_deviation, const float quantity, const float quantity_deviation) {
-    const Manifest category_manifest = Manifest::MPL().GetCategoryManifest(category);
-    const std::vector<Cargo> cargo_list = category_manifest.GetItems();
+    // The comment in the code describing this as the "stupid way" has been there for a long time. It did not originate with me.
+    // I do not blame the original developers for going with a simpler solution when a true normal-distribution, standard-deviation
+    // algorithm may not have been as readily available. But times have changed. C++11 provides this functionality built in.
+
+    //stupid way
+    return_value.SetQuantity(return_value.GetQuantity() + double_to_int((quantity_deviation * 2 + 1) * VegaRandom::Instance().GenRandReal2()));
+    return_value.SetPrice(return_value.GetPrice() + price_deviation * 2.0 * VegaRandom::Instance().RandomDouble());
+    return_value.SetPrice(abs(return_value.GetPrice()));
+    return_value.SetPrice((return_value.GetPrice() + (base_price * average_weight)) / (average_weight + 1));
+    if (return_value.GetQuantity() <= 0) {
+        return_value.SetQuantity(0);
+    }
+    //quantity more than zero
+    else if (max_cargo_price > min_cargo_price + .01) {
+        double renorm_price = (base_price - min_cargo_price) / (max_cargo_price - min_cargo_price);
+        const double max_price_quant_adj = configuration().cargo.max_price_quant_adj_dbl;
+        const double min_price_quant_adj = configuration().cargo.min_price_quant_adj_dbl;
+        const double powah = configuration().cargo.price_quant_adj_power_dbl;
+        renorm_price = std::pow(renorm_price, powah);
+        renorm_price *= (max_price_quant_adj - min_price_quant_adj);
+        renorm_price += 1;
+        if (renorm_price > .001) {
+            return_value.SetQuantity(return_value.GetQuantity() / float_to_int(renorm_price));
+            if (return_value.GetQuantity() < 1) {
+                return_value.SetQuantity(1);
+            }
+        }
+    }
+    const double min_price = configuration().cargo.min_cargo_price_dbl;
+    if (return_value.GetPrice() < min_price) {
+        return_value.SetPrice(min_price);
+    }
+    return return_value;
+}
+
+Cargo Unit::GetCargoQtyAndPriceCpp11StdDev(const double price, const double price_deviation, const double quantity,
+                                            const double quantity_deviation, const double min_cargo_price, const double max_cargo_price, const Cargo &cargo) {
+    Cargo return_value = cargo;
+
+    const double true_minimum_price = std::min(min_cargo_price, configuration().cargo.min_cargo_price_dbl);
+
+    return_value.SetQuantity(double_to_int(VegaRandom::Instance().NormalDistribution(quantity, quantity_deviation, 0, std::numeric_limits<int>::max())));
+    return_value.SetPrice(VegaRandom::Instance().NormalDistribution(price, price_deviation, true_minimum_price, max_cargo_price));
+
+    return return_value;
+}
+
+void Unit::ImportPartListImpl(Unit *thus, const std::vector<Cargo> &cargo_list, const float price, const float price_deviation, const float quantity, const float quantity_deviation, const
+                              bool generate_histograms) {
+    VS_LOG(trace, (boost::format("%1%: called with price %2%, price_deviation %3%, quantity %4%, quantity_deviation %5%, and generate_histograms %6%") % __FUNCTION__ % price % price_deviation % quantity % quantity_deviation % generate_histograms));
 
     // Find the minimum and maximum prices in the cargo list
     // We start with extreme values but at the end, min < max
-    float min_cargo_price = FLT_MAX;
-    float max_cargo_price = 0.0f;
+    float min_cargo_price = std::numeric_limits<float>::max();
+    float max_cargo_price = 0.0F;
     for (const Cargo& cargo : cargo_list) {
         const float price1 = cargo.GetPrice();
         if (price1 < min_cargo_price) {
@@ -3032,47 +3086,67 @@ void Unit::ImportPartList(const std::string &category, const float price, const 
         }
     }
 
-
     for (const Cargo& cargo : cargo_list) {
-        Cargo cargo1 = cargo; // Copy the cargo item
-        const float average_weight = fabs(configuration().cargo.price_recenter_factor_flt);
-        cargo1.SetQuantity(float_to_int(quantity - quantity_deviation));
-        const float base_price = cargo1.GetPrice();
-        cargo1.SetPrice(cargo1.GetPrice() * (price - price_deviation));
-
-        //stupid way
-        cargo1.SetQuantity(cargo1.GetQuantity() + float_to_int((quantity_deviation * 2 + 1) * VegaRandom::Instance().GenRandReal2()));
-        cargo1.SetPrice(cargo1.GetPrice() + price_deviation * 2.0 * VegaRandom::Instance().RandomDouble());
-        cargo1.SetPrice(fabs(cargo1.GetPrice()));
-        cargo1.SetPrice((cargo1.GetPrice() + (base_price * average_weight)) / (average_weight + 1));
-        if (cargo1.GetQuantity() <= 0) {
-            cargo1.SetQuantity(0);
-        }
-        //quantity more than zero
-        else if (max_cargo_price > min_cargo_price + .01) {
-            float renorm_price = (base_price - min_cargo_price) / (max_cargo_price - min_cargo_price);
-            const float max_price_quant_adj = configuration().cargo.max_price_quant_adj_flt;
-            const float min_price_quant_adj = configuration().cargo.min_price_quant_adj_flt;
-            const float powah = configuration().cargo.price_quant_adj_power_flt;
-            renorm_price = std::pow(renorm_price, powah);
-            renorm_price *= (max_price_quant_adj - min_price_quant_adj);
-            renorm_price += 1;
-            if (renorm_price > .001) {
-                cargo1.SetQuantity(cargo1.GetQuantity() / float_to_int(renorm_price));
-                if (cargo1.GetQuantity() < 1) {
-                    cargo1.SetQuantity(1);
-                }
+        if (generate_histograms) {
+            constexpr auto kIterations = 10000;
+            constexpr auto kHistogramDisplayAdjust = 200;
+            // Borrows heavily from sample code at https://en.cppreference.com/cpp/numeric/random/normal_distribution
+            // Retrieved 2026-05-23
+            VS_LOG(trace, (boost::format("  Histograms for cargo %1%:") % cargo.GetName()));
+            std::map<uint64_t, uint64_t> old_way_qty_histogram{};
+            std::map<uint64_t, uint64_t> new_way_qty_histogram{};
+            std::map<uint64_t, uint64_t> old_way_price_histogram{};
+            std::map<uint64_t, uint64_t> new_way_price_histogram{};
+            for (auto n{kIterations}; n; --n) {
+                Cargo cargo_old_way = GetCargoQtyAndPriceOldWay(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
+                                      max_cargo_price, cargo);
+                Cargo cargo_new_way = GetCargoQtyAndPriceCpp11StdDev(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
+                                      max_cargo_price, cargo);
+                auto old_way_qty = [&cargo_old_way]{ return cargo_old_way.GetQuantity(); };
+                auto new_way_qty = [&cargo_new_way]{ return cargo_new_way.GetQuantity(); };
+                auto old_way_price = [&cargo_old_way] { return cargo_old_way.GetPrice() * 100; };
+                auto new_way_price = [&cargo_new_way] { return cargo_new_way.GetPrice() * 100; };
+                ++old_way_qty_histogram[old_way_qty()];
+                ++new_way_qty_histogram[new_way_qty()];
+                ++old_way_price_histogram[old_way_price()];
+                ++new_way_price_histogram[new_way_price()];
+            }
+            VS_LOG(trace, "    Old way quantities:");
+            for (const auto [k, v] : old_way_qty_histogram) {
+                VS_LOG(trace, (boost::format("      %1$10d %2$s") % k % std::string(v / kHistogramDisplayAdjust, '*')));
+            }
+            VS_LOG(trace, "    New way quantities:");
+            for (const auto [k, v] : new_way_qty_histogram) {
+                VS_LOG(trace, (boost::format("      %1$10d %2$s") % k % std::string(v / kHistogramDisplayAdjust, '*')));
+            }
+            VS_LOG(trace, "    Old way prices:");
+            for (const auto [k, v] : old_way_price_histogram) {
+                const double actual_price = k / 100.0;
+                VS_LOG(trace, (boost::format("      %1$8.2f %2$s") % actual_price % std::string(v / kHistogramDisplayAdjust, '*')));
+            }
+            VS_LOG(trace, "    New way prices:");
+            for (const auto [k, v] : new_way_price_histogram) {
+                const double actual_price = k / 100.0;
+                VS_LOG(trace, (boost::format("      %1$8.2f %2$s") % actual_price % std::string(v / kHistogramDisplayAdjust, '*')));
             }
         }
-        const float min_price = configuration().cargo.min_cargo_price_flt;
-        if (cargo1.GetPrice() < min_price) {
-            cargo1.SetPrice(min_price);
-        }
 
-        VS_LOG(trace, (boost::format("%1%: Adding cargo %2% with quantity %3% and price %4%") % __FUNCTION__ % cargo1.GetName() % cargo1.GetQuantity() % cargo1.GetPrice()));
-        cargo_hold.AddCargo(this, cargo1, false);
+        Cargo cargo_old_way = GetCargoQtyAndPriceOldWay(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
+                              max_cargo_price, cargo);
+        Cargo cargo_new_way = GetCargoQtyAndPriceCpp11StdDev(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
+                              max_cargo_price, cargo);
+
+        VS_LOG(trace, (boost::format("%1%: Adding cargo %2% with quantity %3% and price %4%") % __FUNCTION__ % cargo_old_way.GetName() % cargo_old_way.GetQuantity() % cargo_old_way.GetPrice()));
+        thus->cargo_hold.AddCargo(thus, cargo_old_way, false);
 
     }
+}
+
+void Unit::ImportPartList(const std::string &category, const float price, const float price_deviation, const float quantity, const float quantity_deviation) {
+    const Manifest category_manifest = Manifest::MPL().GetCategoryManifest(category);
+    const std::vector<Cargo> cargo_list = category_manifest.GetItems();
+
+    ImportPartListImpl(this, cargo_list, price, price_deviation, quantity, quantity_deviation, false);
 }
 
 
