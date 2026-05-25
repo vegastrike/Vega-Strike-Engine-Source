@@ -41,6 +41,7 @@
 #include <limits>
 
 #include "aligned.h"
+#include "root_generic/vega_random.h"
 #include "src/vs_logging.h"
 
 ParticleTrail particleTrail("sparkle", 500, SRCALPHA, ONE, 0.05f, false, true);
@@ -510,7 +511,7 @@ void ParticleTrail::AddParticle(const ParticlePoint &P, const Vector &V, float s
     particle.size = P.size;
 
     if (particles.size() >= max_particles) {
-        size_t off = ((size_t) rand()) % particles.size();
+        const size_t off = VegaRandom::Instance().RandomSizeTLessThan(particles.size());
         particles.at(off) = particle;
     } else {
         particles.push_back(particle);
@@ -525,13 +526,13 @@ void ParticleEmitter::doParticles(const QVector &pos,
         float pSize,
         const GFXColor &color) const {
     percent = 1 - percent;
-    int i = rand();
-    if (i < RAND_MAX * percent * config.rate) {
+    const int i = VegaRandom::Instance().GenRandUInt32();
+    if (i < static_cast<double>(RAND_MAX) * percent * config.rate) {
         ParticlePoint pp;
-        float r1 = rand() / ((float) RAND_MAX * .5) - 1;
-        float r2 = rand() / ((float) RAND_MAX * .5) - 1;
-        float r3 = rand() / ((float) RAND_MAX * .5) - 1;
-        float r4 = rand() / ((float) RAND_MAX * .5) - 1;
+        const float r1 = VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0);
+        const float r2 = VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0);
+        const float r3 = VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0);
+        const float r4 = VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0);
         Vector rand(r1, r2, r3);
         rand.Normalize();
         pp.loc = pos + rand * rSize * config.locSpread;

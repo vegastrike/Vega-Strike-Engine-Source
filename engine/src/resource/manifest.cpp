@@ -35,7 +35,7 @@
 #include <boost/json.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include "resource/random_utils.h"
+#include "root_generic/vega_random.h"
 #include "resource/json_utils.h"
 
 
@@ -118,14 +118,14 @@ Cargo Manifest::GetCargoByName(const std::string name) const {
     throw ManifestCargoNotFoundException(name);
 }
 
-Cargo Manifest::GetRandomCargo(int quantity) const {
+Cargo Manifest::GetRandomCargo(const int quantity) const {
     // TODO: Need to figure a better solution here
     if(_items.empty()) {
         return Cargo();
     }
 
-    int index = randomInt(_items.size()-1);
-    Cargo c = _items[index];
+    const size_t index = VegaRandom::Instance().RandomSizeTLessThan(_items.size());
+    Cargo c = _items.at(index);
     c.SetQuantity(quantity);
     return c;
 }

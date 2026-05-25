@@ -36,14 +36,12 @@
 #include "root_generic/vs_globals.h"
 #include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
-#include "src/config_xml.h"
 #include "root_generic/xml_support.h"
 #include "cmd/unit_generic.h"
 #include "communication.h"
 #include "cmd/script/flightgroup.h"
 #include "flybywire.h"
 #include "hard_coded_scripts.h"
-#include "cmd/script/mission.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "root_generic/lin_time.h"
 #include "root_generic/faction_generic.h"
@@ -52,10 +50,9 @@
 #include "warpto.h"
 #include "cmd/csv.h"
 #include "src/universe_util.h"
-#include "src/vs_random.h"
+#include "root_generic/vega_random.h"
 #include "src/python/python_compile.h"
 #include "cmd/unit_find.h"
-#include "root_generic/faction_generic.h"
 #include "docking.h"
 #include "src/star_system.h"
 #include "src/universe.h"
@@ -230,7 +227,7 @@ static float aggressivity = 2.01F;
 static int randomtemp;
 
 AggressiveAI::AggressiveAI(const char *filename, Unit *target)
-        : FireAt(), logic(getProperScript(nullptr, nullptr, "default", randomtemp = rand())) {
+        : FireAt(), logic(getProperScript(nullptr, nullptr, "default", randomtemp = VegaRandom::Instance().GenRandInt31())) {
     currentpriority = 0;
     last_jump_time = 0;
     nav = QVector(0, 0, 0);
@@ -486,7 +483,7 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             return queryType(Order::MOVEMENT) == NULL;
 
         case RANDOMIZ:
-            value = ((float) rand()) / RAND_MAX;
+            value = VegaRandom::Instance().RandomFloat();
             break;
         default:
             return false;
@@ -574,7 +571,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
         if (fg->directive != last_directive) {
             if (configuration().ai.always_obedient) {
                 obedient = true;
-            } else if (float ( rand())/RAND_MAX < (obedient ? (1 - logic->obedience) : logic->obedience)) {
+            } else if (VegaRandom::Instance().RandomFloat() < (obedient ? (1 - logic->obedience) : logic->obedience)) {
                 obedient = !obedient;
             }
             if (obedient) {
@@ -1193,7 +1190,7 @@ void AggressiveAI::ReCommandWing(Flightgroup *fg) {
         if (overridable(fg->directive)) {
             //computer won't override capital orders
             if (nullptr != (lead = fg->leader.GetUnit())) {
-                if (float ( rand())/RAND_MAX < simulation_atom_var / time_to_recommand_wing) {
+                if (VegaRandom::Instance().RandomFloat() < simulation_atom_var / time_to_recommand_wing) {
                     if (parent->Threat() && (parent->shield.Percent() < .2)) {
                         fg->directive = string("h");
                         LeadMe(parent, "h", "I need help here!", false);
@@ -1265,25 +1262,25 @@ static Unit *ChooseNavPoint(Unit *parent, Unit **otherdest, float *lurk_on_arriv
     const unsigned int maxrand = 5;
     unsigned int additionalrand[maxrand];
     if (civilian) {
-        firstRand = vsrandom.genrand_int31();
-        secondRand = vsrandom.uniformExc(0, 1);
-        thirdRand = vsrandom.genrand_int31();
+        firstRand = VegaRandom::Instance().GenRandInt31();
+        secondRand = VegaRandom::Instance().UniformExclusive(0, 1);
+        thirdRand = VegaRandom::Instance().GenRandInt31();
         for (unsigned int i = 0; i < maxrand; ++i) {
             additionalrand[i] = thirdRand + i;
         }
     } else {
-        int k = (int) (getNewTime() / timehash);        //two minutes
+        uint_fast32_t k = static_cast<uint_fast32_t>(getNewTime() / timehash);        //two minutes
         string key = UnitUtil::getFlightgroupName(parent);
         std::string::const_iterator start = key.begin();
         for (; start != key.end(); start++) {
             k += (k * 128) + *start;
         }
-        VSRandom choosePlace(k);
-        firstRand = choosePlace.genrand_int31();
-        secondRand = choosePlace.uniformExc(0, 1);
-        thirdRand = choosePlace.genrand_int31();
+        VegaRandom choosePlace(k);
+        firstRand = choosePlace.GenRandInt31();
+        secondRand = choosePlace.UniformExclusive(0, 1);
+        thirdRand = choosePlace.GenRandInt31();
         for (unsigned int i = 0; i < maxrand; ++i) {
-            additionalrand[i] = choosePlace.genrand_int31();
+            additionalrand[i] = choosePlace.GenRandInt31();
         }
     }
     bool asteroidhide = false;
@@ -1452,9 +1449,9 @@ public:
 };
 
 static Vector randVector() {
-    return Vector((rand() / (float) RAND_MAX) * 2 - 1,
-            (rand() / (float) RAND_MAX) * 2 - 1,
-            (rand() / (float) RAND_MAX) * 2 - 1);
+    return Vector(VegaRandom::Instance().RandomFloatInRange(-1.0F, 1.0F),
+            VegaRandom::Instance().RandomFloatInRange(-1.0F, 1.0F),
+            VegaRandom::Instance().RandomFloatInRange(-1.0F, 1.0F));
 }
 
 static void GoTo(AggressiveAI *ai,
@@ -1594,7 +1591,7 @@ volatile Unit *uoi;
 
 void AggressiveAI::Execute() {
     if (parent == uoi) {
-        VS_LOG(info, "kewl");
+        VS_LOG(important_info, "kewl");
     }
     jump_time_check++;     //just so we get a nicely often wrapping var;
     jump_time_check %= 5;
@@ -1602,8 +1599,8 @@ void AggressiveAI::Execute() {
     double firetime = queryTime();
     static int pir = FactionUtil::GetFactionIndex("pirates");
     if (parent->faction == pir) {
-        if (rand() == 0) {
-            VS_LOG(info, "ahoy, a pirates!");
+        if (VegaRandom::Instance().GenRandUInt32() == 0) {
+            VS_LOG(important_info, "ahoy, a pirates!");
         }
     }
     FireAt::Execute();

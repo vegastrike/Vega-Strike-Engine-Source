@@ -37,6 +37,8 @@
 #include "src/universe_util.h"
 #include <string>
 
+#include "root_generic/vega_random.h"
+
 static void DockedScript(Unit *docker, Unit *base) {
     std::string script = configuration().ai.docked_to_script;
     if (!script.empty()) {
@@ -179,7 +181,7 @@ QVector DockingOps::Movement(Unit *utdw) {
         EnqueueOrder(new ChangeHeading(loc, 4, 1, true));
     }
     MoveTo::Execute();
-    if (rand() % 256 == 0) {
+    if (VegaRandom::Instance().RandomUChar() == 0) {
         WarpToP(parent, utdw, true);
     }
     return loc;

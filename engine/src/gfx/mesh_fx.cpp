@@ -28,6 +28,7 @@
 
 #include "gfx_generic/mesh.h"
 #include "root_generic/lin_time.h"
+#include "root_generic/vega_random.h"
 #define MAXLOCALFX (6)
 static float startpotency = 20;
 static float endpotency = 4;
@@ -136,7 +137,7 @@ void Mesh::AddDamageFX(const Vector &pnt, const Vector &norm, const float damage
             GFXColor(1, 0, startpotency / (r_size * r_size)));
     newFX.setSize(rSize());
     if (LocalFX.size() >= MAXLOCALFX) {
-        LocalFX[(rand() % (LocalFX.size()))].MergeLights(newFX);
+        LocalFX.at(VegaRandom::Instance().RandomSizeTLessThan(LocalFX.size())).MergeLights(newFX);
     } else {
         LocalFX.push_back(newFX);
     }

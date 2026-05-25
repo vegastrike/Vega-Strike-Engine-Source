@@ -39,7 +39,7 @@
 #include "tactics.h"
 #include "fire.h"
 #include "order.h"
-#include "src/vs_random.h"
+#include "root_generic/vega_random.h"
 #include "cmd/unit_util.h"
 #include "root_generic/configxml.h"
 using Orders::FireAt;
@@ -158,7 +158,7 @@ public:
         this->updown = updown;
         facing = Vector(0, 0, 0);
         desired_ang_velocity = Vector(0, 0, 0);
-        dir = (rand() < RAND_MAX / 2);
+        dir = VegaRandom::Instance().GenRandReal1() < 0.5;
     }
 
     void SetOppositeDir() {
@@ -216,16 +216,16 @@ void AfterburnTurnTowardsITTS(Order *aisc, Unit *un) {
 void BarrelRoll(Order *aisc, Unit *un) {
     FlyByWire *broll = new FlyByWire;
     AddOrd(aisc, un, broll);
-    broll->RollRight(rand() > RAND_MAX / 2 ? 1 : -1);
+    broll->RollRight(VegaRandom::Instance().GenRandReal1() > 0.5 ? 1 : -1);
     float per;
-    if (rand() < RAND_MAX / 2) {
-        per = ((float) rand()) / RAND_MAX;
+    if (VegaRandom::Instance().GenRandReal1() < 0.5) {
+        per = VegaRandom::Instance().RandomFloat();
         if (per < .5) {
             per -= 1;
         }
         broll->Up(per);
     } else {
-        per = ((float) rand()) / RAND_MAX;
+        per = VegaRandom::Instance().RandomFloat();
         if (per < .5) {
             per -= 1;
         }
@@ -280,12 +280,12 @@ public:
         m.SetParent(parent1);
     }
 
-    LoopAround(bool aggressive, bool afterburn, bool force_afterburn, int seed) : FaceTargetITTS(false, 3),
+    LoopAround(const bool aggressive, const bool afterburn, const bool force_afterburn, const uint_fast32_t seed) : FaceTargetITTS(false, 3),
             m(Vector(0, 0, 1000),
                     true,
                     afterburn,
                     false) {
-        VSRandom vsr(seed);
+        VegaRandom vsr(seed);
         this->aggressive = aggressive;
         this->afterburn = afterburn;
         this->force_afterburn = force_afterburn;
@@ -295,11 +295,11 @@ public:
         const float loopdisd = configuration().ai.loop_around_destination_distance_flt;
         const float loopdisv = configuration().ai.loop_around_destination_vertical_flt;
         const float loopdisl = configuration().ai.loop_around_destination_lateral_flt;
-        rr.Set(loopdisl * vsr.uniformInc(-1, 1),
-                loopdisv * vsr.uniformInc(-1, 1),
-                1.0 + loopdisd * vsr.uniformInc(0, 1));
-        if (vsr.rand() < VS_RAND_MAX / 2) {
-            qq = vsr.uniformInc(-1, 1);
+        rr.Set(loopdisl * vsr.UniformInclusive(-1, 1),
+                loopdisv * vsr.UniformInclusive(-1, 1),
+                1.0 + loopdisd * vsr.UniformInclusive(0, 1));
+        if (vsr.GenRandUInt32() < kVegaIntLeast32tMaxAsULong / 2) {
+            qq = vsr.UniformInclusive(-1, 1);
             rr.j = qq;
             if (qq > 0) {
                 qq += loopdis;
@@ -308,7 +308,7 @@ public:
                 qq -= loopdis;
             }
         } else {
-            pp = vsr.uniformInc(-1, 1);
+            pp = vsr.UniformInclusive(-1, 1);
             rr.i = pp;
             if (pp > 0) {
                 pp += loopdis;
@@ -375,9 +375,9 @@ class LoopAroundAgro : public Orders::FaceTargetITTS {
     bool afterburn;
     bool force_afterburn;
 public:
-    LoopAroundAgro(bool aggressive, bool afterburn, bool force_afterburn, int seed) : FaceTargetITTS(false, 3),
+    LoopAroundAgro(const bool aggressive, const bool afterburn, const bool force_afterburn, const uint_fast32_t seed) : FaceTargetITTS(false, 3),
             m(false, 2, false) {
-        VSRandom vsr(seed);
+        VegaRandom vsr(seed);
         this->afterburn = afterburn;
         this->force_afterburn = force_afterburn;
         this->aggressive = aggressive;
@@ -386,11 +386,11 @@ public:
         const float loopdisd = configuration().ai.loop_around_destination_distance_flt;
         const float loopdisv = configuration().ai.loop_around_destination_vertical_flt;
         const float loopdisl = configuration().ai.loop_around_destination_lateral_flt;
-        rr.Set(loopdisl * vsr.uniformInc(-1, 1),
-                loopdisv * vsr.uniformInc(-1, 1),
-                1.0 + loopdisd * vsr.uniformInc(0, 1));
-        if (vsr.rand() < VS_RAND_MAX / 2) {
-            qq = vsr.uniformInc(-1, 1);
+        rr.Set(loopdisl * vsr.UniformInclusive(-1, 1),
+                loopdisv * vsr.UniformInclusive(-1, 1),
+                1.0 + loopdisd * vsr.UniformInclusive(0, 1));
+        if (vsr.GenRandUInt32() < kVegaIntLeast32tMaxAsULong / 2) {
+            qq = vsr.UniformInclusive(-1, 1);
             rr.j = qq;
             if (qq > 0) {
                 qq += loopdis;
@@ -399,7 +399,7 @@ public:
                 qq -= loopdis;
             }
         } else {
-            pp = vsr.uniformInc(-1, 1);
+            pp = vsr.UniformInclusive(-1, 1);
             rr.i = pp;
             if (pp > 0) {
                 pp += loopdis;
@@ -467,13 +467,13 @@ public:
         m.SetParent(parent1);
     }
 
-    FacePerpendicular(bool aggressive, bool afterburn, bool force_afterburn, int seed) : FaceTargetITTS(false, 3),
+    FacePerpendicular(const bool aggressive, const bool afterburn, const bool force_afterburn, const uint_fast32_t seed) : FaceTargetITTS(false, 3),
             m(Vector(0, 0, 1000),
                     true,
                     afterburn,
                     false) {
         this->aggressive = aggressive;
-        VSRandom vsr(seed);
+        VegaRandom vsr(seed);
         this->afterburn = afterburn;
         this->force_afterburn = force_afterburn;
 
@@ -482,11 +482,11 @@ public:
         const float loopdisd = configuration().ai.loop_around_destination_distance_flt;
         const float loopdisv = configuration().ai.loop_around_destination_vertical_flt;
         const float loopdisl = configuration().ai.loop_around_destination_lateral_flt;
-        rr.Set(loopdisl * vsr.uniformInc(-1, 1),
-                loopdisv * vsr.uniformInc(-1, 1),
-                1.0 + loopdisd * vsr.uniformInc(0, 1));
-        if (vsr.rand() < VS_RAND_MAX / 2) {
-            qq = vsr.uniformInc(-1, 1);
+        rr.Set(loopdisl * vsr.UniformInclusive(-1, 1),
+                loopdisv * vsr.UniformInclusive(-1, 1),
+                1.0 + loopdisd * vsr.UniformInclusive(0, 1));
+        if (vsr.GenRandUInt32() < kVegaIntLeast32tMaxAsULong / 2) {
+            qq = vsr.UniformInclusive(-1, 1);
             rr.j = qq;
             if (qq > 0) {
                 qq += loopdis;
@@ -495,7 +495,7 @@ public:
                 qq -= loopdis;
             }
         } else {
-            pp = vsr.uniformInc(-1, 1);
+            pp = vsr.UniformInclusive(-1, 1);
             rr.i = pp;
             if (pp > 0) {
                 pp += loopdis;
@@ -552,12 +552,12 @@ public:
 }
 
 void LoopAround(Order *aisc, Unit *un) {
-    Order *broll = new Orders::LoopAround(false, true, false, (int) (size_t) un);
+    Order *broll = new Orders::LoopAround(false, true, false, static_cast<uint_fast32_t>(reinterpret_cast<size_t>(un)));
     AddOrd(aisc, un, broll);
 }
 
 void AggressiveLoopAround(Order *aisc, Unit *un) {
-    Order *broll = new Orders::LoopAroundAgro(true, true, false, (int) (size_t) un);
+    Order *broll = new Orders::LoopAroundAgro(true, true, false, static_cast<uint_fast32_t>(reinterpret_cast<size_t>(un)));
     AddOrd(aisc, un, broll);
 }
 
@@ -596,60 +596,60 @@ void RollRightHard(Order *aisc, Unit *un) {
 }
 
 void LoopAroundFast(Order *aisc, Unit *un) {
-    Order *broll = new Orders::LoopAround(false, true, true, (int) (size_t) un);
+    Order *broll = new Orders::LoopAround(false, true, true, static_cast<uint_fast32_t>(reinterpret_cast<size_t>(un)));
     AddOrd(aisc, un, broll);
 }
 
 void FacePerpendicularFast(Order *aisc, Unit *un) {
-    Order *broll = new Orders::FacePerpendicular(false, true, true, (int) (size_t) un);
+    Order *broll = new Orders::FacePerpendicular(false, true, true, static_cast<uint_fast32_t>(reinterpret_cast<size_t>(un)));
     AddOrd(aisc, un, broll);
 }
 
 void FacePerpendicular(Order *aisc, Unit *un) {
-    Order *broll = new Orders::FacePerpendicular(false, true, false, (int) (size_t) un);
+    Order *broll = new Orders::FacePerpendicular(false, true, false, static_cast<uint_fast32_t>(reinterpret_cast<size_t>(un)));
     AddOrd(aisc, un, broll);
 }
 
 void FacePerpendicularSlow(Order *aisc, Unit *un) {
-    Order *broll = new Orders::FacePerpendicular(false, false, false, (int) (size_t) un);
+    Order *broll = new Orders::FacePerpendicular(false, false, false, static_cast<uint_fast32_t>(reinterpret_cast<size_t>(un)));
     AddOrd(aisc, un, broll);
 }
 
 void RollFacePerpendicularFast(Order *aisc, Unit *un) {
-    Order *broll = new Orders::FacePerpendicular(true, true, true, (int) (size_t) un);
+    Order *broll = new Orders::FacePerpendicular(true, true, true, static_cast<uint_fast32_t>(reinterpret_cast<size_t>(un)));
     AddOrd(aisc, un, broll);
 }
 
 void RollFacePerpendicular(Order *aisc, Unit *un) {
-    Order *broll = new Orders::FacePerpendicular(true, true, false, (int) (size_t) un);
+    Order *broll = new Orders::FacePerpendicular(true, true, false, static_cast<uint_fast32_t>(reinterpret_cast<size_t>(un)));
     AddOrd(aisc, un, broll);
 }
 
 void RollFacePerpendicularSlow(Order *aisc, Unit *un) {
-    Order *broll = new Orders::FacePerpendicular(true, false, false, (int) (size_t) un);
+    Order *broll = new Orders::FacePerpendicular(true, false, false, static_cast<uint_fast32_t>(reinterpret_cast<size_t>(un)));
     AddOrd(aisc, un, broll);
 }
 
 void AggressiveLoopAroundFast(Order *aisc, Unit *un) {
-    Order *broll = new Orders::LoopAroundAgro(true, true, true, (int) (size_t) un);
+    Order *broll = new Orders::LoopAroundAgro(true, true, true, static_cast<uint_fast32_t>(reinterpret_cast<size_t>(un)));
     AddOrd(aisc, un, broll);
 }
 
 void LoopAroundSlow(Order *aisc, Unit *un) {
-    Order *broll = new Orders::LoopAround(false, false, false, (int) (size_t) un);
+    Order *broll = new Orders::LoopAround(false, false, false, static_cast<uint_fast32_t>(reinterpret_cast<size_t>(un)));
     AddOrd(aisc, un, broll);
 }
 
 void SelfDestruct(Order *aisc, Unit *un) {
     VS_LOG_AND_FLUSH(trace, "hard_coded_scripts::SelfDestruct " + un->name);
     un->Destroy();
-    un->Split(rand() % 3 + 1);
+    un->Split(VegaRandom::Instance().RandomUInt32InRange(1, 3));
     un->Explode(true, 0);     //displays explosion, unit continues
     un->RemoveFromSystem();      //has no effect
 }
 
 void AggressiveLoopAroundSlow(Order *aisc, Unit *un) {
-    Order *broll = new Orders::LoopAroundAgro(true, false, false, (int) (size_t) un);
+    Order *broll = new Orders::LoopAroundAgro(true, false, false, static_cast<uint_fast32_t>(reinterpret_cast<size_t>(un)));
     AddOrd(aisc, un, broll);
 }
 

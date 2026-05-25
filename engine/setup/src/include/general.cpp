@@ -30,7 +30,7 @@
 
 #include "setup/src/include/general.h"
 
-int RANDOMIZED = 0;
+#include "root_generic/vega_random.h"
 
 // Gets the next parameter from the string, sorted by a space
 // Sticks a \0 at the space and returns a pointer to the right side.
@@ -211,13 +211,8 @@ void strappend(char *dest, char *source, int length) {
 }
 
 int randnum(int start, int end) {
-    int random, dif, min, max;
-    if (RANDOMIZED == 0) {
-        srand((unsigned int) time(NULL));
-        RANDOMIZED = 1;
-    }
-    min = start;
-    max = end;
+    int min = start;
+    int max = end;
     if (end < start) {
         min = end;
         max = start;
@@ -225,10 +220,7 @@ int randnum(int start, int end) {
     if (end == start) {
         return start;
     }
-    dif = max - min + 1;
-    random = rand() % dif;
-    random += min;
-    return random;
+    return VegaRandom::Instance().RandomInt32InRange(min, max);
 }
 
 void randcode(char *line, int length) {

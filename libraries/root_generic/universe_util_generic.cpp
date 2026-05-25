@@ -59,6 +59,7 @@
 
 #include "src/python/init.h"
 #include "root_generic/options.h"
+#include "root_generic/vega_random.h"
 
 #include "src/star_system.h"
 #include "src/universe.h"
@@ -270,15 +271,15 @@ namespace UniverseUtil {
 
 ///tells the respective flightgroups in this system to start shooting at each other
     void TargetEachOther(string fgname, string faction, string enfgname, string enfaction) {
-        int fac = FactionUtil::GetFactionIndex(faction);
-        int enfac = FactionUtil::GetFactionIndex(enfaction);
+        const int fac = FactionUtil::GetFactionIndex(faction);
+        const int enfac = FactionUtil::GetFactionIndex(enfaction);
         Unit *un;
-        Unit *en = NULL;
-        Unit *al = NULL;
-        for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (un = *i) && ((!en) || (!al));
+        Unit *en = nullptr;
+        Unit *al = nullptr;
+        for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); ((un = *i)) && ((!en) || (!al));
              ++i) {
             if (un->faction == enfac && UnitUtil::getFlightgroupName(un) == enfgname) {
-                if ((NULL == en) || (rand() % 3 == 0)) {
+                if ((nullptr == en) || (VegaRandom::Instance().RandomInt32UpTo(2) == 0)) {
                     en = un;
                 }
             }

@@ -46,6 +46,8 @@
 #include "src/universe_util.h"
 
 #include <boost/algorithm/string.hpp>
+
+#include "root_generic/vega_random.h"
 #include "src/vega_cast_utils.h"
 
 // Required definition of static variable
@@ -858,20 +860,20 @@ void Drawable::Split(int level) {
     if (num_chunks) {
         size_t i;
         vector<Mesh *> nw;
-        unsigned int which_chunk = rand() % num_chunks;
-        string chunkname = UniverseUtil::LookupUnitStat(unit->name, fac, "Chunk_" + XMLSupport::tostring(which_chunk));
+        unsigned int which_chunk = VegaRandom::Instance().RandomUInt32UpTo(num_chunks - 1);
+        string chunk_name = UniverseUtil::LookupUnitStat(unit->name, fac, "Chunk_" + XMLSupport::tostring(which_chunk));
         string dir = UniverseUtil::LookupUnitStat(unit->name, fac, "Directory");
         VSFileSystem::current_path.push_back(root);
         VSFileSystem::current_subdirectory.push_back("/" + dir);
         VSFileSystem::current_type.push_back(VSFileSystem::UnitFile);
-        float randomstartframe = 0;
-        float randomstartseconds = 0;
-        string scalestr = UniverseUtil::LookupUnitStat(unit->name, fac, "Unit_Scale");
-        int scale = atoi(scalestr.c_str());
+        float random_start_frame = 0.0F;    // TODO: Make this value actually random?
+        float random_start_seconds = 0.0F;  // TODO: Make this value actually random?
+        string scale_str = UniverseUtil::LookupUnitStat(unit->name, fac, "Unit_Scale");
+        int scale = atoi(scale_str.c_str());
         if (scale == 0) {
             scale = 1;
         }
-        AddMeshes(nw, randomstartframe, randomstartseconds, scale, chunkname, unit->faction,
+        AddMeshes(nw, random_start_frame, random_start_seconds, scale, chunk_name, unit->faction,
                 unit->getFlightgroup(), &meshsizes);
         VSFileSystem::current_type.pop_back();
         VSFileSystem::current_subdirectory.pop_back();
@@ -887,7 +889,9 @@ void Drawable::Split(int level) {
             vector<Mesh *> nw;
             size_t oldsize = old.size();
             for (size_t i = 0; i < oldsize; i++) {
-                PlaneNorm.Set(rand() - RAND_MAX / 2, rand() - RAND_MAX / 2, rand() - RAND_MAX / 2 + .5);
+                PlaneNorm.Set(VegaRandom::Instance().RandomDoubleInRange(-kVegaIntLeast32tMax, kVegaIntLeast32tMax),
+                        VegaRandom::Instance().RandomDoubleInRange(-kVegaIntLeast32tMax, kVegaIntLeast32tMax),
+                        VegaRandom::Instance().RandomDoubleInRange(-kVegaIntLeast32tMax, kVegaIntLeast32tMax) + 0.5);
                 PlaneNorm.Normalize();
                 nw.push_back(nullptr);
                 nw.push_back(nullptr);
@@ -939,10 +943,12 @@ void Drawable::Split(int level) {
             splitsub->ApplyForce(
                     splitsub->meshdata[0]->rSize() * configuration().graphics.explosion_force_dbl * 10.0 * splitsub->GetMass()
                             * loc / locm);
-            loc.Set(rand(), rand(), rand() + .1);
+            loc.Set(VegaRandom::Instance().RandomDoubleUpTo(kVegaUInt32tMaxAsDouble),
+                    VegaRandom::Instance().RandomDoubleUpTo(kVegaUInt32tMaxAsDouble),
+                    VegaRandom::Instance().RandomDoubleUpTo(kVegaUInt32tMaxAsDouble) + 0.1);
             loc.Normalize();
             splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * configuration().graphics.explosion_torque_flt
-                    * (1 + rand() % static_cast<int>(1 + unit->rSize())));
+                    * (1 + VegaRandom::Instance().RandomFloatUpTo(unit->rSize())));
         }
     }
     old.clear();

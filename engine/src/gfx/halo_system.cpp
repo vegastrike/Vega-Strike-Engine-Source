@@ -47,6 +47,7 @@
 #include "collide2/CSopcodecollider.h"
 #include "root_generic/options.h"
 #include "cmd/unit_collide.h"
+#include "root_generic/vega_random.h"
 
 #define HALO_SMOOTHING_UP_FACTOR (0.02)
 #define HALO_SMOOTHING_DOWN_FACTOR (0.01)
@@ -148,7 +149,7 @@ unsigned int HaloSystem::AddHalo(const char *filename,
     halo.back().activation = activation_accel * configuration().physics.game_speed_flt;
     halo.back().oscale = 0;
     halo.back().sparkle_accum = 0;
-    halo.back().sparkle_rate = 0.5 + rand() * 0.5 / float(RAND_MAX);
+    halo.back().sparkle_rate = 0.5 + VegaRandom::Instance().RandomFloatUpTo(0.5F);
     return halo.size() - 1;
 }
 

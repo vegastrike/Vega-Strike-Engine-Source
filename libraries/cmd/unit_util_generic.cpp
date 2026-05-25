@@ -112,15 +112,15 @@ bool hasDockingUnits(const Unit *my_unit) {
             || (my_unit->hasPendingClearanceRequests());
 }
 
-int getPhysicsPriority(Unit *un) {
+uint_fast32_t getPhysicsPriority(Unit *un) {
     const bool FORCE_TOP_PRIORITY = configuration().physics.priorities.force_top_priority;
     if (FORCE_TOP_PRIORITY) {
         return 1;
     }
     //Some other comment mentions these need special treatment for subunit scheduling
-    const int PLAYER_PRIORITY = configuration().physics.priorities.player;
-    const int MISSILE_PRIORITY = configuration().physics.priorities.missile;
-    const int DOCKABLE_PRIORITY = configuration().physics.priorities.dockable;
+    const uint_fast32_t PLAYER_PRIORITY = configuration().physics.priorities.player;
+    const uint_fast32_t MISSILE_PRIORITY = configuration().physics.priorities.missile;
+    const uint_fast32_t DOCKABLE_PRIORITY = configuration().physics.priorities.dockable;
 
     float rad = un->rSize();
     Vega_UnitType untype = un->getUnitType();
@@ -130,14 +130,14 @@ int getPhysicsPriority(Unit *un) {
     Cockpit *cockpit = _Universe->AccessCockpit();
     //const float     fixed_system_orbit_priorities =
     //    configuration().physics.fixed_system_priority_velocity_cutoff;
-    const int SYSTEM_INSTALLATION_PRIORITY = configuration().physics.priorities.system_installation;
+    const uint_fast32_t SYSTEM_INSTALLATION_PRIORITY = configuration().physics.priorities.system_installation;
     bool system_installation = un->owner == getTopLevelOwner();
-    bool force_system_installation_priority = true;
     //if (system_installation && un->Velocity.MagnitudeSquared() > fixed_system_orbit_priorities*fixed_system_orbit_priorities)
     //    force_system_installation_priority = true;
     for (unsigned int i = 0; i < np; ++i) {
         Unit *player = _Universe->AccessCockpit(i)->GetParent();
         if (player) {
+            bool force_system_installation_priority = true;
             if (force_system_installation_priority && player->activeStarSystem == un->activeStarSystem) {
                 return SYSTEM_INSTALLATION_PRIORITY;
             }
@@ -178,8 +178,7 @@ int getPhysicsPriority(Unit *un) {
             }
         }
 #endif
-        if (player == un
-                || (0 && _Universe->AccessCockpit(i)->GetSaveParent() == un)) {
+        if (player == un) {
             return PLAYER_PRIORITY;
         }
     }
@@ -189,18 +188,18 @@ int getPhysicsPriority(Unit *un) {
     if (hasDockingUnits(un)) {
         return DOCKABLE_PRIORITY;
     }
-    const int ASTEROID_PARENT_PRIORITY = configuration().physics.priorities.asteroid_parent;
-    const int ASTEROID_HIGH_PRIORITY = configuration().physics.priorities.asteroid_high;
+    const uint_fast32_t ASTEROID_PARENT_PRIORITY = configuration().physics.priorities.asteroid_parent;
+    const uint_fast32_t ASTEROID_HIGH_PRIORITY = configuration().physics.priorities.asteroid_high;
     //const int ASTEROID_LOW_PRIORITY = configuration().physics.priorities.asteroid_low;
-    const int HIGH_PRIORITY = configuration().physics.priorities.high;
-    const int MEDIUMHIGH_PRIORITY = configuration().physics.priorities.medium_high;
-    const int MEDIUM_PRIORITY = configuration().physics.priorities.medium;
-    const int LOW_PRIORITY = configuration().physics.priorities.low;
-    const int NOT_VISIBLE_COMBAT_HIGH = configuration().physics.priorities.not_visible_combat_high;
-    const int NOT_VISIBLE_COMBAT_MEDIUM = configuration().physics.priorities.not_visible_combat_medium;
-    const int NOT_VISIBLE_COMBAT_LOW = configuration().physics.priorities.not_visible_combat_low;
-    const int NO_ENEMIES = configuration().physics.priorities.no_enemies;
-    const int INERT_PRIORITY = configuration().physics.priorities.inert;
+    const uint_fast32_t HIGH_PRIORITY = configuration().physics.priorities.high;
+    const uint_fast32_t MEDIUMHIGH_PRIORITY = configuration().physics.priorities.medium_high;
+    const uint_fast32_t MEDIUM_PRIORITY = configuration().physics.priorities.medium;
+    const uint_fast32_t LOW_PRIORITY = configuration().physics.priorities.low;
+    const uint_fast32_t NOT_VISIBLE_COMBAT_HIGH = configuration().physics.priorities.not_visible_combat_high;
+    const uint_fast32_t NOT_VISIBLE_COMBAT_MEDIUM = configuration().physics.priorities.not_visible_combat_medium;
+    const uint_fast32_t NOT_VISIBLE_COMBAT_LOW = configuration().physics.priorities.not_visible_combat_low;
+    const uint_fast32_t NO_ENEMIES = configuration().physics.priorities.no_enemies;
+    const uint_fast32_t INERT_PRIORITY = configuration().physics.priorities.inert;
     const double _PLAYERTHREAT_DISTANCE_FACTOR = configuration().physics.priorities.player_threat_distance_factor_dbl;
     const double _THREAT_DISTANCE_FACTOR = configuration().physics.priorities.threat_distance_factor_dbl;
     const double DYNAMIC_THROTTLE_MINFACTOR = configuration().physics.priorities.dynamic_throttle.min_distance_factor_dbl;

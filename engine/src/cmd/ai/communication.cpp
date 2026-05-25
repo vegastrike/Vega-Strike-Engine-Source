@@ -29,6 +29,7 @@
 #include "communication.h"
 #include "root_generic/vs_globals.h"
 #include "src/vs_logging.h"
+#include "root_generic/vega_random.h"
 #include "src/config_xml.h"
 #include <assert.h>
 #include "src/audiolib.h"
@@ -148,7 +149,7 @@ bool nonneg(float i) {
 }
 
 std::string FSM::Node::GetMessage(unsigned int &multiple) const {
-    multiple = rand() % messages.size();
+    multiple = VegaRandom::Instance().RandomSizeTLessThan(messages.size());
     return messages[multiple];
 }
 
@@ -223,27 +224,9 @@ void FSM::Node::AddSound(std::string soundfile, unsigned char sex, float gain) {
 int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, float relationship) const {
     const FSM::Node *n = (unsigned int) curstate
             < nodes.size() ? (&nodes[curstate]) : (&nodes[getDefaultState(relationship)]);
-    mood += -randomresponse + 2 * randomresponse * ((float) rand()) / RAND_MAX;
+    mood += VegaRandom::Instance().RandomFloatInRange(-randomresponse, randomresponse);
 
     int choice = 0;
-#if 0
-    float bestchoice = 4;
-    bool  fitmood    = false;
-    for (unsigned i = 0; i < n->edges.size(); i++) {
-        float md = nodes[n->edges[i]].messagedelta;
-        bool  newfitmood = nonneg( mood ) == nonneg( md );
-        if ( (!fitmood) || newfitmood ) {
-            float newbestchoice = sq( md-mood );
-            if ( (newbestchoice <= bestchoice) || (fitmood == false && newfitmood == true) )
-                if ( (newbestchoice == bestchoice && rand()%2) || newbestchoice < bestchoice ) {
-                    //to make sure some variety happens
-                    fitmood    = newfitmood;
-                    choice     = i;
-                    bestchoice = newbestchoice;
-                }
-        }
-    }
-#endif
     vector<unsigned int> g;
     vector<unsigned int> b;
     const float pos_limit = configuration().ai.lowest_positive_comm_choice_flt;
@@ -258,9 +241,9 @@ int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, floa
         }
     }
     if (g.size() != 0 && (relationship > 0 || (b.size() == 0))) {
-        choice = g[(rand() % g.size())];
+        choice = g.at(VegaRandom::Instance().RandomSizeTLessThan(g.size()));
     } else if (b.size()) {
-        choice = b[rand() % b.size()];
+        choice = b.at(VegaRandom::Instance().RandomSizeTLessThan(b.size()));
     }
     return choice;
 }
@@ -277,7 +260,7 @@ int FSM::getDefaultState(float relationship) const {
     int curstate = 0;
 
     const FSM::Node *n = &nodes[curstate];
-    mood += -randomresponse + 2 * randomresponse * ((float) rand()) / RAND_MAX;
+    mood += VegaRandom::Instance().RandomFloatInRange(-randomresponse, randomresponse);
 
     int choice = 0;
     float bestchoice = 16;
@@ -288,7 +271,7 @@ int FSM::getDefaultState(float relationship) const {
         if ((!fitmood) || newfitmood) {
             float newbestchoice = sq(md - mood);
             if ((newbestchoice <= bestchoice) || (fitmood == false && newfitmood == true)) {
-                if ((newbestchoice == bestchoice && rand() % 2) || newbestchoice < bestchoice) {
+                if ((newbestchoice == bestchoice && VegaRandom::Instance().RandomUInt32UpTo(1) == 1) || newbestchoice < bestchoice) {
                     //to make sure some variety happens
                     fitmood = newfitmood;
                     choice = i;

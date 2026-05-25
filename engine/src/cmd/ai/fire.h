@@ -36,7 +36,7 @@ namespace Orders {
 class FireAt : public CommunicatingAI {
 protected:
     bool ShouldFire(Unit *targ, bool &missilelock);
-    float missileprobability{};
+    double missileprobability{};
     float lastmissiletime{};
     float delay{};
     float agg{};

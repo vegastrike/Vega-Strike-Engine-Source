@@ -5,15 +5,15 @@
  *  \author		Pierre Terdiman
  *  \date		April, 4, 2000
  *
- *  Copyright (C) 1998-2025 Pierre Terdiman, Stephen G. Tuggy, Benjamen R. Meyer
+ *  Copyright (C) 1998-2026 Pierre Terdiman, Stephen G. Tuggy, Benjamen R. Meyer
  *  Public Domain
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TYPES_H
-#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TYPES_H
+#ifndef VEGA_STRIKE_LIBRARIES_COLLIDE2_ICE_ICE_TYPES_H
+#define VEGA_STRIKE_LIBRARIES_COLLIDE2_ICE_ICE_TYPES_H
 
 #define USE_HANDLE_MANAGER
 
@@ -60,14 +60,14 @@
 // typedef double              ice_float64;    //!< sizeof(ice_float64)    must be 8
 
 // ICE_COMPILE_TIME_ASSERT(sizeof(bool)==1);	// ...otherwise things might fail with VC++ 4.2 !
-ICE_COMPILE_TIME_ASSERT(sizeof(uint8_t) == 1);
-ICE_COMPILE_TIME_ASSERT(sizeof(int8_t) == 1);
-ICE_COMPILE_TIME_ASSERT(sizeof(int16_t) == 2);
-ICE_COMPILE_TIME_ASSERT(sizeof(uint16_t) == 2);
-ICE_COMPILE_TIME_ASSERT(sizeof(uint32_t) == 4);
-ICE_COMPILE_TIME_ASSERT(sizeof(int32_t) == 4);
-ICE_COMPILE_TIME_ASSERT(sizeof(uint64_t) == 8);
-ICE_COMPILE_TIME_ASSERT(sizeof(int64_t) == 8);
+static_assert(sizeof(uint8_t) == 1, "sizeof(uint8_t) != 1");
+static_assert(sizeof(int8_t) == 1, "sizeof(int8_t) != 1");
+static_assert(sizeof(int16_t) == 2, "sizeof(int16_t) != 2");
+static_assert(sizeof(uint16_t) == 2, "sizeof(uint16_t) != 2");
+static_assert(sizeof(uint32_t) == 4, "sizeof(uint32_t) != 4");
+static_assert(sizeof(int32_t) == 4, "sizeof(int32_t) != 4");
+static_assert(sizeof(uint64_t) == 8, "sizeof(uint64_t) != 8");
+static_assert(sizeof(int64_t) == 8, "sizeof(int64_t) != 8");
 
 //! TO BE DOCUMENTED
 #define DECLARE_ICE_HANDLE(name)    struct name##__ { int unused; }; typedef struct name##__ *name
@@ -126,7 +126,7 @@ typedef union {
 #define IEEE_MIN_FLOAT            0xff7fffff                    //!< integer representation of MIN_FLOAT
 #define IEEE_UNDERFLOW_LIMIT    0x1a000000
 
-#define ONE_OVER_RAND_MAX        (1.0f / float(RAND_MAX))    //!< Inverse of the max possible value returned by rand()
+#define ONE_OVER_RAND_MAX        (1.0 / static_cast<double>(RAND_MAX))    //!< Inverse of the max possible value returned by rand()
 
 typedef bool
 (*ENUMERATION)(uint32_t value, uint32_t param, uint32_t context); //!< ICE standard enumeration call
@@ -171,11 +171,4 @@ inline_ void TSetMax(T &a, const T &b) {
 
 #define        QUADRAT(x)        ((x)*(x))                        //!< Returns x square
 
-#ifdef _WIN32
-#   define srand48(x) srand((unsigned int) (x))
-#	define srandom(x) srand((unsigned int) (x))
-#	define random()   ((double) rand())
-#   define drand48()  ((double) (((double) rand()) / ((double) RAND_MAX)))
-#endif
-
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TYPES_H
+#endif //VEGA_STRIKE_LIBRARIES_COLLIDE2_ICE_ICE_TYPES_H

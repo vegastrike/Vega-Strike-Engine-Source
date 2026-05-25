@@ -33,6 +33,8 @@
 #endif
 #include <float.h>
 #include <assert.h>
+
+#include "root_generic/vega_random.h"
 #define PBEHIND (-1)
 #define PFRONT (1)
 #define PUNK (0)
@@ -45,7 +47,7 @@ static int whichside(GFXVertex *t, int numvertex, float a, float b, float c, flo
         count += WHICHSID(t[i]);
     }
     if (count == PUNK) {
-        count = (rand() % 2) * 2 - 1;
+        count = (VegaRandom::Instance().RandomInt32UpTo(1)) * 2 - 1;
     }
     return ((count > 0) * 2) - 1;
 }

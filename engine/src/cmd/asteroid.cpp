@@ -26,6 +26,8 @@
  */
 
 #include "cmd/asteroid.h"
+
+#include "root_generic/vega_random.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/collection.h"
 #include "gfx_generic/vec.h"
@@ -51,9 +53,9 @@ Asteroid::Asteroid(const char *filename, int faction, Flightgroup *fg, int fg_sn
     asteroid_physics_offset = 0;
     un_iter iter = getSubUnits();
     while (*iter) {
-        float x = 2 * difficulty * ((float) rand()) / RAND_MAX - difficulty;
-        float y = 2 * difficulty * ((float) rand()) / RAND_MAX - difficulty;
-        float z = 2 * difficulty * ((float) rand()) / RAND_MAX - difficulty;
+        float x = VegaRandom::Instance().RandomFloatInRange(-difficulty, difficulty);
+        float y = VegaRandom::Instance().RandomFloatInRange(-difficulty, difficulty);
+        float z = VegaRandom::Instance().RandomFloatInRange(-difficulty, difficulty);
         (*iter)->SetAngularVelocity(Vector(x, y, z));
         ++iter;
     }

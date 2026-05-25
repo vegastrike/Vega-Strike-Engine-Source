@@ -31,15 +31,16 @@
 #include <stdlib.h>
 #include <math.h>
 #include <ctime>
+
+#include "root_generic/vega_random.h"
+#include "src/vs_math.h"
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338328
 #endif
 #include <float.h>
-#if defined(__APPLE__) && defined (__MACH__)
-#define sqrtf sqrt
-#define cosf cos
-#define sinf sin
-#endif
+
+constexpr float M_PI_FLT = M_PI;
 
 float safety_zone = 0;
 using std::vector;
@@ -52,7 +53,7 @@ public:
     float s;
     float t;
 
-    Vector(float x = 0, float y = 0, float z = 0) {
+    explicit Vector(float x = 0, float y = 0, float z = 0) : s{0}, t{0} {
         i = x;
         j = y;
         k = z;
@@ -66,11 +67,11 @@ public:
         this->t = t;
     }
 
-    Vector operator+(Vector b) {
+    Vector operator+(const Vector b) const {
         return Vector(i + b.i, j + b.j, k + b.k);
     }
 
-    float Mag() {
+    float Mag() const {
         return sqrtf(i * i + j * j + k * k);
     }
 
@@ -138,14 +139,14 @@ public:
     int d;
     float sd, td;
 
-    Tri(int x, int y, int z) {
+    Tri(int x, int y, int z) : sa{0}, ta{0}, sb{0}, tb{0}, sc{0}, tc{0}, d{0}, sd{0}, td{0} {
         c = x;
         b = y;
         a = z;
         quad = false;
     }
 
-    Tri(int x, int y, int z, int w) {
+    Tri(int x, int y, int z, int w) : sa{0}, ta{0}, sb{0}, tb{0}, sc{0}, tc{0}, sd{0}, td{0} {
         d = x;
         c = y;
         b = z;
@@ -153,7 +154,7 @@ public:
         quad = true;
     }
 
-    void Write(FILE *fp) {
+    void Write(FILE *fp) const {
         if (!quad) {
             fprintf(fp, "<Tri>\n");
         } else {
@@ -203,19 +204,19 @@ void determine_centers_and_radii(vector<asteroid> &field,
         const int poly_min,
         const int poly_max) {
     for (unsigned int i = 0; i < field.size(); i++) {
-        field[i].center.i = cube_sides.i * ((float) rand()) / RAND_MAX - cube_sides.i / 2;
-        field[i].center.j = cube_sides.j * ((float) rand()) / RAND_MAX - cube_sides.j / 2;
-        field[i].center.k = cube_sides.k * ((float) rand()) / RAND_MAX - cube_sides.k / 2;
-        float radiusratio = ((float) rand()) / RAND_MAX;
+        field[i].center.i = VegaRandom::Instance().RandomFloatInRange(-cube_sides.i / 2.0F, cube_sides.i / 2.0F);
+        field[i].center.j = VegaRandom::Instance().RandomFloatInRange(-cube_sides.j / 2.0F, cube_sides.j / 2.0F);
+        field[i].center.k = VegaRandom::Instance().RandomFloatInRange(-cube_sides.k / 2.0F, cube_sides.k / 2.0F);
+        float radiusratio = VegaRandom::Instance().RandomFloat();
         field[i].radius = radiusmin + (radiusmax - radiusmin) * radiusratio;
         radiusratio *= radiusratio * (poly_max + 1 - poly_min);
-        field[i].num_polys = (int) radiusratio + poly_min;
+        field[i].num_polys = static_cast<int>(radiusratio) + poly_min;
         if (field[i].num_polys < 4) {
             field[i].num_polys = 4;
         }
-        field[i].YawPitchRoll.i = 2 * M_PI * ((float) rand()) / RAND_MAX;
-        field[i].YawPitchRoll.j = 2 * M_PI * ((float) rand()) / RAND_MAX;
-        field[i].YawPitchRoll.k = 2 * M_PI * ((float) rand()) / RAND_MAX;
+        field[i].YawPitchRoll.i = VegaRandom::Instance().RandomFloatUpTo(2.0F * M_PI_FLT);
+        field[i].YawPitchRoll.j = VegaRandom::Instance().RandomFloatUpTo(2.0F * M_PI_FLT);
+        field[i].YawPitchRoll.k = VegaRandom::Instance().RandomFloatUpTo(2.0F * M_PI_FLT);
         bool insideanother = false;
         if (field[i].center.Mag() < safety_zone) {
             insideanother = true;
@@ -236,8 +237,8 @@ void determine_centers_and_radii(vector<asteroid> &field,
     }
 }
 
-float getR(float minr, float maxr) {
-    return ((maxr - minr) * ((float) rand()) / RAND_MAX) + minr;
+float getR(const float minr, const float maxr) {
+    return VegaRandom::Instance().RandomFloatInRange(minr, maxr);
 }
 
 void generateTet(vector<Vector> &v, vector<Tri> &p, const float minr, const float maxr) {
@@ -279,9 +280,9 @@ void generateNTet(vector<Vector> &v,
                 v.push_back(Vector(projR * cos(2 * M_PI * j / (slices)),                   //i
                         tempR * cos(M_PI * i / (stacks + 1)),                    //j
                         projR * sin(2 * M_PI * j / (slices)),                    //k
-                        ((float) j) / (slices - 1)
+                        static_cast<float>(j) / (slices - 1)
                                 + ((i == 0 || i == stacks + 1) ? .5 : 0),                      //s
-                        ((float) i) / (stacks + 1)));                    //t
+                        static_cast<float>(i) / (stacks + 1)));                    //t
             }
             if (i != 0 && i != 1 && i != stacks + 1) {
                 p.push_back(Tri(1 + (i - 2) * slices + j,
@@ -369,8 +370,7 @@ void write_mesh(FILE *fp, vector<asteroid> &field) {
     }
     fprintf(fp, "</Points>\n<Polygons>\n");
     for (i = 0; i < field.size(); i++) {
-        unsigned int j;
-        for (j = 0; j < field[i].polygon.size(); j++) {
+        for (unsigned int j = 0; j < field[i].polygon.size(); j++) {
             field[i].polygon[j].Write(fp);
         }
     }
@@ -468,7 +468,7 @@ bool isBoxOutsideInnerRadius(Vector center, float sizeofBox, float radius) {
 #ifdef RAND
 float randRadius( float radius )
 {
-    return ( (rand()*2*radius)/RAND_MAX )-radius;
+    return VegaRandom::Instance().RandomFloatInRange(-radius, radius);
 }
 Vector randVecInCube( float radius )
 {
@@ -476,11 +476,11 @@ Vector randVecInCube( float radius )
 }
 #else
 
-float randRadius(float BoxSize) {
-    return ((rand() * BoxSize) / RAND_MAX) - (BoxSize / 2);
+float randRadius(const float BoxSize) {
+    return VegaRandom::Instance().RandomFloatInRange(-BoxSize / 2.0F, BoxSize / 2.0F);
 }
 
-Vector randVecInCube(float BoxSize, float x, float y, float z) {
+Vector randVecInCube(const float BoxSize, const float x, const float y, const float z) {
     return Vector(randRadius(BoxSize) + x, randRadius(BoxSize) + y, randRadius(BoxSize) + z);
 }
 
@@ -509,8 +509,7 @@ void write_unit(FILE *fp, const char *astFile, float offset, float innerRadius, 
     for (float x = -outerRadius; x < outerRadius; x += offset) {
         for (float y = -outerRadius; y < outerRadius; y += offset) {
             for (float z = -outerRadius; z < outerRadius; z += offset) {
-                Vector vec;
-                vec = randVecInCube(BoxSize, x, y, z);
+                const Vector vec = randVecInCube(BoxSize, x, y, z);
                 if ((isBoxInsideOuterRadius(vec, BoxSize,
                         outerRadius) && isBoxOutsideInnerRadius(vec, BoxSize, innerRadius))) {
                     fprintf(fp, "\n\t<SubUnit file=\"%s\" x=\"%f\" y=\"%f\" z=\"%f\" />", astFile, vec.i, vec.j, vec.k);
@@ -602,10 +601,10 @@ int main(int argc, char **argv) {
             return -1;
         }
         printf("Do you want a unit file? (y/n)\n");
-        if (scanf("%c", (char *) &num_cubes) != 1) {
+        if (scanf("%c", reinterpret_cast<char *>(&num_cubes)) != 1) {
             return -1;
         }
-        if ((char) num_cubes == 'y') {
+        if (static_cast<char>(num_cubes) == 'y') {
             printf("Enter Output Unit File:\n");
             if (scanf("%s", unitfilename) != 1) {
                 return -1;
@@ -633,11 +632,7 @@ int main(int argc, char **argv) {
         }
     }
     if (randomseed != 0) {
-        srand(randomseed);
-    } else {
-#ifndef _WIN32
-        srand(time(NULL));
-#endif
+        VegaRandom::Instance().InitGenRand(randomseed);
     }
     for (int i = 0; i < numroids; i++) {
         field.push_back(asteroid());

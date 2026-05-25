@@ -30,6 +30,7 @@
 #include "components_manager.h"
 #include "component_utils.h"
 #include "resource/random_utils.h"
+#include "root_generic/vega_random.h"
 #include "configuration/configuration.h"
 #include "cmd/unit_csv_factory.h"
 #include "vs_logging.h"
@@ -149,7 +150,7 @@ void ComponentsManager::DamageRandomSystem() {
         if (randnum >= .65 && randnum < .9) {
             ecm.Damage();
         } else if (getNumMounts()) {
-            unsigned int whichmount = rand() % getNumMounts();
+            unsigned int whichmount = VegaRandom::Instance().RandomSizeTLessThan(getNumMounts());
             if (randnum >= .9) {
                 DestroyMount(&mounts[whichmount]);
             } else if (mounts[whichmount].ammo > 0 && randnum >= .75) {
@@ -168,7 +169,7 @@ void ComponentsManager::DamageRandomSystem() {
             //Do something NASTY to the cargo
             if (cargo.size() > 0) {
                 unsigned int i = 0;
-                unsigned int cargorand_o = rand();
+                unsigned int cargorand_o = VegaRandom::Instance().GenRandUInt32();
                 unsigned int cargorand;
                 do {
                     cargorand = (cargorand_o + i) % cargo.size();

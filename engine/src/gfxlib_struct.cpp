@@ -33,7 +33,7 @@
 #include "root_generic/xml_support.h"
 #include "src/config_xml.h"
 #include "root_generic/vs_globals.h"
-#include "src/vs_random.h"
+#include "root_generic/vega_random.h"
 #include "src/vs_logging.h"
 #include "imgui.h"
 
@@ -690,7 +690,7 @@ void GFXSphereVertexList::ProceduralModification() {
         }
 
         for (int j = 0; j < ROWS / 2; j++) {
-            direction[j] = (int) vsrandom.uniformInc(0.0, 5.0);
+            direction[j] = (int) VegaRandom::Instance().UniformInclusive(0.0, 5.0);
         }
         if (i % 4 == 1) {
             for (int j = 0; j < ROWS; j += 2) {
