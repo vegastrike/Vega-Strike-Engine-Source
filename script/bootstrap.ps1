@@ -40,17 +40,17 @@ $env:VCPKG_ROOT = "$VCPKG_PARENT_DIR\vcpkg"
 
 [Environment]::SetEnvironmentVariable('VCPKG_ASSET_SOURCES', "$VCPKG_PARENT_DIR\vcpkgAssets", 'User')
 $env:VCPKG_ASSET_SOURCES="$VCPKG_PARENT_DIR\vcpkgAssets"
-mkdir -p $env:VCPKG_ASSET_SOURCES
+New-Item -Force -ItemType Directory -Path $env:VCPKG_ASSET_SOURCES
 [Environment]::SetEnvironmentVariable('X_VCPKG_ASSET_SOURCES', "clear;x-azurl,file:///$VCPKG_PARENT_DIR\vcpkgAssets,,readwrite", 'User')
 $env:X_VCPKG_ASSET_SOURCES="clear;x-azurl,file:///$VCPKG_PARENT_DIR\vcpkgAssets,,readwrite"
 
 [Environment]::SetEnvironmentVariable('VCPKG_BINARY_SOURCES', "clear;files,$VCPKG_PARENT_DIR\vcpkgBin,readwrite", 'User')
 $env:VCPKG_BINARY_SOURCES = "clear;files,$VCPKG_PARENT_DIR\vcpkgBin,readwrite"
-mkdir -p $VCPKG_PARENT_DIR\vcpkgBin
+New-Item -Force -ItemType Directory -Path $VCPKG_PARENT_DIR\vcpkgBin
 
 [Environment]::SetEnvironmentVariable('VCPKG_BUILD_TREES', "$VCPKG_PARENT_DIR\vcpkgBuild", 'User')
 $env:VCPKG_BUILD_TREES="$VCPKG_PARENT_DIR\vcpkgBuild"
-mkdir -p $env:VCPKG_BUILD_TREES
+New-Item -Force -ItemType Directory -Path $env:VCPKG_BUILD_TREES
 [Environment]::SetEnvironmentVariable('VCPKG_INSTALL_OPTIONS', "--x-buildtrees-root=$VCPKG_PARENT_DIR\vcpkgBuild", 'User')
 $env:VCPKG_INSTALL_OPTIONS="--x-buildtrees-root=$VCPKG_PARENT_DIR\vcpkgBuild"
 
