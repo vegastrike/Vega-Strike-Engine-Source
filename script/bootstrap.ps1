@@ -57,13 +57,6 @@ $env:VCPKG_INSTALL_OPTIONS="--x-buildtrees-root=$VCPKG_PARENT_DIR\vcpkgBuild"
 git clone https://github.com/Microsoft/vcpkg.git "$env:VCPKG_ROOT"
 & "$env:VCPKG_ROOT\bootstrap-vcpkg.bat" -disableMetrics
 
-Set-Variable -Name CMAKE_WITH_VERSION -Value (Get-ChildItem "$env:VCPKG_ROOT\downloads\tools" -Filter "cmake-*-windows" -Directory | Select-Object -Last 1).Name
-
-$path = [Environment]::GetEnvironmentVariable('PATH', 'User')
-$newPath = $path + ";$env:VCPKG_ROOT\downloads\tools\$CMAKE_WITH_VERSION\$CMAKE_WITH_VERSION-i386\bin"
-[Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
-$env:PATH = $newPath
-
 $triplet = 'x64-win10'
 [Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_TRIPLET', $triplet, 'User')
 $env:VCPKG_DEFAULT_TRIPLET = $triplet
