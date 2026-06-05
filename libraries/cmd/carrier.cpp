@@ -39,7 +39,7 @@
 #include "cmd/missile.h"
 #include "resource/random_utils.h"
 #include "src/vs_math.h"
-#include "src/vs_random.h"
+#include "root_generic/vega_random.h"
 #include "src/vs_logging.h"
 #include "src/vega_cast_utils.h"
 
@@ -50,11 +50,11 @@ extern void PlayDockingSound(int dock);
 
 
 // TODO: move these two functions to vector and make into single constructor
-inline double uniformrand(double min, double max) {
-    return (static_cast<double>(rand()) / RAND_MAX) * (max - min) + min;
+inline double uniformrand(const double min, const double max) {
+    return VegaRandom::Instance().RandomDoubleInRange(min, max);
 }
 
-inline QVector randVector(double min, double max) {
+inline QVector randVector(const double min, const double max) {
     return QVector(uniformrand(min, max),
             uniformrand(min, max),
             uniformrand(min, max));
@@ -255,7 +255,7 @@ void Carrier::EjectCargo(unsigned int index) {
                 arot = grot;
             }
             Vector rotation
-                    (vsrandom.uniformInc(-arot, arot), vsrandom.uniformInc(-arot, arot), vsrandom.uniformInc(-arot,
+                    (VegaRandom::Instance().UniformInclusive(-arot, arot), VegaRandom::Instance().UniformInclusive(-arot, arot), VegaRandom::Instance().UniformInclusive(-arot,
                             arot));
             const bool all_rotate_same = configuration().graphics.cargo_rotates_at_same_speed;
             if (all_rotate_same && arot != 0) {

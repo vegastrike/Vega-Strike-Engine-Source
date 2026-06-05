@@ -28,6 +28,7 @@
 #include <cstdlib>
 
 #include "root_generic/vs_globals.h"
+#include "root_generic/vega_random.h"
 #include "src/vs_exit.h"
 #include "src/vs_logging.h"
 

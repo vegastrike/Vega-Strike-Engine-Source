@@ -28,6 +28,7 @@
 
 #include "order.h"
 #include "communication.h"
+#include "root_generic/vega_random.h"
 #include "root_generic/configxml.h"
 
 using std::list;
@@ -103,7 +104,7 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
                 }
             }
         }
-        if (cleared || (((float) rand()) / RAND_MAX) < (1 / time)) {
+        if (cleared || VegaRandom::Instance().RandomFloat() < (1 / time)) {
             FSM::Node *n;
             if ((n = messagequeue.back()->getCurrentState())) {
                 ProcessCommMessage(*messagequeue.back());

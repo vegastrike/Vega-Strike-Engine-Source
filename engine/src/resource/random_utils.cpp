@@ -25,22 +25,13 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <random>
+#include "root_generic/vega_random.h"
 
-int randomInt(int max, int min = 0 ) {
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> int_dist(min,max);
-
-    return int_dist(rng); // TODO: test this gets all items
+int randomInt(const int max, const int min = 0 ) {
+    return static_cast<int>(VegaRandom::Instance().RandomInt32InRange(static_cast<int_fast32_t>(min), static_cast<int_fast32_t>(max)));
 }
 
 
 double randomDouble() {
-    const int precision = 10000;
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> int_dist(0,precision);
-    const unsigned int random_int = int_dist(rng);
-    return static_cast<double>(random_int)/precision;
+    return VegaRandom::Instance().RandomDouble();
 }

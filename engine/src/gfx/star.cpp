@@ -29,6 +29,8 @@
 #include "star.h"
 #include "gfx/ani_texture.h"
 #include <assert.h>
+
+#include "root_generic/vega_random.h"
 #include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
 #include "gfx/camera.h"
@@ -96,7 +98,7 @@ public:
         if (!Done()) {
             return &(*system).second;
         } else {
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -142,7 +144,7 @@ bool computeStarColor(float &r, float &g, float &b, Vector luminmax, float dista
     const float starcolorincrement = configuration().graphics.star_color_increment_flt;
     float dissqr = distance * distance / (maxdistance * maxdistance);
     float lum = 100 * luminmax.i / (luminmax.k * dissqr);
-    lum = log((double) luminmax.i * 10. / (double) luminmax.j) * luminscale / dissqr;
+    lum = log(static_cast<double>(luminmax.i) * 10.0 / static_cast<double>(luminmax.j)) * luminscale / dissqr;
     float clamp = starcoloraverage + lum / starcolorincrement;
     if (clamp > 1) {
         clamp = 1;
@@ -175,7 +177,7 @@ static GFXColorVertex *AllocVerticesForSystem(std::string our_system_name, float
     const string allowedSectors = configuration().graphics.star_allowable_sectors;
     if (our_system_name.size() > 0) {
         string lumi = _Universe->getGalaxyProperty(our_system_name, "luminosity");
-        if (lumi.length() == 0 || strtod(lumi.c_str(), NULL) == 0) {
+        if (lumi.length() == 0 || strtod(lumi.c_str(), nullptr) == 0) {
             our_system_name = "";
         } else {
             string::size_type slash = our_system_name.find("/");
@@ -268,10 +270,10 @@ static GFXColorVertex *AllocVerticesForSystem(std::string our_system_name, float
     VS_LOG(info, (boost::format("Min (%1$f, %2$f, %3$f) Max(%4$f, %5$f, %6$f) MinLumin %7$f, MaxLumin %8$f")
             % starmin.i % starmin.j % starmin.k % starmax.i % starmax.j % starmax.k % minlumin % maxlumin));
     for (int y = 0; y < *num; ++y) {
-        tmpvertex[j + repetition - 1].x = -.5 * xyzspread + rand() * ((float) xyzspread / RAND_MAX);
-        tmpvertex[j + repetition - 1].y = -.5 * xyzspread + rand() * ((float) xyzspread / RAND_MAX);
-        tmpvertex[j + repetition - 1].z = -.5 * xyzspread + rand() * ((float) xyzspread / RAND_MAX);
-        float brightness = .1 + .9 * ((float) rand()) / RAND_MAX;
+        tmpvertex[j + repetition - 1].x = VegaRandom::Instance().RandomFloatInRange(-0.5 * xyzspread, 0.5 * xyzspread);
+        tmpvertex[j + repetition - 1].y = VegaRandom::Instance().RandomFloatInRange(-0.5 * xyzspread, 0.5 * xyzspread);
+        tmpvertex[j + repetition - 1].z = VegaRandom::Instance().RandomFloatInRange(-0.5 * xyzspread, 0.5 * xyzspread);
+        float brightness = VegaRandom::Instance().RandomFloatInRange(0.1F, 1.0F);
         tmpvertex[j + repetition - 1].r = brightness;
         tmpvertex[j + repetition - 1].g = brightness;
         tmpvertex[j + repetition - 1].b = brightness;
@@ -343,11 +345,11 @@ static GFXColorVertex *AllocVerticesForSystem(std::string our_system_name, float
 PointStarVlist::PointStarVlist(int num, float spread, const std::string &sysnam) : StarVlist(spread) {
     smoothstreak = 0;
     GFXColorVertex *tmpvertex = AllocVerticesForSystem(sysnam, this->spread, &num, 2);
-    vlist = new GFXVertexList(GFXLINE, num, tmpvertex, num, true, 0);
+    vlist = new GFXVertexList(GFXLINE, num, tmpvertex, num, true, nullptr);
     for (int i = 0, j = 1; i < num / 2; ++i, j += 2) {
         tmpvertex[i] = tmpvertex[j];
     }
-    nonstretchvlist = new GFXVertexList(GFXPOINT, num / 2, tmpvertex, num / 2, false, 0);
+    nonstretchvlist = new GFXVertexList(GFXPOINT, num / 2, tmpvertex, num / 2, false, nullptr);
     delete[] tmpvertex;
 }
 
@@ -377,7 +379,7 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
         const float velstreakscale = configuration().graphics.velocity_star_streak_scale_flt;
         const float minstreak = configuration().graphics.velocity_star_streak_min_flt;
         const float fov_smoothing = configuration().warp.fov_link.smoothing_flt;
-        float fov_smoot = std::pow(double(fov_smoothing), GetElapsedTime());
+        float fov_smoot = std::pow(static_cast<double>(fov_smoothing), GetElapsedTime());
         Vector vel(-velocity * velstreakscale);
         float speed = vel.Magnitude();
         if ((smoothstreak >= minstreak || vel.MagnitudeSquared() >= minstreak * minstreak) && (speed > 1.0e-7)) {
@@ -400,7 +402,7 @@ bool PointStarVlist::BeginDrawState(const QVector &center,
             for (int j = 0; j < numvertices - 1; j += 2) {
                 int i = j;
 //if (SlowStarStreaks)
-//i=((rand()%numvertices)/2)*2;
+// i = (VegaRandom::Instance().RandomInt32UpTo(numvertices - 1) / 2) * 2;
                 Vector vpoint(v[i + 1].x, v[i + 1].y, v[i + 1].z);
                 Vector recenter = (vpoint - center.Cast());
                 if (roll) {
@@ -447,7 +449,7 @@ PointStarVlist::~PointStarVlist() {
     delete nonstretchvlist;
 }
 
-Stars::Stars(int num, float spread) : vlist(NULL), spread(spread) {
+Stars::Stars(int num, float spread) : vlist(nullptr), spread(spread) {
     const string starspritetextures = configuration().graphics.near_stars_sprite_texture;
     const float starspritesize = configuration().graphics.near_stars_sprite_size_flt;
     if (starspritetextures.length() == 0) {
@@ -636,11 +638,11 @@ static Vector GetConstVertex(const GFXColorVertex &c) {
 
 SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std::string texturenames,
         float size) : StarVlist(spread) {
-    int curtexture = 0;
+    size_t cur_texture = 0;
     vector<AnimatedTexture *> animations;
     const bool near_stars_alpha = configuration().graphics.near_stars_alpha;
-    for (curtexture = 0; curtexture < NUM_ACTIVE_ANIMATIONS; ++curtexture) {
-        std::string::size_type where = texturenames.find(" ");
+    for (cur_texture = 0; cur_texture < NUM_ACTIVE_ANIMATIONS; ++cur_texture) {
+        std::string::size_type where = texturenames.find(' ');
         string texturename = texturenames.substr(0, where);
         if (where != string::npos) {
             texturenames = texturenames.substr(where + 1);
@@ -649,26 +651,26 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
         }
         if (texturename.find(".ani") != string::npos) {
             animations.push_back(new AnimatedTexture(texturename.c_str(), 0, near_stars_alpha ? NEAREST : BILINEAR));
-            decal[curtexture] = animations.back();
-        } else if (texturename.length() == 0) {
-            if (curtexture == 0) {
-                decal[curtexture] = new Texture("white.bmp", 0, near_stars_alpha ? NEAREST : BILINEAR);
+            decal[cur_texture] = animations.back();
+        } else if (texturename.empty()) {
+            if (cur_texture == 0) {
+                decal[cur_texture] = new Texture("white.bmp", 0, near_stars_alpha ? NEAREST : BILINEAR);
             } else {
                 if (animations.size()) {
                     AnimatedTexture *tmp =
-                            static_cast< AnimatedTexture * > ( animations[curtexture % animations.size()]->Clone());
+                            vega_dynamic_cast_ptr<AnimatedTexture> ( animations[cur_texture % animations.size()]->Clone());
                     int num = tmp->numFrames();
                     if (num) {
-                        num = rand() % num;
+                        num = VegaRandom::Instance().RandomInt32UpTo(num - 1);
                         tmp->setTime(num / tmp->framesPerSecond());
                     }
-                    decal[curtexture] = tmp;
+                    decal[cur_texture] = tmp;
                 } else {
-                    decal[curtexture] = decal[rand() % curtexture]->Clone();
+                    decal[cur_texture] = decal[VegaRandom::Instance().RandomSizeTLessThan(cur_texture)]->Clone();
                 }
             }
         } else {
-            decal[curtexture] = new Texture(texturename.c_str());
+            decal[cur_texture] = new Texture(texturename.c_str());
         }
     }
     int numVerticesPer = near_stars_alpha ? 4 : 12;
@@ -681,15 +683,15 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
             tmpvertex[i].b = tmpvertex[LAST].b;
             tmpvertex[i].a = tmpvertex[LAST].a;
         }
-        Vector I(rand() * 2.0 / RAND_MAX - 1,
-                rand() * 2.0 / RAND_MAX - 1,
-                rand() * 2.0 / RAND_MAX - 1);
-        Vector J(rand() * 2.0 / RAND_MAX - 1,
-                rand() * 2.0 / RAND_MAX - 1,
-                rand() * 2.0 / RAND_MAX - 1);
-        Vector K(rand() * 2.0 / RAND_MAX - 1,
-                rand() * 2.0 / RAND_MAX - 1,
-                rand() * 2.0 / RAND_MAX - 1);
+        Vector I(VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0),
+                VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0),
+                VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0));
+        Vector J(VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0),
+                VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0),
+                VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0));
+        Vector K(VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0),
+                VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0),
+                VegaRandom::Instance().RandomFloatInRange(-1.0, 1.0));
         if (I.MagnitudeSquared() < .00001) {
             I.i += .5;
         }
@@ -753,7 +755,7 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
             if (i == NUM_ACTIVE_ANIMATIONS - 1) {
                 later = num;
             }
-            vlist[i] = new GFXVertexList(GFXQUAD, later - start, tmpvertex + start, later - start, true, 0);
+            vlist[i] = new GFXVertexList(GFXQUAD, later - start, tmpvertex + start, later - start, true, nullptr);
         }
     }
     delete[] tmpvertex;

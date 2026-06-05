@@ -48,6 +48,7 @@
 #include "src/vega_cast_utils.h"
 
 #include "utils.h"
+#include "root_generic/vega_random.h"
 #include "src/vs_math.h"
 
 using namespace std;
@@ -324,11 +325,11 @@ void testComplexScene(bool doppler) {
             new EngParticleListener(engpaths, world_size));
 
     {
-        constexpr double kPhaseStep = 2.0 * kVegaPiDouble / nengs;
-        for (size_t n = 0; n < nengs; ++n) {
-            const double phase = n * kPhaseStep;
-            const double speed = 2.0 * kPhaseStep * (static_cast<double>(rand() + RAND_MAX / 2) / RAND_MAX);
-            const double radii = world_size * (1.0 + 0.25 * static_cast<double>(rand() - RAND_MAX / 2) / RAND_MAX);
+        constexpr double phase_step = 2.0 * kVegaPiDouble / nengs;
+        for (size_t j = 0; j < nengs; ++j) {
+            const double phase = j * phase_step;
+            const double speed = 2.0 * phase_step * VegaRandom::Instance().RandomDoubleInRange(0.5, 1.5); // max 1.0?
+            const double radii = world_size * (1.0 + 0.25 * VegaRandom::Instance().RandomDoubleInRange(-0.5, 0.5));
 
             engpaths.push_back(LVector3(phase, speed, radii));
         }

@@ -33,6 +33,8 @@
 
 #include <boost/format.hpp>
 
+#include "root_generic/vega_random.h"
+
 ECM::ECM() :
     Component(), EnergyConsumer(nullptr, false, 0), ecm(Resource<int>(0, 0, 0)), active(false) {
     type = ComponentType::ECM;
@@ -120,11 +122,10 @@ bool ECM::BreakLock(void* missile) const {
 
     // There are two separate checks for ECM breaking lock here
     // TODO: pick one
-    float r = rand();
-    float rand_max = static_cast<float>(RAND_MAX);
-    float ecm_value = static_cast<float>(ecm.Value()) * simulation_atom_var / 32768;
+    const double r = VegaRandom::Instance().GenRandReal1();
+    const double ecm_value = static_cast<double>(ecm.Value()) * simulation_atom_var / 32768;
 
-    if (r / rand_max < ecm_value) {
+    if (r / kVegaUInt32tMaxAsDouble < ecm_value) {
         return true;
     }
 

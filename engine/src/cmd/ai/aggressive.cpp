@@ -36,14 +36,12 @@
 #include "root_generic/vs_globals.h"
 #include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
-#include "src/config_xml.h"
 #include "root_generic/xml_support.h"
 #include "cmd/unit_generic.h"
 #include "communication.h"
 #include "cmd/script/flightgroup.h"
 #include "flybywire.h"
 #include "hard_coded_scripts.h"
-#include "cmd/script/mission.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "root_generic/lin_time.h"
 #include "root_generic/faction_generic.h"
@@ -52,10 +50,9 @@
 #include "warpto.h"
 #include "cmd/csv.h"
 #include "src/universe_util.h"
-#include "src/vs_random.h"
+#include "root_generic/vega_random.h"
 #include "src/python/python_compile.h"
 #include "cmd/unit_find.h"
-#include "root_generic/faction_generic.h"
 #include "docking.h"
 #include "src/star_system.h"
 #include "src/universe.h"
@@ -230,7 +227,7 @@ static float aggressivity = 2.01F;
 static int randomtemp;
 
 AggressiveAI::AggressiveAI(const char *filename, Unit *target)
-        : FireAt(), logic(getProperScript(nullptr, nullptr, "default", randomtemp = rand())) {
+        : FireAt(), logic(getProperScript(nullptr, nullptr, "default", randomtemp = VegaRandom::Instance().GenRandInt31())) {
     currentpriority = 0;
     last_jump_time = 0;
     nav = QVector(0, 0, 0);
@@ -486,7 +483,7 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             return queryType(Order::MOVEMENT) == NULL;
 
         case RANDOMIZ:
-            value = ((float) rand()) / RAND_MAX;
+            value = VegaRandom::Instance().RandomFloat();
             break;
         default:
             return false;
@@ -543,25 +540,25 @@ bool AggressiveAI::ProcessLogic(AIEvents::ElemAttrMap &logi, bool inter) {
     return retval;
 }
 
-Unit *GetThreat(Unit *parent, Unit *leader) {
-    Unit *th = NULL;
-    Unit *un = NULL;
+Unit *GetThreat(const Unit *parent, const Unit *leader) {
+    Unit *threat = nullptr;
+    Unit *unit = nullptr;
     bool targetted = false;
     float mindist = FLT_MAX;
     for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
-            (un = *ui);
+            (unit = *ui);
             ++ui) {
-        if (parent->getRelation(un) < 0) {
-            float d = (un->Position() - leader->Position()).Magnitude();
-            bool thistargetted = (un->Target() == leader);
-            if (!th || (thistargetted && !targetted) || ((thistargetted || (!targetted)) && d < mindist)) {
-                th = un;
-                targetted = thistargetted;
+        if (parent->getRelation(unit) < 0) {
+            const float d = static_cast<float>((unit->Position() - leader->Position()).Magnitude());
+            const bool this_targeted = (unit->Target() == leader);
+            if (!threat || (this_targeted && !targetted) || ((this_targeted || (!targetted)) && d < mindist)) {
+                threat = unit;
+                targetted = this_targeted;
                 mindist = d;
             }
         }
     }
-    return th;
+    return threat;
 }
 
 bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
@@ -574,7 +571,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
         if (fg->directive != last_directive) {
             if (configuration().ai.always_obedient) {
                 obedient = true;
-            } else if (float ( rand())/RAND_MAX < (obedient ? (1 - logic->obedience) : logic->obedience)) {
+            } else if (VegaRandom::Instance().RandomFloat() < (obedient ? (1 - logic->obedience) : logic->obedience)) {
                 obedient = !obedient;
             }
             if (obedient) {
@@ -657,7 +654,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                 //a is now used for AI, for backward compatibility. do not use for player
             } else if (fg->directive.find("a") != string::npos || fg->directive.find("A") != string::npos) {
                 Unit *targ = fg->leader.GetUnit();
-                targ = targ != NULL ? targ->Target() : NULL;
+                targ = targ != nullptr ? targ->Target() : nullptr;
                 if (targ) {
                     if (targ->InCorrectStarSystem(_Universe->activeStarSystem())) {
                         CommunicationMessage c(parent, leader, NULL, 0);
@@ -890,7 +887,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                                         true);
                                 ord->SetParent(parent);
                                 ReplaceOrder(ord);
-                                if (parent->Target() != NULL) {
+                                if (parent->Target() != nullptr) {
                                     ord = new Orders::FaceTarget(false, 3);
                                 } else {
                                     ord = new Orders::FaceDirection(-dist * turn_leader);
@@ -1087,7 +1084,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                                                         true);
                                         ord->SetParent(parent);
                                         ReplaceOrder(ord);
-                                        if (parent->Target() != NULL) {
+                                        if (parent->Target() != nullptr) {
                                             ord = new Orders::FaceTarget(false, 3);
                                             ord->SetParent(parent);
                                             ReplaceOrder(ord);
@@ -1150,7 +1147,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                                                         true);
                                         ord->SetParent(parent);
                                         ReplaceOrder(ord);
-                                        if (parent->Target() != NULL) {
+                                        if (parent->Target() != nullptr) {
                                             ord = new Orders::FaceTarget(false, 3);
                                             ord->SetParent(parent);
                                             ReplaceOrder(ord);
@@ -1183,7 +1180,7 @@ static bool overridable(const std::string &s) {
     return (*s.begin()) != toupper(*s.begin());
 }
 
-extern void LeadMe(Unit *un, string directive, string speech, bool changetarget);
+extern void LeadMe(Unit *un, string directive, string speech, bool change_target);
 
 void AggressiveAI::ReCommandWing(Flightgroup *fg) {
     const float time_to_recommand_wing = configuration().ai.targeting.time_to_recommand_wing_flt;
@@ -1193,7 +1190,7 @@ void AggressiveAI::ReCommandWing(Flightgroup *fg) {
         if (overridable(fg->directive)) {
             //computer won't override capital orders
             if (nullptr != (lead = fg->leader.GetUnit())) {
-                if (float ( rand())/RAND_MAX < simulation_atom_var / time_to_recommand_wing) {
+                if (VegaRandom::Instance().RandomFloat() < simulation_atom_var / time_to_recommand_wing) {
                     if (parent->Threat() && (parent->shield.Percent() < .2)) {
                         fg->directive = string("h");
                         LeadMe(parent, "h", "I need help here!", false);
@@ -1265,25 +1262,25 @@ static Unit *ChooseNavPoint(Unit *parent, Unit **otherdest, float *lurk_on_arriv
     const unsigned int maxrand = 5;
     unsigned int additionalrand[maxrand];
     if (civilian) {
-        firstRand = vsrandom.genrand_int31();
-        secondRand = vsrandom.uniformExc(0, 1);
-        thirdRand = vsrandom.genrand_int31();
+        firstRand = VegaRandom::Instance().GenRandInt31();
+        secondRand = VegaRandom::Instance().UniformExclusive(0, 1);
+        thirdRand = VegaRandom::Instance().GenRandInt31();
         for (unsigned int i = 0; i < maxrand; ++i) {
             additionalrand[i] = thirdRand + i;
         }
     } else {
-        int k = (int) (getNewTime() / timehash);        //two minutes
+        uint_fast32_t k = static_cast<uint_fast32_t>(getNewTime() / timehash);        //two minutes
         string key = UnitUtil::getFlightgroupName(parent);
         std::string::const_iterator start = key.begin();
         for (; start != key.end(); start++) {
             k += (k * 128) + *start;
         }
-        VSRandom choosePlace(k);
-        firstRand = choosePlace.genrand_int31();
-        secondRand = choosePlace.uniformExc(0, 1);
-        thirdRand = choosePlace.genrand_int31();
+        VegaRandom choosePlace(k);
+        firstRand = choosePlace.GenRandInt31();
+        secondRand = choosePlace.UniformExclusive(0, 1);
+        thirdRand = choosePlace.GenRandInt31();
         for (unsigned int i = 0; i < maxrand; ++i) {
-            additionalrand[i] = choosePlace.genrand_int31();
+            additionalrand[i] = choosePlace.GenRandInt31();
         }
     }
     bool asteroidhide = false;
@@ -1445,18 +1442,16 @@ public:
                 WarpToP(parent, un, true);
             } else {
                 Unit *playa = _Universe->AccessCockpit()->GetParent();
-                if (playa == NULL || playa->Target() != parent || 1) {
-                    WarpToP(parent, targetlocation, 0, true);
-                }
+                WarpToP(parent, targetlocation, 0, true);
             }
         }
     }
 };
 
 static Vector randVector() {
-    return Vector((rand() / (float) RAND_MAX) * 2 - 1,
-            (rand() / (float) RAND_MAX) * 2 - 1,
-            (rand() / (float) RAND_MAX) * 2 - 1);
+    return Vector(VegaRandom::Instance().RandomFloatInRange(-1.0F, 1.0F),
+            VegaRandom::Instance().RandomFloatInRange(-1.0F, 1.0F),
+            VegaRandom::Instance().RandomFloatInRange(-1.0F, 1.0F));
 }
 
 static void GoTo(AggressiveAI *ai,
@@ -1578,16 +1573,16 @@ void AggressiveAI::AfterburnerJumpTurnTowards(Unit *target) {
     AfterburnTurnTowards(this, parent);
     const float jump_time_limit = configuration().ai.force_jump_after_time_flt;
     if (jump_time_check == 0) {
-        float dist = (target->Position() - parent->Position()).MagnitudeSquared();
-        if (last_jump_distance < dist || last_jump_time > jump_time_limit) {
+        const float distance = static_cast<float>((target->Position() - parent->Position()).MagnitudeSquared());
+        if (last_jump_distance < distance || last_jump_time > jump_time_limit) {
             //force jump
             last_jump_time = 0;
-            if (target->GetDestinations().size()) {
-                string dest = target->GetDestinations()[0];
+            if (!target->GetDestinations().empty()) {
+                const string dest = target->GetDestinations()[0];
                 UnitUtil::JumpTo(parent, dest);
             }
         } else {
-            last_jump_distance = dist;
+            last_jump_distance = distance;
         }
     }
 }
@@ -1596,7 +1591,7 @@ volatile Unit *uoi;
 
 void AggressiveAI::Execute() {
     if (parent == uoi) {
-        VS_LOG(info, "kewl");
+        VS_LOG(important_info, "kewl");
     }
     jump_time_check++;     //just so we get a nicely often wrapping var;
     jump_time_check %= 5;
@@ -1604,8 +1599,8 @@ void AggressiveAI::Execute() {
     double firetime = queryTime();
     static int pir = FactionUtil::GetFactionIndex("pirates");
     if (parent->faction == pir) {
-        if (rand() == 0) {
-            VS_LOG(info, "ahoy, a pirates!");
+        if (VegaRandom::Instance().GenRandUInt32() == 0) {
+            VS_LOG(important_info, "ahoy, a pirates!");
         }
     }
     FireAt::Execute();

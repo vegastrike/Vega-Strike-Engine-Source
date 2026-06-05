@@ -199,8 +199,6 @@ void GFXPickLights(const Vector &center,
         const int maxlights,
         const bool pickglobals) {
     QVector tmp;
-    //Beware if re-using rndvar !! Because rand returns an int and on 64 bits archs sizeof( void*) != sizeof( int) !!!
-    //void * rndvar = (void *)rand();
     int lightsenabled = _GLLightsEnabled;
     tmp = QVector(radius, radius, radius);
 

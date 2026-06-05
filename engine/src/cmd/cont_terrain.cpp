@@ -40,6 +40,7 @@
 #include "cmd/damageable.h"
 
 #include "cmd/unit_collide.h"
+#include "root_generic/vega_random.h"
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
 #include "vegadisk/vsfilesystem.h"
@@ -359,8 +360,8 @@ void ContinuousTerrain::Collide(Unit *un, Matrix t) {
             if (diff.k < 0) {
                 diff.k += static_cast<double>(sizeZ) * static_cast<double>(width);
             }
-            if (!(rand() % 10)) {
-                VS_LOG(warning, (boost::format("unit in out sapce %1$f %2$f %3$f\n") % diff.i % diff.j % diff.k));
+            if (VegaRandom::Instance().RandomUInt32UpTo(9) == 0) {
+                VS_LOG(warning, (boost::format("unit in out space %1$f %2$f %3$f\n") % diff.i % diff.j % diff.k));
             }
             diff = Transform(t, diff);
             const csReversibleTransform bigtransform(transform);
@@ -368,13 +369,6 @@ void ContinuousTerrain::Collide(Unit *un, Matrix t) {
 
             smallmat.p = diff;
             const csReversibleTransform smalltransform(smallmat);
-#if 0
-            Matrix transform;
-            AdjustTerrain( transform, t, un->Position(), i );
-            const csReversibleTransform bigtransform( transform );
-
-            const csReversibleTransform smalltransform( un->GetTransformation() );
-#endif
             QVector smallpos, bigpos;
             Vector smallNormal, bigNormal;
             if (autocol) {

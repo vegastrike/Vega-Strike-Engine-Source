@@ -33,6 +33,8 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 #include <boost/python.hpp>
+
+#include "root_generic/vega_random.h"
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>
@@ -242,7 +244,8 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
                 static soundContainer warnsound;
                 static soundContainer warnsound1;
                 static soundContainer warnsound2;
-                int num = rand() < RAND_MAX / 2 ? 0 : (rand() < RAND_MAX / 2 ? 1 : 2);
+                const int num = VegaRandom::Instance().rand() < RAND_MAX / 2 ? 0 :
+                                (VegaRandom::Instance().rand() < RAND_MAX / 2 ? 1 : 2);
                 if (warnsound.sound < 0) {
                     warnsound.loadsound(str);
                     warnsound1.loadsound(str1);

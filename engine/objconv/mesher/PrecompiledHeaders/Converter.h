@@ -26,9 +26,5 @@
  */
 // NO HEADER GUARD
 
-#ifdef HAVE_OGRE
-#include <OgrePrerequisites.h>
-#endif
-
 #include "objconv/mesher/PrecompiledHeaders/Standard.h"
 #include "objconv/mesher/Converter.h"

@@ -42,22 +42,22 @@ static LONGLONG freq;
 static double   dblnewtime;
 #endif
 #include <map>
-#include "../src/vs_random.h"
-VSRandom vsrandom(11376130011);
+#include "root_generic/vega_random.h"
+
 size_t globmax = 1024;
 class size {
 public:
     size_t num;
 
     size() {
-        num = (size_t) vsrandom.genrand_int32() % globmax;
+        num = static_cast<size_t>(VegaRandom::Instance().RandomUInt32UpTo(globmax));
     }
 
     bool operator==(const size &a) const {
         return this->num == a.num;
     }
 
-    operator size_t() const {
+    explicit operator size_t() const {
         return num;
     }
 };
@@ -69,7 +69,7 @@ bool operator<(const size &a, const size &b) {
 #ifndef _WIN32
 namespace stdext {
 template<>
-class hash<size> {
+struct hash<size> {
     hash<size_t> a;
 public:
     size_t operator()(const size &s) const {
@@ -114,20 +114,23 @@ int main(int argc, char **argv) {
     QueryPerformanceFrequency( (LARGE_INTEGER*) &freq );
     QueryPerformanceCounter( (LARGE_INTEGER*) &ttime );
 #endif
-    size_t lima = (size_t) atof(argv[1]);
-    size_t limb = (size_t) atof(argv[2]);
-    size_t limc = (size_t) atof(argv[3]);
-    size_t limd = (size_t) atof(argv[4]);
-    size_t lime = (size_t) atof(argv[5]);
+
+    VegaRandom::Instance().InitGenRand(11376130011);
+
+    const size_t lima = static_cast<size_t>(atof(argv[1]));
+    const size_t limb = static_cast<size_t>(atof(argv[2]));
+    const size_t limc = static_cast<size_t>(atof(argv[3]));
+    const size_t limd = static_cast<size_t>(atof(argv[4]));
+    const size_t lime = static_cast<size_t>(atof(argv[5]));
     globmax = lime;
-    std::vector<size> sdata(limb);
-    double first = getTime();
+    const std::vector<size> sdata(limb);
+    const double first = getTime();
     for (size_t i = 0; i < lima; ++i) {
         size ins, dat;
         pod[ins.num] = dat.num;
         clas[ins] = dat;
     }
-    double second = getTime();
+    const double second = getTime();
     int sum = 0;
     size tmp;
     for (size_t j = 0; j < limc; ++j) {
@@ -136,7 +139,7 @@ int main(int argc, char **argv) {
             sum += (pod.find(num) != pod.end() ? pod.find(num)->second : 0);
         }
     }
-    double third = getTime();
+    const double third = getTime();
     for (size_t j = 0; j < limc; ++j) {
         for (size_t i = 0; i < limb; ++i) {
             size_t num = sdata[i].num;
@@ -144,7 +147,7 @@ int main(int argc, char **argv) {
             sum += (clas.find(tmp) != clas.end() ? clas.find(tmp)->second.num : 0);
         }
     }
-    double fourth = getTime();
+    const double fourth = getTime();
     for (size_t j = 0; j < limc; ++j) {
         for (size_t i = 0; i < limb; ++i) {
             size_t num = sdata[i].num;
@@ -161,7 +164,7 @@ int main(int argc, char **argv) {
             }
         }
     }
-    double fifth = getTime();
+    const double fifth = getTime();
     for (size_t j = 0; j < limc; ++j) {
         for (size_t i = 0; i < limb; ++i) {
             tmp.num = sdata[i].num;
@@ -178,14 +181,14 @@ int main(int argc, char **argv) {
             }
         }
     }
-    double sixth = getTime();
+    const double sixth = getTime();
     for (size_t j = 0; j < limc; ++j) {
         for (size_t i = 0; i < limb; ++i) {
             size_t num = sdata[i].num;
             sum += pod.find(num)->second;
         }
     }
-    double seventh = getTime();
+    const double seventh = getTime();
     for (size_t j = 0; j < limc; ++j) {
         for (size_t i = 0; i < limb; ++i) {
             size_t num = sdata[i].num;
@@ -193,9 +196,9 @@ int main(int argc, char **argv) {
             sum += clas.find(tmp)->second.num;
         }
     }
-    double eighth = getTime();
-    printf("Outer Array Size %d. Num Important Elem %d. Repeats %d. Num Erases %d\nInitial Hit Percent %f\n",
-            pod.size(), sdata.size(), limc, limd, sdata.size() / (double) lime);
+    const double eighth = getTime();
+    printf("Outer Array Size %lu. Num Important Elem %lu. Repeats %lu. Num Erases %lu\nInitial Hit Percent %f\n",
+            pod.size(), sdata.size(), limc, limd, sdata.size() / static_cast<double>(lime));
     printf("Find Percent Times %f %f\n", third - second, fourth - third);
     printf("Insert/Erase Times %f %f\n", fifth - fourth, sixth - fifth);
     printf("Find all itm Times %f %f\n", seventh - sixth, eighth - seventh);

@@ -48,6 +48,7 @@
 #include "root_generic/lin_time.h"
 #include "cmd/unit_const_cache.h"
 #include "src/vs_math.h"
+#include "root_generic/vega_random.h"
 #include "src/universe.h"
 #include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
@@ -385,10 +386,10 @@ static void AddSubUnits(Unit *thus,
         CheckAccessory(xml.units.back());         //turns on the ceerazy rotation for the turr
     }
     for (int a = xml.units.size() - 1; a >= 0; a--) {
-        bool randomspawn = xml.units[a]->name.get().find("randomspawn") != string::npos;
-        if (randomspawn) {
-            int chancetospawn = float_to_int(xml.units[a]->ftl_energy.MaxLevel());
-            if (chancetospawn > rand() % 100) {
+        const bool random_spawn = xml.units[a]->name.get().find("randomspawn") != string::npos;
+        if (random_spawn) {
+            const int chance_to_spawn = float_to_int(xml.units[a]->ftl_energy.MaxLevel());
+            if (chance_to_spawn > VegaRandom::Instance().RandomInt32UpTo(99)) {
                 thus->SubUnits.prepend(xml.units[a]);
             } else {
                 xml.units[a]->Kill();
@@ -572,7 +573,7 @@ extern std::string getDamageColor(double);
 void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_game) {
     Unit::XML xml;
     xml.unitModifications = modification.c_str();
-    xml.randomstartframe = ((float) rand()) / RAND_MAX;
+    xml.randomstartframe = VegaRandom::Instance().RandomFloat();
     xml.randomstartseconds = 0;
     xml.calculated_role = false;
     xml.damageiterator = 0;

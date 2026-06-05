@@ -57,7 +57,7 @@
 #include <algorithm>
 #include "cmd/role_bitmask.h"
 #include "cmd/unit_const_cache.h"
-#include "src/vs_random.h"
+#include "root_generic/vega_random.h"
 #include "root_generic/galaxy_xml.h"
 #include "gfx/camera.h"
 #include "src/star_system.h"
@@ -906,10 +906,12 @@ void Unit::UpdateSubunitPhysics(const Transformation &trans,
                         ) {
                     if (do_subunit_scheduling) {
                         #if defined(RANDOMIZE_SIM_ATOMS)
-                                                                                                                                                int priority = UnitUtil::getPhysicsPriority( su );
+                            uint_fast32_t priority = UnitUtil::getPhysicsPriority( su );
                             //Add some scattering
-                            priority = (priority+rand()%priority)/2;
-                            if (priority < 1) priority = 1;
+                            priority = (priority + VegaRandom::Instance().RandomInt32UpTo(priority)) / 2;
+                            if (priority < 1) {
+                                priority = 1
+                            };
                             su->sim_atom_multiplier = this->sim_atom_multiplier*priority;
                             if (su->sim_atom_multiplier > SIM_QUEUE_SIZE)
                                 su->sim_atom_multiplier = (SIM_QUEUE_SIZE/su->sim_atom_multiplier)*su->sim_atom_multiplier;
@@ -2997,62 +2999,63 @@ bool myless(const Cargo &a, const Cargo &b) {
 }
 
 
-void Unit::ImportPartList(const std::string &category, float price, float pricedev, float quantity, float quantdev) {
-    Manifest category_manifest = Manifest::MPL().GetCategoryManifest(category);
-    std::vector<Cargo> cargo_list = category_manifest.GetItems();
+void Unit::ImportPartList(const std::string &category, const float price, const float price_deviation, const float quantity, const float quantity_deviation) {
+    const Manifest category_manifest = Manifest::MPL().GetCategoryManifest(category);
+    const std::vector<Cargo> cargo_list = category_manifest.GetItems();
 
     // Find the minimum and maximum prices in the cargo list
     // We start with extreme values but at the end, min < max
     float min_cargo_price = FLT_MAX;
     float max_cargo_price = 0.0f;
-    for (const Cargo& c : cargo_list) {
-        float price = c.GetPrice();
-        if (price < min_cargo_price) {
-            min_cargo_price = price;
+    for (const Cargo& cargo : cargo_list) {
+        const float price1 = cargo.GetPrice();
+        if (price1 < min_cargo_price) {
+            min_cargo_price = price1;
         }
-        if (price > max_cargo_price) {
-            max_cargo_price = price;
+        if (price1 > max_cargo_price) {
+            max_cargo_price = price1;
         }
     }
 
 
     for (const Cargo& cargo : cargo_list) {
-        Cargo c = cargo; // Copy the cargo item
-        const float aveweight = fabs(configuration().cargo.price_recenter_factor_flt);
-        c.SetQuantity(float_to_int(quantity - quantdev));
-        float baseprice = c.GetPrice();
-        c.SetPrice(c.GetPrice() * (price - pricedev));
+        Cargo cargo1 = cargo; // Copy the cargo item
+        const float average_weight = fabs(configuration().cargo.price_recenter_factor_flt);
+        cargo1.SetQuantity(float_to_int(quantity - quantity_deviation));
+        const float base_price = cargo1.GetPrice();
+        cargo1.SetPrice(cargo1.GetPrice() * (price - price_deviation));
 
         //stupid way
-        c.SetQuantity(c.GetQuantity() + float_to_int((quantdev * 2 + 1) * static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) + 1)));
-        c.SetPrice(c.GetPrice() + pricedev * 2 * static_cast<float>(rand()) / RAND_MAX);
-        c.SetPrice(fabs(c.GetPrice()));
-        c.SetPrice((c.GetPrice() + (baseprice * aveweight)) / (aveweight + 1));
-        if (c.GetQuantity() <= 0) {
-            c.SetQuantity(0);
+        cargo1.SetQuantity(cargo1.GetQuantity() + float_to_int((quantity_deviation * 2 + 1) * VegaRandom::Instance().GenRandReal2()));
+        cargo1.SetPrice(cargo1.GetPrice() + price_deviation * 2.0 * VegaRandom::Instance().RandomDouble());
+        cargo1.SetPrice(fabs(cargo1.GetPrice()));
+        cargo1.SetPrice((cargo1.GetPrice() + (base_price * average_weight)) / (average_weight + 1));
+        if (cargo1.GetQuantity() <= 0) {
+            cargo1.SetQuantity(0);
         }
-            //quantity more than zero
+        //quantity more than zero
         else if (max_cargo_price > min_cargo_price + .01) {
-            float renormprice = (baseprice - min_cargo_price) / (max_cargo_price - min_cargo_price);
-            const float maxpricequantadj = configuration().cargo.max_price_quant_adj_flt;
-            const float minpricequantadj = configuration().cargo.min_price_quant_adj_flt;
+            float renorm_price = (base_price - min_cargo_price) / (max_cargo_price - min_cargo_price);
+            const float max_price_quant_adj = configuration().cargo.max_price_quant_adj_flt;
+            const float min_price_quant_adj = configuration().cargo.min_price_quant_adj_flt;
             const float powah = configuration().cargo.price_quant_adj_power_flt;
-            renormprice = std::pow(renormprice, powah);
-            renormprice *= (maxpricequantadj - minpricequantadj);
-            renormprice += 1;
-            if (renormprice > .001) {
-                c.SetQuantity(c.GetQuantity() / float_to_int(renormprice));
-                if (c.GetQuantity() < 1) {
-                    c.SetQuantity(1);
+            renorm_price = std::pow(renorm_price, powah);
+            renorm_price *= (max_price_quant_adj - min_price_quant_adj);
+            renorm_price += 1;
+            if (renorm_price > .001) {
+                cargo1.SetQuantity(cargo1.GetQuantity() / float_to_int(renorm_price));
+                if (cargo1.GetQuantity() < 1) {
+                    cargo1.SetQuantity(1);
                 }
             }
         }
-        const float minprice = configuration().cargo.min_cargo_price_flt;
-        if (c.GetPrice() < minprice) {
-            c.SetPrice(minprice);
+        const float min_price = configuration().cargo.min_cargo_price_flt;
+        if (cargo1.GetPrice() < min_price) {
+            cargo1.SetPrice(min_price);
         }
 
-        cargo_hold.AddCargo(this, c, false);
+        VS_LOG(trace, (boost::format("%1%: Adding cargo %2% with quantity %3% and price %4%") % __FUNCTION__ % cargo1.GetName() % cargo1.GetQuantity() % cargo1.GetPrice()));
+        cargo_hold.AddCargo(this, cargo1, false);
 
     }
 }
@@ -3195,12 +3198,12 @@ void Unit::Repair() {
     float ammt_repair = simulation_atom_var / repairtime * repair_bot.Get();
 
     unsigned int numg = (1 + UnitImages<void>::NUMGAUGES + MAXVDUS);
-    unsigned int which = vsrandom.genrand_int31() % numg;
+    unsigned int which = VegaRandom::Instance().GenRandInt31() % numg;
     const float hud_repair_quantity = configuration().physics.hud_repair_unit_flt;
 
     if (mounts.size()) {
         const float mount_repair_quantity = configuration().physics.mount_repair_unit_flt;
-        unsigned int i = vsrandom.genrand_int31() % mounts.size();
+        unsigned int i = VegaRandom::Instance().GenRandInt31() % mounts.size();
         if (mounts[i].functionality < mounts[i].maxfunctionality) {
             mounts[i].functionality += mount_repair_quantity;
             if (mounts[i].functionality > mounts[i].maxfunctionality) {

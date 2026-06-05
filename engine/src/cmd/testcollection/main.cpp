@@ -27,12 +27,14 @@
 
 
 #include <assert.h>
+#include <cstdint>
 #include <stdlib.h>
 #include <stdio.h>
 #include "unit.h"
 #include <time.h>
 
 #include "cmd/collection.h"
+#include "root_generic/vega_random.h"
 
 #define SIZE 60000
 
@@ -44,10 +46,10 @@ Unit *createUnit() {
 }
 
 void Iteration(UnitCollection *c, int *levels2) {
-    Unit *unit = NULL;
+    Unit *unit = nullptr;
     ++(*levels2);
-    for (un_iter iter = c->createIterator(); unit = *iter;) {
-        int temp = rand();
+    for (un_iter iter = c->createIterator(); (unit = *iter);) {
+        const uint_fast32_t temp = VegaRandom::Instance().GenRandUInt32();
         if (temp < RAND_MAX / 400) {
             unit->Kill();
         } else if (temp < RAND_MAX / 102) {
@@ -75,12 +77,12 @@ int main() {
     }
     seconds = time(NULL) - seconds;
     printf("constructed list of size : %d  in %d seconds using prepend\n", SIZE / 2, seconds);
-    printf("Randomnly inserting %d \n", SIZE / 2);
+    printf("Randomly inserting %d \n", SIZE / 2);
     int ii = SIZE / 2;
     seconds = time(NULL);
     while (ii < SIZE) {
         for (un_iter iter = c->createIterator(); !iter.isDone() && ii < SIZE; ++iter) {
-            int rnd = rand();
+            const uint_fast32_t rnd = VegaRandom::Instance().GenRandUInt32();
             if (rnd < RAND_MAX / 200) {
                 iter.postinsert(u[ii]);
                 ++ii;
@@ -93,7 +95,7 @@ int main() {
     seconds = time(NULL) - seconds;
     printf(".... took %d seconds \n", seconds);
     for (int i = 0; i < SIZE / 32; ++i) {
-        if (rand() < RAND_MAX / 20) {
+        if (VegaRandom::Instance().GenRandUInt32() < RAND_MAX / 20) {
             u[i]->Kill();
         }
     }

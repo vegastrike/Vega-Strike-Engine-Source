@@ -40,6 +40,7 @@
 #include "cmd/cont_terrain.h"
 #include "atmosphere.h"
 #include "root_generic/atmospheric_fog_mesh.h"
+#include "root_generic/vega_random.h"
 
 #ifdef FIX_TERRAIN
 #include "gfx/planetary_transform.h"
@@ -248,7 +249,7 @@ Planet::Planet(QVector x,
     if (wormhole) {
         const std::string& wormhole_unit = configuration().graphics.wormhole_unit;
         string stab(".stable");
-        if (rand() > RAND_MAX * .99) {
+        if (VegaRandom::Instance().RandomDoubleInRange(0.0, 1.0) > 0.99) {
             stab = ".unstable";
         }
         string wormholename = wormhole_unit + stab;
@@ -340,7 +341,7 @@ Planet::Planet(QVector x,
                 shines.emplace_back("shine.ani");
             }
 
-            shine = new Animation(shines[rand() % shines.size()].c_str(),
+            shine = new Animation(shines.at(VegaRandom::Instance().RandomSizeTLessThan(shines.size())).c_str(),
                     true,
                     .1,
                     BILINEAR,
