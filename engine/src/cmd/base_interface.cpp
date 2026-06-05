@@ -33,6 +33,7 @@
 #include <algorithm>
 #include <string>
 
+#include "root_generic/vega_random.h"
 #include "src/vega_cast_utils.h"
 #include "cmd/vega_py_run.h"
 #include "cmd/base.h"
@@ -70,6 +71,8 @@
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
+
+VegaRandom base_interface_random{};
 
 // shows the offset on the lower edge of the screen (for the text line there)
 constexpr double kYLower = -0.9;
@@ -1344,11 +1347,11 @@ void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, i
     }
 }
 
-inline float aynrand(float min, float max) {
-    return (static_cast<float>(rand()) / RAND_MAX) * (max - min) + min;
+float aynrand(const float min, const float max) {
+    return base_interface_random.RandomFloatInRange(min, max);
 }
 
-inline QVector randyVector(float min, float max) {
+QVector randyVector(const float min, const float max) {
     return QVector(aynrand(min, max),
             aynrand(min, max),
             aynrand(min, max));
@@ -1411,7 +1414,7 @@ void BaseInterface::Room::Talk::Click(BaseInterface *base, float x, float y, int
             base->othtext.SetText("");
         } else if (say.size()) {
             curroom = base->curroom;
-            int sayindex = rand() % say.size();
+            const size_t sayindex = VegaRandom::Instance().RandomSizeTLessThan(say.size());
             base->rooms[curroom]->objs.push_back(new Room::BaseTalk(say[sayindex], "currentmsg", true));
             if (soundfiles[sayindex].size() > 0) {
                 int sound = AUDCreateSoundWAV(soundfiles[sayindex], false);
@@ -1497,13 +1500,12 @@ static void AnimationDraw() {
     static StreamTexture T( 512, 256, NEAREST, NULL );
     BaseColor( *data )[512] = reinterpret_cast< BaseColor(*)[512] > ( T.Map() );
     bool counter = false;
-    srand( time( NULL ) );
     for (int i = 0; i < 256; ++i)
         for (int j = 0; j < 512; ++j) {
-            data[i][j].r = rand()&0xff;
-            data[i][j].g = rand()&0xff;
-            data[i][j].b = rand()&0xff;
-            data[i][j].a = rand()&0xff;
+            data[i][j].r = VegaRandom::Instance().RandomUChar();
+            data[i][j].g = VegaRandom::Instance().RandomUChar();
+            data[i][j].b = VegaRandom::Instance().RandomUChar();
+            data[i][j].a = VegaRandom::Instance().RandomUChar();
         }
     T.UnMap();
     T.MakeActive();

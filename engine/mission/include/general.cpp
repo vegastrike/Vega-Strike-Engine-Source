@@ -25,9 +25,10 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* This include has been designed to act independant of the other modules.
+/* This include has been designed to act independent of the other modules.
  * This allows it to be used with other programs with minimal changes */
 
+#include "root_generic/vega_random.h"
 #if defined(_WIN32) && _MSC_VER > 1300
 #define __restrict
 #endif
@@ -247,13 +248,8 @@ void StripExtension(char *filename) {
 #ifdef _G_RANDOM
 
 int randnum(int start, int end) {
-    int random, dif, min, max;
-    if (RANDOMIZED == 0) {
-        srand(time(NULL));
-        RANDOMIZED = 1;
-    }
-    min = start;
-    max = end;
+    int min = start;
+    int max = end;
     if (end < start) {
         min = end;
         max = start;
@@ -261,10 +257,7 @@ int randnum(int start, int end) {
     if (end == start) {
         return start;
     }
-    dif = max - min + 1;
-    random = rand() % dif;
-    random += min;
-    return random;
+    return VegaRandom::Instance().RandomInt32InRange(min, max);
 }
 
 void randcode(char *line, int length) {

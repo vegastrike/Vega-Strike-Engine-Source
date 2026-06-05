@@ -53,7 +53,7 @@ void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVec
 bool setFlightgroupLeader(Unit *my_unit, Unit *un);
 string getFgDirective(const Unit *my_unit);
 bool setFgDirective(Unit *my_unit, string inp);
-int getPhysicsPriority(Unit *un);
+uint_fast32_t getPhysicsPriority(Unit *un);
 int getFgSubnumber(const Unit *my_unit);
 int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero);
 bool repair(Unit *my_unit);

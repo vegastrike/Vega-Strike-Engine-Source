@@ -37,14 +37,16 @@
 #include "src/universe_util.h"
 #include <string>
 
+#include "root_generic/vega_random.h"
+
 static void DockedScript(Unit *docker, Unit *base) {
     std::string script = configuration().ai.docked_to_script;
-    if (script.length() > 0) {
+    if (!script.empty()) {
         Unit *targ = docker->Target();
         docker->Target(base);
         UniverseUtil::setScratchUnit(docker);
         CompileRunPython(script);
-        UniverseUtil::setScratchUnit(NULL);
+        UniverseUtil::setScratchUnit(nullptr);
         docker->Target(targ);         //should be NULL;
     }
 }
@@ -179,7 +181,7 @@ QVector DockingOps::Movement(Unit *utdw) {
         EnqueueOrder(new ChangeHeading(loc, 4, 1, true));
     }
     MoveTo::Execute();
-    if (rand() % 256 == 0) {
+    if (VegaRandom::Instance().RandomUChar() == 0) {
         WarpToP(parent, utdw, true);
     }
     return loc;

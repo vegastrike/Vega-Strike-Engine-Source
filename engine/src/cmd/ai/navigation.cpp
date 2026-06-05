@@ -41,6 +41,7 @@
 #include "warpto.h"
 #include "flybywire.h"
 #include "cmd/unit_util.h"
+#include "root_generic/vega_random.h"
 #include "src/star_system.h"
 #include "src/universe.h"
 
@@ -437,7 +438,7 @@ FaceTargetITTS::FaceTargetITTS(bool fini, int accuracy) : ChangeHeading(QVector(
     useitts = true;
     const bool alwaysuseitts = configuration().ai.always_use_itts;
     if (!alwaysuseitts) {
-        if (rand() >= g_game.difficulty * RAND_MAX) {
+        if (VegaRandom::Instance().GenRandUInt32() >= g_game.difficulty * static_cast<double>(RAND_MAX)) {
             useitts = false;
         }
     }
@@ -805,7 +806,7 @@ void FormUp::Execute() {
     if (targ) {
         MoveTo::SetDest(Transform(targ->GetTransformation(), Pos));
         const bool can_warp_to = configuration().ai.warp_to_wingmen;
-        if (rand() % 64 == 0 && (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
+        if (VegaRandom::Instance().RandomUInt32UpTo(63) == 0 && (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
             WarpToP(parent, targ, true);
         }
     }
@@ -845,7 +846,7 @@ void FormUpToOwner::Execute() {
     if (targ) {
         MoveTo::SetDest(Transform(targ->GetTransformation(), Pos));
         const bool can_warp_to = configuration().ai.warp_to_wingmen;
-        if (rand() % 64 == 0 && (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
+        if (VegaRandom::Instance().RandomUInt32UpTo(63) == 0 && (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
             WarpToP(parent, targ, true);
         }
     }

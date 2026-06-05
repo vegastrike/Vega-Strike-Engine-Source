@@ -35,14 +35,16 @@
 #include <queue>
 #include <iostream>
 #include "objconv/basemaker/sprite.h"
-#include <stdio.h>
+#include <cstdio>
+#include <boost/format.hpp>
+#include "vega_string_utils.h"
 #include "objconv/basemaker/base_maker_texture.h"
 #include "gfx_generic/vec.h"
 #include "gfx_generic/matrix.h"
 #include "gfx/hud.h"
 #include "root_generic/vs_globals.h"
 
-#include <time.h>
+#include "root_generic/vega_random.h"
 #ifdef _WIN32
 #include <direct.h>
 #else
@@ -682,14 +684,14 @@ void Base::Room::Python::EndXML(FILE *fp) {
 }
 
 void Base::Room::Talk::EndXML(FILE *fp) {
-    char randstr[100];
-    sprintf(randstr, "NEW_SCRIPT_%d.py", (int) (rand()));
+    const std::string python_filename = (boost::format("NEW_SCRIPT_%1%.py") % VegaRandom::Instance().GenRandUInt32()).str();
+    char *randstr = vega_str_dup(python_filename.c_str());
     Indent(fp);
     fprintf(fp, "Base.Python (");
     Link::EndXML(fp);
     fprintf(fp, ", '%s')\n", randstr);
     FILE *py = fopen(randstr, "wt");
-    fprintf(py, "import Base\nimport VS\nimport random\n\nrandnum=random.randrange(0,%d)\n", int(say.size()));
+    fprintf(py, "import Base\nimport VS\nimport random\n\nrandnum=random.randrange(0,%d)\n", static_cast<int>(say.size()));
     for (int i = 0; i < say.size(); i++) {
         fprintf(py, "if (randnum==%d):\n", i);
         for (int j = 0; j < say[i].size(); j++) {
@@ -1828,8 +1830,8 @@ void Base::Room::Talk::Click(Base *base, float x, float y, int button, int state
         } else if (say.size()) {
             curroom = base->curroom;
 //index=base->rooms[curroom]->objs.size();
-            int sayindex = rand() % say.size();
-            base->rooms[curroom]->objs.push_back(new Room::BaseTalk(say[sayindex], "currentmsg", true));
+            const size_t sayindex = VegaRandom::Instance().RandomSizeTLessThan(say.size());
+            base->rooms[curroom]->objs.push_back(new Room::BaseTalk(say.at(sayindex), "currentmsg", true));
 //((Room::BaseTalk*)(base->rooms[curroom]->objs.back()))->sayindex=(sayindex);
 //((Room::BaseTalk*)(base->rooms[curroom]->objs.back()))->curtime=0;
         } else {

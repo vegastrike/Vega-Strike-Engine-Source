@@ -36,6 +36,8 @@
 #include "root_generic/vs_globals.h"
 
 #include "root_generic/galaxy_xml.h"
+
+#include "root_generic/vega_random.h"
 #ifdef WRITEGALAXYCOORDS
 #include "gfx/nav/navscreen.h"
 #endif
@@ -345,23 +347,23 @@ bool SGalaxy::setVariable(const string &section, const string &subsection, const
     return true;
 }
 
-const string &SGalaxy::getRandSystem(const string &sect, const string &def) const {
+const string &SGalaxy::getRandSystem(const string &section, const string &default_value) const {
     if (subheirarchy) {
-        const SGalaxy &sector = (*subheirarchy)[sect];
+        const SGalaxy &sector = (*subheirarchy)[section];
         if (sector.subheirarchy) {
-            unsigned int size = sector.subheirarchy->size();
+            const size_t size = sector.subheirarchy->size();
             if (size > 0) {
-                int which = rand() % size;
+                size_t which = VegaRandom::Instance().RandomSizeTLessThan(size);
                 SubHeirarchy::const_iterator i =
                         sector.subheirarchy->begin();
                 while (which > 0) {
                     --which, ++i;
                 }
-                return (*i).first;
+                return i->first;
             }
         }
     }
-    return def;
+    return default_value;
 }
 
 const string &SGalaxy::getVariable(const string &section,

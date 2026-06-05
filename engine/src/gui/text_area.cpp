@@ -547,11 +547,6 @@ void TextArea::ChompIntoItems(const char *text, const char *parent) {
     free(temp);
 }
 
-/*TextAreaItem::TextAreaItem(void) {
- *       TextAreaItem("blank","", NULL);
- *  }*/
-//#include <stdlib.h>
-//#define rnd (((float)rand())/((float)RAND_MAX))
 TextAreaItem::TextAreaItem(const char *new_name, const char *desc, SharedPtr<TextAreaItem> parent_class) :
         col(1, 1, 1, 1) {
     if (new_name != nullptr) {

@@ -33,6 +33,8 @@
 #include <math.h>
 #include <time.h>
 #include <assert.h>
+#include <stdint.h>
+#include "root_generic/vega_random.h"
 
 #ifndef M_PI
 #define M_PI 3.1415926536
@@ -42,15 +44,15 @@ static const size_t BUFFER_SIZE = 16000;
 static const char SCANF_FORMAT_STRING[] = "%15999s";
 
 using namespace std;
-static unsigned int starsysrandom = time(NULL);
 
-static void seedrand(int seed) {
-    starsysrandom = seed;
+static VegaRandom star_sys_random{};
+
+static void seed_rand(const uint_fast32_t seed) {
+    star_sys_random.InitGenRand(seed);
 }
 
-static unsigned int ssrand() {
-    starsysrandom = (starsysrandom * 1103515245 + 12345) % ((unsigned long) RAND_MAX + 1);
-    return starsysrandom;
+static uint_fast32_t ssrand() {
+    return star_sys_random.rand();
 }
 
 namespace StarSystemGent {
@@ -59,7 +61,7 @@ float mmax(float a, float b) {
 }
 
 int rnd(int lower, int upper) {
-    return (int) (lower + (((float(upper - lower)) * ssrand()) / (float(RAND_MAX) + 1.)));
+    return static_cast<int>(lower + ((static_cast<float>(upper - lower) * ssrand()) / (static_cast<float>(RAND_MAX) + 1.)));
 }
 
 const char nada[1] = "";
@@ -181,7 +183,7 @@ public:
 };
 
 float grand() {
-    return float(ssrand()) / RAND_MAX;
+    return star_sys_random.RandomFloat();
 }
 
 vector<Color> lights;
@@ -296,9 +298,9 @@ Color StarColor(float radius, unsigned int &entityindex) {
     return Color(r, g, b);
 }
 
-float LengthOfYear(Vector r, Vector s) {
-    float a = 2 * M_PI * mmax(r.Mag(), s.Mag());
-    float speed = minspeed + (maxspeed - minspeed) * grand();
+float LengthOfYear(const Vector &r, Vector s) {
+    const float a = 2 * std::numbers::pi_v<float> * mmax(r.Mag(), s.Mag());
+    const float speed = minspeed + (maxspeed - minspeed) * grand();
     return a / speed;
 }
 
@@ -884,9 +886,9 @@ void generateStarSystem(string datapath,
         string namelist,
         const vector<string> &jumplocations) {
     if (seed) {
-        seedrand(seed);
+        seed_rand(seed);
     } else {
-        seedrand(time(NULL));
+        seed_rand(time(NULL));
     }
     nument[0] = numstars;
     nument[1] = numgasgiants;

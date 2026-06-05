@@ -44,7 +44,7 @@
 #include "cmd/drawable.h"
 #include "root_generic/options.h"
 #include "root_generic/configxml.h"
-#include "src/vs_random.h"
+#include "root_generic/vega_random.h"
 #include "vegadisk/savegame.h"
 #include "src/universe_util.h" //get galaxy faction, dude
 
@@ -708,10 +708,10 @@ void StarSystem::AddUnit(Unit *unit) {
     }
     draw_list.prepend(unit);
     unit->activeStarSystem = this;     //otherwise set at next physics frame...
-    unsigned int priority = UnitUtil::getPhysicsPriority(unit);
+    const uint_fast32_t priority = UnitUtil::getPhysicsPriority(unit);
     //Do we need the +1 here or not - need to look at when current_sim_location is changed relative to this function
     //and relative to this function, when the bucket is processed...
-    unsigned int tmp = 1 + ((unsigned int) vsrandom.genrand_int32()) % priority;
+    const uint_fast32_t tmp = 1 + VegaRandom::Instance().GenRandUInt32() % priority;
     this->physics_buffer[(this->current_sim_location + tmp) % SIM_QUEUE_SIZE].prepend(unit);
     stats.AddUnit(unit);
 }
@@ -1051,21 +1051,21 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
 }
 
 void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit) {
-    int priority = UnitUtil::getPhysicsPriority(unit);
+    uint_fast32_t priority = UnitUtil::getPhysicsPriority(unit);
     //Doing spreading here and only on priority changes, so as to make AI easier
-    int predprior = unit->predicted_priority;
+    uint_fast32_t predicted_priority = unit->predicted_priority;
     //If the priority has really changed (not an initial scattering, because prediction doesn't match)
-    if (priority != predprior) {
-        if (predprior == 0) {
+    if (priority != predicted_priority) {
+        if (predicted_priority == 0) {
             //Validate snapshot of current interpolated state (this is a reschedule)
             unit->curr_physical_state = unit->cumulative_transformation;
         }
         //Save priority value as prediction for next scheduling, but don't overwrite yet.
-        predprior = priority;
+        predicted_priority = priority;
         //Scatter, so as to achieve uniform distribution
 #if defined(RANDOMIZE_SIM_ATOMS)
         VS_LOG(trace, "void StarSystem::UpdateUnitPhysics( bool firstframe ): Randomizing unit priority");
-        priority  = 1+( ( (unsigned int) vsrandom.genrand_int32() )%priority );
+        priority  = 1 + (VegaRandom::Instance().GenRandUInt32() % priority);
 #endif
     }
     const float backup = simulation_atom_var;
@@ -1093,7 +1093,7 @@ void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit) {
         throw;
     }
     //VS_LOG(trace, (boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg C: simulation_atom_var as restored:   %1%") % simulation_atom_var));
-    unit->predicted_priority = predprior;
+    unit->predicted_priority = predicted_priority;
 }
 
 extern void TerrainCollide();

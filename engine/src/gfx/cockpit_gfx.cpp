@@ -37,12 +37,11 @@
 #include "cmd/unit_util.h"
 #include "cmd/weapon_info.h"
 #include "gfx/camera.h"
-#include "nav/navcomputer.h"
 #include "gfx/gauge.h"
 #include "gfx/cockpit_gfx_utils.h"
 #include "resource/random_utils.h"
 #include "root_generic/configxml.h"
-#include "resource/random_utils.h"
+#include "root_generic/vega_random.h"
 
 #include <algorithm>
 
@@ -50,7 +49,7 @@
 
 // got to move this to some more generic place
 #define SCATTER_CUBE \
-    QVector( rand()/RAND_MAX -.5, rand()/RAND_MAX -.5, rand()/RAND_MAX -.5 )
+    QVector( VegaRandom::Instance().RandomDoubleInRange(-0.5, 0.5), VegaRandom::Instance().RandomDoubleInRange(-0.5, 0.5), VegaRandom::Instance().RandomDoubleInRange(-0.5, 0.5) )
 
 float LookupTargetStat( int stat, Unit *target );
 

@@ -61,6 +61,7 @@
 #include "src/universe.h"
 #include "src/vs_logging.h"
 #include "resource/manifest.h"
+#include "root_generic/vega_random.h"
 
 extern const vector<string> &ParseDestinations(const string &value);
 
@@ -824,29 +825,30 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             viret->type = VAR_FLOAT;
             viret->float_val = percentage;
         } else if (method_id == CMT_UNIT_incrementCargo) {
-            double percentagechange = getFloatArg(node, mode, 1);
+            double percentage_change = getFloatArg(node, mode, 1);
             int quantity = getIntArg(node, mode, 2);
             if (mode == SCRIPT_RUN) {
                 if (my_unit->numCargo() > 0) {
                     unsigned int index;
-                    index = rand() % my_unit->numCargo();
+                    index = VegaRandom::Instance().RandomSizeTLessThan(my_unit->numCargo());
                     Cargo c(my_unit->cargo_hold.GetCargo(index));
                     c.SetQuantity(quantity);
                     if (my_unit->cargo_hold.CanAddCargo(c)) {
                         my_unit->cargo_hold.AddCargo(my_unit, c);
-                        my_unit->cargo_hold.GetCargo(index).SetPrice(my_unit->cargo_hold.GetCargo(index).GetPrice() * percentagechange);
+                        my_unit->cargo_hold.GetCargo(index).SetPrice(my_unit->cargo_hold.GetCargo(index).GetPrice() * percentage_change);
                     }
                 }
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_decrementCargo) {
-            float percentagechange;
-            percentagechange = getFloatArg(node, mode, 1);
+            float percentage_change;
+            percentage_change = getFloatArg(node, mode, 1);
             if (mode == SCRIPT_RUN) {
                 if (my_unit->numCargo() > 0) {
                     unsigned int index;
-                    index = rand() % my_unit->numCargo();
+                    index = VegaRandom::Instance().RandomSizeTLessThan(my_unit->numCargo());
+                    // FIXME: It doesn't look like this code actually decrements cargo like it's supposed to -- Stephen G. Tuggy 2026-04-26
                     // if (my_unit->cargo_hold.RemoveCargo(index, 1, false)) {
                     //     my_unit->cargo_hold.GetCargo(index).SetPrice(my_unit->GetCargo(index).GetPrice() * percentagechange);
                     // }

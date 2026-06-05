@@ -43,6 +43,7 @@
 #include "cmd/damageable.h"
 #include "resource/random_utils.h"
 #include "root_generic/configxml.h"
+#include "root_generic/vega_random.h"
 
 //Various functions that were used in .cpp files that are now included because of
 //the temple GameUnit class
@@ -137,8 +138,8 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
         }
         killlist->back()++;
     } else if (UnitUtil::getRelationToFaction(un, faction) < 0 && faction != upgrades && faction != planets) {
-        int whichcp = rand() % _Universe->numPlayers();
-        Unit *whichrecv = _Universe->AccessCockpit(whichcp)->GetParent();
+        const int which_cockpit = VegaRandom::Instance().RandomInt32UpTo(_Universe->numPlayers() - 1);
+        Unit *whichrecv = _Universe->AccessCockpit(which_cockpit)->GetParent();
         if (whichrecv != NULL) {
             if (UnitUtil::getUnitSystemFile(whichrecv) == UnitUtil::getUnitSystemFile(un)) {
                 if (un->getAIState() && whichrecv->getAIState()) {
@@ -265,9 +266,7 @@ void DealPossibleJumpDamage(Unit *un) {
                      un->GetVelocity(),
                      damage,
                      un,
-                     GFXColor(((float) (rand() % 100)) / 100,
-                        ((float) (rand() % 100)) / 100,
-                        ((float) (rand() % 100)) / 100), nullptr);
+                     GFXColor(VegaRandom::Instance().RandomFloatUpTo(99.0F) / 100.0F,
+                        VegaRandom::Instance().RandomFloatUpTo(99.0F) / 100.0F,
+                        VegaRandom::Instance().RandomFloatUpTo(99.0F) / 100.0F), nullptr);
 }
-
-

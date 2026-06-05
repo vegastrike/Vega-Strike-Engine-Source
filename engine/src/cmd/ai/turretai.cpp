@@ -31,6 +31,7 @@
 #include "turretai.h"
 #include "cmd/unit_generic.h"
 #include "cmd/role_bitmask.h"
+#include "root_generic/vega_random.h"
 #include "src/universe.h"
 
 using namespace Orders;
@@ -78,34 +79,33 @@ void TurretAI::Execute() {
     }
     if (targ) {
         const float dot_cutoff = configuration().ai.firing.turret_dot_cutoff_flt;
-        const float missile_prob = configuration().ai.firing.turret_missile_probability_flt;
+        const double missile_prob = configuration().ai.firing.turret_missile_probability_dbl;
         FaceTargetITTS::Execute();
         if (parent->getNumMounts() > 0) {
-            Vector R(parent->GetTransformation().getR());
+            const Vector R(parent->GetTransformation().getR());
             QVector Pos(targ->Position() - parent->Position());
-            double mag = Pos.Magnitude();
+            const double mag = Pos.Magnitude();
             Pos = Pos / mag;
-            float dot = R.Dot(Pos.Cast());
-            int neu = FactionUtil::GetNeutralFaction();
-            int upg = FactionUtil::GetUpgradeFaction();
-            bool isplayerstarship = _Universe->isPlayerStarshipVoid(parent->owner) != NULL;
+            const float dot = R.Dot(Pos.Cast());
+            const int neu = FactionUtil::GetNeutralFaction();
+            const int upg = FactionUtil::GetUpgradeFaction();
+            const bool is_player_starship = _Universe->isPlayerStarshipVoid(parent->owner) != nullptr;
 
-            bool shouldfire =
+            const bool should_fire =
                     ((mag - targ->rSize() - parent->rSize() < range
                             && dot > dot_cutoff)
-                            && (isplayerstarship == false || targ->faction == upg
-                                    || (isplayerstarship
-                                            && (targ->getRelation((Unit *) parent->owner)
-                                                    < 0 /*now that it is a player, we know it's dereferencable*/
-                                                    || targ->Target() == (Unit *) parent->owner)))
+                            && (is_player_starship == false || targ->faction == upg
+                                    || targ->getRelation(static_cast<Unit *>(parent->owner))
+                                    < 0 /*now that it is a player, we know it's dereferencable*/
+                                    || targ->Target() == static_cast<Unit *>(parent->owner))
                             && targ->faction != neu);
 
-            //FIXME - rand() is not going to be in the expected range here - stephengtuggy 2020-07-25
-            parent->Fire(FireBitmask(parent, shouldfire, rand() < missile_prob * RAND_MAX * SIMULATION_ATOM), true);
-            if (!shouldfire) {
+            parent->Fire(FireBitmask(parent, should_fire,
+                VegaRandom::Instance().RandomDoubleUpTo(RAND_MAX) < missile_prob * RAND_MAX * SIMULATION_ATOM), true);
+            if (!should_fire) {
                 parent->UnFire();
             }
-            hadFired = shouldfire;
+            hadFired = should_fire;
         }
         if (targ->Destroyed()) {
             parent->Target(nullptr);

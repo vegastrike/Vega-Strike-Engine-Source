@@ -36,7 +36,7 @@
 #include "root_generic/vs_globals.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/unit_util.h"
-#include "src/vs_random.h"
+#include "root_generic/vega_random.h"
 #include "cmd/unit_find.h"
 #include "cmd/pilot.h"
 #include "src/universe_util.h"
@@ -86,11 +86,11 @@ bool MatchingMood(const CommunicationMessage &c, float mood, float randomrespons
 }
 
 int CommunicatingAI::selectCommunicationMessageMood(CommunicationMessage &c, float mood) {
-    Unit *targ = c.sender.GetUnit();
+    const Unit *target = c.sender.GetUnit();
     float relationship = 0;
-    if (targ) {
-        relationship = parent->pilot->GetEffectiveRelationship(parent, targ);
-        if (targ == parent->Target() && relationship > -1.0) {
+    if (target) {
+        relationship = parent->pilot->GetEffectiveRelationship(parent, target);
+        if (target == parent->Target() && relationship > -1.0) {
             relationship = -1.0;
         }
         mood += (1 - randomresponse) * relationship;
@@ -319,17 +319,17 @@ void CommunicatingAI::AdjustRelationTo(Unit *un, float factor) {
             }
         }
     }
-    if (newrel < anger || (parent->Target() == NULL && newrel + UnitUtil::getFactionRelation(parent, un) < 0)) {
-        if (parent->Target() == NULL
-                || (parent->getFlightgroup() == NULL
-                        || parent->getFlightgroup()->directive.find(".") == string::npos)) {
+    if (newrel < anger || (parent->Target() == nullptr && newrel + UnitUtil::getFactionRelation(parent, un) < 0)) {
+        if (parent->Target() == nullptr
+                || (parent->getFlightgroup() == nullptr
+                        || parent->getFlightgroup()->directive.find('.') == string::npos)) {
             parent->Target(un);             //he'll target you--even if he's friendly
             parent->TargetTurret(un);             //he'll target you--even if he's friendly
         } else if (newrel > appease) {
             if (parent->Target() == un) {
-                if (parent->getFlightgroup() == NULL || parent->getFlightgroup()->directive.find(".") == string::npos) {
-                    parent->Target(NULL);
-                    parent->TargetTurret(NULL);                     //he'll target you--even if he's friendly
+                if (parent->getFlightgroup() == nullptr || parent->getFlightgroup()->directive.find('.') == string::npos) {
+                    parent->Target(nullptr);
+                    parent->TargetTurret(nullptr);                     //he'll target you--even if he's friendly
                 }
             }
         }
@@ -339,22 +339,22 @@ void CommunicatingAI::AdjustRelationTo(Unit *un, float factor) {
 
 //modified not to check player when hostiles are around--unless player IS the hostile
 Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
-    if (vsrandom.uniformInc(0, 1) < playaprob) {
-        Unit *playa = _Universe->AccessCockpit(rand() % _Universe->numPlayers())->GetParent();
+    if (VegaRandom::Instance().UniformInclusive(0, 1) < playaprob) {
+        Unit *playa = _Universe->AccessCockpit(VegaRandom::Instance().RandomSizeTLessThan(_Universe->numPlayers()))->GetParent();
         if (playa) {
             if ((playa->Position() - parent->Position()).Magnitude() - parent->rSize() - playa->rSize()) {
                 return playa;
             }
         }
     }
-    if (vsrandom.uniformInc(0, 1) < targprob && parent->Target()) {
+    if (VegaRandom::Instance().UniformInclusive(0, 1) < targprob && parent->Target()) {
         return parent->Target();
     }
     //FIXME FOR TESTING ONLY
     //return parent->Target();
-    QVector where = parent->Position() + parent->radar.GetMaxRange() * QVector(vsrandom.uniformInc(-1, 1),
-            vsrandom.uniformInc(-1, 1),
-            vsrandom.uniformInc(-1, 1));
+    QVector where = parent->Position() + parent->radar.GetMaxRange() * QVector(VegaRandom::Instance().UniformInclusive(-1, 1),
+            VegaRandom::Instance().UniformInclusive(-1, 1),
+            VegaRandom::Instance().UniformInclusive(-1, 1));
     Collidable wherewrapper(0, 0, where);
 
     NearestUnitLocator unitLocator;
@@ -400,21 +400,12 @@ void CommunicatingAI::RandomInitiateCommunication(float playaprob, float targpro
 }
 
 int CommunicatingAI::selectCommunicationMessage(CommunicationMessage &c, Unit *un) {
-    if (0 && mood == 0) {
-        FSM::Node *n = c.getCurrentState();
-        if (n) {
-            return rand() % n->edges.size();
-        } else {
-            return 0;
-        }
-    } else {
-        const float moodmul = configuration().ai.mood_affects_response_flt;
-        const float angermul = configuration().ai.anger_affects_response_flt;
-        const float staticrelmul = configuration().ai.static_relationship_affects_response_flt;
-        return selectCommunicationMessageMood(c, moodmul * mood + angermul * parent->pilot->getAnger(parent,
-                un) + staticrelmul
-                * UnitUtil::getFactionRelation(parent, un));
-    }
+    const float moodmul = configuration().ai.mood_affects_response_flt;
+    const float angermul = configuration().ai.anger_affects_response_flt;
+    const float staticrelmul = configuration().ai.static_relationship_affects_response_flt;
+    return selectCommunicationMessageMood(c, moodmul * mood + angermul * parent->pilot->getAnger(parent,
+            un) + staticrelmul
+            * UnitUtil::getFactionRelation(parent, un));
 }
 
 void CommunicatingAI::ProcessCommMessage(CommunicationMessage &c) {

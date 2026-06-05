@@ -46,6 +46,7 @@
 #include <utility>
 
 #include "resource/random_utils.h"
+#include "root_generic/vega_random.h"
 
 float accelStarHandler(float &input) {
     return input / (configuration().physics.game_speed_flt * configuration().physics.game_accel_flt);
@@ -64,7 +65,7 @@ Movable::Movable() : sim_atom_multiplier(1),
         corner_max(Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX)),
         radial_size(0),
         Momentofinertia(0.01) {
-    cur_sim_queue_slot = rand() % SIM_QUEUE_SIZE;
+    cur_sim_queue_slot = VegaRandom::Instance().RandomSizeTLessThan(SIM_QUEUE_SIZE);
     const Vector default_angular_velocity(configuration().general.pitch_flt,
             configuration().general.yaw_flt,
             configuration().general.roll_flt);

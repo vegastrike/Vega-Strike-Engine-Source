@@ -41,7 +41,7 @@
 #include "src/gfxlib.h"
 #include "root_generic/galaxy_xml.h"
 #include "root_generic/galaxy_gen.h"
-#include "src/vs_random.h"
+#include "root_generic/vega_random.h"
 #include "root_generic/options.h"
 #include "src/universe.h"
 #include "src/vs_logging.h"
@@ -63,23 +63,22 @@ using namespace VSFileSystem;
 using std::string;
 using std::vector;
 
-static VSRandom starsysrandom(time(nullptr));
+static VegaRandom star_sys_random{};
 
-static void seedrand(unsigned long seed) {
-    starsysrandom = VSRandom(seed);
+static void seed_rand(const uint_fast32_t seed) {
+    star_sys_random.InitGenRand(seed);
 }
 
-static int stringhash(const string &key) {
-    unsigned int k = 0;
-    string::const_iterator start = key.begin();
-    for (; start != key.end(); start++) {
+static uint_fast32_t string_hash(const string &key) {
+    uint_fast32_t k = 0;
+    for (auto start = key.begin(); start != key.end(); ++start) {
         k += (k * 128) + *start;
     }
     return k;
 }
 
-static unsigned int ssrand() {
-    return starsysrandom.rand();
+static uint_fast32_t ssrand() {
+    return star_sys_random.GenRandUInt32();
 }
 
 static string GetWrapXY(string cname, int &wrapx, int &wrapy) {
@@ -106,7 +105,7 @@ float mmax(float a, float b) {
     return (a > b) ? a : b;
 }
 
-int rnd(int lower, int upper) {
+uint_fast32_t rnd(const uint_fast32_t lower, const uint_fast32_t upper) {
     if (upper > lower) {
         return lower + ssrand() % (upper - lower);
     } else {
@@ -120,15 +119,15 @@ string getGenericName(vector<string> &s) {
     if (s.empty()) {
         return string(nada);
     }
-    return s[rnd(0, s.size())];
+    return s.at(rnd(0, s.size()));
 }
 
 string getRandName(vector<string> &s) {
     if (s.empty()) {
         return string(nada);
     }
-    unsigned int i = rnd(0, s.size());
-    string k = s[i];
+    const uint_fast32_t i = rnd(0, s.size());
+    string k = s.at(i);
     s.erase(s.begin() + i);
     return k;
 }
@@ -240,7 +239,7 @@ public:
 };
 
 float grand() {
-    return float(ssrand()) / VS_RAND_MAX;
+    return star_sys_random.RandomFloat();
 }
 
 vector<Color> lights;
@@ -488,7 +487,7 @@ Vector generateCenter(float minradii, bool jumppoint) {
     r.i *= minradii;
     r.j *= minradii;
     r.k *= minradii;
-    int i = (rnd(0, 8));
+    const uint_fast32_t i = (rnd(0, 8));
     r.i = (i & 1) ? -r.i : r.i;
     r.j = (i & 2) ? -r.j : r.j;
     r.k = (i & 4) ? -r.k : r.k;
@@ -497,7 +496,7 @@ Vector generateCenter(float minradii, bool jumppoint) {
 
 float makeRS(Vector &r, Vector &s, float minradii, bool jumppoint) {
     r = Vector(grand(), grand(), grand());
-    int i = (rnd(0, 8));
+    uint_fast32_t i = (rnd(0, 8));
     r.i = (i & 1) ? -r.i : r.i;
     r.j = (i & 2) ? -r.j : r.j;
     r.k = (i & 4) ? -r.k : r.k;
@@ -866,8 +865,8 @@ void MakePlanet(float radius,
         while (lites.back() != string::npos) {
             lites.push_back(planetlites.find(lites.back() + 1, ' '));
         }
-        unsigned randomnum = rnd(0, lites.size() - 1);
-        cname = planetlites.substr(lites[randomnum] + 1, lites[randomnum + 1]);
+        size_t random_index = rnd(0, lites.size() - 1);
+        cname = planetlites.substr(lites.at(random_index) + 1, lites.at(random_index + 1));
     }
     f.Fprintf("<Planet name=\"%s\" file=\"%s\" unit=\"%s\" ", thisname.c_str(), texturename.c_str(), unitname.c_str());
     if (!technique.empty()) {
@@ -1328,7 +1327,7 @@ void readplanetentity(vector<StarInfo> &starinfos, string planetlist, unsigned i
             // Replace randomized number placeholder tags
             starinfos[u % numstars].planets.back().num =
                     rnd(XMLSupport::parse_int(galaxy->getPlanetVariable(planetname, "texture_min", "0")),
-                            XMLSupport::parse_int(galaxy->getPlanetVariable(planetname, "texture_max", "0")));
+                        XMLSupport::parse_int(galaxy->getPlanetVariable(planetname, "texture_max", "0")));
 
             char num[32];
             if (starinfos[u % numstars].planets.back().num == 0) {
@@ -1379,16 +1378,16 @@ void readplanetentity(vector<StarInfo> &starinfos, string planetlist, unsigned i
             for (k = 0; k < jumps.size(); ++k) {
                 vector<PlanetInfo> *temp;                 //& doesn't like me so I use *.
                 do {
-                    temp = &starinfos[rnd(0, starinfos.size())].planets;
+                    temp = &starinfos.at(rnd(0, starinfos.size())).planets;
                 } while (temp->empty());
-                (*temp)[rnd(0, temp->size())].numjumps++;
+                temp->at(rnd(0, temp->size())).numjumps++;
             }
             for (k = 0; k < numstarbases; ++k) {
                 vector<PlanetInfo> *temp;                 //& appears to still have dislike for me.
                 do {
-                    temp = &starinfos[rnd(0, starinfos.size())].planets;
+                    temp = &starinfos.at(rnd(0, starinfos.size())).planets;
                 } while (temp->empty());
-                (*temp)[rnd(0, temp->size())].numstarbases++;
+                temp->at(rnd(0, temp->size())).numstarbases++;
             }
         }
     }
@@ -1424,9 +1423,9 @@ void generateStarSystem(SystemInfo &si) {
     compactness = si.compactness * configuration().galaxy.compactness_scale_flt;
     jumpcompactness = si.compactness * configuration().galaxy.jump_compactness_scale_flt;
     if (si.seed) {
-        seedrand(si.seed);
+        seed_rand(si.seed);
     } else {
-        seedrand(stringhash(si.sector + '/' + si.name));
+        seed_rand(string_hash(si.sector + '/' + si.name));
     }
     VS_LOG(info, (boost::format("star %1%, natural %2%, bases %3%") % si.numstars % si.numun1 % si.numun2));
     int nat = pushTowardsMean(configuration().galaxy.mean_natural_phenomena, si.numun1);
