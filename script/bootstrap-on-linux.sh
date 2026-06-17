@@ -726,8 +726,6 @@ function bootstrapOnRedHat ()
                                 freeglut-devel \
                                 gcc-c++ \
                                 openal-soft-devel \
-                                SDL3-devel \
-                                SDL2-compat-devel \
                                 SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
