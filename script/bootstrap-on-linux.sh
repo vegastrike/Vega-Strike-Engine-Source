@@ -350,21 +350,112 @@ function bootstrapOnLinuxMint ()
 
     echo "Linux Mint base Distros do NOT support SDL3"
     case "$LINUX_CODENAME" in
-        "wilma"|"zara")
+        "alfa")
             apt-get -qy install \
                             git \
                             cmake \
-                            python3-dev \
                             build-essential \
-                            automake \
+                            lsb-release \
+                            make \
+                            pkg-config \
+                            ninja-build \
                             autoconf \
+                            autoconf-archive \
+                            automake \
+                            libtool \
+                            curl \
+                            zip \
+                            unzip \
+                            tar \
+                            libx11-dev \
+                            libxext-dev \
+                            libxfixes-dev \
+                            libxi-dev \
+                            libxmu-dev \
+                            libxrandr-dev \
+                            libxss-dev \
+                            libxtst-dev \
+                            libwayland-dev \
+                            libxkbcommon-dev \
+                            wayland-protocols \
+                            libibus-1.0-dev \
+                            python3-jinja2 \
+                            libx11-xcb-dev \
+                            libxcb-dpms0-dev \
+                            libxxf86vm-dev \
+                            libxcb-xv0-dev \
+                            python3-dev \
                             libarchive-dev \
                             libpng16-16 \
                             libpng-dev \
                             libpng-tools \
                             libjpeg-turbo8-dev \
                             libexpat1-dev \
-                            libgdk-pixbuf-2.0-dev \
+                            libgtk-3-dev \
+                            libopenal-dev \
+                            libogg-dev \
+                            libvorbis-dev \
+                            libglvnd-dev \
+                            libgl1-mesa-dev \
+                            libsdl3-dev \
+                            libsdl3-image-dev \
+                            libsdl2-dev \
+                            libsdl2-image-dev \
+                            freeglut3-dev \
+                            libboost-python-dev \
+                            libboost-log-dev \
+                            libboost-regex-dev \
+                            libboost-json-dev \
+                            libboost-program-options-dev \
+                            clang \
+                            libprotobuf-dev \
+                            libaudio-dev \
+                            libfribidi-dev \
+                            libglu1-mesa-dev \
+                            mesa-common-dev \
+                            libltdl-dev
+            ;;
+        "wilma"|"zara"|"zena")
+            apt-get -qy install \
+                            git \
+                            cmake \
+                            build-essential \
+                            lsb-release \
+                            make \
+                            pkg-config \
+                            ninja-build \
+                            autoconf \
+                            autoconf-archive \
+                            automake \
+                            libtool \
+                            curl \
+                            zip \
+                            unzip \
+                            tar \
+                            libx11-dev \
+                            libxext-dev \
+                            libxfixes-dev \
+                            libxi-dev \
+                            libxmu-dev \
+                            libxrandr-dev \
+                            libxss-dev \
+                            libxtst-dev \
+                            libwayland-dev \
+                            libxkbcommon-dev \
+                            wayland-protocols \
+                            libibus-1.0-dev \
+                            python3-jinja2 \
+                            libx11-xcb-dev \
+                            libxcb-dpms0-dev \
+                            libxxf86vm-dev \
+                            libxcb-xv0-dev \
+                            python3-dev \
+                            libarchive-dev \
+                            libpng16-16 \
+                            libpng-dev \
+                            libpng-tools \
+                            libjpeg-turbo8-dev \
+                            libexpat1-dev \
                             libgtk-3-dev \
                             libopenal-dev \
                             libogg-dev \
@@ -373,23 +464,19 @@ function bootstrapOnLinuxMint ()
                             libgl1-mesa-dev \
                             libsdl2-dev \
                             libsdl2-image-dev \
-                            libopengl0 \
-                            libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
                             libboost-log-dev \
                             libboost-regex-dev \
                             libboost-json-dev \
                             libboost-program-options-dev \
-                            libxmu-dev \
                             clang \
-                            lsb-release \
-                            make \
-                            pkg-config \
-                            ninja-build \
+                            libprotobuf-dev \
                             libaudio-dev \
                             libfribidi-dev \
-                            libwayland-dev
+                            libglu1-mesa-dev \
+                            mesa-common-dev \
+                            libltdl-dev
             ;;
         "virginia"|"victoria"|"vera"|"vanessa"|"ulyana")
             echo "Sorry, Linux Mint ${LINUX_CODENAME} is no longer supported"
