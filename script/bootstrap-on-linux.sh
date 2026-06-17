@@ -179,50 +179,7 @@ function bootstrapOnUbuntu()
     fi
 
     case "$LINUX_CODENAME" in
-        "questing")
-            apt-get -qy install \
-                            git \
-                            cmake \
-                            python3-dev \
-                            build-essential \
-                            automake \
-                            autoconf \
-                            libarchive-dev \
-                            libpng16-16 \
-                            libpng-dev \
-                            libpng-tools \
-                            libjpeg-turbo8-dev \
-                            libexpat1-dev \
-                            libgdk-pixbuf-2.0-dev \
-                            libgtk-3-dev \
-                            libopenal-dev \
-                            libogg-dev \
-                            libvorbis-dev \
-                            libglvnd-dev \
-                            libgl1-mesa-dev \
-                            libsdl2-dev \
-                            libsdl2-image-dev \
-                            libsdl3-dev \
-                            libsdl3-image-dev \
-                            libopengl0 \
-                            libpostproc-dev \
-                            freeglut3-dev \
-                            libboost-python-dev \
-                            libboost-log-dev \
-                            libboost-regex-dev \
-                            libboost-json-dev \
-                            libboost-program-options-dev \
-                            libxmu-dev \
-                            clang \
-                            lsb-release \
-                            make \
-                            pkg-config \
-                            ninja-build \
-                            libaudio-dev \
-                            libfribidi-dev \
-                            libwayland-dev
-            ;;
-        "plucky")
+        "resolute"|"questing"|"plucky")
             apt-get -qy install \
                             git \
                             cmake \
