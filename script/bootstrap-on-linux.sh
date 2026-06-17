@@ -581,120 +581,67 @@ function bootstrapOnOpenSuseLeap ()
 
 function bootstrapOnFedora ()
 {
-    case "${LINUX_VERSION_ID}" in
-        30|31|32|33|34|35|36|37|38|39)
-            echo "Sorry, Fedora ${LINUX_VERSION_ID} is no longer supported"
-            exit 2
-            ;;
-        40)
-            dnf install -y \
-                                git \
-                                cmake \
-                                boost-devel \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang \
-                                fribidi-devel \
-                                wayland-devel \
-                                wayland-protocols-devel
-            ;;
-        41)
-            dnf install -y \
-                                git \
-                                cmake \
-                                boost-devel \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang \
-                                fribidi-devel \
-                                wayland-devel \
-                                wayland-protocols-devel
-            ;;
-        42)
-            dnf install -y \
-                                git \
-                                cmake \
-                                boost-devel \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL3-devel \
-                                SDL3_image-devel \
-                                sdl2-compat-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang \
-                                fribidi-devel \
-                                wayland-devel \
-                                wayland-protocols-devel
-            ;;
-        43)
-            dnf install -y \
-                                git \
-                                cmake \
-                                boost-devel \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL3-devel \
-                                SDL3_image-devel \
-                                sdl2-compat-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang \
-                                fribidi-devel \
-                                wayland-devel \
-                                wayland-protocols-devel \
-            ;;
-        *)
-            echo "Sorry, this version of Fedora is unsupported"
-            exit 2
-            ;;
-    esac
+    export fedoraVersion=${LINUX_VERSION_ID}
+    export fedoraMaxSupportedVersion=44
+    export fedoraMinSupportedVersion=41
+    if [ ${fedoraVersion} -gt ${fedoraMaxSupportedVersion} ]
+    then
+        echo "Fedora Version ${fedoraVersion} is not yet supported. Pull requests welcome"
+    elif [ ${fedoraVersion} -ge ${fedoraMinSupportedVersion} ]
+    then
+        if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
+        then
+            dnf -y upgrade --refresh
+        fi
+        dnf install -y \
+                            git \
+                            cmake \
+                            gcc-c++ \
+                            rpm-build \
+                            make \
+                            autoconf \
+                            autoconf-archive \
+                            automake \
+                            libtool \
+                            curl \
+                            zip \
+                            unzip \
+                            tar \
+                            kernel-headers \
+                            perl \
+                            libX11-devel \
+                            xorg-x11-proto-devel \
+                            libXfixes-devel \
+                            libXi-devel \
+                            libXmu-devel \
+                            libXrandr-devel \
+                            libXtst-devel \
+                            wayland-devel \
+                            libxkbcommon-devel \
+                            wayland-protocols-devel \
+                            ibus-devel \
+                            python3-jinja2 \
+                            boost-devel \
+                            freeglut-devel \
+                            openal-soft-devel \
+                            libvorbis-devel \
+                            libglvnd-devel \
+                            libjpeg-turbo-devel \
+                            libpng-devel \
+                            expat-devel \
+                            gtk3-devel \
+                            python3-devel \
+                            libarchive-devel \
+                            rpm-build \
+                            clang \
+                            fribidi-devel \
+                            mesa-libGLU-devel \
+                            SDL2_image-devel \
+                            libtool-ltdl-devel
+    else
+        echo "Sorry, Fedora ${LINUX_VERSION_ID} is no longer supported"
+        exit 2
+    fi
 }
 
 function bootstrapOnRedHat ()
