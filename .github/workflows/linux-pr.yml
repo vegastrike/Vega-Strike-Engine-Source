@@ -22,6 +22,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - FROM:     'ubuntu:resolute'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            allow_failure: false
           - FROM:     'ubuntu:questing'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
@@ -36,6 +42,12 @@ jobs:
             allow_failure: false
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
+            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            allow_failure: false
+          - FROM:     'linuxmintd/mint22.3-amd64'
+            COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
@@ -61,6 +73,12 @@ jobs:
           - FROM:     'debian:bookworm'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            allow_failure: false
+          - FROM:     'fedora:44'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
