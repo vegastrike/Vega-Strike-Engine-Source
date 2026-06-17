@@ -828,16 +828,6 @@ function bootstrapOnRockyLinux ()
                                 wayland-protocols-devel
             ;;
         "10.0"|"10.1")
-            declare -a pkgs_to_uninstall=('SDL2_image-devel' 'SDL2_image' 'SDL2-devel' 'SDL2')
-            for pkg in "${pkgs_to_uninstall[@]}"
-            do
-                if dnf list installed | grep -qF "$pkg"; then
-                    dnf -y remove "$pkg"
-                else
-                    echo "Package '$pkg' is not installed."
-                fi
-            done
-
             dnf -y upgrade --refresh
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
@@ -853,8 +843,6 @@ function bootstrapOnRockyLinux ()
                                 freeglut-devel \
                                 gcc-c++ \
                                 openal-soft-devel \
-                                SDL3-devel \
-                                sdl2-compat-devel \
                                 SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
