@@ -38,7 +38,7 @@
 set -e
 
 echo "------------------------------------------"
-echo "--- bootstrap-on-linux.sh | 2025-12-01 ---"
+echo "--- bootstrap-on-linux.sh | 2026-06-18 ---"
 echo "------------------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -705,7 +705,8 @@ function bootstrapOnRedHat ()
                                 wayland-devel \
                                 wayland-protocols-devel
             ;;
-        "10.0"|"10.1")
+        "10.0"|"10.1"|"10.2")
+
             dnf -y upgrade --refresh
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
@@ -811,7 +812,8 @@ function bootstrapOnRockyLinux ()
                                 wayland-devel \
                                 wayland-protocols-devel
             ;;
-        "10.0"|"10.1")
+        "10.0"|"10.1"|"10.2")
+
             dnf -y upgrade --refresh
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
