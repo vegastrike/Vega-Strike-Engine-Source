@@ -282,7 +282,7 @@ Assuming all the above steps succeed, you are now ready to run Vega Strike. Note
 
 Finally, note that the location of the `.vegastrike` folder has changed since v0.5.1r1. It will now be located here: `C:\Users\<YourUserName>\AppData\Local\.vegastrike`.
 
-### Compiling On MacOS
+### Compiling On macOS
 
 VegaStrike is now compiling on macOS as well! macOS 13 is the only version that we officially support at the moment, but the game will build and run on other macOS versions as well.
 
@@ -633,7 +633,7 @@ Bugs can be sent to one of the following:
 
 ### Contributors
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.rst)].
 
 [![Our Contributors](https://opencollective.com/vega-strike/contributors.svg?width=890)](https://github.com/vegastrike/Vega-Strike-Engine-Source/graphs/contributors)
 
