@@ -94,7 +94,6 @@ function bootstrapOnDebian()
                             libsdl2-image-dev \
                             libsdl3-dev \
                             libsdl3-image-dev \
-                            libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
                             libboost-log-dev \
@@ -141,7 +140,6 @@ function bootstrapOnDebian()
                             libgl1-mesa-dev \
                             libsdl2-dev \
                             libsdl2-image-dev \
-                            libpostproc-dev \
                             freeglut3-dev \
                             libboost-python1.81-dev \
                             libboost-log1.81-dev \
@@ -205,7 +203,6 @@ function bootstrapOnUbuntu()
                             libsdl3-dev \
                             libsdl3-image-dev \
                             libopengl0 \
-                            libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
                             libboost-log-dev \
@@ -247,7 +244,6 @@ function bootstrapOnUbuntu()
                             libsdl2-dev \
                             libsdl2-image-dev \
                             libopengl0 \
-                            libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
                             libboost-log-dev \
@@ -315,7 +311,6 @@ function bootstrapOnPopOS ()
                             libsdl3-dev \
                             libsdl3-image-dev \
                             libopengl0 \
-                            libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
                             libboost-log-dev \
