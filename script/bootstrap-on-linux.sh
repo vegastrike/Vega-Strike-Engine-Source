@@ -38,7 +38,7 @@
 set -e
 
 echo "------------------------------------------"
-echo "--- bootstrap-on-linux.sh | 2025-12-01 ---"
+echo "--- bootstrap-on-linux.sh | 2026-06-18 ---"
 echo "------------------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -94,7 +94,6 @@ function bootstrapOnDebian()
                             libsdl2-image-dev \
                             libsdl3-dev \
                             libsdl3-image-dev \
-                            libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
                             libboost-log-dev \
@@ -141,7 +140,6 @@ function bootstrapOnDebian()
                             libgl1-mesa-dev \
                             libsdl2-dev \
                             libsdl2-image-dev \
-                            libpostproc-dev \
                             freeglut3-dev \
                             libboost-python1.81-dev \
                             libboost-log1.81-dev \
@@ -179,7 +177,7 @@ function bootstrapOnUbuntu()
     fi
 
     case "$LINUX_CODENAME" in
-        "questing")
+        "resolute"|"questing"|"plucky")
             apt-get -qy install \
                             git \
                             cmake \
@@ -205,50 +203,6 @@ function bootstrapOnUbuntu()
                             libsdl3-dev \
                             libsdl3-image-dev \
                             libopengl0 \
-                            libpostproc-dev \
-                            freeglut3-dev \
-                            libboost-python-dev \
-                            libboost-log-dev \
-                            libboost-regex-dev \
-                            libboost-json-dev \
-                            libboost-program-options-dev \
-                            libxmu-dev \
-                            clang \
-                            lsb-release \
-                            make \
-                            pkg-config \
-                            ninja-build \
-                            libaudio-dev \
-                            libfribidi-dev \
-                            libwayland-dev
-            ;;
-        "plucky")
-            apt-get -qy install \
-                            git \
-                            cmake \
-                            python3-dev \
-                            build-essential \
-                            automake \
-                            autoconf \
-                            libarchive-dev \
-                            libpng16-16 \
-                            libpng-dev \
-                            libpng-tools \
-                            libjpeg-turbo8-dev \
-                            libexpat1-dev \
-                            libgdk-pixbuf-2.0-dev \
-                            libgtk-3-dev \
-                            libopenal-dev \
-                            libogg-dev \
-                            libvorbis-dev \
-                            libglvnd-dev \
-                            libgl1-mesa-dev \
-                            libsdl2-dev \
-                            libsdl2-image-dev \
-                            libsdl3-dev \
-                            libsdl3-image-dev \
-                            libopengl0 \
-                            libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
                             libboost-log-dev \
@@ -290,7 +244,6 @@ function bootstrapOnUbuntu()
                             libsdl2-dev \
                             libsdl2-image-dev \
                             libopengl0 \
-                            libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
                             libboost-log-dev \
@@ -358,7 +311,6 @@ function bootstrapOnPopOS ()
                             libsdl3-dev \
                             libsdl3-image-dev \
                             libopengl0 \
-                            libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
                             libboost-log-dev \
@@ -393,21 +345,112 @@ function bootstrapOnLinuxMint ()
 
     echo "Linux Mint base Distros do NOT support SDL3"
     case "$LINUX_CODENAME" in
-        "wilma"|"zara")
+        "alfa")
             apt-get -qy install \
                             git \
                             cmake \
-                            python3-dev \
                             build-essential \
-                            automake \
+                            lsb-release \
+                            make \
+                            pkg-config \
+                            ninja-build \
                             autoconf \
+                            autoconf-archive \
+                            automake \
+                            libtool \
+                            curl \
+                            zip \
+                            unzip \
+                            tar \
+                            libx11-dev \
+                            libxext-dev \
+                            libxfixes-dev \
+                            libxi-dev \
+                            libxmu-dev \
+                            libxrandr-dev \
+                            libxss-dev \
+                            libxtst-dev \
+                            libwayland-dev \
+                            libxkbcommon-dev \
+                            wayland-protocols \
+                            libibus-1.0-dev \
+                            python3-jinja2 \
+                            libx11-xcb-dev \
+                            libxcb-dpms0-dev \
+                            libxxf86vm-dev \
+                            libxcb-xv0-dev \
+                            python3-dev \
                             libarchive-dev \
                             libpng16-16 \
                             libpng-dev \
                             libpng-tools \
                             libjpeg-turbo8-dev \
                             libexpat1-dev \
-                            libgdk-pixbuf-2.0-dev \
+                            libgtk-3-dev \
+                            libopenal-dev \
+                            libogg-dev \
+                            libvorbis-dev \
+                            libglvnd-dev \
+                            libgl1-mesa-dev \
+                            libsdl3-dev \
+                            libsdl3-image-dev \
+                            libsdl2-dev \
+                            libsdl2-image-dev \
+                            freeglut3-dev \
+                            libboost-python-dev \
+                            libboost-log-dev \
+                            libboost-regex-dev \
+                            libboost-json-dev \
+                            libboost-program-options-dev \
+                            clang \
+                            libprotobuf-dev \
+                            libaudio-dev \
+                            libfribidi-dev \
+                            libglu1-mesa-dev \
+                            mesa-common-dev \
+                            libltdl-dev
+            ;;
+        "wilma"|"zara"|"zena")
+            apt-get -qy install \
+                            git \
+                            cmake \
+                            build-essential \
+                            lsb-release \
+                            make \
+                            pkg-config \
+                            ninja-build \
+                            autoconf \
+                            autoconf-archive \
+                            automake \
+                            libtool \
+                            curl \
+                            zip \
+                            unzip \
+                            tar \
+                            libx11-dev \
+                            libxext-dev \
+                            libxfixes-dev \
+                            libxi-dev \
+                            libxmu-dev \
+                            libxrandr-dev \
+                            libxss-dev \
+                            libxtst-dev \
+                            libwayland-dev \
+                            libxkbcommon-dev \
+                            wayland-protocols \
+                            libibus-1.0-dev \
+                            python3-jinja2 \
+                            libx11-xcb-dev \
+                            libxcb-dpms0-dev \
+                            libxxf86vm-dev \
+                            libxcb-xv0-dev \
+                            python3-dev \
+                            libarchive-dev \
+                            libpng16-16 \
+                            libpng-dev \
+                            libpng-tools \
+                            libjpeg-turbo8-dev \
+                            libexpat1-dev \
                             libgtk-3-dev \
                             libopenal-dev \
                             libogg-dev \
@@ -416,23 +459,19 @@ function bootstrapOnLinuxMint ()
                             libgl1-mesa-dev \
                             libsdl2-dev \
                             libsdl2-image-dev \
-                            libopengl0 \
-                            libpostproc-dev \
                             freeglut3-dev \
                             libboost-python-dev \
                             libboost-log-dev \
                             libboost-regex-dev \
                             libboost-json-dev \
                             libboost-program-options-dev \
-                            libxmu-dev \
                             clang \
-                            lsb-release \
-                            make \
-                            pkg-config \
-                            ninja-build \
+                            libprotobuf-dev \
                             libaudio-dev \
                             libfribidi-dev \
-                            libwayland-dev
+                            libglu1-mesa-dev \
+                            mesa-common-dev \
+                            libltdl-dev
             ;;
         "virginia"|"victoria"|"vera"|"vanessa"|"ulyana")
             echo "Sorry, Linux Mint ${LINUX_CODENAME} is no longer supported"
@@ -537,120 +576,67 @@ function bootstrapOnOpenSuseLeap ()
 
 function bootstrapOnFedora ()
 {
-    case "${LINUX_VERSION_ID}" in
-        30|31|32|33|34|35|36|37|38|39)
-            echo "Sorry, Fedora ${LINUX_VERSION_ID} is no longer supported"
-            exit 2
-            ;;
-        40)
-            dnf install -y \
-                                git \
-                                cmake \
-                                boost-devel \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang \
-                                fribidi-devel \
-                                wayland-devel \
-                                wayland-protocols-devel
-            ;;
-        41)
-            dnf install -y \
-                                git \
-                                cmake \
-                                boost-devel \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL2-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang \
-                                fribidi-devel \
-                                wayland-devel \
-                                wayland-protocols-devel
-            ;;
-        42)
-            dnf install -y \
-                                git \
-                                cmake \
-                                boost-devel \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL3-devel \
-                                SDL3_image-devel \
-                                sdl2-compat-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang \
-                                fribidi-devel \
-                                wayland-devel \
-                                wayland-protocols-devel
-            ;;
-        43)
-            dnf install -y \
-                                git \
-                                cmake \
-                                boost-devel \
-                                freeglut-devel \
-                                gcc-c++ \
-                                openal-soft-devel \
-                                SDL3-devel \
-                                SDL3_image-devel \
-                                sdl2-compat-devel \
-                                SDL2_image-devel \
-                                libvorbis-devel \
-                                libglvnd-devel \
-                                libjpeg-turbo-devel \
-                                libpng-devel \
-                                expat-devel \
-                                gtk3-devel \
-                                python3-devel \
-                                libarchive-devel \
-                                rpm-build \
-                                make \
-                                clang \
-                                fribidi-devel \
-                                wayland-devel \
-                                wayland-protocols-devel \
-            ;;
-        *)
-            echo "Sorry, this version of Fedora is unsupported"
-            exit 2
-            ;;
-    esac
+    export fedoraVersion=${LINUX_VERSION_ID}
+    export fedoraMaxSupportedVersion=44
+    export fedoraMinSupportedVersion=41
+    if [ ${fedoraVersion} -gt ${fedoraMaxSupportedVersion} ]
+    then
+        echo "Fedora Version ${fedoraVersion} is not yet supported. Pull requests welcome"
+    elif [ ${fedoraVersion} -ge ${fedoraMinSupportedVersion} ]
+    then
+        if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
+        then
+            dnf -y upgrade --refresh
+        fi
+        dnf install -y \
+                            git \
+                            cmake \
+                            gcc-c++ \
+                            rpm-build \
+                            make \
+                            autoconf \
+                            autoconf-archive \
+                            automake \
+                            libtool \
+                            curl \
+                            zip \
+                            unzip \
+                            tar \
+                            kernel-headers \
+                            perl \
+                            libX11-devel \
+                            xorg-x11-proto-devel \
+                            libXfixes-devel \
+                            libXi-devel \
+                            libXmu-devel \
+                            libXrandr-devel \
+                            libXtst-devel \
+                            wayland-devel \
+                            libxkbcommon-devel \
+                            wayland-protocols-devel \
+                            ibus-devel \
+                            python3-jinja2 \
+                            boost-devel \
+                            freeglut-devel \
+                            openal-soft-devel \
+                            libvorbis-devel \
+                            libglvnd-devel \
+                            libjpeg-turbo-devel \
+                            libpng-devel \
+                            expat-devel \
+                            gtk3-devel \
+                            python3-devel \
+                            libarchive-devel \
+                            rpm-build \
+                            clang \
+                            fribidi-devel \
+                            mesa-libGLU-devel \
+                            SDL2_image-devel \
+                            libtool-ltdl-devel
+    else
+        echo "Sorry, Fedora ${LINUX_VERSION_ID} is no longer supported"
+        exit 2
+    fi
 }
 
 function bootstrapOnRedHat ()
@@ -687,7 +673,7 @@ function bootstrapOnRedHat ()
                                 wayland-devel \
                                 wayland-protocols-devel
             ;;
-        "9.6")
+        "9.6"|"9.7"|"9.8")
             dnf -y install dnf-plugins-core
             dnf config-manager --set-enabled crb
             dnf config-manager --set-enabled devel
@@ -719,8 +705,7 @@ function bootstrapOnRedHat ()
                                 wayland-devel \
                                 wayland-protocols-devel
             ;;
-        "10.0"|"10.1")
-            dnf -y upgrade --refresh
+        "10.0"|"10.1"|"10.2")
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
             dnf -y config-manager --set-enabled devel
@@ -735,8 +720,6 @@ function bootstrapOnRedHat ()
                                 freeglut-devel \
                                 gcc-c++ \
                                 openal-soft-devel \
-                                SDL3-devel \
-                                SDL2-compat-devel \
                                 SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \
@@ -795,7 +778,7 @@ function bootstrapOnRockyLinux ()
                                 wayland-devel \
                                 wayland-protocols-devel
             ;;
-        "9.6")
+        "9.6"|"9.7"|"9.8")
             dnf -y install dnf-plugins-core
             dnf config-manager --set-enabled crb
             dnf config-manager --set-enabled devel
@@ -827,18 +810,7 @@ function bootstrapOnRockyLinux ()
                                 wayland-devel \
                                 wayland-protocols-devel
             ;;
-        "10.0"|"10.1")
-            declare -a pkgs_to_uninstall=('SDL2_image-devel' 'SDL2_image' 'SDL2-devel' 'SDL2')
-            for pkg in "${pkgs_to_uninstall[@]}"
-            do
-                if dnf list installed | grep -qF "$pkg"; then
-                    dnf -y remove "$pkg"
-                else
-                    echo "Package '$pkg' is not installed."
-                fi
-            done
-
-            dnf -y upgrade --refresh
+        "10.0"|"10.1"|"10.2")
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
             dnf -y config-manager --set-enabled devel
@@ -853,8 +825,6 @@ function bootstrapOnRockyLinux ()
                                 freeglut-devel \
                                 gcc-c++ \
                                 openal-soft-devel \
-                                SDL3-devel \
-                                sdl2-compat-devel \
                                 SDL2_image-devel \
                                 libvorbis-devel \
                                 libglvnd-devel \

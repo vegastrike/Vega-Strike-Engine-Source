@@ -11,8 +11,8 @@
 # set -e
 
 echo "--------------------------"
-echo "--- setup | 2020-08-19 ---"
+echo "--- setup | 2026-06-18 ---"
 echo "--------------------------"
 
-script/bootstrap $@
+script/bootstrap "$@"
 script/clean
