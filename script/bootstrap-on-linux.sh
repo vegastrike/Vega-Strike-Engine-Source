@@ -673,7 +673,7 @@ function bootstrapOnRedHat ()
                                 wayland-devel \
                                 wayland-protocols-devel
             ;;
-        "9.6")
+        "9.6"|"9.7"|"9.8")
             dnf -y install dnf-plugins-core
             dnf config-manager --set-enabled crb
             dnf config-manager --set-enabled devel
@@ -780,7 +780,7 @@ function bootstrapOnRockyLinux ()
                                 wayland-devel \
                                 wayland-protocols-devel
             ;;
-        "9.6")
+        "9.6"|"9.7"|"9.8")
             dnf -y install dnf-plugins-core
             dnf config-manager --set-enabled crb
             dnf config-manager --set-enabled devel
