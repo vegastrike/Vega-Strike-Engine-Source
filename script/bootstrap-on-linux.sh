@@ -706,8 +706,6 @@ function bootstrapOnRedHat ()
                                 wayland-protocols-devel
             ;;
         "10.0"|"10.1"|"10.2")
-
-            dnf -y upgrade --refresh
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
             dnf -y config-manager --set-enabled devel
@@ -813,8 +811,6 @@ function bootstrapOnRockyLinux ()
                                 wayland-protocols-devel
             ;;
         "10.0"|"10.1"|"10.2")
-
-            dnf -y upgrade --refresh
             dnf -y install 'dnf-command(config-manager)'
             dnf -y config-manager --set-enabled crb
             dnf -y config-manager --set-enabled devel
