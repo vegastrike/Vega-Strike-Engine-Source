@@ -274,15 +274,15 @@ by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source
 
 Vega Strike is now compiling on Windows! There are also installers available for Windows 10 and Windows 11, as of Vega Strike v0.9.0-beta1. If you want to try it out and perhaps offer feedback, that would certainly be welcome.
 
-To compile Vega Strike on Windows, start by installing either Visual Studio 2022 or just the Visual Studio 2022 Developer Tools. When selecting the Workloads and Components to install, include at least "C++ for Desktop" and a recent build of the Windows SDK. Probably Git and the GitHub for Windows extension also. Install the latest Visual Studio updates as well.
+To compile Vega Strike on Windows, start by installing either Visual Studio 2026 or just the Visual Studio 2026 Developer Tools. When selecting the Workloads and Components to install, include at least "C++ for Desktop" and a recent build of the Windows SDK. Probably Git and the GitHub for Windows extension also. Install the latest Visual Studio updates as well.
 
-Once the Visual Studio Installer finishes, reboot your computer. Then, find `Developer PowerShell for VS 2022` on the Start menu; alt-click it ("right-click"); and choose "Run as Administrator." Run `Set-ExecutionPolicy RemoteSigned` (or another suitable PowerShell Execution Policy of your choice). Type `Y` and press Enter to confirm. Exit PowerShell. Now reopen `Developer PowerShell for VS 2022`, this time without Admin privileges, and run `script/bootstrap.ps1`. Once that finishes, reboot your computer again. Finally, open `Developer PowerShell for VS 2022` one more time, and run `script/build.ps1 -Generator VS2022Win64`.
+Once the Visual Studio Installer finishes, reboot your computer. Then, find `Developer PowerShell for VS 2026` on the Start menu; alt-click it ("right-click"); and choose "Run as Administrator." Run `Set-ExecutionPolicy RemoteSigned` (or another suitable PowerShell Execution Policy of your choice). Type `Y` and press Enter to confirm. Exit PowerShell. Now reopen `Developer PowerShell for VS 2026`, this time without Admin privileges, and run `script/bootstrap.ps1`. Once that finishes, reboot your computer again. Finally, open `Developer PowerShell for VS 2026` one more time, and run `script/build.ps1 -PresetName VS2026Win64-pie-enabled-RelWithDebInfo -BuildType RelWithDebInfo`. (The build type can also be `Debug` or `Release`. Just make sure that it matches the build type stanza at the end of the preset name.)
 
 Assuming all the above steps succeed, you are now ready to run Vega Strike. Note that `vegasettings` is not currently building on Windows, so you will need to edit `vegastrike.config` manually as needed.
 
 Finally, note that the location of the `.vegastrike` folder has changed since v0.5.1r1. It will now be located here: `C:\Users\<YourUserName>\AppData\Local\.vegastrike`.
 
-### Compiling On MacOS
+### Compiling On macOS
 
 VegaStrike is now compiling on macOS as well! macOS 13 is the only version that we officially support at the moment, but the game will build and run on other macOS versions as well.
 
@@ -633,7 +633,7 @@ Bugs can be sent to one of the following:
 
 ### Contributors
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.rst)].
 
 [![Our Contributors](https://opencollective.com/vega-strike/contributors.svg?width=890)](https://github.com/vegastrike/Vega-Strike-Engine-Source/graphs/contributors)
 
