@@ -32,14 +32,14 @@
 #include "cmd/basecomputer.h"
 #include "gfx/hud.h"
 #include "gfx/sprite.h"
-#include <stdio.h>
+#include <cstdio>
 #include "gui/glut_support.h"
 
 #include "audio/Types.h"
 #include "audio/Source.h"
 
-//#define BASE_MAKER
-//#define BASE_XML //in case you want to write out XML instead...
+// #define BASE_MAKER
+// #define BASE_XML //in case you want to write out XML instead...
 
 #define BASE_EXTENSION ".py"
 
@@ -84,7 +84,8 @@ public:
             }
 
             explicit Link(const std::string &ind, const std::string &pfile)
-                    : pythonfile(pfile), alpha(1.0f), index(ind), eventMask(ClickEvent), clickbtn(-1) {
+                : pythonfile(pfile), x{0}, y{0}, wid{0}, hei{0}, alpha(1.0f), index(ind), eventMask(ClickEvent),
+                  clickbtn(-1) {
             }
 
             virtual ~Link() {
@@ -98,76 +99,78 @@ public:
         class Goto : public Link {
         public:
             int index;
-            virtual void Click(::BaseInterface *base, float x, float y, int button, int state);
 
-            virtual ~Goto() {
+            void Click(::BaseInterface *base, float x, float y, int button, int state) override;
+
+            ~Goto() override {
             }
 
-            explicit Goto(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile) {
+            explicit Goto(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile), index{0} {
             }
 
 #ifdef BASE_MAKER
-            virtual void EndXML( FILE *fp );
+            void EndXML( FILE *fp ) override;
 #endif
         };
         class Comp : public Link {
         public:
-            vector<BaseComputer::DisplayMode> modes;
-            virtual void Click(::BaseInterface *base, float x, float y, int button, int state);
+            vector<DisplayMode> modes;
 
-            virtual ~Comp() {
+            void Click(::BaseInterface *base, float x, float y, int button, int state) override;
+
+            ~Comp() override {
             }
 
             explicit Comp(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile) {
             }
 
 #ifdef BASE_MAKER
-            virtual void EndXML( FILE *fp );
+            void EndXML( FILE *fp ) override;
 #endif
         };
         class Launch : public Link {
         public:
-            virtual void Click(::BaseInterface *base, float x, float y, int button, int state);
+            void Click(::BaseInterface *base, float x, float y, int button, int state) override;
 
-            virtual ~Launch() {
+            ~Launch() override {
             }
 
             explicit Launch(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile) {
             }
 
 #ifdef BASE_MAKER
-            virtual void EndXML( FILE *fp );
+            void EndXML( FILE *fp ) override;
 #endif
         };
         class Eject : public Link {
         public:
-            virtual void Click(::BaseInterface *base, float x, float y, int button, int state);
+            void Click(::BaseInterface *base, float x, float y, int button, int state) override;
 
-            virtual ~Eject() {
+            ~Eject() override {
             }
 
             explicit Eject(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile) {
             }
 
 #ifdef BASE_MAKER
-            virtual void EndXML( FILE *fp );
+            void EndXML( FILE *fp ) override;
 #endif
         };
         class Talk : public Link {
         public:
-//At the moment, the BaseInterface::Room::Talk class is unused... but I may find a use for it later...
+            //At the moment, the BaseInterface::Room::Talk class is unused... but I may find a use for it later...
             std::vector<std::string> say;
             std::vector<std::string> soundfiles;
             int index;
             int curroom;
-            virtual void Click(::BaseInterface *base, float x, float y, int button, int state);
+            void Click(::BaseInterface *base, float x, float y, int button, int state) override;
             explicit Talk(const std::string &ind, const std::string &pythonfile);
 
-            virtual ~Talk() {
+            ~Talk() override {
             }
 
 #ifdef BASE_MAKER
-            virtual void EndXML( FILE *fp );
+            void EndXML( FILE *fp ) override;
 #endif
         };
         class Python : public Link {
@@ -175,11 +178,11 @@ public:
             Python(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile) {
             }
 
-            virtual ~Python() {
+            ~Python() override {
             }
 
 #ifdef BASE_MAKER
-            virtual void EndXML( FILE *fp );
+            void EndXML( FILE *fp ) override;
 #endif
         };
         class BaseObj {
@@ -201,12 +204,13 @@ public:
             std::string pythonfile;
             float timeleft;
             float maxtime;
-            virtual void Draw(::BaseInterface *base);
+
+            void Draw(::BaseInterface *base) override;
 #ifdef BASE_MAKER
-            virtual void EndXML( FILE *fp );
+            void EndXML( FILE *fp ) override;
 #endif
 
-            virtual ~BasePython() {
+            ~BasePython() override {
             }
 
             BasePython(const std::string &ind, const std::string &python, float time)
@@ -218,12 +222,13 @@ public:
         class BaseText : public BaseObj {
         public:
             TextPlane text;
-            virtual void Draw(::BaseInterface *base);
+
+            void Draw(::BaseInterface *base) override;
 #ifdef BASE_MAKER
-            virtual void EndXML( FILE *fp );
+            void EndXML( FILE *fp ) override;
 #endif
 
-            virtual ~BaseText() {
+            ~BaseText() override {
             }
 
             BaseText(const std::string &texts,
@@ -259,14 +264,14 @@ public:
         };
         class BaseShip : public BaseObj {
         public:
-            virtual void Draw(::BaseInterface *base);
+            void Draw(::BaseInterface *base) override;
             Matrix mat;
 
-            virtual ~BaseShip() {
+            ~BaseShip() override {
             }
 
 #ifdef BASE_MAKER
-            virtual void EndXML( FILE *fp );
+            void EndXML( FILE *fp ) override;
 #endif
 
             explicit BaseShip(const std::string &ind) : BaseObj(ind) {
@@ -288,16 +293,17 @@ public:
         };
         class BaseVSSprite : public BaseObj {
         public:
-            virtual void Draw(::BaseInterface *base);
+            void Draw(::BaseInterface *base) override;
             VSSprite spr;
             SharedPtr<Audio::Source> soundsource;
             std::string soundscene;
 
 #ifdef BASE_MAKER
             std::string  texfile;
-            virtual void EndXML( FILE *fp );
+
+            void EndXML( FILE *fp ) override;
 #endif
-            virtual ~BaseVSSprite();
+            ~BaseVSSprite() override;
             BaseVSSprite(const std::string &spritefile, const std::string &ind);
             void SetSprite(const std::string &spritefile);
 
@@ -327,7 +333,7 @@ public:
             double hidePointerTime;
 
         public:
-            virtual ~BaseVSMovie() {
+            ~BaseVSMovie() override {
             }
 
             BaseVSMovie(const std::string &moviefile, const std::string &ind);
@@ -349,24 +355,25 @@ public:
                 this->callback = callback;
             }
 
-            virtual void Draw(::BaseInterface *base);
+            void Draw(::BaseInterface *base) override;
         };
 
         class BaseTalk : public BaseObj {
         public:
             static bool hastalked;
-            virtual void Draw(::BaseInterface *base);
+
+            void Draw(::BaseInterface *base) override;
 //Talk * caller;
             unsigned int curchar;
             float curtime;
 
-            virtual ~BaseTalk() {
+            ~BaseTalk() override {
             }
 
             std::string message;
             BaseTalk(const std::string &msg, const std::string &ind, bool only_one_talk);
 #ifdef BASE_MAKER
-            virtual void EndXML( FILE *fp ) {}
+            void EndXML( FILE *fp ) override {}
 #endif
         };
         std::string soundfile;
@@ -374,11 +381,11 @@ public:
         std::vector<Link *> links;
         std::vector<BaseObj *> objs;
 #ifdef BASE_MAKER
-        void EndXML( FILE *fp );
+        void EndXML( FILE *fp ) const;
 #endif
-        void Draw(::BaseInterface *base);
+        void Draw(::BaseInterface *base) const;
         void Click(::BaseInterface *base, float x, float y, int button, int state);
-        int MouseOver(::BaseInterface *base, float x, float y);
+        int MouseOver(::BaseInterface *base, float x, float y) const;
         Room();
         ~Room();
     };
@@ -395,7 +402,7 @@ public:
     std::string python_kbhandler;
 
 #ifdef BASE_MAKER
-    void EndXML( FILE *fp );
+    void EndXML( FILE *fp ) const;
 #endif
     void Terminate();
     void GotoLink(int linknum);
@@ -404,7 +411,7 @@ public:
     void Load(const char *filename, const char *time_of_day, const char *faction);
     static void ClickWin(int x, int y, int button, int state);
     void Click(int x, int y, int button, int state);
-    void Key(unsigned int ch, unsigned int mod, bool release, int x, int y);
+    void Key(unsigned int ch, unsigned int mod, bool release, int x, int y) const;
     static void PassiveMouseOverWin(int x, int y);
     static void ActiveMouseOverWin(int x, int y);
     static void ProcessKeyboardBuffer();

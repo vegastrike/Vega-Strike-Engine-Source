@@ -58,7 +58,7 @@ typedef boost::python::dict Dictionary;
 typedef boost::python::dictionary           Dictionary;
 #endif
 
-int Room(std::string text);
+int Room(const std::string &text);
 void Texture(int room, std::string index, std::string file, float x, float y);
 bool Video(int room, std::string index, std::string vfile, std::string afile, float x, float y);
 bool VideoStream(int room, std::string index, std::string streamfile, float x, float y, float w, float h);
