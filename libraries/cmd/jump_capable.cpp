@@ -164,7 +164,6 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     if (ss == nullptr) {
         ss = _Universe->activeStarSystem();
     }
-    Unit *un = nullptr;
     QVector start(unit->Position());
     QVector end(RealPosition(target));
     float totallength = (start - end).Magnitude();
@@ -209,12 +208,13 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     bool unsafe = false;
     if ((!teleport_autopilot) && (!nanspace)) {
         if (Guaranteed == Mission::AUTO_NORMAL && unit->cloak.Cloaked()) {
-            bool ignore_friendlies = true;
+            Unit *un = nullptr;
             for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != nullptr; ++i) {
                 const bool canflythruplanets = configuration().physics.can_auto_through_planets;
                 if ((!(un->getUnitType() == Vega_UnitType::planet
                         && canflythruplanets)) && un->getUnitType() != Vega_UnitType::nebula && (!UnitUtil::isSun(un))) {
                     if (un != this && un != target) {
+                        bool ignore_friendlies = true;
                         float tdis = (start - un->Position()).Magnitude() - unit->rSize() - un->rSize();
                         float nedis = (end - un->Position()).Magnitude() - unit->rSize() - un->rSize();
                         float trad =
@@ -257,10 +257,10 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             }
         }
     }
-    bool nowhere = false;
     if (this != target) {
+        bool nowhere = false;
         if ((end - start).MagnitudeSquared()
-                < (static_cast<double>(unit->rSize()) * static_cast<double>(unit->rSize()))) {
+            < (static_cast<double>(unit->rSize()) * static_cast<double>(unit->rSize()))) {
             failuremessage = configuration().graphics.hud.already_near_message;
             return false;
         }
@@ -334,12 +334,11 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         if (!nowhere) {
             unit->SetCurPosition(sep);
         }
-        Cockpit *cp;
-        if ((cp = _Universe->isPlayerStarship(const_unit)) != nullptr) {
-            std::string followermessage;
+        if (_Universe->isPlayerStarship(const_unit) != nullptr) {
             if (unit->getFlightgroup() != nullptr) {
-                Unit *other = nullptr;
                 if (recursive_level > 0) {
+                    Unit *other = nullptr;
+                    std::string follower_message;
                     for (un_iter ui = ss->getUnitList().createIterator(); nullptr != (other = *ui); ++ui) {
                         Flightgroup *ff = other->getFlightgroup();
                         bool leadah = (ff == unit->getFlightgroup());
@@ -353,7 +352,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                             if (otherord->PursueTarget(unit, leadah)) {
                                 other->AutoPilotToErrorMessage(unit,
                                         ignore_energy_requirements,
-                                        followermessage,
+                                        follower_message,
                                         recursive_level - 1);
                                 if (leadah) {
                                     if (other->IsPlayerShip()) {
@@ -392,7 +391,7 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
     //inverse fractional effect of ship vs real big object
     const float def_inv_interdiction = 1.0 / configuration().physics.default_interdiction_flt;
     Unit *planet;
-    Unit *testthis = NULL;
+    Unit *testthis = nullptr;
     {
         NearestUnitLocator locatespec;
         findObjects(_Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY],
@@ -404,9 +403,9 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
             (planet = *iter) || testthis;
             ++iter) {
         if (!planet || !planet->Killed()) {
-            if (planet == NULL) {
+            if (planet == nullptr) {
                 planet = testthis;
-                testthis = NULL;
+                testthis = nullptr;
             }
             if (planet == this) {
                 continue;
@@ -456,7 +455,7 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 } else {
                     break;
                 }
-            } while (0);
+            } while (false);
             if (!testthis) {
                 break;
             } //don't want the ++
@@ -568,23 +567,23 @@ Vector JumpCapable::GetWarpVelocity() const {
     }
 }
 
-bool JumpCapable::InCorrectStarSystem(StarSystem *active) {
+bool JumpCapable::InCorrectStarSystem(const StarSystem *active) {
     return active == activeStarSystem;
 }
 
-bool JumpCapable::TransferUnitToSystem(StarSystem *Current) {
-    Unit *unit = static_cast<Unit *>(this);
+bool JumpCapable::TransferUnitToSystem(StarSystem *new_system) {
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     if (getStarSystem()->RemoveUnit(unit)) {
         unit->RemoveFromSystem();
-        unit->Target(NULL);
-        Current->AddUnit(unit);
+        unit->Target(nullptr);
+        new_system->AddUnit(unit);
 
         Cockpit *an_active_cockpit = _Universe->isPlayerStarship(unit);
-        if (an_active_cockpit != NULL) {
-            an_active_cockpit->activeStarSystem = Current;
-            an_active_cockpit->visitSystem(Current->getFileName());
+        if (an_active_cockpit != nullptr) {
+            an_active_cockpit->activeStarSystem = new_system;
+            an_active_cockpit->visitSystem(new_system->getFileName());
         }
-        activeStarSystem = Current;
+        activeStarSystem = new_system;
         return true;
     } else {
         VS_LOG_AND_FLUSH(fatal, "Fatal Error: cannot remove starship from critical system");

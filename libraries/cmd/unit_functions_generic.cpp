@@ -74,14 +74,14 @@ const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction 
     return partUnit;
 }
 
-int SelectDockPort(Unit *utdw, Unit *parent) {
-    const vector<DockingPorts> *dp = &utdw->DockingPortLocations();
+int SelectDockPort(const Unit *unit_to_dock_with, const Unit *parent) {
+    const vector<DockingPorts> *dp = &unit_to_dock_with->DockingPortLocations();
     float dist = FLT_MAX;
     int num = -1;
     for (unsigned int i = 0; i < dp->size(); ++i) {
         if (!(*dp)[i].IsOccupied()) {
-            Vector rez = Transform(utdw->GetTransformation(), (*dp)[i].GetPosition());
-            float wdist = (rez - parent->Position()).MagnitudeSquared();
+            Vector rez = Transform(unit_to_dock_with->GetTransformation(), (*dp)[i].GetPosition());
+            const float wdist = (rez - parent->Position()).MagnitudeSquared();
             if (wdist < dist) {
                 num = i;
                 dist = wdist;

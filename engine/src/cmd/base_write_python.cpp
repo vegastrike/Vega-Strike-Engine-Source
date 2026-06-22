@@ -49,7 +49,7 @@ void BaseInterface::Room::Python::EndXML( FILE *fp )
 {
     VSFileSystem::vs_fprintf( fp, "Base.Python (" );
     Link::EndXML( fp );
-    VSFileSystem::vs_fprintf( fp, ", '%s')\n", file.c_str() );
+    VSFileSystem::vs_fprintf( fp, ", '%s')\n", pythonfile.c_str() );
 }
 
 void BaseInterface::Room::Talk::EndXML( FILE *fp )
@@ -73,7 +73,7 @@ void BaseInterface::Room::Talk::EndXML( FILE *fp )
         if ( !( soundfiles[i].empty() ) )
             VSFileSystem::vs_fprintf( fp, "  VS.playSound ('%s', (0,0,0), (0,0,0))\n", soundfiles[i].c_str() );
     }
-    //obolete... creates a file that uses the Python function instead.
+    //obsolete... creates a file that uses the Python function instead.
 }
 
 void BaseInterface::Room::Launch::EndXML( FILE *fp )
@@ -93,34 +93,37 @@ void BaseInterface::Room::Comp::EndXML( FILE *fp )
 {
     VSFileSystem::vs_fprintf( fp, "Base.Comp (" );
     Link::EndXML( fp );
-    VSFileSystem::Write( ", '", 3, 1, fp );
-    for (int i = 0; i < modes.size(); i++) {
-        char *mode = NULL;
-        switch (modes[i])
-        {
-        case BaseComputer::CARGO:
-            mode = "Cargo";
-            break;
-        case BaseComputer::UPGRADE:
-            mode = "Upgrade";
-            break;
-        case BaseComputer::SHIP_DEALER:
-            mode = "ShipDealer";
-            break;
-        case BaseComputer::MISSIONS:
-            mode = "Missions";
-            break;
-        case BaseComputer::NEWS:
-            mode = "News";
-            break;
-        case BaseComputer::INFO:
-            mode = "Info";
-            break;
+    VSFileSystem::vs_write( ", '", 3, 1, fp );
+    for (const auto each_mode : modes) {
+        std::string mode_string;
+        switch (modes.at(RAW_DISPLAY_MODE(each_mode))) {
+            case DisplayMode::CARGO:
+                mode_string = "Cargo";
+                break;
+            case DisplayMode::UPGRADE:
+                mode_string = "Upgrade";
+                break;
+            case DisplayMode::SHIP_DEALER:
+                mode_string = "ShipDealer";
+                break;
+            case DisplayMode::MISSIONS:
+                mode_string = "Missions";
+                break;
+            case DisplayMode::NEWS:
+                mode_string = "News";
+                break;
+            case DisplayMode::INFO:
+                mode_string = "Info";
+                break;
+            default:
+                break;
         }
-        if (mode)
-            VSFileSystem::vs_fprintf( fp, "%s ", mode );
-        if ( (i+1) == ( modes.size() ) )
+        if (!mode_string.empty()) {
+            VSFileSystem::vs_fprintf( fp, "%s ", mode_string.c_str() );
+        }
+        if (each_mode == modes.at(modes.size() - 1)) {
             VSFileSystem::vs_fprintf( fp, "'" );
+        }
     }
     VSFileSystem::vs_fprintf( fp, ")\n" );
 }
@@ -145,25 +148,27 @@ void BaseInterface::Room::BaseVSSprite::EndXML( FILE *fp )
     VSFileSystem::vs_fprintf( fp, "Base.Texture (room, '%s', '%s', %g, %g)\n", index.c_str(), texfile.c_str(), x, y );
 }
 
-void BaseInterface::Room::EndXML( FILE *fp )
-{
-    int i;
-    i = VSFileSystem::vs_fprintf( fp, "room = Base.Room ('%s')\n", deftext.c_str() );
-    for (i = 0; i < links.size(); i++)
-        if (links[i])
-            links[i]->EndXML( fp );
-    for (i = 0; i < objs.size(); i++)
-        if (objs[i])
-            objs[i]->EndXML( fp );
-    VSFileSystem::vs_fprintf( fp, "\n" );
-    fflush( fp );
+void BaseInterface::Room::EndXML(FILE *fp) const {
+    int i = VSFileSystem::vs_fprintf(fp, "room = Base.Room ('%s')\n", deftext.c_str());
+    for (i = 0; i < links.size(); i++) {
+        if (links[i]) {
+            links[i]->EndXML(fp);
+        }
+    }
+    for (i = 0; i < objs.size(); i++) {
+        if (objs[i]) {
+            objs[i]->EndXML(fp);
+        }
+    }
+    VSFileSystem::vs_fprintf(fp, "\n");
+    fflush(fp);
 }
 
-void BaseInterface::EndXML( FILE *fp )
-{
-    VSFileSystem::vs_fprintf( fp, "import Base\n\n" );
-    for (int i = 0; i < rooms.size(); i++)
-        rooms[i]->EndXML( fp );
+void BaseInterface::EndXML(FILE *fp) const {
+    VSFileSystem::vs_fprintf(fp, "import Base\n\n");
+    for (int i = 0; i < rooms.size(); i++) {
+        rooms[i]->EndXML(fp);
+    }
 }
 
 //#endif

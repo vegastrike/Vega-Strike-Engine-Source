@@ -55,8 +55,8 @@ public:
     const StarSystem *getStarSystem() const;
     Vector GetWarpRefVelocity() const;
     Vector GetWarpVelocity() const;
-    bool InCorrectStarSystem(StarSystem *);
-    virtual bool TransferUnitToSystem(StarSystem *NewSystem);
+    bool InCorrectStarSystem(const StarSystem *);
+    virtual bool TransferUnitToSystem(StarSystem *new_system);
     virtual bool TransferUnitToSystem(unsigned int whichJumpQueue,
             class StarSystem *&previouslyActiveStarSystem,
             bool DoSightAndSound);
