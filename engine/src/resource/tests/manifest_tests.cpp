@@ -111,7 +111,7 @@ TEST(Cargo, GetCargoQtyAndPriceImplementations) {
     constexpr double kPriceDeviation = 0.1;
     constexpr double kQuantityDeviation = 0.1;
     constexpr double kMinPrice = 0.01;
-    constexpr double kMaxPriceAdd = 100.00;
+    constexpr double kMaxPriceMult = 10.00;
     constexpr int    kMinQuantity = 0;
     const std::string kCargoCategory = "upgrades/Armor";
 
@@ -135,8 +135,8 @@ TEST(Cargo, GetCargoQtyAndPriceImplementations) {
     }
 
     for (const Cargo& cargo : cargo_list) {
-        Cargo cargo_old_way = Cargo::GetCargoQtyAndPriceOldWay(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, cargo.GetPrice() + kMaxPriceAdd, cargo);
-        Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, cargo.GetPrice() + kMaxPriceAdd, cargo);
+        Cargo cargo_old_way = Cargo::GetCargoQtyAndPriceOldWay(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, cargo.GetPrice() * kMaxPriceMult, cargo);
+        Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, cargo.GetPrice() * kMaxPriceMult, cargo);
 
         ASSERT_EQ(cargo_old_way.GetName(), cargo.GetName());
         ASSERT_EQ(cargo_new_way.GetName(), cargo.GetName());
@@ -156,6 +156,6 @@ TEST(Cargo, GetCargoQtyAndPriceImplementations) {
         ASSERT_GE(cargo_old_way.GetPrice(), kMinPrice);
         ASSERT_GE(cargo_new_way.GetPrice(), kMinPrice);
         // ASSERT_LE(cargo_old_way.GetPrice(), cargo.GetPrice() + kMaxPriceAdd);
-        ASSERT_LE(cargo_new_way.GetPrice(), cargo.GetPrice() + kMaxPriceAdd);
+        ASSERT_LE(cargo_new_way.GetPrice(), cargo.GetPrice() * kMaxPriceMult);
     }
 }
