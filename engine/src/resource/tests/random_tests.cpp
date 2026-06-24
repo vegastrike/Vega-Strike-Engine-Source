@@ -285,3 +285,37 @@ TEST(VegaRandom, NormalDistribution_Float) {
         EXPECT_LE(random_float, 10.0F);
     }
 }
+
+TEST(VegaRandom, NormalDistribution_DoubleWithinVeryCloseTolerances) {
+    double random_double = VegaRandom::Instance().NormalDistribution(1.0, 2.0, 1.0, 1.0);
+    ASSERT_DOUBLE_EQ(random_double, 1.0);
+
+    random_double = VegaRandom::Instance().NormalDistribution(1.0, 0.0, 0.0, 10.0);
+    ASSERT_DOUBLE_EQ(random_double, 1.0);
+
+    random_double = VegaRandom::Instance().NormalDistribution(0.3, 2.0, 0.3, 0.1 + 0.2);
+    ASSERT_DOUBLE_EQ(random_double, 0.3);
+}
+
+TEST(VegaRandom, NormalDistribution_FloatWithinVeryCloseTolerances) {
+    float random_float = VegaRandom::Instance().NormalDistribution(1.0F, 2.0F, 1.0F, 1.0F);
+    ASSERT_FLOAT_EQ(random_float, 1.0F);
+
+    random_float = VegaRandom::Instance().NormalDistribution(1.0F, 0.0F, 0.0F, 10.0F);
+    ASSERT_FLOAT_EQ(random_float, 1.0F);
+
+    random_float = VegaRandom::Instance().NormalDistribution(0.3F, 2.0F, 0.3F, 0.1F + 0.2F);
+    ASSERT_FLOAT_EQ(random_float, 0.3F);
+}
+
+TEST(VegaRandom, NormalDistribution_DoubleInvalidArguments) {
+    ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(1.0, -1.0, 0.0, 10.0); }, std::domain_error);
+    ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(1.0, 1.0, 2.0, 0.0); }, std::domain_error);
+    ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(-1.0, 1.0, 0.0, 10.0); }, std::domain_error);
+}
+
+TEST(VegaRandom, NormalDistribution_FloatInvalidArguments) {
+    ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(1.0F, -1.0F, 0.0F, 10.0F); }, std::domain_error);
+    ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(1.0F, 1.0F, 2.0F, 0.0F); }, std::domain_error);
+    ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(-1.0F, 1.0F, 0.0F, 10.0F); }, std::domain_error);
+}

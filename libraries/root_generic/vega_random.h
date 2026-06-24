@@ -31,6 +31,9 @@
 #include <random>
 #include <cstdint>
 #include <limits>
+#include <stdexcept>
+
+#include "src/vs_math.h"
 
 constexpr int_fast32_t kVegaIntFast32tMax = std::numeric_limits<int_fast32_t>::max();
 constexpr int_least32_t kVegaIntLeast32tMax = std::numeric_limits<int_least32_t>::max();
@@ -121,6 +124,23 @@ public:
     /// generates a random double on a normal distribution defined by mean and standard_deviation, and guaranteed to be
     /// between min and max, inclusive
     double NormalDistribution(const double mean, const double standard_deviation, const double min, const double max) {
+        // Validate parameters
+        if (min > max) {
+            throw std::domain_error("min must be less than or equal to max");
+        }
+        if (mean < min || mean > max) {
+            throw std::domain_error("mean must be between min and max, inclusive");
+        }
+        if (standard_deviation < 0.0) {
+            throw std::domain_error("standard_deviation must be greater than or equal to zero");
+        }
+        if (equal_within_ulps(min, max, 1)) {
+            return mean;
+        }
+        if (equal_within_ulps(standard_deviation, 0.0, 1)) {
+            return mean;
+        }
+
         std::normal_distribution<double> normal_dist(mean, standard_deviation);
         double random_double;
         do {
@@ -132,6 +152,23 @@ public:
     /// generates a random float on a normal distribution defined by mean and standard_deviation, and guaranteed to be
     /// between min and max, inclusive
     float NormalDistribution(const float mean, const float standard_deviation, const float min, const float max) {
+        // Validate parameters
+        if (min > max) {
+            throw std::domain_error("min must be less than or equal to max");
+        }
+        if (mean < min || mean > max) {
+            throw std::domain_error("mean must be between min and max, inclusive");
+        }
+        if (standard_deviation < 0.0F) {
+            throw std::domain_error("standard_deviation must be greater than or equal to zero");
+        }
+        if (equal_within_ulps(min, max, 1)) {
+            return mean;
+        }
+        if (equal_within_ulps(standard_deviation, 0.0F, 1)) {
+            return mean;
+        }
+
         std::normal_distribution<float> normal_dist(mean, standard_deviation);
         float random_float;
         do {
