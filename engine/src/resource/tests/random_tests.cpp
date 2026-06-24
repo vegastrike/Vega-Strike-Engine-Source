@@ -262,6 +262,26 @@ TEST(VegaRandom, RandomSizeTLessThan) {
         EXPECT_GE(random_index, 0);
         EXPECT_LT(random_index, test_vector_size);
         EXPECT_LT(random_index, test_vector.size());
-        ASSERT_NO_THROW(test_vector.at(random_index));
+        int _result{};
+        ASSERT_NO_THROW(_result = test_vector.at(random_index));
+        EXPECT_EQ(_result, test_vector.at(random_index));
+        EXPECT_GE(_result, 0);
+        EXPECT_LE(_result, std::numeric_limits<int_least32_t>::max());
+    }
+}
+
+TEST(VegaRandom, NormalDistribution_Double) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        double random_double = VegaRandom::Instance().NormalDistribution(5.0, 2.0, 0.0, 10.0);
+        EXPECT_GE(random_double, 0.0);
+        EXPECT_LE(random_double, 10.0);
+    }
+}
+
+TEST(VegaRandom, NormalDistribution_Float) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        float random_float = VegaRandom::Instance().NormalDistribution(5.0F, 2.0F, 0.0F, 10.0F);
+        EXPECT_GE(random_float, 0.0F);
+        EXPECT_LE(random_float, 10.0F);
     }
 }
