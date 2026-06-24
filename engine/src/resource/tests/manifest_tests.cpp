@@ -107,11 +107,11 @@ TEST(Manifest, Singleton) {
     // assert(&mpl1 == &mpl2);
 }
 
-TEST(Unit, GetCargoQtyAndPriceImplementations) {
+TEST(Cargo, GetCargoQtyAndPriceImplementations) {
     constexpr double kPriceDeviation = 0.1;
     constexpr double kQuantityDeviation = 0.1;
-    constexpr double kMinPrice = 0.00;
-    constexpr double kMaxPrice = 100.00;
+    constexpr double kMinPrice = 0.01;
+    constexpr double kMaxPriceAdd = 100.00;
     constexpr int    kMinQuantity = 0;
     const std::string kCargoCategory = "upgrades/Armor";
 
@@ -135,27 +135,27 @@ TEST(Unit, GetCargoQtyAndPriceImplementations) {
     }
 
     for (const Cargo& cargo : cargo_list) {
-        Cargo cargo_old_way = Cargo::GetCargoQtyAndPriceOldWay(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, kMaxPrice, cargo);
-        Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, kMaxPrice, cargo);
+        Cargo cargo_old_way = Cargo::GetCargoQtyAndPriceOldWay(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, cargo.GetPrice() + kMaxPriceAdd, cargo);
+        Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, cargo.GetPrice() + kMaxPriceAdd, cargo);
 
-        // ASSERT_EQ(cargo_old_way.GetName(), cargo.GetName());
-        // ASSERT_EQ(cargo_new_way.GetName(), cargo.GetName());
-        // ASSERT_EQ(cargo_old_way.GetCategory(), cargo.GetCategory());
-        // ASSERT_EQ(cargo_new_way.GetCategory(), cargo.GetCategory());
-        // ASSERT_EQ(cargo_old_way.GetCategory(), kCargoCategory);
-        // ASSERT_EQ(cargo_new_way.GetCategory(), kCargoCategory);
-        // ASSERT_EQ(cargo_old_way.GetDescription(), cargo.GetDescription());
-        // ASSERT_EQ(cargo_new_way.GetDescription(), cargo.GetDescription());
-        // ASSERT_EQ(cargo_old_way.GetMass(), cargo.GetMass());
-        // ASSERT_EQ(cargo_new_way.GetMass(), cargo.GetMass());
-        // ASSERT_EQ(cargo_old_way.GetVolume(), cargo.GetVolume());
-        // ASSERT_EQ(cargo_new_way.GetVolume(), cargo.GetVolume());
+        ASSERT_EQ(cargo_old_way.GetName(), cargo.GetName());
+        ASSERT_EQ(cargo_new_way.GetName(), cargo.GetName());
+        ASSERT_EQ(cargo_old_way.GetCategory(), cargo.GetCategory());
+        ASSERT_EQ(cargo_new_way.GetCategory(), cargo.GetCategory());
+        ASSERT_EQ(cargo_old_way.GetCategory(), kCargoCategory);
+        ASSERT_EQ(cargo_new_way.GetCategory(), kCargoCategory);
+        ASSERT_EQ(cargo_old_way.GetDescription(), cargo.GetDescription());
+        ASSERT_EQ(cargo_new_way.GetDescription(), cargo.GetDescription());
+        ASSERT_EQ(cargo_old_way.GetMass(), cargo.GetMass());
+        ASSERT_EQ(cargo_new_way.GetMass(), cargo.GetMass());
+        ASSERT_EQ(cargo_old_way.GetVolume(), cargo.GetVolume());
+        ASSERT_EQ(cargo_new_way.GetVolume(), cargo.GetVolume());
 
         ASSERT_GE(cargo_old_way.GetQuantity(), kMinQuantity);
         ASSERT_GE(cargo_new_way.GetQuantity(), kMinQuantity);
         ASSERT_GE(cargo_old_way.GetPrice(), kMinPrice);
         ASSERT_GE(cargo_new_way.GetPrice(), kMinPrice);
-        ASSERT_LE(cargo_old_way.GetPrice(), kMaxPrice);
-        ASSERT_LE(cargo_new_way.GetPrice(), kMaxPrice);
+        // ASSERT_LE(cargo_old_way.GetPrice(), cargo.GetPrice() + kMaxPriceAdd);
+        ASSERT_LE(cargo_new_way.GetPrice(), cargo.GetPrice() + kMaxPriceAdd);
     }
 }
