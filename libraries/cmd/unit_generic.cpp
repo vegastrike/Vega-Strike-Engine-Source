@@ -32,6 +32,7 @@
 #include "cmd/unit_generic.h"
 
 #include <set>
+#include <cfenv>
 #include "root_generic/configxml.h"
 #include "src/audiolib.h"
 #include "cmd/base.h"
@@ -3059,11 +3060,17 @@ Cargo Unit::GetCargoQtyAndPriceOldWay(const double price, const double price_dev
 Cargo Unit::GetCargoQtyAndPriceCpp11StdDev(const double price, const double price_deviation, const double quantity,
                                             const double quantity_deviation, const double min_cargo_price, const double max_cargo_price, const Cargo &cargo) {
     Cargo return_value = cargo;
+    std::fesetround(FE_TONEAREST);
 
-    const double true_minimum_price = std::min(min_cargo_price, configuration().cargo.min_cargo_price_dbl);
+    const double true_minimum_price = std::max(min_cargo_price, configuration().cargo.min_cargo_price_dbl);
 
-    return_value.SetQuantity(double_to_int(VegaRandom::Instance().NormalDistribution(quantity, quantity_deviation, 0, std::numeric_limits<int>::max())));
-    return_value.SetPrice(VegaRandom::Instance().NormalDistribution(price, price_deviation, true_minimum_price, max_cargo_price));
+    double qty_dbl = VegaRandom::Instance().NormalDistribution(quantity, quantity_deviation, 0, std::numeric_limits<int>::max());
+    int qty_int = std::rint(qty_dbl);
+    return_value.SetQuantity(qty_int);
+
+    double price1 = VegaRandom::Instance().NormalDistribution(price, price_deviation, true_minimum_price, max_cargo_price);
+    double price_rounded = std::rint(price1 * 100.0) / 100.0;
+    return_value.SetPrice(price_rounded);
 
     return return_value;
 }
