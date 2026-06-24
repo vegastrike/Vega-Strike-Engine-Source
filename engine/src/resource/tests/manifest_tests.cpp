@@ -107,28 +107,56 @@ TEST(Manifest, Singleton) {
     // assert(&mpl1 == &mpl2);
 }
 
-// TEST(Unit, GetCargoQtyAndPriceImplementations) {
-//     const Manifest manifest = createManifest();
-//     const Manifest category_manifest = manifest.GetCategoryManifest("upgrades/Armor");
-//
-//     const std::vector<Cargo> cargo_list = category_manifest.GetItems();
-//     Unit test_unit{};
-//
-//     // Find the minimum and maximum prices in the cargo list
-//     // We start with extreme values but at the end, min < max
-//     float min_cargo_price = std::numeric_limits<float>::max();
-//     float max_cargo_price = 0.0F;
-//     for (const Cargo& cargo : cargo_list) {
-//         const float price1 = cargo.GetPrice();
-//         if (price1 < min_cargo_price) {
-//             min_cargo_price = price1;
-//         }
-//         if (price1 > max_cargo_price) {
-//             max_cargo_price = price1;
-//         }
-//     }
-//
-//     for (const Cargo& cargo : cargo_list) {
-//         Cargo cargo_old_way = Unit::GetCargoQtyAndPriceOldWay();
-//     }
-// }
+TEST(Unit, GetCargoQtyAndPriceImplementations) {
+    constexpr double kPriceDeviation = 0.1;
+    constexpr double kQuantityDeviation = 0.1;
+    constexpr double kMinPrice = 0.00;
+    constexpr double kMaxPrice = 100.00;
+    constexpr int    kMinQuantity = 0;
+    const std::string kCargoCategory = "upgrades/Armor";
+
+    const Manifest manifest = createManifest();
+    const Manifest category_manifest = manifest.GetCategoryManifest(kCargoCategory);
+
+    const std::vector<Cargo> cargo_list = category_manifest.GetItems();
+    Unit test_unit{};
+
+    // Find the minimum and maximum prices in the cargo list
+    // We start with extreme values but at the end, min < max
+    float min_cargo_price = std::numeric_limits<float>::max();
+    float max_cargo_price = 0.0F;
+    for (const Cargo& cargo : cargo_list) {
+        const float price1 = cargo.GetPrice();
+        if (price1 < min_cargo_price) {
+            min_cargo_price = price1;
+        }
+        if (price1 > max_cargo_price) {
+            max_cargo_price = price1;
+        }
+    }
+
+    for (const Cargo& cargo : cargo_list) {
+        Cargo cargo_old_way = Unit::GetCargoQtyAndPriceOldWay(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, kMaxPrice, cargo);
+        Cargo cargo_new_way = Unit::GetCargoQtyAndPriceCpp11StdDev(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, kMaxPrice, cargo);
+
+        ASSERT_EQ(cargo_old_way.GetName(), cargo.GetName());
+        ASSERT_EQ(cargo_new_way.GetName(), cargo.GetName());
+        ASSERT_EQ(cargo_old_way.GetCategory(), cargo.GetCategory());
+        ASSERT_EQ(cargo_new_way.GetCategory(), cargo.GetCategory());
+        ASSERT_EQ(cargo_old_way.GetCategory(), kCargoCategory);
+        ASSERT_EQ(cargo_new_way.GetCategory(), kCargoCategory);
+        ASSERT_EQ(cargo_old_way.GetDescription(), cargo.GetDescription());
+        ASSERT_EQ(cargo_new_way.GetDescription(), cargo.GetDescription());
+        ASSERT_EQ(cargo_old_way.GetMass(), cargo.GetMass());
+        ASSERT_EQ(cargo_new_way.GetMass(), cargo.GetMass());
+        ASSERT_EQ(cargo_old_way.GetVolume(), cargo.GetVolume());
+        ASSERT_EQ(cargo_new_way.GetVolume(), cargo.GetVolume());
+
+        ASSERT_GE(cargo_old_way.GetQuantity(), kMinQuantity);
+        ASSERT_GE(cargo_new_way.GetQuantity(), kMinQuantity);
+        ASSERT_GE(cargo_old_way.GetPrice(), kMinPrice);
+        ASSERT_GE(cargo_new_way.GetPrice(), kMinPrice);
+        ASSERT_LE(cargo_old_way.GetPrice(), kMaxPrice);
+        ASSERT_LE(cargo_new_way.GetPrice(), kMaxPrice);
+    }
+}
