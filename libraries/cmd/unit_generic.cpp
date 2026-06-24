@@ -3016,6 +3016,8 @@ bool myless(const Cargo &a, const Cargo &b) {
 
 void Unit::ImportPartListImpl(Unit *thus, const std::vector<Cargo> &cargo_list, const float price, const float price_deviation, const float quantity, const float quantity_deviation, const
                               bool generate_histograms) {
+    // constexpr float kMaxPriceMult = 2.00F;
+
     VS_LOG(trace, (boost::format("%1%: called with price %2%, price_deviation %3%, quantity %4%, quantity_deviation %5%, and generate_histograms %6%") % __FUNCTION__ % price % price_deviation % quantity % quantity_deviation % generate_histograms));
 
     // Find the minimum and maximum prices in the cargo list
@@ -3031,6 +3033,8 @@ void Unit::ImportPartListImpl(Unit *thus, const std::vector<Cargo> &cargo_list, 
             max_cargo_price = price1;
         }
     }
+
+    // max_cargo_price *= kMaxPriceMult;
 
     for (const Cargo& cargo : cargo_list) {
         if (generate_histograms) {

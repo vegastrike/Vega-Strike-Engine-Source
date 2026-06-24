@@ -166,6 +166,8 @@ TEST(Cargo, GetCargoQtyAndPriceHistograms) {
     constexpr double kPriceDeviation = 0.1;
     constexpr double kQuantityDeviation = 0.1;
     constexpr float kMaxPriceMult = 10.00F;
+    constexpr auto kIterations = 10000;
+    constexpr auto kHistogramDisplayAdjust = 200;
     const std::string kCargoCategory = "upgrades/Armor";
 
     const Manifest manifest = createManifest();
@@ -189,8 +191,6 @@ TEST(Cargo, GetCargoQtyAndPriceHistograms) {
     max_cargo_price *= kMaxPriceMult;
 
     for (const Cargo& cargo : cargo_list) {
-        constexpr auto kIterations = 10000;
-        constexpr auto kHistogramDisplayAdjust = 200;
         // Borrows heavily from sample code at https://en.cppreference.com/cpp/numeric/random/normal_distribution
         // Retrieved 2026-05-23
         VS_LOG(trace, (boost::format("  Histograms for cargo %1%:") % cargo.GetName()));
