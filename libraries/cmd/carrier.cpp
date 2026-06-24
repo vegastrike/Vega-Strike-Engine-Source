@@ -26,6 +26,8 @@
  */
 
 
+#include <cfenv>
+
 #include "cmd/carrier.h"
 
 #include "root_generic/configxml.h"
@@ -389,3 +391,69 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
     return mangled;
 }
 
+Cargo Carrier::GetCargo(unsigned int index) const {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+    return unit->cargo_hold.GetCargo(index);
+}
+
+Cargo Carrier::GetCargoQtyAndPriceOldWay(double price, double price_deviation, double quantity,
+    double quantity_deviation, double min_cargo_price, double max_cargo_price, const Cargo &cargo) {
+    Cargo return_value = cargo; // Copy the cargo item
+    const double average_weight = abs(configuration().cargo.price_recenter_factor_dbl);
+    return_value.SetQuantity(double_to_int(quantity - quantity_deviation));
+    const double base_price = return_value.GetPrice();
+    return_value.SetPrice(return_value.GetPrice() * (price - price_deviation));
+
+    // The comment in the code describing this as the "stupid way" has been there for a long time. It did not originate with me.
+    // I do not blame the original developers for going with a simpler solution when a true normal-distribution, standard-deviation
+    // algorithm may not have been as readily available. But times have changed. C++11 provides this functionality built in.
+
+    //stupid way
+    return_value.SetQuantity(return_value.GetQuantity() + double_to_int((quantity_deviation * 2 + 1) * VegaRandom::Instance().GenRandReal2()));
+    return_value.SetPrice(return_value.GetPrice() + price_deviation * 2.0 * VegaRandom::Instance().RandomDouble());
+    return_value.SetPrice(abs(return_value.GetPrice()));
+    return_value.SetPrice((return_value.GetPrice() + (base_price * average_weight)) / (average_weight + 1));
+    if (return_value.GetQuantity() <= 0) {
+        return_value.SetQuantity(0);
+    }
+    //quantity more than zero
+    else if (max_cargo_price > min_cargo_price + .01) {
+        double renorm_price = (base_price - min_cargo_price) / (max_cargo_price - min_cargo_price);
+        const double max_price_quant_adj = configuration().cargo.max_price_quant_adj_dbl;
+        const double min_price_quant_adj = configuration().cargo.min_price_quant_adj_dbl;
+        const double powah = configuration().cargo.price_quant_adj_power_dbl;
+        renorm_price = std::pow(renorm_price, powah);
+        renorm_price *= (max_price_quant_adj - min_price_quant_adj);
+        renorm_price += 1;
+        if (renorm_price > .001) {
+            return_value.SetQuantity(return_value.GetQuantity() / float_to_int(renorm_price));
+            if (return_value.GetQuantity() < 1) {
+                return_value.SetQuantity(1);
+            }
+        }
+    }
+    const double min_price = configuration().cargo.min_cargo_price_dbl;
+    if (return_value.GetPrice() < min_price) {
+        return_value.SetPrice(min_price);
+    }
+    return return_value;
+}
+
+Cargo Carrier::GetCargoQtyAndPriceCpp11StdDev(double price, double price_deviation, double quantity,
+    double quantity_deviation, double min_cargo_price, double max_cargo_price, const Cargo &cargo) {
+    Cargo return_value = cargo;
+    std::fesetround(FE_TONEAREST);
+
+    const double true_minimum_price = std::max(min_cargo_price, configuration().cargo.min_cargo_price_dbl);
+
+    double qty_dbl = VegaRandom::Instance().NormalDistribution(quantity, quantity_deviation, 0, std::numeric_limits<int>::max());
+    int qty_int = std::rint(qty_dbl);
+    return_value.SetQuantity(qty_int);
+
+    double price1 = VegaRandom::Instance().NormalDistribution(price, price_deviation, true_minimum_price, max_cargo_price);
+    // Round to two decimal places
+    double price_rounded = std::rint(price1 * 100.0) / 100.0;
+    return_value.SetPrice(price_rounded);
+
+    return return_value;
+}

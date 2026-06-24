@@ -287,12 +287,6 @@ public:
             bool force_change_on_nothing,
             bool gen_downgrade_list);
 
-    static Cargo GetCargoQtyAndPriceOldWay(double price, double price_deviation, double quantity,
-                                              double quantity_deviation,
-                                              double min_cargo_price, double max_cargo_price, const Cargo &cargo);
-    static Cargo GetCargoQtyAndPriceCpp11StdDev(double price, double price_deviation, double quantity,
-                                                 double quantity_deviation,
-                                                 double min_cargo_price, double max_cargo_price, const Cargo &cargo);
     static void ImportPartListImpl(Unit *thus, const std::vector<Cargo> &cargo_list, float price, float price_deviation,
                                    float quantity, float quantity_deviation, bool generate_histograms);
     void ImportPartList(const std::string &category, float price, float price_deviation, float quantity, float quantity_deviation);
