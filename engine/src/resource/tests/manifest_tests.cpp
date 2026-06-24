@@ -111,7 +111,7 @@ TEST(Cargo, GetCargoQtyAndPriceImplementations) {
     constexpr double kPriceDeviation = 0.1;
     constexpr double kQuantityDeviation = 0.1;
     constexpr double kMinPrice = 0.01;
-    constexpr double kMaxPriceMult = 10.00;
+    constexpr float  kMaxPriceMult = 10.00F;
     constexpr int    kMinQuantity = 0;
     const std::string kCargoCategory = "upgrades/Armor";
 
@@ -134,9 +134,11 @@ TEST(Cargo, GetCargoQtyAndPriceImplementations) {
         }
     }
 
+    max_cargo_price *= kMaxPriceMult;
+
     for (const Cargo& cargo : cargo_list) {
-        Cargo cargo_old_way = Cargo::GetCargoQtyAndPriceOldWay(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, cargo.GetPrice() * kMaxPriceMult, cargo);
-        Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, cargo.GetPrice() * kMaxPriceMult, cargo);
+        Cargo cargo_old_way = Cargo::GetCargoQtyAndPriceOldWay(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, max_cargo_price, cargo);
+        Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, max_cargo_price, cargo);
 
         ASSERT_EQ(cargo_old_way.GetName(), cargo.GetName());
         ASSERT_EQ(cargo_new_way.GetName(), cargo.GetName());
@@ -157,5 +159,76 @@ TEST(Cargo, GetCargoQtyAndPriceImplementations) {
         ASSERT_GE(cargo_new_way.GetPrice(), kMinPrice);
         // ASSERT_LE(cargo_old_way.GetPrice(), cargo.GetPrice() + kMaxPriceAdd);
         ASSERT_LE(cargo_new_way.GetPrice(), cargo.GetPrice() * kMaxPriceMult);
+    }
+}
+
+TEST(Cargo, GetCargoQtyAndPriceHistograms) {
+    constexpr double kPriceDeviation = 0.1;
+    constexpr double kQuantityDeviation = 0.1;
+    constexpr float kMaxPriceMult = 10.00F;
+    const std::string kCargoCategory = "upgrades/Armor";
+
+    const Manifest manifest = createManifest();
+    const Manifest category_manifest = manifest.GetCategoryManifest(kCargoCategory);
+
+    const std::vector<Cargo> cargo_list = category_manifest.GetItems();
+
+    // Find the minimum and maximum prices in the cargo list
+    // We start with extreme values but at the end, min < max
+    float min_cargo_price = std::numeric_limits<float>::max();
+    float max_cargo_price = 0.0F;
+    for (const Cargo& cargo : cargo_list) {
+        const float price1 = cargo.GetPrice();
+        if (price1 < min_cargo_price) {
+            min_cargo_price = price1;
+        }
+        if (price1 > max_cargo_price) {
+            max_cargo_price = price1;
+        }
+    }
+    max_cargo_price *= kMaxPriceMult;
+
+    for (const Cargo& cargo : cargo_list) {
+        constexpr auto kIterations = 10000;
+        constexpr auto kHistogramDisplayAdjust = 200;
+        // Borrows heavily from sample code at https://en.cppreference.com/cpp/numeric/random/normal_distribution
+        // Retrieved 2026-05-23
+        VS_LOG(trace, (boost::format("  Histograms for cargo %1%:") % cargo.GetName()));
+        std::map<uint64_t, uint64_t> old_way_qty_histogram{};
+        std::map<uint64_t, uint64_t> new_way_qty_histogram{};
+        std::map<uint64_t, uint64_t> old_way_price_histogram{};
+        std::map<uint64_t, uint64_t> new_way_price_histogram{};
+        for (auto n{kIterations}; n; --n) {
+            Cargo cargo_old_way = Cargo::GetCargoQtyAndPriceOldWay(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, min_cargo_price,
+                                  max_cargo_price, cargo);
+            Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, min_cargo_price,
+                                  max_cargo_price, cargo);
+            auto old_way_qty = [&cargo_old_way]{ return cargo_old_way.GetQuantity(); };
+            auto new_way_qty = [&cargo_new_way]{ return cargo_new_way.GetQuantity(); };
+            auto old_way_price = [&cargo_old_way] { return cargo_old_way.GetPrice() * 100; };
+            auto new_way_price = [&cargo_new_way] { return cargo_new_way.GetPrice() * 100; };
+            ++old_way_qty_histogram[old_way_qty()];
+            ++new_way_qty_histogram[new_way_qty()];
+            ++old_way_price_histogram[old_way_price()];
+            ++new_way_price_histogram[new_way_price()];
+        }
+        VS_LOG(trace, "    Old way quantities:");
+        for (const auto [k, v] : old_way_qty_histogram) {
+            VS_LOG(trace, (boost::format("      %1$10d %2$s") % k % std::string(v / kHistogramDisplayAdjust, '*')));
+        }
+        VS_LOG(trace, "    New way quantities:");
+        for (const auto [k, v] : new_way_qty_histogram) {
+            VS_LOG(trace, (boost::format("      %1$10d %2$s") % k % std::string(v / kHistogramDisplayAdjust, '*')));
+        }
+        VS_LOG(trace, "    Old way prices:");
+        for (const auto [k, v] : old_way_price_histogram) {
+            const double actual_price = k / 100.0;
+            VS_LOG(trace, (boost::format("      %1$8.2f %2$s") % actual_price % std::string(v / kHistogramDisplayAdjust, '*')));
+        }
+        VS_LOG(trace, "    New way prices:");
+        for (const auto [k, v] : new_way_price_histogram) {
+            const double actual_price = k / 100.0;
+            VS_LOG(trace, (boost::format("      %1$8.2f %2$s") % actual_price % std::string(v / kHistogramDisplayAdjust, '*')));
+        }
     }
 }
