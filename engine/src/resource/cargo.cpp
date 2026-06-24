@@ -371,6 +371,7 @@ Cargo Cargo::GetCargoQtyAndPriceOldWay(double price, double price_deviation, dou
         double min_cargo_price, double max_cargo_price, const Cargo &cargo) {
     Cargo return_value = cargo; // Copy the cargo item
     const double average_weight = abs(configuration().cargo.price_recenter_factor_dbl);
+    // VS_LOG(trace, (boost::format("average_weight (abs(configuration().cargo.price_recenter_factor_dbl)) = %1%") % average_weight));
     return_value.SetQuantity(double_to_int(quantity - quantity_deviation));
     const double base_price = return_value.GetPrice();
     return_value.SetPrice(return_value.GetPrice() * (price - price_deviation));
@@ -394,6 +395,9 @@ Cargo Cargo::GetCargoQtyAndPriceOldWay(double price, double price_deviation, dou
         const double max_price_quant_adj = configuration().cargo.max_price_quant_adj_dbl;
         const double min_price_quant_adj = configuration().cargo.min_price_quant_adj_dbl;
         const double powah = configuration().cargo.price_quant_adj_power_dbl;
+        // VS_LOG(trace, (boost::format("max_price_quant_adj = %1%") % max_price_quant_adj));
+        // VS_LOG(trace, (boost::format("min_price_quant_adj = %1%") % min_price_quant_adj));
+        // VS_LOG(trace, (boost::format("powah = %1%") % powah));
         renorm_price = std::pow(renorm_price, powah);
         renorm_price *= (max_price_quant_adj - min_price_quant_adj);
         renorm_price += 1;
@@ -405,6 +409,7 @@ Cargo Cargo::GetCargoQtyAndPriceOldWay(double price, double price_deviation, dou
         }
     }
     const double min_price = configuration().cargo.min_cargo_price_dbl;
+    // VS_LOG(trace, (boost::format("min_price (configuration().cargo.min_cargo_price_dbl) = %1%") % min_price));
     if (return_value.GetPrice() < min_price) {
         return_value.SetPrice(min_price);
     }
@@ -413,16 +418,50 @@ Cargo Cargo::GetCargoQtyAndPriceOldWay(double price, double price_deviation, dou
 
 Cargo Cargo::GetCargoQtyAndPriceCpp11StdDev(double price, double price_deviation, double quantity,
         double quantity_deviation, double min_cargo_price, double max_cargo_price, const Cargo &cargo) {
+    constexpr double kMinQuantity = 0.0;
+    constexpr double kMaxQuantity = std::numeric_limits<int32_t>::max();
+    constexpr double kMinDeviation = 0.01;
+    constexpr double kMaxDeviation = 5.0;
+
     Cargo return_value = cargo;
     std::fesetround(FE_TONEAREST);
 
     const double true_minimum_price = std::max(min_cargo_price, configuration().cargo.min_cargo_price_dbl);
+    double true_maximum_price = max_cargo_price;
+    if (true_minimum_price > true_maximum_price) {
+        true_maximum_price = true_minimum_price;
+    }
+    double quantity_constrained = quantity;
+    if (quantity_constrained > kMaxQuantity) {
+        quantity_constrained = kMaxQuantity;
+    } else if (quantity_constrained < kMinQuantity) {
+        quantity_constrained = kMinQuantity;
+    }
+    double price_constrained = price;
+    if (price_constrained > max_cargo_price) {
+        price_constrained = max_cargo_price;
+    } else if (price_constrained < true_minimum_price) {
+        price_constrained = true_minimum_price;
+    }
+    double quantity_deviation_constrained = quantity_deviation;
+    if (quantity_deviation_constrained > kMaxDeviation) {
+        quantity_deviation_constrained = kMaxDeviation;
+    } else if (quantity_deviation_constrained < kMinDeviation) {
+        quantity_deviation_constrained = kMinDeviation;
+    }
+    double price_deviation_constrained = price_deviation;
+    if (price_deviation_constrained > kMaxDeviation) {
+        price_deviation_constrained = kMaxDeviation;
+    } else if (price_deviation_constrained < kMinDeviation) {
+        price_deviation_constrained = kMinDeviation;
+    }
 
-    double qty_dbl = VegaRandom::Instance().NormalDistribution(quantity, quantity_deviation, 0, std::numeric_limits<int>::max());
+    double qty_dbl = VegaRandom::Instance().NormalDistribution(quantity_constrained, quantity_deviation_constrained, 0.0, std::numeric_limits<int>::max());
+    // Round to nearest whole number
     int qty_int = std::rint(qty_dbl);
     return_value.SetQuantity(qty_int);
 
-    double price1 = VegaRandom::Instance().NormalDistribution(price, price_deviation, true_minimum_price, max_cargo_price);
+    double price1 = VegaRandom::Instance().NormalDistribution(price_constrained, price_deviation_constrained, true_minimum_price, true_maximum_price);
     // Round to two decimal places
     double price_rounded = std::rint(price1 * 100.0) / 100.0;
     return_value.SetPrice(price_rounded);
