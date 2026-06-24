@@ -45,13 +45,6 @@ public:
     std::string GetManifest(unsigned int i, Unit *scanningUnit, const Vector &original_velocity) const;
     void EjectCargo(unsigned int index);
     Cargo GetCargo(unsigned int index) const;
-
-    static Cargo GetCargoQtyAndPriceOldWay(double price, double price_deviation, double quantity,
-                                              double quantity_deviation,
-                                              double min_cargo_price, double max_cargo_price, const Cargo &cargo);
-    static Cargo GetCargoQtyAndPriceCpp11StdDev(double price, double price_deviation, double quantity,
-                                                 double quantity_deviation,
-                                                 double min_cargo_price, double max_cargo_price, const Cargo &cargo);
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_CARRIER_H

@@ -135,8 +135,8 @@ TEST(Unit, GetCargoQtyAndPriceImplementations) {
     }
 
     for (const Cargo& cargo : cargo_list) {
-        Cargo cargo_old_way = Unit::GetCargoQtyAndPriceOldWay(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, kMaxPrice, cargo);
-        Cargo cargo_new_way = Unit::GetCargoQtyAndPriceCpp11StdDev(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, kMaxPrice, cargo);
+        Cargo cargo_old_way = Cargo::GetCargoQtyAndPriceOldWay(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, kMaxPrice, cargo);
+        Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(cargo.GetPrice(), kPriceDeviation, 1.0, kQuantityDeviation, kMinPrice, kMaxPrice, cargo);
 
         // ASSERT_EQ(cargo_old_way.GetName(), cargo.GetName());
         // ASSERT_EQ(cargo_new_way.GetName(), cargo.GetName());

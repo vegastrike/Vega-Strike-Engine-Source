@@ -3044,9 +3044,9 @@ void Unit::ImportPartListImpl(Unit *thus, const std::vector<Cargo> &cargo_list, 
             std::map<uint64_t, uint64_t> old_way_price_histogram{};
             std::map<uint64_t, uint64_t> new_way_price_histogram{};
             for (auto n{kIterations}; n; --n) {
-                Cargo cargo_old_way = GetCargoQtyAndPriceOldWay(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
+                Cargo cargo_old_way = Cargo::GetCargoQtyAndPriceOldWay(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
                                       max_cargo_price, cargo);
-                Cargo cargo_new_way = GetCargoQtyAndPriceCpp11StdDev(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
+                Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
                                       max_cargo_price, cargo);
                 auto old_way_qty = [&cargo_old_way]{ return cargo_old_way.GetQuantity(); };
                 auto new_way_qty = [&cargo_new_way]{ return cargo_new_way.GetQuantity(); };
@@ -3077,9 +3077,9 @@ void Unit::ImportPartListImpl(Unit *thus, const std::vector<Cargo> &cargo_list, 
             }
         }
 
-        Cargo cargo_old_way = GetCargoQtyAndPriceOldWay(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
+        Cargo cargo_old_way = Cargo::GetCargoQtyAndPriceOldWay(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
                               max_cargo_price, cargo);
-        Cargo cargo_new_way = GetCargoQtyAndPriceCpp11StdDev(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
+        Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
                               max_cargo_price, cargo);
 
         VS_LOG(trace, (boost::format("%1%: Adding cargo %2% with quantity %3% and price %4%") % __FUNCTION__ % cargo_old_way.GetName() % cargo_old_way.GetQuantity() % cargo_old_way.GetPrice()));

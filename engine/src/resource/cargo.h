@@ -136,6 +136,14 @@ public:
 
     // For use by PlayerShip
     int index = 0;
+
+    // Static methods
+    static Cargo GetCargoQtyAndPriceOldWay(double price, double price_deviation, double quantity,
+                                              double quantity_deviation,
+                                              double min_cargo_price, double max_cargo_price, const Cargo &cargo);
+    static Cargo GetCargoQtyAndPriceCpp11StdDev(double price, double price_deviation, double quantity,
+                                                 double quantity_deviation,
+                                                 double min_cargo_price, double max_cargo_price, const Cargo &cargo);
 };
 
 #endif //VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H
