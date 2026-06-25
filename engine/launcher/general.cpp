@@ -149,7 +149,7 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
     current = new char[LENGTH + 1];
     length = strlen(line);
     strcpy(current, line);
-    while ((location = strstr(current, search)) > 0) {
+    while ((location = strstr(current, search))) {
         chr_new[0] = '\0';
         calc = strlen(current) - strlen(search) + strlen(replace);
         if (calc > LENGTH) {
@@ -409,7 +409,7 @@ char *NewString(char *line) {
 
 // if _G_ERROR is defined, it will print the error message
 // if EXIT_ON_FATAL is defined, and is_fatal is greater than 0, the program will exit
-void ShowError(char *error_msg, char *error_code, int is_fatal) {
+void ShowError(const char *error_msg, const char *error_code, int is_fatal) {
 #ifdef _G_ERROR
     if (is_fatal > 0) {
         fprintf(stderr, "Fatal ");

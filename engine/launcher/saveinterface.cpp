@@ -44,9 +44,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#endif
 
 #include "common/common.h"
-#endif
 #ifdef _WIN32
 extern void GetRidOfConsole ();
 extern void my_sleep (int i);
@@ -144,16 +144,15 @@ int win_close(GtkWidget *w, void *) {
 void changehome();
 
 GdkWindow *Help(const char *title, const char *text) {
-    GtkWidget *window;
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window), 300, 0);
     gtk_window_set_title(GTK_WINDOW(window), title);
-    gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(win_close), NULL);
+    g_signal_connect(G_OBJECT(window), "delete_event", G_CALLBACK(win_close), NULL);
     GtkWidget *label = gtk_label_new(text);
     gtk_container_add(GTK_CONTAINER(window), label);
     gtk_widget_show(label);
     gtk_widget_show(window);
-    return (GdkWindow *) window;
+    return reinterpret_cast<GdkWindow *>(window);
 }
 
 void save_stuff(const char *filename) {
@@ -235,6 +234,7 @@ DWORD WINAPI DrawStartupDialog(LPVOID lpParameter) {
 #ifndef _WIN32
 
 void changeToData() {
+    // FIXME -- I don't think these paths are correct any longer -- Stephen G. Tuggy 2026-06-24
     chdir("/usr/games/vegastrike/data");
     FILE *fp = fopen("vegastrike.config", "r");
     if (!fp) {
@@ -291,8 +291,9 @@ void launch_mission() {
 
 using std::string;
 
-void file_mission_sel(GtkWidget *w, GtkFileSelection *fs) {
-    std::string tmp = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
+void file_mission_sel(GtkWidget *w, GtkFileChooser *fs) {
+    gchar* result = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fs));
+    std::string tmp{result};
     FILE *fp = (fopen(tmp.c_str(), "r"));
     if (fp != NULL) {
         fclose(fp);
@@ -322,10 +323,13 @@ void file_mission_sel(GtkWidget *w, GtkFileSelection *fs) {
 }
 
 void file_ok_sel(GtkWidget *w,
-        GtkFileSelection *fs) {
-    if ((gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs)))[0] != '\0') {
-        save_stuff(gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs))
-                + lastSlash(gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs))));
+        GtkFileChooser *fs) {
+    gchar* result_gchar = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fs));
+    const std::string result_string{result_gchar};
+    const char *result = result_string.c_str();
+    if (result[0] != '\0') {
+        save_stuff(result
+                + lastSlash(result));
     }
     launch_mission();
     GdkWindow *ww = gtk_widget_get_parent_window(w);
@@ -335,14 +339,19 @@ void file_ok_sel(GtkWidget *w,
 }
 
 void file_ok_auto_sel(GtkWidget *w,
-        GtkFileSelection *fs) {
-    if ((gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs)))[0] != '\0') {
-        char *name = new char[strlen(gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs))) + 2];
+        GtkFileChooser *fs) {
+    gchar* result_gchar = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fs));
+    const std::string result_string{result_gchar};
+    const char *result = result_string.c_str();
+    if (result[0] != '\0') {
+        char *name = new char[strlen(result) + 2];
         strcpy(name + 1,
-                gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs))
-                        + lastSlash(gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs))));
+                result
+                        + lastSlash(result));
         name[0] = '~';
-        save_stuff(name);
+        const std::string name_string{name};
+        save_stuff(name_string.c_str());
+        delete[] name;
     }
     launch_mission();
     GdkWindow *ww = gtk_widget_get_parent_window(w);
@@ -352,7 +361,7 @@ void file_ok_auto_sel(GtkWidget *w,
 }
 
 void hello(GtkWidget *widget, gpointer data) {
-    int i = (int) (size_t) data;
+    const int i = static_cast<int>(reinterpret_cast<size_t>(data));
     int pid = 0;
     switch (i) {
         case 5:
@@ -380,10 +389,10 @@ void hello(GtkWidget *widget, gpointer data) {
                 char pwd [65535];
                 getcwd(pwd,65533);
                 pwd[65533]=pwd[65534]='\0';
-                int pid=spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/Setup.exe").c_str(),NULL);
+                int pid=spawnl(P_NOWAIT,"./vegasettings.exe",(std::string(pwd)+"/vegasettings.exe").c_str(),NULL);
                 if (pid==-1) {
                     if (chdir("bin")==0) {
-                        spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/bin/Setup.exe").c_str(),NULL);
+                        spawnl(P_NOWAIT,"./vegasettings.exe",(std::string(pwd)+"/bin/vegasettings.exe").c_str(),NULL);
                         chdir("..");
                     }
                 }
@@ -407,6 +416,46 @@ void hello(GtkWidget *widget, gpointer data) {
             gtk_main_quit();
             break;
     }
+}
+
+void activate(GtkApplication* app, gpointer data)
+{
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+    // Source - https://stackoverflow.com/a/25353804
+    // Posted by Ivan, modified by community. See post 'Timeline' for change history
+    // Retrieved 2026-06-25, License - CC BY-SA 3.0
+
+    GdkGeometry windowProperties;
+    windowProperties.min_width = 300;
+    windowProperties.min_height = 350;
+    gtk_window_set_geometry_hints(GTK_WINDOW(window), NULL, &windowProperties, GDK_HINT_MIN_SIZE);
+
+    gtk_window_set_title(GTK_WINDOW(window), "Vega Strike Launcher");
+
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 1);
+    for (int i = 0; i < NUM_TITLES; ++i) {
+        GtkWidget *button = gtk_button_new_with_label(titles[i]);
+
+        /* When the button receives the "clicked" signal, it will call the
+         * function hello() passing it NULL as its argument.  The hello()
+         * function is defined above. */
+        g_signal_connect(G_OBJECT(button), "clicked",
+                G_CALLBACK(hello), reinterpret_cast<void *>(i));
+        gtk_container_add(GTK_CONTAINER(vbox), button);
+        gtk_widget_show(button);
+    }
+    gtk_widget_show(vbox);
+    gtk_container_add(GTK_CONTAINER(window), vbox);
+
+    gtk_application_add_window(app, GTK_WINDOW(window));
+    // GtkWidget *button = gtk_button_new_with_label("Button");
+    // g_signal_connect_swapped(GTK_BUTTON(button), "clicked", G_CALLBACK(gtk_widget_destroy), window);
+    // g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_widget_destroy), window);
+    // g_signal_connect(G_OBJECT(window), "delete_event", G_CALLBACK(gtk_widget_destroy), window);
+    // gtk_container_add(GTK_CONTAINER(window), button);
+    // gtk_widget_show(button);
+    gtk_window_present(GTK_WINDOW(window));
 }
 
 #if defined(_WINDOWS) && defined(_WIN32)
@@ -449,42 +498,20 @@ int main(int argc,
         }
     }
     //    chdir ("./.vegastrike/save");
-    gtk_init(&argc, (char ***) (&argv));
-    GtkWidget *window;
-    GtkWidget *button;
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_default_size(GTK_WINDOW(window), 300, 350);
-    gtk_window_set_title(GTK_WINDOW(window), "Vega Strike Launcher");
-    GtkWidget *vbox = gtk_vbox_new(FALSE, 3);
-    /* When the window is given the "delete_event" signal (this is given
-     * by the window manager, usually by the "close" option, or on the
-     * titlebar), we ask it to call the delete_event () function
-     * as defined above. The data passed to the callback
-     * function is NULL and is ignored in the callback function. */
-    gtk_signal_connect(GTK_OBJECT(window), "destroy", GTK_SIGNAL_FUNC(gtk_exit), NULL);
-    gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(gtk_exit), NULL);
-    for (int i = 0; i < NUM_TITLES; i++) {
-        button = gtk_button_new_with_label(titles[i]);
 
-        /* When the button receives the "clicked" signal, it will call the
-         * function hello() passing it NULL as its argument.  The hello()
-         * function is defined above. */
-        gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                GTK_SIGNAL_FUNC(hello), (void *) i);
-        gtk_container_add(GTK_CONTAINER(vbox), button);
-        gtk_widget_show(button);
-    }
-    gtk_widget_show(vbox);
-    gtk_container_add(GTK_CONTAINER(window), vbox);
+    GApplicationFlags flags = G_APPLICATION_DEFAULT_FLAGS;
+    GtkApplication *app = gtk_application_new("org.vega-strike.vslauncher", flags);
+    GApplication *gapp = G_APPLICATION(app);
+    g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+    g_application_run(gapp, argc, argv);
+    g_object_unref (app);
 
-    /* and the window */
-    gtk_widget_show(window);
 #if defined(_WIN32) && (!defined(_WINDOWS)) && !defined(__MINGW32__) && !defined(__CYGWIN__)
     GetRidOfConsole();
 #else
-    printf(my_mission.c_str());
+    printf("%s", my_mission.c_str());
 #endif
-    gtk_main();
+    // gtk_main();
     return (0);
 }
 
@@ -514,74 +541,74 @@ char *makeasc(wchar_t *str) {
 #include "launcher/general.h"
 
 void fileop_destroy(GtkWidget *w,
-        GtkFileSelection *fs) {
-    if (fs && fs->fileop_dialog) {
-        gtk_widget_destroy(fs->fileop_dialog);
-        fs->fileop_dialog = 0;
-    }
+        GtkFileChooserWidget *fs) {
+    // if (fs && fs->fileop_dialog) {
+    //     gtk_widget_destroy(fs->fileop_dialog);
+    //     fs->fileop_dialog = 0;
+    // }
 }
 
 void delfile(GtkWidget *w,
-        GtkFileSelection *fs) {
-    GtkWidget *i = fs->selection_entry;
-    if (i) {
-        wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
-        char *newstr = makeasc(chr);
-        char *remstr = new char[strlen(newstr) + 20];
-        sprintf(remstr, "../serialized_xml/%s/", newstr);
-        glob_t *dirs = FindFiles(remstr, "");
-        for (unsigned int i = 0; i < dirs->gl_pathc; i++) {
-            remove(dirs->gl_pathv[i]);
-        }
-        rmdir(remstr);
-        remove(newstr);
-        delete[]newstr;
-        delete[]remstr;
-        gtk_file_selection_set_filename(fs, "\0\0\0\0\0\0\0\0");
-        gtk_widget_destroy(GTK_FILE_SELECTION(fs)->fileop_dialog);
-        GTK_FILE_SELECTION(fs)->fileop_dialog = 0;
-    }
+        GtkFileChooserWidget *fs) {
+    // GtkWidget *i = fs->selection_entry;
+    // if (i) {
+    //     wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
+    //     char *newstr = makeasc(chr);
+    //     char *remstr = new char[strlen(newstr) + 20];
+    //     sprintf(remstr, "../serialized_xml/%s/", newstr);
+    //     glob_t *dirs = FindFiles(remstr, "");
+    //     for (unsigned int i = 0; i < dirs->gl_pathc; i++) {
+    //         remove(dirs->gl_pathv[i]);
+    //     }
+    //     rmdir(remstr);
+    //     remove(newstr);
+    //     delete[]newstr;
+    //     delete[]remstr;
+    //     gtk_file_selection_set_filename(fs, "\0\0\0\0\0\0\0\0");
+    //     gtk_widget_destroy(GTK_FILE_CHOOSER_WIDGET(fs)->fileop_dialog);
+    //     GTK_FILE_CHOOSER_WIDGET(fs)->fileop_dialog = 0;
+    // }
 }
 
 void delfile_conf(GtkWidget *w,
-        GtkFileSelection *fs) {
-    GtkWidget *i = fs->selection_entry;
-    if (i) {
-        GtkWidget *window;
-        wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
-        char *newstr = makeasc(chr);
-        char *remstr = new char[strlen(newstr) + 20];
-        sprintf(remstr, "Delete Game \"%s\"?", newstr);
-        window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-        gtk_window_set_default_size(GTK_WINDOW(window), 300, 0);
-        gtk_window_set_title(GTK_WINDOW(window), "Delete Game");
-        GtkWidget *vbox = gtk_vbox_new(0, 10);
-        GtkWidget *cont = gtk_hbox_new(1, 5);
-        GtkWidget *ok = gtk_button_new_with_label("Delete");
-        GtkWidget *cancel = gtk_button_new_with_label("Cancel");
-        gtk_signal_connect(GTK_OBJECT(ok), "clicked", GTK_SIGNAL_FUNC(delfile), GTK_OBJECT(fs));
-        gtk_signal_connect(GTK_OBJECT(cancel), "clicked", GTK_SIGNAL_FUNC(fileop_destroy), GTK_OBJECT(fs));
-        gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(win_close), NULL);
-        GtkWidget *label = gtk_label_new(remstr);
-//		gtk_container_add (GTK_CONTAINER (window), label);
-        gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 5);
-//		gtk_container_add (GTK_CONTAINER (window), ok);
-//		gtk_container_add (GTK_CONTAINER (window), cancel);
-        gtk_box_pack_start(GTK_BOX(cont), ok, TRUE, TRUE, 5);
-        gtk_box_pack_start(GTK_BOX(cont), cancel, TRUE, TRUE, 5);
-        gtk_box_pack_start(GTK_BOX(vbox), cont, TRUE, TRUE, 5);
-        gtk_container_add(GTK_CONTAINER(window), vbox);
-        gtk_widget_show(label);
-        gtk_widget_show(ok);
-        GTK_WIDGET_SET_FLAGS(ok, GTK_CAN_DEFAULT);
-        GTK_WIDGET_SET_FLAGS(cancel, GTK_CAN_DEFAULT);
-        gtk_widget_grab_default(cancel);
-        gtk_widget_show(cancel);
-        gtk_widget_show(cont);
-        gtk_widget_show(vbox);
-        gtk_widget_show(window);
-        GTK_FILE_SELECTION(fs)->fileop_dialog = window;
-    }
+        GtkFileChooserWidget *fs) {
+//     GtkWidget *i = fs->selection_entry;
+//     if (i) {
+//         GtkWidget *window;
+//         wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
+//         char *newstr = makeasc(chr);
+//         char *remstr = new char[strlen(newstr) + 20];
+//         sprintf(remstr, "Delete Game \"%s\"?", newstr);
+//         window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+//         gtk_window_set_default_size(GTK_WINDOW(window), 300, 0);
+//         gtk_window_set_title(GTK_WINDOW(window), "Delete Game");
+//         GtkWidget *vbox = gtk_vbox_new(0, 10);
+//         GtkWidget *cont = gtk_hbox_new(1, 5);
+//         GtkWidget *ok = gtk_button_new_with_label("Delete");
+//         GtkWidget *cancel = gtk_button_new_with_label("Cancel");
+//         g_signal_connect(G_OBJECT(ok), "clicked", G_CALLBACK(delfile), G_OBJECT(fs));
+//         g_signal_connect(G_OBJECT(cancel), "clicked", G_CALLBACK(fileop_destroy), G_OBJECT(fs));
+//         g_signal_connect(G_OBJECT(window), "delete_event", G_CALLBACK(win_close), NULL);
+//         GtkWidget *label = gtk_label_new(remstr);
+// //		gtk_container_add (GTK_CONTAINER (window), label);
+//         gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 5);
+// //		gtk_container_add (GTK_CONTAINER (window), ok);
+// //		gtk_container_add (GTK_CONTAINER (window), cancel);
+//         gtk_box_pack_start(GTK_BOX(cont), ok, TRUE, TRUE, 5);
+//         gtk_box_pack_start(GTK_BOX(cont), cancel, TRUE, TRUE, 5);
+//         gtk_box_pack_start(GTK_BOX(vbox), cont, TRUE, TRUE, 5);
+//         gtk_container_add(GTK_CONTAINER(window), vbox);
+//         gtk_widget_show(label);
+//         gtk_widget_show(ok);
+//         gtk_widget_set_state_flags()_set_flags(ok, GTK_CAN_DEFAULT);
+//         GTK_WIDGET_SET_FLAGS(cancel, GTK_CAN_DEFAULT);
+//         gtk_widget_grab_default(cancel);
+//         gtk_widget_show(cancel);
+//         gtk_widget_show(cont);
+//         gtk_widget_show(vbox);
+//         gtk_widget_show(window);
+//         GTK_FILE_CHOOSER_WIDGET(fs)->fileop_dialog = window;
+//     }
 }
 
 struct dumbstruct { GtkWidget *filesel, *entrywin; };
@@ -589,83 +616,83 @@ struct dumbstruct { GtkWidget *filesel, *entrywin; };
 void fileop_destroy_dumb(GtkWidget *w,
         dumbstruct *fs) {
     if (fs->filesel) {
-        gtk_widget_destroy(GTK_FILE_SELECTION(fs->filesel)->fileop_dialog);
-        GTK_FILE_SELECTION(fs->filesel)->fileop_dialog = 0;
+        // gtk_widget_destroy(GTK_FILE_CHOOSER_WIDGET(fs->filesel)->fileop_dialog);
+        // GTK_FILE_CHOOSER_WIDGET(fs->filesel)->fileop_dialog = 0;
     }
     delete fs;
 }
 
 void renfile(GtkWidget *w,
         dumbstruct *dmb) {
-    GtkFileSelection *fs = GTK_FILE_SELECTION(dmb->filesel);
+    GtkFileChooserWidget *fs = GTK_FILE_CHOOSER_WIDGET(dmb->filesel);
     GtkWidget *ent = dmb->entrywin;
-    GtkWidget *i = fs->selection_entry;
-    if (i && ent) {
-        wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
-        char *newstr = makeasc(chr);
-        chr = (wchar_t *) GTK_ENTRY(ent)->text;
-        char *newentstr = makeasc(chr);
-        char *remstr = new char[strlen(newstr) + 20];
-        char *rementstr = new char[strlen(newentstr) + 20];
-        sprintf(remstr, "../serialized_xml/%s/", newstr);
-        sprintf(rementstr, "../serialized_xml/%s/", newentstr);
-        rename(remstr, rementstr);
-        rename(newstr, newentstr);
-        gtk_file_selection_set_filename(fs, "\0\0\0\0\0\0\0\0");
-        // "U\0n\0i\0c\0o\0d\0e\0 \0\0\0\0\0"
-//		delete []newstr;
-        delete[]remstr;
-//		delete []newentstr;
-        delete[]rementstr;
-    }
-    fileop_destroy_dumb(w, dmb);
+//     GtkWidget *i = fs->selection_entry;
+//     if (i && ent) {
+//         wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
+//         char *newstr = makeasc(chr);
+//         chr = (wchar_t *) GTK_ENTRY(ent)->text;
+//         char *newentstr = makeasc(chr);
+//         char *remstr = new char[strlen(newstr) + 20];
+//         char *rementstr = new char[strlen(newentstr) + 20];
+//         sprintf(remstr, "../serialized_xml/%s/", newstr);
+//         sprintf(rementstr, "../serialized_xml/%s/", newentstr);
+//         rename(remstr, rementstr);
+//         rename(newstr, newentstr);
+//         gtk_file_selection_set_filename(fs, "\0\0\0\0\0\0\0\0");
+//         // "U\0n\0i\0c\0o\0d\0e\0 \0\0\0\0\0"
+// //		delete []newstr;
+//         delete[]remstr;
+// //		delete []newentstr;
+//         delete[]rementstr;
+//     }
+//     fileop_destroy_dumb(w, dmb);
 }
 
 void renfile_conf(GtkWidget *w,
-        GtkFileSelection *fs) {
-    GtkWidget *i = fs->selection_entry;
-    if (i) {
-        GtkWidget *window;
-        wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
-        char *newstr = makeasc(chr);
-        char *remstr = new char[strlen(newstr) + 20];
-        sprintf(remstr, "Rename Game \"%s\" to:", newstr);
-        window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-        gtk_window_set_default_size(GTK_WINDOW(window), 300, 0);
-        gtk_window_set_title(GTK_WINDOW(window), "Rename Game");
-        GtkWidget *vbox = gtk_vbox_new(0, 10);
-        GtkWidget *cont = gtk_hbox_new(1, 5);
-        GtkWidget *ok = gtk_button_new_with_label("Rename");
-        GtkWidget *cancel = gtk_button_new_with_label("Cancel");
-        GtkWidget *entry = gtk_entry_new();
-        dumbstruct *newdum = new dumbstruct();
-        newdum->filesel = GTK_WIDGET(fs);
-        newdum->entrywin = entry;
-        gtk_signal_connect(GTK_OBJECT(ok), "clicked", GTK_SIGNAL_FUNC(renfile), newdum);
-        gtk_signal_connect(GTK_OBJECT(cancel), "clicked", GTK_SIGNAL_FUNC(fileop_destroy_dumb), newdum);
-        gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(win_close), NULL);
-        GtkWidget *label = gtk_label_new(remstr);
-//		gtk_container_add (GTK_CONTAINER (window), label);
-        gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 5);
-        gtk_box_pack_start(GTK_BOX(vbox), entry, TRUE, TRUE, 5);
-//		gtk_container_add (GTK_CONTAINER (window), ok);
-//		gtk_container_add (GTK_CONTAINER (window), cancel);
-        gtk_box_pack_start(GTK_BOX(cont), ok, TRUE, TRUE, 5);
-        gtk_box_pack_start(GTK_BOX(cont), cancel, TRUE, TRUE, 5);
-        gtk_box_pack_start(GTK_BOX(vbox), cont, TRUE, TRUE, 5);
-        gtk_container_add(GTK_CONTAINER(window), vbox);
-        gtk_widget_show(label);
-        gtk_widget_show(ok);
-        GTK_WIDGET_SET_FLAGS(ok, GTK_CAN_DEFAULT);
-        GTK_WIDGET_SET_FLAGS(cancel, GTK_CAN_DEFAULT);
-        gtk_widget_grab_default(cancel);
-        gtk_widget_show(entry);
-        gtk_widget_show(cancel);
-        gtk_widget_show(cont);
-        gtk_widget_show(vbox);
-        gtk_widget_show(window);
-        GTK_FILE_SELECTION(fs)->fileop_dialog = window;
-    }
+        GtkFileChooserWidget *fs) {
+//     GtkWidget *i = fs->selection_entry;
+//     if (i) {
+//         GtkWidget *window;
+//         wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
+//         char *newstr = makeasc(chr);
+//         char *remstr = new char[strlen(newstr) + 20];
+//         sprintf(remstr, "Rename Game \"%s\" to:", newstr);
+//         window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+//         gtk_window_set_default_size(GTK_WINDOW(window), 300, 0);
+//         gtk_window_set_title(GTK_WINDOW(window), "Rename Game");
+//         GtkWidget *vbox = gtk_vbox_new(0, 10);
+//         GtkWidget *cont = gtk_hbox_new(1, 5);
+//         GtkWidget *ok = gtk_button_new_with_label("Rename");
+//         GtkWidget *cancel = gtk_button_new_with_label("Cancel");
+//         GtkWidget *entry = gtk_entry_new();
+//         dumbstruct *newdum = new dumbstruct();
+//         newdum->filesel = GTK_WIDGET(fs);
+//         newdum->entrywin = entry;
+//         g_signal_connect(G_OBJECT(ok), "clicked", G_CALLBACK(renfile), newdum);
+//         g_signal_connect(G_OBJECT(cancel), "clicked", G_CALLBACK(fileop_destroy_dumb), newdum);
+//         g_signal_connect(G_OBJECT(window), "delete_event", G_CALLBACK(win_close), NULL);
+//         GtkWidget *label = gtk_label_new(remstr);
+// //		gtk_container_add (GTK_CONTAINER (window), label);
+//         gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 5);
+//         gtk_box_pack_start(GTK_BOX(vbox), entry, TRUE, TRUE, 5);
+// //		gtk_container_add (GTK_CONTAINER (window), ok);
+// //		gtk_container_add (GTK_CONTAINER (window), cancel);
+//         gtk_box_pack_start(GTK_BOX(cont), ok, TRUE, TRUE, 5);
+//         gtk_box_pack_start(GTK_BOX(cont), cancel, TRUE, TRUE, 5);
+//         gtk_box_pack_start(GTK_BOX(vbox), cont, TRUE, TRUE, 5);
+//         gtk_container_add(GTK_CONTAINER(window), vbox);
+//         gtk_widget_show(label);
+//         gtk_widget_show(ok);
+//         GTK_WIDGET_SET_FLAGS(ok, GTK_CAN_DEFAULT);
+//         GTK_WIDGET_SET_FLAGS(cancel, GTK_CAN_DEFAULT);
+//         gtk_widget_grab_default(cancel);
+//         gtk_widget_show(entry);
+//         gtk_widget_show(cancel);
+//         gtk_widget_show(cont);
+//         gtk_widget_show(vbox);
+//         gtk_widget_show(window);
+//         GTK_FILE_CHOOSER_WIDGET(fs)->fileop_dialog = window;
+//     }
 }
 
 #define BUFFER_SIZE 65530
@@ -680,257 +707,256 @@ void copyfp(FILE *f1, FILE *f2) {
 
 void copyfile(GtkWidget *w,
         dumbstruct *dmb) {
-    GtkFileSelection *fs = GTK_FILE_SELECTION(dmb->filesel);
+    GtkFileChooserWidget *fs = GTK_FILE_CHOOSER_WIDGET(dmb->filesel);
     GtkWidget *ent = dmb->entrywin;
-    GtkWidget *i = fs->selection_entry;
-    if (i) {
-        wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
-        char *newstr = makeasc(chr);
-        char *remstr = new char[strlen(newstr) + 20];
-        char *newentstr = makeasc((wchar_t *) GTK_ENTRY(ent)->text);
-        char *rementstr = new char[strlen(newentstr) + 20];
-        sprintf(remstr, "../serialized_xml/%s/", newstr);
-        sprintf(rementstr, "../serialized_xml/%s/", newentstr);
-#ifdef _WIN32
-        mkdir(rementstr);
-#else
-        mkdir(rementstr, 0xffffffff);
-#endif
-        delete[]rementstr;
-        FILE *f1 = 0;
-        FILE *f2 = 0;
-        glob_t *dirs = FindFiles(remstr, "");
-        for (unsigned int i = 0; i < dirs->gl_pathc; i++) {
-            f1 = fopen(dirs->gl_pathv[i], "rb");
-            if (f1) {
-                int len = strlen(dirs->gl_pathv[i]);
-                char *newchr;
-                int j;
-                for (j = len - 1; j >= 0 && dirs->gl_pathv[i][j] != '\\' && dirs->gl_pathv[i][j] != '/'; j--) {
-                }
-                newchr = dirs->gl_pathv[i] + j + 1;
-                char *rementstr = new char[strlen(newentstr) + 20 + strlen(newchr)];
-                sprintf(rementstr, "../serialized_xml/%s/%s", newentstr, newchr);
-                f2 = fopen(rementstr, "w+b");
-                if (f2) {
-                    copyfp(f1, f2);
-                    fclose(f2);
-                }
-                fclose(f1);
-                delete[]rementstr;
-            }
-        }
-        f1 = fopen(newstr, "rb");
-        if (f1) {
-            f2 = fopen(newentstr, "wb");
-            if (f2) {
-                copyfp(f1, f2);
-                fclose(f2);
-            }
-            fclose(f1);
-        }
-//		delete []newstr;
-        delete[]remstr;
-        gtk_file_selection_set_filename(fs, "\0\0\0\0\0\0\0\0");
-//		delete []newentstr;
-        gtk_widget_destroy(GTK_FILE_SELECTION(fs)->fileop_dialog);
-        GTK_FILE_SELECTION(fs)->fileop_dialog = 0;
-    }
+//     GtkWidget *i = fs->selection_entry;
+//     if (i) {
+//         wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
+//         char *newstr = makeasc(chr);
+//         char *remstr = new char[strlen(newstr) + 20];
+//         char *newentstr = makeasc((wchar_t *) GTK_ENTRY(ent)->text);
+//         char *rementstr = new char[strlen(newentstr) + 20];
+//         sprintf(remstr, "../serialized_xml/%s/", newstr);
+//         sprintf(rementstr, "../serialized_xml/%s/", newentstr);
+// #ifdef _WIN32
+//         mkdir(rementstr);
+// #else
+//         mkdir(rementstr, 0xffffffff);
+// #endif
+//         delete[]rementstr;
+//         FILE *f1 = 0;
+//         FILE *f2 = 0;
+//         glob_t *dirs = FindFiles(remstr, "");
+//         for (unsigned int i = 0; i < dirs->gl_pathc; i++) {
+//             f1 = fopen(dirs->gl_pathv[i], "rb");
+//             if (f1) {
+//                 int len = strlen(dirs->gl_pathv[i]);
+//                 char *newchr;
+//                 int j;
+//                 for (j = len - 1; j >= 0 && dirs->gl_pathv[i][j] != '\\' && dirs->gl_pathv[i][j] != '/'; j--) {
+//                 }
+//                 newchr = dirs->gl_pathv[i] + j + 1;
+//                 char *rementstr = new char[strlen(newentstr) + 20 + strlen(newchr)];
+//                 sprintf(rementstr, "../serialized_xml/%s/%s", newentstr, newchr);
+//                 f2 = fopen(rementstr, "w+b");
+//                 if (f2) {
+//                     copyfp(f1, f2);
+//                     fclose(f2);
+//                 }
+//                 fclose(f1);
+//                 delete[]rementstr;
+//             }
+//         }
+//         f1 = fopen(newstr, "rb");
+//         if (f1) {
+//             f2 = fopen(newentstr, "wb");
+//             if (f2) {
+//                 copyfp(f1, f2);
+//                 fclose(f2);
+//             }
+//             fclose(f1);
+//         }
+// //		delete []newstr;
+//         delete[]remstr;
+//         gtk_file_selection_set_filename(fs, "\0\0\0\0\0\0\0\0");
+// //		delete []newentstr;
+//         gtk_widget_destroy(GTK_FILE_CHOOSER_WIDGET(fs)->fileop_dialog);
+//         GTK_FILE_CHOOSER_WIDGET(fs)->fileop_dialog = 0;
+//     }
 }
 
 void copyfile_conf(GtkWidget *w,
-        GtkFileSelection *fs) {
-    GtkWidget *i = fs->selection_entry;
-    if (i) {
-        GtkWidget *window;
-        wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
-        char *newstr = makeasc(chr);
-        char *remstr = new char[strlen(newstr) + 20];
-        sprintf(remstr, "Copy Game \"%s\" to:", newstr);
-        window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-        gtk_window_set_default_size(GTK_WINDOW(window), 300, 0);
-        gtk_window_set_title(GTK_WINDOW(window), "Copy Game");
-        GtkWidget *vbox = gtk_vbox_new(0, 10);
-        GtkWidget *cont = gtk_hbox_new(1, 5);
-        GtkWidget *ok = gtk_button_new_with_label("Copy");
-        GtkWidget *cancel = gtk_button_new_with_label("Cancel");
-        GtkWidget *entry = gtk_entry_new();
-        dumbstruct *newdum = new dumbstruct();
-        newdum->filesel = GTK_WIDGET(fs);
-        newdum->entrywin = entry;
-        gtk_signal_connect(GTK_OBJECT(ok), "clicked", GTK_SIGNAL_FUNC(copyfile), newdum);
-        gtk_signal_connect(GTK_OBJECT(cancel), "clicked", GTK_SIGNAL_FUNC(fileop_destroy_dumb), newdum);
-        gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(win_close), NULL);
-        GtkWidget *label = gtk_label_new(remstr);
-//		gtk_container_add (GTK_CONTAINER (window), label);
-        gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 5);
-        gtk_box_pack_start(GTK_BOX(vbox), entry, TRUE, TRUE, 5);
-//		gtk_container_add (GTK_CONTAINER (window), ok);
-//		gtk_container_add (GTK_CONTAINER (window), cancel);
-        gtk_box_pack_start(GTK_BOX(cont), ok, TRUE, TRUE, 5);
-        gtk_box_pack_start(GTK_BOX(cont), cancel, TRUE, TRUE, 5);
-        gtk_box_pack_start(GTK_BOX(vbox), cont, TRUE, TRUE, 5);
-        gtk_container_add(GTK_CONTAINER(window), vbox);
-        gtk_widget_show(label);
-        gtk_widget_show(ok);
-        GTK_WIDGET_SET_FLAGS(ok, GTK_CAN_DEFAULT);
-        GTK_WIDGET_SET_FLAGS(cancel, GTK_CAN_DEFAULT);
-        gtk_widget_grab_default(cancel);
-        gtk_widget_show(entry);
-        gtk_widget_show(cancel);
-        gtk_widget_show(cont);
-        gtk_widget_show(vbox);
-        gtk_widget_show(window);
-        GTK_FILE_SELECTION(fs)->fileop_dialog = window;
-    }
+        GtkFileChooserWidget *fs) {
+//     GtkWidget *i = fs->selection_entry;
+//     if (i) {
+//         GtkWidget *window;
+//         wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
+//         char *newstr = makeasc(chr);
+//         char *remstr = new char[strlen(newstr) + 20];
+//         sprintf(remstr, "Copy Game \"%s\" to:", newstr);
+//         window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+//         gtk_window_set_default_size(GTK_WINDOW(window), 300, 0);
+//         gtk_window_set_title(GTK_WINDOW(window), "Copy Game");
+//         GtkWidget *vbox = gtk_vbox_new(0, 10);
+//         GtkWidget *cont = gtk_hbox_new(1, 5);
+//         GtkWidget *ok = gtk_button_new_with_label("Copy");
+//         GtkWidget *cancel = gtk_button_new_with_label("Cancel");
+//         GtkWidget *entry = gtk_entry_new();
+//         dumbstruct *newdum = new dumbstruct();
+//         newdum->filesel = GTK_WIDGET(fs);
+//         newdum->entrywin = entry;
+//         g_signal_connect(G_OBJECT(ok), "clicked", G_CALLBACK(copyfile), newdum);
+//         g_signal_connect(G_OBJECT(cancel), "clicked", G_CALLBACK(fileop_destroy_dumb), newdum);
+//         g_signal_connect(G_OBJECT(window), "delete_event", G_CALLBACK(win_close), NULL);
+//         GtkWidget *label = gtk_label_new(remstr);
+// //		gtk_container_add (GTK_CONTAINER (window), label);
+//         gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 5);
+//         gtk_box_pack_start(GTK_BOX(vbox), entry, TRUE, TRUE, 5);
+// //		gtk_container_add (GTK_CONTAINER (window), ok);
+// //		gtk_container_add (GTK_CONTAINER (window), cancel);
+//         gtk_box_pack_start(GTK_BOX(cont), ok, TRUE, TRUE, 5);
+//         gtk_box_pack_start(GTK_BOX(cont), cancel, TRUE, TRUE, 5);
+//         gtk_box_pack_start(GTK_BOX(vbox), cont, TRUE, TRUE, 5);
+//         gtk_container_add(GTK_CONTAINER(window), vbox);
+//         gtk_widget_show(label);
+//         gtk_widget_show(ok);
+//         GTK_WIDGET_SET_FLAGS(ok, GTK_CAN_DEFAULT);
+//         GTK_WIDGET_SET_FLAGS(cancel, GTK_CAN_DEFAULT);
+//         gtk_widget_grab_default(cancel);
+//         gtk_widget_show(entry);
+//         gtk_widget_show(cancel);
+//         gtk_widget_show(cont);
+//         gtk_widget_show(vbox);
+//         gtk_widget_show(window);
+//         GTK_FILE_CHOOSER_WIDGET(fs)->fileop_dialog = window;
+//     }
 }
 
 void copynormal(GtkWidget *w,
         dumbstruct *dmb) {
-    GtkFileSelection *fs = GTK_FILE_SELECTION(dmb->filesel);
+    GtkFileChooserWidget *fs = GTK_FILE_CHOOSER_WIDGET(dmb->filesel);
     GtkWidget *ent = dmb->entrywin;
-    GtkWidget *i = fs->selection_entry;
-    if (i && ent) {
-        wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
-        char *newstr = makeasc(chr);
-        chr = (wchar_t *) GTK_ENTRY(ent)->text;
-        char *newentstr = makeasc(chr);
-        if (newstr && newstr[0] != '\0' && newentstr && newentstr[0] != '\0') {
-            FILE *f1, *f2;
-            f1 = fopen(newstr, "rb");
-            if (f1) {
-                f2 = fopen(newentstr, "wb");
-                if (f2) {
-                    copyfp(f1, f2);
-                    fclose(f2);
-                }
-                fclose(f1);
-            }
-        }
-        gtk_file_selection_set_filename(fs, "\0\0\0\0\0\0\0\0");
-//		delete []newstr;
-//		delete []newentstr;
-    }
+//     GtkWidget *i = fs->selection_entry;
+//     if (i && ent) {
+//         wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
+//         char *newstr = makeasc(chr);
+//         chr = (wchar_t *) GTK_ENTRY(ent)->text;
+//         char *newentstr = makeasc(chr);
+//         if (newstr && newstr[0] != '\0' && newentstr && newentstr[0] != '\0') {
+//             FILE *f1, *f2;
+//             f1 = fopen(newstr, "rb");
+//             if (f1) {
+//                 f2 = fopen(newentstr, "wb");
+//                 if (f2) {
+//                     copyfp(f1, f2);
+//                     fclose(f2);
+//                 }
+//                 fclose(f1);
+//             }
+//         }
+//         gtk_file_selection_set_filename(fs, "\0\0\0\0\0\0\0\0");
+// //		delete []newstr;
+// //		delete []newentstr;
+//     }
     fileop_destroy_dumb(w, dmb);
 }
 
 void copynormal_conf(GtkWidget *w,
-        GtkFileSelection *fs) {
-    GtkWidget *i = fs->selection_entry;
-    if (i) {
-        GtkWidget *window;
-        wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
-        char *newstr = makeasc(chr);
-        char *remstr = new char[strlen(newstr) + 20];
-        sprintf(remstr, "Copy File \"%s\" to:", newstr);
-        window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-        gtk_window_set_default_size(GTK_WINDOW(window), 300, 0);
-        gtk_window_set_title(GTK_WINDOW(window), "Copy File");
-        GtkWidget *vbox = gtk_vbox_new(0, 10);
-        GtkWidget *cont = gtk_hbox_new(1, 5);
-        GtkWidget *ok = gtk_button_new_with_label("Copy");
-        GtkWidget *cancel = gtk_button_new_with_label("Cancel");
-        GtkWidget *entry = gtk_entry_new();
-        dumbstruct *newdum = new dumbstruct();
-        newdum->filesel = GTK_WIDGET(fs);
-        newdum->entrywin = entry;
-        gtk_signal_connect(GTK_OBJECT(ok), "clicked", GTK_SIGNAL_FUNC(copynormal), newdum);
-        gtk_signal_connect(GTK_OBJECT(cancel), "clicked", GTK_SIGNAL_FUNC(fileop_destroy_dumb), newdum);
-        gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(win_close), NULL);
-        GtkWidget *label = gtk_label_new(remstr);
-//		gtk_container_add (GTK_CONTAINER (window), label);
-        gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 5);
-        gtk_box_pack_start(GTK_BOX(vbox), entry, TRUE, TRUE, 5);
-//		gtk_container_add (GTK_CONTAINER (window), ok);
-//		gtk_container_add (GTK_CONTAINER (window), cancel);
-        gtk_box_pack_start(GTK_BOX(cont), ok, TRUE, TRUE, 5);
-        gtk_box_pack_start(GTK_BOX(cont), cancel, TRUE, TRUE, 5);
-        gtk_box_pack_start(GTK_BOX(vbox), cont, TRUE, TRUE, 5);
-        gtk_container_add(GTK_CONTAINER(window), vbox);
-        gtk_widget_show(label);
-        gtk_widget_show(ok);
-        GTK_WIDGET_SET_FLAGS(ok, GTK_CAN_DEFAULT);
-        GTK_WIDGET_SET_FLAGS(cancel, GTK_CAN_DEFAULT);
-        gtk_widget_grab_default(cancel);
-        gtk_widget_show(entry);
-        gtk_widget_show(cancel);
-        gtk_widget_show(cont);
-        gtk_widget_show(vbox);
-        gtk_widget_show(window);
-        GTK_FILE_SELECTION(fs)->fileop_dialog = window;
-    }
+        GtkFileChooserWidget *fs) {
+//     GtkWidget *i = fs->selection_entry;
+//     if (i) {
+//         GtkWidget *window;
+//         wchar_t *chr = (wchar_t *) GTK_ENTRY(i)->text;
+//         char *newstr = makeasc(chr);
+//         char *remstr = new char[strlen(newstr) + 20];
+//         sprintf(remstr, "Copy File \"%s\" to:", newstr);
+//         window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+//         gtk_window_set_default_size(GTK_WINDOW(window), 300, 0);
+//         gtk_window_set_title(GTK_WINDOW(window), "Copy File");
+//         GtkWidget *vbox = gtk_vbox_new(0, 10);
+//         GtkWidget *cont = gtk_hbox_new(1, 5);
+//         GtkWidget *ok = gtk_button_new_with_label("Copy");
+//         GtkWidget *cancel = gtk_button_new_with_label("Cancel");
+//         GtkWidget *entry = gtk_entry_new();
+//         dumbstruct *newdum = new dumbstruct();
+//         newdum->filesel = GTK_WIDGET(fs);
+//         newdum->entrywin = entry;
+//         g_signal_connect(G_OBJECT(ok), "clicked", G_CALLBACK(copynormal), newdum);
+//         g_signal_connect(G_OBJECT(cancel), "clicked", G_CALLBACK(fileop_destroy_dumb), newdum);
+//         g_signal_connect(G_OBJECT(window), "delete_event", G_CALLBACK(win_close), NULL);
+//         GtkWidget *label = gtk_label_new(remstr);
+// //		gtk_container_add (GTK_CONTAINER (window), label);
+//         gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 5);
+//         gtk_box_pack_start(GTK_BOX(vbox), entry, TRUE, TRUE, 5);
+// //		gtk_container_add (GTK_CONTAINER (window), ok);
+// //		gtk_container_add (GTK_CONTAINER (window), cancel);
+//         gtk_box_pack_start(GTK_BOX(cont), ok, TRUE, TRUE, 5);
+//         gtk_box_pack_start(GTK_BOX(cont), cancel, TRUE, TRUE, 5);
+//         gtk_box_pack_start(GTK_BOX(vbox), cont, TRUE, TRUE, 5);
+//         gtk_container_add(GTK_CONTAINER(window), vbox);
+//         gtk_widget_show(label);
+//         gtk_widget_show(ok);
+//         GTK_WIDGET_SET_FLAGS(ok, GTK_CAN_DEFAULT);
+//         GTK_WIDGET_SET_FLAGS(cancel, GTK_CAN_DEFAULT);
+//         gtk_widget_grab_default(cancel);
+//         gtk_widget_show(entry);
+//         gtk_widget_show(cancel);
+//         gtk_widget_show(cont);
+//         gtk_widget_show(vbox);
+//         gtk_widget_show(window);
+//         GTK_FILE_CHOOSER_WIDGET(fs)->fileop_dialog = window;
+//     }
 }
 
 void LoadSaveFunction(char *Filename,
         char *otherstr,
         int i,
-        GtkSignalFunc func,
+        gpointer func,
         const char *default_thing = "\0\0\0\0\0\0\0\0",
         bool usenormalbuttons = false) {
-    GtkWidget *filew;
-    filew = gtk_file_selection_new(Filename);
-    if (!usenormalbuttons) {
-        gtk_widget_destroy(GTK_FILE_SELECTION(filew)->button_area);
-        GTK_FILE_SELECTION(filew)->button_area = gtk_hbox_new(FALSE, 0);
-        gtk_widget_show(GTK_FILE_SELECTION(filew)->button_area);
-        GtkWidget *newb = gtk_button_new_with_label("Delete Game");
-//	char *Addon="\nWarning: Do not use the \"Delete File\" button to delete saved games...\nUse the \"Delete Game\" button instead.";
-//	char *otherstr=new char [strlen(othstr)+strlen(Addon)+5];
-//	sprintf(otherstr,"%s%s",othstr,Addon);
-        gtk_widget_show(newb);
-        gtk_container_add(GTK_CONTAINER(GTK_FILE_SELECTION(filew)->button_area), newb);
-        gtk_signal_connect(GTK_OBJECT(newb), "clicked", (GtkSignalFunc) delfile_conf, filew);
-        newb = gtk_button_new_with_label("Rename Game");
-        gtk_widget_show(newb);
-        gtk_container_add(GTK_CONTAINER(GTK_FILE_SELECTION(filew)->button_area), newb);
-        gtk_signal_connect(GTK_OBJECT(newb), "clicked", (GtkSignalFunc) renfile_conf, filew);
-        newb = gtk_button_new_with_label("Copy Game");
-        gtk_widget_show(newb);
-        gtk_container_add(GTK_CONTAINER(GTK_FILE_SELECTION(filew)->button_area), newb);
-        gtk_signal_connect(GTK_OBJECT(newb), "clicked", (GtkSignalFunc) copyfile_conf, filew);
-    } else {
-        GtkWidget *newb = gtk_button_new_with_label("Copy File");
-        gtk_widget_show(newb);
-        gtk_container_add(GTK_CONTAINER(GTK_FILE_SELECTION(filew)->button_area), newb);
-        gtk_signal_connect(GTK_OBJECT(newb), "clicked", (GtkSignalFunc) copynormal_conf, filew);
-    }
-    gtk_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(filew)->ok_button),
-            "clicked", (GtkSignalFunc) func, filew);
-    GTK_FILE_SELECTION(filew)->help_button = gtk_button_new_with_label("Help");
-    GTK_WIDGET_SET_FLAGS(GTK_FILE_SELECTION(filew)->help_button, GTK_CAN_DEFAULT);
-    gtk_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(filew)->help_button),
-            "clicked", (GtkSignalFunc) help_func, (void *) i);
-
-    gtk_signal_connect_object(GTK_OBJECT(GTK_FILE_SELECTION
-                    (filew)->cancel_button),
-            "clicked", (GtkSignalFunc) gtk_widget_destroy,
-            GTK_OBJECT(filew));
-//    if (default_thing[0]!='\0') {
-//      gtk_file_selection_complete (GTK_FILE_SELECTION(filew), default_thing);
-//    }else {
-    gtk_file_selection_set_filename(GTK_FILE_SELECTION(filew), default_thing);
-//    }
-    GtkWidget *lbl = gtk_label_new(otherstr);
-    gtk_container_add(GTK_CONTAINER(GTK_FILE_SELECTION(filew)->action_area), lbl);
-    gtk_widget_show(lbl);
-    GtkWidget *box = gtk_label_new("");
-    gtk_container_add(GTK_CONTAINER(GTK_FILE_SELECTION(filew)->button_area), box);
-    gtk_box_pack_end(GTK_BOX(GTK_FILE_SELECTION(filew)->ok_button->parent),
-            GTK_FILE_SELECTION(filew)->help_button,
-            FALSE,
-            TRUE,
-            40);
-    if (!usenormalbuttons) {
-        gtk_box_pack_end(GTK_BOX(GTK_FILE_SELECTION(filew)->main_vbox),
-                GTK_FILE_SELECTION(filew)->button_area,
-                FALSE,
-                TRUE,
-                0);
-    }
-    gtk_widget_show(box);
-    gtk_widget_show(GTK_FILE_SELECTION(filew)->help_button);
-    gtk_widget_show(filew);
-//	delete []otherstr;
+    GtkWidget *filew = gtk_file_chooser_widget_new(GTK_FILE_CHOOSER_ACTION_SAVE);
+//     if (!usenormalbuttons) {
+//         gtk_widget_destroy(GTK_FILE_CHOOSER_WIDGET(filew)->button_area);
+//         GTK_FILE_CHOOSER_WIDGET(filew)->button_area = gtk_hbox_new(FALSE, 0);
+//         gtk_widget_show(GTK_FILE_CHOOSER_WIDGET(filew)->button_area);
+//         GtkWidget *newb = gtk_button_new_with_label("Delete Game");
+// //	char *Addon="\nWarning: Do not use the \"Delete File\" button to delete saved games...\nUse the \"Delete Game\" button instead.";
+// //	char *otherstr=new char [strlen(othstr)+strlen(Addon)+5];
+// //	sprintf(otherstr,"%s%s",othstr,Addon);
+//         gtk_widget_show(newb);
+//         gtk_container_add(GTK_CONTAINER(GTK_FILE_CHOOSER_WIDGET(filew)->button_area), newb);
+//         gtk_signal_connect(GTK_OBJECT(newb), "clicked", (GtkSignalFunc) delfile_conf, filew);
+//         newb = gtk_button_new_with_label("Rename Game");
+//         gtk_widget_show(newb);
+//         gtk_container_add(GTK_CONTAINER(GTK_FILE_CHOOSER_WIDGET(filew)->button_area), newb);
+//         gtk_signal_connect(GTK_OBJECT(newb), "clicked", (GtkSignalFunc) renfile_conf, filew);
+//         newb = gtk_button_new_with_label("Copy Game");
+//         gtk_widget_show(newb);
+//         gtk_container_add(GTK_CONTAINER(GTK_FILE_CHOOSER_WIDGET(filew)->button_area), newb);
+//         gtk_signal_connect(GTK_OBJECT(newb), "clicked", (GtkSignalFunc) copyfile_conf, filew);
+//     } else {
+//         GtkWidget *newb = gtk_button_new_with_label("Copy File");
+//         gtk_widget_show(newb);
+//         gtk_container_add(GTK_CONTAINER(GTK_FILE_CHOOSER_WIDGET(filew)->button_area), newb);
+//         gtk_signal_connect(GTK_OBJECT(newb), "clicked", (GtkSignalFunc) copynormal_conf, filew);
+//     }
+//     gtk_signal_connect(GTK_OBJECT(GTK_FILE_CHOOSER_WIDGET(filew)->ok_button),
+//             "clicked", (GtkSignalFunc) func, filew);
+//     GTK_FILE_CHOOSER_WIDGET(filew)->help_button = gtk_button_new_with_label("Help");
+//     GTK_WIDGET_SET_FLAGS(GTK_FILE_CHOOSER_WIDGET(filew)->help_button, GTK_CAN_DEFAULT);
+//     gtk_signal_connect(GTK_OBJECT(GTK_FILE_CHOOSER_WIDGET(filew)->help_button),
+//             "clicked", (GtkSignalFunc) help_func, (void *) i);
+//
+//     gtk_signal_connect_object(GTK_OBJECT(GTK_FILE_CHOOSER_WIDGET
+//                     (filew)->cancel_button),
+//             "clicked", (GtkSignalFunc) gtk_widget_destroy,
+//             GTK_OBJECT(filew));
+// //    if (default_thing[0]!='\0') {
+// //      gtk_file_selection_complete (GTK_FILE_CHOOSER_WIDGET(filew), default_thing);
+// //    }else {
+//     gtk_file_selection_set_filename(GTK_FILE_CHOOSER_WIDGET(filew), default_thing);
+// //    }
+//     GtkWidget *lbl = gtk_label_new(otherstr);
+//     gtk_container_add(GTK_CONTAINER(GTK_FILE_CHOOSER_WIDGET(filew)->action_area), lbl);
+//     gtk_widget_show(lbl);
+//     GtkWidget *box = gtk_label_new("");
+//     gtk_container_add(GTK_CONTAINER(GTK_FILE_CHOOSER_WIDGET(filew)->button_area), box);
+//     gtk_box_pack_end(GTK_BOX(GTK_FILE_CHOOSER_WIDGET(filew)->ok_button->parent),
+//             GTK_FILE_CHOOSER_WIDGET(filew)->help_button,
+//             FALSE,
+//             TRUE,
+//             40);
+//     if (!usenormalbuttons) {
+//         gtk_box_pack_end(GTK_BOX(GTK_FILE_CHOOSER_WIDGET(filew)->main_vbox),
+//                 GTK_FILE_CHOOSER_WIDGET(filew)->button_area,
+//                 FALSE,
+//                 TRUE,
+//                 0);
+//     }
+//     gtk_widget_show(box);
+//     gtk_widget_show(GTK_FILE_CHOOSER_WIDGET(filew)->help_button);
+//     gtk_widget_show(filew);
+// //	delete []otherstr;
 }
 
 void LoadMissionDialog(char *Filename, int i) {
@@ -943,12 +969,12 @@ void LoadMissionDialog(char *Filename, int i) {
     char mypwd[1000];
     getcwd(mypwd, 1000);
     //  fprintf (stderr,mypwd);
-    LoadSaveFunction(Filename,
-            "Select the mission, then run by clicking new or load game.",
-            i,
-            (GtkSignalFunc) file_mission_sel,
-            my_mission.c_str(),
-            true);
+    // LoadSaveFunction(Filename,
+    //         "Select the mission, then run by clicking new or load game.",
+    //         i,
+    //         (GtkSignalFunc) file_mission_sel,
+    //         my_mission.c_str(),
+    //         true);
 }
 
 void changehome() {
@@ -981,12 +1007,12 @@ void changehome() {
 
 void LoadSaveDialog(char *Filename, char *otherstr, int i) {
     changehome();
-    LoadSaveFunction(Filename, otherstr, i, (GtkSignalFunc) file_ok_sel);
+    // LoadSaveFunction(Filename, otherstr, i, file_ok_sel);
 }
 
 void LoadAutoDialog(char *Filename, char *otherstr, int i) {
     changehome();
-    LoadSaveFunction(Filename, otherstr, i, (GtkSignalFunc) file_ok_auto_sel);
+    // LoadSaveFunction(Filename, otherstr, i, (GtkSignalFunc) file_ok_auto_sel);
 }
 /* example-end */
 
