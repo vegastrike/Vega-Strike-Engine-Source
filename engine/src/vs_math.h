@@ -55,10 +55,10 @@
 #define FINITE(x) ( std::isfinite( x ) )
 #define ISNAN(x) ( std:: isnan( x ) )
 
-// From example given at https://en.cppreference.com/cpp/types/numeric_limits/epsilon . Retrieved 2026-06-24.
-template <class T>
-std::enable_if_t<not std::numeric_limits<T>::is_integer, bool>
-equal_within_ulps(T x, T y, std::size_t n)
+// Adapted from example given at https://en.cppreference.com/cpp/types/numeric_limits/epsilon . Retrieved 2026-06-24.
+template <typename T,
+std::enable_if_t<std::is_floating_point_v<T>, bool> = true>
+bool equal_within_ulps(T x, T y, std::size_t n)
 {
     // Since `epsilon()` is the gap size (ULP, unit in the last place)
     // of floating-point numbers in interval [1, 2), we can scale it to
