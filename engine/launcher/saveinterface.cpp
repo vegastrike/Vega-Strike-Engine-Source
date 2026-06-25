@@ -45,7 +45,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "src/common/common.h"
+#include "common/common.h"
 #endif
 #ifdef _WIN32
 extern void GetRidOfConsole ();

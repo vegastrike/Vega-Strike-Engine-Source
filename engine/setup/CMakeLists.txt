@@ -31,13 +31,13 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 	MESSAGE(STATUS "Configuring vegasettings for Linux")
 
 	SET(VEGASETTINGS_SOURCES
-		src/c/setup.cpp
-		src/include/central.cpp
-		src/include/display_gtk.cpp
-		src/include/display_dialog.cpp
-		src/include/file.cpp
-		src/include/general.cpp
-		../src/common/common.cpp
+            src/c/setup.cpp
+            src/include/central.cpp
+            src/include/display_gtk.cpp
+            src/include/display_dialog.cpp
+            src/include/file.cpp
+            src/include/general.cpp
+            ../../common/common.cpp
 		)
 
 	ADD_EXECUTABLE(vegasettings ${VEGASETTINGS_SOURCES})
@@ -78,11 +78,11 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 	FIND_PACKAGE(Boost COMPONENTS program_options REQUIRED)
 
 	INCLUDE_DIRECTORIES(
-        ${Vega_Strike_SOURCE_DIR}/setup/src/include
-        ${Vega_Strike_SOURCE_DIR}/src/common
-        ${Vega_Strike_BINARY_DIR}
-        ${GTK3_INCLUDE_DIRS}
-		${Boost_INCLUDE_DIRS}
+            ${Vega_Strike_SOURCE_DIR}/setup/src/include
+            ${Vega_Strike_SOURCE_DIR}/common
+            ${Vega_Strike_BINARY_DIR}
+            ${GTK3_INCLUDE_DIRS}
+            ${Boost_INCLUDE_DIRS}
     )
 
 	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS} ${Boost_LIBRARIES})
@@ -98,7 +98,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 			src/include/display_dialog.cpp
 			src/include/file.cpp
 			src/include/general.cpp
-			../src/common/common.cpp
+            ../../common/common.cpp
 	)
 
 	ADD_EXECUTABLE(vegasettings MACOSX_BUNDLE ${VEGASETTINGS_SOURCES})
@@ -136,9 +136,8 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 
 	INCLUDE_DIRECTORIES(
 			${Vega_Strike_SOURCE_DIR}/setup/src/include
-			${Vega_Strike_SOURCE_DIR}/src/common
+			${Vega_Strike_SOURCE_DIR}/common
 			${Vega_Strike_BINARY_DIR}
-			${Vega_Strike_SOURCE_DIR}/setup/src/include
 			${GTK3_INCLUDE_DIRS}
 			${Boost_INCLUDE_DIRS}
 			${GTK3_GLIBCONFIG_INCLUDE_DIR}
