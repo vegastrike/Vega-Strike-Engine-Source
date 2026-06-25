@@ -721,6 +721,7 @@ ADD_SUBDIRECTORY(setup)
 
 # Add other utilities here
 ADD_SUBDIRECTORY(objconv)
+ADD_SUBDIRECTORY(launcher)
 
 ## show debug output
 #GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
