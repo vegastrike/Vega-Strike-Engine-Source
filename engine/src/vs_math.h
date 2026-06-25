@@ -35,6 +35,7 @@
 #include <math.h>
 #include <float.h>
 #include <cmath>
+#include <algorithm>
 
 #ifdef HAVE_IEEEFP_H
     #include <ieeefp.h>

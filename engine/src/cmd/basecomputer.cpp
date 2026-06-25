@@ -3789,7 +3789,7 @@ string buildUpgradeDescription(Cargo &item, std::map<std::string, std::string> s
         boost::python::object dict = MapToObject(ship_map);
         const std::string text = GetString("get_upgrade_info", "upgrade_view",
                                            "upgrade_view.py", dict.ptr());
-    return text;
+        return text;
     } catch (const std::runtime_error& e) {
         VS_LOG(error, (boost::format("Error in buildUpgradeDescription: %1%") % e.what()));
     }
