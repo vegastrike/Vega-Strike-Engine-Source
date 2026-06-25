@@ -30,8 +30,8 @@
 #include "get_string.h"
 #include "vegadisk/vsfilesystem.h"
 
-#include <Python.h>
 #include <boost/python.hpp>
+#include <Python.h>
 #include <boost/filesystem.hpp>
 
 /** Converts PyObject* raw pointer to RAII managed wrapper. */
