@@ -272,7 +272,7 @@ void launch_mission() {
         execlp("vegastrike", "/usr/local/bin/vegastrike", num, my_mission.c_str(), NULL);
 #else
         DWORD id;
-        HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),strdup (num)),0,&id);
+        HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (vega_str_dup2 (my_mission.c_str()),vega_str_dup2 (num)),0,&id);
 #endif
     } else {
 
@@ -284,7 +284,7 @@ void launch_mission() {
         execlp("vegastrike", "/usr/local/bin/vegastrike", my_mission.c_str(), NULL);
 #else
         DWORD id;
-        HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),NULL),0,&id);
+        HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (vega_str_dup2 (my_mission.c_str()),NULL),0,&id);
 #endif
     }
 }

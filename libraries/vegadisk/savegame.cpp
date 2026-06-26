@@ -45,6 +45,7 @@
 #include "cmd/fg_util.h"
 #include "src/star_system.h"
 #include "src/universe.h"
+#include "src/vega_string_utils.h"
 #include "root_generic/options.h"
 #include "cmd/vega_py_run.h"
 #include "src/vs_exit.h"
@@ -311,7 +312,7 @@ string SaveGame::WriteNewsData() {
     }
     ret += XMLSupport::tostring(i) + "\n";
     for (int j = tmp.size() - 1; j >= 0; j--) {
-        char *msg = strdup(tmp[j].message.get().c_str());
+        char *msg = vega_str_dup(tmp[j].message.get().c_str());
         int k = 0;
         while (msg[k]) {
             if (msg[k] == '\r') {

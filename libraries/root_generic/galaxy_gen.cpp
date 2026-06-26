@@ -44,6 +44,7 @@
 #include "common/vega_random.h"
 #include "root_generic/options.h"
 #include "src/universe.h"
+#include "src/vega_string_utils.h"
 #include "src/vs_logging.h"
 
 #ifndef _WIN32
@@ -564,7 +565,7 @@ Vector generateAndUpdateRS(Vector &r, Vector &s, float thisplanetradius, bool ju
 }
 
 vector<string> parseBigUnit(const string &input) {
-    char *mystr = strdup(input.c_str());
+    char *mystr = vega_str_dup(input.c_str());
     char *ptr = mystr;
     char *oldptr = mystr;
     vector<string> ans;
@@ -623,7 +624,7 @@ string getJumpTo(const string &s) {
 }
 
 string starin(const string &input) {
-    char *tmp = strdup(input.c_str());
+    char *tmp = vega_str_dup(input.c_str());
     for (unsigned int i = 0; tmp[i] != '\0'; i++) {
         if (tmp[i] == '*') {
             tmp[i] = '\0';
@@ -638,7 +639,7 @@ string starin(const string &input) {
 
 string GetNebFile(string &input) {
     string ip = input.c_str();
-    char *ptr = strdup(ip.c_str());
+    char *ptr = vega_str_dup(ip.c_str());
     for (unsigned int i = 0; ptr[i] != '\0'; i++) {
         if (ptr[i] == '^') {
             ptr[i] = '\0';

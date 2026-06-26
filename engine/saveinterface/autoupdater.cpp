@@ -49,6 +49,9 @@
 extern void GetRidOfConsole ();
 extern void my_sleep (int i);
 #endif
+
+#include "common/common.h"
+
 void LoadMissionDialog(char *Filename, int i);
 void LoadSaveDialog(char *, int);
 void LoadAutoDialog(char *, int);
@@ -101,7 +104,7 @@ return 0;
 
 void CvsUpdate(int index) {
     if (progress) {
-        char *str = strdup(buttonvec[index].c_str());
+        char *str = vega_str_dup2(buttonvec[index].c_str());
         printf("cvs update -kb -r %s\n", str);
         DWORD id;
         HANDLE hThr = CreateThread(NULL, 0, DrawStartupDialog, str, 0, &id);

@@ -29,6 +29,7 @@
 #include "gfx/quadtree.h"
 #include "root_generic/xml_support.h"
 #include "src/gfxlib.h"
+#include "src/vega_string_utils.h"
 #include "gfx/ani_texture.h"
 #include <assert.h>
 #include "vegadisk/vsfilesystem.h"
@@ -207,7 +208,7 @@ void QuadTree::beginElement(const std::string &name, const AttributeList &attrib
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                 switch (attribute_map.lookup((*iter).name)) {
                     case FFILE:
-                        textures.back().tex.filename = strdup((*iter).value.c_str());
+                        textures.back().tex.filename = vega_str_dup((*iter).value.c_str());
                         break;
                     case ALPHAFILE:
                         xml->alpha.back() = (*iter).value.c_str();

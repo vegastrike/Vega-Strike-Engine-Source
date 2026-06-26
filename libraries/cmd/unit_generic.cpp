@@ -88,6 +88,7 @@
 #include "src/vega_cast_utils.h"
 #include "resource/random_utils.h"
 #include "gldrv/mouse_cursor.h"
+#include "common/common.h"
 
 #include <math.h>
 #include <cmath>
@@ -277,7 +278,7 @@ string GetUnitDir(string filename) {
 }
 
 char *GetUnitDir(const char *filename) {
-    char *retval = strdup(filename);
+    char *retval = vega_str_dup2(filename);
     if (retval[0] == '\0') {
         return retval;
     }

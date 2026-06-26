@@ -55,6 +55,7 @@
 #include <sstream>
 
 #include "src/vega_cast_utils.h"
+#include "src/vega_string_utils.h"
 
 namespace pt = boost::property_tree;
 namespace alg = boost::algorithm;
@@ -765,8 +766,8 @@ void SystemFactory::initializeAlpha(Object object, BLENDFUNC blend_source, BLEND
         return;
     } // This is really only a check for an empty string. Refactor?
 
-    char *s = strdup(alpha);
-    char *d = strdup(alpha);
+    char *s = vega_str_dup(alpha);
+    char *d = vega_str_dup(alpha);
 
     blend_source = SRCALPHA;
     blend_destination = INVSRCALPHA;

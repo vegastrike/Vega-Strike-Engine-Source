@@ -39,6 +39,7 @@
 #include <assert.h>
 #include "cmd/cont_terrain.h"
 #include "atmosphere.h"
+#include "src/vega_string_utils.h"
 #include "root_generic/atmospheric_fog_mesh.h"
 #include "common/vega_random.h"
 
@@ -85,7 +86,7 @@ char *getnoslash(char *inp) {
 }
 
 string getCargoUnitName(const char *textname) {
-    char *tmp2 = strdup(textname);
+    char *tmp2 = vega_str_dup(textname);
     char *tmp = getnoslash(tmp2);
     unsigned int i;
     for (i = 0; tmp[i] != '\0' && (isalpha(tmp[i]) || tmp[i] == '_'); i++) {

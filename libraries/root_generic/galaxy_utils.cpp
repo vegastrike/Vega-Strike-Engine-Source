@@ -27,6 +27,7 @@
 
 #include "cmd/script/mission.h"
 #include "src/universe.h"
+#include "src/vega_string_utils.h"
 #include "root_generic/galaxy_xml.h"
 #include "root_generic/galaxy_gen.h"
 #include "root_generic/configxml.h"
@@ -51,7 +52,7 @@ string RemoveDotSystem(const char *input) {
     if (sl == 0) {
         return string("");
     }
-    char *tmp = strdup(input);
+    char *tmp = vega_str_dup(input);
     char *ptr = tmp + sl - 1;
     while (ptr > tmp) {
         if (*ptr == '.') {
@@ -59,7 +60,7 @@ string RemoveDotSystem(const char *input) {
                 *ptr = '\0';
 
                 char *ttmp = tmp;
-                tmp = strdup(RemoveDotSystem(tmp).c_str());
+                tmp = vega_str_dup(RemoveDotSystem(tmp).c_str());
                 ptr = (tmp + (ptr - ttmp));
                 free(ttmp);
 

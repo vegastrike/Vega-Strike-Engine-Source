@@ -30,6 +30,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "common/common.h"
+
 //Button::Button(float x, float y, float wid, float hei, char *name) { ; }
 Button::Button(float x, float y, float wid, float hei, const char *name) {
     //Initialize the variables
@@ -37,7 +39,7 @@ Button::Button(float x, float y, float wid, float hei, const char *name) {
     ycoord = y;
     width = wid;
     height = hei;
-    label = strdup(name);
+    label = vega_str_dup2(name);
     highlight = 0;
 
     Refresh();
@@ -48,7 +50,7 @@ void Button::ModifyName(const char *newname) {
         free(label);
     }
     if (newname) {
-        label = strdup(newname);
+        label = vega_str_dup2(newname);
     }
 }
 
