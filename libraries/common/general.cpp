@@ -31,7 +31,6 @@
 #if defined(_WIN32) && _MSC_VER > 1300
 #define __restrict
 #endif
-#include "common/general.h"
 #if defined(__APPLE__) || defined(MACOSX)
 #include <sys/param.h> // For MAXPATHLEN
 #endif
@@ -47,8 +46,13 @@
 #endif
 #include <string>
 #include <vector>
+
 using std::string;
 using std::vector;
+
+#include "common/general.h"
+#include "common/common.h"
+
 #ifdef _G_RANDOM
 #include "common/vega_random.h"
 int RANDOMIZED = 0;
@@ -433,11 +437,11 @@ void SetString(char **ptr, char *line) {
         delete *ptr;
         *ptr = nullptr;
     }
-    *ptr = strdup(line);
+    *ptr = vega_str_dup2(line);
 }
 
 char *NewString(char *line) {
-    return strdup(line);
+    return vega_str_dup2(line);
 }
 
 #endif    // __cplusplus
@@ -574,7 +578,7 @@ glob_t *FindPath(char *path, int type) {
 #endif
     pathlist.push_back((string(thispath) + SEPERATOR + mypath).c_str());
     for (cur = 0; cur < pathlist.size(); cur++) {
-        curpath = strdup(pathlist[cur].c_str());
+        curpath = vega_str_dup2(pathlist[cur].c_str());
         dir = opendir(curpath);
         chdir(curpath);
         if (dir == 0) {
@@ -582,7 +586,7 @@ glob_t *FindPath(char *path, int type) {
         }
         entry = 0;
         while ((entry = readdir(dir)) != NULL) {
-            newpath = strdup((string(curpath) + SEPERATOR + entry->d_name).c_str());
+            newpath = vega_str_dup2((string(curpath) + SEPERATOR + entry->d_name).c_str());
             if (isdir(newpath) == 1) {
                 pathlist.push_back(newpath);
                 if (type == 1) {
@@ -606,7 +610,7 @@ glob_t *FindPath(char *path, int type) {
     #endif
 
     for (cur = 0; cur < FILES->gl_pathc; cur++) {
-        FILES->gl_pathv[cur] = strdup(result[cur].c_str());
+        FILES->gl_pathv[cur] = vega_str_dup2(result[cur].c_str());
     }
 
     return FILES;

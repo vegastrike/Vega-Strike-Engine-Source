@@ -26,8 +26,8 @@
  *
  * Portions of this code from Tux Racer by Jasmin F. Patry www.tuxracer.com
  */
-#ifndef VEGA_STRIKE_ENGINE_VS_MATH_H
-#define VEGA_STRIKE_ENGINE_VS_MATH_H
+#ifndef VEGA_STRIKE_LIBRARIES_COMMON_VS_MATH_H
+#define VEGA_STRIKE_LIBRARIES_COMMON_VS_MATH_H
 
 #include <config.h>
 
@@ -80,4 +80,4 @@ bool equal_within_ulps(T x, T y, std::size_t n)
     return std::fabs(x - y) <= n * std::ldexp(std::numeric_limits<T>::epsilon(), exp);
 }
 
-#endif //VEGA_STRIKE_ENGINE_VS_MATH_H
+#endif //VEGA_STRIKE_LIBRARIES_COMMON_VS_MATH_H

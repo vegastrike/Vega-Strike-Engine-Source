@@ -33,12 +33,12 @@
 // Mar 05, 2002: Fixed the FindFiles() so it now checks sub directories
 // Mar 05, 2002: Fixed FindFiles() again
 
-#ifndef VEGA_STRIKE_LAUNCHER_GENERAL_H
-#define VEGA_STRIKE_LAUNCHER_GENERAL_H
+#ifndef VEGA_STRIKE_LIBRARIES_COMMON_GENERAL_H
+#define VEGA_STRIKE_LIBRARIES_COMMON_GENERAL_H
 
 /* Don't forget, these defines can be set at compile time with the compile flag -D */
 
-#define _G_ALL		// Enable everything except _G_DEBUG
+// #define _G_ALL		// Enable everything except _G_DEBUG
 
 //#define _G_DEBUG		// Debug Messaging
 #define _G_ERROR        // Error Messaging (internal and external)
@@ -47,7 +47,7 @@
 #endif
 //#define _G_NUMBER		// Number processing
 #define _G_PATH               // Functions that deal with directories
-//#define _G_RANDOM		// Enable Random Number
+#define _G_RANDOM		// Enable Random Number
 #define _G_STRING_MANAGE    // Enable String Management
 #define _G_STRING_PARSE    // Enable the String Parsing
 //#define _G_XML          	// Enable the XML string parsing
@@ -135,7 +135,7 @@ char *StripExtension(char *filename);
 #ifdef _G_RANDOM
 int randnum(int start, int end);
 void randcode(char *line, int length);
-#endif    // _G_STRING_RANDOM
+#endif    // _G_RANDOM
 
 #ifdef _G_NUMBER
 void itoa(char *line, int number, int length);
@@ -152,7 +152,7 @@ void btoa(char *dest, char *string);
 #ifdef _G_GLIB
 char *GetString(GString *line);
 void SetString(GString **ptr, char *line);
-#endif    // G_GLIB
+#endif    // _G_GLIB
 
 #ifdef __cplusplus
 char *GetString(char *line);
@@ -182,4 +182,4 @@ glob_t *FindFiles(char *path, char *extension);
 glob_t *FindDirs(char *path);
 #endif    // _G_PATH
 
-#endif    // VEGA_STRIKE_LAUNCHER_GENERAL_H
+#endif    // VEGA_STRIKE_LIBRARIES_COMMON_GENERAL_H

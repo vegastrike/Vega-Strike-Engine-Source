@@ -25,8 +25,8 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_VEGA_RANDOM_H
-#define VEGA_STRIKE_VEGA_RANDOM_H
+#ifndef VEGA_STRIKE_LIBRARIES_COMMOON_VEGA_RANDOM_H
+#define VEGA_STRIKE_LIBRARIES_COMMOON_VEGA_RANDOM_H
 
 #include <random>
 #include <cstdint>
@@ -290,4 +290,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_VEGA_RANDOM_H
+#endif //VEGA_STRIKE_LIBRARIES_COMMOON_VEGA_RANDOM_H
