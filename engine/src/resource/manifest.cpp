@@ -35,7 +35,7 @@
 #include <boost/json.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "resource/json_utils.h"
 
 

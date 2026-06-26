@@ -34,8 +34,6 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
     SET(LAUNCHER_SOURCES
             saveinterface.cpp
-            ../../common/common.cpp
-            general.cpp
         )
 
     ADD_EXECUTABLE(vslauncher ${LAUNCHER_SOURCES})
@@ -81,7 +79,10 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             ${GTK3_INCLUDE_DIRS}
     )
 
-    TARGET_LINK_LIBRARIES(vslauncher ${GTK_LIBS})
+    TARGET_LINK_LIBRARIES(vslauncher
+            ${GTK_LIBS}
+            vegastrike_common
+    )
 
     INSTALL(TARGETS vslauncher DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vslauncher)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
@@ -89,8 +90,6 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 
     SET(LAUNCHER_SOURCES
             saveinterface.cpp
-            ../../common/common.cpp
-            general.cpp
     )
 
     ADD_EXECUTABLE(vslauncher MACOSX_BUNDLE ${LAUNCHER_SOURCES})
@@ -138,7 +137,10 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
             ${CMAKE_PREFIX_PATH}/lib/glib-2.0/include
     )
 
-    TARGET_LINK_LIBRARIES(vslauncher ${GTK_LIBS})
+    TARGET_LINK_LIBRARIES(vslauncher
+            ${GTK_LIBS}
+            vegastrike_common
+    )
 
     INSTALL(TARGETS vslauncher DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vslauncher BUNDLE DESTINATION "/Applications/VegaStrike")
 ELSE ()

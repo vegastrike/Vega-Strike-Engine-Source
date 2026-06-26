@@ -34,7 +34,7 @@
 #include <time.h>
 #include <assert.h>
 #include <stdint.h>
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 #ifndef M_PI
 #define M_PI 3.1415926536

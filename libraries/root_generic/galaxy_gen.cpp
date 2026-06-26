@@ -41,7 +41,7 @@
 #include "src/gfxlib.h"
 #include "root_generic/galaxy_xml.h"
 #include "root_generic/galaxy_gen.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "root_generic/options.h"
 #include "src/universe.h"
 #include "src/vs_logging.h"

@@ -30,7 +30,7 @@
 #include "root_generic/galaxy_xml.h"
 #include "root_generic/galaxy_gen.h"
 #include "root_generic/configxml.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
 

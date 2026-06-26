@@ -27,7 +27,7 @@
 
 #include "cmd/asteroid.h"
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/collection.h"
 #include "gfx_generic/vec.h"

@@ -33,7 +33,7 @@
 
 #include <boost/format.hpp>
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 ECM::ECM() :
     Component(), EnergyConsumer(nullptr, false, 0), ecm(Resource<int>(0, 0, 0)), active(false) {

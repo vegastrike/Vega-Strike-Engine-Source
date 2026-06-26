@@ -40,7 +40,7 @@
 #include "cmd/cont_terrain.h"
 #include "atmosphere.h"
 #include "root_generic/atmospheric_fog_mesh.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 #ifdef FIX_TERRAIN
 #include "gfx/planetary_transform.h"

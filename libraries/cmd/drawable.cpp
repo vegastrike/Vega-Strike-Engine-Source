@@ -47,7 +47,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "src/vega_cast_utils.h"
 
 // Required definition of static variable

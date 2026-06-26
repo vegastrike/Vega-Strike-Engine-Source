@@ -28,17 +28,30 @@
 /* This include has been designed to act independent of the other modules.
  * This allows it to be used with other programs with minimal changes */
 
-#include "launcher/general.h"
+#if defined(_WIN32) && _MSC_VER > 1300
+#define __restrict
+#endif
+#include "common/general.h"
 #if defined(__APPLE__) || defined(MACOSX)
 #include <sys/param.h> // For MAXPATHLEN
+#endif
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <sys/dir.h>
+#include <stdio.h>
+#include <unistd.h>
 #endif
 #ifdef __MINGW32__
 #include <dirent.h>
 #endif
+#include <string>
+#include <vector>
 using std::string;
 using std::vector;
 #ifdef _G_RANDOM
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
+int RANDOMIZED = 0;
 #endif    // _G_RANDOM
 
 // Gets the next parameter from the string, sorted by a space
@@ -154,6 +167,8 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
         calc = strlen(current) - strlen(search) + strlen(replace);
         if (calc > LENGTH) {
             strcpy(line, current);
+            delete[] chr_new;
+            delete[] current;
             return line;
         }
         dif = location - current;
@@ -236,6 +251,7 @@ char *StripExtension(char *filename) {
 #endif    // _G_STRING_PARSE
 
 #ifdef _G_RANDOM
+
 int randnum(int start, int end) {
     int min = start;
     int max = end;
@@ -253,11 +269,19 @@ void randcode(char *line, int length) {
     int current, randomA, randomB, test;
     test = 2;
     for (current = 0; current < length; current++) {
-        if (test % 5 == 1 && current > 1) { line[current] = '-'; test++; continue; }
-        randomA = randnum(1,2);
+        if (test % 5 == 1 && current > 1) {
+            line[current] = '-';
+            test++;
+            continue;
+        }
+        randomA = randnum(1, 2);
         randomB = 60;
-        if (randomA == 1) { randomB = randnum(48,57); }
-        if (randomA == 2) { randomB = randnum(65,90); }
+        if (randomA == 1) {
+            randomB = randnum(48, 57);
+        }
+        if (randomA == 2) {
+            randomB = randnum(65, 90);
+        }
         line[current] = randomB;
         test++;
     }
@@ -277,12 +301,18 @@ void itoa(char *line, int number, int length) {
     while (1) {
         multiplier = 0;
         current = base;
-        while (current / 10 >= 1) { current /= 10; multiplier++; continue; }
-        if (base == 0) { break; }
+        while (current / 10 >= 1) {
+            current /= 10;
+            multiplier++;
+            continue;
+        }
+        if (base == 0) {
+            break;
+        }
         current /= 10;
-        reduce = pwer(1,multiplier);
+        reduce = pwer(1, multiplier);
         current = base / reduce;
-        reduce = pwer(current,multiplier);
+        reduce = pwer(current, multiplier);
         current += 48;
         line[cur] = current;
         cur++;
@@ -295,20 +325,20 @@ void itoa(char *line, int number, int length) {
 // pwer is for x * 10^y
 // pwr is for x^y
 int pwer(int start, int end) {
-        return do_power(start, end, 10);
+    return do_power(start, end, 10);
 }
 
 int pwr(int start, int end) {
-        return do_power(1, end, start);
+    return do_power(1, end, start);
 }
 
 int do_power(int start, int end, int multiply) {
-        int current, val_return;
-        val_return = start;
-        for (current = 2; current <= end; current++) {
-                val_return *= multiply;
-        }
-        return val_return;
+    int current, val_return;
+    val_return = start;
+    for (current = 2; current <= end; current++) {
+        val_return *= multiply;
+    }
+    return val_return;
 }
 
 #ifdef __cplusplus
@@ -330,7 +360,7 @@ double pwer(double start, long end) {
 void btoa(char *dest, char *string) {
     int max, cur, pos, new_val;
     char *ptr_char, cur_char[1];
-    char new_string[strlen(string)+1];
+    char *new_string = (char *) malloc(strlen(string) + 1);
     max = 7;
     cur = 7;
     pos = 0;
@@ -338,13 +368,21 @@ void btoa(char *dest, char *string) {
     new_val = 0;
     while (ptr_char[0] != '\0') {
         cur_char[0] = ptr_char[0];
-        if (ptr_char[0] == '1') { new_val += pwr(2,cur); }
+        if (ptr_char[0] == '1') {
+            new_val += pwr(2, cur);
+        }
         cur--;
-        if (cur < 0) { cur = max; new_string[pos] = new_val; new_val = 0; pos++; }
+        if (cur < 0) {
+            cur = max;
+            new_string[pos] = new_val;
+            new_val = 0;
+            pos++;
+        }
         ptr_char++;
     }
     new_string[pos] = '\0';
     strcpy(dest, new_string);
+    free(new_string);
     return;
 }
 
@@ -436,38 +474,58 @@ void ShowError(const char *error_msg, const char *error_code, int is_fatal) {
 
 char *xml_pre_chomp_comment(char *string) {
     int length, cur;
-    if (string[0] == '<' && string[1] == '!') { string[0] = '\0'; return string += 5; }
+    if (string[0] == '<' && string[1] == '!') {
+        string[0] = '\0';
+        return string += 5;
+    }
     length = strlen(string) - 5;
     for (cur = 0; cur <= length; cur++) {
-        if (string[cur] == '<' && string[cur+1] == '!') { string[cur] = '\0'; return &string[cur+5]; }
+        if (string[cur] == '<' && string[cur + 1] == '!') {
+            string[cur] = '\0';
+            return &string[cur + 5];
+        }
     }
-    return &string[length+5];
+    return &string[length + 5];
 }
+
 char *xml_chomp_comment(char *string) {
     int len, cur;
-    if (string[0] == '\0') { return string; }
+    if (string[0] == '\0') {
+        return string;
+    }
     len = strlen(string) - 1;
-    if (len <= 3) { return &string[len+1]; }
-    if (string[len] == '>' && string[len-1] == '-' && string[len-2] == '-') {
-        if (string[len-3] == ' ') { string[len-3] = '\0'; }
-        string[len-2] = '\0';
-        return &string[len-2];
+    if (len <= 3) {
+        return &string[len + 1];
+    }
+    if (string[len] == '>' && string[len - 1] == '-' && string[len - 2] == '-') {
+        if (string[len - 3] == ' ') {
+            string[len - 3] = '\0';
+        }
+        string[len - 2] = '\0';
+        return &string[len - 2];
     }
     len -= 3;
     for (cur = 0; cur <= len; cur++) {
-        if (string[cur] == '-' && string[cur+2] == '>') {
-            if (string[cur-1] == ' ') { string[cur-1] = '\0'; }
+        if (string[cur] == '-' && string[cur + 2] == '>') {
+            if (string[cur - 1] == ' ') {
+                string[cur - 1] = '\0';
+            }
             string[cur] = '\0';
-            string[cur+2] = '\0';
-            return &string[cur+3];
+            string[cur + 2] = '\0';
+            return &string[cur + 3];
         }
     }
-    return &string[len+4];
+    return &string[len + 4];
 }
 
 #endif    // _G_XML
 
 #ifdef _G_PATH
+
+// Uses glob to look for dirs and files.
+// Please note: These functions have not been tested with C, only with C++
+// Reminder: Add an error control function for glob()
+
 
 int isdir(const char *file) {
     int length = strlen(file);
@@ -483,7 +541,7 @@ int isdir(const char *file) {
         }
     }
 
-    if (-1 == chdir(file)) {
+    if (-1 == chdir((std::string(file) + "/").c_str())) {
         return 0;
     } else {
         chdir("..");

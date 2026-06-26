@@ -44,7 +44,7 @@
 #include "gfx/hud.h"
 #include "root_generic/vs_globals.h"
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #ifdef _WIN32
 #include <direct.h>
 #else

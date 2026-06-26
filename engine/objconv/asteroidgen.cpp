@@ -32,8 +32,8 @@
 #include <math.h>
 #include <ctime>
 
-#include "root_generic/vega_random.h"
-#include "src/vs_math.h"
+#include "common/vega_random.h"
+#include "common/vs_math.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338328

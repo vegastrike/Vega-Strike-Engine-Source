@@ -33,7 +33,7 @@
 #include <limits>
 #include <stdexcept>
 
-#include "src/vs_math.h"
+#include "common/vs_math.h"
 
 constexpr int_fast32_t kVegaIntFast32tMax = std::numeric_limits<int_fast32_t>::max();
 constexpr int_least32_t kVegaIntLeast32tMax = std::numeric_limits<int_least32_t>::max();

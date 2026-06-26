@@ -55,7 +55,7 @@
 #include "root_generic/easydom.h"
 
 #include "msgcenter.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 #include "src/star_system.h"
 #include "src/universe.h"

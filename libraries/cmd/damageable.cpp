@@ -29,7 +29,7 @@
 #include "cmd/damageable.h"
 
 #include "gfx_generic/vec.h"
-#include "src/vs_math.h"
+#include "common/vs_math.h"
 #include "configuration/game_config.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/configxml.h"
@@ -44,7 +44,7 @@
 #include "gfx_generic/mesh.h"
 #include "src/vega_cast_utils.h"
 #include "resource/random_utils.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 #include <algorithm>
 #include "configuration/configuration.h"

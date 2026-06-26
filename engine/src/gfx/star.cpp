@@ -30,7 +30,7 @@
 #include "gfx/ani_texture.h"
 #include <assert.h>
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
 #include "gfx/camera.h"

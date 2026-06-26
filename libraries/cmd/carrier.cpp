@@ -38,7 +38,7 @@
 #include "cmd/ai/aggressive.h"
 #include "cmd/missile.h"
 #include "resource/random_utils.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "src/vs_logging.h"
 #include "src/vega_cast_utils.h"
 

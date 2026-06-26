@@ -67,7 +67,7 @@
 #include "gfx/warptrail.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "cmd/csv.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "root_generic/galaxy_xml.h"
 #include "gfx/camera.h"
 #include "root_generic/options.h"

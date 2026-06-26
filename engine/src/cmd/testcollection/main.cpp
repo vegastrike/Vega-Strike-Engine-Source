@@ -34,7 +34,7 @@
 #include <time.h>
 
 #include "cmd/collection.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 #define SIZE 60000
 

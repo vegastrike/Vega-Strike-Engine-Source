@@ -36,7 +36,7 @@
 #include "root_generic/vs_globals.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/unit_util.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "cmd/unit_find.h"
 #include "cmd/pilot.h"
 #include "src/universe_util.h"

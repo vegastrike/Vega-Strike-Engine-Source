@@ -43,7 +43,7 @@
 #include <boost/algorithm/string/classification.hpp>
 
 #include "root_generic/macosx_math.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "src/vega_cast_utils.h"
 
 static const std::string default_product_name("DEFAULT_PRODUCT_NAME");

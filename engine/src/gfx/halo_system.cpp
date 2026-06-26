@@ -47,7 +47,7 @@
 #include "collide2/CSopcodecollider.h"
 #include "root_generic/options.h"
 #include "cmd/unit_collide.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 #define HALO_SMOOTHING_UP_FACTOR (0.02)
 #define HALO_SMOOTHING_DOWN_FACTOR (0.01)

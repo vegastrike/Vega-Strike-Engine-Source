@@ -34,7 +34,7 @@
 #include <boost/version.hpp>
 #include <boost/python.hpp>
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>

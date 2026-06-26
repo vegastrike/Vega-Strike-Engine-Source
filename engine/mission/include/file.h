@@ -27,9 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_MISSION_FILE_H
 #define VEGA_STRIKE_ENGINE_MISSION_FILE_H
 
-#include "mission/include/central.h"
+#include "common/central.h"
 #include "mission/include/easydom.h"
-#include "mission/include/general.h"
+#include "common/general.h"
 #include <glob.h>
 #include <vector>
 #include <list>

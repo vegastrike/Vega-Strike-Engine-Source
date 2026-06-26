@@ -40,7 +40,7 @@
 #endif
 #include <sys/stat.h>
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 unsigned long genrand_int32(void);
 void init_genrand(unsigned long s);

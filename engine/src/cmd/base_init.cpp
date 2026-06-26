@@ -49,7 +49,7 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include "cmd/base.h"
 #include "cmd/base_util.h"
 #include "vegadisk/vsfilesystem.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 static BoostPythonDictionary GetEventDataPython() {
     return BaseUtil::GetEventData();

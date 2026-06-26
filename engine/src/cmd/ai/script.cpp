@@ -45,7 +45,7 @@
 
 #include <assert.h>
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 using namespace XMLSupport;
 

@@ -61,7 +61,7 @@
 #include "src/universe.h"
 #include "src/vs_logging.h"
 #include "resource/manifest.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 extern const vector<string> &ParseDestinations(const string &value);
 

@@ -57,7 +57,7 @@ using VSFileSystem::SaveFile;
 #include "gfx/sprite.h"
 #include "gfx/aux_texture.h"
 #include "src/audiolib.h"
-#include "src/vs_math.h"
+#include "common/vs_math.h"
 #include "cmd/damageable.h"
 #include "src/universe.h"
 #include "cmd/mount_size.h"
