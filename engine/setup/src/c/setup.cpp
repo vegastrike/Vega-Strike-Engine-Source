@@ -25,6 +25,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include "../include/central.h"
 #include <stdlib.h>
 #ifdef _WIN32
@@ -41,6 +42,7 @@
 #endif
 #include <vector>
 #include <string>
+#include <iostream>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 

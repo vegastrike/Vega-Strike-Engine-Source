@@ -50,7 +50,7 @@
 #define _G_RANDOM		// Enable Random Number
 #define _G_STRING_MANAGE    // Enable String Management
 #define _G_STRING_PARSE    // Enable the String Parsing
-//#define _G_XML          	// Enable the XML string parsing
+#define _G_XML          	// Enable the XML string parsing
 
 // If memory can't be allocated to perform a function, and EXIT_ON_FATAL is not defined,
 // the function will return NULL. With this defined, functions which return pointers to
