@@ -35,7 +35,9 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             src/include/display_gtk.cpp
             src/include/display_dialog.cpp
             src/include/file.cpp
-		)
+            src/include/central.cpp
+            src/include/central.h
+    )
 
 	ADD_EXECUTABLE(vegasettings ${VEGASETTINGS_SOURCES})
     TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
@@ -97,7 +99,9 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
             src/include/display_gtk.cpp
 			src/include/display_dialog.cpp
 			src/include/file.cpp
-	)
+            src/include/central.cpp
+            src/include/central.h
+    )
 
 	ADD_EXECUTABLE(vegasettings MACOSX_BUNDLE ${VEGASETTINGS_SOURCES})
     TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
