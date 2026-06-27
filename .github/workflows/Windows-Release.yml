@@ -83,10 +83,11 @@ jobs:
 
       - name: Create directories on cache miss
         run: |
-          mkdir -p "${{ github.workspace }}/vcpkgAssets"
-          mkdir -p "${{ github.workspace }}/vcpkgBCache"
-          mkdir -p "${{ github.workspace }}/vcpkgBin"
-          mkdir -p "${{ github.workspace }}/vcpkgBuild"
+          New-Item -Force -ItemType Directory -Path "${{ github.workspace }}/vcpkgAssets"
+          New-Item -Force -ItemType Directory -Path "${{ github.workspace }}/vcpkgBCache"
+          New-Item -Force -ItemType Directory -Path "${{ github.workspace }}/vcpkgBin"
+          New-Item -Force -ItemType Directory -Path "${{ github.workspace }}/vcpkgBuild"
+        shell: pwsh
         if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
       - name: Set up Python
