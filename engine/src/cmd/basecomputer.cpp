@@ -4331,7 +4331,7 @@ bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *contro
 
     std::string text;
     try {
-        boost::python::object args = WrapObject(PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr()), false);
+        boost::python::object args = WrapObject(PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr()), true);
         VS_LOG_AND_FLUSH(debug, (boost::format("%1%: tuple reference count: %2%") % __FUNCTION__ % args.ptr()->ob_refcnt));
         text = GetString("get_player_info", "player_info", "player_info.py", args.ptr());
     } catch (const std::runtime_error& e) {
