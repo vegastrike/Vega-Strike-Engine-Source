@@ -35,7 +35,7 @@ using std::string;
 static const char *kNullUnitErrorMsg = "\nERROR: NULL Unit used in Python script; returning default value...";
 #define CHECKME \
     }           \
-    Unit *me = GetUnit(); if (!me) {VS_LOG_AND_FLUSH(error, kNullUnitErrorMsg); return
+    Unit *me = GetUnit(); if (!me) {VS_LOG_AND_FLUSH(error, (std::string(kNullUnitErrorMsg) + " in " + __FUNCTION__).c_str()); return
 #define WRAPPED0(type, name, def) \
     type name() {                   \
         {CHECKME def; }             \
