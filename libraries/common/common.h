@@ -53,7 +53,7 @@ inline char *vega_str_dup2(const char *string) {
     size_t buf_size = strlen(string) + 1;
     char *alloc;
     alloc = (char *)malloc(buf_size);
-    assert(alloc != nullptr, "Out of memory");
+    assert(alloc != nullptr);
     strncpy(alloc, string, buf_size);
     alloc[buf_size - 1] = '\0';
     return alloc;
