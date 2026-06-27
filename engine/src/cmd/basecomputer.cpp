@@ -27,6 +27,9 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
+
+#define PY_SSIZE_T_CLEAN
+
 #include "src/vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
                                                                                                                         //For WIN32 debugging.
@@ -152,7 +155,7 @@ void InitBaseComputer() {
 }
 
 // Can't declare in header because PyObject is problematic
-extern boost::python::object WrapObject(PyObject* raw_object);
+extern boost::python::object WrapObject(PyObject* raw_object, bool should_borrow);
 
 extern boost::python::object GetPyObject(const std::string& function_name,
                                         const std::string& module_name,
@@ -164,7 +167,7 @@ extern std::string GetString(const std::string& function_name,
                             const std::string& file_name,
                             PyObject* raw_args);
 
-extern boost::python::object MapToObject(const std::map<std::string, std::string>& cpp_map);
+extern boost::python::object MapToObject(SharedPtr<std::map<std::string, std::string>> cpp_map);
 
 //end for directory thing
 extern const char *DamagedCategory;
@@ -243,7 +246,7 @@ extern void RespawnNow(Cockpit *cockpit);
 string buildShipDescription(Cargo &item, string &texture_description);
 //build the previous description from a cargo purchase item
 string buildCargoDescription(const Cargo &item, BaseComputer &computer, float price);
-string buildUpgradeDescription(Cargo &item, std::map<std::string, std::string> ship_map);
+string buildUpgradeDescription(const Cargo &item, std::map<std::string, std::string> ship_map);
 int BaseCargoAssets(Unit *base_unit, string cargo_name);
 
 //"Basic Repair" item that is added to Buy UPGRADE mode.
@@ -3761,7 +3764,8 @@ string buildShipDescription(Cargo &item, std::string &texture_description) {
             // We are building a standard ship from the template
             ship_map = newPart->UnitToMap();
         }
-        boost::python::object dict = MapToObject(ship_map);
+        SharedPtr<std::map<std::string, std::string>> ship_map_ptr = MakeShared<std::map<std::string, std::string>>(ship_map);
+        boost::python::object dict = MapToObject(ship_map_ptr);
         str = GetString("get_ship_description", "ship_view", "ship_view.py", dict.ptr());
     } catch (const std::runtime_error& e) {
         VS_LOG(error, (boost::format("Error in buildShipDescription: %1%") % e.what()));
@@ -3782,11 +3786,12 @@ string buildShipDescription(Cargo &item, std::string &texture_description) {
 }
 
 //UNDER CONSTRUCTION
-string buildUpgradeDescription(Cargo &item, std::map<std::string, std::string> ship_map) {
+string buildUpgradeDescription(const Cargo &item, std::map<std::string, std::string> ship_map) {
     const std::string key = item.GetName() + "__upgrades";
-    ship_map["upgrade_key"] = key;
+    SharedPtr<std::map<std::string, std::string>> ship_map_copy = MakeShared<std::map<std::string, std::string>>(ship_map);
+    (*ship_map_copy)["upgrade_key"] = key;
     try {
-        boost::python::object dict = MapToObject(ship_map);
+        boost::python::object dict = MapToObject(ship_map_copy);
         const std::string text = GetString("get_upgrade_info", "upgrade_view",
                                            "upgrade_view.py", dict.ptr());
         return text;
@@ -4326,7 +4331,8 @@ bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *contro
 
     std::string text;
     try {
-        boost::python::object args = WrapObject(PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr()));
+        boost::python::object args = WrapObject(PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr()), false);
+        VS_LOG_AND_FLUSH(debug, (boost::format("%1%: tuple reference count: %2%") % __FUNCTION__ % args.ptr()->ob_refcnt));
         text = GetString("get_player_info", "player_info", "player_info.py", args.ptr());
     } catch (const std::runtime_error& e) {
         VS_LOG(error, (boost::format("Error in showPlayerInfo: %1%") % e.what()));
@@ -4357,7 +4363,8 @@ bool BaseComputer::showShipStats(const EventCommandId &command, Control *control
     const std::map<std::string, std::string> ship_map = playerUnit->UnitToMap();
     std::string text;
     try {
-        boost::python::object dict = MapToObject(ship_map);
+        SharedPtr<std::map<std::string, std::string>> ship_map_ptr = MakeShared<std::map<std::string, std::string>>(ship_map);
+        boost::python::object dict = MapToObject(ship_map_ptr);
         text = GetString("get_ship_description", "ship_view",
                           "ship_view.py", dict.ptr());
     } catch (const std::runtime_error& e) {
