@@ -43,7 +43,9 @@
 //#define _G_DEBUG		// Debug Messaging
 #define _G_ERROR        // Error Messaging (internal and external)
 //#define _G_NUMBER		// Number processing
+#ifndef _WIN32
 #define _G_PATH               // Functions that deal with directories
+#endif
 #define _G_RANDOM		// Enable Random Number
 #define _G_STRING_MANAGE    // Enable String Management
 #define _G_STRING_PARSE    // Enable the String Parsing
