@@ -6,7 +6,7 @@ Welcome to Vega Strike!
 
 There are many ways to contribute - coding, art work, documentation, testing, and much more.
 This repository covers the core Vega Strike Engine that sits at the heart of it all, and
-the guidlines here are specific to working with this repository. Please see the
+the guidelines here are specific to working with this repository. Please see the
 `Vega Strike: Community Contribution`_ guidelines for other areas of contribution.
 
 Overview
@@ -49,7 +49,7 @@ Please bear in mind that we are bound to accept contributions under the followin
 Please note that we do not allow licenses not mentioned above, in particular:
 * (CC-NC) Creative Commons Non-Commercial license or any combination with CC-BY and CC-SA
 
-For a more updated list, please see `Vega Srike: Licensing`_.
+For a more updated list, please see `Vega Strike: Licensing`_.
 
 Building
 ========
@@ -94,7 +94,7 @@ When submitting a Pull Request please document:
 
 Packaging
 =========
-|gitter-packagers| `Vega Strike: Gitter - Packgers`_
+|gitter-packagers| `Vega Strike: Gitter - Packagers`_
 
 We directly support packaging on a few platforms. Packaging for addition platforms is more than welcome.
 We greatly appreciate the work you do as we would not be able to reach our users without you.
@@ -116,16 +116,16 @@ package and setting a dependency on the Vega Strike Game Engine package.
 .. note:: Source Packages would will be very large especially for the data packages. This cannot be avoided. Both source and binary
     packages should be provided.
 
-Please join us at `Vega Strike: Gitter - Packgers`_ to if you have any questions.
+Please join us at `Vega Strike: Gitter - Packagers`_ to if you have any questions.
 
 .. |gitter-packagers| image:: https://badges.gitter.im/vegastrike/vegastrike-packaging.svg
 
 .. _`Vega Strike: Community Contribution` :: https://wiki.vega-strike.org/HowTo:Contribute
 .. _`Vega Strike: Under the Coldest Sea` :: https://github.com/vegastrike/Assets-Masters
 .. _`Vega Strike: UtCS Production` :: https://github.com/vegastrike/Assets-Production
-.. _`Vega Srike: Licensing` :: https://wiki.vega-strike.org/Development:Graphics_Requirements#Licenses
+.. _`Vega Strike: Licensing` :: https://wiki.vega-strike.org/Development:Graphics_Requirements#Licenses
 .. _`Vega Strike: Issues` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/issues
 .. _`Vega Strike: Milestones` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/milestones
 .. _`Vega Strike: Pull Request Validation` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/wiki/Pull-Request-Validation
 .. _`Vega Strike: Pull Requests` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/pulls
-.. _`Vega Strike: Gitter - Packgers` :: https://gitter.im/vegastrike/vegastrike-packaging?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
+.. _`Vega Strike: Gitter - Packagers` :: https://gitter.im/vegastrike/vegastrike-packaging?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge

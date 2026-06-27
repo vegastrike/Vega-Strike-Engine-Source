@@ -52,6 +52,7 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include <string>
 #include <cstdlib>
 #include <cassert>
+#include <algorithm>
 #include "src/vega_cast_utils.h"
 #include "src/audiolib.h"
 #include "cmd/base.h"
@@ -86,10 +87,10 @@ using namespace XMLSupport;
 namespace BaseUtil {
 inline BaseInterface::Room *CheckRoom(int room) {
     if (!BaseInterface::CurrentBase) {
-        return 0;
+        return nullptr;
     }
     if (room < 0 || room >= static_cast<int>(BaseInterface::CurrentBase->rooms.size())) {
-        return 0;
+        return nullptr;
     }
     return BaseInterface::CurrentBase->rooms[room];
 }
@@ -113,27 +114,27 @@ public:
         this->index = index;
     }
 
-    virtual void onPreAttach(Source &source, bool detach) {
+    void onPreAttach(Source &source, bool detach) override {
     };
 
-    virtual void onPostAttach(Source &source, bool detach) {
+    void onPostAttach(Source &source, bool detach) override {
     };
 
-    virtual void onPrePlay(Source &source, bool stop) {
+    void onPrePlay(Source &source, bool stop) override {
     };
 
-    virtual void onPostPlay(Source &source, bool stop) {
+    void onPostPlay(Source &source, bool stop) override {
     };
 
-    virtual void onUpdate(Source &source, int updateFlags) {
+    void onUpdate(Source &source, int updateFlags) override {
     };
 
-    virtual void onEndOfStream(Source &source) {
+    void onEndOfStream(Source &source) override {
         // Verify context before switching rooms
-        if (BaseInterface::CurrentBase != NULL) {
+        if (BaseInterface::CurrentBase != nullptr) {
             if (BaseUtil::GetCurRoom() == sourceRoom) {
                 // We're in the right context, switch to target room
-                BaseInterface::Room *room = CheckRoom(sourceRoom);
+                const BaseInterface::Room *room = CheckRoom(sourceRoom);
 
                 if (!room) {
                     return;
@@ -142,7 +143,7 @@ public:
                 for (size_t i = 0; i < room->objs.size(); i++) {
                     if (room->objs[i]) {
                         if (room->objs[i]->index == index) {
-                            BaseInterface::Room::BaseVSMovie *movie =
+                            const BaseInterface::Room::BaseVSMovie *movie =
                                     vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSMovie>(room->objs[i]);
 
                             if (!movie->getCallback().empty()) {
@@ -157,7 +158,7 @@ public:
     };
 };
 
-int Room(std::string text) {
+int Room(const std::string &text) {
     if (!BaseInterface::CurrentBase) {
         return -1;
     }
@@ -257,7 +258,7 @@ bool VideoStream(int room, std::string index, std::string streamfile, float x, f
     newobj->SetSize(w, h);
 
 #ifdef BASE_MAKER
-    newobj->texfile = file;
+    newobj->texfile = streamfile;   // Is this correct? SGT 2026-05-04
 #endif
 
     if (newobj->spr.LoadSuccess()) {
@@ -284,7 +285,7 @@ void SetVideoCallback(int room, std::string index, std::string callback) {
                         vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSMovie>(newroom->objs[i]);
                 movie->setCallback(callback);
 
-                if (movie->soundsource.get() != NULL) {
+                if (movie->soundsource) {
                     SharedPtr<SourceListener> transitionListener(
                             new VideoAudioStreamListener(room, index));
 
@@ -548,6 +549,9 @@ void SetLinkEventMask(int room, std::string index, std::string maskdef) {
                 VS_LOG(warning,
                         (boost::format("%1$s: WARNING: Ignoring request for movement event mask.\n") % __FILE__));
                 break;
+            default:
+                VS_LOG(error, (boost::format("unknown mask %1$s\n") % maskdef[i]));
+                return;
         }
     }
     BaseInterface::Room *newroom = CheckRoom(room);
@@ -603,7 +607,7 @@ void LinkPython(int room,
     }
     newroom->links.push_back(new BaseInterface::Room::Goto(index, pythonfile));
     BaseLink(newroom, x, y, wid, hei, text);
-    ((BaseInterface::Room::Goto *) newroom->links.back())->index = to;
+    vega_dynamic_cast_ptr<BaseInterface::Room::Goto>(newroom->links.back())->index = to;
 }
 
 void Launch(int room, std::string index, float x, float y, float wid, float hei, std::string text) {
@@ -663,15 +667,15 @@ void CompPython(int room,
     newroom->links.push_back(newcomp);
     BaseLink(newroom, x, y, wid, hei, text);
     static const EnumMap::Pair modelist[] = {
-            EnumMap::Pair("Cargo", BaseComputer::CARGO),
-            EnumMap::Pair("Upgrade", BaseComputer::UPGRADE),
-            EnumMap::Pair("ShipDealer", BaseComputer::SHIP_DEALER),
-            EnumMap::Pair("Missions", BaseComputer::MISSIONS),
-            EnumMap::Pair("News", BaseComputer::NEWS),
-            EnumMap::Pair("Info", BaseComputer::INFO),
-            EnumMap::Pair("LoadSave", BaseComputer::LOADSAVE),
-            EnumMap::Pair("Network", BaseComputer::NETWORK),
-            EnumMap::Pair("UNKNOWN", BaseComputer::LOADSAVE),
+            EnumMap::Pair("Cargo", static_cast<int>(DisplayMode::CARGO)),
+            EnumMap::Pair("Upgrade", static_cast<int>(DisplayMode::UPGRADE)),
+            EnumMap::Pair("ShipDealer", static_cast<int>(DisplayMode::SHIP_DEALER)),
+            EnumMap::Pair("Missions", static_cast<int>(DisplayMode::MISSIONS)),
+            EnumMap::Pair("News", static_cast<int>(DisplayMode::NEWS)),
+            EnumMap::Pair("Info", static_cast<int>(DisplayMode::INFO)),
+            EnumMap::Pair("LoadSave", static_cast<int>(DisplayMode::LOADSAVE)),
+            EnumMap::Pair("Network", static_cast<int>(DisplayMode::NETWORK)),
+            EnumMap::Pair("UNKNOWN", static_cast<int>(DisplayMode::LOADSAVE)),
     };
     static const EnumMap modemap(modelist, sizeof(modelist) / sizeof(*modelist));
     const char *newmode = modes.c_str();
@@ -688,12 +692,12 @@ void CompPython(int room,
         if (j == 0) {
             continue;
         }
-        //in otherwords, if j is 0 then the 0th index will become null
+        //in other words, if j is 0 then the 0th index will become null
         //EnumMap crashes if the string is empty.
         curmode[j] = '\0';
         int modearg = modemap.lookup(curmode);
-        if (modearg < BaseComputer::DISPLAY_MODE_COUNT) {
-            newcomp->modes.push_back((BaseComputer::DisplayMode) (modearg));
+        if (modearg < RAW_DISPLAY_MODE(DisplayMode::DISPLAY_MODE_COUNT)) {
+            newcomp->modes.push_back(static_cast<DisplayMode>(modearg));
         } else {
             VS_LOG(warning,
                     (boost::format("WARNING: Unknown computer mode %1$s found in python script...\n") % curmode));
@@ -761,36 +765,24 @@ void EnqueueMessage(std::string text) {
     EnqueueMessageToRoom(BaseInterface::CurrentBase->curroom, text);
 }
 
-void EraseLink(int room, std::string index) {
-    BaseInterface::Room *newroom = CheckRoom(room);
-    if (!newroom) {
+void EraseLink(const int room, std::string index) {
+    BaseInterface::Room *new_room = CheckRoom(room);
+    if (!new_room) {
         return;
     }
-    for (int i = 0; i < (int) newroom->links.size(); i++) {
-        if (newroom->links[i]) {
-            if (newroom->links[i]->index == index) {
-                newroom->links.erase(newroom->links.begin() + i);
-                i--;
-//break;
-            }
-        }
-    }
+    const auto first_to_remove = std::stable_partition(new_room->links.begin(), new_room->links.end(),
+            [index](const BaseInterface::Room::Link * link_ptr) { return link_ptr->index != index; });
+    new_room->links.erase(first_to_remove, new_room->links.end());
 }
 
-void EraseObj(int room, std::string index) {
-    BaseInterface::Room *newroom = CheckRoom(room);
-    if (!newroom) {
+void EraseObj(const int room, std::string index) {
+    BaseInterface::Room *new_room = CheckRoom(room);
+    if (!new_room) {
         return;
     }
-    for (int i = 0; i < (int) newroom->objs.size(); i++) {
-        if (newroom->objs[i]) {
-            if (newroom->objs[i]->index == index) {
-                newroom->objs.erase(newroom->objs.begin() + i);
-                i--;
-//break;
-            }
-        }
-    }
+    const auto first_to_remove = std::stable_partition(new_room->objs.begin(), new_room->objs.end(),
+            [index](const BaseInterface::Room::BaseObj * obj) { return obj->index != index; });
+    new_room->objs.erase(first_to_remove, new_room->objs.end());
 }
 
 int GetCurRoom() {
@@ -829,8 +821,8 @@ bool BuyShip(std::string name, bool my_fleet, bool force_base_inventory) {
     } catch(ManifestCargoNotFoundException& e) {
         VS_LOG(error, e.what());
     }
-    
-    return false; 
+
+    return false;
 }
 
 // This function is not used
