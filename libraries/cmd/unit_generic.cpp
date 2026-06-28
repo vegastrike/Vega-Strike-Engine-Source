@@ -3017,8 +3017,6 @@ bool myless(const Cargo &a, const Cargo &b) {
 
 void Unit::ImportPartListImpl(Unit *thus, const vector<Cargo> &cargo_list, const float price, const float price_deviation, const float quantity, const
                               float quantity_deviation) {
-    constexpr double kPriceDeviation    = 0.1;
-    constexpr double kQuantityDeviation = 0.5;
     constexpr float  kMaxPriceMult      = 5.00F;
     constexpr bool   kUseNewWay         = true;
 
@@ -3043,7 +3041,7 @@ void Unit::ImportPartListImpl(Unit *thus, const vector<Cargo> &cargo_list, const
     for (const Cargo& cargo : cargo_list) {
         Cargo cargo_old_way = Cargo::GetCargoQtyAndPriceOldWay(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
                               max_cargo_price, cargo);
-        Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(price, kPriceDeviation, quantity, kQuantityDeviation, min_cargo_price,
+        Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
                               max_cargo_price, cargo);
 
         if (kUseNewWay) {
