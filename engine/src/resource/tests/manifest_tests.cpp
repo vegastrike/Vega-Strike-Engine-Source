@@ -109,9 +109,9 @@ TEST(Manifest, Singleton) {
 
 TEST(Cargo, GetCargoQtyAndPriceImplementations) {
     constexpr double kPriceDeviation = 0.1;
-    constexpr double kQuantityDeviation = 0.1;
+    constexpr double kQuantityDeviation = 0.5;
     constexpr double kMinPrice = 0.01;
-    constexpr float  kMaxPriceMult = 10.00F;
+    constexpr float  kMaxPriceMult = 5.00F;
     constexpr int    kMinQuantity = 0;
     const std::string kCargoCategory = "upgrades/Armor";
 
