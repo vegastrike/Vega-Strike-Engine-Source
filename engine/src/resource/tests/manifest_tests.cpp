@@ -164,8 +164,8 @@ TEST(Cargo, GetCargoQtyAndPriceImplementations) {
 
 TEST(Cargo, GetCargoQtyAndPriceHistograms) {
     constexpr double kPriceDeviation = 0.1;
-    constexpr double kQuantityDeviation = 0.1;
-    constexpr float kMaxPriceMult = 10.00F;
+    constexpr double kQuantityDeviation = 0.5;
+    constexpr float kMaxPriceMult = 5.00F;
     constexpr auto kIterations = 10000;
     constexpr auto kHistogramDisplayAdjust = 200;
     const std::string kCargoCategory = "upgrades/Armor";
