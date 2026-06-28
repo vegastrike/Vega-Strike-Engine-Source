@@ -42,6 +42,7 @@ constexpr uint_fast32_t kVegaUIntFast32tMax = std::numeric_limits<uint_fast32_t>
 constexpr uint_least32_t kVegaUIntLeast32tMax = std::numeric_limits<uint_least32_t>::max();
 constexpr double kVegaUInt32tMaxAsDouble = std::numeric_limits<uint_least32_t>::max();
 constexpr double kVegaUInt32tMaxAsDoublePlus1 = std::numeric_limits<uint_least32_t>::max() + 1.0;
+constexpr unsigned int kStdDevMaxTries = 10;
 
 
 class VegaRandom {
@@ -143,8 +144,13 @@ public:
 
         std::normal_distribution<double> normal_dist(mean, standard_deviation);
         double random_double;
+        unsigned int try_number = 0;
         do {
             random_double = normal_dist(gen);
+            // Only try a certain number of times to get a random value within the parameters. After that, just return the `mean` value.
+            if (++try_number > kStdDevMaxTries) {
+                return mean;
+            }
         } while (random_double < min || random_double > max);
         return random_double;
     }
@@ -171,8 +177,13 @@ public:
 
         std::normal_distribution<float> normal_dist(mean, standard_deviation);
         float random_float;
+        unsigned int try_number = 0;
         do {
             random_float = normal_dist(gen);
+            // Only try a certain number of times to get a random value within the parameters. After that, just return the `mean` value.
+            if (++try_number > kStdDevMaxTries) {
+                return mean;
+            }
         } while (random_float < min || random_float > max);
         return random_float;
     }

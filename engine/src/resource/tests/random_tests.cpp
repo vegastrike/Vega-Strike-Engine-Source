@@ -319,3 +319,19 @@ TEST(VegaRandom, NormalDistribution_FloatInvalidArguments) {
     ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(1.0F, 1.0F, 2.0F, 0.0F); }, std::domain_error);
     ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(-1.0F, 1.0F, 0.0F, 10.0F); }, std::domain_error);
 }
+
+TEST(VegaRandom, NormalDistribution_DoubleMaxRetries) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        double random_double = VegaRandom::Instance().NormalDistribution(5.0, 200.0, 4.999999, 5.000001);
+        EXPECT_GE(random_double, 4.999999);
+        EXPECT_LE(random_double, 5.000001);
+    }
+}
+
+TEST(VegaRandom, NormalDistribution_FloatMaxRetries) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        float random_float = VegaRandom::Instance().NormalDistribution(5.0F, 200.0F, 4.999999F, 5.000001F);
+        EXPECT_GE(random_float, 4.999999F);
+        EXPECT_LE(random_float, 5.000001F);
+    }
+}
