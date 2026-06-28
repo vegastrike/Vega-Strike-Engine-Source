@@ -3047,13 +3047,13 @@ void Unit::ImportPartListImpl(Unit *thus, const vector<Cargo> &cargo_list, const
                               max_cargo_price, cargo);
 
         if (kUseNewWay) {
-            VS_LOG(trace, (boost::format("%1%: Adding cargo %2% (old way) with quantity %3% and price %4%")
-                            % __FUNCTION__ % cargo_old_way.GetName() % cargo_old_way.GetQuantity() % cargo_old_way.GetPrice()));
-            thus->cargo_hold.AddCargo(thus, cargo_old_way, false);
-        } else {
             VS_LOG(trace, (boost::format("%1%: Adding cargo %2% (new way) with quantity %3% and price %4%")
                             % __FUNCTION__ % cargo_new_way.GetName() % cargo_new_way.GetQuantity() % cargo_new_way.GetPrice()));
             thus->cargo_hold.AddCargo(thus, cargo_new_way, false);
+        } else {
+            VS_LOG(trace, (boost::format("%1%: Adding cargo %2% (old way) with quantity %3% and price %4%")
+                            % __FUNCTION__ % cargo_old_way.GetName() % cargo_old_way.GetQuantity() % cargo_old_way.GetPrice()));
+            thus->cargo_hold.AddCargo(thus, cargo_old_way, false);
         }
     }
 }
