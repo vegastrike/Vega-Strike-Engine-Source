@@ -25,12 +25,11 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "button.h"
-#include "gldrv/winsys.h"
 #include <cstdlib>
-#include <cstring>
 
-#include "common/common.h"
+#include "gui/button.h"
+#include "gldrv/winsys.h"
+#include "src/vega_string_utils.h"
 
 //Button::Button(float x, float y, float wid, float hei, char *name) { ; }
 Button::Button(float x, float y, float wid, float hei, const char *name) {
@@ -39,7 +38,7 @@ Button::Button(float x, float y, float wid, float hei, const char *name) {
     ycoord = y;
     width = wid;
     height = hei;
-    label = vega_str_dup2(name);
+    label = vega_str_dup(name);
     highlight = 0;
 
     Refresh();
@@ -50,7 +49,7 @@ void Button::ModifyName(const char *newname) {
         free(label);
     }
     if (newname) {
-        label = vega_str_dup2(newname);
+        label = vega_str_dup(newname);
     }
 }
 
