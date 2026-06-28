@@ -287,8 +287,8 @@ public:
             bool force_change_on_nothing,
             bool gen_downgrade_list);
 
-    static void ImportPartListImpl(Unit *thus, const std::vector<Cargo> &cargo_list, float price, float price_deviation,
-                                   float quantity, float quantity_deviation, bool generate_histograms);
+    static void ImportPartListImpl(Unit *thus, const vector<Cargo> &cargo_list, float price, float price_deviation,
+                                   float quantity, float quantity_deviation);
     void ImportPartList(const std::string &category, float price, float price_deviation, float quantity, float quantity_deviation);
 
     void ClearMounts();
