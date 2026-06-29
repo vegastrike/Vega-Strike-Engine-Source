@@ -371,7 +371,7 @@ Cargo Cargo::GetCargoQtyAndPriceOldWay(double price, double price_deviation, dou
         double min_cargo_price, double max_cargo_price, const Cargo &cargo) {
     Cargo return_value = cargo; // Copy the cargo item
     const double average_weight = abs(configuration().cargo.price_recenter_factor_dbl);
-    // VS_LOG(trace, (boost::format("average_weight (abs(configuration().cargo.price_recenter_factor_dbl)) = %1%") % average_weight));
+    // VS_LOG(trace, (boost::format("%1%: average_weight (abs(configuration().cargo.price_recenter_factor_dbl)) = %2%") % __FUNCTION__ % average_weight));
     return_value.SetQuantity(double_to_int(quantity - quantity_deviation));
     const double base_price = return_value.GetPrice();
     return_value.SetPrice(return_value.GetPrice() * (price - price_deviation));
@@ -395,9 +395,9 @@ Cargo Cargo::GetCargoQtyAndPriceOldWay(double price, double price_deviation, dou
         const double max_price_quant_adj = configuration().cargo.max_price_quant_adj_dbl;
         const double min_price_quant_adj = configuration().cargo.min_price_quant_adj_dbl;
         const double powah = configuration().cargo.price_quant_adj_power_dbl;
-        // VS_LOG(trace, (boost::format("max_price_quant_adj = %1%") % max_price_quant_adj));
-        // VS_LOG(trace, (boost::format("min_price_quant_adj = %1%") % min_price_quant_adj));
-        // VS_LOG(trace, (boost::format("powah = %1%") % powah));
+        // VS_LOG(trace, (boost::format("%1%: max_price_quant_adj = %2%") % __FUNCTION__ % max_price_quant_adj));
+        // VS_LOG(trace, (boost::format("%1%: min_price_quant_adj = %2%") % __FUNCTION__ % min_price_quant_adj));
+        // VS_LOG(trace, (boost::format("%1%: powah = %2%") % __FUNCTION__ % powah));
         renorm_price = std::pow(renorm_price, powah);
         renorm_price *= (max_price_quant_adj - min_price_quant_adj);
         renorm_price += 1;
@@ -409,7 +409,7 @@ Cargo Cargo::GetCargoQtyAndPriceOldWay(double price, double price_deviation, dou
         }
     }
     const double min_price = configuration().cargo.min_cargo_price_dbl;
-    // VS_LOG(trace, (boost::format("min_price (configuration().cargo.min_cargo_price_dbl) = %1%") % min_price));
+    // VS_LOG(trace, (boost::format("%1%: min_price (configuration().cargo.min_cargo_price_dbl) = %2%") % __FUNCTION__ % min_price));
     if (return_value.GetPrice() < min_price) {
         return_value.SetPrice(min_price);
     }
@@ -421,10 +421,13 @@ Cargo Cargo::GetCargoQtyAndPriceCpp11StdDev(double price, double price_deviation
     constexpr double kMinQuantity = 0.0;
     constexpr double kMaxQuantity = std::numeric_limits<int32_t>::max();
     constexpr double kMinDeviation = 0.01;
-    constexpr double kMaxDeviation = 5.0;
+    constexpr double kMaxDeviation = 50.0;
 
     Cargo return_value = cargo;
     std::fesetround(FE_TONEAREST);
+    const double average_weight = abs(configuration().cargo.price_recenter_factor_dbl);
+    // VS_LOG(trace, (boost::format("%1%: average_weight (abs(configuration().cargo.price_recenter_factor_dbl)) = %2%") % __FUNCTION__ % average_weight));
+    const double base_price = return_value.GetPrice();
 
     const double true_minimum_price = std::max(min_cargo_price, configuration().cargo.min_cargo_price_dbl);
     double true_maximum_price = max_cargo_price;
@@ -462,9 +465,30 @@ Cargo Cargo::GetCargoQtyAndPriceCpp11StdDev(double price, double price_deviation
     return_value.SetQuantity(qty_int);
 
     double price1 = VegaRandom::Instance().NormalDistribution(price_constrained, price_deviation_constrained, true_minimum_price, true_maximum_price);
+    return_value.SetPrice(price1);
+    return_value.SetPrice((return_value.GetPrice() + (base_price * average_weight)) / (average_weight + 1));
     // Round to two decimal places
-    double price_rounded = std::rint(price1 * 100.0) / 100.0;
+    double price_rounded = std::rint(return_value.GetPrice() * 100.0) / 100.0;
     return_value.SetPrice(price_rounded);
+
+    if (return_value.GetQuantity() > 0 && true_maximum_price > true_minimum_price + 0.01) {
+        double renorm_price = (base_price - min_cargo_price) / (max_cargo_price - min_cargo_price);
+        const double max_price_quant_adj = configuration().cargo.max_price_quant_adj_dbl;
+        const double min_price_quant_adj = configuration().cargo.min_price_quant_adj_dbl;
+        const double powah = configuration().cargo.price_quant_adj_power_dbl;
+        // VS_LOG(trace, (boost::format("%1%: max_price_quant_adj = %2%") % __FUNCTION__ % max_price_quant_adj));
+        // VS_LOG(trace, (boost::format("%1%: min_price_quant_adj = %2%") % __FUNCTION__ % min_price_quant_adj));
+        // VS_LOG(trace, (boost::format("%1%: powah = %2%") % __FUNCTION__ % powah));
+        renorm_price = std::pow(renorm_price, powah);
+        renorm_price *= (max_price_quant_adj - min_price_quant_adj);
+        renorm_price += 1;
+        if (renorm_price > .001) {
+            return_value.SetQuantity(return_value.GetQuantity() / float_to_int(renorm_price));
+            if (return_value.GetQuantity() < 1) {
+                return_value.SetQuantity(1);
+            }
+        }
+    }
 
     return return_value;
 }

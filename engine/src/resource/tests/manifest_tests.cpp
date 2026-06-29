@@ -168,7 +168,7 @@ TEST(Cargo, GetCargoQtyAndPriceHistograms) {
     constexpr float kMaxPriceMult = 5.00F;
     constexpr auto kIterations = 10000;
     constexpr auto kHistogramDisplayAdjust = 200;
-    const std::string kCargoCategory = "upgrades/Armor";
+    const std::string kCargoCategory = "upgrades/Capacitors/Standard";
 
     const Manifest manifest = createManifest();
     const Manifest category_manifest = manifest.GetCategoryManifest(kCargoCategory);
