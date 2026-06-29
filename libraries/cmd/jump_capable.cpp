@@ -26,6 +26,7 @@
  */
 
 
+#include <numbers>
 #include "cmd/jump_capable.h"
 #include "cmd/ai/order.h"
 #include "cmd/unit_find.h"
@@ -34,6 +35,7 @@
 #include "gfx/warptrail.h"
 #include "vegadisk/vsfilesystem.h"
 #include "src/vs_exit.h"
+#include "src/vs_math.h"
 #include "src/vega_cast_utils.h"
 #include "root_generic/configxml.h"
 
@@ -294,7 +296,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                     unit->GetOrientation(p, q, r);
                 }
                 if (r.Dot(methem) < 0) {
-                    unit->Rotate(p * (PI / theta));
+                    unit->Rotate(p * (kVegaPiFloat / theta));
                 }
                 unit->Velocity = methem * unit->Velocity.Magnitude();
             }

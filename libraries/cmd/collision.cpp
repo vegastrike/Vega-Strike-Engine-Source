@@ -37,10 +37,10 @@
 #include "cmd/damageable.h"
 
 #include <typeinfo>
-// #include <boost/log/trivial.hpp>
 #include "src/vega_cast_utils.h"
 #include "cmd/planet.h"
 #include "src/vs_logging.h"
+#include "src/vs_math.h"
 
 // TODO: convert all float to double and all Vector to QVector.
 
@@ -206,7 +206,7 @@ void Collision::adjustInterpenetration(QVector &new_velocity, QVector &new_angul
     double magnitude = new_velocity.Magnitude();
     QVector velocity_norm =
             new_velocity.Normalize(); // want to perform positional displacement in direction of new velocity vector
-    double movementKludgeMagnitude = 2 * (new_angular_velocity.Dot(velocity_norm) * unit->radial_size / PI + magnitude);
+    double movementKludgeMagnitude = 2 * (new_angular_velocity.Dot(velocity_norm) * unit->radial_size / kVegaPiDouble + magnitude);
     QVector movementKludgeAmount = movementKludgeMagnitude * velocity_norm + abs(movementKludgeMagnitude) * normal;
     unit->SetPosition(unit->Position() + (movementKludgeAmount)
             * SIMULATION_ATOM); // move by one physics frame at F() resultant linear velocity + component of angular velocity along linear velocity vector + normal before applying force -- this is NOT REMOTELY correct, but will often be sufficient

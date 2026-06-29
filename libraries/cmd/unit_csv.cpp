@@ -337,7 +337,7 @@ static vector<SubUnitStruct> GetSubUnits(const std::string &subunits) {
             Q.i = nextElementFloat(subunits, elemstart, elemend);
             Q.j = nextElementFloat(subunits, elemstart, elemend);
             Q.k = nextElementFloat(subunits, elemstart, elemend);
-            double restricted = cos(nextElementFloat(subunits, elemstart, elemend, 180) * M_PI / 180.0);
+            const double restricted = cos(nextElementFloat(subunits, elemstart, elemend, 180.0) * kVegaPiDouble / 180.0);
 
             ret.push_back(SubUnitStruct(filename, pos, Q, R, restricted));
         } else {
@@ -908,7 +908,7 @@ static string tos(int val) {
     return XMLSupport::tostring(val);
 }
 
-const std::map<std::string, std::string> Unit::UnitToMap() {
+std::map<std::string, std::string> Unit::UnitToMap() const {
     std::map<std::string, std::string> unit = std::map<std::string, std::string>();
     string val;
 
@@ -946,25 +946,25 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
             if (mounts[j].status == Mount::DESTROYED || mounts[j].status == Mount::UNCHOSEN) {
                 printedname = "";
             }
-            mountstr += "{" + printedname + ";" + XMLSupport::tostring(mounts[j].ammo) + ";"
-                    + XMLSupport::tostring(
-                        mounts[j].volume) + ";" + getMountSizeString(mounts[j].size);
-            sprintf(mnt, ";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
-                    m.p.i / unitScale,
-                    m.p.j / unitScale,
-                    m.p.k / unitScale,
-                    (double) mounts[j].xyscale / unitScale,
-                    (double) mounts[j].zscale / unitScale,
-                    (double) m.getR().i,
-                    (double) m.getR().j,
-                    (double) m.getR().k,
-                    (double) m.getQ().i,
-                    (double) m.getQ().j,
-                    (double) m.getQ().k,
-                    (double) mounts[j].functionality,
-                    (double) mounts[j].maxfunctionality
-                    );
-            mountstr += mnt;
+            mountstr += (boost::format("{%1%;%2%;%3%;%4%;%5%;%6%;%7%;%8%;%9%;%10%;%11%;%12%;%13%;%14%;%15%;%16%;%17%}")
+                % printedname
+                % mounts.at(j).ammo
+                % mounts.at(j).volume
+                % getMountSizeString(mounts.at(j).size)
+                % (m.p.i / unitScale)
+                % (m.p.j / unitScale)
+                % (m.p.k / unitScale)
+                % (static_cast<double>(mounts[j].xyscale) / unitScale)
+                % (static_cast<double>(mounts[j].zscale) / unitScale)
+                % static_cast<double>(m.getR().i)
+                % static_cast<double>(m.getR().j)
+                % static_cast<double>(m.getR().k)
+                % static_cast<double>(m.getQ().i)
+                % static_cast<double>(m.getQ().j)
+                % static_cast<double>(m.getQ().k)
+                % static_cast<double>(mounts.at(j).functionality)
+                % static_cast<double>(mounts.at(j).maxfunctionality)
+                ).str();
         }
         unit["Mounts"] = mountstr;
     }
@@ -978,7 +978,7 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
                 subunits[k].filename = "destroyed_blank";
             }
             k = 0;
-            for (un_iter su = this->getSubUnits(); (subun = (*su)) != NULL; ++su, ++k) {
+            for (un_kiter su = this->viewSubUnits(); (subun = (*su)) != nullptr; ++su, ++k) {
                 unsigned int j = k;
                 for (; j < subunits.size(); ++j) {
                     if ((subun->Position() - subunits[j].pos).MagnitudeSquared() < .00000001) {
@@ -993,21 +993,21 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
                     subunits[j].filename = subun->name;
                 }
             }
-            string str;
+            std::string str;
             for (k = 0; k < subunits.size(); ++k) {
-                char tmp[1024];
-                sprintf(tmp, ";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
-                        subunits[k].pos.i,
-                        subunits[k].pos.j,
-                        subunits[k].pos.k,
-                        subunits[k].R.i,
-                        subunits[k].R.j,
-                        subunits[k].R.k,
-                        subunits[k].Q.i,
-                        subunits[k].Q.j,
-                        subunits[k].Q.k,
-                        ((double) acos(subunits[k].restricted) * 180. / M_PI));
-                str += "{" + subunits[k].filename + tmp;
+                std::string tmp = (boost::format("{%1%;%2%;%3%;%4%;%5%;%6%;%7%;%8%;%9%;%10%;%11%}")
+                    % subunits.at(k).filename
+                    % subunits.at(k).pos.i
+                    % subunits.at(k).pos.j
+                    % subunits.at(k).pos.k
+                    % subunits.at(k).R.i
+                    % subunits.at(k).R.j
+                    % subunits.at(k).R.k
+                    % subunits.at(k).Q.i
+                    % subunits.at(k).Q.j
+                    % subunits.at(k).Q.k
+                    % (acos(subunits.at(k).restricted) * 180.0 / kVegaPiDouble)).str();
+                str += tmp;
             }
             unit["Sub_Units"] = str;
         }

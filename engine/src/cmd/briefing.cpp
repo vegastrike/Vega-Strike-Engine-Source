@@ -26,6 +26,7 @@
  */
 
 
+#include <numbers>
 #include "briefing.h"
 #include "cmd/unit_generic.h"
 #include "gfx_generic/mesh.h"
@@ -72,8 +73,8 @@ void SetDirection(Matrix &mat, Vector start, Vector end, const Matrix cam, bool 
         q = q - r * (r.Dot(q) / r.MagnitudeSquared());
         if (q.MagnitudeSquared() < .000001) {
             q = r;
-            q.Yaw(M_PI / 2);
-            q.Pitch(M_PI / 2);
+            q.Yaw(kVegaPiFloat / 2.0F);
+            q.Pitch(kVegaPiFloat / 2.0F);
             q = q - r * (r.Dot(q) / r.MagnitudeSquared());
         }
         Normalize(q);

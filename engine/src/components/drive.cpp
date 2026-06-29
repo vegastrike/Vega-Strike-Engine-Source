@@ -26,7 +26,7 @@
  */
 
 #define _USE_MATH_DEFINES
-#include <math.h>
+#include "src/vs_math.h"
 #include <string>
 
 #include "components/drive.h"
@@ -34,8 +34,6 @@
 #include "component_utils.h"
 #include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
-
-
 
 Drive::Drive(EnergyContainer *source):
     Component(0.0, 0.0, true, true),
@@ -76,11 +74,11 @@ void Drive::Load(std::string unit_key) {
 
     // Drive
     yaw = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", std::string("0.0")),
-                                                       M_PI / 180.0, minimal_drive_functionality);
+                                                       kVegaPiDouble / 180.0, minimal_drive_functionality);
     pitch = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", std::string("0.0")),
-                                                       M_PI / 180.0, minimal_drive_functionality);
+                                                       kVegaPiDouble / 180.0, minimal_drive_functionality);
     roll = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", std::string("0.0")),
-                                                       M_PI / 180.0, minimal_drive_functionality);
+                                                       kVegaPiDouble / 180.0, minimal_drive_functionality);
 
     ResourceYawPitchRollParser(unit_key, YPR::Yaw, max_yaw_right, max_yaw_left);
     ResourceYawPitchRollParser(unit_key, YPR::Pitch, max_pitch_up, max_pitch_down);
@@ -126,7 +124,7 @@ void Drive::SaveToCSV(std::map<std::string, std::string>& unit) const {
     const double game_speed = configuration().physics.game_speed_dbl;
     const double game_accel = configuration().physics.game_accel_dbl;
     const double game_accel_speed = (game_speed * game_accel);
-    const double to_degrees = M_PI / 180;
+    constexpr double to_degrees = kVegaPiDouble / 180;
     unit["Maneuver_Yaw"] = yaw.Serialize(to_degrees);
     unit["Maneuver_Pitch"] = pitch.Serialize(to_degrees);
     unit["Maneuver_Roll"] = roll.Serialize(to_degrees);

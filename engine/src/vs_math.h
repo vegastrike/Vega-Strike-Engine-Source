@@ -32,25 +32,18 @@
 #include <config.h>
 
 #include "root_generic/macosx_math.h"
-#include <math.h>
 #include <float.h>
 #include <cmath>
+#include <numbers>
 
 #ifdef HAVE_IEEEFP_H
     #include <ieeefp.h>
 #endif //HAVE_IEEEFP_H
 
-#ifndef M_PI
-    #define M_PI 3.14159265358979323846
-#endif //M_PI
-
-#ifndef PI
-    #define PI M_PI
-#endif //PI
-
-#ifndef M_1_PI
-    #define M_1_PI (1/M_PI)
-#endif //M_1_PI
+constexpr double kVegaPiDouble = std::numbers::pi_v<double>;
+constexpr float kVegaPiFloat = std::numbers::pi_v<float>;
+constexpr double kVegaInvPiDouble = std::numbers::inv_pi_v<double>;
+constexpr float kVegaInvPiFloat = std::numbers::inv_pi_v<float>;
 
 #define FINITE(x) ( std::isfinite( x ) )
 #define ISNAN(x) ( std:: isnan( x ) )
