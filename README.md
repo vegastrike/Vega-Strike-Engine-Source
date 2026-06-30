@@ -83,7 +83,7 @@ OPTIONS
 Vegastrike takes a single positional parameter indicating which mission it should load
 
 ```bash
-bin/vegastrike mission/explore_universe.mission -d$(pwd)/../Assets-Production
+$ bin/vegastrike mission/explore_universe.mission -d$(pwd)/../Assets-Production
 ```
 
 is an example of a valid mission call
@@ -91,7 +91,7 @@ is an example of a valid mission call
 the -l flag (must be flushed with the system) will force a player to begin in a star system.
 
 ```bash
-bin/vegastrike -lvega_sector/vega mission/bomber.mission -d$(pwd)/../Assets-Production
+$ bin/vegastrike -lvega_sector/vega mission/bomber.mission -d$(pwd)/../Assets-Production
 ```
 
 will force the bomber mission to run in the vega sector.
@@ -139,7 +139,7 @@ By default, the full clone will download over 800 MB of data. There are several 
 3. Do a shallow clone using the following:
 
 ```bash
-git clone git@github.com:vegastrike/Vega-Strike-Engine-Source.git --shallow-since=2023-09-27
+$ git clone git@github.com:vegastrike/Vega-Strike-Engine-Source.git --shallow-since=2023-09-27
 ```
 
 This will produce a significantly smaller download - in the order of 22-30 MB; well over a 10x reduction.
@@ -158,28 +158,20 @@ This will produce a significantly smaller download - in the order of 22-30 MB; w
      Most dependencies are already met with a standard desktop Funtoo install. In particular, you want to make sure your "flavor" is set to desktop,
      and that you have a proper "mix-in" depending on the desktop manager you use. Check your current profile:
 
-     ```bash
-     sudo epro show
-     ```
+     $ sudo epro show
 
      and if you don't have the desktop flavor enabled, enable it with
 
-     ```bash
-     sudo epro flavor desktop
-     ```
+     $ sudo epro flavor desktop
 
      Also enable the proper mix-in for your desktop manager; for instance xfce:
 
-     ```bash
-     sudo epro mix-in +xfce (or gnome, kde etc)
-     ```
+     $ sudo epro mix-in +xfce (or gnome, kde etc)
 
      All of the steps above are outlined in the Funtoo installation guide at <https://www.funtoo.org/Install/Profiles> and you should have done it
      already in the process of installing desktop Funtoo. The only dependency that you have to install manually is OpenAL:
 
-     ```bash
-     sudo emerge media-libs/openal
-     ```
+     $ sudo emerge media-libs/openal
 
    After that you are ready to compile.
 
@@ -190,27 +182,27 @@ This will produce a significantly smaller download - in the order of 22-30 MB; w
    b. *OR* configure and compile VS manually, using the ncurses ccmake frontend:
 
    ```bash
-   mkdir build
-   cd build
-   ccmake ..
-   # (configure/edit options to taste in ccmake, press 'c' to save the selected options
-   # and press 'g' to update the build configuration files used by the make build tool)
-   cd ..
-   cmake --build ./build -j $(getconf _NPROCESSORS_ONLN) # (where the getconf clause returns the number of available CPU threads/cores on the system)
-   mkdir bin
-   cp build/vegastrike-engine build/setup/vegasettings bin
+   $ mkdir build
+   $ cd build
+   $ ccmake ..
+   $ # (configure/edit options to taste in ccmake, press 'c' to save the selected options
+   $ # and press 'g' to update the build configuration files used by the make build tool)
+   $ cd ..
+   $ cmake --build ./build -j $(getconf _NPROCESSORS_ONLN) # (where the getconf clause returns the number of available CPU threads/cores on the system)
+   $ mkdir bin
+   $ cp build/vegastrike-engine build/setup/vegasettings bin
    ```
 
    c. *OR* configure and compile VS manually, using the command-line cmake frontend:
 
    ```bash
-   mkdir build
-   cd build
-   cmake ..
-   cd ..
-   cmake --build ./build -j $(getconf _NPROCESSORS_ONLN) # (where the getconf clause returns the number of available CPU threads/cores on the system)
-   mkdir bin
-   cp build/vegastrike-engine build/setup/vegasettings bin
+   $ mkdir build
+   $ cd build
+   $ cmake ..
+   $ cd ..
+   $ cmake --build ./build -j $(getconf _NPROCESSORS_ONLN) # (where the getconf clause returns the number of available CPU threads/cores on the system)
+   $ mkdir bin
+   $ cp build/vegastrike-engine build/setup/vegasettings bin
    ```
 
    __TIPS__:
@@ -218,13 +210,13 @@ This will produce a significantly smaller download - in the order of 22-30 MB; w
    To enable verbose output for debugging purposes (will show compilation commands), pass the `--verbose` argument, where supported:
 
    ```bash
-   cmake --build ./build --verbose
+   $ cmake --build ./build --verbose
    ```
 
    To enable/disable compile-time options with cmake, use `cmake -D<option>=<value>`. Example:
 
    ```bash
-   cmake .. -DENABLE_PIE=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
+   $ cmake .. -DENABLE_PIE=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
    ```
 
    __NOTE__:
@@ -253,7 +245,7 @@ This will produce a significantly smaller download - in the order of 22-30 MB; w
 4. When you run vegasettings, specify the path to the assets/game data on the command line with `--target` followed by a space. E.g.:
 
    ```bash
-   ./bin/vegasettings --target $(pwd)/../Assets-Production
+   $ ./bin/vegasettings --target $(pwd)/../Assets-Production
    ```
 
    The absolute path may need to be supplied, rather than a relative path.
@@ -261,7 +253,7 @@ This will produce a significantly smaller download - in the order of 22-30 MB; w
    Do the same with vegastrike-engine using `-d` and no space. E.g.:
 
    ```bash
-   ./bin/vegastrike-engine -d$(pwd)/../Assets-Production
+   $ ./bin/vegastrike-engine -d$(pwd)/../Assets-Production
    ```
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
@@ -279,19 +271,19 @@ To compile Vega Strike on Windows, start by installing either Visual Studio 2026
 Once the Visual Studio Installer finishes, reboot your computer. Then, find `Developer PowerShell for VS 2026` on the Start menu; alt-click it ("right-click"); and choose "Run as Administrator." Run:
 
 ```pwsh
-Set-ExecutionPolicy RemoteSigned
+> Set-ExecutionPolicy RemoteSigned
 ```
 
 (or another suitable PowerShell Execution Policy of your choice). Type `Y` and press Enter to confirm. Exit PowerShell. Now reopen `Developer PowerShell for VS 2026`, this time without Admin privileges, and run:
 
 ```pwsh
-script/bootstrap.ps1
+> script/bootstrap.ps1
 ```
 
 Once that finishes, reboot your computer again. Finally, open `Developer PowerShell for VS 2026` one more time, and run:
 
 ```pwsh
-script/build.ps1 -PresetName VS2026Win64-pie-enabled-RelWithDebInfo -BuildType RelWithDebInfo
+> script/build.ps1 -PresetName VS2026Win64-pie-enabled-RelWithDebInfo -BuildType RelWithDebInfo
 ```
 
 (The build type can also be `Debug` or `Release`. Just make sure that it matches the build type stanza at the end of the preset name.)
@@ -309,7 +301,7 @@ Please note: We only support Intel-based Macs (x86_64) at this time. Help adding
 To install the required build dependencies using Homebrew, run the following:
 
 ```bash
-script/bootstrap-mac.sh
+$ script/bootstrap-mac.sh
 ```
 
 (Or `script/bootstrap-on-macos.sh`, depending on which branch of the code you have downloaded.)
@@ -317,15 +309,15 @@ script/bootstrap-mac.sh
 If you have MacPorts, run the following:
 
 ```bash
-sudo port install python312 boost181@1.81.0_12+cmake_scripts+no_single+no_static+python312 glib2 +quartz libepoxy +quartz gtk3 +quartz libsdl2 libGLU freeglut openal-soft cmake expat libjpeg-turbo libpng libvorbis ninja
-
-export CMAKE_PREFIX_PATH="/opt/local/"
-
-echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
-
-# Keep these lines! Otherwise you will likely get PFNGL... not found errors.
-ln -s "$CMAKE_PREFIX_PATH/include/GL" "$CMAKE_PREFIX_PATH/include/OpenGL"
-ln -s "$CMAKE_PREFIX_PATH/include/GL" "$CMAKE_PREFIX_PATH/include/GLUT"
+$ sudo port install python312 boost181@1.81.0_12+cmake_scripts+no_single+no_static+python312 glib2 +quartz libepoxy +quartz gtk3 +quartz libsdl2 libGLU freeglut openal-soft cmake expat libjpeg-turbo libpng libvorbis ninja
+$ 
+$ export CMAKE_PREFIX_PATH="/opt/local/"
+$ 
+$ echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
+$ 
+$ # Keep these lines! Otherwise you will likely get PFNGL... not found errors.
+$ ln -s "$CMAKE_PREFIX_PATH/include/GL" "$CMAKE_PREFIX_PATH/include/OpenGL"
+$ ln -s "$CMAKE_PREFIX_PATH/include/GL" "$CMAKE_PREFIX_PATH/include/GLUT"
 ```
 
 Or, if the branch you're on has the `bootstrap-on-macOS-using-MacPorts.sh` script, just run that, with sudo privileges.
@@ -335,13 +327,13 @@ Or, if the branch you're on has the `bootstrap-on-macOS-using-MacPorts.sh` scrip
 After building Vega Strike, the packages can be built using:
 
 ```bash
-make package
+$ make package
 ```
 
 Or:
 
 ```bash
-cpack ./build
+$ cpack ./build
 ```
 
 ## Gameplay
