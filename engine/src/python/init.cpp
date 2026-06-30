@@ -199,6 +199,7 @@ void Python::init() {
     PyConfig_InitPythonConfig(&config);
 
     config.isolated = 1;
+    config.coerce_c_locale = 2;
 
     // Now we can do python things about them and initialize them
     Py_Initialize();
