@@ -27,35 +27,44 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "get_string.h"
-#include "vegadisk/vsfilesystem.h"
 
-#include <Python.h>
+#define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
+#include <Python.h>
 #include <boost/filesystem.hpp>
 
+#include "get_string.h"
+#include "vegadisk/vsfilesystem.h"
+#include "src/vs_logging.h"
+
 /** Converts PyObject* raw pointer to RAII managed wrapper. */
-boost::python::object WrapObject(PyObject* raw_object) {
+boost::python::object WrapObject(PyObject* raw_object, const bool should_borrow) {
     if(!raw_object) {
         VS_LOG_AND_FLUSH(error, "Error: WrapObject raw_object is null");
         PyErr_Print();
         PyErr_Clear();
         throw std::runtime_error("Error: WrapObject raw_object is null");
     }
-    
+
     // Transfer ownership to RAII wrapper
-    return boost::python::object{boost::python::handle<>(raw_object)};
+    if (should_borrow) {
+        boost::python::handle<> handle(boost::python::borrowed(raw_object));
+        return boost::python::object{handle};
+    } else {
+        boost::python::handle<> handle(raw_object);
+        return boost::python::object{handle};
+    }
 }
 
 boost::python::object GetPyObject(const std::string& function_name,
                                   const std::string& module_name,
                                   const std::string& file_name,
                                   PyObject* raw_args) {
-    boost::python::object module = WrapObject(PyImport_ImportModule(module_name.c_str()));
-    boost::python::object function = WrapObject(PyObject_GetAttrString(module.ptr(), function_name.c_str()));
-    boost::python::object args = WrapObject(raw_args);
-    boost::python::object result = WrapObject(PyObject_CallObject(function.ptr(), args.ptr()));
-    
+    boost::python::object module = WrapObject(PyImport_ImportModule(module_name.c_str()), false);
+    boost::python::object function = WrapObject(PyObject_GetAttrString(module.ptr(), function_name.c_str()), false);
+    boost::python::object args = WrapObject(raw_args, false);
+    boost::python::object result = WrapObject(PyObject_CallObject(function.ptr(), args.ptr()), true);
+
     return result;
 }
 
@@ -76,11 +85,12 @@ std::string GetString(const std::string& function_name,
     return std::string(c_str);
 }
 
-boost::python::object MapToObject(const std::map<std::string, std::string>& cpp_map) {
+boost::python::object MapToObject(boost::shared_ptr<std::map<std::string, std::string>> cpp_map) {
     boost::python::dict dict;
-    for (const auto& pair : cpp_map) {
+    for (const auto& pair : *cpp_map) {
         dict[pair.first] = pair.second;
     }
-    
-    return WrapObject(PyTuple_Pack(1, dict.ptr()));
+
+    boost::python::object wrap_object = WrapObject(PyTuple_Pack(1, dict.ptr()), true);
+    return wrap_object;
 }
