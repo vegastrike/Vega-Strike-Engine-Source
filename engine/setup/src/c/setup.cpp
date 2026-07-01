@@ -25,6 +25,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include "../include/central.h"
 #include <stdlib.h>
 #ifdef _WIN32
@@ -41,8 +42,11 @@
 #endif
 #include <vector>
 #include <string>
+#include <iostream>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
+
+#include "common/common.h"
 
 using std::string;
 using std::vector;
@@ -217,7 +221,7 @@ int main(int argc, char *argv[]) {
             origpath[65535] = 0;
             printf("Found data in %s\n", origpath);
             CONFIG.data_path =
-                    strdup(origpath); //TODO[String Safety] -- future platform specific intrinsic options relevant here //[MSVC-Warn]
+                    vega_str_dup2(origpath); //TODO[String Safety] -- future platform specific intrinsic options relevant here //[MSVC-Warn]
             break;
         }
     }

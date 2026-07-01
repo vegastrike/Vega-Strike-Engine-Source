@@ -38,6 +38,7 @@
 #include "src/in_kb.h"
 #include "src/main_loop.h"
 #include "gfx/aux_texture.h"
+#include "src/vega_string_utils.h"
 #include "root_generic/configxml.h"
 
 using std::string;
@@ -319,7 +320,7 @@ void Texture::Load(const char *FileName,
             return;
         }
     }
-    char *t = strdup(FileName);
+    char *t = vega_str_dup(FileName);
     int tmp = strlen(FileName);
     if (tmp > 3) {
         t[tmp - 3] = 'a';

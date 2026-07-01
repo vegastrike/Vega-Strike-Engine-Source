@@ -46,7 +46,7 @@
 #include <utility>
 
 #include "resource/random_utils.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 float accelStarHandler(float &input) {
     return input / (configuration().physics.game_speed_flt * configuration().physics.game_accel_flt);

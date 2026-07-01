@@ -26,6 +26,9 @@
  */
 
 #include "root_generic/macosx_math.h"
+#include <limits>
+#include <cfenv>
+#include <cmath>
 #include <string>
 #include "posh/posh.h"
 #if defined (__APPLE__)
@@ -109,32 +112,37 @@ int XNSGetExecutablePath( char *execPath, size_t *execPathSize )
 
 #endif
 
-int float_to_int(float a) {
-    int maxint = 0x7ffffff;
-    int minint = -0x8000000;
-    if ((a < maxint) && (a > minint)) {
-        return int(a);
+constexpr int kMinInt = std::numeric_limits<int>::min();
+constexpr int kMaxInt = std::numeric_limits<int>::max();
+constexpr float kMinIntAsFloat = static_cast<float>(std::numeric_limits<int>::min());
+constexpr float kMaxIntAsFloat = static_cast<float>(std::numeric_limits<int>::max());
+constexpr double kMinIntAsDouble = static_cast<double>(std::numeric_limits<int>::min());
+constexpr double kMaxIntAsDouble = static_cast<double>(std::numeric_limits<int>::max());
+
+int float_to_int(const float a) {
+    std::fesetround(FE_TONEAREST);
+    if ((a < kMaxIntAsFloat) && (a > kMinIntAsFloat)) {
+        return static_cast<int>(std::rint(a));
     }
     if (a > 0) {
-        return maxint;
+        return kMaxInt;
     }
     if (a < 0) {
-        return minint;
+        return kMinInt;
     }
     return 0;
 }
 
-int double_to_int(double a) {
-    int maxint = 0x7ffffff;
-    int minint = -0x8000000;
-    if ((a < maxint) && (a > minint)) {
-        return int(a);
+int double_to_int(const double a) {
+    std::fesetround(FE_TONEAREST);
+    if ((a < kMaxIntAsDouble) && (a > kMinIntAsDouble)) {
+        return static_cast<int>(std::rint(a));
     }
     if (a > 0) {
-        return maxint;
+        return kMaxInt;
     }
     if (a < 0) {
-        return minint;
+        return kMinInt;
     }
     return 0;
 }

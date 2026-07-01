@@ -29,6 +29,7 @@
 #define __restrict
 #endif
 #include "mission/include/file.h"
+#include "common/common.h"
 
 void FindMissions(char *path) {
     MISSIONS = FindFiles(path, EXT_MISSION);
@@ -44,7 +45,7 @@ void LoadMission(char *filename) {
 //	vector<easyDomNode *>::const_iterator siter;
 //	easyDomNode *sub = 0;
 
-    file = _strdup(filename);
+    file = vega_str_dup2(filename);
     name = StripPath(file);
     StripExtension(name);
 
@@ -216,7 +217,7 @@ void CheckVar(string parent, string current, string name, string value) {
     if (name.empty() || value.empty()) {
         return;
     }
-    param = _strdup(value.c_str());
+    param = vega_str_dup2(value.c_str());
     if (name == "mission_name") {
         SetString(&DATA.name, param);
     }

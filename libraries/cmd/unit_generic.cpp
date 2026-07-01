@@ -32,6 +32,7 @@
 #include "cmd/unit_generic.h"
 
 #include <set>
+#include <cfenv>
 #include "root_generic/configxml.h"
 #include "src/audiolib.h"
 #include "cmd/base.h"
@@ -66,7 +67,7 @@
 #include "gfx/warptrail.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "cmd/csv.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "root_generic/galaxy_xml.h"
 #include "gfx/camera.h"
 #include "root_generic/options.h"
@@ -87,6 +88,7 @@
 #include "src/vega_cast_utils.h"
 #include "resource/random_utils.h"
 #include "gldrv/mouse_cursor.h"
+#include "common/common.h"
 
 #include <math.h>
 #include <cmath>
@@ -276,7 +278,7 @@ string GetUnitDir(string filename) {
 }
 
 char *GetUnitDir(const char *filename) {
-    char *retval = strdup(filename);
+    char *retval = vega_str_dup2(filename);
     if (retval[0] == '\0') {
         return retval;
     }
@@ -3013,15 +3015,18 @@ bool myless(const Cargo &a, const Cargo &b) {
     return a < b;
 }
 
+void Unit::ImportPartListImpl(Unit *thus, const vector<Cargo> &cargo_list, const float price, const float price_deviation, const float quantity, const
+                              float quantity_deviation) {
+    constexpr float  kMaxPriceMult      = 5.00F;
+    constexpr bool   kUseNewWay         = true;
 
-void Unit::ImportPartList(const std::string &category, const float price, const float price_deviation, const float quantity, const float quantity_deviation) {
-    const Manifest category_manifest = Manifest::MPL().GetCategoryManifest(category);
-    const std::vector<Cargo> cargo_list = category_manifest.GetItems();
+    VS_LOG(trace, (boost::format("%1%: called with price %2%, price_deviation %3%, quantity %4%, and quantity_deviation %5%")
+                    % __FUNCTION__ % price % price_deviation % quantity % quantity_deviation));
 
     // Find the minimum and maximum prices in the cargo list
     // We start with extreme values but at the end, min < max
-    float min_cargo_price = FLT_MAX;
-    float max_cargo_price = 0.0f;
+    float min_cargo_price = std::numeric_limits<float>::max();
+    float max_cargo_price = 0.0F;
     for (const Cargo& cargo : cargo_list) {
         const float price1 = cargo.GetPrice();
         if (price1 < min_cargo_price) {
@@ -3031,48 +3036,31 @@ void Unit::ImportPartList(const std::string &category, const float price, const 
             max_cargo_price = price1;
         }
     }
-
+    max_cargo_price *= kMaxPriceMult;
 
     for (const Cargo& cargo : cargo_list) {
-        Cargo cargo1 = cargo; // Copy the cargo item
-        const float average_weight = fabs(configuration().cargo.price_recenter_factor_flt);
-        cargo1.SetQuantity(float_to_int(quantity - quantity_deviation));
-        const float base_price = cargo1.GetPrice();
-        cargo1.SetPrice(cargo1.GetPrice() * (price - price_deviation));
+        Cargo cargo_old_way = Cargo::GetCargoQtyAndPriceOldWay(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
+                              max_cargo_price, cargo);
+        Cargo cargo_new_way = Cargo::GetCargoQtyAndPriceCpp11StdDev(price, price_deviation, quantity, quantity_deviation, min_cargo_price,
+                              max_cargo_price, cargo);
 
-        //stupid way
-        cargo1.SetQuantity(cargo1.GetQuantity() + float_to_int((quantity_deviation * 2 + 1) * VegaRandom::Instance().GenRandReal2()));
-        cargo1.SetPrice(cargo1.GetPrice() + price_deviation * 2.0 * VegaRandom::Instance().RandomDouble());
-        cargo1.SetPrice(fabs(cargo1.GetPrice()));
-        cargo1.SetPrice((cargo1.GetPrice() + (base_price * average_weight)) / (average_weight + 1));
-        if (cargo1.GetQuantity() <= 0) {
-            cargo1.SetQuantity(0);
+        if (kUseNewWay) {
+            VS_LOG(trace, (boost::format("%1%: Adding cargo %2% (new way) with quantity %3% and price %4%")
+                            % __FUNCTION__ % cargo_new_way.GetName() % cargo_new_way.GetQuantity() % cargo_new_way.GetPrice()));
+            thus->cargo_hold.AddCargo(thus, cargo_new_way, false);
+        } else {
+            VS_LOG(trace, (boost::format("%1%: Adding cargo %2% (old way) with quantity %3% and price %4%")
+                            % __FUNCTION__ % cargo_old_way.GetName() % cargo_old_way.GetQuantity() % cargo_old_way.GetPrice()));
+            thus->cargo_hold.AddCargo(thus, cargo_old_way, false);
         }
-        //quantity more than zero
-        else if (max_cargo_price > min_cargo_price + .01) {
-            float renorm_price = (base_price - min_cargo_price) / (max_cargo_price - min_cargo_price);
-            const float max_price_quant_adj = configuration().cargo.max_price_quant_adj_flt;
-            const float min_price_quant_adj = configuration().cargo.min_price_quant_adj_flt;
-            const float powah = configuration().cargo.price_quant_adj_power_flt;
-            renorm_price = std::pow(renorm_price, powah);
-            renorm_price *= (max_price_quant_adj - min_price_quant_adj);
-            renorm_price += 1;
-            if (renorm_price > .001) {
-                cargo1.SetQuantity(cargo1.GetQuantity() / float_to_int(renorm_price));
-                if (cargo1.GetQuantity() < 1) {
-                    cargo1.SetQuantity(1);
-                }
-            }
-        }
-        const float min_price = configuration().cargo.min_cargo_price_flt;
-        if (cargo1.GetPrice() < min_price) {
-            cargo1.SetPrice(min_price);
-        }
-
-        VS_LOG(trace, (boost::format("%1%: Adding cargo %2% with quantity %3% and price %4%") % __FUNCTION__ % cargo1.GetName() % cargo1.GetQuantity() % cargo1.GetPrice()));
-        cargo_hold.AddCargo(this, cargo1, false);
-
     }
+}
+
+void Unit::ImportPartList(const std::string &category, const float price, const float price_deviation, const float quantity, const float quantity_deviation) {
+    const Manifest category_manifest = Manifest::MPL().GetCategoryManifest(category);
+    const std::vector<Cargo> cargo_list = category_manifest.GetItems();
+
+    ImportPartListImpl(this, cargo_list, price, price_deviation, quantity, quantity_deviation);
 }
 
 

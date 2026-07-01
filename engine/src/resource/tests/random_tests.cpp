@@ -28,7 +28,7 @@
 #include <gtest/gtest.h>
 
 #include "resource/random_utils.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 constexpr int kNumRepetitions = 100;
 
@@ -262,6 +262,76 @@ TEST(VegaRandom, RandomSizeTLessThan) {
         EXPECT_GE(random_index, 0);
         EXPECT_LT(random_index, test_vector_size);
         EXPECT_LT(random_index, test_vector.size());
-        ASSERT_NO_THROW(test_vector.at(random_index));
+        int _result{};
+        ASSERT_NO_THROW(_result = test_vector.at(random_index));
+        EXPECT_EQ(_result, test_vector.at(random_index));
+        EXPECT_GE(_result, 0);
+        EXPECT_LE(_result, std::numeric_limits<int_least32_t>::max());
+    }
+}
+
+TEST(VegaRandom, NormalDistribution_Double) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        double random_double = VegaRandom::Instance().NormalDistribution(5.0, 2.0, 0.0, 10.0);
+        EXPECT_GE(random_double, 0.0);
+        EXPECT_LE(random_double, 10.0);
+    }
+}
+
+TEST(VegaRandom, NormalDistribution_Float) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        float random_float = VegaRandom::Instance().NormalDistribution(5.0F, 2.0F, 0.0F, 10.0F);
+        EXPECT_GE(random_float, 0.0F);
+        EXPECT_LE(random_float, 10.0F);
+    }
+}
+
+TEST(VegaRandom, NormalDistribution_DoubleWithinVeryCloseTolerances) {
+    double random_double = VegaRandom::Instance().NormalDistribution(1.0, 2.0, 1.0, 1.0);
+    ASSERT_DOUBLE_EQ(random_double, 1.0);
+
+    random_double = VegaRandom::Instance().NormalDistribution(1.0, 0.0, 0.0, 10.0);
+    ASSERT_DOUBLE_EQ(random_double, 1.0);
+
+    random_double = VegaRandom::Instance().NormalDistribution(0.3, 2.0, 0.3, 0.1 + 0.2);
+    ASSERT_DOUBLE_EQ(random_double, 0.3);
+}
+
+TEST(VegaRandom, NormalDistribution_FloatWithinVeryCloseTolerances) {
+    float random_float = VegaRandom::Instance().NormalDistribution(1.0F, 2.0F, 1.0F, 1.0F);
+    ASSERT_FLOAT_EQ(random_float, 1.0F);
+
+    random_float = VegaRandom::Instance().NormalDistribution(1.0F, 0.0F, 0.0F, 10.0F);
+    ASSERT_FLOAT_EQ(random_float, 1.0F);
+
+    random_float = VegaRandom::Instance().NormalDistribution(0.3F, 2.0F, 0.3F, 0.1F + 0.2F);
+    ASSERT_FLOAT_EQ(random_float, 0.3F);
+}
+
+TEST(VegaRandom, NormalDistribution_DoubleInvalidArguments) {
+    ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(1.0, -1.0, 0.0, 10.0); }, std::domain_error);
+    ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(1.0, 1.0, 2.0, 0.0); }, std::domain_error);
+    ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(-1.0, 1.0, 0.0, 10.0); }, std::domain_error);
+}
+
+TEST(VegaRandom, NormalDistribution_FloatInvalidArguments) {
+    ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(1.0F, -1.0F, 0.0F, 10.0F); }, std::domain_error);
+    ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(1.0F, 1.0F, 2.0F, 0.0F); }, std::domain_error);
+    ASSERT_THROW({ VegaRandom::Instance().NormalDistribution(-1.0F, 1.0F, 0.0F, 10.0F); }, std::domain_error);
+}
+
+TEST(VegaRandom, NormalDistribution_DoubleMaxRetries) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        double random_double = VegaRandom::Instance().NormalDistribution(5.0, 200.0, 4.999999, 5.000001);
+        EXPECT_GE(random_double, 4.999999);
+        EXPECT_LE(random_double, 5.000001);
+    }
+}
+
+TEST(VegaRandom, NormalDistribution_FloatMaxRetries) {
+    for (int i = 0; i < kNumRepetitions; ++i) {
+        float random_float = VegaRandom::Instance().NormalDistribution(5.0F, 200.0F, 4.999999F, 5.000001F);
+        EXPECT_GE(random_float, 4.999999F);
+        EXPECT_LE(random_float, 5.000001F);
     }
 }

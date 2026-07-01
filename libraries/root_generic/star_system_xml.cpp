@@ -44,7 +44,9 @@
 #include "src/universe_util.h"
 #include "cmd/atmosphere.h"
 #include "src/star_xml.h"
+#include "src/vega_string_utils.h"
 #include "cmd/planetary_orbit.h"
+#include "common/vega_random.h"
 #include "root_generic/atmospheric_fog_mesh.h"
 
 #include "root_generic/options.h"
@@ -56,8 +58,6 @@
 #include <string>
 #include <vector>
 #include <map>
-
-#include "root_generic/vega_random.h"
 
 using std::string;
 using std::vector;
@@ -154,7 +154,7 @@ Vector ComputeRotVel(float rotvel, const QVector &r, const QVector &s) {
 void GetLights(const vector<GFXLight> &origlights, vector<GFXLightLocal> &curlights, const char *str, float lightSize) {
     int tint;
     char isloc;
-    char *tmp = strdup(str);
+    char *tmp = vega_str_dup(str);
     GFXLightLocal lloc;
     char *st = tmp;
     int numel;
@@ -196,8 +196,8 @@ void parse_dual_alpha(const char *alpha, BLENDFUNC &blendSrc, BLENDFUNC &blendDs
     if (alpha == NULL) {
     } else if (alpha[0] == '\0') {
     } else {
-        char *s = strdup(alpha);
-        char *d = strdup(alpha);
+        char *s = vega_str_dup(alpha);
+        char *d = vega_str_dup(alpha);
         blendSrc = SRCALPHA;
         blendDst = INVSRCALPHA;
         if (2 == sscanf(alpha, "%s %s", s, d)) {

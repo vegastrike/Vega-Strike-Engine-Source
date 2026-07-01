@@ -44,7 +44,7 @@
 #include "cmd/drawable.h"
 #include "root_generic/options.h"
 #include "root_generic/configxml.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "vegadisk/savegame.h"
 #include "src/universe_util.h" //get galaxy faction, dude
 

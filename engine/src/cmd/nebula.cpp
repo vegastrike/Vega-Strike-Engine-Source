@@ -37,7 +37,7 @@
 #include "root_generic/xml_support.h"
 #include "gfx_generic/mesh.h"
 #include "gfx/cockpit.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "src/universe.h"
 
 #undef BOOST_NO_CWCHAR

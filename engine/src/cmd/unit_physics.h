@@ -34,7 +34,7 @@
 #include "src/audiolib.h"
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
-#include "src/vs_math.h"
+#include "common/vs_math.h"
 
 #ifdef FIX_TERRAIN
 #include "gfx/planetary_transform.h"

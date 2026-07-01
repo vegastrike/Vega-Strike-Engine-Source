@@ -300,7 +300,7 @@ static bool get_screen_measurements() {
     usable_logical_window_size.w = 0;
     usable_logical_window_size.h = 0;
 
-    std:string screen_name = "";
+    std::string screen_name = "";
     SDL_DisplayID instance_ID;
     SDL_DisplayMode mode_for_ID;
     int configured_width = configuration().graphics.resolution_x;
@@ -394,7 +394,7 @@ static bool setup_sdl_video_mode() {
     Uint32 video_flags = 0;
     int bpp = 0;
     SDL_Rect display_bounds;
-    std:string screen_name = "";
+    std::string screen_name = "";
     SDL_DisplayID instance_ID;
     SDL_DisplayMode* mode_for_ID = static_cast<SDL_DisplayMode*>(std::calloc(sizeof(SDL_DisplayMode), 1));
     if (mode_for_ID == nullptr) {

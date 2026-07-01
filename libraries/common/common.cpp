@@ -33,8 +33,9 @@
 #include <unistd.h>
 #endif
 
-using std::string;
 #include "common/common.h"
+
+using std::string;
 
 #ifndef _WIN32
 

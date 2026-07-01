@@ -39,7 +39,7 @@
 #include "tactics.h"
 #include "fire.h"
 #include "order.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "cmd/unit_util.h"
 #include "root_generic/configxml.h"
 using Orders::FireAt;

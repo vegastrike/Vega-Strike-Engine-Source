@@ -31,7 +31,7 @@
 #include "turretai.h"
 #include "cmd/unit_generic.h"
 #include "cmd/role_bitmask.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "src/universe.h"
 
 using namespace Orders;

@@ -38,13 +38,14 @@
 #include <cstdio>
 #include <boost/format.hpp>
 #include "vega_string_utils.h"
+#include "common/common.h"
 #include "objconv/basemaker/base_maker_texture.h"
 #include "gfx_generic/vec.h"
 #include "gfx_generic/matrix.h"
 #include "gfx/hud.h"
 #include "root_generic/vs_globals.h"
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #ifdef _WIN32
 #include <direct.h>
 #else
@@ -1482,7 +1483,7 @@ bool LinkStage1(std::string input,
             false,
             inputroomindex,
             dat1,
-            strdup(input.c_str()),
+            vega_str_dup2(input.c_str()),
             NULL,
             x,
             y);

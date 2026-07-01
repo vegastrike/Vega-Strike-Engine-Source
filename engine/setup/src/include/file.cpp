@@ -25,11 +25,15 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include <string>
 #include <sys/stat.h>
 
 using std::string;
+
 #include "setup/src/include/file.h"
+#include "common/general.h"
+
 extern char origpath[65536];
 bool origconfig = false;
 

@@ -31,7 +31,7 @@
 #include <cstdio>
 #include <boost/format.hpp>
 #include "vega_string_utils.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 void BaseInterface::Room::Link::EndXML( FILE *fp )
 {

@@ -37,7 +37,7 @@
 
 #include "root_generic/galaxy_xml.h"
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #ifdef WRITEGALAXYCOORDS
 #include "gfx/nav/navscreen.h"
 #endif

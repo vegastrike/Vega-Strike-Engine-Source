@@ -31,10 +31,10 @@
 #include "configuration/game_config.h"
 #include "configuration/configuration.h"
 #include "src/gfxlib.h"
-#include "src/vs_math.h"
+#include "common/vs_math.h"
 
 VertexBuilder<> GetCross(const QVector &location, const Vector& cam_p,
-                           const Vector& cam_q, const float& size) {
+                         const Vector& cam_q, const float& size) {
     static VertexBuilder<> verts;
     verts.clear();
     verts.insert( location+cam_p*size );

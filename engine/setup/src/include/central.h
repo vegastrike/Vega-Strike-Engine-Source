@@ -43,7 +43,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "setup/src/include/general.h"
+#include "common/general.h"
 #include "setup/src/include/file.h"
 
 #ifndef MAX_READ

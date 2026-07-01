@@ -63,7 +63,7 @@
 #include "src/vs_logging.h"
 #include "cmd/unit_util.h"
 #include "resource/cargo.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 FireKeyboard::FireKeyboard(unsigned int whichplayer, unsigned int whichjoystick) : Order(WEAPON, 0) {
     memset(savedTargets, 0, sizeof(void *) * NUMSAVEDTARGETS);

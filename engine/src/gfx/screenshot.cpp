@@ -27,6 +27,7 @@
 
 
 #include "src/in_kb.h"
+#include "src/vega_string_utils.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
 #include "gfx/vsimage.h"
@@ -62,7 +63,7 @@ void Screenshot(const KBData &, KBSTATE state) {
                 break;
             }
         }
-        char *tmpchar = strdup(filename.c_str());
+        char *tmpchar = vega_str_dup(filename.c_str());
         image.WriteImage(tmpchar, tmp, PngImage, xywh[2], xywh[3], false, 8, TextureFile, true);
         free(tmpchar);
     }

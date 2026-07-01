@@ -28,7 +28,7 @@
 
 #include "order.h"
 #include "communication.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "root_generic/configxml.h"
 
 using std::list;
