@@ -248,6 +248,9 @@ int main(int argc, char *argv[]) {
     const boost::filesystem::path program_path(argv[0]);
     // const boost::filesystem::path canonical_program_path = boost::filesystem::canonical(program_path);
 
+    // set standard C locale (avoids side effects when the default locale is different)
+    std::locale::global(std::locale("C.UTF-8"));
+
     const boost::filesystem::path program_name{program_path.filename()};  //canonical_program_path.filename();
     const boost::filesystem::path program_directory_path{program_path.parent_path()};
 

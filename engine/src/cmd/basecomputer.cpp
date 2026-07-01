@@ -443,12 +443,12 @@ std::string prettyPrintFloat(float value, int precision = 2) {
     // TODO: Need to place this somewhere else
     // Call this once if you want your whole program to follow system locale
 
-    std::locale::global(std::locale(""));
+    //std::locale::global(std::locale(""));
 
     std::ostringstream out;
 
     // Use the user's global locale (setlocale/std::locale::global)
-    out.imbue(std::locale(""));
+    //out.imbue(std::locale(""));
 
     // Fixed n digits after decimal + locale separators
     out << std::fixed << std::setprecision(precision) << value;
