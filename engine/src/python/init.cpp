@@ -177,6 +177,7 @@ void Python::init() {
     PyPreConfig_InitPythonConfig(&py_pre_config);
 
     PyStatus status;
+    py_pre_config.coerce_c_locale = 2;
 
     status = Py_PreInitialize(&py_pre_config);
     if (PyStatus_Exception(status)) {
@@ -199,7 +200,6 @@ void Python::init() {
     PyConfig_InitPythonConfig(&config);
 
     config.isolated = 1;
-    config.coerce_c_locale = 2;
 
     // Now we can do python things about them and initialize them
     Py_Initialize();
