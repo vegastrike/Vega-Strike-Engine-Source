@@ -66,12 +66,15 @@ void unpicklights () {
 	    VSFileSystem::vs_fprintf (stderr,"GFXLIGHT FAILURE %d is beyond array of size %d\n",(int)*i,(int)_llights->size());
 	    continue;
 	  }
-	  if (GLLights[(*_llights)[*i].Target()].index!=*i) {
+	  int targ =(*_llights)[*i].Target();
+	  if (targ<0) {
+	    continue;//light never held a GL slot, or was killed (-2)--do not resurrect it by writing -1 below
+	  }
+	  if (GLLights[targ].index!=*i) {
 	    //VSFileSystem::vs_fprintf (stderr,"uh oh");
 	    (*_llights)[*i].Target()=-1;
 	    continue;//a lengthy operation... Since picked lights may have been smashed
 	  }
-    int targ =(*_llights)[*i].Target(); 
     if (GLLights[targ].options&OpenGLL::GL_ENABLED) {
       glDisable (GL_LIGHT0+targ);
       GLLights[targ].options=OpenGLL::GLL_LOCAL;
@@ -187,7 +190,7 @@ void gfx_light::dopickenables () {
     while (oldtrav!=oldpicked->end()&& *oldtrav < *traverse) {
       oldtrav++;
     }
-    if (((*traverse)==(*oldtrav))&&((*_llights)[*oldtrav].target>=0)) {
+    if (oldtrav!=oldpicked->end()&&((*traverse)==(*oldtrav))&&((*_llights)[*oldtrav].target>=0)) {
       //BOGUS ASSERT... just like this light wasn't on if it was somehow clobberedassert (GLLights[(*_llights)[oldpicked->front()].target].index == oldpicked->front());
       oldpicked->erase (oldtrav);//already taken care of. main screen turn on ;-)
     } 
@@ -195,12 +198,13 @@ void gfx_light::dopickenables () {
   }
   oldtrav = oldpicked->begin();
   while (oldtrav!=oldpicked->end()) {
-    if (GLLights[(*_llights)[(*oldtrav)].target].index != (*oldtrav)) {
+    int targ = (*_llights)[(*oldtrav)].target;
+    if (targ<0||GLLights[targ].index != (*oldtrav)) {
       oldtrav++;
-      continue;//don't clobber what's not yours
+      continue;//don't clobber what's not yours (or a light that no longer holds a GL slot)
     }
-    GLLights[(*_llights)[(*oldtrav)].target].index = -1;
-    GLLights[(*_llights)[(*oldtrav)].target].options &= (OpenGLL::GL_ENABLED&OpenGLL::GLL_LOCAL);//set it to be desirable to kill
+    GLLights[targ].index = -1;
+    GLLights[targ].options &= (OpenGLL::GL_ENABLED&OpenGLL::GLL_LOCAL);//set it to be desirable to kill
     oldtrav++;
   }
   traverse= newpicked->begin();
@@ -236,6 +240,9 @@ void gfx_light::dopickenables () {
       continue;
     }
     int glind=(*_llights)[*oldtrav].target;
+    if (glind<0) {
+      continue;//light never held a GL slot, or was killed (-2)--do not resurrect it by writing -1 below
+    }
     if ((GLLights[glind].options&OpenGLL::GL_ENABLED)&&GLLights[glind].index==-1) {//if hasn't been duly clobbered
       glDisable (GL_LIGHT0+glind);
       GLLights[glind].options &= (~OpenGLL::GL_ENABLED);
