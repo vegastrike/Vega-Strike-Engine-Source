@@ -259,6 +259,7 @@ void gfx_light::TrashFromGLLights () {
   assert (target>=0);
   assert ((GLLights[target].options&OpenGLL::GLL_ON)==0);//better be disabled so we know it's not in the table, etc
   assert ((&(*_llights)[GLLights[target].index])==this);
+  removelightfromnewpick(GLLights[target].index);
   GLLights[target].index = -1;
   GLLights[target].options= OpenGLL::GLL_LOCAL;
   target = -1;

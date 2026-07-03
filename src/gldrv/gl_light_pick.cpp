@@ -37,6 +37,15 @@ static vector <int> pickedlights [2];
 static vector <int>* newpicked=&pickedlights[0];
 static vector <int>* oldpicked=&pickedlights[1];
 
+void removelightfromnewpick (int index) {
+    std::vector<int>::iterator where;
+    for (int i=0;i<2;++i) {
+        while ((where=std::find(pickedlights[i].begin(),pickedlights[i].end(),index))!=pickedlights[i].end()) {
+            pickedlights[i].erase(where);
+        }
+    }
+}
+
 inline int getIndex (const LineCollide & t) {
     return t.object.i;
 }
@@ -53,6 +62,10 @@ static void swappicked () {
 
 void unpicklights () {
 	for (std::vector <int>::iterator i=newpicked->begin();i!=newpicked->end();i++) {
+	  if (*i>=(int)_llights->size()) {
+	    VSFileSystem::vs_fprintf (stderr,"GFXLIGHT FAILURE %d is beyond array of size %d\n",(int)*i,(int)_llights->size());
+	    continue;
+	  }
 	  if (GLLights[(*_llights)[*i].Target()].index!=*i) {
 	    //VSFileSystem::vs_fprintf (stderr,"uh oh");
 	    (*_llights)[*i].Target()=-1;
@@ -68,6 +81,7 @@ void unpicklights () {
 
   }
   newpicked->clear();
+  oldpicked->clear();
 }
 
 static float attenuatedIntensity(const gfx_light &light, const Vector& center, const float rad)
@@ -191,6 +205,11 @@ void gfx_light::dopickenables () {
   }
   traverse= newpicked->begin();
   while (traverse!=newpicked->end()) {
+    if (*traverse>=(int)_llights->size()) {
+      VSFileSystem::vs_fprintf (stderr,"GFXLIGHT FAILURE %d is beyond array of size %d\n",(int)*traverse,(int)_llights->size());
+      traverse++;
+      continue;
+    }
     if ((*_llights)[*traverse].target==-1) {
 	int gltarg = findLocalClobberable();
 	if (gltarg==-1) {
@@ -212,6 +231,10 @@ void gfx_light::dopickenables () {
     oldpicked->pop_front();
   }*/
   for (oldtrav = oldpicked->begin(); oldtrav!=oldpicked->end(); oldtrav++) {
+    if (*oldtrav>=(int)_llights->size()) {
+      VSFileSystem::vs_fprintf (stderr,"GFXLIGHT FAILURE %d is beyond array of size %d\n",(int)*oldtrav,(int)_llights->size());
+      continue;
+    }
     int glind=(*_llights)[*oldtrav].target;
     if ((GLLights[glind].options&OpenGLL::GL_ENABLED)&&GLLights[glind].index==-1) {//if hasn't been duly clobbered
       glDisable (GL_LIGHT0+glind);

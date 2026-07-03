@@ -108,6 +108,8 @@ struct OpenGLLights {
 void light_rekey_frame();
 ///picks doubtless changed position
 void unpicklights();
+///scrubs the given light index out of both picked-light lists (call when a light is trashed or killed)
+void removelightfromnewpick(int whichlight);
 ///The curren tlight context
 extern int _currentContext;
 ///The light data _llights points to one of these

@@ -285,6 +285,7 @@ void /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number) {
 }
 
 void /*GFXDRVAPI*/ GFXSetLightContext (const int con_number) {
+  unpicklights();//never let stale picked lights refer into the context we are about to swap away
   int GLLindex=0;
   unsigned int i;
   lighttable.Clear();
