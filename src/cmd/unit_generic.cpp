@@ -2799,7 +2799,10 @@ else {
 	if (!isSubUnit()) {
 		for (unsigned int locind=0;locind<Unit::NUM_COLLIDE_MAPS;++locind) {
 			if (is_null(this->location[locind])) {
-				this->getStarSystem()->collidemap[locind]->insert(Collidable(this));
+				//must store the iterator: RemoveFromSystem skips the erase when location is null,
+				//so a unit killed before the next flatten would leave a permanent collide-map entry
+				//referencing it (and flatten would write a backpointer into the killed unit)
+				this->location[locind]=this->getStarSystem()->collidemap[locind]->insert(Collidable(this));
 			}
 			else if (locind==Unit::UNIT_BOLT) {
 								 // that update will propagate with the flatten
