@@ -30,7 +30,7 @@ class PythonBasicType {
   PyObject * NewObject () const{
     switch (type) {
     case MYSTRING:
-      return PyString_FromString (objects.c_str());
+      return PyUnicode_FromString (objects.c_str());
     case MYLONG:
       return PyLong_FromLong (objecti);      
     case MYDOUBLE:

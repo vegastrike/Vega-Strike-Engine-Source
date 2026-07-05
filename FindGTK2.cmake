@@ -368,6 +368,13 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
       ${GTK2_PANGO_INCLUDE_DIR}
       ${GTK2_CAIRO_INCLUDE_DIR}
       ${GTK2_ATK_INCLUDE_DIR}
+      # Transitive include dirs (e.g. harfbuzz, fribidi) that pango/cairo
+      # need on modern distros but that the find_path() lookups above
+      # don't capture, since those only locate each module's own headers.
+      ${_PANGOIncDir}
+      ${_CAIROIncDir}
+      ${_ATKIncDir}
+      ${_GDK2IncDir}
     )
 
     if (GTK2_GTK_LIBRARY AND GTK2_GTK_INCLUDE_DIR)

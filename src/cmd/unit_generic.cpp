@@ -728,7 +728,7 @@ void Unit::DeactivateJumpDrive ()
 }
 
 
-float copysign (float x, float y)
+float vs_copysign (float x, float y)
 {
 	if (y>0)
 		return x;
@@ -3639,9 +3639,9 @@ void Unit::ApplyLocalTorque(const Vector &torque)
 Vector Unit::MaxTorque(const Vector &torque)
 {
 	// torque is a normal
-	return torque * (Vector(copysign(limits.pitch, torque.i),
-		copysign(limits.yaw, torque.j),
-		copysign(limits.roll, torque.k)) * torque);
+	return torque * (Vector(vs_copysign(limits.pitch, torque.i),
+		vs_copysign(limits.yaw, torque.j),
+		vs_copysign(limits.roll, torque.k)) * torque);
 }
 
 
@@ -3666,11 +3666,11 @@ Vector Unit::ClampTorque (const Vector &amt1)
 	static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
 	float fuelclamp=(fuel<=0)?staticfuelclamp:1;
 	if (fabs(amt1.i)>fuelclamp*limits.pitch)
-		Res.i=copysign(fuelclamp*limits.pitch,amt1.i);
+		Res.i=vs_copysign(fuelclamp*limits.pitch,amt1.i);
 	if (fabs(amt1.j)>fuelclamp*limits.yaw)
-		Res.j=copysign(fuelclamp*limits.yaw,amt1.j);
+		Res.j=vs_copysign(fuelclamp*limits.yaw,amt1.j);
 	if (fabs(amt1.k)>fuelclamp*limits.roll)
-		Res.k=copysign(fuelclamp*limits.roll,amt1.k);
+		Res.k=vs_copysign(fuelclamp*limits.roll,amt1.k);
 
 	//static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
 	//static float Deuteriumconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Deuterium","1/0.6"));
@@ -3801,8 +3801,8 @@ Vector Unit::ClampAngVel (const Vector & velocity)
 Vector Unit::MaxThrust(const Vector &amt1)
 {
 	// amt1 is a normal
-	return amt1 * (Vector(copysign(limits.lateral, amt1.i),
-		copysign(limits.vertical, amt1.j),
+	return amt1 * (Vector(vs_copysign(limits.lateral, amt1.i),
+		vs_copysign(limits.vertical, amt1.j),
 		amt1.k>0?limits.forward:-limits.retro) * amt1);
 }
 
@@ -3860,9 +3860,9 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn)
 	float fuelclamp=(fuel<=0)?staticfuelclamp:1;
 	float abfuelclamp= (fuel<=0)?staticabfuelclamp:1;
 	if (fabs(amt1.i)>fabs(fuelclamp*limits.lateral))
-		Res.i=copysign(fuelclamp*limits.lateral,amt1.i);
+		Res.i=vs_copysign(fuelclamp*limits.lateral,amt1.i);
 	if (fabs(amt1.j)>fabs(fuelclamp*limits.vertical))
-		Res.j=copysign(fuelclamp*limits.vertical,amt1.j);
+		Res.j=vs_copysign(fuelclamp*limits.vertical,amt1.j);
 	float ablimit =
 		afterburn
 		?((limits.afterburn-limits.forward)*abfuelclamp+limits.forward*fuelclamp)

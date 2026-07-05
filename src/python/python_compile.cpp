@@ -1,7 +1,7 @@
 #include "cmd/unit_generic.h"
 #include "python_compile.h"
 #include <compile.h>
-#include <eval.h>
+#include <ceval.h>
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
@@ -80,7 +80,7 @@ void CompileRunPython (const std::string &filename) {
             if ((m = PyImport_AddModule("__main__")) != NULL) {
                 PyObject *localdict = PyDict_New ();
                 if ((d = PyModule_GetDict(m)) != NULL) {
-                    PyObject * exe=PyEval_EvalCode(CompiledProgram, d, localdict);      
+                    PyObject * exe=PyEval_EvalCode((PyObject*)CompiledProgram, d, localdict);
                     Py_XDECREF (exe);
                     //unref exe?
                 }

@@ -302,7 +302,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
     for (counter=0;counter<4;++counter) {
       if (!replaced[counter]) {
         delete Pit[counter];
-        Pit[counter]=false;
+        Pit[counter]=NULL;
       }
     }
     break;

@@ -138,7 +138,7 @@ void LoadConfig(void) {
 		n_parm = next_parm(parm);		// next_parm is a line splitter included with general.c
 		if (strcmp("groups", parm) == 0) {
 			parm = n_parm;
-			while ((n_parm = next_parm(parm)) > 0) {	
+			while ((n_parm = next_parm(parm)) != 0) {	
 				G_CURRENT->name = NewString(parm);
 				G_NEXT = (struct group *)malloc(sizeof(struct group));
 				if (G_NEXT == 0) { fprintf (stderr,"Out of memory\n");exit(-1); }
@@ -156,7 +156,7 @@ void LoadConfig(void) {
 			n_parm = next_parm(parm);
 			group = NewString(parm);
 			parm = n_parm;
-			while ((n_parm = next_parm(parm)) > 0) {
+			while ((n_parm = next_parm(parm)) != 0) {
 				C_CURRENT->name = NewString(parm);
 				C_NEXT = (struct catagory *)malloc(sizeof(struct catagory));
 				if (C_NEXT == 0) { fprintf (stderr,"Out of memory\n");exit(-1); }
@@ -271,7 +271,7 @@ void Modconfig(int setting, char *name, char *group) {
 		if (strcmp(name, parm) == 0) { commenting = setting; }
 		else {
 			parm = n_parm;
-			while ((n_parm = next_parm(parm)) > 0) {
+			while ((n_parm = next_parm(parm)) != 0) {
 				if (parm[0] == '<') { break; }
 				if (strcmp(name, parm) == 0) {
 					commenting = setting;

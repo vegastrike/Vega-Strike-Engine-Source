@@ -39,7 +39,7 @@ class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
 #include "init.h"
 #include "cmd/script/pythonmission.h"
 #include <compile.h>
-#include <eval.h>
+#include <ceval.h>
 #include "python/python_compile.h"
 #include "cmd/ai/fire.h"
 #include <memory>
@@ -142,7 +142,21 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 #define VS_BOOST_MAKE_TUPLE_4(a,b,c,d) boost::python::tuple(a,b,c,d)
 #endif
 #define PYTHON_END_MODULE(name) }
+#if PY_VERSION_HEX >= 0x03000000
+// Boost.Python's Python-3 BOOST_PYTHON_MODULE generates PyInit_<name>(),
+// which both builds and returns the module object (unlike the old Python-2
+// init<name>() that populated a module Py_InitModule had already created).
+// These modules are embedded, not imported from a .so, so nothing else
+// would otherwise insert them into sys.modules for "import <name>" to find.
+#define PYTHON_INIT_MODULE(name) \
+    do { \
+        PyObject *_vsPyMod = PyInit_##name(); \
+        if (_vsPyMod) \
+            PyDict_SetItemString(PyImport_GetModuleDict(), #name, _vsPyMod); \
+    } while (0)
+#else
 #define PYTHON_INIT_MODULE(name) init##name()
+#endif
 #if BOOST_VERSION != 102800
 
 #define PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) { \

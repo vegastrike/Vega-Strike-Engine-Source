@@ -396,7 +396,7 @@ char *CPK3::ExtractFile(const char *lpname, int *file_size)
   
   // if the file isn't in the archive
   if (index == -1)
-    return false;
+    return NULL;
 
   int flength = GetFileLen(index);
      

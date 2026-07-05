@@ -10,7 +10,15 @@ cmake_minimum_required(VERSION 2.4)
 
 project (vsUTCS)
 
-
+# This is 2009-era C++03 code. Modern GCC defaults to a much stricter
+# dialect (implicit conversions demoted to errors, std::auto_ptr /
+# unary_function removed in C++17, etc). Compile it as C++14 (new enough
+# for the system Boost we link against) with -fpermissive so old-style
+# conversions stay warnings instead of hard errors, rather than porting
+# every call site.
+SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wno-register")
 
 include_directories(${vsUTCS_SOURCE_DIR}/src 
 					${vsUTCS_SOURCE_DIR}/src/cmd

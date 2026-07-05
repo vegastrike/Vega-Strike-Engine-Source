@@ -1,12 +1,10 @@
+#include <cmath>
 #include "cmd/unit_generic.h"
 #include "config_xml.h"
 #include "xml_support.h"
 #include "vs_globals.h"
 #include "universe_util.h"
 #include "gldrv/winsys.h"
-
-static inline float fmin(float a, float b) { return (a<b)?a:b; };
-static inline float fmax(float a, float b) { return (a>b)?a:b; };
 
 class ShipCommands {
 		Functor<ShipCommands> *csetkps;

@@ -627,9 +627,12 @@ unsigned int theunitcounter=0;
 unsigned int totalprocessed=0;
 unsigned int movingavgarray[128]={0};
 unsigned int movingtotal=0;
+namespace Orders {
 double aggfire=0;
 int numprocessed=0;
 double targetpick=0;
+}
+using namespace Orders;
 
 void StarSystem::RequestPhysics(Unit *un, unsigned int queue)
 {

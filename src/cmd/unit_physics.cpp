@@ -40,7 +40,7 @@
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "networking/netclient.h"
 //#endif
-extern float copysign (float x, float y);
+extern float vs_copysign (float x, float y);
 
 // the rotation should be applied in world coordinates
 /** MISNOMER...not really clamping... more like renomalizing  slow too

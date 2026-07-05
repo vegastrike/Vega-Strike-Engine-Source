@@ -368,7 +368,7 @@ unsigned char *	VSImage::ReadPNG()
 		png_set_palette_to_rgb(png_ptr);
 		   
 	if (this->img_color_type == PNG_COLOR_TYPE_GRAY && this->img_depth < 8)
-		png_set_gray_1_2_4_to_8(png_ptr);
+		png_set_expand_gray_1_2_4_to_8(png_ptr);
 
 	png_set_expand (png_ptr);
 	png_read_update_info (png_ptr,info_ptr);
@@ -904,7 +904,7 @@ VSError	VSImage::WritePNG( unsigned char * data)
     png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
     return BadFormat;
   }
-  if (setjmp(png_ptr->jmpbuf)) {
+  if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
     return BadFormat;
   }
