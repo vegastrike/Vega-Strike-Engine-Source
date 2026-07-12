@@ -177,6 +177,7 @@ void Python::init() {
     PyPreConfig_InitPythonConfig(&py_pre_config);
 
     PyStatus status;
+    py_pre_config.coerce_c_locale = 0;
 
     status = Py_PreInitialize(&py_pre_config);
     if (PyStatus_Exception(status)) {
