@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 #====================================
 # @file   : build
-# @brief  : build VegaStrike
-# @usage  : ./script/build --preset-name=VS2022Win64-pie-enabled-RelWithDebInfo
+# @brief  : build Vega Strike
+# @usage  : ./script/build --preset-name=linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo
 # @param  : preset-name=, build-type=
 #====================================
 
 #============ DESCRIPTION ===========
-# This script builds VegaStrike.
+# This script builds Vega Strike.
 # After this, it copies the relevant files to the 'bin' directory.
 # The steps for creating this script were taken from the projects wiki:
 # https://github.com/Taose/Vegastrike-taose/wiki/How-to-Build
 #====================================
 
-# Copyright (C) 2020-2025 Stephen G. Tuggy and other Vega Strike contributors.
+# Copyright (C) 2020-2026 Stephen G. Tuggy and other Vega Strike contributors.
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -36,7 +36,7 @@
 set -e
 
 echo "--------------------------"
-echo "--- build | 2025-11-27 ---"
+echo "--- build | 2026-07-12 ---"
 echo "--------------------------"
 
 #----------------------------------
@@ -69,7 +69,7 @@ done
 
 ROOT_DIR=$(pwd)
 echo "ROOT_DIR: ${ROOT_DIR}"
-BUILD_DIR="${ROOT_DIR}/build"
+BUILD_DIR="${ROOT_DIR}/build/${preset_name}"
 echo "BUILD_DIR: ${BUILD_DIR}"
 BIN_DIR="${ROOT_DIR}/bin"
 COMMAND=""
@@ -107,6 +107,6 @@ for i in "${directories_to_copy_if_they_exist[@]}"
 do
     if [ -d "$i" ]
     then
-        cp -v "$i" "${BIN_DIR}"/
+        cp -rv "$i" "${BIN_DIR}"/
     fi
 done
