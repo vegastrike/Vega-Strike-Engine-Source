@@ -77,11 +77,11 @@ jobs:
           PYTHONHOME: ""
           PYTHONPATH: ""
           IS_RELEASE: 1
-        run: script/cibuild --preset-name=${{ matrix.preset-name }}
+        run: script/cibuild --preset-name=${{ matrix.preset-name }} --build-type=${{ matrix.build-type }}
 
       - name: Package it
         working-directory: ${{github.workspace}}
-        run: cpack -V --preset-name="package-${{ matrix.preset-name }}"
+        run: cpack -V --preset-name="package-${{ matrix.preset-name }}" -G DragNDrop
 
       - name: Upload the artifacts
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
