@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 ##
-# package
+#====================================
+# @file   : package
+# @brief  : package Vega Strike installer
+# @usage  : ./script/package --preset-name=linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo
+# @param  : preset-name=, build-type=
+#====================================
 #
 # Vega Strike - Space Simulation, Combat and Trading
 # Copyright (C) 2001-2026 The Vega Strike Contributors:
@@ -37,14 +42,44 @@
 # ====================================
 #
 
+echo "----------------------------"
+echo "--- package | 2026-07-12 ---"
+echo "----------------------------"
 
 #----------------------------------
 # validate parameters
 #----------------------------------
 
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --preset_name=*)
+      preset_name="${1#*=}"
+      ;;
+    --preset-name=*)
+      preset_name="${1#*=}"
+      ;;
+    --build_type=*)
+      build_type="${1#*=}"
+      ;;
+    --build-type=*)
+      build_type="${1#*=}"
+      ;;
+    *)
+      printf "***************************\n"
+      printf "* Error: Invalid argument.*\n"
+      printf "***************************\n"
+      exit 1
+      ;;
+  esac
+  shift
+done
+
 ROOT_DIR=$(pwd)
-BUILD_DIR=$ROOT_DIR/build
+echo "ROOT_DIR: ${ROOT_DIR}"
+BUILD_DIR="${ROOT_DIR}/build/${preset_name}"
+echo "BUILD_DIR: ${BUILD_DIR}"
 BIN_DIR=$ROOT_DIR/bin
+echo "BIN_DIR: ${BIN_DIR}"
 PACKAGE_DIR=$ROOT_DIR/packages
 VS_EXECUTABLE=${BUILD_DIR}/vegastrike-engine
 VS_CONFIG_EXECUTABLE=${BUILD_DIR}/vegasettings
@@ -175,7 +210,7 @@ function copyTarballs()
 function copyFiles()
 {
 	# Ensure the package output directory exists
-	mkdir -p ${PACKAGE_DIR}
+	mkdir -p "${PACKAGE_DIR}"
 
 	copyDebFiles
 	copyRpmFiles
@@ -184,28 +219,24 @@ function copyFiles()
 
 function buildPackages()
 {
-	# before running make package regen the Cmake data so that
-	# it picks up the dependencies just generated
-	cmake "${ROOT_DIR}"
-	make package
-	make package_source
+	# before running the package step, regen the CMake data so that it picks up the dependencies just generated
+	cmake --preset "$preset_name"
+
+	# Run the actual package step
+	cpack -V --preset "package-$preset_name"
 }
 
-echo "----------------------------"
-echo "--- package | 2020-12-13 ---"
-echo "----------------------------"
-
-if [ ! -f ${VS_EXECUTABLE} ]; then
+if [ ! -f "${VS_EXECUTABLE}" ]; then
 	echo "***************************************"
 	echo "*** Please build Vega Strike first. ***"
 	echo "***************************************"
 	exit 1
 fi
 
-cd $BUILD_DIR
+pushd "$BUILD_DIR" || exit 2
 
 buildDependencies
 buildPackages
 copyFiles
 
-cd $ROOT_DIR
+popd || exit 2
