@@ -233,10 +233,6 @@ if [ ! -f "${VS_EXECUTABLE}" ]; then
 	exit 1
 fi
 
-pushd "$BUILD_DIR" || exit 2
-
 buildDependencies
 buildPackages
 copyFiles
-
-popd || exit 2
