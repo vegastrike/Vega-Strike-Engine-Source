@@ -38,7 +38,7 @@
 #include "cmd/ai/aggressive.h"
 #include "cmd/missile.h"
 #include "resource/random_utils.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "src/vs_logging.h"
 #include "src/vega_cast_utils.h"
 
@@ -389,3 +389,7 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
     return mangled;
 }
 
+Cargo Carrier::GetCargo(unsigned int index) const {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+    return unit->cargo_hold.GetCargo(index);
+}

@@ -60,7 +60,7 @@ using VSFileSystem::SaveFile;
 #include "gfx/sprite.h"
 #include "gfx/aux_texture.h"
 #include "src/audiolib.h"
-#include "src/vs_math.h"
+#include "common/vs_math.h"
 #include "cmd/damageable.h"
 #include "src/universe.h"
 #include "cmd/mount_size.h"
@@ -3794,7 +3794,7 @@ string buildUpgradeDescription(const Cargo &item, std::map<std::string, std::str
         boost::python::object dict = MapToObject(ship_map_copy);
         const std::string text = GetString("get_upgrade_info", "upgrade_view",
                                            "upgrade_view.py", dict.ptr());
-    return text;
+        return text;
     } catch (const std::runtime_error& e) {
         VS_LOG(error, (boost::format("Error in buildUpgradeDescription: %1%") % e.what()));
     }

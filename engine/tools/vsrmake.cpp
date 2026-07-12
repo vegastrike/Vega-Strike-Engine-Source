@@ -35,7 +35,7 @@
   @todo Allow packaging of files named to the standard input.
  */
 #include "vsrtools.h"
-#include "tools/common.h"
+#include "common/common.h"
 #include <stdlib.h>
 #include <cstring>
 #include <vector>

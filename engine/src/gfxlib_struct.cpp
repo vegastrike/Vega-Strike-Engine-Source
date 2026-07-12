@@ -33,7 +33,7 @@
 #include "root_generic/xml_support.h"
 #include "src/config_xml.h"
 #include "root_generic/vs_globals.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "src/vs_logging.h"
 #include "imgui.h"
 

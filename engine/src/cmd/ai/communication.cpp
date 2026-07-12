@@ -29,7 +29,7 @@
 #include "communication.h"
 #include "root_generic/vs_globals.h"
 #include "src/vs_logging.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "src/config_xml.h"
 #include <assert.h>
 #include "src/audiolib.h"

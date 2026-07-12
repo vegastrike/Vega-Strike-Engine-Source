@@ -37,7 +37,7 @@
 #include "src/universe_util.h"
 #include <string>
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 static void DockedScript(Unit *docker, Unit *base) {
     std::string script = configuration().ai.docked_to_script;

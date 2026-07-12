@@ -30,6 +30,7 @@
 #include <boost/python.hpp>
 #include "cmd/unit_generic.h"
 #include "src/python/python_compile.h"
+#include "src/vega_string_utils.h"
 #include <compile.h>
 #if ((PY_VERSION_HEX) < 0x030B0000)
 #include <eval.h>
@@ -68,7 +69,7 @@ std::string getCompilingName(const std::string &name) {
 }
 
 void InterpretPython(const std::string &name) {
-    char *temp = strdup(getCompilingName(name).c_str());
+    char *temp = vega_str_dup(getCompilingName(name).c_str());
     FILE *fp = VSFileSystem::vs_open(name.c_str(), "r");
     if (fp) {
         PyRun_SimpleFile(fp, temp);
@@ -90,7 +91,7 @@ PyObject *CompilePython(const std::string &name) {
         VS_LOG(info, (boost::format("Compiling python module %1$s\n") % name));
 
         std::string compiling_name = getCompilingName(name).c_str();
-        char *temp = strdup(compiling_name.c_str());
+        char *temp = vega_str_dup(compiling_name.c_str());
 
         retval = Py_CompileString(str, temp, Py_file_input);
         if (retval) {

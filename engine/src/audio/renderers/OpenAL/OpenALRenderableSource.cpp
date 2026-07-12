@@ -39,7 +39,7 @@
 #include "../../Source.h"
 #include "../../Listener.h"
 
-#include "src/vs_math.h"
+#include "common/vs_math.h"
 
 namespace Audio {
 

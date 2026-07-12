@@ -26,7 +26,7 @@
  */
 
 #include "root_generic/vs_globals.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include <ctime>
 #include <cstdio>
 #include "src/vega_cast_utils.h"

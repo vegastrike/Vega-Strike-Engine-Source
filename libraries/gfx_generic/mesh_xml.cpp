@@ -30,6 +30,7 @@
 #include "gfx_generic/mesh_xml.h"
 #include "gfx/aux_texture.h"
 #include "gfx/aux_logo.h"
+#include "src/vega_string_utils.h"
 #include "src/vegastrike.h"
 #include "root_generic/configxml.h"
 
@@ -474,8 +475,8 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                         this->polygon_offset = XMLSupport::parse_float((*iter).value);
                         break;
                     case MeshXML::BLENDMODE: {
-                        char *csrc = strdup((*iter).value.c_str());
-                        char *cdst = strdup((*iter).value.c_str());
+                        char *csrc = vega_str_dup((*iter).value.c_str());
+                        char *cdst = vega_str_dup((*iter).value.c_str());
                         sscanf(((*iter).value).c_str(), "%s %s", csrc, cdst);
                         SetBlendMode(parse_alpha(csrc), parse_alpha(cdst));
                         free(csrc);

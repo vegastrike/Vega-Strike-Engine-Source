@@ -40,7 +40,7 @@
 #include "cmd/damageable.h"
 
 #include "cmd/unit_collide.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
 #include "vegadisk/vsfilesystem.h"

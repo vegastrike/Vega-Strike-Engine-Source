@@ -42,7 +42,7 @@
 
 #include "src/vega_cast_utils.h"
 #include "cmd/unit_find.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "root_generic/lin_time.h" //DEBUG ONLY
 #include "cmd/pilot.h"
 #include "src/universe.h"

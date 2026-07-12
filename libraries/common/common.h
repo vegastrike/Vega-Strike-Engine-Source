@@ -24,8 +24,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
 
+
+#ifndef VEGA_STRIKE_LIBRARIES_COMMON_COMMON_H
+#define VEGA_STRIKE_LIBRARIES_COMMON_COMMON_H
 
 /* This file is for common (as in shared between vegastrike, vegasettings as vsconfig) stuff
  * that is not important enough to warrant its own file.
@@ -33,9 +35,29 @@
 
 #ifndef _WIN32
 #include <string>
+#include <cstring>
+#include <cassert>
 
 //Returns where the data directory is. Returns the cwd if it can't find the data dir.
 //Note: When it returns it has already changed dir to where the data directory is
 std::string getdatadir();
 
 #endif
+
+inline char *vega_str_dup2(const char *string) {
+#if _XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
+    return strdup(string);
+#elif defined (_WINDOWS)
+    return _strdup(string);
+#else //_XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
+    size_t buf_size = strlen(string) + 1;
+    char *alloc;
+    alloc = (char *)malloc(buf_size);
+    assert(alloc != nullptr);
+    strncpy(alloc, string, buf_size);
+    alloc[buf_size - 1] = '\0';
+    return alloc;
+#endif //_XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
+}
+
+#endif // VEGA_STRIKE_LIBRARIES_COMMON_COMMON_H

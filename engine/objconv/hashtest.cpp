@@ -42,7 +42,7 @@ static LONGLONG freq;
 static double   dblnewtime;
 #endif
 #include <map>
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 size_t globmax = 1024;
 class size {

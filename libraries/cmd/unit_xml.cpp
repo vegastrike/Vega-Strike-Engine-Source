@@ -34,7 +34,7 @@
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
 #include "src/vegastrike.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include <assert.h>
 #include "root_generic/xml_serializer.h"
 #include "cmd/unit_collide.h"

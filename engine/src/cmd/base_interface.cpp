@@ -33,7 +33,7 @@
 #include <algorithm>
 #include <string>
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "src/vega_cast_utils.h"
 #include "cmd/vega_py_run.h"
 #include "cmd/base.h"

@@ -30,7 +30,7 @@
 #include "components_manager.h"
 #include "component_utils.h"
 #include "resource/random_utils.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "configuration/configuration.h"
 #include "cmd/unit_csv_factory.h"
 #include "vs_logging.h"
