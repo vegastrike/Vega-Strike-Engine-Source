@@ -234,4 +234,7 @@ fi
 
 buildDependencies
 buildPackages
+
+pushd "$BUILD_DIR" || exit 2
 copyFiles
+popd || exit 2
