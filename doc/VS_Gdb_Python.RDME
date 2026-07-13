@@ -1,0 +1,93 @@
+In order to properly setup and use gdb with pythonon the "vegastrike-engine", some things need to happen.
+
+sudo apt-get install gdb python3.7-dbg gdb-doc gdbserver python3-gdbm-dbg python3-tk-dbg
+
+1 gdb and gdb-python (3,x), test python described below
+2 debug symbols (ex foo.dbg) for vegastrike build dependancies
+3 vegastrike built with "-O -fno-inline" + debug symbols
+
+
+
+########### Important files ###############
+$XDG_CONFIG_HOME/gdb/gdbinit (/etc/gdb/gdbinit 0n debian 10)
+$HOME/.config/gdb/gdbinit
+$HOME/.gdbinit
+
+************
+from python 
+https://devguide.python.org/gdb/
+
+In gdb 7, support for extending gdb with Python was added. When CPython is built you will notice a python* file in the root directory of your checkout. Read the module docstring for details on how to use the file to enhance gdb for easier debugging of a CPython process.
+
+To activate support, you must add the directory containing python-gdb.py to GDB’s “auto-load-safe-path”. Put this in your ~/.gdbinit file:
+
+add-auto-load-safe-path /path/to/checkout
+************
+
+So using locate I would :
+ $ locate *-gdb.py
+
+Which on my debian"buster" reports
+
+:~$ locate *-gdb.py
+/usr/share/gdb/auto-load/lib/x86_64-linux-gnu/libpthread-2.28.so-gdb.py
+/usr/share/gdb/auto-load/usr/bin/python3.7-dbg-gdb.py
+/usr/share/gdb/auto-load/usr/bin/python3.7-gdb.py
+/usr/share/gdb/auto-load/usr/bin/python3.7dm-gdb.py
+/usr/share/gdb/auto-load/usr/bin/python3.7m-gdb.py
+/usr/share/gdb/auto-load/usr/lib/jvm/java-11-openjdk-amd64/jre/lib/server/libjvm.so-gdb.py
+/usr/share/gdb/auto-load/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0.5800.3-gdb.py
+/usr/share/gdb/auto-load/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0.5800.3-gdb.py
+/usr/share/gdb/auto-load/usr/lib/x86_64-linux-gnu/libisl.so.19.1.0-gdb.py
+/usr/share/gdb/auto-load/usr/lib/x86_64-linux-gnu/libpython3.7dm.so.1.0-gdb.py
+/usr/share/gdb/auto-load/usr/lib/x86_64-linux-gnu/libpython3.7m.so.1.0-gdb.py
+/usr/share/gdb/auto-load/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.25-gdb.py
+
+As the closest one is "/usr/share/gdb/auto-load/usr/bin/python3.7-gdb.py" I chose this one. I don't know what the rest are yet so I'll leave them alone
+
+!@#@!!@#@!!@#@! END ONE TIME SETUP SECTION !@#@!!@#@!!@#@!
+
+TESTING
+
+ If you are doing this for the first time, you may want to verify it works.
+This test displays/doesn't display the pid # of gdb via python (you will soon understand)
+
+first in terminal start gdb
+
+~$ gdb
+GNU gdb ... blah blah ...
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word".
+(gdb) 
+
+here at "(gdb)" type "pi"
+
+(gdb) pi
+
+you should see ">>>" whicxh is the gdb-python command prompt.
+First timer should try the following
+enter this at ">>>" prompt 
+
+>>> import os
+>>> print('I am pid ()'.format(os.getpid()))
+I am pid ()
+
+
+If this works then you have a gdb_python <= 2.7 and needs to be changed (unless you are using python <= 2.7)
+
+Now try the python 3 version
+
+
+>>> import os 
+>>> print('my pid is',os.getpid())
+my pid is 27319
+
+now you are ready to run gdb_python on vegastrike=engine
+
+
+
+
+  
+
+
