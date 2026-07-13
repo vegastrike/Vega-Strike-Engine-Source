@@ -29,6 +29,7 @@
 
 #include "painttext.h"
 
+#include "vega_cast_utils.h"
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
 #include "gldrv/gl_globals.h"
@@ -316,8 +317,7 @@ static void parseFormatFloat(const std::string &str, //String.
     *resultPos = curPos + 1;           //Skip over these chars no matter what.
     if (formatSuccess && num.size() > 0) {
         //Convert string to float.
-        //Can't figure out std::locale, so we'll use easy, dumb conversion.
-        *resultValue = atof(num.c_str());
+        *resultValue = locale_aware_stof(num);
     }
 }
 

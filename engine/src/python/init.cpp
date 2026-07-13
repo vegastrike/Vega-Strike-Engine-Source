@@ -175,6 +175,9 @@ void Python::init() {
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
 
+    // Is this right? Shouldn't it be 1 or 2? -- Stephen G. Tuggy 2026-07-13
+    py_pre_config.coerce_c_locale = 0;
+
     PyStatus status;
 
     status = Py_PreInitialize(&py_pre_config);

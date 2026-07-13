@@ -119,7 +119,7 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, severity_logger_mt<vega_log_level>) {
 }
 
 VegaStrikeLogger::VegaStrikeLogger() : slg_(my_logger::get()), file_log_back_end_(nullptr), file_log_sink_(nullptr) {
-    boost::filesystem::path::imbue(std::locale(""));
+    boost::filesystem::path::imbue(std::locale(kLocaleName));
     logging_core_ = boost::log::core::get();
     console_log_sink_ = boost::log::add_console_log
             (
