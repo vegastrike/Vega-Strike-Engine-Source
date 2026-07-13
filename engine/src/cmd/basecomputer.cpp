@@ -27,6 +27,9 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
+
+#define PY_SSIZE_T_CLEAN
+
 #include "src/vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
                                                                                                                         //For WIN32 debugging.
@@ -87,12 +90,19 @@ using VSFileSystem::SaveFile;
 #include "src/vega_cast_utils.h"
 
 // Can't declare in header because PyObject is problematic
-extern const std::string GetString(const std::string function_name,
-                            const std::string module_name,
-                            const std::string file_name,
-                            PyObject* args);
+extern boost::python::object WrapObject(PyObject* raw_object, bool should_borrow);
 
-using namespace XMLSupport; // FIXME -- Shouldn't include an entire namespace, according to Google Style Guide -- stephengtuggy 2021-09-07
+extern boost::python::object GetPyObject(const std::string& function_name,
+                                        const std::string& module_name,
+                                        const std::string& file_name,
+                                        PyObject* raw_args);
+
+extern std::string GetString(const std::string& function_name,
+                            const std::string& module_name,
+                            const std::string& file_name,
+                            PyObject* raw_args);
+
+extern boost::python::object MapToObject(SharedPtr<std::map<std::string, std::string>> cpp_map);
 
 //end for directory thing
 extern const char *DamagedCategory;
@@ -238,9 +248,7 @@ extern void RespawnNow(Cockpit *cockpit);
 string buildShipDescription(Cargo &item, string &texture_description);
 //build the previous description from a cargo purchase item
 string buildCargoDescription(const Cargo &item, BaseComputer &computer, float price);
-//put in buffer a pretty prepresentation of the POSITIVE float f (ie 4,732.17)
-void prettyPrintFloat(char *buffer, float f, int digits_before, int digits_after, int buffer_len = 128);
-string buildUpgradeDescription(Cargo &item, std::map<std::string, std::string> ship_map);
+string buildUpgradeDescription(const Cargo &item, std::map<std::string, std::string> ship_map);
 int BaseCargoAssets(Unit *base_unit, string cargo_name);
 
 //"Basic Repair" item that is added to Buy UPGRADE mode.
@@ -411,44 +419,24 @@ static float SellPrice(Unit *playerUnit, const Cargo *item) {
 const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0);
 
 
+std::string prettyPrintFloat(float value, int precision = 2) {
+    // TODO: Need to place this somewhere else
+    // Call this once if you want your whole program to follow system locale
 
-#define PRETTY_ADD(str, val, digits)                        \
-    do {                                                      \
-        text += "#n#";                                        \
-        text += prefix;                                       \
-        text += str;                                          \
-        prettyPrintFloat( conversionBuffer, val, 0, digits ); \
-        text += conversionBuffer;                             \
-    }                                                         \
-    while (0)
+    std::locale::global(std::locale(""));
 
-#define PRETTY_ADDN(str, val, digits)                       \
-    do {                                                      \
-        text += str;                                          \
-        prettyPrintFloat( conversionBuffer, val, 0, digits ); \
-        text += conversionBuffer;                             \
-    }                                                         \
-    while (0)
+    std::ostringstream out;
 
-#define PRETTY_ADDU(str, val, digits, unit)                 \
-    do {                                                      \
-        text += "#n#";                                        \
-        text += prefix;                                       \
-        text += str;                                          \
-        prettyPrintFloat( conversionBuffer, val, 0, digits ); \
-        text += conversionBuffer;                             \
-        text += " ";                                          \
-        text += unit;                                         \
-    }                                                         \
-    while (0)
+    // Use the user's global locale (setlocale/std::locale::global)
+    out.imbue(std::locale(""));
 
-#define MODIFIES(mode, playerUnit, blankUnit, what)                                 \
-    (   (((playerUnit) -> what) != 0)                                               \
-     && ( (mode != 0) || (((playerUnit) -> what) != ((blankUnit) -> what)) )   )
+    // Fixed n digits after decimal + locale separators
+    out << std::fixed << std::setprecision(precision) << value;
 
-#define MODIFIES_ALTEMPTY(mode, playerUnit, blankUnit, what, empty)                 \
-    (   (((playerUnit) -> what) != (empty))                                         \
-     && ( (mode != 0) || (((playerUnit) -> what) != ((blankUnit) -> what)) )   )
+    return out.str();
+}
+
+
 
 //CONSTRUCTOR.
 BaseComputer::BaseComputer(Unit *player, Unit *base, const std::vector<DisplayMode> &modes) :
@@ -1816,6 +1804,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
     string tailString;
     string tempString = "";
     Unit *baseUnit = m_base.GetUnit();
+
     if (tlist->transaction != ACCEPT_MISSION) {
         //Do the money.
         switch (tlist->transaction) {
@@ -1843,6 +1832,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     tempString = (boost::format("Cargo volume: %1$.2f cubic meters;  "
                                                 "Mass: %2$.2f metric tons#n1.5#") % item.GetVolume() % item.GetMass()).str();
                 }
+
                 descString += tempString;
                 tailString = buildCargoDescription(item, *this, item.GetPrice());
                 break;
@@ -1887,7 +1877,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     //the current base.  "Buying" this ship makes it my current ship.
                     tempString = (boost::format("#b#Transport cost: %1$.2f#-b#n1.5#") % item.GetPrice()).str();
                 } else {
-                    PRETTY_ADDN("", baseUnit->PriceCargo(item.GetName()), 2);
+                    text += prettyPrintFloat(baseUnit->PriceCargo(item.GetName()));
                     tempString = (boost::format("Price: #b#%1%#-b#n#") % text).str();
                     const bool print_volume = configuration().graphics.bases.print_cargo_volume;
                     if (print_volume) {
@@ -2760,7 +2750,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList &transaction_list) {
     if (!active_missions.empty()) {
         for (unsigned int i = 1; i < active_missions.size(); ++i) {
             CargoColor a_mission;
-            a_mission.cargo.SetName(XMLSupport::tostring(i) + " " + active_missions[i]->mission_name);
+            a_mission.cargo.SetName(std::to_string(i) + " " + active_missions[i]->mission_name);
             a_mission.cargo.SetPrice(0);
             a_mission.cargo.SetQuantity(1);
             a_mission.cargo.SetCategory("Active_Missions");
@@ -2768,7 +2758,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList &transaction_list) {
             for (unsigned int j = 0; j < active_missions[i]->objectives.size(); ++j) {
                 a_mission.cargo.SetDescription(
                         a_mission.cargo.GetDescription() + active_missions[i]->objectives.at(j).objective + ": "
-                                + XMLSupport::tostring(static_cast<int>(100
+                                + std::to_string(static_cast<int>(100
                                                                         * active_missions[i]->objectives.at(j).completeness))
                                 + "%\\");
             }
@@ -2885,6 +2875,7 @@ void BaseComputer::loadBuyUpgradeControls(void) {
 
     //Mark all the upgrades that we can't do.
     //cargo.mission == true means we can't upgrade this.
+    // TODO: fix this nonsense. We should get mission status from the colors but the other way around.
     for (auto iter = tlist.masterList.begin(); iter != tlist.masterList.end(); ++iter) {
         iter->cargo.SetMissionFlag((!equalColors(iter->color, DEFAULT_UPGRADE_COLOR())));
     }
@@ -2946,6 +2937,7 @@ void BaseComputer::loadSellUpgradeControls(void) {
     }
     //Mark all the upgrades that we can't do.
     //cargo.mission == true means we can't upgrade this.
+    // TODO: fix this nonsense. We should get mission status from the colors but the other way around.
     for (auto iter = tlist.masterList.begin(); iter != tlist.masterList.end(); ++iter) {
         iter->cargo.SetMissionFlag((!equalColors(iter->color, DEFAULT_UPGRADE_COLOR())));
     }
@@ -3540,7 +3532,6 @@ bool BaseComputer::buyUpgrade(const EventCommandId &command, Control *control) {
                 Unit *base_unit = m_base.GetUnit();
                 if (base_unit) {
                     constexpr int quantity = 1;
-                    unsigned int index = base_unit->cargo_hold.GetIndex(*item);
                     player_unit->BuyUpgrade(base_unit, item, quantity);
                     player_unit->Upgrade(item->GetName(), 0, 0, true, false);
                     refresh();
@@ -3567,7 +3558,7 @@ bool BaseComputer::sellUpgrade(const EventCommandId &command, Control *control) 
             if (baseUnit && playerUnit) {
                 constexpr int quantity = 1;
                 playerUnit->SellUpgrade(baseUnit, item, quantity);
-                UpgradeOperationResult result = playerUnit->UpgradeUnit(item->GetName(), false, true);
+                playerUnit->UpgradeUnit(item->GetName(), false, true);
                 refresh();
             }
             return true;
@@ -3744,6 +3735,8 @@ string buildShipDescription(Cargo &item, std::string &texture_description) {
         //Player owns this starship.
         newModifications = _Universe->AccessCockpit()->GetUnitModifications();
     }
+
+    // Load the Unit
     Flightgroup *flightGroup = new Flightgroup();
     int fgsNumber = 0;
     current_unit_load_mode = NO_MESH;
@@ -3770,32 +3763,44 @@ string buildShipDescription(Cargo &item, std::string &texture_description) {
         }
     }
 
-    std::map<std::string, std::string> ship_map = newPart->UnitToMap();
-    std::string str = GetString("get_ship_description", "ship_view",
-                          "ship_view.py",
-                          ship_map);
+    std::string str;
+    try {
+        std::map<std::string, std::string> ship_map = newPart->UnitToMap();
+        SharedPtr<std::map<std::string, std::string>> ship_map_ptr = MakeShared<std::map<std::string, std::string>>(ship_map);
+        boost::python::object dict = MapToObject(ship_map_ptr);
+        str = GetString("get_ship_description", "ship_view", "ship_view.py", dict.ptr());
+    } catch (const std::runtime_error& e) {
+        VS_LOG(error, (boost::format("Error in buildShipDescription: %1%") % e.what()));
+    }
 
     VS_LOG(debug, "buildShipDescription: killing newPart");
     newPart->Kill();
     // VS_LOG(debug, "buildShipDescription: deleting newPart");
     // delete newPart;
     // newPart = nullptr;
-    if (texture_description != "" && (string::npos == str.find('@'))) {
+    if (!texture_description.empty() && (string::npos == str.find('@'))) {
         str = "@" + texture_description + "@" + str;
     }
     VS_LOG(debug, (boost::format("buildShipDescription: texture_description == %1%") % texture_description));
-    VS_LOG(debug, (boost::format("buildShipDescription: return value       == %1%") % str));
+    VS_LOG(debug, (boost::format("buildShipDescription: return value        == %1%") % str));
     VS_LOG(debug, "Leaving buildShipDescription");
     return str;
 }
 
 //UNDER CONSTRUCTION
-string buildUpgradeDescription(Cargo &item, std::map<std::string, std::string> ship_map) {
+string buildUpgradeDescription(const Cargo &item, std::map<std::string, std::string> ship_map) {
     const std::string key = item.GetName() + "__upgrades";
-    ship_map["upgrade_key"] = key;
-    const std::string text = GetString("get_upgrade_info", "upgrade_view",
-        "upgrade_view.py", ship_map);
-    return text;
+    SharedPtr<std::map<std::string, std::string>> ship_map_copy = MakeShared<std::map<std::string, std::string>>(ship_map);
+    (*ship_map_copy)["upgrade_key"] = key;
+    try {
+        boost::python::object dict = MapToObject(ship_map_copy);
+        const std::string text = GetString("get_upgrade_info", "upgrade_view",
+                                           "upgrade_view.py", dict.ptr());
+        return text;
+    } catch (const std::runtime_error& e) {
+        VS_LOG(error, (boost::format("Error in buildUpgradeDescription: %1%") % e.what()));
+    }
+    return std::string();
 }
 
 class PriceSort {
@@ -3994,7 +3999,7 @@ void trackPrice(int which_player, const Cargo &item, float price, const string &
         {
             for (size_t i = 0; i < recordedHighestPrices.size(); ++i) {
                 string &text = highest[i];
-                PRETTY_ADD("", recordedHighestPrices.at(i), 2);
+                text += "#n#" + prefix + prettyPrintFloat(recordedHighestPrices.at(i));
                 text += " (at " + recordedHighestLocs.at(i) + ")";
 
                 VS_LOG(info, (boost::format("Highest item %1%") % text));
@@ -4006,7 +4011,7 @@ void trackPrice(int which_player, const Cargo &item, float price, const string &
         {
             for (size_t i = 0; i < recordedLowestPrices.size(); ++i) {
                 string &text = lowest[i];
-                PRETTY_ADD("", recordedLowestPrices.at(i), 2);
+                text += "#n#" + prefix + prettyPrintFloat(recordedLowestPrices.at(i));
                 text += " (at " + recordedLowestLocs.at(i) + ")";
 
                 VS_LOG(info, (boost::format("Lowest item %1%") % text));
@@ -4050,34 +4055,35 @@ string buildCargoDescription(const Cargo &item, BaseComputer &computer, float pr
     return desc;
 }
 
-//Load the controls for the SHIP_DEALER display.
+// Load the controls for the SHIP_DEALER display.
 void BaseComputer::loadShipDealerControls(void) {
-    //Make sure there's nothing in the transaction lists.
+    // Make sure there's nothing in the transaction lists.
     resetTransactionLists();
 
-    //Set up the base dealer's transaction list.
+    // Set up the base dealer's transaction list.
     std::vector<std::string> filter_vec;
     filter_vec.push_back("starships");
     loadMasterList(m_base.GetUnit(), m_base.GetUnit()->cargo_hold, filter_vec, std::vector<std::string>(), true, m_transList1);
 
-    //Add in the starships owned by this player.
+    // Add in the starships owned by this player.
     const Cockpit *cockpit = _Universe->AccessCockpit();
     for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i) {
         CargoColor cargoColor;
         cargoColor.cargo = CreateCargoForOwnerStarship(cockpit, m_base.GetUnit(), i);
         m_transList1.masterList.push_back(cargoColor);
     }
-    //remove the descriptions, we don't build them all here, it is a time-consuming operation
+
+    // remove the descriptions, we don't build them all here, it is a time-consuming operation
     vector<CargoColor> *items = &m_transList1.masterList;
     for (auto it = items->begin(); it != items->end(); ++it) {
         it->cargo.SetDescription("");
     }
-    //Load the picker from the master list.
+    // Load the picker from the master list.
     SimplePicker *basePicker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("Ships"));
     assert(basePicker != NULL);
     loadListPicker(m_transList1, *basePicker, BUY_SHIP, true);
 
-    //Make the title right.
+    // Make the title right.
     recalcTitle();
 }
 
@@ -4119,9 +4125,11 @@ bool BaseComputer::sellShip(const EventCommandId &command, Control *control) {
     Unit *base_unit = m_base.GetUnit();
     const Cargo *item = selectedItem();
     
+    // Some sanity checks
     if (!(player_unit && base_unit && item && player_unit->IsPlayerShip())) {
         return true;
     }
+
     return ::sellShip(base_unit, player_unit, item->GetName(), this);
 }
 
@@ -4294,38 +4302,7 @@ bool BaseComputer::changeToInfoMode(const EventCommandId &command, Control *cont
     return true;
 }
 
-//Faction colors 2-Sept-03.  mbyron.
-/*
- *  0. r=0.5 g=0.5 b=1
- *  1. r=0 g=0 b=1
- *  2. r=0 g=1 b=0
- *  3. r=0.5 g=0.5 b=1
- *  4. r=0.75 g=0.5 b=0.25
- *  5. r=0 g=0.5 b=1
- *  6. r=0.5 g=0 b=1
- *  7. r=0.5 g=0.5 b=1
- *  8. r=0.5 g=0.5 b=1
- *  9. r=1 g=0.5 b=0
- *  10. r=0.4 g=0.2 b=0.7
- *  11. r=1 g=1 b=1
- *  12. r=0.5 g=0.5 b=1
- *  13. r=1 g=0 b=0
- *  14. r=0.5 g=0.5 b=1
- */
 
-//Given a faction number, return a PaintText color command for the faction.
-//This lightens up the faction colors to make them more easily seen on the dark background.
-static std::string factionColorTextString(int faction) {
-    //The following gets the spark (faction) color.
-    const float *spark = FactionUtil::GetSparkColor(faction);
-
-    //Brighten up the raw colors by multiplying each channel by 2/3, then adding back 1/3.
-    //The darker colors are too hard to read.
-    std::string result =
-            colorsToCommandString(spark[0] / 1.5 + 1.0 / 3, spark[1] / 1.5 + 1.0 / 3, spark[2] / 1.5 + 1.0 / 3);
-
-    return result;
-}
 
 
 // A utility to convert vector to list
@@ -4351,10 +4328,14 @@ bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *contro
     boost::python::list relations_list = VectorToList(relations_vector);
     boost::python::list kills_list = VectorToList(kills_vector);
 
-    PyObject* args = PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr());
+    std::string text;
+    try {
+        boost::python::object args = WrapObject(PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr()), true);
+        text = GetString("get_player_info", "player_info", "player_info.py", args.ptr());
+    } catch (const std::runtime_error& e) {
+        VS_LOG(error, (boost::format("Error in showPlayerInfo: %1%") % e.what()));
+    }
 
-    const std::string text = GetString("get_player_info", "player_info",
-        "player_info.py", args);
 
     //Put this in the description.
     StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
@@ -4365,77 +4346,6 @@ bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *contro
     return true;
 }
 
-//does not work with negative numbers!!
-void prettyPrintFloat(char *buffer, float f, int digits_before, const int digits_after, const int buffer_len) {
-    int buffer_pos = 0;
-    if (!FINITE(f) || ISNAN(f)) {
-        buffer[0] = 'n';
-        buffer[1] = '/';
-        buffer[2] = 'a';
-        buffer[3] = '\0';
-        return;
-    }
-    if (f < 0) {
-        buffer[0] = '-';
-        buffer_pos = 1;
-        f = (-f);
-    }
-    float temp = f;
-    int before = 0;
-    while (temp >= 1.0f) {
-        before++;
-        temp /= 10.0f;
-    }
-    while (buffer_pos < (buffer_len - 4 - digits_after) && before < digits_before) {
-        buffer[buffer_pos++] = '0';
-        digits_before--;
-    }
-    if (before) {
-        for (int p = before; buffer_pos < (buffer_len - 4 - digits_after) && p > 0; p--) {
-            temp = f;
-            float subtractor = 1;
-            for (int i = 0; i < p - 1; i++) {
-                temp /= 10.0f;
-                subtractor *= 10.0;
-            }
-            //we can't cast to int before in case of overflow
-            const int digit = static_cast<int>(temp) % 10;
-            buffer[buffer_pos++] = '0' + digit;
-            //reason for the following line: otherwise the  "((int)temp)%10" may overflow when converting
-            f = f - (static_cast<float>(digit) * subtractor);
-            if ((p != 1) && (p % 3 == 1)) {
-                buffer[buffer_pos++] = ' ';
-            } // thousand separator
-        }
-    } else {
-        buffer[buffer_pos++] = '0';
-    }
-    if (digits_after == 0) {
-        buffer[buffer_pos] = 0;
-        return;
-    }
-
-    if (buffer_pos < buffer_len) {
-        buffer[buffer_pos++] = '.';
-    }
-
-    temp = f;
-    for (int i = 0; buffer_pos < (buffer_len - 1) && i < digits_after; i++) {
-        temp *= 10;
-        buffer[buffer_pos++] = '0' + (static_cast<int>(temp) % 10);
-    }
-    if (buffer_pos < buffer_len) {
-        buffer[buffer_pos] = 0;
-    }
-}
-
-static const char *WeaponTypeStrings[] = {
-        "UNKNOWN",
-        "BEAM",
-        "BALL",
-        "BOLT",
-        "PROJECTILE"
-};
 
 
 
@@ -4449,9 +4359,15 @@ bool BaseComputer::showShipStats(const EventCommandId &command, Control *control
     Cargo uninit_cargo;
 
     const std::map<std::string, std::string> ship_map = playerUnit->UnitToMap();
-    std::string text = GetString("get_ship_description", "ship_view",
-                          "ship_view.py",
-                          ship_map);
+    std::string text;
+    try {
+        SharedPtr<std::map<std::string, std::string>> ship_map_ptr = MakeShared<std::map<std::string, std::string>>(ship_map);
+        boost::python::object dict = MapToObject(ship_map_ptr);
+        text = GetString("get_ship_description", "ship_view",
+                          "ship_view.py", dict.ptr());
+    } catch (const std::runtime_error& e) {
+        VS_LOG(error, (boost::format("Error in showShipStats: %1%") % e.what()));
+    }
 
     //remove picture, if any
     string::size_type pic;
