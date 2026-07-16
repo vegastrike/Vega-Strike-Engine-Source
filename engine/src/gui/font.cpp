@@ -51,6 +51,11 @@ bool useStroke() {
     return !tmp;
 }
 
+static double GetGlobalUIScale() {
+    // You could pull this from your config file or a new GUIState variable
+    return configuration().graphics.gui_font_scale_flt;
+}
+
 //Calculate the metrics for this font.
 //This does the real work, and doesn't check whether it needs to be done.
 void Font::calcMetrics(void) {
@@ -72,7 +77,7 @@ void Font::calcMetrics(void) {
     m_needMetrics = false;
 
     //Vertical scaling factor:
-    m_verticalScaling = size() / REFERENCE_LINE_SPACING;
+    m_verticalScaling = (size() * GetGlobalUIScale()) / REFERENCE_LINE_SPACING;
     //Horizontal scaling factor.  Same as vertical, except we need to make the coord system
     //the same distance in all directions, so we need to apply the ratio of vert / horiz
     //resolution.  Otherwise the fonts are slightly stretched horizontally -- there
