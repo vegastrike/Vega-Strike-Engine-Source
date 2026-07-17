@@ -82,6 +82,9 @@ TEST(Python, Call_Function) {
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
 
+    // Is this right? Should it be 0, 1, 2, or -1? -- Stephen G. Tuggy 2026-07-13
+    py_pre_config.coerce_c_locale = 2;
+
     PyStatus status;
 
     status = Py_PreInitialize(&py_pre_config);
