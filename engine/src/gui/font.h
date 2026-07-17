@@ -34,17 +34,6 @@ static const float LIGHT_STROKE = 0.6;
 static const float NORMAL_STROKE = 1.0;
 static const float BOLD_STROKE = 1.5;
 
-//The GLUT outline font (GLUT_STROKE_ROMAN) has a maximum ascender over the baseline of
-//119.05, and a max descender under the baseline of 33.33.
-//We add a bit of extra space to make sure the characters don't run into each other vertically.
-//Not too much, because the max ascender almost never runs into the max descender, and
-//we don't want too much white space between lines.  (This spacing is a guess -- tweak
-//it if necessary.)
-//These constants describe the reference vertical spacing of the font:
-static const double REFERENCE_BASELINE_POS = 33.33;
-static const double REFERENCE_FONT_ASCENDER = 119.05;
-static const double REFERENCE_LINE_SPACING = REFERENCE_FONT_ASCENDER + REFERENCE_BASELINE_POS;
-
 //Font object.
 //Right now, this only supports the GLUT outline font.
 //We try to choose the best options for a given Font size.  May or may not do
@@ -74,7 +63,7 @@ public:
     }
 
 //Draw a character.  Assumes scaling is done, current color set, etc.
-    float drawChar(char c) const;
+    float drawChar(char c, float xOffset = 0) const;
 
 //The width of a character in reference units.
     double charWidth(char c) const;
@@ -82,11 +71,17 @@ public:
 //The width of a string in reference units.
     double stringWidth(const std::string &str) const;
 
-//Vertical scaling factor to be used to image this font.
+//Vertical scaling factor from char reference space to identity space to be used to image this font.
     double verticalScaling(void) const;
 
-//Horizontal scaling factor to be used to image this font.
+//Horizontal scaling factor from char reference space to identity space to be used to image this font.
     double horizontalScaling(void) const;
+
+// Returns the font ascent
+    double ascent(void) const;
+
+// Returns the font descent
+    double descent(void) const;
 
 //CONSTRUCTION
     Font(float newsize = .1, float weight = NORMAL_STROKE) :
@@ -119,7 +114,7 @@ protected:
 //This does the real work, and doesn't check whether it needs to be done.
     void calcMetrics(void);
 
-//Check whether we need to recalc the metrics, and do it in const object.
+    // Check whether we need to recalc the metrics, and do it in const object.
     void calcMetricsIfNeeded(void) const;
 
 protected:
