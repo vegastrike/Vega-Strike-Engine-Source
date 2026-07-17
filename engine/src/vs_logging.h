@@ -88,7 +88,6 @@ private:
     boost::shared_ptr<FileLogBackEnd> file_log_back_end_;
     boost::shared_ptr<ConsoleLogSink> console_log_sink_;
     boost::shared_ptr<FileLogSink> file_log_sink_;
-    const char *kLocaleName = "C.UTF-8";
 
 private:
     VegaStrikeLogger();
