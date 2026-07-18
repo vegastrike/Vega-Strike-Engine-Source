@@ -209,7 +209,9 @@ static float drawChars(const string &str,
     glLineWidth(font.strokeWidth());
     //Draw all the characters.
     for (int charPos = start; charPos <= end; charPos++) {
-        inRasterPos += font.drawChar(str[charPos], inRasterPos);
+        if(str[charPos] != '\0') {
+            inRasterPos += font.drawChar(str[charPos], inRasterPos);
+        }
     }
     return inRasterPos;
 }
