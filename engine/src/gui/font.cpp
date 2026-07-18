@@ -4,7 +4,7 @@
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2026 The Vega Strike Contributors:
  * Project creator: Daniel Horn
- * Original development team: As listed in the AUTHORS file
+ * Original development team: As listed in the AUTHORS file. Specifically: Mike Byron
  * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy, Danny Gehl
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -41,7 +41,6 @@ void Font::calcMetricsIfNeeded(void) const {
 // Calculates the metrics for this font.
 // This does the real work, and doesn't check whether it needs to be done.
 void Font::calcMetrics(void) {
-    m_needMetrics = false;
 
     // Determine how much we need to scale the font 
     // to reach the desired 'm_size' (0.1 = 10% of the screen height).
@@ -56,6 +55,7 @@ void Font::calcMetrics(void) {
     double aspect_ratio = static_cast<double>(configuration().graphics.resolution_y) / static_cast<double>(configuration().graphics.resolution_x);
     m_horizontalScaling = m_verticalScaling * aspect_ratio;
 
+    m_needMetrics = false;
     // printf("Vertical Scaling: %f, Horizontal Scaling: %f,\n", 
     //     m_verticalScaling, m_horizontalScaling);
 }
