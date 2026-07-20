@@ -28,31 +28,32 @@
 #include <sstream>
 #include "src/vs_logging.h"
 #include "configuration/configuration.h"
-
-// Macros
-
-#define NORM_TO_PIXEL_X(val) (((val) + 1.0f) * 0.5f * ImGui::GetIO().DisplaySize.x)
-#define NORM_TO_PIXEL_Y(val) ((1.0f - (val)) * 0.5f * ImGui::GetIO().DisplaySize.y)
-#define NORM_TO_PIXEL_W(val) ((val) * 0.5f * ImGui::GetIO().DisplaySize.x)
-const double BASE_LINE_FONT_SIZE = 0.05d;
+#include "imgui_internal.h"
 
 void FormattedLayout::endLine(Line& line) {
-    if (!line.empty()) {
+    // if (!line.empty()) {
+        line.lineSpacing = currentLineSpacing;
         this->push_back(line);
-    }
+    // }
     line.clear();
     line.width = 0.0f;
+    currentLineSpacing = line.lineSpacing = 0.0f;
 }
 
 // UI functions
 
 // Draws (a line of) text to the UI
 void ImGuiText::draw() {
+    if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
+        return; // Safe exit: No active window context
+    }
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    if ( !draw_list ) return;
     // Calculate the Pixel Rect for Clipping
     float pMinX = NORM_TO_PIXEL_X(m_rect.origin.x);
-    float pMinY = NORM_TO_PIXEL_Y(m_rect.origin.y + m_rect.size.height) - 3; // Top of rect
+    float pMinY = NORM_TO_PIXEL_Y(m_rect.origin.y + m_rect.size.height) - 5; // Top of rect
     float pMaxX = NORM_TO_PIXEL_X(m_rect.origin.x + m_rect.size.width);
-    float pMaxY = NORM_TO_PIXEL_Y(m_rect.origin.y) + 7; // Bottom of rect
+    float pMaxY = NORM_TO_PIXEL_Y(m_rect.origin.y) + 10; // Bottom of rect
 
     // Clipping coords to avoid overrunning text
     ImVec4 clipRect(pMinX, pMinY, pMaxX, pMaxY);
@@ -72,22 +73,24 @@ void ImGuiText::draw() {
     }
 
     ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(m_color.r, m_color.g, m_color.b, m_color.a));
-    // const int fontSize = m_font.size()/BASE_LINE_FONT_SIZE*configuration().graphics.font_point_dbl;
     
     // Poor man's bold effect, redraw with 2px offset
     // FIXME Replace with proper bold font
     if(m_font.strokeWeight() == BOLD_STROKE) {
-        ImGui::GetBackgroundDrawList()->AddText(nullptr, 0.0f, ImVec2(pos.x, pos.y + 2.0f), color, m_text.c_str(), nullptr, 0.0f, &clipRect);
+        draw_list->AddText(nullptr, NORM_TO_PIXEL_FONT_SIZE(m_font.size()), ImVec2(pos.x, pos.y + 2.0f), color, m_text.c_str(), nullptr, 0.0f, &clipRect);
     }
 
     // Main text
-    ImGui::GetBackgroundDrawList()->AddText(nullptr, 0.0f, pos, color, m_text.c_str(), nullptr, 0.0f, &clipRect);
+    draw_list->AddText(nullptr, NORM_TO_PIXEL_FONT_SIZE(m_font.size()), pos, color, m_text.c_str(), nullptr, 0.0f, &clipRect);
 }
 
 void ImGuiText::drawFormattedMultilineText(int firstLineToDraw) {
-    ImGuiContext* ctx = ImGui::GetCurrentContext();
-    if (!ctx) return;
-    const float lineHeight = ImGui::CalcTextSize("Hg").y; // this should give us the the full height of a text line
+    if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
+        return; // Safe exit: No active window context
+    }
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    if ( !draw_list ) return;
+    // const float lineHeight = ImGui::CalcTextSize("Hg").y; // this should give us the the full height of a text line
     // Calculate the Pixel Rect for Clipping
     float pMinX = NORM_TO_PIXEL_X(m_rect.origin.x);
     float pMinY = NORM_TO_PIXEL_Y(m_rect.origin.y + m_rect.size.height); // Top of rect
@@ -127,37 +130,116 @@ void ImGuiText::drawFormattedMultilineText(int firstLineToDraw) {
         // Add Justification logic here?
         
         for (const auto& frag : line) {
-            // const int fontSize = frag.font.size()/BASE_LINE_FONT_SIZE*configuration().graphics.font_point_dbl;
-
             // Draw Bold "shadow"
             if (frag.isBold || m_font.strokeWeight() == BOLD_STROKE) {
-                ImGui::GetBackgroundDrawList()->AddText(nullptr, 0.0f, 
+                draw_list->AddText(nullptr, NORM_TO_PIXEL_FONT_SIZE(frag.font.size()), 
                     ImVec2(currentX, currentY + 2.0f), frag.color, frag.text.c_str(), nullptr, 0.0f, &clipRect);
             }
 
             // Draw Main Text
-            ImGui::GetBackgroundDrawList()->AddText(nullptr, 0.0f, 
+            draw_list->AddText(nullptr, NORM_TO_PIXEL_FONT_SIZE(frag.font.size()), 
                 ImVec2(currentX, currentY), frag.color, frag.text.c_str(), nullptr, 0.0f, &clipRect);
             
             currentX += frag.width; // Move pen right
         }
-        currentY += lineHeight; // Move pen down
+        currentY += line.lineHeight + (line.lineSpacing * line.lineHeight); // Move pen down
     }
+}
+
+// Helper to convert 2 hex chars to an integer (0-255)
+static int ParseHexByte(const char* hex) {
+    int val = 0;
+    for (int i = 0; i < 2; ++i) {
+        char c = hex[i];
+        val <<= 4;
+        if (c >= '0' && c <= '9') val |= (c - '0');
+        else if (c >= 'A' && c <= 'F') val |= (c - 'A' + 10);
+        else if (c >= 'a' && c <= 'f') val |= (c - 'a' + 10);
+    }
+    return val;
+}
+
+void DrawVegaStrikeRichText(const std::string& text, ImVec4 defaultColor) {
+    const char* s = text.c_str();
+    const char* end = s + text.length();
+    int colorPushes = 0;
+    bool firstChunk = true;
+
+    ImGui::PushStyleColor(ImGuiCol_Text, defaultColor);
+    colorPushes++;
+
+    while (s < end) {
+        const char* hash = strchr(s, '#');
+        
+        if (hash) {
+            // 1. Draw any text that comes BEFORE the '#'
+            if (hash > s) {
+                if (!firstChunk) ImGui::SameLine(0.0f, 0.0f);
+                ImGui::TextUnformatted(s, hash);
+                firstChunk = false;
+            }
+
+            // 2. Do we have a complete 7-character color code?
+            if (hash + 7 <= end) {
+                int r = ParseHexByte(hash + 1);
+                int g = ParseHexByte(hash + 3);
+                int b = ParseHexByte(hash + 5);
+
+                if (r == 0 && g == 0 && b == 0) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, defaultColor);
+                } else {
+                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(r, g, b, 255));
+                }
+                colorPushes++;
+
+                // Skip the parsed color code
+                s = hash + 7; 
+            } 
+            // 3. Incomplete code: Typewriter effect check
+            else {
+                bool isPartialHex = true;
+                for (const char* c = hash + 1; c < end; ++c) {
+                    if (!std::isxdigit(static_cast<unsigned char>(*c))) {
+                        isPartialHex = false;
+                        break;
+                    }
+                }
+
+                if (isPartialHex) {
+                    // It's a partial color code. Stop drawing and hide it 
+                    // until the remaining characters type out in future frames.
+                    break; 
+                } else {
+                    // It's just a normal '#' followed by non-hex text (e.g., "Ship #4")
+                    if (!firstChunk) ImGui::SameLine(0.0f, 0.0f);
+                    ImGui::TextUnformatted(hash, end);
+                    break;
+                }
+            }
+        } else {
+            // No more color codes, draw the remainder of the string
+            if (!firstChunk) ImGui::SameLine(0.0f, 0.0f);
+            ImGui::TextUnformatted(s, end);
+            break;
+        }
+    }
+
+    ImGui::PopStyleColor(colorPushes);
 }
 
 int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) const {
     int result = 0;
-    float currentHeight = vertInterval;
-    float lineHeight = ImGui::CalcTextSize("Hg").y; // Use the same height as in drawLines()
+    float currentHeight = NORM_TO_PIXEL_H(vertInterval)*0.95; // Have a little safety margin, otherwise the last line looks sometimes cut
 
     // 2. Iterate through m_layout starting from lineNumber
     for (size_t i = lineNumber; i < m_layout.size(); ++i) {
+        const auto& line = m_layout[i];
         // If the remaining space is less than our line height, we are done
-        if (currentHeight - lineHeight < 0.0f) {
+        if (currentHeight - line.lineHeight < 0.0f) {
             break;
         }
         
-        currentHeight -= lineHeight;
+        currentHeight -= line.lineHeight;
         result++;
     }
     return result;
@@ -169,11 +251,24 @@ int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) 
 void ImGuiText::setText(const std::string& text) {
     // only parse upon change
     if( text != m_text) {
-        VS_LOG(debug, (boost::format("Raw text set for GUI control: %1%") % text));
+        VS_LOG(error, (boost::format("Raw text set for GUI control: %1%") % text));
         m_layout = parseText(text, NORM_TO_PIXEL_W(m_rect.size.width)); // Parser runs only when text changes
         m_layoutVersion++; // Text has changed, outside logic uses this information to update GUI state
     }
     m_text = text;
+}
+
+ImVec2 ImGuiText::getTextWidth(const std::string text, const float fontSize) {
+    ImFont* font = ImGui::GetFont();
+    ImVec2 size2,size = ImVec2(0,0);
+    float scaleFactor = fontSize * configuration().graphics.resolution_y / configuration().graphics.font_point_flt * 0.5;
+    // FIXME normally this would be te way, but it throws exceptions, scalefactor as workaround
+    // if (font && font->IsLoaded()) {
+    //     size = font->CalcTextSizeA(NORM_TO_PIXEL_FONT_SIZE(fontSize), FLT_MAX, -1.0f, text.c_str());
+    // } else {
+        size = ImGui::CalcTextSize(text.c_str());
+    // }
+    return ImVec2(size.x * scaleFactor, size.y * scaleFactor);
 }
 
 //Get a floating-point argument for a PaintText format command.
@@ -203,7 +298,8 @@ void ImGuiText::parseFormatFloat(const std::string &str, //String.
         if (isdigit(c) || c == '.' || c == ',') {
             num += c;
         } else {
-            //Found a bad character.  Stop.
+            //Found a bad character. Return carriage. Stop.
+            curPos -= 2;
             break;
         }
     }
@@ -272,7 +368,7 @@ void ImGuiText::parseFormat(std::string input, size_t startPos, //Location of be
                 if (formatSuccess) {
                     *endLine = true;                 //End of this line.
                     if (value != BOGUS_LINE_SPACING) {
-                        // m_layout.currentLineSpacing = value;
+                        m_layout.currentLineSpacing = value;
                     }
                 }
                 break;
@@ -283,7 +379,7 @@ void ImGuiText::parseFormat(std::string input, size_t startPos, //Location of be
                 float value = BOGUS_LINE_SPACING;            //Bogus value.
                 parseFormatFloat(input, curPos + 1, endPos, &formatSuccess, &value, &curPos);
                 if (formatSuccess && value != BOGUS_LINE_SPACING) {
-                    // m_layout.permanentLineSpacing = value;
+                    m_layout.permanentLineSpacing = value;
                 }
                 break;
             }
@@ -355,9 +451,11 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
     // Helper to add fragment
     auto addFragment = [&](const std::string& text) {
         // if (text.empty()) return;
-        const float len = ImGui::CalcTextSize(text.c_str()).x;
-        currentLine.push_back({text, m_fontStack.back(), m_colorStack.back(), m_fontStack.back().strokeWeight() == BOLD_STROKE, len});
-        currentLine.width += len;
+        ImVec2 dimensions = getTextWidth(text,  m_fontStack.back().size());
+        currentLine.push_back({text, m_fontStack.back(), m_colorStack.back(), m_fontStack.back().strokeWeight() == BOLD_STROKE, dimensions.x});
+        currentLine.width += dimensions.x;
+        // update lineheight if fragment is larger
+        currentLine.lineHeight = dimensions.y > currentLine.lineHeight ? dimensions.y : currentLine.lineHeight;
     };
 
     // Initialise stacks for top level color and font weight
@@ -369,11 +467,9 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
     size_t fragmentStartPos = 0;
     while (curPos < endPos) {
         // consume all non-control chars until 
-        const char currentChar = input[curPos];
-        std::string currentCharStr(1, input[curPos]);
 
         // first let's check if it is a format char
-        if(currentChar == DT_FORMAT_CHAR) {
+        if(input[curPos] == DT_FORMAT_CHAR) {
             // save previous text as fragment, avoid empty fragements
             if(curPos > fragmentStartPos) {
                 addFragment(input.substr(fragmentStartPos, curPos - fragmentStartPos));
@@ -384,10 +480,11 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
 
             if (input[curPos] == DT_FORMAT_CHAR) {
                 // Handle double hash "##" -> treat as a single "#"
-                std::string charStr(1, input[curPos]);
-                currentLine.push_back({charStr, m_fontStack.back(), m_colorStack.back(), m_fontStack.back().strokeWeight() == BOLD_STROKE, ImGui::CalcTextSize(charStr.c_str()).x});
-                currentLine.width += ImGui::CalcTextSize(charStr.c_str()).x;
-                curPos++;
+                // std::string charStr(1, input[curPos]);
+                // currentLine.push_back({charStr, m_fontStack.back(), m_colorStack.back(), m_fontStack.back().strokeWeight() == BOLD_STROKE, ImGui::CalcTextSize(charStr.c_str()).x});
+                // currentLine.width += ImGui::CalcTextSize(charStr.c_str()).x;
+                fragmentStartPos = curPos;
+                continue;
             } else {
                 bool forceEndLine = false;
                 
@@ -408,21 +505,26 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
             fragmentStartPos = curPos;
         } else {
             // this consumes all chars but control chars and breakes when the line is full
-            if(currentChar == ' ') {
+            if(input[curPos] == ' ') {
                 // we'll skip the space
                 lastWordBreakPos = curPos + 1;
             }
 
             // special news handling
-            if(currentChar == '\\') {
+            if(input[curPos] == '\\') {
                 addFragment(input.substr(fragmentStartPos, curPos - fragmentStartPos));
                 fragmentStartPos = curPos + 2;
                 layout.endLine(currentLine);
                 // we skipt the \\, +1 here and +1 at the end of the loop
                 curPos++;
-            } else
+            } else if(input[curPos] == '\n') {
+                // create a new line and continue
+                addFragment(input.substr(fragmentStartPos, curPos - fragmentStartPos));
+                fragmentStartPos = curPos + 1;
+                layout.endLine(currentLine);
+            } else 
             // line too long?
-            if(currentLine.width + ImGui::CalcTextSize(input.substr(fragmentStartPos, curPos - fragmentStartPos).c_str()).x > widthInPixels) {
+            if(currentLine.width + getTextWidth(input.substr(fragmentStartPos, curPos - fragmentStartPos),  m_fontStack.back().size()).x > widthInPixels) {
                 // break at last word break
                 addFragment(input.substr(fragmentStartPos, lastWordBreakPos - fragmentStartPos));
                 fragmentStartPos = lastWordBreakPos;
@@ -433,7 +535,7 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
         }
 
         // when we hit the end, add what we got
-        if(curPos >= endPos) {
+        if(curPos >= endPos && fragmentStartPos < endPos) {
             addFragment(input.substr(fragmentStartPos));
         }
 

@@ -34,6 +34,7 @@
 
 #include "configuration/configuration.h"
 #include "gldrv/mouse_cursor.h"
+#include "imgui_internal.h"
 
 // Point
 bool Point::operator==(const Point &other) {
@@ -172,84 +173,110 @@ GFXColor GUI_OPAQUE_DARK_GRAY() {
 
 //Draw a rectangle using the specified color.
 void drawRect(const Rect &rect, const GFXColor &color) {
-    GFXDisable(TEXTURE0);
+    // Prevent segfault if called outside an ImGui window
+    if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
+        return; 
+    }
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    if (!draw_list) return;
 
-    GFXColorf(color);
+    float pMinX = NORM_TO_PIXEL_X(rect.left());
+    float pMinY = NORM_TO_PIXEL_Y(rect.top());
+    float pMaxX = NORM_TO_PIXEL_X(rect.right());
+    float pMaxY = NORM_TO_PIXEL_Y(rect.bottom());
 
-    const float verts[4 * 3] = {
-            rect.left(), rect.top(), 0,
-            rect.right(), rect.top(), 0,
-            rect.right(), rect.bottom(), 0,
-            rect.left(), rect.bottom(), 0,
-    };
-    GFXDraw(GFXQUAD, verts, 4);
-
-    GFXEnable(TEXTURE0);
+    ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(color.r, color.g, color.b, color.a));
+    draw_list->AddRectFilled(ImVec2(pMinX, pMinY), ImVec2(pMaxX, pMaxY), col);
 }
 
 //Draw the outline of a rectangle using the specified color.
 void drawRectOutline(const Rect &rect, const GFXColor &color, float lineWidth) {
-    GFXDisable(TEXTURE0);
-    GFXLineWidth(lineWidth);
-    GFXColorf(color);
+    // Prevent segfault if called outside an ImGui window
+    if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
+        return; 
+    }
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    if (!draw_list) return;
 
-    const float verts[5 * 3] = {
-            rect.left(), rect.top(), 0,
-            rect.right(), rect.top(), 0,
-            rect.right(), rect.bottom(), 0,
-            rect.left(), rect.bottom(), 0,
-            rect.left(), rect.top(), 0,
-    };
-    GFXDraw(GFXLINESTRIP, verts, 5);
+    float pMinX = NORM_TO_PIXEL_X(rect.left());
+    float pMinY = NORM_TO_PIXEL_Y(rect.top());
+    float pMaxX = NORM_TO_PIXEL_X(rect.right());
+    float pMaxY = NORM_TO_PIXEL_Y(rect.bottom());
 
-    GFXEnable(TEXTURE0);
+    ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(color.r, color.g, color.b, color.a));
+    // ImGui's line thickness scaling can use lineWidth directly
+    draw_list->AddRect(ImVec2(pMinX, pMinY), ImVec2(pMaxX, pMaxY), col, 0.0f, 0, lineWidth);
 }
 
 //Draw upper-left part of rectangle's "shadow".
 void drawUpLeftShadow(const Rect &rect, const GFXColor &color, float lineWidth) {
-    GFXDisable(TEXTURE0);
-    GFXLineWidth(lineWidth);
-    GFXColorf(color);
+    // Prevent segfault if called outside an ImGui window
+    if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
+        return; 
+    }
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    if (!draw_list) return;
 
-    const float verts[3 * 3] = {
-            rect.origin.x, rect.origin.y, 0,
-            rect.origin.x, rect.origin.y + rect.size.height, 0,
-            rect.origin.x + rect.size.width, rect.origin.y + rect.size.height, 0,
-    };
-    GFXDraw(GFXLINESTRIP, verts, 3);
+    float x1 = NORM_TO_PIXEL_X(rect.origin.x);
+    float y1 = NORM_TO_PIXEL_Y(rect.origin.y);
+    float x2 = NORM_TO_PIXEL_X(rect.origin.x);
+    float y2 = NORM_TO_PIXEL_Y(rect.origin.y + rect.size.height);
+    float x3 = NORM_TO_PIXEL_X(rect.origin.x + rect.size.width);
+    float y3 = NORM_TO_PIXEL_Y(rect.origin.y + rect.size.height);
 
-    GFXEnable(TEXTURE0);
+    ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(color.r, color.g, color.b, color.a));
+    draw_list->AddPolyline(
+        std::vector<ImVec2>{ {x1, y1}, {x2, y2}, {x3, y3} }.data(), 
+        3, col, 0, lineWidth
+    );
 }
 
 //Draw lower-right part of rectangle's "shadow".
 void drawLowRightShadow(const Rect &rect, const GFXColor &color, float lineWidth) {
-    GFXDisable(TEXTURE0);
-    GFXLineWidth(lineWidth);
-    GFXColorf(color);
+    // Prevent segfault if called outside an ImGui window
+    if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
+        return; 
+    }
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    if (!draw_list) return;
 
-    const float verts[3 * 3] = {
-            rect.origin.x, rect.origin.y, 0,
-            rect.origin.x + rect.size.width, rect.origin.y, 0,
-            rect.origin.x + rect.size.width, rect.origin.y + rect.size.height, 0,
-    };
-    GFXDraw(GFXLINESTRIP, verts, 3);
+    float x1 = NORM_TO_PIXEL_X(rect.origin.x);
+    float y1 = NORM_TO_PIXEL_Y(rect.origin.y);
+    float x2 = NORM_TO_PIXEL_X(rect.origin.x + rect.size.width);
+    float y2 = NORM_TO_PIXEL_Y(rect.origin.y);
+    float x3 = NORM_TO_PIXEL_X(rect.origin.x + rect.size.width);
+    float y3 = NORM_TO_PIXEL_Y(rect.origin.y + rect.size.height);
 
-    GFXEnable(TEXTURE0);
+    ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(color.r, color.g, color.b, color.a));
+    draw_list->AddPolyline(
+        std::vector<ImVec2>{ {x1, y1}, {x2, y2}, {x3, y3} }.data(), 
+        3, col, 0, lineWidth
+    );
 }
 
 //Fill a closed polygon.
 void drawFilledPolygon(const std::vector<Point> &coords, const GFXColor &color) {
-    GFXDisable(TEXTURE0);
-    GFXColorf(color);
-
-    std::vector<float> verts(coords.size() * 2);
-    float *v = &verts[0];
-    for (std::vector<Point>::const_iterator i = coords.begin(); i != coords.end(); i++) {
-        *v++ = i->x;
-        *v++ = i->y;
+    // Prevent segfault if called outside an ImGui window
+    if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
+        return; 
     }
-    GFXDraw(GFXPOLY, &verts[0], coords.size(), 2);
+    if (coords.empty()) return;
 
-    GFXDisable(TEXTURE0);
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    if (!draw_list) return;
+
+    // Convert normalized Vega Strike Points to pixel-space ImVec2 objects
+    std::vector<ImVec2> pixels(coords.size());
+    for (size_t i = 0; i < coords.size(); ++i) {
+        pixels[i] = ImVec2(
+            NORM_TO_PIXEL_X(coords[i].x),
+            NORM_TO_PIXEL_Y(coords[i].y)
+        );
+    }
+
+    ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(color.r, color.g, color.b, color.a));
+
+    // ImGui handles filled convex polygons natively
+    draw_list->AddConvexPolyFilled(pixels.data(), static_cast<int>(pixels.size()), col);
 }
 

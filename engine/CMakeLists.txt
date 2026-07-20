@@ -250,6 +250,7 @@ SET(LIBGUI_SOURCES
     src/gui/groupcontrol.cpp
     src/gui/guidefs.cpp
     src/gui/guitexture.cpp
+    src/gui/imguitext.cpp
     src/gui/modaldialog.cpp
     src/gui/newbutton.cpp
     src/gui/painttext.cpp

@@ -29,6 +29,15 @@
 
 #include "src/gfxlib.h"
 #include "gldrv/winsys.h"
+#include "imgui/imgui.h"
+
+// Macros for point conversion from VS [1-,1] coords to pixels
+#define NORM_TO_PIXEL_X(val) (((val) + 1.0f) * 0.5f * ImGui::GetIO().DisplaySize.x)
+#define NORM_TO_PIXEL_Y(val) ((1.0f - (val)) * 0.5f * ImGui::GetIO().DisplaySize.y)
+#define NORM_TO_PIXEL_W(val) ((val) * 0.5f * ImGui::GetIO().DisplaySize.x)
+#define NORM_TO_PIXEL_H(val) ((val) * 0.5f * ImGui::GetIO().DisplaySize.y)
+#define NORM_TO_PIXEL_FONT_SIZE(val) ((val) * 0.5f * ImGui::GetIO().DisplaySize.y)
+
 //Location in 2d.
 struct Point {
     float x, y;

@@ -67,9 +67,12 @@ struct TextFragment {
 struct Line : public std::vector<TextFragment> {
     float width = 0.0f;
     float lineHeight = 0.0f;
+    float lineSpacing = 0.0f;
 };
 struct FormattedLayout : public std::vector<Line> {
     void endLine(Line& currentLine);
+    float currentLineSpacing = 0.0f;           //Line spacing for the current line.
+    float permanentLineSpacing = 0.0f;         //New permanent line spacing.
 };
 
 class ImGuiText {
@@ -90,6 +93,7 @@ public:
     // Draws the text
     void draw();
     void drawFormattedMultilineText(int firstLineToDraw);
+    ImVec2 getTextWidth(const std::string text, const float fontSize);
 private:
     Rect m_rect;
     Font m_font;

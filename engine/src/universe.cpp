@@ -498,7 +498,29 @@ void Universe::StartDraw() {
 #endif
         SetActiveCockpit(i);
         pushActiveStarSystem(AccessCockpit(i)->activeStarSystem);
+        
+        // ImGui Init
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
+
+        // End ImGui Init
+        ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
+        const ImVec2 window_size(configuration().graphics.resolution_x,
+                                configuration().graphics.resolution_y);
+        ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
+        ImGui::Begin("main_window", nullptr, window_flags);
         ProcessInput(i);                       //input neesd to be taken care of;
+                // ImGui End Frame
+        ImGui::End();
+        // Rendering
+        ImGui::Render();
+
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+        SDL_GL_SwapWindow(current_window);
+        // End ImGui
+
         popActiveStarSystem();
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double process_input_end_time = realTime();
