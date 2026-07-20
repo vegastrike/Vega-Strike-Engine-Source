@@ -28,7 +28,7 @@
 #define VEGA_STRIKE_ENGINE_GUI_BUTTON_H
 
 #include "control.h"
-#include "painttext.h"
+#include "imguitext.h"
 
 //See cpp file for detailed descriptions of classes, functions, etc.
 
@@ -182,7 +182,7 @@ protected:
     float m_variableBorderCycleTime;   //Variable border cycle time (in seconds).
     GFXColor m_borderColor;                       //Color of border.
     GFXColor m_endBorderColor;                    //End color of border if cycling.
-    PaintText m_paintText;         //Object that displays label.
+    ImGuiText m_paintText;         //Object that displays label.
 
 //State for painting a cycling border.
     GFXColor m_currentCycleColor;         //The current color of the cycling border.

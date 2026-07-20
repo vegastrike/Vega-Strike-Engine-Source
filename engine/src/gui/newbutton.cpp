@@ -31,7 +31,6 @@
 
 #include "root_generic/lin_time.h"                           //For cycling borders.
 #include "eventmanager.h"
-#include "painttext.h"
 
 //The NewButton class supports the normal button control.  It can be
 //pressed by the mouse, and, by default, send a command out when

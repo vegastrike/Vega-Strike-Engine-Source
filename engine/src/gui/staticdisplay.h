@@ -28,7 +28,7 @@
 #define VEGA_STRIKE_ENGINE_GUI_STATIC_DISPLAY_H
 
 #include "control.h"
-#include "painttext.h"
+#include "imguitext.h"
 #include "guitexture.h"
 
 //See cpp file for detailed descriptions of classes, functions, etc.
@@ -66,11 +66,11 @@ public:
 
 //Whether the text is multi-line.
     virtual bool multiLine(void) {
-        return m_paintText.widthExceeded() == PaintText::MULTI_LINE;
+        return m_paintText.lineCount() > 1;
     }
 
     virtual void setMultiLine(bool multi) {
-        m_paintText.setWidthExceeded(multi ? PaintText::MULTI_LINE : PaintText::ELLIPSIS);
+        // not implemented
     }
 
 //Text margins.
@@ -127,7 +127,7 @@ protected:
 
 //VARIABLES
 protected:
-    PaintText m_paintText;      //Text object.
+    ImGuiText m_paintText;      //Text object.
     Size m_textMargins;         //Inset area where no text appears.
     int m_scrollPosition;      //Index of first display cell shown.
     int m_layoutVersion;       //A way to tell when the PaintText layout has changed.
