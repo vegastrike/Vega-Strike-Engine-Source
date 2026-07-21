@@ -62,13 +62,15 @@ void Font::calcMetrics(void) {
 
 float Font::drawChar(char c, float xOffset) const {
     ImGuiContext* ctx = ImGui::GetCurrentContext();
-    if (!ctx) return 0.0f;
+    if (!ctx) {
+        return 0.0f;
+    }
 
     // Get the texture ID first
     ImTextureID tex_id = ctx->IO.Fonts->TexRef.GetTexID();
 
     // If tex_id is 0, the font atlas is not initialized or has been destroyed
-    if (!tex_id || tex_id == (ImTextureID)(intptr_t)-1) {
+    if (!tex_id || tex_id == static_cast<ImTextureID>(-1)) {
         return 0.0f;
     }
 
@@ -76,15 +78,19 @@ float Font::drawChar(char c, float xOffset) const {
     
     // Access the baked font data instead of the raw ImFont object
     ImFontBaked* font_baked = ImGui::GetFontBaked(); 
-    if (!font_baked) return 0.0f;
+    if (!font_baked) {
+        return 0.0f;
+    }
     
     // Use the new FindGlyph method on the baked font
     const ImFontGlyph* glyph = font_baked->FindGlyph((ImWchar)c);
-    if (!glyph) return 0.0f;
+    if (!glyph) {
+        return 0.0f;
+    }
 
     // IMPORTANT: Tell OpenGL which unit we are binding to
     GFXActiveTexture(GL_TEXTURE0); 
-    glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)tex_id);
+    glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(static_cast<intptr_t>(tex_id)));
 
     const float unit_scale = 1;//2.5f;
     // move up one line
@@ -121,7 +127,7 @@ float Font::drawChar(char c, float xOffset) const {
     GFXDraw(GFXQUAD, verts, 4, 3, 0, 2, 0);
 
     // Return the advance value
-    return (float)glyph->AdvanceX;
+    return static_cast<float>(glyph->AdvanceX);
 }
 
 double Font::charWidth(char c) const {
@@ -129,7 +135,7 @@ double Font::charWidth(char c) const {
     ImFontBaked* font_baked = ImGui::GetFontBaked();
     if (!font_baked) return 0.0f;
     const ImFontGlyph* glyph = font_baked->FindGlyph((ImWchar)c);
-    return glyph ? (double)(glyph->AdvanceX) : 0.0;
+    return glyph ? static_cast<double>(glyph->AdvanceX) : 0.0;
 }
 
 double Font::stringWidth(const std::string &str) const {

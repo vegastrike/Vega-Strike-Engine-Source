@@ -50,20 +50,21 @@ void ImGuiText::draw() {
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     if ( !draw_list ) return;
     // Calculate the Pixel Rect for Clipping
-    float pMinX = NORM_TO_PIXEL_X(m_rect.origin.x);
-    float pMinY = NORM_TO_PIXEL_Y(m_rect.origin.y + m_rect.size.height) - 5; // Top of rect
-    float pMaxX = NORM_TO_PIXEL_X(m_rect.origin.x + m_rect.size.width);
-    float pMaxY = NORM_TO_PIXEL_Y(m_rect.origin.y) + 10; // Bottom of rect
+    float pMinX = Coordinates::normToPixelX(m_rect.origin.x);
+    float pMinY = Coordinates::normToPixelY(m_rect.origin.y + m_rect.size.height) - 5; // Top of rect
+    float pMaxX = Coordinates::normToPixelX(m_rect.origin.x + m_rect.size.width);
+    float pMaxY = Coordinates::normToPixelY(m_rect.origin.y) + 10; // Bottom of rect
 
     // Clipping coords to avoid overrunning text
     ImVec4 clipRect(pMinX, pMinY, pMaxX, pMaxY);
 
-    float pixelX = NORM_TO_PIXEL_X(m_rect.origin.x);
+    float pixelX = Coordinates::normToPixelX(m_rect.origin.x);
     // center in cell
-    float pixelCenterY = NORM_TO_PIXEL_Y(m_rect.origin.y + (m_rect.size.height * 0.5f));
-    float pixelWidth = NORM_TO_PIXEL_W(m_rect.size.width);
+    float pixelCenterY = Coordinates::normToPixelY(m_rect.origin.y + (m_rect.size.height * 0.5f));
+    float pixelWidth = Coordinates::normToPixelW(m_rect.size.width);
+    float pixelFontSize = Coordinates::normToPixelFontSize(m_font.size());
 
-    ImVec2 textSize = ImGui::CalcTextSize(m_text.c_str());
+    ImVec2 textSize = getTextWidth(m_text.c_str(), m_font.size());
     // Move half the text size up
     float pixelY = pixelCenterY - (textSize.y * 0.5f);
     ImVec2 pos(pixelX, pixelY);
@@ -77,11 +78,11 @@ void ImGuiText::draw() {
     // Poor man's bold effect, redraw with 2px offset
     // FIXME Replace with proper bold font
     if(m_font.strokeWeight() == BOLD_STROKE) {
-        draw_list->AddText(nullptr, NORM_TO_PIXEL_FONT_SIZE(m_font.size()), ImVec2(pos.x, pos.y + 2.0f), color, m_text.c_str(), nullptr, 0.0f, &clipRect);
+        draw_list->AddText(nullptr, pixelFontSize, ImVec2(pos.x, pos.y + 2.0f), color, m_text.c_str(), nullptr, 0.0f, &clipRect);
     }
 
     // Main text
-    draw_list->AddText(nullptr, NORM_TO_PIXEL_FONT_SIZE(m_font.size()), pos, color, m_text.c_str(), nullptr, 0.0f, &clipRect);
+    draw_list->AddText(nullptr, pixelFontSize, pos, color, m_text.c_str(), nullptr, 0.0f, &clipRect);
 }
 
 void ImGuiText::drawFormattedMultilineText(int firstLineToDraw) {
@@ -92,19 +93,19 @@ void ImGuiText::drawFormattedMultilineText(int firstLineToDraw) {
     if ( !draw_list ) return;
     // const float lineHeight = ImGui::CalcTextSize("Hg").y; // this should give us the the full height of a text line
     // Calculate the Pixel Rect for Clipping
-    float pMinX = NORM_TO_PIXEL_X(m_rect.origin.x);
-    float pMinY = NORM_TO_PIXEL_Y(m_rect.origin.y + m_rect.size.height); // Top of rect
-    float pMaxX = NORM_TO_PIXEL_X(m_rect.origin.x + m_rect.size.width);
-    float pMaxY = NORM_TO_PIXEL_Y(m_rect.origin.y); // Bottom of rect
+    float pMinX = Coordinates::normToPixelX(m_rect.left());
+    float pMinY = Coordinates::normToPixelY(m_rect.top()); // Top of rect
+    float pMaxX = Coordinates::normToPixelX(m_rect.right());
+    float pMaxY = Coordinates::normToPixelY(m_rect.bottom()); // Bottom of rect
 
     // Clipping coords to avoid overrunning text
     ImVec4 clipRect(pMinX, pMinY, pMaxX, pMaxY);
 
-    float pixelX = NORM_TO_PIXEL_X(m_rect.origin.x);
-    float pixelY = NORM_TO_PIXEL_Y(m_rect.origin.y + m_rect.size.height);
-    float pixelWidth = NORM_TO_PIXEL_W(m_rect.size.width);
+    float pixelX = Coordinates::normToPixelX(m_rect.left());
+    float pixelY = Coordinates::normToPixelY(m_rect.top());
+    float pixelWidth = Coordinates::normToPixelW(m_rect.size.width);
 
-    ImVec2 textSize = ImGui::CalcTextSize(m_text.c_str());
+    ImVec2 textSize = getTextWidth(m_text.c_str(), m_font.size());
     ImVec2 pos(pixelX, pixelY);
 
     if (m_justification == CENTER_JUSTIFY && (pixelWidth - textSize.x) > 0) { 
@@ -121,7 +122,7 @@ void ImGuiText::drawFormattedMultilineText(int firstLineToDraw) {
         }
 
         // Stop if the line is going to be drawn below the bottom of the clipping rect
-        if (currentY > NORM_TO_PIXEL_Y(m_rect.origin.y)) {
+        if (currentY > Coordinates::normToPixelY(m_rect.origin.y)) {
             break;
         }
         const auto& line = m_layout[i];
@@ -130,14 +131,15 @@ void ImGuiText::drawFormattedMultilineText(int firstLineToDraw) {
         // Add Justification logic here?
         
         for (const auto& frag : line) {
+            float pixelFontSize = Coordinates::normToPixelFontSize(frag.font.size());
             // Draw Bold "shadow"
             if (frag.isBold || m_font.strokeWeight() == BOLD_STROKE) {
-                draw_list->AddText(nullptr, NORM_TO_PIXEL_FONT_SIZE(frag.font.size()), 
+                draw_list->AddText(nullptr, pixelFontSize, 
                     ImVec2(currentX, currentY + 2.0f), frag.color, frag.text.c_str(), nullptr, 0.0f, &clipRect);
             }
 
             // Draw Main Text
-            draw_list->AddText(nullptr, NORM_TO_PIXEL_FONT_SIZE(frag.font.size()), 
+            draw_list->AddText(nullptr, pixelFontSize, 
                 ImVec2(currentX, currentY), frag.color, frag.text.c_str(), nullptr, 0.0f, &clipRect);
             
             currentX += frag.width; // Move pen right
@@ -229,7 +231,7 @@ void DrawVegaStrikeRichText(const std::string& text, ImVec4 defaultColor) {
 
 int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) const {
     int result = 0;
-    float currentHeight = NORM_TO_PIXEL_H(vertInterval)*0.95; // Have a little safety margin, otherwise the last line looks sometimes cut
+    float currentHeight = Coordinates::normToPixelH(vertInterval)*0.95; // Have a little safety margin, otherwise the last line looks sometimes cut
 
     // 2. Iterate through m_layout starting from lineNumber
     for (size_t i = lineNumber; i < m_layout.size(); ++i) {
@@ -251,20 +253,20 @@ int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) 
 void ImGuiText::setText(const std::string& text) {
     // only parse upon change
     if( text != m_text) {
-        VS_LOG(error, (boost::format("Raw text set for GUI control: %1%") % text));
-        m_layout = parseText(text, NORM_TO_PIXEL_W(m_rect.size.width)); // Parser runs only when text changes
+        VS_LOG(debug, (boost::format("Raw text set for GUI control: %1%") % text));
+        m_layout = parseText(text, Coordinates::normToPixelW(m_rect.size.width)); // Parser runs only when text changes
         m_layoutVersion++; // Text has changed, outside logic uses this information to update GUI state
     }
     m_text = text;
 }
 
 ImVec2 ImGuiText::getTextWidth(const std::string text, const float fontSize) {
-    ImFont* font = ImGui::GetFont();
+    // ImFont* font = ImGui::GetFont();
     ImVec2 size2,size = ImVec2(0,0);
     float scaleFactor = fontSize * configuration().graphics.resolution_y / configuration().graphics.font_point_flt * 0.5;
     // FIXME normally this would be te way, but it throws exceptions, scalefactor as workaround
     // if (font && font->IsLoaded()) {
-    //     size = font->CalcTextSizeA(NORM_TO_PIXEL_FONT_SIZE(fontSize), FLT_MAX, -1.0f, text.c_str());
+    //     size = font->CalcTextSizeA(Coordinates::normToPixelFontSize(fontSize), FLT_MAX, -1.0f, text.c_str());
     // } else {
         size = ImGui::CalcTextSize(text.c_str());
     // }
@@ -511,25 +513,30 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
             }
 
             // special news handling
-            if(input[curPos] == '\\') {
-                addFragment(input.substr(fragmentStartPos, curPos - fragmentStartPos));
-                fragmentStartPos = curPos + 2;
-                layout.endLine(currentLine);
-                // we skipt the \\, +1 here and +1 at the end of the loop
-                curPos++;
-            } else if(input[curPos] == '\n') {
-                // create a new line and continue
-                addFragment(input.substr(fragmentStartPos, curPos - fragmentStartPos));
-                fragmentStartPos = curPos + 1;
-                layout.endLine(currentLine);
-            } else 
-            // line too long?
-            if(currentLine.width + getTextWidth(input.substr(fragmentStartPos, curPos - fragmentStartPos),  m_fontStack.back().size()).x > widthInPixels) {
-                // break at last word break
-                addFragment(input.substr(fragmentStartPos, lastWordBreakPos - fragmentStartPos));
-                fragmentStartPos = lastWordBreakPos;
-                layout.endLine(currentLine);
-            } 
+            switch (input[curPos]) {
+                case '\\':
+                    addFragment(input.substr(fragmentStartPos, curPos - fragmentStartPos));
+                    fragmentStartPos = curPos + 2;
+                    layout.endLine(currentLine);
+                    // we skipt the \\, +1 here and +1 at the end of the loop
+                    curPos++;
+                    break;
+                case '\n':
+                    // create a new line and continue
+                    addFragment(input.substr(fragmentStartPos, curPos - fragmentStartPos));
+                    fragmentStartPos = curPos + 1;
+                    layout.endLine(currentLine);
+                    break;
+                default:
+                    // line too long?
+                    if(currentLine.width + getTextWidth(input.substr(fragmentStartPos, curPos - fragmentStartPos),  m_fontStack.back().size()).x > widthInPixels) {
+                        // break at last word break
+                        addFragment(input.substr(fragmentStartPos, lastWordBreakPos - fragmentStartPos));
+                        fragmentStartPos = lastWordBreakPos;
+                        layout.endLine(currentLine);
+                    }
+                    break; 
+            };
 
             curPos++;
         }
@@ -551,8 +558,8 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
 //     ImVec2 screenSize = ImGui::GetIO().DisplaySize;
     
 //     // Calculate top-left and bottom-right for ImGui
-//     ImVec2 pMin(NORM_TO_PIXEL_X(r.origin.x), NORM_TO_PIXEL_Y(r.origin.y + r.size.height));
-//     ImVec2 pMax(NORM_TO_PIXEL_X(r.origin.x + r.size.width), NORM_TO_PIXEL_Y(r.origin.y));
+//     ImVec2 pMin(Coordinates::normToPixelX(r.origin.x), Coordinates::normToPixelY(r.origin.y + r.size.height));
+//     ImVec2 pMax(Coordinates::normToPixelX(r.origin.x + r.size.width), Coordinates::normToPixelY(r.origin.y));
 
 //     // Convert color
 //     ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(color.r, color.g, color.b, color.a));

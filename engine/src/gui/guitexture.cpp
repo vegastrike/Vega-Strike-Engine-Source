@@ -67,10 +67,10 @@ void GuiTexture::draw(const Rect &rect) const {
     if (!draw_list) return;
 
     // Convert normalized Vega Strike coordinates to pixels
-    float pMinX = NORM_TO_PIXEL_X(rect.left());
-    float pMinY = NORM_TO_PIXEL_Y(rect.top());
-    float pMaxX = NORM_TO_PIXEL_X(rect.right());
-    float pMaxY = NORM_TO_PIXEL_Y(rect.bottom());
+    float pMinX = Coordinates::normToPixelX(rect.left());
+    float pMinY = Coordinates::normToPixelY(rect.top());
+    float pMaxX = Coordinates::normToPixelX(rect.right());
+    float pMaxY = Coordinates::normToPixelY(rect.bottom());
 
     // Extract the OpenGL texture ID
     GLint actual_gl_id = 0;
@@ -80,7 +80,7 @@ void GuiTexture::draw(const Rect &rect) const {
     if (actual_gl_id <= 0) {
         return;
     }
-    ImTextureID texID = (ImTextureID)(uintptr_t)actual_gl_id;
+    ImTextureID texID = static_cast<ImTextureID>(static_cast<uintptr_t>(actual_gl_id));
 
     // Map UV coordinates to match original vertex layout
     ImVec2 uv_min(0.0f, 1.0f);

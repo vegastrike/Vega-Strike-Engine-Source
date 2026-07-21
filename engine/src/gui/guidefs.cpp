@@ -180,10 +180,10 @@ void drawRect(const Rect &rect, const GFXColor &color) {
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     if (!draw_list) return;
 
-    float pMinX = NORM_TO_PIXEL_X(rect.left());
-    float pMinY = NORM_TO_PIXEL_Y(rect.top());
-    float pMaxX = NORM_TO_PIXEL_X(rect.right());
-    float pMaxY = NORM_TO_PIXEL_Y(rect.bottom());
+    float pMinX = Coordinates::normToPixelX(rect.left());
+    float pMinY = Coordinates::normToPixelY(rect.top());
+    float pMaxX = Coordinates::normToPixelX(rect.right());
+    float pMaxY = Coordinates::normToPixelY(rect.bottom());
 
     ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(color.r, color.g, color.b, color.a));
     draw_list->AddRectFilled(ImVec2(pMinX, pMinY), ImVec2(pMaxX, pMaxY), col);
@@ -198,10 +198,10 @@ void drawRectOutline(const Rect &rect, const GFXColor &color, float lineWidth) {
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     if (!draw_list) return;
 
-    float pMinX = NORM_TO_PIXEL_X(rect.left());
-    float pMinY = NORM_TO_PIXEL_Y(rect.top());
-    float pMaxX = NORM_TO_PIXEL_X(rect.right());
-    float pMaxY = NORM_TO_PIXEL_Y(rect.bottom());
+    float pMinX = Coordinates::normToPixelX(rect.left());
+    float pMinY = Coordinates::normToPixelY(rect.top());
+    float pMaxX = Coordinates::normToPixelX(rect.right());
+    float pMaxY = Coordinates::normToPixelY(rect.bottom());
 
     ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(color.r, color.g, color.b, color.a));
     // ImGui's line thickness scaling can use lineWidth directly
@@ -217,12 +217,12 @@ void drawUpLeftShadow(const Rect &rect, const GFXColor &color, float lineWidth) 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     if (!draw_list) return;
 
-    float x1 = NORM_TO_PIXEL_X(rect.origin.x);
-    float y1 = NORM_TO_PIXEL_Y(rect.origin.y);
-    float x2 = NORM_TO_PIXEL_X(rect.origin.x);
-    float y2 = NORM_TO_PIXEL_Y(rect.origin.y + rect.size.height);
-    float x3 = NORM_TO_PIXEL_X(rect.origin.x + rect.size.width);
-    float y3 = NORM_TO_PIXEL_Y(rect.origin.y + rect.size.height);
+    float x1 = Coordinates::normToPixelX(rect.origin.x);
+    float y1 = Coordinates::normToPixelY(rect.origin.y);
+    float x2 = Coordinates::normToPixelX(rect.origin.x);
+    float y2 = Coordinates::normToPixelY(rect.origin.y + rect.size.height);
+    float x3 = Coordinates::normToPixelX(rect.origin.x + rect.size.width);
+    float y3 = Coordinates::normToPixelY(rect.origin.y + rect.size.height);
 
     ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(color.r, color.g, color.b, color.a));
     draw_list->AddPolyline(
@@ -240,12 +240,12 @@ void drawLowRightShadow(const Rect &rect, const GFXColor &color, float lineWidth
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     if (!draw_list) return;
 
-    float x1 = NORM_TO_PIXEL_X(rect.origin.x);
-    float y1 = NORM_TO_PIXEL_Y(rect.origin.y);
-    float x2 = NORM_TO_PIXEL_X(rect.origin.x + rect.size.width);
-    float y2 = NORM_TO_PIXEL_Y(rect.origin.y);
-    float x3 = NORM_TO_PIXEL_X(rect.origin.x + rect.size.width);
-    float y3 = NORM_TO_PIXEL_Y(rect.origin.y + rect.size.height);
+    float x1 = Coordinates::normToPixelX(rect.origin.x);
+    float y1 = Coordinates::normToPixelY(rect.origin.y);
+    float x2 = Coordinates::normToPixelX(rect.origin.x + rect.size.width);
+    float y2 = Coordinates::normToPixelY(rect.origin.y);
+    float x3 = Coordinates::normToPixelX(rect.origin.x + rect.size.width);
+    float y3 = Coordinates::normToPixelY(rect.origin.y + rect.size.height);
 
     ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(color.r, color.g, color.b, color.a));
     draw_list->AddPolyline(
@@ -269,8 +269,8 @@ void drawFilledPolygon(const std::vector<Point> &coords, const GFXColor &color) 
     std::vector<ImVec2> pixels(coords.size());
     for (size_t i = 0; i < coords.size(); ++i) {
         pixels[i] = ImVec2(
-            NORM_TO_PIXEL_X(coords[i].x),
-            NORM_TO_PIXEL_Y(coords[i].y)
+            Coordinates::normToPixelX(coords[i].x),
+            Coordinates::normToPixelY(coords[i].y)
         );
     }
 

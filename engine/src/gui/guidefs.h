@@ -31,12 +31,35 @@
 #include "gldrv/winsys.h"
 #include "imgui/imgui.h"
 
-// Macros for point conversion from VS [1-,1] coords to pixels
-#define NORM_TO_PIXEL_X(val) (((val) + 1.0f) * 0.5f * ImGui::GetIO().DisplaySize.x)
-#define NORM_TO_PIXEL_Y(val) ((1.0f - (val)) * 0.5f * ImGui::GetIO().DisplaySize.y)
-#define NORM_TO_PIXEL_W(val) ((val) * 0.5f * ImGui::GetIO().DisplaySize.x)
-#define NORM_TO_PIXEL_H(val) ((val) * 0.5f * ImGui::GetIO().DisplaySize.y)
-#define NORM_TO_PIXEL_FONT_SIZE(val) ((val) * 0.5f * ImGui::GetIO().DisplaySize.y)
+// Namespace for coordinate conversion
+namespace Coordinates {
+
+    /// Converts normalized X coordinate [-1.0, 1.0] to display pixel space [0, DisplaySize.x]
+    [[nodiscard]] inline float normToPixelX(float val) noexcept {
+        return (val + 1.0f) * 0.5f * ImGui::GetIO().DisplaySize.x;
+    }
+
+    /// Converts normalized Y coordinate [-1.0, 1.0] (where +1 is top) to display pixel space [0, DisplaySize.y]
+    [[nodiscard]] inline float normToPixelY(float val) noexcept {
+        return (1.0f - val) * 0.5f * ImGui::GetIO().DisplaySize.y;
+    }
+
+    /// Scales a normalized width [0.0, 2.0] relative to display width
+    [[nodiscard]] inline float normToPixelW(float val) noexcept {
+        return val * 0.5f * ImGui::GetIO().DisplaySize.x;
+    }
+
+    /// Scales a normalized height/font size [0.0, 2.0] to pixel height
+    [[nodiscard]] inline float normToPixelH(float val) noexcept {
+        return val * 0.5f * ImGui::GetIO().DisplaySize.y;
+    }
+
+    /// Scales a normalized font size font size [0.0, 2.0] pixel height 
+    [[nodiscard]] inline float normToPixelFontSize(float val) noexcept {
+        return Coordinates::normToPixelH(val);
+    }
+
+} // namespace Coordinates
 
 //Location in 2d.
 struct Point {

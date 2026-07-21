@@ -87,10 +87,10 @@ Control *Window::findControlById(const std::string &id) {
 //Draw/redraw the whole window.
 void Window::draw(void) {
     // Convert normalized VS coordinates to pixels for ImGui
-    float x = NORM_TO_PIXEL_X(m_rect.origin.x);
-    float y = NORM_TO_PIXEL_Y(m_rect.origin.y + m_rect.size.height); // ImGui origin is top-left
-    float w = NORM_TO_PIXEL_W(m_rect.size.width);
-    float h = NORM_TO_PIXEL_H(m_rect.size.height);
+    float x = Coordinates::normToPixelX(m_rect.left());
+    float y = Coordinates::normToPixelY(m_rect.top()); // ImGui origin is top-left
+    float w = Coordinates::normToPixelW(m_rect.size.width);
+    float h = Coordinates::normToPixelH(m_rect.size.height);
 
     ImGui::SetNextWindowPos(ImVec2(x, y), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
