@@ -531,6 +531,16 @@ GFXColor BaseComputer::getColorForGroup(std::string id) {
 
 //Hack that constructs controls in code.
 void BaseComputer::constructControls(void) {
+    // Attempt loading via JSON using our controls_factory
+    if (getControls("controls.json", window())) {
+        // Successfully built GUI from controls.json!
+        return;
+    }
+
+    // ==========================================================
+    // FALLBACK: Hardcoded control construction runs if getControls returns false
+    // ==========================================================
+    VS_LOG(error, "BaseComputer: Constructing GUI using hardcoded C++ fallback.");
     std::map<std::string, std::map<std::string, std::string>> controls;
 
     VSFileSystem::VSFile jsonFile;
