@@ -193,9 +193,8 @@ void Picker::draw(void) {
         //this object, and they aren't now.
 
         // Some pickers like news show larger texts and need to be processed first
-        std::string firstline = getFirstLine(cell->text(), "\\");
         display.paintText.setRect(drawRect);
-        display.paintText.setText(firstline);
+        display.paintText.setText(cell->text());
         display.paintText.setFont(m_font);
         display.paintText.setColor(textColor);
         display.paintText.draw();

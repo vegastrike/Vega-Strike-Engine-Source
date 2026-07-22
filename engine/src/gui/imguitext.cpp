@@ -42,50 +42,9 @@ void FormattedLayout::endLine(Line& line) {
 
 // UI functions
 
-// Draws (a line of) text to the UI
-void ImGuiText::draw() {
-    if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
-        return; // Safe exit: No active window context
-    }
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    if ( !draw_list ) return;
-    // Calculate the Pixel Rect for Clipping
-    float pMinX = Coordinates::normToPixelX(m_rect.origin.x);
-    float pMinY = Coordinates::normToPixelY(m_rect.origin.y + m_rect.size.height) - 5; // Top of rect
-    float pMaxX = Coordinates::normToPixelX(m_rect.origin.x + m_rect.size.width);
-    float pMaxY = Coordinates::normToPixelY(m_rect.origin.y) + 10; // Bottom of rect
-
-    // Clipping coords to avoid overrunning text
-    ImVec4 clipRect(pMinX, pMinY, pMaxX, pMaxY);
-
-    float pixelX = Coordinates::normToPixelX(m_rect.origin.x);
-    // center in cell
-    float pixelCenterY = Coordinates::normToPixelY(m_rect.origin.y + (m_rect.size.height * 0.5f));
-    float pixelWidth = Coordinates::normToPixelW(m_rect.size.width);
-    float pixelFontSize = Coordinates::normToPixelFontSize(m_font.size());
-
-    ImVec2 textSize = getTextWidth(m_text.c_str(), m_font.size());
-    // Move half the text size up
-    float pixelY = pixelCenterY - (textSize.y * 0.5f);
-    ImVec2 pos(pixelX, pixelY);
-
-    if (m_justification == CENTER_JUSTIFY) { 
-        pos.x += (pixelWidth - textSize.x) * 0.5f;
-    }
-
-    ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(m_color.r, m_color.g, m_color.b, m_color.a));
-    
-    // Poor man's bold effect, redraw with 2px offset
-    // FIXME Replace with proper bold font
-    if(m_font.strokeWeight() == BOLD_STROKE) {
-        draw_list->AddText(nullptr, pixelFontSize, ImVec2(pos.x, pos.y + 2.0f), color, m_text.c_str(), nullptr, 0.0f, &clipRect);
-    }
-
-    // Main text
-    draw_list->AddText(nullptr, pixelFontSize, pos, color, m_text.c_str(), nullptr, 0.0f, &clipRect);
-}
-
-void ImGuiText::drawFormattedMultilineText(int firstLineToDraw) {
+// Draws (one or more lines of) text to the UI
+void ImGuiText::draw(int firstLineToDraw) {
+    parseTextIfNeeded();
     if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
         return; // Safe exit: No active window context
     }
@@ -94,24 +53,23 @@ void ImGuiText::drawFormattedMultilineText(int firstLineToDraw) {
     // const float lineHeight = ImGui::CalcTextSize("Hg").y; // this should give us the the full height of a text line
     // Calculate the Pixel Rect for Clipping
     float pMinX = Coordinates::normToPixelX(m_rect.left());
-    float pMinY = Coordinates::normToPixelY(m_rect.top()); // Top of rect
+    float pMinY = Coordinates::normToPixelY(m_rect.top()) - 5; // Top of rect
     float pMaxX = Coordinates::normToPixelX(m_rect.right());
-    float pMaxY = Coordinates::normToPixelY(m_rect.bottom()); // Bottom of rect
+    float pMaxY = Coordinates::normToPixelY(m_rect.bottom()) + 10; // Bottom of rect
 
     // Clipping coords to avoid overrunning text
     ImVec4 clipRect(pMinX, pMinY, pMaxX, pMaxY);
 
     float pixelX = Coordinates::normToPixelX(m_rect.left());
-    float pixelY = Coordinates::normToPixelY(m_rect.top());
+    // position text in middle of rect for single line text
+    float pixelY = m_multiLine ? Coordinates::normToPixelY(m_rect.top()) : Coordinates::normToPixelY((m_rect.top() + m_rect.bottom()) *0.5f);
     float pixelWidth = Coordinates::normToPixelW(m_rect.size.width);
 
     ImVec2 textSize = getTextWidth(m_text.c_str(), m_font.size());
-    ImVec2 pos(pixelX, pixelY);
-
-    if (m_justification == CENTER_JUSTIFY && (pixelWidth - textSize.x) > 0) { 
-        pos.x += (pixelWidth - textSize.x) * 0.5f;
+    // position single-line text half a line down so it is perfectly centered
+    if(!m_multiLine) {
+        pixelY -= (textSize.y * 0.5f);
     }
-
     // ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(m_color.r, m_color.g, m_color.b, m_color.a));
     
     float currentY = pixelY;
@@ -127,8 +85,9 @@ void ImGuiText::drawFormattedMultilineText(int firstLineToDraw) {
         }
         const auto& line = m_layout[i];
         float currentX = pixelX;
-
-        // Add Justification logic here?
+        if (m_justification == CENTER_JUSTIFY && (pixelWidth - line.width) > 0) { 
+            currentX += (pixelWidth - line.width) * 0.5f;
+        }
         
         for (const auto& frag : line) {
             float pixelFontSize = Coordinates::normToPixelFontSize(frag.font.size());
@@ -229,7 +188,30 @@ void DrawVegaStrikeRichText(const std::string& text, ImVec4 defaultColor) {
     ImGui::PopStyleColor(colorPushes);
 }
 
-int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) const {
+// Text processing
+
+// Set the text and parse
+void ImGuiText::setText(const std::string& text) {
+    if(text != m_text) {
+        m_layout.needsProcessing = true;
+    }
+    m_text = text; 
+}
+
+// this is a little complicated and only needed because text and multiline can be set separately, 
+// but both is needed in order to decide how to process the text
+void ImGuiText::parseTextIfNeeded() {
+    // only process the text upon change
+    if(m_layout.needsProcessing) {
+        VS_LOG(debug, (boost::format("Raw text set for GUI control: %1%") % m_text));
+        m_layout = parseText(m_text, Coordinates::normToPixelW(m_rect.size.width)); // Parser runs only when text changes
+        m_layoutVersion++; // Text has changed, outside logic uses this information to update GUI state
+    }
+    m_layout.needsProcessing = false;
+}
+
+int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) {
+    parseTextIfNeeded();
     int result = 0;
     float currentHeight = Coordinates::normToPixelH(vertInterval)*0.95; // Have a little safety margin, otherwise the last line looks sometimes cut
 
@@ -245,19 +227,6 @@ int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) 
         result++;
     }
     return result;
-}
-
-// Text processing
-
-// Set the text and parse
-void ImGuiText::setText(const std::string& text) {
-    // only parse upon change
-    if( text != m_text) {
-        VS_LOG(debug, (boost::format("Raw text set for GUI control: %1%") % text));
-        m_layout = parseText(text, Coordinates::normToPixelW(m_rect.size.width)); // Parser runs only when text changes
-        m_layoutVersion++; // Text has changed, outside logic uses this information to update GUI state
-    }
-    m_text = text;
 }
 
 ImVec2 ImGuiText::getTextWidth(const std::string text, const float fontSize) {
@@ -468,7 +437,7 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
     size_t endPos = input.size();
     size_t fragmentStartPos = 0;
     while (curPos < endPos) {
-        // consume all non-control chars until 
+        // consume all non-control chars until control char is hit
 
         // first let's check if it is a format char
         if(input[curPos] == DT_FORMAT_CHAR) {
@@ -529,14 +498,22 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
                     break;
                 default:
                     // line too long?
-                    if(currentLine.width + getTextWidth(input.substr(fragmentStartPos, curPos - fragmentStartPos),  m_fontStack.back().size()).x > widthInPixels) {
+                    std::string currentFragmentText = input.substr(fragmentStartPos, curPos - fragmentStartPos);
+                    // for single-line text, add ellipsis to the end of the line
+                    if(!m_multiLine) {
+                        currentFragmentText += ELLIPSIS_STRING;
+                    }
+                    if(currentLine.width + getTextWidth(currentFragmentText,  m_fontStack.back().size()).x > widthInPixels) {
                         // break at last word break
-                        addFragment(input.substr(fragmentStartPos, lastWordBreakPos - fragmentStartPos));
+                        addFragment(input.substr(fragmentStartPos, lastWordBreakPos - fragmentStartPos) + (m_multiLine ? "" : ELLIPSIS_STRING));
                         fragmentStartPos = lastWordBreakPos;
                         layout.endLine(currentLine);
                     }
                     break; 
             };
+            if(!m_multiLine && layout.size() > 0) {
+                break;
+            }
 
             curPos++;
         }

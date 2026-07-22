@@ -75,8 +75,8 @@ void StaticDisplay::draw(void) {
         m_scroller->setScrollPosition(m_scrollPosition);
         m_layoutVersion = m_paintText.layoutVersion();         //Remember layout version for next time.
     }
-    m_paintText.drawFormattedMultilineText(m_scrollPosition);
-}
+    m_paintText.draw(m_scrollPosition);
+}  
 
 //Set the object that takes care of scrolling.
 void StaticDisplay::setScroller(Scroller *s) {

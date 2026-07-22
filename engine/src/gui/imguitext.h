@@ -49,13 +49,6 @@ static const float BOGUS_LINE_SPACING = -100.0; //"NULL" value for line spacing.
 static const size_t ELLIPSIS_FRAGMENT = 64; //@
 static const std::string ELLIPSIS_STRING = "...";
 
-// Get the first line of a multi-line text
-inline std::string getFirstLine(const std::string& str, const std::string& delim) {
-    size_t pos = str.find(delim);
-    if (pos == std::string::npos) return str;
-    return str.substr(0, pos);
-}
-
 struct TextFragment {
     std::string text;
     Font font;
@@ -73,6 +66,7 @@ struct FormattedLayout : public std::vector<Line> {
     void endLine(Line& currentLine);
     float currentLineSpacing = 0.0f;           //Line spacing for the current line.
     float permanentLineSpacing = 0.0f;         //New permanent line spacing.
+    bool needsProcessing = true;
 };
 
 class ImGuiText {
@@ -88,17 +82,23 @@ public:
     GFXColor color() { return m_color; };
     int lineCount(void) const { return m_layout.size(); };
     int layoutVersion(void) const { return m_layoutVersion; };
-    int visibleLineCountStartingWith(int lineNumber, float vertInterval) const;
-    
+    int visibleLineCountStartingWith(int lineNumber, float vertInterval);
+    //Whether the text is multi-line.
+    bool multiLine(void) {
+        return m_multiLine;
+    }
+    void setMultiLine(bool multi) {
+        m_multiLine = multi;
+    }    
     // Draws the text
-    void draw();
-    void drawFormattedMultilineText(int firstLineToDraw);
+    void draw(int firstLineToDraw=0);
     ImVec2 getTextWidth(const std::string text, const float fontSize);
 private:
     Rect m_rect;
     Font m_font;
     std::string m_text;
     Justification m_justification = LEFT_JUSTIFY;
+    bool m_multiLine = false;
     GFXColor m_color;
     FormattedLayout m_layout;
     int m_layoutVersion = 0;
@@ -131,4 +131,5 @@ private:
         size_t *resultPos, //OUT: Ptr to string past the format string.
         bool *endLine //OUT: True = Done with current line.
     );
+    void parseTextIfNeeded();
 };

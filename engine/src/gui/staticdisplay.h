@@ -66,11 +66,11 @@ public:
 
 //Whether the text is multi-line.
     virtual bool multiLine(void) {
-        return m_paintText.lineCount() > 1;
+        return m_paintText.multiLine();
     }
 
     virtual void setMultiLine(bool multi) {
-        // not implemented
+        m_paintText.setMultiLine(multi);
     }
 
 //Text margins.
