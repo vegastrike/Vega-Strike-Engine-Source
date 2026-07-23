@@ -30,7 +30,6 @@
 
 #define PY_SSIZE_T_CLEAN
 
-#include "src/vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
                                                                                                                         //For WIN32 debugging.
 #include <crtdbg.h>
@@ -60,14 +59,12 @@ using VSFileSystem::SaveFile;
 #include "gfx/sprite.h"
 #include "gfx/aux_texture.h"
 #include "src/audiolib.h"
-#include "src/vs_math.h"
 #include "cmd/damageable.h"
 #include "src/universe.h"
 #include "cmd/mount_size.h"
 #include "cmd/weapon_info.h"
 #include "src/vs_logging.h"
 #include "controls_factory.h"
-#include "src/python/infra/get_string.h"
 #include "root_generic/configxml.h"
 #include "resource/manifest.h"
 #include "cmd/reload_utils.h"
@@ -88,7 +85,6 @@ using VSFileSystem::SaveFile;
 #include <pwd.h>
 #include <sys/types.h>
 #endif
-#include <locale>
 #include "src/vega_cast_utils.h"
 
 enum class Color {
@@ -3671,7 +3667,7 @@ bool BaseComputer::reloadUpgrade(const EventCommandId &command, Control *control
 
         // Full reload price is 5% of gun. 
         // TODO: make it configurable
-        double reload_price = ammo_to_reload/max_ammo * 0.05 * item->GetPrice();
+        double reload_price = static_cast<double>(ammo_to_reload)/max_ammo * 0.05 * item->GetPrice();
         if(reload_price < playerUnit->credits) {
             playerUnit->credits -= reload_price;
             mount.ammo = max_ammo;
