@@ -25,16 +25,11 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "src/vegastrike.h"
-
 #include "picker.h"
 
 #include "eventmanager.h"
 #include "scroller.h"
 
-#include "root_generic/vs_globals.h"
-#include "src/config_xml.h"
-#include "root_generic/xml_support.h"
 #include "gldrv/mouse_cursor.h"
 
 #include <list>

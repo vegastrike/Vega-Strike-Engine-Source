@@ -24,8 +24,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "imguitext.h"
-#include <sstream>
+#include "gui/imguitext.h"
 #include "src/vs_logging.h"
 #include "configuration/configuration.h"
 #include "imgui_internal.h"
@@ -384,10 +383,10 @@ void ImGuiText::parseFormat(std::string input, size_t startPos, //Location of be
                 } else if (input[curPos] == DT_FORMAT_STROKE_CHAR) {
                     if (m_fontStack.size() > 1) {
                         m_fontStack.pop_back();
-                    } else if (input[curPos] == DT_FORMAT_COLOR_CHAR) {
-                        if (m_colorStack.size() > 1) {
-                            m_colorStack.pop_back();
-                        }
+                    }
+                } else if (input[curPos] == DT_FORMAT_COLOR_CHAR) {
+                    if (m_colorStack.size() > 1) {
+                        m_colorStack.pop_back();
                     }
                 }
                 curPos++;

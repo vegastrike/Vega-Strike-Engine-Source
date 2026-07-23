@@ -25,8 +25,6 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "src/vegastrike.h"
-
 #include "window.h"
 
 #include "eventmanager.h"

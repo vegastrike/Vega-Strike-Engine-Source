@@ -28,7 +28,7 @@
 #define VEGA_STRIKE_ENGINE_GUI_PICKER_H
 
 #include "control.h"
-#include "imguitext.h"
+#include "gui/imguitext.h"
 
 #include <list>
 
