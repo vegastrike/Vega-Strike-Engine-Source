@@ -34,6 +34,20 @@ Below are the official places to find the current developers:
 * FreeNode IRC: #vegastrike
 * Vega Strike Forums: https://forums.vega-strike.org/
 
+AI :robot:
+==========
+
+Use of AI is a contraversal topic. However, it is inevitable and now part of the world we live in. So while ideally we would not allow it that is no longer feasible as people will
+then simply not declare their use of AI and then unknown risks have entered into the project. Therefore we kindly ask that anyone that wishes to contribute with AI follow the
+guidelines below.
+
+As a general rule, we follow the same policies on AI contributions as the `Linux Kernel: AI Policy`_ with the following changes:
+- Use only our accepted licenses, see `Vega Strike: Licensing`_ for details.
+- Follow our coding style
+- AI agents may not be added to the licensing statements in the files, only the human author making the contribution.
+- Like with human contributed changes all changes must be play tested by the author as appropriate. Do not simply use the AI to make a contribution that has never been actually appropriately tested. Lack of testing will have your PR closed.
+- Code requires comments; do not outright remove comments. Comments carry the intent; while code tells what actually happens.
+
 Licensing
 =========
 
@@ -129,3 +143,4 @@ Please join us at `Vega Strike: Gitter - Packagers`_ to if you have any question
 .. _`Vega Strike: Pull Request Validation` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/wiki/Pull-Request-Validation
 .. _`Vega Strike: Pull Requests` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/pulls
 .. _`Vega Strike: Gitter - Packagers` :: https://gitter.im/vegastrike/vegastrike-packaging?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
+.. _`Linux Kernel: AI Policy` :: https://docs.kernel.org/process/coding-assistants.html
