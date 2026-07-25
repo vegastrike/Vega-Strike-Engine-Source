@@ -34,7 +34,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-
+#include "src/vs_math.h"
 
 CRadar::CRadar():
         max_range(0),
@@ -104,9 +104,9 @@ void CRadar::Load(std::string unit_key) {
     tracking_active = true;
     const std::string max_range_string = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", std::string("300000000"));
     max_range = Resource<long>(max_range_string,1,0);
-    max_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0) * M_PI / 180);
-    tracking_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * M_PI / 180);
-    lock_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0) * M_PI / 180);
+    max_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0) * kVegaPiDouble / 180.0);
+    tracking_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * kVegaPiDouble / 180.0);
+    lock_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0) * kVegaPiDouble / 180.0);
     operational = max_range.Percent();
     installed = max_range > 0;
 }
@@ -119,9 +119,9 @@ void CRadar::SaveToCSV(std::map<std::string, std::string>& unit) const {
     // TODO: can't serialize if also doing acos on it
     // Also, can't use Resource because games stores in radian
     // and these can be minus.
-    unit["Tracking_Cone"] = std::to_string(acos(tracking_cone) * 180. / M_PI);
-    unit["Max_Cone"] = std::to_string(acos(max_cone) * 180. / M_PI);
-    unit["Lock_Cone"] = std::to_string(acos(lock_cone) * 180. / M_PI);
+    unit["Tracking_Cone"] = std::to_string(acos(tracking_cone) * 180.0 / kVegaPiDouble);
+    unit["Max_Cone"] = std::to_string(acos(max_cone) * 180.0 / kVegaPiDouble);
+    unit["Lock_Cone"] = std::to_string(acos(lock_cone) * 180.0 / kVegaPiDouble);
 }
 
 bool CRadar::CanDowngrade() const {

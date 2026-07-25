@@ -28,19 +28,16 @@
 
 #include "src/gfxlib.h"
 #include "gfx_generic/vec.h"
-#include <stdio.h>
+#include <cstdio>
 //typedef float GLdouble;
-#include <math.h>
-#include <string.h>
-#include <assert.h>
+#include <cmath>
+#include <cstring>
+#include <cassert>
 #ifdef WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
-#ifndef M_PI
-# define M_PI 3.14159265358979323846            /* pi */
-#endif
 #endif
 #include "gl_matrix.h"
 
@@ -48,6 +45,7 @@
 #include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "gldrv/winsys.h"
+#include "src/vs_math.h"
 
 //#include <GL/glu.h>
 
@@ -488,7 +486,7 @@ void GFXFrustum(float *m, float *i, float left, float right, float bottom, float
 void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar, float cockpit_offset) {
     //gluPerspective (fov,aspect,znear,zfar);
     float xmin, xmax, ymin, ymax;
-    ymax = znear * tanf(fov * M_PI / ((float) 360.0));       //78.0 --> 4.7046
+    ymax = znear * tanf(fov * kVegaPiFloat / 360.0F);       //78.0 --> 4.7046
     ymin = -ymax;     //-4.7046
     xmin = (ymin - cockpit_offset / 2) * aspect;       //-6.2571
     xmax = (ymax + cockpit_offset / 2) * aspect;       //6.2571

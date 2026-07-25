@@ -27,6 +27,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_RING_H
 #define VEGA_STRIKE_ENGINE_GFX_RING_H
 
+#include "src/vs_math.h"
 #include "gfx_generic/mesh.h"
 #include "src/vegastrike.h"
 
@@ -46,28 +47,28 @@ class RingMesh : public Mesh {
             const BLENDFUNC a = ONE,
             const BLENDFUNC b = ZERO,
             bool envMap = false,
-            float theta_min = 0.0,
-            float theta_max = 2 * M_PI,
+            float theta_min = 0.0F,
+            float theta_max = 2.0F * kVegaPiFloat,
             FILTER mipmap = MIPMAP);
 
 public:
     RingMesh() : Mesh() {
     }
 
-    RingMesh(float iradius,
-            float oradius,
-            int slices,
+    RingMesh(const float iradius,
+            const float oradius,
+            const int slices,
             const char *texture,
             const QVector &r,
             const QVector &s,
-            int texwrapx = 1,
-            int texwrapy = 1,
+            const int texwrapx = 1,
+            const int texwrapy = 1,
             const BLENDFUNC a = SRCALPHA,
             const BLENDFUNC b = INVSRCALPHA,
-            bool envMap = false,
-            float theta_min = 0.0,
-            float theta_max = 2 * M_PI,
-            FILTER mipmap = TRILINEAR) {
+            const bool envMap = false,
+            const float theta_min = 0.0,
+            const float theta_max = 2.0F * kVegaPiFloat,
+            const FILTER mipmap = TRILINEAR) {
         RingMesh::InitRing(iradius,
                            oradius,
                            slices,

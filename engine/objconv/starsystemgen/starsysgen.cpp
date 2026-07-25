@@ -26,19 +26,18 @@
  */
 
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <vector>
 #include <string>
-#include <math.h>
+#include <cmath>
+#include <ctime>
+#include <cassert>
+#include "src/vs_math.h"
 #include <time.h>
 #include <assert.h>
-#include <stdint.h>
+#include <cstdint>
 #include "root_generic/vega_random.h"
-
-#ifndef M_PI
-#define M_PI 3.1415926536
-#endif
 
 static const size_t BUFFER_SIZE = 16000;
 static const char SCANF_FORMAT_STRING[] = "%15999s";
@@ -129,56 +128,26 @@ public:
                 this->i * v.j - this->j * v.i);
     }
 
-    void Yaw(float rad) //only works with unit vector
+    void Yaw(const float rad) //only works with unit vector
     {
-        float theta = 0.0f;
-        float m = Mag();
-        if (i > 0) {
-            theta = (float) atan(k / i);
-        } else if (i < 0) {
-            theta = M_PI + (float) atan(k / i);
-        } else if (k <= 0 && i == 0) {
-            theta = -M_PI / 2;
-        } else if (k > 0 && i == 0) {
-            theta = M_PI / 2;
-        }
-        theta += rad;
-        i = m * cosf(theta);
-        k = m * sinf(theta);
+        const float theta = std::atan2f(k, i) + rad;
+        const float m = Mag();
+        i = m * std::cosf(theta);
+        k = m * std::sinf(theta);
     }
 
-    void Roll(float rad) {
-        float theta = 0.0f;
-        float m = Mag();
-        if (i > 0) {
-            theta = (float) atan(j / i);
-        } else if (i < 0) {
-            theta = M_PI + (float) atan(j / i);
-        } else if (j <= 0 && i == 0) {
-            theta = -M_PI / 2;
-        } else if (j > 0 && i == 0) {
-            theta = M_PI / 2;
-        }
-        theta += rad;
-        i = m * cosf(theta);
-        j = m * sinf(theta);
+    void Roll(const float rad) {
+        const float theta = std::atan2f(j, i) + rad;
+        const float m = Mag();
+        i = m * std::cosf(theta);
+        j = m * std::sinf(theta);
     }
 
-    void Pitch(float rad) {
-        float theta = 0.0f;
-        float m = Mag();
-        if (k > 0) {
-            theta = (float) atan(j / k);
-        } else if (k < 0) {
-            theta = M_PI + (float) atan(j / k);
-        } else if (j <= 0 && k == 0) {
-            theta = -M_PI / 2;
-        } else if (j > 0 && k == 0) {
-            theta = M_PI / 2;
-        }
-        theta += rad;
-        k = m * cosf(theta);
-        j = m * sinf(theta);
+    void Pitch(const float rad) {
+        const float theta = std::atan2f(j, k) + rad;
+        const float m = Mag();
+        k = m * std::cosf(theta);
+        j = m * std::sinf(theta);
     }
 };
 

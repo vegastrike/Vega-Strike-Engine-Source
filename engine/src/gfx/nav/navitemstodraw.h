@@ -24,7 +24,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
+
+#ifndef GFX_NAV_NAVITEMSTODRAW_H
+#define GFX_NAV_NAVITEMSTODRAW_H
+
+#include "src/vs_math.h"
 
 //This draws the mouse cursor
 //**********************************
@@ -101,7 +105,7 @@ void NavigationSystem::DrawGrid(float &x1, float &x2, float &y1, float &y2, cons
 
 //This will draw a circle over the screen
 //**********************************
-void NavigationSystem::DrawCircle(float x, float y, float size, const GFXColor &col) {
+inline void NavigationSystem::DrawCircle(const float x, const float y, const float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -110,10 +114,10 @@ void NavigationSystem::DrawCircle(float x, float y, float size, const GFXColor &
     // 20 segments
     static VertexBuilder<> verts;
     verts.clear();
-    for (float i = 0; i < 2 * M_PI + M_PI / 10; i += M_PI / 10) {
+    for (float i = 0.0F; i < 2.0F * kVegaPiFloat + kVegaPiFloat / 10.0F; i += kVegaPiFloat / 10.0F) {
         verts.insert(
-                x + 0.5 * size * cos(i),
-                y + 0.5 * size * sin(i),
+                x + 0.5F * size * cos(i),
+                y + 0.5F * size * sin(i),
                 0
         );
     }
@@ -125,7 +129,7 @@ void NavigationSystem::DrawCircle(float x, float y, float size, const GFXColor &
 
 //This will draw a half circle, centered at the top 1/4 center
 //**********************************
-void NavigationSystem::DrawHalfCircleTop(float x, float y, float size, const GFXColor &col) {
+inline void NavigationSystem::DrawHalfCircleTop(const float x, const float y, const float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -134,10 +138,10 @@ void NavigationSystem::DrawHalfCircleTop(float x, float y, float size, const GFX
     // 10 segments
     static VertexBuilder<> verts;
     verts.clear();
-    for (float i = 0; i < M_PI + M_PI / 10; i += M_PI / 10) {
+    for (float i = 0.0F; i < kVegaPiFloat + kVegaPiFloat / 10.0F; i += kVegaPiFloat / 10.0F) {
         verts.insert(
-                x + 0.5 * size * cos(i),
-                y + 0.5 * size * sin(i) - 0.25 * size,
+                x + 0.5F * size * cos(i),
+                y + 0.5F * size * sin(i) - 0.25F * size,
                 0
         );
     }
@@ -149,7 +153,7 @@ void NavigationSystem::DrawHalfCircleTop(float x, float y, float size, const GFX
 
 //This will draw a half circle, centered at the bottom 1/4 center
 //**********************************
-void NavigationSystem::DrawHalfCircleBottom(float x, float y, float size, const GFXColor &col) {
+inline void NavigationSystem::DrawHalfCircleBottom(const float x, const float y, const float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -158,10 +162,10 @@ void NavigationSystem::DrawHalfCircleBottom(float x, float y, float size, const 
     // 10 segments
     static VertexBuilder<> verts;
     verts.clear();
-    for (float i = M_PI; i < 2 * M_PI + M_PI / 10; i += M_PI / 10) {
+    for (float i = kVegaPiFloat; i < 2.0F * kVegaPiFloat + kVegaPiFloat / 10.0F; i += kVegaPiFloat / 10.0F) {
         verts.insert(
-                x + 0.5 * size * cos(i),
-                y + 0.5 * size * sin(i) + 0.25 * size,
+                x + 0.5F * size * cos(i),
+                y + 0.5F * size * sin(i) + 0.25F * size,
                 0
         );
     }
@@ -173,7 +177,7 @@ void NavigationSystem::DrawHalfCircleBottom(float x, float y, float size, const 
 
 //This will draw a planet icon. circle + lightning thingy
 //**********************************
-void NavigationSystem::DrawPlanet(float x, float y, float size, const GFXColor &col) {
+inline void NavigationSystem::DrawPlanet(float x, float y, float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -181,15 +185,15 @@ void NavigationSystem::DrawPlanet(float x, float y, float size, const GFXColor &
 
     static VertexBuilder<> verts;
     verts.clear();
-    for (float i = 0; i < 2 * M_PI; i += M_PI / 10) {
+    for (float i = 0.0F; i < 2.0F * kVegaPiFloat; i += kVegaPiFloat / 10.0F) {
         verts.insert(
-                x + 0.5 * size * cos(i),
-                y + 0.5 * size * sin(i),
+                x + 0.5F * size * cos(i),
+                y + 0.5F * size * sin(i),
                 0
         );
         verts.insert(
-                x + 0.5 * size * cos(i + M_PI / 10),
-                y + 0.5 * size * sin(i + M_PI / 10),
+                x + 0.5F * size * cos(i + kVegaPiFloat / 10.0F),
+                y + 0.5F * size * sin(i + kVegaPiFloat / 10.0F),
                 0
         );
     }
@@ -248,7 +252,7 @@ void NavigationSystem::DrawStation(float x, float y, float size, const GFXColor 
 
 //This will draw a jump node icon
 //**********************************
-void NavigationSystem::DrawJump(float x, float y, float size, const GFXColor &col) {
+inline void NavigationSystem::DrawJump(float x, float y, float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -256,15 +260,15 @@ void NavigationSystem::DrawJump(float x, float y, float size, const GFXColor &co
 
     static VertexBuilder<> verts;
     verts.clear();
-    for (float i = 0; i < 2 * M_PI; i += M_PI / 10) {
+    for (float i = 0.0; i < 2.0 * kVegaPiFloat; i += kVegaPiFloat / 10.0F) {
         verts.insert(
-                x + 0.5 * size * cos(i),
-                y + 0.5 * size * sin(i),
+                x + 0.5F * size * cos(i),
+                y + 0.5F * size * sin(i),
                 0
         );
         verts.insert(
-                x + 0.5 * size * cos(i + M_PI / 10),
-                y + 0.5 * size * sin(i + M_PI / 10),
+                x + 0.5F * size * cos(i + kVegaPiFloat / 10.0F),
+                y + 0.5F * size * sin(i + kVegaPiFloat / 10.0F),
                 0
         );
     }
@@ -353,7 +357,7 @@ void NavigationSystem::DrawTargetCorners(float x, float y, float size, const GFX
 
 //This will draw an oriented circle
 //**********************************
-void NavigationSystem::DrawNavCircle(float x, float y, float size, float rot_x, float rot_y, const GFXColor &col) {
+inline void NavigationSystem::DrawNavCircle(float x, float y, float size, float rot_x, float rot_y, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -366,10 +370,10 @@ void NavigationSystem::DrawNavCircle(float x, float y, float size, float rot_x, 
     static VertexBuilder<float, 3, 0, 4> verts;
     verts.clear();
     verts.reserve(vnum);
-    for (float i = 0; i < 2 * M_PI; i += (2 * M_PI / segments)) {
+    for (float i = 0.0F; i < 2.0F * kVegaPiFloat; i += (2.0F * kVegaPiFloat / segments)) {
         GFXColor ci(col.r, col.g, col.b * fabs(sin(i / 2.0)), col.a);
         QVector pos1((0.6 * size * cos(i)), (0.6 * size * sin(i)), 0);
-        QVector pos2((0.6 * size * cos(i + (2 * M_PI / segments))), (0.6 * size * sin(i + (6.28 / segments))), 0);
+        QVector pos2((0.6 * size * cos(i + (2.0 * kVegaPiDouble / segments))), (0.6 * size * sin(i + (2.0 * kVegaPiDouble / segments))), 0);
 
         pos1 = dxyz(pos1, 0, 0, rot_y);
         pos1 = dxyz(pos1, rot_x, 0, 0);
@@ -395,9 +399,9 @@ void NavigationSystem::DrawNavCircle(float x, float y, float size, float rot_x, 
             verts.insert(GFXColorVertex(pos2t, ci));
         }
     }
-    for (float i = 0; i < 2 * M_PI; i += (2 * M_PI / segments2)) {
-        GFXColor ci(col.r, col.g, col.b * fabs(sin(i / 2.0)), col.a);
-        QVector pos1((0.6 * size * cos(i) / float(circles * 2)), (0.6 * size * sin(i) / float(circles * 2)), 0);
+    for (float i = 0.0F; i < 2.0F * kVegaPiFloat; i += (2.0F * kVegaPiFloat / segments2)) {
+        GFXColor ci(col.r, col.g, col.b * fabs(sin(i / 2.0F)), col.a);
+        QVector pos1((0.6 * size * cos(i) / static_cast<float>(circles * 2)), (0.6 * size * sin(i) / static_cast<float>(circles * 2)), 0);
         QVector pos2((0.6 * size * cos(i)), (0.6 * size * sin(i)), 0);
 
         if ((fabs(i - 1.57) < 0.01) || (fabs(i - 3.14) < 0.01) || (fabs(i - 4.71) < 0.01) || (i < 0.01)) {
@@ -431,3 +435,4 @@ void NavigationSystem::DrawNavCircle(float x, float y, float size, float rot_x, 
 }
 //**********************************
 
+#endif // GFX_NAV_NAVITEMSTODRAW_H

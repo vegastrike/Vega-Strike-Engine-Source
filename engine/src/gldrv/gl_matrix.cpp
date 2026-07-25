@@ -24,10 +24,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include <numbers>
+#include "src/vs_math.h"
 #include "gl_globals.h"
 #include "src/gfxlib.h"
 #include "gfx_generic/vec.h"
-#include <stdio.h>
 //typedef float GLdouble;
 #include <math.h>
 #include <string.h>
@@ -40,9 +42,6 @@
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
-#ifndef M_PI
-# define M_PI 3.14159265358979323846            /* pi */
-#endif
 #endif
 #include "gl_matrix.h"
 #include "root_generic/vs_globals.h"
@@ -343,7 +342,7 @@ void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zf
 
     float xmin, xmax, ymin, ymax;
 
-    ymax = znear * tanf(fov * M_PI / ((float) 360.0));       //78.0 --> 4.7046
+    ymax = znear * tanf(fov * kVegaPiFloat / 360.0F);       //78.0 --> 4.7046
 
     ymin = -ymax;     //-4.7046
 

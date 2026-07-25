@@ -26,13 +26,14 @@
  */
 
 
+#include <numbers>
+#include "src/vs_math.h"
 #include "gfx_generic/boltdrawmanager.h"
 
 #include "matrix.h"
 #include "gfx/animation.h"
 
 #include "root_generic/lin_time.h"
-#include "root_generic/options.h"
 #include "src/universe.h"
 
 QVector BoltDrawManager::camera_position = QVector();
@@ -91,11 +92,11 @@ void BoltDrawManager::Draw() {
     GFXDisable(LIGHTING);
     GFXDisable(CULLFACE);
     GFXBlendMode(ONE, configuration().graphics.blend_guns ? ONE : ZERO);
-    GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
+    GFXTextureCoordGenMode(0, NO_GEN, nullptr, nullptr);
     GFXAlphaTest(GREATER, .1);
 
     float pixel_angle = 2
-            * sin(configuration().graphics.fov_flt * M_PI / 180.0F
+            * sin(configuration().graphics.fov_flt * kVegaPiFloat / 180.0F
                     / (configuration().graphics.resolution_y
                             > configuration().graphics.resolution_x ? configuration().graphics.resolution_y : configuration().graphics.resolution_x))
             * configuration().graphics.bolt_pixel_size_flt;

@@ -38,7 +38,6 @@
 #include <boost/python/to_python_value.hpp>
 #include <boost/python/converter/builtin_converters.hpp>
 #include "src/vegastrike.h"
-#include <math.h>
 #define _CZ (761.465325527)
 
 // Specialization comes first (actually only for declaration)
@@ -286,54 +285,21 @@ TVector<S, T> TVector<S, T>::Max(const TVector<S, T> &other) const {
 template<typename S, typename T>
 void TVector<S, T>::Yaw(S rad) //only works with unit vector
 {
-    float theta;
-    theta = 0.0f; //FIXME This line added temporarily by chuck_starchaser
-    if (i > 0) {
-        theta = (float) atan(k / i);
-    } else if (i < 0) {
-        theta = PI + (float) atan(k / i);
-    } else if (k <= 0 && i == 0) {
-        theta = -PI / 2;
-    } else if (k > 0 && i == 0) {
-        theta = PI / 2;
-    }
-    theta += rad; //FIXME If none of the if's is true, theta is uninitialized!
+    const float theta = std::atan2f(k, i) + rad;
     i = cosf(theta);
     k = sinf(theta);
 }
 
 template<typename S, typename T>
 void TVector<S, T>::Roll(S rad) {
-    float theta;
-    theta = 0.0f; //FIXME This line added temporarily by chuck_starchaser
-    if (i > 0) {
-        theta = (float) atan(j / i);
-    } else if (i < 0) {
-        theta = PI + (float) atan(j / i);
-    } else if (j <= 0 && i == 0) {
-        theta = -PI / 2;
-    } else if (j > 0 && i == 0) {
-        theta = PI / 2;
-    }
-    theta += rad; //FIXME If none of the if's is true, theta is uninitialized!
+    const float theta = std::atan2f(j, i) + rad;
     i = cosf(theta);
     j = sinf(theta);
 }
 
 template<typename S, typename T>
 void TVector<S, T>::Pitch(S rad) {
-    float theta;
-    theta = 0.0f; //FIXME This line added temporarily by chuck_starchaser
-    if (k > 0) {
-        theta = (float) atan(j / k);
-    } else if (k < 0) {
-        theta = PI + (float) atan(j / k);
-    } else if (j <= 0 && k == 0) {
-        theta = -PI / 2;
-    } else if (j > 0 && k == 0) {
-        theta = PI / 2;
-    }
-    theta += rad; //FIXME If none of the if's is true, theta is uninitialized!
+    const float theta = std::atan2f(j, k) + rad;
     k = cosf(theta);
     j = sinf(theta);
 }
