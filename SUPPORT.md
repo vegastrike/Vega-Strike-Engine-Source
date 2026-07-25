@@ -73,7 +73,7 @@ We have generally only maintained a single release at a time, and our primary fo
 If there are bugs in an existing current release then we will address it and make a new point release.
 
 | Release Version | Status | Release Date | EOL Date | Comments |
-| :-------------- | :----: | :----------: | :------: | -------: |
+| :-------------- | :----: | :----------: | :------: | :------- |
 | 0.11.x | In Development | TBD | N/A | Current version in development |
 | 0.10.x | In Development | TBD | N/A | This will be our first LTS due to some code dependency changes that will effect some older systems |
 | 0.9.x | Current Release | 2025-03-31 | N/A | Will be unsupported once 0.10.x is released |
