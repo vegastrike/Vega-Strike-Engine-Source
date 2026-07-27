@@ -28,7 +28,7 @@ So let's work together - if we do, then we'll raise the red flag where appropria
 
 ## Response times
 
-We ask that you give us an industry normal response time.
+We ask that you give us an industry-standard response time.
 
 ## Compromised Infrastructure: 24 hours
 
