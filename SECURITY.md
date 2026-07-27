@@ -59,7 +59,7 @@ If there is a security bug in the code, then please let us know via our contact 
 Once you have initiated contact that you can help speed up the process by the following:
 
 1. Please submit a PR
-2. Be discrete about what is being fixed and why. Do *not* raise the alarm bells in the PR; but do note that you alerted us via our security contact policy.
+2. Be discreet about what is being fixed and why. Do *not* raise the alarm bells in the PR; but do note that you alerted us via our security contact policy.
 3. Please provide enough information that we can evaluate what is being fixed and why. However remember this is in the public form.
 
 We cannot guarantee a new release will happen within 30 days as it will certainly depend on a number of factors such as:
