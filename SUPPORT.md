@@ -53,7 +53,7 @@ Please visit https://github.com/vegastrike/Vega-Strike-Engine-Source/wiki/Platfo
 
 We have supported macOS releases since version 0.9.0 when we were able to build DMG images again.
 
-As a general policy we support the current versions of MacOS as long as we have access to a builder in GitHub.
+As a general policy we support the current versions of macOS as long as we have access to a builder in GitHub.
 However, if something were to fail then it may take us a while to fix it as the team generally does not have access to macOS development systems.
 
 Please visit https://github.com/vegastrike/Vega-Strike-Engine-Source/wiki/Platform-Support#macos for our macOS Support Policy.
