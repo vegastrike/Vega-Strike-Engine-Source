@@ -75,7 +75,7 @@ If there are bugs in an existing current release then we will address it and mak
 | Release Version | Status | Release Date | EOL Date | Comments |
 | :-------------- | :----: | :----------: | :------: | :------- |
 | 0.11.x | In Development | TBD | N/A | Current version in development |
-| 0.10.x | In Development | TBD | N/A | This will be our first LTS due to some code dependency changes that will effect some older systems |
+| 0.10.x | In Development | TBD | N/A | This will be our first LTS (Long Term Support) release due to some code dependency changes that will affect some older systems |
 | 0.9.x | Current Release | 2025-03-31 | N/A | Will be unsupported once 0.10.x is released |
 | 0.8.x | EOL | 2022-03-20 | 2025-03-31 | Unsupported |
 | 0.7.x | EOL | 2021-04-20 | 2022-03-20 | Unsupported |
