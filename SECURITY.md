@@ -16,7 +16,7 @@ If there is an emergency situation then please do the following:
 1. Send the email per our contact information above.
 2. Please reach out to us in gitter.im to alert us that there is something we need to look for. Do *not* tell us what the issue is there.
 
-### Question: Why do should the issue not be disclosed in the forums or public spaces?
+### Question: Why should the issue not be disclosed in the forums or public spaces?
 
 Before releasing something publicly we need a moment to review and potentially address it.
 We ask that you give us the normal amount of time that most organizations get to address concerns before releasing anything publicly - 30/60/90 days.
