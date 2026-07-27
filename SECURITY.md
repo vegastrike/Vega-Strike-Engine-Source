@@ -40,7 +40,7 @@ Infrastructure consists of:
 - websites
 - forums
 - communication channels (gitter.im, matrix.io, IRC, etc)
-- compromised accounts (our Github Organizations, social media accounts, etc) - anything you see that bears our name and we claim ownership to.
+- compromised accounts (our Github Organizations, social media accounts, etc) - anything you see that bears our name and that we claim ownership to.
 
 ## Compromised Deliverables: 72 hours
 
