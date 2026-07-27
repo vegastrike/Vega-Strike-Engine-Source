@@ -23,7 +23,7 @@ We would also like to thank the following people for helping us bring the projec
 - [Denis Belanger aka Loki1950](https://github.com/Loki1950)
 - [J.S aka Minister of Information](https://github.com/ministerofinformation)
 
-We would not have been able to continue to this project without your guidance, input, or granting us access.
+We would not have been able to continue this project without your guidance, input, or granting us access.
 
 Current Team
 ============
