@@ -3,7 +3,7 @@
 The Vega Strike Development team has the following support policies:
 
 - Please file an issue in our GitHub Issues as this is the fastest way to get attention from the development team.
-- We do try to monitor various please:
+- We do try to monitor the following:
    - Gitter.Im/Matrix Vega Strike Community
    - The Vega Strike Forums
    - Vega Strike IRC Channel
