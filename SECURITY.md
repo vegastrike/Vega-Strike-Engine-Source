@@ -60,7 +60,7 @@ Once you have initiated contact that you can help speed up the process by the fo
 
 1. Please submit a PR
 2. Be discreet about what is being fixed and why. Do *not* raise the alarm bells in the PR; but do note that you alerted us via our security contact policy.
-3. Please provide enough information that we can evaluate what is being fixed and why. However remember this is in the public form.
+3. Please provide enough information that we can evaluate what is being fixed and why. However remember that this is in the public form.
 
 We cannot guarantee a new release will happen within 30 days as it will certainly depend on a number of factors such as:
 - where it is
