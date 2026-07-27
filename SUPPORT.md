@@ -9,7 +9,7 @@ The Vega Strike Development team has the following support policies:
    - Vega Strike IRC Channel
    - Various Vega Strike Emails and Social Media accounts
 
-However we cannot be every where. We do ask that you participate in GitHub where the team is centralized.
+However we cannot be everywhere. We do ask that you participate in GitHub where the team is centralized.
 
 ## Bug Reports
 
