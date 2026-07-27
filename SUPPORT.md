@@ -49,7 +49,7 @@ We try to support currently supported platforms for the major distributions:
 
 Please visit https://github.com/vegastrike/Vega-Strike-Engine-Source/wiki/Platform-Support#linux-distribution-support-policy for our Linux Support Policy.
 
-### MacOS
+### macOS
 
 We have supported macOS releases since version 0.9.0 when we were able to build DMG images again.
 
