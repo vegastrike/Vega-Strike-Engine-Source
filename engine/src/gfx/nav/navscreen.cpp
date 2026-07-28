@@ -65,6 +65,7 @@
 #include "gfx/nav/navcomputer.h"
 #include "gfx/nav/navpath.h"
 #include "gldrv/winsys.h"
+#include "gui/imgui_support.h"
 
 //This sets up the items in the navscreen
 //**********************************
@@ -456,6 +457,8 @@ void NavigationSystem::Draw() {
     GFXHudMode(true);
     GFXDisable(DEPTHTEST);
     GFXDisable(DEPTHWRITE);
+    StartGUIFrame();
+    
     //**********************************
 
     screenoccupation->reset();
@@ -543,6 +546,7 @@ void NavigationSystem::Draw() {
     //**********************************
 
     GFXEnable(TEXTURE0);
+    EndGUIFrame(MOUSE_POINTER_NORMAL);
     GFXHudMode(false);
 }
 //**********************************

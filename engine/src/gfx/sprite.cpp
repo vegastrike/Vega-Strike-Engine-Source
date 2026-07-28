@@ -34,14 +34,14 @@
 #include "gfx/aux_texture.h"
 #include "gfx/ani_texture.h"
 #include "gfx/sprite.h"
-#include "gfx_generic/matrix.h"
 #include "src/gfxlib.h"
-#include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
 #include "gldrv/gl_globals.h"
 #include <assert.h>
 #include <math.h>
 #include "src/gnuhash.h"
+#include "imgui/imgui.h"
+#include "gui/guidefs.h"
 
 #ifdef _WIN32
 #include <direct.h>
@@ -297,6 +297,43 @@ void VSSprite::Draw() {
         }
         GFXEnable(CULLFACE);
     }
+}
+
+// draws a sprite at its position with ImGUI
+void VSSprite::DrawWithImGui(ImDrawList *drawList = ImGui::GetBackgroundDrawList()) {
+    if (!surface) {
+        return;
+    }
+
+    // FIXME - support multi-texture, rotation, passes and layers
+
+    // Make the sprite's texture active and fetch its GL ID
+    surface->MakeActive(0, 0);
+    
+    GLint actual_gl_id = 0;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &actual_gl_id);
+    if (actual_gl_id <= 0) return;
+
+    ImTextureID texID = static_cast<ImTextureID>(static_cast<uintptr_t>(actual_gl_id));
+
+    // Get current sprite position, we draw from top left, thus adjust Y
+    ImVec2 topLeft(
+    Coordinates::normToPixelX(xcenter),
+    Coordinates::normToPixelY(ycenter + heighto2 * 2)
+    );
+    // Get the size of the sprite in pixels
+    ImVec2 spriteSize(Coordinates::normToPixelW(widtho2 * 2), Coordinates::normToPixelH(heighto2 * 2)); 
+
+    // Draw directly to ImGui's top-level overlay
+    // Note: (0,0) to (1,1) UVs work cleanly here. If flipped vertically, swap 0.0f and 1.0f on Y.
+    drawList->AddImage(
+        texID,
+        topLeft,                                             // Top-left (Hotspot)
+        ImVec2(topLeft.x + spriteSize.x, topLeft.y + spriteSize.y), // Bottom-right
+        ImVec2(0.0f, 1.0f),                                   // UV Top-Left
+        ImVec2(1.0f, 0.0f),                                   // UV Bottom-Right
+        IM_COL32(255, 255, 255, 255)
+    );
 }
 
 void VSSprite::SetPosition(const float &x1, const float &y1) {
