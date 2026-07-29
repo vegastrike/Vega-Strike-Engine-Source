@@ -458,7 +458,16 @@ void NavigationSystem::Draw() {
     GFXDisable(DEPTHTEST);
     GFXDisable(DEPTHWRITE);
     StartGUIFrame();
-    
+ 
+    // Obscure cockpit almost completely.
+    const ImVec2 start_position(0,0);
+    const ImVec2 end_position(configuration().graphics.resolution_x,
+                              configuration().graphics.resolution_y);
+    const ImU32 background_color = IM_COL32(0,0,0,224);
+    ImGui::GetBackgroundDrawList()->AddRectFilled(start_position, end_position, background_color,
+                    0.0f // No rounded borders
+    );
+
     //**********************************
 
     screenoccupation->reset();
@@ -672,7 +681,7 @@ void NavigationSystem::DrawMission() {
         text += "\n";
     }
     text +=
-            "#FFA000     PRESS SHIFT-M TO TOGGLE THIS MENU    \n\n\n\n#000000*******#00a6FFVega Strike 0.7#000000*********\nWelcome to VS. Your ship undocks stopped; #8080FFArrow keys/mouse/joystick#000000 steer your ship. Use #8080FF+#000000 & #8080FF-#000000 to adjust cruise control, or #8080FF/#000000 & #8080FF[backspace]#000000 to go to max governor setting or full-stop, respectively. Use #8080FFy#000000 to toggle between maneuver and travel settings for your relative velocity governors. Use #8080ff[home]#000000 & #8080FF[end]#000000 to set and unset velocity reference point to the current target (non-hostile targets only). Use #8080FFTab#000000 to activate Overdrive(if present).\n\nPress #8080FFn#000000 to cycle nav points, #8080FFt#000000 to cycle targets, and #8080FFp#000000 to target objects in front of you.\n\n#8080FF[space]#000000 fires guns, and #8080ff[Enter]#000000 fires missiles.\n\nThe #8080FFa#000000 key activates SPEC drive for insystem FTL.\nInterstellar Travel requires a #FFBB11 jump drive#000000 and #FFBB11FTL Capacitors#000000 to be installed. To jump, fly into the green wireframe nav-marker; hit #8080FFj#000000 to jump to the linked system.\n\nTo dock, target a base, planet or large vessel and hail with #8080FF0#000000 to request docking clearance. When you get close, a green box will appear. Fly to the box. When inside the box, #8080FFd#000000 will dock.\n\n#FF0000If Vega Strike halts or acts oddly,#000000\n#FFFF00immediately#000000 post the latest log\nfile from $HOME/.vegastrike/logs/\nto https://forums.vega-strike.org/\nbefore you restart Vega Strike.\n";
+            "#FFA000     PRESS SHIFT-M TO TOGGLE THIS MENU    \n\n\n\n#000000*******#00a6FFVega Strike 0.10.0#000000*********\nWelcome to VS. Your ship undocks stopped; #8080FFArrow keys/mouse/joystick#000000 steer your ship. Use #8080FF+#000000 & #8080FF-#000000 to adjust cruise control, or #8080FF/#000000 & #8080FF[backspace]#000000 to go to max governor setting or full-stop, respectively. Use #8080FFy#000000 to toggle between maneuver and travel settings for your relative velocity governors. Use #8080ff[home]#000000 & #8080FF[end]#000000 to set and unset velocity reference point to the current target (non-hostile targets only). Use #8080FFTab#000000 to activate Overdrive(if present).\n\nPress #8080FFn#000000 to cycle nav points, #8080FFt#000000 to cycle targets, and #8080FFp#000000 to target objects in front of you.\n\n#8080FF[space]#000000 fires guns, and #8080ff[Enter]#000000 fires missiles.\n\nThe #8080FFa#000000 key activates SPEC drive for insystem FTL.\nInterstellar Travel requires a #FFBB11 jump drive#000000 and #FFBB11FTL Capacitors#000000 to be installed. To jump, fly into the green wireframe nav-marker; hit #8080FFj#000000 to jump to the linked system.\n\nTo dock, target a base, planet or large vessel and hail with #8080FF0#000000 to request docking clearance. When you get close, a green box will appear. Fly to the box. When inside the box, #8080FFd#000000 will dock.\n\n#FF0000If Vega Strike halts or acts oddly,#000000\n#FFFF00immediately#000000 post the latest log\nfile from $HOME/.vegastrike/logs/\nto https://forums.vega-strike.org/\nbefore you restart Vega Strike.\n";
     displayname.SetText(text);
     displayname.SetCharSize(1, 1);
     displayname.Draw();
@@ -1249,7 +1258,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
             } else {
                 //if in mission mode
 
-                navcomp->run();
+                flipbit(whattodraw, 1);
             }
         }
         //******************************************************
@@ -1699,50 +1708,30 @@ void NavigationSystem::RecordMinAndMax(const QVector &pos,
     //**********************************
 }
 
+/*
+ * Draws the origin orientation triad (X, Y, Z axes widget) using ImGui DrawList
+ * and normalized-to-pixel coordinate conversion.
+ */
 void NavigationSystem::DrawOriginOrientationTri(float center_nav_x, float center_nav_y, bool system_not_galaxy) {
-    //Draw Origin Orientation Tri
-    //**********************************
-    QVector directionx;
-    QVector directiony;
-    QVector directionz;
+    // Determine basis vectors based on active axis alignment
+    QVector directionx, directiony, directionz;
+
     if (axis == 2) {
-        directionx.i = 0.1;
-        directionx.j = 0.0;
-        directionx.k = 0.0;
-
-        directionz.i = 0.0;
-        directionz.j = 0.1;
-        directionz.k = 0.0;
-
-        directiony.i = 0.0;
-        directiony.j = 0.0;
-        directiony.k = 0.1;
+        directionx = QVector(0.1f, 0.0f, 0.0f);
+        directionz = QVector(0.0f, 0.1f, 0.0f);
+        directiony = QVector(0.0f, 0.0f, 0.1f);
     } else if (axis == 1) {
-        directiony.i = 0.1;
-        directiony.j = 0.0;
-        directiony.k = 0.0;
-
-        directionz.i = 0.0;
-        directionz.j = 0.1;
-        directionz.k = 0.0;
-
-        directionx.i = 0.0;
-        directionx.j = 0.0;
-        directionx.k = 0.1;
+        directiony = QVector(0.1f, 0.0f, 0.0f);
+        directionz = QVector(0.0f, 0.1f, 0.0f);
+        directionx = QVector(0.0f, 0.0f, 0.1f);
     } else {
-        //(axis == 3)
-        directionx.i = 0.1;
-        directionx.j = 0.0;
-        directionx.k = 0.0;
-
-        directiony.i = 0.0;
-        directiony.j = 0.1;
-        directiony.k = 0.0;
-
-        directionz.i = 0.0;
-        directionz.j = 0.0;
-        directionz.k = 0.1;
+        // (axis == 3)
+        directionx = QVector(0.1f, 0.0f, 0.0f);
+        directiony = QVector(0.0f, 0.1f, 0.0f);
+        directionz = QVector(0.0f, 0.0f, 0.1f);
     }
+
+    // Apply 3D rotation matrix transformations if in 3D view mode
     if (system_not_galaxy) {
         if (system_view == VIEW_3D) {
             directionx = dxyz(directionx, 0, 0, ry_s);
@@ -1764,31 +1753,37 @@ void NavigationSystem::DrawOriginOrientationTri(float center_nav_x, float center
         directionz = dxyz(directionz, 0, 0, ry);
         directionz = dxyz(directionz, rx, 0, 0);
     }
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
 
-    float x0 = center_nav_x - 0.8 * ((screenskipby4[1] - screenskipby4[0]) / 2);
-    float y0 = center_nav_y - 0.8 * ((screenskipby4[3] - screenskipby4[2]) / 2);
-    float x1 = x0 + (directionx.i * (0.3 / (0.3 - directionx.k)));
-    float y1 = y0 + (directionx.j * (0.3 / (0.3 - directionx.k)));
-    float x2 = x0 + (directiony.i * (0.3 / (0.3 - directiony.k)));
-    float y2 = y0 + (directiony.j * (0.3 / (0.3 - directiony.k)));
-    float x3 = x0 + (directionz.i * (0.3 / (0.3 - directionz.k)));
-    float y3 = y0 + (directionz.j * (0.3 / (0.3 - directionz.k)));
+    // Compute normalized origin and axis endpoint coordinates
+    float x0 = center_nav_x - 0.8f * ((screenskipby4[1] - screenskipby4[0]) / 2.0f);
+    float y0 = center_nav_y - 0.8f * ((screenskipby4[3] - screenskipby4[2]) / 2.0f);
 
-    const float verts[6 * (3 + 4)] = {
-            x0, y0, 0, 1, 0, 0, 0.5,
-            x1, y1, 0, 1, 0, 0, 0.5,
-            x0, y0, 0, 0, 1, 0, 0.5,
-            x2, y2, 0, 0, 1, 0, 0.5,
-            x0, y0, 0, 0, 0, 1, 0.5,
-            x3, y3, 0, 0, 0, 1, 0.5,
-    };
-    GFXDraw(GFXLINE, verts, 6, 3, 4);
+    float x1 = x0 + (directionx.i * (0.3f / (0.3f - directionx.k)));
+    float y1 = y0 + (directionx.j * (0.3f / (0.3f - directionx.k)));
 
-    GFXEnable(TEXTURE0);
-    //**********************************
+    float x2 = x0 + (directiony.i * (0.3f / (0.3f - directiony.k)));
+    float y2 = y0 + (directiony.j * (0.3f / (0.3f - directiony.k)));
+
+    float x3 = x0 + (directionz.i * (0.3f / (0.3f - directionz.k)));
+    float y3 = y0 + (directionz.j * (0.3f / (0.3f - directionz.k)));
+
+    // Convert normalized coordinates to screen pixels
+    ImVec2 p0(static_cast<float>(Coordinates::normToPixelX(x0)), static_cast<float>(Coordinates::normToPixelY(y0)));
+    ImVec2 p1(static_cast<float>(Coordinates::normToPixelX(x1)), static_cast<float>(Coordinates::normToPixelY(y1)));
+    ImVec2 p2(static_cast<float>(Coordinates::normToPixelX(x2)), static_cast<float>(Coordinates::normToPixelY(y2)));
+    ImVec2 p3(static_cast<float>(Coordinates::normToPixelX(x3)), static_cast<float>(Coordinates::normToPixelY(y3)));
+
+    ImDrawList* drawList = ImGui::GetForegroundDrawList();
+
+    // Packed RGB colors with 0.5 (128) Alpha
+    const ImU32 red   = IM_COL32(255,   0,   0, 128); // X Axis
+    const ImU32 green = IM_COL32(  0, 255,   0, 128); // Y Axis
+    const ImU32 blue  = IM_COL32(  0,   0, 255, 128); // Z Axis
+
+    // Draw origin triad lines
+    drawList->AddLine(p0, p1, red,   2.0f);
+    drawList->AddLine(p0, p2, green, 2.0f);
+    drawList->AddLine(p0, p3, blue,  2.0f);
 }
 
 float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale,
@@ -1979,6 +1974,9 @@ void NavigationSystem::TranslateAndDisplay(QVector &pos,
     DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, system_not_galaxy);
 }
 
+/*
+ * Display orientation projection lines using ImGui DrawList and pixel projection.
+ */
 void NavigationSystem::DisplayOrientationLines(float the_x,
         float the_y,
         float the_x_flat,
@@ -1987,43 +1985,58 @@ void NavigationSystem::DisplayOrientationLines(float the_x,
     if ((system_not_galaxy ? system_view : galaxy_view) == VIEW_ORTHO) {
         return;
     }
-    //Draw orientation lines
-    //**********************************
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
-    GFXColorf(GFXColor(0.5, 0.5, 0.5, .15));
+
+    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+
+    // Default line color: Grey with ~15% Alpha
+    GFXColor lineCol(0.5f, 0.5f, 0.5f, 0.15f);
 
     bool display_flat_circle = true;
     if ((the_y_flat > screenskipby4[3])
             || (the_y_flat < screenskipby4[2])
             || (the_x_flat > screenskipby4[1])
             || (the_x_flat < screenskipby4[0])) {
-        GFXColorf(GFXColor(0, 1, 1, .05));
+        // Cyan tint with 5% Alpha if flat point is out of screen bounds
+        lineCol = GFXColor(0.0f, 1.0f, 1.0f, 0.05f);
         display_flat_circle = false;
     }
+
     bool display_flat = true;
     if ((the_x > screenskipby4[1])
             || (the_x < screenskipby4[0])
             || (the_y > screenskipby4[3])
             || (the_y < screenskipby4[2])) {
-        GFXColorf(GFXColor(1, 1, 0, .05));
+        // Yellow tint with 5% Alpha if main point is out of screen bounds
+        lineCol = GFXColor(1.0f, 1.0f, 0.0f, 0.05f);
         display_flat = false;
     }
+
     if (display_flat) {
         IntersectBorder(the_x_flat, the_y_flat, the_x, the_y);
-        const float verts[2 * 3] = {
-                the_x_flat, the_y_flat, 0,
-                the_x, the_y, 0,
-        };
-        GFXDraw(GFXLINE, verts, 2);
+
+        // Draw the orientation vector line
+        ImVec2 p1 = ImVec2(
+            static_cast<float>(Coordinates::normToPixelX(the_x_flat)),
+            static_cast<float>(Coordinates::normToPixelY(the_y_flat))
+        );
+        ImVec2 p2 = ImVec2(
+            static_cast<float>(Coordinates::normToPixelX(the_x)),
+            static_cast<float>(Coordinates::normToPixelY(the_y))
+        );
+
+        ImU32 colPacked = IM_COL32(
+            static_cast<int>(lineCol.r * 255.0f),
+            static_cast<int>(lineCol.g * 255.0f),
+            static_cast<int>(lineCol.b * 255.0f),
+            static_cast<int>(lineCol.a * 255.0f)
+        );
+
+        drawList->AddLine(p1, p2, colPacked, 1.0f);
+
         if (display_flat_circle) {
-            DrawCircle(the_x_flat, the_y_flat, (.005 * system_item_scale), GFXColor(1, 1, 1, .2));
+            DrawCircle(the_x_flat, the_y_flat, (0.005f * system_item_scale), GFXColor(1.0f, 1.0f, 1.0f, 0.2f));
         }
     }
-
-    GFXEnable(TEXTURE0);
-    //**********************************
 }
 
 void Beautify(string systemfile, string &sector, string &system) {

@@ -264,7 +264,7 @@ int TextPlane::Draw(const string &newText, int offset, bool start_lower, bool fo
 
     std::vector<TextLine> lines = ParseText(newText, color);
     ImVec2 text_size;
-    ImDrawList* draw_list = ImGui::GetForegroundDrawList();
+    ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
     const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
     
     // Move one line up if not start_lower 
