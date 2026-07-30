@@ -39,11 +39,15 @@ The current core development team consists of:
   - Vegastrike.org
   - Announcements
   - Social Media (Facebook, Twitter/X, YouTube, etc)
+  - Release Support (Making releases, testing)
 - [Stephen G. Tuggy](https://github.com/stephengtuggy)
   - Coder
   - Windows and Mac support
   - Docker Images
   - GitHub Actions
+  - Release Support (Making releases, testing)
+  - Copyright Maintenance
+  - OS Version Support List Maintenance
 - [Roy Falk](https://github.com/royfalk)
   - Coder
   - Linux support
