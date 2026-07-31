@@ -12,10 +12,19 @@
 # as published by the Free Software Foundation; either version 3
 # of the License, or (at your option) any later version.
 #
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see
+# <https://www.gnu.org/licenses/>.
+#
 
 bl_info = {
     "name": "Vega Strike (.xmesh) Import",
-    "author": "Danny Gehl with Gemini AI",
+    "author": "Danny Gehl",
     "version": (0, 3, 0),
     "blender": (4, 2, 0),
     "location": "File > Import > Vega Strike (.xmesh)",
@@ -27,7 +36,6 @@ bl_info = {
 
 import os
 import xml.sax
-
 import bpy
 from bpy_extras.io_utils import ImportHelper
 from bpy.props import StringProperty
@@ -36,13 +44,16 @@ from bpy.types import Operator
 
 def find_texture(path, file_name):
     """Locate a texture file beside the mesh or under ../../textures."""
+    if not file_name:
+        return None
+        
     source_path = os.path.join(path, file_name)
     if os.path.isfile(source_path):
         return source_path
 
     search_base_dir = os.path.normpath(os.path.join(path, "..", "..", "textures"))
     if not os.path.isdir(search_base_dir):
-		# vessels have an extra sub directory
+        # vessels have an extra sub directory
         search_base_dir = os.path.normpath(os.path.join(path, "..", "..", "..", "textures"))
         if not os.path.isdir(search_base_dir):
             return None
@@ -67,7 +78,6 @@ def _load_image(filepath):
 def _make_material(obj_name, handler):
     mat = bpy.data.materials.new(name=obj_name + ".mat")
     mat.use_nodes = True
-    mat.use_backface_culling = False
 
     nodes = mat.node_tree.nodes
     links = mat.node_tree.links
@@ -83,21 +93,23 @@ def _make_material(obj_name, handler):
     diffuse = handler.rgb_col or [1.0, 1.0, 1.0]
     bsdf.inputs["Base Color"].default_value = (diffuse[0], diffuse[1], diffuse[2], 1.0)
     
-    if handler.alpha is not None:
+    if handler.alpha < 1.0:
         bsdf.inputs["Alpha"].default_value = handler.alpha
-        if handler.alpha < 1.0:
-            mat.blend_method = "BLEND"
+        mat.blend_method = "BLEND"
             
-    if handler.emit is not None and handler.emit > 0.0:
+    if handler.emit > 0.0:
         bsdf.inputs["Emission Strength"].default_value = handler.emit
         
     if handler.spec is not None:
-        bsdf.inputs["Specular IOR Level"].default_value = handler.spec
+        if "Specular IOR Level" in bsdf.inputs:
+            bsdf.inputs["Specular IOR Level"].default_value = handler.spec
+        elif "Specular" in bsdf.inputs:
+            bsdf.inputs["Specular"].default_value = handler.spec
         
     if handler.spec_col:
         bsdf.inputs["Specular Tint"].default_value = (handler.spec_col[0], handler.spec_col[1], handler.spec_col[2], 1.0)
 
-    # 1. Color Texture
+    # 1. Color Texture (Texture)
     color_socket = None
     if handler.color_texture:
         color_path = find_texture(handler.path, handler.color_texture)
@@ -108,10 +120,10 @@ def _make_material(obj_name, handler):
                 tex_node.image = color_image
                 tex_node.location = (-300, 200)
                 color_socket = tex_node.outputs["Color"]
-                if handler.alpha is not None and handler.alpha < 1.0:
+                if handler.alpha < 1.0:
                     links.new(tex_node.outputs["Alpha"], bsdf.inputs["Alpha"])
 
-    if color_socket and handler.rgb_col:
+    if color_socket and handler.rgb_col != [1.0, 1.0, 1.0]:
         mix = nodes.new("ShaderNodeMix")
         mix.data_type = "RGBA"
         mix.blend_type = "MULTIPLY"
@@ -124,8 +136,8 @@ def _make_material(obj_name, handler):
         links.new(color_socket, bsdf.inputs["Base Color"])
 
     # 2. Specular Texture (Texture1)
-    if handler.spec_texture:
-        spec_path = find_texture(handler.path, handler.spec_texture)
+    if handler.texture1:
+        spec_path = find_texture(handler.path, handler.texture1)
         if spec_path:
             spec_image = _load_image(spec_path)
             if spec_image:
@@ -136,31 +148,25 @@ def _make_material(obj_name, handler):
                 spec_node.location = (-300, -100)
                 links.new(spec_node.outputs["Color"], bsdf.inputs["Specular Tint"])
 
-	# 3. Emissive Texture (Texture2)
-    if handler.spec_texture2:
-        emis_path = find_texture(handler.path, handler.spec_texture2)
+    # 3. Emissive / Damage Texture (Texture2)
+    if handler.texture2:
+        emis_path = find_texture(handler.path, handler.texture2)
         if emis_path:
             emis_image = _load_image(emis_path)
             if emis_image:
-                # Emissive maps are usually treated as color data, not non-color
-                # Remove the Non-Color check if your texture is data-driven
                 emis_node = nodes.new("ShaderNodeTexImage")
                 emis_node.image = emis_image
                 emis_node.location = (-300, -400)
                 
-                # Connect to Emission input of the Principled BSDF
                 links.new(emis_node.outputs["Color"], bsdf.inputs["Emission Color"])
-                
-                # Set Emission Strength (optional, default to 1.0)
                 bsdf.inputs["Emission Strength"].default_value = 1.0
 
     # 4. Normal Map Texture (Texture4)
-    if handler.spec_texture4:
-        normal_path = find_texture(handler.path, handler.spec_texture4)
+    if handler.texture4:
+        normal_path = find_texture(handler.path, handler.texture4)
         if normal_path:
             normal_image = _load_image(normal_path)
             if normal_image:
-                # Normal maps MUST use Non-Color space data to render correctly
                 if normal_image.colorspace_settings.name != 'Non-Color':
                     normal_image.colorspace_settings.name = 'Non-Color'
                 
@@ -171,7 +177,6 @@ def _make_material(obj_name, handler):
                 normal_map_node = nodes.new("ShaderNodeNormalMap")
                 normal_map_node.location = (-250, -600)
                 
-                # Link Texture -> Normal Map Node -> Principled BSDF
                 links.new(normal_tex_node.outputs["Color"], normal_map_node.inputs["Color"])
                 links.new(normal_map_node.outputs["Normal"], bsdf.inputs["Normal"])
 
@@ -183,19 +188,22 @@ def create_xmesh_object(handler):
     mesh.from_pydata(handler.verts, [], handler.faces)
     mesh.update()
 
+    # Assign UV Coordinates
     if handler.faceuvs and handler.uvs:
         uv_layer = mesh.uv_layers.new(name="UVMap")
         for face_idx, poly in enumerate(mesh.polygons):
-            for corner_idx, loop_idx in enumerate(
-                range(poly.loop_start, poly.loop_start + poly.loop_total)
-            ):
+            for corner_idx, loop_idx in enumerate(range(poly.loop_start, poly.loop_start + poly.loop_total)):
                 uv_index = handler.faceuvs[face_idx][corner_idx]
                 uv_layer.data[loop_idx].uv = handler.uvs[uv_index]
+
+    # Assign Custom Normals if present
+    if len(handler.normals) == len(handler.verts):
+        mesh.normals_split_custom_set_from_vertices(handler.normals)
 
     obj = bpy.data.objects.new(handler.obj_name, mesh)
     handler.context.collection.objects.link(obj)
 
-    # Store Vega Strike mesh configurations as Custom Properties for future exporting
+    # Store Vega Strike properties with standardized keys matching the Exporter
     obj["xmesh_scale"] = handler.scale
     obj["xmesh_reverse"] = handler.reverse
     obj["xmesh_forcetexture"] = handler.forcetexture
@@ -204,25 +212,19 @@ def create_xmesh_object(handler):
     obj["xmesh_blend"] = handler.blend
     obj["xmesh_alphatest"] = handler.alphatest
     
-    # Store Vega Strike material configurations as Custom Properties
     obj["mat_power"] = handler.mat_power
     obj["mat_cullface"] = handler.mat_cullface
     obj["mat_reflect"] = handler.mat_reflect
     obj["mat_lighting"] = handler.mat_lighting
     obj["mat_usenormals"] = handler.mat_usenormals
     
-    # Track original texture fields even if not loaded by default node setups
     if handler.color_texture: obj["xmesh_texture"] = handler.color_texture
-    if handler.spec_texture: obj["xmesh_texture1"] = handler.spec_texture
-    if handler.spec_texture1: obj["xmesh_texture2"] = handler.spec_texture1
-    if handler.spec_texture2: obj["xmesh_texture3"] = handler.spec_texture2
-    if handler.spec_texture4: obj["xmesh_texture4"] = handler.spec_texture4
+    if handler.texture1: obj["xmesh_texture1"] = handler.texture1
+    if handler.texture2: obj["xmesh_texture2"] = handler.texture2
+    if handler.texture4: obj["xmesh_texture4"] = handler.texture4
 
     mat = _make_material(handler.obj_name, handler)
     mesh.materials.append(mat)
-
-    for poly in mesh.polygons:
-        poly.use_smooth = True
 
     return obj
 
@@ -238,10 +240,11 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
 
         self.faces = []
         self.verts = []
+        self.normals = []
         self.uvs = []
         self.faceuvs = []
 
-        # Default fallback values for Material properties
+        # Material defaults
         self.rgb_col = [1.0, 1.0, 1.0]
         self.alpha = 1.0
         self.emit = 0.0
@@ -249,123 +252,96 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
         self.spec_col = None
         self.amb = 0.0
 
-        # Read header fields defaults
+        # Header defaults
         self.scale = 1.0
         self.reverse = 0
         self.forcetexture = 0
         self.sharevert = 0
-        self.polygonoffset = 0.000000
+        self.polygonoffset = 0.0
         self.blend = "ONE ZERO"
-        self.alphatest = 0.000000
-        self.color_texture = None
-        self.spec_texture = None
-        self.spec_texture1 = None
-        self.spec_texture2 = None
-        self.spec_texture3 = None
-        self.spec_texture4 = None
+        self.alphatest = 0.0
+        
+        self.color_texture = ""
+        self.texture1 = ""
+        self.texture2 = ""
+        self.texture4 = ""
+
         self.mat_power = 60.0
         self.mat_cullface = 1
-        self.mat_reflect = 0
+        self.mat_reflect = 0.0
         self.mat_lighting = 1
         self.mat_usenormals = 1
 
     def _progress(self, factor):
-        if self._wm:
-            self._wm.progress_update(int(factor * 100))
+        try:
+            if self._wm:
+                self._wm.progress_update(int(factor * 100))
+        except Exception:
+            pass
 
     def startDocument(self):
-        print("Loading file...")
-        if self._wm:
-            self._wm.progress_begin(0, 100)
-        self._progress(0.0)
+        try:
+            if self._wm:
+                self._wm.progress_begin(0, 100)
+        except Exception:
+            pass
 
     def endDocument(self):
-        print("Finished loading file, constructing mesh...")
-        self._progress(0.9)
         create_xmesh_object(self)
-        print("Done, object built")
-        self._progress(1.0)
-        if self._wm:
-            self._wm.progress_end()
+        try:
+            if self._wm:
+                self._wm.progress_end()
+        except Exception:
+            pass
 
     def startElement(self, pname, attr_mixed):
         name = pname.lower()
         attr = {key.lower(): value for key, value in attr_mixed.items()}
 
         if name == "mesh":
-            if "texture" in attr:
-                self.color_texture = attr["texture"]
-                print("* color tex:", self.color_texture)
-            if "texture1" in attr:
-                self.spec_texture = attr["texture1"]
-                print("* spec tex:", self.spec_texture)
-            if "texture2" in attr:
-                self.spec_texture1 = attr["texture2"]
-                print("* dmg tex:", self.spec_texture1)
-            if "texture3" in attr:
-                self.spec_texture2 = attr["texture3"]
-                print("* glow tex:", self.spec_texture2)
-            if "texture4" in attr:
-                self.spec_texture4 = attr["texture4"]
-                print("* norm tex:", self.spec_texture4)
+            self.color_texture = attr.get("texture", "")
+            self.texture1 = attr.get("texture1", "")
+            self.texture2 = attr.get("texture2", "")
+            self.texture4 = attr.get("texture4", "")
 
-            for key, value in attr.items():
-                if key.startswith("scale"):
-                    try:
-                        self.scale = float(value)
-                    except ValueError:
-                        self.scale = 1.0
-                elif key == "reverse":
-                    self.reverse = int(value)
-                elif key == "forcetexture":
-                    self.forcetexture = int(value)
-                elif key == "sharevert":
-                    self.sharevert = int(value)
-                elif key == "polygonoffset":
-                    self.polygonoffset = float(value)
-                elif key == "blend":
-                    self.blend = value
-                elif key == "alphatest":
-                    self.alphatest = float(value)
-        elif name == "points":
-            print("Reading vertex coordinates...")
-            self._progress(0.1)
+            if "scale" in attr:
+                try: self.scale = float(attr["scale"])
+                except ValueError: pass
+            if "reverse" in attr: self.reverse = int(attr["reverse"])
+            if "forcetexture" in attr: self.forcetexture = int(attr["forcetexture"])
+            if "sharevert" in attr: self.sharevert = int(attr["sharevert"])
+            if "polygonoffset" in attr: self.polygonoffset = float(attr["polygonoffset"])
+            if "blend" in attr: self.blend = attr["blend"]
+            if "alphatest" in attr: self.alphatest = float(attr["alphatest"])
+
         elif name == "location":
-            self.verts.append(
-                (float(attr["x"]), float(attr["y"]), float(attr["z"]))
-            )
-        elif name == "polygons":
-            print("Reading faces...")
-            self._progress(0.25)
+            self.verts.append((float(attr["x"]), float(attr["y"]), float(attr["z"])))
+            
+        elif name == "normal":
+            self.normals.append((float(attr["i"]), float(attr["j"]), float(attr["k"])))
+
         elif name in ("tri", "quad", "trifan"):
             self._face_verts = []
             self._face_uvs = []
+
         elif name == "vertex":
             self._face_verts.append(int(attr["point"]))
             self._face_uvs.append((float(attr["s"]), 1.0 - float(attr["t"])))
+
         elif name == "diffuse":
-            self.rgb_col = [
-                float(attr["red"]),
-                float(attr["green"]),
-                float(attr["blue"]),
-            ]
+            self.rgb_col = [float(attr["red"]), float(attr["green"]), float(attr["blue"])]
             self.alpha = float(attr["alpha"])
+
         elif name == "ambient":
-            self.amb = (
-                float(attr["red"]) + float(attr["green"]) + float(attr["blue"])
-            ) / 3.0 * float(attr["alpha"])
+            self.amb = (float(attr["red"]) + float(attr["green"]) + float(attr["blue"])) / 3.0 * float(attr["alpha"])
+
         elif name == "specular":
-            spec_intensity = float(attr.get("alpha", 0.5))
-            self.spec_col = [
-                float(attr["red"]),
-                float(attr["green"]),
-                float(attr["blue"]),
-            ]
-            self.spec = spec_intensity
+            self.spec_col = [float(attr["red"]), float(attr["green"]), float(attr["blue"])]
+            self.spec = float(attr.get("alpha", 0.5))
+
         elif name == "emissive":
-            self.emit = (
-                float(attr["red"]) + float(attr["green"]) + float(attr["blue"])
-            ) / 3.0 * float(attr["alpha"])
+            self.emit = (float(attr["red"]) + float(attr["green"]) + float(attr["blue"])) / 3.0 * float(attr["alpha"])
+
         elif name == "material":
             if "power" in attr: self.mat_power = float(attr["power"])
             if "cullface" in attr: self.mat_cullface = int(attr["cullface"])
@@ -379,29 +355,16 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
         if name in ("tri", "quad"):
             self.faces.append(self._face_verts)
             insert_pos = len(self.uvs)
-            self.faceuvs.append(
-                list(range(insert_pos, insert_pos + len(self._face_uvs)))
-            )
+            self.faceuvs.append(list(range(insert_pos, insert_pos + len(self._face_uvs))))
             self.uvs.extend(self._face_uvs)
+
         elif name == "trifan":
             fan_idx = 2
             while fan_idx < len(self._face_verts):
-                self.faces.append(
-                    [
-                        self._face_verts[0],
-                        self._face_verts[fan_idx - 1],
-                        self._face_verts[fan_idx],
-                    ]
-                )
+                self.faces.append([self._face_verts[0], self._face_verts[fan_idx - 1], self._face_verts[fan_idx]])
                 insert_pos = len(self.uvs)
                 self.faceuvs.append(list(range(insert_pos, insert_pos + 3)))
-                self.uvs.extend(
-                    [
-                        self._face_uvs[0],
-                        self._face_uvs[fan_idx - 1],
-                        self._face_uvs[fan_idx],
-                    ]
-                )
+                self.uvs.extend([self._face_uvs[0], self._face_uvs[fan_idx - 1], self._face_uvs[fan_idx]])
                 fan_idx += 1
 
 

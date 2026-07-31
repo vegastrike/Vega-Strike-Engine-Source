@@ -13,10 +13,24 @@
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
 
+
+#
+# XMESH exporter for Blender v5.2+ by Danny Gehl
+# Written from the ground up for XMESH and for the latest Blender API.
+# This is an evolution of the XMESH exporter for Blender v2.28+ (by dandandaman <dandandaman@users.sourceforge.net>
+# Reference was taken of Volker [vmx] Mische's OBJ script for v2.11+
 bl_info = {
     "name": "Vega Strike (.xmesh) Export",
-    "author": "Danny Gehl with Gemini AI",
+    "author": "Danny Gehl",
     "version": (0, 3, 0),
     "blender": (4, 2, 0),
     "location": "File > Export > Vega Strike (.xmesh)",
@@ -24,20 +38,35 @@ bl_info = {
     "category": "Import-Export",
 }
 
-import os
 import bpy
+import bmesh
+from xml.sax.saxutils import quoteattr
 from bpy_extras.io_utils import ExportHelper
-from bpy.props import StringProperty
+from bpy.props import StringProperty, BoolProperty
 from bpy.types import Operator
 
 
-def export_object_to_xmesh(obj, filepath):
-    # Ensure we use an evaluated mesh version to capture modifiers if applied
+def escape_attr(val):
+    """Safely format and quote string values for XML attributes."""
+    return quoteattr(str(val))
+
+
+def export_object_to_xmesh(obj, filepath, triangulate=True):
     depsgraph = bpy.context.evaluated_depsgraph_get()
     obj_eval = obj.evaluated_get(depsgraph)
-    mesh = obj_eval.to_mesh()
+    
+    # Use BMesh to optionally triangulate N-Gons cleanly
+    bm = bmesh.new()
+    bm.from_mesh(obj_eval.to_mesh())
+    
+    if triangulate:
+        bmesh.ops.triangulate(bm, faces=bm.faces[:])
+        
+    mesh = bpy.data.meshes.new(name="temp_xmesh")
+    bm.to_mesh(mesh)
+    bm.free()
 
-    # Re-fetch fallback custom property values if preserved from structural import
+    # Re-fetch fallback custom property values
     scale = obj.get("xmesh_scale", 1.0)
     reverse = obj.get("xmesh_reverse", 0)
     forcetexture = obj.get("xmesh_forcetexture", 0)
@@ -58,91 +87,74 @@ def export_object_to_xmesh(obj, filepath):
     mat_lighting = obj.get("mat_lighting", 1)
     mat_usenormals = obj.get("mat_usenormals", 1)
 
-    # Attempt to fall back to shader node values if custom properties aren't populated
+    # Fallback to Shader Nodes for texture mapping
     if not texture and obj.data.materials:
         mat = obj.data.materials[0]
-        if mat.use_nodes:
+        if mat and mat.use_nodes:
             for node in mat.node_tree.nodes:
                 if node.type == 'TEX_IMAGE' and node.image:
-                    if "NORMAL" in node.image.name.upper() or node.image.colorspace_settings.name == 'Non-Color':
-                        texture4 = node.image.name
+                    img_name = node.image.name
+                    if "NORMAL" in img_name.upper() or node.image.colorspace_settings.name == 'Non-Color':
+                        texture4 = img_name
                     else:
-                        texture = node.image.name
+                        texture = img_name
 
-    with open(filepath, "w", encoding="utf-8") as f:
-        # Mesh properties formatting
-        f.write(f'<Mesh scale="{scale:.6f}" ')
-        f.write(f'reverse="{reverse}" forcetexture="{forcetexture}" sharevert="{sharevert}" ')
-        f.write(f'polygonoffset="{polygonoffset:.6f}" blend="{blend}" alphatest="{alphatest:.6f}"')
-        if texture: f.write(f' texture="{texture}"')
-        if texture1: f.write(f' texture1="{texture1}"')
-        if texture2: f.write(f' texture2="{texture2}"')
-        if texture4: f.write(f' texture4="{texture4}"')
-        f.write(">\n")
+    try:
+        with open(filepath, "w", encoding="utf-8") as f:
+            # Header writing with attribute escaping
+            f.write(f'<Mesh scale="{scale:.6f}" ')
+            f.write(f'reverse="{reverse}" forcetexture="{forcetexture}" sharevert="{sharevert}" ')
+            f.write(f'polygonoffset="{polygonoffset:.6f}" blend={escape_attr(blend)} alphatest="{alphatest:.6f}"')
+            if texture: f.write(f' texture={escape_attr(texture)}')
+            if texture1: f.write(f' texture1={escape_attr(texture1)}')
+            if texture2: f.write(f' texture2={escape_attr(texture2)}')
+            if texture4: f.write(f' texture4={escape_attr(texture4)}')
+            f.write(">\n")
 
-        # Re-build Material section with clean fallback tracking
-        f.write(f'<Material power="{mat_power:.6f}" cullface="{mat_cullface}" reflect="{mat_reflect}" ')
-        f.write(f'lighting="{mat_lighting}" usenormals="{mat_usenormals}">\n')
-        
-        # Pull color attributes directly from standard fallbacks
-        f.write('\t<Ambient Red="1.000000" Green="1.000000" Blue="1.000000" Alpha="1.000000"/>\n')
-        f.write('\t<Diffuse Red="1.000000" Green="1.000000" Blue="1.000000" Alpha="1.000000"/>\n')
-        f.write('\t<Emissive Red="0.000000" Green="0.000000" Blue="0.000000" Alpha="1.000000"/>\n')
-        f.write('\t<Specular Red="1.000000" Green="1.000000" Blue="1.000000" Alpha="1.000000"/>\n')
-        f.write("</Material>\n")
+            # Material block
+            f.write(f'<Material power="{mat_power:.6f}" cullface="{mat_cullface}" reflect="{mat_reflect}" ')
+            f.write(f'lighting="{mat_lighting}" usenormals="{mat_usenormals}">\n')
+            f.write('\t<Ambient Red="1.000000" Green="1.000000" Blue="1.000000" Alpha="1.000000"/>\n')
+            f.write('\t<Diffuse Red="1.000000" Green="1.000000" Blue="1.000000" Alpha="1.000000"/>\n')
+            f.write('\t<Emissive Red="0.000000" Green="0.000000" Blue="0.000000" Alpha="1.000000"/>\n')
+            f.write('\t<Specular Red="1.000000" Green="1.000000" Blue="1.000000" Alpha="1.000000"/>\n')
+            f.write("</Material>\n")
 
-		# Map vertices to their first encountered UV coordinates
-        vert_uvs = {i: (0.0, 0.0) for i in range(len(mesh.vertices))}
-        uv_layer = mesh.uv_layers.active
-        
-        if uv_layer:
+            # Write Points (3D Coordinates & Normals)
+            f.write("<Points>\n")
+            for vert in mesh.vertices:
+                norm = vert.normal
+                f.write("\t<Point>\n")
+                f.write(f'\t\t<Location x="{vert.co.x:.6f}" y="{vert.co.y:.6f}" z="{vert.co.z:.6f}"/>\n')
+                f.write(f'\t\t<Normal i="{norm.x:.6f}" j="{norm.y:.6f}" k="{norm.z:.6f}"/>\n')
+                f.write("\t</Point>\n")
+            f.write("</Points>\n")
+
+            # Write Polygons with Per-Loop UVs
+            f.write("<Polygons>\n")
+            uv_layer = mesh.uv_layers.active
+
             for poly in mesh.polygons:
+                p_type = "Tri" if len(poly.loop_indices) == 3 else "Quad" if len(poly.loop_indices) == 4 else "Trifan"
+                f.write(f"\t<{p_type}>\n")
+                
                 for loop_idx in poly.loop_indices:
                     vert_idx = mesh.loops[loop_idx].vertex_index
-                    uv = uv_layer.data[loop_idx].uv
-                    # Flip V-axis back cleanly for VegaStrike layout specs (1.0 - y)
-                    vert_uvs[vert_idx] = (uv.x, 1.0 - uv.y)
-
-        # Vertex location layout writing (Simple & Clean)
-        f.write("<Points>\n")
-        for i, vert in enumerate(mesh.vertices):
-            s_coord, t_coord = vert_uvs[i]
-            
-            # Simple, standard inverted vertex normals
-            norm_i = -vert.normal.x
-            norm_j = -vert.normal.y
-            norm_k = -vert.normal.z
-            
-            f.write("\t<Point>\n")
-            f.write(f'\t\t<Location x="{vert.co.x:.6f}" y="{vert.co.y:.6f}" z="{vert.co.z:.6f}" s="{s_coord:.6f}" t="{t_coord:.6f}"/>\n')
-            f.write(f'\t\t<Normal i="{norm_i:.6f}" j="{norm_j:.6f}" k="{norm_k:.6f}"/>\n')
-            f.write("\t</Point>\n")
-        f.write("</Points>\n")
-
-        # Polygons calculation layout writing
-        f.write("<Polygons>\n")
-        uv_layer = mesh.uv_layers.active
-
-        for poly in mesh.polygons:
-            p_type = "Tri" if len(poly.loop_indices) == 3 else "Quad" if len(poly.loop_indices) == 4 else "Trifan"
-            f.write(f"\t<{p_type}>\n")
-            
-            for loop_idx in poly.loop_indices:
-                vert_idx = mesh.loops[loop_idx].vertex_index
-                s_coord, t_coord = 0.0, 0.0
-                if uv_layer:
-                    uv = uv_layer.data[loop_idx].uv
-                    s_coord = uv.x
-                    t_coord = 1.0 - uv.y  # Flip V-axis back cleanly for VegaStrike layout specs
+                    s_coord, t_coord = 0.0, 0.0
+                    if uv_layer:
+                        uv = uv_layer.data[loop_idx].uv
+                        s_coord = uv.x
+                        t_coord = 1.0 - uv.y  # Invert V-axis for DirectX/VegaStrike spec
+                    
+                    f.write(f'\t\t<Vertex point="{vert_idx}" s="{s_coord:.6f}" t="{t_coord:.6f}"/>\n')
                 
-                f.write(f'\t\t<Vertex point="{vert_idx}" s="{s_coord:.6f}" t="{t_coord:.6f}"/>\n')
-            
-            f.write(f"\t</{p_type}>\n")
-        f.write("</Polygons>\n")
+                f.write(f"\t</{p_type}>\n")
+            f.write("</Polygons>\n")
+            f.write("</Mesh>\n")
 
-        f.write("</Mesh>\n")
-
-    obj_eval.to_mesh_clear()
+    finally:
+        bpy.data.meshes.remove(mesh)
+        obj_eval.to_mesh_clear()
 
 
 class ExportXMesh(Operator, ExportHelper):
@@ -156,6 +168,12 @@ class ExportXMesh(Operator, ExportHelper):
         default="*.xmesh",
         options={'HIDDEN'},
         maxlen=255,
+    )
+
+    triangulate: BoolProperty(
+        name="Triangulate Mesh",
+        description="Convert all n-gons and quads to triangles before exporting",
+        default=True,
     )
 
     def execute(self, context):
@@ -173,8 +191,8 @@ class ExportXMesh(Operator, ExportHelper):
             self.report({'ERROR'}, "No valid Mesh object selected for export.")
             return {'CANCELLED'}
 
-        export_object_to_xmesh(target_obj, self.filepath)
-        self.report({'INFO'}, f"Successfully exported structural xmesh file to {self.filepath}")
+        export_object_to_xmesh(target_obj, self.filepath, triangulate=self.triangulate)
+        self.report({'INFO'}, f"Successfully exported xmesh file to {self.filepath}")
         return {'FINISHED'}
 
 
