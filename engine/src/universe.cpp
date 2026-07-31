@@ -411,8 +411,19 @@ void Universe::StartDraw() {
     RESETTIME();
 #endif
     GFXBeginScene();
+    // ImGui Init
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+    // End ImGui Init
+    ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
+    const ImVec2 window_size(configuration().graphics.resolution_x,
+                            configuration().graphics.resolution_y);
+    ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
+
     size_t i;
     StarSystem* lastStarSystem = nullptr;
+    ImGui::Begin("main_window", nullptr, window_flags);
     for (i = 0; i < _cockpits.size(); ++i) {
         SetActiveCockpit(i);
         float x{};
@@ -434,31 +445,12 @@ void Universe::StartDraw() {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double update_gfx_end_time = realTime();
 #endif
-        // ImGui Init
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
-
-        // End ImGui Init
-        ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
-        const ImVec2 window_size(configuration().graphics.resolution_x,
-                                configuration().graphics.resolution_y);
-        ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
-        ImGui::Begin("main_window", nullptr, window_flags);
 
         if (!RefreshGUI() && !UniverseUtil::isSplashScreenShowing()) {
             activeStarSystem()->Draw();
         }
 
         // ImGui End Frame
-        ImGui::End();
-        // Rendering
-        ImGui::Render();
-
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        SDL_Window* current_window = SDL_GL_GetCurrentWindow();
-        SDL_GL_SwapWindow(current_window);
-        // End ImGui
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double draw_active_star_system_end_time = realTime();
         VS_LOG(trace,
@@ -467,6 +459,7 @@ void Universe::StartDraw() {
 #endif
         AccessCamera()->SetSubwindow(0, 0, 1, 1);
     }
+    ImGui::End();
     UpdateTime();
     UpdateTimeCompressionSounds();
     _Universe->SetActiveCockpit(randomInt(_cockpits.size() - 1, 0));
@@ -498,7 +491,13 @@ void Universe::StartDraw() {
 #endif
         SetActiveCockpit(i);
         pushActiveStarSystem(AccessCockpit(i)->activeStarSystem);
+        
+        // continue drawing in the main window as events can add to the drawlist
+        ImGui::Begin("main_window");
         ProcessInput(i);                       //input neesd to be taken care of;
+                // ImGui End Frame
+        ImGui::End();
+
         popActiveStarSystem();
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double process_input_end_time = realTime();
@@ -515,6 +514,14 @@ void Universe::StartDraw() {
 #if defined(LOG_TIME_TAKEN_DETAILS)
     const double gfx_end_scene_start_time = realTime();
 #endif
+    // Rendering imgui frame
+    ImGui::Render();
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_GL_SwapWindow(current_window);
+    // End ImGui
+
     GFXEndScene();
 #if defined(LOG_TIME_TAKEN_DETAILS)
     const double gfx_end_scene_end_time = realTime();
