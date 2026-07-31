@@ -37,7 +37,7 @@ Below are the official places to find the current developers:
 AI :robot:
 ==========
 
-Use of AI is a contraversal topic. However, it is inevitable and now part of the world we live in. So while ideally we would not allow it that is no longer feasible as people will
+Use of AI is a controversial topic. However, it is inevitable and now part of the world we live in. So while ideally we would not allow it that is no longer feasible as people will
 then simply not declare their use of AI and then unknown risks have entered into the project. Therefore we kindly ask that anyone that wishes to contribute with AI follow the
 guidelines below.
 
