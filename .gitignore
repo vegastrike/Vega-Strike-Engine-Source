@@ -3,6 +3,8 @@ build/
 build-*/
 cmake-build/
 cmake-build-*/
+CMakeFiles
+*.cmake
 data/
 ext/
 *.pyc
