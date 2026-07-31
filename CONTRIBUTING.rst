@@ -37,19 +37,33 @@ Below are the official places to find the current developers:
 Licensing
 =========
 
-Please bear in mind that we are bound to accept contributions under the following licenses. This means that if you submit your work for use in Vega Strike, it will be automatically licensed under GPL unless you state one of the other licenses:
-* (GPL) GNU General Public License
-* (LGPL) GNU Lesser General Public License
-* (GPDL) GNU General Public Documentation License
-* (PD) Public Domain
-* (CC-BY) Creative Commons By Attribution license
-* (CC-SA) Creative Commons Share Alike license
-* (CC-BY-SA) Creative Commons By Attribution Share Alike license
+Vega Strike and our various Game Assets are licensed under a variety of licenses as documented by `Vega Strike: Licensing`_.
 
-Please note that we do not allow licenses not mentioned above, in particular:
-* (CC-NC) Creative Commons Non-Commercial license or any combination with CC-BY and CC-SA
+This repository specifically covers the Vega Strike Engine which is simply licensed under the GNU General Public License v3 or later.
 
-For a more updated list, please see `Vega Strike: Licensing`_.
+Engine Code
+-----------
+
+All specific code that is fully under the control of this project and not imported from another project
+needs to be licensed under the GNU General Public License v3 or later.
+
+Libraries
+---------
+
+There are times that third party libraries have to get integrated directly to the Vega Strike Engine code because
+of how they are distributed. Such libraries need to follow these rules:
+
+1. They must be linkable against code licensed with the GNU General Public License v3 or later.
+2. They must be distributable with a valid Open Source License, as defined by the Open Source Definition and maintained by the Open Source Initiative.
+3. Wrappers to them should be either in the project's original license or under the Vega Strike Engine's license.
+
+When integrating a new third party library please be prepared to discuss its licensing.
+
+History
+-------
+
+The Vega Strike Engine code was originally licensed under the GNU General Public License v2 or later.
+It was migrated to GNU General Public v3 or later after moving to GitHub and in full compliance with the existing license.
 
 Building
 ========
