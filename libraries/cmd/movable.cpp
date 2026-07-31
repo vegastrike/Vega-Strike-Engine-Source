@@ -168,6 +168,24 @@ void Movable::UpdatePhysics(const Transformation& trans,
         //clamp velocity
         // TODO: use resource class to do this more elegantly
         ResolveForces(trans, transmat);
+        // Enforce the flight computer's set speed on the RESULTING velocity
+        // magnitude (not per-axis), so turning or moving diagonally cannot push
+        // the ship past the speed the pilot set. This runs after the velocity
+        // integration, so it holds for the frame. Warp (SPEC) is exempt.
+        const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+        if (graphicOptions.WarpFieldStrength == 1.0) {
+            double limit = unit->computer.set_speed;
+            // If already moving faster than set_speed (e.g. afterburn), allow up
+            // to the afterburner speed so the boost is not cut off abruptly.
+            const double mag = Velocity.Magnitude();
+            if (mag > limit && unit->afterburner.CanConsume()) {
+                limit = unit->MaxAfterburnerSpeed();
+            }
+            if (limit > 0 && mag > limit) {
+                Velocity *= (limit / mag);
+            }
+        }
+        // Hard per-axis physical safety cap (applies in all modes, incl. warp).
         float velocity_max = configuration().physics.velocity_max_flt;
         if (Velocity.i > velocity_max) {
             Velocity.i = velocity_max;
