@@ -25,21 +25,15 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "src/vegastrike.h"
-
 #include "staticdisplay.h"
 
 #include "guidefs.h"
 #include "scroller.h"
 #include "configuration/configuration.h"
 
-#include "root_generic/vs_globals.h"
-#include "src/config_xml.h"
-#include "root_generic/xml_support.h"
-
 //The StaticDisplay class is used to show something on a window.
-//Right now, it only supports text, but could be expanded to support
-//images, textures, meshes, etc.
+//Right now, it supports formatted text which can be single-line or multi-line.
+//it can be used in a scrollable container as well
 //This control does not respond to input events.
 
 //The rect for the text object has changed -- reset it.
@@ -75,8 +69,8 @@ void StaticDisplay::draw(void) {
         m_scroller->setScrollPosition(m_scrollPosition);
         m_layoutVersion = m_paintText.layoutVersion();         //Remember layout version for next time.
     }
-    m_paintText.drawLines(m_scrollPosition);
-}
+    m_paintText.draw(m_scrollPosition);
+}  
 
 //Set the object that takes care of scrolling.
 void StaticDisplay::setScroller(Scroller *s) {

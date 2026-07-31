@@ -25,7 +25,6 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "src/vegastrike.h"
 #include "scroller.h"
 #include "newbutton.h"
 #include "slider.h"
