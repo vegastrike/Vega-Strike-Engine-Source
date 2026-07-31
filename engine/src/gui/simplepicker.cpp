@@ -25,9 +25,6 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-#include "src/vegastrike.h"
-
 #include "simplepicker.h"
 
 static const int CHILD_VECTOR_RESERVE = 20;         //Make sure we don't get many re-alloc's.
