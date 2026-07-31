@@ -26,10 +26,13 @@
  */
 
 #include "root_generic/vs_globals.h"
+
+#include <iostream>
 #include <time.h>
 #include <stdio.h>
 #include <string>
 #include <locale>
+#include <ostream>
 
 /*
  * Globals
@@ -47,6 +50,34 @@ float audio_atom_var = (float) (1.0 / 18.0);
 Mission *mission = nullptr;
 
 double benchmark = -1.0;
+
+std::locale &GetGlobalLocale() {
+    const auto kLocaleNames = {"C.UTF-8", "C.UTF8", "C.utf8", "C", "POSIX", "en_US.UTF8", "en_US.UTF8", "en_US.utf8"};
+    static std::locale * our_locale = nullptr;
+    if (our_locale == nullptr) {
+        for (const auto & kLocaleName : kLocaleNames) {
+            try {
+                our_locale = new std::locale(kLocaleName);
+                // If we get to this line, that means success! Found a locale we can use
+                break;
+            } catch (const std::bad_alloc &) {
+                std::cerr << "Locale memory allocation failed. Exiting..." << std::endl;
+                exit(-1);
+            } catch (const std::runtime_error &) {
+                // This locale didn't work. Try the next one
+                continue;
+            }
+        }
+        if (our_locale == nullptr) {
+            std::cerr << "Unable to find a compatible locale. Exiting..." << std::endl;
+            exit(-1);
+        } else {
+            std::cout << "Found a compatible locale: " << our_locale->name() << std::endl;
+        }
+    }
+    return *our_locale;
+}
+
 bool STATIC_VARS_DESTROYED = false;
 const char *mission_key = "unit_to_dock_with";
 
@@ -56,6 +87,3 @@ double avg_loop = 0;
 int nb_checks = 1;
 double last_check = 1;
 double cur_check = 1;
-
-const std::string kLocaleName = "C.UTF-8";
-std::locale our_numeric_locale = std::locale(kLocaleName);
