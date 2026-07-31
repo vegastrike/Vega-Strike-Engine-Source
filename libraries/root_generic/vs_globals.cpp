@@ -52,7 +52,7 @@ Mission *mission = nullptr;
 double benchmark = -1.0;
 
 std::locale &GetGlobalLocale() {
-    const auto kLocaleNames = {"C.UTF-8", "C.UTF8", "C.utf8", "C", "POSIX", "en_US.UTF8", "en_US.UTF8", "en_US.utf8"};
+    const auto kLocaleNames = {"C.UTF-8", "C.UTF8", "C.utf8", "C", "POSIX", "en_US.UTF-8", "en_US.UTF8", "en_US.utf8"};
     static std::locale * our_locale = nullptr;
     if (our_locale == nullptr) {
         for (const auto & kLocaleName : kLocaleNames) {
