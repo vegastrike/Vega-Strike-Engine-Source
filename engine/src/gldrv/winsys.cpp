@@ -559,7 +559,7 @@ static bool setup_sdl_video_mode() {
     get_screen_measurements();
 
     // Initialize imgui
-    InitGui(window, &context);
+    InitGui(window, &context, configuration().graphics.font_point_dbl);
 
     return true;
 }

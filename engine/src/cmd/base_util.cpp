@@ -888,13 +888,13 @@ const Dictionary &GetEventData() {
     return _GetEventData();
 }
 
+//  Python accessor, not used in cpp
 float GetTextHeight(std::string text, Vector widheimult) {
-    static constexpr bool force_highquality = true;
-    constexpr bool use_bit = force_highquality ||  configuration().graphics.high_quality_font;
     const float font_point = configuration().graphics.font_point_flt;
-    return use_bit ? getFontHeight() : (font_point * 2 / configuration().graphics.resolution_y);
+    return font_point * 2 / configuration().graphics.resolution_y;
 }
 
+//  Python accessor, not used in cpp
 float GetTextWidth(std::string text, Vector widheimult) {
     //Unsupported for now
     return 0;

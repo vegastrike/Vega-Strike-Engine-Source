@@ -25,8 +25,6 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "src/vegastrike.h"
-
 #include "window.h"
 
 #include "eventmanager.h"
@@ -38,6 +36,7 @@
 //For drawing the cursor.
 #include "gfx/aux_texture.h"
 #include "gfx/sprite.h"
+#include "imgui/imgui.h"
 
 //The outside boundaries of the window.
 void Window::setRect(const Rect &r) {
@@ -85,8 +84,42 @@ Control *Window::findControlById(const std::string &id) {
 
 //Draw/redraw the whole window.
 void Window::draw(void) {
-    drawBackground();
-    m_controls->draw();
+    // Convert normalized VS coordinates to pixels for ImGui
+    float x = Coordinates::normToPixelX(m_rect.left());
+    float y = Coordinates::normToPixelY(m_rect.top()); // ImGui origin is top-left
+    float w = Coordinates::normToPixelW(m_rect.size.width);
+    float h = Coordinates::normToPixelH(m_rect.size.height);
+
+    ImGui::SetNextWindowPos(ImVec2(x, y), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+
+    // Give each window a unique name based on its pointer or index
+    std::string windowName = "LegacyWindow_" + std::to_string(reinterpret_cast<uintptr_t>(this));
+
+    // Lock down the window flags so it behaves like a static legacy container
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | 
+                             ImGuiWindowFlags_NoResize | 
+                             ImGuiWindowFlags_NoMove | 
+                             ImGuiWindowFlags_NoScrollbar | 
+                             ImGuiWindowFlags_NoSavedSettings;
+
+    // Set background color matching legacy window color
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(m_color.r, m_color.g, m_color.b, m_color.a));
+
+    if (ImGui::Begin(windowName.c_str(), nullptr, flags)) {
+        
+        // Run control drawing routines inside this isolated ImGui context, this allows for hybrid imgui/gx rendering
+        if (m_controller) {
+            m_controller->draw();
+        }
+        
+        drawBackground();
+        m_controls->draw();
+    }
+    ImGui::End();
+    
+    ImGui::PopStyleColor();
+
 }
 
 //Draw window background.

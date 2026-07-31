@@ -28,7 +28,7 @@
 #define VEGA_STRIKE_ENGINE_GUI_PICKER_H
 
 #include "control.h"
-#include "painttext.h"
+#include "gui/imguitext.h"
 
 #include <list>
 
@@ -248,7 +248,7 @@ protected:
     struct DisplayCell {
         PickerCell *cell;
         int level;              //How much indent for this cell.  0 = no indent.
-        PaintText paintText;  //Object containing drawn text.
+        ImGuiText paintText;  //Object containing drawn text.
 
         DisplayCell(PickerCell *c = NULL, int l = 0) : cell(c), level(l), paintText() {
         }

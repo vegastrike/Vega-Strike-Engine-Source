@@ -205,17 +205,13 @@ static float drawChars(const string &str,
         float inRasterPos) {
     //Make sure the graphics state is right.
     GFXColorf(color);
-    if (useStroke()) {
-        glLineWidth(font.strokeWidth());
-    } else {
-        const bool setRasterPos = configuration().graphics.set_raster_text_color;
-        if (setRasterPos) {
-            glRasterPos2f(inRasterPos / (configuration().graphics.resolution_x / 2), 0);
-        }
-    }
+    GFXEnable(TEXTURE0);
+    glLineWidth(font.strokeWidth());
     //Draw all the characters.
     for (int charPos = start; charPos <= end; charPos++) {
-        inRasterPos += font.drawChar(str[charPos]);
+        if(str[charPos] != '\0') {
+            inRasterPos += font.drawChar(str[charPos], inRasterPos);
+        }
     }
     return inRasterPos;
 }
@@ -228,8 +224,16 @@ void PaintText::drawLines(size_t start, size_t count) const {
     if (m_lines.empty()) {
         return;
     }
+    // Save current textures
+    GLint saved_texture;
+    GLint saved_active_texture;
+
+    // Get which texture unit is currently active
+    glGetIntegerv(GL_ACTIVE_TEXTURE, &saved_active_texture);
+    // Get the binding for the currently active unit (usually GL_TEXTURE0)
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture);
     //Initialize the graphics state.
-    GFXToggleTexture(false, 0);
+    GFXToggleTexture(true, 0);
     if (configuration().graphics.smooth_lines) {
         glEnable(GL_LINE_SMOOTH);
     }
@@ -280,6 +284,9 @@ void PaintText::drawLines(size_t start, size_t count) const {
     }
     glPopMatrix();
     GFXToggleTexture(true, 0);
+    // restore previous texture
+    GFXActiveTexture(saved_active_texture);
+    glBindTexture(GL_TEXTURE_2D, saved_texture);
 }
 
 //Get a floating-point argument for a PaintText format command.
@@ -733,7 +740,7 @@ void PaintText::calcLayout(void) {
         //SINGLE LINE.
         currentLine->height = m_rect.size.height;
         currentLine->baseLine = (currentLine->height - m_font.size()) / 2.0
-                + m_verticalScaling * REFERENCE_FONT_ASCENDER;
+                + m_verticalScaling * m_font.ascent();
 
         string::size_type ignorePos = 0;
         bool ellipsis = (m_widthExceeded == ELLIPSIS);
@@ -751,7 +758,8 @@ void PaintText::calcLayout(void) {
         while (true) {
             //Figure vertical measurements before we parse the line.
             currentLine->height = m_layout.fontStack.back().size() * m_layout.currentLineSpacing;
-            currentLine->baseLine = currentLine->height - m_verticalScaling * REFERENCE_BASELINE_POS;
+            currentLine->baseLine = (currentLine->height - m_font.size()) / 2.0f 
+                                        + m_verticalScaling * m_font.ascent();
 
             //Get the first line of chars, including the length.
             string::size_type endNextLinePos = 0;
