@@ -38,6 +38,7 @@
 #include "gfx/vsimage.h"
 #include "gldrv/gl_globals.h"
 #include "gfx/aux_texture.h"
+#include "imguitext.h"
 
 using namespace VSFileSystem;
 
@@ -56,19 +57,47 @@ bool GuiTexture::read(const std::string &fileName) {
 
 //Draw this texture, stretching to fit the rect.
 void GuiTexture::draw(const Rect &rect) const {
-    //Don't draw unless there is something usable.
+    // Don't draw unless there is something usable.
     if (m_texture == NULL || !m_texture->LoadSuccess()) {
         return;
     }
     m_texture->MakeActive();
-    GFXColor4f(1, 1, 1, 1);
-    const float verts[4 * (3 + 2)] = {
-            rect.left(), rect.top(), 0, 0, 1,
-            rect.left(), rect.bottom(), 0, 0, 0,
-            rect.right(), rect.bottom(), 0, 1, 0,
-            rect.right(), rect.top(), 0, 1, 1,
-    };
-    GFXDraw(GFXQUAD, verts, 4, 3, 0, 2);
+
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    if (!draw_list) return;
+
+    // Convert normalized Vega Strike coordinates to pixels
+    float pMinX = Coordinates::normToPixelX(rect.left());
+    float pMinY = Coordinates::normToPixelY(rect.top());
+    float pMaxX = Coordinates::normToPixelX(rect.right());
+    float pMaxY = Coordinates::normToPixelY(rect.bottom());
+
+    // Extract the OpenGL texture ID
+    GLint actual_gl_id = 0;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &actual_gl_id);
+
+    // Guard against invalid/unbound textures
+    if (actual_gl_id <= 0) {
+        return;
+    }
+    ImTextureID texID = static_cast<ImTextureID>(static_cast<uintptr_t>(actual_gl_id));
+
+    // Map UV coordinates to match original vertex layout
+    ImVec2 uv_min(0.0f, 1.0f);
+    ImVec2 uv_max(1.0f, 0.0f);
+
+    // Default white tint (equivalent to GFXColor4f(1, 1, 1, 1))
+    ImU32 tintColor = IM_COL32(255, 255, 255, 255);
+
+    // Submit to ImGui draw list instead of immediate-mode GFXDraw
+    draw_list->AddImage(
+        texID, 
+        ImVec2(pMinX, pMinY), 
+        ImVec2(pMaxX, pMaxY), 
+        uv_min, 
+        uv_max, 
+        tintColor
+    );
 }
 
 //CONSTRUCTION
