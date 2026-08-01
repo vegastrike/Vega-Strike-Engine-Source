@@ -679,25 +679,6 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
             afterburn
                     ? ((unit->afterburner.thrust - unit->drive.forward.Value()) * abfuelclamp + unit->drive.forward.Value() * fuelclamp)
                     : unit->drive.forward.Value();
-    if (!afterburn) {
-        // When at or above the set speed AND moving forward, don't push the
-        // main thruster harder than the orthogonal thrusters can counter.
-        // Otherwise a turn accelerates into the new heading (main thruster)
-        // faster than the orthogonal thrusters can decelerate the old
-        // heading, letting the speed climb past the set point. At speed in a
-        // straight line the FCMP requests ~no forward thrust, so this only
-        // bites during turns (or any re-direction).
-        //
-        // Moving forward (Velocity.k > 0) is required: if the craft is facing
-        // into its motion (e.g. flipped around to brake with the main engine),
-        // forward thrust DECELERATES and must be available at full power.
-        // Afterburn is exempt: it is meant to accelerate.
-        const float speed = Velocity.Magnitude();
-        const float ortho = std::max(unit->drive.lateral.Value(), unit->drive.vertical.Value());
-        if (speed >= unit->computer.set_speed && Velocity.k > 0 && ablimit > ortho) {
-            ablimit = ortho;
-        }
-    }
     if (amt1.k > ablimit) {
         Res.k = ablimit;
     }
@@ -712,6 +693,41 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     }
     if (amt1.k < -retro_limit) {
         Res.k = -retro_limit;
+    }
+    if (!afterburn) {
+        // At or above the set speed and moving forward, the FCMP may only
+        // REDIRECT the velocity, not accelerate it: remove the component of
+        // the final thrust parallel to the current velocity. This keeps the
+        // speed from climbing past the set point during turns, while the
+        // perpendicular (redirecting) component keeps firing until all speed
+        // is in the intended (forward) direction. Applied AFTER the per-axis
+        // clamps (so they cannot override it), then re-clamped per-axis so
+        // the projection cannot exceed the physical thruster limits.
+        //
+        // Deceleration is never affected: moving backward (Velocity.k < 0)
+        // skips this, and retro thrust is parallel-negative so it is kept.
+        // Afterburn is exempt: it is meant to accelerate.
+        const float speed = Velocity.Magnitude();
+        if (speed >= unit->computer.set_speed && Velocity.k > 0 && speed > 0) {
+            const Vector vhat = Velocity / speed;
+            const double parallel = Res.Dot(vhat);
+            if (parallel > 0) {
+                Res -= vhat * parallel;
+                // Re-clamp per-axis after the projection.
+                if (fabs(Res.i) > fabs(fuelclamp * unit->drive.lateral)) {
+                    Res.i = copysign(fuelclamp * unit->drive.lateral, Res.i);
+                }
+                if (fabs(Res.j) > fabs(fuelclamp * unit->drive.vertical)) {
+                    Res.j = copysign(fuelclamp * unit->drive.vertical, Res.j);
+                }
+                if (Res.k > ablimit) {
+                    Res.k = ablimit;
+                }
+                if (Res.k < -retro_limit) {
+                    Res.k = -retro_limit;
+                }
+            }
+        }
     }
 
     if (afterburn) {
