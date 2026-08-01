@@ -704,6 +704,12 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
         // never overshoot the set point. This continues until all speed is in
         // the intended direction.
         //
+        // IMPORTANT: use the FRESH local velocity (UpCoordinateLevel of the
+        // world velocity), exactly as the FCMP does. The raw Velocity member
+        // is not re-expressed when the ship rotates, so it is stale/mixed
+        // after a turn and projecting against it leaves residuals that
+        // accumulate into overshoot.
+        //
         // If the perpendicular result exceeds a per-axis thruster limit,
         // scale it down PRESERVING DIRECTION (never re-clamp per-axis, which
         // would reintroduce the accelerating component).
@@ -711,9 +717,10 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
         // Deceleration is never affected: moving backward (Velocity.k < 0)
         // skips this, and retro thrust is parallel-negative so it is kept.
         // Afterburn is exempt: it is meant to accelerate.
-        const float speed = Velocity.Magnitude();
-        if (speed >= unit->computer.set_speed && Velocity.k > 0 && speed > 0) {
-            const Vector vhat = Velocity / speed;
+        const Vector local_vel = UpCoordinateLevel(GetVelocity());
+        const float speed = local_vel.Magnitude();
+        if (speed >= unit->computer.set_speed && local_vel.k > 0 && speed > 0) {
+            const Vector vhat = local_vel / speed;
             const double parallel = Res.Dot(vhat);
             if (parallel > 0) {
                 Res -= vhat * parallel;
