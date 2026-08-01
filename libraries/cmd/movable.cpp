@@ -182,11 +182,26 @@ void Movable::UpdatePhysics(const Transformation& trans,
             // A fuel-only proxy (CanConsume) would wrongly lift the limit during
             // a turn, letting turn overspeed ride up to the afterburn speed.
             const double mag = Velocity.Magnitude();
-            if (mag > limit && unit->afterburner.active) {
-                limit = unit->MaxAfterburnerSpeed();
-            }
-            if (limit > 0 && mag > limit) {
-                Velocity *= (limit / mag);
+            if (mag > limit) {
+                if (unit->afterburner.active) {
+                    limit = unit->MaxAfterburnerSpeed();
+                }
+                if (mag > limit) {
+                    // Decelerate toward the limit at the max rate the opposing
+                    // thrusters can produce (per-axis drive limits), not an
+                    // instant snap. Overspeed from afterburn release, travel
+                    // mode, or turns bleeds off at the ship's real
+                    // deceleration capability. Use the direction opposite to
+                    // the current velocity so forward motion bleeds via retro
+                    // thrust, sideways via lateral, etc.
+                    const double decel = GetMaxAccelerationInDirectionOf(-Velocity, unit->afterburner.active);
+                    const double bleed = decel * simulation_atom_var;
+                    double newmag = mag - bleed;
+                    if (newmag < limit) {
+                        newmag = limit;
+                    }
+                    Velocity *= (newmag / mag);
+                }
             }
         }
     }
