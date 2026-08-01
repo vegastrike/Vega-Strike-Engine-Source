@@ -701,8 +701,17 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     if (amt1.k > ablimit) {
         Res.k = ablimit;
     }
-    if (amt1.k < -unit->drive.retro) {
-        Res.k = -unit->drive.retro;
+    // Retro (braking) thrust: afterburn also boosts deceleration, so the
+    // afterburner's extra thrust is available when braking just as it is when
+    // accelerating forward. Mirrors the forward ablimit formula.
+    float retro_limit = unit->drive.retro.Value();
+    if (afterburn) {
+        retro_limit =
+                (unit->afterburner.thrust - unit->drive.retro.Value()) * abfuelclamp
+                + unit->drive.retro.Value() * fuelclamp;
+    }
+    if (amt1.k < -retro_limit) {
+        Res.k = -retro_limit;
     }
 
     if (afterburn) {
