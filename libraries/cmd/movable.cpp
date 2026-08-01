@@ -696,13 +696,17 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     }
     if (!afterburn) {
         // At or above the set speed and moving forward, the FCMP may only
-        // REDIRECT the velocity, not accelerate it: remove the component of
-        // the final thrust parallel to the current velocity. This keeps the
-        // speed from climbing past the set point during turns, while the
-        // perpendicular (redirecting) component keeps firing until all speed
-        // is in the intended (forward) direction. Applied AFTER the per-axis
-        // clamps (so they cannot override it), then re-clamped per-axis so
-        // the projection cannot exceed the physical thruster limits.
+        // REDIRECT the velocity, not accelerate it. After the per-axis
+        // clamps, remove the component of the final thrust parallel to the
+        // current velocity. The remaining thrust is perpendicular to the
+        // velocity: it rotates the velocity toward the intended (forward)
+        // direction while keeping the speed constant, so the total speed can
+        // never overshoot the set point. This continues until all speed is in
+        // the intended direction.
+        //
+        // If the perpendicular result exceeds a per-axis thruster limit,
+        // scale it down PRESERVING DIRECTION (never re-clamp per-axis, which
+        // would reintroduce the accelerating component).
         //
         // Deceleration is never affected: moving backward (Velocity.k < 0)
         // skips this, and retro thrust is parallel-negative so it is kept.
@@ -713,19 +717,22 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
             const double parallel = Res.Dot(vhat);
             if (parallel > 0) {
                 Res -= vhat * parallel;
-                // Re-clamp per-axis after the projection.
-                if (fabs(Res.i) > fabs(fuelclamp * unit->drive.lateral)) {
-                    Res.i = copysign(fuelclamp * unit->drive.lateral, Res.i);
+                // Scale the whole vector down (preserving direction) so each
+                // axis stays within its physical thruster limit.
+                float scale = 1.0f;
+                const float lim_i = fabs(fuelclamp * unit->drive.lateral);
+                const float lim_j = fabs(fuelclamp * unit->drive.vertical);
+                const float lim_k = (Res.k > 0) ? ablimit : retro_limit;
+                if (lim_i > 0 && fabs(Res.i) > lim_i) {
+                    scale = std::min(scale, lim_i / fabs(Res.i));
                 }
-                if (fabs(Res.j) > fabs(fuelclamp * unit->drive.vertical)) {
-                    Res.j = copysign(fuelclamp * unit->drive.vertical, Res.j);
+                if (lim_j > 0 && fabs(Res.j) > lim_j) {
+                    scale = std::min(scale, lim_j / fabs(Res.j));
                 }
-                if (Res.k > ablimit) {
-                    Res.k = ablimit;
+                if (lim_k > 0 && fabs(Res.k) > lim_k) {
+                    scale = std::min(scale, lim_k / fabs(Res.k));
                 }
-                if (Res.k < -retro_limit) {
-                    Res.k = -retro_limit;
-                }
+                Res *= scale;
             }
         }
     }
