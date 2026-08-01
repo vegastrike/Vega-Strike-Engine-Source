@@ -656,10 +656,7 @@
         "CMAKE_TOOLCHAIN_FILE": {
           "value": "cmake/Homebrew.cmake",
           "type": "FILEPATH"
-        },
-        "CMAKE_FIND_FRAMEWORK": "LAST",
-        "INSTALL_GTEST": "OFF",
-        "USE_GTEST": "OFF"
+        }
       },
       "condition": {
         "type": "equals",
