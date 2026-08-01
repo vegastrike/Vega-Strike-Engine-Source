@@ -1944,6 +1944,8 @@ namespace vega_config {
 
     struct {
         bool auto_hide = true;
+        std::string loading_sprite = "load_screen.ani";
+        std::string loading_message = "Loading...";
 
     } splash;
 

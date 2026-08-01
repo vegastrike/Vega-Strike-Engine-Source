@@ -6734,6 +6734,16 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 splash.auto_hide = boost::json::value_to<bool>(*auto_hide_value_ptr);
             }
 
+            const boost::json::value * loading_sprite_value_ptr = splash_object.if_contains("loading_sprite");
+            if (loading_sprite_value_ptr != nullptr) {
+                splash.loading_sprite = boost::json::value_to<std::string>(*loading_sprite_value_ptr);
+            }
+
+            const boost::json::value * loading_message_value_ptr = splash_object.if_contains("loading_message");
+            if (loading_message_value_ptr != nullptr) {
+                splash.loading_message = boost::json::value_to<std::string>(*loading_message_value_ptr);
+            }
+
         }
 
 
