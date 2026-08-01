@@ -166,6 +166,26 @@ namespace UniverseUtil {
     }
 
     std::string vsConfig(std::string category, std::string option, std::string def) {
+        // The old vegastrike.config XML map_variables is gone; resolve known
+        // settings from config.json (configuration()). Unknown keys return
+        // the caller's default (mop-up: migrate remaining vsConfig call sites).
+        if (category == "graphics") {
+            if (option == "x_resolution") {
+                return std::to_string(configuration().graphics.resolution_x);
+            }
+            if (option == "y_resolution") {
+                return std::to_string(configuration().graphics.resolution_y);
+            }
+            if (option == "base_max_width") {
+                return std::to_string(configuration().graphics.bases.max_width);
+            }
+            if (option == "base_max_height") {
+                return std::to_string(configuration().graphics.bases.max_height);
+            }
+            if (option == "aspect") {
+                return std::to_string(configuration().graphics.aspect_flt);
+            }
+        }
         return vs_config->getVariable(category, option, def);
     }
 
