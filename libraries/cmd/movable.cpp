@@ -679,6 +679,21 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
             afterburn
                     ? ((unit->afterburner.thrust - unit->drive.forward.Value()) * abfuelclamp + unit->drive.forward.Value() * fuelclamp)
                     : unit->drive.forward.Value();
+    if (!afterburn) {
+        // When at or above the set speed, don't push the main thruster harder
+        // than the orthogonal thrusters can counter. Otherwise a turn
+        // accelerates into the new heading (main thruster) faster than the
+        // orthogonal thrusters can decelerate the old heading, letting the
+        // speed climb past the set point. At speed in a straight line the
+        // FCMP requests ~no forward thrust, so this only bites during turns
+        // (or any re-direction). Afterburn is exempt: it is meant to
+        // accelerate.
+        const float speed = Velocity.Magnitude();
+        const float ortho = std::max(unit->drive.lateral.Value(), unit->drive.vertical.Value());
+        if (speed >= unit->computer.set_speed && ablimit > ortho) {
+            ablimit = ortho;
+        }
+    }
     if (amt1.k > ablimit) {
         Res.k = ablimit;
     }
