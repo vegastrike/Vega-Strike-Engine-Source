@@ -177,11 +177,12 @@ void Movable::UpdatePhysics(const Transformation& trans,
         const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
         if (graphicOptions.WarpFieldStrength == 1.0) {
             double limit = unit->computer.set_speed;
-            // If already moving faster than set_speed (e.g. afterburn), allow
-            // up to the resource-backed afterburner speed so the boost is not
-            // cut off abruptly.
+            // Allow up to the afterburner speed only when the afterburner is
+            // ACTIVELY engaged (afterburn && CanConsume, set in Movable::Thrust).
+            // A fuel-only proxy (CanConsume) would wrongly lift the limit during
+            // a turn, letting turn overspeed ride up to the afterburn speed.
             const double mag = Velocity.Magnitude();
-            if (mag > limit && unit->afterburner.CanConsume()) {
+            if (mag > limit && unit->afterburner.active) {
                 limit = unit->MaxAfterburnerSpeed();
             }
             if (limit > 0 && mag > limit) {
@@ -749,6 +750,10 @@ void Movable::RollTorque(float amt) {
 void Movable::Thrust(const Vector &amt1, bool afterburn) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     afterburn = afterburn && unit->afterburner.CanConsume();
+    // Record whether the afterburner is actively engaged this step. The
+    // velocity clamp in UpdatePhysics reads this to allow afterburn speed only
+    // when the burner is truly active (not merely when fuel exists).
+    unit->afterburner.active = afterburn;
 
     //Unit::Thrust( amt1, afterburn );
     {
