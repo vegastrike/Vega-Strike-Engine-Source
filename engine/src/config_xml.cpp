@@ -49,6 +49,7 @@
 #include "src/python/python_compile.h"
 #include "src/vs_logging.h"
 #include "src/sdl_key_converter.h"
+#include "configuration/configuration.h"
 
 /* *********************************************************** */
 
@@ -255,248 +256,116 @@ void GameVegaConfig::initCommandMap() // DELETE ME
 
 /* *********************************************************** */
 
-void GameVegaConfig::doBindings(configNode *node) {
-    vector<easyDomNode *>::const_iterator siter;
-    for (siter = node->subnodes.begin(); siter != node->subnodes.end(); siter++) {
-        configNode *cnode = (configNode *) (*siter);
-        if ((cnode)->Name() == "bind") {
-            checkBind(cnode);
-        } else if (((cnode)->Name() == "axis")) {
-            doAxis(cnode);
-        } else {
-            VS_LOG(warning, (boost::format("Unknown tag: %1%") % (cnode)->Name()));
-        }
-    }
-}
-
 /* *********************************************************** */
 
-void GameVegaConfig::doAxis(configNode *node) {
-    string name = node->attr_value("name");
-    string myjoystick = node->attr_value("joystick");
-    string axis = node->attr_value("axis");
-    string invertstr = node->attr_value("inverse");
-    string mouse_str = node->attr_value("mouse");
-    if (name.empty() || (mouse_str.empty() && myjoystick.empty()) || axis.empty()) {
-        VS_LOG(warning, "no correct axis description given ");
-        return;
-    }
-    int joy_nr = atoi(myjoystick.c_str());
-    if (!mouse_str.empty()) {
-        joy_nr = MOUSE_JOYSTICK;
-    }
-    int axis_nr = atoi(axis.c_str());
-
-    //no checks for correct number yet
-
-    bool inverse = false;
-    if (!invertstr.empty()) {
-        inverse = XMLSupport::parse_bool(invertstr);
-    }
-    if (name == "x") {
-        axis_joy[0] = joy_nr;
-        joystick[joy_nr]->axis_axis[0] = axis_nr;
-        joystick[joy_nr]->axis_inverse[0] = inverse;
-    } else if (name == "y") {
-        axis_joy[1] = joy_nr;
-        joystick[joy_nr]->axis_axis[1] = axis_nr;
-        joystick[joy_nr]->axis_inverse[1] = inverse;
-    } else if (name == "z") {
-        axis_joy[2] = joy_nr;
-        joystick[joy_nr]->axis_axis[2] = axis_nr;
-        joystick[joy_nr]->axis_inverse[2] = inverse;
-    } else if (name == "throttle") {
-        axis_joy[3] = joy_nr;
-        joystick[joy_nr]->axis_axis[3] = axis_nr;
-        joystick[joy_nr]->axis_inverse[3] = inverse;
-    } else if (name == "hatswitch") {
-        string nr_str = node->attr_value("nr");
-        string margin_str = node->attr_value("margin");
-        if (nr_str.empty() || margin_str.empty()) {
-            VS_LOG(warning, "you have to assign a number and a margin to the hatswitch");
-            return;
-        }
-        int nr = atoi(nr_str.c_str());
-
-        float margin = atof(margin_str.c_str());
-        hatswitch_margin[nr] = margin;
-
-        hatswitch_axis[nr] = axis_nr;
-        hatswitch_joystick[nr] = joy_nr;
-
-        vector<easyDomNode *>::const_iterator siter;
-
-        hs_value_index = 0;
-        for (siter = node->subnodes.begin(); siter != node->subnodes.end(); siter++) {
-            configNode *cnode = (configNode *) (*siter);
-            checkHatswitch(nr, cnode);
-        }
-    } else {
-        VS_LOG(warning, (boost::format("unknown axis %1%") % name));
-        return;
-    }
-}
-
-/* *********************************************************** */
-
-void GameVegaConfig::checkHatswitch(int nr, configNode *node) {
-    if (node->Name() != "hatswitch") {
-        VS_LOG(warning, "not a hatswitch node ");
-        return;
-    }
-    string strval = node->attr_value("value");
-    float val = atof(strval.c_str());
-    if (val > 1.0 || val < -1.0) {
-        VS_LOG(error, "only hatswitch values from -1.0 to 1.0 allowed");
-        return;
-    }
-    hatswitch[nr][hs_value_index] = val;
-    VS_LOG(info, (boost::format("setting hatswitch nr %1% %2% = %3%") % nr % hs_value_index % val));
-    hs_value_index++;
-}
-
-/* *********************************************************** */
-
-void GameVegaConfig::checkBind(configNode *node) {
-    if (node->Name() != "bind") {
-        VS_LOG(warning, "not a bind node ");
-        return;
-    }
-    std::string modifier_string = node->attr_value("modifier");
-    int modifier = getModifier(modifier_string);
-
-    string cmdstr = node->attr_value("command");
-    string player_bound = node->attr_value("player");
-    if (player_bound.empty()) {
-        player_bound = "0";
-    }
-    KBHandler handler = commandMap[cmdstr];
-    if (handler == NULL) {
-        VS_LOG(error, (boost::format("No such command: %1%") % cmdstr));
-        return;
-    }
-    string player_str = node->attr_value("player");
-    string joy_str = node->attr_value("joystick");
-    string mouse_str = node->attr_value("mouse");
-    const std::string keystr = node->attr_value("key");
-    string additional_data = node->attr_value("data");
-    string buttonstr = node->attr_value("button");
-    string hat_str = node->attr_value("hatswitch");
-    string dighswitch = node->attr_value("digital-hatswitch");
-    string direction = node->attr_value("direction");
-    if (!player_str.empty()) {
-        if (!joy_str.empty()) {
-            int jn = atoi(joy_str.c_str());
-            if (jn < MAX_JOYSTICKS) {
-                joystick[jn]->player = atoi(player_str.c_str());
-            }
-        } else if (!mouse_str.empty()) {
-            joystick[MOUSE_JOYSTICK]->player = atoi(player_str.c_str());
-        }
-    }
-    if (!keystr.empty()) {
-        //normal keyboard key
-        //now map the command to a callback function and bind it
-        if (keystr.length() == 1) {
-            const int sdl_key_value = SDLKeyConverter::Convert(keystr);
-            BindKey(keystr[0], modifier, XMLSupport::parse_int(player_bound), handler, KBData(additional_data));
-        } else {
-            int glut_key = key_map[keystr];
-            if (glut_key == 0) {
-                VS_LOG(error, (boost::format("No such special key: %1%") % keystr));
-                return;
-            }
-            BindKey(glut_key, modifier, XMLSupport::parse_int(player_bound), handler, KBData(additional_data));
-        }
-    } else if (!buttonstr.empty()) {
-        //maps a joystick button or analogue hatswitch button
-        int button_nr = atoi(buttonstr.c_str());
-        if (joy_str.empty() && mouse_str.empty()) {
-            //it has to be the analogue hatswitch
-            if (hat_str.empty()) {
-                VS_LOG(error, "you got to give an analogue hatswitch number");
-                return;
-            }
-            int hatswitch_nr = atoi(hat_str.c_str());
-
-            BindHatswitchKey(hatswitch_nr, button_nr, handler, KBData(additional_data));
-
-        } else {
-            //joystick button
-            int joystick_nr;
-            if (mouse_str.empty()) {
-                joystick_nr = atoi(joy_str.c_str());
-            } else {
-                joystick_nr = (MOUSE_JOYSTICK);
-            }
-            if (joystick[joystick_nr]->isAvailable()) {
-                //now map the command to a callback function and bind it
-
-                //yet to check for correct buttons/joy-nr
-
-                BindJoyKey(joystick_nr, button_nr, handler, KBData(additional_data));
-            } else {
-                static bool first = true;
-                if (first) {
-                    VS_LOG(warning, "\nrefusing to bind command to joystick (joy-nr too high)");
-                    first = false;
-                }
-            }
-        }
-    } else if (!(dighswitch.empty() || direction.empty() || (mouse_str.empty() && joy_str.empty()))) {
-        //digital hatswitch or ...
-        if (dighswitch.empty() || direction.empty() || (mouse_str.empty() && joy_str.empty())) {
-            VS_LOG(error, "you have to specify joystick,digital-hatswitch,direction");
-            return;
-        }
-        int hsw_nr = atoi(dighswitch.c_str());
-
-        int joy_nr;
-        if (mouse_str.empty()) {
-            joy_nr = atoi(joy_str.c_str());
-        } else {
-            joy_nr = MOUSE_JOYSTICK;
-        }
-        if (!(joystick[joy_nr]->isAvailable() && hsw_nr < joystick[joy_nr]->nr_of_hats)) {
-            VS_LOG(error, "refusing to bind digital hatswitch: no such hatswitch");
-            return;
-        }
-        int dir_index;
-        if (direction == "center") {
-            dir_index = VS_HAT_CENTERED;
-        } else if (direction == "up") {
-            dir_index = VS_HAT_UP;
-        } else if (direction == "right") {
-            dir_index = VS_HAT_RIGHT;
-        } else if (direction == "left") {
-            dir_index = VS_HAT_LEFT;
-        } else if (direction == "down") {
-            dir_index = VS_HAT_DOWN;
-        } else if (direction == "rightup") {
-            dir_index = VS_HAT_RIGHTUP;
-        } else if (direction == "rightdown") {
-            dir_index = VS_HAT_RIGHTDOWN;
-        } else if (direction == "leftup") {
-            dir_index = VS_HAT_LEFTUP;
-        } else if (direction == "leftdown") {
-            dir_index = VS_HAT_LEFTDOWN;
-        } else {
-            VS_LOG(error, "no valid direction string");
-            return;
-        }
-        BindDigitalHatswitchKey(joy_nr, hsw_nr, dir_index, handler, KBData(additional_data));
-        VS_LOG(info,
-                (boost::format("Bound joy %1% hatswitch %2% dir_index %3% to command %4%") % joy_nr % hsw_nr % dir_index
-                        % cmdstr));
-    } else {
-        return;
-    }
-}
-
-/* *********************************************************** */
-
+// Fill the runtime binding tables from config.json (the "actions" and
+// "axes" sections), replacing the old vegastrike.config XML path. The
+// runtime input system (BindKey/BindJoyKey/BindDigitalHatswitchKey +
+// axis_joy[]/joystick[].axis_axis[]) is unchanged - we populate the same
+// structures the XML parser used to.
 void GameVegaConfig::bindKeys() {
-    doBindings(bindings);
+    const auto & cfg = configuration();
+
+    // command name -> handler map (from initGlobalCommandMap)
+    CommandMap & cmd_map = commandMap;
+
+    // Helper to bind one keyboard entry.
+    auto bind_keyboard = [&](const std::string & cmd, const vega_config::Configuration::ActionBinding & b) {
+        KBHandler handler = cmd_map[cmd];
+        if (handler == nullptr) {
+            VS_LOG(error, (boost::format("No such command: %1%") % cmd));
+            return;
+        }
+        int mod = getModifier(b.modifier);
+        if (b.key.length() == 1) {
+            // single printable char (shift already encoded, e.g. '+' for Shift+=)
+            BindKey(b.key[0], mod, 0, handler, KBData());
+        } else {
+            // special key name (tab, cursor-up, function-1, ...)
+            auto it = key_map.find(b.key);
+            if (it == key_map.end()) {
+                VS_LOG(error, (boost::format("No such special key: %1%") % b.key));
+                return;
+            }
+            BindKey(it->second, mod, 0, handler, KBData());
+        }
+    };
+
+    // Helper to bind one mouse/joystick button entry.
+    auto bind_button = [&](const std::string & cmd, const vega_config::Configuration::ActionBinding & b) {
+        KBHandler handler = cmd_map[cmd];
+        if (handler == nullptr) {
+            VS_LOG(error, (boost::format("No such command: %1%") % cmd));
+            return;
+        }
+        int joy_nr = b.is_mouse ? MOUSE_JOYSTICK : b.joystick;
+        if (joy_nr >= MAX_JOYSTICKS || joystick[joy_nr] == nullptr || !joystick[joy_nr]->isAvailable()) {
+            VS_LOG(warning, (boost::format("refusing to bind command %1% to joystick (not available)") % cmd));
+            return;
+        }
+        BindJoyKey(joy_nr, b.button, handler, KBData());
+    };
+
+    // Helper to bind one digital hatswitch entry.
+    auto bind_hat = [&](const std::string & cmd, const vega_config::Configuration::ActionBinding & b) {
+        KBHandler handler = cmd_map[cmd];
+        if (handler == nullptr) {
+            VS_LOG(error, (boost::format("No such command: %1%") % cmd));
+            return;
+        }
+        int joy_nr = b.joystick;
+        if (joy_nr >= MAX_JOYSTICKS || joystick[joy_nr] == nullptr || !joystick[joy_nr]->isAvailable()
+            || b.hatswitch >= joystick[joy_nr]->nr_of_hats) {
+            VS_LOG(warning, (boost::format("refusing to bind command %1% to hatswitch (not available)") % cmd));
+            return;
+        }
+        int dir_index = VS_HAT_CENTERED;
+        if (b.direction == "up") { dir_index = VS_HAT_UP; }
+        else if (b.direction == "right") { dir_index = VS_HAT_RIGHT; }
+        else if (b.direction == "down") { dir_index = VS_HAT_DOWN; }
+        else if (b.direction == "left") { dir_index = VS_HAT_LEFT; }
+        else if (b.direction == "rightup") { dir_index = VS_HAT_RIGHTUP; }
+        else if (b.direction == "rightdown") { dir_index = VS_HAT_RIGHTDOWN; }
+        else if (b.direction == "leftup") { dir_index = VS_HAT_LEFTUP; }
+        else if (b.direction == "leftdown") { dir_index = VS_HAT_LEFTDOWN; }
+        BindDigitalHatswitchKey(joy_nr, b.hatswitch, dir_index, handler, KBData());
+    };
+
+    for (const auto & action : cfg.actions) {
+        const std::string & cmd = action.first;
+        const auto & bindings = action.second;
+        for (const auto & b : bindings.keyboard) { bind_keyboard(cmd, b); }
+        for (const auto & b : bindings.mouse) { bind_button(cmd, b); }
+        for (const auto & b : bindings.joystick) { bind_button(cmd, b); }
+        for (const auto & b : bindings.hat) { bind_hat(cmd, b); }
+    }
+
+    // Axes: x/y/z/throttle -> axis_joy[] + joystick[].axis_axis[]/axis_inverse[]
+    // (the runtime reads these in flyjoystick.cpp; same contract as old XML doAxis)
+    int role_index = -1;
+    if (cfg.axes.count("x")) { role_index = AXIS_X; }
+    else if (cfg.axes.count("y")) { role_index = AXIS_Y; }
+    else if (cfg.axes.count("z")) { role_index = AXIS_Z; }
+    else if (cfg.axes.count("throttle")) { role_index = AXIS_THROTTLE; }
+    (void)role_index;
+    for (const auto & entry : cfg.axes) {
+        const std::string & role = entry.first;
+        const auto & ar = entry.second;
+        int idx = -1;
+        if (role == "x") { idx = AXIS_X; }
+        else if (role == "y") { idx = AXIS_Y; }
+        else if (role == "z") { idx = AXIS_Z; }
+        else if (role == "throttle") { idx = AXIS_THROTTLE; }
+        else { VS_LOG(warning, (boost::format("unknown axis %1%") % role)); continue; }
+        int joy_nr = (ar.source == "mouse") ? MOUSE_JOYSTICK : ar.joystick;
+        if (joy_nr >= MAX_JOYSTICKS || joystick[joy_nr] == nullptr) {
+            VS_LOG(warning, (boost::format("refusing to assign axis %1% to joystick (not available)") % role));
+            continue;
+        }
+        axis_joy[idx] = joy_nr;
+        joystick[joy_nr]->axis_axis[idx] = ar.axis;
+        joystick[joy_nr]->axis_inverse[idx] = ar.inverse;
+    }
 }
 
 /* *********************************************************** */

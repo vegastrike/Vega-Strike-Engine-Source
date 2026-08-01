@@ -42,15 +42,12 @@
 /* *********************************************************** */
 
 VegaConfig::VegaConfig(const char *configfile) {
-    configNodeFactory domf;
-    configNode *top = (configNode *) domf.LoadXML(configfile);
-    if (top == nullptr) {
-        VS_LOG_AND_FLUSH(fatal, "Panic exit - no configuration");
-        VSExit(0);
-    }
+    // The old vegastrike.config XML is gone; configuration now comes from
+    // config.json via vega_config::configuration(). getVariable()/getColor()
+    // return defaults until their call sites migrate to configuration().
+    (void)configfile;
     variables = nullptr;
     colors = nullptr;
-    checkConfig(top);
 }
 
 VegaConfig::~VegaConfig() {
