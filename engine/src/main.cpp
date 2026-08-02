@@ -432,10 +432,6 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     if (newSplashScreen != nullptr) {
         ani = newSplashScreen;
     }
-    // The loading screen is a full-screen splash with no interactive
-    // elements; hide the OS cursor (the classic bases draw their own
-    // custom pointer, and in-flight modes manage it themselves).
-    winsys_show_cursor(false);
     UpdateTime();
 
     Matrix tmp;
