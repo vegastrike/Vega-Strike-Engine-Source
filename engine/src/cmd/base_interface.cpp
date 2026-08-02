@@ -744,11 +744,15 @@ void base_main_loop() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     // Draw the custom cursor AFTER ImGui's render so it isn't painted over.
-    // CurrentBase->mousePointerStyle reflects hover state (NORMAL/HOVER);
-    // EndGUIFrame draws mouse.spr/mouseover.spr at the software mouse
-    // position and hides the OS cursor.
+    // CurrentBase->mousePointerStyle reflects hover state (NORMAL/HOVER) for
+    // the legacy base; the basecomputer (CallComp) doesn't update it (stays
+    // HOVER from entering), so force NORMAL there - its buttons highlight
+    // themselves and the green cursor is fine.
     if (BaseInterface::CurrentBase) {
-        EndGUIFrame(BaseInterface::CurrentBase->getMousePointerStyle());
+        MousePointerStyle style = BaseInterface::CurrentBase->CallComp
+                ? MOUSE_POINTER_NORMAL
+                : BaseInterface::CurrentBase->getMousePointerStyle();
+        EndGUIFrame(style);
     }
 
     SDL_GL_SwapWindow(current_window);
@@ -955,10 +959,15 @@ void BaseInterface::Click(int xint, int yint, int button, int state) {
 }
 
 void BaseInterface::ClickWin(int button, int state, int x, int y) {
-    if (state == WS_MOUSE_DOWN) {
-        getMouseButtonMask() |= (1 << (button - 1));
-    } else if (state == WS_MOUSE_UP) {
-        getMouseButtonMask() &= ~(1 << (button - 1));
+    // The mask tracks real mouse buttons (1-5). Wheel is synthesized as
+    // buttons 254/255 - guard the shift so it can't corrupt the mask
+    // (1 << 253 is undefined behavior).
+    if (button >= 1 && button < 32) {
+        if (state == WS_MOUSE_DOWN) {
+            getMouseButtonMask() |= (1 << (button - 1));
+        } else if (state == WS_MOUSE_UP) {
+            getMouseButtonMask() &= ~(1 << (button - 1));
+        }
     }
     if (CurrentBase) {
         if (CurrentBase->CallComp) {
