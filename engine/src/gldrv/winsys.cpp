@@ -710,6 +710,22 @@ void winsys_process_events() {
                     }
                     break;
 
+                case SDL_EVENT_MOUSE_WHEEL:
+                    // SDL3 delivers the wheel as a dedicated event (not button
+                    // events like SDL2). Synthesize the old wheel-up/down
+                    // button presses (WS_WHEEL_UP=254 / WS_WHEEL_DOWN=255)
+                    // so the basecomputer scroll, nav zoom, and any other
+                    // button-based consumers work unchanged.
+                    if (mouse_func && event.wheel.y != 0.0F) {
+                        const int btn = (event.wheel.y > 0.0F)
+                                ? WS_WHEEL_UP : WS_WHEEL_DOWN;
+                        const int x = static_cast<int>(event.wheel.mouse_x);
+                        const int y = static_cast<int>(event.wheel.mouse_y);
+                        (*mouse_func)(btn, WS_MOUSE_DOWN, x, y);
+                        (*mouse_func)(btn, WS_MOUSE_UP, x, y);
+                    }
+                    break;
+
                 case SDL_EVENT_MOUSE_MOTION:
                     if (event.motion.state) {
                         /* buttons are down */
