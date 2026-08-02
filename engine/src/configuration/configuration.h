@@ -2083,6 +2083,10 @@ namespace vega_config {
 
     } weapons;
 
+    // Colors: section -> {name: [r,g,b,a]} (ported from the old vegastrike.config
+    // <colors> section; seeded into VegaConfig::map_colors for getColor()).
+    std::map<std::string, std::map<std::string, std::vector<float>>> colors;
+
     };
 }
 

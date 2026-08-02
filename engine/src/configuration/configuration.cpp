@@ -7089,6 +7089,27 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         }
 
 
+        // Colors: section -> {name: [r,g,b,a]}
+        const boost::json::value * colors_value_ptr = root_object.if_contains("colors");
+        if (colors_value_ptr != nullptr && colors_value_ptr->is_object()) {
+            boost::json::object colors_object = colors_value_ptr->get_object();
+            for (const auto & section_entry : colors_object) {
+                const std::string & section = section_entry.key();
+                if (!section_entry.value().is_object()) { continue; }
+                boost::json::object section_object = section_entry.value().get_object();
+                for (const auto & color_entry : section_object) {
+                    const std::string & name = color_entry.key();
+                    if (!color_entry.value().is_array()) { continue; }
+                    std::vector<float> rgba;
+                    for (const auto & v : color_entry.value().get_array()) {
+                        rgba.push_back(boost::json::value_to<float>(v));
+                    }
+                    colors[section][name] = rgba;
+                }
+            }
+        }
+
+
     } catch (std::exception const& e) {
         VS_LOG(error, (boost::format("%1%: Exception loading config: '%2%'") % __FUNCTION__ % e.what()));
     }
