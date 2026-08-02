@@ -36,6 +36,7 @@
 #include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "gldrv/gl_globals.h"
+#include "gldrv/mouse_cursor.h"
 #include "configuration/configuration.h"
 
 using namespace VSFileSystem;
@@ -224,7 +225,14 @@ void EndGUIFrame(MousePointerStyle pointerStyle) {
         // Draw the custom cursor sprite at the software mouse position
         // (tracked by SetSoftwareMousePosition from the base's motion funcs).
         // DrawGlutMouse converts pixel coords to the sprite's normalized space.
-        DrawGlutMouse(mmx, mmy, whichSprite);
+        // Only when hardware_cursor=false (custom sprite mode); with
+        // hardware_cursor=true the OS arrow is used instead.
+        if (!configuration().physics.hardware_cursor) {
+            DrawGlutMouse(mmx, mmy, whichSprite);
+            // The custom sprite IS the cursor here; hide the OS cursor so it
+            // doesn't show a smaller duplicate on top.
+            hideCursor();
+        }
 
         //GFXEndScene();bad things...only call this once
         GFXHudMode(false);

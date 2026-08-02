@@ -2013,13 +2013,11 @@ int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
         }
     }
 
-    // Change mouse pointer to arrow
+    // In bases/menus the custom cursor sprite is drawn (EndGUIFrame
+    // draws mouse.spr/mouseover.spr at the software mouse position), so
+    // hide the OS cursor to avoid a smaller duplicate on top.
     if(IsPlayerShip()) {
-        if(configuration().mouse.enabled) {
-            changeCursor(CursorType::arrow);
-        } else {
-            showCursor();
-        }
+        hideCursor();
     }
 
     return whichdockport + 1;
@@ -2118,9 +2116,11 @@ bool Unit::UnDock(Unit *utdw) {
             // Send notification that a ship has undocked from a station
             _Universe->AccessCockpit()->OnDockEnd(utdw, this);
 
-            // Change mouse cursor to crosshairs in flight (the aim point)
+            // In flight the HUD renders its own crosshair (DrawCrosshairs),
+            // so hide the OS cursor - it is not the aim point. With
+            // hardware_cursor=true use the OS crosshair instead.
             if(IsPlayerShip()) {
-                if(configuration().mouse.enabled) {
+                if(configuration().physics.hardware_cursor) {
                     changeCursor(CursorType::crosshairs);
                 } else {
                     hideCursor();
