@@ -26,6 +26,7 @@
  */
 
 #include "window.h"
+#include "glut_support.h"
 
 #include "eventmanager.h"
 #include "groupcontrol.h"
@@ -231,34 +232,8 @@ void WindowManager::draw() {
             m_windows[i]->draw();
         }
     }
-    //Emulate EndGUIFrame.
-    static VSSprite MouseVSSprite("mouse.spr", BILINEAR, GFXTRUE);
-    static Texture dummy("white.bmp", 0, NEAREST, TEXTURE2D, TEXTURE_2D, GFXTRUE);
-    GFXDisable(CULLFACE);
-    ConditionalCursorDraw(true);
-    //Figure position of cursor sprite.
-    float sizex = 0.0, sizey = 0.0;
-    const Point loc = globalEventManager().mouseLoc();
-    MouseVSSprite.GetSize(sizex, sizey);
-    float tempx = 0.0, tempy = 0.0;
-    MouseVSSprite.GetPosition(tempx, tempy);
-    MouseVSSprite.SetPosition(tempx + loc.x + sizex / 2, tempy + loc.y + sizey / 2);
-
-    dummy.MakeActive();
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
-    GFXColorf(GUI_OPAQUE_WHITE());
-
-    //Draw the cursor sprite.
-    GFXEnable(TEXTURE0);
-    GFXDisable(DEPTHTEST);
-    GFXDisable(TEXTURE1);
-    MouseVSSprite.Draw();
-    // The custom sprite is the cursor here; hide the OS cursor.
-    hideCursor();
-
-    GFXHudMode(false);
-    GFXEnable(CULLFACE);
-    MouseVSSprite.SetPosition(tempx, tempy);
+    // The cursor is drawn after ImGui::Render() in base_main_loop so
+    // ImGui's RenderDrawData doesn't paint over it.
 }
 
 //A new window has been created and is ready to be drawn.

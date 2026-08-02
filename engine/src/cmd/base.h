@@ -54,6 +54,10 @@ class BaseInterface {
     bool midloop;
     TextPlane curtext;
 public:
+    MousePointerStyle getMousePointerStyle() const {
+        return mousePointerStyle;
+    }
+
     class Room {
     public:
         class Link {

@@ -742,6 +742,15 @@ void base_main_loop() {
     ImGui::Render();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    // Draw the custom cursor AFTER ImGui's render so it isn't painted over.
+    // CurrentBase->mousePointerStyle reflects hover state (NORMAL/HOVER);
+    // EndGUIFrame draws mouse.spr/mouseover.spr at the software mouse
+    // position and hides the OS cursor.
+    if (BaseInterface::CurrentBase) {
+        EndGUIFrame(BaseInterface::CurrentBase->getMousePointerStyle());
+    }
+
     SDL_GL_SwapWindow(current_window);
     // End ImGui
 
@@ -1560,7 +1569,6 @@ void BaseInterface::Draw() {
         othtext.background_color= static_cast<ImU32>(tmpbg);
     }
     SetupViewport();
-    EndGUIFrame(mousePointerStyle);
 
     glViewport(0, 0, native_resolution_x, native_resolution_y);
 
