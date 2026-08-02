@@ -735,11 +735,7 @@ void GFXInit(int argc, char **argv) {
         winsys_swap_buffers();
     }
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-    // With hardware_cursor=false (default), the game draws the custom sprite
-    // cursor (mouse.spr) in bases/menus, so the OS cursor must stay hidden -
-    // otherwise both cursors overlap. With hardware_cursor=true, show the OS
-    // cursor instead.
-    winsys_show_cursor(configuration().physics.hardware_cursor);
+    winsys_show_cursor(true);
 }
 
 void GFXLoop(void main_loop()) {
