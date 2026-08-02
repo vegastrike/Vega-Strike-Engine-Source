@@ -58,6 +58,11 @@ void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontS
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     ImGuiIO& io = ImGui::GetIO();
+    // The game manages its own cursor (custom PNG SDL cursors: arrow in
+    // bases/menus, crosshair in flight). Stop ImGui from overriding it
+    // with the system cursor every frame - the cursor must stay visible
+    // (winsys_init shows it) but its image is the game's.
+    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
     io.Fonts->Clear();
     ImFontConfig cfg;
     cfg.SizePixels = fontSize;
