@@ -37,6 +37,7 @@
 #include "gfx/aux_texture.h"
 #include "gfx/sprite.h"
 #include "imgui/imgui.h"
+#include "gldrv/mouse_cursor.h"
 
 //The outside boundaries of the window.
 void Window::setRect(const Rect &r) {
@@ -251,7 +252,9 @@ void WindowManager::draw() {
     GFXEnable(TEXTURE0);
     GFXDisable(DEPTHTEST);
     GFXDisable(TEXTURE1);
-    //MouseVSSprite.Draw();
+    MouseVSSprite.Draw();
+    // The custom sprite is the cursor here; hide the OS cursor.
+    hideCursor();
 
     GFXHudMode(false);
     GFXEnable(CULLFACE);
