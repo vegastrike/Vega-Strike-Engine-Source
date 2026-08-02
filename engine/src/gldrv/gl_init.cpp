@@ -588,7 +588,7 @@ void GFXInit(int argc, char **argv) {
 
     glViewport(0, 0, native_resolution_x, native_resolution_y);
     
-    static GFXColor clearcol = vs_config->getColor("space_background");;
+    static GFXColor clearcol = vs_config->getColor("space_background", GFXColor(0, 0, 0, 1));
     gl_options.wireframe = configuration().graphics.use_wireframe;
     (const_cast<vega_config::Configuration &>(configuration())).graphics.max_texture_dimension = configuration().graphics.max_texture_dimension;
     (const_cast<vega_config::Configuration &>(configuration())).graphics.max_movie_dimension = configuration().graphics.max_movie_dimension;
