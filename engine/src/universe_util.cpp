@@ -214,6 +214,11 @@ void showSplashProgress(float progress) //DELETE ?
 
 void hideSplashScreen() {
     SetStarSystemLoading(false);
+    // Loading finished; restore the system cursor state (bootstrap_draw hid
+    // it). The main menu / bases draw their own custom pointers, and
+    // in-flight modes manage the cursor - this just un-hides the OS cursor
+    // so those paths can use it.
+    winsys_show_cursor(true);
 }
 
 bool isSplashScreenShowing() {
