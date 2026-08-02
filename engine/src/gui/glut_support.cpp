@@ -37,8 +37,6 @@
 #include "src/vs_logging.h"
 #include "gldrv/gl_globals.h"
 #include "configuration/configuration.h"
-#include "gui/guidefs.h"
-#include "gui/eventmanager.h"
 
 using namespace VSFileSystem;
 
@@ -223,23 +221,10 @@ void EndGUIFrame(MousePointerStyle pointerStyle) {
                 return;
         }
 
-        // Draw the custom cursor sprite at the mouse position (the game's
-        // pointer for bases/menus). Position like window.cpp does.
-        float sizex = 0.0, sizey = 0.0;
-        const Point loc = globalEventManager().mouseLoc();
-        whichSprite->GetSize(sizex, sizey);
-        float tempx = 0.0, tempy = 0.0;
-        whichSprite->GetPosition(tempx, tempy);
-        whichSprite->SetPosition(tempx + loc.x + sizex / 2, tempy + loc.y + sizey / 2);
-
-        dummy.MakeActive();
-        GFXBlendMode(SRCALPHA, INVSRCALPHA);
-        GFXColorf(GUI_OPAQUE_WHITE());
-        GFXEnable(TEXTURE0);
-        GFXDisable(DEPTHTEST);
-        GFXDisable(TEXTURE1);
-        whichSprite->Draw();
-        whichSprite->SetPosition(tempx, tempy);
+        // Draw the custom cursor sprite at the software mouse position
+        // (tracked by SetSoftwareMousePosition from the base's motion funcs).
+        // DrawGlutMouse converts pixel coords to the sprite's normalized space.
+        DrawGlutMouse(mmx, mmy, whichSprite);
 
         //GFXEndScene();bad things...only call this once
         GFXHudMode(false);
