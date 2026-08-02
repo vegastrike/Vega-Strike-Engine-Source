@@ -2118,10 +2118,15 @@ bool Unit::UnDock(Unit *utdw) {
 
             // In flight the HUD renders its own crosshair (DrawCrosshairs),
             // so hide the OS cursor - it is not the aim point. With
-            // hardware_cursor=true use the OS crosshair instead.
+            // In flight, the mouse cursor (OS crosshair) follows the mouse
+            // for mouse flight control; the HUD also renders its own center
+            // reticle. Explicitly show it - a base may have hidden the OS
+            // cursor (custom sprite mode). With hardware_cursor=true the
+            // crosshair is used the same way.
             if(IsPlayerShip()) {
-                if(configuration().physics.hardware_cursor) {
+                if(configuration().mouse.enabled) {
                     changeCursor(CursorType::crosshairs);
+                    showCursor();
                 } else {
                     hideCursor();
                 }
