@@ -2118,14 +2118,10 @@ bool Unit::UnDock(Unit *utdw) {
             // Send notification that a ship has undocked from a station
             _Universe->AccessCockpit()->OnDockEnd(utdw, this);
 
-            // Change mouse cursor to crosshairs (warp) or OS cursor (glide)
+            // Change mouse cursor to crosshairs in flight (the aim point)
             if(IsPlayerShip()) {
                 if(configuration().mouse.enabled) {
-                    if (configuration().joystick.mouse_cursor) {
-                        showCursor();   // glide: absolute mouse, show OS cursor
-                    } else {
-                        changeCursor(CursorType::crosshairs);   // warp: relative mouse
-                    }
+                    changeCursor(CursorType::crosshairs);
                 } else {
                     hideCursor();
                 }
