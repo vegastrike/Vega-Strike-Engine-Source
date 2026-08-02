@@ -260,6 +260,11 @@ void EventManager::ProcessMouseActive(int x, int y) {
 
 void EventManager::ProcessMousePassive(int x, int y) {
     ModifyMouseSensitivity(x, y);
+    // Keep the software mouse position in sync for the custom cursor sprite
+    // (EndGUIFrame/DrawGlutMouse use mmx/mmy). The legacy base path does
+    // this in BaseInterface::PassiveMouseOverWin; the NEW_GUI/basecomputer
+    // path needs it here too.
+    SetSoftwareMousePosition(x, y);
     InputEvent event(MOUSE_MOVE_EVENT, 0, 0, Point(MouseXTo2dX(x), MouseYTo2dY(y)));
     globalEventManager().sendInputEvent((event));
     clearDeleteQueue();
