@@ -58,6 +58,10 @@ void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontS
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     ImGuiIO& io = ImGui::GetIO();
+    // The game manages its own cursor (custom mouse.spr sprite in bases,
+    // HUD crosshair in flight, hidden OS cursor with hardware_cursor=false).
+    // Stop ImGui from forcing the OS cursor on/off every frame.
+    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
     io.Fonts->Clear();
     ImFontConfig cfg;
     cfg.SizePixels = fontSize;
