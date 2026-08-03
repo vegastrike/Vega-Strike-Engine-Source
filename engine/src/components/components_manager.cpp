@@ -44,6 +44,10 @@ Resource<double> ComponentsManager::credits = Resource<double>(0.0, 0.0);
 void ComponentsManager::Load(std::string unit_key) {
     mass = base_mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 0.0);
 
+    // Clear any previously-loaded prohibited upgrades so repeated Load() calls
+    // (e.g. the two calls made from Unit::LoadRow) do not accumulate duplicates.
+    prohibited_upgrades.clear();
+
     // Consumer
     std::string prohibited_upgrades_string = UnitCSVFactory::GetVariable(unit_key, "Prohibited_Upgrades", std::string());
 
