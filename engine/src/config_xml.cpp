@@ -357,14 +357,27 @@ void GameVegaConfig::bindKeys() {
         else if (role == "z") { idx = AXIS_Z; }
         else if (role == "throttle") { idx = AXIS_THROTTLE; }
         else { VS_LOG(warning, (boost::format("unknown axis %1%") % role)); continue; }
-        int joy_nr = (ar.source == "mouse") ? MOUSE_JOYSTICK : ar.joystick;
+        // If mouse flight control is enabled, x/y come from the mouse
+        // (MOUSE_JOYSTICK), honoring mouse.inverse_x/y. The settings app's
+        // "enable mouse" checkbox drives this (old XML: #set Mouse warp/glide
+        // made the <axis name=x mouse=...> entries active).
+        int joy_nr;
+        bool inverse = ar.inverse;
+        int axis_nr = ar.axis;
+        if (cfg.mouse.enabled && (idx == AXIS_X || idx == AXIS_Y)) {
+            joy_nr = MOUSE_JOYSTICK;
+            axis_nr = (idx == AXIS_X) ? 0 : 1;
+            inverse = (idx == AXIS_X) ? cfg.mouse.inverse_x : cfg.mouse.inverse_y;
+        } else {
+            joy_nr = (ar.source == "mouse") ? MOUSE_JOYSTICK : ar.joystick;
+        }
         if (joy_nr >= MAX_JOYSTICKS || joystick[joy_nr] == nullptr) {
             VS_LOG(warning, (boost::format("refusing to assign axis %1% to joystick (not available)") % role));
             continue;
         }
         axis_joy[idx] = joy_nr;
-        joystick[joy_nr]->axis_axis[idx] = ar.axis;
-        joystick[joy_nr]->axis_inverse[idx] = ar.inverse;
+        joystick[joy_nr]->axis_axis[idx] = axis_nr;
+        joystick[joy_nr]->axis_inverse[idx] = inverse;
     }
 }
 
