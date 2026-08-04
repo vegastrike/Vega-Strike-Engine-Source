@@ -34,7 +34,6 @@ AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: false
-AllowShortNamespacesOnASingleLine: false
 BreakBeforeBraces: Attach
 ContinuationIndentWidth: 8
 EmptyLineBeforeAccessModifier: LogicalBlock
@@ -57,7 +56,6 @@ IncludeCategories:
   - Regex: '.*'
     Priority: 5
 IndentAccessModifiers: false
-IndentCaseLabels: false
 IndentExternBlock: Indent
 IndentPPDirectives: AfterHash
 InsertNewlineAtEOF: true
@@ -70,7 +68,7 @@ KeepEmptyLines:
   AtStartOfBlock: false
   AtStartOfFile: false
 LineEnding: LF
-MaxEmptyLinesToKeep: 2
+MaxEmptyLinesToKeep: 3
 NamespaceIndentation: None
 PointerAlignment: Right
 ReferenceAlignment: Pointer
