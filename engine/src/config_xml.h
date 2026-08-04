@@ -57,13 +57,8 @@ private:
     void initKeyMap();
     CommandMap command_map;
     KeyMap key_map;
-    int hs_value_index;
 //vector<vColor *> colors;
     void bindKeys();
-    void doBindings(configNode *node);
-    void checkBind(configNode *node);
-    void doAxis(configNode *node);
-    void checkHatswitch(int nr, configNode *node);
 };
 
 #endif //VEGA_STRIKE_ENGINE_CONFIG_XML_H
