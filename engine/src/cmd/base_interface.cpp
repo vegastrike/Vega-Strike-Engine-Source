@@ -560,18 +560,9 @@ BaseInterface::Room::BaseTalk::BaseTalk(const std::string &msg, const std::strin
 }
 
 void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
-    int tmpx = configuration().graphics.resolution_x;
-    int tmpy = configuration().graphics.resolution_y;
-    const int base_max_width = configuration().graphics.bases.max_width;
-    const int base_max_height = configuration().graphics.bases.max_height;
-    if (base_max_width && base_max_height) {
-        if (base_max_width < tmpx) {
-            (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = base_max_width;
-        }
-        if (base_max_height < tmpy) {
-            (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = base_max_height;
-        }
-    }
+    // Text lays out in the actual window resolution (native_resolution);
+    // the old base_max_width clamp (removed here) mutated resolution_x/y
+    // to bases.max_width, mis-scaling text vs the base art on large screens.
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
     GFXColor tmpbg(text.background_color);
     bool automatte = (0 == tmpbg.a);
@@ -597,8 +588,6 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         text.Draw(text.GetText(), 0, true, false, automatte);
     }
     text.background_color= static_cast<ImU32>(tmpbg);
-    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = tmpx;
-    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = tmpy;
 }
 
 void RunPython(const char *filnam) {
