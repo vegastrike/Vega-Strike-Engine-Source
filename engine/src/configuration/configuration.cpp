@@ -113,20 +113,24 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
 
         // Actions: command -> per-device binding arrays. The engine's
         // GameVegaConfig::bindKeys() fills the runtime binding tables from these.
+        // NOTE: load_config runs twice (datadir then homedir overlay); start
+        // from the existing entry so a partial overlay (e.g. only keyboard[])
+        // merges onto the datadir binds instead of wiping mouse/joystick/hat.
         const boost::json::value * actions_value_ptr = root_object.if_contains("actions");
         if (actions_value_ptr != nullptr) {
             boost::json::object actions_object = actions_value_ptr->get_object();
             for (const auto & actions_entry : actions_object) {
                 const std::string & command = actions_entry.key();
                 const boost::json::value & bindings_value = actions_entry.value();
-                ActionBindings bindings;
                 if (!bindings_value.is_object()) {
                     continue;
                 }
+                ActionBindings bindings = actions.count(command) ? actions[command] : ActionBindings{};
                 boost::json::object bindings_object = bindings_value.get_object();
-                // keyboard[]
+                // keyboard[] (overlay array replaces the datadir array)
                 const boost::json::value * kb_ptr = bindings_object.if_contains("keyboard");
                 if (kb_ptr != nullptr && kb_ptr->is_array()) {
+                    bindings.keyboard.clear();
                     for (const auto & entry : kb_ptr->get_array()) {
                         if (!entry.is_object()) { continue; }
                         boost::json::object e = entry.get_object();
@@ -138,9 +142,10 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                         bindings.keyboard.push_back(b);
                     }
                 }
-                // mouse[]
+                // mouse[] (overlay array replaces the datadir array)
                 const boost::json::value * ms_ptr = bindings_object.if_contains("mouse");
                 if (ms_ptr != nullptr && ms_ptr->is_array()) {
+                    bindings.mouse.clear();
                     for (const auto & entry : ms_ptr->get_array()) {
                         if (!entry.is_object()) { continue; }
                         boost::json::object e = entry.get_object();
@@ -153,9 +158,10 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                         bindings.mouse.push_back(b);
                     }
                 }
-                // joystick[]
+                // joystick[] (overlay array replaces the datadir array)
                 const boost::json::value * js_ptr = bindings_object.if_contains("joystick");
                 if (js_ptr != nullptr && js_ptr->is_array()) {
+                    bindings.joystick.clear();
                     for (const auto & entry : js_ptr->get_array()) {
                         if (!entry.is_object()) { continue; }
                         boost::json::object e = entry.get_object();
@@ -169,9 +175,10 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                         bindings.joystick.push_back(b);
                     }
                 }
-                // hat[] (digital hatswitch: {joystick, hatswitch, direction})
+                // hat[] (overlay array replaces the datadir array)
                 const boost::json::value * ht_ptr = bindings_object.if_contains("hat");
                 if (ht_ptr != nullptr && ht_ptr->is_array()) {
+                    bindings.hat.clear();
                     for (const auto & entry : ht_ptr->get_array()) {
                         if (!entry.is_object()) { continue; }
                         boost::json::object e = entry.get_object();
@@ -190,6 +197,10 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         }
 
         // Axes: role (x/y/z/throttle) -> {source, joystick, axis, inverse}
+        // NOTE: load_config is called twice (datadir then homedir overlay), so a
+        // partial overlay entry (e.g. {inverse: true}) must MERGE onto the
+        // datadir entry rather than replace it, or the unset fields would fall
+        // back to defaults (axis=-1 => unbound) and the axis would stop working.
         const boost::json::value * axes_value_ptr = root_object.if_contains("axes");
         if (axes_value_ptr != nullptr) {
             boost::json::object axes_object = axes_value_ptr->get_object();
@@ -198,7 +209,9 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 const boost::json::value & role_value = axes_entry.value();
                 if (!role_value.is_object()) { continue; }
                 boost::json::object role_object = role_value.get_object();
-                AxisRole ar;
+                // Start from the existing entry (if any) so overlay keys merge
+                // onto the datadir defaults instead of replacing them.
+                AxisRole ar = axes.count(role) ? axes[role] : AxisRole{};
                 const auto * src = role_object.if_contains("source");
                 if (src != nullptr) { ar.source = boost::json::value_to<std::string>(*src); }
                 const auto * joy = role_object.if_contains("joystick");
