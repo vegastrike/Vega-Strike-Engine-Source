@@ -298,6 +298,12 @@ void GameVegaConfig::bindKeys() {
             VS_LOG(error, (boost::format("No such command: %1%") % cmd));
             return;
         }
+        // Mouse buttons bind to the reserved mouse-joystick slot regardless of
+        // joystick.enabled; joystick buttons only bind when the joystick is
+        // enabled (so a Keyboard/Joystick selector can disable them).
+        if (!b.is_mouse && !cfg.joystick.enabled) {
+            return;
+        }
         int joy_nr = b.is_mouse ? MOUSE_JOYSTICK : b.joystick;
         if (joy_nr >= MAX_JOYSTICKS || joystick[joy_nr] == nullptr || !joystick[joy_nr]->isAvailable()) {
             VS_LOG(warning, (boost::format("refusing to bind command %1% to joystick (not available)") % cmd));
@@ -311,6 +317,11 @@ void GameVegaConfig::bindKeys() {
         KBHandler handler = cmd_map[cmd];
         if (handler == nullptr) {
             VS_LOG(error, (boost::format("No such command: %1%") % cmd));
+            return;
+        }
+        // Hatswitch is a joystick feature - ignore it when the joystick is
+        // disabled.
+        if (!cfg.joystick.enabled) {
             return;
         }
         int joy_nr = b.joystick;
@@ -357,14 +368,20 @@ void GameVegaConfig::bindKeys() {
         else if (role == "z") { idx = AXIS_Z; }
         else if (role == "throttle") { idx = AXIS_THROTTLE; }
         else { VS_LOG(warning, (boost::format("unknown axis %1%") % role)); continue; }
-        // If mouse flight control is enabled, x/y come from the mouse
-        // (MOUSE_JOYSTICK), honoring mouse.inverse_x/y. The settings app's
-        // "enable mouse" checkbox drives this (old XML: #set Mouse warp/glide
-        // made the <axis name=x mouse=...> entries active).
+        // The device for x/y is decided by the per-role source in config.json
+        // (axes.x/y.source), NOT by the global mouse.enabled flag - otherwise
+        // enabling the mouse would steal x/y away from the joystick. Mouse
+        // only drives x/y when that role is explicitly configured as mouse.
+        bool is_mouse_axis = (ar.source == "mouse");
+        // Joystick axes only apply when the joystick is enabled (Keyboard /
+        // Mouse modes disable it).
+        if (!is_mouse_axis && !cfg.joystick.enabled) {
+            continue;
+        }
         int joy_nr;
         bool inverse = ar.inverse;
         int axis_nr = ar.axis;
-        if (cfg.mouse.enabled && (idx == AXIS_X || idx == AXIS_Y)) {
+        if (is_mouse_axis && (idx == AXIS_X || idx == AXIS_Y)) {
             joy_nr = MOUSE_JOYSTICK;
             axis_nr = (idx == AXIS_X) ? 0 : 1;
             inverse = (idx == AXIS_X) ? cfg.mouse.inverse_x : cfg.mouse.inverse_y;
