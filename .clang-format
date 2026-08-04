@@ -1,0 +1,84 @@
+---
+BasedOnStyle: Google
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+---
+Language: Cpp
+InsertBraces: true
+ColumnLimit: 120
+AccessModifierOffset: 0
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossComments: false
+  AcrossEmptyLines: false
+  AlignCompound: true
+  PadOperators: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossComments: false
+  AcrossEmptyLines: false
+  AlignFunctionPointers: true
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossComments: false
+  AcrossEmptyLines: false
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 2
+AllowShortIfStatementsOnASingleLine: Never
+BreakBeforeBraces: Attach
+ContinuationIndentWidth: 8
+EmptyLineBeforeAccessModifier: LogicalBlock
+FixNamespaceComments: true
+ForEachMacros: [RANGES_FOR, FOREACH, BOOST_FOREACH]
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^((<|")boost/python\.hpp("|>))$'
+    Priority: -2
+  - Regex: '^((<|")Python\.h("|>))$'
+    Priority: -1
+  - Regex: '^<[[:alnum:].]+>$'
+    Priority: 1
+  - Regex: '^((<|")boost/)'
+    Priority: 2
+  - Regex: '^<[[:alnum:]./]+>$'
+    Priority: 3
+  - Regex: '^"[[:alnum:]./]+"$'
+    Priority: 4
+  - Regex: '.*'
+    Priority: 5
+IndentAccessModifiers: false
+IndentCaseLabels: false
+IndentExternBlock: Indent
+IndentPPDirectives: AfterHash
+InsertNewlineAtEOF: true
+IntegerLiteralSeparator:
+  Binary: 0
+  Decimal: 3
+  Hex: 0
+KeepEmptyLines:
+  AtEndOfFile: false
+  AtStartOfBlock: false
+  AtStartOfFile: false
+LineEnding: LF
+MaxEmptyLinesToKeep: 2
+NamespaceIndentation: None
+NumericLiteralCase:
+  ExponentLetter: Upper
+  HexDigit: Upper
+  Prefix: Lower
+  Suffix: Upper
+PointerAlignment: Right
+ReferenceAlignment: Pointer
+ReflowComments: Always
+RemoveParentheses: Leave
+SeparateDefinitionBlocks: Always
+SortIncludes:
+  Enabled: true
+  IgnoreCase: true
+  IgnoreExtension: true
+  Natural: true
+SortUsingDeclarations: LexicographicNumeric
+Standard: Latest
+WhitespaceSensitiveMacros: [STRINGIZE, PP_STRINGIZE, BOOST_PP_STRINGIZE]
