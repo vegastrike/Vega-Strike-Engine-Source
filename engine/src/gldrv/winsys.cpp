@@ -47,6 +47,7 @@
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
 #include "src/config_xml.h"
+#include "src/in_joystick.h"
 #include "root_generic/vs_globals.h"
 #include "src/vs_logging.h"
 #include "root_generic/options.h"
@@ -733,6 +734,14 @@ void winsys_process_events() {
                         (*reshape_func)(native_resolution_x,
                                 native_resolution_y);
                     }
+                    break;
+
+                case SDL_EVENT_JOYSTICK_ADDED:
+                    AddJoystick(event.jdevice.which);
+                    break;
+
+                case SDL_EVENT_JOYSTICK_REMOVED:
+                    RemoveJoystick(event.jdevice.which);
                     break;
 
                 case SDL_EVENT_QUIT:
