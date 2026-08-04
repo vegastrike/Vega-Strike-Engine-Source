@@ -69,7 +69,6 @@ jobs:
 
       - name: Build it
         env:
-          MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
@@ -81,10 +80,10 @@ jobs:
           USE_GTEST: 0
           INSTALL_SDL3: 0
           INSTALL_SDL3_IMAGE: 0
-        run: script/cibuild --preset-name=${{ matrix.preset-name }}
+        run: script/cibuild --preset-name="${{ matrix.preset-name }}"
 
       - name: Package it
-        working-directory: ${{github.workspace}}
+        working-directory: "${{ github.workspace }}"
         run: cpack -V --preset-name="package-${{ matrix.preset-name }}"
 
       - name: Upload the artifacts
