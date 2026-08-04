@@ -28,7 +28,7 @@ AlignTrailingComments:
   OverEmptyLines: 2
 AllowShortIfStatementsOnASingleLine: Never
 BreakBeforeBraces: Attach
-ContinuationIndentWidth: 12
+ContinuationIndentWidth: 8
 EmptyLineBeforeAccessModifier: LogicalBlock
 FixNamespaceComments: true
 ForEachMacros: [RANGES_FOR, FOREACH, BOOST_FOREACH]
@@ -64,21 +64,11 @@ KeepEmptyLines:
 LineEnding: LF
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: None
-NumericLiteralCase:
-  ExponentLetter: Upper
-  HexDigit: Upper
-  Prefix: Lower
-  Suffix: Upper
 PointerAlignment: Right
 ReferenceAlignment: Pointer
-ReflowComments: Always
 RemoveParentheses: Leave
 SeparateDefinitionBlocks: Always
-SortIncludes:
-  Enabled: true
-  IgnoreCase: true
-  IgnoreExtension: true
-  Natural: true
+SortIncludes: CaseInsensitive
 SortUsingDeclarations: LexicographicNumeric
 Standard: Latest
 WhitespaceSensitiveMacros: [STRINGIZE, PP_STRINGIZE, BOOST_PP_STRINGIZE]
