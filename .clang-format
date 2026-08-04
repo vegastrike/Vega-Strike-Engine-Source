@@ -28,7 +28,7 @@ AlignTrailingComments:
   OverEmptyLines: 2
 AllowShortIfStatementsOnASingleLine: Never
 BreakBeforeBraces: Attach
-ContinuationIndentWidth: 8
+ContinuationIndentWidth: 12
 EmptyLineBeforeAccessModifier: LogicalBlock
 FixNamespaceComments: true
 ForEachMacros: [RANGES_FOR, FOREACH, BOOST_FOREACH]
