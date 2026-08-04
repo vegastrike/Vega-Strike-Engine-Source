@@ -33,9 +33,9 @@
 
 
 static bool softwarePosition;
-// virtual mouse x after sensitivity adjustmemt
+// virtual mouse x after sensitivity adjustment
 static int mmx = 0;
-// virtual mouse x after sensitivity adjustmemt
+// virtual mouse y after sensitivity adjustment
 static int mmy = 0;
 
 // Set the software mouse position

@@ -70,21 +70,13 @@ void NavigationSystem::DrawGrid(float &x1, float &x2, float &y1, float &y2, cons
     // Vertical grid lines
     for (int i = 1; i < 10; i++) {
         float x = x1 + i * deltax;
-        drawList->AddLine(
-            NormToPixel(x, y1),
-            NormToPixel(x, y2),
-            color, 1.0f
-        );
+        drawList->AddLine(NormToPixel(x, y1), NormToPixel(x, y2), color, 1.0f);
     }
 
     // Horizontal grid lines
     for (int i = 1; i < 10; i++) {
         float y = y1 + i * deltay;
-        drawList->AddLine(
-            NormToPixel(x1, y),
-            NormToPixel(x2, y),
-            color, 1.0f
-        );
+        drawList->AddLine(NormToPixel(x1, y), NormToPixel(x2, y), color, 1.0f);
     }
 }
 
@@ -107,17 +99,14 @@ void NavigationSystem::DrawHalfCircleTop(float x, float y, float size, const GFX
     ImDrawList* drawList = GetNavDrawList();
     ImU32 color = ToImColor(col);
 
-    const int segments = 10;
-    float radius = 0.5f * size;
-    float yOffset = y - 0.25f * size;
+    float radiusPx = Coordinates::normToPixelW(0.5f * size);
+    ImVec2 center = NormToPixel(x, y);
+    center.y -= radiusPx * 0.5f; // Offset in pixel space
 
     drawList->PathClear();
-    for (int i = 0; i <= segments; ++i) {
-        float angle = i * (static_cast<float>(M_PI) / segments);
-        float px = x + radius * std::cos(angle);
-        float py = yOffset + radius * std::sin(angle);
-        drawList->PathLineTo(NormToPixel(px, py));
-    }
+    // PathArcTo(center, radius, a_min, a_max, num_segments)
+    // 0 to PI draws the arc
+    drawList->PathArcTo(center, radiusPx, 0.0f, static_cast<float>(M_PI), 16);
     drawList->PathStroke(color, 0, NAV_LINE_WEIGHT);
 }
 
@@ -128,17 +117,13 @@ void NavigationSystem::DrawHalfCircleBottom(float x, float y, float size, const 
     ImDrawList* drawList = GetNavDrawList();
     ImU32 color = ToImColor(col);
 
-    const int segments = 10;
-    float radius = 0.5f * size;
-    float yOffset = y + 0.25f * size;
+    float radiusPx = Coordinates::normToPixelW(0.5f * size);
+    ImVec2 center = NormToPixel(x, y);
+    center.y += radiusPx * 0.5f; // Offset in pixel space
 
     drawList->PathClear();
-    for (int i = 0; i <= segments; ++i) {
-        float angle = static_cast<float>(M_PI) + i * (static_cast<float>(M_PI) / segments);
-        float px = x + radius * std::cos(angle);
-        float py = yOffset + radius * std::sin(angle);
-        drawList->PathLineTo(NormToPixel(px, py));
-    }
+    // PI to 2*PI draws the opposite arc
+    drawList->PathArcTo(center, radiusPx, static_cast<float>(M_PI), static_cast<float>(M_PI * 2.0), 16);
     drawList->PathStroke(color, 0, NAV_LINE_WEIGHT);
 }
 
@@ -149,39 +134,44 @@ void NavigationSystem::DrawPlanet(float x, float y, float size, const GFXColor &
     ImDrawList* drawList = GetNavDrawList();
     ImU32 color = ToImColor(col);
 
-    // Outer circle
-    float radius = 0.5f * size;
-    DrawCircle(x ,y, size, col);
+    ImVec2 c = NormToPixel(x, y);
+    float r = Coordinates::normToPixelW(0.5f * size);
 
-    // Planet interior lines
-    drawList->AddLine(NormToPixel(x - radius, y), NormToPixel(x, y + 0.2f * size), color, NAV_LINE_WEIGHT);
-    drawList->AddLine(NormToPixel(x, y + 0.2f * size), NormToPixel(x, y - 0.2f * size), color, NAV_LINE_WEIGHT);
-    drawList->AddLine(NormToPixel(x, y - 0.2f * size), NormToPixel(x + radius, y), color, NAV_LINE_WEIGHT);
+    // Outer circle
+    drawList->AddCircle(c, r, color, 0, NAV_LINE_WEIGHT);
+
+    // Planet interior lines (all calculated in pure pixel space relative to center)
+    drawList->AddLine(ImVec2(c.x - r, c.y), ImVec2(c.x, c.y + r * 0.4f), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x, c.y + r * 0.4f), ImVec2(c.x, c.y - r * 0.4f), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x, c.y - r * 0.4f), ImVec2(c.x + r, c.y), color, NAV_LINE_WEIGHT);
 }
 
 //**********************************
-// Draws a station icon (3x3 grid pattern)
+// Draws a station icon (Square 3x3 grid pattern)
 //**********************************
 void NavigationSystem::DrawStation(float x, float y, float size, const GFXColor &col) {
     ImDrawList* drawList = GetNavDrawList();
     ImU32 color = ToImColor(col);
 
-    float segment = size / 3.0f;
-    float startX = x - 0.5f * size;
-    float startY = y - 0.5f * size;
-    float endX = x + 0.5f * size;
-    float endY = y + 0.5f * size;
+    ImVec2 c = NormToPixel(x, y);
+    float halfSizePx = Coordinates::normToPixelW(0.5f * size);
+    float segmentPx = (halfSizePx * 2.0f) / 3.0f;
 
-    // Horizontal lines
+    float startX = c.x - halfSizePx;
+    float startY = c.y - halfSizePx;
+    float endX   = c.x + halfSizePx;
+    float endY   = c.y + halfSizePx;
+
+    // Horizontal grid lines
     for (int i = 0; i < 4; i++) {
-        float currentY = startY + i * segment;
-        drawList->AddLine(NormToPixel(startX, currentY), NormToPixel(endX, currentY), color, NAV_LINE_WEIGHT);
+        float curY = startY + i * segmentPx;
+        drawList->AddLine(ImVec2(startX, curY), ImVec2(endX, curY), color, NAV_LINE_WEIGHT);
     }
 
-    // Vertical lines
+    // Vertical grid lines
     for (int i = 0; i < 4; i++) {
-        float currentX = startX + i * segment;
-        drawList->AddLine(NormToPixel(currentX, startY), NormToPixel(currentX, endY), color, NAV_LINE_WEIGHT);
+        float curX = startX + i * segmentPx;
+        drawList->AddLine(ImVec2(curX, startY), ImVec2(curX, endY), color, NAV_LINE_WEIGHT);
     }
 }
 
@@ -192,24 +182,26 @@ void NavigationSystem::DrawJump(float x, float y, float size, const GFXColor &co
     ImDrawList* drawList = GetNavDrawList();
     ImU32 color = ToImColor(col);
 
-    float radius = 0.5f * size;
-    float offset = 0.125f * size;
+    ImVec2 c = NormToPixel(x, y);
+    float r = Coordinates::normToPixelW(0.5f * size);
+    float off = r * 0.25f; // Offset relative to radius in pixel space
 
     // Outer circle
-    DrawCircle(x ,y, size, col);
+    drawList->AddCircle(c, r, color, 0, NAV_LINE_WEIGHT);
 
-    // Cardinal arrows
-    drawList->AddLine(NormToPixel(x, y + radius), NormToPixel(x + offset, y + offset), color, NAV_LINE_WEIGHT);
-    drawList->AddLine(NormToPixel(x, y + radius), NormToPixel(x - offset, y + offset), color, NAV_LINE_WEIGHT);
-
-    drawList->AddLine(NormToPixel(x, y - radius), NormToPixel(x + offset, y - offset), color, NAV_LINE_WEIGHT);
-    drawList->AddLine(NormToPixel(x, y - radius), NormToPixel(x - offset, y - offset), color, NAV_LINE_WEIGHT);
-
-    drawList->AddLine(NormToPixel(x - radius, y), NormToPixel(x - offset, y + offset), color, NAV_LINE_WEIGHT);
-    drawList->AddLine(NormToPixel(x - radius, y), NormToPixel(x - offset, y - offset), color, NAV_LINE_WEIGHT);
-
-    drawList->AddLine(NormToPixel(x + radius, y), NormToPixel(x + offset, y + offset), color, NAV_LINE_WEIGHT);
-    drawList->AddLine(NormToPixel(x + radius, y), NormToPixel(x + offset, y - offset), color, NAV_LINE_WEIGHT);
+    // Cardinal arrows in pixel space
+    // Top
+    drawList->AddLine(ImVec2(c.x, c.y - r), ImVec2(c.x + off, c.y - off), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x, c.y - r), ImVec2(c.x - off, c.y - off), color, NAV_LINE_WEIGHT);
+    // Bottom
+    drawList->AddLine(ImVec2(c.x, c.y + r), ImVec2(c.x + off, c.y + off), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x, c.y + r), ImVec2(c.x - off, c.y + off), color, NAV_LINE_WEIGHT);
+    // Left
+    drawList->AddLine(ImVec2(c.x - r, c.y), ImVec2(c.x - off, c.y + off), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x - r, c.y), ImVec2(c.x - off, c.y - off), color, NAV_LINE_WEIGHT);
+    // Right
+    drawList->AddLine(ImVec2(c.x + r, c.y), ImVec2(c.x + off, c.y + off), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x + r, c.y), ImVec2(c.x + off, c.y - off), color, NAV_LINE_WEIGHT);
 }
 
 //**********************************
@@ -219,12 +211,15 @@ void NavigationSystem::DrawMissile(float x, float y, float size, const GFXColor 
     ImDrawList* drawList = GetNavDrawList();
     ImU32 color = ToImColor(col);
 
-    drawList->AddLine(NormToPixel(x - 0.5f * size, y - 0.125f * size), NormToPixel(x, y + 0.375f * size), color, NAV_LINE_WEIGHT);
-    drawList->AddLine(NormToPixel(x + 0.5f * size, y - 0.125f * size), NormToPixel(x, y + 0.375f * size), color, NAV_LINE_WEIGHT);
-    drawList->AddLine(NormToPixel(x - 0.25f * size, y - 0.125f * size), NormToPixel(x - 0.25f * size, y + 0.125f * size), color, NAV_LINE_WEIGHT);
-    drawList->AddLine(NormToPixel(x + 0.25f * size, y - 0.125f * size), NormToPixel(x + 0.25f * size, y + 0.125f * size), color, NAV_LINE_WEIGHT);
-    drawList->AddLine(NormToPixel(x - 0.25f * size, y + 0.125f * size), NormToPixel(x, y - 0.125f * size), color, NAV_LINE_WEIGHT);
-    drawList->AddLine(NormToPixel(x + 0.25f * size, y + 0.125f * size), NormToPixel(x, y - 0.125f * size), color, NAV_LINE_WEIGHT);
+    ImVec2 c = NormToPixel(x, y);
+    float s = Coordinates::normToPixelW(size);
+
+    drawList->AddLine(ImVec2(c.x - 0.5f * s, c.y + 0.125f * s), ImVec2(c.x, c.y - 0.375f * s), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x + 0.5f * s, c.y + 0.125f * s), ImVec2(c.x, c.y - 0.375f * s), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x - 0.25f * s, c.y + 0.125f * s), ImVec2(c.x - 0.25f * s, c.y - 0.125f * s), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x + 0.25f * s, c.y + 0.125f * s), ImVec2(c.x + 0.25f * s, c.y - 0.125f * s), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x - 0.25f * s, c.y - 0.125f * s), ImVec2(c.x, c.y + 0.125f * s), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x + 0.25f * s, c.y - 0.125f * s), ImVec2(c.x, c.y + 0.125f * s), color, NAV_LINE_WEIGHT);
 }
 
 //**********************************
@@ -234,107 +229,109 @@ void NavigationSystem::DrawTargetCorners(float x, float y, float size, const GFX
     ImDrawList* drawList = GetNavDrawList();
     ImU32 color = ToImColor(col);
 
-    float half = 0.5f * size;
-    float inner = 0.3f * size;
+    ImVec2 c = NormToPixel(x, y);
+    float half  = Coordinates::normToPixelW(0.5f * size);
+    float inner = Coordinates::normToPixelW(0.3f * size);
 
     // Top-Left corner
-    drawList->AddLine(NormToPixel(x - half, y + half), NormToPixel(x - inner, y + half), color, NAV_LINE_WEIGHT*2);
-    drawList->AddLine(NormToPixel(x - half, y + half), NormToPixel(x - half, y + inner), color, NAV_LINE_WEIGHT*2);
+    drawList->AddLine(ImVec2(c.x - half, c.y - half), ImVec2(c.x - inner, c.y - half), color, NAV_LINE_WEIGHT * 2);
+    drawList->AddLine(ImVec2(c.x - half, c.y - half), ImVec2(c.x - half, c.y - inner), color, NAV_LINE_WEIGHT * 2);
 
     // Top-Right corner
-    drawList->AddLine(NormToPixel(x + half, y + half), NormToPixel(x + inner, y + half), color, NAV_LINE_WEIGHT*2);
-    drawList->AddLine(NormToPixel(x + half, y + half), NormToPixel(x + half, y + inner), color, NAV_LINE_WEIGHT*2);
+    drawList->AddLine(ImVec2(c.x + half, c.y - half), ImVec2(c.x + inner, c.y - half), color, NAV_LINE_WEIGHT * 2);
+    drawList->AddLine(ImVec2(c.x + half, c.y - half), ImVec2(c.x + half, c.y - inner), color, NAV_LINE_WEIGHT * 2);
 
     // Bottom-Left corner
-    drawList->AddLine(NormToPixel(x - half, y - half), NormToPixel(x - inner, y - half), color, NAV_LINE_WEIGHT*2);
-    drawList->AddLine(NormToPixel(x - half, y - half), NormToPixel(x - half, y - inner), color, NAV_LINE_WEIGHT*2);
+    drawList->AddLine(ImVec2(c.x - half, c.y + half), ImVec2(c.x - inner, c.y + half), color, NAV_LINE_WEIGHT * 2);
+    drawList->AddLine(ImVec2(c.x - half, c.y + half), ImVec2(c.x - half, c.y + inner), color, NAV_LINE_WEIGHT * 2);
 
     // Bottom-Right corner
-    drawList->AddLine(NormToPixel(x + half, y - half), NormToPixel(x + inner, y - half), color, NAV_LINE_WEIGHT*2);
-    drawList->AddLine(NormToPixel(x + half, y - half), NormToPixel(x + half, y - inner), color, NAV_LINE_WEIGHT*2);
+    drawList->AddLine(ImVec2(c.x + half, c.y + half), ImVec2(c.x + inner, c.y + half), color, NAV_LINE_WEIGHT * 2);
+    drawList->AddLine(ImVec2(c.x + half, c.y + half), ImVec2(c.x + half, c.y + inner), color, NAV_LINE_WEIGHT * 2);
 }
 
 //**********************************
-// Draws a 3D projected navigation disc using smooth ImGui Ellipses
+// Draws a 3D projected/oriented navigation circle grid (Accurate 3D perspective)
 //**********************************
 void NavigationSystem::DrawNavCircle(float x, float y, float size, float rot_x, float rot_y, const GFXColor &col) {
     ImDrawList* drawList = GetNavDrawList();
 
     constexpr int circles = 4;
+    constexpr int segments = 20;
     constexpr int segments2 = 12;
     constexpr float TWO_PI = 2.0f * static_cast<float>(M_PI);
 
-    // Compute pixel radii based on 3D tilt
-    ImVec2 center = NormToPixel(x, y);
-    float baseRadiusPx = Coordinates::normToPixelW(0.6f * size);
-    
-    // Minor axis compresses based on pitch tilt (rot_x)
-    float radiusX = baseRadiusPx;
-    float radiusY = baseRadiusPx * std::fabs(std::cos(rot_x));
+    // 1. Concentric web circles in true 3D projection
+    for (int i = 0; i < segments; ++i) {
+        float angle1 = i * (TWO_PI / segments);
+        float angle2 = (i + 1) * (TWO_PI / segments);
 
-    // -------------------------------------------------------------------------
-    // 1. Smooth Concentric Web Ellipses
-    // -------------------------------------------------------------------------
-    for (int j = circles; j > 0; --j) {
-        float scale = static_cast<float>(j) / static_cast<float>(circles);
-        float rx = radiusX * scale;
-        float ry = radiusY * scale;
+        GFXColor ci(col.r, col.g, col.b * std::fabs(std::sin(angle1 / 2.0f)), col.a);
+        ImU32 segmentColor = ToImColor(ci);
 
-        // Draw rotated ellipse path
-        drawList->PathClear();
-        constexpr int ellipseSegments = 32; // Smooth auto-tessellated curve
-        
-        for (int i = 0; i < ellipseSegments; ++i) {
-            float a = i * (TWO_PI / ellipseSegments);
-            
-            // Unrotated ellipse point
-            float ex = rx * std::cos(a);
-            float ey = ry * std::sin(a);
+        QVector pos1(0.6 * size * std::cos(angle1), 0.6 * size * std::sin(angle1), 0.0);
+        QVector pos2(0.6 * size * std::cos(angle2), 0.6 * size * std::sin(angle2), 0.0);
 
-            // Apply yaw rotation (rot_y) on screen plane
-            float rotX = ex * std::cos(rot_y) - ey * std::sin(rot_y);
-            float rotY = ex * std::sin(rot_y) + ey * std::cos(rot_y);
+        pos1 = dxyz(pos1, 0, 0, rot_y);
+        pos1 = dxyz(pos1, rot_x, 0, 0);
+        pos2 = dxyz(pos2, 0, 0, rot_y);
+        pos2 = dxyz(pos2, rot_x, 0, 0);
 
-            drawList->PathLineTo(ImVec2(center.x + rotX, center.y + rotY));
+        float standard_unit = 0.25f * 1.2f * size;
+        float zdistance1 = (1.2f * size) - pos1.k;
+        float zdistance2 = (1.2f * size) - pos2.k;
+        float zscale1 = standard_unit / zdistance1;
+        float zscale2 = standard_unit / zdistance2;
+
+        pos1 *= (zscale1 * 5.0f);
+        pos2 *= (zscale2 * 5.0f);
+
+        for (int j = circles; j > 0; j--) {
+            float scale = static_cast<float>(j) / static_cast<float>(circles);
+            QVector p1 = pos1 * scale;
+            QVector p2 = pos2 * scale;
+
+            drawList->AddLine(
+                NormToPixel(x + p1.i, y + p1.j),
+                NormToPixel(x + p2.i, y + p2.j),
+                segmentColor, NAV_LINE_WEIGHT
+            );
         }
-
-        // Color with standard alpha
-        ImU32 ringColor = ToImColor(col);
-        drawList->PathStroke(ringColor, ImDrawFlags_Closed, NAV_LINE_WEIGHT);
     }
 
-    // -------------------------------------------------------------------------
-    // 2. Radial Spoke Lines (12 Rays from center outward)
-    // -------------------------------------------------------------------------
-    constexpr float angleStepSpoke = TWO_PI / static_cast<float>(segments2);
-    constexpr float innerScale = 1.0f / static_cast<float>(circles * 2);
-
+    // 2. Radial spoke lines in true 3D projection
     for (int i = 0; i < segments2; ++i) {
-        float angle = i * angleStepSpoke;
+        float angle = i * (TWO_PI / segments2);
 
-        // Fading blue channel gradient along the radial direction
-        GFXColor ci(col.r, col.g, col.b * std::fabs(std::sin(angle * 0.5f)), col.a);
+        GFXColor ci(col.r, col.g, col.b * std::fabs(std::sin(angle / 2.0f)), col.a);
         ImU32 spokeColor = ToImColor(ci);
 
-        bool isCardinal = (std::fabs(angle - 1.57f) < 0.01f) || 
-                         (std::fabs(angle - 3.14f) < 0.01f) || 
-                         (std::fabs(angle - 4.71f) < 0.01f) || 
-                         (angle < 0.01f);
+        QVector pos1(0.6 * size * std::cos(angle) / (circles * 2), 0.6 * size * std::sin(angle) / (circles * 2), 0.0);
+        QVector pos2(0.6 * size * std::cos(angle), 0.6 * size * std::sin(angle), 0.0);
 
-        float outerScale = isCardinal ? 1.1f : 1.0f;
+        if ((std::fabs(angle - 1.57f) < 0.01f) || (std::fabs(angle - 3.14f) < 0.01f) || 
+            (std::fabs(angle - 4.71f) < 0.01f) || (angle < 0.01f)) {
+            pos2 *= 1.1f;
+        }
 
-        // Radial start and end points along ellipse boundary
-        auto GetEllipsePoint = [&](float a, float scaleFactor) -> ImVec2 {
-            float ex = radiusX * scaleFactor * std::cos(a);
-            float ey = radiusY * scaleFactor * std::sin(a);
-            float rotX = ex * std::cos(rot_y) - ey * std::sin(rot_y);
-            float rotY = ex * std::sin(rot_y) + ey * std::cos(rot_y);
-            return ImVec2(center.x + rotX, center.y + rotY);
-        };
+        pos1 = dxyz(pos1, 0, 0, rot_y);
+        pos1 = dxyz(pos1, rot_x, 0, 0);
+        pos2 = dxyz(pos2, 0, 0, rot_y);
+        pos2 = dxyz(pos2, rot_x, 0, 0);
 
-        ImVec2 pInner = GetEllipsePoint(angle, innerScale);
-        ImVec2 pOuter = GetEllipsePoint(angle, outerScale);
+        float standard_unit = 0.25f * 1.2f * size;
+        float zdistance1 = (1.2f * size) - pos1.k;
+        float zdistance2 = (1.2f * size) - pos2.k;
+        float zscale1 = standard_unit / zdistance1;
+        float zscale2 = standard_unit / zdistance2;
 
-        drawList->AddLine(pInner, pOuter, spokeColor, NAV_LINE_WEIGHT);
+        pos1 *= (zscale1 * 5.0f);
+        pos2 *= (zscale2 * 5.0f);
+
+        drawList->AddLine(
+            NormToPixel(x + pos1.i, y + pos1.j),
+            NormToPixel(x + pos2.i, y + pos2.j),
+            spokeColor, NAV_LINE_WEIGHT
+        );
     }
 }
