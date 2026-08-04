@@ -586,7 +586,17 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     string tmpstr;
     csvRow = unit_identifier;
 
-    this->Load(unit_identifier);
+    // Load the named unit's components. For the LEGACY save-game format the
+    // resolved unit_key below is remapped to "player_ship", so this first
+    // load seeds the named ship's row before the remap; the Load(unit_key)
+    // call near the end then applies the saved per-ship state. For the NEW
+    // save-game format unit_key stays unit_identifier, making this first load
+    // redundant with the later one.
+    // TODO: remove this and the legacy "player_ship" remap once the legacy
+    // save-game format is retired (see SaveGame::new_save_game_format).
+    if (saved_game && !SaveGame::new_save_game_format) {
+        this->Load(unit_identifier);
+    }
 
     // Textual Descriptions
     this->setUnitKey(unit_identifier);
