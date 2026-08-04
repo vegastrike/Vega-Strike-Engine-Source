@@ -49,6 +49,8 @@ class JoyStick;
 extern void ProcessJoystick(int whichjoystick);
 extern void InitJoystick();
 extern void DeInitJoystick();
+extern void AddJoystick(int device_index);   // SDL2: open by device index (ADDED event)
+extern void RemoveJoystick(SDL_JoystickID instance_id);   // SDL2: match by instance ID (REMOVED event)
 
 const int MAX_JOYSTICKS = 16;
 const int MOUSE_JOYSTICK = MAX_JOYSTICKS - 1;
@@ -77,6 +79,7 @@ class JoyStick {
 public:
 //initializes the joystick
     JoyStick(int);
+    JoyStick(int which, int device_index);   // SDL2 hotplug (opens by device index)
 //engine calls GetJoyStick to get coordinates and buttons
     void GetJoyStick(float &x, float &y, float &z, int &buttons);
     bool isAvailable(void);
@@ -84,6 +87,7 @@ public:
     int NumButtons();
 
 #if defined (HAVE_SDL)
+    SDL_JoystickID  instanceID;   // SDL2 instance ID, for hotplug add/remove matching
     SDL_Joystick *joy;
 #else //defined (HAVE_SDL)
     void   *otherdata; //bad form to have an ifdef in a struct

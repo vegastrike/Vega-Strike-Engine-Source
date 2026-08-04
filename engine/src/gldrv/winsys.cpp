@@ -47,6 +47,7 @@
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
 #include "src/config_xml.h"
+#include "src/in_joystick.h"
 #include "root_generic/vs_globals.h"
 #include "src/vs_logging.h"
 #include "root_generic/options.h"
@@ -591,6 +592,17 @@ void winsys_process_events() {
                                 event.window.data2);
                     }
 #endif
+                    break;
+
+                // SDL2: the joystick-hotplug commit is adapted from the SDL3 master
+                case SDL_JOYDEVICEADDED: {
+                    // SDL2 ADDED event carries the device INDEX; open by index and
+                    // store the instance ID for REMOVED matching.
+                    AddJoystick(event.jdevice.which);
+                    break;
+                }
+                case SDL_JOYDEVICEREMOVED:
+                    RemoveJoystick(event.jdevice.which);
                     break;
 
                 case SDL_QUIT:

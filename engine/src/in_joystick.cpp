@@ -248,6 +248,7 @@ JoyStick::JoyStick(int which) : mouse(which == MOUSE_JOYSTICK) {
         joy_available = false;
         return;
     }
+    instanceID = SDL_JoystickInstanceID(joy);
     joy_available = true;
     nr_of_axes = SDL_JoystickNumAxes(joy);
     nr_of_buttons = SDL_JoystickNumButtons(joy);
@@ -267,6 +268,121 @@ JoyStick::JoyStick(int which) : mouse(which == MOUSE_JOYSTICK) {
     VS_LOG(info, (boost::format("axes: %1% buttons: %2% hats: %3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats));
 }
 
+// SDL2 joystick hotplug: open a newly-plugged device by its device INDEX (SDL2's
+// SDL_JOYDEVICEADDED event carries the device index; the instance ID is derived after open).
+void AddJoystick(int device_index) {
+    // If this instance is already open (e.g. an ADDED event for a device that was
+    // enumerated at init), do nothing.
+    for (int slot = 0; slot < MAX_JOYSTICKS; ++slot) {
+        JoyStick *js = joystick[slot];
+        if (js != nullptr && js->isAvailable() && js->instanceID == SDL_JoystickGetDeviceInstanceID(device_index)) {
+            return;
+        }
+    }
+    // Find a free slot for the newly-plugged device (skip the mouse slot).
+    for (int slot = 0; slot < MAX_JOYSTICKS; ++slot) {
+        if (slot == MOUSE_JOYSTICK) {
+            continue;
+        }
+        if (joystick[slot] != nullptr && joystick[slot]->isAvailable()) {
+            continue;
+        }
+        if (joystick[slot] != nullptr) {
+            delete joystick[slot];
+        }
+        joystick[slot] = new JoyStick(slot, device_index);
+        if (joystick[slot]->isAvailable()) {
+            ++num_joysticks;
+            VS_LOG(important_info,
+                   (boost::format("Joystick added: slot %1% (%2%)\n") % slot
+                    % (SDL_JoystickNameForIndex(device_index) ? SDL_JoystickNameForIndex(device_index) : "?")));
+        } else {
+            VS_LOG(warning, (boost::format("Joystick added but failed to open: slot %1%\n") % slot));
+        }
+        return;
+    }
+    VS_LOG(warning, "No free joystick slot for hotplugged device");
+}
+
+void RemoveJoystick(SDL_JoystickID instance_id) {
+    for (int slot = 0; slot < MAX_JOYSTICKS; ++slot) {
+        if (slot == MOUSE_JOYSTICK) {
+            continue;
+        }
+        JoyStick *js = joystick[slot];
+        if (js == nullptr || !js->isAvailable()) {
+            continue;
+        }
+        if (js->instanceID != instance_id) {
+            continue;
+        }
+#if defined (HAVE_SDL)
+        if (js->joy != nullptr) {
+            SDL_JoystickClose(js->joy);
+            js->joy = nullptr;
+        }
+#endif
+        js->joy_available = false;
+        if (num_joysticks > 0) {
+            --num_joysticks;
+        }
+        VS_LOG(important_info, (boost::format("Joystick removed: slot %1%\n") % slot));
+        return;
+    }
+}
+
+// SDL2 hotplug: construct a joystick for a known device index, storing its instance ID so
+// RemoveJoystick can match it later.
+JoyStick::JoyStick(const int which, const int device_index) : mouse(which == MOUSE_JOYSTICK) {
+    for (int j = 0; j < MAX_AXES; ++j) {
+        axis_axis[j] = -1;
+        axis_inverse[j] = false;
+        joy_axis[j] = 0;
+    }
+    joy_buttons = 0;
+
+    player = which;
+    debug_digital_hatswitch = configuration().joystick.debug_digital_hatswitch;
+    if (which != MOUSE_JOYSTICK) {
+        deadzone = configuration().joystick.deadband_flt;
+    } else {
+        deadzone = configuration().joystick.mouse_deadband_flt;
+    };
+    joy_available = 0;
+    joy_x = joy_y = joy_z = 0;
+    if (which == MOUSE_JOYSTICK) {
+        InitMouse(which);
+    }
+#if defined (NO_SDL_JOYSTICK)
+    return;
+
+#else
+#ifdef HAVE_SDL
+    joy = SDL_JoystickOpen(device_index);
+    if (joy == nullptr) {
+        VS_LOG(warning, (boost::format("warning: no joystick nr %1%\n") % which));
+        joy_available = false;
+        return;
+    }
+    instanceID = SDL_JoystickInstanceID(joy);
+    joy_available = true;
+    nr_of_axes = SDL_JoystickNumAxes(joy);
+    nr_of_buttons = SDL_JoystickNumButtons(joy);
+    nr_of_hats = SDL_JoystickNumHats(joy);
+#else
+    //WE HAVE GLUT
+    if (which > 0 && which != MOUSE_JOYSTICK) {
+        joy_available = false;
+        return;
+    }
+    joy_available = true;
+    nr_of_axes    = 3;
+    nr_of_buttons = 15;
+    nr_of_hats    = 0;
+#endif //we have GLUT
+#endif
+    VS_LOG(info, (boost::format("axes: %1% buttons: %2% hats: %3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats));
+}
 void JoyStick::InitMouse(int which) {
     player = 0;     //default to first player
     joy_available = true;
