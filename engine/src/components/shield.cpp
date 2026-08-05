@@ -340,34 +340,35 @@ void Shield::Regenerate(const bool player_ship) {
     * Finally, you adjust whatever used it to the value in question
     */
 
-    // Shield Maintenance
-    // TODO: lib_damage restore efficiency by replacing with shield->efficiency
-    //const double efficiency = 1;
-
-    const double shield_maintenance_cost = TotalMaxLayerValue() * configuration().components.shield.maintenance_factor_dbl;
-    SetConsumption(shield_maintenance_cost);
-    const double actual_maintenance_percent = Consume();
-    if(Percent() > actual_maintenance_percent) {
-        Decrease();
-        return;
-    }
-
-    // Manually throttle shield strength
+    // Manually throttle shield strength (must run before the fully-charged
+    // gate so a throttled shield still decreases toward its power limit)
     if(Percent() > max_power) {
         Decrease();
         return;
     }
 
-    // Shield Regeneration
+    // Fully charged shields need no energy - return before any consumption.
+    // (Regression fix: the maintenance drain below used to run even at full
+    // shields, so the capacitor could never refill after combat. See
+    // https://github.com/vegastrike/Vega-Strike-Engine-Source - shield
+    // maintenance drain bug; old pre-2025 model only spent energy while
+    // shields were actually recharging.)
     if(TotalLayerValue() == TotalMaxLayerValue()) {
-        // Fully charged. No need for more action or energy consumption
         return;
     }
 
-    const double shield_regeneration_cost = regeneration.AdjustedValue() * configuration().components.shield.regeneration_factor_dbl;
-    SetConsumption(shield_regeneration_cost);
-    const double actual_regeneration_percent = Consume();
-    double regen = actual_regeneration_percent * regeneration.AdjustedValue() * simulation_atom_var;
+    /* Shield Regeneration - energy-limited by what the reactor can supply.
+    * The energy cost scales with the shield deficit being rebuilt, so a
+    * heavily damaged shield demands proportionally more power. If the
+    * reactor can't supply the full cost, Consume() returns the fraction it
+    * could actually provide and regen slows by that same fraction - e.g.
+    * half the energy -> half the recharge rate -> twice as long to fill
+    * (matches the pre-2025 behavior).
+    */
+    const double shield_recharge_cost = (TotalMaxLayerValue() - TotalLayerValue()) * configuration().components.shield.maintenance_factor_dbl;
+    SetConsumption(shield_recharge_cost);
+    const double actual_recharge_percent = Consume();
+    double regen = actual_recharge_percent * regeneration.AdjustedValue() * simulation_atom_var;
 
     for (Resource<double> &facet : facets) {
         facet += regen;
