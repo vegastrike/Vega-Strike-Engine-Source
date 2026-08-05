@@ -22,9 +22,3 @@ Checks:
   - performance-*
   - portability-*
   - readability-*
-HeaderFileExtensions:
-  - .h
-  - .hpp
-ImplementationFileExtensions:
-  - .c
-  - .cpp
