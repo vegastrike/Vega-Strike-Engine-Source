@@ -37,9 +37,11 @@ Below are the official places to find the current developers:
 AI :robot:
 ==========
 
-Use of AI is a controversial topic. However, it is inevitable and now part of the world we live in. So while ideally we would not allow it that is no longer feasible as people will
-then simply not declare their use of AI and then unknown risks have entered into the project. Therefore we kindly ask that anyone that wishes to contribute with AI follow the
-guidelines below.
+The adoption of artificial intelligence presents both significant opportunities and legitimate ethical, security, and operational
+concerns. Recognizing the magnitude of these challenges, we take the risks associated with AI seriously. Rather than prohibiting
+its use—which risks driving adoption unmonitored into the shadows—this policy establishes clear guidelines for its safe,
+transparent, and responsible integration. By defining explicit boundaries, we ensure that our teams can leverage AI effectively
+while maintaining strict oversight, quality control, and risk mitigation across all projects.
 
 As a general rule, we follow the same policies on AI contributions as the `Linux Kernel: AI Policy`_ with the following changes:
 - Use only our accepted licenses, see `Vega Strike: Licensing`_ for details.
