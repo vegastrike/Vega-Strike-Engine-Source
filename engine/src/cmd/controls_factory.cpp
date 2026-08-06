@@ -44,6 +44,7 @@
 #include "gui/scroller.h"
 #include "gui/control.h"
 #include "gui/simplepicker.h"
+#include "gui/textinputdisplay.h"
 
 // All supported UI control property keys
 enum class ControlProp {
@@ -194,7 +195,7 @@ GFXColor getColor(const std::string& colorString) {
     return GFXColor(); // Return default fallback color
 }
 
-Control* getControl(const std::map<std::string, std::string>& attributes) {
+Control* getControl(const std::map<std::string, std::string>& attributes, std::vector<unsigned int>* base_keyboard_queue) {
     auto itType = attributes.find("type");
     if (itType == attributes.end()) {
         VS_LOG(error, "getControl(): Missing 'type' attribute");
@@ -312,6 +313,51 @@ Control* getControl(const std::map<std::string, std::string>& attributes) {
                 default:                   break;
             }
         }
+    } else if (type == "textInputDisplay") {
+        // TextInputDisplay requires keyboard queue and filter string
+        std::string filter = "\x1b\r*?\\/|:<>\"^"; // Default filter mask
+        
+        auto itFilter = attributes.find("invalidChars");
+        if (itFilter != attributes.end()) {
+            filter = itFilter->second;
+        }
+
+        auto* tid = new TextInputDisplay(base_keyboard_queue, filter.c_str());
+        c = tid;
+
+        for (const auto& pair : attributes) {
+            const std::string& key = pair.first;
+            const std::string& value = pair.second;
+            switch (parseProp(key)) {
+                case ControlProp::Text:
+                    tid->setText(value);
+                    break;
+                case ControlProp::Justification:
+                    if (value == "Left" || value == "0") {
+                        tid->setJustification(LEFT_JUSTIFY);
+                    } else if (value == "Right" || value == "1") {
+                        tid->setJustification(RIGHT_JUSTIFY);
+                    } else if (value == "Center" || value == "2") {
+                        tid->setJustification(CENTER_JUSTIFY);
+                    }
+                    break;
+                case ControlProp::TextMargins: {
+                    auto size = splitAndConvert(value, ',');
+                    if (size.size() >= 2) {
+                        tid->setTextMargins(Size(size[0], size[1]));
+                    }
+                    break;
+                }
+                case ControlProp::Multiline:
+                    tid->setMultiLine(value == "true");
+                    break;
+                case ControlProp::OutlineColor:
+                    tid->setOutlineColor(getColor(value));
+                    break;
+                default:
+                    break;
+            }
+        }
     } else if (type == "groupControl") {
         // GroupControls act primarily as structural containers
         auto* gc = new GroupControl;
@@ -366,7 +412,8 @@ Control* getControl(const std::map<std::string, std::string>& attributes) {
 
 bool getControls(
         const std::string& filename, // the file name of the JSON data 
-        Window* window // the window the group controls will be added to
+        Window* window, // the window the group controls will be added to
+        std::vector<unsigned int>* base_keyboard_queue
     ) {
 
     // Load file via engine API
@@ -392,7 +439,7 @@ bool getControls(
     for (const auto& pair : parsedControls) {
         const std::string& controlName = pair.first;
         const auto& attributes = pair.second;
-        Control* c = getControl(attributes);
+        Control* c = getControl(attributes, base_keyboard_queue);
         if (!c) {
             continue;
         }
@@ -432,17 +479,19 @@ bool getControls(
 
     // --- Pass 3: Add the scrollers ---
     for (const auto& pair : scrollerLinks) {
-        Control* pickerControl = pair.first;
+        Control* targetControl = pair.first;
         const std::string& scrollerName = pair.second;
         auto it = controlMap.find(scrollerName);
         if (it != controlMap.end()) {
-            if (auto* picker = dynamic_cast<SimplePicker*>(pickerControl)) {
-                if (auto* scroller = dynamic_cast<Scroller*>(it->second)) {
+            if (auto* scroller = dynamic_cast<Scroller*>(it->second)) {
+                if (auto* picker = dynamic_cast<SimplePicker*>(targetControl)) {
                     picker->setScroller(scroller);
+                } else if (auto* sd = dynamic_cast<StaticDisplay*>(targetControl)) {
+                    sd->setScroller(scroller);
                 }
             }
         } else {
-            VS_LOG(error, (boost::format("getControls(): Scroller '%1%' not found for picker binding") % scrollerName));
+            VS_LOG(error, (boost::format("getControls(): Scroller '%1%' not found for control binding") % scrollerName));
         }
     }
 
