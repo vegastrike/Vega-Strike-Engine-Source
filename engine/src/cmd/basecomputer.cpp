@@ -2641,16 +2641,14 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
         // This is not as clear as it looks.
         // Light missile size is 64. Medium is 128. Light and medium is 192.
         // This hack produces inconsistent but plausible results.
-        quantity = mount_size / missile_size;
+        m_newPart->mounts[0].ammo = quantity = mount_size / missile_size;
         VS_LOG(important_info, (boost::format("Buying %1% missiles (%2%/%3%)") % quantity % missile_size % mount_size));
     }
 
 
     if(playerUnit->BuyUpgrade(baseUnit, &m_part, quantity)) {
         double percent = 0;
-        // Modify upgrade quantity according to cargo quantity
-        m_newPart->mounts[0].ammo = quantity;
-
+        
         //Upgrade the ship.
         playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, 0, true, percent);
         const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
