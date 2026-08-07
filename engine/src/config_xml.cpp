@@ -436,6 +436,7 @@ CommandMap initGlobalCommandMap() {
     commandMap["SheltonKey"] = FlyByKeyboard::SheltonKey;
     commandMap["MatchSpeedKey"] = FlyByKeyboard::MatchSpeedKey;
     commandMap["PauseKey"] = FireKeyboard::TogglePause;
+    commandMap["ConfigKey"] = FireKeyboard::ToggleConfigScreen;
     commandMap["JumpKey"] = FlyByKeyboard::JumpKey;
     commandMap["AutoKey"] = FlyByKeyboard::AutoKey;
     commandMap["SwitchCombatMode"] = FlyByKeyboard::SwitchCombatModeKey;
