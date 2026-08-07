@@ -65,21 +65,22 @@ jobs:
       # installed and set it to a GHA variable that can be consumed below
       - name: Build it
         env:
-          MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
           PYTHONHOME: ""
           PYTHONPATH: ""
-        run: script/cibuild --preset-name=${{ matrix.preset-name }}
+          INSTALL_GTEST: 1
+          USE_GTEST: 1
+        run: script/cibuild --preset-name="${{ matrix.preset-name }}" --build-type="${{ matrix.build-type }}"
 
       - name: Test
-        working-directory: ${{github.workspace}}
+        working-directory: "${{ github.workspace }}"
         env:
           GTEST_OUTPUT: xml
           GTEST_COLOR: 1
-        run: ctest -V --preset-name=${{ matrix.preset-name }}
+        run: script/test --preset-name="${{ matrix.preset-name }}"
 
       - name: Upload test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

@@ -31,6 +31,8 @@
 #include <stddef.h>
 
 //#include "src/command.h"
+#include <locale>
+
 #include "src/vs_exit.h"
 
 class Universe;
@@ -139,5 +141,7 @@ class ForceFeedback;
 extern ForceFeedback *forcefeedback;
 
 extern double benchmark;
+
+std::locale &GetGlobalLocale();
 
 #endif //VEGA_STRIKE_ENGINE_VS_GLOBALS_H
