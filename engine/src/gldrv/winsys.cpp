@@ -697,6 +697,11 @@ void winsys_process_events() {
                     state = true;
                     //does same thing as KEYDOWN, but with different state.
                 case SDL_EVENT_KEY_DOWN:
+                    // Global (always-active) actions fire in any context (e.g. ConfigKey/Alt+C).
+                    // Handled globally -> skip the context-specific dispatch so it doesn't double-fire.
+                    if (HandleGlobalKey(event.key.key, event.key.mod, event.key.down, x, y)) {
+                        break;
+                    }
                     if (keyboard_func) {
                         SDL_GetMouseState(&x, &y);
                         (*keyboard_func)(event.key.key, event.key.mod, event.key.down, x, y);
