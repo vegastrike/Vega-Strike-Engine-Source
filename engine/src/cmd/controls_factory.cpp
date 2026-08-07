@@ -483,8 +483,8 @@ bool getControls(
         const std::string& scrollerName = pair.second;
         auto it = controlMap.find(scrollerName);
         if (it != controlMap.end()) {
-            if (auto* scroller = vega_dynamic_cast_ptr<Scroller>(it->second)) {
-                if (auto* picker = vega_dynamic_cast_ptr<SimplePicker>(targetControl)) {
+            if (auto* scroller = vega_dynamic_cast_ptr<Scroller>(it->second, true)) {
+                if (auto* picker = vega_dynamic_cast_ptr<SimplePicker>(targetControl, true)) {
                     picker->setScroller(scroller);
                 } else if (auto* sd = dynamic_cast<StaticDisplay*>(targetControl)) {
                     sd->setScroller(scroller);
