@@ -466,6 +466,7 @@ void Universe::StartDraw() {
     UpdateTime();
     UpdateTimeCompressionSounds();
     _Universe->SetActiveCockpit(randomInt(_cockpits.size() - 1, 0));
+    if (!optionsActive) {  // config screen open -> freeze the sim, keep rendering
     for (i = 0; i < star_system.size() && i < configuration().physics.num_running_systems; ++i) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double update_star_system_start_time = realTime();
@@ -488,6 +489,7 @@ void Universe::StartDraw() {
            (boost::format("%1%: Time taken by StarSystem::ProcessPendingJumps(): %2%") % __FUNCTION__ % (
                star_system_process_pending_jumps_end_time - star_system_process_pending_jumps_start_time)));
 #endif
+    }
     for (i = 0; i < _cockpits.size(); ++i) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double process_input_start_time = realTime();
@@ -517,6 +519,7 @@ void Universe::StartDraw() {
 #if defined(LOG_TIME_TAKEN_DETAILS)
     const double gfx_end_scene_start_time = realTime();
 #endif
+    DrawConfigOverlay();  // config overlay on top (no-op unless optionsActive)
     // Rendering imgui frame
     ImGui::Render();
 
@@ -859,6 +862,25 @@ unsigned int Universe::numPlayers() {
 
 void Universe::TogglePause() {
     paused = !paused;
+}
+
+void Universe::ToggleOptionsActive() {
+    optionsActive = !optionsActive;
+}
+
+void DrawConfigOverlay() {
+    if (!_Universe->isOptionsActive()) {
+        return;
+    }
+    // Config screen overlay (placeholder — Phase 3). Transparent, drawn last so it's on top.
+    // Closed via the Alt+C toggle (Esc is a taken binding).
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(configuration().graphics.resolution_x,
+                                    configuration().graphics.resolution_y),
+            ImGuiCond_Always);
+    ImGui::Begin("config_window", nullptr, window_flags);
+    ImGui::Text("Configuration (placeholder)");
+    ImGui::End();
 }
 
 /////////////////////////////////////////////////////////

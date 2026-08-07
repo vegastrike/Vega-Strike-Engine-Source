@@ -53,6 +53,7 @@
 #include "src/vs_exit.h"
 #include "configuration/configuration.h"
 #include "libraries/gui/gui.h"
+#include "backends/imgui_impl_sdl3.h"
 
 #include <SDL3/SDL_video.h>
 
@@ -687,8 +688,7 @@ void winsys_process_events() {
     }
     while (keepRunning) {
         while (SDL_PollEvent(&event)) {
-            // forward all events to ImGUI
-            ImGui_ImplSDL3_ProcessEvent(&event);
+            // forward all events to ImGUI            ImGui_ImplSDL3_ProcessEvent(&event);
 
             // now the VS processing of events
             state = false;

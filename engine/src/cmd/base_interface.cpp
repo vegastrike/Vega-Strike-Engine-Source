@@ -752,6 +752,7 @@ void base_main_loop() {
 
     // ImGui End Frame
     ImGui::End();
+    DrawConfigOverlay();  // config overlay on top (no-op unless optionsActive)
     // Rendering
     ImGui::Render();
 
