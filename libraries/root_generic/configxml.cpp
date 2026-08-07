@@ -42,15 +42,32 @@
 /* *********************************************************** */
 
 VegaConfig::VegaConfig(const char *configfile) {
-    configNodeFactory domf;
-    configNode *top = (configNode *) domf.LoadXML(configfile);
-    if (top == nullptr) {
-        VS_LOG_AND_FLUSH(fatal, "Panic exit - no configuration");
-        VSExit(0);
-    }
+    // The old vegastrike.config XML is gone; configuration now comes from
+    // config.json. Colors are seeded into map_colors from the configuration()
+    // "colors" section so the existing getColor("section","name") call sites
+    // keep working.
+    (void)configfile;
     variables = nullptr;
     colors = nullptr;
-    checkConfig(top);
+
+    // Seed map_colors from configuration().colors (section -> {name: [r,g,b,a]})
+    for (const auto & section_entry : configuration().colors) {
+        const std::string & section = section_entry.first;
+        for (const auto & color_entry : section_entry.second) {
+            const std::string & name = color_entry.first;
+            const auto & rgba = color_entry.second;
+            if (rgba.size() < 4) {
+                continue;
+            }
+            vColor vc;
+            vc.name = section + "/" + name;
+            vc.r = rgba[0];
+            vc.g = rgba[1];
+            vc.b = rgba[2];
+            vc.a = rgba[3];
+            map_colors[vc.name] = vc;
+        }
+    }
 }
 
 VegaConfig::~VegaConfig() {

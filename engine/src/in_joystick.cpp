@@ -210,6 +210,67 @@ void DeInitJoystick() {
     num_joysticks = 0;
 }
 
+void AddJoystick(SDL_JoystickID instance_id) {
+    // If this instance is already open (e.g. an ADDED event for a device that
+    // was enumerated at init), do nothing.
+    for (int slot = 0; slot < MAX_JOYSTICKS; ++slot) {
+        JoyStick *js = joystick[slot];
+        if (js != nullptr && js->isAvailable() && js->instanceID == instance_id) {
+            return;
+        }
+    }
+    // Find a free slot for the newly-plugged device (skip the mouse slot).
+    for (int slot = 0; slot < MAX_JOYSTICKS; ++slot) {
+        if (slot == MOUSE_JOYSTICK) {
+            continue;
+        }
+        if (joystick[slot] != nullptr && joystick[slot]->isAvailable()) {
+            continue;
+        }
+        if (joystick[slot] != nullptr) {
+            delete joystick[slot];
+        }
+        joystick[slot] = new JoyStick(slot, instance_id);
+        if (joystick[slot]->isAvailable()) {
+            ++num_joysticks;
+            VS_LOG(important_info,
+                   (boost::format("Joystick added: slot %1% (%2%)\n") % slot
+                    % (SDL_GetJoystickNameForID(instance_id) ? SDL_GetJoystickNameForID(instance_id) : "?")));
+        } else {
+            VS_LOG(warning, (boost::format("Joystick added but failed to open: slot %1%\n") % slot));
+        }
+        return;
+    }
+    VS_LOG(warning, "No free joystick slot for hotplugged device");
+}
+
+void RemoveJoystick(SDL_JoystickID instance_id) {
+    for (int slot = 0; slot < MAX_JOYSTICKS; ++slot) {
+        if (slot == MOUSE_JOYSTICK) {
+            continue;
+        }
+        JoyStick *js = joystick[slot];
+        if (js == nullptr || !js->isAvailable()) {
+            continue;
+        }
+        if (js->instanceID != instance_id) {
+            continue;
+        }
+#if defined (HAVE_SDL)
+        if (js->joy != nullptr) {
+            SDL_CloseJoystick(js->joy);
+            js->joy = nullptr;
+        }
+#endif
+        js->joy_available = false;
+        if (num_joysticks > 0) {
+            --num_joysticks;
+        }
+        VS_LOG(important_info, (boost::format("Joystick removed: slot %1%\n") % slot));
+        return;
+    }
+}
+
 JoyStick::JoyStick(const int which, const SDL_JoystickID instance_id) : mouse(which == MOUSE_JOYSTICK) {
     for (int j = 0; j < MAX_AXES; ++j) {
         axis_axis[j] = -1;
@@ -305,13 +366,23 @@ extern void GetMouseXY(int &mousex, int &mousey);
 
 void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     std::pair<double, double> pair = GetJoystickFromMouse();
-    x = pair.first;
-    y = pair.second;
+    // Sensitivity scales the -1..1 deflection (50 = baseline; higher = more
+    // axis per mouse move). Glide uses absolute position; warp recenters the
+    // cursor each frame so the next read is relative to center.
+    const float sensitivity = configuration().joystick.mouse_sensitivity_flt / 50.0F;
+    x = static_cast<float>(pair.first) * sensitivity;
+    y = static_cast<float>(pair.second) * sensitivity;
     z = 0;
     joy_axis[0] = x;
     joy_axis[1] = y;
     joy_axis[2] = z = 0;
     buttons = getMouseButtonStatus();
+    if (configuration().joystick.warp_mouse) {
+        // Recenter the cursor so warp-mode mouse is relative, not absolute.
+        int w = 0, h = 0;
+        SDL_GetWindowSize(SDL_GL_GetCurrentWindow(), &w, &h);
+        SetMousePosition(w / 2, h / 2);
+    }
 }
 
 void JoyStick::GetJoyStick(float &x, float &y, float &z, long long& buttons) {

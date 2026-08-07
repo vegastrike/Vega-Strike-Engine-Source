@@ -49,6 +49,8 @@ class JoyStick;
 extern void ProcessJoystick(int whichjoystick);
 extern void InitJoystick();
 extern void DeInitJoystick();
+extern void AddJoystick(SDL_JoystickID instance_id);
+extern void RemoveJoystick(SDL_JoystickID instance_id);
 
 const int MAX_JOYSTICKS = 16;
 const int MOUSE_JOYSTICK = MAX_JOYSTICKS - 1;
