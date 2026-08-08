@@ -30,16 +30,10 @@
 
 #include <string>
 #include <map>
-#include <unordered_set>
 
 #include "vegadisk/vsfilesystem.h"
-#include "gui/window.h"
 #include "gui/control.h"
 
-std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFileSystem::VSFile &file); // parse controls from a given VSFile
-Control* getControl(const std::map<std::string, std::string>& attributes); // construct a single control elenment
-bool getControls( // reads a controls.json file and returns all control groups
-    const std::string& filename, // the file name of the JSON data 
-        Window* window // the window the group controls will be added to
-);
+std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFileSystem::VSFile &file);
+Control* getControl(std::map<std::string, std::string> attributes);
 #endif // VEGA_STRIKE_ENGINE_CMD_CONTROLS_FACTORY_H
