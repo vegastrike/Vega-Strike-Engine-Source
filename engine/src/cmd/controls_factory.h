@@ -30,6 +30,7 @@
 
 #include <string>
 #include <map>
+#include <unordered_set>
 
 #include "vegadisk/vsfilesystem.h"
 #include "gui/window.h"

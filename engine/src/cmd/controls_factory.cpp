@@ -38,6 +38,7 @@
 
 #include "src/vega_cast_utils.h"
 #include "cmd/drawable.h"
+#include "resource/json_utils.h"
 
 #include "gui/staticdisplay.h"
 #include "gui/newbutton.h"
@@ -124,9 +125,8 @@ std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFi
         std::map<std::string, std::string> control_attributes;
 
         // Iterate dynamically over all keys in the object withou filtering!
-        for (boost::json::object::const_iterator it = control.begin(); it != control.end(); ++it) {
-            std::string key(it->key());
-            const boost::json::value& val = it->value();
+        for (const auto& [key_view, val] : control) {
+            std::string key(key_view);
 
             if (val.is_bool()) {
                 control_attributes[key] = val.get_bool() ? "true" : "false";
@@ -209,9 +209,7 @@ Control* getControl(const std::map<std::string, std::string>& attributes) {
         auto* sd = new StaticDisplay;
         c = sd;
 
-        for (const auto& pair : attributes) {
-            const std::string& key = pair.first;
-            const std::string& value = pair.second;
+        for (const auto& [key, value] : attributes) {
             switch (parseProp(key)) {
                 case ControlProp::Text:
                     sd->setText(value);
@@ -246,9 +244,7 @@ Control* getControl(const std::map<std::string, std::string>& attributes) {
         auto* b = new NewButton;
         c = b;
 
-        for (const auto& pair : attributes) {
-            const std::string& key = pair.first;
-            const std::string& value = pair.second;
+        for (const auto& [key, value] : attributes) {
             switch (parseProp(key)) {
                 case ControlProp::Label:          b->setLabel(value); break;
                 case ControlProp::Command:        b->setCommand(value); break;
@@ -267,9 +263,7 @@ Control* getControl(const std::map<std::string, std::string>& attributes) {
         auto* s = new Scroller;
         c = s;
 
-        for (const auto& pair : attributes) {
-            const std::string& key = pair.first;
-            const std::string& value = pair.second;
+        for (const auto& [key, value] : attributes) {
             switch (parseProp(key)) {
                 case ControlProp::ButtonColor:  s->setButtonColor(getColor(value)); break;
                 case ControlProp::OutlineColor: s->setOutlineColor(getColor(value)); break;
@@ -281,9 +275,7 @@ Control* getControl(const std::map<std::string, std::string>& attributes) {
         auto* p = new SimplePicker;
         c = p;
 
-        for (const auto& pair : attributes) {
-            const std::string& key = pair.first;
-            const std::string& value = pair.second;
+        for (const auto& [key, value] : attributes) {
             switch (parseProp(key)) {
                 case ControlProp::OutlineColor:       p->setOutlineColor(getColor(value)); break;
                 case ControlProp::SelectionColor:     p->setSelectionColor(getColor(value)); break;
@@ -304,9 +296,7 @@ Control* getControl(const std::map<std::string, std::string>& attributes) {
         auto* sid = new StaticImageDisplay;
         c = sid;
 
-        for (const auto& pair : attributes) {
-            const std::string& key = pair.first;
-            const std::string& value = pair.second;
+        for (const auto& [key, value] : attributes) {
             switch (parseProp(key)) {
                 case ControlProp::Texture: sid->setTexture(value); break;
                 default:                   break;
@@ -323,9 +313,7 @@ Control* getControl(const std::map<std::string, std::string>& attributes) {
     }
 
     // --- Common Base Properties ---
-    for (const auto& pair : attributes) {
-        const std::string& key = pair.first;
-        const std::string& value = pair.second;
+    for (const auto& [key, value] : attributes) {
         switch (parseProp(key)) {
             case ControlProp::Id:
                 c->setId(value);
@@ -389,9 +377,7 @@ bool getControls(
     std::vector<std::pair<Control*, std::string>> scrollerLinks;
 
     // --- Pass 1: Instantiate all controls ---
-    for (const auto& pair : parsedControls) {
-        const std::string& controlName = pair.first;
-        const auto& attributes = pair.second;
+    for (const auto& [controlName, attributes] : parsedControls) {
         Control* c = getControl(attributes);
         if (!c) {
             continue;
@@ -417,10 +403,8 @@ bool getControls(
     }
 
     // --- Pass 2: Wire Hierarchy & Bindings ---
-    for (const auto& pair : parentLinks) {
-        Control* child = pair.first;
-        const std::string& parentName = pair.second;
-        auto it = controlMap.find(parentName);
+    for (const auto& [child, parentName] : parentLinks) {
+       auto it = controlMap.find(parentName);
         if (it != controlMap.end()) {
             if (auto* group = dynamic_cast<GroupControl*>(it->second)) {
                 group->addChild(child);
@@ -431,9 +415,7 @@ bool getControls(
     }
 
     // --- Pass 3: Add the scrollers ---
-    for (const auto& pair : scrollerLinks) {
-        Control* pickerControl = pair.first;
-        const std::string& scrollerName = pair.second;
+    for (const auto& [pickerControl, scrollerName] : scrollerLinks) {
         auto it = controlMap.find(scrollerName);
         if (it != controlMap.end()) {
             if (auto* picker = dynamic_cast<SimplePicker*>(pickerControl)) {
