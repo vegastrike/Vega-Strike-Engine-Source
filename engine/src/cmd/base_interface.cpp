@@ -70,7 +70,6 @@
 #include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_sdlrenderer3.h"
 
 VegaRandom base_interface_random{};
 
@@ -117,7 +116,8 @@ static bool createdbase = false;
 static int createdmusic = -1;
 
 void ModifyMouseSensitivity(int &x, int &y) {
-    biModifyMouseSensitivity(x, y, false);
+    // FIXME enabling this breaks mouse over events in the main menu
+    // biModifyMouseSensitivity(x, y, false);
 }
 
 #ifdef BASE_MAKER
@@ -744,6 +744,9 @@ void base_main_loop() {
                              configuration().graphics.resolution_y);
     ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
     ImGui::Begin("main_window", nullptr, window_flags);
+
+    // hide the mouse cursor, we got a cooler one!
+    ImGui::SetMouseCursor(ImGuiMouseCursor_None);
     
     bool refresh_result = RefreshGUI();
 
@@ -957,6 +960,8 @@ void BaseInterface::Click(int xint, int yint, int button, int state) {
 }
 
 void BaseInterface::ClickWin(int button, int state, int x, int y) {
+    ModifyMouseSensitivity(x, y);
+    SetSoftwareMousePosition(x, y);
     if (state == WS_MOUSE_DOWN) {
         getMouseButtonMask() |= (1 << (button - 1));
     } else if (state == WS_MOUSE_UP) {
@@ -1533,7 +1538,7 @@ void BaseInterface::Draw() {
 
     GFXColor(0, 0, 0, 0);
     SetupViewport();
-    StartGUIFrame(GFXTRUE);
+    StartGUIFrame();
     if (GetElapsedTime() < 1) {
         AnimatedTexture::UpdateAllFrame();
     }

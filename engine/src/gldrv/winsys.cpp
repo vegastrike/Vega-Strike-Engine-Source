@@ -57,7 +57,7 @@
 #include <SDL3/SDL_video.h>
 
 #include "gldrv/mouse_cursor.h"
-
+#include "backends/imgui_impl_sdl3.h"
 /*
  * Windowing System Abstraction Layer
  * Abstracts creation of windows, handling of events, etc.
@@ -687,7 +687,10 @@ void winsys_process_events() {
     }
     while (keepRunning) {
         while (SDL_PollEvent(&event)) {
+            // forward all events to ImGUI
+            ImGui_ImplSDL3_ProcessEvent(&event);
 
+            // now the VS processing of events
             state = false;
             switch (event.type) {
                 case SDL_EVENT_KEY_UP:
