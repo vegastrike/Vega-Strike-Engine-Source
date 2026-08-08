@@ -667,7 +667,7 @@ void NavigationSystem::DrawMission() {
     TextPlane displayname;
     GFXColor temp_color(1, 1, 1, 1);
     displayname.color = static_cast<ImU32>(temp_color);
-    displayname.SetSize(.42, -.7);
+    displayname.SetSize(.62, -.7);
     displayname.SetPos(originx + (.1 * deltax) + .37, originy /*+(1*deltay)*/ );
     std::string text;
     if (active_missions.size() > 1) {
