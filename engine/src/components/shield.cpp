@@ -364,7 +364,10 @@ void Shield::Regenerate(const bool player_ship) {
         return;
     }
 
-    const double shield_regeneration_cost = regeneration.AdjustedValue() * configuration().components.shield.regeneration_factor_dbl;
+    // Energy-limited recharge: the cost scales with the deficit being rebuilt, so a
+    // shield too big for the reactor charges at a reduced rate (slower) rather than
+    // at full speed. (Consume() returns the fraction the reactor could actually supply.)
+    const double shield_regeneration_cost = (TotalMaxLayerValue() - TotalLayerValue()) * configuration().components.shield.regeneration_factor_dbl;
     SetConsumption(shield_regeneration_cost);
     const double actual_regeneration_percent = Consume();
     double regen = actual_regeneration_percent * regeneration.AdjustedValue() * simulation_atom_var;
