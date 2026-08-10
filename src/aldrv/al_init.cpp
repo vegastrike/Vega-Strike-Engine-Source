@@ -148,8 +148,8 @@ bool AUDInit()
     scalevel = game_options.DopplerScale;
     g_game.audio_frequency_mode = game_options.frequency;
     maxallowedsingle     = game_options.MaxSingleSounds;
-    g_game.max_sound_sources = 
     maxallowedtotal      = game_options.MaxTotalSounds;
+    g_game.max_sound_sources = maxallowedtotal;
     if (!game_options.Sound && !game_options.Music)
         return false;
     int attrlist[] = {ALC_FREQUENCY, g_game.audio_frequency_mode, 0};
