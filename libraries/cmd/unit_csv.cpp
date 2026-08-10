@@ -586,8 +586,6 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     string tmpstr;
     csvRow = unit_identifier;
 
-    this->Load(unit_identifier);
-
     // Textual Descriptions
     this->setUnitKey(unit_identifier);
     this->unit_name = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
