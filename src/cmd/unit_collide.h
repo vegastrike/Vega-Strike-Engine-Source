@@ -94,9 +94,9 @@ public: UnitHash3d( StarSystem *ss )
     {
         if ( !hugeobjects.empty() )
             hugeobjects.clear();
-        if ( this->active_huge.size() )
+        if ( this->active_huge->size() )
             ha.clear();
-        if ( this->accum_huge.size() )
+        if ( this->accum_huge->size() )
             hb.clear();
         acc_huge.clear();
         act_huge.clear();

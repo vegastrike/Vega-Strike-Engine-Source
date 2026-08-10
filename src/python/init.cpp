@@ -13,7 +13,7 @@
 #include <pyerrors.h>
 #include <pythonrun.h>
 #include <compile.h>
-#include <eval.h>
+#include <Python.h>
 #include <stdio.h>
 #include <math.h>
 

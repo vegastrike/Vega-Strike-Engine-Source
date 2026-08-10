@@ -243,7 +243,7 @@ char* TextArea::GetSelectedItem( int type )
 {
     TextAreaItem *search;
     search = ItemList->FindCount( cur_selected, 0 );
-    if (search == 0) return '\0';
+    if (search == 0) return nullptr;
     if (type == 1) return search->name;
 
     else return search->description;

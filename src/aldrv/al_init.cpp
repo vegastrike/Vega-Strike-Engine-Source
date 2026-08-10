@@ -135,7 +135,6 @@ static ALCcontext *context_id = NULL;
 #endif
 bool AUDInit()
 {
-    g_game.sound_enabled = 
 #ifdef HAVE_AL
     usedoppler    = game_options.Doppler;
     usepositional = game_options.Positional;

@@ -8,6 +8,11 @@
 
 cmake_minimum_required(VERSION 3.5)
 
+# 2013 codebase uses C++11-era features incl. dynamic exception specs (throw()), which
+# are errors in C++17+. Build as C++14 to keep the original code compiling unchanged.
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 project (vsUTCS)
 
 UNSET(PYTHONLIBS_FOUND)

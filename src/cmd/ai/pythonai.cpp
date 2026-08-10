@@ -4,7 +4,7 @@
 
 #include "cs_python.h"
 #include <compile.h>
-#include <eval.h>
+#include <Python.h>
 #include <stdio.h>
 
 #include "python/python_class.h"

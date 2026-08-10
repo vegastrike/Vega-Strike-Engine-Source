@@ -26,7 +26,7 @@
 #include "init.h"
 #include "cmd/script/pythonmission.h"
 #include <compile.h>
-#include <eval.h>
+#include <Python.h>
 #include "python/python_compile.h"
 #include "cmd/ai/fire.h"
 #include <memory>

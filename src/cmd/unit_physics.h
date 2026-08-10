@@ -41,7 +41,8 @@
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "networking/netclient.h"
 
-extern float copysign( float x, float y );
+#include <cmath>
+using std::copysign;
 
 extern unsigned int apply_float_to_unsigned_int( float tmp ); //short fix
 

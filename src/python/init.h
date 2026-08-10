@@ -40,6 +40,9 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 struct my_builtin_to_python
 {
     BOOST_STATIC_CONSTANT( bool, uses_registry = false );
+    // Modern Boost.Python requires get_pytype() on to_python_value types.
+    // These converters return Python tuples, so report PyTuple_Type.
+    static const PyTypeObject *get_pytype() { return &PyTuple_Type; }
 };
 
 #ifndef BOOST_PYTHON_TO_PYTHON_BY_VALUE

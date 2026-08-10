@@ -34,6 +34,9 @@ public:
     typedef typename std::allocator<T>::value_type value_type;
     typedef typename std::allocator<T>::size_type size_type;
     typedef typename std::allocator<T>::difference_type difference_type;
+
+    // Modern C++ (17+) requires allocator rebind for allocator_traits.
+    template <class U> struct rebind { typedef aligned_allocator<U, ALIGN> other; };
     
     static const int _OVERHEAD = (sizeof(T) + ALIGN-1) / ALIGN + sizeof(size_t);
     
@@ -77,7 +80,7 @@ public:
         return __alpn(vrv, ALIGN);
     }
 
-    void _dealign (typename std::allocator<T>::pointer p)
+    typename std::allocator<T>::pointer _dealign (typename std::allocator<T>::pointer p)
     {
         if (p == 0)
             return p;
@@ -90,7 +93,10 @@ public:
     
     typename std::allocator<T>::pointer allocate (typename std::allocator<T>::size_type n, typename std::allocator<void>::const_pointer hint=0)
     {
-        return __alpn(_align(std::allocator<T>::allocate(n+_OVERHEAD, _dealign(hint))), ALIGN);
+        // The hint is only an optimization hint that modern allocators ignore;
+        // pass nullptr to avoid const-cast issues (hint never affected correctness).
+        (void)hint;
+        return __alpn(_align(std::allocator<T>::allocate(n+_OVERHEAD, nullptr)), ALIGN);
     }
     
     void deallocate (typename std::allocator<T>::pointer p, typename std::allocator<T>::size_type n)
