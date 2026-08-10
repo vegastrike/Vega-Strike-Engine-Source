@@ -34,7 +34,7 @@
 #include <float.h>
 #include <assert.h>
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #define PBEHIND (-1)
 #define PFRONT (1)
 #define PUNK (0)

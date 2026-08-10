@@ -40,7 +40,7 @@ extern float audio_atom_var;
 extern float SIMULATION_ATOM;
 extern float AUDIO_ATOM;
 
-#include "src/vs_math.h"
+#include "common/vs_math.h"
 
 #include <stdlib.h>
 #include <stdio.h>

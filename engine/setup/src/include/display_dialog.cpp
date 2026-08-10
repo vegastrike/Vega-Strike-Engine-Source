@@ -107,7 +107,7 @@ void SetOption(struct group *CURRENT, char *selectedstr) {
 
   if (OLD == NEW) { return; }
 
-  CURRENT->setting = strdup(NEW->name); //TODO[String Safety] -- future platform specific intrinsic options relevant here
+  CURRENT->setting = vega_str_dup2(NEW->name); //TODO[String Safety] -- future platform specific intrinsic options relevant here
 
   DisableSetting(OLD->name, OLD->group);
   EnableSetting(NEW->name, NEW->group);
@@ -188,10 +188,10 @@ void ShowMain() {
       if (CUR->name == NULL) { continue; }
       if (strcmp(CURRENT->name, CUR->group) != 0) { continue; }
       if (strcmp(CUR->name, CURRENT->setting) == 0) {
-        group_options_list[selected][i*2+1]=strdup(ON); //TODO[String Safety] -- future platform specific intrinsic options relevant here
+        group_options_list[selected][i*2+1]=vega_str_dup2(ON); //TODO[String Safety] -- future platform specific intrinsic options relevant here
         subselected=i;
       } else {
-        group_options_list[selected][i*2+1]=strdup(OFF); //TODO[String Safety] -- future platform specific intrinsic options relevant here
+        group_options_list[selected][i*2+1]=vega_str_dup2(OFF); //TODO[String Safety] -- future platform specific intrinsic options relevant here
       }
       i++;
     } while ((CUR = CUR->next) > 0);
@@ -204,7 +204,7 @@ void ShowMain() {
       continue;
     }
     SetOption(CURRENT,selectedstr);
-    menuitem_list[selected*2+1]=strdup(selectedstr); //TODO[String Safety] -- future platform specific intrinsic options relevant here
+    menuitem_list[selected*2+1]=vega_str_dup2(selectedstr); //TODO[String Safety] -- future platform specific intrinsic options relevant here
   }
   dlg_clear();
   dlg_killall_bg(&ret);

@@ -41,7 +41,7 @@
 #include <limits>
 
 #include "aligned.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "src/vs_logging.h"
 
 ParticleTrail particleTrail("sparkle", 500, SRCALPHA, ONE, 0.05f, false, true);

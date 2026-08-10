@@ -80,7 +80,7 @@
 #include "src/universe_util.h"
 #include "src/save_util.h"
 #include "src/in_kb_data.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "cmd/enhancement.h"
 
 #include "root_generic/options.h"

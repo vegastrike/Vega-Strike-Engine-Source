@@ -33,7 +33,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+
 #include "vegadisk/vsfilesystem.h"
+#include "src/vega_string_utils.h"
 #include "src/vs_logging.h"
 #include "gfx/vsimage.h"
 #include "gfx/aux_texture.h"
@@ -505,7 +507,7 @@ void EnvironmentMapGeneratorMain(const char *inpt, const char *outpt, float a, f
         InputName = (char *) malloc(sizeof(char) * (strlen(inpt) + 2));
         strcpy(InputName, inpt);
     }
-    OutputName = strdup(outpt);
+    OutputName = vega_str_dup(outpt);
     free(tmp);
     tmp = NULL;
     VS_LOG(info, (boost::format("input name %1%, output name %2%") % InputName % OutputName));
@@ -514,6 +516,3 @@ void EnvironmentMapGeneratorMain(const char *inpt, const char *outpt, float a, f
     free(InputName);
     free(OutputName);
 }
-
-
-

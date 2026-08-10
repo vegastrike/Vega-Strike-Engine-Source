@@ -383,6 +383,15 @@ struct GFXColorVertex {
         z = vv.z;
     }
 
+    void SetVtx2(const GFXVertex &vv) {
+        SetVtx(vv);
+
+        tx = vv.tx;
+        ty = vv.ty;
+        tz = vv.tz;
+        tw = vv.tw;
+    }
+
     Vector GetTangent() const {
         return Vector(tx, ty, tz);
     }

@@ -48,6 +48,7 @@
 #include "mission.h"
 #include "root_generic/easydom.h"
 #include "flightgroup.h"
+#include "src/vega_string_utils.h"
 #include "root_generic/vs_globals.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "cmd/images.h"
@@ -61,7 +62,7 @@
 #include "src/universe.h"
 #include "src/vs_logging.h"
 #include "resource/manifest.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 extern const vector<string> &ParseDestinations(const string &value);
 
@@ -968,11 +969,11 @@ Unit *Mission::call_unit_launch(CreateFlightgroup *fg, Vega_UnitType type, const
         Unit *my_unit;
         if (type == Vega_UnitType::planet) {
             float radius = 1;
-            char *tex = strdup(fg->fg->type.c_str());
-            char *nam = strdup(fg->fg->type.c_str());
-            char *bsrc = strdup(fg->fg->type.c_str());
-            char *bdst = strdup(fg->fg->type.c_str());
-            char *citylights = strdup(fg->fg->type.c_str());
+            char *tex = vega_str_dup(fg->fg->type.c_str());
+            char *nam = vega_str_dup(fg->fg->type.c_str());
+            char *bsrc = vega_str_dup(fg->fg->type.c_str());
+            char *bdst = vega_str_dup(fg->fg->type.c_str());
+            char *citylights = vega_str_dup(fg->fg->type.c_str());
             tex[0] = '\0';
             bsrc[0] = '\0';             //have at least 1 char
             bdst[0] = '\0';

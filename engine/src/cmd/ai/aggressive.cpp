@@ -50,7 +50,7 @@
 #include "warpto.h"
 #include "cmd/csv.h"
 #include "src/universe_util.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 #include "src/python/python_compile.h"
 #include "cmd/unit_find.h"
 #include "docking.h"

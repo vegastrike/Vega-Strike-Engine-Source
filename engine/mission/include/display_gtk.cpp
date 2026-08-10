@@ -29,6 +29,7 @@
 #define __restrict
 #endif
 #include "mission/include/display_gtk.h"
+#include "common/common.h"
 
 GtkWidget *window, *main_vbox, *scrolled_win, *tree, *main_hbox;
 GtkWidget *labels[4];    // Array of changable lables to display the mission information
@@ -167,7 +168,7 @@ void AddMissionsToTree(char *path, GtkWidget *tree, int is_parent) {
             continue;
         }    // Verify it's a directory and not a file
 
-        filename = _strdup(file);
+        filename = vega_str_dup2(file);
         filename = StripPath(filename);
         if (strcmp("CVS", filename) == 0) {
             continue;
@@ -196,7 +197,7 @@ void AddMissionsToTree(char *path, GtkWidget *tree, int is_parent) {
             continue;
         }
 
-        filename = _strdup(file);
+        filename = vega_str_dup2(file);
         filename = StripPath(filename);
         StripExtension(filename);
 

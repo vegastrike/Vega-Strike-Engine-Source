@@ -24,23 +24,32 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// Version 2.2
-#ifndef VEGA_STRIKE_ENGINE_MISSION_GENERAL_H
-#define VEGA_STRIKE_ENGINE_MISSION_GENERAL_H
+
+// Version 2.34
+
+// Feb 20, 2002: Imported changes made by Daniel Horn & ace123 for (Vega Strike). Replaces the glob() with portable calls
+//               This adds isdir() and FindPath() and changes FindFiles() and FindDirs() to wrappers to FindPath()
+// Mar 05, 2002: StripExtension() now returns the extension that was stripped
+// Mar 05, 2002: Fixed the FindFiles() so it now checks sub directories
+// Mar 05, 2002: Fixed FindFiles() again
+
+#ifndef VEGA_STRIKE_LIBRARIES_COMMON_GENERAL_H
+#define VEGA_STRIKE_LIBRARIES_COMMON_GENERAL_H
 
 /* Don't forget, these defines can be set at compile time with the compile flag -D */
 
-#define _G_ALL        // Enable everything except _G_DEBUG
+// #define _G_ALL		// Enable everything except _G_DEBUG
 
 //#define _G_DEBUG		// Debug Messaging
-//#define _G_ERROR		// Error Messaging (internal and external)
-//#define _G_GLIB		// use GLIB for string allocation
-//#define _G_GLOB		// Enable the GLOB file searching
+#define _G_ERROR        // Error Messaging (internal and external)
 //#define _G_NUMBER		// Number processing
-//#define _G_RANDOM		// Enable Random Number
-//#define _G_STRING_MANAGE	// Enable String Management
-//#define _G_STRING_PARSE	// Enable the String Parsing
-//#define _G_XML          	// Enable the XML string parsing
+#ifndef _WIN32
+#define _G_PATH               // Functions that deal with directories
+#endif
+#define _G_RANDOM		// Enable Random Number
+#define _G_STRING_MANAGE    // Enable String Management
+#define _G_STRING_PARSE    // Enable the String Parsing
+#define _G_XML          	// Enable the XML string parsing
 
 // If memory can't be allocated to perform a function, and EXIT_ON_FATAL is not defined,
 // the function will return NULL. With this defined, functions which return pointers to
@@ -55,7 +64,7 @@
 #ifdef _G_ALL
 #define _G_ERROR
 #define _G_GLIB
-#define _G_GLOB
+#define _G_PATH
 #define _G_NUMBER
 #define _G_RANDOM
 #define _G_STRING_MANAGE
@@ -69,10 +78,19 @@
 #include <glib.h>
 #endif    // _G_GLIB
 
-#ifdef _G_GLOB
-#include <glob.h>
+#ifdef _G_PATH
+
+#ifdef _WIN32
+#include <direct.h>
+#else
 #include <stdio.h>
-#endif    // _G_GLIB
+#include <sys/dir.h>
+#include <unistd.h>
+#endif    // _WIN32
+
+#include <string>
+#include <vector>
+#endif    // _G_PATH
 
 #ifdef _G_ERROR
 #include <stdio.h>
@@ -88,11 +106,8 @@
 #include <time.h>
 #endif    // _G_RANDOM
 
-#ifdef _G_DEBUG
-#ifdef __cplusplus		//iostream is only used in debugging
-#include <iostream.h>
-#endif    // __cplusplus
-#endif    // _G_DEBUG
+#if defined _G_DEBUG && defined __cplusplus
+#endif    // _G_DEBUG && __cplusplus
 
 #ifndef MAX_READ
 #define MAX_READ 1024
@@ -113,13 +128,13 @@ char *strmov(char *to, char *from);
 void lower(char *line);
 void strappend(char *dest, char *source, int length);
 char *StripPath(char *filename);
-void StripExtension(char *filename);
+char *StripExtension(char *filename);
 #endif    // _G_STRING_PARSE
 
 #ifdef _G_RANDOM
 int randnum(int start, int end);
 void randcode(char *line, int length);
-#endif    // _G_STRING_RANDOM
+#endif    // _G_RANDOM
 
 #ifdef _G_NUMBER
 void itoa(char *line, int number, int length);
@@ -136,7 +151,7 @@ void btoa(char *dest, char *string);
 #ifdef _G_GLIB
 char *GetString(GString *line);
 void SetString(GString **ptr, char *line);
-#endif    // G_GLIB
+#endif    // _G_GLIB
 
 #ifdef __cplusplus
 char *GetString(char *line);
@@ -145,16 +160,25 @@ char *NewString(char *string);
 #endif    // __cplusplus
 #endif    // _G_STRING_MANAGE
 
-void ShowError(char *error_msg, char *error_code, int is_fatal);
+void ShowError(const char *error_msg, const char *error_code, int is_fatal);
 
 #ifdef _G_XML
 char *xml_pre_chomp_comment(char *string);
 char *xml_chomp_comment(char *string);
 #endif    // _G_XML
 
-#ifdef _G_GLOB
+#ifdef _G_PATH
+// Emulate the glob_t struct without having to include glob.h
+typedef struct {
+    size_t gl_pathc;
+    char **gl_pathv;
+    size_t gl_offs;
+} glob_t;
+
+int isdir(const char *file);
+glob_t *FindPath(char *path, int type);
 glob_t *FindFiles(char *path, char *extension);
 glob_t *FindDirs(char *path);
-#endif    // _G_GLOB
+#endif    // _G_PATH
 
-#endif // VEGA_STRIKE_ENGINE_MISSION_GENERAL_H
+#endif    // VEGA_STRIKE_LIBRARIES_COMMON_GENERAL_H

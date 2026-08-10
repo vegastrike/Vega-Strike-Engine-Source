@@ -28,6 +28,7 @@
 
 #include <assert.h>
 #include "root_generic/faction_generic.h"
+#include "src/vega_string_utils.h"
 #include "src/vs_logging.h"
 #include "src/config_xml.h"
 #include "root_generic/vs_globals.h"
@@ -239,7 +240,7 @@ string savedFactions;
 
 void FactionUtil::LoadSerializedFaction(char *&buf) {
     if (buf == NULL) {
-        char *bleh = strdup(savedFactions.c_str());
+        char *bleh = vega_str_dup(savedFactions.c_str());
         char *blah = bleh;
         LoadSerializedFaction(blah);
         free(bleh);

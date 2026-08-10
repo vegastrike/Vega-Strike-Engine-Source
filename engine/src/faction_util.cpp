@@ -38,7 +38,7 @@
 #include "gfx/aux_texture.h"
 #include "gfx/animation.h"
 #include "cmd/music.h"
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 // DO NOT PUT INCLUDES AFTER using namespace
 

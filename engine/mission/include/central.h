@@ -40,7 +40,7 @@
 #ifndef _WIN32
 #include <unistd.h>
 #endif
-#include "mission/include/general.h"
+#include "common/general.h"
 #include "mission/include/display_gtk.h"
 #include "mission/include/file.h"
 #include "mission/include/easydom.h"

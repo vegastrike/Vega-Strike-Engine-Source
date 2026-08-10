@@ -47,6 +47,7 @@
 #include "gfx/animation.h"
 #include "root_generic/galaxy_gen.h"
 #include "src/universe_util.h"
+#include "src/vega_string_utils.h"
 #include "vegadisk/vsfilesystem.h"
 #include "cmd/ai/communication.h"
 #include "src/universe.h"
@@ -147,7 +148,7 @@ int vdu_lookup(char *&s) {
 #define strcasecmp stricmp
 #endif
     int retval = 0;
-    char *t = strdup(s);
+    char *t = vega_str_dup(s);
     int i;
     for (i = 0; t[i] != '\0'; i++) {
         if (isspace(t[i])) {
@@ -169,7 +170,7 @@ int vdu_lookup(char *&s) {
 }
 
 int parse_vdu_type(const char *x) {
-    char *mystr = strdup(x);
+    char *mystr = vega_str_dup(x);
     char *s = mystr;
     int retval = 0;
     while (s[0] != '\0') {

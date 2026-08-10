@@ -25,7 +25,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "root_generic/vega_random.h"
+#include "common/vega_random.h"
 
 int randomInt(const int max, const int min = 0 ) {
     return static_cast<int>(VegaRandom::Instance().RandomInt32InRange(static_cast<int_fast32_t>(min), static_cast<int_fast32_t>(max)));

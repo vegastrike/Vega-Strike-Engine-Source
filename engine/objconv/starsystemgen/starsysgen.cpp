@@ -34,7 +34,8 @@
 #include <time.h>
 #include <assert.h>
 #include <stdint.h>
-#include "root_generic/vega_random.h"
+#include "common/common.h"
+#include "common/vega_random.h"
 
 #ifndef M_PI
 #define M_PI 3.1415926536
@@ -412,7 +413,7 @@ Vector generateAndUpdateRS(Vector &r, Vector &s, float thisplanetradius) {
 }
 
 vector<string> parseBigUnit(string input) {
-    char *mystr = strdup(input.c_str());
+    char *mystr = vega_str_dup2(input.c_str());
     char *ptr = mystr;
     char *oldptr = mystr;
     vector<string> ans;
@@ -470,7 +471,7 @@ string getJumpTo(string s) {
 }
 
 string starin(string input) {
-    char *tmp = strdup(input.c_str());
+    char *tmp = vega_str_dup2(input.c_str());
     for (unsigned int i = 0; tmp[i] != '\0'; i++) {
         if (tmp[i] == '*') {
             tmp[i] = '\0';
@@ -485,7 +486,7 @@ string starin(string input) {
 
 string GetNebFile(string &input) {
     string ip = input.c_str();
-    char *ptr = strdup(ip.c_str());
+    char *ptr = vega_str_dup2(ip.c_str());
     for (unsigned int i = 0; ptr[i] != '\0'; i++) {
         if (ptr[i] == '^') {
             ptr[i] = '\0';
@@ -845,7 +846,7 @@ string getStarSystemFileName(string input) {
 }
 
 string getStarSystemName(string in) {
-    char *tmp = strdup(noslash(in.c_str()));
+    char *tmp = vega_str_dup2(noslash(in.c_str()));
     tmp[0] = toupper(tmp[0]);
     string tmP(tmp);
     free(tmp);
@@ -853,7 +854,7 @@ string getStarSystemName(string in) {
 }
 
 string getStarSystemSector(string in) {
-    char *tmp = strdup(in.c_str());
+    char *tmp = vega_str_dup2(in.c_str());
     char *freer = tmp;
     while (*tmp++) {
         if (*tmp == '/') {

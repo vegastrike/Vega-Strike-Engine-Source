@@ -42,7 +42,7 @@
   @todo Allow only specified files to be extracted. (Low priority)
  */
 #include "vsrtools.h"
-#include "tools/common.h"
+#include "common/common.h"
 #include <stdlib.h>
 #include <string>
 #include <vector>

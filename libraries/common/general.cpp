@@ -28,11 +28,12 @@
 /* This include has been designed to act independent of the other modules.
  * This allows it to be used with other programs with minimal changes */
 
-#include "root_generic/vega_random.h"
 #if defined(_WIN32) && _MSC_VER > 1300
 #define __restrict
 #endif
-#include "mission/include/general.h"
+#if defined(__APPLE__) || defined(MACOSX)
+#include <sys/param.h> // For MAXPATHLEN
+#endif
 #ifdef _WIN32
 #include <direct.h>
 #else
@@ -40,10 +41,20 @@
 #include <stdio.h>
 #include <unistd.h>
 #endif
+#ifdef __MINGW32__
+#include <dirent.h>
+#endif
 #include <string>
 #include <vector>
-using namespace std;
+
+using std::string;
+using std::vector;
+
+#include "common/general.h"
+#include "common/common.h"
+
 #ifdef _G_RANDOM
+#include "common/vega_random.h"
 int RANDOMIZED = 0;
 #endif    // _G_RANDOM
 
@@ -145,26 +156,23 @@ char *pre_chomp(char *line) {
 
 char *replace(char *line, char *search, char *replace, int LENGTH) {
     int length, dif, calc;
-    char *ptr_new, *location;
-
     char *chr_new, *current;
-    chr_new = (char *) malloc(sizeof(char) * LENGTH);
-    current = (char *) malloc(sizeof(char) * LENGTH);
+    char *ptr_new, *location;
     calc = strlen(line) - strlen(search) + strlen(replace);
     if (calc > LENGTH) {
-        free(chr_new);
-        free(current);
         return line;
     }
+    chr_new = new char[LENGTH + 1];
+    current = new char[LENGTH + 1];
     length = strlen(line);
     strcpy(current, line);
-    while ((location = strstr(current, search)) > 0) {
+    while ((location = strstr(current, search))) {
         chr_new[0] = '\0';
         calc = strlen(current) - strlen(search) + strlen(replace);
         if (calc > LENGTH) {
             strcpy(line, current);
-            free(current);
-            free(chr_new);
+            delete[] chr_new;
+            delete[] current;
             return line;
         }
         dif = location - current;
@@ -175,8 +183,8 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
         strcpy(current, chr_new);
     }
     strcpy(line, current);
-    free(chr_new);
-    free(current);
+    delete[] chr_new;
+    delete[] current;
     return line;
 }
 
@@ -225,12 +233,12 @@ char *StripPath(char *filename) {
     return last;
 }
 
-void StripExtension(char *filename) {
+char *StripExtension(char *filename) {
     int length, cur;
     char *last = filename;
     length = strlen(filename) - 1;
     if (length <= 0) {
-        return;
+        return const_cast<char *>("");
     }
     for (cur = 0; cur <= length; cur++) {
         if (filename[cur] == '.') {
@@ -239,8 +247,9 @@ void StripExtension(char *filename) {
     }
     if (last[0] == '.') {
         last[0] = '\0';
+        return last + 1;
     }
-    return;
+    return last;
 }
 
 #endif    // _G_STRING_PARSE
@@ -418,20 +427,21 @@ char *NewString(char *line) {
 
 char *GetString(char *line) {
     if (line == 0) {
-        return '\0';
+        return const_cast<char *>("");
     }
     return line;
 }
 
 void SetString(char **ptr, char *line) {
-    if (*ptr > 0) {
+    if (*ptr != nullptr) {
         delete *ptr;
+        *ptr = nullptr;
     }
-    *ptr = _strdup(line);
+    *ptr = vega_str_dup2(line);
 }
 
 char *NewString(char *line) {
-    return _strdup(line);
+    return vega_str_dup2(line);
 }
 
 #endif    // __cplusplus
@@ -514,7 +524,7 @@ char *xml_chomp_comment(char *string) {
 
 #endif    // _G_XML
 
-#ifdef _G_GLOB
+#ifdef _G_PATH
 
 // Uses glob to look for dirs and files.
 // Please note: These functions have not been tested with C, only with C++
@@ -522,109 +532,116 @@ char *xml_chomp_comment(char *string) {
 
 
 int isdir(const char *file) {
-    int tmp = strlen(file);
-    if (tmp == 0) {
+    int length = strlen(file);
+    if (length == 0) {
         return -1;
     }
-    if (file[tmp - 1] == '.') {
-        if (tmp == 1) {
+    if (file[length - 1] == '.') {
+        if (length == 1) {
             return -1;
         }
-        if (file[tmp - 2] == '.' || file[tmp - 2] == '/' || file[tmp - 2] == '\\') {
+        if (file[length - 2] == '.' || file[length - 2] == SEPERATOR || file[length - 2] == '\\') {
             return -1;
         }
     }
 
-    if (-1 == _chdir((string(file) + "/").c_str())) {
+    if (-1 == chdir((std::string(file) + "/").c_str())) {
         return 0;
     } else {
-        _chdir("..");
+        chdir("..");
         return 1;
     }
 }
 
-glob_t *FindFiles(char *path, char *extension) {
-    glob_t *FILES;
-    char *pattern;
+// type = 0: file
+// type = 1: dirs
 
-#ifdef __cplusplus
-    FILES = new glob_t;
-    pattern = new char[strlen(path) + strlen(extension) + 1];
-#else
-    FILES = (glob_t *)malloc(sizeof(glob_t));
-    pattern = (char *)malloc(strlen(path) + strlen(extension) + 1);
-    if (FILES == NULL || pattern == NULL) { ShowError("Out of memory", "G03", 1); return NULL; }
-#endif    // __cplusplus
-
-    sprintf(pattern, "%s%s", path, extension);
-
-    //glob(pattern, GLOB_MARK, NULL, FILES);
+glob_t *FindPath(char *path, int type) {
+    glob_t *FILES = new glob_t;
     string mypath(path);
+#if defined(__APPLE__) || defined(MACOSX)
+    char thispath[MAXPATHLEN];
+#else
     char thispath[800000];
-    _getcwd(thispath, 790000);
-    _chdir(path);
-    DIR *dir = opendir(".");
-    _chdir(thispath);
+#endif
+    char *curpath = 0;
+    DIR *dir;
     vector<string> result;
-    if (dir) {
-        dirent *blah;
-        while (NULL != (blah = readdir(dir))) {
-            if (0 == isdir((string(thispath) + "/" + mypath + "/" + blah->d_name).c_str())) {
-                result.push_back(mypath + blah->d_name);
+    vector<string> pathlist;
+    dirent *entry;
+    unsigned int cur;
+    char *newpath = 0;
+#if defined(__APPLE__) || defined(MACOSX)
+    getcwd(thispath, MAXPATHLEN);
+#else
+    getcwd(thispath, 790000);
+#endif
+    pathlist.push_back((string(thispath) + SEPERATOR + mypath).c_str());
+    for (cur = 0; cur < pathlist.size(); cur++) {
+        curpath = vega_str_dup2(pathlist[cur].c_str());
+        dir = opendir(curpath);
+        chdir(curpath);
+        if (dir == 0) {
+            continue;
+        }
+        entry = 0;
+        while ((entry = readdir(dir)) != NULL) {
+            newpath = vega_str_dup2((string(curpath) + SEPERATOR + entry->d_name).c_str());
+            if (isdir(newpath) == 1) {
+                pathlist.push_back(newpath);
+                if (type == 1) {
+                    result.push_back(newpath);
+                }
+            } else if (type == 0) {
+                result.push_back(newpath);
             }
-            _chdir(thispath);
         }
         closedir(dir);
     }
+    chdir(thispath);
+
     FILES->gl_pathc = result.size();
-    FILES->gl_pathv = new char *[result.size()];
-    for (unsigned int i = 0; i < result.size(); i++) {
-        FILES->gl_pathv[i] = new char[result[i].size() + 1];
-        strcpy(FILES->gl_pathv[i], result[i].c_str());
+
+    #ifdef __cplusplus
+    FILES->gl_pathv = new char *[FILES->gl_pathc];
+    #else
+    FILES->gl_pathv = (char *)malloc(sizof(char *) * FILES->gl_pathc);
+    if (FILES->gl_pathv == 0) { ShowError("Out of memory", "G04", 1); return NULL; }
+    #endif
+
+    for (cur = 0; cur < FILES->gl_pathc; cur++) {
+        FILES->gl_pathv[cur] = vega_str_dup2(result[cur].c_str());
     }
+
     return FILES;
 }
 
-glob_t *FindDirs(char *path) {
-    glob_t *DIRS;
-    char *pattern;
-
-#ifdef __cplusplus
-    DIRS = new glob_t;
-    pattern = new char[strlen(path) + 2];
-#else
-    DIRS = (glob_t *)malloc(sizeof(glob_t));
-    pattern = (char *)malloc(strlen(path) + 2);
-    if (DIRS == NULL || pattern == NULL) { ShowError("Out of memory", "G04", 1); return NULL; }
-#endif    // __cplusplus
-
-    sprintf(pattern, "%s*", path);
-
-    //glob(pattern, GLOB_MARK, NULL, DIRS);
-    char thispath[800000];
-    _getcwd(thispath, 790000);
-    _chdir(path);
-    string mypath(path);
-    DIR *dir = opendir(".");
-    _chdir(thispath);
-    vector<string> result;
-    if (dir) {
-        dirent *blah;
-        while (NULL != (blah = readdir(dir))) {
-            if (1 == isdir((string(thispath) + "/" + mypath + "/" + blah->d_name).c_str())) {
-                result.push_back(mypath + blah->d_name + "/");
-                _chdir(thispath);
-            }
-        }
-        closedir(dir);
-    }
-    DIRS->gl_pathc = result.size();
-    DIRS->gl_pathv = new char *[result.size()];
-    for (unsigned int i = 0; i < result.size(); i++) {
-        DIRS->gl_pathv[i] = new char[result[i].size() + 1];
-        strcpy(DIRS->gl_pathv[i], result[i].c_str());
-    }
-    return DIRS;
+glob_t *FindFiles(char *path, char *extension) {
+    return FindPath(path, 0);
 }
 
-#endif    // _G_GLOB
+glob_t *FindDirs(char *path) {
+    return FindPath(path, 1);
+}
+
+/*
+glob_t *FindDirs(char *path) {
+	glob_t *DIRS;
+	char *pattern;
+
+#ifdef __cplusplus
+	DIRS = new glob_t;
+	pattern = new char[strlen(path) + 2];
+#else
+	DIRS = (glob_t *)malloc(sizeof(glob_t));
+	pattern = (char *)malloc(strlen(path) + 2);
+	if (DIRS == NULL || pattern == NULL) { ShowError("Out of memory", "G04", 1); return NULL; }
+#endif    // __cplusplus
+
+	sprintf(pattern, "%s*", path);
+	glob(pattern, GLOB_MARK, NULL, DIRS);
+	return DIRS;
+}
+*/
+
+#endif    // _G_PATH
