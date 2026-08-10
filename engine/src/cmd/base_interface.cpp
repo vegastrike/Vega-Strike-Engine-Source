@@ -979,7 +979,11 @@ void BaseInterface::ClickWin(int button, int state, int x, int y) {
 }
 
 void BaseInterface::PassiveMouseOverWin(int x, int y) {
-    ModifyMouseSensitivity(x, y);
+    // Do NOT apply ModifyMouseSensitivity here. It doubles the mouse position
+    // (a low-res workaround) and clamps at the screen edges, which corrupts
+    // coordinates near the border. The click path (ClickWin) uses raw pixels,
+    // and the computer path applies its own sensitivity handling in
+    // EventManager. Passing raw pixels keeps hover consistent with clicks.
     SetSoftwareMousePosition(x, y);
     if (CurrentBase) {
         if (CurrentBase->CallComp) {
@@ -998,7 +1002,7 @@ void BaseInterface::PassiveMouseOverWin(int x, int y) {
 }
 
 void BaseInterface::ActiveMouseOverWin(int x, int y) {
-    ModifyMouseSensitivity(x, y);
+    // See PassiveMouseOverWin: do NOT apply ModifyMouseSensitivity here.
     SetSoftwareMousePosition(x, y);
     if (CurrentBase) {
         if (CurrentBase->CallComp) {
