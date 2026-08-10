@@ -75,6 +75,8 @@ void Pilot::DoHit( Unit *parent, void *aggressor, int faction )
 }
 float Pilot::getAnger( const Unit *parent, const Unit *target ) const
 {
+    if (target == NULL)
+        return 0.0f;
     relationmap::const_iterator iter = effective_relationship.find( target );
     float rel = 0;
     if ( iter != effective_relationship.end() )
@@ -128,6 +130,8 @@ float Pilot::getAnger( const Unit *parent, const Unit *target ) const
 
 float Pilot::GetEffectiveRelationship( const Unit *parent, const Unit *target )  const
 {
+    if (target == NULL)
+        return 0.0f;
     return getAnger( parent, target )+UnitUtil::getFactionRelation( parent, target );
 }
 

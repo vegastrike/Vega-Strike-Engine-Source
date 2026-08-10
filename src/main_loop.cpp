@@ -1030,8 +1030,16 @@ void main_loop()
     gl_batches_this_frame = 0;
 #endif
     
-    //Commit audio scene status to renderer
-    if (g_game.sound_enabled)
-        Audio::SceneManager::getSingleton()->commit();
+    //Commit audio scene status to renderer (new Audio:: scene-graph subsystem;
+    // primary gameplay audio is via audiolib. Skip if no renderer was set.)
+    if (g_game.sound_enabled && Audio::SceneManager::getSingleton()->getRenderer()) {
+        try {
+            Audio::SceneManager::getSingleton()->commit();
+        } catch (const Audio::Exception &e) {
+            // Non-fatal: primary gameplay audio is via audiolib; a scene-graph
+            // OpenAL hiccup must not terminate the game.
+            std::cerr << "Audio::SceneManager::commit failed: " << e.what() << std::endl;
+        }
+    }
 }
 
