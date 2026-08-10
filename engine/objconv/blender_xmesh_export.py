@@ -1,5 +1,3 @@
-#!BPY
-##
 # blender_xmesh_export.py
 #
 # Copyright (C) dandandaman
@@ -8,10 +6,11 @@
 # Copyright (C) 2020 pyramid3d
 # Copyright (C) 2021 daviewales
 # Copyright (C) 2025, 2026 Stephen G. Tuggy
+# Copyright (C) 2026 Danny Gehl
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -24,252 +23,192 @@
 #
 
 
-"""
-Name: 'VegaStrike (selected) (.xmesh)...'
-Blender: 228
-Group: 'Export'
-Tooltip: 'Export VegaStrike (selected) (.xmesh)'
-"""
-from __future__ import print_function
-try:
-    range = xrange
-except:
-    pass
-
-__author__	= "Dandandaman"
-__url__		= ("blender", "http://www.blender.org", "Author's homepage, http://black-paralysis.sf.net/")
-__version__	= "0.1"
-
 #
-# XMESH exporter for Blender v2.28+ (by dandandaman <dandandaman@users.sourceforge.net>
-# Written from the ground up for XMESH and for the new api.  Reference was taken of
-# Volker [vmx] Mische's OBJ script for v2.11+
-#
-#
-#==================================================
-#               Things to do
-#==================================================
-# Get texture filename
-# Fix index problem better for tex coords
-# Add support for specifying directories
-# Add GUI support
-# Add input support
-#
-#
-#
-#==================================================
-#               Usage Instructions
-#==================================================
-# Select the objects you wish to export.
-# Run this script.
-#
-# Remember that texture coordinates must be UV mapped!
-# And remember to use only one UV image per object!
-#
-#
-#
-#
-#
-#
-# ------------------------------
-# IMPORT NESCESSARY LIBRARIES
-# ------------------------------
-import Blender
-from Blender import Types, Object, NMesh
-import os
+# XMESH exporter for Blender v5.2+ by Danny Gehl
+# Written from the ground up for XMESH and for the latest Blender API.
+# This is an evolution of the XMESH exporter for Blender v2.28+ (by dandandaman <dandandaman@users.sourceforge.net>
+# Reference was taken of Volker [vmx] Mische's OBJ script for v2.11+
+bl_info = {
+    "name": "Vega Strike (.xmesh) Export",
+    "author": "Danny Gehl",
+    "version": (0, 3, 0),
+    "blender": (4, 2, 0),
+    "location": "File > Export > Vega Strike (.xmesh)",
+    "description": "Export selected objects to Vega Strike .xmesh format structural custom properties.",
+    "category": "Import-Export",
+}
 
-# ------------------------------
-# SETUP RUNTIME VARIABLES
-# ------------------------------
-global outputdir
-outputpath = '.'	# If this is invalid, I use your current working dir (printed out at end)
-if 'HOMEDRIVE' in os.environ and 'HOMEPATH' in os.environ:
-	outputpath=os.environ['HOMEDRIVE'].os.environ['HOMEPATH']
-if 'HOME' in os.environ:
-	outputpath=os.environ['HOME']
-
-#outputdir, Name = os.path.split(outputpath)
-#print outputdir
-#print Name
-outputdir=outputpath
-
-objtransforms = False									# FIXME:  This is not used yet!!!
-
-def processSelected():
-	global outputdir
-	if not os.path.isdir(outputdir):
-		outputdir = os.curdir
-
-	os.chdir(outputdir)
-
-	objs = Object.GetSelected()
-
-	if len(objs) == 0:
-		print("Error:  No Objects Selected")
-	else:
-		for obj in objs:
-			if obj.getType() != "Mesh":
-				print(("Error: Object " + obj.name + " is a " + obj.getType() + ", not a mesh!"))
-			else:
-				print(("Object is a " + obj.getType()))
-				exportObject(obj)
-
-	print("Finished: xmesh files written to %s" % os.getcwd())
+import bpy
+import bmesh
+from xml.sax.saxutils import quoteattr
+from bpy_extras.io_utils import ExportHelper
+from bpy.props import StringProperty, BoolProperty
+from bpy.types import Operator
 
 
-def exportObject(obj):
-	objmesh = NMesh.GetRawFromObject(obj.getName())
-	objfaces = objmesh.faces
-	objfacelists = list()
-	for fac in objfaces:
-		objfacelists.append(fac.v)
-	for i in range(len(objfacelists)):
-		for j in range(len(objfacelists[i])):
-			objfacelists[i][j] = objfacelists[i][j].index
-#	print objfacelists
-	objmaterials = objmesh.materials
-	objvertices = objmesh.verts
-	vertcoords = list()
-	for vert in objvertices:
-		vertcoords.append(vert.co)
-#	print vertcoords
-	vertnormals = list()
-	for vert in objvertices:
-		vertnormals.append(vert.no)
-#	print vertnormals
-#	texcoords = list()
-#	for vert in objvertices:
-#		texcoords.append(vert.uvco)
-#	print texcoords
-	texcoords = list()
-	for fac in objfaces:
-		texcoords.append(fac.uv)
-#	print texcoords
-
-	filename = "%s_%s.xmesh" % (obj.getName(),objmesh.name)
-	FILE = open(filename, "w")
-	FILE.write("<!--\n")
-	FILE.write("Vegastrike XMESH <" + filename + "> from Blender (by dandandaman's script)\n")
+def escape_attr(val):
+    """Safely format and quote string values for XML attributes."""
+    return quoteattr(str(val))
 
 
-	# Polycount info
-	FILE.write("Total number of Faces:   \t%s\n" % len(objfaces))
-	FILE.write("Total number of Vertices:\t%s\n" % len(objvertices))
-	FILE.write("-->\n")
+def export_object_to_xmesh(obj, filepath, triangulate=True):
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    obj_eval = obj.evaluated_get(depsgraph)
+    
+    # Use BMesh to optionally triangulate N-Gons cleanly
+    bm = bmesh.new()
+    bm.from_mesh(obj_eval.to_mesh())
+    
+    if triangulate:
+        bmesh.ops.triangulate(bm, faces=bm.faces[:])
+        
+    mesh = bpy.data.meshes.new(name="temp_xmesh")
+    bm.to_mesh(mesh)
+    bm.free()
+
+    # Re-fetch fallback custom property values
+    scale = obj.get("xmesh_scale", 1.0)
+    reverse = obj.get("xmesh_reverse", 0)
+    forcetexture = obj.get("xmesh_forcetexture", 0)
+    sharevert = obj.get("xmesh_sharevert", 0)
+    polygonoffset = obj.get("xmesh_polygonoffset", 0.0)
+    blend = obj.get("xmesh_blend", "ONE ZERO")
+    alphatest = obj.get("xmesh_alphatest", 0.0)
+
+    texture = obj.get("xmesh_texture", "")
+    texture1 = obj.get("xmesh_texture1", "")
+    texture2 = obj.get("xmesh_texture2", "")
+    texture4 = obj.get("xmesh_texture4", "")
+
+    # Material settings extraction
+    mat_power = obj.get("mat_power", 60.0)
+    mat_cullface = obj.get("mat_cullface", 1)
+    mat_reflect = obj.get("mat_reflect", 0)
+    mat_lighting = obj.get("mat_lighting", 1)
+    mat_usenormals = obj.get("mat_usenormals", 1)
+
+    # Fallback to Shader Nodes for texture mapping
+    if not texture and obj.data.materials:
+        mat = obj.data.materials[0]
+        if mat and mat.use_nodes:
+            for node in mat.node_tree.nodes:
+                if node.type == 'TEX_IMAGE' and node.image:
+                    img_name = node.image.name
+                    if "NORMAL" in img_name.upper() or node.image.colorspace_settings.name == 'Non-Color':
+                        texture4 = img_name
+                    else:
+                        texture = img_name
+
+    try:
+        with open(filepath, "w", encoding="utf-8") as f:
+            # Header writing with attribute escaping
+            f.write(f'<Mesh scale="{scale:.6f}" ')
+            f.write(f'reverse="{reverse}" forcetexture="{forcetexture}" sharevert="{sharevert}" ')
+            f.write(f'polygonoffset="{polygonoffset:.6f}" blend={escape_attr(blend)} alphatest="{alphatest:.6f}"')
+            if texture: f.write(f' texture={escape_attr(texture)}')
+            if texture1: f.write(f' texture1={escape_attr(texture1)}')
+            if texture2: f.write(f' texture2={escape_attr(texture2)}')
+            if texture4: f.write(f' texture4={escape_attr(texture4)}')
+            f.write(">\n")
+
+            # Material block
+            f.write(f'<Material power="{mat_power:.6f}" cullface="{mat_cullface}" reflect="{mat_reflect}" ')
+            f.write(f'lighting="{mat_lighting}" usenormals="{mat_usenormals}">\n')
+            f.write('\t<Ambient Red="1.000000" Green="1.000000" Blue="1.000000" Alpha="1.000000"/>\n')
+            f.write('\t<Diffuse Red="1.000000" Green="1.000000" Blue="1.000000" Alpha="1.000000"/>\n')
+            f.write('\t<Emissive Red="0.000000" Green="0.000000" Blue="0.000000" Alpha="1.000000"/>\n')
+            f.write('\t<Specular Red="1.000000" Green="1.000000" Blue="1.000000" Alpha="1.000000"/>\n')
+            f.write("</Material>\n")
+
+            # Write Points (3D Coordinates & Normals)
+            f.write("<Points>\n")
+            for vert in mesh.vertices:
+                norm = vert.normal
+                f.write("\t<Point>\n")
+                f.write(f'\t\t<Location x="{vert.co.x:.6f}" y="{vert.co.y:.6f}" z="{vert.co.z:.6f}"/>\n')
+                f.write(f'\t\t<Normal i="{norm.x:.6f}" j="{norm.y:.6f}" k="{norm.z:.6f}"/>\n')
+                f.write("\t</Point>\n")
+            f.write("</Points>\n")
+
+            # Write Polygons with Per-Loop UVs
+            f.write("<Polygons>\n")
+            uv_layer = mesh.uv_layers.active
+
+            for poly in mesh.polygons:
+                p_type = "Tri" if len(poly.loop_indices) == 3 else "Quad" if len(poly.loop_indices) == 4 else "Trifan"
+                f.write(f"\t<{p_type}>\n")
+                
+                for loop_idx in poly.loop_indices:
+                    vert_idx = mesh.loops[loop_idx].vertex_index
+                    s_coord, t_coord = 0.0, 0.0
+                    if uv_layer:
+                        uv = uv_layer.data[loop_idx].uv
+                        s_coord = uv.x
+                        t_coord = 1.0 - uv.y  # Invert V-axis for DirectX/VegaStrike spec
+                    
+                    f.write(f'\t\t<Vertex point="{vert_idx}" s="{s_coord:.6f}" t="{t_coord:.6f}"/>\n')
+                
+                f.write(f"\t</{p_type}>\n")
+            f.write("</Polygons>\n")
+            f.write("</Mesh>\n")
+
+    finally:
+        bpy.data.meshes.remove(mesh)
+        obj_eval.to_mesh_clear()
 
 
-	quads = list()
-	tris = list()
+class ExportXMesh(Operator, ExportHelper):
+    """Export selection to Vega Strike .xmesh"""
+    bl_idname = "export_scene.xmesh"
+    bl_label = "Export Vega Strike (.xmesh)"
+    bl_options = {'PRESET'}
 
-	global teximg
-	teximg = [objfaces[0].image]
+    filename_ext = ".xmesh"
+    filter_glob: StringProperty(
+        default="*.xmesh",
+        options={'HIDDEN'},
+        maxlen=255,
+    )
 
-	for fac in objfaces:
-		if len(fac.v) == 4:
-			quads.append(fac)
-		elif len(fac.v) == 3:
-			tris.append(fac)
-		if fac.image not in teximg and (fac.image):
-			teximg.append(fac.image)
+    triangulate: BoolProperty(
+        name="Triangulate Mesh",
+        description="Convert all n-gons and quads to triangles before exporting",
+        default=True,
+    )
 
-	texname = ""
-	tex_ind = 0
-	while (tex_ind < len(teximg)):
-		if not teximg[tex_ind]:
-			tex_ind+=1
-		else:
-			texname = teximg[tex_ind].getName()
-			tex_ind+=1
+    def execute(self, context):
+        selected_objs = context.selected_objects
+        active_obj = context.active_object
+        
+        target_obj = active_obj if (active_obj and active_obj.type == 'MESH') else None
+        if not target_obj:
+            for obj in selected_objs:
+                if obj.type == 'MESH':
+                    target_obj = obj
+                    break
+                    
+        if not target_obj:
+            self.report({'ERROR'}, "No valid Mesh object selected for export.")
+            return {'CANCELLED'}
 
-	# FIXME: add texture header!!!
-	FILE.write("<Mesh ")
-	FILE.write("texture = \"%s\">\n" % texname)
+        export_object_to_xmesh(target_obj, self.filepath, triangulate=self.triangulate)
+        self.report({'INFO'}, f"Successfully exported xmesh file to {self.filepath}")
+        return {'FINISHED'}
 
-	# Print all vertices and vertice normals to file
-	FILE.write("<Points>\n")
-	for i in range(len(objvertices)):
-		FILE.write("\t<Point>\n")
-		FILE.write("\t\t<Location x=\"%s\" y=\"%s\" z=\"%s\"/> <!-- %s -->\n" % (objvertices[i][0], objvertices[i][1], objvertices[i][2], i))
-		FILE.write("\t\t<Normal i=\"%s\" j=\"%s\" k=\"%s\"/>\n" % (vertnormals[i][0], vertnormals[i][1], vertnormals[i][2]))
-		FILE.write("\t</Point>\n")
-	FILE.write("</Points>\n")
 
-	FILE.write("<Polygons>\n")
+def menu_func_export(self, context):
+    self.layout.operator(ExportXMesh.bl_idname, text="Vega Strike (.xmesh)")
 
-	makePolys(tris,FILE)
-	makePolys(quads,FILE)
 
-#	if (quads):					#FIXME: Add helper function for polygons to make this easier!!!
-#		for quad in quads:
-#			FILE.write("\t<Quad>\n")
-#			for j in range(len(quad.v)):
-#				if has_uv:
-#					FILE.write("\t\t<Vertex point=\"%s\" s=\"%s\" t=\"%s\"/>\n" % ((quad.v[j] + 1), quad.uv[j][0], quad.uv[j][1]))
-#				else:
-#					FILE.write("\t\t<Vertex point=\"%s\" s=\"\" t=\"\"/>\n" % (quad.v[j] + 1))
-#			FILE.write("\t</Quad>\n")
-#
-#	if (tris):
-#		for tri in tris:
-#			FILE.write("\t<Tri>\n")
-#			for j in range(len(tri.v)):
-#				if has_uv:
-#					FILE.write("\t\t<Vertex point=\"%s\" s=\"%s\" t=\"%s\"/>\n" % ((tri.v[j] + 1), tri.uv[j][0], tri.uv[j][1]))
-#				else:
-#					FILE.write("\t\t<Vertex point=\"%s\" s=\"\" t=\"\"/>\n" % (tri.v[j] + 1))
-#			FILE.write("\t</Tri>\n")
-#
-#
+def register():
+    bpy.utils.register_class(ExportXMesh)
+    bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
-	FILE.write("</Polygons>\n<Material>\n</Material>\n</Mesh>")
-	FILE.close()
- 	print(("Written " + filename))
-	print("\t%s contains %s faces (%s quads, %s tris) and %s vertices" % (filename, len(objfaces), len(quads), len(tris), len(objvertices)))
-	printErrors()
 
-def printErrors():
-	global teximg
-	if teximg == [""]:
-		print("\tError (non critical): your object has no textures!")
-		print("\t\tIf this is a surprise to you, remember that your object")
-		print("\t\tcan only use UV mapping to export the texture info properly.")
+def unregister():
+    bpy.utils.unregister_class(ExportXMesh)
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
 
-	elif len(teximg) != 1:
-		print("\tError (non critical): your object uses %s images as textures." % len(teximg))
-		print("\t\tAlthough valid in blender...VS doesn't support this.")
-		print("\t\tIf you hassle me enough, I may make the script automatically")
-		print("\t\tbreak the object into seperate meshes to accomodate that.")
-	print("\n")
 
-def makePolys(polylist,FILE):
-	has_uv = False
-	for poly in polylist:
-		FILE.write("\t<%s>\n" % (getLabel(poly)))
-		for j in range(len(poly.v)):
-			FILE.write("\t\t<Vertex point=\"%s\" %s/>\n" % (poly.v[j], formatUV(poly.uv,j)))
-#			if has_uv:
-#				FILE.write("\t\t<Vertex point=\"%s\" %s/>\n" % (poly.v[j] + 1, formatUV(poly.uv[j])))
-#			else:
-#				FILE.write("\t\t<Vertex point=\"%s\" s=\"\" t=\"\"/>\n" % (poly.v[j] + 1))
-		FILE.write("\t</%s>\n" % (getLabel(poly)))
-
-def getLabel(poly):
-	num = len(poly.v)
-	if num == 3:
-		return "Tri"
-	if num == 4:
-		return "Quad"
-
-def formatUV(uv,i):
-	str = "s=\"\" t=\"\""
-	if (uv):
-		str = "s=\"%s\" t=\"%s\"" % (uv[i][0], uv[i][1])
-	return str
-
-# ------------------------------
-# Runs the script
-# ------------------------------
-#Window.FileSelector(processSelected, 'Export VegaStrike (selected)', newFName('xmesh'))
-
-processSelected()
-
+if __name__ == "__main__":
+    register()
