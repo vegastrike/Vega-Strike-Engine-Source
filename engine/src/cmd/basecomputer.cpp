@@ -525,7 +525,7 @@ GFXColor BaseComputer::getColorForGroup(std::string id) {
 //Hack that constructs controls in code.
 void BaseComputer::constructControls(void) {
     // Attempt loading via JSON using our controls_factory
-    if (getControls("controls.json", window(), &base_keyboard_queue)) {
+    if (getControls("controls.json", window())) {
         // Successfully built GUI from controls.json!
         return;
     }
