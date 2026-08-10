@@ -6,7 +6,7 @@
 # ccmake will let you set the Build type (debug,release,basic)
 
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.5)
 
 project (vsUTCS)
 
@@ -509,9 +509,7 @@ SET(VEGASERVER_SOURCES ${LIBCMDSERVER_SOURCES}
 					   src/gldrv/gl_vertex_list.cpp
 					   src/gldrv/gl_sphere_list_server.cpp)
 					   
-if(COMMAND cmake_policy)					   
-	cmake_policy(SET CMP0003 OLD) 
-endif(COMMAND cmake_policy)
+# CMP0003 OLD removed — modern CMake no longer supports OLD for this policy.
 
 # Set the default build type to Release
 IF(NOT CMAKE_BUILD_TYPE)
@@ -671,7 +669,7 @@ check_type_size("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${vsUTCS_SOURCE_DIR})
 
 # Configurable python version (some data sets might need 3.x, some 2.x)
-SET(VS_PYTHON_VERSION 2 CACHE STRING "Python version to build against: 2, 3, 2.x, 3.x")
+SET(VS_PYTHON_VERSION 3 CACHE STRING "Python version to build against: 2, 3, 2.x, 3.x")
 SET(Python_ADDITIONAL_VERSIONS 3.3mu 3.3m 3.2mu 3.2m)
 
 find_package(PythonLibs ${VS_PYTHON_VERSION} REQUIRED)
