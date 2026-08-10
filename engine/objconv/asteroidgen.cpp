@@ -27,10 +27,11 @@
 
 
 #include <vector>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include <ctime>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include "src/vs_math.h"
 
 #include "root_generic/vega_random.h"
 #include "src/vs_math.h"
@@ -53,13 +54,13 @@ public:
     float s;
     float t;
 
-    explicit Vector(float x = 0, float y = 0, float z = 0) : s{0}, t{0} {
+    explicit Vector(const float x = 0, const float y = 0, const float z = 0) : s(0.0F), t(0.0F) {
         i = x;
         j = y;
         k = z;
     }
 
-    Vector(float x, float y, float z, float s, float t) {
+    Vector(const float x, const float y, const float z, const float s, const float t) {
         i = x;
         j = y;
         k = z;
@@ -75,58 +76,29 @@ public:
         return sqrtf(i * i + j * j + k * k);
     }
 
-    void Yaw(float rad) //only works with unit vector
+    void Yaw(const float rad) //only works with unit vector
     {
-        float theta = 0.0f;
-        float m = Mag();
-        if (i > 0) {
-            theta = (float) atan(k / i);
-        } else if (i < 0) {
-            theta = M_PI + (float) atan(k / i);
-        } else if (k <= 0 && i == 0) {
-            theta = -M_PI / 2;
-        } else if (k > 0 && i == 0) {
-            theta = M_PI / 2;
-        }
-        theta += rad;
-        i = m * cosf(theta);
-        k = m * sinf(theta);
+        const float theta = std::atan2f(k, i) + rad;
+        const float m = Mag();
+        i = m * std::cosf(theta);
+        k = m * std::sinf(theta);
     }
 
-    void Roll(float rad) {
-        float theta = 0.0f;
-        float m = Mag();
-        if (i > 0) {
-            theta = (float) atan(j / i);
-        } else if (i < 0) {
-            theta = M_PI + (float) atan(j / i);
-        } else if (j <= 0 && i == 0) {
-            theta = -M_PI / 2;
-        } else if (j > 0 && i == 0) {
-            theta = M_PI / 2;
-        }
-        theta += rad;
-        i = m * cosf(theta);
-        j = m * sinf(theta);
+    void Roll(const float rad) {
+        const float theta = std::atan2f(j, i) + rad;
+        const float m = Mag();
+        i = m * std::cosf(theta);
+        j = m * std::sinf(theta);
     }
 
-    void Pitch(float rad) {
-        float theta = 0.0f;
-        float m = Mag();
-        if (k > 0) {
-            theta = (float) atan(j / k);
-        } else if (k < 0) {
-            theta = M_PI + (float) atan(j / k);
-        } else if (j <= 0 && k == 0) {
-            theta = -M_PI / 2;
-        } else if (j > 0 && k == 0) {
-            theta = M_PI / 2;
-        }
-        theta += rad;
-        k = m * cosf(theta);
-        j = m * sinf(theta);
+    void Pitch(const float rad) {
+        const float theta = std::atan2f(j, k) + rad;
+        const float m = Mag();
+        k = m * std::cosf(theta);
+        j = m * std::sinf(theta);
     }
 };
+
 class Tri {
 public:
     bool quad;
@@ -214,9 +186,9 @@ void determine_centers_and_radii(vector<asteroid> &field,
         if (field[i].num_polys < 4) {
             field[i].num_polys = 4;
         }
-        field[i].YawPitchRoll.i = VegaRandom::Instance().RandomFloatUpTo(2.0F * M_PI_FLT);
-        field[i].YawPitchRoll.j = VegaRandom::Instance().RandomFloatUpTo(2.0F * M_PI_FLT);
-        field[i].YawPitchRoll.k = VegaRandom::Instance().RandomFloatUpTo(2.0F * M_PI_FLT);
+        field[i].YawPitchRoll.i = VegaRandom::Instance().RandomFloatUpTo(2.0F * kVegaPiFloat);
+        field[i].YawPitchRoll.j = VegaRandom::Instance().RandomFloatUpTo(2.0F * kVegaPiFloat);
+        field[i].YawPitchRoll.k = VegaRandom::Instance().RandomFloatUpTo(2.0F * kVegaPiFloat);
         bool insideanother = false;
         if (field[i].center.Mag() < safety_zone) {
             insideanother = true;
@@ -274,15 +246,15 @@ void generateNTet(vector<Vector> &v,
         for (unsigned int j = 0; j < slices; j++) {
             if (i != 0 && i != stacks + 1) {
                 tempR = getR(minr, maxr);
-            }                  ///don't want the tip ot have different points
-            float projR = tempR * sin(M_PI * i / (stacks + 1));
+            }                  ///don't want the tip to have different points
+            const float projR = tempR * sin(kVegaPiFloat * i / (stacks + 1));
             if ((i != 0 && i != stacks + 1) || j == 0) {
-                v.push_back(Vector(projR * cos(2 * M_PI * j / (slices)),                   //i
-                        tempR * cos(M_PI * i / (stacks + 1)),                    //j
-                        projR * sin(2 * M_PI * j / (slices)),                    //k
+                v.push_back(Vector(projR * cos(2.0 * kVegaPiFloat * j / (slices)), //i
+                        tempR * cos(kVegaPiFloat * i / (stacks + 1)),                //j
+                        projR * sin(2.0 * kVegaPiFloat * j / (slices)),              //k
                         static_cast<float>(j) / (slices - 1)
-                                + ((i == 0 || i == stacks + 1) ? .5 : 0),                      //s
-                        static_cast<float>(i) / (stacks + 1)));                    //t
+                                + ((i == 0 || i == stacks + 1) ? .5 : 0),             //s
+                        static_cast<float>(i) / (stacks + 1)));                     //t
             }
             if (i != 0 && i != 1 && i != stacks + 1) {
                 p.push_back(Tri(1 + (i - 2) * slices + j,

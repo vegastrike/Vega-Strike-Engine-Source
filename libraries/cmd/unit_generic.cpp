@@ -32,7 +32,7 @@
 #include "cmd/unit_generic.h"
 
 #include <set>
-#include "root_generic/configxml.h"
+#include "src/vs_math.h"
 #include "src/audiolib.h"
 #include "cmd/base.h"
 #include "cmd/music.h"
@@ -48,35 +48,24 @@
 #include "cmd/script/mission.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/ai/fire.h"
-#include "cmd/ai/turretai.h"
-#include "cmd/ai/communication.h"
 #include "cmd/ai/navigation.h"
 #include "cmd/ai/script.h"
-#include "cmd/ai/missionscript.h"
-#include "cmd/ai/flybywire.h"
-#include "cmd/ai/aggressive.h"
 #include "src/python/python_class.h"
 #include "cmd/missile.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "gfx/vsbox.h"
 #include <algorithm>
-#include "cmd/ai/ikarus.h"
 #include "cmd/role_bitmask.h"
 #include "cmd/unit_const_cache.h"
-#include "gfx/warptrail.h"
-#include "gfx_generic/cockpit_generic.h"
-#include "cmd/csv.h"
 #include "root_generic/vega_random.h"
 #include "root_generic/galaxy_xml.h"
 #include "gfx/camera.h"
-#include "root_generic/options.h"
 #include "src/star_system.h"
 #include "src/universe.h"
 #include "cmd/weapon_info.h"
 #include "cmd/mount_size.h"
 #include "cmd/turret.h"
 #include "cmd/energetic.h"
-#include "configuration/game_config.h"
 #include "resource/resource.h"
 #include "cmd/base_util.h"
 #include "cmd/unit_csv_factory.h"
@@ -91,7 +80,6 @@
 #include <math.h>
 #include <cmath>
 #include <list>
-#include <cstdint>
 #include <boost/format.hpp>
 #include <random>
 
@@ -99,7 +87,6 @@
 #define strcasecmp stricmp
 #endif
 
-#include "cmd/unit_find.h"
 #include "cmd/pilot.h"
 
 #include <iostream>
@@ -107,8 +94,6 @@
 
 using std::endl;
 using std::list;
-
-
 
 // This is a left over kludge because I don't want to mess with python interfaces yet.
 // TODO: remove
@@ -1149,7 +1134,7 @@ extern std::string getDamageColor(double);
 //NUMGAUGES has been moved to pImages.h in UnitImages<void>
 void Unit::DamageRandSys(float dam, const Vector &vec) {
     // TODO: take actual damage into account when damaging components.
-    const float deg = fabs(180 * atan2(vec.i, vec.k) / M_PI);
+    const float deg = fabs(180.0F * atan2(vec.i, vec.k) / kVegaPiFloat);
     const float random_number = randomDouble();
     const float inv_min_dam = 1.0F - configuration().physics.min_damage_flt;
     const float inv_max_dam = 1.0F - configuration().physics.max_damage_flt;
@@ -2110,7 +2095,7 @@ bool Unit::UnDock(Unit *utdw) {
                         GetOrientation(p, q, r);
                     }
                     if (r.Dot(methem) < 0) {
-                        Rotate(p * (PI / theta));
+                        Rotate(p * (kVegaPiFloat / theta));
                     }
                 }
             }

@@ -271,9 +271,6 @@ void testComplexScene(bool doppler) {
 
     clearScene();
 
-    int i;
-    double t;
-
     SceneManager *sm = SceneManager::getSingleton();
 
     // Create (and verify that) the test scene set
@@ -300,11 +297,11 @@ void testComplexScene(bool doppler) {
     //      distance (forcing sources on/off)
 
     const size_t nengs = 100;
-    const double worldsize = 500.0;
+    const double world_size = 500.0;
 
     // Set scene manager settings for test
     sm->setMaxSources(10);
-    sm->setMaxDistance(worldsize / 4);
+    sm->setMaxDistance(world_size / 4);
     sm->getRenderer()->setDopplerFactor(doppler ? 0.25 : 0.0);
     sm->getRenderer()->setMeterDistance(1.0);
 
@@ -325,14 +322,14 @@ void testComplexScene(bool doppler) {
 
     // Fill in engpaths
     SharedPtr<SourceListener> englistener(
-            new EngParticleListener(engpaths, worldsize));
+            new EngParticleListener(engpaths, world_size));
 
     {
-        constexpr double phase_step = 2.0 * M_PI / nengs;
+        constexpr double phase_step = 2.0 * kVegaPiDouble / nengs;
         for (size_t j = 0; j < nengs; ++j) {
             const double phase = j * phase_step;
             const double speed = 2.0 * phase_step * VegaRandom::Instance().RandomDoubleInRange(0.5, 1.5); // max 1.0?
-            const double radii = worldsize * (1.0 + 0.25 * VegaRandom::Instance().RandomDoubleInRange(-0.5, 0.5));
+            const double radii = world_size * (1.0 + 0.25 * VegaRandom::Instance().RandomDoubleInRange(-0.5, 0.5));
 
             engpaths.push_back(LVector3(phase, speed, radii));
         }
@@ -343,25 +340,25 @@ void testComplexScene(bool doppler) {
     cerr << "  playing out scene..." << flush;
 
     {
-        for (vector<SharedPtr<Source> >::iterator i = engsources.begin(); i != engsources.end(); ++i) {
-            (*i)->startPlaying();
+        for (auto source = engsources.begin(); source != engsources.end(); ++source) {
+            (*source)->startPlaying();
         }
     }
 
-    for (t = getRealTime(); (getRealTime() - t) < 20.0;) { // 20s = 200 ticks
-        const double phase_step = 2.0 * M_PI / 20;
-        double phase = (getRealTime() - t) * phase_step;
-        double speed = phase_step;
+    for (double t = getRealTime(); (getRealTime() - t) < 20.0;) { // 20s = 200 ticks
+        constexpr double kPhaseStep = 2.0 * kVegaPiDouble / 20.0;
+        const double phase = (getRealTime() - t) * kPhaseStep;
+        constexpr double speed = kPhaseStep;
 
-        LVector3 pos = LVector3(
-                cos(phase) * worldsize,
-                -sin(phase) * worldsize,
+        const LVector3 pos = LVector3(
+                cos(phase) * world_size,
+                -sin(phase) * world_size,
                 0
         );
 
         LVector3 dpos = LVector3(
-                -sin(phase) * worldsize * speed,
-                -cos(phase) * worldsize * speed,
+                -sin(phase) * world_size * speed,
+                -cos(phase) * world_size * speed,
                 0
         );
 
@@ -375,12 +372,12 @@ void testComplexScene(bool doppler) {
     }
 
     {
-        for (vector<SharedPtr<Source> >::iterator i = engsources.begin(); i != engsources.end(); ++i) {
-            (*i)->stopPlaying();
+        for (auto source = engsources.begin(); source != engsources.end(); ++source) {
+            (*source)->stopPlaying();
         }
     }
 
-    for (i = 0; i < 10; ++i) { // 1s = 10 ticks
+    for (int i = 0; i < 10; ++i) { // 1s = 10 ticks
         smTick();
     }
 

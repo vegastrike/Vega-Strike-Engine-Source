@@ -26,6 +26,7 @@
  */
 
 
+#include <numbers>
 #include "cmd/atmosphere.h"
 #include "gfx_generic/mesh.h"
 #include "gfx_generic/matrix.h"
@@ -58,19 +59,21 @@ void Atmosphere::setArray1(float c0[3], const GFXColor &c1) {
     c0[2] = c1.b;
 }
 
-Atmosphere::Atmosphere(const Parameters &params) : user_params(params), divisions(64) {
+Atmosphere::Atmosphere(const Parameters &params) : user_params(params), cap(nullptr), stack(nullptr), l0(0), l1(0),
+                                                   l2(0),
+                                                   divisions(64) {
     dome = new SphereMesh(params.radius,
-            divisions,
-            divisions,
-            "white.bmp",
-            "",
-            NULL,
-            true,
-            ONE,
-            ZERO,
-            false,
-            0,
-            M_PI / 2);
+                          divisions,
+                          divisions,
+                          "white.bmp",
+                          "",
+                          nullptr,
+                          true,
+                          ONE,
+                          ZERO,
+                          false,
+                          0,
+                          kVegaPiFloat / 2.0F);
 }
 
 Atmosphere::~Atmosphere() {
@@ -125,7 +128,7 @@ void Atmosphere::Update(const QVector &position, const Matrix &tmatrix) {
         }
     }
     if (!sunboxes.empty()) {
-        float rho = acos(rho1) / (PI / 2);
+        float rho = acos(rho1) / (kVegaPiFloat / 2.0F);
         float radius = user_params.radius;
         /* index 0 is the top color, index 1 is the bottom color */
         GFXLight light0 = GFXLight();
@@ -149,7 +152,7 @@ void Atmosphere::Update(const QVector &position, const Matrix &tmatrix) {
         Matrix m;
         QVector r;
         ScaledCrossProduct(QVector(0, 1, 0), localDir, r);
-        Rotate(m, r.Cast(), -80 * (PI / 180));
+        Rotate(m, r.Cast(), -80.0F * (kVegaPiFloat / 180.0F));
         r = Transform(m, QVector(0, 0, 1));
         float sradius = 1.1 * radius;
         light2.SetProperties(POSITION, GFXColor(sradius * r.i, sradius * r.j, sradius * r.k, 1));

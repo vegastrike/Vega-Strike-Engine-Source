@@ -27,11 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H
 #define VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H
 
-#include "root_generic/macosx_math.h"
-#include <math.h>
-#ifndef M_PI
-#define M_PI (3.1415926536)
-#endif
+#include <cmath>
+#include "src/vs_math.h"
+
 /**
  * We could make it virtual and ahve a sphere-map or cube-map version of this
  *
@@ -80,9 +78,9 @@ public:
         SetR(b);
     }
 
-    void SetXZ(float x, float z) {
-        this->scalex = 2 * M_PI / x;
-        this->scalez = M_PI / z;
+    void SetXZ(const float x, const float z) {
+        this->scalex = 2.0F * kVegaPiFloat / x;
+        this->scalez = kVegaPiFloat / z;
     }                                                                         //x ranges from 0 to 2PI x ranges from -PI/2 to PI/2
     void SetR(float rr) {
         r = rr;
@@ -93,15 +91,15 @@ public:
     }
 
     float GetX() const {
-        return 2 * M_PI / scalex;
+        return 2.0F * kVegaPiFloat / scalex;
     }
 
     float GetZ() const {
-        return M_PI / scalez;
+        return kVegaPiFloat / scalez;
     }
 
     QVector Transform(const QVector &v) const override {
-        Vector T(v.i * scalex, r + v.j, v.k * scalez - .5 * M_PI);
+        Vector T(v.i * scalex, r + v.j, v.k * scalez - 0.5F * kVegaPiFloat);
         double cosphi = cos(T.k);
         return QVector(T.j * cosphi * cos(T.i), static_cast<double>(T.j) * sin(T.k), T.j * cosphi * sin(T.i));
     }
@@ -113,7 +111,8 @@ public:
     QVector InvTransform(const QVector &v) const override {
         float rplusy = v.Magnitude();
         //float lengthxypln = sqrtf (rplusy*rplusy-v.j*v.j);//pythagorus
-        return QVector((atan2(-v.k, -v.i) + M_PI) / scalex, rplusy - r, (asin(v.j / rplusy) + M_PI * .5) / scalez);
+        return QVector((atan2(-v.k, -v.i) + kVegaPiDouble) / scalex,
+            rplusy - r, (asin(v.j / rplusy) + kVegaPiDouble * 0.5) / scalez);
     }
 
     CLIPSTATE BoxInFrustum(Vector &min, Vector &max, const Vector &campos) const override {

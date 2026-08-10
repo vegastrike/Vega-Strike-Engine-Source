@@ -46,6 +46,7 @@
 #include "cmd/planetary_orbit.h"
 #include "src/universe.h"
 #include "src/vs_logging.h"
+#include "src/vs_math.h"
 #include "cmd/weapon_info.h"
 #include "cmd/unit_csv_factory.h"
 
@@ -326,10 +327,10 @@ uint_fast32_t getPhysicsPriority(Unit *un) {
     }
 }
 
-void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVector center) {
+void orbit(Unit *my_unit, Unit *orbitee, const float speed, const QVector &R, const QVector &S, const QVector &center) {
     if (my_unit) {
         my_unit->PrimeOrders(new PlanetaryOrbit(my_unit,
-                                                speed / (M_PI * (S.Magnitude() + R.Magnitude())),
+                                                speed / (kVegaPiDouble * (S.Magnitude() + R.Magnitude())),
                                                 0,
                                                 R,
                                                 S,
@@ -337,7 +338,7 @@ void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVec
                                                 orbitee));
         if (orbitee) {
             if (orbitee->getUnitType() == Vega_UnitType::planet) {
-                ((Planet *) orbitee)->AddSatellite(my_unit);
+                (vega_dynamic_cast_ptr<Planet>(orbitee))->AddSatellite(my_unit);
             }
         }
         if (my_unit->faction != FactionUtil::GetFactionIndex("neutral")) {

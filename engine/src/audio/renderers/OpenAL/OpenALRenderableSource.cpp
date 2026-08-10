@@ -117,8 +117,8 @@ void OpenALRenderableSource::updateImpl(int flags, const Listener &sceneListener
         // Cone
         {
             Range<Scalar> angleRange = source->getAngleRange();
-            alSourcef(als, AL_CONE_INNER_ANGLE, float(angleRange.min) * M_1_PI * 360.f);
-            alSourcef(als, AL_CONE_OUTER_ANGLE, float(angleRange.max) * M_1_PI * 360.f);
+            alSourcef(als, AL_CONE_INNER_ANGLE, angleRange.min * kVegaInvPiFloat * 360.0F);
+            alSourcef(als, AL_CONE_OUTER_ANGLE, angleRange.max * kVegaInvPiFloat * 360.0F);
             alSourcef(als, AL_CONE_OUTER_GAIN, 0.f);
         }
         // Relativity

@@ -36,13 +36,11 @@
 #include "src/audiolib.h"
 #include "root_generic/lin_time.h"
 
-#include <assert.h>     //needed for assert() calls
-//#include "planetary_transform.h"  commented out by chuck_starchaser; --never used
+#include <cassert>     //needed for assert() calls
+#include "src/vs_math.h"
 
 #include "src/vs_logging.h"
 #include "src/vs_exit.h"
-
-//const float PI=3.1415926536;
 
 Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1, 0.075, &Coord, &P, &Q, &R) {
     ResetVectors(P, Q, R);
@@ -57,7 +55,7 @@ Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1, 0.075
     changed = GFXTRUE;
     //SetPosition();
     //SetOrientation();
-    Yaw(PI);
+    Yaw(kVegaPiFloat);
     x = y = 0;
     xsize = ysize = 1.0;
     zoom = 1.0;

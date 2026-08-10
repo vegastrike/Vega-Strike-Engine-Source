@@ -27,15 +27,9 @@
 
 
 #include "gfx_generic/sphere.h"
-#include "gfx/ani_texture.h"
-#include "src/vegastrike.h"
 #include "src/config_xml.h"
 #include "root_generic/vs_globals.h"
-#include "vegadisk/vsfilesystem.h"
 #include "root_generic/xml_support.h"
-#ifndef M_PI
-#define M_PI (3.1415926536F)
-#endif
 #include "gfx/camera.h"
 
 using XMLSupport::tostring;
