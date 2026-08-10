@@ -47,13 +47,13 @@ void InitGraphics(int *argc, char*** argv) {
 	gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
 	gtk_window_set_title(GTK_WINDOW(window), title);
 
-	gtk_signal_connect(GTK_OBJECT(window), "destroy", GTK_SIGNAL_FUNC(exit_0), NULL);
-	gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(exit_0), NULL);
+	g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(exit_0), NULL);
+	g_signal_connect(G_OBJECT(window), "delete_event", G_CALLBACK(exit_0), NULL);
 
 	gtk_container_set_border_width(GTK_CONTAINER(window), 0);
 
-	main_vbox = gtk_vbox_new(FALSE, 1);
-	gtk_container_border_width(GTK_CONTAINER(main_vbox), 1);
+	main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 1);
+	gtk_container_set_border_width(GTK_CONTAINER(main_vbox), 1);
 	gtk_container_add(GTK_CONTAINER(window), main_vbox);
 
         GtkWidget *lbl=gtk_label_new(static_text);
@@ -89,18 +89,19 @@ void ShowMain(void) {
 //		cout << count << ") " << CURRENT->name << " [" << GetInfo(CURRENT->setting) << "]\n";
 		count++;
 		if (column == 1) {
-			hbox = gtk_hbox_new(FALSE, 2);
+			hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 		}
-		vbox = gtk_vbox_new(FALSE, 0);
+		vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 		label = gtk_label_new(CURRENT->name);
 		gtk_container_add(GTK_CONTAINER(vbox), label);
 		gtk_widget_show(label);
 #ifndef USE_RADIO
-		GtkWidget *menu=gtk_option_menu_new();
-		GtkWidget *my_menu=gtk_menu_new();
-		AddCats(my_menu, CURRENT->name, CURRENT->setting);
-		gtk_option_menu_set_menu(GTK_OPTION_MENU(menu),my_menu);
-		/* This packs the button into the window (a gtk container). */
+		/* Use a GtkComboBoxText (replaces the removed GtkOptionMenu).
+		   The group name is stored on the widget so the 'changed' handler
+		   can resolve which catagory was selected. */
+		GtkWidget *menu=gtk_combo_box_text_new();
+		g_object_set_data(G_OBJECT(menu), "vs-group", CURRENT->name);
+		AddCats(menu, CURRENT->name, CURRENT->setting);
 		catagory *NEWCUR=&CATS;
 		int i=0;
 		do {
@@ -108,13 +109,13 @@ void ShowMain(void) {
 			if (NEWCUR->name == NULL) { continue; }
 			if (strcmp(CURRENT->name, NEWCUR->group) != 0) { continue; }
 			if (strcmp(NEWCUR->name, CURRENT->setting) == 0) {
-//				printf("|||%s|||",GetInfo(NEWCUR->name));
-				gtk_option_menu_set_history(GTK_OPTION_MENU(menu),i);
+				gtk_combo_box_set_active(GTK_COMBO_BOX(menu),i);
 				break;
 			}
 			i++;
-		} while ((NEWCUR = NEWCUR->next) > 0);
-//		printf("\n\n");
+		} while ((NEWCUR = NEWCUR->next) != NULL);
+		/* Connect 'changed' AFTER set_active so setup doesn't trigger it */
+		g_signal_connect(G_OBJECT(menu), "changed", G_CALLBACK(ClickButton), NULL);
 		gtk_widget_show (menu);
 		gtk_container_add(GTK_CONTAINER(vbox), menu);
 #else
@@ -128,18 +129,18 @@ void ShowMain(void) {
 			gtk_widget_show(hbox);
 		}
 		column++;
-	} while ((CURRENT = CURRENT->next) > 0);
+	} while ((CURRENT = CURRENT->next) != NULL);
 	if (column != 1) {
 		gtk_container_add(GTK_CONTAINER(main_vbox), hbox);
 		gtk_widget_show(hbox);
 	}
-	vbox = gtk_vbox_new(FALSE, 2);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	button = gtk_button_new_with_label("Save Settings And View Readme");
-	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(myexit), NULL);
+	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(myexit), NULL);
 	gtk_widget_show(button);
 	gtk_container_add(GTK_CONTAINER(vbox), button);
 	button = gtk_button_new_with_label("Save Settings and Exit");
-	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(exit_0), NULL);
+	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(exit_0), NULL);
 	gtk_widget_show(button);
 	gtk_container_add(GTK_CONTAINER(vbox), button);
 	gtk_container_add(GTK_CONTAINER(main_vbox), vbox);
@@ -156,14 +157,12 @@ void AddCats(GtkWidget *vbox, char *group, char *def) {
 #endif    
 	CUR = &CATS;
 	do {
-		GtkWidget *button;
+		GtkWidget *button = NULL;
 		if (CUR->name == NULL) { continue; }
 		if (strcmp(group, CUR->group) != 0) { continue; }
 #ifndef USE_RADIO
-		button=gtk_menu_item_new_with_label(GetInfo(CUR->name));
-		gtk_widget_show(button);
-		gtk_menu_append(GTK_MENU(vbox),button);
-		gtk_signal_connect(GTK_OBJECT(button), "activate", GTK_SIGNAL_FUNC(ClickButton), CUR);
+		/* Populate the combo box with each catagory's display text */
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(vbox), GetInfo(CUR->name));
 #else
 		if (strcmp(CUR->name, def) == 0) {
 			int length = strlen(GetInfo(CUR->name))+3;
@@ -176,23 +175,28 @@ void AddCats(GtkWidget *vbox, char *group, char *def) {
 		else {
 			button=gtk_radio_button_new_with_label (radiogroup, GetInfo(CUR->name));
 		}
-		radiogroup = gtk_radio_button_group (GTK_RADIO_BUTTON (button));
+		radiogroup = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
 		gtk_widget_show (button);
 		gtk_container_add(GTK_CONTAINER(vbox), button);
 		if (strcmp(CUR->name, def) == 0) {
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
 		}
-		gtk_signal_connect(GTK_OBJECT(button), "toggled", GTK_SIGNAL_FUNC(ClickButton), CUR);
-//		gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(ClickButton), CUR);
+		g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(ClickButton), CUR);
 #endif
 		CUR->button = button;
-	} while ((CUR = CUR->next) > 0);
+	} while ((CUR = CUR->next) != NULL);
+
+#ifndef USE_RADIO
+	/* Connect the combo box 'changed' signal once, after populating */
+	g_signal_connect(G_OBJECT(vbox), "changed", G_CALLBACK(ClickButton), NULL);
+#endif
 }
 
 void ClickButton(GtkWidget *w, struct catagory *CUR) {
 	struct catagory *OLD;
 	struct group *NEW;
 	char *new_text, *old;
+	const char *sel_name = NULL;
 
 #ifdef USE_RADIO
 	int length;
@@ -202,7 +206,22 @@ void ClickButton(GtkWidget *w, struct catagory *CUR) {
 		// Deactivate event--we don't care.
 		return;
 	}
-	GtkWidget *label = GTK_BIN(CUR->button)->child;
+	GtkWidget *label = gtk_bin_get_child(GTK_BIN(CUR->button));
+#else
+	/* Combo box path: resolve the selected catagory from the active item.
+	   The widget 'w' is the combo box; its active text maps to a catagory
+	   in the group stored on the widget. */
+	char *group = (char*)g_object_get_data(G_OBJECT(w), "vs-group");
+	char *sel_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(w));
+	if (sel_text == NULL) { return; }
+	struct catagory *C = &CATS;
+	do {
+		if (C->name == NULL) { continue; }
+		if (strcmp(group, C->group) != 0) { continue; }
+		if (strcmp(sel_text, GetInfo(C->name)) == 0) { CUR = C; break; }
+	} while ((C = C->next) != NULL);
+	g_free(sel_text);
+	if (CUR == NULL) { return; }
 #endif
 
 
@@ -226,7 +245,7 @@ void ClickButton(GtkWidget *w, struct catagory *CUR) {
 	NEW->setting = new_text;
 
 #ifdef USE_RADIO
-	label = GTK_BIN(OLD->button)->child;
+	label = gtk_bin_get_child(GTK_BIN(OLD->button));
 	gtk_label_set_text(GTK_LABEL(label), GetInfo(OLD->name));
 #endif
 	DisableSetting(OLD->name, OLD->group);

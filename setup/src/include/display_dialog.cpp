@@ -69,13 +69,13 @@ void SetOption(struct group *CURRENT, char *selectedstr) {
     if (!OLD->name) { continue; }
     if (strcmp(OLD->group,CURRENT->name)!=0) { continue; }
     if (strcmp(OLD->name,CURRENT->setting)==0) break;
-  } while((OLD=OLD->next) > 0);
+  } while((OLD=OLD->next) != NULL);
   if (!OLD) return;
   do {
     if (!NEW->name) { continue; }
     if (strcmp(NEW->group,CURRENT->name)!=0) { continue; }
     if (strcmp(GetInfo(NEW->name),selectedstr)==0) break;
-  } while((NEW=NEW->next) > 0);
+  } while((NEW=NEW->next) != NULL);
   if (!NEW) return;
 
   if (OLD == NEW) { return; }
@@ -104,7 +104,7 @@ void ShowMain() {
   do {
     if (CURRENT->name == NULL) { continue; }
     ++count;
-  } while ((CURRENT = CURRENT->next) > 0);
+  } while ((CURRENT = CURRENT->next) != NULL);
   menuitem_list=new char*[count*2+1];
   group_options_list=new char**[count+1];
   menu_titles=new char*[count+1];
@@ -124,7 +124,7 @@ void ShowMain() {
       if (CUR->name == NULL) { continue; }
       if (strcmp(CURRENT->name, CUR->group) != 0) { continue; }
       i++;
-    } while ((CUR = CUR->next) > 0);
+    } while ((CUR = CUR->next) != NULL);
     group_options_list[count]=new char*[i*2+1];
     memset(group_options_list[count],0,sizeof(char*)*(i*2+1));
     CUR=&CATS;
@@ -135,9 +135,9 @@ void ShowMain() {
       group_options_list[count][i*2]=GetInfo(CUR->name);
       group_options_list[count][i*2+1]=NULL;
       i++;
-    } while ((CUR = CUR->next) > 0);
+    } while ((CUR = CUR->next) != NULL);
     count++;
-  } while ((CURRENT = CURRENT->next) > 0);
+  } while ((CURRENT = CURRENT->next) != NULL);
   while (true) {
     ret=ShowMainMenu(menuitem_list, menuitem_list[selected*2], selectedstr);
     if (ret==DLG_EXIT_CANCEL||ret==DLG_EXIT_ESC) {
@@ -154,7 +154,7 @@ void ShowMain() {
       if (CURRENT->name == NULL) { continue; }
       if (strcmp(CURRENT->name,selectedstr)==0) break;
       ++selected;
-    } while ((CURRENT = CURRENT->next) > 0);
+    } while ((CURRENT = CURRENT->next) != NULL);
     CUR = &CATS;
     int i=0;
     do {
@@ -167,7 +167,7 @@ void ShowMain() {
         group_options_list[selected][i*2+1]=strdup(OFF);
       }
       i++;
-    } while ((CUR = CUR->next) > 0);
+    } while ((CUR = CUR->next) != NULL);
     ret=ShowSubMenu(group_options_list[selected],group_options_list[selected][subselected*2],selectedstr,menuitem_list[selected*2]);
     if (ret==DLG_EXIT_CANCEL||ret==DLG_EXIT_ESC) {
       continue;

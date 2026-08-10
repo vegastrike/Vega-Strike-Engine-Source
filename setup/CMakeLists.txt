@@ -11,16 +11,11 @@ SET(VSSETUP_SOURCES src/c/setup.cpp
 
 add_executable(vssetup ${VSSETUP_SOURCES})
 
-#find GTK2
-find_package(GTK2 REQUIRED)
-IF(GTK2_FOUND)
-    SET(GTK_LIBS ${GTK2_LIBRARIES})
-    SET(GTK_CFLAGS ${GTK2_DEFINITIONS} -DGTK)
-ELSE(GTK2_FOUND)
-     message("Cant get GTK2 found")
-ENDIF(GTK2_FOUND)
-
+#find GTK3 (replaces removed GTK2) via pkg-config
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+SET(GTK_CFLAGS -DGTK)
 add_definitions(${GTK_CFLAGS})
-include_directories(${vsUTCS_SOURCE_DIR}/setup/src/include ${vsUTCS_SOURCE_DIR}/src/common ${vsUTCS_BINARY_DIR} ${GTK2_INCLUDE_DIRS})
-target_link_libraries(vssetup ${GTK_LIBS})
+include_directories(${vsUTCS_SOURCE_DIR}/setup/src/include ${vsUTCS_SOURCE_DIR}/src/common ${vsUTCS_BINARY_DIR} ${GTK3_INCLUDE_DIRS})
+target_link_libraries(vssetup ${GTK3_LIBRARIES})
 ENDIF (NOT BEOS)
