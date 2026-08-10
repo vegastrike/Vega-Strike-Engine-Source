@@ -30,6 +30,7 @@
 
 #define PY_SSIZE_T_CLEAN
 
+#include "src/vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
                                                                                                                         //For WIN32 debugging.
 #include <crtdbg.h>
@@ -51,17 +52,22 @@ using VSFileSystem::SaveFile;
 //FIXME mbyron -- Hack instead of reading XML.
 #include "gui/newbutton.h"
 #include "gui/staticdisplay.h"
+#include "gui/textinputdisplay.h"
 #include "gui/simplepicker.h"
+#include "gui/groupcontrol.h"
+#include "gui/scroller.h"
 #include "cmd/unit_xml.h"
 #include "gfx/sprite.h"
 #include "gfx/aux_texture.h"
 #include "src/audiolib.h"
+#include "src/vs_math.h"
 #include "cmd/damageable.h"
 #include "src/universe.h"
 #include "cmd/mount_size.h"
 #include "cmd/weapon_info.h"
 #include "src/vs_logging.h"
 #include "controls_factory.h"
+#include "src/python/infra/get_string.h"
 #include "root_generic/configxml.h"
 #include "resource/manifest.h"
 #include "cmd/reload_utils.h"
@@ -82,6 +88,7 @@ using VSFileSystem::SaveFile;
 #include <pwd.h>
 #include <sys/types.h>
 #endif
+#include <locale>
 #include "src/vega_cast_utils.h"
 
 enum class Color {
@@ -524,14 +531,702 @@ GFXColor BaseComputer::getColorForGroup(std::string id) {
 
 //Hack that constructs controls in code.
 void BaseComputer::constructControls(void) {
-    // Attempt loading via JSON using our controls_factory
-    if (getControls("controls.json", window())) {
-        // Successfully built GUI from controls.json!
+    std::map<std::string, std::map<std::string, std::string>> controls;
+
+    VSFileSystem::VSFile jsonFile;
+    VSFileSystem::VSError err = jsonFile.OpenReadOnly("controls.json");
+    if (err <= VSFileSystem::Ok) {
+        controls = parseControlsJSON(jsonFile);
+    } else {
+        VS_LOG(error, "controls.json not found");
         return;
     }
 
-    VS_LOG(fatal, "BaseComputer: In Asset version >= 3.0 a controls.json file is required for the computer to work, please update the data directory or raise a bug for it.");
-    CockpitKeys::QuitNow();
+    if (m_displayModes.size() != 1 || m_displayModes.at(0) != DisplayMode::NETWORK) {
+        //Base info title.
+        StaticDisplay *baseTitle = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["baseTitle"]));
+        window()->addControl(baseTitle);
+
+        //Player info title.
+        StaticDisplay *playerTitle = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["playerTitle"]));
+        window()->addControl(playerTitle);
+
+        //Options button.
+        NewButton *options = vega_dynamic_cast_ptr<NewButton>(getControl(controls["saveLoad"]));
+        window()->addControl(options);
+    }
+
+    NewButton *done = vega_dynamic_cast_ptr<NewButton>(getControl(controls["done"]));
+    window()->addControl(done);
+
+    //Mode button.
+    NewButton *mode = vega_dynamic_cast_ptr<NewButton>(getControl(controls["mode"]));
+    window()->addControl(mode);
+    {
+        //CARGO group control.
+        GroupControl *cargoGroup = new GroupControl;
+        cargoGroup->setId("CargoGroup");
+        window()->addControl(cargoGroup);
+
+        //Seller text display.
+        StaticDisplay *sellLabel = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["seller"]));
+        cargoGroup->addChild(sellLabel);
+
+        //Player inventory text display.
+        StaticDisplay *inv = new StaticDisplay;
+        *inv = *sellLabel;
+        inv->setRect(Rect(.15, .56, .81, .1));
+        inv->setText("Inventory");
+        cargoGroup->addChild(inv);
+
+        //Total price text display.
+        StaticDisplay *totalPrice = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["totalPrice"]));
+        cargoGroup->addChild(totalPrice);
+
+        //"Max" text display.
+        StaticDisplay *maxForPlayer = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["maxQuantity"]));
+        cargoGroup->addChild(maxForPlayer);
+
+        //Scroller for seller.
+        Scroller *sellerScroller = vega_dynamic_cast_ptr<Scroller>(getControl(controls["sellerScroller"]));
+
+
+        //Seller picker.
+        SimplePicker *sell_pick = vega_dynamic_cast_ptr<SimplePicker>(getControl(controls["sellerPicker"]));
+        sell_pick->setScroller(sellerScroller);
+        cargoGroup->addChild(sell_pick);
+
+        cargoGroup->addChild(sellerScroller);                 //Want this "over" the picker.
+
+        //Scroller for inventory.
+        Scroller *inventoryScroller = vega_dynamic_cast_ptr<Scroller>(getControl(controls["inventoryScroller"]));
+
+        //Inventory picker.
+        SimplePicker *inventoryPick = vega_dynamic_cast_ptr<SimplePicker>(getControl(controls["inventoryPicker"]));
+        inventoryPick->setScroller(inventoryScroller);
+        cargoGroup->addChild(inventoryPick);
+
+        cargoGroup->addChild(inventoryScroller);            //Want this "over" the picker.
+
+        //Buy button.
+        NewButton *buy = vega_dynamic_cast_ptr<NewButton>(getControl(controls["buy"]));
+        cargoGroup->addChild(buy);
+
+        //"Buy 10" button.
+        NewButton *buy10 = vega_dynamic_cast_ptr<NewButton>(getControl(controls["buy10"]));
+        cargoGroup->addChild(buy10);
+
+        //"Buy 1" button.
+        NewButton *buy1 = vega_dynamic_cast_ptr<NewButton>(getControl(controls["buy1"]));
+        cargoGroup->addChild(buy1);
+
+        //Scroller for description.
+        Scroller *descScroller = vega_dynamic_cast_ptr<Scroller>(getControl(controls["descriptionScroller"]));
+
+        //Description box.
+        StaticDisplay *ms = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["description"]));
+        StaticImageDisplay *picture = vega_dynamic_cast_ptr<StaticImageDisplay>(getControl(controls["picture"]));
+        ms->setScroller(descScroller);
+        cargoGroup->addChild(ms);
+
+        cargoGroup->addChild(descScroller);           //Want this "over" the description.
+        cargoGroup->addChild(picture);
+    }
+    {
+        //UPGRADE group control.
+        GroupControl *upgradeGroup = new GroupControl;
+        upgradeGroup->setId("UpgradeGroup");
+        window()->addControl(upgradeGroup);
+        GFXColor color = getColorForGroup("UpgradeGroup");
+
+        //Seller text display.
+        StaticDisplay *sellLabel = vega_dynamic_cast_ptr<StaticDisplay>(getControl(controls["sellLabel"]));
+        upgradeGroup->addChild(sellLabel);
+
+        //Player inventory text display.
+        StaticDisplay *inv = new StaticDisplay;
+        *inv = *sellLabel;
+        inv->setRect(Rect(.15, .55, .81, .1));
+        inv->setText("Improvements To Sell");
+        upgradeGroup->addChild(inv);
+
+        //Scroller for seller.
+        Scroller *sellerScroller = vega_dynamic_cast_ptr<Scroller>(getControl(controls["sellerScroller"]));
+
+        //Seller picker.
+        SimplePicker *sell_pick = new SimplePicker;
+        sell_pick->setRect(Rect(-.96, -.4, .76, .95));
+        sell_pick->setColor(GFXColor(color.r, color.g, color.b, .1));
+        sell_pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        sell_pick->setTextColor(GUI_OPAQUE_WHITE());
+        sell_pick->setFont(Font(.07));
+        sell_pick->setTextMargins(Size(0.02, 0.01));
+        sell_pick->setSelectionColor(GFXColor(0, .6, 0, .8));
+        sell_pick->setHighlightColor(GFXColor(0, .6, 0, .35));
+        sell_pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
+        sell_pick->setId("BaseUpgrades");
+        sell_pick->setScroller(sellerScroller);
+        upgradeGroup->addChild(sell_pick);
+
+        upgradeGroup->addChild(sellerScroller);         //Want this "over" the picker.
+
+        //Scroller for inventory.
+        Scroller *invScroller = new Scroller;
+        invScroller->setRect(Rect(.91, -.4, .05, .95));
+        invScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        invScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        invScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
+        invScroller->setTextColor(GUI_OPAQUE_WHITE());
+        invScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+
+        //Inventory picker.
+        SimplePicker *ipick = new SimplePicker;
+        ipick->setRect(Rect(.15, -.4, .76, .95));
+        ipick->setColor(GFXColor(color.r, color.g, color.b, .1));
+        ipick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        ipick->setTextColor(GUI_OPAQUE_WHITE());
+        ipick->setSelectionColor(GFXColor(0, .6, 0, .8));
+        ipick->setHighlightColor(GFXColor(0, .6, 0, .35));
+        ipick->setHighlightTextColor(GUI_OPAQUE_WHITE());
+        ipick->setFont(Font(.07));
+        ipick->setTextMargins(Size(0.02, 0.01));
+        ipick->setId("PlayerUpgrades");
+        ipick->setScroller(invScroller);
+        upgradeGroup->addChild(ipick);
+
+        upgradeGroup->addChild(invScroller);          //Want this "over" picker.
+
+        //Buy button.
+        NewButton *buy = new NewButton;
+        buy->setRect(Rect(-.11, .2, .22, .12));
+        buy->setColor(GFXColor(0, 1, 1, .1));
+        buy->setTextColor(GUI_OPAQUE_WHITE());
+        buy->setDownColor(GFXColor(0, 1, 1, .4));
+        buy->setDownTextColor(GFXColor(.2, .2, .2));
+        buy->setVariableBorderCycleTime(1.0);
+        buy->setBorderColor(GFXColor(.2, .2, .2));
+        buy->setEndBorderColor(GFXColor(.4, .4, .4));
+        buy->setShadowWidth(2.0);
+        buy->setFont(Font(.1, BOLD_STROKE));
+        buy->setId("Commit");
+        upgradeGroup->addChild(buy);
+
+        //Fix button.
+        NewButton *fix = new NewButton;
+        fix->setRect(Rect(-.11, .0, .22, .12));
+        fix->setColor(GFXColor(0, 1, 1, .1));
+        fix->setTextColor(GUI_OPAQUE_WHITE());
+        fix->setDownColor(GFXColor(0, 1, 1, .4));
+        fix->setDownTextColor(GFXColor(.2, .2, .2));
+        fix->setVariableBorderCycleTime(1.0);
+        fix->setBorderColor(GFXColor(.2, .2, .2));
+        fix->setEndBorderColor(GFXColor(.4, .4, .4));
+        fix->setShadowWidth(2.0);
+        fix->setFont(Font(.1, BOLD_STROKE));
+        fix->setId("CommitFix");
+        upgradeGroup->addChild(fix);
+
+        //Scroller for description.
+        Scroller *descScroller = new Scroller;
+        descScroller->setRect(Rect(.91, -.95, .05, .5));
+        descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        descScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+        descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+
+        //Description box.
+        StaticDisplay *ms = new StaticDisplay;
+        StaticImageDisplay *picture = new StaticImageDisplay;
+        picture->setRect(Rect(-.96, -.45, .46 * .75, -.47));
+        picture->setTexture("blackclear.png");
+        picture->setId("DescriptionImage");
+        ms->setRect(Rect(-.6, -.95, 1.51, .5));
+
+        ms->setColor(GFXColor(color.r, color.g, color.b, .1));
+        ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        ms->setFont(Font(.06));
+        ms->setMultiLine(true);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
+        ms->setTextMargins(Size(.02, .01));
+        ms->setId("Description");
+        ms->setScroller(descScroller);
+        upgradeGroup->addChild(ms);
+
+        upgradeGroup->addChild(descScroller);         //Want this "over" description box.
+        upgradeGroup->addChild(picture);
+    }
+    {
+        //NEWS group control.
+        GroupControl *newsGroup = new GroupControl;
+        newsGroup->setId("NewsGroup");
+        window()->addControl(newsGroup);
+        GFXColor color = getColorForGroup("NewsGroup");
+
+        //Scroller for picker.
+        Scroller *pickScroller = new Scroller;
+        pickScroller->setRect(Rect(.91, 0, .05, .65));
+        pickScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        pickScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        pickScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
+        pickScroller->setTextColor(GUI_OPAQUE_WHITE());
+        pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+
+        //News picker.
+        SimplePicker *pick = new SimplePicker;
+        pick->setRect(Rect(-.96, 0, 1.87, .65));
+        pick->setColor(GFXColor(color.r, color.g, color.b, .1));
+        pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        pick->setTextColor(GUI_OPAQUE_WHITE());
+        pick->setSelectionColor(GFXColor(0, .6, 0, .8));
+        pick->setHighlightColor(GFXColor(0, .6, 0, .35));
+        pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
+        pick->setFont(Font(.07));
+        pick->setTextMargins(Size(0.02, 0.01));
+        pick->setId("NewsPicker");
+        pick->setScroller(pickScroller);
+        newsGroup->addChild(pick);
+
+        newsGroup->addChild(pickScroller);            //Want scroller "over" picker.
+
+        //Scroller for description.
+        Scroller *descScroller = new Scroller;
+        descScroller->setRect(Rect(.91, -.95, .05, .90));
+        descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        descScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+        descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+
+        //Description box.
+        StaticDisplay *ms = new StaticDisplay;
+        ms->setRect(Rect(-.96, -.95, 1.87, .90));
+        ms->setColor(GFXColor(color.r, color.g, color.b, .1));
+        ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        ms->setFont(Font(.07));
+        ms->setMultiLine(true);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
+        ms->setTextMargins(Size(.02, .01));
+        ms->setId("Description");
+        ms->setScroller(descScroller);
+        newsGroup->addChild(ms);
+
+        newsGroup->addChild(descScroller);         //Want scroller "over" description box.
+    }
+    {
+        GroupControl *loadSaveGroup = new GroupControl;
+        loadSaveGroup->setId("LoadSaveGroup");
+        window()->addControl(loadSaveGroup);
+        GFXColor color = getColorForGroup("LoadSaveGroup");
+        //Scroller for picker.
+        Scroller *pickScroller = new Scroller;
+        pickScroller->setRect(Rect(-.20, -.7, .05, 1.4));
+        pickScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        pickScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        pickScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
+        pickScroller->setTextColor(GUI_OPAQUE_WHITE());
+        pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+
+        //Save game picker.
+        SimplePicker *pick = new SimplePicker;
+        pick->setRect(Rect(-.96, -.7, .76, 1.4));
+        pick->setColor(GFXColor(color.r, color.g, color.b, .1));
+        pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        pick->setTextColor(GUI_OPAQUE_WHITE());
+        pick->setSelectionColor(GFXColor(0, .6, 0, .8));
+        pick->setHighlightColor(GFXColor(0, .6, 0, .35));
+        pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
+        pick->setFont(Font(.07));
+        pick->setTextMargins(Size(0.02, 0.01));
+        pick->setId("LoadSavePicker");
+        pick->setScroller(pickScroller);
+        loadSaveGroup->addChild(pick);
+
+        loadSaveGroup->addChild(pickScroller);         //Want scroller "over" picker.
+
+        //Scroller for description.
+        Scroller *descScroller = new Scroller;
+        descScroller->setRect(Rect(.91, -.7, .05, 1.4));
+        descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        descScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+        descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+
+        //Description box.
+        StaticDisplay *ms = new StaticDisplay;
+        ms->setRect(Rect(.15, -.7, .76, 1.4));
+        ms->setColor(GFXColor(color.r, color.g, color.b, .1));
+        ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        ms->setFont(Font(.07));
+        ms->setMultiLine(true);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
+        ms->setTextMargins(Size(.02, .01));
+        ms->setId("Description");
+        ms->setScroller(descScroller);
+        loadSaveGroup->addChild(ms);
+
+        loadSaveGroup->addChild(descScroller);         //Want scroller "over" description box.
+
+        //Scroller for description.
+        Scroller *inputTextScroller = new Scroller;
+        inputTextScroller->setRect(Rect(.61, -0.95, .05, .2));
+        inputTextScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        inputTextScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4),
+                GUI_OPAQUE_WHITE());
+        inputTextScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
+        inputTextScroller->setTextColor(GUI_OPAQUE_WHITE());
+        inputTextScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+
+        //Description box.
+        StaticDisplay *inputText = new TextInputDisplay(&base_keyboard_queue, "\x1b\n \t\r*?\\/|:<>\"^");
+        inputText->setRect(Rect(-.6, -.95, 1.21, .2));
+        inputText->setColor(GFXColor(color.r, color.g, color.b, .1));
+        inputText->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        inputText->setFont(Font(.07));
+        inputText->setMultiLine(true);
+        inputText->setTextColor(GUI_OPAQUE_WHITE());
+        inputText->setTextMargins(Size(.02, .01));
+        inputText->setId("InputText");
+        inputText->setScroller(inputTextScroller);
+        loadSaveGroup->addChild(inputText);
+
+        loadSaveGroup->addChild(inputTextScroller); //Want scroller "over" description box.
+        //Accept button.
+        //no save in network mode!
+        NewButton *buy10 = new NewButton;
+        buy10->setRect(Rect(-.11, 0, .22, .12));
+        buy10->setColor(GFXColor(0, 1, 1, .1));
+        buy10->setTextColor(GUI_OPAQUE_WHITE());
+        buy10->setDownColor(GFXColor(0, 1, 1, .4));
+        buy10->setDownTextColor(GFXColor(.2, .2, .2));
+        buy10->setVariableBorderCycleTime(1.0);
+        buy10->setBorderColor(GFXColor(.2, .2, .2));
+        buy10->setEndBorderColor(GFXColor(.4, .4, .4));
+        buy10->setShadowWidth(2.0);
+        buy10->setFont(Font(.08, BOLD_STROKE));
+        buy10->setId("Commit10");
+        buy10->setLabel("Save");
+        buy10->setCommand("Save");
+        loadSaveGroup->addChild(buy10);
+
+        NewButton *accept = new NewButton;
+        accept->setRect(Rect(-.11, -.2, .22, .12));
+        accept->setColor(GFXColor(0, 1, 1, .1));
+        accept->setTextColor(GUI_OPAQUE_WHITE());
+        accept->setDownColor(GFXColor(0, 1, 1, .4));
+        accept->setDownTextColor(GFXColor(.2, .2, .2));
+        accept->setVariableBorderCycleTime(1.0);
+        accept->setBorderColor(GFXColor(.2, .2, .2));
+        accept->setEndBorderColor(GFXColor(.4, .4, .4));
+        accept->setShadowWidth(2.0);
+        accept->setFont(Font(.08, BOLD_STROKE));
+        accept->setId("Commit");
+        accept->setLabel("Load");
+        accept->setCommand("Load");
+        loadSaveGroup->addChild(accept);
+
+        NewButton *quit = new NewButton;
+        quit->setRect(Rect(-.95, -.9, .3, .1));
+        quit->setColor(GFXColor(.8, 1, .1, .1));
+        quit->setTextColor(GUI_OPAQUE_WHITE());
+        quit->setDownColor(GFXColor(.8, 1, .1, .4));
+        quit->setDownTextColor(GFXColor(.2, .2, .2));
+        quit->setVariableBorderCycleTime(1.0);
+        quit->setBorderColor(GFXColor(.5, .2, .2));
+        quit->setEndBorderColor(GFXColor(.7, .4, .4));
+        quit->setShadowWidth(2.0);
+        quit->setFont(Font(.07, BOLD_STROKE));
+        quit->setId("CommitAll");
+        quit->setLabel("Quit Game");
+        quit->setCommand("Quit");
+        loadSaveGroup->addChild(quit);
+
+        NewButton *new_game = new NewButton;
+        new_game->setRect(Rect(-.11, -.4, .22, .12));
+        new_game->setColor(GFXColor(0, 1, 1, .1));
+        new_game->setTextColor(GUI_OPAQUE_WHITE());
+        new_game->setDownColor(GFXColor(0, 1, 1, .4));
+        new_game->setDownTextColor(GFXColor(.2, .2, .2));
+        new_game->setVariableBorderCycleTime(1.0);
+        new_game->setBorderColor(GFXColor(.2, .2, .2));
+        new_game->setEndBorderColor(GFXColor(.4, .4, .4));
+        new_game->setShadowWidth(2.0);
+        new_game->setFont(Font(.08, BOLD_STROKE));
+        new_game->setId("NewGame");
+        new_game->setLabel("New");
+        new_game->setCommand("New");
+        loadSaveGroup->addChild(new_game);
+    }
+    {
+        GroupControl *networkGroup = new GroupControl;
+        networkGroup->setId("NetworkGroup");
+        window()->addControl(networkGroup);
+        GroupControl *netJoinGroup = new GroupControl;
+        netJoinGroup->setId("NetworkJoinGroup");
+        networkGroup->addChild(netJoinGroup);
+        GroupControl *netStatGroup = new GroupControl;
+        netStatGroup->setId("NetworkStatGroup");
+        netStatGroup->setHidden(true);
+        networkGroup->addChild(netStatGroup);
+
+        //GameMenu::createNetworkControls( netJoinGroup, &base_keyboard_queue );
+
+        if (m_displayModes.size() != 1 || m_displayModes.at(0) != DisplayMode::NETWORK) {
+            NewButton *loadsave = new NewButton;
+            loadsave->setRect(Rect(.7, -.9, .25, .1));
+            loadsave->setColor(GFXColor(1, .5, .1, .1));
+            loadsave->setTextColor(GUI_OPAQUE_WHITE());
+            loadsave->setDownColor(GFXColor(1, .5, .1, .4));
+            loadsave->setDownTextColor(GFXColor(.2, .2, .2));
+            loadsave->setVariableBorderCycleTime(1.0);
+            loadsave->setBorderColor(GFXColor(.2, .5, .2));
+            loadsave->setEndBorderColor(GFXColor(.4, .7, .4));
+            loadsave->setShadowWidth(2.0);
+            loadsave->setFont(Font(.07, 1));
+            loadsave->setId("CommitAll");
+            loadsave->setLabel("Save/Load");
+            loadsave->setCommand("ShowOptionsMenu");
+            networkGroup->addChild(loadsave);
+        }
+        if ((m_displayModes.size() == 1 && m_displayModes.at(0) == DisplayMode::NETWORK)) {
+            NewButton *quit = new NewButton;
+            quit->setRect(Rect(-.95, -.9, .3, .1));
+            quit->setColor(GFXColor(.8, 1, .1, .1));
+            quit->setTextColor(GUI_OPAQUE_WHITE());
+            quit->setDownColor(GFXColor(.8, 1, .1, .4));
+            quit->setDownTextColor(GFXColor(.2, .2, .2));
+            quit->setVariableBorderCycleTime(1.0);
+            quit->setBorderColor(GFXColor(.5, .2, .2));
+            quit->setEndBorderColor(GFXColor(.7, .4, .4));
+            quit->setShadowWidth(2.0);
+            quit->setFont(Font(.07, BOLD_STROKE));
+            quit->setId("CommitAll");
+            quit->setLabel("Quit Game");
+            quit->setCommand("Quit");
+            networkGroup->addChild(quit);
+        }
+    }
+    {
+        //MISSIONS group control.
+        GroupControl *missionsGroup = new GroupControl;
+        missionsGroup->setId("MissionsGroup");
+        window()->addControl(missionsGroup);
+        GFXColor color = getColorForGroup("MissionsGroup");
+
+        //Scroller for picker.
+        Scroller *pickScroller = new Scroller;
+        pickScroller->setRect(Rect(-.20, -.8, .05, 1.45));
+        pickScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        pickScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        pickScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
+        pickScroller->setTextColor(GUI_OPAQUE_WHITE());
+        pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+
+        //Picker.
+        SimplePicker *pick = new SimplePicker;
+        pick->setRect(Rect(-.96, -.8, .76, 1.45));
+        pick->setColor(GFXColor(color.r, color.g, color.b, .1));
+        pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        pick->setTextColor(GUI_OPAQUE_WHITE());
+        pick->setSelectionColor(GFXColor(0, .6, 0, .8));
+        pick->setHighlightColor(GFXColor(0, .6, 0, .35));
+        pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
+        pick->setFont(Font(.07));
+        pick->setTextMargins(Size(0.02, 0.01));
+        pick->setId("Missions");
+        pick->setScroller(pickScroller);
+        missionsGroup->addChild(pick);
+
+        missionsGroup->addChild(pickScroller);         //Want scroller "over" picker.
+
+        //Scroller for description.
+        Scroller *descScroller = new Scroller;
+        descScroller->setRect(Rect(.91, -.8, .05, 1.45));
+        descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        descScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+        descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+
+        //Description box.
+        StaticDisplay *ms = new StaticDisplay;
+        ms->setRect(Rect(-.10, -.8, 1.01, 1.45));
+        ms->setColor(GFXColor(color.r, color.g, color.b, .1));
+        ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        ms->setFont(Font(.06));
+        ms->setMultiLine(true);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
+        ms->setTextMargins(Size(.02, .01));
+        ms->setId("Description");
+        ms->setScroller(descScroller);
+        missionsGroup->addChild(ms);
+
+        missionsGroup->addChild(descScroller);         //Want scroller "over" description box.
+
+        //Accept button.
+        NewButton *accept = new NewButton;
+        accept->setRect(Rect(-.23, -.95, .22, .11));
+        accept->setColor(GFXColor(0, 1, 1, .1));
+        accept->setTextColor(GUI_OPAQUE_WHITE());
+        accept->setDownColor(GFXColor(0, 1, 1, .4));
+        accept->setDownTextColor(GFXColor(.2, .2, .2));
+        accept->setVariableBorderCycleTime(1.0);
+        accept->setBorderColor(GFXColor(.2, .2, .2));
+        accept->setEndBorderColor(GFXColor(.4, .4, .4));
+        accept->setShadowWidth(2.0);
+        accept->setFont(Font(.08, BOLD_STROKE));
+        accept->setId("Commit");
+        missionsGroup->addChild(accept);
+    }
+    {
+        //SHIP_DEALER group control.
+        GroupControl *shipDealerGroup = new GroupControl;
+        shipDealerGroup->setId("ShipDealerGroup");
+        window()->addControl(shipDealerGroup);
+        GFXColor color = getColorForGroup("ShipDealerGroup");
+
+        //Scroller for picker.
+        Scroller *pickScroller = new Scroller;
+        pickScroller->setRect(Rect(-.20, -.8, .05, 1.45));
+        pickScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        pickScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        pickScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
+        pickScroller->setTextColor(GUI_OPAQUE_WHITE());
+        pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+
+        //Picker.
+        SimplePicker *pick = new SimplePicker;
+        pick->setRect(Rect(-.96, -.8, .76, 1.45));
+        pick->setColor(GFXColor(color.r, color.g, color.b, .1));
+        pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        pick->setTextColor(GUI_OPAQUE_WHITE());
+        pick->setSelectionColor(GFXColor(0, .6, 0, .8));
+        pick->setHighlightColor(GFXColor(0, .6, 0, .35));
+        pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
+        pick->setFont(Font(.07));
+        pick->setTextMargins(Size(0.02, 0.01));
+        pick->setId("Ships");
+        pick->setScroller(pickScroller);
+        shipDealerGroup->addChild(pick);
+
+        shipDealerGroup->addChild(pickScroller);              //Want scroller to be "over" picker.
+
+        //Scroller for description.
+        Scroller *descScroller = new Scroller;
+        descScroller->setRect(Rect(.91, -.5, .05, 1.15));
+        descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        descScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+        descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+
+        //Description box.
+        StaticDisplay *ms = new StaticDisplay;
+        StaticImageDisplay *picture = new StaticImageDisplay;
+        picture->setRect(Rect(-.10, -.51, .48 * .75, -.48));
+        picture->setTexture("blackclear.png");
+        picture->setId("DescriptionImage");
+        ms->setRect(Rect(-.10, -.5, 1.01, 1.15));
+        ms->setColor(GFXColor(color.r, color.g, color.b, .1));
+        ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        ms->setFont(Font(.06));
+        ms->setMultiLine(true);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
+        ms->setTextMargins(Size(.02, .01));
+        ms->setId("Description");
+        ms->setScroller(descScroller);
+        shipDealerGroup->addChild(ms);
+
+        shipDealerGroup->addChild(descScroller);         //Want scroller "over" description box.
+        shipDealerGroup->addChild(picture);
+        //Buy button.
+        NewButton *buy = new NewButton;
+        buy->setRect(Rect(-.53, -.95, .22, .11));
+        buy->setColor(GFXColor(0, 1, 1, .1));
+        buy->setTextColor(GUI_OPAQUE_WHITE());
+        buy->setDownColor(GFXColor(0, 1, 1, .4));
+        buy->setDownTextColor(GFXColor(.2, .2, .2));
+        buy->setVariableBorderCycleTime(1.0);
+        buy->setBorderColor(GFXColor(.2, .2, .2));
+        buy->setEndBorderColor(GFXColor(.4, .4, .4));
+        buy->setShadowWidth(2.0);
+        buy->setFont(Font(.08, BOLD_STROKE));
+        buy->setId("Commit");
+        shipDealerGroup->addChild(buy);
+        NewButton *sell = new NewButton;
+        sell->setRect(Rect(-.23, -.95, .22, .11));
+        sell->setColor(GFXColor(0, 1, 1, .1));
+        sell->setTextColor(GUI_OPAQUE_WHITE());
+        sell->setDownColor(GFXColor(0, 1, 1, .4));
+        sell->setDownTextColor(GFXColor(.2, .2, .2));
+        sell->setVariableBorderCycleTime(1.0);
+        sell->setBorderColor(GFXColor(.2, .2, .2));
+        sell->setEndBorderColor(GFXColor(.4, .4, .4));
+        sell->setShadowWidth(2.0);
+        sell->setFont(Font(.08, BOLD_STROKE));
+        sell->setId("Commit10");
+        shipDealerGroup->addChild(sell);
+    }
+    {
+        //INFO group control.
+        GroupControl *infoGroup = new GroupControl;
+        infoGroup->setId("InfoGroup");
+        window()->addControl(infoGroup);
+        GFXColor color = getColorForGroup("InfoGroup");
+
+        //Player Info button.
+        NewButton *playerInfo = new NewButton;
+        playerInfo->setRect(Rect(-.40, .52, .27, .09));
+        playerInfo->setLabel("Player Info");
+        static GFXColor player_info_color = vs_config->getColor("player_info", GFXColor(0, .4, 0));
+        playerInfo->setCommand("ShowPlayerInfo");
+
+        playerInfo->setColor(GFXColor(player_info_color.r, player_info_color.g, player_info_color.b, .25));
+        playerInfo->setTextColor(GUI_OPAQUE_WHITE());
+        playerInfo->setDownColor(GFXColor(player_info_color.r, player_info_color.g, player_info_color.b, .5));
+        playerInfo->setDownTextColor(GUI_OPAQUE_BLACK());
+        playerInfo->setHighlightColor(GFXColor(player_info_color.r, player_info_color.g, player_info_color.b, .4));
+        playerInfo->setFont(Font(.07));
+        infoGroup->addChild(playerInfo);
+
+        //Ship Stats button.
+        NewButton *shipStats = new NewButton;
+        shipStats->setRect(Rect(-.05, .52, .27, .09));
+        shipStats->setLabel("Ship Stats");
+        shipStats->setCommand("ShowShipStats");
+        shipStats->setColor(GFXColor(player_info_color.r, player_info_color.g, player_info_color.b, .25));
+        shipStats->setTextColor(GUI_OPAQUE_WHITE());
+        shipStats->setDownColor(GFXColor(player_info_color.r, player_info_color.g, player_info_color.b, .5));
+        shipStats->setDownTextColor(GUI_OPAQUE_BLACK());
+        shipStats->setHighlightColor(GFXColor(player_info_color.r, player_info_color.g, player_info_color.b, .4));
+        shipStats->setFont(Font(.07));
+        infoGroup->addChild(shipStats);
+
+        //Scroller for description.
+        Scroller *descScroller = new Scroller;
+        descScroller->setRect(Rect(.91, -.95, .05, 1.4));
+        descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
+        descScroller->setThumbColor(GFXColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
+        descScroller->setButtonColor(GFXColor(color.r * .4, color.g * .4, color.b * .4));
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+        descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+
+        //Description box.
+        StaticDisplay *ms = new StaticDisplay;
+        ms->setRect(Rect(-.96, -.95, 1.87, 1.4));
+        ms->setColor(GFXColor(color.r, color.g, color.b, .1));
+        ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        ms->setFont(Font(.07));
+        ms->setMultiLine(true);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
+        ms->setTextMargins(Size(.02, .01));
+        ms->setId("Description");
+        ms->setScroller(descScroller);
+        infoGroup->addChild(ms);
+
+        infoGroup->addChild(descScroller);
+    }
 }
 
 //Create the controls that will be used for this window.
@@ -2966,7 +3661,7 @@ bool BaseComputer::reloadUpgrade(const EventCommandId &command, Control *control
 
         // Full reload price is 5% of gun. 
         // TODO: make it configurable
-        double reload_price = static_cast<double>(ammo_to_reload)/max_ammo * 0.05 * item->GetPrice();
+        double reload_price = ammo_to_reload/max_ammo * 0.05 * item->GetPrice();
         if(reload_price < playerUnit->credits) {
             playerUnit->credits -= reload_price;
             mount.ammo = max_ammo;
