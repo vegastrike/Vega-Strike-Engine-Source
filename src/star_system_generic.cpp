@@ -468,10 +468,6 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
 {
     static bool phytoggle  = true;
     static int  batchcount = SIM_QUEUE_SIZE-1;
-    double aitime = 0;
-    double phytime = 0;
-    double collidetime     = 0;
-    double bolttime = 0;
     targetpick   = 0;
     aggfire      = 0;
     numprocessed = 0;
@@ -507,18 +503,13 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
                     theunitcounter   = theunitcounter+1;
                     SIMULATION_ATOM *= priority;
                     unit->sim_atom_multiplier = priority;
-                    double aa = queryTime();
                     unit->ExecuteAI();
-                    double bb = queryTime();
                     unit->ResetThreatLevel();
                     //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
                     unit->UpdatePhysics( identity_transformation, identity_matrix, Vector( 0,
                                                                                            0,
                                                                                            0 ), priority
                                          == 1 ? firstframe : true, &this->gravitationalUnits(), unit );
-                    double cc = queryTime();
-                    aitime  += bb-aa;
-                    phytime += cc-bb;
                     SIMULATION_ATOM = backup;
                     unit->predicted_priority = predprior;
                 }
@@ -531,9 +522,7 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
                     fflush( stdout );
                 } throw;
             }
-            double c0  = queryTime();
             Bolt::UpdatePhysics( this );
-            double cc  = queryTime();
             last_collisions.clear();
             collidemap[Unit::UNIT_BOLT]->flatten();
             if (Unit::NUM_COLLIDE_MAPS > 1)
@@ -551,9 +540,6 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
                 else
                     iter.moveBefore( physics_buffer[newloc] );
             }
-            double dd = queryTime();
-            collidetime += dd-cc;
-            bolttime    += cc-c0;
             current_sim_location = (current_sim_location+1)%SIM_QUEUE_SIZE;
             ++physicsframecounter;
             totalprocessed += theunitcounter;
