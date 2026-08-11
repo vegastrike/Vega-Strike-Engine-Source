@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Vega Strike Setup (VS-05 LTS)
+GenericName=vegastrike-settings
+Comment=Configure Vega Strike VS-05 LTS
+Exec=/opt/vs-05-lts/vssetup --target /opt/vs-05-lts/data
+Icon=/opt/vs-05-lts/data/vegastrike_settings.png
+Terminal=false
+Type=Application
+Categories=Game;Simulation;Settings;
+StartupNotify=false
