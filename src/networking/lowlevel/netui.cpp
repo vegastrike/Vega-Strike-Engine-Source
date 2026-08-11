@@ -30,7 +30,6 @@ AddressIP NetUIBase::lookupHost( const char *host, unsigned short port )
     static_initNetwork();
 
     AddressIP remote_ip;
-    memset( &remote_ip, 0, sizeof (AddressIP) );
 
     struct hostent *he = NULL;
     //Gets the host info for host
