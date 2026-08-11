@@ -499,8 +499,8 @@ inline void DrawITTSLine( QVector fromLoc, QVector aimLoc, GFXColor linecolor=GF
     GFXEnable( SMOOTH );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     const float verts[2 * 3] = {
-        fromLoc.x, fromLoc.y, fromLoc.z, 
-        aimLoc.x,   aimLoc.y,  aimLoc.z,
+        (float)fromLoc.x, (float)fromLoc.y, (float)fromLoc.z, 
+        (float)aimLoc.x,  (float)aimLoc.y,  (float)aimLoc.z,
     };
     GFXDraw( GFXLINE, verts, 2 );
     GFXDisable( SMOOTH );
@@ -562,15 +562,15 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
         if (draw_line_to_targets_target && targets_target != NULL) {
             QVector ttLoc = targets_target->Position();
             const float verts[3 * 3] = {
-                myLoc.x, myLoc.y, myLoc.z, 
-                Loc.x,   Loc.y,   Loc.z, 
-                ttLoc.x, ttLoc.x, ttLoc.x,
+                (float)myLoc.x, (float)myLoc.y, (float)myLoc.z, 
+                (float)Loc.x,   (float)Loc.y,   (float)Loc.z, 
+                (float)ttLoc.x, (float)ttLoc.y, (float)ttLoc.z,
             };
             GFXDraw( GFXLINESTRIP, verts, 3 );
         } else {
             const float verts[2 * 3] = {
-                myLoc.x, myLoc.y, myLoc.z, 
-                Loc.x,   Loc.y,   Loc.z, 
+                (float)myLoc.x, (float)myLoc.y, (float)myLoc.z, 
+                (float)Loc.x,   (float)Loc.y,   (float)Loc.z, 
             };
             GFXDraw( GFXLINESTRIP, verts, 2 );
         }
