@@ -121,7 +121,6 @@ void SphereMesh::InitSphere( float radius,
             }
             float drho, dtheta;
             float x, y, z;
-            float s, t, ds, dt;
             int   i, j, imin, imax;
             float nsign = Insideout ? -1.0 : 1.0;
             float normalscale = reverse_normals ? -1.0 : 1.0;
@@ -130,9 +129,6 @@ void SphereMesh::InitSphere( float radius,
             /* Code below adapted from gluSphere */
             drho   = (rho_max-rho_min)/(float) stacks;
             dtheta = (theta_max-theta_min)/(float) slices;
-            ds     = 1.0/slices;
-            dt     = 1.0/stacks;
-            t = 1.0;  /* because loop now runs from 0 */
             imin   = 0;
             imax   = stacks;
             int  numQuadstrips   = stacks;
@@ -151,7 +147,6 @@ void SphereMesh::InitSphere( float radius,
             for (i = imin; i < imax; i++) {
                 GFXVertex *vertexlist = vl+(i*(slices+1)*2);
                 g_rho( i+1 ) = (i+1)*drho+rho_min;
-                s = 0.0;
                 g_theta( 0 ) = 0;
                 for (j = 0; j <= slices; j++) {
                     g_theta( j+1 ) = (j+1)*dtheta;
@@ -177,9 +172,7 @@ void SphereMesh::InitSphere( float radius,
                     vertexlist[j*2+sec].x = x*radius;
                     vertexlist[j*2+sec].z = -y*radius;
                     vertexlist[j*2+sec].y = z*radius;
-                    s += ds;
                 }
-                t -= dt;
                 QSOffsets[i] = (slices+1)*2;
                 modes[i] = GFXQUADSTRIP;
             }
