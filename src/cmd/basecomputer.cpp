@@ -4158,7 +4158,7 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
     }
     std::string str;
     showUnitStats( newPart, str, 0, 0, item );
-    delete newPart;
+    newPart->Kill();
     if ( texturedescription != "" && ( string::npos == str.find( '@' ) ) )
         str = "@"+texturedescription+"@"+str;
     return str;
@@ -4178,7 +4178,7 @@ string buildUpgradeDescription( Cargo &item )
     string str = "";
     str += item.description;
     showUnitStats( newPart, str, 0, 1, item );
-    delete newPart;
+    newPart->Kill();
     return str;
 }
 
