@@ -146,7 +146,7 @@ Hashtable3d< LineCollideStar, 20, CTACC, lighthuge >lighttable;
 
 GFXLight gfx_light::operator=( const GFXLight &tmp )
 {
-    memcpy( this, &tmp, sizeof (GFXLight) );
+    static_cast<GFXLight&>( *this ) = tmp;
     return tmp;
 }
 
@@ -326,10 +326,10 @@ void gfx_light::ResetProperties( const enum LIGHT_TARGET light_targ, const GFXCo
     bool changed = false;
     if ( LocalLight() ) {
         GFXLight t;
-        memcpy( &t, this, sizeof (GFXLight) );
+        t = *this;
         t.SetProperties( light_targ, color );
         changed = RemoveFromTable( false, t );
-        memcpy( this, &t, sizeof (GFXLight) );
+        *this = t;
         if (changed)
             AddToTable();
         if (target >= 0)
