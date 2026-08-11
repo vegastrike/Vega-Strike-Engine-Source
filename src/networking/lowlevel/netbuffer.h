@@ -61,23 +61,7 @@ public: NetBuffer();
  *       void			addWeaponInfo( weapon_info wi)
  *       {
  *               wi.netswap();
- *               char *	buf = NULL;
- *               int		wi_size = 0;
- *               setWeaponInfoToBuffer( wi, buf, wi_size);
- *               resizeBuffer( offset+wi_size);
- *               memcpy( buffer+offset, buf, wi_size);
- *               offset += wi_size;
- *               delete buf;
- *       }
- */
-/*
- *       weapon_info	getWeaponInfo()
- *       {
- *               int wisize=0;
- *               weapon_info tmp = getWeaponInfoFromBuffer( buffer+offset, wisize);
- *               tmp.netswap();
- *               offset += wisize;
- *               return tmp;
+ *               // (dead code: weapon_info network serialization was removed)
  *       }
  */
     void addShield( const Shield &shield );
