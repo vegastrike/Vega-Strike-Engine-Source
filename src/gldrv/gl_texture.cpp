@@ -454,14 +454,12 @@ static void DownSampleTexture( unsigned char **newbuf,
         int rowstride    = scaleheight*istride;
         int chunkstride  = 32*pixsize;
         int ichunkstride = scalewidth*chunkstride;
-        int wshift       = 0;
-        int hshift       = 0;
         int amask        = wmask;
         while (amask)
-            amask >>= 1, tshift++, wshift++;
+            amask >>= 1, tshift++;
         amask = hmask;
         while (amask)
-            amask >>= 1, tshift++, hshift++;
+            amask >>= 1, tshift++;
         int tmask = (1<<tshift)-1;
         *newbuf = (unsigned char*) malloc( newheight*newwidth*pixsize*sizeof (unsigned char) );
         unsigned int   temp[32*4];
