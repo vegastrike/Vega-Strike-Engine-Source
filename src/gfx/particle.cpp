@@ -10,15 +10,13 @@
 
 #include <iterator>
 #include <limits>
+#include <algorithm>
 
 #include "aligned.h"
-#include "vectorize.h"
 
 ParticleTrail particleTrail( "sparkle", 500, SRCALPHA, ONE, 0.05, false, true );
 ParticleTrail smokeTrail( "smoke", 500, SRCALPHA, INVSRCALPHA );
 ParticleTrail debrisTrail( "debris", 500, SRCALPHA, INVSRCALPHA, 0.5, true );
-
-using vectorized::vectorize;
 
 static float mymax( float a, float b )
 {
@@ -55,24 +53,26 @@ void ParticleTrail::ChangeMax( unsigned int max )
     this->maxparticles = max;
 }
 
-VECTORIZE_MEMBER_FUNC(color_clamp_func, GFXColor, GFXColor, clamp);
-
 template <typename LOC, typename VEL, typename COL>
 static inline void UpdateColor( LOC &vloc, const VEL &vvel, COL &vcol, typename COL::const_reference fadetime, const float time )
 {
     const double dtime = time;
-    vectorize(vloc) += vectorize(vvel) * dtime;
-    vectorize(vcol) = vectorized::map( vectorize(vcol) - fadetime, color_clamp_func() );
+    assert( vloc.size() == vvel.size() && vloc.size() == vcol.size() );
+    for ( size_t i = 0, n = vloc.size(); i < n; ++i )
+        vloc[i] += vvel[i] * dtime;
+    for ( typename COL::iterator it = vcol.begin(); it != vcol.end(); ++it )
+        *it = ( *it - fadetime ).clamp();
 }
 
 template <typename LOC, typename VEL, typename COL>
 static inline void UpdateAlpha( LOC &vloc, const VEL &vvel, COL &vcol, const float time, const float fade )
 {
     const double dtime = time;
-    vectorize(vloc) += vectorize(vvel) * dtime;
-    for (typename COL::iterator it = vcol.begin(); it != vcol.end(); ++it) {
-        it->a = mymax(0.0f, it->a - fade * time);
-    }
+    assert( vloc.size() == vvel.size() && vloc.size() == vcol.size() );
+    for ( size_t i = 0, n = vloc.size(); i < n; ++i )
+        vloc[i] += vvel[i] * dtime;
+    for ( typename COL::iterator it = vcol.begin(); it != vcol.end(); ++it )
+        it->a = std::max( 0.0f, it->a - fade * time );
 }
 
 //Write 3 pos and 4 col float values into v and increment v by 7
