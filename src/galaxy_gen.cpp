@@ -345,9 +345,9 @@ void readColorGrads( vector< string > &entity, const char *file )
 {
     VSFile  f;
     VSError err = f.OpenReadOnly( file, UniverseFile );
+    GradColor g;
     if (err > Ok) {
         printf( "Failed to load %s", file );
-        GradColor( g );
         g.minrad   = 0;
         g.r = g.g = g.b = .9;
         g.variance = .1;
@@ -357,7 +357,6 @@ void readColorGrads( vector< string > &entity, const char *file )
     }
     char input_buffer[1000];
     char output_buffer[1000];
-    GradColor g;
     while ( !f.Eof() ) {
         f.ReadLine( input_buffer, 999 );
         if (sscanf( input_buffer, "%f %f %f %f %f %s", &g.minrad, &g.r, &g.g, &g.b, &g.variance, output_buffer ) == 6) {
