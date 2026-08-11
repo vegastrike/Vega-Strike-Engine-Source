@@ -36,14 +36,14 @@ void ParticleTrail::ChangeMax( unsigned int max )
         vertices_per_particle = indices_per_particle = 12;
     
     if (gl_options.max_array_vertices > 0 && 
-            (max * vertices_per_particle) > gl_options.max_array_vertices)
+            (max * vertices_per_particle) > (unsigned int)gl_options.max_array_vertices)
     {
         max = gl_options.max_array_vertices / vertices_per_particle;
         if (max > 0)
             max--; // for a margin
     }
     if (gl_options.max_array_indices > 0 && 
-            (max * indices_per_particle) > gl_options.max_array_indices)
+            (max * indices_per_particle) > (unsigned int)gl_options.max_array_indices)
     {
         max = gl_options.max_array_indices / indices_per_particle;
         if (max > 0)
