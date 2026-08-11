@@ -20,11 +20,6 @@ ParticleTrail debrisTrail( "debris", 500, SRCALPHA, INVSRCALPHA, 0.5, true );
 
 using vectorized::vectorize;
 
-static float mymin( float a, float b )
-{
-    return a > b ? b : a;
-}
-
 static float mymax( float a, float b )
 {
     return a > b ? a : b;
