@@ -71,7 +71,7 @@ namespace Audio {
          *      @par Instead of returning null, if a codec of such characteristics cannot be found, 
          *      a CodecNotFound exception is risen.
          */
-        Codec* findByName(const std::string& name) const throw(CodecNotFoundException);
+ Codec* findByName(const std::string& name) const;
         
         /**
          * Find a codec that can handle the file.
@@ -83,13 +83,13 @@ namespace Audio {
          *      @par Instead of returning null, if a codec of such characteristics cannot be found, 
          *      an CodecNotFound exception is risen.
          */
-        Codec* findByFile(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const throw(CodecNotFoundException);
+ Codec* findByFile(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const;
         
         /**
          * Open the specified file with a suitable codec.
          * @see findByFile
          */
-        Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const throw(Exception);
+ Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const;
         
     };
     

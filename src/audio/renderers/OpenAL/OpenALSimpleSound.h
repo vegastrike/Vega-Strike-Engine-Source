@@ -41,7 +41,7 @@ namespace Audio {
         // about sending the samples to where they're needed.
     protected:
         /** @copydoc Sound::loadImpl */
-        virtual void loadImpl(bool wait) throw(Exception);
+ virtual void loadImpl(bool wait);
         
         /** @copydoc Sound::unloadImpl */
         virtual void unloadImpl() throw();

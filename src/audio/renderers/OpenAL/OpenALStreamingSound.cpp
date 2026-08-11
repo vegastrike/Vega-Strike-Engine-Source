@@ -41,7 +41,7 @@ namespace Audio {
     }
 
     void OpenALStreamingSound::loadImpl(bool wait) 
-        throw(Exception)
+
     {
         // just in case
         unloadImpl();
@@ -113,7 +113,7 @@ namespace Audio {
     }
     
     ALBufferHandle OpenALStreamingSound::readAndFlip()
-        throw(Exception)
+
     {
         if (!isLoaded())
             throw ResourceNotLoadedException(getName());
@@ -147,7 +147,7 @@ namespace Audio {
     }
     
     void OpenALStreamingSound::unqueueBuffer(ALBufferHandle buffer) 
-        throw(Exception)
+
     {
         if (playBufferIndex < NUM_BUFFERS && buffer == bufferHandles[playBufferIndex]) {
             playBufferIndex = (playBufferIndex + 1) % NUM_BUFFERS;
@@ -155,7 +155,7 @@ namespace Audio {
     }
     
     void OpenALStreamingSound::seek(double position)
-        throw(Exception)
+
     {
         if (!isLoaded())
             throw ResourceNotLoadedException(getName());

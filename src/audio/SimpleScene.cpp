@@ -26,13 +26,13 @@ namespace Audio {
     }
 
     void SimpleScene::add(SharedPtr<Source> source) 
-        throw(Exception)
+
     {
         attach(dynamic_cast<SimpleSource*>(source.get()));
     }
     
     void SimpleScene::remove(SharedPtr<Source> source) 
-        throw(NotFoundException)
+
     {
         detach(dynamic_cast<SimpleSource*>(source.get()));
     }
@@ -44,7 +44,7 @@ namespace Audio {
     }
     
     void SimpleScene::notifySourcePlaying(SharedPtr<Source> source, bool playing) 
-        throw(Exception)
+
     {
         if (playing) 
             activeSources.insert(source);

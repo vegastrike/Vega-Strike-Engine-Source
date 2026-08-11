@@ -122,7 +122,7 @@ namespace Audio {
                 }
                 
                 void openDevice(const char *deviceSpecifier)
-                    throw (Exception)
+
                 {
                     if (alDevice)
                         throw Exception("Trying to open a device without closing the previous one first");
@@ -148,7 +148,7 @@ namespace Audio {
                 }
                 
                 void closeDevice()
-                    throw (Exception)
+
                 {
                     if (alContext)
                         throw Exception("Trying to close device without closing the previous one first");
@@ -161,7 +161,7 @@ namespace Audio {
                 }
                 
                 void openContext(const Format &format)
-                    throw (Exception)
+
                 {
                     if (alContext)
                         throw Exception("Trying to open context without closing the previous one first");
@@ -186,14 +186,14 @@ namespace Audio {
                 }
                 
                 void commit() 
-                    throw (Exception)
+
                 {
                     alcProcessContext(alContext);
                     checkAlError();
                 }
                 
                 void suspend()
-                    throw (Exception)
+
                 {
                     // FIXME: There's a residual error here on Windows. Can't track down where it's from.
                     alGetError();
@@ -204,7 +204,7 @@ namespace Audio {
                 }
                 
                 void closeContext()
-                    throw (Exception)
+
                 {
                     if (alContext) {
                         alcMakeContextCurrent(NULL);
@@ -233,7 +233,7 @@ namespace Audio {
     using namespace __impl::OpenAL;
 
     OpenALRenderer::OpenALRenderer() 
-        throw(Exception) :
+:
         data(new RendererData)
     {
     }
@@ -246,7 +246,7 @@ namespace Audio {
             const std::string &name, 
             VSFileSystem::VSFileType type, 
             bool streaming) 
-        throw(Exception)
+
     {
         checkContext();
         SharedPtr<Sound> sound = data->lookupSound(type,name);
@@ -277,7 +277,7 @@ namespace Audio {
     }
     
     void OpenALRenderer::attach(SharedPtr<Source> source) 
-        throw(Exception)
+
     {
         checkContext();
         source->setRenderable( SharedPtr<RenderableSource>(
@@ -289,7 +289,7 @@ namespace Audio {
     }
     
     void OpenALRenderer::attach(SharedPtr<Listener> listener) 
-        throw(Exception)
+
     {
         checkContext();
         listener->setRenderable( SharedPtr<RenderableListener>(
@@ -333,7 +333,7 @@ namespace Audio {
     }
     
     void OpenALRenderer::setOutputFormat(const Format &format) 
-        throw(Exception)
+
     {
         if (!data->alDevice)
             data->openDevice(NULL);
@@ -343,7 +343,7 @@ namespace Audio {
     }
     
     void OpenALRenderer::checkContext()
-        throw(Exception)
+
     {
         if (!data->alDevice)
             data->openDevice(NULL);
@@ -354,7 +354,7 @@ namespace Audio {
     }
     
     void OpenALRenderer::beginTransaction() 
-        throw(Exception)
+
     {
         data->suspend();
         
@@ -363,13 +363,13 @@ namespace Audio {
     }
     
     void OpenALRenderer::commitTransaction() 
-        throw(Exception)
+
     {
         data->commit();
     }
     
     void OpenALRenderer::initContext()
-        throw(Exception)
+
     {
         // Set the distance model
         alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
@@ -380,7 +380,7 @@ namespace Audio {
     }
     
     void OpenALRenderer::setupDopplerEffect()
-        throw(Exception)
+
     {
         clearAlError();
         
@@ -401,7 +401,7 @@ namespace Audio {
     }
     
     BorrowedOpenALRenderer::BorrowedOpenALRenderer(ALCdevice *device, ALCcontext *context) 
-        throw(Exception) :
+:
         OpenALRenderer()
     {
         if (device) 
@@ -423,14 +423,14 @@ namespace Audio {
     }
 
     void BorrowedOpenALRenderer::setOutputFormat(const Format &format) 
-        throw(Exception)
+
     {
         // No-op... format is given by the borrowed context
         Renderer::setOutputFormat(format);
     }
     
     void BorrowedOpenALRenderer::checkContext()
-        throw(Exception)
+
     {
         // No-op... context has been borrowed
     }

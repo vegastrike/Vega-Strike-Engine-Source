@@ -34,7 +34,7 @@ namespace Audio {
     }
 
     void OpenALSimpleSound::loadImpl(bool wait) 
-        throw(Exception)
+
     {
         // just in case
         unloadImpl();

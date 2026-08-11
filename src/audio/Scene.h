@@ -43,12 +43,12 @@ namespace Audio {
         /** Attach a source to this scene.
          * @remarks The must be stopped. Adding a playing source is an error.
          */
-        virtual void add(SharedPtr<Source> source) throw(Exception) = 0;
+ virtual void add(SharedPtr<Source> source)= 0;
         
         /** Detach a source from this scene
          * @remarks The source is implicitly stopped.
          */
-        virtual void remove(SharedPtr<Source> source) throw(NotFoundException) = 0;
+ virtual void remove(SharedPtr<Source> source)= 0;
         
         /** Get the scene's listener */
         virtual Listener& getListener() throw() = 0;

@@ -64,7 +64,7 @@ namespace Audio {
         // about sending the samples to where they're needed.
     protected:
         /** @copydoc Sound::loadImpl */
-        virtual void loadImpl(bool wait) throw(Exception);
+ virtual void loadImpl(bool wait);
         
         /** @copydoc Sound::unloadImpl */
         virtual void unloadImpl() throw();
@@ -85,7 +85,7 @@ namespace Audio {
          *      You may seek the stream and keep going, for instance, for a looping stream.
          *      Any other exception would be fatal.
          */
-        ALBufferHandle readAndFlip() throw(Exception);
+ ALBufferHandle readAndFlip();
         
         /** Notify a dequeued buffer
          *
@@ -93,7 +93,7 @@ namespace Audio {
          *      as dequeued, allowing readAndFlip() to use it for new data. The caller is 
          *      expected to have detached the buffer from the source.
          */
-        void unqueueBuffer(ALBufferHandle buffer) throw(Exception);
+ void unqueueBuffer(ALBufferHandle buffer);
         
         /** Reset the buffer queue */
         void flushBuffers() throw();
@@ -108,7 +108,7 @@ namespace Audio {
          * Set the stream's position, in seconds
          * @see Stream::seek(double)
          */
-        void seek(double position) throw(Exception);
+ void seek(double position);
     };
 
 };

@@ -37,25 +37,25 @@ namespace Audio {
         SoundBuffer() throw();
         
         /** Create a buffer of specified sample capacity and format */
-        SoundBuffer(unsigned int capacity, const Format &format) throw(OutOfMemoryException);
+ SoundBuffer(unsigned int capacity, const Format &format);
         
         /** Create a copy of the other buffer
          * @remarks Only used bytes will be copied. 
          */
-        SoundBuffer(const SoundBuffer &other) throw(OutOfMemoryException);
+ SoundBuffer(const SoundBuffer &other);
         
         /** Set a buffer's capacity.
          * @param capacity The buffer's capacity in bytes
          * @remarks Destroys the current data in the buffer.
          */
-        void reserve(unsigned int capacity) throw(OutOfMemoryException);
+ void reserve(unsigned int capacity);
         
         /** Set a buffer's capacity and format.
          * @param capacity The buffer's capacity in samples (or frames) for 'format'
          * @param format The new format associated to the buffer
          * @remarks Destroys the current data in the buffer.
          */
-        void reserve(unsigned int capacity, const Format &format) throw(OutOfMemoryException);
+ void reserve(unsigned int capacity, const Format &format);
         
         /** Get a buffer's byte capacity */
         unsigned int getByteCapacity() const throw() { return byteCapacity; }
@@ -94,10 +94,10 @@ namespace Audio {
          *      requires less bytes only the used bytes count will be modified leaving
          *      the same byte capacity.
          */
-        void reformat(const Format &newFormat) throw(Exception);
+ void reformat(const Format &newFormat);
         
         /** Copy the given buffer as if SoundBuffer(buffer) was called */
-        SoundBuffer& operator=(const SoundBuffer &other) throw(OutOfMemoryException);
+ SoundBuffer& operator=(const SoundBuffer &other);
         
         /** Swap buffer contents and format 
          * It's an inherently quick operation, since it only swaps pointers and descriptors.

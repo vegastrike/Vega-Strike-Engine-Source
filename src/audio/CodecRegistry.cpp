@@ -68,7 +68,7 @@ namespace Audio {
         }
     }
     
-    Codec* CodecRegistry::findByName(const std::string& name) const throw(CodecNotFoundException)
+ Codec* CodecRegistry::findByName(const std::string& name) const
     {
         NameCodec::const_iterator it = nameCodec.find(name);
         if (it != nameCodec.end())
@@ -99,7 +99,7 @@ namespace Audio {
         }
     };
     
-    Codec* CodecRegistry::findByFile(const std::string& path, VSFileSystem::VSFileType type) const throw(CodecNotFoundException)
+ Codec* CodecRegistry::findByFile(const std::string& path, VSFileSystem::VSFileType type) const
     {
         std::vector<Codec*> candidates;
         
@@ -139,7 +139,7 @@ namespace Audio {
     }
     
     Stream* CodecRegistry::open(const std::string& path, VSFileSystem::VSFileType type) const 
-        throw(Exception)
+
     {
         Codec *codec = findByFile(path, type);
 		return codec->open(path, type);
