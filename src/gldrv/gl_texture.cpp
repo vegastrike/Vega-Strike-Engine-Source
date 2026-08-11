@@ -362,6 +362,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
     case TEXTURERECT:
         textures[*handle].targets = GL_TEXTURE_RECTANGLE_ARB;
         break;
+    default:
+        break;
     }
     //for those libs with stubbed out handle gen't
     textures[*handle].name = *handle+1;
