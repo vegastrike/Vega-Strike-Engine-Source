@@ -1791,7 +1791,8 @@ void BaseComputer::recalcTitle()
 
     //Credits the player has.
     const float playerCredits = _Universe->AccessCockpit()->credits;
-    const char *stardate = _Universe->current_stardate.GetFullTrekDate().c_str();
+    const std::string stardateString = _Universe->current_stardate.GetFullTrekDate();
+    const char *stardate = stardateString.c_str();
     switch (m_currentDisplay)
     {
     default:
