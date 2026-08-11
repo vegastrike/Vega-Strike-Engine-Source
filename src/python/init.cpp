@@ -144,7 +144,9 @@ void Python::init()
         return;
     isinit = true;
 //initialize python library
-    Py_NoSiteFlag = 1;
+    PyConfig pyconfig;
+    PyConfig_InitPythonConfig( &pyconfig );
+    pyconfig.site_import = 0;    // equivalent of the deprecated Py_NoSiteFlag = 1
 
 // These functions add these modules to the builtin package
     InitVS();
@@ -153,7 +155,8 @@ void Python::init()
     InitDirector();
 
 // Now we can do python things about them and initialize them
-    Py_Initialize();
+    Py_InitializeFromConfig( &pyconfig );
+    PyConfig_Clear( &pyconfig );
     initpaths();
 
 #if BOOST_VERSION != 102800
