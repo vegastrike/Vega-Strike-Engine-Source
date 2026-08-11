@@ -12,21 +12,21 @@
 namespace Radar
 {
 
-std::auto_ptr<Display> Factory(Type::Value type)
+std::unique_ptr<Display> Factory(Type::Value type)
 {
     switch (type)
     {
     case Type::NullDisplay:
-        return std::auto_ptr<Display>(new NullDisplay);
+        return std::unique_ptr<Display>(new NullDisplay);
 
     case Type::SphereDisplay:
-        return std::auto_ptr<Display>(new SphereDisplay);
+        return std::unique_ptr<Display>(new SphereDisplay);
 
     case Type::BubbleDisplay:
-        return std::auto_ptr<Display>(new BubbleDisplay);
+        return std::unique_ptr<Display>(new BubbleDisplay);
 
     case Type::PlaneDisplay:
-        return std::auto_ptr<Display>(new PlaneDisplay);
+        return std::unique_ptr<Display>(new PlaneDisplay);
 
     default:
         assert(false);
