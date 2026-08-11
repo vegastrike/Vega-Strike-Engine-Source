@@ -86,6 +86,11 @@ extern mp3Loader   *alutLoadMP3p;
 extern unsigned int maxallowedsingle;
 extern unsigned int maxallowedtotal;
 extern bool usedoppler;
+
+// The OpenAL context (created by AUDInit). Made non-static so other threads
+// (e.g. the music loading thread) can call alcMakeContextCurrent on it, since
+// OpenAL contexts are thread-local and alGenBuffers etc. require a current one.
+extern ALvoid *context_id;
 extern bool usepositional;
 
 #endif

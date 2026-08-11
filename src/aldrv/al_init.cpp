@@ -128,9 +128,9 @@ float AUDGetDoppler()
 static ALCdevice  *dev = NULL;
 
 #ifndef _WIN32
-static ALvoid     *context_id = NULL;
+ALvoid     *context_id = NULL;
 #else
-static ALCcontext *context_id = NULL;
+ALCcontext *context_id = NULL;
 #endif
 #endif
 bool AUDInit()

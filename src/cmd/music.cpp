@@ -35,6 +35,7 @@
 
 //To allow for loading in another thread, we must handle some AL vars ourselves...
 #include "aldrv/al_globals.h"
+#include <AL/alc.h>
 #include "options.h"
 
 
@@ -276,6 +277,10 @@ readerThread(
 #endif
         {
             me->freeWav = true;
+            // OpenAL contexts are thread-local. This music-loading thread must make
+            // the game's OpenAL context current before generating buffers, else
+            // alGenBuffers fails with AL_INVALID_OPERATION (no current context).
+            alcMakeContextCurrent( (ALCcontext*)context_id );
             if (foundcache) {
                 *me->music_load_info = wherecache->second;
                 me->freeWav = false;
