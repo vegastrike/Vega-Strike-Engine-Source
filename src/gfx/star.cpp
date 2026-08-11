@@ -1,6 +1,7 @@
 #include "star.h"
 #include "ani_texture.h"
 #include <assert.h>
+#include <algorithm>
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "gfx/camera.h"
@@ -160,7 +161,7 @@ static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, flo
     if ( !our_system_name.empty() )
         *num = NumStarsInGalaxy();
     GFXColorVertex *tmpvertex = new GFXColorVertex[(*num)*repetition];
-    memset( tmpvertex, 0, sizeof (GFXVertex)*(*num)*repetition );
+    std::fill_n( tmpvertex, (*num)*repetition, GFXColorVertex() );
     StarIter si;
     int starcount = 0;
     int j = 0;
