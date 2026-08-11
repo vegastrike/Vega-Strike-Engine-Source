@@ -368,7 +368,7 @@ Planet::Planet() :
     terraintrans = NULL;
     atmospheric  = false;
     //Force shields to 0
-    memset( &(this->shield), 0, sizeof (Unit::shield) );
+    this->shield = Shield();
     this->shield.number = 2;
 }
 
@@ -514,7 +514,7 @@ Planet::Planet( QVector x,
      *  this->shield.shield2fb.front=0;
      *  this->shield.shield2fb.back=0;
      */
-    memset( &(this->shield), 0, sizeof (Unit::shield) );
+    this->shield = Shield();
     this->shield.number = 2;
     if ( meshdata.empty() ) meshdata.push_back( NULL );
 }

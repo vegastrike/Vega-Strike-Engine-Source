@@ -1065,9 +1065,6 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     Shield two;
     Shield four;
     Shield eight;
-    memset( &two, 0, sizeof (Shield) );
-    memset( &four, 0, sizeof (Shield) );
-    memset( &eight, 0, sizeof (Shield) );
     shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Front_Top_Right ),
                              two.shield2fb.front, four.shield4fbrl.front, eight.shield8.frontrighttop );
     shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Front_Top_Left ),
@@ -1109,7 +1106,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     int   iter;
     if (shieldcount > MAX_SHIELD_NUMBER)
         shieldcount = MAX_SHIELD_NUMBER;
-    memset( shield.range, 0, sizeof (shield.range) );
+    std::fill_n( shield.range, MAX_SHIELD_NUMBER, ShieldFacing() );
     if (shieldcount == 8) {
         shield.number = 8;
         shield.shield.cur[0]     = shield.shield.max[0] = eight.shield8.frontlefttopmax;
