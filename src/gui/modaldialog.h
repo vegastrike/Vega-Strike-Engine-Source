@@ -101,6 +101,7 @@ void showListQuestion( const std::string &title,
 class QuestionDialog : public ModalDialog
 {
 public:
+    using ModalDialog::init;
 //Load the controls for this dialog.
     virtual void initControls( void ) = 0;
 

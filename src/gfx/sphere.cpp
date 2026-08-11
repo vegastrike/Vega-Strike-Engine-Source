@@ -20,7 +20,7 @@ static GFXColor getSphereColor()
     return tmp;
 }
 
-void SphereMesh::ProcessDrawQueue( int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
+void SphereMesh::ProcessDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
 {
     static GFXColor spherecol( getSphereColor() );
     GFXColor tmpcol( 0, 0, 0, 1 );
@@ -36,7 +36,7 @@ void SphereMesh::SelectCullFace( int whichdrawqueue )
     GFXEnable( CULLFACE );
 }
 
-void CityLights::ProcessDrawQueue( int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
+void CityLights::ProcessDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
 {
     const GFXColor citycol( 1, 1, 1, 1 );
     GFXColor tmpcol( 0, 0, 0, 1 );

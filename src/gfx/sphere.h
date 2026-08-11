@@ -83,7 +83,7 @@ public: SphereMesh() : Mesh()
                     reverse_normals );
     }
     void Draw( float lod, bool centered = false, const Matrix &m = identity_matrix );
-    virtual void ProcessDrawQueue( int whichpass, int which, bool zsort, const QVector &sortctr );
+    virtual void ProcessDrawQueue( size_t whichpass, int which, bool zsort, const QVector &sortctr );
 };
 
 class CityLights : public SphereMesh
@@ -116,7 +116,7 @@ public: CityLights() : SphereMesh() {}
                 float theta_min = 0.0,
                 float theta_max = 2 *M_PI,
                 bool inside_out = true );
-    virtual void ProcessDrawQueue( int whichpass, int which, bool zsort, const QVector &sortctr );
+    virtual void ProcessDrawQueue( size_t whichpass, int which, bool zsort, const QVector &sortctr );
 };
 #endif
 

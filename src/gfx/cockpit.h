@@ -168,6 +168,7 @@ class GameCockpit : public Cockpit
     void DrawArrowToTarget(const Radar::Sensor&, Vector LocalCoordinates);
     void updateRadar(Unit * un);
 public:
+    using Cockpit::Init;
     std::string textMessage;
     bool editingTextMessage;
     std::string autoMessage;

@@ -8,6 +8,7 @@ class Box : public Mesh
 private:
     Vector corner_min, corner_max;
 public: Box( const Vector &cornermin, const Vector &cornermax );
+    using Mesh::ProcessDrawQueue;
     void ProcessDrawQueue( int whichdrawqueue );
 };
 

@@ -66,6 +66,7 @@ private:
 class CriteriaParent : public CriteriaNode
 {
 public:
+    using CriteriaNode::unhook;
     virtual CriteriaNode * unhook( CriteriaNode *child ) = 0;
 
     virtual CriteriaNode * clone() const = 0;
