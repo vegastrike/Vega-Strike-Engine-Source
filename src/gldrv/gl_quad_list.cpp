@@ -23,6 +23,7 @@
 #include "gfxlib.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
+#include <algorithm>
 #include <stdio.h>
 #include "vsfilesystem.h"
 
@@ -159,7 +160,7 @@ void GFXQuadList::ModQuad( int which, const GFXColorVertex *vertices )
     if (which < 0 || which >= numVertices/4 || quadassignments[which] == -1)
         return;
     if (isColor) {
-        memcpy( data.vertices+(quadassignments[which]*4), vertices, 4*sizeof (GFXColorVertex) );
+        std::copy_n( vertices, 4, data.colors+(quadassignments[which]*4) );
     } else {
         data.vertices[(quadassignments[which]*4)+0].SetTexCoord( vertices[0].s,
                                                                  vertices[0].t ).SetNormal( Vector( vertices[0].i,
