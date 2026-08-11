@@ -116,15 +116,15 @@
 													base_class();													\
 		virtual										~base_class();													\
 		/* Builds from a standard tree */																			\
-		override(AABBOptimizedTree)	bool			Build(AABBTree* tree);											\
+		ice_override(AABBOptimizedTree)	bool			Build(AABBTree* tree) override;											\
 		/* Refits the tree */																						\
-		override(AABBOptimizedTree)	bool			Refit(const MeshInterface* mesh_interface);						\
+		ice_override(AABBOptimizedTree)	bool			Refit(const MeshInterface* mesh_interface) override;						\
 		/* Walks the tree */																						\
-		override(AABBOptimizedTree)	bool			Walk(GenericWalkingCallback callback, void* user_data) const;	\
+		ice_override(AABBOptimizedTree)	bool			Walk(GenericWalkingCallback callback, void* user_data) const override;	\
 		/* Data access */																							\
 		inline_						const node*		GetNodes()		const	{ return mNodes;					}	\
 		/* Stats */																									\
-		override(AABBOptimizedTree)	udword			GetUsedBytes()	const	{ return mNbNodes*sizeof(node);		}	\
+		ice_override(AABBOptimizedTree)	udword			GetUsedBytes()	const override { return mNbNodes*sizeof(node);		}	\
 		private:																									\
 									node*			mNodes;
 

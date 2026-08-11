@@ -69,6 +69,7 @@
 	class OPCODE_API AABBTreeCollider : public Collider
 	{
 		public:
+		using Collider::InitQuery;
 		// Constructor / Destructor
 											AABBTreeCollider();
 		virtual								~AABBTreeCollider();
@@ -175,7 +176,7 @@
 		 *	\return		null if everything is ok, else a string describing the problem
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		override(Collider)	const char*		ValidateSettings();
+		ice_override(Collider)	const char*		ValidateSettings() override;
 
 		protected:
 		// Colliding pairs

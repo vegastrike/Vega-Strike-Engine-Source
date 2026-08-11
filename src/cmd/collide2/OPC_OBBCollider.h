@@ -38,6 +38,7 @@
 	class OPCODE_API OBBCollider : public VolumeCollider
 	{
 		public:
+		using VolumeCollider::InitQuery;
 		// Constructor / Destructor
 											OBBCollider();
 		virtual								~OBBCollider();
@@ -78,7 +79,7 @@
 		 *	\return		null if everything is ok, else a string describing the problem
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		override(Collider)	const char*		ValidateSettings();
+		ice_override(Collider)	const char*		ValidateSettings() override;
 
 		protected:
 		// Precomputed data

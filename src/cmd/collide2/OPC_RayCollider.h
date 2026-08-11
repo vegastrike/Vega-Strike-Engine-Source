@@ -63,6 +63,7 @@
 	class OPCODE_API RayCollider : public Collider
 	{
 		public:
+		using Collider::InitQuery;
 		// Constructor / Destructor
 											RayCollider();
 		virtual								~RayCollider();
@@ -173,7 +174,7 @@
 		 *	\return		null if everything is ok, else a string describing the problem
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		override(Collider)	const char*		ValidateSettings();
+		ice_override(Collider)	const char*		ValidateSettings() override;
 
 		protected:
 		// Ray in local space

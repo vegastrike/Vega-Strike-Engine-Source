@@ -39,6 +39,7 @@
 	class OPCODE_API LSSCollider : public VolumeCollider
 	{
 		public:
+		using VolumeCollider::InitQuery;
 		// Constructor / Destructor
 											LSSCollider();
 		virtual								~LSSCollider();

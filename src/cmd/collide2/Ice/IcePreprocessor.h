@@ -82,7 +82,11 @@
 	#define FUNCTION				extern "C"
 
 	// Cosmetic stuff [mainly useful with multiple inheritance]
-	#define	override(base_class)	virtual
+	// Renamed from 'override' (now a C++11 keyword) to 'ice_override'.
+	// Expands to 'virtual'; the C++11 'override' keyword is appended at the
+	// end of each declaration in the derived classes (it must follow the
+	// parameter list, unlike 'virtual' which precedes the return type).
+	#define	ice_override(base_class)	virtual
 
 	// Our own inline keyword, so that:
 	// - we can switch to __forceinline to check it's really better or not

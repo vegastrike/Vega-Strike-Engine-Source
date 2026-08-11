@@ -35,6 +35,7 @@
 	class OPCODE_API SphereCollider : public VolumeCollider
 	{
 		public:
+		using VolumeCollider::InitQuery;
 		// Constructor / Destructor
 											SphereCollider();
 		virtual								~SphereCollider();

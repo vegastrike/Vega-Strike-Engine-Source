@@ -37,6 +37,7 @@
 	class OPCODE_API AABBCollider : public VolumeCollider
 	{
 		public:
+		using VolumeCollider::InitQuery;
 		// Constructor / Destructor
 											AABBCollider();
 		virtual								~AABBCollider();
