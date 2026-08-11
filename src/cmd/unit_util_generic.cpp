@@ -340,6 +340,8 @@ void setFactionName( Unit *my_unit, string factionname )
 
 float getFactionRelation( const Unit *my_unit, const Unit *their_unit )
 {
+    if ((my_unit == nullptr) || (their_unit == nullptr))
+        return 0.0f;
     float relation = FactionUtil::GetIntRelation( my_unit->faction, their_unit->faction );
     int   my_cp    = _Universe->whichPlayerStarship( my_unit );
     int   their_cp = _Universe->whichPlayerStarship( their_unit );
