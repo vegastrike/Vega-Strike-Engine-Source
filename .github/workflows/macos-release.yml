@@ -69,7 +69,6 @@ jobs:
 
       - name: Build it
         env:
-          MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
@@ -77,10 +76,10 @@ jobs:
           PYTHONHOME: ""
           PYTHONPATH: ""
           IS_RELEASE: 1
-        run: script/cibuild --preset-name=${{ matrix.preset-name }} --build-type=${{ matrix.build-type }}
+        run: script/cibuild --preset-name="${{ matrix.preset-name }}" --build-type="${{ matrix.build-type }}"
 
       - name: Package it
-        working-directory: ${{github.workspace}}
+        working-directory: "${{ github.workspace }}"
         run: cpack -V --preset-name="package-${{ matrix.preset-name }}" -G DragNDrop
 
       - name: Upload the artifacts

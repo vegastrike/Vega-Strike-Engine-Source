@@ -33,9 +33,7 @@
 #include "root_generic/vs_globals.h"
 #include "src/vs_exit.h"
 
-extern std::locale our_numeric_locale;
-
-inline double locale_aware_stod(const std::string& s, const double default_value = 0.0, const std::locale& loc = our_numeric_locale) noexcept {
+inline double locale_aware_stod(const std::string& s, const double default_value = 0.0, const std::locale& loc = GetGlobalLocale()) noexcept {
     std::istringstream iss(s);
     iss.imbue(loc);
     try {
@@ -48,7 +46,7 @@ inline double locale_aware_stod(const std::string& s, const double default_value
     }
 }
 
-inline float locale_aware_stof(const std::string& s, const float default_value = 0.0F, const std::locale& loc = our_numeric_locale) noexcept {
+inline float locale_aware_stof(const std::string& s, const float default_value = 0.0F, const std::locale& loc = GetGlobalLocale()) noexcept {
     std::istringstream iss(s);
     iss.imbue(loc);
     try {
@@ -61,7 +59,7 @@ inline float locale_aware_stof(const std::string& s, const float default_value =
     }
 }
 
-inline int locale_aware_stoi(const std::string& s, const int default_value = 0, const std::locale& loc = our_numeric_locale) noexcept {
+inline int locale_aware_stoi(const std::string& s, const int default_value = 0, const std::locale& loc = GetGlobalLocale()) noexcept {
     std::istringstream iss(s);
     iss.imbue(loc);
     try {
@@ -74,7 +72,7 @@ inline int locale_aware_stoi(const std::string& s, const int default_value = 0, 
     }
 }
 
-inline long locale_aware_stol(const std::string& s, const long default_value = 0L, const std::locale& loc = our_numeric_locale) noexcept {
+inline long locale_aware_stol(const std::string& s, const long default_value = 0L, const std::locale& loc = GetGlobalLocale()) noexcept {
     std::istringstream iss(s);
     iss.imbue(loc);
     try {
