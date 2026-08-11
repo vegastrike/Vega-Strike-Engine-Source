@@ -670,8 +670,14 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                         }
                         if (fg->directive != last_directive) {
                             Order *lo = leader->getAIState();
-                            if (lo || callme)
+                            if (callme) {
+                                // I (parent) newly acquired the target: my own AI handles it.
+                                Order *myAI = parent->getAIState();
+                                if (myAI)
+                                    myAI->Communicate( c );
+                            } else if (lo) {
                                 lo->Communicate( c );
+                            }
                         }
                     }
                 }
@@ -1168,8 +1174,14 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                                 c.SetCurrentState( c.fsm->GetNoNode(), NULL, 0 );
                             }
                             Order *loo = leader->getAIState();
-                            if (loo || callme)
+                            if (callme) {
+                                // I (parent) newly acquired the target: my own AI handles it.
+                                Order *myAI = parent->getAIState();
+                                if (myAI)
+                                    myAI->Communicate( c );
+                            } else if (loo) {
                                 loo->Communicate( c );
+                            }
                         }
                     }
                 }

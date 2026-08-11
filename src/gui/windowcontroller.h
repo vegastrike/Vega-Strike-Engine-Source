@@ -94,7 +94,7 @@ public:
         //Iterate through the dispatch table.
         for (const WctlTableEntry *p = &WctlCommandTable[0]; p->function; p++)
             if (p->command == command)
-                if ( p->controlId.size() == 0 || p->controlId == control->id() )
+                if ( p->controlId.size() == 0 || (control != NULL && p->controlId == control->id()) )
                     //Found a handler for the command.
                     return ( ( static_cast< Subclass* > (this) )->*(p->function) )( command, control );
         //Let the base class have a try at the command first.
