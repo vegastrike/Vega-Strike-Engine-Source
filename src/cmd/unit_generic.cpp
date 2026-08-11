@@ -89,7 +89,7 @@ void Unit::SetSerial( ObjSerial s )
 
 Unit::graphic_options::graphic_options()
 {
-    FaceCamera  = Animating = missilelock = InWarp = unused1 = WarpRamping = NoDamageParticles = 0;
+    FaceCamera  = Animating = missilelock = InWarp = active_afterburn = WarpRamping = NoDamageParticles = 0;
     specInterdictionOnline = 1;
     NumAnimationPoints = 0;
     RampCounter = 0;
@@ -2293,6 +2293,37 @@ void Unit::UpdatePhysics( const Transformation &trans,
     if (resolveforces) {
         //clamp velocity
         net_accel = ResolveForces( trans, transmat );
+        // Enforce the flight computer's set speed on the RESULTING velocity
+        // magnitude (not per-axis), so turning or moving diagonally cannot push
+        // the ship past the speed the pilot set. Runs after the velocity
+        // integration, so it holds for the frame. Warp (SPEC) is exempt.
+        if (graphicOptions.WarpFieldStrength == 1.0) {
+            double limit = computer.set_speed;
+            //Allow up to the afterburner speed only when the afterburner is
+            //ACTIVELY engaged (active_afterburn set in ClampThrust). A fuel-only
+            //proxy would wrongly lift the limit during a turn, letting turn
+            //overspeed ride up to the afterburn speed.
+            const double mag = Velocity.Magnitude();
+            if (mag > limit) {
+                if (graphicOptions.active_afterburn)
+                    limit = computer.max_ab_speed();
+                if (mag > limit) {
+                    //Decelerate toward the limit at the max rate the opposing
+                    //thrusters can produce (per-axis drive limits), not an
+                    //instant snap. Overspeed from afterburn release, travel
+                    //mode, or turns bleeds off at the ship's real deceleration
+                    //capability. Use the direction opposite to the current
+                    //velocity so forward motion bleeds via retro thrust,
+                    //sideways via lateral, etc.
+                    const double decel  = GetMaxAccelerationInDirectionOf( -Velocity, graphicOptions.active_afterburn );
+                    const double bleed  = decel*SIMULATION_ATOM;
+                    double       newmag = mag-bleed;
+                    if (newmag < limit)
+                        newmag = limit;
+                    Velocity *= (newmag/mag);
+                }
+            }
+        }
         if (Velocity.i > VELOCITY_MAX)
             Velocity.i = VELOCITY_MAX;
 
@@ -3459,6 +3490,11 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
     }
     if (3 == afterburntype)      //no afterburner -- we should really make these types an enum :-/
         afterburn = false;
+    //Record whether the afterburner is truly engaged this step (after
+    //fuel/energy resolution), so the velocity clamp in UpdatePhysics can allow
+    //afterburn speed only when the burner is actually active — not merely when
+    //fuel exists (which would wrongly lift the limit during a turn).
+    graphicOptions.active_afterburn = afterburn;
     Vector Res = amt1;
 
     float  fuelclamp   = (fuel <= 0) ? staticfuelclamp : 1;
@@ -3473,8 +3509,59 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
         : limits.forward;
     if (amt1.k > ablimit)
         Res.k = ablimit;
-    if (amt1.k < -limits.retro)
-        Res.k = -limits.retro;
+    // Retro (braking) thrust: afterburn also boosts deceleration, just as it
+    // boosts forward acceleration. Mirrors the forward ablimit formula.
+    float retro_limit = limits.retro;
+    if (afterburn)
+        retro_limit = (limits.afterburn-limits.retro)*abfuelclamp+limits.retro*fuelclamp;
+    if (amt1.k < -retro_limit)
+        Res.k = -retro_limit;
+    if ( !afterburn ) {
+        // At or above the set speed and moving forward, the FCMP may only
+        // REDIRECT the velocity, not accelerate it. After the per-axis clamps,
+        // remove the component of the final thrust parallel to the current
+        // velocity. The remaining thrust is perpendicular to the velocity: it
+        // rotates the velocity toward the intended (forward) direction while
+        // keeping the speed constant, so the total speed can never overshoot
+        // the set point. This continues until all speed is in the intended
+        // direction.
+        //
+        // IMPORTANT: use the FRESH local velocity (UpCoordinateLevel of the
+        // world velocity), exactly as the FCMP does. The raw Velocity member is
+        // not re-expressed when the ship rotates, so it is stale/mixed after a
+        // turn and projecting against it leaves residuals that accumulate into
+        // overshoot.
+        //
+        // If the perpendicular result exceeds a per-axis thruster limit, scale
+        // it down PRESERVING DIRECTION (never re-clamp per-axis, which would
+        // reintroduce the accelerating component).
+        //
+        // Deceleration is never affected: moving backward (local_vel.k < 0)
+        // skips this, and retro thrust is parallel-negative so it is kept.
+        // Afterburn is exempt: it is meant to accelerate.
+        const Vector local_vel = UpCoordinateLevel( GetVelocity() );
+        const float  speed     = local_vel.Magnitude();
+        if (speed >= computer.set_speed && local_vel.k > 0 && speed > 0) {
+            const Vector vhat     = local_vel/speed;
+            const double parallel = Res.Dot( vhat );
+            if (parallel > 0) {
+                Res -= vhat*parallel;
+                //Scale the whole vector down (preserving direction) so each
+                //axis stays within its physical thruster limit.
+                float scale = 1.0f;
+                const float lim_i = fabs( fuelclamp*limits.lateral );
+                const float lim_j = fabs( fuelclamp*limits.vertical );
+                const float lim_k = (Res.k > 0) ? ablimit : retro_limit;
+                if (lim_i > 0 && fabs( Res.i ) > lim_i)
+                    scale = std::min( scale, lim_i/fabs( Res.i ) );
+                if (lim_j > 0 && fabs( Res.j ) > lim_j)
+                    scale = std::min( scale, lim_j/fabs( Res.j ) );
+                if (lim_k > 0 && fabs( Res.k ) > lim_k)
+                    scale = std::min( scale, lim_k/fabs( Res.k ) );
+                Res *= scale;
+            }
+        }
+    }
     static float Lithium6constant =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "DeuteriumRelativeEfficiency_Lithium", "1" ) );
     //1/5,000,000 m/s

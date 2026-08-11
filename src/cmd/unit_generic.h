@@ -361,7 +361,7 @@ public:
         unsigned Animating : 1;
         unsigned InWarp : 1;
         unsigned WarpRamping : 1;
-        unsigned unused1 : 1;
+        unsigned active_afterburn : 1;      //afterburner truly engaged this step (not merely has fuel)
         unsigned NoDamageParticles : 1;
         unsigned specInterdictionOnline : 1;
         unsigned char NumAnimationPoints;
