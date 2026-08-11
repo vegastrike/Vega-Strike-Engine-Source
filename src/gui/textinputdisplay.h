@@ -20,7 +20,7 @@
  */
 
 #ifndef __TEXTINPUTDISPLAY_H__
-#define __TEXTINPUTISPLAY_H__
+#define __TEXTINPUTDISPLAY_H__
 
 #include "staticdisplay.h"
 #include <vector>
