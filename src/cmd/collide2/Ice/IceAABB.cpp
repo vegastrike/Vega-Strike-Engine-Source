@@ -385,6 +385,7 @@ float AABB::ComputeBoxArea(const Point& eye, const Matrix4x4& mat, float width, 
 {
 	const sbyte* Outline = ComputeOutline(eye, num);
 	if(!Outline)	return -1.0f;
+	if(num < 1)	return -1.0f;	// ComputeOutline guarantees num>=1 when Outline!=null
 
 	// Compute box vertices
 	Point vertexBox[8], dst[8];
