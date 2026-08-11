@@ -80,7 +80,6 @@ GFXSphereVertexList::GFXSphereVertexList( float radius, int detail, bool Insideo
         float theta_max = 2.0f*3.1415926536f;
         float drho, dtheta;
         float x, y, z, tx, ty;
-        float s, t, ds, dt;
         int   i, j, imin, imax;
         float nsign = Insideout ? -1.0 : 1.0;
         float normalscale = reverse_normals ? -1.0 : 1.0;
@@ -89,10 +88,6 @@ GFXSphereVertexList::GFXSphereVertexList( float radius, int detail, bool Insideo
         /* Code below adapted from gluSphere */
         drho   = (rho_max-rho_min)/(float) stacks;
         dtheta = (theta_max-theta_min)/(float) slices;
-
-        ds     = 1.0f/slices;
-        dt     = 1.0f/stacks;
-        t = 1.0f;               /* because loop now runs from 0 */
 
         imin   = 0;
         imax   = stacks;
@@ -121,7 +116,6 @@ GFXSphereVertexList::GFXSphereVertexList( float radius, int detail, bool Insideo
             GFXVertex *vertexlist = vl+(i*(slices+1)*2);
             g_rho( i+1 ) = (i+1)*drho+rho_min; //FIXME These macros are horrible
 
-            s = 0.0;
             g_theta( 0 ) = 0;
             for (j = 0; j <= slices; j++) {
                 g_theta( j+1 ) = (j+1)*dtheta;
@@ -179,11 +173,8 @@ GFXSphereVertexList::GFXSphereVertexList( float radius, int detail, bool Insideo
                 vertexlist[j*2+sec].x  = x*radius;
                 vertexlist[j*2+sec].z  = -y*radius;
                 vertexlist[j*2+sec].y  = z*radius;
-
-                s       += ds;
             }
 
-            t           -= dt;
             QSOffsets[i] = (slices+1)*2;
             modes[i]     = GFXQUADSTRIP;
         }
