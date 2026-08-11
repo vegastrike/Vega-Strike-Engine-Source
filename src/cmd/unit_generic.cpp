@@ -4906,7 +4906,15 @@ void Unit::ProcessDeleteQueue()
 #endif
         Unit *mydeleter = Unitdeletequeue.back();
         Unitdeletequeue.pop_back();
+
+        // Avoid segfault when the unit getting destroyed is the player's current target
+        Unit* parent = _Universe->AccessCockpit()->GetParent();
+        if (parent && parent->Target() == mydeleter) {
+            parent->computer.target.SetUnit( NULL );
+        }
+
         delete mydeleter;                        ///might modify unitdeletequeue
+        mydeleter = nullptr;
 
 #ifdef DESTRUCTDEBUG
         VSFileSystem::vs_fprintf( stderr, "Completed %d\n", Unitdeletequeue.size() );
