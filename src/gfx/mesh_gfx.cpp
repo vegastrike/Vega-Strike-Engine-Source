@@ -1291,7 +1291,7 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
             activateTextureUnit( tu );
             tuimask |= (1<<tu.targetIndex);
         }
-        catch (MissingTexture e) {
+        catch (MissingTexture& e) {
             if (tu.defaultType == Technique::Pass::TextureUnit::Decal && tu.defaultIndex == 0) {
                 //Global default for decal 0 is white, this allows textureless objects
                 //that would otherwise not be possible

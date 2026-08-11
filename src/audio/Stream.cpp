@@ -46,7 +46,7 @@ namespace Audio {
         
         try {
             getBufferImpl(rbuffer, rbufferSize);
-        } catch (NoBufferException) {
+        } catch (NoBufferException&) {
             nextBufferImpl();
             getBufferImpl(rbuffer, rbufferSize);
             curBufferPos = rbuffer;

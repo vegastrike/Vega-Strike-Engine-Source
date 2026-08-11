@@ -971,7 +971,7 @@ bool commandI::fexecute( string *incommand, bool isDown, int sock_in )
             l.append( in );
             conoutf( l );             //print the error to the console
         }
-        catch (exception e) {
+        catch (exception& e) {
             string l;
             l.append( "Command processor: Exception occured: " );
             l.append( e.what() );

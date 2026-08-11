@@ -46,7 +46,7 @@ namespace Audio {
             // load the stream
             try {
                 loadStream();
-            } catch(ResourceAlreadyLoadedException e) {
+            } catch (ResourceAlreadyLoadedException& e) {
                 // Weird...
                 getStream()->seek(0);
             }
@@ -89,9 +89,9 @@ namespace Audio {
                     }
                 }
                 closeStream();
-            } catch(EndOfStreamException e) {
+            } catch (EndOfStreamException& e) {
                 closeStream();
-            } catch(Exception e) {
+            } catch (Exception& e) {
                 closeStream();
                 throw e;
             }
@@ -144,7 +144,7 @@ namespace Audio {
             checkAlError();
             
             onLoaded(true);
-        } catch(Exception e) {
+        } catch (Exception& e) {
             onLoaded(false);
             throw e;
         }

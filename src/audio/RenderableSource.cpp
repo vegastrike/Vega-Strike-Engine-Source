@@ -24,7 +24,7 @@ namespace Audio {
     {
         try {
             startPlayingImpl(start);
-        } catch(EndOfStreamException) {
+        } catch (EndOfStreamException&) {
             // Silently discard EOS, results in the more transparent
             // behavior of simply notifying listeners of source
             // termination ASAP, which is also accurate.
@@ -39,7 +39,7 @@ namespace Audio {
         try {
             if (isPlaying())
                 stopPlayingImpl();
-        } catch(Exception e) {}
+        } catch (Exception& e) {}
     }
     
     bool RenderableSource::isPlaying() const 
@@ -47,7 +47,7 @@ namespace Audio {
     {
         try {
             return isPlayingImpl();
-        } catch(Exception e) {
+        } catch (Exception& e) {
             // Cannot be playing if an exception rises, 
             // as that implies a problem with the underlying API
             return false;
@@ -65,7 +65,7 @@ namespace Audio {
     {
         try {
             updateImpl(flags, sceneListener);
-        } catch(Exception e) {
+        } catch (Exception& e) {
             fprintf(stderr, "Ignoring exception in renderable update: %s", e.what());
         }
     }

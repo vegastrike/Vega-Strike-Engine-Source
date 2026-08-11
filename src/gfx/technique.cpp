@@ -478,7 +478,7 @@ Technique::Technique( const string &nam ) :
             game_options.techniquesBasePath+"/"
             +game_options.techniquesSubPath+"/"
             +name+".technique" );
-    } catch(Audio::FileOpenException e) {
+    } catch (Audio::FileOpenException& e) {
         VSFileSystem::vs_dprintf(1, "Cannot find specialized technique, trying generic: %s\n", e.what());
         // Else try a default
         serializer.importXML(
@@ -639,7 +639,7 @@ TechniquePtr Technique::getTechnique( const std::string &name )
                                          "Compilation of technique %s successful\n",
                                          ptr->getName().c_str() );
             }
-            catch (ProgramCompileError e) {
+            catch (ProgramCompileError& e) {
                 std::string fallback = ptr->getFallback();
                 VSFileSystem::vs_fprintf( stderr,
                                          "Compilation of technique %s failed... trying %s\n"

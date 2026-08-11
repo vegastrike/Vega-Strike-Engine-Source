@@ -190,7 +190,7 @@ namespace Audio {
     {
         try {
             return data->getDefinitionFile(path);
-        } catch(NotFoundException e) {
+        } catch (NotFoundException& e) {
             addDefinitionFile(path, false);
             return data->getDefinitionFile(path);
         }
