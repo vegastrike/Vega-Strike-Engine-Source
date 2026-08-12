@@ -51,6 +51,8 @@ void ComponentsManager::Load(std::string unit_key) {
         return;
     }
 
+    assert(prohibited_upgrades.empty());
+
     std::vector<std::string> upgrades;
 
     boost::split(upgrades, prohibited_upgrades_string, boost::is_any_of(";"));
@@ -59,12 +61,11 @@ void ComponentsManager::Load(std::string unit_key) {
         boost::split(parts, upgrade, boost::is_any_of(":"));
         if (parts.size() == 1) {
             const std::string& category = parts[0];
-            prohibited_upgrades.emplace_back(category, 0);
+            prohibited_upgrades.insert({category, 0});
         } else if (parts.size() == 2) {
             const std::string& category = parts[0];
             const int limit = locale_aware_stoi(parts[1]);
-            //const std::pair<const std::string, const int> pair(category, limit);
-            prohibited_upgrades.emplace_back(category, limit);
+            prohibited_upgrades.insert({category, limit});
         } else {
             VS_LOG(error, (boost::format("%1%: Invalid format in prohibited upgrades string: %2%") % __FUNCTION__ % upgrade));
         }
