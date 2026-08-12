@@ -84,6 +84,7 @@ Mount::Mount( const string &filename, int am, int vol, float xyscale, float zsca
     serial       = 0;
     ammo         = am;
     sound        = -1;
+    last_sound_refire_time = 0.0;
     type         = &wi;
     this->volume = vol;
     ref.gun      = NULL;
