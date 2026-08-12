@@ -4969,7 +4969,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     //following lines somewhat borken in terms of semantics for quantity of fuel
     //and policy of upgrades to fuel
     if (!mode) {
-        PRETTY_ADDU( statcolor+"Fuel capacity: #-c", playerUnit->FuelData(), 2, "metric tons of Lithium-6" );
+        PRETTY_ADDU( statcolor+"Fuel capacity: #-c", playerUnit->MaxFuelData(), 2, "metric tons of Lithium-6" );
     } else if ( blankUnit->FuelData() != playerUnit->FuelData() ) {
         switch (replacement_mode)
         {

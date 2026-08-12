@@ -1089,8 +1089,12 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
             return .25*(armordat[0]+armordat[2]+armordat[4]+armordat[6]);
         }
     case UnitImages< void >::FUEL:
-        if (target->FuelData() > maxfuel)
-            maxfuel = target->FuelData();
+        //fuel/maxfuel: current fuel over tank capacity. maxfuel (cockpit
+        //member) is seeded from the unit's capacity at init; the old
+        //"grow to max seen" heuristic was a workaround for the missing
+        //capacity (fuel bar showed full after save/load).
+        if (target->MaxFuelData() > maxfuel)
+            maxfuel = target->MaxFuelData();
         if (maxfuel > 0) return target->FuelData()/maxfuel;
         return 0;
 

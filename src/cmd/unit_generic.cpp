@@ -944,6 +944,7 @@ void Unit::ZeroAll()
     Mass                  = 0;
     shieldtight           = 0;           //this can be used to differentiate whether this is a capship or a fighter?
     fuel                  = 0;
+    maxfuel               = 0;
     afterburnenergy       = 0;
     afterburntype         = 0;
     Momentofinertia       = 0;
@@ -1120,6 +1121,7 @@ void Unit::Init()
     curr_physical_state = prev_physical_state = identity_transformation;
     Mass = .01;
     fuel = 000;
+    maxfuel = 0;
 
     static Vector myang( XMLSupport::parse_float( vs_config->getVariable( "general", "pitch", "0" ) ), XMLSupport::parse_float(
                             vs_config->getVariable( "general", "yaw", "0" ) ), XMLSupport::parse_float( vs_config->getVariable(
@@ -4835,6 +4837,11 @@ float Unit::FuelData() const
     return fuel;
 }
 
+float Unit::MaxFuelData() const
+{
+    return maxfuel;
+}
+
 float Unit::WarpEnergyData() const
 {
     if (maxwarpenergy > 0)
@@ -7298,8 +7305,13 @@ bool Unit::UpAndDownGrade( const Unit *up,
             || cell_has_recursive_data( upgrade_name, up->faction, "Afterburner_Accel" ) )
             STDUPGRADE( limits.afterburn, tlimits_afterburn, templ->limits.afterburn, 0 );
         if ( !csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data( upgrade_name, up->faction, "Fuel_Capacity" ) )
+            || cell_has_recursive_data( upgrade_name, up->faction, "Fuel_Capacity" ) ) {
             STDUPGRADE( fuel, up->fuel, templ->fuel, 0 );
+            // Fuel-capacity upgrades enlarge the tank: keep maxfuel (tank
+            // capacity) in step with fuel so the HUD fraction stays correct.
+            if (maxfuel < fuel)
+                maxfuel = fuel;
+        }
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "Default_Speed_Governor" ) )
             STDUPGRADE( computer.max_combat_speed, tmax_speed, templ->computer.max_combat_speed, 0 );

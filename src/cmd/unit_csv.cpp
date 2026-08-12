@@ -19,6 +19,9 @@
 #include "unit_const_cache.h"
 #define VS_PI 3.1415926535897931
 
+// Defined later in this file (after LoadRow).
+CSVRow GetUnitRow( string filename, bool subu, int faction, bool readlast, bool &rread );
+
 CSVRow LookupUnitRow( const string &unitname, const string &faction )
 {
     string hashname = unitname+"__"+faction;
@@ -1050,7 +1053,37 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     pImage->CockpitCenter.k = ::stof( OPTIM_GET( row, table, CockpitZ ) )*xml.unitscale;
     Mass = stof( OPTIM_GET( row, table, Mass ), 1.0 );
     Momentofinertia = stof( OPTIM_GET( row, table, Moment_Of_Inertia ), 1.0 );
-    fuel = ::stof( OPTIM_GET( row, table, Fuel_Capacity ) );
+    // FUEL TANK CAPACITY vs CURRENT FUEL (save/load semantics):
+    // The units.csv column Fuel_Capacity is the ship's MAXIMUM tank size
+    // (e.g. Llama = 25 metric tons). However, the 2013-era save format
+    // (WriteUnitString, below) writes the CURRENT fuel level into that same
+    // column - it has no separate field for remaining fuel. When loading a
+    // SAVED unit, Fuel_Capacity therefore holds the current fuel level, and
+    // the true tank capacity must be recovered from the ship's base
+    // (unmodified assets) row rather than trusting the saved value -
+    // otherwise the tank "becomes" whatever fuel was left and the HUD shows
+    // a full bar after any save/load cycle. For a FRESH unit (no save table
+    // on the unitTables stack) Fuel_Capacity IS the capacity, so fuel = maxfuel.
+    // We deliberately do NOT change the save format: files saved here remain
+    // byte-compatible with the era and with other engines (which read
+    // Fuel_Capacity as current fuel on load, exactly as this code did).
+    fuel = ::stof( OPTIM_GET( row, table, Fuel_Capacity ) );          // saved value = CURRENT fuel
+    {
+        // Recover the base (assets) tank capacity: readlast=false skips the
+        // save table pushed on top of unitTables and finds the original ship row.
+        bool  rread = false;
+        CSVRow baserow = GetUnitRow( this->filename, isSubUnit(), faction, false, rread );
+        if (rread) {
+            maxfuel = ::stof( OPTIM_GET( baserow, baserow.getParent(), Fuel_Capacity ) );
+            // Guard: if a fuel-capacity upgrade ever made the tank bigger than
+            // the base value, keep the larger size (fuel cannot exceed capacity).
+            if (maxfuel < fuel)
+                maxfuel = fuel;
+        } else {
+            // No save table (fresh unit): the loaded value IS the capacity.
+            maxfuel = fuel;
+        }
+    }
     hull = maxhull = ::stof( OPTIM_GET( row, table, Hull ) );
     specInterdiction = ::stof( OPTIM_GET( row, table, Spec_Interdiction ) );
     armor.frontlefttop     = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Left ) );
@@ -1642,6 +1675,13 @@ string Unit::WriteUnitString()
                 }
                 unit["Mass"] = tos( Mass );
                 unit["Moment_Of_Inertia"] = tos( Momentofinertia );
+                // NOTE: we intentionally write the CURRENT fuel level into the
+                // Fuel_Capacity column here (the 2013-era save format has no
+                // separate field for remaining fuel). Do NOT "fix" this to write
+                // maxfuel: the format is frozen for compatibility with era saves
+                // and other engines. The load side (LoadRow) recovers the true
+                // tank capacity from the unmodified assets row and treats the
+                // saved value as the current fuel level.
                 unit["Fuel_Capacity"] = tos( fuel );
                 unit["Hull"] = tos( hull );
                 unit["Spec_Interdiction"] = tos( specInterdiction );

@@ -811,6 +811,8 @@ protected:
     float  shieldtight;
 //fuel of this unit
     float  fuel;
+//capacity of this unit's fuel tank (mirrors maxhull)
+    float  maxfuel;
     float  afterburnenergy;              //short fix
     int    afterburntype;                        //0--energy, 1--fuel
 //-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
@@ -901,6 +903,8 @@ public:
     }
     void SetAfterBurn( float aft );
     float FuelData() const;
+    //Tank capacity (fuel tank size); distinguishes capacity from current fuel
+    float MaxFuelData() const;
     float WarpCapData() const;
     void SetFuel( float f );
 //Returns the current ammt of energy left

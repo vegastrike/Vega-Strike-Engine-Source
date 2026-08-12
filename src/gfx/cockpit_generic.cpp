@@ -140,7 +140,7 @@ void Cockpit::SetParent( Unit *unit, const char *filename, const char *unitmodna
         if (StartArmor[5] == 0) StartArmor[5] = 1;
         if (StartArmor[6] == 0) StartArmor[6] = 1;
         if (StartArmor[7] == 0) StartArmor[7] = 1;
-        maxfuel = unit->FuelData();
+        maxfuel = unit->MaxFuelData();
         maxhull = unit->GetHull();
     }
 }

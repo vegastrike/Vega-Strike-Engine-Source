@@ -1472,6 +1472,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 break;
             case FUEL:
                 fuel = Mass*60*getFuelConversion();
+                maxfuel = fuel;
                 //FIXME! This is a hack until we get csv support
                 //FIXME FIXME FIXME got support a long time ago! --chuck_starchaser
                 break;
