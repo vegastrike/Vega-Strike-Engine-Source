@@ -1069,18 +1069,30 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     // Fuel_Capacity as current fuel on load, exactly as this code did).
     fuel = ::stof( OPTIM_GET( row, table, Fuel_Capacity ) );          // saved value = CURRENT fuel
     {
-        // Recover the base (assets) tank capacity: readlast=false skips the
-        // save table pushed on top of unitTables and finds the original ship row.
+        // Recover the base (assets) tank capacity for the ship MODEL named in
+        // the save row (the Name column), not the row key (e.g. "Llama.begin"
+        // is a variant key of the "Llama" model). Two important details:
+        //  1. Look up by the Name column so we get the ship's true base
+        //     capacity, not some other variant.
+        //  2. Read the base row's Fuel_Capacity via the NAME-based CSVRow::
+        //     operator[](string), NOT via OPTIM_GET: the CSV optimizer's
+        //     column indexes are global statics that the save table's
+        //     SetupOptimizer overwrites, so OPTIM_GET on the base table reads
+        //     the wrong column after a save table has been pushed.
         bool  rread = false;
-        CSVRow baserow = GetUnitRow( this->filename, isSubUnit(), faction, false, rread );
+        CSVRow baserow = GetUnitRow( fullname, isSubUnit(), faction, false, rread );
         if (rread) {
-            maxfuel = ::stof( OPTIM_GET( baserow, baserow.getParent(), Fuel_Capacity ) );
+            const std::string &cap = baserow["Fuel_Capacity"];
+            if ( !cap.empty() )
+                maxfuel = ::stof( cap );
+            else
+                maxfuel = fuel;
             // Guard: if a fuel-capacity upgrade ever made the tank bigger than
             // the base value, keep the larger size (fuel cannot exceed capacity).
             if (maxfuel < fuel)
                 maxfuel = fuel;
         } else {
-            // No save table (fresh unit): the loaded value IS the capacity.
+            // No base row found (fresh unit): the loaded value IS the capacity.
             maxfuel = fuel;
         }
     }
