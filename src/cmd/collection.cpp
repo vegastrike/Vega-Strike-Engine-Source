@@ -43,6 +43,13 @@ UnitCollection::UnitIterator::UnitIterator( UnitCollection *orig )
 {
     col = orig;
     it = col->u.begin();
+    //Register BEFORE the constructor's erase loop: the loop calls
+    //col->erase(it), which defers physical node deletion while other
+    //iterators are active on the list (removedIters). If we register only
+    //after erasing, activeIters undercounts and erase() takes the immediate
+    //u.erase() path, freeing a node a mid-walk iterator may still visit ->
+    //use-after-free in advance(). Matches the modern engine's fix.
+    col->reg(this);
     while(it != col->u.end()){
         if((*it) == NULL)
             ++it;
@@ -53,7 +60,6 @@ UnitCollection::UnitIterator::UnitIterator( UnitCollection *orig )
                 break;
         }
     }
-    col->reg(this);
 }
 
 UnitCollection::UnitIterator::~UnitIterator()
