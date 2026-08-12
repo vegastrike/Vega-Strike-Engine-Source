@@ -165,24 +165,44 @@ void Movable::UpdatePhysics(const Transformation& trans,
     UpdatePhysics3(trans, transmat, lastframe, uc, superunit);
 
     if (resolveforces) {
-        //clamp velocity
-        // TODO: use resource class to do this more elegantly
+        //clamp velocity to the resource-backed speed limits
         ResolveForces(trans, transmat);
-        float velocity_max = configuration().physics.velocity_max_flt;
-        if (Velocity.i > velocity_max) {
-            Velocity.i = velocity_max;
-        } else if (Velocity.i < -velocity_max) {
-            Velocity.i = -velocity_max;
-        }
-        if (Velocity.j > velocity_max) {
-            Velocity.j = velocity_max;
-        } else if (Velocity.j < -velocity_max) {
-            Velocity.j = -velocity_max;
-        }
-        if (Velocity.k > velocity_max) {
-            Velocity.k = velocity_max;
-        } else if (Velocity.k < -velocity_max) {
-            Velocity.k = -velocity_max;
+        // Enforce the flight computer's set speed on the RESULTING velocity
+        // magnitude (not per-axis), so turning or moving diagonally cannot push
+        // the ship past the speed the pilot set. This runs after the velocity
+        // integration, so it holds for the frame. Warp (SPEC) is exempt.
+        // The limits come from the drive/afterburner Resource values via
+        // MaxSpeed()/MaxAfterburnerSpeed(); the hardcoded velocity_max_flt
+        // per-axis cap is no longer needed.
+        const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+        if (graphicOptions.WarpFieldStrength == 1.0) {
+            double limit = unit->computer.set_speed;
+            // Allow up to the afterburner speed only when the afterburner is
+            // ACTIVELY engaged (afterburn && CanConsume, set in Movable::Thrust).
+            // A fuel-only proxy (CanConsume) would wrongly lift the limit during
+            // a turn, letting turn overspeed ride up to the afterburn speed.
+            const double mag = Velocity.Magnitude();
+            if (mag > limit) {
+                if (unit->afterburner.active) {
+                    limit = unit->MaxAfterburnerSpeed();
+                }
+                if (mag > limit) {
+                    // Decelerate toward the limit at the max rate the opposing
+                    // thrusters can produce (per-axis drive limits), not an
+                    // instant snap. Overspeed from afterburn release, travel
+                    // mode, or turns bleeds off at the ship's real
+                    // deceleration capability. Use the direction opposite to
+                    // the current velocity so forward motion bleeds via retro
+                    // thrust, sideways via lateral, etc.
+                    const double decel = GetMaxAccelerationInDirectionOf(-Velocity, unit->afterburner.active);
+                    const double bleed = decel * simulation_atom_var;
+                    double newmag = mag - bleed;
+                    if (newmag < limit) {
+                        newmag = limit;
+                    }
+                    Velocity *= (newmag / mag);
+                }
+            }
         }
     }
 
@@ -662,8 +682,66 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     if (amt1.k > ablimit) {
         Res.k = ablimit;
     }
-    if (amt1.k < -unit->drive.retro) {
-        Res.k = -unit->drive.retro;
+    // Retro (braking) thrust: afterburn also boosts deceleration, so the
+    // afterburner's extra thrust is available when braking just as it is when
+    // accelerating forward. Mirrors the forward ablimit formula.
+    float retro_limit = unit->drive.retro.Value();
+    if (afterburn) {
+        retro_limit =
+                (unit->afterburner.thrust - unit->drive.retro.Value()) * abfuelclamp
+                + unit->drive.retro.Value() * fuelclamp;
+    }
+    if (amt1.k < -retro_limit) {
+        Res.k = -retro_limit;
+    }
+    if (!afterburn) {
+        // At or above the set speed and moving forward, the FCMP may only
+        // REDIRECT the velocity, not accelerate it. After the per-axis
+        // clamps, remove the component of the final thrust parallel to the
+        // current velocity. The remaining thrust is perpendicular to the
+        // velocity: it rotates the velocity toward the intended (forward)
+        // direction while keeping the speed constant, so the total speed can
+        // never overshoot the set point. This continues until all speed is in
+        // the intended direction.
+        //
+        // IMPORTANT: use the FRESH local velocity (UpCoordinateLevel of the
+        // world velocity), exactly as the FCMP does. The raw Velocity member
+        // is not re-expressed when the ship rotates, so it is stale/mixed
+        // after a turn and projecting against it leaves residuals that
+        // accumulate into overshoot.
+        //
+        // If the perpendicular result exceeds a per-axis thruster limit,
+        // scale it down PRESERVING DIRECTION (never re-clamp per-axis, which
+        // would reintroduce the accelerating component).
+        //
+        // Deceleration is never affected: moving backward (Velocity.k < 0)
+        // skips this, and retro thrust is parallel-negative so it is kept.
+        // Afterburn is exempt: it is meant to accelerate.
+        const Vector local_vel = UpCoordinateLevel(GetVelocity());
+        const float speed = local_vel.Magnitude();
+        if (speed >= unit->computer.set_speed && local_vel.k > 0 && speed > 0) {
+            const Vector vhat = local_vel / speed;
+            const double parallel = Res.Dot(vhat);
+            if (parallel > 0) {
+                Res -= vhat * parallel;
+                // Scale the whole vector down (preserving direction) so each
+                // axis stays within its physical thruster limit.
+                float scale = 1.0f;
+                const float lim_i = fabs(fuelclamp * unit->drive.lateral);
+                const float lim_j = fabs(fuelclamp * unit->drive.vertical);
+                const float lim_k = (Res.k > 0) ? ablimit : retro_limit;
+                if (lim_i > 0 && fabs(Res.i) > lim_i) {
+                    scale = std::min(scale, lim_i / fabs(Res.i));
+                }
+                if (lim_j > 0 && fabs(Res.j) > lim_j) {
+                    scale = std::min(scale, lim_j / fabs(Res.j));
+                }
+                if (lim_k > 0 && fabs(Res.k) > lim_k) {
+                    scale = std::min(scale, lim_k / fabs(Res.k));
+                }
+                Res *= scale;
+            }
+        }
     }
 
     if (afterburn) {
@@ -745,6 +823,10 @@ void Movable::RollTorque(float amt) {
 void Movable::Thrust(const Vector &amt1, bool afterburn) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     afterburn = afterburn && unit->afterburner.CanConsume();
+    // Record whether the afterburner is actively engaged this step. The
+    // velocity clamp in UpdatePhysics reads this to allow afterburn speed only
+    // when the burner is truly active (not merely when fuel exists).
+    unit->afterburner.active = afterburn;
 
     //Unit::Thrust( amt1, afterburn );
     {
