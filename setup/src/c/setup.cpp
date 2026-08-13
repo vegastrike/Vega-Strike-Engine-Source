@@ -453,8 +453,8 @@ static SDL_Window *window = NULL;
 static SDL_GLContext gl_context = NULL;
 
 // Fixed logical resolution scaled up to fill the fullscreen window.
-#define VSSETUP_LOGICAL_W 800
-#define VSSETUP_LOGICAL_H 600
+#define VSSETUP_LOGICAL_W 1280
+#define VSSETUP_LOGICAL_H 720
 static GLuint fbo = 0, fbo_tex = 0;
 
 static void view_readme(void) {
@@ -593,7 +593,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     // Fix the layout resolution BEFORE the frame is built, so the UI and the
-    // 800x600 FBO render agree (otherwise the draw data is laid out in native
+    // 1280x720 FBO render agree (otherwise the draw data is laid out in native
     // fullscreen space and gets clipped to nothing at 800x600 -> black).
     ImGui::GetIO().DisplaySize = ImVec2(VSSETUP_LOGICAL_W, VSSETUP_LOGICAL_H);
     ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
@@ -684,7 +684,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     ImGui::End();
 
     ImGui::Render();
-    // Render ImGui at 800x600 into the offscreen FBO.
+    // Render ImGui at 1280x720 into the offscreen FBO.
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glViewport(0, 0, VSSETUP_LOGICAL_W, VSSETUP_LOGICAL_H);
     glClearColor(0.10f, 0.11f, 0.12f, 1.0f);
