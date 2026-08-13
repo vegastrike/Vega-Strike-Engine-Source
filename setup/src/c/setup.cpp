@@ -95,6 +95,7 @@ static std::string active_asset;                // the active asset pack (persis
 static std::string selected_asset;              // asset highlighted in the asset screen
 static std::vector<std::string> discovered;     // installed asset dirs
 static bool show_help = false;                  // show the asset-help text
+static bool invalid_popup = false;              // warn about an asset lacking Version.txt
 static const char *ASSET_HELP =
     "To add an asset pack, put its folder in:\n"
     "  ~/.local/share/vs-05/assets/<packname>/\n\n"
@@ -313,10 +314,19 @@ static void load_active_asset(void) {
     }
 }
 
+// True if the asset dir contains a Version.txt (empty = the 'none' option is fine).
+static bool asset_has_version(const std::string &name) {
+    if (name.empty()) return true;
+    return file_exists(assets_dir_path() + "/" + name + "/Version.txt");
+}
+
 // Ensure the asset's Version.txt points the engine at the per-mod config dir
 // (~/.config/vs-05/<mod>/), rewriting it if it still names the old .vs-05 subdir.
+// Only touches a file that already exists; a missing Version.txt (i.e. not a real
+// VegaStrike mod) is left alone and handled by the app's validity check.
 static void ensure_asset_version(const std::string &name) {
     std::string vfile = assets_dir_path() + "/" + name + "/Version.txt";
+    if (!file_exists(vfile)) return;
     std::string want = ".config/vs-05/" + name;
     std::string cur;
     FILE *f = fopen(vfile.c_str(), "r");
@@ -395,6 +405,7 @@ static bool load_config(void) {
     if (active_asset.empty()) return false;
     std::string asset_dir = assets_dir_path() + "/" + active_asset;
     if (!file_exists(asset_dir + "/vegastrike.config")) return false;
+    if (!asset_has_version(active_asset)) return false;   // not a valid VegaStrike mod
 
     columns = 4;
     program_name.clear();
@@ -476,8 +487,10 @@ static void draw_assets_screen(void) {
         if (!discovered.empty()) ImGui::Separator();
     }
     for (auto &a : discovered)
-        if (ImGui::Selectable(a.c_str(), a == selected_asset))
+        if (ImGui::Selectable(a.c_str(), a == selected_asset)) {
             selected_asset = a;
+            if (!asset_has_version(a)) invalid_popup = true;
+        }
     ImGui::Separator();
     if (ImGui::Selectable("(none)", selected_asset.empty()))
         selected_asset = "";
@@ -486,16 +499,32 @@ static void draw_assets_screen(void) {
     // Help, Save, Close
     float btnw = ImGui::CalcTextSize("Close").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
     float gap = ImGui::GetStyle().ItemSpacing.x;
+    bool sel_ok = selected_asset.empty() || asset_has_version(selected_asset);
     ImGui::SetCursorPosX((avail_w - (btnw * 3 + gap * 2)) * 0.5f);
     if (ImGui::Button("Help", ImVec2(btnw, 0))) show_help = !show_help;
     ImGui::SameLine();
+    ImGui::BeginDisabled(!sel_ok);
     if (ImGui::Button("Save", ImVec2(btnw, 0))) {
         active_asset = selected_asset;
         save_active_asset();
         load_config();   // rebuild the table for the new active asset
     }
+    ImGui::EndDisabled();
     ImGui::SameLine();
     if (ImGui::Button("Close", ImVec2(btnw, 0))) mode = 0;
+
+    // Warning modal when the selected directory has no Version.txt.
+    if (invalid_popup) { ImGui::OpenPopup("No Version.txt"); invalid_popup = false; }
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("No Version.txt", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::TextWrapped("This asset has no version.txt.\n\n"
+                           "Are you sure this is a VegaStrike mod?\n\n"
+                           "Save is disabled for this directory.\n");
+        ImGui::Separator();
+        if (ImGui::Button("OK", ImVec2(120, 0))) ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
 }
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
