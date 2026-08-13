@@ -236,7 +236,7 @@ static bool has_unsaved(void) {
     return false;
 }
 
-// The engine binary sits next to this app in the install dir.
+// The engine binary (vs-05) sits next to this app in the install dir.
 static std::string find_engine(void) {
     char buf[4096];
     ssize_t n = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
@@ -245,11 +245,11 @@ static std::string find_engine(void) {
         std::string exe(buf);
         size_t slash = exe.rfind('/');
         if (slash != std::string::npos) {
-            std::string cand = exe.substr(0, slash) + "/vegastrike";
+            std::string cand = exe.substr(0, slash) + "/vs-05";
             if (file_exists(cand)) return cand;
         }
     }
-    return data_dir + "/../vegastrike";
+    return data_dir + "/../vs-05";
 }
 
 // Launch the engine, pointing it at the data dir (it finds the config from the

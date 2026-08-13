@@ -657,6 +657,7 @@ OPTION(DISABLE_CLIENT "Disable building the vegastrike bin"
 		OFF )
 IF(NOT DISABLE_CLIENT)
 	add_executable(vegastrike ${VEGASTRIKE_SOURCES})
+	set_target_properties(vegastrike PROPERTIES OUTPUT_NAME vs-05)   # avoid clashing with the main vegastrike binary
 ENDIF(NOT DISABLE_CLIENT)
 
 OPTION(DISABLE_SERVER "Disable building the vegaserver bin"
