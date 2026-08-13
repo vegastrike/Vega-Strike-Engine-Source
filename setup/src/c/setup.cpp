@@ -313,6 +313,28 @@ static void load_active_asset(void) {
     }
 }
 
+// Ensure the asset's Version.txt points the engine at the per-mod config dir
+// (~/.config/vs-05/<mod>/), rewriting it if it still names the old .vs-05 subdir.
+static void ensure_asset_version(const std::string &name) {
+    std::string vfile = assets_dir_path() + "/" + name + "/Version.txt";
+    std::string want = ".config/vs-05/" + name;
+    std::string cur;
+    FILE *f = fopen(vfile.c_str(), "r");
+    if (f) {
+        char buf[512];
+        if (fgets(buf, sizeof(buf), f)) {
+            cur = buf;
+            if (!cur.empty() && cur[cur.size()-1] == '\n') cur.pop_back();
+        }
+        fclose(f);
+    }
+    if (cur != want) {
+        FILE *w = fopen(vfile.c_str(), "w");
+        if (w) { fprintf(w, "%s\n", want.c_str()); fclose(w); }
+        fprintf(stderr, "Set %s Version.txt -> %s\n", name.c_str(), want.c_str());
+    }
+}
+
 static void save_active_asset(void) {
     mkdir(xdg_config_dir().c_str(), 0755);
     mkdir((xdg_config_dir() + "/vs-05").c_str(), 0755);
@@ -402,6 +424,7 @@ static bool load_config(void) {
     config_file = pm_cfg;
     read_source = pm_cfg;
     data_dir = asset_dir;
+    ensure_asset_version(active_asset);
 
     FILE *fp = fopen(read_source.c_str(), "r");
     if (!fp) return false;
