@@ -51,7 +51,6 @@ static char *next_parm(char *s) {
 }
 
 static bool file_exists(const std::string &p) { struct stat st; return stat(p.c_str(), &st) == 0; }
-static long file_mtime(const std::string &p)  { struct stat st; return stat(p.c_str(), &st) == 0 ? (long)st.st_mtime : -1; }
 
 // Split a line that may hold an XML comment "<!-- ... -->" into the part
 // before it, inside it, and after it (all pointers into `line`).
@@ -184,7 +183,7 @@ static int rewrite(const std::string &path, const std::string &group,
             fprintf(wp, "%s\n", line); continue;
         }
         if (strcmp(kw, "set") == 0) {
-            char *grp = args; char *val = next_parm(grp);
+            char *grp = args; (void)next_parm(grp);   // advances + null-terminates the group token
             if (grp && strcmp(grp, group.c_str()) == 0) {
                 if (setting == 1) fprintf(wp, "#set %s none\n", group.c_str());
                 else fprintf(wp, "#set %s %s\n", group.c_str(), name.c_str());
