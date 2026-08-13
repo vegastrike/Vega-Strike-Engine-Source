@@ -220,6 +220,7 @@ static void apply_change(Group *g, const std::string &new_option) {
 
 // Commit any staged changes to the config file (comment old, uncomment new, update #set).
 static void save(void) {
+    if (config_file.empty()) return;   // no active asset -> nothing to save
     for (auto &g : groups)
         if (g.current != g.original) {
             rewrite(config_file, g.name, g.original, 1);
@@ -255,6 +256,7 @@ static std::string find_engine(void) {
 // home subdir derived from Version.txt). Commits staged changes first so the
 // game sees the current settings.
 static void launch(void) {
+    if (active_asset.empty()) { fprintf(stderr, "No active asset to launch.\n"); return; }
     save();
     std::string engine = find_engine();
     std::string arg = "-D" + data_dir;
@@ -349,32 +351,33 @@ static const std::string &assets_help_text(void) {
 // Startup: find the data dir, read setup.config, locate the config we edit
 // ---------------------------------------------------------------------------
 
-static bool discover(int argc, char **argv) {
-    // candidate data dirs, mirroring the original setup.cpp search
-    char cwd[4096];
-    std::string launch = getcwd(cwd, sizeof(cwd)) ? cwd : "";
-    std::vector<std::string> candidates;
-    if (argc > 2 && strcmp(argv[1], "--target") == 0) candidates.push_back(argv[2]);
-#ifdef DATA_DIR
-    candidates.push_back(DATA_DIR);
-#endif
-    if (!launch.empty()) {
-        candidates.push_back(launch);
-        candidates.push_back(launch + "/data");
-        candidates.push_back(launch + "/../data");
-        candidates.push_back(launch + "/data4.x");
-        candidates.push_back(launch + "/../data4.x");
-        candidates.push_back(launch + "/../Resources");
+static void copy_file(const std::string &src, const std::string &dst) {
+    FILE *in = fopen(src.c_str(), "r");
+    if (!in) return;
+    FILE *out = fopen(dst.c_str(), "w");
+    if (out) {
+        char buf[4096];
+        size_t n;
+        while ((n = fread(buf, 1, sizeof(buf), in)) > 0) fwrite(buf, 1, n, out);
+        fclose(out);
     }
-    std::string found;
-    for (auto &c : candidates)
-        if (file_exists(c + "/setup.config") && file_exists(c + "/Version.txt")) { found = c; break; }
-    if (found.empty()) { fprintf(stderr, "Error: Failed to find data directory (setup.config + Version.txt).\n"); return false; }
-    data_dir = found;
+    fclose(in);
+}
 
-    FILE *f = fopen((data_dir + "/setup.config").c_str(), "r");
-    if (!f) { fprintf(stderr, "Unable to read setup.config\n"); return false; }
-    {
+// Load the config model for the active asset. With no active asset there is no
+// table. The per-mod config (~/.config/vs-05/<mod>/vegastrike.config) is the
+// edit target, initialized from the asset's shipped config on first use.
+static bool load_config(void) {
+    groups.clear();
+    config_file.clear();
+    if (active_asset.empty()) return false;
+    std::string asset_dir = assets_dir_path() + "/" + active_asset;
+    if (!file_exists(asset_dir + "/vegastrike.config")) return false;
+
+    columns = 4;
+    program_name.clear();
+    FILE *f = fopen((asset_dir + "/setup.config").c_str(), "r");
+    if (f) {
         char line[512];
         while (fgets(line, sizeof(line), f)) {
             chomp(line);
@@ -382,28 +385,30 @@ static bool discover(int argc, char **argv) {
             char *kw = line; char *val = next_parm(kw);
             if (val == NULL) continue;
             if (strcmp(kw, "program_name") == 0) program_name = val;
-            else if (strcmp(kw, "config_file") == 0) read_source = val;
             else if (strcmp(kw, "columns") == 0) columns = atoi(val);
         }
+        fclose(f);
     }
-    fclose(f);
-    if (read_source.empty()) read_source = "vegastrike.config";
 
-    // home subdir named in Version.txt
-    std::string home = getenv("HOME") ? getenv("HOME") : ".";
-    std::string sub;
-    FILE *v = fopen((data_dir + "/Version.txt").c_str(), "r");
-    if (v) { int c; while ((c = fgetc(v)) != EOF && !isspace(c)) sub += (char)c; fclose(v); }
-    if (sub.empty()) { fprintf(stderr, "Error: Failed to find Version.txt anywhere.\n"); return false; }
-    std::string home_dir = home + "/" + sub;
-    mkdir(home_dir.c_str(), 0755);
+    // per-mod config dir (edit target); init from the shipped config if missing
+    std::string pm_dir = xdg_config_dir() + "/vs-05/" + active_asset;
+    std::string pm_cfg = pm_dir + "/vegastrike.config";
+    if (!file_exists(pm_cfg)) {
+        mkdir(xdg_config_dir().c_str(), 0755);
+        mkdir((xdg_config_dir() + "/vs-05").c_str(), 0755);
+        mkdir(pm_dir.c_str(), 0755);
+        copy_file(asset_dir + "/vegastrike.config", pm_cfg);
+    }
+    config_file = pm_cfg;
+    read_source = pm_cfg;
+    data_dir = asset_dir;
 
-    // we always edit the home copy; read from whichever copy is newer
-    std::string home_cfg = home_dir + "/" + read_source;
-    std::string data_cfg = data_dir + "/" + read_source;
-    config_file = home_cfg;
-    read_source = (file_exists(home_cfg) && (!file_exists(data_cfg) || file_mtime(home_cfg) >= file_mtime(data_cfg)))
-                    ? home_cfg : data_cfg;
+    FILE *fp = fopen(read_source.c_str(), "r");
+    if (!fp) return false;
+    parse_config(fp);
+    fclose(fp);
+    build_display();
+    for (auto &g : groups) g.original = g.current;
     return true;
 }
 
@@ -430,7 +435,7 @@ static void view_readme(void) {
 
 static std::string window_title(void) {
     std::string t = program_name.empty() ? "Vega Strike" : program_name;
-    return "Program Configuration - " + t + " - Version 0.5.1 Build 13218";
+    return "Program Configuration - " + t + " - Version " VSSETUP_VERSION;
 }
 
 // The asset-selection screen (opened by the main Assets button).
@@ -450,6 +455,9 @@ static void draw_assets_screen(void) {
     for (auto &a : discovered)
         if (ImGui::Selectable(a.c_str(), a == selected_asset))
             selected_asset = a;
+    ImGui::Separator();
+    if (ImGui::Selectable("(none)", selected_asset.empty()))
+        selected_asset = "";
     ImGui::EndChild();
 
     // Help, Save, Close
@@ -459,27 +467,20 @@ static void draw_assets_screen(void) {
     if (ImGui::Button("Help", ImVec2(btnw, 0))) show_help = !show_help;
     ImGui::SameLine();
     if (ImGui::Button("Save", ImVec2(btnw, 0))) {
-        if (!selected_asset.empty()) active_asset = selected_asset;
+        active_asset = selected_asset;
         save_active_asset();
+        load_config();   // rebuild the table for the new active asset
     }
     ImGui::SameLine();
     if (ImGui::Button("Close", ImVec2(btnw, 0))) mode = 0;
 }
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
-    if (!discover(argc, argv)) return SDL_APP_FAILURE;
-
-    FILE *fp = fopen(read_source.c_str(), "r");
-    if (!fp) { fprintf(stderr, "Unable to read %s\n", read_source.c_str()); return SDL_APP_FAILURE; }
-    parse_config(fp);
-    fclose(fp);
-    build_display();
-    for (auto &g : groups) g.original = g.current;   // baseline for save()
-
     ensure_assets_dir();
     discover_assets();
     load_active_asset();
     selected_asset = active_asset;
+    load_config();   // asset-driven; no active asset -> no table
 
     if (!SDL_Init(SDL_INIT_VIDEO)) { fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError()); return SDL_APP_FAILURE; }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
@@ -553,6 +554,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
         draw_assets_screen();
     } else {
     ImGui::Text("VS-05 Configuration Utility");
+    ImGui::Text("Version %s", VSSETUP_VERSION);
     ImGui::Text("Active asset: %s", active_asset.empty() ? "(none)" : active_asset.c_str());
     ImGui::Separator();
 
@@ -576,6 +578,9 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     }
     float total_w = 0;
     for (auto c : colw) total_w += c;
+    if (groups.empty()) {
+        ImGui::TextWrapped("No asset selected.\n\nUse the Assets button to choose an installed asset pack, which provides the configuration table.");
+    } else {
     ImGui::SetCursorPosX(fmaxf(0.0f, (ImGui::GetContentRegionAvail().x - total_w) * 0.5f));
     if (ImGui::BeginTable("grid", columns, ImGuiTableFlags_SizingFixedFit)) {
         for (auto &g : groups) {
@@ -595,6 +600,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
                 if (sel >= 0 && sel != current) apply_change(&g, g.options[sel].name);
         }
         ImGui::EndTable();
+    }
     }
     ImGui::EndChild();
 

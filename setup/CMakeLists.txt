@@ -8,6 +8,18 @@ string(REPLACE "-fvisibility=hidden" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 string(REPLACE "-fvisibility=hidden" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
 string(REPLACE "-fvisibility=hidden" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
+# Version string from git (tag + commits, e.g. "v0.5.1" or "v0.5.1-12-gabc1234").
+execute_process(
+    COMMAND git describe --tags --dirty --always
+    WORKING_DIRECTORY ${vsUTCS_SOURCE_DIR}
+    OUTPUT_VARIABLE VSSETUP_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET)
+if (NOT VSSETUP_VERSION)
+    set(VSSETUP_VERSION "unknown")
+endif()
+add_definitions(-DVSSETUP_VERSION="${VSSETUP_VERSION}")
+
 add_executable(vssetup src/c/setup.cpp)
 
 # Vendored Dear ImGui (libraries/imgui) with the SDL3 + OpenGL3 backends.

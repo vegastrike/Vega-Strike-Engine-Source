@@ -594,6 +594,30 @@ void InitDataDirectory()
     if (!datadir.empty())
         data_paths.push_back( datadir );
 
+    /* If no data dir was given on the command line, use the active asset
+     * configured by the settings app:
+     *   ~/.config/vs-05/active_asset  ->  ~/.local/share/vs-05/assets/<name>/
+     * so the configured asset is the first one discovered. */
+    if (datadir.empty()) {
+        const char *home = getenv( "HOME" );
+        if (home) {
+            std::string active = std::string( home ) + "/.config/vs-05/active_asset";
+            FILE *f = fopen( active.c_str(), "r" );
+            if (f) {
+                char buf[256];
+                if (fgets( buf, sizeof( buf ), f )) {
+                    size_t n = strlen( buf );
+                    while (n && (buf[n-1] == '\n' || buf[n-1] == '\r')) buf[--n] = '\0';
+                    if (buf[0]) {
+                        std::string assetdir = std::string( home ) + "/.local/share/vs-05/assets/" + buf;
+                        data_paths.push_back( assetdir );
+                    }
+                }
+                fclose( f );
+            }
+        }
+    }
+
     /* DATA_DIR should no longer be necessary--it will either use the path
      *  to the binary, or the current directory. */
 #ifdef DATA_DIR
