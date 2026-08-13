@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -73,6 +74,7 @@ struct Option { std::string name; std::string desc; };
 struct Group {
     std::string name;
     std::string current;              // current #set value (option name)
+    std::string original;             // the #set value as loaded (for save())
     std::vector<Option> options;      // in #cat order
     std::vector<std::string> display; // per-option combo text (desc, else name)
     std::vector<const char*> items;   // pointers into display, for ImGui::Combo
@@ -196,13 +198,20 @@ static int rewrite(const std::string &path, const std::string &group,
     return 0;
 }
 
-// Apply a dropdown change: comment the old setting, then uncomment the new one.
+// Stage a dropdown change: only updates the in-memory model. save() commits it.
 static void apply_change(Group *g, const std::string &new_option) {
-    if (g->current == new_option) return;
-    std::string old_option = g->current;
-    rewrite(config_file, g->name, old_option, 1);
-    rewrite(config_file, g->name, new_option, 2);
-    g->current = new_option;
+    if (g->current != new_option)
+        g->current = new_option;
+}
+
+// Commit any staged changes to the config file (comment old, uncomment new, update #set).
+static void save(void) {
+    for (auto &g : groups)
+        if (g.current != g.original) {
+            rewrite(config_file, g.name, g.original, 1);
+            rewrite(config_file, g.name, g.current, 2);
+            g.original = g.current;
+        }
 }
 
 // ---------------------------------------------------------------------------
@@ -279,10 +288,13 @@ static SDL_GLContext gl_context = NULL;
 #define VSSETUP_LOGICAL_H 600
 static GLuint fbo = 0, fbo_tex = 0;
 
-static void myexit(void) {
+static void view_readme(void) {
     std::string r = data_dir + "/documentation/readme.txt";
-    execlp("xdg-open", "xdg-open", r.c_str(), NULL);
-    exit(0);
+    // fork so xdg-open opens the readme while the settings app keeps running.
+    if (fork() == 0) {
+        execlp("xdg-open", "xdg-open", r.c_str(), NULL);
+        _exit(0);
+    }
 }
 
 static std::string window_title(void) {
@@ -298,6 +310,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
     parse_config(fp);
     fclose(fp);
     build_display();
+    for (auto &g : groups) g.original = g.current;   // baseline for save()
 
     if (!SDL_Init(SDL_INIT_VIDEO)) { fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError()); return SDL_APP_FAILURE; }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
@@ -367,11 +380,31 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(VSSETUP_LOGICAL_W, VSSETUP_LOGICAL_H), ImGuiCond_Always);
     ImGui::Begin("##vssetup", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
+    ImGui::Text("VS-05 Configuration Utility");
     ImGui::TextWrapped("Vega Strike requires the latest drivers for your video card.\nIf you run into problems please upgrade your video drivers.\n\nTo adjust volume levels in-game, use F9/F10 for sound and F11/F12 for music.");
     ImGui::Separator();
 
-    float btn = ImGui::GetFrameHeightWithSpacing() * 2 + ImGui::GetStyle().ItemSpacing.y;
-    ImGui::BeginChild("groups", ImVec2(0, -btn), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+    float avail_w = ImGui::GetContentRegionAvail().x;
+    float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
+
+    // Frame holding the settings table (fills the space between the header and
+    // the buttons; the table just scrolls inside it).
+    ImGui::BeginChild("frame", ImVec2(0, -btn_h), ImGuiChildFlags_Borders,
+                      ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+    // Center the table horizontally within the frame.
+    int idx = 0;
+    std::vector<float> colw(columns, 0.0f);
+    for (auto &g : groups) {
+        float cw = 0;
+        for (auto &s : g.display) cw = fmaxf(cw, ImGui::CalcTextSize(s.c_str()).x);
+        cw += ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x;
+        cw = fmaxf(cw, ImGui::CalcTextSize(g.name.c_str()).x);
+        colw[idx % columns] = fmaxf(colw[idx % columns], cw);
+        idx++;
+    }
+    float total_w = 0;
+    for (auto c : colw) total_w += c;
+    ImGui::SetCursorPosX(fmaxf(0.0f, (ImGui::GetContentRegionAvail().x - total_w) * 0.5f));
     if (ImGui::BeginTable("grid", columns, ImGuiTableFlags_SizingFixedFit)) {
         for (auto &g : groups) {
             ImGui::TableNextColumn();
@@ -380,7 +413,11 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
             for (size_t j = 0; j < g.options.size(); j++)
                 if (g.options[j].name == g.current) { current = (int)j; break; }
             int sel = current;
-            ImGui::SetNextItemWidth(-FLT_MIN);
+            // Width = widest option text + the dropdown arrow + padding, so the
+            // arrow never overlaps the text.
+            float cw = 0;
+            for (auto &s : g.display) cw = fmaxf(cw, ImGui::CalcTextSize(s.c_str()).x);
+            ImGui::SetNextItemWidth(cw + ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x);
             char lbl[64]; snprintf(lbl, sizeof(lbl), "##%s", g.name.c_str());
             if (ImGui::Combo(lbl, &sel, g.items.data(), (int)g.items.size()))
                 if (sel >= 0 && sel != current) apply_change(&g, g.options[sel].name);
@@ -389,8 +426,15 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     }
     ImGui::EndChild();
 
-    if (ImGui::Button("Save Settings And View Readme")) myexit();
-    if (ImGui::Button("Save Settings and Exit")) want_quit = true;
+    // Center the three buttons side by side.
+    float btnw = ImGui::CalcTextSize("View Readme").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
+    float gap = ImGui::GetStyle().ItemSpacing.x;
+    ImGui::SetCursorPosX((avail_w - (btnw * 3 + gap * 2)) * 0.5f);
+    if (ImGui::Button("Save", ImVec2(btnw, 0))) save();
+    ImGui::SameLine();
+    if (ImGui::Button("View Readme", ImVec2(btnw, 0))) view_readme();
+    ImGui::SameLine();
+    if (ImGui::Button("Exit", ImVec2(btnw, 0))) want_quit = true;
     ImGui::End();
 
     ImGui::Render();
