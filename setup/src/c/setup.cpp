@@ -19,6 +19,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <dirent.h>
+#include <algorithm>
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -86,6 +88,18 @@ static std::string read_source;   // path we read the model from (newer of home/
 static std::string data_dir;      // the data directory (for the readme)
 static std::string program_name;  // from setup.config (for the window title)
 static int columns = 4;
+
+// Asset selection state
+static int mode = 0;                            // 0 = main settings, 1 = asset screen
+static std::string active_asset;                // the active asset pack (persisted)
+static std::string selected_asset;              // asset highlighted in the asset screen
+static std::vector<std::string> discovered;     // installed asset dirs
+static bool show_help = false;                  // show the asset-help text
+static const char *ASSET_HELP =
+    "To add an asset pack, put its folder in:\n"
+    "  ~/.local/share/vs-05/assets/<packname>/\n\n"
+    "Each pack is a complete data tree (units/, sectors/, meshes/, \n"
+    "textures/, ...). Select a pack below to make it the active asset.";
 
 static Group *find_group(const std::string &name) {
     for (auto &g : groups) if (g.name == name) return &g;
@@ -251,6 +265,87 @@ static void launch(void) {
 }
 
 // ---------------------------------------------------------------------------
+// XDG asset discovery (assets in ~/.local/share/vs-05/assets, config+saves in
+// ~/.config/vs-05)
+// ---------------------------------------------------------------------------
+
+static std::string xdg_data_dir(void) {
+    std::string home = getenv("HOME") ? getenv("HOME") : ".";
+    return home + "/.local/share";
+}
+static std::string xdg_config_dir(void) {
+    std::string home = getenv("HOME") ? getenv("HOME") : ".";
+    return home + "/.config";
+}
+static std::string assets_dir_path(void) { return xdg_data_dir() + "/vs-05/assets"; }
+static std::string active_asset_file(void) { return xdg_config_dir() + "/vs-05/active_asset"; }
+
+static void ensure_assets_dir(void) {
+    mkdir(xdg_data_dir().c_str(), 0755);
+    mkdir((xdg_data_dir() + "/vs-05").c_str(), 0755);
+    mkdir(assets_dir_path().c_str(), 0755);
+}
+
+static void discover_assets(void) {
+    discovered.clear();
+    DIR *dir = opendir(assets_dir_path().c_str());
+    if (!dir) return;
+    struct dirent *ent;
+    while ((ent = readdir(dir)) != NULL) {
+        if (ent->d_name[0] == '.') continue;
+        struct stat st;
+        std::string p = assets_dir_path() + "/" + ent->d_name;
+        if (stat(p.c_str(), &st) == 0 && S_ISDIR(st.st_mode))
+            discovered.push_back(ent->d_name);
+    }
+    closedir(dir);
+    std::sort(discovered.begin(), discovered.end());
+}
+
+static void load_active_asset(void) {
+    FILE *f = fopen(active_asset_file().c_str(), "r");
+    if (f) {
+        char buf[256];
+        if (fgets(buf, sizeof(buf), f)) { buf[strcspn(buf, "\n")] = '\0'; active_asset = buf; }
+        fclose(f);
+    }
+}
+
+static void save_active_asset(void) {
+    mkdir(xdg_config_dir().c_str(), 0755);
+    mkdir((xdg_config_dir() + "/vs-05").c_str(), 0755);
+    FILE *f = fopen(active_asset_file().c_str(), "w");
+    if (f) { fputs(active_asset.c_str(), f); fclose(f); }
+}
+
+// The installed assets_help.txt (next to this app), cached; falls back to the
+// embedded ASSET_HELP text if it can't be read.
+static const std::string &assets_help_text(void) {
+    static std::string cached;
+    static bool loaded = false;
+    if (!loaded) {
+        loaded = true;
+        std::string path;
+        char buf[4096];
+        ssize_t n = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+        if (n > 0) {
+            buf[n] = '\0';
+            std::string exe(buf);
+            size_t slash = exe.rfind('/');
+            if (slash != std::string::npos) path = exe.substr(0, slash) + "/assets_help.txt";
+        }
+        FILE *f = !path.empty() ? fopen(path.c_str(), "r") : NULL;
+        if (f) {
+            char line[512];
+            while (fgets(line, sizeof(line), f)) cached += line;
+            fclose(f);
+        }
+        if (cached.empty()) cached = ASSET_HELP;
+    }
+    return cached;
+}
+
+// ---------------------------------------------------------------------------
 // Startup: find the data dir, read setup.config, locate the config we edit
 // ---------------------------------------------------------------------------
 
@@ -338,6 +433,39 @@ static std::string window_title(void) {
     return "Program Configuration - " + t + " - Version 0.5.1 Build 13218";
 }
 
+// The asset-selection screen (opened by the main Assets button).
+static void draw_assets_screen(void) {
+    ImGui::Text("Asset Packs");
+    ImGui::TextWrapped("Active asset: %s", active_asset.empty() ? "(none)" : active_asset.c_str());
+    ImGui::Separator();
+    float avail_w = ImGui::GetContentRegionAvail().x;
+    float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
+
+    ImGui::BeginChild("assets", ImVec2(0, -btn_h), ImGuiChildFlags_Borders,
+                      ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+    if (show_help || discovered.empty()) {
+        ImGui::TextWrapped("%s", assets_help_text().c_str());
+        if (!discovered.empty()) ImGui::Separator();
+    }
+    for (auto &a : discovered)
+        if (ImGui::Selectable(a.c_str(), a == selected_asset))
+            selected_asset = a;
+    ImGui::EndChild();
+
+    // Help, Save, Close
+    float btnw = ImGui::CalcTextSize("Close").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
+    float gap = ImGui::GetStyle().ItemSpacing.x;
+    ImGui::SetCursorPosX((avail_w - (btnw * 3 + gap * 2)) * 0.5f);
+    if (ImGui::Button("Help", ImVec2(btnw, 0))) show_help = !show_help;
+    ImGui::SameLine();
+    if (ImGui::Button("Save", ImVec2(btnw, 0))) {
+        if (!selected_asset.empty()) active_asset = selected_asset;
+        save_active_asset();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Close", ImVec2(btnw, 0))) mode = 0;
+}
+
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
     if (!discover(argc, argv)) return SDL_APP_FAILURE;
 
@@ -347,6 +475,11 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
     fclose(fp);
     build_display();
     for (auto &g : groups) g.original = g.current;   // baseline for save()
+
+    ensure_assets_dir();
+    discover_assets();
+    load_active_asset();
+    selected_asset = active_asset;
 
     if (!SDL_Init(SDL_INIT_VIDEO)) { fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError()); return SDL_APP_FAILURE; }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
@@ -416,8 +549,11 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(VSSETUP_LOGICAL_W, VSSETUP_LOGICAL_H), ImGuiCond_Always);
     ImGui::Begin("##vssetup", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
+    if (mode == 1) {
+        draw_assets_screen();
+    } else {
     ImGui::Text("VS-05 Configuration Utility");
-    ImGui::TextWrapped("Vega Strike requires the latest drivers for your video card.\nIf you run into problems please upgrade your video drivers.\n\nTo adjust volume levels in-game, use F9/F10 for sound and F11/F12 for music.");
+    ImGui::Text("Active asset: %s", active_asset.empty() ? "(none)" : active_asset.c_str());
     ImGui::Separator();
 
     float avail_w = ImGui::GetContentRegionAvail().x;
@@ -462,15 +598,17 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     }
     ImGui::EndChild();
 
-    // Center the four buttons side by side. Launch and Exit turn red when there
+    // Center the five buttons side by side. Launch and Exit turn red when there
     // are unsaved changes.
     float btnw = ImGui::CalcTextSize("View Readme").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
     float gap = ImGui::GetStyle().ItemSpacing.x;
     bool unsaved = has_unsaved();
-    ImGui::SetCursorPosX((avail_w - (btnw * 4 + gap * 3)) * 0.5f);
+    ImGui::SetCursorPosX((avail_w - (btnw * 5 + gap * 4)) * 0.5f);
     if (ImGui::Button("Save", ImVec2(btnw, 0))) save();
     ImGui::SameLine();
     if (ImGui::Button("View Readme", ImVec2(btnw, 0))) view_readme();
+    ImGui::SameLine();
+    if (ImGui::Button("Assets", ImVec2(btnw, 0))) { discover_assets(); selected_asset = active_asset; mode = 1; }
     ImGui::SameLine();
     if (unsaved) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
@@ -485,6 +623,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     }
     if (ImGui::Button("Exit", ImVec2(btnw, 0))) want_quit = true;
     if (unsaved) ImGui::PopStyleColor(2);
+    }
     ImGui::End();
 
     ImGui::Render();

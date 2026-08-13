@@ -1,0 +1,30 @@
+VS-05 Asset Packs
+=================
+
+VS-05 loads its assets from asset packs installed in your home directory.
+Each pack is a folder containing a complete data tree (units/, sectors/,
+meshes/, textures/, ...).
+
+The settings app's "Assets" screen lists the packs it finds and lets you
+pick the active one.
+
+Getting the Vegastrike assets
+-----------------------------
+
+The default "vegastrike" asset pack is available from the VS-05 repository:
+
+    https://github.com/evertvorster/VS-05-lts-Assets
+
+Download the data and extract it so you end up with a folder named after the
+pack, containing the data tree. For example, for the standard assets:
+
+    ~/.local/share/vs-05/assets/vegastrike/
+
+Other asset packs can be placed next to it, one folder each:
+
+    ~/.local/share/vs-05/assets/<packname>/
+
+After placing a pack there, open the settings app, go to Assets, select the
+pack, and click Save. It becomes the active asset.
+
+(placeholder - full documentation to follow)
