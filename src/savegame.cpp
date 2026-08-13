@@ -560,7 +560,10 @@ void SaveGame::ReadMissionStringData( char* &buf, bool select_data, const std::s
         buf2 += hopto( buf2, ' ', '\n', 0 );
         vector< string > *vecstring = 0;
         bool skip = true;
-        if ( !select_data || select_data_filter.count( mag_num ) ) {
+        // md_i_size can be < 0 on a malformed save (e.g. the wcpu New_Game).
+        // Passing it to reserve() casts it to a huge size_t and throws
+        // std::length_error (hard crash), so guard it like the modern engine.
+        if ( md_i_size >= 0 && ( !select_data || select_data_filter.count( mag_num ) ) ) {
             vecstring = &missionstringdata->m[mag_num];
             vecstring->clear();
             vecstring->reserve(md_i_size);
