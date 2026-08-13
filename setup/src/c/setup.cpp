@@ -214,6 +214,42 @@ static void save(void) {
         }
 }
 
+// True if any group has a staged change not yet committed to disk.
+static bool has_unsaved(void) {
+    for (auto &g : groups)
+        if (g.current != g.original) return true;
+    return false;
+}
+
+// The engine binary sits next to this app in the install dir.
+static std::string find_engine(void) {
+    char buf[4096];
+    ssize_t n = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+    if (n > 0) {
+        buf[n] = '\0';
+        std::string exe(buf);
+        size_t slash = exe.rfind('/');
+        if (slash != std::string::npos) {
+            std::string cand = exe.substr(0, slash) + "/vegastrike";
+            if (file_exists(cand)) return cand;
+        }
+    }
+    return data_dir + "/../vegastrike";
+}
+
+// Launch the engine, pointing it at the data dir (it finds the config from the
+// home subdir derived from Version.txt). Commits staged changes first so the
+// game sees the current settings.
+static void launch(void) {
+    save();
+    std::string engine = find_engine();
+    std::string arg = "-D" + data_dir;
+    if (fork() == 0) {
+        execlp(engine.c_str(), engine.c_str(), arg.c_str(), NULL);
+        _exit(0);
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Startup: find the data dir, read setup.config, locate the config we edit
 // ---------------------------------------------------------------------------
@@ -426,15 +462,29 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     }
     ImGui::EndChild();
 
-    // Center the three buttons side by side.
+    // Center the four buttons side by side. Launch and Exit turn red when there
+    // are unsaved changes.
     float btnw = ImGui::CalcTextSize("View Readme").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
     float gap = ImGui::GetStyle().ItemSpacing.x;
-    ImGui::SetCursorPosX((avail_w - (btnw * 3 + gap * 2)) * 0.5f);
+    bool unsaved = has_unsaved();
+    ImGui::SetCursorPosX((avail_w - (btnw * 4 + gap * 3)) * 0.5f);
     if (ImGui::Button("Save", ImVec2(btnw, 0))) save();
     ImGui::SameLine();
     if (ImGui::Button("View Readme", ImVec2(btnw, 0))) view_readme();
     ImGui::SameLine();
+    if (unsaved) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
+    }
+    if (ImGui::Button("Launch", ImVec2(btnw, 0))) launch();
+    if (unsaved) ImGui::PopStyleColor(2);
+    ImGui::SameLine();
+    if (unsaved) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
+    }
     if (ImGui::Button("Exit", ImVec2(btnw, 0))) want_quit = true;
+    if (unsaved) ImGui::PopStyleColor(2);
     ImGui::End();
 
     ImGui::Render();
