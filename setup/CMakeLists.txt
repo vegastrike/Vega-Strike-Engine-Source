@@ -1,21 +1,28 @@
 IF (NOT BEOS)
-#set_property(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "")
-SET(VSSETUP_SOURCES src/c/setup.cpp
-                    src/include/central.cpp
-                    src/include/display_gtk.cpp
-                    src/include/display_dialog.cpp
-                    src/include/file.cpp
-                    src/include/general.cpp
-                    ../src/common/common.cpp )                                                                                                        
+# vssetup is a standalone Dear ImGui + SDL3 + OpenGL3 app. It does not use the
+# engine's config.h defines or hidden-visibility flags, so strip them here.
+string(REPLACE "-include config.h" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REPLACE "-include config.h" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+string(REPLACE "-include config.h" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+string(REPLACE "-fvisibility=hidden" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REPLACE "-fvisibility=hidden" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+string(REPLACE "-fvisibility=hidden" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
+add_executable(vssetup src/c/setup.cpp)
 
-add_executable(vssetup ${VSSETUP_SOURCES})
+# Vendored Dear ImGui (libraries/imgui) with the SDL3 + OpenGL3 backends.
+find_package(SDL3 CONFIG REQUIRED)
+find_package(OpenGL REQUIRED)
+add_library(vegastrike_imgui STATIC
+    ${vsUTCS_SOURCE_DIR}/libraries/imgui/imgui.cpp
+    ${vsUTCS_SOURCE_DIR}/libraries/imgui/imgui_draw.cpp
+    ${vsUTCS_SOURCE_DIR}/libraries/imgui/imgui_tables.cpp
+    ${vsUTCS_SOURCE_DIR}/libraries/imgui/imgui_widgets.cpp
+    ${vsUTCS_SOURCE_DIR}/libraries/imgui/backends/imgui_impl_sdl3.cpp
+    ${vsUTCS_SOURCE_DIR}/libraries/imgui/backends/imgui_impl_opengl3.cpp )
+set_property(TARGET vegastrike_imgui PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+target_link_libraries(vegastrike_imgui PUBLIC SDL3::SDL3 OpenGL::GL)
 
-#find GTK3 (replaces removed GTK2) via pkg-config
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-SET(GTK_CFLAGS -DGTK)
-add_definitions(${GTK_CFLAGS})
-include_directories(${vsUTCS_SOURCE_DIR}/setup/src/include ${vsUTCS_SOURCE_DIR}/src/common ${vsUTCS_BINARY_DIR} ${GTK3_INCLUDE_DIRS})
-target_link_libraries(vssetup ${GTK3_LIBRARIES})
+target_link_libraries(vssetup vegastrike_imgui m)
+include_directories(${vsUTCS_SOURCE_DIR}/libraries/imgui)
 ENDIF (NOT BEOS)

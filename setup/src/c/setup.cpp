@@ -1,212 +1,422 @@
-/***************************************************************************
- *                           setup.cpp  -  description
- *                           ----------------------------
- *                           begin                : January 18, 2002
- *                           copyright            : (C) 2002 by David Ranger
- *                           email                : sabarok@start.com.au
- **************************************************************************/
+// vssetup: Vega Strike settings configurator — Dear ImGui + SDL3 + OpenGL3.
+// Self-contained drop-in replacement for the GTK vssetup. Same binary name,
+// same launch (from the data dir, or --target DATADIR), same behaviour:
+//   - finds the data dir (setup.config + Version.txt), switches to the user
+//     home subdir named in Version.txt
+//   - reads setup.config (columns/program name) + the #groups/#cat/#set/#desc
+//     header of vegastrike.config
+//   - shows one dropdown per group; on change, toggles the <!-- --> comment
+//     blocks so the engine sees exactly one value per option, and updates the
+//     "#set <group>" line.
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   any later version.                                                    *
- *                                                                         *
- **************************************************************************/
+#define SDL_MAIN_USE_CALLBACKS
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
+#define GL_GLEXT_PROTOTYPES 1   // GL 3.0 FBO/blit functions (glGenFramebuffers, glBlitFramebuffer)
+#include <GL/gl.h>
 
-#include "../include/central.h"
-#include <stdlib.h>
-#ifdef _WIN32
-#include <direct.h>
-#include <windows.h>
-#else
-#include <sys/dir.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-#include <pwd.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 
-#endif
-#include <vector>
 #include <string>
-using std::string;
-using std::vector;
-char origpath[65536];
+#include <vector>
 
-static int   bogus_int; //added by chuck_starchaser to squash a warning or two
-static char *bogus_str; //added by chuck_starchaser to squash a warning or two
+#include "imgui.h"
+#include "backends/imgui_impl_sdl3.h"
+#include "backends/imgui_impl_opengl3.h"
 
-static void changeToProgramDirectory( char *argv0 )
-{
-    int   ret     = -1;   /* Should it use argv[0] directly? */
-    char *program = argv0;
-#ifndef _WIN32
-    char  buf[65536];
-    {
-        char  linkname[128];        /* /proc/<pid>/exe */
-        linkname[0] = '\0';
-        pid_t pid;
+// ---------------------------------------------------------------------------
+// String / file helpers
+// ---------------------------------------------------------------------------
 
-        /* Get our PID and build the name of the link in /proc */
-        pid = getpid();
-
-        sprintf( linkname, "/proc/%d/exe", pid );
-        ret = readlink( linkname, buf, 65535 );
-        if (ret <= 0) {
-            sprintf( linkname, "/proc/%d/file", pid );
-            ret = readlink( linkname, buf, 65535 );
-        }
-        if (ret <= 0)
-            ret = readlink( program, buf, 65535 );
-        if (ret > 0) {
-            buf[ret] = '\0';
-            /* Ensure proper NUL termination */
-            program  = buf;
-        }
-    }
-#endif
-    char *parentdir;
-    int   pathlen = strlen( program );
-    parentdir = new char[pathlen+1];
-    char *c;
-    strncpy( parentdir, program, pathlen+1 );
-    c = (char*) parentdir;
-    while (*c != '\0')      /* go to end */
-        c++;
-    while ( (*c != '/') && (*c != '\\') && c > parentdir )        /* back up to parent */
-        c--;
-    *c = '\0';             /* cut off last part (binary name) */
-    if (strlen( parentdir ) > 0)
-        bogus_int = chdir( parentdir );          /* chdir to the binary app's parent */
-    delete[] parentdir;
+static void chomp(char *line) {
+    size_t n = strlen(line);
+    while (n && (line[n-1] == '\n' || line[n-1] == '\r')) { line[--n] = '\0'; }
 }
 
-#if defined (_WINDOWS) && defined (_WIN32)
-typedef char FileNameCharType[65536];
-int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd )
-{
-    char  *argv0 = new char[65535];
-    char **argv  = &argv0;
-    int    argc  = 0;
-    strcpy( argv0, origpath );
-    GetModuleFileName( NULL, argv0, 65534 );
-#else
-int main( int argc, char *argv[] )
-{
-#endif
-    CONFIG.data_path = NULL;
-    CONFIG.config_file = NULL;
-    CONFIG.program_name = NULL;
-    CONFIG.temp_file = NULL;
-    
-    bogus_str = getcwd( origpath, 65535 );
-    origpath[65535] = 0;
-    
-    changeToProgramDirectory( argv[0] );
-    {
-        vector< string >data_paths;
-        
-        if (argc > 1) {
-            if (strcmp( argv[1], "--target" ) == 0 && argc > 2) {
-                data_paths.push_back( argv[2] );
-            } else {
-                fprintf( stderr, "Usage: vssetup [--target DATADIR]\n" );
-                return 1;
-            }
-        }
-        
-#ifdef DATA_DIR
-        data_paths.push_back( DATA_DIR );
-#endif
-        data_paths.push_back( origpath );
-        data_paths.push_back( string( origpath )+"/.." );
-        data_paths.push_back( string( origpath )+"/../data4.x" );
-        data_paths.push_back( string( origpath )+"/../../data4.x" );
-        data_paths.push_back( string( origpath )+"/data4.x" );
-        data_paths.push_back( string( origpath )+"/data" );
-        data_paths.push_back( string( origpath )+"/../data" );
-        data_paths.push_back( string( origpath )+"/../Resources" );
-        bogus_str = getcwd( origpath, 65535 );
-        origpath[65535] = 0;
-        data_paths.push_back( "." );
-        data_paths.push_back( ".." );
-        data_paths.push_back( "../data4.x" );
-        data_paths.push_back( "../../data4.x" );
-        data_paths.push_back( "../data" );
-        data_paths.push_back( "../../data" );
-        data_paths.push_back( "../Resources" );
-        data_paths.push_back( "../Resources/data" );
-        data_paths.push_back( "../Resources/data4.x" );
-/*
- *               data_paths.push_back( "/usr/share/local/vegastrike/data");
- *               data_paths.push_back( "/usr/local/share/vegastrike/data");
- *               data_paths.push_back( "/usr/local/vegastrike/data");
- *               data_paths.push_back( "/usr/share/vegastrike/data");
- *               data_paths.push_back( "/usr/local/games/vegastrike/data");
- *               data_paths.push_back( "/usr/games/vegastrike/data");
- *               data_paths.push_back( "/opt/share/vegastrike/data");
- *               data_paths.push_back( "/usr/share/local/vegastrike/data4.x");
- *               data_paths.push_back( "/usr/local/share/vegastrike/data4.x");
- *               data_paths.push_back( "/usr/local/vegastrike/data4.x");
- *               data_paths.push_back( "/usr/share/vegastrike/data4.x");
- *               data_paths.push_back( "/usr/local/games/vegastrike/data4.x");
- *               data_paths.push_back( "/usr/games/vegastrike/data4.x");
- *               data_paths.push_back( "/opt/share/vegastrike/data4.x");
- */
-        //Win32 data should be "."
-        for (vector< string >::iterator vsit = data_paths.begin(); vsit != data_paths.end(); vsit++) {
-            //Test if the dir exist and contains config_file
-            bogus_int = chdir( origpath );
-            bogus_int = chdir( (*vsit).c_str() );
-            FILE *setupcfg = fopen( "setup.config", "r" );
-            if (!setupcfg)
-                continue;
-            fclose( setupcfg );
-            setupcfg  = fopen( "Version.txt", "r" );
-            if (!setupcfg)
-                continue;
-            bogus_str = getcwd( origpath, 65535 );
-            origpath[65535] = 0;
-            printf( "Found data in %s\n", origpath );
-            CONFIG.data_path = strdup(origpath);
-            break;
-        }
-    }
-#ifndef _WIN32
-    struct passwd *pwent;
-    pwent = getpwuid( getuid() );
-    string HOMESUBDIR;
-    FILE  *version = fopen( "Version.txt", "r" );
-    if (!version)
-        version = fopen( "../Version.txt", "r" );
-    if (version) {
-        std::string hsd = "";
-        int c;
-        while ( ( c = fgetc( version ) ) != EOF ) {
-            if ( isspace( c ) )
-                break;
-            hsd += (char) c;
-        }
-        fclose( version );
-        if ( hsd.length() )
-            HOMESUBDIR = hsd;
-        //fprintf (STD_OUT,"Using %s as the home directory\n",hsd.c_str());
-    }
-    if ( HOMESUBDIR.empty() ) {
-        fprintf( stderr, "Error: Failed to find Version.txt anywhere.\n" );
-        return 1;
-    }
-    bogus_int = chdir( pwent->pw_dir );
+// NUL-terminate the first token of `s` and return a pointer to the next one.
+static char *next_parm(char *s) {
+    if (s == NULL || *s == '\0') return NULL;
+    while (*s && *s != ' ' && *s != '\t') s++;
+    if (*s == '\0') return s;
+    *s++ = '\0';
+    while (*s == ' ' || *s == '\t') s++;
+    return s;
+}
 
-    mkdir( HOMESUBDIR.c_str(), 0755 );
-    bogus_int = chdir( HOMESUBDIR.c_str() );
-#endif
-    Start( &argc, &argv );
-#if defined (_WINDOWS) && defined (_WIN32)
-    delete[] argv0;
-#endif
+static bool file_exists(const std::string &p) { struct stat st; return stat(p.c_str(), &st) == 0; }
+static long file_mtime(const std::string &p)  { struct stat st; return stat(p.c_str(), &st) == 0 ? (long)st.st_mtime : -1; }
+
+// Split a line that may hold an XML comment "<!-- ... -->" into the part
+// before it, inside it, and after it (all pointers into `line`).
+struct comment_parts { const char *before; const char *inside; const char *after; };
+static struct comment_parts split_comment(char *line) {
+    char *op = strstr(line, "<!--");
+    char *inside, *after;
+    if (op) { *op = '\0'; inside = op + 4; while (*inside == ' ') inside++; }
+    else { inside = line; }
+    char *cl = strstr(inside, "-->");
+    if (cl) { char *end = cl; if (end > inside && end[-1] == ' ') end--; *end = '\0'; after = cl + 3; }
+    else { after = inside + strlen(inside); }
+    struct comment_parts p = { line, inside, after };
+    return p;
+}
+
+// ---------------------------------------------------------------------------
+// Config model
+// ---------------------------------------------------------------------------
+
+struct Option { std::string name; std::string desc; };
+struct Group {
+    std::string name;
+    std::string current;              // current #set value (option name)
+    std::vector<Option> options;      // in #cat order
+    std::vector<std::string> display; // per-option combo text (desc, else name)
+    std::vector<const char*> items;   // pointers into display, for ImGui::Combo
+};
+
+static std::vector<Group> groups;
+static std::string config_file;   // path we edit (always the home copy)
+static std::string read_source;   // path we read the model from (newer of home/data)
+static std::string data_dir;      // the data directory (for the readme)
+static std::string program_name;  // from setup.config (for the window title)
+static int columns = 4;
+
+static Group *find_group(const std::string &name) {
+    for (auto &g : groups) if (g.name == name) return &g;
+    return NULL;
+}
+
+static void parse_config(FILE *fp) {
+    char line[4096];
+    while (fgets(line, sizeof(line), fp)) {
+        chomp(line);
+        struct comment_parts p = split_comment(line);
+        char *head = (char*)p.inside;
+        if (head[0] != '#') continue;
+        char *rest = head + 1;
+        if (rest[0] == '#') continue;
+        char *kw = rest; char *args = next_parm(kw);
+        if (args == NULL) continue;
+        if (strcmp(kw, "endheader") == 0) return;
+        if (strcmp(kw, "groups") == 0) {
+            char *t = args, *p2;
+            while (t && (p2 = next_parm(t)) != NULL) { groups.push_back({ t }); t = p2; }
+        } else if (strcmp(kw, "cat") == 0) {
+            char *grp = args; char *opts = next_parm(grp);
+            Group *g = find_group(grp);
+            if (g && opts) { char *t = opts, *p2; while (t && (p2 = next_parm(t)) != NULL) { g->options.push_back({ t }); t = p2; } }
+        } else if (strcmp(kw, "set") == 0) {
+            char *grp = args; char *val = next_parm(grp);
+            Group *g = find_group(grp);
+            if (g && val) g->current = val;
+        } else if (strcmp(kw, "desc") == 0) {
+            char *name = args; char *desc = next_parm(name);
+            for (auto &g : groups) for (auto &o : g.options) if (o.name == name) { o.desc = desc; break; }
+        }
+    }
+}
+
+// Fill each group's combo text once (desc, falling back to the option name).
+static void build_display(void) {
+    for (auto &g : groups) {
+        g.display.reserve(g.options.size());
+        for (auto &o : g.options) g.display.push_back(o.desc.empty() ? o.name : o.desc);
+        g.items.reserve(g.display.size());
+        for (auto &s : g.display) g.items.push_back(s.c_str());
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Rewrite: toggle the <!-- --> comment blocks so only `name` stays active,
+// and update the "#set <group>" line. setting 1 = comment `name` out,
+// 2 = uncomment `name` in (mirrors the original Modconfig).
+// ---------------------------------------------------------------------------
+
+static int rewrite(const std::string &path, const std::string &group,
+                   const std::string &name, int setting) {
+    FILE *rp = fopen(path.c_str(), "r");
+    if (!rp) { fprintf(stderr, "Unable to read %s\n", path.c_str()); return -1; }
+    std::string tmp = path + ".tmp";
+    FILE *wp = fopen(tmp.c_str(), "w");
+    if (!wp) { fclose(rp); fprintf(stderr, "Unable to write %s\n", tmp.c_str()); return -1; }
+
+    int commenting = 0;   // 0 scanning, 1 opening a comment, 2 closing one
+    char line[4096];
+    while (fgets(line, sizeof(line), rp)) {
+        chomp(line);
+        char copy[4096]; strcpy(copy, line);
+        struct comment_parts p = split_comment(copy);
+        char *head = (char*)p.inside;
+
+        if (head[0] != '#') { fprintf(wp, "%s\n", line); continue; }
+        char *kw = head + 1; char *args = next_parm(kw);
+
+        if (strcmp(kw, "endheader") == 0) { fprintf(wp, "%s\n", line); continue; }
+        if (strcmp(kw, "end") == 0) {
+            if (commenting == 1) fprintf(wp, "#end -->\n");
+            else if (commenting == 2) fprintf(wp, "<!-- #end -->\n");
+            else fprintf(wp, "%s\n", line);
+            commenting = 0;
+            continue;
+        }
+        if (strcmp(kw, "groups") == 0 || strcmp(kw, "cat") == 0 || strcmp(kw, "desc") == 0) {
+            fprintf(wp, "%s\n", line); continue;
+        }
+        if (strcmp(kw, "set") == 0) {
+            char *grp = args; char *val = next_parm(grp);
+            if (grp && strcmp(grp, group.c_str()) == 0) {
+                if (setting == 1) fprintf(wp, "#set %s none\n", group.c_str());
+                else fprintf(wp, "#set %s %s\n", group.c_str(), name.c_str());
+            } else { fprintf(wp, "%s\n", line); }
+            continue;
+        }
+
+        // an option-marker "#..." line: does it mention `name`?
+        bool match = false;
+        char *t = head + 1;
+        while (t && !match && (args = next_parm(t)) != NULL) {
+            if (strcmp(t, name.c_str()) == 0) match = true;
+            t = args;
+        }
+        if (match) commenting = setting;
+        if (commenting == 0) { fprintf(wp, "%s\n", line); continue; }
+
+        fprintf(wp, "%s", p.before);
+        if (commenting == 1) fprintf(wp, "<!-- %s", p.inside);
+        else fprintf(wp, "<!-- %s -->", p.inside);
+        fprintf(wp, "%s\n", p.after);
+    }
+    fclose(rp);
+    fclose(wp);
+    if (rename(tmp.c_str(), path.c_str()) != 0) { fprintf(stderr, "Unable to commit %s\n", path.c_str()); return -1; }
     return 0;
 }
 
+// Apply a dropdown change: comment the old setting, then uncomment the new one.
+static void apply_change(Group *g, const std::string &new_option) {
+    if (g->current == new_option) return;
+    std::string old_option = g->current;
+    rewrite(config_file, g->name, old_option, 1);
+    rewrite(config_file, g->name, new_option, 2);
+    g->current = new_option;
+}
+
+// ---------------------------------------------------------------------------
+// Startup: find the data dir, read setup.config, locate the config we edit
+// ---------------------------------------------------------------------------
+
+static bool discover(int argc, char **argv) {
+    // candidate data dirs, mirroring the original setup.cpp search
+    char cwd[4096];
+    std::string launch = getcwd(cwd, sizeof(cwd)) ? cwd : "";
+    std::vector<std::string> candidates;
+    if (argc > 2 && strcmp(argv[1], "--target") == 0) candidates.push_back(argv[2]);
+#ifdef DATA_DIR
+    candidates.push_back(DATA_DIR);
+#endif
+    if (!launch.empty()) {
+        candidates.push_back(launch);
+        candidates.push_back(launch + "/data");
+        candidates.push_back(launch + "/../data");
+        candidates.push_back(launch + "/data4.x");
+        candidates.push_back(launch + "/../data4.x");
+        candidates.push_back(launch + "/../Resources");
+    }
+    std::string found;
+    for (auto &c : candidates)
+        if (file_exists(c + "/setup.config") && file_exists(c + "/Version.txt")) { found = c; break; }
+    if (found.empty()) { fprintf(stderr, "Error: Failed to find data directory (setup.config + Version.txt).\n"); return false; }
+    data_dir = found;
+
+    FILE *f = fopen((data_dir + "/setup.config").c_str(), "r");
+    if (!f) { fprintf(stderr, "Unable to read setup.config\n"); return false; }
+    {
+        char line[512];
+        while (fgets(line, sizeof(line), f)) {
+            chomp(line);
+            if (line[0] == '#') continue;
+            char *kw = line; char *val = next_parm(kw);
+            if (val == NULL) continue;
+            if (strcmp(kw, "program_name") == 0) program_name = val;
+            else if (strcmp(kw, "config_file") == 0) read_source = val;
+            else if (strcmp(kw, "columns") == 0) columns = atoi(val);
+        }
+    }
+    fclose(f);
+    if (read_source.empty()) read_source = "vegastrike.config";
+
+    // home subdir named in Version.txt
+    std::string home = getenv("HOME") ? getenv("HOME") : ".";
+    std::string sub;
+    FILE *v = fopen((data_dir + "/Version.txt").c_str(), "r");
+    if (v) { int c; while ((c = fgetc(v)) != EOF && !isspace(c)) sub += (char)c; fclose(v); }
+    if (sub.empty()) { fprintf(stderr, "Error: Failed to find Version.txt anywhere.\n"); return false; }
+    std::string home_dir = home + "/" + sub;
+    mkdir(home_dir.c_str(), 0755);
+
+    // we always edit the home copy; read from whichever copy is newer
+    std::string home_cfg = home_dir + "/" + read_source;
+    std::string data_cfg = data_dir + "/" + read_source;
+    config_file = home_cfg;
+    read_source = (file_exists(home_cfg) && (!file_exists(data_cfg) || file_mtime(home_cfg) >= file_mtime(data_cfg)))
+                    ? home_cfg : data_cfg;
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// GUI
+// ---------------------------------------------------------------------------
+
+static SDL_Window *window = NULL;
+static SDL_GLContext gl_context = NULL;
+
+// Fixed logical resolution scaled up to fill the fullscreen window.
+#define VSSETUP_LOGICAL_W 800
+#define VSSETUP_LOGICAL_H 600
+static GLuint fbo = 0, fbo_tex = 0;
+
+static void myexit(void) {
+    std::string r = data_dir + "/documentation/readme.txt";
+    execlp("xdg-open", "xdg-open", r.c_str(), NULL);
+    exit(0);
+}
+
+static std::string window_title(void) {
+    std::string t = program_name.empty() ? "Vega Strike" : program_name;
+    return "Program Configuration - " + t + " - Version 0.5.1 Build 13218";
+}
+
+SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
+    if (!discover(argc, argv)) return SDL_APP_FAILURE;
+
+    FILE *fp = fopen(read_source.c_str(), "r");
+    if (!fp) { fprintf(stderr, "Unable to read %s\n", read_source.c_str()); return SDL_APP_FAILURE; }
+    parse_config(fp);
+    fclose(fp);
+    build_display();
+
+    if (!SDL_Init(SDL_INIT_VIDEO)) { fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError()); return SDL_APP_FAILURE; }
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    std::string title = window_title();
+    window = SDL_CreateWindow(title.c_str(), 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN);
+    if (!window) { fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError()); return SDL_APP_FAILURE; }
+    gl_context = SDL_GL_CreateContext(window);
+    if (!gl_context) { fprintf(stderr, "SDL_GL_CreateContext failed: %s\n", SDL_GetError()); return SDL_APP_FAILURE; }
+    SDL_GL_MakeCurrent(window, gl_context);
+    SDL_GL_SetSwapInterval(1);
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    io.IniFilename = nullptr;
+    io.Fonts->AddFontDefault();
+    ImGui_ImplSDL3_InitForOpenGL(window, gl_context);
+    ImGui_ImplOpenGL3_Init("#version 130");
+
+    // Offscreen 800x600 buffer that we scale up to fill the fullscreen window.
+    glGenFramebuffers(1, &fbo);
+    glGenTextures(1, &fbo_tex);
+    glBindTexture(GL_TEXTURE_2D, fbo_tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, VSSETUP_LOGICAL_W, VSSETUP_LOGICAL_H, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo_tex, 0);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        fprintf(stderr, "warning: vssetup FBO incomplete\n");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+    fprintf(stderr, "vssetup-imgui ready: %zu groups\n", groups.size());
+    return SDL_APP_CONTINUE;
+}
+
+SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
+    // Scale mouse coords from the fullscreen window into the 800x600 logical space.
+    if (event->type == SDL_EVENT_MOUSE_MOTION || event->type == SDL_EVENT_MOUSE_BUTTON_DOWN
+        || event->type == SDL_EVENT_MOUSE_BUTTON_UP) {
+        int win_w, win_h;
+        SDL_GetWindowSizeInPixels(window, &win_w, &win_h);
+        float sx = (float)VSSETUP_LOGICAL_W / win_w;
+        float sy = (float)VSSETUP_LOGICAL_H / win_h;
+        if (event->type == SDL_EVENT_MOUSE_MOTION) { event->motion.x *= sx; event->motion.y *= sy; }
+        else { event->button.x *= sx; event->button.y *= sy; }
+    }
+    ImGui_ImplSDL3_ProcessEvent(event);
+    if (event->type == SDL_EVENT_QUIT) return SDL_APP_SUCCESS;
+    return SDL_APP_CONTINUE;
+}
+
+SDL_AppResult SDL_AppIterate(void *appstate) {
+    static bool want_quit = false;
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    // Fix the layout resolution BEFORE the frame is built, so the UI and the
+    // 800x600 FBO render agree (otherwise the draw data is laid out in native
+    // fullscreen space and gets clipped to nothing at 800x600 -> black).
+    ImGui::GetIO().DisplaySize = ImVec2(VSSETUP_LOGICAL_W, VSSETUP_LOGICAL_H);
+    ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
+    ImGui::NewFrame();
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(VSSETUP_LOGICAL_W, VSSETUP_LOGICAL_H), ImGuiCond_Always);
+    ImGui::Begin("##vssetup", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
+    ImGui::TextWrapped("Vega Strike requires the latest drivers for your video card.\nIf you run into problems please upgrade your video drivers.\n\nTo adjust volume levels in-game, use F9/F10 for sound and F11/F12 for music.");
+    ImGui::Separator();
+
+    float btn = ImGui::GetFrameHeightWithSpacing() * 2 + ImGui::GetStyle().ItemSpacing.y;
+    ImGui::BeginChild("groups", ImVec2(0, -btn), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+    if (ImGui::BeginTable("grid", columns, ImGuiTableFlags_SizingFixedFit)) {
+        for (auto &g : groups) {
+            ImGui::TableNextColumn();
+            ImGui::Text("%s", g.name.c_str());
+            int current = -1;
+            for (size_t j = 0; j < g.options.size(); j++)
+                if (g.options[j].name == g.current) { current = (int)j; break; }
+            int sel = current;
+            ImGui::SetNextItemWidth(-FLT_MIN);
+            char lbl[64]; snprintf(lbl, sizeof(lbl), "##%s", g.name.c_str());
+            if (ImGui::Combo(lbl, &sel, g.items.data(), (int)g.items.size()))
+                if (sel >= 0 && sel != current) apply_change(&g, g.options[sel].name);
+        }
+        ImGui::EndTable();
+    }
+    ImGui::EndChild();
+
+    if (ImGui::Button("Save Settings And View Readme")) myexit();
+    if (ImGui::Button("Save Settings and Exit")) want_quit = true;
+    ImGui::End();
+
+    ImGui::Render();
+    // Render ImGui at 800x600 into the offscreen FBO.
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glViewport(0, 0, VSSETUP_LOGICAL_W, VSSETUP_LOGICAL_H);
+    glClearColor(0.10f, 0.11f, 0.12f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    // Blit the 800x600 buffer scaled up to fill the fullscreen window.
+    int win_w, win_h;
+    SDL_GetWindowSizeInPixels(window, &win_w, &win_h);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBlitFramebuffer(0, 0, VSSETUP_LOGICAL_W, VSSETUP_LOGICAL_H, 0, 0, win_w, win_h, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    SDL_GL_SwapWindow(window);
+    return want_quit ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
+}
+
+void SDL_AppQuit(void *appstate, SDL_AppResult result) {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL3_Shutdown();
+    ImGui::DestroyContext();
+    SDL_GL_DestroyContext(gl_context);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+    fprintf(stderr, "vssetup-imgui quit\n");
+}
