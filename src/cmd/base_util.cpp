@@ -715,7 +715,10 @@ const Dictionary& GetEventData()
 
 float GetTextHeight( std::string text, Vector widheimult )
 {
-    static bool  force_highquality = true;
+    // Don't force the bitmap path: for vector fonts the actual rendered glyph height is
+    // font_point*2/y_resolution (matching TextPlane), NOT the hardcoded bitmap height that
+    // getFontHeight() returns. Using the real font height keeps list rows sized to the glyphs.
+    static bool  force_highquality = false;
     static bool  use_bit    = force_highquality
                               || XMLSupport::parse_bool( vs_config->getVariable( "graphics", "high_quality_font", "false" ) );
     static float font_point = XMLSupport::parse_float( vs_config->getVariable( "graphics", "font_point", "16" ) );

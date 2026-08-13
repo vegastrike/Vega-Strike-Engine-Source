@@ -243,8 +243,13 @@ int TextPlane::Draw( const string &newText, int offset, bool startlower, bool fo
     GetPos( row, origcol );
     float rowheight = use_bit ? getFontHeight() : myFontMetrics.j;
     myFontMetrics.j = rowheight;
+    // Line advance gets leading so lines don't touch: the glyph is myFontMetrics.j tall
+    // (scaley = myFontMetrics.j/REFERENCE_LINE_SPACING), but each line is placed line_advance
+    // apart. Tunable factor.
+    const float LINE_SPACING_FACTOR = 1.3;
+    const float line_advance        = rowheight*LINE_SPACING_FACTOR;
     if (startlower)
-        row -= rowheight;
+        row -= line_advance;
     GFXPushBlendMode();
     glLineWidth( 1 );
     if (!use_bit && font_antialias) {
@@ -289,7 +294,7 @@ int TextPlane::Draw( const string &newText, int offset, bool startlower, bool fo
     glScalef( scalex, scaley, 1 );
     bool     firstThroughLoop = true;
     GFXColor currentCol( this->col );
-    while ( text_it != newText.end() && (firstThroughLoop || row > myDims.j-rowheight*.25) ) {
+    while ( text_it != newText.end() && (firstThroughLoop || row > myDims.j-line_advance*.25) ) {
         unsigned char myc = *text_it;
         if (myc == '_')
             myc = ' ';
@@ -364,7 +369,7 @@ int TextPlane::Draw( const string &newText, int offset, bool startlower, bool fo
         if ( doNewLine( text_it, newText.end(), col, myDims.i, myFontMetrics.i, row-rowheight <= myDims.j ) ) {
             GetPos( tmp, col );
             firstThroughLoop = false;
-            row -= rowheight;
+            row -= line_advance;
             glPopMatrix();
             glPushMatrix();
             glLoadIdentity();
