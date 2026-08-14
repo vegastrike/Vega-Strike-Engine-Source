@@ -700,7 +700,10 @@ void PaintText::calcLayout( void )
     if (m_widthExceeded != MULTI_LINE) {
         //SINGLE LINE.
         currentLine->height   = m_rect.size.height;
-        currentLine->baseLine = ( currentLine->height-m_font.size() )/2.0
+        // Center the actual rendered glyph (verticalScaling * the natural font line box), not
+        // font.size(), so vertical centering tracks the rendered size as the font scales.
+        const double renderedHeight = m_verticalScaling*(REFERENCE_FONT_ASCENDER+REFERENCE_BASELINE_POS);
+        currentLine->baseLine = ( currentLine->height-renderedHeight )/2.0
                                 +m_verticalScaling*REFERENCE_FONT_ASCENDER;
 
         string::size_type ignorePos = 0;
@@ -717,8 +720,13 @@ void PaintText::calcLayout( void )
         int nextLinePos = 0;         //The char loc in m_text of the beginning of the next line.
         while (true) {
             //Figure vertical measurements before we parse the line.
-            currentLine->height   = m_layout.fontStack.back().size()*m_layout.currentLineSpacing;
-            currentLine->baseLine = currentLine->height-m_verticalScaling*REFERENCE_BASELINE_POS;
+            // Line box = the actual rendered glyph height (verticalScaling * the natural font line
+            // box) * line spacing, derived from the font's own metrics so line spacing tracks the
+            // rendered size as the font scales — don't hardcode a factor.
+            const Font &lineFont = m_layout.fontStack.back();
+            const double renderedHeight = lineFont.verticalScaling()*(REFERENCE_FONT_ASCENDER+REFERENCE_BASELINE_POS);
+            currentLine->height   = renderedHeight*m_layout.currentLineSpacing;
+            currentLine->baseLine = currentLine->height-lineFont.verticalScaling()*REFERENCE_BASELINE_POS;
 
             //Get the first line of chars, including the length.
             string::size_type endNextLinePos = 0;
