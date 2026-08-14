@@ -18,9 +18,9 @@ The two repos (in lockstep at the fork point):
 - **Engine** — `github.com/evertvorster/VS-05-lts-Engine`
 - **Assets** — `github.com/evertvorster/VS-05-lts-Assets`
 
-> Note: these are personal forks (thousands of commits behind the modern `vegastrike/*`
-> upstream). The modern workstream is separate and pushes to `vegastrike/*`. See the
-> project-vault README ("Repo model & workstreams") for the two-workstream model.
+This is a community fork. The **official Vega Strike** project lives upstream at
+`github.com/vegastrike/` (engine + assets); this fork modernises the 2013-era mechanics
+separately.
 
 ## Getting it
 
@@ -321,7 +321,4 @@ So that's how to use AI scripts.
 If you want to know more about writing actual maneuvers (like turnaway.xml  which as you can see is in the directory) please contact me at hellcatv@hotmail.com
 you need to have a heavy background in vector math.
 
-� 2002 Daniel Horn, Patrick Horn, Alan Shieh, and Aleksander Rawass
-       Sabarok Aresh, Stefan Stapelberg
 
-� 2002 Graphic Art Daniel Aleksandrow, James Carthew, Jason Wizenreid, Warden, and many more that I do not have the brains to say right now...

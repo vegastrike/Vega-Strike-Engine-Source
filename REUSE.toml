@@ -1,0 +1,39 @@
+version = 1
+SPDX-PackageName = "Vega Strike VS-05 LTS"
+SPDX-PackageSupplier = "Evert Vorster"
+
+[[annotations]]
+path = ["src/**", "launcher/**", "mission/**", "objconv/**", "saveinterface/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2001-2013 The Vega Strike Contributors"
+SPDX-License-Identifier = "GPL-2.0-or-later"
+
+[[annotations]]
+path = "libraries/imgui/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2014-2025 Omar Cornut"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["libraries/imgui/imstb_rectpack.h", "libraries/imgui/imstb_textedit.h", "libraries/imgui/imstb_truetype.h"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2015-2021 Sean Barrett"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["setup/src/c/setup.cpp", "assets_help.txt", ".gitignore", "vegastrike-vs05.desktop", "vegastrike-vs05-settings.desktop"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Evert Vorster"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = ["AUTHORS", "CMakeLists.txt", "CYGWIN.NOTES", "ChangeLog", "DOCUMENTATION", "NEWS", "ToDo.txt", "README.MACOSX.rtf", "README.sgi", "README.md", "Resources.RES", "Resources.rc", "resource.h", "FindMATH.cmake", "FindPNG.cmake", "FindVorbis.cmake", "FindFFMPEG.cmake", "FindGTK2.cmake", "FindOGRE.cmake", "cmake-config.h.in", "buildmac.sh", "buildrpm", "dossify.pl", "doxygenConfig", "intel-mac-conf.sh", "makerelease.bash", "undos.pl", "stringsort.cpp", "vegastrike.spec", "license.txt", "acctserver.ico", "cursor1.cur", "icon2.ico", "icon3.ico", "icon4.ico", "ts.ico", "vssetup-gtk+osx.sh"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2001-2013 The Vega Strike Contributors"
+SPDX-License-Identifier = "GPL-2.0-or-later"
+
+[[annotations]]
+path = ["VegaStrikeOSX.icns", "VegaStrikeOSXApp.pbproj/**", "English.lproj/**", "boost/**", "datascripts/**", "tools/**", "vs_cubemap_gen/**", "setup/CMakeLists.txt", "setup/icon1.ico", "setup/resource.h", "setup/vega.rc", "setup/src/Config.pl", "setup/src/build", "setup/src/macbuild.sh", "vc98/libfmod.a"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2001-2013 The Vega Strike Contributors"
+SPDX-License-Identifier = "GPL-2.0-or-later"

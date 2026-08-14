@@ -1,0 +1,28 @@
+Vega Strike VS-05 LTS
+======================
+
+This project is distributed under the GNU General Public License, version 3
+or (at your option) any later version — see the file
+`LICENSES/GPL-3.0-or-later.txt` for the full text.
+
+License composition
+-------------------
+
+The VS-05 fork contains code under several licenses. Per the fork policy,
+**new code added by this project is GPL-3.0-or-later**, while all other code
+keeps whatever license it already declares. In particular:
+
+| Component | License |
+|---|---|
+| New code added by the VS-05 fork | **GPL-3.0-or-later** |
+| Original 2013-era engine code | **GPL-2.0-or-later** (`LICENSES/GPL-2.0-or-later.txt`) |
+| Dear ImGui (vendored, `libraries/imgui/`) | **MIT** (`LICENSES/MIT.txt`) |
+| imstb_* single-file libraries (in imgui) | **Public domain** (`LICENSES/CC0-1.0.txt`) |
+| `objconv/blender_xmesh_import.txt` | GPL (Alex Feterman) |
+
+The GPL-2.0-or-later engine code is compatible with GPL-3.0-or-later by virtue
+of its "or (at your option) any later version" clause, so the combined work is
+licensed under GPL-3.0-or-later.
+
+Individual source files carry SPDX license identifiers in their headers where
+practical. The `LICENSES/` directory holds the full text of each license used.
