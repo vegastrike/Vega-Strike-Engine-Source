@@ -8,6 +8,8 @@
 //   - shows one dropdown per group; on change, toggles the <!-- --> comment
 //     blocks so the engine sees exactly one value per option, and updates the
 //     "#set <group>" line.
+//   - Launch options on the asset screen: optional command template around a
+//     fixed %command% marker (e.g. "prime-run %command%") honored by Launch.
 
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL.h>
@@ -18,6 +20,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <errno.h>
 #include <math.h>
 #include <dirent.h>
 #include <algorithm>
@@ -236,6 +240,66 @@ static bool has_unsaved(void) {
     return false;
 }
 
+// Launch command template, persisted in ~/.config/vs-05/launch_command.
+// Format: "<prefix> %command% <suffix>", e.g. "prime-run %command%".
+// %command% is the game itself (engine binary + -D data dir). The marker is
+// mandatory; the UI enforces this by rendering it as fixed text between the
+// two editable fields. An empty file or a bare "%command%" means direct launch.
+static std::string xdg_config_dir(void);   // defined below (XDG section)
+static std::string launch_command_file(void) { return xdg_config_dir() + "/vs-05/launch_command"; }
+static std::string read_launch_command(void) {
+    FILE *f = fopen(launch_command_file().c_str(), "r");
+    if (!f) return "";
+    char buf[256];
+    if (!fgets(buf, sizeof(buf), f)) { fclose(f); return ""; }
+    fclose(f);
+    chomp(buf);
+    return buf;
+}
+static void write_launch_command(const std::string &cmd) {
+    FILE *f = fopen(launch_command_file().c_str(), "w");
+    if (f) { fputs(cmd.c_str(), f); fputc('\n', f); fclose(f); }
+}
+
+// Edit buffers for the launch-options fields on the asset screen. The stored
+// template is split around the fixed %command% marker for display.
+static char launch_pre_buf[128] = "";
+static char launch_suf_buf[128] = "";
+
+static void launch_load_bufs(void) {
+    std::string cmd = read_launch_command();
+    size_t at = cmd.find("%command%");
+    if (at == std::string::npos) {      // missing/legacy file -> direct launch form
+        launch_pre_buf[0] = '\0';
+        launch_suf_buf[0] = '\0';
+        return;
+    }
+    std::string pre = cmd.substr(0, at);
+    std::string suf = cmd.substr(at + 9);    // strlen("%command%")
+    while (!pre.empty() && isspace((unsigned char) pre[pre.size()-1])) pre.erase(pre.size()-1);
+    while (!pre.empty() && isspace((unsigned char) pre[0])) pre.erase(0, 1);
+    while (!suf.empty() && isspace((unsigned char) suf[0])) suf.erase(0, 1);
+    while (!suf.empty() && isspace((unsigned char) suf[suf.size()-1])) suf.erase(suf.size()-1);
+    snprintf(launch_pre_buf, sizeof(launch_pre_buf), "%s", pre.c_str());
+    snprintf(launch_suf_buf, sizeof(launch_suf_buf), "%s", suf.c_str());
+}
+
+// Normalize the edit buffers into a template and persist it. Called on every
+// edit; the marker always survives (it is fixed UI text), so the result is
+// always valid. Both sides empty -> "%command%" (direct launch).
+static void launch_commit_bufs(void) {
+    std::string pre = launch_pre_buf;
+    std::string suf = launch_suf_buf;
+    while (!pre.empty() && isspace((unsigned char) pre[pre.size()-1])) pre.erase(pre.size()-1);
+    while (!pre.empty() && isspace((unsigned char) pre[0])) pre.erase(0, 1);
+    while (!suf.empty() && isspace((unsigned char) suf[0])) suf.erase(0, 1);
+    while (!suf.empty() && isspace((unsigned char) suf[suf.size()-1])) suf.erase(suf.size()-1);
+    std::string cmd = "%command%";
+    if (!pre.empty()) cmd = pre + " " + cmd;
+    if (!suf.empty()) cmd = cmd + " " + suf;
+    write_launch_command(cmd);
+}
+
 // The engine binary (vs-05) sits next to this app in the install dir.
 static std::string find_engine(void) {
     char buf[4096];
@@ -252,17 +316,56 @@ static std::string find_engine(void) {
     return data_dir + "/../vs-05";
 }
 
+// Split a launch-command template on whitespace into argv tokens. %command%
+// expands to the engine binary + its -D<data> argument; launch_commit_bufs()
+// normalizes the template so the marker stands alone as a token. No shell is
+// involved - quoting/globbing in the template is not supported.
+static std::vector<std::string> tokenize_cmd(const std::string &s) {
+    std::vector<std::string> t;
+    size_t i = 0;
+    while (i < s.size()) {
+        while (i < s.size() && isspace((unsigned char) s[i])) i++;
+        if (i >= s.size()) break;
+        size_t j = i;
+        while (j < s.size() && !isspace((unsigned char) s[j])) j++;
+        t.push_back(s.substr(i, j - i));
+        i = j;
+    }
+    return t;
+}
+
 // Launch the engine, pointing it at the data dir (it finds the config from the
 // home subdir derived from Version.txt). Commits staged changes first so the
-// game sees the current settings.
+// game sees the current settings. Honors the launch-command template from the
+// asset screen: %command% expands to the engine + -D arg (empty/bare template
+// launches directly).
 static void launch(void) {
     if (active_asset.empty()) { fprintf(stderr, "No active asset to launch.\n"); return; }
     save();
     std::string engine = find_engine();
     std::string arg = "-D" + data_dir;
+    std::vector<std::string> argv_s;
+    bool expanded = false;
+    for (auto &tok : tokenize_cmd(read_launch_command())) {
+        if (tok == "%command%") {
+            argv_s.push_back(engine);
+            argv_s.push_back(arg);
+            expanded = true;
+        } else {
+            argv_s.push_back(tok);
+        }
+    }
+    if (argv_s.empty() || !expanded) {   // empty/bare template -> direct launch
+        argv_s.push_back(engine);
+        argv_s.push_back(arg);
+    }
+    std::vector<char *> argv;
+    for (auto &s : argv_s) argv.push_back(const_cast<char *>(s.c_str()));
+    argv.push_back(NULL);
     if (fork() == 0) {
-        execlp(engine.c_str(), engine.c_str(), arg.c_str(), NULL);
-        _exit(0);
+        execvp(argv[0], argv.data());
+        fprintf(stderr, "vssetup: failed to launch '%s': %s\n", argv[0], strerror(errno));
+        _exit(1);
     }
 }
 
@@ -479,7 +582,12 @@ static void draw_assets_screen(void) {
     float avail_w = ImGui::GetContentRegionAvail().x;
     float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
 
-    ImGui::BeginChild("assets", ImVec2(0, -btn_h), ImGuiChildFlags_Borders,
+    // Reserve room below the list for the launch-options block + the button row.
+    float opts_h = ImGui::GetFrameHeightWithSpacing()       // "Launch options" header
+                 + ImGui::GetFrameHeightWithSpacing()       // prefix + marker + suffix row
+                 + ImGui::GetTextLineHeightWithSpacing();   // description line
+
+    ImGui::BeginChild("assets", ImVec2(0, -(btn_h + opts_h + ImGui::GetStyle().ItemSpacing.y * 2)), ImGuiChildFlags_Borders,
                       ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
     if (show_help || discovered.empty()) {
         ImGui::TextWrapped("%s", assets_help_text().c_str());
@@ -494,6 +602,24 @@ static void draw_assets_screen(void) {
     if (ImGui::Selectable("(none)", selected_asset.empty()))
         selected_asset = "";
     ImGui::EndChild();
+
+    // Launch options: a fixed %command% marker between two editable fields, so
+    // the marker can never be removed (Steam-style, e.g. "prime-run %command%").
+    // Persisted by launch_commit_bufs(); honored by launch().
+    ImGui::Separator();
+    ImGui::Text("Launch options");
+    float marker_w = ImGui::CalcTextSize("%command%").x;
+    float field_w  = fmaxf(40.0f, (avail_w - marker_w - ImGui::GetStyle().ItemSpacing.x * 2) * 0.5f);
+    ImGui::SetNextItemWidth(field_w);
+    if (ImGui::InputText("##launch_pre", launch_pre_buf, sizeof(launch_pre_buf)))
+        launch_commit_bufs();
+    ImGui::SameLine(0, 0);
+    ImGui::TextUnformatted("%command%");
+    ImGui::SameLine(0, 0);
+    ImGui::SetNextItemWidth(field_w);
+    if (ImGui::InputText("##launch_suf", launch_suf_buf, sizeof(launch_suf_buf)))
+        launch_commit_bufs();
+    ImGui::TextDisabled("%%command%% is the game itself - e.g. \"prime-run %%command%%\". Leave both sides empty for a normal launch.");
 
     // Help, Save, Close
     float btnw = ImGui::CalcTextSize("Close").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
@@ -665,7 +791,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     ImGui::SameLine();
     if (ImGui::Button("View Readme", ImVec2(btnw, 0))) view_readme();
     ImGui::SameLine();
-    if (ImGui::Button("Assets", ImVec2(btnw, 0))) { discover_assets(); selected_asset = active_asset; mode = 1; }
+    if (ImGui::Button("Assets", ImVec2(btnw, 0))) { discover_assets(); selected_asset = active_asset; launch_load_bufs(); mode = 1; }
     ImGui::SameLine();
     if (unsaved) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
