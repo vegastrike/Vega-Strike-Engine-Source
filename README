@@ -1,4 +1,108 @@
-----------------------------------------------
+# Vega Strike — VS-05 LTS
+
+**An "homage edition" of the 2013 game, modernised to build and run today.**
+
+## What this fork is
+
+VS-05 is a fork of Vega Strike taken at the point just before the **"Deus CSV split"**
+(2013-11-29). It is essentially what the 0.5 release should have been: the pre-CSV-split
+2013 mechanics, cleaned up and made to build and run on a modern system with **no new
+features and no mechanics changes** — only the library and build-system porting needed to
+compile and run.
+
+It exists as a clean, known-good baseline of the game mechanics — to demonstrate that the
+original game ran well, and as the reference source for the long-term Godot remake.
+
+The two repos (in lockstep at the fork point):
+
+- **Engine** — `github.com/evertvorster/VS-05-lts-Engine`
+- **Assets** — `github.com/evertvorster/VS-05-lts-Assets`
+
+> Note: these are personal forks (thousands of commits behind the modern `vegastrike/*`
+> upstream). The modern workstream is separate and pushes to `vegastrike/*`. See the
+> project-vault README ("Repo model & workstreams") for the two-workstream model.
+
+## Getting it
+
+```sh
+git clone git@github.com:evertvorster/VS-05-lts-Engine.git
+git clone git@github.com:evertvorster/VS-05-lts-Assets.git
+```
+
+## Dependencies
+
+**Engine build tools:** CMake, a C++ compiler, git, system Boost (headers).
+
+**Engine runtime libraries:** Boost, Python 3, freeglut, SDL3, libvorbis, OpenAL,
+libpng, libjpeg-turbo, zlib, expat, GLU.
+
+**Assets:** pure game data — no build; it only needs the engine.
+
+The exact package names differ by distribution (e.g. on Arch: `cmake`, `boost`,
+`python`, `freeglut`, `sdl3`, `libvorbis`, `openal`, `libpng`, `libjpeg-turbo`,
+`zlib`, `expat`, `glu`).
+
+## Compiling
+
+The classic workflow: **clone the repo, build it in place, and run from there.** Build the
+engine first (the assets are data-only). From a fresh checkout:
+
+```sh
+cd VS-05-lts-Engine
+cmake -B build -DCMAKE_BUILD_TYPE=Debug \
+      -DUSE_SYSTEM_BOOST=ON \
+      -DDISABLE_FFMPEG=ON
+cmake --build build
+```
+
+Notes on the CMake options:
+
+- **`-DCMAKE_BUILD_TYPE=Debug`** — this carries `-DNV_CUBE_MAP`. A build configured
+  without `NV_CUBE_MAP` (e.g. a plain `Release`/`RelWithDebInfo` that drops the project's
+  custom per-build-type defines) will show a white space background.
+- **`-DUSE_SYSTEM_BOOST=ON`** — use the system Boost rather than the bundled (incomplete)
+  copy.
+- **`-DDISABLE_FFMPEG=ON`** — no video files are shipped, so FFmpeg is not needed.
+
+The assets need no build step — run the engine with `-D` pointing at the assets `data`
+directory.
+
+## Running it
+
+The engine has no `install()` rules — the binaries stay in the build directory and are run
+from there, pointing at the assets `data` directory:
+
+```sh
+cd VS-05-lts-Engine/build
+./vs-05 -D/path/to/VS-05-lts-Assets/data
+```
+
+The game also auto-detects a data directory from a set of known paths (see
+`getdatadir()`), so `-D` is only needed when the data dir is somewhere non-standard.
+
+The settings app / launcher is built alongside the engine and discovers installed asset
+packs automatically:
+
+```sh
+cd VS-05-lts-Engine/build/setup
+./config-vs-05
+```
+
+It is a Dear ImGui + SDL3 launcher: it auto-discovers asset packs under the user's data
+directory (`~/.local/share/vs-05/assets/<mod>/`), lets you pick a pack and per-group
+settings, writes the per-pack user config, and can launch the game. User config/saves live
+under the per-user home subdir named in the active asset's `Version.txt`.
+
+> **Packaged install (Arch Linux).** On Arch, the game is available as AUR packages — once
+> released, install with `yay -S vs-05` / `paru -S vs-05` (engine + assets). This installs to
+> a self-contained location so it does not clash with a main Vega Strike install, and adds
+> desktop entries for the game and the settings app.
+
+---
+The section below is the **original 2002-era README** (gameplay, controls, mission/AI
+editing), kept intact for reference.
+---
+
 Readme for VegaStrike version 0.2.0 Beta2
 ----------------------------------------------
 Vegastrike has finally reached the state of being multisystem!
@@ -217,7 +321,7 @@ So that's how to use AI scripts.
 If you want to know more about writing actual maneuvers (like turnaway.xml  which as you can see is in the directory) please contact me at hellcatv@hotmail.com
 you need to have a heavy background in vector math.
 
-� 2002 Daniel Horn, Patrick Horn, Alan Shieh, and Aleksander Rawass
+� 2002 Daniel Horn, Patrick Horn, Alan Shieh, and Aleksander Rawass
        Sabarok Aresh, Stefan Stapelberg
 
-� 2002 Graphic Art Daniel Aleksandrow, James Carthew, Jason Wizenreid, Warden, and many more that I do not have the brains to say right now...
+� 2002 Graphic Art Daniel Aleksandrow, James Carthew, Jason Wizenreid, Warden, and many more that I do not have the brains to say right now...
