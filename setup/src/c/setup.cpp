@@ -627,10 +627,13 @@ static void draw_assets_screen(void) {
     ImGui::TextDisabled("%%command%% is the game itself - e.g. \"prime-run %%command%%\". Leave both sides empty for a normal launch.");
     ImGui::EndChild();
 
-    // Help, Save, Close
+    // Help, Save, Close. Close turns red when something is unsaved (pending
+    // config changes from the main screen, or an asset selection not yet saved)
+    // so leaving doesn't silently discard it - mirrors the main screen's Exit.
     float btnw = ImGui::CalcTextSize("Close").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
     float gap = ImGui::GetStyle().ItemSpacing.x;
     bool sel_ok = selected_asset.empty() || asset_has_version(selected_asset);
+    bool unsaved = has_unsaved() || selected_asset != active_asset;
     ImGui::SetCursorPosX((avail_w - (btnw * 3 + gap * 2)) * 0.5f);
     if (ImGui::Button("Help", ImVec2(btnw, 0))) show_help = !show_help;
     ImGui::SameLine();
@@ -642,7 +645,12 @@ static void draw_assets_screen(void) {
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
+    if (unsaved) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
+    }
     if (ImGui::Button("Close", ImVec2(btnw, 0))) mode = 0;
+    if (unsaved) ImGui::PopStyleColor(2);
 
     // Warning modal when the selected directory has no Version.txt.
     if (invalid_popup) { ImGui::OpenPopup("No Version.txt"); invalid_popup = false; }
