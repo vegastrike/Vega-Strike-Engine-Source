@@ -66,28 +66,52 @@ directory.
 ## Running it
 
 The engine has no `install()` rules — the binaries stay in the build directory and are run
-from there, pointing at the assets `data` directory:
+from there.
 
-```sh
-cd VS-05-lts-Engine/build
-./vs-05 -D/path/to/VS-05-lts-Assets/data
+### 1. Install an asset pack first (run the setup to configure it)
+
+VS-05 loads its game data from **asset packs** in your home directory, not from the source
+tree. Each pack is a folder containing a complete data tree (`units/`, `sectors/`, `meshes/`,
+`textures/`, ...). The default "vegastrike" pack is the `VS-05-lts-Assets` repo
+(`github.com/evertvorster/VS-05-lts-Assets`).
+
+Download/extract the pack so it ends up as a folder named after the pack, containing the
+data tree, under the assets directory:
+
+```
+~/.local/share/vs-05/assets/vegastrike/     <- the standard pack
+~/.local/share/vs-05/assets/<packname>/     <- other packs, one folder each
 ```
 
-The game also auto-detects a data directory from a set of known paths (see
-`getdatadir()`), so `-D` is only needed when the data dir is somewhere non-standard.
+Each pack folder must contain a `Version.txt` for the setup to accept it.
 
-The settings app / launcher is built alongside the engine and discovers installed asset
-packs automatically:
+### 2. Run the setup app first, select the pack, and Save
+
+The settings app / launcher discovers the asset packs and configures which one is active.
+Run it **before** the game:
 
 ```sh
 cd VS-05-lts-Engine/build/setup
 ./config-vs-05
 ```
 
-It is a Dear ImGui + SDL3 launcher: it auto-discovers asset packs under the user's data
-directory (`~/.local/share/vs-05/assets/<mod>/`), lets you pick a pack and per-group
-settings, writes the per-pack user config, and can launch the game. User config/saves live
-under the per-user home subdir named in the active asset's `Version.txt`.
+In the setup app: open the **Assets** screen, select your pack, and click **Save** to make it
+the active asset. The setup app is a Dear ImGui + SDL3 launcher — it lets you pick a pack and
+per-group settings, writes the per-pack user config, and can launch the game from there.
+
+### 3. Run the game
+
+```sh
+cd VS-05-lts-Engine/build
+./vs-05            # uses the active asset configured by the setup app
+./vs-05 -D/path/to/data  # or point at a data directory explicitly
+```
+
+When run without `-D`, the game uses the active asset selected in the setup app (or
+auto-detects a data dir from a set of known paths — see `getdatadir()`).
+
+Per-pack user config and saves live under the per-user home subdir named in the active
+asset's `Version.txt`.
 
 > **Packaged install (Arch Linux).** On Arch, the game is available as AUR packages — once
 > released, install with `yay -S vs-05` / `paru -S vs-05` (engine + assets). This installs to
