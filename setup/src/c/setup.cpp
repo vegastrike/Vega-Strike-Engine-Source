@@ -582,12 +582,15 @@ static void draw_assets_screen(void) {
     float avail_w = ImGui::GetContentRegionAvail().x;
     float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
 
-    // Reserve room below the list for the launch-options block + the button row.
-    float opts_h = ImGui::GetFrameHeightWithSpacing()       // "Launch options" header
-                 + ImGui::GetFrameHeightWithSpacing()       // prefix + marker + suffix row
-                 + ImGui::GetTextLineHeightWithSpacing();   // description line
+    // Reserve room below the list for the launch-options box + the button row.
+    float opt_pad = ImGui::GetStyle().WindowPadding.y;
+    float opts_h  = opt_pad * 2
+                  + ImGui::GetTextLineHeightWithSpacing()    // "Launch options" header
+                  + ImGui::GetFrameHeightWithSpacing()       // prefix + marker + suffix row
+                  + ImGui::GetTextLineHeightWithSpacing();   // description line
+    float sep_h   = ImGui::GetStyle().ItemSpacing.y;
 
-    ImGui::BeginChild("assets", ImVec2(0, -(btn_h + opts_h + ImGui::GetStyle().ItemSpacing.y * 2)), ImGuiChildFlags_Borders,
+    ImGui::BeginChild("assets", ImVec2(0, -(btn_h + opts_h + sep_h * 2)), ImGuiChildFlags_Borders,
                       ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
     if (show_help || discovered.empty()) {
         ImGui::TextWrapped("%s", assets_help_text().c_str());
@@ -603,13 +606,15 @@ static void draw_assets_screen(void) {
         selected_asset = "";
     ImGui::EndChild();
 
-    // Launch options: a fixed %command% marker between two editable fields, so
-    // the marker can never be removed (Steam-style, e.g. "prime-run %command%").
+    // Launch options: a bordered box so it reads as its own section. A fixed
+    // %command% marker between two editable fields - the marker is UI text and
+    // can never be removed (Steam-style, e.g. "prime-run %command%").
     // Persisted by launch_commit_bufs(); honored by launch().
-    ImGui::Separator();
+    ImGui::BeginChild("launch_box", ImVec2(0, opts_h), ImGuiChildFlags_Borders);
     ImGui::Text("Launch options");
-    float marker_w = ImGui::CalcTextSize("%command%").x;
-    float field_w  = fmaxf(40.0f, (avail_w - marker_w - ImGui::GetStyle().ItemSpacing.x * 2) * 0.5f);
+    float box_avail = ImGui::GetContentRegionAvail().x;
+    float marker_w  = ImGui::CalcTextSize("%command%").x;
+    float field_w   = fminf(fmaxf(80.0f, (box_avail - marker_w - ImGui::GetStyle().ItemSpacing.x * 2) * 0.5f), 240.0f);
     ImGui::SetNextItemWidth(field_w);
     if (ImGui::InputText("##launch_pre", launch_pre_buf, sizeof(launch_pre_buf)))
         launch_commit_bufs();
@@ -620,6 +625,7 @@ static void draw_assets_screen(void) {
     if (ImGui::InputText("##launch_suf", launch_suf_buf, sizeof(launch_suf_buf)))
         launch_commit_bufs();
     ImGui::TextDisabled("%%command%% is the game itself - e.g. \"prime-run %%command%%\". Leave both sides empty for a normal launch.");
+    ImGui::EndChild();
 
     // Help, Save, Close
     float btnw = ImGui::CalcTextSize("Close").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
