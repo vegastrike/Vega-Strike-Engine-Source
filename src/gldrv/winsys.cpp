@@ -364,6 +364,10 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
     if (!setup_sdl_video_mode( window_title )) {
         winsys_init(argc, argv, window_title, icon_title);
     } else {
+        /* The HUD/text renderer (gfx/hud.cpp) draws fonts via freeglut's
+         * glutStrokeCharacter/glutBitmapCharacter even in the SDL build, so
+         * GLUT must be initialized (master called glutInit here too). */
+        glutInit( argc, argv );
         /* SDL 3 has no SDL_WM_SetIcon and the window must exist before the
          * icon can be attached (SDL 1.2 set it before SDL_SetVideoMode); the
          * window title was passed to SDL_CreateWindow. SDL_StartTextInput
