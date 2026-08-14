@@ -2,6 +2,18 @@
 
 **An "homage edition" of the 2013 game, modernised to build and run today.**
 
+## Major features
+
+- **Modern settings app / launcher (Dear ImGui + SDL3).** The old GTK settings tool is
+  replaced by a fast, fullscreen, asset-driven launcher (`config-vs-05`) built on Dear ImGui
+  and SDL3 — a major new addition to this fork.
+- **Mod-friendly asset packs.** You can run just about any Vega Strike mod made for the
+  ~0.5 era. Asset packs live one-per-folder under `~/.local/share/vs-05/assets/`, and
+  switching between them is fast and easy — provided the assets are in the right place.
+- **Launch from the setup tool or the game binary.** The setup app can launch the game
+  directly, or you can just run the `vs-05` binary — it picks up the same configuration
+  automatically.
+
 ## What this fork is
 
 VS-05 is a fork of Vega Strike taken at the point just before the **"Deus CSV split"**
