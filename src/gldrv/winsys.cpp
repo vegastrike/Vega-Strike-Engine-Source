@@ -319,6 +319,16 @@ static bool setup_sdl_video_mode( const char *window_title )
     SDL_GetWindowSize( g_window, &actual_w, &actual_h );
     VSFileSystem::vs_dprintf( 3, "Setting Screen to w %d h %d\n", actual_w, actual_h );
 
+    /* On Wayland (and some X11 setups) the compositor engages fullscreen
+     * asynchronously; relying on the SDL_WINDOW_FULLSCREEN creation flag alone
+     * leaves the first few frames (the intro splash screens) rendering windowed
+     * before the compositor switches the window to fullscreen. Setting the
+     * fullscreen mode explicitly with NULL = desktop mode forces the switch to
+     * happen synchronously, before any frame is drawn. */
+    if (gl_options.fullscreen) {
+        SDL_SetWindowFullscreenMode( g_window, NULL );
+    }
+
     return true;
 }
 
