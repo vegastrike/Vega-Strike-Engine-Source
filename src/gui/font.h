@@ -38,7 +38,12 @@ static const float BOLD_STROKE   = 1.5;
 //These constants describe the reference vertical spacing of the font:
 static const double REFERENCE_BASELINE_POS  = 33.33;
 static const double REFERENCE_FONT_ASCENDER = 119.05;
-static const double REFERENCE_LINE_SPACING  = REFERENCE_FONT_ASCENDER+REFERENCE_BASELINE_POS;
+// VS-05: the vector (stroke) glyph scale is size()/REFERENCE_LINE_SPACING, so the reference
+// spacing is also the text-size knob. Shrinking it by VECTOR_FONT_SCALE renders vector text
+// that much larger at higher resolutions (the original "spacing is a guess -- tweak it if
+// necessary" knob). Keep hud.cpp TextPlane and base_util.cpp GetTextHeight in sync with this.
+static const double VECTOR_FONT_SCALE       = 1.5;
+static const double REFERENCE_LINE_SPACING  = (REFERENCE_FONT_ASCENDER+REFERENCE_BASELINE_POS)/VECTOR_FONT_SCALE;
 
 //Font object.
 //Right now, this only supports the GLUT outline font.

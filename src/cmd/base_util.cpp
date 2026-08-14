@@ -722,7 +722,10 @@ float GetTextHeight( std::string text, Vector widheimult )
     static bool  use_bit    = force_highquality
                               || XMLSupport::parse_bool( vs_config->getVariable( "graphics", "high_quality_font", "false" ) );
     static float font_point = XMLSupport::parse_float( vs_config->getVariable( "graphics", "font_point", "16" ) );
-    return use_bit ? getFontHeight() : (font_point*2/g_game.y_resolution);
+    // Vector row height must match the rendered glyph height. TextPlane scales the stroke glyph
+    // by 1/REFERENCE_LINE_SPACING, which is VECTOR_FONT_SCALE smaller than the natural
+    // ascender+descender reference, so the rendered height is font_point*2/y_res*VECTOR_FONT_SCALE.
+    return use_bit ? getFontHeight() : (font_point*2/g_game.y_resolution)*VECTOR_FONT_SCALE;
 }
 
 float GetTextWidth( std::string text, Vector widheimult )

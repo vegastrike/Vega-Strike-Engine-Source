@@ -231,7 +231,7 @@ int TextPlane::Draw( const string &newText, int offset, bool startlower, bool fo
     static bool  font_antialias = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "font_antialias", "true" ) );
     void *fnt = getFont();
     static float std_wid        = glutStrokeWidth( GLUT_STROKE_ROMAN, 'W' );
-    myFontMetrics.i  = font_point*std_wid/(119.05+33.33);
+    myFontMetrics.i  = font_point*std_wid/REFERENCE_LINE_SPACING;
     if (use_bit)
         myFontMetrics.i = glutBitmapWidth( fnt, 'W' );
     myFontMetrics.j  = font_point;
@@ -289,7 +289,7 @@ int TextPlane::Draw( const string &newText, int offset, bool startlower, bool fo
             numplayers = ( _Universe->numPlayers() > 3 ? _Universe->numPlayers()/2
                           : _Universe->numPlayers() );
         scalex = numplayers*myFontMetrics.i/std_wid;
-        scaley = myFontMetrics.j/(119.05+33.33);
+        scaley = myFontMetrics.j/REFERENCE_LINE_SPACING;
     }
     glScalef( scalex, scaley, 1 );
     bool     firstThroughLoop = true;
