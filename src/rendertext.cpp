@@ -6,7 +6,7 @@
 #include "vegastrike.h"
 #include "cg_global.h"
 #ifdef HAVE_SDL
-#include "SDL/SDL.h"
+#include <SDL3/SDL.h>
 #endif
 #include "gfx/hud.h"
 #include "gldrv/winsys.h"
@@ -27,9 +27,9 @@ using std::endl;
 //****************
 
 #ifdef HAVE_SDL
-static SDL_mutex * _rtextSDLMutex()
+static SDL_Mutex * _rtextSDLMutex()
 {
-    static SDL_mutex *rv = SDL_CreateMutex();
+    static SDL_Mutex *rv = SDL_CreateMutex();
     return rv;
 }
 #endif
@@ -144,7 +144,7 @@ void RText::conoutf( string &s, int a, int b, int c )
 {
 #ifdef HAVE_SDL
     //NOTE: first call must be single-threaded!
-    SDL_mutex *mymutex = _rtextSDLMutex();
+    SDL_Mutex *mymutex = _rtextSDLMutex();
     SDL_LockMutex( mymutex );
 #endif
     cout<<s<<endl;

@@ -36,7 +36,7 @@ static LONGLONG freq;
 static double   dblnewtime;
 #else
 #if defined (HAVE_SDL)
-#   include <SDL/SDL.h>
+#   include <SDL3/SDL.h>
 #endif /* defined( HAVE_SDL ) */
 static double newtime;
 static double lasttime;

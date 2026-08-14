@@ -9,7 +9,7 @@
 #include <vector>
 
 #ifdef HAVE_SDL
-#   include <SDL/SDL.h>
+#   include <SDL3/SDL.h>
 #endif
 
 #include <string>
@@ -1523,7 +1523,7 @@ void BringConsole( const KBData&, KBSTATE newState )
             winsys_set_keyboard_func( (winsys_keyboard_func_t) &commandI::keypress );
             CommandInterpretor->console = true;
 #ifdef HAVE_SDL
-            SDL_EnableUNICODE( true );
+            winsys_set_text_input( true );
 #endif
         }
     }
