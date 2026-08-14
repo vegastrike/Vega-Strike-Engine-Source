@@ -638,11 +638,16 @@ static void draw_assets_screen(void) {
     if (ImGui::Button("Help", ImVec2(btnw, 0))) show_help = !show_help;
     ImGui::SameLine();
     ImGui::BeginDisabled(!sel_ok);
+    if (unsaved) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.45f, 0.22f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
+    }
     if (ImGui::Button("Save", ImVec2(btnw, 0))) {
         active_asset = selected_asset;
         save_active_asset();
         load_config();   // rebuild the table for the new active asset
     }
+    if (unsaved) ImGui::PopStyleColor(2);
     ImGui::EndDisabled();
     ImGui::SameLine();
     if (unsaved) {
@@ -801,7 +806,12 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     float gap = ImGui::GetStyle().ItemSpacing.x;
     bool unsaved = has_unsaved();
     ImGui::SetCursorPosX((avail_w - (btnw * 5 + gap * 4)) * 0.5f);
+    if (unsaved) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.45f, 0.22f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
+    }
     if (ImGui::Button("Save", ImVec2(btnw, 0))) save();
+    if (unsaved) ImGui::PopStyleColor(2);
     ImGui::SameLine();
     if (ImGui::Button("View Readme", ImVec2(btnw, 0))) view_readme();
     ImGui::SameLine();
