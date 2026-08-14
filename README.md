@@ -49,17 +49,13 @@ engine first (the assets are data-only). From a fresh checkout:
 
 ```sh
 cd VS-05-lts-Engine
-cmake -B build -DCMAKE_BUILD_TYPE=Debug \
-      -DUSE_SYSTEM_BOOST=ON \
-      -DDISABLE_FFMPEG=ON
+cmake -B build -DUSE_SYSTEM_BOOST=ON -DDISABLE_FFMPEG=ON
 cmake --build build
 ```
 
-Notes on the CMake options:
+The default build type is `Release`; `Debug` and `Profiler` are also supported. Notes on the
+CMake options:
 
-- **`-DCMAKE_BUILD_TYPE=Debug`** — this carries `-DNV_CUBE_MAP`. A build configured
-  without `NV_CUBE_MAP` (e.g. a plain `Release`/`RelWithDebInfo` that drops the project's
-  custom per-build-type defines) will show a white space background.
 - **`-DUSE_SYSTEM_BOOST=ON`** — use the system Boost rather than the bundled (incomplete)
   copy.
 - **`-DDISABLE_FFMPEG=ON`** — no video files are shipped, so FFmpeg is not needed.
