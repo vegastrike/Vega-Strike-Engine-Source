@@ -599,7 +599,7 @@ static void dispatch_key( unsigned int sym, unsigned int unicode, SDL_Keymod mod
     );
 
     if (shifton && is_unicode
-        && shiftup( shiftdown( unicode ) ) != unicode) {
+        && (unsigned int) shiftup( shiftdown( unicode ) ) != unicode) {
         modbits = modbits&~(SDL_KMOD_LSHIFT|SDL_KMOD_RSHIFT|SDL_KMOD_CAPS);
         shifton = false;
     }
