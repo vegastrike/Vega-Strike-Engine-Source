@@ -28,7 +28,7 @@
 #endif
 
 #if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
-#   include <SDL/SDL.h>
+#   include <SDL3/SDL.h>
 #elif defined( HAVE_GLUT )
 #if defined(__APPLE__) || defined(MACOSX)
     #include <GLUT/glut.h>
@@ -53,27 +53,39 @@ extern "C"
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
+/* SDL 3 port (from scratch, 2026-08-14):
+ *
+ * The WSK_* keycode values below are FROZEN at their SDL 1.2 values (verified
+ * against sdl12-compat's SDL_keysym.h). They are the game's internal key
+ * identity: baked into the keyBindings[][]/keyState[][] array sizes
+ * (in_kb.cpp KEYMAP_SIZE), the key_map name table (config_xml.cpp) and every
+ * user key binding. SDL 3 renumbered all special keys (SDLK_UP: 273 ->
+ * 0x40000052) and removed SDLK_LAST, so this enum must NOT track SDL 3
+ * constants. Translation from SDL 3 keycodes happens at the boundary in
+ * winsys.cpp (sdl3key_to_wsk); ASCII-range keys are identical in both SDLs
+ * and pass through unchanged.
+ */
 typedef enum {
-    WSK_NOT_AVAIL = SDLK_UNKNOWN,
+    WSK_NOT_AVAIL = 0,
 
     /* Numeric keypad */
-    WSK_KP0 = SDLK_KP0,
-    WSK_KP1 = SDLK_KP1,
-    WSK_KP2 = SDLK_KP2,
-    WSK_KP3 = SDLK_KP3,
-    WSK_KP4 = SDLK_KP4,
-    WSK_KP5 = SDLK_KP5,
-    WSK_KP6 = SDLK_KP6,
-    WSK_KP7 = SDLK_KP7,
-    WSK_KP8 = SDLK_KP8,
-    WSK_KP9 = SDLK_KP9,
-    WSK_KP_PERIOD = SDLK_KP_PERIOD,
-    WSK_KP_DIVIDE = SDLK_KP_DIVIDE,
-    WSK_KP_MULTIPLY = SDLK_KP_MULTIPLY,
-    WSK_KP_MINUS = SDLK_KP_MINUS,
-    WSK_KP_PLUS = SDLK_KP_PLUS,
-    WSK_KP_ENTER = SDLK_KP_ENTER,
-    WSK_KP_EQUALS = SDLK_KP_EQUALS,
+    WSK_KP0 = 256,
+    WSK_KP1 = 257,
+    WSK_KP2 = 258,
+    WSK_KP3 = 259,
+    WSK_KP4 = 260,
+    WSK_KP5 = 261,
+    WSK_KP6 = 262,
+    WSK_KP7 = 263,
+    WSK_KP8 = 264,
+    WSK_KP9 = 265,
+    WSK_KP_PERIOD = 266,
+    WSK_KP_DIVIDE = 267,
+    WSK_KP_MULTIPLY = 268,
+    WSK_KP_MINUS = 269,
+    WSK_KP_PLUS = 270,
+    WSK_KP_ENTER = 271,
+    WSK_KP_EQUALS = 272,
 	
 	WSK_RETURN = 13,
 	WSK_TAB = '\t',
@@ -91,83 +103,83 @@ typedef enum {
     127,
 #endif
     /* Arrows + Home/End pad */
-    WSK_UP = SDLK_UP,
-    WSK_DOWN = SDLK_DOWN,
-    WSK_RIGHT = SDLK_RIGHT,
-    WSK_LEFT = SDLK_LEFT,
-    WSK_INSERT = SDLK_INSERT,
-    WSK_HOME = SDLK_HOME,
-    WSK_END = SDLK_END,
-    WSK_PAGEUP = SDLK_PAGEUP,
-    WSK_PAGEDOWN = SDLK_PAGEDOWN,
+    WSK_UP = 273,
+    WSK_DOWN = 274,
+    WSK_RIGHT = 275,
+    WSK_LEFT = 276,
+    WSK_INSERT = 277,
+    WSK_HOME = 278,
+    WSK_END = 279,
+    WSK_PAGEUP = 280,
+    WSK_PAGEDOWN = 281,
 
     /* Function keys */
-    WSK_F1 = SDLK_F1,
-    WSK_F2 = SDLK_F2,
-    WSK_F3 = SDLK_F3,
-    WSK_F4 = SDLK_F4,
-    WSK_F5 = SDLK_F5,
-    WSK_F6 = SDLK_F6,
-    WSK_F7 = SDLK_F7,
-    WSK_F8 = SDLK_F8,
-    WSK_F9 = SDLK_F9,
-    WSK_F10 = SDLK_F10,
-    WSK_F11 = SDLK_F11,
-    WSK_F12 = SDLK_F12,
-    WSK_F13 = SDLK_F13,
-    WSK_F14 = SDLK_F14,
-    WSK_F15 = SDLK_F15,
+    WSK_F1 = 282,
+    WSK_F2 = 283,
+    WSK_F3 = 284,
+    WSK_F4 = 285,
+    WSK_F5 = 286,
+    WSK_F6 = 287,
+    WSK_F7 = 288,
+    WSK_F8 = 289,
+    WSK_F9 = 290,
+    WSK_F10 = 291,
+    WSK_F11 = 292,
+    WSK_F12 = 293,
+    WSK_F13 = 294,
+    WSK_F14 = 295,
+    WSK_F15 = 296,
 
     /* Key state modifier keys */
-    WSK_NUMLOCK = SDLK_NUMLOCK,
-    WSK_CAPSLOCK = SDLK_CAPSLOCK,
-    WSK_SCROLLOCK = SDLK_SCROLLOCK,
-    WSK_RSHIFT = SDLK_RSHIFT,
-    WSK_LSHIFT = SDLK_LSHIFT,
-    WSK_RCTRL = SDLK_RCTRL,
-    WSK_LCTRL = SDLK_LCTRL,
-    WSK_RALT = SDLK_RALT,
-    WSK_LALT = SDLK_LALT,
-    WSK_RMETA = SDLK_RMETA,
-    WSK_LMETA = SDLK_LMETA,
-    WSK_BREAK = SDLK_BREAK,
-	WSK_PAUSE = SDLK_PAUSE,
-    WSK_LAST=SDLK_LAST
+    WSK_NUMLOCK = 300,
+    WSK_CAPSLOCK = 301,
+    WSK_SCROLLOCK = 302,
+    WSK_RSHIFT = 303,
+    WSK_LSHIFT = 304,
+    WSK_RCTRL = 305,
+    WSK_LCTRL = 306,
+    WSK_RALT = 307,
+    WSK_LALT = 308,
+    WSK_RMETA = 309,
+    WSK_LMETA = 310,
+    WSK_BREAK = 318,      /* SDL 1.2 SDLK_BREAK; no SDL 3 keycode exists - binding never fires */
+	WSK_PAUSE = 19,       /* SDL 1.2 SDLK_PAUSE */
+    WSK_LAST = 323        /* SDL 1.2 SDLK_LAST; SDL 3 removed SDLK_LAST */
 
 } winsys_keysym_t;
 typedef enum {
-        WSK_MOD_NONE=KMOD_NONE,
-	WSK_MOD_LSHIFT=KMOD_LSHIFT,
-	WSK_MOD_RSHIFT=KMOD_RSHIFT,
-	WSK_MOD_LCTRL=KMOD_LCTRL ,
-	WSK_MOD_RCTRL=KMOD_RCTRL ,
-	WSK_MOD_LALT=KMOD_LALT  ,
-	WSK_MOD_RALT=KMOD_RALT  ,
-	WSK_MOD_LMETA=KMOD_LMETA ,
-	WSK_MOD_RMETA=KMOD_RMETA ,
-	WSK_MOD_NUM=KMOD_NUM   ,
-	WSK_MOD_CAPS=KMOD_CAPS  ,
-	WSK_MOD_MODE=KMOD_MODE  
+    /* SDL 3 SDL_KMOD_* bits are identical to SDL 1.2 KMOD_* (verified); only
+     * the names gained the SDL_ prefix and LMETA/RMETA became LGUI/RGUI. */
+        WSK_MOD_NONE=SDL_KMOD_NONE,
+	WSK_MOD_LSHIFT=SDL_KMOD_LSHIFT,
+	WSK_MOD_RSHIFT=SDL_KMOD_RSHIFT,
+	WSK_MOD_LCTRL=SDL_KMOD_LCTRL ,
+	WSK_MOD_RCTRL=SDL_KMOD_RCTRL ,
+	WSK_MOD_LALT=SDL_KMOD_LALT  ,
+	WSK_MOD_RALT=SDL_KMOD_RALT  ,
+	WSK_MOD_LMETA=SDL_KMOD_LGUI ,
+	WSK_MOD_RMETA=SDL_KMOD_RGUI ,
+	WSK_MOD_NUM=SDL_KMOD_NUM   ,
+	WSK_MOD_CAPS=SDL_KMOD_CAPS  ,
+	WSK_MOD_MODE=SDL_KMOD_MODE  
 } winsys_modifiers;
 
-// mouse wheel events are only available with SDL 1.2.5 or later
-#ifndef SDL_BUTTON_WHEELUP
-# define SDL_BUTTON_WHEELUP 254
-#endif
-#ifndef SDL_BUTTON_WHEELDOWN
-# define SDL_BUTTON_WHEELDOWN 255
-#endif
+/* SDL 1.2 delivered the mouse wheel as button presses (SDL_BUTTON_WHEELUP=4,
+ * SDL_BUTTON_WHEELDOWN=5). SDL 3 has a dedicated SDL_EVENT_MOUSE_WHEEL and
+ * renumbered buttons 4/5 to X1/X2, so keep the wheel values as frozen SDL 1
+ * literals: winsys.cpp synthesizes 4/5 press+release pairs from the wheel
+ * event and renumbers real X1/X2 (4/5) to the SDL 1 X1/X2 values (6/7). */
 typedef enum {
-    WS_LEFT_BUTTON = SDL_BUTTON_LEFT,
-    WS_MIDDLE_BUTTON = SDL_BUTTON_MIDDLE,
-    WS_RIGHT_BUTTON = SDL_BUTTON_RIGHT,
-	WS_WHEEL_UP = SDL_BUTTON_WHEELUP,
-	WS_WHEEL_DOWN = SDL_BUTTON_WHEELDOWN
+    WS_LEFT_BUTTON = SDL_BUTTON_LEFT,      /* 1 */
+    WS_MIDDLE_BUTTON = SDL_BUTTON_MIDDLE,  /* 2 */
+    WS_RIGHT_BUTTON = SDL_BUTTON_RIGHT,    /* 3 */
+	WS_WHEEL_UP = 4,
+	WS_WHEEL_DOWN = 5
 } winsys_mouse_button_t;
 
 typedef enum {
-    WS_MOUSE_DOWN = SDL_PRESSED,
-    WS_MOUSE_UP = SDL_RELEASED
+    WS_MOUSE_DOWN = SDL_PRESSED,   /* 1 */
+    WS_MOUSE_UP = SDL_RELEASED     /* 0 */
 } winsys_button_state_t;
 
 #else
@@ -315,6 +327,7 @@ void winsys_set_passive_motion_func( winsys_motion_func_t func );
 
 void winsys_swap_buffers();
 void winsys_enable_key_repeat( bool enabled );
+void winsys_set_text_input( bool enabled );
 void winsys_warp_pointer( int x, int y );
 void winsys_show_cursor( bool visible );
 
