@@ -20,7 +20,7 @@
 #include "cs_python.h"
 #include "audio/test.h"
 #if defined (HAVE_SDL)
-#include <SDL/SDL.h>
+#include <SDL3/SDL.h>
 #endif
 #include "cmd/role_bitmask.h"
 #if defined (WITH_MACOSX_BUNDLE)
@@ -320,7 +320,8 @@ int main( int argc, char *argv[] )
     std::vector<std::vector <char > > temp = ROLES::getAllRolePriorities();
 #if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
-    if ( SDL_InitSubSystem( SDL_INIT_JOYSTICK ) ) {
+    /* SDL 3 returns bool true on success; SDL 1.2 returned 0 on success */
+    if ( !SDL_InitSubSystem( SDL_INIT_JOYSTICK ) ) {
         VSFileSystem::vs_fprintf( stderr, "Couldn't initialize SDL: %s\n", SDL_GetError() );
         winsys_exit( 1 );
     }

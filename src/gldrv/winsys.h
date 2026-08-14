@@ -178,8 +178,8 @@ typedef enum {
 } winsys_mouse_button_t;
 
 typedef enum {
-    WS_MOUSE_DOWN = SDL_PRESSED,   /* 1 */
-    WS_MOUSE_UP = SDL_RELEASED     /* 0 */
+    WS_MOUSE_DOWN = 1,   /* SDL 1.2 SDL_PRESSED; SDL 3 dropped the defines */
+    WS_MOUSE_UP = 0      /* SDL 1.2 SDL_RELEASED */
 } winsys_button_state_t;
 
 #else

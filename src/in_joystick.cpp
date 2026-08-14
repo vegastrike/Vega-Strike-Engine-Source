@@ -53,6 +53,9 @@ static int minz   = -1;
 
 JoyStick  *joystick[MAX_JOYSTICKS]; //until I know where I place it
 int num_joysticks = 0;
+/* SDL 3 joystick instance IDs, cached from SDL_GetJoysticks() in InitJoystick()
+ * (SDL 3 opens joysticks by instance ID, not by index) */
+static SDL_JoystickID joyIDs[MAX_JOYSTICKS];
 void modifyDeadZone( JoyStick *j )
 {
     for (int a = 0; a < j->nr_of_axes; a++) {
@@ -141,7 +144,13 @@ void InitJoystick()
                 UnbindDigitalHatswitchKey( j, h, v );
 #ifndef NO_SDL_JOYSTICK
 #ifdef HAVE_SDL
-    num_joysticks = SDL_NumJoysticks();
+    /* SDL 3: SDL_GetJoysticks() returns a caller-freed array of instance IDs
+     * (SDL_NumJoysticks() no longer exists); the IDs are cached for the
+     * per-joystick opens in JoyStick::JoyStick(int). */
+    SDL_JoystickID *ids = SDL_GetJoysticks( &num_joysticks );
+    for (int i = 0; i < num_joysticks && i < MAX_JOYSTICKS; i++)
+        joyIDs[i] = ids[i];
+    SDL_free( ids );
     printf( "%i joysticks were found.\n\n", num_joysticks );
     printf( "The names of the joysticks are:\n" );
 #else
@@ -157,7 +166,7 @@ void InitJoystick()
 #ifndef NO_SDL_JOYSTICK
 #ifdef HAVE_SDL
         if (i < num_joysticks)
-            printf( "    %s\n", SDL_JoystickName( i ) );
+            printf( "    %s\n", SDL_GetJoystickNameForID( joyIDs[i] ) );
 #else
         if (i < num_joysticks)
             //SDL_EventState (SDL_JOYBUTTONDOWN,SDL_ENABLE);
@@ -200,22 +209,21 @@ JoyStick::JoyStick( int which ) : mouse( which == MOUSE_JOYSTICK )
 
 #else
 #ifdef HAVE_SDL
-    num_joysticks = SDL_NumJoysticks();
     if (which >= num_joysticks) {
         if (which != MOUSE_JOYSTICK)
             joy_available = false;
         return;
     }
-    joy = SDL_JoystickOpen( which );     //joystick nr should be configurable
+    joy = SDL_OpenJoystick( joyIDs[which] );     //joystick nr should be configurable
     if (joy == NULL) {
         printf( "warning: no joystick nr %d\n", which );
         joy_available = false;
         return;
     }
     joy_available = true;
-    nr_of_axes    = SDL_JoystickNumAxes( joy );
-    nr_of_buttons = SDL_JoystickNumButtons( joy );
-    nr_of_hats    = SDL_JoystickNumHats( joy );
+    nr_of_axes    = SDL_GetNumJoystickAxes( joy );
+    nr_of_buttons = SDL_GetNumJoystickButtons( joy );
+    nr_of_hats    = SDL_GetNumJoystickHats( joy );
 #else
     //WE HAVE GLUT
     if (which > 0 && which != MOUSE_JOYSTICK) {
@@ -342,19 +350,19 @@ void JoyStick::GetJoyStick( float &x, float &y, float &z, int &buttons )
     int a;
 #ifndef NO_SDL_JOYSTICK
 #if defined (HAVE_SDL)
-    int numaxes = SDL_JoystickNumAxes( joy ) < MAX_AXES ? SDL_JoystickNumAxes( joy ) : MAX_AXES;
+    int numaxes = SDL_GetNumJoystickAxes( joy ) < MAX_AXES ? SDL_GetNumJoystickAxes( joy ) : MAX_AXES;
     vector< Sint16 >axi( numaxes );
     for (a = 0; a < numaxes; a++)
-        axi[a] = SDL_JoystickGetAxis( joy, a );
+        axi[a] = SDL_GetJoystickAxis( joy, a );
     joy_buttons   = 0;
-    nr_of_buttons = SDL_JoystickNumButtons( joy );
+    nr_of_buttons = SDL_GetNumJoystickButtons( joy );
     for (int i = 0; i < nr_of_buttons; i++) {
-        int butt = SDL_JoystickGetButton( joy, i );
+        int butt = SDL_GetJoystickButton( joy, i );
         if (butt == 1)
             joy_buttons |= (1<<i);
     }
     for (int h = 0; h < nr_of_hats; h++)
-        digital_hat[h] = SDL_JoystickGetHat( joy, h );
+        digital_hat[h] = SDL_GetJoystickHat( joy, h );
     for (a = 0; a < numaxes; a++)
         joy_axis[a] = ( (float) axi[a]/32768.0 );
     modifyDeadZone( this );
