@@ -1117,6 +1117,9 @@ BaseInterface::BaseInterface( const char *basefile, Unit *base, Unit *un ) :
     curtext.SetCharSize( x*2, y*2 );
     curtext.SetSize( 1-.01, -2 );
     othtext.GetCharSize( x, y );
+    // Scale the NPC/talk speech (hauler/bartender) to match the rest of the base-interface text.
+    // The HUD/cockpit TextPlanes keep scale 1.0 and are unaffected.
+    othtext.SetCharScale( BASE_FONT_SCALE );
     othtext.SetCharSize( x*2, y*2 );
     othtext.SetSize( 1-.01, -.75 );
 
