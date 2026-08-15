@@ -216,6 +216,20 @@ static bool create_window_and_context( const char *window_title, int width, int 
 {
     g_window = SDL_CreateWindow( window_title, width, height, flags );
     if (g_window != NULL) {
+        // In exclusive fullscreen SDL3 defaults to the monitor's native (max) resolution unless we
+        // pin the window to a display mode matching the requested width/height.
+        if ( flags & SDL_WINDOW_FULLSCREEN ) {
+            int count = 0;
+            SDL_DisplayMode **modes = SDL_GetFullscreenDisplayModes( SDL_GetDisplayForWindow( g_window ), &count );
+            if (modes) {
+                for (int i = 0; i < count; ++i)
+                    if (modes[i]->w == width && modes[i]->h == height) {
+                        SDL_SetWindowFullscreenMode( g_window, modes[i] );
+                        break;
+                    }
+                SDL_free( modes );
+            }
+        }
         g_glcontext = SDL_GL_CreateContext( g_window );
         if (g_glcontext != NULL) {
             SDL_GL_MakeCurrent( g_window, g_glcontext );
