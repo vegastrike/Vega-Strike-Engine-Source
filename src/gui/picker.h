@@ -228,7 +228,9 @@ protected:
 //The total vertical space between displayed cells.
     float totalCellHeight( void )
     {
-        return m_font.size()+m_extraCellHeight;
+        // Row height must track the actual rendered glyph height (scales with font size), not
+        // font.size(), so list rows fit the glyphs as the font scales.
+        return m_font.verticalScaling()*(REFERENCE_FONT_ASCENDER+REFERENCE_BASELINE_POS)+m_extraCellHeight;
     }
 
 //Find the cell that corresponds to a point in the control.
