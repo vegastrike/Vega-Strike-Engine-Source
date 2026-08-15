@@ -174,10 +174,12 @@ static int rewrite(const std::string &path, const std::string &group,
 
         if (head[0] != '#') { fprintf(wp, "%s\n", line); continue; }
         char *kw = head + 1;
-        // Keep a copy of the full option list: next_parm(kw) below null-terminates the first
-        // token of head+1, so scanning head+1 later would only ever see the first option, and
-        // multi-option markers like "#warp_mouse glide_mouse" would never match.
-        char *marker_copy = strdup(kw);
+        // next_parm(kw) below null-terminates the first token of head+1 (clobbering it), and the
+        // option-match scan also mutates the buffer it walks, so keep TWO copies: marker_orig is
+        // used for the rewritten marker line output (kept whole, so all the marker's options are
+        // preserved), and marker_scan is walked by the match loop (next_parm may modify it).
+        char *marker_orig = strdup(kw);
+        char *marker_scan = strdup(kw);
         char *args = next_parm(kw);
 
         if (strcmp(kw, "endheader") == 0) { fprintf(wp, "%s\n", line); continue; }
@@ -200,22 +202,25 @@ static int rewrite(const std::string &path, const std::string &group,
             continue;
         }
 
-        // an option-marker "#..." line: does it mention `name`? Scan the copy so ALL options
+        // an option-marker "#..." line: does it mention `name`? Scan marker_scan so ALL options
         // are checked (head+1 was clobbered to the first token by next_parm(kw) above).
         bool match = false;
-        char *t = marker_copy;
+        char *t = marker_scan;
         while (t && !match && (args = next_parm(t)) != NULL) {
             if (strcmp(t, name.c_str()) == 0) match = true;
             t = args;
         }
-        free(marker_copy);
+        free(marker_scan);
         if (match) commenting = setting;
-        if (commenting == 0) { fprintf(wp, "%s\n", line); continue; }
+        if (commenting == 0) { fprintf(wp, "%s\n", line); free(marker_orig); continue; }
 
         fprintf(wp, "%s", p.before);
-        if (commenting == 1) fprintf(wp, "<!-- %s", p.inside);
-        else fprintf(wp, "<!-- %s -->", p.inside);
+        // Output from marker_orig (whole), prefixed with '#': p.inside is clobbered to the first
+        // token by next_parm(kw), so using it would drop the other options of the marker.
+        if (commenting == 1) fprintf(wp, "<!-- #%s", marker_orig);
+        else fprintf(wp, "<!-- #%s -->", marker_orig);
         fprintf(wp, "%s\n", p.after);
+        free(marker_orig);
     }
     fclose(rp);
     fclose(wp);
