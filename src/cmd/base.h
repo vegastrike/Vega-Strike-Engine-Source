@@ -188,11 +188,10 @@ public:
             {
                 text.SetPos( posx, posy );
                 text.SetSize( wid, hei );
-                float cx = 0, cy = 0;
-                text.GetCharSize( cx, cy );
-                cx *= charsizemult;
-                cy *= charsizemult;
-                text.SetCharSize( cx, cy );
+                // Scale base-interface text relative to the HUD font. TextPlane::Draw normally sizes
+                // every TextPlane from the global font_point; this per-instance scale lets the base
+                // (bartender/guilds/dialog) text render larger while the HUD and base computer stay put.
+                text.SetCharScale( BASE_FONT_SCALE );
                 text.SetText( texts );
             }
             void SetText( const std::string &newtext )

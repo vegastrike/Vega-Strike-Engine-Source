@@ -35,6 +35,7 @@ class TextPlane
     Vector myFontMetrics;     //i = width, j = height
     Vector myDims;
     int    numlet;
+    float  m_charScale;  //per-instance text scale, multiplies the global font_point in Draw
 /*
  *  struct GlyphPosition {
  *       float left, right, top, bottom;
@@ -53,6 +54,10 @@ public:
     {
         myFontMetrics.i = x;
         myFontMetrics.j = y;
+    }
+    void SetCharScale( float s )
+    {
+        m_charScale = s;
     }
     void GetCharSize( float &x, float &y )
     {

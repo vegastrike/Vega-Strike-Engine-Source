@@ -44,6 +44,10 @@ static const double REFERENCE_FONT_ASCENDER = 119.05;
 // necessary" knob). Keep hud.cpp TextPlane and base_util.cpp GetTextHeight in sync with this.
 static const double VECTOR_FONT_SCALE       = 1.5;
 static const double REFERENCE_LINE_SPACING  = (REFERENCE_FONT_ASCENDER+REFERENCE_BASELINE_POS)/VECTOR_FONT_SCALE;
+// Scale applied to base-interface (bartender/guilds/dialog) TextPlane text relative to the HUD
+// font, so the base stays readable against the larger base-computer gui Font text. Applied
+// per-instance in TextPlane::Draw; HUD/cockpit TextPlanes keep the default scale of 1.0.
+static const float BASE_FONT_SCALE          = 1.5;
 
 //Font object.
 //Right now, this only supports the GLUT outline font.

@@ -123,6 +123,7 @@ TextPlane::TextPlane( const GFXColor &c, const GFXColor &bgcol )
     myDims.i    = 2;
     myDims.j    = -2;
     myFontMetrics.Set( .06, .08, 0 );
+    m_charScale = 1.0;
     SetPos( 0, 0 );
 }
 
@@ -237,6 +238,11 @@ int TextPlane::Draw( const string &newText, int offset, bool startlower, bool fo
     myFontMetrics.j  = font_point;
     myFontMetrics.i /= .5*g_game.x_resolution;
     myFontMetrics.j /= .5*g_game.y_resolution;
+    // Per-instance scale (base-interface text): grows the glyph and its line advance together, so
+    // the base stays readable against the larger base-computer gui Font text. HUD/cockpit
+    // TextPlanes keep m_charScale=1.0 and are unaffected.
+    myFontMetrics.i *= m_charScale;
+    myFontMetrics.j *= m_charScale;
     float tmp, row, col;
     float origcol;
     GetPos( row, col );
