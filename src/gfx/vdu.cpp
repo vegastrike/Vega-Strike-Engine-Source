@@ -52,16 +52,6 @@ const std::string vdu_modes[] =
 string reformatName( string nam )
 {
     nam = nam.substr( 0, nam.find( "." ) );
-    // Jump points are stored without spaces ("JumpToStirling" / "Jump_To_Stirling" / "Jump to Stirling")
-    // depending on how the universe was generated. Normalise all three to a readable "Jump to Stirling".
-    if ( nam.compare( 0, 8, "Jump to " ) == 0 || nam.compare( 0, 6, "JumpTo" ) == 0
-         || nam.compare( 0, 8, "Jump_To_" ) == 0 ) {
-        size_t pos = ( nam.compare( 0, 6, "JumpTo" ) == 0 ) ? 6 : 8;
-        string dest = nam.substr( pos );
-        for (size_t i = 0; i < dest.size(); ++i)
-            if (dest[i] == '_') dest[i] = ' ';
-        return "Jump to "+dest;
-    }
     if ( nam.length() )
         nam[0] = toupper( nam[0] );
     return nam;
