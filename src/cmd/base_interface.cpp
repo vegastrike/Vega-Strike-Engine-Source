@@ -367,7 +367,7 @@ void BaseInterface::Room::Draw( BaseInterface *base )
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "base_locationmarker_drawalways", "false" ) );
     static float y_lower = -0.9;           //shows the offset on the lower edge of the screen (for the textline there) -> Should be defined globally somewhere
     static float base_text_background_alpha =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_text_background_alpha", "0.0625" ) );
+        XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_text_background_alpha", "0" ) );
     if (enable_markers) {
         float x, y, text_wid, text_hei;
         //get offset from config;
@@ -523,7 +523,7 @@ void BaseInterface::Room::BaseText::Draw( BaseInterface *base )
             g_game.y_resolution = base_max_height;
     }
     static float base_text_background_alpha =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_text_background_alpha", "0.0625" ) );
+        XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_text_background_alpha", "0" ) );
     GFXColor     tmpbg = text.bgcol;
     bool automatte     = (0 == tmpbg.a);
     if (automatte)
@@ -1448,7 +1448,7 @@ void BaseInterface::Draw()
     float x, y;
     glViewport( 0, 0, g_game.x_resolution, g_game.y_resolution );
     static float base_text_background_alpha =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_text_background_alpha", "0.0625" ) );
+        XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_text_background_alpha", "0" ) );
 
     curtext.GetCharSize( x, y );
     curtext.SetPos( -.99, -1+(y*1.5) );
