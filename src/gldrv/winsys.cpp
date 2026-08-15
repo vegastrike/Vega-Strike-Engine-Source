@@ -323,10 +323,24 @@ static bool setup_sdl_video_mode( const char *window_title )
      * asynchronously; relying on the SDL_WINDOW_FULLSCREEN creation flag alone
      * leaves the first few frames (the intro splash screens) rendering windowed
      * before the compositor switches the window to fullscreen. Setting the
-     * fullscreen mode explicitly with NULL = desktop mode forces the switch to
-     * happen synchronously, before any frame is drawn. */
+     * fullscreen mode explicitly forces the switch to happen synchronously,
+     * before any frame is drawn. Pin the window to a fullscreen display mode
+     * matching the configured resolution so the game runs at the chosen size
+     * (not the monitor's native/max); if no exact mode exists, mode stays NULL
+     * and SDL falls back to the desktop mode. */
     if (gl_options.fullscreen) {
-        SDL_SetWindowFullscreenMode( g_window, NULL );
+        const SDL_DisplayMode *mode = NULL;
+        int count = 0;
+        SDL_DisplayMode **modes = SDL_GetFullscreenDisplayModes( SDL_GetDisplayForWindow( g_window ), &count );
+        if (modes) {
+            for (int i = 0; i < count; ++i)
+                if (modes[i]->w == g_game.x_resolution && modes[i]->h == g_game.y_resolution) {
+                    mode = modes[i];
+                    break;
+                }
+            SDL_free( modes );
+        }
+        SDL_SetWindowFullscreenMode( g_window, mode );
     }
 
     return true;
