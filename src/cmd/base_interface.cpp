@@ -409,7 +409,13 @@ void BaseInterface::Room::Draw( BaseInterface *base )
                         GFXDisable( TEXTURE0 );
                         TextPlane text_marker;
                         text_marker.SetText( links[i]->text );
+                        // Scale the base navigation/talk marker text to match the rest of the
+                        // base-interface text. HUD/cockpit TextPlanes keep scale 1.0, so they are
+                        // unaffected.
+                        text_marker.SetCharScale( BASE_FONT_SCALE );
                         text_marker.GetCharSize( text_wid, text_hei );                           //get average charactersize
+                        text_wid *= BASE_FONT_SCALE;   // keep the border-alignment metrics aligned to the scaled glyphs
+                        text_hei *= BASE_FONT_SCALE;
                         float     text_pos_x = x+text_offset_x;                                  //align right ...
                         float     text_pos_y = y+text_offset_y+text_hei;                         //...and on top
                         text_wid = text_wid*links[i]->text.length()*0.25;                                 //calc ~width of text (=multiply the average characterwidth with the number of characters)
