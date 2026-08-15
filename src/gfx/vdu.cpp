@@ -63,7 +63,7 @@ string getUnitNameAndFgNoBase( Unit *target )
     if (target->isUnit() == PLANETPTR) {
         string hr = ( (Planet*) target )->getHumanReadablePlanetType();
         if ( !hr.empty() )
-            return hr+string( ":" )+reformatName( target->name );
+            return hr+": "+reformatName( target->name );
     } else if (target->isUnit() == UNITPTR) {
         if (fg) {
             int    fgsnumber = target->getFgSubnumber();
@@ -78,7 +78,7 @@ string getUnitNameAndFgNoBase( Unit *target )
                     XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "print_ship_type", "true" ) );
                 if (printfgname)
                     fgname += fg->name
-                              +(printshiptype ? ( ( confignums && ("" != fgnstring) ) ? " =" : " : " ) : "");
+                              +(printshiptype ? ( ( confignums && ("" != fgnstring) ) ? " =" : ": " ) : "");
                 if ( confignums && ("" != fgnstring) )
                     fgname += fgnstring+"= ";
                 if (printshiptype)
@@ -89,22 +89,22 @@ string getUnitNameAndFgNoBase( Unit *target )
                     XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "basename:basename", "true" ) );
                 if ( namecolonname == false || reformatName( target->name ) == ( reformatName( target->getFullname() ) ) ) {
                     std::string retval( reformatName( target->getFullname() ) );
-                    if ( confignums && ("" != fgnstring) ) retval += " : "+fgnstring;
+                    if ( confignums && ("" != fgnstring) ) retval += ": "+fgnstring;
                     return retval;
                 } else {
                     if ( reformatName( target->name ) == ( reformatName( target->getFullname() ) ) ) {
                         std::string retval( reformatName(
-                                               target->name )+" "
+                                               target->name )
                                            +( ( confignums && ("" != fgnstring) ) ? (": "+fgnstring) : "" ) );
                         return retval;
                     } else {
-                        std::string retval( reformatName( target->name )+" : "+target->getFullname() );
+                        std::string retval( reformatName( target->name )+": "+target->getFullname() );
                         return retval;
                     }
                 }
             }
         } else if (Network != NULL) {
-            std::string retval( reformatName( target->name )+":"+target->getFullname() );
+            std::string retval( reformatName( target->name )+": "+target->getFullname() );
             return retval;
         }
     }
