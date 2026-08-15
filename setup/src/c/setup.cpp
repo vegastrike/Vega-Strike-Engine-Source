@@ -239,7 +239,9 @@ static void apply_change(Group *g, const std::string &new_option) {
 static void save(void) {
     if (config_file.empty()) return;   // no active asset -> nothing to save
     if (reset_pending) {
-        // Full reset: overwrite the user config with the asset's shipped config.
+        // Rebase the user config on the asset's shipped config (discard the
+        // old user file), then fall through so any selections the user made
+        // after Reset are still applied on top of that fresh base.
         std::string asset_cfg = data_dir + "/vegastrike.config";
         FILE *in = fopen(asset_cfg.c_str(), "r");
         if (in) {
@@ -252,8 +254,8 @@ static void save(void) {
             fclose(in);
         }
         reset_pending = false;
-        for (auto &g : groups) g.original = g.current;
-        return;
+        // NOTE: do NOT set g.original = g.current here, or the user's new
+        // selections would be marked as already-saved and skipped below.
     }
     for (auto &g : groups)
         if (g.current != g.original) {
