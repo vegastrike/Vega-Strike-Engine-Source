@@ -87,6 +87,7 @@ struct Group {
 
 static std::vector<Group> groups;
 static std::string config_file;   // path we edit (always the home copy)
+static bool reset_pending = false;  // staged "Reset Config": save() will overwrite the user config with the asset's
 static std::string read_source;   // path we read the model from (newer of home/data)
 static std::string data_dir;      // the data directory (for the readme)
 static std::string program_name;  // from setup.config (for the window title)
@@ -237,6 +238,23 @@ static void apply_change(Group *g, const std::string &new_option) {
 // Commit any staged changes to the config file (comment old, uncomment new, update #set).
 static void save(void) {
     if (config_file.empty()) return;   // no active asset -> nothing to save
+    if (reset_pending) {
+        // Full reset: overwrite the user config with the asset's shipped config.
+        std::string asset_cfg = data_dir + "/vegastrike.config";
+        FILE *in = fopen(asset_cfg.c_str(), "r");
+        if (in) {
+            FILE *out = fopen(config_file.c_str(), "w");
+            if (out) {
+                char buf[4096]; size_t n;
+                while ((n = fread(buf, 1, sizeof(buf), in)) > 0) fwrite(buf, 1, n, out);
+                fclose(out);
+            }
+            fclose(in);
+        }
+        reset_pending = false;
+        for (auto &g : groups) g.original = g.current;
+        return;
+    }
     for (auto &g : groups)
         if (g.current != g.original) {
             rewrite(config_file, g.name, g.original, 1);
@@ -245,11 +263,28 @@ static void save(void) {
         }
 }
 
-// True if any group has a staged change not yet committed to disk.
+// True if any group has a staged change (or a pending reset) not yet committed.
 static bool has_unsaved(void) {
+    if (reset_pending) return true;
     for (auto &g : groups)
         if (g.current != g.original) return true;
     return false;
+}
+
+// Reload the config model from the ASSET's shipped file, discarding any user
+// overrides, and stage a full overwrite for the next save().
+static void reset_config(void) {
+    if (data_dir.empty() || active_asset.empty()) return;
+    std::string asset_cfg = data_dir + "/vegastrike.config";
+    if (!file_exists(asset_cfg)) return;
+    groups.clear();
+    FILE *fp = fopen(asset_cfg.c_str(), "r");
+    if (!fp) return;
+    parse_config(fp);
+    fclose(fp);
+    build_display();
+    for (auto &g : groups) g.original = g.current;
+    reset_pending = true;
 }
 
 // Launch command template, persisted in ~/.config/vs-05/launch_command.
@@ -812,12 +847,12 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     }
     ImGui::EndChild();
 
-    // Center the five buttons side by side. Launch and Exit turn red when there
+    // Center the six buttons side by side. Save/Exit and Reset Config turn red when there
     // are unsaved changes.
-    float btnw = ImGui::CalcTextSize("View Readme").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
+    float btnw = ImGui::CalcTextSize("Reset Config").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
     float gap = ImGui::GetStyle().ItemSpacing.x;
     bool unsaved = has_unsaved();
-    ImGui::SetCursorPosX((avail_w - (btnw * 5 + gap * 4)) * 0.5f);
+    ImGui::SetCursorPosX((avail_w - (btnw * 6 + gap * 5)) * 0.5f);
     if (unsaved) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.45f, 0.22f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
@@ -826,6 +861,13 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     if (unsaved) ImGui::PopStyleColor(2);
     ImGui::SameLine();
     if (ImGui::Button("View Readme", ImVec2(btnw, 0))) view_readme();
+    ImGui::SameLine();
+    if (reset_pending) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
+    }
+    if (ImGui::Button("Reset Config", ImVec2(btnw, 0))) reset_config();
+    if (reset_pending) ImGui::PopStyleColor(2);
     ImGui::SameLine();
     if (ImGui::Button("Assets", ImVec2(btnw, 0))) { discover_assets(); selected_asset = active_asset; launch_load_bufs(); mode = 1; }
     ImGui::SameLine();
