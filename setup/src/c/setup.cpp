@@ -862,12 +862,13 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     ImGui::SameLine();
     if (ImGui::Button("View Readme", ImVec2(btnw, 0))) view_readme();
     ImGui::SameLine();
-    if (reset_pending) {
+    bool rpending = reset_pending;   // capture before the click (the click sets reset_pending)
+    if (rpending) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
     }
     if (ImGui::Button("Reset Config", ImVec2(btnw, 0))) reset_config();
-    if (reset_pending) ImGui::PopStyleColor(2);
+    if (rpending) ImGui::PopStyleColor(2);
     ImGui::SameLine();
     if (ImGui::Button("Assets", ImVec2(btnw, 0))) { discover_assets(); selected_asset = active_asset; launch_load_bufs(); mode = 1; }
     ImGui::SameLine();
