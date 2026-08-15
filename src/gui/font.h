@@ -47,7 +47,9 @@ static const double REFERENCE_LINE_SPACING  = (REFERENCE_FONT_ASCENDER+REFERENCE
 // Scale applied to base-interface (bartender/guilds/dialog) TextPlane text relative to the HUD
 // font, so the base stays readable against the larger base-computer gui Font text. Applied
 // per-instance in TextPlane::Draw; HUD/cockpit TextPlanes keep the default scale of 1.0.
-static const float BASE_FONT_SCALE          = 1.5;
+// 2.0/VECTOR_FONT_SCALE keeps the base-interface + main-menu TOTAL at 2.0x (vector 1.5 x base
+// 4/3), i.e. smaller than the earlier 2.25x, while the HUD and base computer stay at 1.5x.
+static const float BASE_FONT_SCALE          = 2.0f / VECTOR_FONT_SCALE;
 
 //Font object.
 //Right now, this only supports the GLUT outline font.
