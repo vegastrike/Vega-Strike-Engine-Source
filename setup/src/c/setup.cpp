@@ -173,7 +173,12 @@ static int rewrite(const std::string &path, const std::string &group,
         char *head = (char*)p.inside;
 
         if (head[0] != '#') { fprintf(wp, "%s\n", line); continue; }
-        char *kw = head + 1; char *args = next_parm(kw);
+        char *kw = head + 1;
+        // Keep a copy of the full option list: next_parm(kw) below null-terminates the first
+        // token of head+1, so scanning head+1 later would only ever see the first option, and
+        // multi-option markers like "#warp_mouse glide_mouse" would never match.
+        char *marker_copy = strdup(kw);
+        char *args = next_parm(kw);
 
         if (strcmp(kw, "endheader") == 0) { fprintf(wp, "%s\n", line); continue; }
         if (strcmp(kw, "end") == 0) {
@@ -195,13 +200,15 @@ static int rewrite(const std::string &path, const std::string &group,
             continue;
         }
 
-        // an option-marker "#..." line: does it mention `name`?
+        // an option-marker "#..." line: does it mention `name`? Scan the copy so ALL options
+        // are checked (head+1 was clobbered to the first token by next_parm(kw) above).
         bool match = false;
-        char *t = head + 1;
+        char *t = marker_copy;
         while (t && !match && (args = next_parm(t)) != NULL) {
             if (strcmp(t, name.c_str()) == 0) match = true;
             t = args;
         }
+        free(marker_copy);
         if (match) commenting = setting;
         if (commenting == 0) { fprintf(wp, "%s\n", line); continue; }
 
