@@ -581,7 +581,7 @@ void WriteUnit( const string &tag,
 string getJumpTo( const string &s )
 {
     char tmp[1000] = "";
-    if ( 1 == sscanf( s.c_str(), "Jump_To_%s", tmp ) )
+    if ( 1 == sscanf( s.c_str(), "Jump to %s", tmp ) )
         tmp[0] = tolower( tmp[0] );
     else return s;
     return string( tmp );
@@ -697,7 +697,7 @@ void MakeJump( float radius, bool forceRS = false, Vector R = Vector( 0, 0, 0 ),
         center = generateAndUpdateRS( RR, SS, radius, true );
     }
     string thisname;
-    thisname = string( "Jump_To_" )+getStarSystemName( s );
+    thisname = string( "Jump to " )+getStarSystemName( s );
     if (thisname.length() > 8)
         *(thisname.begin()+8) = toupper( *(thisname.begin()+8) );
     Tab();
