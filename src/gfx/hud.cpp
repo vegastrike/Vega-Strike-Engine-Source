@@ -263,7 +263,7 @@ int TextPlane::Draw( const string &newText, int offset, bool startlower, bool fo
     // and bitmap fonts (use_bit) keep the fixed 1px width.
     if (m_baseText && !use_bit) {
         float eff = font_point * m_charScale;   // effective point size
-        float lw  = 1.0f + (eff - 12.0f) / 20.0f;   // 1px at ~12pt, ~2px at 32pt, ~3px at 52pt
+        float lw  = 1.0f + (eff - 12.0f) / 9.0f;   // 1px at ~12pt, 2px at ~21pt, 3px at ~30pt
         if (lw < 1.0f) lw = 1.0f;
         if (lw > 3.0f) lw = 3.0f;
         glLineWidth( lw );
