@@ -106,12 +106,12 @@ void NavigationSystem::Setup()
     rx     = -0.5;              //galaxy mode settings
     ry     = 0.5;
     rz     = 0.0;
-    zoom   = 1.8;
+    zoom   = 1.0;              //start at 1.0 so the full sector/galaxy extent fits on screen
 
     rx_s   = -0.5;              //system mode settings
     ry_s   = 1.5;
     rz_s   = 0.0;
-    zoom_s = 1.8;
+    zoom_s = 1.0;              //start at 1.0 (1.8 magnified ~3.24x and clipped the edges)
 
     scrolloffset = 0;
 
@@ -192,10 +192,10 @@ void NavigationSystem::Setup()
 //HERE GOES THE PARSING
 
 //*************************
-    screenskipby4[0]   = .3;
-    screenskipby4[1]   = .7;
-    screenskipby4[2]   = .3;
-    screenskipby4[3]   = .7;
+    screenskipby4[0]   = 0;
+    screenskipby4[1]   = 1;
+    screenskipby4[2]   = 0;
+    screenskipby4[3]   = 1;
 
     buttonskipby4_1[0] = .75;
     buttonskipby4_1[1] = .95;
@@ -233,10 +233,10 @@ void NavigationSystem::Setup()
     buttonskipby4_7[3] = .30;
     if ( !ParseFile( "navdata.xml" ) ) {
         //start DUMMP VARS
-        screenskipby4[0]   = .3;
-        screenskipby4[1]   = .7;
-        screenskipby4[2]   = .3;
-        screenskipby4[3]   = .7;
+        screenskipby4[0]   = 0;
+        screenskipby4[1]   = 1;
+        screenskipby4[2]   = 0;
+        screenskipby4[3]   = 1;
 
         buttonskipby4_1[0] = .75;
         buttonskipby4_1[1] = .95;
@@ -1123,8 +1123,8 @@ void NavigationSystem::DrawButton( float &x1, float &x2, float &y1, float &y2, i
             //releasing #1, toggle the draw (nav / mission)
             if ( checkbit( whattodraw, 1 ) ) {
                 //if in nav system NOT mission
-                zoom     = 1.8;
-                zoom_s   = 1.8;
+                zoom     = 1.0;
+                zoom_s   = 1.0;
 
                 axis     = axis-1;
                 if (axis == 0)
@@ -1185,7 +1185,7 @@ void NavigationSystem::DrawButton( float &x1, float &x2, float &y1, float &y2, i
 }
 //**********************************
 
-//Draws the actual button outline
+//Draws the actual button outline — a thin rounded-rect line loop.
 //**********************************
 void NavigationSystem::DrawButtonOutline( float &x1, float &x2, float &y1, float &y2, const GFXColor &col )
 {
@@ -1194,17 +1194,29 @@ void NavigationSystem::DrawButtonOutline( float &x1, float &x2, float &y1, float
     GFXDisable( LIGHTING );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
 
-    const float verts[8 * 3] = {
-        x1, y1, 0,
-        x1, y2, 0,
-        x2, y1, 0,
-        x2, y2, 0,
-        x1, y1, 0,
-        x2, y1, 0,
-        x1, y2, 0,
-        x2, y2, 0,
-    };
-    GFXDraw( GFXLINE, verts, 8 );
+    // Rounded rectangle outline: line-loop around the button with slightly
+    // rounded corners (a few segments per corner). Corner radius is a fraction
+    // of the smaller dimension.
+    const float r = 0.5f * std::min( x2-x1, y2-y1 ) * 0.08f;   // ~8% of min dimension
+    const int   seg = 3;                                        // segments per corner
+    float verts[ 4 * 4 * seg * 3 ];                             // 4 corners * (seg+1) pts * 3, ~ ample
+    int n = 0;
+    // Corner centers and the sweep angles (going around counter-clockwise from
+    // bottom-left). Corner arcs from angle a0 to a0+90deg.
+    float cx[4] = { x1+r, x2-r, x2-r, x1+r };
+    float cy[4] = { y1+r, y1+r, y2-r, y2-r };
+    float a0[4] = { 180.f, 270.f, 0.f, 90.f };
+    for (int c = 0; c < 4; ++c) {
+        for (int s = 0; s <= seg; ++s) {
+            float ang = ( a0[c] + 90.f * ( float(s) / seg ) ) * (float)M_PI / 180.f;
+            verts[n++] = cx[c] + r * cosf( ang );
+            verts[n++] = cy[c] + r * sinf( ang );
+            verts[n++] = 0;
+        }
+    }
+    // close the loop (draw is GFXLINE, add the first point again at the end)
+    verts[n++] = verts[0]; verts[n++] = verts[1]; verts[n++] = verts[2];
+    GFXDraw( GFXLINE, verts, n/3 );
 
     GFXEnable( TEXTURE0 );
 }
