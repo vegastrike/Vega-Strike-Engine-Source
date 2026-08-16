@@ -2798,28 +2798,6 @@ void GameCockpit::Draw()
     }
     AutoLanding();
     GFXColor4f( 1, 1, 1, 1 );
-    if (QuitAllow || getTimeCompression() < .5) {
-        if (QuitAllow) {
-            if (!die) {
-                static VSSprite QuitSprite( "quit.sprite", BILINEAR, GFXTRUE );
-                static VSSprite QuitCompatSprite( "quit.spr", BILINEAR, GFXTRUE );
-
-                GFXEnable( TEXTURE0 );
-                if ( QuitSprite.LoadSuccess() )
-                    QuitSprite.Draw();
-                else
-                    QuitCompatSprite.Draw();
-            }
-        } else {
-            static VSSprite PauseSprite( "pause.sprite", BILINEAR, GFXTRUE );
-            static VSSprite PauseCompatSprite( "pause.spr", BILINEAR, GFXTRUE );
-            GFXEnable( TEXTURE0 );
-            if ( PauseSprite.LoadSuccess() )
-                PauseSprite.Draw();
-            else
-                PauseCompatSprite.Draw();
-        }
-    }
     static float dietime = 0;
     if (die) {
         if (un)
@@ -2939,6 +2917,37 @@ void GameCockpit::Draw()
         DrawNavSystem();
         AccessCamera()->SetFov( oldfov );
         AccessCamera()->UpdateGFXAgain();
+    }
+
+    // Draw the quit/pause overlay AFTER the nav computer so it renders on top
+    // (previously it was drawn before DrawNavSystem, so the nav screen covered
+    // the ESC help / quit sprite and it showed shaded behind).
+    if (QuitAllow || getTimeCompression() < .5) {
+        GFXHudMode( true );
+        GFXDisable( DEPTHTEST );
+        GFXDisable( DEPTHWRITE );
+        GFXDisable( LIGHTING );
+        if (QuitAllow) {
+            if (!die) {
+                static VSSprite QuitSprite( "quit.sprite", BILINEAR, GFXTRUE );
+                static VSSprite QuitCompatSprite( "quit.spr", BILINEAR, GFXTRUE );
+
+                GFXEnable( TEXTURE0 );
+                if ( QuitSprite.LoadSuccess() )
+                    QuitSprite.Draw();
+                else
+                    QuitCompatSprite.Draw();
+            }
+        } else {
+            static VSSprite PauseSprite( "pause.sprite", BILINEAR, GFXTRUE );
+            static VSSprite PauseCompatSprite( "pause.spr", BILINEAR, GFXTRUE );
+            GFXEnable( TEXTURE0 );
+            if ( PauseSprite.LoadSuccess() )
+                PauseSprite.Draw();
+            else
+                PauseCompatSprite.Draw();
+        }
+        GFXHudMode( false );
     }
 
     GFXEnable( DEPTHWRITE );
