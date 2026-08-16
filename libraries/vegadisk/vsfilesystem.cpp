@@ -869,10 +869,23 @@ void InitPaths(string conf, string subdir) {
         SubDirectories.push_back(vec);
     }
 
-    const boost::filesystem::path config_file_path{datadir + "/config.json"};
-    (const_cast<vega_config::Configuration&>(configuration())).load_config(config_file_path);
-    const boost::filesystem::path config_file_path2{homedir + "/config.json"};
-    (const_cast<vega_config::Configuration&>(configuration())).load_config(config_file_path2);
+    // Load the split config files (config.json + bindings.json + theme.json + engine.json),
+    // merging each into the same configuration singleton. load_config() tolerates missing
+    // files, so if only config.json exists, only that is loaded.
+    //
+    // Precedence (later loads overwrite earlier ones):
+    //   1. All datadir files first (defaults).
+    //   2. All homedir files second (user overrides win over defaults).
+    //   3. Within each group, config.json loads last, so a user-facing setting in config.json
+    //      overwrites the same key in engine.json/theme.json/bindings.json.
+    for (const std::string & config_file_name : {"bindings.json", "theme.json", "engine.json", "config.json"}) {
+        (const_cast<vega_config::Configuration&>(configuration())).load_config(
+            boost::filesystem::path(datadir + "/" + config_file_name));
+    }
+    for (const std::string & config_file_name : {"bindings.json", "theme.json", "engine.json", "config.json"}) {
+        (const_cast<vega_config::Configuration&>(configuration())).load_config(
+            boost::filesystem::path(homedir + "/" + config_file_name));
+    }
 
     LoadConfig(std::move(subdir));
 
