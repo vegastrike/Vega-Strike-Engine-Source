@@ -1,11 +1,11 @@
 /*
- * glut_support.h
+ * imgui_support.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2026 The Vega Strike Contributors:
  * Project creator: Daniel Horn
- * Original development team: As listed in the AUTHORS file. Specifically: David Ranger
- * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy, Danny Gehl
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -24,20 +24,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef VEGA_STRIKE_ENGINE_GUI_GLUT_SUPPORT_H
-#define VEGA_STRIKE_ENGINE_GUI_GLUT_SUPPORT_H
 
-/* If you have functions that perform the same operation, but use different parameters,
- * It may be best if you replace the following functions with wrappers to your own functions
+/**
+ * This util class contains helpers which can be used in the event loops
  */
+
+#include <boost/parameter/aux_/void.hpp>
 #include <vector>
 using std::vector;
-#include "gfxlib.h"
 
+enum MousePointerStyle {
+    MOUSE_POINTER_NONE,
+    MOUSE_POINTER_NORMAL,
+    MOUSE_POINTER_HOVER
+};
 
-void ShowColor(float x, float y, float wid, float hei, float red, float green, float blue, float alpha);
-void ShowText(float x, float y, float wid, int size, const char *string, int no_end);
-float WidthOfChar(char chr);
-extern int HAS_ALPHA;
-
-#endif    //VEGA_STRIKE_ENGINE_GUI_GLUT_SUPPORT_H
+void SetSoftwareMousePosition(int x, int y);
+void StartGUIFrame(void);
+void DrawMouseCursor(MousePointerStyle pointerStyle);
+void EndGUIFrame(MousePointerStyle pointerStyle);
