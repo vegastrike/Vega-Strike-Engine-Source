@@ -36,6 +36,7 @@ class TextPlane
     Vector myDims;
     int    numlet;
     float  m_charScale;  //per-instance text scale, multiplies the global font_point in Draw
+    bool   m_baseText;   //base-interface text (bar/bases/dialogs): vector line width scales with size; HUD stays 1px
 /*
  *  struct GlyphPosition {
  *       float left, right, top, bottom;
@@ -58,6 +59,10 @@ public:
     void SetCharScale( float s )
     {
         m_charScale = s;
+    }
+    void SetBaseText( bool b )
+    {
+        m_baseText = b;
     }
     void GetCharSize( float &x, float &y )
     {

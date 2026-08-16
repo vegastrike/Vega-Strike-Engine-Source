@@ -192,6 +192,7 @@ public:
                 // every TextPlane from the global font_point; this per-instance scale lets the base
                 // (bartender/guilds/dialog) text render larger while the HUD and base computer stay put.
                 text.SetCharScale( BASE_FONT_SCALE );
+                text.SetBaseText( true );   // base text: vector stroke width scales with size
                 text.SetText( texts );
             }
             void SetText( const std::string &newtext )

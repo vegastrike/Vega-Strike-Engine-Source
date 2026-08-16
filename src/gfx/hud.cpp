@@ -124,6 +124,7 @@ TextPlane::TextPlane( const GFXColor &c, const GFXColor &bgcol )
     myDims.j    = -2;
     myFontMetrics.Set( .06, .08, 0 );
     m_charScale = 1.0;
+    m_baseText  = false;
     SetPos( 0, 0 );
 }
 
@@ -257,7 +258,18 @@ int TextPlane::Draw( const string &newText, int offset, bool startlower, bool fo
     if (startlower)
         row -= line_advance;
     GFXPushBlendMode();
-    glLineWidth( 1 );
+    // Base-interface vector text: scale the stroke line width with the rendered font size (thin at
+    // small sizes, up to ~3px at large) so larger text stays readable. The HUD (m_baseText=false)
+    // and bitmap fonts (use_bit) keep the fixed 1px width.
+    if (m_baseText && !use_bit) {
+        float eff = font_point * m_charScale;   // effective point size
+        float lw  = 1.0f + (eff - 12.0f) / 20.0f;   // 1px at ~12pt, ~2px at 32pt, ~3px at 52pt
+        if (lw < 1.0f) lw = 1.0f;
+        if (lw > 3.0f) lw = 3.0f;
+        glLineWidth( lw );
+    } else {
+        glLineWidth( 1 );
+    }
     if (!use_bit && font_antialias) {
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
         if (gl_options.smooth_lines)

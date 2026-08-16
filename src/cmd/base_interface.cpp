@@ -413,6 +413,7 @@ void BaseInterface::Room::Draw( BaseInterface *base )
                         // base-interface text. HUD/cockpit TextPlanes keep scale 1.0, so they are
                         // unaffected.
                         text_marker.SetCharScale( BASE_FONT_SCALE );
+                        text_marker.SetBaseText( true );   // base navigation/talk marker: weight scales
                         text_marker.GetCharSize( text_wid, text_hei );                           //get average charactersize
                         text_wid *= BASE_FONT_SCALE;   // keep the border-alignment metrics aligned to the scaled glyphs
                         text_hei *= BASE_FONT_SCALE;
@@ -1116,10 +1117,12 @@ BaseInterface::BaseInterface( const char *basefile, Unit *base, Unit *un ) :
     curtext.GetCharSize( x, y );
     curtext.SetCharSize( x*2, y*2 );
     curtext.SetSize( 1-.01, -2 );
+    curtext.SetBaseText( true );   // base's own text line: vector stroke width scales with size
     othtext.GetCharSize( x, y );
     // Scale the NPC/talk speech (hauler/bartender) to match the rest of the base-interface text.
     // The HUD/cockpit TextPlanes keep scale 1.0 and are unaffected.
     othtext.SetCharScale( BASE_FONT_SCALE );
+    othtext.SetBaseText( true );   // base speech: vector stroke width scales with size
     othtext.SetCharSize( x*2, y*2 );
     othtext.SetSize( 1-.01, -.75 );
 
