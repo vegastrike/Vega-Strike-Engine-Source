@@ -419,6 +419,17 @@ void NavigationSystem::Draw()
     GFXDisable( DEPTHWRITE );
     //**********************************
 
+    // Full-screen opaque black backdrop so the live game behind is fully hidden.
+    // (Modern nav screen: no translucent shade, pure black.)
+    {
+        GFXColor4f( 0, 0, 0, 1 );
+        static const float bgverts[4*3] = {
+            -1, -1, 0,   1, -1, 0,   1, 1, 0,   -1, 1, 0
+        };
+        GFXDraw( GFXQUAD, bgverts, 4, 3, 0, 0 );
+        GFXColor4f( 1, 1, 1, 1 );
+    }
+
     screenoccupation->reset();
 
     //Save current mouse location
