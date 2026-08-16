@@ -133,7 +133,9 @@ float Font::drawChar(char c, float xOffset) const {
 double Font::charWidth(char c) const {
     calcMetricsIfNeeded();
     ImFontBaked* font_baked = ImGui::GetFontBaked();
-    if (!font_baked) return 0.0f;
+    if (font_baked == nullptr) {
+        return 0.0F;
+    }
     const ImFontGlyph* glyph = font_baked->FindGlyph((ImWchar)c);
     return glyph ? static_cast<double>(glyph->AdvanceX) : 0.0;
 }
@@ -163,14 +165,21 @@ double Font::strokeWidth(void) const {
 
 double Font::ascent(void) const {
     ImFontBaked* font_baked = ImGui::GetFontBaked();
-    return font_baked ? font_baked->Ascent : 0.0f;
+    return font_baked != nullptr ? font_baked->Ascent : 0.0F;
 }
 
 double Font::descent(void) const {
     ImFontBaked* font_baked = ImGui::GetFontBaked();
-    return font_baked ? font_baked->Descent : 0.0f;
+    return font_baked != nullptr ? font_baked->Descent : 0.0F;
 }
 
 bool useStroke(void) {
     return true;
+}
+
+ImFont* Font::getFont(void) const {
+    if(m_strokeWeight == BOLD_STROKE) {
+        return gui_Fonts.Bold;
+    }
+    return gui_Fonts.Regular;
 }

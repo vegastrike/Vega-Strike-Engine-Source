@@ -1,11 +1,11 @@
 /*
- * gui.h
+ * fonts.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2026 The Vega Strike Contributors:
  * Project creator: Daniel Horn
  * Original development team: As listed in the AUTHORS file
- * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy, Danny Gehl
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -25,18 +25,16 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_LIBRARIES_GUI_GUI_H
-#define VEGA_STRIKE_LIBRARIES_GUI_GUI_H
+struct ImFont;
 
-#include <string>
-#include <SDL3/SDL_video.h>
+struct GuiFonts {
+    ImFont* Regular        = nullptr;
+    ImFont* SemiBold       = nullptr;
+    ImFont* Bold           = nullptr;
+    ImFont* Italic         = nullptr;
+    ImFont* SemiBoldItalic = nullptr;
+    ImFont* BoldItalic     = nullptr;
+};
 
-/** Init and cleanup ImGui.
- */
-extern bool gui_initialized;
-extern SDL_Window* current_window;
-
-void InitGui(SDL_Window *window, const SDL_GLContext *context, const std::string& fontFilePath, float fontSize);
-void CleanupGui();
-
-#endif // VEGA_STRIKE_LIBRARIES_GUI_GUI_H
+extern GuiFonts gui_Fonts;
+extern const float defaultNormTextSize;
