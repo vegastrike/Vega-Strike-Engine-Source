@@ -45,6 +45,28 @@ bool useStroke()
                                                        vs_config->getVariable( "graphics", "high_quality_font", "false" ) ) );
     return !tmp;
 }
+
+// Map the configured bitmap-font name (graphics/font, else graphics/basefont) to the matching
+// GLUT_BITMAP_* face, mirroring hud.cpp's getFont(). Defaults to Helvetica 12. The config app
+// writes these names (helvetica10/12/18, times10/24, fixed13/15) via the Font picker.
+static void * bitmap_font_for_config()
+{
+    static std::string whichfont = vs_config->getVariable( "graphics", "font",
+                                                            vs_config->getVariable( "graphics", "basefont", "helvetica12" ) );
+    if (whichfont == "helvetica10")
+        return GLUT_BITMAP_HELVETICA_10;
+    if (whichfont == "helvetica18")
+        return GLUT_BITMAP_HELVETICA_18;
+    if (whichfont == "times24")
+        return GLUT_BITMAP_TIMES_ROMAN_24;
+    if (whichfont == "times10")
+        return GLUT_BITMAP_TIMES_ROMAN_10;
+    if (whichfont == "fixed13")
+        return GLUT_BITMAP_8_BY_13;
+    if (whichfont == "fixed15")
+        return GLUT_BITMAP_9_BY_15;
+    return GLUT_BITMAP_HELVETICA_12;
+}
 //Calculate the metrics for this font.
 //This does the real work, and doesn't check whether it needs to be done.
 void Font::calcMetrics( void )
@@ -64,6 +86,9 @@ void Font::calcMetrics( void )
                                          *(g_game.x_resolution/referenceStrokeWidthResolution);
 
     m_strokeWidth     = guiMax( minimumStrokeWidth, nonClippedStrokeWidth );
+    // Pick the bitmap face once per metrics recalc (bitmap fonts can't scale; the config picks
+    // the family + size). Only used in the non-stroke path.
+    m_bitmapFont      = bitmap_font_for_config();
     m_needMetrics     = false;
 
     //Vertical scaling factor:
@@ -115,8 +140,8 @@ float Font::drawChar( char c ) const
             glTranslated( m_extraCharWidth, 0.0, 0.0 );
         return 0;
     } else {
-        glutBitmapCharacter( GLUT_BITMAP_HELVETICA_12, c );
-        return glutBitmapWidth( GLUT_BITMAP_HELVETICA_12, c );
+        glutBitmapCharacter( m_bitmapFont, c );
+        return glutBitmapWidth( m_bitmapFont, c );
     }
 }
 
@@ -134,7 +159,7 @@ double Font::charWidth( char c ) const
         const double charWidth = glutStrokeWidth( GLUT_STROKE_ROMAN, c );
         return charWidth+m_extraCharWidth+GLUT_WIDTH_HACK;
     } else {
-        return glutBitmapWidth( GLUT_BITMAP_HELVETICA_12, c )/(size()*2);
+        return glutBitmapWidth( m_bitmapFont, c )/(size()*2);
     }
 }
 

@@ -106,6 +106,7 @@ public:
         , m_spaceCharFixup( 10.0 )
         , m_verticalScaling( 1.0 )
         , m_horizontalScaling( 1.0 )
+        , m_bitmapFont( 0 )
     {}
 
 //METRICS
@@ -143,6 +144,7 @@ protected:
     double m_spaceCharFixup;    //Negative translation to apply to space character.
     double m_verticalScaling;   //Vertical factor from char reference space to identity space.
     double m_horizontalScaling; //Horizontal factor from char reference space to identity space.
+    void  *m_bitmapFont;        //Chosen GLUT_BITMAP_* face for the bitmap path (cached in calcMetrics).
 };
 
 #endif   //__FONT_H__
