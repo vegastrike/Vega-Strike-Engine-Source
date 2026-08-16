@@ -872,6 +872,9 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
 
     // Center the six buttons side by side. Save/Exit and Reset Config turn red when there
     // are unsaved changes. (Same centering method as classic.)
+    // Re-read the mode: the mode toggle above may have changed it this frame, and set_mode
+    // marks the mode switch dirty - so the buttons must reflect the post-toggle state.
+    is_modern = vs05ui::mode() == vs05ui::MODE_MODERN;
     float btnw = ImGui::CalcTextSize("Reset Config").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
     float gap = ImGui::GetStyle().ItemSpacing.x;
     bool unsaved = is_modern ? vs05ui::has_unsaved() : has_unsaved();
