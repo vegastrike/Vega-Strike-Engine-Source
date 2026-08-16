@@ -33,7 +33,7 @@
 #include "gfx/hud.h"
 #include "gfx/sprite.h"
 #include <cstdio>
-#include "gui/glut_support.h"
+#include "gui/imgui_support.h"
 
 #include "audio/Types.h"
 #include "audio/Source.h"
