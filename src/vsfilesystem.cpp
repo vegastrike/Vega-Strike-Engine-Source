@@ -700,12 +700,44 @@ void InitDataDirectory()
     cout<<"Found MODDIR = "<<moddir<<endl;
 }
 
+// Modern-mode switch: if the modern config file exists and its first-line switch says
+// mode=modern, load it instead of vegastrike.config. Fail-soft: anything other than an
+// explicit modern switch falls back to the default (classic) file.
+static bool modern_config_requested( const string &hdir, const string &ddir )
+{
+    string path;
+    if ( FileExists( hdir, "vs-modern.config" ) >= 0 )
+        path = hdir + "/vs-modern.config";
+    else if ( FileExists( ddir, "vs-modern.config" ) >= 0 )
+        path = ddir + "/vs-modern.config";
+    else
+        return false;
+    FILE *f = fopen( path.c_str(), "r" );
+    if ( !f )
+        return false;
+    char line[256];
+    bool modern = false;
+    if ( fgets( line, sizeof( line ), f ) ) {
+        // only the first line (the switch comment) is inspected
+        if ( strstr( line, "mode=modern" ) != NULL )
+            modern = true;
+    }
+    fclose( f );
+    return modern;
+}
+
 //Config file has been loaded from data dir but now we look at the specified moddir in order
 //to see if we should use a mod config file
 void LoadConfig( string subdir )
 {
     bool found = false;
     bool foundweapons = false;
+    // Modern mode: if vs-modern.config exists and requests modern, switch the config filename
+    // BEFORE the search, so the normal search + createVegaConfig pick up the modern file.
+    if ( config_file == "vegastrike.config" && modern_config_requested( homedir, datadir ) ) {
+        cout<<"CONFIGFILE - Modern mode requested, loading vs-modern.config"<<endl;
+        config_file = "vs-modern.config";
+    }
     //First check if we have a config file in homedir+"/"+subdir or in datadir+"/"+subdir
     weapon_list = "weapon_list.xml";
     if (subdir != "") {

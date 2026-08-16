@@ -20,7 +20,7 @@ if (NOT VSSETUP_VERSION)
 endif()
 add_definitions(-DVSSETUP_VERSION="${VSSETUP_VERSION}")
 
-add_executable(vssetup src/c/setup.cpp)
+add_executable(vssetup src/c/setup.cpp src/c/modern_ui.cpp src/c/config_model.cpp)
 set_target_properties(vssetup PROPERTIES OUTPUT_NAME config-vs-05)   # settings app binary
 
 # Vendored Dear ImGui (libraries/imgui) with the SDL3 + OpenGL3 backends.

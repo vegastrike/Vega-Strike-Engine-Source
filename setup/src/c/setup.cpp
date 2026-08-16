@@ -17,6 +17,8 @@
 #define GL_GLEXT_PROTOTYPES 1   // GL 3.0 FBO/blit functions (glGenFramebuffers, glBlitFramebuffer)
 #include <GL/gl.h>
 
+#include "modern_ui.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -594,6 +596,7 @@ static bool load_config(void) {
     fclose(fp);
     build_display();
     for (auto &g : groups) g.original = g.current;
+    vs05ui::init(active_asset, asset_dir);   // seed the modern model for the active asset
     return true;
 }
 
@@ -778,6 +781,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
         else { event->button.x *= sx; event->button.y *= sy; }
     }
     ImGui_ImplSDL3_ProcessEvent(event);
+    vs05ui::handle_event(event);
     if (event->type == SDL_EVENT_QUIT) return SDL_APP_SUCCESS;
     return SDL_APP_CONTINUE;
 }
@@ -801,10 +805,23 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     ImGui::Text("VS-05 Configuration Utility");
     ImGui::Text("Version %s", VSSETUP_VERSION);
     ImGui::Text("Active asset: %s", active_asset.empty() ? "(none)" : active_asset.c_str());
+    // Mode toggle: Classic (edits the asset config) vs Modern (owns its own config).
+    bool is_modern = vs05ui::mode() == vs05ui::MODE_MODERN;
+    if (ImGui::Button(is_modern ? "Mode: Modern" : "Mode: Classic")) {
+        vs05ui::set_mode(is_modern ? vs05ui::MODE_CLASSIC : vs05ui::MODE_MODERN);
+    }
+    ImGui::SameLine();
+    ImGui::TextWrapped(is_modern ? "own presets -> generates vs-modern.config"
+                                : "edits the asset's vegastrike.config");
     ImGui::Separator();
 
     float avail_w = ImGui::GetContentRegionAvail().x;
     float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
+
+    if (is_modern && !active_asset.empty()) {
+        // Modern mode: the module draws its own display/input UI.
+        vs05ui::draw();
+    } else {
 
     // Frame holding the settings table (fills the space between the header and
     // the buttons; the table just scrolls inside it).
@@ -848,18 +865,22 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     }
     }
     ImGui::EndChild();
+    }   // end Classic-mode table (Modern draws its own UI above)
 
     // Center the six buttons side by side. Save/Exit and Reset Config turn red when there
-    // are unsaved changes.
+    // are unsaved changes. (Same centering method as classic.)
     float btnw = ImGui::CalcTextSize("Reset Config").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
     float gap = ImGui::GetStyle().ItemSpacing.x;
-    bool unsaved = has_unsaved();
+    bool unsaved = is_modern ? vs05ui::has_unsaved() : has_unsaved();
     ImGui::SetCursorPosX((avail_w - (btnw * 6 + gap * 5)) * 0.5f);
     if (unsaved) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.45f, 0.22f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
     }
-    if (ImGui::Button("Save", ImVec2(btnw, 0))) save();
+    if (ImGui::Button("Save", ImVec2(btnw, 0))) {
+        if (is_modern) vs05ui::save();
+        else save();
+    }
     if (unsaved) ImGui::PopStyleColor(2);
     ImGui::SameLine();
     if (ImGui::Button("View Readme", ImVec2(btnw, 0))) view_readme();
@@ -869,7 +890,10 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
     }
-    if (ImGui::Button("Reset Config", ImVec2(btnw, 0))) reset_config();
+    if (ImGui::Button("Reset Config", ImVec2(btnw, 0))) {
+        if (is_modern) vs05ui::reset();
+        else reset_config();
+    }
     if (rpending) ImGui::PopStyleColor(2);
     ImGui::SameLine();
     if (ImGui::Button("Assets", ImVec2(btnw, 0))) { discover_assets(); selected_asset = active_asset; launch_load_bufs(); mode = 1; }
