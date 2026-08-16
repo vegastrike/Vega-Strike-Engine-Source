@@ -25,6 +25,7 @@
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "config_xml.h"
+#include "in_joystick.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
 #include "options.h"
@@ -763,6 +764,11 @@ void winsys_process_events()
 
             case SDL_EVENT_QUIT:
                 /* SDL 1.2's loop ignored SDL_QUIT (window close); keep parity */
+                break;
+
+            case SDL_EVENT_JOYSTICK_ADDED:
+            case SDL_EVENT_JOYSTICK_REMOVED:
+                ReinitJoysticks();   // hotplug: detect a joystick added/removed after launch
                 break;
             }
         }

@@ -30,6 +30,9 @@ struct Model {
 // Parse a config file into a Model. Returns false on unparseable input.
 bool parse(const std::string &filename, Model &out);
 
+// Parse a bare-root XML file (e.g. <bindings>...</bindings>) into an Element.
+bool parse_file_root(const std::string &filename, Element &out);
+
 // Serialize a Model to a file as engine-readable plain XML.
 bool generate(const Model &m, const std::string &filename);
 
@@ -55,9 +58,26 @@ void set_var(Model &m, const std::string &section, const std::string &name, cons
 // Get an attribute from an element ("" if absent).
 std::string attr(const Element &e, const std::string &name);
 void set_attr(Element &e, const std::string &name, const std::string &value);
+void remove_attr(Element &e, const std::string &name);
 
 // All <bind> elements under <bindings> (for the Bindings dialog / tests).
 const std::vector<Element> *bindings(const Model &m);
+
+// Merge the <bind> elements from a bindings.xml-style file (a bare <bindings> root)
+// into the model's <bindings> block, replacing the existing <bind> elements. Returns
+// false if the file can't be read.
+bool apply_bindings_file(Model &m, const std::string &filename);
+
+// --- axis elements under <bindings> (joystick flight roles) ---
+
+// Find an <axis name=N> under <bindings> (const + non-const).
+const Element *find_axis(const Model &m, const std::string &name);
+Element       *find_axis(      Model &m, const std::string &name);
+
+// Set/remove an <axis name=N joystick=J axis=A inverse=B> element under <bindings>.
+// If bound (axis>=0) it is created or updated; if unbound it is removed.
+void set_axis(Model &m, const std::string &name, int joystick, int axis, bool inverse);
+void remove_axis(Model &m, const std::string &name);
 
 // ---------------------------------------------------------------------------
 // Presets (setup/presets.xml): the modern UI's preset structure.
@@ -68,6 +88,8 @@ struct PresetOption {
     std::string name;
     std::string desc;
     std::vector<std::pair<std::string,std::string>> vars;  // (var-name, value)
+    // Non-var elements the preset sets (e.g. <axis mouse=...> for mouse/joystick modes).
+    std::vector<Element> elements;
 };
 
 // One group of preset options (e.g. Geometry -> GeomHigh...).

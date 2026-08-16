@@ -476,7 +476,7 @@
 </vegaconfig>
 <!-- vssetup modern presets (shipped with config-vs-05): full base config + header table + presets.
 Modern re-creates its config from this; the engine ignores the comment blocks.
-#groups Computer Physics Sound MusicAndVolume Geometry Textures FactionTextures Shaders Color Mouse Joystick AcceleratedVisual Text Autodocker Censorship
+#groups Computer Physics Sound MusicAndVolume Geometry Textures FactionTextures Shaders Color Mouse AcceleratedVisual Text Autodocker Censorship
 #cat Computer 1000MHz 2000MHz 3000MHz 4000MHz 4000MHzPlus
 #cat Geometry GeomExtreme GeomVeryHigh GeomHigh GeomMedium GeomLow GeomRetro
 #cat Textures TexRetro Tex256 Tex512 Tex1024 Tex2048 TexMax
@@ -485,7 +485,6 @@ Modern re-creates its config from this; the engine ignores the comment blocks.
 #cat Sound audio_off audio_3d_windows audio_3d_win_male audio_3d_linux audio_3d_linux_male
 #cat MusicAndVolume windows_ext_music_high windows_ext_music_on windows_ext_music_low music_off
 #cat Mouse warp_mouse inv_warp_mouse inv_glide_mouse glide_mouse no_mouse
-#cat Joystick no_joy joy_normal joy_throttle joy_axis joy_throttle_and_axis joy_t_a_rev
 #cat Physics default classic realistic
 #cat AcceleratedVisual gl_accelerated_visual_on gl_accelerated_visual_off
 #cat Text text_aa_vector text_vector text_bitmap
@@ -501,7 +500,6 @@ Modern re-creates its config from this; the engine ignores the comment blocks.
 #set Color full_32
 #set Physics default
 #set Mouse no_mouse
-#set Joystick joy_normal
 #set Shaders extremeshader
 #set AcceleratedVisual gl_accelerated_visual_on
 #set Text text_aa_vector
@@ -514,12 +512,6 @@ Modern re-creates its config from this; the engine ignores the comment blocks.
 #desc verylowshader Simplest Shader
 #desc onboardshader Onboard Shader
 #desc noshader No Shader Support
-#desc no_joy No Joystick
-#desc joy_normal 2 Axis Joystick
-#desc joy_axis 3 Axis Joystick
-#desc joy_throttle 2 Axis Joystick And Throttle
-#desc joy_throttle_and_axis 3 Axis Joystick and Throttle
-#desc joy_t_a_rev Joystick and Throttle Reversed
 #desc GeomRetro Retro Detail
 #desc GeomLow Low Detail
 #desc GeomMedium Medium Detail

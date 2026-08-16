@@ -44,6 +44,7 @@ class JoyStick;
 extern void ProcessJoystick( int whichjoystick );
 extern void InitJoystick();
 extern void DeInitJoystick();
+extern void ReinitJoysticks();
 
 const int MAX_JOYSTICKS      = 16;
 const int MOUSE_JOYSTICK     = MAX_JOYSTICKS-1;

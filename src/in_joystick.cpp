@@ -183,6 +183,35 @@ void DeInitJoystick()
     for (int i = 0; i < MAX_JOYSTICKS; i++)
         delete joystick[i];
 }
+
+// Re-enumerate connected SDL joysticks (hotplug support). Called on
+// SDL_EVENT_JOYSTICK_ADDED / SDL_EVENT_JOYSTICK_REMOVED so a joystick plugged in
+// after launch is detected and used. Recreates the per-slot JoyStick when its
+// availability changes; the mouse joystick (MOUSE_JOYSTICK) is always available.
+void ReinitJoysticks()
+{
+#ifndef NO_SDL_JOYSTICK
+#ifdef HAVE_SDL
+    SDL_JoystickID *ids = SDL_GetJoysticks( &num_joysticks );
+    if ( num_joysticks > MAX_JOYSTICKS )
+        num_joysticks = MAX_JOYSTICKS;
+    for (int i = 0; i < num_joysticks; i++)
+        joyIDs[i] = ids[i];
+    SDL_free( ids );
+
+    for (int i = 0; i < MAX_JOYSTICKS; i++) {
+        if ( i == MOUSE_JOYSTICK )
+            continue;   // mouse joystick is always available
+        bool present = i < num_joysticks;
+        bool avail   = joystick[i] && joystick[i]->isAvailable();
+        if ( present != avail ) {
+            delete joystick[i];
+            joystick[i] = new JoyStick( i );
+        }
+    }
+#endif
+#endif
+}
 JoyStick::JoyStick( int which ) : mouse( which == MOUSE_JOYSTICK )
 {
     for (int j = 0; j < MAX_AXES; ++j) {

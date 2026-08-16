@@ -119,6 +119,21 @@ bool parse(const std::string &filename, Model &out) {
     return true;
 }
 
+// Parse a bare-root XML file (e.g. <bindings>...</bindings>) into an Element.
+bool parse_file_root(const std::string &filename, Element &out) {
+    std::string s = read_all(filename.c_str());
+    if (s.empty()) return false;
+    size_t i = 0;
+    skip_ws_and_comments(s, i);
+    if (s.compare(i, 5, "<?xml") == 0) {
+        size_t end = s.find("?>", i);
+        if (end == std::string::npos) return false;
+        i = end + 2;
+        skip_ws_and_comments(s, i);
+    }
+    return parse_element(s, i, out);
+}
+
 // ---------------------------------------------------------------------------
 // Generator
 // ---------------------------------------------------------------------------
@@ -231,6 +246,11 @@ void set_attr(Element &e, const std::string &name, const std::string &value) {
     e.attrs.push_back(std::make_pair(name, value));
 }
 
+void remove_attr(Element &e, const std::string &name) {
+    for (size_t i = 0; i < e.attrs.size(); i++)
+        if (e.attrs[i].first == name) { e.attrs.erase(e.attrs.begin() + i); return; }
+}
+
 std::string get_var(const Model &m, const std::string &section, const std::string &name) {
     const Element *s = find_variables_section(m, section);
     if (!s) return "";
@@ -261,6 +281,76 @@ const std::vector<Element> *bindings(const Model &m) {
     return NULL;
 }
 
+static Element *bindings_elem(Model &m);   // defined below
+
+bool apply_bindings_file(Model &m, const std::string &filename) {
+    Element file;
+    if (!parse_file_root(filename, file)) return false;   // <bindings> root
+    Element *b = bindings_elem(m);
+    if (!b) return false;
+    // Replace the existing <bind> elements with those from the file.
+    std::vector<Element> new_children;
+    for (auto &c : file.children)
+        if (c.name == "bind") new_children.push_back(c);
+    // keep the non-bind children (e.g. existing <axis>), drop old binds
+    for (auto &c : b->children)
+        if (c.name != "bind") new_children.push_back(c);
+    b->children = new_children;
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// Axis elements under <bindings> (joystick flight roles)
+// ---------------------------------------------------------------------------
+
+static Element *bindings_elem(Model &m) {
+    for (auto &c : m.root.children)
+        if (c.name == "bindings") return &c;
+    return NULL;
+}
+
+const Element *find_axis(const Model &m, const std::string &name) {
+    const std::vector<Element> *b = bindings(m);
+    if (!b) return NULL;
+    for (auto &c : *b)
+        if (c.name == "axis" && attr(c, "name") == name) return &c;
+    return NULL;
+}
+
+Element *find_axis(Model &m, const std::string &name) {
+    Element *b = bindings_elem(m);
+    if (!b) return NULL;
+    for (auto &c : b->children)
+        if (c.name == "axis" && attr(c, "name") == name) return &c;
+    return NULL;
+}
+
+void set_axis(Model &m, const std::string &name, int joystick, int axis, bool inverse) {
+    Element *b = bindings_elem(m);
+    if (!b) return;
+    Element *ax = find_axis(m, name);
+    if (!ax) {
+        Element e; e.name = "axis";
+        e.attrs.push_back(std::make_pair("name", name));
+        b->children.push_back(e);
+        ax = &b->children.back();
+    }
+    set_attr(*ax, "joystick", std::to_string(joystick));
+    set_attr(*ax, "axis", std::to_string(axis));
+    set_attr(*ax, "inverse", inverse ? "true" : "false");
+    remove_attr(*ax, "mouse");   // this is a joystick axis; drop any stale mouse attr
+}
+
+void remove_axis(Model &m, const std::string &name) {
+    Element *b = bindings_elem(m);
+    if (!b) return;
+    for (size_t i = 0; i < b->children.size(); i++)
+        if (b->children[i].name == "axis" && attr(b->children[i], "name") == name) {
+            b->children.erase(b->children.begin() + i);
+            return;
+        }
+}
+
 // ---------------------------------------------------------------------------
 // Presets (setup/presets.xml) — the modern UI's preset structure.
 // ---------------------------------------------------------------------------
@@ -289,6 +379,41 @@ static bool parse_var_line(const std::string &line, std::string &name, std::stri
     value = line.substr(q + 7, q2 - (q + 7));
     return true;
 }
+
+// Parse a non-var element line like <axis name="x" mouse="0" axis="0" inverse="false"/>
+// into an Element (name + ordered attrs). Returns false if it isn't one.
+static bool parse_element_line(const std::string &line, Element &out) {
+    size_t lt = line.find('<');
+    size_t gt = line.find('>');
+    if (lt == std::string::npos || gt == std::string::npos || gt <= lt + 1) return false;
+    std::string tag = line.substr(lt + 1, gt - lt - 1);
+    size_t sp = tag.find_first_of(" \t/");
+    out.name = (sp == std::string::npos) ? tag : tag.substr(0, sp);
+    // only axis/bind/hatswitch are meaningful non-var elements in presets
+    if (out.name != "axis" && out.name != "bind" && out.name != "hatswitch") return false;
+    std::string rest = (sp == std::string::npos) ? "" : tag.substr(sp);
+    size_t i = 0;
+    while (i < rest.size()) {
+        while (i < rest.size() && (rest[i] == ' ' || rest[i] == '\t' || rest[i] == '/')) i++;
+        if (i >= rest.size()) break;
+        size_t an = i;
+        while (i < rest.size() && rest[i] != '=' && rest[i] != ' ' && rest[i] != '\t') i++;
+        std::string aname = rest.substr(an, i - an);
+        if (i < rest.size() && rest[i] == '=') {
+            i++;
+            while (i < rest.size() && (rest[i] == ' ' || rest[i] == '\t')) i++;
+            if (i < rest.size() && rest[i] == '\"') {
+                i++;
+                size_t vs = i;
+                while (i < rest.size() && rest[i] != '\"') i++;
+                out.attrs.push_back(std::make_pair(aname, rest.substr(vs, i - vs)));
+                if (i < rest.size()) i++;
+            }
+        }
+    }
+    return true;
+}
+
 
 bool parse_presets(const std::string &filename, std::vector<PresetGroup> &out) {
     out.clear();
@@ -368,29 +493,74 @@ bool parse_presets(const std::string &filename, std::vector<PresetGroup> &out) {
             }
         }
         else if (!active.empty()) {
-            // a var setting inside a preset block
+            // a var or element setting inside a preset block
             std::string name, value;
-            if (parse_var_line(t, name, value))
+            if (parse_var_line(t, name, value)) {
                 for (auto *o : active) o->vars.push_back(std::make_pair(name, value));
+            } else {
+                Element el;
+                if (parse_element_line(t, el))
+                    for (auto *o : active) o->elements.push_back(el);
+            }
         }
     }
     return true;
 }
 
+// True if a preset var belongs in the joystick section (the mouse/joystick vars).
+static bool is_joystick_var(const std::string &name) {
+    static const char *joy_vars[] = {
+        "mouse_cursor", "mouse_cursor_pancam", "mouse_cursor_pantgt", "mouse_cursor_chasecam",
+        "warp_mouse", "warp_mouse_zone", "mouse_sensitivity", "mouse_exponent",
+        "reverse_mouse_spr", "deadband", "mouse_deadband", "force_use_of_joystick",
+        "force_feedback", "ff_device", "joystick_exponent", "polling_rate",
+        "debug_digital_hatswitch", "mouse_blur", "clamp_axes", NULL
+    };
+    for (int i = 0; joy_vars[i]; i++) if (name == joy_vars[i]) return true;
+    return false;
+}
+
 void apply_preset(PresetGroup &g, const std::string &option, Model &m) {
     for (auto &o : g.options) {
         if (o.name != option) continue;
+        // vars: put each var into its real section. Prefer the section in the model that
+        // already holds an active var with that name; else joystick for mouse/joystick vars,
+        // else graphics (the default home for most preset vars like per_pixel_lighting).
         for (auto &kv : o.vars) {
-            // find the section holding this var, then set it
             const Element *v = variables_elem(m);
-            if (!v) continue;
-            for (auto &sec : v->children) {
-                if (sec.name != "section") continue;
-                for (auto &vv : sec.children)
-                    if (vv.name == "var" && attr(vv, "name") == kv.first) {
-                        set_var(m, attr(sec, "name"), kv.first, kv.second);
-                        break;
-                    }
+            std::string section;
+            if (v) {
+                for (auto &sec : v->children) {
+                    if (sec.name != "section") continue;
+                    for (auto &vv : sec.children)
+                        if (vv.name == "var" && attr(vv, "name") == kv.first) { section = attr(sec, "name"); break; }
+                    if (!section.empty()) break;
+                }
+            }
+            if (section.empty())
+                section = is_joystick_var(kv.first) ? "joystick" : "graphics";
+            set_var(m, section, kv.first, kv.second);
+        }
+        // non-var elements (axis/bind): apply to the <bindings> block
+        Element *b = NULL;
+        for (auto &c : m.root.children)
+            if (c.name == "bindings") { b = &c; break; }
+        if (b) {
+            for (auto &el : o.elements) {
+                Element *found = NULL;
+                for (auto &c : b->children)
+                    if (c.name == el.name && attr(c, "name") == attr(el, "name")) { found = &c; break; }
+                if (found) {
+                    for (auto &a : el.attrs) set_attr(*found, a.first, a.second);
+                } else {
+                    b->children.push_back(el);
+                    found = &b->children.back();
+                    for (auto &a : el.attrs) set_attr(*found, a.first, a.second);
+                }
+                // A preset axis declares one device; drop the other so they don't
+                // conflict on x/y (e.g. a mouse-mode axis must not keep a joystick attr).
+                if (attr(el, "mouse") != "") { remove_attr(*found, "joystick"); }
+                else if (attr(el, "joystick") != "") { remove_attr(*found, "mouse"); }
             }
         }
         break;
