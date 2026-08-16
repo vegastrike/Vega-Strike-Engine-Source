@@ -400,32 +400,6 @@ void NavigationSystem::Draw()
         //***************
 
         Matrix mat( p, q, r, pos );
-        // The console backdrop (mesh[0]) is a 3D mesh placed at mesh_coord depth and loaded
-        // with a per-asset navdata 'scale' that was tuned for one specific resolution/aspect.
-        // It doesn't match the on-screen band the 2D text/buttons expect (x_small..x_large), so
-        // on other aspects it renders too big/small. Recompute its scale from the projection so
-        // it always spans that band, independent of resolution/aspect and asset navdata.
-        if (i == 0 && mesh[i]) {
-            Camera *navcam = _Universe->AccessCamera();
-            float fov = navcam->GetFov();
-            float aspect = g_game.aspect > 0 ? g_game.aspect : 16.0f / 9.0f;
-            float depth = screen_z;   // distance from the camera (mesh_coord z)
-            // Visible world width at this depth for a perspective frustum.
-            float visible_w = 2.0f * depth * tanf( fov * M_PI / 360.0f ) * aspect;
-            // Target on-screen band fraction. screenskipby4[] is in NDC (-1..1) after ScreenToCoord,
-            // so the width spans (x_large-x_small)*2 of the -1..1 range; the fraction of the full
-            // viewport width is half that. (0.58 band -> 1.16 NDC -> 0.58 of the screen width.)
-            float target_frac = 0.5f * (screenskipby4[1] - screenskipby4[0]);
-            if (target_frac > 0.0f && visible_w > 0.0f) {
-                // Current rendered width of the console at its loaded scale.
-                float cur_w = mesh[i]->corner_max().i - mesh[i]->corner_min().i;
-                if (cur_w > 0.0f) {
-                    float k = (target_frac * visible_w) / cur_w;   // scale factor to span the band
-                    Vector s( k, k, k );
-                    ScaleMatrix( mat, s );
-                }
-            }
-        }
         if (mesh[i]) {
             mesh[i]->Draw( 
                 FLT_MAX, // lod
