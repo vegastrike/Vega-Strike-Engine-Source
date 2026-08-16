@@ -987,6 +987,15 @@ static void restore_preset_selections(const std::string &modern_cfg) {
             font_header_parsed = full;
             continue;
         }
+        if (strncmp(t, "#baseaspect ", 12) == 0) {
+            std::string v = t + 12;
+            int idx = atoi(v.c_str());
+            if (idx >= 0 && idx < (int)(sizeof(aspect_opts) / sizeof(aspect_opts[0]))) {
+                sel_base_aspect = idx;
+                base_aspect_text = aspect_opts[idx];
+            }
+            continue;
+        }
         if (strncmp(t, "#fc ", 4) == 0) {
             std::string rest(t + 4);
             size_t sp = rest.find_first_of(" \t\n");
@@ -1018,6 +1027,8 @@ static std::string preset_header() {
     h += "#fc " + std::string(fc_names[flight_control]) + "\n";
     // Persist the font picker state (type + bitmap size) so it restores on next load.
     h += "#font " + font_header_value() + "\n";
+    // Persist the base aspect ratio so it restores on next load.
+    h += "#baseaspect " + std::to_string(sel_base_aspect) + "\n";
     for (auto &g : g_presets) {
         if (g.name == "Resolution") continue;
         if (!g.current.empty()) h += "#set " + g.name + " " + g.current + "\n";
@@ -1044,6 +1055,8 @@ void reset() {
     std::string fp = model_get_var("graphics", "font_point");
     if (!fp.empty()) snprintf(text_height_buf, sizeof(text_height_buf), "%s", fp.c_str());
     restore_font_state();
+    sel_base_aspect = 0;
+    base_aspect_text = aspect_opts[0];
     g_dirty = true;   // the next Save regenerates from the fresh asset base
 }
 
