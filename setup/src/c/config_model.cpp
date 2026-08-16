@@ -251,6 +251,12 @@ void remove_attr(Element &e, const std::string &name) {
         if (e.attrs[i].first == name) { e.attrs.erase(e.attrs.begin() + i); return; }
 }
 
+bool has_attr(const Element &e, const std::string &name) {
+    for (auto &a : e.attrs)
+        if (a.first == name) return true;
+    return false;
+}
+
 std::string get_var(const Model &m, const std::string &section, const std::string &name) {
     const Element *s = find_variables_section(m, section);
     if (!s) return "";
@@ -281,7 +287,7 @@ const std::vector<Element> *bindings(const Model &m) {
     return NULL;
 }
 
-static Element *bindings_elem(Model &m);   // defined below
+Element *bindings_elem(Model &m);   // defined below
 
 bool apply_bindings_file(Model &m, const std::string &filename) {
     Element file;
@@ -299,14 +305,34 @@ bool apply_bindings_file(Model &m, const std::string &filename) {
     return true;
 }
 
+Element &add_bind(Model &m, const std::vector<std::pair<std::string,std::string>> &attrs) {
+    Element *b = bindings_elem(m);
+    Element e; e.name = "bind"; e.attrs = attrs;
+    b->children.push_back(e);
+    return b->children.back();
+}
+
+void remove_bind(Model &m, size_t index) {
+    Element *b = bindings_elem(m);
+    if (!b) return;
+    size_t n = 0;
+    for (size_t i = 0; i < b->children.size(); i++) {
+        if (b->children[i].name != "bind") continue;
+        if (n == index) { b->children.erase(b->children.begin() + i); return; }
+        n++;
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Axis elements under <bindings> (joystick flight roles)
 // ---------------------------------------------------------------------------
 
-static Element *bindings_elem(Model &m) {
+Element *bindings_elem(Model &m) {
     for (auto &c : m.root.children)
         if (c.name == "bindings") return &c;
-    return NULL;
+    Element b; b.name = "bindings";
+    m.root.children.push_back(b);
+    return &m.root.children.back();
 }
 
 const Element *find_axis(const Model &m, const std::string &name) {

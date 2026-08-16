@@ -59,6 +59,7 @@ void set_var(Model &m, const std::string &section, const std::string &name, cons
 std::string attr(const Element &e, const std::string &name);
 void set_attr(Element &e, const std::string &name, const std::string &value);
 void remove_attr(Element &e, const std::string &name);
+bool has_attr(const Element &e, const std::string &name);
 
 // All <bind> elements under <bindings> (for the Bindings dialog / tests).
 const std::vector<Element> *bindings(const Model &m);
@@ -67,6 +68,18 @@ const std::vector<Element> *bindings(const Model &m);
 // into the model's <bindings> block, replacing the existing <bind> elements. Returns
 // false if the file can't be read.
 bool apply_bindings_file(Model &m, const std::string &filename);
+
+// Find the <bindings> container element (creating it if absent), for the Bindings dialog.
+Element *bindings_elem(Model &m);
+
+// Append a <bind> element to the <bindings> block. `attrs` is a sequence of
+// name/value attribute pairs (e.g. key/modifier/command), preserved in order.
+// Returns the newly-created element.
+Element &add_bind(Model &m, const std::vector<std::pair<std::string,std::string>> &attrs);
+
+// Remove the i-th <bind> element (in child order) from the <bindings> block.
+// No-op if i is out of range.
+void remove_bind(Model &m, size_t index);
 
 // --- axis elements under <bindings> (joystick flight roles) ---
 

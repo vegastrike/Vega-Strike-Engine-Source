@@ -156,7 +156,6 @@
 	<bind mouse="0" button="8" modifier="none" command="WeapSelKey" />
 	<bind mouse="0" button="9" modifier="none" command="MisSelKey" />
 	<bind joystick="0" player="0" button="0" modifier="none" command="FireKey" />
-	<bind joystick="0" button="1" modifier="none" command="ABKey" />
 	<bind joystick="0" button="2" modifier="none" command="MissileKey" />
 	<bind joystick="0" button="3" modifier="none" command="TargetKey" />
 	<bind joystick="0" button="4" modifier="none" command="PickTargetKey" />
@@ -169,10 +168,8 @@
 	<bind joystick="0" button="1" modifier="none" command="Joystick::Mode::InertialXZToggle" />
 	<bind joystick="0" button="1" modifier="none" command="Joystick::Mode::RollToggle" />
 	<bind joystick="0" button="1" modifier="none" command="Joystick::Mode::BankToggle" />
-	<bind hatswitch="0" button="2" modifier="none" command="Cockpit::SwitchLVDU" />
-	<bind hatswitch="0" button="3" modifier="none" command="Cockpit::InsideLeft" />
-	<bind joystick="0" digital-hatswitch="0" direction="up" command="ABKey"/>
-	<bind joystick="0" digital-hatswitch="0" direction="left" command="TargetKey"/>
-	<bind joystick="0" digital-hatswitch="0" direction="center" command="ABKey"/>
-	<bind joystick="0" digital-hatswitch="0" direction="right" command="ABKey"/>
+	<bind joystick="0" digital-hatswitch="0" direction="up" command="Cockpit::Inside"/>
+	<bind joystick="0" digital-hatswitch="0" direction="down" command="Cockpit::InsideBack"/>
+	<bind joystick="0" digital-hatswitch="0" direction="left" command="Cockpit::InsideLeft"/>
+	<bind joystick="0" digital-hatswitch="0" direction="right" command="Cockpit::InsideRight"/>
 </bindings>
