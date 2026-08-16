@@ -1007,6 +1007,22 @@ void NavigationSystem::DrawButton( float &x1, float &x2, float &y1, float &y2, i
     float       yl     = (y1+y2)/2.0;
     a_label.SetPos( (xl-offset)-(checkbit( buttonstates, button_number-1 ) ? 0.006 : 0), (yl+0.025) );
     a_label.SetText( label );
+
+    // Modern flat button: draw a subtle dark fill behind the label so it reads
+    // as a button even though the physical panel mesh is gone. Uses the button
+    // rect x1..y2; the label sits slightly above centre.
+    {
+        GFXColorf( GFXColor( 0, 0, 0, 0.35f ) );
+        GFXDisable( TEXTURE0 );
+        GFXDisable( LIGHTING );
+        GFXBlendMode( SRCALPHA, INVSRCALPHA );
+        const float bv[4*3] = {
+            x1, y1, 0,   x2, y1, 0,   x2, y2, 0,   x1, y2, 0
+        };
+        GFXDraw( GFXQUAD, bv, 4, 3, 0, 0 );
+        GFXColorf( GFXColor( 1, 1, 1, 1 ) );
+    }
+
     static bool nav_button_labels =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_nav_button_labels", "true" ) );
     if (nav_button_labels) {
