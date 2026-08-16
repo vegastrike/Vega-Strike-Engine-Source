@@ -801,6 +801,11 @@ ELSE (WIN32)
     INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
 ENDIF (WIN32)
 
+# Copy fonts
+FILE(
+    COPY "fonts"
+    DESTINATION ${CMAKE_BINARY_DIR}
+)
 
 ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/doc" "./doc")
 

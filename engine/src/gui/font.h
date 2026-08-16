@@ -28,6 +28,7 @@
 #define VEGA_STRIKE_ENGINE_GUI_FONT_H
 
 #include <string>
+#include "libraries/gui/fonts.h"
 
 //Some pre-defined weights for the outline stroke font.
 static const float LIGHT_STROKE = 0.6;
@@ -44,7 +45,7 @@ class Font {
 public:
 //Font size.  Vertical distance in identity space.
     float size(void) const {
-        return m_size * 0.5;
+        return m_size * 0.5F;
     }
 
     void setSize(float s) {
@@ -83,6 +84,9 @@ public:
 // Returns the font descent
     double descent(void) const;
 
+    // Returns the ImGUI font
+    ImFont* getFont(void) const;
+
 //CONSTRUCTION
     Font(float newsize = .1, float weight = NORMAL_STROKE) :
             m_size(newsize),
@@ -117,7 +121,6 @@ protected:
     // Check whether we need to recalc the metrics, and do it in const object.
     void calcMetricsIfNeeded(void) const;
 
-protected:
 //VARIABLES
     float m_size;          //Size of font. Vertical distance in identity space.
     float m_strokeWeight;  //"Look" of stroke font.  Weight of stroke in characters.
