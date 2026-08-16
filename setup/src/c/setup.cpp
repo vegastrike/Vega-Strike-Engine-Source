@@ -881,6 +881,10 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
     }
     if (ImGui::Button("Save", ImVec2(btnw, 0))) {
+        // The mode switch becomes real on Save: patch vs-modern.config's first line to the
+        // current mode so the engine loads the right config next time. Do this for BOTH modes
+        // (switching to Classic must stop the engine loading the modern config).
+        vs05ui::write_mode_switch();
         if (is_modern) vs05ui::save();
         else save();
     }

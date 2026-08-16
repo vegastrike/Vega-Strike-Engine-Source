@@ -1080,6 +1080,30 @@ void set_mode(Mode m) {
     if (m == MODE_MODERN && !g_loaded && !g_asset.empty())
         init(g_asset, g_data_dir);   // (re)seed when entering modern
     persist_mode();
+    g_dirty = true;   // a mode switch is a pending change until Saved
+}
+
+// Patch ONLY the first-line mode switch in vs-modern.config to reflect the current
+// mode, without touching the rest of the modern config (so a classic save doesn't
+// rewrite the modern model). The engine reads this switch to decide which config to
+// load. Called on Save; the mode switch becomes real only then.
+void write_mode_switch() {
+    if (g_asset.empty()) return;
+    std::string mf = modern_config_file();
+    FILE *f = fopen(mf.c_str(), "r");
+    if (!f) return;   // no modern config to patch (pure classic)
+    // read the whole file
+    std::string content;
+    char buf[4096];
+    size_t n;
+    while ((n = fread(buf, 1, sizeof(buf), f)) > 0) content.append(buf, n);
+    fclose(f);
+    // replace the first line (the mode switch) with the current mode's switch
+    size_t nl = content.find('\n');
+    std::string new_switch = "<!-- vssetup:mode=" + std::string(g_mode == MODE_MODERN ? "modern" : "classic") + " -->\n";
+    std::string out = (nl == std::string::npos) ? new_switch : new_switch + content.substr(nl + 1);
+    FILE *w = fopen(mf.c_str(), "w");
+    if (w) { fputs(out.c_str(), w); fclose(w); }
 }
 
 std::string engine_config_file() {

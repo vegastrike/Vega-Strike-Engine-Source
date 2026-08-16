@@ -50,6 +50,9 @@ bool has_unsaved();
 // --- mode ---
 Mode mode();
 void set_mode(Mode m);
+// Patch the vs-modern.config first-line mode switch to the current mode (on Save), so
+// switching to Classic stops the engine from loading the modern config.
+void write_mode_switch();
 
 // --- launch helper: the config file the engine reads in this mode ---
 std::string engine_config_file();
