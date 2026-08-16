@@ -356,58 +356,9 @@ void NavigationSystem::Draw()
     if (_Universe->AccessCockpit()->GetParent() == NULL)
         return;
     
-    //DRAW THE SCREEN MODEL
-    //**********************************
-    Vector p, q, r;
-    static float zrange =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "cockpit_nav_zrange", "10" ) );
-    static float zfloor =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "cockpit_nav_zfloor", "0.1" ) );
-    _Universe->AccessCamera()->GetOrientation( p, q, r );
-    _Universe->AccessCamera()->UpdateGFX( GFXTRUE,
-                                          GFXTRUE,
-                                          GFXFALSE,
-                                          GFXTRUE,
-                                          zfloor,
-                                          zfloor+zrange );
-
-    _Universe->activateLightMap();
-    for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
-        float screen_x = 0.0;
-        float screen_y = 0.0;
-        float screen_z = 0.0;
-
-        screen_x = meshcoordinate_x[i];
-        screen_y = meshcoordinate_y[i];
-        screen_z = meshcoordinate_z[i];
-        if ( checkbit( buttonstates, (i-1) ) )          //button1 = 0, starts at -1, returning 0, no addition done
-            screen_z += meshcoordinate_z_delta[i];
-        QVector pos = _Universe->AccessCamera()->GetPosition();
-
-        //offset horizontal
-        //***************
-        pos = (p.Cast()*screen_x)+pos;
-        //***************
-
-        //offset vertical
-        //***************
-        pos = (q.Cast()*screen_y)+pos;
-        //***************
-
-        //offset sink
-        //***************
-        pos = (r.Cast()*screen_z)+pos;
-        //***************
-
-        Matrix mat( p, q, r, pos );
-        if (mesh[i]) {
-            mesh[i]->Draw( 
-                FLT_MAX, // lod
-                mat );
-        }
-    }
-    Mesh::ProcessZFarMeshes(true);
-    Mesh::ProcessUndrawnMeshes(false,true);
+    // MODERN: the physical nav-panel mesh is removed — the nav screen is now a
+    // clean 2D interface drawn over an opaque black backdrop (no camera/lightmap
+    // setup needed; the content renders in HUD screen space).
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     GFXColor4f( 1, 1, 1, 1 );
     GFXDisable( TEXTURE0 );
