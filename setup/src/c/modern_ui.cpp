@@ -58,6 +58,15 @@ static bool display_inited = false;
 // HUD: use the rendered crosshair (the better-aiming reticle) vs the sprite image.
 static bool rendered_crosshair = true;
 
+// Font picker. The font choice drives high_quality_font[_computer] + font_antialias (bitmap vs
+// vector), and the bitmap name/size drives graphics/font + graphics/basefont. The vector height
+// uses the existing text_height_buf (font_point).
+enum { FONT_AA_VEC = 0, FONT_VEC, FONT_HELVETICA, FONT_TIMES, FONT_FIXED };
+static const char *font_type_names[] = { "Antialiased Vector", "Vector", "Helvetica", "Times", "Fixed" };
+static int sel_font_type = FONT_AA_VEC;
+// Selected bitmap size index per family (index into the family's sizes array; -1 = suggested).
+static int sel_bitmap_size[3] = { -1, -1, -1 };   // 0=Helvetica 1=Times 2=Fixed
+
 // Flight control: 0=keyboard 1=mouse 2=joystick
 enum { FC_KEYBOARD = 0, FC_MOUSE = 1, FC_JOYSTICK = 2 };
 static int flight_control = FC_KEYBOARD;
@@ -154,6 +163,61 @@ static void prefill_text_height() {
         int fp = (int)(0.0125 * sel_res_h + 2.5 + 0.5);
         snprintf(text_height_buf, sizeof(text_height_buf), "%d", fp);
     }
+}
+
+// Bitmap font families and their fixed sizes. Order matches the freeglut faces.
+// Each size is the bitmap's pixel height (glutBitmapHeight). The hud.cpp getFont()
+// reads graphics/font + graphics/basefont as these names; the Font class uses the
+// closest bitmap <= the requested height once the auto-select fix is in.
+struct BitmapFamily {
+    const char *name;
+    int  n;                 // number of sizes
+    const char **size_names;
+    const int *px;
+};
+static const char *helv_sizes[] = { "10", "12", "18" };
+static const int   helv_px[]    = { 14, 16, 23 };
+static const char *times_sizes[] = { "10", "24" };
+static const int   times_px[]   = { 14, 29 };
+static const char *fixed_sizes[] = { "8x13", "9x15" };
+static const int   fixed_px[]   = { 14, 16 };
+static const BitmapFamily bitmap_families[] = {
+    { "Helvetica", 3, helv_sizes, helv_px },
+    { "Times", 2, times_sizes, times_px },
+    { "Fixed", 2, fixed_sizes, fixed_px },
+};
+
+// The ideal font height (font_point) for the current resolution.
+static int ideal_font_height() {
+    return sel_res_h > 0 ? (int)(0.0125 * sel_res_h + 2.5 + 0.5) : 16;
+}
+
+static int suggested_bitmap_size(int family);   // defined below
+
+// Encode the current font picker state as the '#font' header line (e.g. 'aa_vec', 'vec',
+// 'helvetica 12', 'times 24', 'fixed 9x15'). Persisted in the app-owned header so the picker
+// restores across launches, independent of the (now-removed) Text preset group.
+static std::string font_header_value() {
+    if (sel_font_type == FONT_AA_VEC) return "aa_vec";
+    if (sel_font_type == FONT_VEC) return "vec";
+    int fam = sel_font_type - FONT_HELVETICA;
+    const BitmapFamily &f = bitmap_families[fam];
+    int sz = sel_bitmap_size[fam];
+    if (sz < 0) sz = suggested_bitmap_size(fam);
+    if (sz < 0 || sz >= f.n) sz = 0;
+    return std::string(f.name) + " " + f.size_names[sz];
+}
+
+// Suggest the bitmap size (index) nearest the ideal vector height.
+static int suggested_bitmap_size(int family) {
+    const BitmapFamily &f = bitmap_families[family];
+    int ideal = ideal_font_height();
+    int best = 0, bestdiff = 1000000;
+    for (int i = 0; i < f.n; i++) {
+        int d = f.px[i] < ideal ? ideal - f.px[i] : f.px[i] - ideal;
+        if (d < bestdiff) { bestdiff = d; best = i; }
+    }
+    return best;
 }
 
 // The highest-resolution mode a monitor supports (by pixel area). Returns false
@@ -611,7 +675,7 @@ static void apply_presets_to_model() {
     // dialog) are skipped here; their vars are written by those controls. (The
     // Joystick group was removed from presets.xml - axis mapping is hand-rolled.)
     for (auto &g : g_presets) {
-        if (g.name == "Resolution" || g.name == "Mouse") continue;
+        if (g.name == "Resolution" || g.name == "Mouse" || g.name == "Text") continue;
         if (!g.current.empty())
             vs05cfg::apply_preset(g, g.current, g_model);
     }
@@ -633,6 +697,34 @@ static void apply_display_to_model() {
     snprintf(b, sizeof(b), "%d", sel_res_w);   model_set_var("graphics", "x_resolution", b);
     snprintf(b, sizeof(b), "%d", sel_res_h);   model_set_var("graphics", "y_resolution", b);
     model_set_var("graphics", "font_point", text_height_buf);
+    // Font choice -> high_quality_font[_computer] + font_antialias + the bitmap name for
+    // hud.cpp getFont()/getFontHeight(). Vector keeps font_point; bitmap uses the chosen size.
+    if (sel_font_type == FONT_AA_VEC) {
+        model_set_var("graphics", "high_quality_font", "false");
+        model_set_var("graphics", "high_quality_font_computer", "false");
+        model_set_var("graphics", "font_antialias", "true");
+    } else if (sel_font_type == FONT_VEC) {
+        model_set_var("graphics", "high_quality_font", "false");
+        model_set_var("graphics", "high_quality_font_computer", "false");
+        model_set_var("graphics", "font_antialias", "false");
+    } else {
+        int fam = sel_font_type - FONT_HELVETICA;
+        const BitmapFamily &f = bitmap_families[fam];
+        int sz = sel_bitmap_size[fam];
+        if (sz < 0) sz = suggested_bitmap_size(fam);
+        if (sz < 0 || sz >= f.n) sz = 0;
+        model_set_var("graphics", "high_quality_font", "true");
+        model_set_var("graphics", "high_quality_font_computer", "true");
+        model_set_var("graphics", "font_antialias", "false");
+        // Name = lowercase family + size the hud.cpp getFont() expects (helvetica12, times24,
+        // fixed13/fixed15 - the Fixed sizes are labeled 8x13/9x15 but the config uses the px).
+        std::string nm;
+        if (fam == 0) nm = "helvetica" + std::string(f.size_names[sz]);
+        else if (fam == 1) nm = "times" + std::string(f.size_names[sz]);
+        else nm = "fixed" + std::string(f.size_names[sz]).substr(2);   // "8x13"->"13", "9x15"->"15"
+        model_set_var("graphics", "font", nm);
+        model_set_var("graphics", "basefont", nm);
+    }
     char asp[24];
     snprintf(asp, sizeof(asp), "%.3f", sel_screen_aspect >= 0 ? aspect_vals[sel_screen_aspect] : current_screen_aspect());
     model_set_var("graphics", "aspect", asp);
@@ -723,6 +815,7 @@ static void apply_all_to_model() {
 }
 
 static void restore_preset_selections(const std::string &modern_cfg);   // defined below (after init)
+static void restore_font_state();                                       // defined below (after init)
 
 // ---------------------------------------------------------------------------
 // Seed the model from the asset config
@@ -801,6 +894,7 @@ bool init(const std::string &active_asset, const std::string &data_dir) {
         resolution_text = std::to_string(sel_res_w) + "x" + std::to_string(sel_res_h);
     std::string fp = model_get_var("graphics", "font_point");
     if (!fp.empty()) snprintf(text_height_buf, sizeof(text_height_buf), "%s", fp.c_str());
+    restore_font_state();
     rendered_crosshair = model_get_var("graphics", "draw_rendered_crosshairs") != "false";
     load_joystick_staging();   // restore joystick settings (deadband, ffb, axes) on load
     refresh_screen_aspect_text();
@@ -811,6 +905,59 @@ bool init(const std::string &active_asset, const std::string &data_dir) {
 // Persistence
 // ---------------------------------------------------------------------------
 
+// The #font header value parsed from vs-modern.config (empty if none). Restores the picker's
+// explicit type/size choice across launches.
+static std::string font_header_parsed;
+
+// Apply a '#font <value>' header line (e.g. 'aa_vec', 'helvetica 12') to the picker state.
+static void apply_font_header_value(const std::string &v) {
+    sel_font_type = FONT_AA_VEC;
+    for (int i = 0; i < 3; i++) sel_bitmap_size[i] = -1;
+    if (v == "vec") { sel_font_type = FONT_VEC; return; }
+    // Family keyword before the first space.
+    size_t sp = v.find(' ');
+    std::string famname = (sp == std::string::npos) ? v : v.substr(0, sp);
+    std::string sizestr = (sp == std::string::npos) ? "" : v.substr(sp + 1);
+    for (int fam = 0; fam < 3; fam++) {
+        if (bitmap_families[fam].name == famname) {
+            sel_font_type = FONT_HELVETICA + fam;
+            const BitmapFamily &f = bitmap_families[fam];
+            if (!sizestr.empty())
+                for (int i = 0; i < f.n; i++)
+                    if (std::string(f.size_names[i]) == sizestr) { sel_bitmap_size[fam] = i; break; }
+            return;
+        }
+    }
+}
+
+// Restore the font picker state: prefer the app-header #font line, else derive from the model's
+// high_quality_font / font_antialias / font vars. Defaults to AA Vector if nothing is set.
+static void restore_font_state() {
+    if (!font_header_parsed.empty()) { apply_font_header_value(font_header_parsed); return; }
+    std::string hqf = model_get_var("graphics", "high_quality_font");
+    std::string aa  = model_get_var("graphics", "font_antialias");
+    std::string fn  = model_get_var("graphics", "font");
+    sel_font_type = FONT_AA_VEC;
+    for (int i = 0; i < 3; i++) sel_bitmap_size[i] = -1;
+    if (hqf == "true") {
+        int fam = -1;
+        std::string base;
+        if (fn.compare(0, 8, "helvetica") == 0) { fam = 0; base = fn.substr(8); }
+        else if (fn.compare(0, 5, "times") == 0) { fam = 1; base = fn.substr(5); }
+        else if (fn.compare(0, 5, "fixed") == 0) { fam = 2; base = fn.substr(5); }
+        if (fam >= 0) {
+            sel_font_type = FONT_HELVETICA + fam;
+            const BitmapFamily &f = bitmap_families[fam];
+            for (int i = 0; i < f.n; i++) {
+                std::string want = (fam == 2) ? ("8x" + base) : base;
+                if (std::string(f.size_names[i]) == want) { sel_bitmap_size[fam] = i; break; }
+            }
+        }
+    } else {
+        sel_font_type = (aa == "true") ? FONT_AA_VEC : FONT_VEC;
+    }
+}
+
 // Build the app-owned #set header (active preset per group) to persist the
 // selections inside vs-modern.config (the engine ignores the comment).
 // Restore the persisted #set selections from vs-modern.config (overriding the
@@ -818,6 +965,7 @@ bool init(const std::string &active_asset, const std::string &data_dir) {
 static void restore_preset_selections(const std::string &modern_cfg) {
     FILE *f = fopen(modern_cfg.c_str(), "r");
     if (!f) return;
+    font_header_parsed.clear();   // no #font line => derive from the model
     char line[1024];
     bool in_presets = false;
     while (fgets(line, sizeof(line), f)) {
@@ -826,6 +974,19 @@ static void restore_preset_selections(const std::string &modern_cfg) {
         if (strncmp(t, "<!-- vssetup presets", 20) == 0) { in_presets = true; continue; }
         if (strncmp(t, "-->", 3) == 0) { in_presets = false; continue; }
         if (!in_presets) continue;
+        if (strncmp(t, "#font ", 6) == 0) {
+            std::string v = t + 6;
+            size_t e = v.find_first_of(" \t\r\n");
+            v = v.substr(0, e == std::string::npos ? std::string::npos : e);
+            // Keep the rest (e.g. the bitmap size) after the family keyword.
+            std::string full = t + 6;
+            size_t e2 = full.find_first_of("\r\n");
+            full = full.substr(0, e2 == std::string::npos ? std::string::npos : e2);
+            // trim trailing spaces
+            while (!full.empty() && (full.back() == ' ' || full.back() == '\t')) full.pop_back();
+            font_header_parsed = full;
+            continue;
+        }
         if (strncmp(t, "#fc ", 4) == 0) {
             std::string rest(t + 4);
             size_t sp = rest.find_first_of(" \t\n");
@@ -855,6 +1016,8 @@ static std::string preset_header() {
     std::string h;
     // Persist the flight-control mode so it restores on next load.
     h += "#fc " + std::string(fc_names[flight_control]) + "\n";
+    // Persist the font picker state (type + bitmap size) so it restores on next load.
+    h += "#font " + font_header_value() + "\n";
     for (auto &g : g_presets) {
         if (g.name == "Resolution") continue;
         if (!g.current.empty()) h += "#set " + g.name + " " + g.current + "\n";
@@ -878,6 +1041,9 @@ void reset() {
     // Reset preset selections to the shipped defaults.
     std::string pf = shipped_presets_file();
     if (!pf.empty()) vs05cfg::parse_presets(pf, g_presets);
+    std::string fp = model_get_var("graphics", "font_point");
+    if (!fp.empty()) snprintf(text_height_buf, sizeof(text_height_buf), "%s", fp.c_str());
+    restore_font_state();
     g_dirty = true;   // the next Save regenerates from the fresh asset base
 }
 
@@ -1052,10 +1218,34 @@ static void draw_display_frame() {
             if (ImGui::MenuItem(aspect_opts[i])) { sel_screen_aspect = (int)i; refresh_screen_aspect_text(); g_dirty = true; }
         ImGui::EndPopup();
     }
-    ImGui::Text("Text Height"); ImGui::SameLine();
-    ImGui::SetNextItemWidth(90);
-    if (ImGui::InputText("##textheight", text_height_buf, sizeof(text_height_buf), ImGuiInputTextFlags_CharsDecimal))
-        g_dirty = true;
+    ImGui::Text("Font"); ImGui::SameLine();
+    if (ImGui::Button(font_type_names[sel_font_type])) ImGui::OpenPopup("##pick_font");
+    if (ImGui::BeginPopup("##pick_font")) {
+        for (size_t i = 0; i < sizeof(font_type_names) / sizeof(font_type_names[0]); ++i)
+            if (ImGui::MenuItem(font_type_names[i])) { sel_font_type = (int)i; g_dirty = true; }
+        ImGui::EndPopup();
+    }
+    if (sel_font_type == FONT_AA_VEC || sel_font_type == FONT_VEC) {
+        ImGui::SameLine(); ImGui::Text("Text Height"); ImGui::SameLine();
+        ImGui::SetNextItemWidth(60);
+        if (ImGui::InputText("##textheight", text_height_buf, sizeof(text_height_buf), ImGuiInputTextFlags_CharsDecimal))
+            g_dirty = true;
+    } else {
+        int fam = sel_font_type - FONT_HELVETICA;
+        const BitmapFamily &f = bitmap_families[fam];
+        int sz = sel_bitmap_size[fam];
+        if (sz < 0) sz = suggested_bitmap_size(fam);
+        if (sz < 0 || sz >= f.n) sz = 0;
+        ImGui::SameLine();
+        if (ImGui::Button(f.size_names[sz])) ImGui::OpenPopup("##pick_bsize");
+        if (ImGui::BeginPopup("##pick_bsize")) {
+            for (int i = 0; i < f.n; i++) {
+                bool sel = (i == sz);
+                if (ImGui::Selectable(f.size_names[i], sel)) { sel_bitmap_size[fam] = i; g_dirty = true; }
+            }
+            ImGui::EndPopup();
+        }
+    }
     if (ImGui::Button("Base Aspect Ratio")) ImGui::OpenPopup("##pick_asp");
     ImGui::SameLine(); ImGui::TextUnformatted(base_aspect_text.c_str());
     if (ImGui::BeginPopup("##pick_asp")) {
@@ -1403,7 +1593,7 @@ static void draw_preset_table() {
     // Collect the preset groups to show (skip hand-rolled display/input groups).
     std::vector<vs05cfg::PresetGroup*> show;
     for (auto &g : g_presets) {
-        if (g.name == "Resolution" || g.name == "Mouse") continue;
+        if (g.name == "Resolution" || g.name == "Mouse" || g.name == "Text") continue;
         if (!g.options.empty()) show.push_back(&g);
     }
     if (show.empty()) { ImGui::TextWrapped("No presets to show."); return; }

@@ -476,7 +476,7 @@
 </vegaconfig>
 <!-- vssetup modern presets (shipped with config-vs-05): full base config + header table + presets.
 Modern re-creates its config from this; the engine ignores the comment blocks.
-#groups Computer Physics Sound MusicAndVolume Geometry Textures FactionTextures Shaders Color Mouse AcceleratedVisual Text Autodocker Censorship
+#groups Computer Physics Sound MusicAndVolume Geometry Textures FactionTextures Shaders Color Mouse AcceleratedVisual Autodocker Censorship
 #cat Computer 1000MHz 2000MHz 3000MHz 4000MHz 4000MHzPlus
 #cat Geometry GeomExtreme GeomVeryHigh GeomHigh GeomMedium GeomLow GeomRetro
 #cat Textures TexRetro Tex256 Tex512 Tex1024 Tex2048 TexMax
@@ -487,7 +487,6 @@ Modern re-creates its config from this; the engine ignores the comment blocks.
 #cat Mouse warp_mouse inv_warp_mouse inv_glide_mouse glide_mouse no_mouse
 #cat Physics default classic realistic
 #cat AcceleratedVisual gl_accelerated_visual_on gl_accelerated_visual_off
-#cat Text text_aa_vector text_vector text_bitmap
 #cat FactionTextures faction_tex_on faction_tex_off
 #cat Autodocker autodocker_on autodocker_off
 #cat Censorship uncensored censored
@@ -502,7 +501,6 @@ Modern re-creates its config from this; the engine ignores the comment blocks.
 #set Mouse no_mouse
 #set Shaders extremeshader
 #set AcceleratedVisual gl_accelerated_visual_on
-#set Text text_aa_vector
 #set Autodocker autodocker_off
 #set Censorship uncensored
 #desc extremeshader Extreme Shader
@@ -559,9 +557,6 @@ Modern re-creates its config from this; the engine ignores the comment blocks.
 #desc autodocker_off OFF (default)
 #desc uncensored Uncensored
 #desc censored Censored
-#desc text_vector Vector
-#desc text_aa_vector Antialiased Vector
-#desc text_bitmap Bitmap
 #endheader -->
 <!-- #warp_mouse inv_warp_mouse glide_mouse inv_glide_mouse
 	<axis name="x" mouse="0" axis="0" inverse="false"/>
@@ -642,21 +637,6 @@ Modern re-creates its config from this; the engine ignores the comment blocks.
 	<var name="colordepth" value="32"/>
 	<var name="zfar" value="600000"/>
 	<var name="fullscreen" value="true"/>
-#end -->
-<!-- #text_bitmap
-	<var name="high_quality_font" value="true"/>
-	<var name="high_quality_font_computer" value="true"/>
-	<var name="font_antialias" value="false"/>
-#end -->
-<!-- #text_vector
-	<var name="high_quality_font" value="false"/>
-	<var name="high_quality_font_computer" value="false"/>
-	<var name="font_antialias" value="false"/>
-#end -->
-<!-- #text_aa_vector
-	<var name="high_quality_font" value="false"/>
-	<var name="high_quality_font_computer" value="false"/>
-	<var name="font_antialias" value="true"/>
 #end -->
 <!-- #GeomRetro
 	<var name="draw_star_body" value="false"/>
