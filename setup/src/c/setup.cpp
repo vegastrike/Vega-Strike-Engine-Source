@@ -805,6 +805,9 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     ImGui::Text("VS-05 Configuration Utility");
     ImGui::Text("Version %s", VSSETUP_VERSION);
     ImGui::Text("Active asset: %s", active_asset.empty() ? "(none)" : active_asset.c_str());
+    // Assets: pick / manage the active asset pack. Placed above the mode toggle so the user
+    // chooses which asset they're configuring before picking Classic vs Modern for it.
+    if (ImGui::Button("Assets", ImVec2(0, 0))) { discover_assets(); selected_asset = active_asset; launch_load_bufs(); mode = 1; }
     // Mode toggle: Classic (edits the asset config) vs Modern (owns its own config).
     bool is_modern = vs05ui::mode() == vs05ui::MODE_MODERN;
     if (ImGui::Button(is_modern ? "Mode: Modern" : "Mode: Classic")) {
@@ -872,7 +875,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     float btnw = ImGui::CalcTextSize("Reset Config").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
     float gap = ImGui::GetStyle().ItemSpacing.x;
     bool unsaved = is_modern ? vs05ui::has_unsaved() : has_unsaved();
-    ImGui::SetCursorPosX((avail_w - (btnw * 6 + gap * 5)) * 0.5f);
+    ImGui::SetCursorPosX((avail_w - (btnw * 5 + gap * 4)) * 0.5f);
     if (unsaved) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.45f, 0.22f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
@@ -895,8 +898,6 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
         else reset_config();
     }
     if (rpending) ImGui::PopStyleColor(2);
-    ImGui::SameLine();
-    if (ImGui::Button("Assets", ImVec2(btnw, 0))) { discover_assets(); selected_asset = active_asset; launch_load_bufs(); mode = 1; }
     ImGui::SameLine();
     if (unsaved) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
