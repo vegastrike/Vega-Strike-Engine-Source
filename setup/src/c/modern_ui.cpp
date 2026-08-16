@@ -138,10 +138,6 @@ static std::string modern_config_file() {
     return xdg_config_dir() + "/vs-05/" + g_asset + "/vs-modern.config";
 }
 
-static std::string app_state_file() {
-    return xdg_config_dir() + "/vs-05/app_state";
-}
-
 // ---------------------------------------------------------------------------
 // Display helpers
 // ---------------------------------------------------------------------------
@@ -821,24 +817,19 @@ static void restore_font_state();                                       // defin
 // Seed the model from the asset config
 // ---------------------------------------------------------------------------
 
-// Determine the startup mode: the vs-modern.config switch if present, else the
-// persisted app_state, else Classic.
+// Determine the startup mode from the modern config's first-line switch. If
+// vs-modern.config does not exist (or the switch isn't modern), default to
+// Classic. There is intentionally no separate mode-marker fallback: the app's
+// own config file is the only authority, so a stale marker can never wedge the
+// app into a mode it isn't in.
 static void load_startup_mode() {
+    g_mode = MODE_CLASSIC;
     std::string mf = modern_config_file();
     FILE *f = fopen(mf.c_str(), "r");
     if (f) {
         char line[256];
         if (fgets(line, sizeof(line), f) && strstr(line, "mode=modern") != NULL)
             g_mode = MODE_MODERN;
-        fclose(f);
-        return;   // the switch (if the file exists) is authoritative
-    }
-    // no modern config: fall back to app_state
-    f = fopen(app_state_file().c_str(), "r");
-    if (f) {
-        char line[64];
-        if (fgets(line, sizeof(line), f))
-            g_mode = (strncmp(line, "modern", 6) == 0) ? MODE_MODERN : MODE_CLASSIC;
         fclose(f);
     }
 }
@@ -1066,20 +1057,10 @@ bool has_unsaved() {
 
 Mode mode() { return g_mode; }
 
-// Persist the mode to ~/.config/vs-05/app_state (read at startup).
-static void persist_mode() {
-    FILE *f = fopen(app_state_file().c_str(), "w");
-    if (f) {
-        fprintf(f, "%s\n", g_mode == MODE_MODERN ? "modern" : "classic");
-        fclose(f);
-    }
-}
-
 void set_mode(Mode m) {
     g_mode = m;
     if (m == MODE_MODERN && !g_loaded && !g_asset.empty())
         init(g_asset, g_data_dir);   // (re)seed when entering modern
-    persist_mode();
     g_dirty = true;   // a mode switch is a pending change until Saved
 }
 

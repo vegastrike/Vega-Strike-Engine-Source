@@ -16,7 +16,7 @@
 
 namespace vs05ui {
 
-// Mode flag (persisted in the vs-modern.config switch / app_state).
+// Mode flag (persisted in the vs-modern.config switch).
 enum Mode { MODE_CLASSIC = 0, MODE_MODERN = 1 };
 
 // --- lifecycle ---
