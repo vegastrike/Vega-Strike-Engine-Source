@@ -190,8 +190,10 @@ void NavigationSystem::Setup()
     //
 
 //HERE GOES THE PARSING
-
 //*************************
+// Map region (normalised screen bounds), set directly in C++ — the layout is no
+// longer moddable via navdata.xml. FULL SCREEN; the button column overlays the
+// right edge on top of the map.
     screenskipby4[0]   = 0;
     screenskipby4[1]   = 1;
     screenskipby4[2]   = 0;
@@ -231,54 +233,7 @@ void NavigationSystem::Setup()
     buttonskipby4_7[1] = .95;
     buttonskipby4_7[2] = .25;
     buttonskipby4_7[3] = .30;
-    if ( !ParseFile( "navdata.xml" ) ) {
-        //start DUMMP VARS
-        screenskipby4[0]   = 0;
-        screenskipby4[1]   = 1;
-        screenskipby4[2]   = 0;
-        screenskipby4[3]   = 1;
-
-        buttonskipby4_1[0] = .75;
-        buttonskipby4_1[1] = .95;
-        buttonskipby4_1[2] = .85;
-        buttonskipby4_1[3] = .90;
-
-        buttonskipby4_2[0] = .75;
-        buttonskipby4_2[1] = .95;
-        buttonskipby4_2[2] = .75;
-        buttonskipby4_2[3] = .80;
-
-        buttonskipby4_3[0] = .75;
-        buttonskipby4_3[1] = .95;
-        buttonskipby4_3[2] = .65;
-        buttonskipby4_3[3] = .70;
-
-        buttonskipby4_4[0] = .75;
-        buttonskipby4_4[1] = .95;
-        buttonskipby4_4[2] = .55;
-        buttonskipby4_4[3] = .60;
-
-        buttonskipby4_5[0] = .75;
-        buttonskipby4_5[1] = .95;
-        buttonskipby4_5[2] = .45;
-        buttonskipby4_5[3] = .50;
-
-        buttonskipby4_6[0] = .75;
-        buttonskipby4_6[1] = .95;
-        buttonskipby4_6[2] = .35;
-        buttonskipby4_6[3] = .40;
-
-        buttonskipby4_7[0] = .75;
-        buttonskipby4_7[1] = .95;
-        buttonskipby4_7[2] = .25;
-        buttonskipby4_7[3] = .30;
-
-        unsetbit( whattodraw, 4 );
-        for (int i = 0; i < NAVTOTALMESHCOUNT; i++)
-            mesh[i] = NULL;
-        vs_fprintf( stderr, "ERROR: Map mesh file not found!!! Using default: blank mesh.\n" );
-        //end DUMMY VARS
-    }
+    // No navdata.xml — the map region and button layout are fixed in C++ above.
     ScreenToCoord( screenskipby4[0] );
     ScreenToCoord( screenskipby4[1] );
     ScreenToCoord( screenskipby4[2] );
