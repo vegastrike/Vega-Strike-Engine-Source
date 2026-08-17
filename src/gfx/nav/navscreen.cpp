@@ -1760,17 +1760,19 @@ void NavigationSystem::TranslateCoordinates( QVector &pos,
                                              float &system_item_scale_temp,
                                              bool system_not_galaxy )
 {
+    // Call CalculatePerspectiveAdjustment first: it center-subtracts the
+    // positions, applies the view rotation (3D) or pan (2D), and applies the
+    // zoom to pos/pos_flat. Without this the map was frozen (no pan/zoom) and
+    // the projection mixed absolute world coords with a span-based scale. This
+    // mirrors the upstream vegastrike fix (commit a70b85420).
+    CalculatePerspectiveAdjustment( zscale, zdistance, pos, pos_flat, system_item_scale_temp, system_not_galaxy );
 
     //TRANSLATE INTO SCREEN DISPLAY COORDINATES
     //**********************************
-    // Subtract the computed center so positions are relative to the cluster's
-    // centroid, then normalize by themaxvalue (the span). Without this the
-    // projection mixed absolute world coords with a span-based scale and all
-    // elements collapsed/escaped to a dot.
-    the_x = ( (float) pos.i - center_x );
-    the_y = ( (float) pos.j - center_y );
-    the_x_flat = ( (float) pos_flat.i - center_x );
-    the_y_flat = ( (float) pos_flat.j - center_y );
+    the_x = (float) pos.i;
+    the_y = (float) pos.j;
+    the_x_flat = (float) pos_flat.i;
+    the_y_flat = (float) pos_flat.j;
 
     the_x = ( the_x/(themaxvalue) );
     the_y = ( the_y/(themaxvalue) );
