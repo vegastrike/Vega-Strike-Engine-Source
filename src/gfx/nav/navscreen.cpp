@@ -965,7 +965,7 @@ void NavigationSystem::DrawButton( float &x1, float &x2, float &y1, float &y2, i
     // as a button even though the physical panel mesh is gone. Uses the button
     // rect x1..y2; the label sits slightly above centre.
     {
-        GFXColorf( GFXColor( 0, 0, 0, 0.35f ) );
+        GFXColorf( GFXColor( 0, 0, 0, 0.6f ) );
         GFXDisable( TEXTURE0 );
         GFXDisable( LIGHTING );
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
@@ -1331,6 +1331,23 @@ void NavigationSystem::Adjust3dTransformation( bool three_d, bool system_vs_gala
 {
     //Adjust transformation
     //**********************************
+    // PAN on middle (button 2) or right (button 3) drag, in both 2D and 3D.
+    if ( ( (mouse_previous_state[1] == 1) || (mouse_previous_state[2] == 1) )
+        && TestIfInRange( screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
+                          mouse_y_current ) ) {
+        float ndx = -1.0*(mouse_x_current-mouse_x_previous);
+        float ndy = -1.0*(mouse_y_current-mouse_y_previous);
+        float zoom_modifier = 1.;
+        // 2D pan shifts the pan offset rx/ry; 3D shifts the orbit target so the
+        // view translates without rotating.
+        if (system_vs_galaxy) {
+            rx_s -= (ndx*camera_z)/zoom_modifier;
+            ry_s -= (ndy*camera_z)/zoom_modifier;
+        } else {
+            rx -= (ndx*camera_z)/zoom_modifier;
+            ry -= (ndy*camera_z)/zoom_modifier;
+        }
+    }
     if ( (mouse_previous_state[0] == 1)
         && TestIfInRange( screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
                           mouse_y_current ) ) {
