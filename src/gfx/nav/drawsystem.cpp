@@ -121,7 +121,9 @@ void NavigationSystem::DrawSystem()
 //float themaxvalue = fabs(pos.i);
     themaxvalue = 0.0;
 
-    float center_nav_x = ( (screenskipby4[0]+screenskipby4[1])/2 );
+    // Centre the map's content in the FREE area (left screen edge to the button
+    // column), not the geometric screen centre (which sits under the buttons).
+    float center_nav_x = -0.25f;   // midpoint of [-1, 0.5]; the buttons start at 0.5
     float center_nav_y = ( (screenskipby4[2]+screenskipby4[3])/2 );
     //**********************************
     //Retrieve unit data min/max
