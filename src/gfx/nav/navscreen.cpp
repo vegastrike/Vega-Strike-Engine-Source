@@ -1445,22 +1445,28 @@ void NavigationSystem::Adjust3dTransformation( bool three_d, bool system_vs_gala
     //**********************************
     //Set the prespective zoom level
     //**********************************
+    // Wheel is reported directly in getMouseButtonStatus(): bit 8 = wheel up,
+    // bit 16 = wheel down. Read it directly so zoom works regardless of whether
+    // the input routing also populated mouse_wentdown[3/4].
+    int wheelbits = getMouseButtonStatus();
+    bool wheelup = (wheelbits & 8) != 0;
+    bool wheeldn = (wheelbits & 16) != 0;
     if ( ( (mouse_previous_state[1] == 1)
           && TestIfInRange( screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
-                            mouse_y_current ) ) || (mouse_wentdown[3] || mouse_wentdown[4]) ) {
+                            mouse_y_current ) ) || wheelup || wheeldn || mouse_wentdown[3] || mouse_wentdown[4] ) {
         static float wheel_zoom_level = XMLSupport::parse_float( vs_config->getVariable( "graphics", "wheel_zoom_amount", "0.1" ) );
         if (system_vs_galaxy) {
-            if (mouse_wentdown[3])
+            if (wheelup || mouse_wentdown[3])
                 zoom_s += wheel_zoom_level;
-            else if (mouse_wentdown[4])
+            else if (wheeldn || mouse_wentdown[4])
                 zoom_s -= wheel_zoom_level;
             else
                 zoom_s = zoom_s+( /*1.0 +*/ 8*(mouse_y_current-mouse_y_previous) );
             //if(zoom < 1.0)
             //zoom = 1.0;
 //static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));
-            if (zoom_s < 1.2)
-                zoom_s = 1.2;
+            if (zoom_s < .5)
+                zoom_s = .5;
             if (zoom_s > MAXZOOM)
                 zoom_s = MAXZOOM;
         } else {
@@ -1757,10 +1763,14 @@ void NavigationSystem::TranslateCoordinates( QVector &pos,
 
     //TRANSLATE INTO SCREEN DISPLAY COORDINATES
     //**********************************
-    the_x = (float) pos.i;
-    the_y = (float) pos.j;
-    the_x_flat = (float) pos_flat.i;
-    the_y_flat = (float) pos_flat.j;
+    // Subtract the computed center so positions are relative to the cluster's
+    // centroid, then normalize by themaxvalue (the span). Without this the
+    // projection mixed absolute world coords with a span-based scale and all
+    // elements collapsed/escaped to a dot.
+    the_x = ( (float) pos.i - center_x );
+    the_y = ( (float) pos.j - center_y );
+    the_x_flat = ( (float) pos_flat.i - center_x );
+    the_y_flat = ( (float) pos_flat.j - center_y );
 
     the_x = ( the_x/(themaxvalue) );
     the_y = ( the_y/(themaxvalue) );
