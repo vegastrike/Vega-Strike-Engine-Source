@@ -1754,7 +1754,10 @@ void NavigationSystem::TranslateCoordinates( QVector &pos,
 
     float navscreen_width_delta  = (screenskipby4[1]-screenskipby4[0]);
     float navscreen_height_delta = (screenskipby4[3]-screenskipby4[2]);
-    float navscreen_small_delta  = std::min( navscreen_width_delta, navscreen_height_delta );
+    // Scale to slightly less than the full extent so content and labels fit
+    // within the vertical screen bounds (text near the top was being clipped
+    // on wide monitors).
+    float navscreen_small_delta  = std::min( navscreen_width_delta, navscreen_height_delta ) * 0.82f;
 
     the_x = (the_x*navscreen_small_delta);
     the_x = the_x+center_nav_x;
