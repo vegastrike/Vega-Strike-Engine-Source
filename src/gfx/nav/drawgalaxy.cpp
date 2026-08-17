@@ -881,10 +881,11 @@ void NavigationSystem::DrawGalaxy()
 
         ReplaceAxes( pos );             //poop
 
-        //Modify by old rotation amount (re-enabled: apply the 3D view rotation
-        //so the rendered galaxy moves when the user rotates the view).
+        //Modify by old rotation amount — 3D rotation is now handled by
+        // CalculatePerspectiveAdjustment in TranslateCoordinates; do NOT apply
+        // it here too or the view is double-rotated.
         //*************************
-        if (galaxy_view == VIEW_3D) { pos = dxyz( pos, 0, ry, 0 ); pos = dxyz( pos, rx, 0, 0 ); }
+//if(galaxy_view==VIEW_3D){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
         //*************************
         //*************************
 
