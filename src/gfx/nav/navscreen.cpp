@@ -1192,29 +1192,37 @@ void NavigationSystem::DrawButtonOutline( float &x1, float &x2, float &y1, float
     GFXDisable( LIGHTING );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
 
-    // Rounded rectangle outline: line-loop around the button with slightly
-    // rounded corners (a few segments per corner). Corner radius is a fraction
-    // of the smaller dimension.
-    const float r = 0.5f * std::min( x2-x1, y2-y1 ) * 0.08f;   // ~8% of min dimension
-    const int   seg = 3;                                        // segments per corner
-    float verts[ 4 * 4 * seg * 3 ];                             // 4 corners * (seg+1) pts * 3, ~ ample
+    // Rounded rectangle outline as a connected line strip: each corner is an
+    // arc, then a straight segment runs along the edge to the next corner arc.
+    const float r = 0.5f * std::min( x2-x1, y2-y1 ) * 0.08f;
+    const int   seg = 3;
+    float verts[ 4 * 4 * seg * 3 ];
     int n = 0;
-    // Corner centers and the sweep angles (going around counter-clockwise from
-    // bottom-left). Corner arcs from angle a0 to a0+90deg.
+
+    // Four corners bottom-left, bottom-right, top-right, top-left.
     float cx[4] = { x1+r, x2-r, x2-r, x1+r };
     float cy[4] = { y1+r, y1+r, y2-r, y2-r };
     float a0[4] = { 180.f, 270.f, 0.f, 90.f };
+
+    // Helper lambda-ish via a local function is awkward in C++03; just loop.
     for (int c = 0; c < 4; ++c) {
+        // arc of this corner
         for (int s = 0; s <= seg; ++s) {
             float ang = ( a0[c] + 90.f * ( float(s) / seg ) ) * (float)M_PI / 180.f;
             verts[n++] = cx[c] + r * cosf( ang );
             verts[n++] = cy[c] + r * sinf( ang );
             verts[n++] = 0;
         }
+        // straight segment along the edge to the start of the NEXT corner arc
+        int   nc  = (c+1)%4;
+        float ang = a0[nc] * (float)M_PI / 180.f;
+        verts[n++] = cx[nc] + r * cosf( ang );
+        verts[n++] = cy[nc] + r * sinf( ang );
+        verts[n++] = 0;
     }
-    // close the loop (draw is GFXLINE, add the first point again at the end)
+    // close the loop back to the first point
     verts[n++] = verts[0]; verts[n++] = verts[1]; verts[n++] = verts[2];
-    GFXDraw( GFXLINE, verts, n/3 );
+    GFXDraw( GFXLINESTRIP, verts, n/3 );
 
     GFXEnable( TEXTURE0 );
 }
