@@ -431,9 +431,7 @@ void NavigationSystem::Draw()
 
     //Draw Button Outlines
     //**********************************
-    bool outlinebuttons = 0;
-    if (configmode > 0)
-        outlinebuttons = 1;
+    bool outlinebuttons = 1;   // always draw button outlines (modern flat buttons)
     DrawButton( buttonskipby4_1[0], buttonskipby4_1[1], buttonskipby4_1[2], buttonskipby4_1[3], 1, outlinebuttons );
     DrawButton( buttonskipby4_2[0], buttonskipby4_2[1], buttonskipby4_2[2], buttonskipby4_2[3], 2, outlinebuttons );
     DrawButton( buttonskipby4_3[0], buttonskipby4_3[1], buttonskipby4_3[2], buttonskipby4_3[3], 3, outlinebuttons );
