@@ -135,14 +135,9 @@ void NavigationSystem::DrawSystem()
         string temp = (*bleh)->name;
         pos = (*bleh)->Position();
         ReplaceAxes( pos );
-        //Modify by old rotation amount
+        //Modify by old rotation amount (re-enabled: apply the 3D view rotation)
         //*************************
-//if(system_view==VIEW_3D)
-//{
-//pos = dxyz(pos, 0, ry_s, 0);
-//pos = dxyz(pos, rx_s, 0, 0);
-//}
-        //*************************
+        if (system_view == VIEW_3D) { pos = dxyz( pos, 0, ry_s, 0 ); pos = dxyz( pos, rx_s, 0, 0 ); }
         //*************************
         if ( ( UnitUtil::isSignificant( *bleh ) ) || ( _Universe->AccessCockpit()->GetParent() == (*bleh) ) )
             RecordMinAndMax( pos, min_x, max_x, min_y, max_y, min_z, max_z, themaxvalue );
