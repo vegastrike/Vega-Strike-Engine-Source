@@ -51,6 +51,12 @@ namespace vega_config {
 		// from load_config() for each merged config file.
 		void parseColors(const boost::json::object& root_object);
 
+		// Parses the "actions" section (bindings.json) into this->actions.
+		void parseActions(const boost::json::object& root_object);
+
+		// Parses the "axes" section (bindings.json) into this->axes.
+		void parseAxes(const boost::json::object& root_object);
+
 
     struct {
         std::string details = "High";
@@ -63,6 +69,44 @@ namespace vega_config {
     struct {
 
     } advanced;
+
+    // --- Actions (input bindings) ---
+    //
+    // command -> per-device binding arrays. This replaces the old flat
+    // 'controls' struct and the vegastrike.config XML <bind> / <axis> blocks.
+    // The engine fills the same in-memory input tables (BindKey/BindJoyKey/...)
+    // from these in GameVegaConfig::bindKeys(); the runtime input system
+    // itself is unchanged.
+    //
+    // Source: bindings.json, section "actions". See parseActions().
+    struct ActionBinding {
+        std::string key;        // keyboard: key name, e.g. "a" or "tab"
+        std::string modifier;   // "none" | "alt" | "ctrl" (shift encoded in key)
+        int button = -1;        // mouse/joystick: button index
+        int joystick = -1;      // joystick: device index (mouse uses -1 + is_mouse)
+        bool is_mouse = false;  // true for mouse-button binds (mouse-as-joystick slot)
+        int hatswitch = -1;     // digital hat: hat index
+        std::string direction;  // digital hat: VS_HAT_* name ("up","right",...)
+    };
+    struct ActionBindings {
+        std::vector<ActionBinding> keyboard;
+        std::vector<ActionBinding> mouse;
+        std::vector<ActionBinding> joystick;
+        std::vector<ActionBinding> hat;
+    };
+    std::map<std::string, ActionBindings> actions;
+
+    // --- Axes (input axes) ---
+    //
+    // role (x/y/z/throttle) -> source device + physical axis + inverse flag.
+    // Source: bindings.json, section "axes". See parseAxes().
+    struct AxisRole {
+        std::string source = "joystick";  // "joystick" | "mouse"
+        int joystick = 0;
+        int axis = -1;
+        bool inverse = false;
+    };
+    std::map<std::string, AxisRole> axes;
 
     struct {
 
