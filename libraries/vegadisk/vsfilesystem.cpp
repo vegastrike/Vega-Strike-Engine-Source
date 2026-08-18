@@ -708,9 +708,6 @@ void LoadConfig(string subdir) {
         delete vs_config;
     }
 
-    // This is a replacement for the old config xml files
-    vega_config::GetGameConfig().LoadGameConfig(config_file);
-
     vs_config = createVegaConfig(config_file.c_str());
 
     std::string universe_file = datadir + "/" \
