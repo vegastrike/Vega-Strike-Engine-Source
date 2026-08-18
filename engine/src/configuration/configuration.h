@@ -31,7 +31,10 @@
 
 #include <string>
 #include <memory>
+#include <map>
+#include <vector>
 #include <boost/filesystem/path.hpp>
+#include <boost/json.hpp>
 
 #include "components/energy_consumer.h"
 
@@ -43,6 +46,10 @@ namespace vega_config {
 
 		void load_config(const std::string& json_text);
 		void load_config(const boost::filesystem::path & config_file_path);
+
+		// Parses the "colors" section (theme.json) into this->colors. Called
+		// from load_config() for each merged config file.
+		void parseColors(const boost::json::object& root_object);
 
 
     struct {
@@ -2787,6 +2794,22 @@ namespace vega_config {
         bool can_fire_in_spec = false;
 
     } weapons;
+
+    // Colors: section -> { name : [r, g, b, a] }.
+    //
+    // Ported from the old vegastrike.config <colors> section, which now lives in
+    // theme.json. The engine merges theme.json into the configuration() object at
+    // startup, so this map is read straight from the merged config. VegaConfig's
+    // ctor seeds its getColor() lookup table from this map, so all the existing
+    // vs_config->getColor(section, name) call sites keep working unchanged.
+    //
+    // Schema (theme.json):
+    //   "colors": {
+    //     "default": { "enemy": [1.0, 0.0, 0.0, 1.0], "friend": [0.0, 1.0, 0.0, 1.0], ... },
+    //     "nav":      { "current_system": [1.0, 0.3, 0.3, 1.0], ... },
+    //     ...
+    //   }
+    std::map<std::string, std::map<std::string, std::vector<float>>> colors;
 
     };
 }

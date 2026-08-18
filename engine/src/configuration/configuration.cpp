@@ -8947,9 +8947,57 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
 
         }
 
+        // Colors: read straight from the merged config object. theme.json is
+        // already merged into configuration() by vsfilesystem.cpp, so parsing
+        // the "colors" section here picks up every file that contributed one
+        // (datadir defaults, then any homedir overrides).
+        parseColors(root_object);
 
     } catch (std::exception const& e) {
         VS_LOG(error, (boost::format("%1%: Exception loading config: '%2%'") % __FUNCTION__ % e.what()));
+    }
+}
+
+// Parse the "colors" section of the merged config into this->colors
+// (section -> { name : [r,g,b,a] }). VegaConfig's ctor reads this map to seed
+// its getColor() lookup table, so all the existing vs_config->getColor(...)
+// call sites keep working unchanged.
+//
+// Schema (theme.json):
+//   "colors": {
+//     "default": { "enemy": [1.0, 0.0, 0.0, 1.0], "friend": [0.0, 1.0, 0.0, 1.0], ... },
+//     "nav":      { "current_system": [1.0, 0.3, 0.3, 1.0], ... },
+//     ...
+//   }
+//
+// Because load_config() is called once per config file (and the same file may
+// be loaded again as a homedir override), a section/name that appears more
+// than once is simply overwritten with the latest value -- later loads win,
+// which matches the overall merge precedence.
+void vega_config::Configuration::parseColors(const boost::json::object& root_object) {
+    const boost::json::value* colors_value_ptr = root_object.if_contains("colors");
+    if (colors_value_ptr == nullptr || !colors_value_ptr->is_object()) {
+        return;  // no colors in this file (e.g. config.json, engine.json)
+    }
+
+    for (const auto& section_entry : colors_value_ptr->get_object()) {
+        const std::string& section = section_entry.key();
+        if (!section_entry.value().is_object()) {
+            continue;
+        }
+        for (const auto& color_entry : section_entry.value().get_object()) {
+            const std::string& name = color_entry.key();
+            if (!color_entry.value().is_array()) {
+                continue;
+            }
+            std::vector<float> rgba;
+            for (const auto& component : color_entry.value().get_array()) {
+                rgba.push_back(boost::json::value_to<float>(component));
+            }
+            if (rgba.size() >= 4) {
+                colors[section][name] = rgba;
+            }
+        }
     }
 }
 

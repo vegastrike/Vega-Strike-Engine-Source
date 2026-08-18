@@ -50,7 +50,31 @@ VegaConfig::VegaConfig(const char *configfile) {
     }
     variables = nullptr;
     colors = nullptr;
+    // checkConfig still parses variables + bindings from the XML (those are
+    // swapped over to the JSON configs in later steps), but colors now come
+    // from the merged JSON config (theme.json) via configuration().colors.
     checkConfig(top);
+
+    // Seed the getColor() lookup table from the merged config, so every
+    // existing vs_config->getColor(section, name) call site keeps working
+    // unchanged. Colors live in theme.json (section -> {name: [r,g,b,a]}).
+    for (const auto& section_entry : configuration().colors) {
+        const std::string& section = section_entry.first;
+        for (const auto& color_entry : section_entry.second) {
+            const std::string& name = color_entry.first;
+            const auto& rgba = color_entry.second;
+            if (rgba.size() < 4) {
+                continue;
+            }
+            vColor vc;
+            vc.name = section + "/" + name;
+            vc.r = rgba[0];
+            vc.g = rgba[1];
+            vc.b = rgba[2];
+            vc.a = rgba[3];
+            map_colors[vc.name] = vc;
+        }
+    }
 }
 
 VegaConfig::~VegaConfig() {
@@ -80,8 +104,6 @@ bool VegaConfig::checkConfig(configNode *node) {
         configNode *cnode = (configNode *) (*siter);
         if (cnode->Name() == "variables") {
             doVariables(cnode);
-        } else if (cnode->Name() == "colors") {
-            doColors(cnode);
         } else if (cnode->Name() == "bindings") {
             bindings = cnode;              //delay the bindings until keyboard/joystick is initialized
         } else {
