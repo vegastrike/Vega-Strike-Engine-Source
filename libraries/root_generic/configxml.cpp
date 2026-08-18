@@ -42,18 +42,14 @@
 /* *********************************************************** */
 
 VegaConfig::VegaConfig(const char *configfile) {
-    configNodeFactory domf;
-    configNode *top = (configNode *) domf.LoadXML(configfile);
-    if (top == nullptr) {
-        VS_LOG_AND_FLUSH(fatal, "Panic exit - no configuration");
-        VSExit(0);
-    }
+    // The engine no longer reads the old vegastrike.config XML at all. All
+    // settings, colors, and input bindings now come from the merged JSON config
+    // (config.json / bindings.json / theme.json / engine.json) via
+    // configuration(). The configfile argument is ignored (kept to preserve the
+    // createVegaConfig() signature); color lookups are seeded below.
+    (void)configfile;
     variables = nullptr;
     colors = nullptr;
-    // checkConfig still parses variables + bindings from the XML (those are
-    // swapped over to the JSON configs in later steps), but colors now come
-    // from the merged JSON config (theme.json) via configuration().colors.
-    checkConfig(top);
 
     // Seed the getColor() lookup table from the merged config, so every
     // existing vs_config->getColor(section, name) call site keeps working
