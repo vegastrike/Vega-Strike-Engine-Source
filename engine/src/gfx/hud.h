@@ -28,13 +28,23 @@
 #define VEGA_STRIKE_ENGINE_GFX_HUD_H
 
 #include <string>
-#include "gfx_generic/vec.h"
 #include "src/gfxlib_struct.h"
 
 #include <cstdint>
 using ImU32 = std::uint32_t;
 
 class Texture;
+
+// Text in a specific color
+struct TextSegment {
+    std::string text;
+    ImU32 color;
+};
+
+struct TextLine {
+    float width;
+    std::vector<TextSegment> segments;
+};
 
 class TextPlane {
     std::string myText;
@@ -48,6 +58,8 @@ class TextPlane {
  *       float left, right, top, bottom;
  *  } myGlyphPos[256];
  */
+    std::vector<TextLine> ParseText(const std::string& text, ImU32 default_color);
+
 public:
     ImU32 color, background_color;
     TextPlane(const struct GFXColor &col = GFXColor(1, 1, 1, 1), const struct GFXColor &bgcol = GFXColor(0, 0, 0, 0));

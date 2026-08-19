@@ -31,12 +31,9 @@
 #include "groupcontrol.h"
 #include "windowcontroller.h"
 
-#include "eventmanager.h"
-
 //For drawing the cursor.
-#include "gfx/aux_texture.h"
-#include "gfx/sprite.h"
 #include "imgui/imgui.h"
+#include "gui/imgui_support.h"
 
 //The outside boundaries of the window.
 void Window::setRect(const Rect &r) {
@@ -115,8 +112,8 @@ void Window::draw(void) {
         
         drawBackground();
         m_controls->draw();
+        ImGui::End();
     }
-    ImGui::End();
     
     ImGui::PopStyleColor();
 
@@ -206,17 +203,7 @@ extern void ConditionalCursorDraw(bool);
 //Draw all visible windows.
 void WindowManager::draw() {
     GFXHudMode(true);            //Load identity matrices.
-    GFXColorf(GUI_OPAQUE_WHITE());
 
-    GFXDisable(DEPTHTEST);
-    GFXEnable(DEPTHWRITE);
-    GFXDisable(LIGHTING);
-    GFXDisable(CULLFACE);
-    GFXClear(GFXTRUE);
-    GFXDisable(DEPTHWRITE);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
-    GFXDisable(TEXTURE1);
-    GFXEnable(TEXTURE0);
     //Just loop through all the windows, and remember if anything gets drawn.
     //Since the first window in the list is drawn first, z-order is
     //maintained.  First entry is the bottom window, last is the top window.
@@ -230,32 +217,9 @@ void WindowManager::draw() {
             m_windows[i]->draw();
         }
     }
-    //Emulate EndGUIFrame.
-    static VSSprite MouseVSSprite("mouse.spr", BILINEAR, GFXTRUE);
-    static Texture dummy("white.bmp", 0, NEAREST, TEXTURE2D, TEXTURE_2D, GFXTRUE);
-    GFXDisable(CULLFACE);
-    ConditionalCursorDraw(true);
-    //Figure position of cursor sprite.
-    float sizex = 0.0, sizey = 0.0;
-    const Point loc = globalEventManager().mouseLoc();
-    MouseVSSprite.GetSize(sizex, sizey);
-    float tempx = 0.0, tempy = 0.0;
-    MouseVSSprite.GetPosition(tempx, tempy);
-    MouseVSSprite.SetPosition(tempx + loc.x + sizex / 2, tempy + loc.y + sizey / 2);
-
-    dummy.MakeActive();
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
-    GFXColorf(GUI_OPAQUE_WHITE());
-
-    //Draw the cursor sprite.
-    GFXEnable(TEXTURE0);
-    GFXDisable(DEPTHTEST);
-    GFXDisable(TEXTURE1);
-    //MouseVSSprite.Draw();
 
     GFXHudMode(false);
-    GFXEnable(CULLFACE);
-    MouseVSSprite.SetPosition(tempx, tempy);
+    EndGUIFrame(MOUSE_POINTER_NORMAL);
 }
 
 //A new window has been created and is ready to be drawn.
