@@ -32,21 +32,21 @@
 extern VegaConfig *vs_config;
 
 string vs_options::getCallsign(int squadnum) {
-    return vs_config->getVariable(std::string("player")
-            + ((squadnum > 0) ? XMLSupport::tostring(squadnum + 1) : std::string(
-                    "")), "callsign", "pilot");
+    // Player callsign now comes from the merged JSON config (config.json -> player.callsign).
+    // Only the single-player (squadnum 0) callsign is stored in config; higher squadnums
+    // fall back to the default.
+    if (squadnum > 0) {
+        return "pilot";
+    }
+    return configuration().player.callsign;
 }
 
 string vs_options::getPlayer(int playernum) {
-    return (vs_config->getVariable("player" + ((playernum > 0) ? XMLSupport::tostring(playernum + 1) : string("")),
-            "callsign",
-            ""));
+    return (playernum > 0) ? std::string("") : configuration().player.callsign;
 }
 
 string vs_options::getPassword(int playernum) {
-    return (vs_config->getVariable("player" + ((playernum > 0) ? XMLSupport::tostring(playernum + 1) : string("")),
-            "password",
-            ""));
+    return (playernum > 0) ? std::string("") : configuration().player.password;
 }
 
 std::shared_ptr<vs_options> game_options() {

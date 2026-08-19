@@ -123,11 +123,15 @@ Music::Music(Unit *parent) : random(false), p(parent), song(-1), thread_initiali
     }
     lastlist = PEACELIST;
     int i;
-    const char *listvars[MAXLIST] =
-            {"battleplaylist", "peaceplaylist", "panicplaylist", "victoryplaylist", "lossplaylist"};
-    const char *deflistvars[MAXLIST] = {"battle.m3u", "peace.m3u", "panic.m3u", "victory.m3u", "loss.m3u"};
+    // Playlist names now come from the merged JSON config (engine.json ->
+    // audio.battle_playlist etc.), in the same order as the old XML.
+    const std::string *config_playlists[MAXLIST] = {
+        &configuration().audio.battle_playlist, &configuration().audio.peace_playlist,
+        &configuration().audio.panic_playlist, &configuration().audio.victory_playlist,
+        &configuration().audio.loss_playlist,
+    };
     for (i = 0; i < MAXLIST; i++) {
-        LoadMusic(vs_config->getVariable("audio", listvars[i], deflistvars[i]).c_str());
+        LoadMusic((*config_playlists[i]).c_str());
     }
     soft_vol_up_latency = configuration().audio.music_volume_up_latency_flt;
     soft_vol_down_latency = configuration().audio.music_volume_down_latency_flt;
