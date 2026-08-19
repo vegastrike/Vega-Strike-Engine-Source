@@ -817,10 +817,10 @@ void GameCockpit::TriggerEvents(Unit *un) {
 }
 
 
-void GameCockpit::Init(const char *file) {
+void GameCockpit::Init(const char *file, bool defaultCockpit) {
     smooth_fov = configuration().graphics.fov_flt;
     editingTextMessage = false;
-    Cockpit::Init(file);
+    Cockpit::Init(file, defaultCockpit);
     if (Panel.size() > 0) {
         float x, y;
         Panel.front()->GetPosition(x, y);
