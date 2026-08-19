@@ -342,6 +342,11 @@ static bool setup_sdl_video_mode( const char *window_title )
             SDL_free( modes );
         }
         SDL_SetWindowFullscreenMode( g_window, mode );
+        /* Wayland (and some X11 compositors) apply fullscreen asynchronously.
+         * SDL_SyncWindow blocks until the pending fullscreen transition is
+         * finalized, so the first frame is already fullscreen instead of the
+         * window lingering windowed through the intro/loading screens. */
+        SDL_SyncWindow( g_window );
     }
 
     return true;
