@@ -116,6 +116,8 @@ float getFontHeight()
     return point/g_game.y_resolution;
 }
 
+const float TextPlane::LINE_SPACING_FACTOR = 1.3;
+
 TextPlane::TextPlane( const GFXColor &c, const GFXColor &bgcol )
 {
     col = c;
@@ -252,9 +254,8 @@ int TextPlane::Draw( const string &newText, int offset, bool startlower, bool fo
     myFontMetrics.j = rowheight;
     // Line advance gets leading so lines don't touch: the glyph is myFontMetrics.j tall
     // (scaley = myFontMetrics.j/REFERENCE_LINE_SPACING), but each line is placed line_advance
-    // apart. Tunable factor.
-    const float LINE_SPACING_FACTOR = 1.3;
-    const float line_advance        = rowheight*LINE_SPACING_FACTOR;
+    // apart. Tunable factor (shared with VDU::Draw via TextPlane::LINE_SPACING_FACTOR).
+    const float line_advance        = rowheight*TextPlane::LINE_SPACING_FACTOR;
     if (startlower)
         row -= line_advance;
     GFXPushBlendMode();

@@ -1853,7 +1853,11 @@ void VDU::Draw( GameCockpit *parentcp, Unit *parent, const GFXColor &color )
     //also faster, as computing the abs of a float amounts to setting the sign bit;
     //though I'm less than 100% entirely sure of the correctness of the change... --chuck_starchaser
     cols = int(fabs(ceil(w/csx)));
-    rows = int(fabs(ceil(h/csy)));
+    // rows must reflect the actual line advance (TextPlane steps each line by
+    // rowheight*LINE_SPACING_FACTOR), not the raw glyph height. Otherwise bottom-
+    // padded text (range, messages) is positioned ~1.3x further down than rows
+    // assumes and scrolls off the bottom of the VDU.
+    rows = int(fabs(ceil(h/csy/TextPlane::LINE_SPACING_FACTOR)));
 
     Unit *targ;
     h    = fabs( h/2 );

@@ -29,6 +29,12 @@ class Texture;
 
 class TextPlane
 {
+    // Line spacing multiplier shared by the renderer and VDU row-capacity math.
+    // TextPlane::Draw advances each line by rowheight*LINE_SPACING_FACTOR, so any
+    // caller that computes how many lines fit (VDU::Draw's rows, etc.) must divide
+    // by the same factor or bottom-anchored text scrolls off the visible area.
+    static const float LINE_SPACING_FACTOR;
+
     std::string myText;
 
 //Texture *myFont;
