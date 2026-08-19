@@ -33,8 +33,10 @@ class TextPlane
     // TextPlane::Draw advances each line by rowheight*LINE_SPACING_FACTOR, so any
     // caller that computes how many lines fit (VDU::Draw's rows, etc.) must divide
     // by the same factor or bottom-anchored text scrolls off the visible area.
+public:
     static const float LINE_SPACING_FACTOR;
 
+private:
     std::string myText;
 
 //Texture *myFont;
