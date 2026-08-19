@@ -1994,11 +1994,20 @@ string GameCockpit::getsoundending(int which) {
     static bool gotten = false;
     static std::string strs[9];
     if (gotten == false) {
-        char tmpstr[2] = {'\0'};
+        // Sound extension names now come from the merged JSON config
+        // (engine.json -> base.cockpit_audio.sounds_extension_N).
         for (int i = 0; i < 9; ++i) {
-            tmpstr[0] = i + '1';
-            string vsconfigvar = string("sounds_extension_") + tmpstr;
-            strs[i] = vs_config->getVariable("cockpitaudio", vsconfigvar, "\n");
+            switch (i) {
+            case 0: strs[i] = configuration().cockpit_audio.sounds_extension_1; break;
+            case 1: strs[i] = configuration().cockpit_audio.sounds_extension_2; break;
+            case 2: strs[i] = configuration().cockpit_audio.sounds_extension_3; break;
+            case 3: strs[i] = configuration().cockpit_audio.sounds_extension_4; break;
+            case 4: strs[i] = configuration().cockpit_audio.sounds_extension_5; break;
+            case 5: strs[i] = configuration().cockpit_audio.sounds_extension_6; break;
+            case 6: strs[i] = configuration().cockpit_audio.sounds_extension_7; break;
+            case 7: strs[i] = configuration().cockpit_audio.sounds_extension_8; break;
+            default: strs[i] = configuration().cockpit_audio.sounds_extension_9; break;
+            }
             if (strs[i] == "\n") {
                 strs[i] = "";
                 break;
