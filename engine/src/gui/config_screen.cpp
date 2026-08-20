@@ -1103,10 +1103,14 @@ static void draw_bindings_dialog(void) {
 // Configuration.preset).
 // ---------------------------------------------------------------------------
 
+struct PresetOptionInfo {
+    std::string name;
+    std::vector<std::pair<std::string,std::string>> vars;   // (var-name, value)
+};
 struct PresetGroupInfo {
     std::string key;              // config.json preset key (lowercase, e.g. "computer")
     std::string label;            // display name (e.g. "Computer")
-    std::vector<std::string> options;  // option names (e.g. "4000MHz")
+    std::vector<PresetOptionInfo> options;  // options + the vars each sets
 };
 
 static std::vector<PresetGroupInfo> g_preset_groups;
@@ -1150,12 +1154,88 @@ static void load_presets() {
                     || key == "accelerated_visual" || key == "color" || key == "joystick") continue;
                 PresetGroupInfo g;
                 g.key = key; g.label = kv.key();
-                for (const auto &okv : kv.value().as_object()) g.options.push_back(okv.key());
+                for (const auto &okv : kv.value().as_object()) {
+                    PresetOptionInfo o;
+                    o.name = okv.key();
+                    if (okv.value().is_object()) {
+                        for (const auto &vv : okv.value().as_object()) {
+                            if (vv.value().is_string())
+                                o.vars.push_back({vv.key(), boost::json::value_to<std::string>(vv.value())});
+                        }
+                    }
+                    g.options.push_back(o);
+                }
                 if (!g.options.empty()) g_preset_groups.push_back(g);
             }
         }
     } catch (...) {}
     g_presets_loaded = true;
+}
+
+// Apply one preset variable (name,value) to the engine's Configuration, using
+// the field names the engine's load_config reads. Returns true if it set something.
+static bool apply_preset_var(const std::string &name, const std::string &value) {
+    auto &c = cfg();
+    bool b = (value == "true" || value == "1");
+    int  i = atoi(value.c_str());
+    float f = (float)atof(value.c_str());
+    double d = (double)atof(value.c_str());
+    bool set = true;
+    // graphics
+    if (name=="fog") c.graphics.fog=b; else if (name=="background") c.graphics.background=b;
+    else if (name=="blend_panels") c.graphics.blend_panels=b; else if (name=="cockpit") c.graphics.cockpit=b;
+    else if (name=="color_depth") c.graphics.color_depth=i; else if (name=="force_lighting") c.graphics.force_lighting=b;
+    else if (name=="full_screen") c.graphics.full_screen=b; else if (name=="reflection") c.graphics.reflection=b;
+    else if (name=="smooth_lines") c.graphics.smooth_lines=b; else if (name=="star_blend") c.graphics.star_blend=b;
+    else if (name=="draw_star_body") c.graphics.draw_star_body=b; else if (name=="draw_star_glow") c.graphics.draw_star_glow=b;
+    else if (name=="high_quality_font") c.graphics.high_quality_font=b; else if (name=="high_quality_font_computer") c.graphics.high_quality_font_computer=b;
+    else if (name=="high_quality_sprites") c.graphics.high_quality_sprites=b; else if (name=="per_pixel_lighting") c.graphics.per_pixel_lighting=b;
+    else if (name=="specmap_with_reflection") c.graphics.specmap_with_reflection=b;
+    else if (name=="gl_accelerated_visual") c.graphics.gl_accelerated_visual=b;
+    else if (name=="aspect") { c.graphics.aspect_flt=f; c.graphics.aspect_dbl=d; }
+    else if (name=="font_point") { c.graphics.font_point_flt=f; c.graphics.font_point_dbl=d; }
+    else if (name=="model_detail") { c.graphics.model_detail_flt=f; c.graphics.model_detail_dbl=d; }
+    else if (name=="mipmap_detail") c.graphics.mipmap_detail=i;
+    else if (name=="planet_detail_level") c.graphics.planet_detail_level=i;
+    else if (name=="resolution_x") c.graphics.resolution_x=i; else if (name=="resolution_y") c.graphics.resolution_y=i;
+    else if (name=="max_cubemap_size") c.graphics.max_cubemap_size=i;
+    else if (name=="max_movie_dimension") c.graphics.max_movie_dimension=i;
+    else if (name=="max_texture_dimension") c.graphics.max_texture_dimension=i;
+    else if (name=="technique_set") c.graphics.technique_set=value;
+    else if (name=="mac_shader_name") c.graphics.mac_shader_name=value;
+    else if (name=="default_full_technique") c.graphics.default_full_technique=value;
+    else if (name=="default_simple_technique") c.graphics.default_simple_technique=value;
+    else if (name=="faction_dependent_textures") c.graphics.faction_dependent_textures=b;
+    // audio
+    else if (name=="ai_sound") c.audio.ai_sound=b; else if (name=="every_other_mount") c.audio.every_other_mount=b;
+    else if (name=="music") c.audio.music=b; else if (name=="sound") c.audio.sound=b;
+    else if (name=="positional") c.audio.positional=b;
+    else if (name=="music_volume") { c.audio.music_volume_flt=f; c.audio.music_volume_dbl=d; }
+    else if (name=="volume") { c.audio.volume_flt=f; c.audio.volume_dbl=d; }
+    else if (name=="max_single_sounds") c.audio.max_single_sounds=i;
+    else if (name=="max_total_sounds") c.audio.max_total_sounds=i;
+    else if (name=="sounds_extension_1") c.cockpit_audio.sounds_extension_1=value;
+    else if (name=="sounds_extension_2") c.cockpit_audio.sounds_extension_2=value;
+    // physics
+    else if (name=="game_speed") { c.physics.game_speed_flt=f; c.physics.game_speed_dbl=d; }
+    else if (name=="game_accel") { c.physics.game_accel_flt=f; c.physics.game_accel_dbl=d; }
+    else if (name=="inactive_system_time") { c.physics.inactive_system_time_flt=f; c.physics.inactive_system_time_dbl=d; }
+    else if (name=="num_running_systems") c.physics.num_running_systems=i;
+    // general
+    else if (name=="num_old_systems") c.general.num_old_systems=i;
+    else if (name=="simulation_atom") { c.general.simulation_atom_flt=f; c.general.simulation_atom_dbl=d; }
+    // joystick
+    else if (name=="mouse_cursor") c.joystick.mouse_cursor=b;
+    else if (name=="mouse_sensitivity") { c.joystick.mouse_sensitivity_flt=f; c.joystick.mouse_sensitivity_dbl=d; }
+    else if (name=="reverse_mouse_spr") c.joystick.reverse_mouse_spr=b;
+    else if (name=="warp_mouse") c.joystick.warp_mouse=b;
+    else if (name=="force_use_of_joystick") c.joystick.force_use_of_joystick=b;
+    // splash / test
+    else if (name=="loading_sprite") c.splash.loading_sprite=value;
+    else if (name=="autodocker") c.test.autodocker=b;
+    else { set = false; }
+    if (set) mark_dirty("preset_var." + name);
+    return set;
 }
 
 // Draw the preset grid (vs-05 layout: group + combo, centered, 3 columns).
@@ -1170,7 +1250,7 @@ static void draw_presets_frame() {
     for (size_t i = 0; i < g_preset_groups.size(); i++) {
         auto &g = g_preset_groups[i];
         float cw = 0;
-        for (auto &o : g.options) cw = fmaxf(cw, ImGui::CalcTextSize(o.c_str()).x);
+        for (auto &o : g.options) cw = fmaxf(cw, ImGui::CalcTextSize(o.name.c_str()).x);
         cw += ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x;
         cw = fmaxf(cw, ImGui::CalcTextSize(g.label.c_str()).x);
         colw[i % cols] = fmaxf(colw[i % cols], cw);
@@ -1186,17 +1266,19 @@ static void draw_presets_frame() {
             std::string cur = configuration().preset.count(g.key) ? configuration().preset.at(g.key) : "";
             int sel = 0;
             for (size_t j = 0; j < g.options.size(); ++j)
-                if (g.options[j] == cur) { sel = (int)j; break; }
+                if (g.options[j].name == cur) { sel = (int)j; break; }
             float cw = 0;
-            for (auto &o : g.options) cw = fmaxf(cw, ImGui::CalcTextSize(o.c_str()).x);
+            for (auto &o : g.options) cw = fmaxf(cw, ImGui::CalcTextSize(o.name.c_str()).x);
             ImGui::SetNextItemWidth(cw + ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x);
             std::vector<const char *> items;
-            for (auto &o : g.options) items.push_back(o.c_str());
+            for (auto &o : g.options) items.push_back(o.name.c_str());
             std::string lbl = "##mpre_" + g.key;
             if (ImGui::Combo(lbl.c_str(), &sel, items.data(), (int)items.size())) {
                 if (sel >= 0) {
-                    cfg().preset[g.key] = g.options[sel];
+                    cfg().preset[g.key] = g.options[sel].name;
                     mark_dirty("preset." + g.key);
+                    // Apply the preset's vars to Configuration.
+                    for (auto &kv : g.options[sel].vars) apply_preset_var(kv.first, kv.second);
                 }
             }
         }
