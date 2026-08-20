@@ -13,6 +13,7 @@
 #include "configuration/configuration.h"
 #include "gldrv/winsys.h"
 #include "universe.h"
+#include <boost/json.hpp>
 #include <imgui.h>
 #include <SDL3/SDL.h>
 #include <algorithm>
@@ -1095,6 +1096,75 @@ static void draw_bindings_dialog(void) {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Presets (dropdowns from engine.json presets; record selectors in
+// Configuration.preset).
+// ---------------------------------------------------------------------------
+
+struct PresetGroupInfo {
+    std::string key;              // config.json preset key (lowercase, e.g. "computer")
+    std::string label;            // display name (e.g. "Computer")
+    std::vector<std::string> options;  // option names (e.g. "4000MHz")
+};
+
+// Static preset category/option definitions, matching engine.json -> presets.
+// (Categories/options verified against Assets engine.json 2026-08-20. The app
+// records selectors in Configuration.preset; it does not expand the vars yet.)
+static const PresetGroupInfo kPresetDefs[] = {
+    { "computer", "Computer", { "800MHz", "1600MHz", "2000MHz", "3000MHz", "4000MHz", "4000MHzPlus" } },
+    { "physics", "Physics", { "Default (1.0)", "Realistic" } },
+    { "geometry", "Geometry", { "GeomRetro", "GeomLow", "GeomMedium", "GeomHigh", "GeomVeryHigh", "GeomExtreme" } },
+    { "textures", "Textures", { "TexRetro", "Tex256", "Tex512", "Tex1024", "Tex2048", "TexMax" } },
+    { "shaders", "Shaders", { "noshader", "lowshader", "mediumshader", "highshader", "extremeshader", "onboardshader" } },
+    { "sound", "Sound", { "audio_off", "audio_3d_windows", "audio_3d_win_male", "audio_3d_linux", "audio_3d_linux_male" } },
+    { "music", "MusicAndVolume", { "music_off", "windows_ext_music_low", "windows_ext_music_on", "windows_ext_music_high" } },
+    { "faction_textures", "FactionTextures", { "faction_tex_off", "faction_tex_on" } },
+    { "autodocker", "Autodocker", { "autodocker_off", "autodocker_on" } },
+    { "censorship", "Censorship", { "uncensored", "censored" } },
+};
+static const size_t kPresetDefCount = sizeof(kPresetDefs) / sizeof(kPresetDefs[0]);
+
+// Draw the preset grid (vs-05 layout: group + combo, centered, 3 columns).
+static void draw_presets_frame() {
+    int cols = 3;
+    std::vector<float> colw(cols, 0.0f);
+    for (size_t i = 0; i < kPresetDefCount; i++) {
+        auto &g = kPresetDefs[i];
+        float cw = 0;
+        for (auto &o : g.options) cw = fmaxf(cw, ImGui::CalcTextSize(o.c_str()).x);
+        cw += ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x;
+        cw = fmaxf(cw, ImGui::CalcTextSize(g.label.c_str()).x);
+        colw[i % cols] = fmaxf(colw[i % cols], cw);
+    }
+    float total_w = 0;
+    for (auto c : colw) total_w += c;
+    ImGui::SetCursorPosX(fmaxf(0.0f, (ImGui::GetContentRegionAvail().x - total_w) * 0.5f));
+    if (ImGui::BeginTable("modern_presets", cols, ImGuiTableFlags_SizingFixedFit)) {
+        for (size_t i = 0; i < kPresetDefCount; i++) {
+            auto &g = kPresetDefs[i];
+            ImGui::TableNextColumn();
+            ImGui::Text("%s", g.label.c_str());
+            std::string cur = configuration().preset.count(g.key) ? configuration().preset.at(g.key) : "";
+            int sel = 0;
+            for (size_t j = 0; j < g.options.size(); ++j)
+                if (g.options[j] == cur) { sel = (int)j; break; }
+            float cw = 0;
+            for (auto &o : g.options) cw = fmaxf(cw, ImGui::CalcTextSize(o.c_str()).x);
+            ImGui::SetNextItemWidth(cw + ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x);
+            std::vector<const char *> items;
+            for (auto &o : g.options) items.push_back(o.c_str());
+            std::string lbl = "##mpre_" + g.key;
+            if (ImGui::Combo(lbl.c_str(), &sel, items.data(), (int)items.size())) {
+                if (sel >= 0) {
+                    cfg().preset[g.key] = g.options[sel];
+                    mark_dirty("preset." + g.key);
+                }
+            }
+        }
+        ImGui::EndTable();
+    }
+}
+
 } // namespace
 
 void DrawConfigScreen() {
@@ -1184,6 +1254,10 @@ void DrawConfigScreen() {
     // Bindings dialog (modal on top).
     if (bind_dialog_open) ImGui::OpenPopup("Bindings");
     draw_bindings_dialog();
+
+    // Presets frame.
+    ImGui::Separator();
+    draw_presets_frame();
 
     ImGui::End();
 }

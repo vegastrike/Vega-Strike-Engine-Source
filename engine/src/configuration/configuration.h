@@ -66,6 +66,11 @@ namespace vega_config {
 
     } settings_app;
 
+    // Preset selectors from config.json's "preset" section (e.g.
+    // computer="4000MHz", shaders="highshader"). Metadata for the settings app;
+    // the engine does not expand these itself. Key is the lowercase category.
+    std::map<std::string, std::string> preset;
+
     struct {
 
     } advanced;

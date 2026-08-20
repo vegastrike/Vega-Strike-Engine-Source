@@ -104,6 +104,16 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
 
         }
 
+        // Parse the "preset" section (config.json) into this->preset selectors.
+        const boost::json::value * preset_value_ptr = root_object.if_contains("preset");
+        if (preset_value_ptr != nullptr && preset_value_ptr->is_object()) {
+            for (const auto & kv : preset_value_ptr->get_object()) {
+                if (kv.value().is_string()) {
+                    preset[kv.key()] = boost::json::value_to<std::string>(kv.value());
+                }
+            }
+        }
+
 
         const boost::json::value * advanced_value_ptr = root_object.if_contains("advanced");
         if (advanced_value_ptr != nullptr) {
