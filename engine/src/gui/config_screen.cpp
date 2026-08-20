@@ -417,6 +417,7 @@ static const char *mouse_mode_names[] = { "glide_mouse", "inv_glide_mouse", "war
 struct MouseStaging {
     bool cam_pancam = false, cam_pantgt = false, cam_chasecam = true;
     char warp_zone[8] = "200", exponent[8] = "1.5", deadband[8] = "0.05";
+    int  mode_idx = 0;   // index into mouse_mode_names
 };
 static MouseStaging mouse_stg;
 
@@ -467,6 +468,11 @@ static void load_mouse_staging() {
     snprintf(mouse_stg.warp_zone, sizeof(mouse_stg.warp_zone), "%d", j.warp_mouse_zone);
     snprintf(mouse_stg.exponent, sizeof(mouse_stg.exponent), "%.1f", j.mouse_exponent_flt);
     snprintf(mouse_stg.deadband, sizeof(mouse_stg.deadband), "%.2f", j.mouse_deadband_flt);
+    // Load the persisted mouse mode (input.mouse_preset) into the picker.
+    mouse_stg.mode_idx = 0;
+    const std::string &mp = configuration().input.mouse_preset;
+    for (int i = 0; i < 5; ++i)
+        if (mouse_mode_names[i] == mp) { mouse_stg.mode_idx = i; break; }
 }
 
 // Load joystick staging from Configuration.joystick + input.axes.
@@ -491,6 +497,10 @@ static void load_joystick_staging() {
 // Apply flight-control exclusivity to Configuration.joystick.
 static void apply_flight_to_config() {
     auto &j = cfg().joystick;
+    // The triple-state device switch (input.device) drives flight-control mode.
+    cfg().input.device = (flight_control == FC_MOUSE) ? "mouse"
+                       : (flight_control == FC_JOYSTICK) ? "joystick" : "keyboard";
+    mark_dirty("input.device");
     if (flight_control == FC_MOUSE) {
         j.force_use_of_joystick = false;
         j.warp_mouse = true;
@@ -500,8 +510,8 @@ static void apply_flight_to_config() {
         j.force_use_of_joystick = false;
         j.warp_mouse = false;
     }
-    mark_dirty("joystick.force_use_of_joystick");
-    mark_dirty("joystick.warp_mouse");
+    mark_dirty("input.joystick.force_use_of_joystick");
+    mark_dirty("input.joystick.warp_mouse");
     // Route the x/y flight axes to the mouse (MOUSE_JOYSTICK) only when Mouse
     // flight control is selected. The engine's config_xml axis router keys off
     // axes.x/y.source; without this, selecting Mouse silently does nothing.
@@ -532,12 +542,35 @@ static void apply_mouse_to_config() {
     j.warp_mouse_zone = atoi(mouse_stg.warp_zone);
     j.mouse_exponent_flt = (float)atof(mouse_stg.exponent);
     j.mouse_deadband_flt = (float)atof(mouse_stg.deadband);
-    mark_dirty("joystick.mouse_cursor_pancam");
-    mark_dirty("joystick.mouse_cursor_pantgt");
-    mark_dirty("joystick.mouse_cursor_chasecam");
-    mark_dirty("joystick.warp_mouse_zone");
-    mark_dirty("joystick.mouse_exponent");
-    mark_dirty("joystick.mouse_deadband");
+    mark_dirty("input.joystick.mouse_cursor_pancam");
+    mark_dirty("input.joystick.mouse_cursor_pantgt");
+    mark_dirty("input.joystick.mouse_cursor_chasecam");
+    mark_dirty("input.joystick.warp_mouse_zone");
+    mark_dirty("input.joystick.mouse_exponent");
+    mark_dirty("input.joystick.mouse_deadband");
+    // Apply the full mouse-mode preset (glide/inv_glide/warp/inv_warp/no_mouse):
+    // the vars (mouse_cursor/warp_mouse/reverse_mouse_spr/sensitivity) + the
+    // x/y axis routing with the per-mode y-axis inversion. Only meaningful when
+    // Mouse is the active flight device.
+    if (flight_control != FC_MOUSE) return;
+    const char *mode = mouse_mode_names[mouse_stg.mode_idx];
+    bool warp = (std::string(mode) == "warp_mouse" || std::string(mode) == "inv_warp_mouse");
+    bool glide = (std::string(mode) == "glide_mouse" || std::string(mode) == "inv_glide_mouse");
+    // Preset vars (defaults: mouse off, not inverted).
+    j.mouse_cursor = glide;                 // cursor shown in glide, hidden in warp/no
+    j.reverse_mouse_spr = (std::string(mode) == "inv_glide_mouse");
+    j.warp_mouse = warp;
+    j.mouse_sensitivity_flt = warp ? 120.0f : 40.0f;
+    mark_dirty("input.joystick.mouse_cursor");
+    mark_dirty("input.joystick.reverse_mouse_spr");
+    mark_dirty("input.joystick.warp_mouse");
+    mark_dirty("input.joystick.mouse_sensitivity");
+    // Axis routing: warp/glide (non-inv) invert y; inv_* modes do not.
+    auto &axes = cfg().axes;
+    axes["x"].source = "mouse"; axes["x"].axis = 0; axes["x"].inverse = false;
+    axes["y"].source = "mouse"; axes["y"].axis = 1;
+    axes["y"].inverse = !std::string(mode).rfind("inv_", 0);
+    mark_dirty("bindings.axes");
 }
 
 // Apply joystick staging to Configuration.joystick + input.axes.
@@ -548,10 +581,10 @@ static void apply_joystick_to_config() {
     j.force_feedback = joy_ffb;
     j.ff_device = atoi(joy_ff_device);
     j.mouse_cursor = joy_mouse_cursor;
-    mark_dirty("joystick.deadband");
-    mark_dirty("joystick.force_feedback");
-    mark_dirty("joystick.ff_device");
-    mark_dirty("joystick.mouse_cursor");
+    mark_dirty("input.joystick.deadband");
+    mark_dirty("input.joystick.force_feedback");
+    mark_dirty("input.joystick.ff_device");
+    mark_dirty("input.joystick.mouse_cursor");
     // Write the x/y/z/throttle axes.
     auto &axes = cfg().axes;
     for (int r = 0; r < 4; ++r) {
@@ -666,9 +699,12 @@ static void draw_mouse_dialog() {
     ImGui::SetNextWindowSize(ImVec2(360, 0), ImGuiCond_Appearing);
     if (ImGui::BeginPopupModal("Mouse Settings", &mouse_dialog_open, ImGuiWindowFlags_AlwaysAutoResize)) {
         // Flight mode (Mouse preset).
-        int sel = 0;
         ImGui::Text("Flight mode"); ImGui::SameLine(); ImGui::SetNextItemWidth(180);
-        if (ImGui::Combo("##mmode", &sel, mouse_mode_names, 5)) { dirty = true; }
+        if (ImGui::Combo("##mmode", &mouse_stg.mode_idx, mouse_mode_names, 5)) {
+            cfg().input.mouse_preset = mouse_mode_names[mouse_stg.mode_idx];
+            mark_dirty("input.mouse_preset");
+            dirty = true;
+        }
         ImGui::Separator();
         ImGui::Checkbox("Mouse cursor on pan camera", &mouse_stg.cam_pancam);
         ImGui::Checkbox("Mouse cursor on target pan camera", &mouse_stg.cam_pantgt);
@@ -1401,21 +1437,27 @@ static boost::json::value read_config_value(const std::string &path) {
     // general
     else if (path=="general.num_old_systems") return c.general.num_old_systems;
     else if (path=="general.simulation_atom") return c.general.simulation_atom_flt;
-    // joystick
-    else if (path=="joystick.mouse_cursor") return c.joystick.mouse_cursor;
-    else if (path=="joystick.mouse_sensitivity") return c.joystick.mouse_sensitivity_flt;
-    else if (path=="joystick.reverse_mouse_spr") return c.joystick.reverse_mouse_spr;
-    else if (path=="joystick.warp_mouse") return c.joystick.warp_mouse;
-    else if (path=="joystick.force_use_of_joystick") return c.joystick.force_use_of_joystick;
-    else if (path=="joystick.mouse_cursor_pancam") return c.joystick.mouse_cursor_pancam;
-    else if (path=="joystick.mouse_cursor_pantgt") return c.joystick.mouse_cursor_pantgt;
-    else if (path=="joystick.mouse_cursor_chasecam") return c.joystick.mouse_cursor_chasecam;
-    else if (path=="joystick.warp_mouse_zone") return c.joystick.warp_mouse_zone;
-    else if (path=="joystick.mouse_exponent") return c.joystick.mouse_exponent_flt;
-    else if (path=="joystick.mouse_deadband") return c.joystick.mouse_deadband_flt;
-    else if (path=="joystick.deadband") return c.joystick.deadband_flt;
-    else if (path=="joystick.force_feedback") return c.joystick.force_feedback;
-    else if (path=="joystick.ff_device") return c.joystick.ff_device;
+    // joystick (input.joystick)
+    else if (path=="input.joystick.mouse_cursor") return c.joystick.mouse_cursor;
+    else if (path=="input.joystick.mouse_sensitivity") return c.joystick.mouse_sensitivity_flt;
+    else if (path=="input.joystick.reverse_mouse_spr") return c.joystick.reverse_mouse_spr;
+    else if (path=="input.joystick.warp_mouse") return c.joystick.warp_mouse;
+    else if (path=="input.joystick.force_use_of_joystick") return c.joystick.force_use_of_joystick;
+    else if (path=="input.joystick.mouse_cursor_pancam") return c.joystick.mouse_cursor_pancam;
+    else if (path=="input.joystick.mouse_cursor_pantgt") return c.joystick.mouse_cursor_pantgt;
+    else if (path=="input.joystick.mouse_cursor_chasecam") return c.joystick.mouse_cursor_chasecam;
+    else if (path=="input.joystick.warp_mouse_zone") return c.joystick.warp_mouse_zone;
+    else if (path=="input.joystick.mouse_exponent") return c.joystick.mouse_exponent_flt;
+    else if (path=="input.joystick.mouse_deadband") return c.joystick.mouse_deadband_flt;
+    else if (path=="input.joystick.deadband") return c.joystick.deadband_flt;
+    else if (path=="input.joystick.force_feedback") return c.joystick.force_feedback;
+    else if (path=="input.joystick.ff_device") return c.joystick.ff_device;
+    else if (path=="input.device") return boost::json::value(c.input.device);
+    else if (path=="input.mouse_preset") return boost::json::value(c.input.mouse_preset);
+    else if (path=="input.mouse.enabled") return c.mouse.enabled;
+    else if (path=="input.mouse.inverse_x") return c.mouse.inverse_x;
+    else if (path=="input.mouse.inverse_y") return c.mouse.inverse_y;
+    else if (path=="input.joystick.enabled") return c.joystick.enabled;
     // splash / test
     else if (path=="splash.loading_sprite") return boost::json::value(c.splash.loading_sprite);
     else if (path=="test.autodocker") return c.test.autodocker;
@@ -1482,6 +1524,15 @@ static void draw_presets_frame() {
 } // namespace
 
 void DrawConfigScreen() {
+    // Load flight-control mode from the persisted input.device once.
+    static bool s_loaded = false;
+    if (!s_loaded) {
+        s_loaded = true;
+        const std::string &dev = configuration().input.device;
+        flight_control = (dev == "mouse") ? FC_MOUSE : (dev == "joystick") ? FC_JOYSTICK : FC_KEYBOARD;
+        if (flight_control == FC_MOUSE) load_mouse_staging();
+        else if (flight_control == FC_JOYSTICK) load_joystick_staging();
+    }
     // Cover the whole screen (game resolution), not a floating window.
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(configuration().graphics.resolution_x,

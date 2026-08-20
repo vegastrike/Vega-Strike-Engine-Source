@@ -2237,6 +2237,16 @@ namespace vega_config {
 
     } keyboard;
 
+    // The `input` section (config.json) — the triple-state device switch and
+    // behavior-preset selectors. The mouse/joystick/keyboard sub-structs above
+    // are populated from input.mouse / input.joystick / input.keyboard.
+    struct {
+        std::string device = "keyboard";        // "keyboard" | "mouse" | "joystick"
+        std::string mouse_preset = "glide_mouse";
+        std::string joystick_preset = "joy_normal";
+
+    } input;
+
     struct {
         int vsdebug = 0;
         bool verbose_debug = false;
