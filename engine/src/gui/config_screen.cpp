@@ -502,6 +502,25 @@ static void apply_flight_to_config() {
     }
     mark_dirty("joystick.force_use_of_joystick");
     mark_dirty("joystick.warp_mouse");
+    // Route the x/y flight axes to the mouse (MOUSE_JOYSTICK) only when Mouse
+    // flight control is selected. The engine's config_xml axis router keys off
+    // axes.x/y.source; without this, selecting Mouse silently does nothing.
+    // For Keyboard/Joystick modes, restore source to joystick (preserving any
+    // existing axis/joystick numbers so we don't clobber joystick config).
+    auto &axes = cfg().axes;
+    if (flight_control == FC_MOUSE) {
+        axes["x"].source = "mouse"; axes["x"].axis = 0;
+        axes["x"].inverse = cfg().mouse.inverse_x;
+        axes["y"].source = "mouse"; axes["y"].axis = 1;
+        axes["y"].inverse = cfg().mouse.inverse_y;
+    } else {
+        for (const char *role : {"x", "y"}) {
+            auto it = axes.find(role);
+            if (it != axes.end() && it->second.source == "mouse")
+                it->second.source = "joystick";
+        }
+    }
+    mark_dirty("bindings.axes");
 }
 
 // Apply mouse staging to Configuration.joystick.
@@ -593,7 +612,7 @@ static void write_out_dirty() {
         fprintf(stderr, "[vs-settings-ng] wrote config overlay to %s/config.json\n", VSFileSystem::homedir.c_str());
     }
     // Write bindings.json overlay (if bindings changed).
-    if (has_bindings) {
+    if (has_bindings || g_dirty_paths.count("bindings.axes")) {
         // Serialize the whole actions map (the bindings dialog commits it wholesale).
         boost::json::object actions_obj;
         for (const auto &kv : configuration().actions) {
@@ -621,6 +640,18 @@ static void write_out_dirty() {
             actions_obj[kv.first] = ab;
         }
         bindings_out["actions"] = actions_obj;
+        // Serialize the axes tree (x/y/z/throttle) so flight-control device
+        // routing (e.g. Mouse -> axes.x.source="mouse") persists to bindings.json.
+        boost::json::object axes_obj;
+        for (const auto &kv : configuration().axes) {
+            boost::json::object ar;
+            ar["source"] = kv.second.source;
+            ar["joystick"] = kv.second.joystick;
+            ar["axis"] = kv.second.axis;
+            ar["inverse"] = kv.second.inverse;
+            axes_obj[kv.first] = ar;
+        }
+        bindings_out["axes"] = axes_obj;
         fs::create_directories(VSFileSystem::homedir);
         std::ofstream out(VSFileSystem::homedir + "/bindings.json");
         out << boost::json::serialize(bindings_out) << "\n";
