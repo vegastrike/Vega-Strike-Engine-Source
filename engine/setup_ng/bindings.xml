@@ -1,0 +1,175 @@
+<?xml version="1.0"?>
+<bindings>
+	<bind key="C" modifier="none" command="ChangeCommStatus" />
+	<bind key="X" modifier="none" command="UpFreq" />
+	<bind key="V" modifier="none" command="DownFreq" />
+	<bind key="W" modifier="none" command="SwitchWebcam" />
+	<bind key="S" modifier="none" command="SwitchSecured" />
+	<bind key="S" modifier="none" command="Cockpit::SkipMusicTrack" />
+	<bind key="i" modifier="none" command="Screenshot" />
+	<bind key="F" modifier="alt" command="CommFormUp" />
+	<bind key="B" modifier="alt" command="CommBreakForm" />
+	<bind key="H" modifier="alt" command="CommHelpMeOut" />
+	<bind key="D" modifier="alt" command="CommAttackTarget" />
+	<bind key="function-1" modifier="none" command="Comm1Key" />
+	<bind key="function-2" modifier="none" command="Comm2Key" />
+	<bind key="function-3" modifier="none" command="Comm3Key" />
+	<bind key="function-4" modifier="none" command="Comm4Key" />
+	<bind key="function-5" modifier="none" command="Comm5Key" />
+	<bind key="function-6" modifier="none" command="Comm6Key" />
+	<bind key="function-7" modifier="none" command="Comm7Key" />
+	<bind key="function-8" modifier="none" command="Comm8Key" />
+	<bind key="1" modifier="alt" command="SaveTarget1" />
+	<bind key="2" modifier="alt" command="SaveTarget2" />
+	<bind key="3" modifier="alt" command="SaveTarget3" />
+	<bind key="4" modifier="alt" command="SaveTarget4" />
+	<bind key="5" modifier="alt" command="SaveTarget5" />
+	<bind key="6" modifier="alt" command="SaveTarget6" />
+	<bind key="7" modifier="alt" command="SaveTarget7" />
+	<bind key="8" modifier="alt" command="SaveTarget8" />
+	<bind key="9" modifier="alt" command="SaveTarget9" />
+	<bind key="1" modifier="ctrl" command="RestoreTarget1" />
+	<bind key="2" modifier="ctrl" command="RestoreTarget2" />
+	<bind key="3" modifier="ctrl" command="RestoreTarget3" />
+	<bind key="4" modifier="ctrl" command="RestoreTarget4" />
+	<bind key="5" modifier="ctrl" command="RestoreTarget5" />
+	<bind key="6" modifier="ctrl" command="RestoreTarget6" />
+	<bind key="7" modifier="ctrl" command="RestoreTarget7" />
+	<bind key="8" modifier="ctrl" command="RestoreTarget8" />
+	<bind key="9" modifier="ctrl" command="RestoreTarget9" />
+	<bind key="space" modifier="none" command="FireKey" />
+	<bind key="y" modifier="none" command="SwitchCombatMode" />
+	<bind key="j" modifier="none" command="JumpKey" />
+	<bind key="A" modifier="none" command="ToggleWarpDrive" />
+	<bind key="a" modifier="none" command="ASAP" />
+	<bind key="c" modifier="none" command="CloakKey" />
+	<bind key="E" modifier="alt" command="EjectKey" />
+	<bind key="e" modifier="none" command="ECMKey" />
+	<bind key="Z" modifier="none" command="EjectCargoKey" />
+	<bind key="return" modifier="none" command="MissileKey" />
+	<bind key="keypad-enter" modifier="none" command="MissileKey" />
+	<bind key="g" modifier="none" command="WeapSelKey"/>
+	<bind key="G" modifier="none" command="ReverseWeapSelKey"/>
+	<bind key=";" modifier="none" command="Respawn"/>
+	<bind key="[" modifier="none" command="TurretControl"/>
+	<bind key="]" modifier="none" command="TextMessage"/>
+	<bind key="d" modifier="none" command="DockKey"/>
+	<bind key="0" modifier="alt" command="RequestClearenceKey"/>
+	<bind key="W" modifier="none" command="ReverseMisSelKey"/>
+	<bind key="w" modifier="none" command="MisSelKey"/>
+	<bind key="t" modifier="none" command="TargetKey" />
+	<bind key="n" modifier="none" command="SigTargetKey" />
+	<bind key="b" modifier="none" command="SubUnitTargetKey"/>
+	<bind key="u" modifier="none" command="UnitTargetKey" />
+	<bind key="l" modifier="none" command="LockTargetKey" />
+	<bind key="p" modifier="none" command="PickTargetKey" />
+	<bind key="h" modifier="none" command="NearestTargetKey" />
+	<bind key="T" modifier="none" command="ReverseTargetKey" />
+	<bind key="r" modifier="none" command="NearestHostileTargetKey"/>
+	<bind key="R" modifier="none" command="NearestDangerousHostileKey"/>
+	<bind key="k" modifier="none" command="NearestFriendlyKey"/>
+	<bind key="K" modifier="none" command="NearestBaseKey"/>
+	<bind key="k" modifier="ctrl" command="NearestPlanetKey"/>
+	<bind key="k" modifier="alt"  command="NearestJumpKey"/>
+	<bind key="P" modifier="none" command="TurretTargetKey" />
+	<bind key="o" modifier="none" command="TurretAIOn" />
+	<bind key="o" modifier="alt" command="TurretAIOff" />
+	<bind key="O" modifier="none" command="TurretAIFireAtWill" />
+	<bind key="H" modifier="none" command="ReverseNearestTargetKey" />
+	<bind key="N" modifier="alt" command="ReverseMissionTargetKey" />
+	<bind key="n" modifier="alt" command="MissionTargetKey" />
+	<bind key="N" modifier="none" command="ReverseSigTargetKey" />
+	<bind key="U" modifier="none" command="ReverseUnitTargetKey" />
+	<bind key="`" modifier="none" command="Flight::Mode::InertialToggle" /> <!-- was SheltonKey, you may use InertialToggle also -->
+	<bind key="-" modifier="none" command="DecelKey"/>
+	<bind key="+" modifier="none" command="AccelKey" />
+	<bind key="keypad-minus" modifier="none" command="DecelKey"/>
+	<bind key="keypad-plus" modifier="none" command="AccelKey" />
+	<bind key="=" modifier="none" command="AccelKey"/>
+	<bind key="/" modifier="none" command="RollLeftKey"/>
+	<bind key="*" modifier="none" command="RollRightKey"/>
+	<bind key="keypad-divide" modifier="none" command="RollLeftKey"/>
+	<bind key="keypad-multiply" modifier="none" command="RollRightKey"/>
+	<bind key="backspace" modifier="none" command="StopKey"/>
+	<bind key="\" modifier="none" command="StartKey"/>
+	<bind key="tab" modifier="none" command="ABKey" />
+	<bind key="!" modifier="none" command="SuicideKey"/>
+	<bind key="cursor-up" modifier="none" command="UpKey"/>
+	<bind key="cursor-down" modifier="none" command="DownKey"/>
+	<bind key="cursor-left" modifier="none" command="RightKey"/>
+	<bind key="cursor-right" modifier="none" command="LeftKey"/>
+	<bind key="cursor-insert" modifier="none" command="RollLeftKey"/>
+	<bind key="cursor-delete" modifier="none" command="RollRightKey"/>
+	<bind key="keypad-8" modifier="none" command="UpKey"/>
+	<bind key="keypad-2" modifier="none" command="DownKey"/>
+	<bind key="keypad-5" modifier="none" command="DownKey"/>
+	<bind key="keypad-4" modifier="none" command="RightKey"/>
+	<bind key="keypad-6" modifier="none" command="LeftKey"/>
+	<bind key="M" modifier="none" command="Cockpit::NavScreen"/>
+	<bind key="1" modifier="none" command="Cockpit::Inside"/>
+	<bind key="2" modifier="none" command="Cockpit::InsideLeft"/>
+	<bind key="3" modifier="none" command="Cockpit::InsideRight"/>
+	<bind key="4" modifier="none" command="Cockpit::InsideBack"/>
+	<bind key="5" modifier="none" command="Cockpit::Behind"/>
+	<bind key="6" modifier="none" command="Cockpit::Pan"/>
+	<bind key="7" modifier="none" command="Cockpit::ViewTarget"/>
+	<bind key="8" modifier="none" command="Cockpit::PanTarget"/>
+	<bind key="9" modifier="none" command="Cockpit::ZoomIn"/>
+	<bind key="0" modifier="none" command="Cockpit::ZoomOut"/>
+	<bind key="0" modifier="ctrl" command="Cockpit::OutsideTarget"/>
+	<bind key="|" modifier="none" command="PauseKey"/>
+	<bind key="pause" modifier="none" command="PauseKey"/>
+	<bind key="," command="ThrustUp"/>
+	<bind key="." command="ThrustDown"/>
+	<bind key="less-than" command="ThrustLeft"/>
+	<bind key="greater-than" command="ThrustRight"/>
+	<bind key="function-9" modifier="none" command="VolumeInc"/>
+	<bind key="function-10" modifier="none" command="VolumeDec"/>
+	<bind key="function-11" modifier="none" command="MusicVolumeInc"/>
+	<bind key="function-12" modifier="none" command="MusicVolumeDec"/>
+	<bind key="v" modifier="ctrl" command="NewShader"/>
+	<bind key="m" modifier="none" command="Cockpit::SwitchLVDU"/>
+	<bind key="v" modifier="none" command="Cockpit::SwitchRVDU"/>
+	<bind key="q" modifier="none" command="Cockpit::PitchDown"/>
+	<bind key="z" modifier="none" command="Cockpit::PitchUp"/>
+	<bind key="s" modifier="none" command="Cockpit::YawLeft"/>
+	<bind key="f" modifier="none" command="Cockpit::YawRight"/>
+	<bind key="cursor-pagedown" modifier="none" command="Cockpit::ScrollDown"/>
+	<bind key="cursor-pageup" modifier="none" command="Cockpit::ScrollUp"/>
+	<bind key="keypad-3" modifier="none" command="Cockpit::ScrollDown"/>
+	<bind key="keypad-9" modifier="none" command="Cockpit::ScrollUp"/>
+	<bind key="function-1" modifier="ctrl" command="ConsoleKeys::BringConsole"/>
+	<bind key="cursor-home" modifier="none" command="SetVelocityRefKey"/>
+	<bind key="cursor-end" modifier="none" command="SetVelocityNullKey"/>
+	<bind key="keypad-7" modifier="none" command="SetVelocityRefKey"/>
+	<bind key="keypad-1" modifier="none" command="SetVelocityNullKey"/>
+	<bind key="esc" modifier="none" command="Cockpit::Quit"/>
+	<bind mouse="0" player="1" button="0" modifier="none" command="FireKey" />
+	<bind mouse="0" player="0" button="0" modifier="none" command="FireKey" />
+	<bind mouse="0" button="2" modifier="none" command="ABKey" />
+	<bind mouse="0" button="1" modifier="none" command="MissileKey" />
+	<bind mouse="0" button="3" modifier="none" command="TargetKey" />
+	<bind mouse="0" button="4" modifier="none" command="PickTargetKey" />
+	<bind mouse="0" button="5" modifier="none" command="DecelKey" />
+	<bind mouse="0" button="6" modifier="none" command="SheltonKey" />
+	<bind mouse="0" button="7" modifier="none" command="AccelKey" />
+	<bind mouse="0" button="8" modifier="none" command="WeapSelKey" />
+	<bind mouse="0" button="9" modifier="none" command="MisSelKey" />
+	<bind joystick="0" player="0" button="0" modifier="none" command="FireKey" />
+	<bind joystick="0" button="2" modifier="none" command="MissileKey" />
+	<bind joystick="0" button="3" modifier="none" command="TargetKey" />
+	<bind joystick="0" button="4" modifier="none" command="PickTargetKey" />
+	<bind joystick="0" button="5" modifier="none" command="DecelKey" />
+	<bind joystick="0" button="6" modifier="none" command="SheltonKey" />
+	<bind joystick="0" button="7" modifier="none" command="AccelKey" />
+	<bind joystick="0" button="8" modifier="none" command="WeapSelKey" />
+	<bind joystick="0" button="9" modifier="none" command="MisSelKey" />
+	<bind joystick="0" button="1" modifier="none" command="Joystick::Mode::InertialXYToggle" />
+	<bind joystick="0" button="1" modifier="none" command="Joystick::Mode::InertialXZToggle" />
+	<bind joystick="0" button="1" modifier="none" command="Joystick::Mode::RollToggle" />
+	<bind joystick="0" button="1" modifier="none" command="Joystick::Mode::BankToggle" />
+	<bind joystick="0" digital-hatswitch="0" direction="up" command="Cockpit::Inside"/>
+	<bind joystick="0" digital-hatswitch="0" direction="down" command="Cockpit::InsideBack"/>
+	<bind joystick="0" digital-hatswitch="0" direction="left" command="Cockpit::InsideLeft"/>
+	<bind joystick="0" digital-hatswitch="0" direction="right" command="Cockpit::InsideRight"/>
+</bindings>
