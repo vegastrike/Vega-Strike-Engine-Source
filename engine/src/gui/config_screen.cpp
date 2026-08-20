@@ -177,9 +177,11 @@ static void load_display_from_config() {
 // Apply the display-frame state back to Configuration (Save).
 static void apply_display_to_config() {
     auto &g = cfg().graphics;
-    g.resolution_x = sel_res_w;
-    g.resolution_y = sel_res_h;
-    g.full_screen = true;   // in-game config screen implies fullscreen (vs-05 used the FBO); keep the existing setting
+    // Apply the resolution/fullscreen live to the running game (reuses the
+    // windowed-mode resize cascade: SetWindowSize -> WINDOW_RESIZED ->
+    // get_screen_measurements + Reshape). The config screen is fullscreen, so
+    // keep full_screen true.
+    winsys_apply_resolution(sel_res_w, sel_res_h, true);
     g.font_point_flt = (float)atoi(text_height_buf);
     if (sel_font_type == FONT_AA_VEC) {
         g.high_quality_font = false;

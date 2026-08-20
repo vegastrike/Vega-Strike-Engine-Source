@@ -661,6 +661,20 @@ void winsys_show_cursor(bool visible) {
     }
 }
 
+// Apply a new resolution/fullscreen to the live window. Reuses the existing
+// windowed-mode resize cascade: SDL_SetWindowSize fires SDL_EVENT_WINDOW_RESIZED,
+// which triggers get_screen_measurements() + the reshape callback (Reshape), which
+// re-inits the viewport and updates configuration().graphics.resolution_x/y.
+// Enter/leave fullscreen first so SetWindowSize targets the right mode.
+void winsys_apply_resolution(int width, int height, bool fullscreen) {
+    auto &g = const_cast<vega_config::Configuration &>(configuration()).graphics;
+    g.resolution_x = width;
+    g.resolution_y = height;
+    g.full_screen = fullscreen;
+    SDL_SetWindowFullscreen(window, fullscreen);
+    SDL_SetWindowSize(window, width, height);
+}
+
 /*---------------------------------------------------------------------------*/
 /*!
  *  Processes and dispatches events.  This function never returns.
