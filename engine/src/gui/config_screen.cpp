@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include <map>
+#include <set>
 #include <cstdio>
 #include <cstdlib>
 
@@ -43,6 +45,14 @@ bool display_inited = false;
 
 bool rendered_crosshair = true;
 bool cfg_full_screen = true;
+
+// Mouse / Joystick dialog open flags.
+static bool mouse_dialog_open = false;
+static bool joy_dialog_open = false;
+
+// Forward declarations (defined below; used by draw_display_frame).
+static void load_mouse_staging();
+static void load_joystick_staging();
 
 enum { FONT_AA_VEC = 0, FONT_VEC, FONT_HELVETICA, FONT_TIMES, FONT_FIXED };
 static const char *font_type_names[] = { "Antialiased Vector", "Vector", "Helvetica", "Times", "Fixed" };
@@ -327,7 +337,34 @@ void draw_display_frame() {
             if (ImGui::MenuItem(aspect_opts[i])) { sel_base_aspect = (int)i; base_aspect_text = aspect_opts[i]; dirty = true; }
         ImGui::EndPopup();
     }
-    ImGui::EndChild();
+    ImGui::EndChild();   // end dpyframe (left column)
+
+    // Right column: Flight Control + Input buttons + Rendered Crosshair, side by
+    // side with the monitor/resolution/display controls (as vs-05).
+    ImGui::SameLine();
+    ImGui::BeginChild("dpybtns", ImVec2(side_w, 6 * btn_h), ImGuiChildFlags_Borders);
+    if (ImGui::Button(("Flight Control: " + std::string(fc_names[flight_control])).c_str(), ImVec2(-1, 0)))
+        ImGui::OpenPopup("##flight");
+    if (ImGui::BeginPopup("##flight")) {
+        for (int i = 0; i < 3; ++i) {
+            if (ImGui::MenuItem(fc_names[i])) {
+                flight_control = i;
+                if (i == FC_MOUSE) { load_mouse_staging(); }
+                else if (i == FC_JOYSTICK) { load_joystick_staging(); }
+                dirty = true;
+            }
+        }
+        ImGui::EndPopup();
+    }
+    // Flight-control gating: only the active device's settings are enabled.
+    if (flight_control != FC_MOUSE) ImGui::BeginDisabled();
+    if (ImGui::Button("Mouse Settings", ImVec2(-1, 0))) { load_mouse_staging(); mouse_dialog_open = true; }
+    if (flight_control != FC_MOUSE) ImGui::EndDisabled();
+    if (flight_control != FC_JOYSTICK) ImGui::BeginDisabled();
+    if (ImGui::Button("Joystick Settings", ImVec2(-1, 0))) { load_joystick_staging(); joy_dialog_open = true; }
+    if (flight_control != FC_JOYSTICK) ImGui::EndDisabled();
+    if (ImGui::Checkbox("Rendered Crosshair", &rendered_crosshair)) dirty = true;
+    ImGui::EndChild();   // end dpybtns (right column)
 }
 
 // ---------------------------------------------------------------------------
@@ -344,10 +381,6 @@ struct MouseStaging {
 };
 static MouseStaging mouse_stg;
 
-// Mouse / Joystick dialog open flags (declared here so draw_flight_frame can open them).
-static bool mouse_dialog_open = false;
-static bool joy_dialog_open = false;
-
 // Joystick flight roles (x/y/z/throttle).
 static const char *joy_role_names[] = { "x", "y", "z", "throttle" };
 static int  joy_bind_stick[4] = { 0, 0, 0, 0 };
@@ -356,6 +389,35 @@ static bool joy_bind_inv[4] = { false, false, false, false };
 static char joy_deadband[8] = "0.05";
 static bool joy_ffb = false;
 static char joy_ff_device[8] = "0";
+static bool joy_mouse_cursor = false;
+static bool joy_auto_sampling = false;
+static float joy_auto_timer = 0.0f, joy_auto_max = 0.0f;
+
+// Which flight role (if any) maps to this physical (stick, axis).
+static int role_for_axis(int stick, int axis) {
+    for (int r = 0; r < 4; ++r)
+        if (joy_bind_stick[r] == stick && joy_bind_axis[r] == axis) return r;
+    return -1;
+}
+
+// Sample the bound axes for Auto Deadband (max deflection over ~1s).
+static float joy_sample_bound_axes() {
+    float m = 0.0f;
+    SDL_UpdateJoysticks();
+    int n = 0; SDL_JoystickID *ids = SDL_GetJoysticks(&n);
+    for (int r = 0; r < 4; ++r) {
+        int s = joy_bind_stick[r];
+        if (s < 0 || s >= n || joy_bind_axis[r] < 0) continue;
+        SDL_Joystick *joy = SDL_OpenJoystick(ids[s]);
+        if (!joy) continue;
+        float v = SDL_GetJoystickAxis(joy, joy_bind_axis[r]) / 32768.0f;
+        if (v < 0) v = -v;
+        if (v > m) m = v;
+        SDL_CloseJoystick(joy);
+    }
+    if (ids) SDL_free(ids);
+    return m;
+}
 
 // Load mouse staging from Configuration.joystick.
 static void load_mouse_staging() {
@@ -374,6 +436,7 @@ static void load_joystick_staging() {
     snprintf(joy_deadband, sizeof(joy_deadband), "%.2f", j.deadband_flt);
     joy_ffb = j.force_feedback;
     snprintf(joy_ff_device, sizeof(joy_ff_device), "%d", j.ff_device);
+    joy_mouse_cursor = j.mouse_cursor;
     const auto &axes = configuration().axes;
     for (int r = 0; r < 4; ++r) {
         joy_bind_stick[r] = 0; joy_bind_axis[r] = -1; joy_bind_inv[r] = false;
@@ -423,6 +486,7 @@ static void apply_joystick_to_config() {
     j.deadband_flt = (float)atof(joy_deadband);
     j.force_feedback = joy_ffb;
     j.ff_device = atoi(joy_ff_device);
+    j.mouse_cursor = joy_mouse_cursor;
     // Write the x/y/z/throttle axes.
     auto &axes = cfg().axes;
     for (int r = 0; r < 4; ++r) {
@@ -436,28 +500,6 @@ static void apply_joystick_to_config() {
             axes[role].inverse = joy_bind_inv[r];
         }
     }
-}
-
-// Flight Control picker + Mouse/Joystick buttons.
-static void draw_flight_frame() {
-    if (ImGui::Button(("Flight Control: " + std::string(fc_names[flight_control])).c_str(), ImVec2(-1, 0)))
-        ImGui::OpenPopup("##flight");
-    if (ImGui::BeginPopup("##flight")) {
-        for (int i = 0; i < 3; ++i) {
-            if (ImGui::MenuItem(fc_names[i])) {
-                flight_control = i;
-                if (i == FC_MOUSE) load_mouse_staging();
-                else if (i == FC_JOYSTICK) load_joystick_staging();
-                dirty = true;
-            }
-        }
-        ImGui::EndPopup();
-    }
-    ImGui::Separator();
-    ImGui::Text("Input");
-    if (ImGui::Button("Mouse Settings")) { load_mouse_staging(); mouse_dialog_open = true; }
-    ImGui::SameLine();
-    if (ImGui::Button("Joystick Settings")) { load_joystick_staging(); joy_dialog_open = true; }
 }
 
 // Mouse Settings dialog.
@@ -491,27 +533,91 @@ static void draw_mouse_dialog() {
 // Joystick Settings dialog.
 static void draw_joystick_dialog() {
     if (!joy_dialog_open) return;
-    ImGui::SetNextWindowSize(ImVec2(420, 0), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(460, 0), ImGuiCond_Appearing);
     if (ImGui::BeginPopupModal("Joystick Settings", &joy_dialog_open, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text("Bind each flight role to a joystick axis (joystick index, axis index).");
+        ImGui::Text("Deflect an axis to identify it, then bind it to a flight role.");
         ImGui::Separator();
-        static const char *roles[] = { "x", "y", "z", "throttle" };
-        for (int r = 0; r < 4; ++r) {
-            ImGui::Text("%s", roles[r]); ImGui::SameLine();
-            ImGui::SetNextItemWidth(50);
-            if (ImGui::InputInt(("##jstick" + std::string(roles[r])).c_str(), &joy_bind_stick[r])) dirty = true;
-            ImGui::SameLine(); ImGui::SetNextItemWidth(50);
-            if (ImGui::InputInt(("##jaxis" + std::string(roles[r])).c_str(), &joy_bind_axis[r])) dirty = true;
-            ImGui::SameLine();
-            if (ImGui::Checkbox(("inv##" + std::string(roles[r])).c_str(), &joy_bind_inv[r])) dirty = true;
+        SDL_UpdateJoysticks();   // refresh axis state (also for a just-hotplugged joystick)
+        int n = 0; SDL_JoystickID *ids = SDL_GetJoysticks(&n);
+        // Persistent open handles: open each device once and reuse across frames so a
+        // hotplugged joystick's axis state stays live.
+        static std::map<SDL_JoystickID, SDL_Joystick*> g_joy_open;
+        std::set<SDL_JoystickID> present;
+        for (int i = 0; i < n; ++i) present.insert(ids[i]);
+        // close any handle whose device was removed
+        for (auto it = g_joy_open.begin(); it != g_joy_open.end();) {
+            if (present.find(it->first) == present.end()) { SDL_CloseJoystick(it->second); it = g_joy_open.erase(it); }
+            else ++it;
         }
+        if (n <= 0 || !ids) {
+            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "No Joystick Detected");
+        } else {
+            static const char *dd[] = { "none", "x", "y", "z", "throttle" };
+            for (int i = 0; i < n; ++i) {
+                SDL_Joystick *joy = g_joy_open[ids[i]];
+                if (!joy) { joy = SDL_OpenJoystick(ids[i]); g_joy_open[ids[i]] = joy; }
+                if (!joy) continue;
+                const char *nm = SDL_GetJoystickName(joy);
+                int na = SDL_GetNumJoystickAxes(joy);
+                for (int a = 0; a < na; ++a) {
+                    float val = SDL_GetJoystickAxis(joy, a) / 32768.0f;
+                    int role = role_for_axis(i, a);
+                    char id[32]; snprintf(id, sizeof(id), "##joy%d_a%d", i, a);
+                    ImGui::Text("%s A%d", nm ? nm : "Joy", a); ImGui::SameLine();
+                    ImGui::SetNextItemWidth(110);
+                    ImGui::BeginDisabled();
+                    ImGui::SliderFloat((std::string(id) + "live").c_str(), &val, -1.0f, 1.0f, "");
+                    ImGui::EndDisabled();
+                    ImGui::SameLine();
+                    int cur = role < 0 ? 0 : role + 1;
+                    ImGui::SetNextItemWidth(90);
+                    if (ImGui::Combo((std::string(id) + "bind").c_str(), &cur, dd, 5)) {
+                        int nr = cur - 1;
+                        for (int r = 0; r < 4; ++r)
+                            if (joy_bind_stick[r] == i && joy_bind_axis[r] == a) { joy_bind_stick[r] = -1; joy_bind_axis[r] = -1; }
+                        if (nr >= 0) { joy_bind_stick[nr] = i; joy_bind_axis[nr] = a; }
+                        dirty = true;
+                    }
+                    ImGui::SameLine();
+                    bool has = role >= 0;
+                    if (!has) ImGui::BeginDisabled();
+                    bool inv = has ? joy_bind_inv[role] : false;
+                    if (ImGui::Checkbox((std::string(id) + "inv").c_str(), &inv) && has) {
+                        joy_bind_inv[role] = inv; dirty = true;
+                    }
+                    if (!has) ImGui::EndDisabled();
+                }
+            }
+        }
+        if (ids) SDL_free(ids);
         ImGui::Separator();
         ImGui::Text("Deadband"); ImGui::SameLine(); ImGui::SetNextItemWidth(90);
         if (ImGui::InputText("##jdb", joy_deadband, sizeof(joy_deadband), ImGuiInputTextFlags_CharsDecimal)) dirty = true;
-        ImGui::Checkbox("Force feedback", &joy_ffb);
-        ImGui::Text("FF device"); ImGui::SameLine(); ImGui::SetNextItemWidth(90);
+        ImGui::SameLine();
+        if (ImGui::Button("Auto Deadband")) { joy_auto_sampling = true; joy_auto_timer = 0.0f; joy_auto_max = 0.0f; }
+        if (joy_auto_sampling) {
+            float m = joy_sample_bound_axes();
+            if (m > joy_auto_max) joy_auto_max = m;
+            joy_auto_timer += ImGui::GetIO().DeltaTime;
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.4f, 1.0f), "Sampling... keep the stick still");
+            if (joy_auto_timer >= 1.0f) {
+                float db = joy_auto_max + 0.05f;
+                if (db < 0.0f) db = 0.0f; else if (db > 0.5f) db = 0.5f;
+                snprintf(joy_deadband, sizeof(joy_deadband), "%.3f", db);
+                joy_auto_sampling = false; dirty = true;
+            }
+        }
+        if (ImGui::Checkbox("Force feedback", &joy_ffb)) dirty = true;
+        if (ImGui::Checkbox("Mouse cursor in flight", &joy_mouse_cursor)) dirty = true;
+        ImGui::Text("FFB device"); ImGui::SameLine(); ImGui::SetNextItemWidth(50);
         if (ImGui::InputText("##jff", joy_ff_device, sizeof(joy_ff_device), ImGuiInputTextFlags_CharsDecimal)) dirty = true;
         ImGui::Separator();
+        if (ImGui::Button("Reset Axis")) {
+            for (int r = 0; r < 4; ++r) { joy_bind_stick[r] = -1; joy_bind_axis[r] = -1; joy_bind_inv[r] = false; }
+            dirty = true;
+        }
+        ImGui::SameLine();
         if (ImGui::Button("Accept")) { joy_dialog_open = false; dirty = true; ImGui::CloseCurrentPopup(); }
         ImGui::SameLine();
         if (ImGui::Button("Close")) { joy_dialog_open = false; ImGui::CloseCurrentPopup(); }
@@ -539,10 +645,6 @@ void DrawConfigScreen() {
 
     // Rendered crosshair toggle (vs-05 had it in the display/button area).
     if (ImGui::Checkbox("Rendered Crosshair", &rendered_crosshair)) dirty = true;
-
-    // Flight Control + Input (Mouse/Joystick).
-    ImGui::Separator();
-    draw_flight_frame();
 
     ImGui::Separator();
     ImGui::TextUnformatted(dirty ? "(unsaved changes)" : "(saved)");
