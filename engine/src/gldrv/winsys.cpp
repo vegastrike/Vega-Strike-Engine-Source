@@ -688,7 +688,8 @@ void winsys_process_events() {
     }
     while (keepRunning) {
         while (SDL_PollEvent(&event)) {
-            // forward all events to ImGUI            ImGui_ImplSDL3_ProcessEvent(&event);
+            // forward all events to ImGUI
+            ImGui_ImplSDL3_ProcessEvent(&event);
 
             // now the VS processing of events
             state = false;
