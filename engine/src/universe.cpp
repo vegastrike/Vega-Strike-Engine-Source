@@ -70,6 +70,7 @@
 #include "root_generic/options.h"
 
 #include "gui/pause_screen.h"
+#include "gldrv/winsys.h"
 
 #include "imgui/imgui.h"
 #include "backends/imgui_impl_sdl3.h"
@@ -867,6 +868,9 @@ void Universe::TogglePause() {
 
 void Universe::ToggleOptionsActive() {
     optionsActive = !optionsActive;
+    // Show the cursor when the config screen is open (so the user can click),
+    // hide it again when closed. The in-flight HUD keeps the cursor hidden.
+    winsys_show_cursor(optionsActive);
 }
 
 void DrawConfigOverlay() {
@@ -874,7 +878,5 @@ void DrawConfigOverlay() {
         return;
     }
     vs_settings_ng::DrawConfigScreen();
-}
-
-/////////////////////////////////////////////////////////
+}/////////////////////////////////////////////////////////
 // Unsorted

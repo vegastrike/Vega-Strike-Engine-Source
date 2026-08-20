@@ -11,6 +11,8 @@
 #include "config_screen.h"
 
 #include "configuration/configuration.h"
+#include "gldrv/winsys.h"
+#include "universe.h"
 #include <imgui.h>
 #include <vector>
 #include <string>
@@ -33,8 +35,13 @@ char font_point_buf[8] = "16";
 } // namespace
 
 void DrawConfigScreen() {
+    // Cover the whole screen (game resolution), not a floating window.
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(configuration().graphics.resolution_x,
+                                    configuration().graphics.resolution_y), ImGuiCond_Always);
     ImGui::Begin("Config", nullptr,
-                 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings);
+                 ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+                 ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
     ImGui::Text("vs-settings-ng — Configuration");
     ImGui::Separator();
 
@@ -88,7 +95,9 @@ void DrawConfigScreen() {
     ImGui::SameLine();
     if (ImGui::Button("Close")) {
         loaded = false;   // reload from Configuration next open
-        // Request the overlay to close (handled by caller via ToggleOptionsActive).
+        if (_Universe) {
+            _Universe->ToggleOptionsActive();   // close the overlay; hide cursor on inactive
+        }
     }
 
     ImGui::End();
