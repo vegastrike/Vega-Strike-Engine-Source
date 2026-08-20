@@ -1401,6 +1401,12 @@ static void draw_presets_frame() {
         return;
     }
     int cols = 3;
+    // Wrap the grid in its own bordered frame (own frame, above the button bar).
+    int rows = (int)ceil((double)g_preset_groups.size() / (double)cols);
+    float row_h = ImGui::GetFrameHeight() + ImGui::GetTextLineHeight()
+                  + ImGui::GetStyle().ItemSpacing.y;
+    float pres_h = rows * row_h + ImGui::GetStyle().WindowPadding.y * 2;
+    ImGui::BeginChild("presetsframe", ImVec2(-1.0f, pres_h), ImGuiChildFlags_Borders);
     std::vector<float> colw(cols, 0.0f);
     for (size_t i = 0; i < g_preset_groups.size(); i++) {
         auto &g = g_preset_groups[i];
@@ -1439,6 +1445,7 @@ static void draw_presets_frame() {
         }
         ImGui::EndTable();
     }
+    ImGui::EndChild();   // end presetsframe
 }
 
 } // namespace
@@ -1464,6 +1471,10 @@ void DrawConfigScreen() {
 
     ImGui::Separator();
     ImGui::TextUnformatted(dirty ? "(unsaved changes)" : "(saved)");
+
+    // Presets frame (own frame, above the button bar).
+    ImGui::Separator();
+    draw_presets_frame();
 
     // Bottom button bar, pinned to the bottom of the window and centered.
     auto apply_all = [&]() {
@@ -1533,10 +1544,6 @@ void DrawConfigScreen() {
     // Bindings dialog (modal on top).
     if (bind_dialog_open) ImGui::OpenPopup("Bindings");
     draw_bindings_dialog();
-
-    // Presets frame.
-    ImGui::Separator();
-    draw_presets_frame();
 
     ImGui::End();
 }
