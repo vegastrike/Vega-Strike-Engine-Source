@@ -665,14 +665,36 @@ void winsys_show_cursor(bool visible) {
 // windowed-mode resize cascade: SDL_SetWindowSize fires SDL_EVENT_WINDOW_RESIZED,
 // which triggers get_screen_measurements() + the reshape callback (Reshape), which
 // re-inits the viewport and updates configuration().graphics.resolution_x/y.
-// Enter/leave fullscreen first so SetWindowSize targets the right mode.
+// In fullscreen, SDL_SetWindowSize is ignored; instead match and set a fullscreen
+// display mode (as the startup path does).
 void winsys_apply_resolution(int width, int height, bool fullscreen) {
     auto &g = const_cast<vega_config::Configuration &>(configuration()).graphics;
     g.resolution_x = width;
     g.resolution_y = height;
     g.full_screen = fullscreen;
-    SDL_SetWindowFullscreen(window, fullscreen);
-    SDL_SetWindowSize(window, width, height);
+
+    int screen_number = g.screen;
+    std::string screen_name;
+    SDL_DisplayID instance_ID = 0;
+    get_sdl_display_name_by_number(screen_number, screen_name, instance_ID);
+
+    if (fullscreen) {
+        SDL_SetWindowFullscreen(window, true);
+        int num_modes = 0;
+        SDL_DisplayMode **modes = SDL_GetFullscreenDisplayModes(instance_ID, &num_modes);
+        if (modes) {
+            for (int i = 0; i < num_modes; ++i) {
+                if (modes[i]->w == width && modes[i]->h == height) {
+                    SDL_SetWindowFullscreenMode(window, modes[i]);
+                    break;
+                }
+            }
+        }
+        if (modes) SDL_free(modes);
+    } else {
+        SDL_SetWindowFullscreen(window, false);
+        SDL_SetWindowSize(window, width, height);
+    }
 }
 
 /*---------------------------------------------------------------------------*/
