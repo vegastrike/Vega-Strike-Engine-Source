@@ -70,6 +70,7 @@
 #include "root_generic/options.h"
 
 #include "gui/pause_screen.h"
+#include "gui/imgui_support.h"
 #include "gldrv/winsys.h"
 
 #include "imgui/imgui.h"
@@ -878,5 +879,10 @@ void DrawConfigOverlay() {
         return;
     }
     vs_settings_ng::DrawConfigScreen();
-}/////////////////////////////////////////////////////////
+    // The config screen is a clickable GUI overlay; draw the software cursor on
+    // top (the in-flight HUD path otherwise leaves the cursor hidden).
+    DrawMouseCursor(MOUSE_POINTER_NORMAL);
+}
+
+/////////////////////////////////////////////////////////
 // Unsorted
