@@ -15,6 +15,7 @@
 #include "universe.h"
 #include "vegadisk/vsfilesystem.h"
 #include <boost/json.hpp>
+#include <boost/filesystem.hpp>
 #include <imgui.h>
 #include <SDL3/SDL.h>
 #include <algorithm>
@@ -25,6 +26,8 @@
 #include <fstream>
 #include <cstdio>
 #include <cstdlib>
+
+namespace fs = boost::filesystem;
 
 namespace vs_settings_ng {
 
@@ -59,6 +62,7 @@ static void load_joystick_staging();
 static void load_bindings_staging();
 static void draw_bindings_dialog();
 static void handle_bindings_event(const SDL_Event *event);
+static boost::json::value read_config_value(const std::string &path);
 
 // Bindings dialog state (declared here so draw_display_frame can open it).
 static bool bind_dialog_open = false;
@@ -545,14 +549,83 @@ static void apply_joystick_to_config() {
 }
 
 // Write the accumulated dirty config paths out to the user config files.
-// Single write-out entry point — deferred to Layer 3. g_dirty_paths holds exactly
-// what changed, so once the write-back is implemented this persists just those.
-// For now it logs what would be written.
+// Set a dotted path ("graphics.fog") into a nested boost::json::object.
+static void json_set_path(boost::json::object &root, const std::string &path, const boost::json::value &val) {
+    size_t dot = path.find('.');
+    if (dot == std::string::npos) { root[path] = val; return; }
+    std::string head = path.substr(0, dot);
+    std::string rest = path.substr(dot + 1);
+    if (!root.contains(head) || !root[head].is_object())
+        root[head] = boost::json::object();
+    json_set_path(root[head].as_object(), rest, val);
+}
+
+// Write the accumulated dirty config paths out to the user config files
+// (VSFileSystem::homedir/config.json + bindings.json). Single write-out entry point.
 static void write_out_dirty() {
     if (g_dirty_paths.empty()) return;
-    fprintf(stderr, "[vs-settings-ng] config write-out deferred; %zu dirty path(s):\n", g_dirty_paths.size());
-    for (const auto &p : g_dirty_paths)
-        fprintf(stderr, "  %s\n", p.c_str());
+    boost::json::object config_out;
+    boost::json::object bindings_out;
+    bool has_bindings = false;
+    for (const auto &path : g_dirty_paths) {
+        if (path == "bindings.actions") {
+            has_bindings = true;
+            continue;
+        }
+        if (path.rfind("preset.", 0) == 0) {
+            // preset selector: config.json -> preset.<cat>
+            std::string cat = path.substr(7);
+            auto &preset_obj = config_out["preset"].is_object() ? config_out["preset"].as_object()
+                               : (config_out["preset"] = boost::json::object()).as_object();
+            auto it = configuration().preset.find(cat);
+            if (it != configuration().preset.end()) preset_obj[cat] = it->second;
+            continue;
+        }
+        boost::json::value v = read_config_value(path);
+        if (!v.is_null()) json_set_path(config_out, path, v);
+    }
+
+    // Write config.json overlay (if any config changes).
+    if (!config_out.empty()) {
+        fs::create_directories(VSFileSystem::homedir);
+        std::ofstream out(VSFileSystem::homedir + "/config.json");
+        out << boost::json::serialize(config_out) << "\n";
+        fprintf(stderr, "[vs-settings-ng] wrote config overlay to %s/config.json\n", VSFileSystem::homedir.c_str());
+    }
+    // Write bindings.json overlay (if bindings changed).
+    if (has_bindings) {
+        // Serialize the whole actions map (the bindings dialog commits it wholesale).
+        boost::json::object actions_obj;
+        for (const auto &kv : configuration().actions) {
+            boost::json::object ab;
+            ab["keyboard"] = boost::json::array();
+            ab["mouse"] = boost::json::array();
+            ab["joystick"] = boost::json::array();
+            ab["hat"] = boost::json::array();
+            for (const auto &b : kv.second.keyboard) {
+                boost::json::object kb; kb["key"] = b.key; kb["modifier"] = b.modifier;
+                ab["keyboard"].as_array().push_back(kb);
+            }
+            for (const auto &b : kv.second.mouse) {
+                boost::json::object mb; mb["button"] = b.button; mb["modifier"] = b.modifier;
+                ab["mouse"].as_array().push_back(mb);
+            }
+            for (const auto &b : kv.second.joystick) {
+                boost::json::object jb; jb["joystick"] = b.joystick; jb["button"] = b.button; jb["modifier"] = b.modifier;
+                ab["joystick"].as_array().push_back(jb);
+            }
+            for (const auto &b : kv.second.hat) {
+                boost::json::object hb; hb["joystick"] = b.joystick; hb["hat"] = b.hatswitch; hb["direction"] = b.direction;
+                ab["hat"].as_array().push_back(hb);
+            }
+            actions_obj[kv.first] = ab;
+        }
+        bindings_out["actions"] = actions_obj;
+        fs::create_directories(VSFileSystem::homedir);
+        std::ofstream out(VSFileSystem::homedir + "/bindings.json");
+        out << boost::json::serialize(bindings_out) << "\n";
+        fprintf(stderr, "[vs-settings-ng] wrote bindings overlay to %s/bindings.json\n", VSFileSystem::homedir.c_str());
+    }
     g_dirty_paths.clear();
 }
 
@@ -1236,6 +1309,88 @@ static bool apply_preset_var(const std::string &name, const std::string &value) 
     else { set = false; }
     if (set) mark_dirty("preset_var." + name);
     return set;
+}
+
+// Read the current value of a Configuration field given its dotted path (the
+// reverse of apply_preset_var). Returns a JSON value, or null if unknown.
+static boost::json::value read_config_value(const std::string &path) {
+    const auto &c = configuration();
+    // graphics
+    if (path=="graphics.fog") return c.graphics.fog;
+    else if (path=="graphics.background") return c.graphics.background;
+    else if (path=="graphics.blend_panels") return c.graphics.blend_panels;
+    else if (path=="graphics.cockpit") return c.graphics.cockpit;
+    else if (path=="graphics.color_depth") return c.graphics.color_depth;
+    else if (path=="graphics.force_lighting") return c.graphics.force_lighting;
+    else if (path=="graphics.full_screen") return c.graphics.full_screen;
+    else if (path=="graphics.reflection") return c.graphics.reflection;
+    else if (path=="graphics.smooth_lines") return c.graphics.smooth_lines;
+    else if (path=="graphics.star_blend") return c.graphics.star_blend;
+    else if (path=="graphics.draw_star_body") return c.graphics.draw_star_body;
+    else if (path=="graphics.draw_star_glow") return c.graphics.draw_star_glow;
+    else if (path=="graphics.high_quality_font") return c.graphics.high_quality_font;
+    else if (path=="graphics.high_quality_font_computer") return c.graphics.high_quality_font_computer;
+    else if (path=="graphics.high_quality_sprites") return c.graphics.high_quality_sprites;
+    else if (path=="graphics.per_pixel_lighting") return c.graphics.per_pixel_lighting;
+    else if (path=="graphics.specmap_with_reflection") return c.graphics.specmap_with_reflection;
+    else if (path=="graphics.gl_accelerated_visual") return c.graphics.gl_accelerated_visual;
+    else if (path=="graphics.aspect") return c.graphics.aspect_flt;
+    else if (path=="graphics.font_point") return c.graphics.font_point_flt;
+    else if (path=="graphics.model_detail") return c.graphics.model_detail_flt;
+    else if (path=="graphics.mipmap_detail") return c.graphics.mipmap_detail;
+    else if (path=="graphics.planet_detail_level") return c.graphics.planet_detail_level;
+    else if (path=="graphics.resolution_x") return c.graphics.resolution_x;
+    else if (path=="graphics.resolution_y") return c.graphics.resolution_y;
+    else if (path=="graphics.max_cubemap_size") return c.graphics.max_cubemap_size;
+    else if (path=="graphics.max_movie_dimension") return c.graphics.max_movie_dimension;
+    else if (path=="graphics.max_texture_dimension") return c.graphics.max_texture_dimension;
+    else if (path=="graphics.technique_set") return boost::json::value(c.graphics.technique_set);
+    else if (path=="graphics.mac_shader_name") return boost::json::value(c.graphics.mac_shader_name);
+    else if (path=="graphics.default_full_technique") return boost::json::value(c.graphics.default_full_technique);
+    else if (path=="graphics.default_simple_technique") return boost::json::value(c.graphics.default_simple_technique);
+    else if (path=="graphics.faction_dependent_textures") return c.graphics.faction_dependent_textures;
+    else if (path=="graphics.draw_rendered_crosshairs") return c.graphics.draw_rendered_crosshairs;
+    // audio
+    else if (path=="audio.ai_sound") return c.audio.ai_sound;
+    else if (path=="audio.every_other_mount") return c.audio.every_other_mount;
+    else if (path=="audio.music") return c.audio.music;
+    else if (path=="audio.sound") return c.audio.sound;
+    else if (path=="audio.positional") return c.audio.positional;
+    else if (path=="audio.music_volume") return c.audio.music_volume_flt;
+    else if (path=="audio.volume") return c.audio.volume_flt;
+    else if (path=="audio.max_single_sounds") return c.audio.max_single_sounds;
+    else if (path=="audio.max_total_sounds") return c.audio.max_total_sounds;
+    else if (path=="audio.sounds_extension_1") return boost::json::value(c.cockpit_audio.sounds_extension_1);
+    else if (path=="audio.sounds_extension_2") return boost::json::value(c.cockpit_audio.sounds_extension_2);
+    // physics
+    else if (path=="physics.game_speed") return c.physics.game_speed_flt;
+    else if (path=="physics.game_accel") return c.physics.game_accel_flt;
+    else if (path=="physics.inactive_system_time") return c.physics.inactive_system_time_flt;
+    else if (path=="physics.num_running_systems") return c.physics.num_running_systems;
+    // general
+    else if (path=="general.num_old_systems") return c.general.num_old_systems;
+    else if (path=="general.simulation_atom") return c.general.simulation_atom_flt;
+    // joystick
+    else if (path=="joystick.mouse_cursor") return c.joystick.mouse_cursor;
+    else if (path=="joystick.mouse_sensitivity") return c.joystick.mouse_sensitivity_flt;
+    else if (path=="joystick.reverse_mouse_spr") return c.joystick.reverse_mouse_spr;
+    else if (path=="joystick.warp_mouse") return c.joystick.warp_mouse;
+    else if (path=="joystick.force_use_of_joystick") return c.joystick.force_use_of_joystick;
+    else if (path=="joystick.mouse_cursor_pancam") return c.joystick.mouse_cursor_pancam;
+    else if (path=="joystick.mouse_cursor_pantgt") return c.joystick.mouse_cursor_pantgt;
+    else if (path=="joystick.mouse_cursor_chasecam") return c.joystick.mouse_cursor_chasecam;
+    else if (path=="joystick.warp_mouse_zone") return c.joystick.warp_mouse_zone;
+    else if (path=="joystick.mouse_exponent") return c.joystick.mouse_exponent_flt;
+    else if (path=="joystick.mouse_deadband") return c.joystick.mouse_deadband_flt;
+    else if (path=="joystick.deadband") return c.joystick.deadband_flt;
+    else if (path=="joystick.force_feedback") return c.joystick.force_feedback;
+    else if (path=="joystick.ff_device") return c.joystick.ff_device;
+    // splash / test
+    else if (path=="splash.loading_sprite") return boost::json::value(c.splash.loading_sprite);
+    else if (path=="test.autodocker") return c.test.autodocker;
+    else if (path=="preset_var.model_detail") return c.graphics.model_detail_flt;
+    else if (path=="preset_var.font_point") return c.graphics.font_point_flt;
+    return boost::json::value(nullptr);
 }
 
 // Draw the preset grid (vs-05 layout: group + combo, centered, 3 columns).
