@@ -13,6 +13,7 @@
 #include "configuration/configuration.h"
 #include "gldrv/winsys.h"
 #include "universe.h"
+#include "vegadisk/vsfilesystem.h"
 #include <boost/json.hpp>
 #include <imgui.h>
 #include <SDL3/SDL.h>
@@ -21,6 +22,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <fstream>
 #include <cstdio>
 #include <cstdlib>
 
@@ -1107,29 +1109,66 @@ struct PresetGroupInfo {
     std::vector<std::string> options;  // option names (e.g. "4000MHz")
 };
 
-// Static preset category/option definitions, matching engine.json -> presets.
-// (Categories/options verified against Assets engine.json 2026-08-20. The app
-// records selectors in Configuration.preset; it does not expand the vars yet.)
-static const PresetGroupInfo kPresetDefs[] = {
-    { "computer", "Computer", { "800MHz", "1600MHz", "2000MHz", "3000MHz", "4000MHz", "4000MHzPlus" } },
-    { "physics", "Physics", { "Default (1.0)", "Realistic" } },
-    { "geometry", "Geometry", { "GeomRetro", "GeomLow", "GeomMedium", "GeomHigh", "GeomVeryHigh", "GeomExtreme" } },
-    { "textures", "Textures", { "TexRetro", "Tex256", "Tex512", "Tex1024", "Tex2048", "TexMax" } },
-    { "shaders", "Shaders", { "noshader", "lowshader", "mediumshader", "highshader", "extremeshader", "onboardshader" } },
-    { "sound", "Sound", { "audio_off", "audio_3d_windows", "audio_3d_win_male", "audio_3d_linux", "audio_3d_linux_male" } },
-    { "music", "MusicAndVolume", { "music_off", "windows_ext_music_low", "windows_ext_music_on", "windows_ext_music_high" } },
-    { "faction_textures", "FactionTextures", { "faction_tex_off", "faction_tex_on" } },
-    { "autodocker", "Autodocker", { "autodocker_off", "autodocker_on" } },
-    { "censorship", "Censorship", { "uncensored", "censored" } },
-};
-static const size_t kPresetDefCount = sizeof(kPresetDefs) / sizeof(kPresetDefs[0]);
+static std::vector<PresetGroupInfo> g_preset_groups;
+static bool g_presets_loaded = false;
+
+// Map an engine.json preset category name (e.g. "MusicAndVolume", "FactionTextures")
+// to the config.json preset key (lowercase snake_case: "music", "faction_textures").
+// Known exceptions first (MusicAndVolume -> music), then camelCase -> snake_case.
+static std::string preset_key_for_category(const std::string &cat) {
+    if (cat == "MusicAndVolume") return "music";
+    std::string key;
+    key.reserve(cat.size() + 4);
+    for (size_t i = 0; i < cat.size(); ++i) {
+        char c = cat[i];
+        if (c >= 'A' && c <= 'Z') {
+            if (i > 0) key += '_';
+            key += (char)(c - 'A' + 'a');
+        } else {
+            key += c;
+        }
+    }
+    return key;
+}
+
+// Load preset categories/options from engine.json -> presets (via VSFileSystem::datadir).
+static void load_presets() {
+    if (g_presets_loaded) return;
+    g_preset_groups.clear();
+    std::ifstream in(VSFileSystem::datadir + "/engine.json");
+    if (!in) return;
+    std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    try {
+        boost::json::value root = boost::json::parse(text);
+        const boost::json::value *presets = root.if_object() ? root.as_object().if_contains("presets") : nullptr;
+        if (presets && presets->is_object()) {
+            for (const auto &kv : presets->as_object()) {
+                if (!kv.value().is_object() || kv.value().as_object().empty()) continue;
+                std::string key = preset_key_for_category(kv.key());
+                // Skip the hand-rolled display/input/degenerate groups (as vs-05 does).
+                if (key == "resolution" || key == "mouse" || key == "text"
+                    || key == "accelerated_visual" || key == "color" || key == "joystick") continue;
+                PresetGroupInfo g;
+                g.key = key; g.label = kv.key();
+                for (const auto &okv : kv.value().as_object()) g.options.push_back(okv.key());
+                if (!g.options.empty()) g_preset_groups.push_back(g);
+            }
+        }
+    } catch (...) {}
+    g_presets_loaded = true;
+}
 
 // Draw the preset grid (vs-05 layout: group + combo, centered, 3 columns).
 static void draw_presets_frame() {
+    load_presets();
+    if (g_preset_groups.empty()) {
+        ImGui::TextWrapped("No presets loaded (engine.json presets not found).");
+        return;
+    }
     int cols = 3;
     std::vector<float> colw(cols, 0.0f);
-    for (size_t i = 0; i < kPresetDefCount; i++) {
-        auto &g = kPresetDefs[i];
+    for (size_t i = 0; i < g_preset_groups.size(); i++) {
+        auto &g = g_preset_groups[i];
         float cw = 0;
         for (auto &o : g.options) cw = fmaxf(cw, ImGui::CalcTextSize(o.c_str()).x);
         cw += ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x;
@@ -1140,8 +1179,8 @@ static void draw_presets_frame() {
     for (auto c : colw) total_w += c;
     ImGui::SetCursorPosX(fmaxf(0.0f, (ImGui::GetContentRegionAvail().x - total_w) * 0.5f));
     if (ImGui::BeginTable("modern_presets", cols, ImGuiTableFlags_SizingFixedFit)) {
-        for (size_t i = 0; i < kPresetDefCount; i++) {
-            auto &g = kPresetDefs[i];
+        for (size_t i = 0; i < g_preset_groups.size(); i++) {
+            auto &g = g_preset_groups[i];
             ImGui::TableNextColumn();
             ImGui::Text("%s", g.label.c_str());
             std::string cur = configuration().preset.count(g.key) ? configuration().preset.at(g.key) : "";
@@ -1189,10 +1228,7 @@ void DrawConfigScreen() {
     ImGui::Separator();
     ImGui::TextUnformatted(dirty ? "(unsaved changes)" : "(saved)");
 
-    // Bottom button bar.
-    //  Preview: live-apply all changes to Configuration, stay open (green when dirty).
-    //  Save:     live-apply + write out + close (green when dirty).
-    //  Close:    don't save anything, just close (red when dirty).
+    // Bottom button bar, pinned to the bottom of the window and centered.
     auto apply_all = [&]() {
         apply_display_to_config();
         apply_flight_to_config();
@@ -1203,6 +1239,12 @@ void DrawConfigScreen() {
         if (_Universe) _Universe->ToggleOptionsActive();   // close; hide cursor on inactive
     };
     float btnw = ImGui::CalcTextSize("Save").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
+    float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
+    // Reserve space at the bottom for the button row (separator + buttons), centered.
+    ImGui::SetCursorPosY(ImGui::GetWindowHeight() - btn_h * 2);
+    float avail = ImGui::GetContentRegionAvail().x;
+    ImGui::SetCursorPosX(fmaxf(0.0f, (avail - (btnw * 3 + ImGui::GetStyle().ItemSpacing.x * 2)) * 0.5f));
+    ImGui::Separator();
 
     // Preview (green when dirty): live-apply, stay open.
     if (dirty) {
