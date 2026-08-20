@@ -344,6 +344,10 @@ struct MouseStaging {
 };
 static MouseStaging mouse_stg;
 
+// Mouse / Joystick dialog open flags (declared here so draw_flight_frame can open them).
+static bool mouse_dialog_open = false;
+static bool joy_dialog_open = false;
+
 // Joystick flight roles (x/y/z/throttle).
 static const char *joy_role_names[] = { "x", "y", "z", "throttle" };
 static int  joy_bind_stick[4] = { 0, 0, 0, 0 };
@@ -457,7 +461,6 @@ static void draw_flight_frame() {
 }
 
 // Mouse Settings dialog.
-static bool mouse_dialog_open = false;
 static void draw_mouse_dialog() {
     if (!mouse_dialog_open) return;
     ImGui::SetNextWindowSize(ImVec2(360, 0), ImGuiCond_Appearing);
@@ -486,7 +489,6 @@ static void draw_mouse_dialog() {
 }
 
 // Joystick Settings dialog.
-static bool joy_dialog_open = false;
 static void draw_joystick_dialog() {
     if (!joy_dialog_open) return;
     ImGui::SetNextWindowSize(ImVec2(420, 0), ImGuiCond_Appearing);
