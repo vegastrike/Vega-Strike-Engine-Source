@@ -75,6 +75,7 @@
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
+#include "gui/config_screen.h"
 
 // Using
 using namespace VSFileSystem;
@@ -872,15 +873,7 @@ void DrawConfigOverlay() {
     if (!_Universe->isOptionsActive()) {
         return;
     }
-    // Config screen overlay (placeholder — Phase 3). Transparent, drawn last so it's on top.
-    // Closed via the Alt+C toggle (Esc is a taken binding).
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImVec2(configuration().graphics.resolution_x,
-                                    configuration().graphics.resolution_y),
-            ImGuiCond_Always);
-    ImGui::Begin("config_window", nullptr, window_flags);
-    ImGui::Text("Configuration (placeholder)");
-    ImGui::End();
+    vs_settings_ng::DrawConfigScreen();
 }
 
 /////////////////////////////////////////////////////////
