@@ -1010,11 +1010,11 @@ static void draw_capture_dialog(void) {
 
 // Bindings dialog: category column on the left; binds table on the right.
 static void draw_bindings_dialog(void) {
-    ImGui::SetNextWindowSize(ImVec2(820, 540), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(960, 540), ImGuiCond_Appearing);
     if (ImGui::BeginPopupModal("Bindings", &bind_dialog_open)) {
-        ImGui::BeginChild("catcol", ImVec2(190, 440), ImGuiChildFlags_Borders);
+        ImGui::BeginChild("catcol", ImVec2(220, 440), ImGuiChildFlags_Borders);
         for (int c = 0; c < BC_COUNT; ++c)
-            if (ImGui::Selectable(bind_cat_names[c], bind_cat == c, 0, ImVec2(180, 0))) bind_cat = c;
+            if (ImGui::Selectable(bind_cat_names[c], bind_cat == c, 0, ImVec2(210, 0))) bind_cat = c;
         ImGui::EndChild();
         ImGui::SameLine();
         float tbl_w = ImGui::GetContentRegionAvail().x;
