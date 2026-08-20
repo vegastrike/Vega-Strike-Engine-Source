@@ -54,6 +54,7 @@
 #include "configuration/configuration.h"
 #include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl3.h"
+#include "gui/config_screen.h"
 
 #include <SDL3/SDL_video.h>
 
@@ -743,6 +744,12 @@ void winsys_process_events() {
         while (SDL_PollEvent(&event)) {
             // forward all events to ImGUI
             ImGui_ImplSDL3_ProcessEvent(&event);
+
+            // Forward to the config screen (binding capture, joystick hotplug)
+            // while it is open.
+            if (config_overlay_active) {
+                vs_settings_ng::HandleConfigEvent(&event);
+            }
 
             // now the VS processing of events
             state = false;

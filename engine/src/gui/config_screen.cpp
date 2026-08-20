@@ -53,6 +53,15 @@ static bool joy_dialog_open = false;
 // Forward declarations (defined below; used by draw_display_frame).
 static void load_mouse_staging();
 static void load_joystick_staging();
+static void load_bindings_staging();
+static void draw_bindings_dialog();
+static void handle_bindings_event(const SDL_Event *event);
+
+// Bindings dialog state (declared here so draw_display_frame can open it).
+static bool bind_dialog_open = false;
+static bool bind_capturing = false;
+static int  bind_rebind_row = -1;
+static std::string bind_capture_cmd;
 
 enum { FONT_AA_VEC = 0, FONT_VEC, FONT_HELVETICA, FONT_TIMES, FONT_FIXED };
 static const char *font_type_names[] = { "Antialiased Vector", "Vector", "Helvetica", "Times", "Fixed" };
@@ -385,6 +394,7 @@ void draw_display_frame() {
     if (flight_control != FC_JOYSTICK) ImGui::BeginDisabled();
     if (ImGui::Button("Joystick Settings", ImVec2(-1, 0))) { load_joystick_staging(); joy_dialog_open = true; }
     if (flight_control != FC_JOYSTICK) ImGui::EndDisabled();
+    if (ImGui::Button("Bindings", ImVec2(-1, 0))) { load_bindings_staging(); bind_capture_cmd.clear(); bind_rebind_row = -1; bind_capturing = false; bind_dialog_open = true; }
     if (ImGui::Checkbox("Rendered Crosshair", &rendered_crosshair)) dirty = true;
     ImGui::EndChild();   // end dpybtns (right column)
 }
@@ -666,6 +676,425 @@ static void draw_joystick_dialog() {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Bindings (full vs-05 port, against Configuration.actions)
+// ---------------------------------------------------------------------------
+
+// Bind categories (vs-05 BC_*).
+enum { BC_COCKPIT = 0, BC_MOVEMENT, BC_WEAPONS, BC_TARGETING, BC_COMMS, BC_SHIP, BC_MISC, BC_COUNT };
+static const char *bind_cat_names[BC_COUNT] = { "Cockpit / Camera", "Movement / Flight", "Weapons / Combat",
+    "Targeting", "Comms", "Ship / Systems", "Interface / Misc" };
+
+struct BindRow {
+    std::string command, device;   // device: "key" | "mouse" | "joystick"
+    std::string key, button, device_idx, modifier;
+    std::string hat_idx;           // joystick digital-hatswitch index
+    std::string hat_dir;           // joystick digital-hatswitch direction, else ""
+    int  category = BC_MISC;
+    bool remove = false, dirty = false, conflict = false;
+};
+static std::vector<BindRow> bindrows;
+static int  bind_cat = BC_COCKPIT;
+static bool bind_pending = false;
+static bool bind_capture_requested = false;
+static bool cap_valid = false;
+static bool cap_open = false;
+static std::string cap_device, cap_idx, cap_btn, cap_key, cap_modifier;
+static std::string cap_hat_idx, cap_hat_dir;
+static ImVec2 cap_frame_pos, cap_frame_size;
+
+static bool starts_with(const std::string &s, const char *prefix) {
+    size_t n = strlen(prefix);
+    return s.size() >= n && s.compare(0, n, prefix) == 0;
+}
+static int bind_category(const std::string &cmd) {
+    if (starts_with(cmd, "Cockpit::")) return BC_COCKPIT;
+    if (starts_with(cmd, "Thrust") || starts_with(cmd, "Flight:") || starts_with(cmd, "Joystick:")
+        || cmd == "ToggleWarpDrive") return BC_MOVEMENT;
+    if (cmd == "FireKey" || cmd == "MissileKey" || cmd == "WeapSelKey" || cmd == "MisSelKey"
+        || cmd == "ReverseWeapSelKey" || cmd == "ReverseMisSelKey" || cmd == "SheltonKey" || cmd == "ECMKey"
+        || starts_with(cmd, "Turret") || cmd == "SwitchCombatMode" || cmd == "ABKey"
+        || cmd == "AccelKey" || cmd == "DecelKey") return BC_WEAPONS;
+    if (cmd.find("Target") != std::string::npos) return BC_TARGETING;
+    if (starts_with(cmd, "Comm") || cmd == "TextMessage" || cmd == "ChangeCommStatus") return BC_COMMS;
+    if (cmd == "CloakKey" || cmd == "EjectKey" || cmd == "EjectCargoKey" || cmd == "JumpKey"
+        || cmd == "DockKey" || cmd == "UnDockKey" || cmd == "PauseKey" || cmd == "StartKey" || cmd == "StopKey"
+        || cmd == "Respawn" || cmd == "SuicideKey" || cmd == "SwitchSecured" || cmd == "SwitchWebcam"
+        || cmd == "SetVelocityRefKey" || cmd == "SetVelocityNullKey" || cmd == "RequestClearenceKey") return BC_SHIP;
+    return BC_MISC;
+}
+static std::string bind_input(const BindRow &r) {
+    if (r.device == "key") return "k:" + r.key + ":" + r.modifier;
+    if (r.device == "joystick" && !r.hat_dir.empty())
+        return r.device + ":hat:" + r.device_idx + ":" + r.hat_idx + ":" + r.hat_dir;
+    return r.device + ":" + r.device_idx + ":" + r.button;
+}
+static void compute_bind_conflicts(void) {
+    std::map<std::string, std::vector<std::string>> input_cmds;
+    for (auto &r : bindrows) {
+        if (r.remove) continue;
+        std::string in = bind_input(r);
+        if (std::find(input_cmds[in].begin(), input_cmds[in].end(), r.command) == input_cmds[in].end())
+            input_cmds[in].push_back(r.command);
+    }
+    for (auto &r : bindrows) {
+        r.conflict = false;
+        if (r.remove) continue;
+        r.conflict = input_cmds[bind_input(r)].size() > 1;
+    }
+}
+
+// Load Configuration.actions into the staged bindrows.
+static void load_bindings_staging() {
+    bindrows.clear();
+    for (const auto &kv : configuration().actions) {
+        const std::string &cmd = kv.first;
+        const auto &ab = kv.second;
+        for (const auto &b : ab.keyboard) {
+            BindRow r; r.command = cmd; r.category = bind_category(cmd); r.device = "key";
+            r.key = b.key; r.modifier = b.modifier; bindrows.push_back(r);
+        }
+        for (const auto &b : ab.mouse) {
+            BindRow r; r.command = cmd; r.category = bind_category(cmd); r.device = "mouse";
+            r.button = std::to_string(b.button); r.device_idx = "0"; r.modifier = "none"; bindrows.push_back(r);
+        }
+        for (const auto &b : ab.joystick) {
+            BindRow r; r.command = cmd; r.category = bind_category(cmd); r.device = "joystick";
+            r.button = std::to_string(b.button); r.device_idx = std::to_string(b.joystick); r.modifier = "none";
+            bindrows.push_back(r);
+        }
+        for (const auto &b : ab.hat) {
+            BindRow r; r.command = cmd; r.category = bind_category(cmd); r.device = "joystick";
+            r.hat_idx = std::to_string(b.hatswitch); r.hat_dir = b.direction;
+            r.device_idx = std::to_string(b.joystick); r.modifier = "none"; bindrows.push_back(r);
+        }
+    }
+    compute_bind_conflicts();
+}
+
+// Commit the staged bindrows to Configuration.actions (on Accept).
+static void apply_bindrows_to_config() {
+    auto &actions = cfg().actions;
+    actions.clear();   // rebuild from the staged rows
+    for (const auto &r : bindrows) {
+        if (r.remove) continue;
+        auto &ab = actions[r.command];
+        vega_config::Configuration::ActionBinding b;
+        b.modifier = "none";
+        if (r.device == "key") {
+            b.key = r.key; b.modifier = r.modifier; ab.keyboard.push_back(b);
+        } else if (r.device == "mouse") {
+            b.button = atoi(r.button.c_str()); b.is_mouse = true; b.joystick = -1; ab.mouse.push_back(b);
+        } else if (!r.hat_dir.empty()) {
+            b.hatswitch = atoi(r.hat_idx.c_str()); b.direction = r.hat_dir;
+            b.joystick = atoi(r.device_idx.c_str()); ab.hat.push_back(b);
+        } else {
+            b.button = atoi(r.button.c_str()); b.joystick = atoi(r.device_idx.c_str()); ab.joystick.push_back(b);
+        }
+    }
+    // Bindings changed -> mark the whole actions tree dirty (written out as bindings.json).
+    mark_dirty("bindings.actions");
+}
+
+// Mark every bind row sharing the currently-captured input (other actions) as removed.
+static void clear_other_binds(void) {
+    std::string in;
+    if (cap_device == "key") in = "k:" + cap_key + ":" + cap_modifier;
+    else if (cap_device == "joystick" && !cap_hat_dir.empty())
+        in = "joystick:hat:" + cap_idx + ":" + cap_hat_idx + ":" + cap_hat_dir;
+    else in = cap_device + ":" + cap_idx + ":" + cap_btn;
+    if (in.empty()) return;
+    for (auto &r : bindrows) {
+        if (r.remove || r.command == bind_capture_cmd) continue;
+        if (bind_input(r) == in) { r.remove = true; r.dirty = true; }
+    }
+    compute_bind_conflicts();
+}
+
+// Actions already bound to the currently-captured input (excluding the target action).
+static std::vector<std::string> capture_conflicts(void) {
+    std::string in;
+    if (cap_device == "key") in = "k:" + cap_key + ":" + cap_modifier;
+    else if (cap_device == "joystick" && !cap_hat_dir.empty())
+        in = "joystick:hat:" + cap_idx + ":" + cap_hat_idx + ":" + cap_hat_dir;
+    else in = cap_device + ":" + cap_idx + ":" + cap_btn;
+    if (in.empty()) return {};
+    std::vector<std::string> out;
+    for (auto &r : bindrows) {
+        if (r.remove || r.command == bind_capture_cmd) continue;
+        if (bind_input(r) == in)
+            if (std::find(out.begin(), out.end(), r.command) == out.end())
+                out.push_back(r.command);
+    }
+    return out;
+}
+
+// Map an SDL3 keycode to the config's key-name convention.
+static const char *config_key_name(SDL_Keycode key) {
+    switch (key) {
+        case SDLK_RETURN: return "return";
+        case SDLK_ESCAPE: return "esc";
+        case SDLK_TAB: return "tab";
+        case SDLK_SPACE: return "space";
+        case SDLK_BACKSPACE: return "backspace";
+        case SDLK_LEFT: return "cursor-left";
+        case SDLK_RIGHT: return "cursor-right";
+        case SDLK_UP: return "cursor-up";
+        case SDLK_DOWN: return "cursor-down";
+        case SDLK_HOME: return "cursor-home";
+        case SDLK_END: return "cursor-end";
+        case SDLK_PAGEUP: return "cursor-pageup";
+        case SDLK_PAGEDOWN: return "cursor-pagedown";
+        case SDLK_INSERT: return "cursor-insert";
+        case SDLK_DELETE: return "cursor-delete";
+        case SDLK_CAPSLOCK: return "capslock";
+        case SDLK_SCROLLLOCK: return "scrollock";
+        case SDLK_NUMLOCKCLEAR: return "keypad-numlock";
+        default: {
+            if (key >= SDLK_F1 && key <= SDLK_F15) {
+                static char b[16]; snprintf(b, sizeof(b), "function-%d", (int)(key - SDLK_F1) + 1);
+                return b;
+            }
+            if (key >= ' ' && key <= '~') {
+                static char b[2]; b[0] = (char)key; b[1] = 0; return b;
+            }
+            return NULL;
+        }
+    }
+}
+
+// Convert an SDL joystick instance ID to its index in SDL_GetJoysticks().
+static int joystick_index_of(SDL_JoystickID which) {
+    int n = 0; SDL_JoystickID *ids = SDL_GetJoysticks(&n);
+    int idx = -1;
+    for (int i = 0; i < n; i++) if (ids[i] == which) { idx = i; break; }
+    SDL_free(ids);
+    return idx;
+}
+
+// Map an SDL_HAT_* bitmask to its direction name; NULL for CENTERED.
+static const char *hat_value_name(Uint8 v) {
+    switch (v) {
+        case SDL_HAT_UP:       return "up";
+        case SDL_HAT_RIGHT:    return "right";
+        case SDL_HAT_DOWN:     return "down";
+        case SDL_HAT_LEFT:     return "left";
+        case SDL_HAT_RIGHTUP:  return "rightup";
+        case SDL_HAT_RIGHTDOWN: return "rightdown";
+        case SDL_HAT_LEFTUP:   return "leftup";
+        case SDL_HAT_LEFTDOWN: return "leftdown";
+        default:               return NULL;
+    }
+}
+
+// Commit a captured input to a new/replaced bind row for the current action.
+static void accept_capture(void) {
+    BindRow nr;
+    nr.command = bind_capture_cmd; nr.category = bind_category(bind_capture_cmd);
+    nr.remove = false; nr.dirty = true; nr.conflict = false;
+    nr.device = cap_device;
+    if (cap_device == "key") { nr.key = cap_key; nr.modifier = cap_modifier; }
+    else if (cap_device == "joystick" && !cap_hat_dir.empty()) {
+        nr.hat_idx = cap_hat_idx; nr.hat_dir = cap_hat_dir; nr.device_idx = cap_idx;
+    }
+    else { nr.button = cap_btn; nr.device_idx = cap_idx; }
+    if (bind_rebind_row >= 0 && bind_rebind_row < (int)bindrows.size()) {
+        BindRow &r = bindrows[bind_rebind_row];
+        r.key.clear(); r.button.clear(); r.device_idx.clear(); r.modifier = "none";
+        r.hat_idx.clear(); r.hat_dir.clear();
+        r.device = nr.device; r.key = nr.key; r.button = nr.button;
+        r.device_idx = nr.device_idx; r.modifier = nr.modifier;
+        r.hat_idx = nr.hat_idx; r.hat_dir = nr.hat_dir;
+        r.dirty = true;
+    } else {
+        bindrows.push_back(nr);
+    }
+    bind_rebind_row = -1;
+    cap_valid = false;
+    compute_bind_conflicts();
+}
+
+// Handle SDL events for binding capture + joystick hotplug.
+static void handle_bindings_event(const SDL_Event *event) {
+    if (bind_capturing && cap_open && !bind_capture_cmd.empty()) {
+        if (event->type == SDL_EVENT_KEY_DOWN) {
+            SDL_Keycode kc = event->key.key;
+            if (kc == SDLK_LSHIFT || kc == SDLK_RSHIFT || kc == SDLK_LCTRL || kc == SDLK_RCTRL
+                || kc == SDLK_LALT || kc == SDLK_RALT || kc == SDLK_LGUI || kc == SDLK_RGUI)
+                return;
+            const char *nm = config_key_name(kc);
+            if (nm) {
+                std::string k = nm;
+                if ((event->key.mod & SDL_KMOD_SHIFT) && k.size() == 1 && k[0] >= 'a' && k[0] <= 'z')
+                    k[0] = (char)(k[0] - 'a' + 'A');
+                cap_device = "key"; cap_key = k;
+                cap_modifier = (event->key.mod & SDL_KMOD_CTRL) ? "ctrl"
+                             : ((event->key.mod & SDL_KMOD_ALT) ? "alt" : "none");
+                cap_valid = true;
+            }
+            return;
+        }
+        if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+            bool inframe = event->button.x >= cap_frame_pos.x && event->button.x <= cap_frame_pos.x + cap_frame_size.x
+                        && event->button.y >= cap_frame_pos.y && event->button.y <= cap_frame_pos.y + cap_frame_size.y;
+            if (inframe) {
+                cap_device = "mouse"; cap_btn = std::to_string(event->button.button);
+                cap_idx = "0"; cap_modifier = "none"; cap_valid = true;
+                return;
+            }
+        }
+        if (event->type == SDL_EVENT_JOYSTICK_BUTTON_DOWN) {
+            int idx = joystick_index_of(event->jbutton.which);
+            cap_device = "joystick"; cap_btn = std::to_string(event->jbutton.button);
+            cap_idx = (idx < 0) ? std::to_string(event->jbutton.which) : std::to_string(idx);
+            cap_modifier = "none"; cap_valid = true;
+            return;
+        }
+        if (event->type == SDL_EVENT_JOYSTICK_HAT_MOTION) {
+            const char *dir = hat_value_name(event->jhat.value);
+            if (dir) {
+                int idx = joystick_index_of(event->jhat.which);
+                cap_device = "joystick";
+                cap_idx = (idx < 0) ? std::to_string(event->jhat.which) : std::to_string(idx);
+                cap_hat_idx = std::to_string(event->jhat.hat);
+                cap_hat_dir = dir;
+                cap_btn.clear();
+                cap_valid = true;
+            }
+            return;
+        }
+    }
+    if (event->type == SDL_EVENT_JOYSTICK_ADDED || event->type == SDL_EVENT_JOYSTICK_REMOVED)
+        SDL_UpdateJoysticks();
+}
+
+// Capture Binding modal.
+static void draw_capture_dialog(void) {
+    if (bind_capture_requested) { ImGui::OpenPopup("Capture Binding"); bind_capture_requested = false; }
+    cap_open = ImGui::BeginPopupModal("Capture Binding", &bind_capturing, ImGuiWindowFlags_AlwaysAutoResize);
+    if (cap_open) {
+        ImGui::Text("Capture binding for %s", bind_capture_cmd.c_str());
+        ImGui::Text("Press a key, joystick button, or move a hat (anywhere),");
+        ImGui::Text("or click the frame below for a mouse button:");
+        ImGui::BeginChild("capframe", ImVec2(280, 56), ImGuiChildFlags_Borders);
+        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.3f, 1.0f), "    click here for a mouse bind");
+        cap_frame_pos = ImGui::GetWindowPos(); cap_frame_size = ImGui::GetWindowSize();
+        ImGui::EndChild();
+        if (cap_valid) {
+            std::string disp;
+            if (cap_device == "key")
+                disp = cap_key + (cap_modifier == "none" ? "" : " " + cap_modifier);
+            else if (cap_device == "joystick" && !cap_hat_dir.empty())
+                disp = "joystick hat-" + cap_hat_idx + " " + cap_hat_dir;
+            else
+                disp = cap_device + " " + cap_btn;
+            ImGui::Text("Captured: %s", disp.c_str());
+            auto conflicts = capture_conflicts();
+            if (!conflicts.empty()) {
+                ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "! This input is already bound to:");
+                for (auto &c : conflicts)
+                    ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "    - %s", c.c_str());
+                ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "  Accepting will share the input (not recommended).");
+                if (ImGui::Button("Clear other Bind")) clear_other_binds();
+            }
+        }
+        ImGui::Separator();
+        if (cap_valid && ImGui::Button("Accept")) { accept_capture(); bind_pending = true; dirty = true; bind_capturing = false; ImGui::CloseCurrentPopup(); }
+        if (cap_valid) ImGui::SameLine();
+        if (ImGui::Button("Retry")) { cap_valid = false; cap_hat_dir.clear(); cap_hat_idx.clear(); }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel")) { bind_capturing = false; cap_valid = false; ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
+    }
+}
+
+// Bindings dialog: category column on the left; binds table on the right.
+static void draw_bindings_dialog(void) {
+    ImGui::SetNextWindowSize(ImVec2(820, 540), ImGuiCond_Appearing);
+    if (ImGui::BeginPopupModal("Bindings", &bind_dialog_open)) {
+        ImGui::BeginChild("catcol", ImVec2(190, 440), ImGuiChildFlags_Borders);
+        for (int c = 0; c < BC_COUNT; ++c)
+            if (ImGui::Selectable(bind_cat_names[c], bind_cat == c, 0, ImVec2(180, 0))) bind_cat = c;
+        ImGui::EndChild();
+        ImGui::SameLine();
+        float tbl_w = ImGui::GetContentRegionAvail().x;
+        ImGui::BeginChild("bindlist", ImVec2(tbl_w, 440), ImGuiChildFlags_Borders,
+                          ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+        if (bindrows.empty()) {
+            ImGui::TextWrapped("No bindings loaded (Configuration has no actions).");
+        } else {
+            std::vector<std::string> cmds;
+            for (auto &r : bindrows)
+                if (std::find(cmds.begin(), cmds.end(), r.command) == cmds.end()) cmds.push_back(r.command);
+            std::sort(cmds.begin(), cmds.end());
+            if (ImGui::BeginTable("bindtable", 5,
+                    ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit)) {
+                ImGui::TableSetupColumn("Action");
+                ImGui::TableSetupColumn("Input");
+                ImGui::TableSetupColumn("Binding");
+                ImGui::TableSetupColumn("Add");
+                ImGui::TableSetupColumn("Delete");
+                ImGui::TableHeadersRow();
+                int row = 0;
+                for (auto &cmd : cmds) {
+                    if (bind_category(cmd) != bind_cat) continue;
+                    bool any = false;
+                    for (size_t i = 0; i < bindrows.size(); ++i) {
+                        BindRow &r = bindrows[i];
+                        if (r.command != cmd || r.remove) continue;
+                        any = true;
+                        std::string dev = (r.device == "key") ? "keyboard" : r.device;
+                        std::string disp;
+                        if (r.device == "key")
+                            disp = r.key + (r.modifier == "none" ? "" : " " + r.modifier);
+                        else if (r.device == "joystick" && !r.hat_dir.empty())
+                            disp = "hat-" + r.hat_idx + " " + r.hat_dir;
+                        else
+                            disp = "btn " + r.button;
+                        ImGui::TableNextRow();
+                        ImGui::TableSetColumnIndex(0); ImGui::TextUnformatted(cmd.c_str());
+                        ImGui::TableSetColumnIndex(1); ImGui::TextUnformatted(dev.c_str());
+                        ImGui::TableSetColumnIndex(2);
+                        char bid[24]; snprintf(bid, sizeof(bid), "##bind%d", row);
+                        if (r.conflict) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
+                        if (ImGui::Button((disp + bid).c_str())) {
+                            bind_capture_cmd = cmd; bind_rebind_row = (int)i;
+                            bind_capturing = true; cap_valid = false; cap_hat_dir.clear(); cap_hat_idx.clear();
+                            bind_capture_requested = true;
+                        }
+                        if (r.conflict) ImGui::PopStyleColor();
+                        ImGui::TableSetColumnIndex(3);
+                        char aid[24]; snprintf(aid, sizeof(aid), "+##%d", row);
+                        if (ImGui::Button(aid)) { bind_capture_cmd = cmd; bind_rebind_row = -1; bind_capturing = true; cap_valid = false; cap_hat_dir.clear(); cap_hat_idx.clear(); bind_capture_requested = true; }
+                        ImGui::TableSetColumnIndex(4);
+                        char xid[24]; snprintf(xid, sizeof(xid), "X##%d", row);
+                        if (ImGui::Button(xid)) { r.remove = true; r.dirty = true; compute_bind_conflicts(); }
+                        row++;
+                    }
+                    if (!any) {
+                        ImGui::TableNextRow();
+                        ImGui::TableSetColumnIndex(0); ImGui::TextUnformatted(cmd.c_str());
+                        ImGui::TableSetColumnIndex(1); ImGui::Text("(none)");
+                        ImGui::TableSetColumnIndex(2);
+                        ImGui::TableSetColumnIndex(3);
+                        char aid[24]; snprintf(aid, sizeof(aid), "+##%d", row);
+                        if (ImGui::Button(aid)) { bind_capture_cmd = cmd; bind_rebind_row = -1; bind_capturing = true; cap_valid = false; cap_hat_dir.clear(); cap_hat_idx.clear(); bind_capture_requested = true; }
+                        row++;
+                    }
+                }
+                ImGui::EndTable();
+            }
+        }
+        ImGui::EndChild();
+        ImGui::Separator();
+        if (ImGui::Button("Accept")) { bind_pending = true; dirty = true; apply_bindrows_to_config(); bind_capturing = false; bind_dialog_open = false; ImGui::CloseCurrentPopup(); }
+        ImGui::SameLine();
+        if (ImGui::Button("Close")) { bind_capturing = false; bind_dialog_open = false; ImGui::CloseCurrentPopup(); }
+        draw_capture_dialog();
+        ImGui::EndPopup();
+    }
+}
+
 } // namespace
 
 void DrawConfigScreen() {
@@ -752,7 +1181,16 @@ void DrawConfigScreen() {
     draw_mouse_dialog();
     draw_joystick_dialog();
 
+    // Bindings dialog (modal on top).
+    if (bind_dialog_open) ImGui::OpenPopup("Bindings");
+    draw_bindings_dialog();
+
     ImGui::End();
+}
+
+void HandleConfigEvent(const SDL_Event *event) {
+    // Binding capture + joystick hotplug (only meaningful while the config screen is open).
+    handle_bindings_event(event);
 }
 
 } // namespace vs_settings_ng
