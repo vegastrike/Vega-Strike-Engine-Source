@@ -661,6 +661,15 @@ void winsys_show_cursor(bool visible) {
     }
 }
 
+// Whether the in-game config overlay is open. While active, winsys suppresses
+// forwarding mouse/keyboard to the game handlers (the overlay consumes input) so
+// clicks don't pass through to the game behind.
+static bool config_overlay_active = false;
+
+void winsys_set_config_overlay_active(bool active) {
+    config_overlay_active = active;
+}
+
 // Apply a new resolution/fullscreen to the live window. Reuses the existing
 // windowed-mode resize cascade: SDL_SetWindowSize fires SDL_EVENT_WINDOW_RESIZED,
 // which triggers get_screen_measurements() + the reshape callback (Reshape), which
@@ -694,6 +703,14 @@ void winsys_apply_resolution(int width, int height, bool fullscreen) {
     } else {
         SDL_SetWindowFullscreen(window, false);
         SDL_SetWindowSize(window, width, height);
+    }
+
+    // Refresh the measurements + reshape callback so native_resolution_x/y and the
+    // GL viewport update for the new mode. In windowed this normally fires via
+    // SDL_EVENT_WINDOW_RESIZED; fullscreen mode changes may not, so force it here.
+    get_screen_measurements();
+    if (reshape_func) {
+        (*reshape_func)(native_resolution_x, native_resolution_y);
     }
 }
 
@@ -739,7 +756,9 @@ void winsys_process_events() {
                     if (HandleGlobalKey(event.key.key, event.key.mod, event.key.down, x, y)) {
                         break;
                     }
-                    if (keyboard_func) {
+                    // While the config overlay is open, consume input (don't forward to the
+                    // game) so clicks/keys don't pass through to the game behind.
+                    if (!config_overlay_active && keyboard_func) {
                         SDL_GetMouseState(&x, &y);
                         (*keyboard_func)(event.key.key, event.key.mod, event.key.down, x, y);
                     }
@@ -747,7 +766,7 @@ void winsys_process_events() {
 
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
                 case SDL_EVENT_MOUSE_BUTTON_UP:
-                    if (mouse_func) {
+                    if (!config_overlay_active && mouse_func) {
                         (*mouse_func)(event.button.button,
                             event.button.down,
                             event.button.x,
@@ -776,13 +795,13 @@ void winsys_process_events() {
                 case SDL_EVENT_MOUSE_MOTION:
                     if (event.motion.state) {
                         /* buttons are down */
-                        if (motion_func) {
+                        if (!config_overlay_active && motion_func) {
                             (*motion_func)(event.motion.x,
                                 event.motion.y);
                         }
                     } else {
                         /* no buttons are down */
-                        if (passive_motion_func) {
+                        if (!config_overlay_active && passive_motion_func) {
                             (*passive_motion_func)(event.motion.x,
                                     event.motion.y);
                         }

@@ -872,6 +872,8 @@ void Universe::ToggleOptionsActive() {
     // Show the cursor when the config screen is open (so the user can click),
     // hide it again when closed. The in-flight HUD keeps the cursor hidden.
     winsys_show_cursor(optionsActive);
+    // While the config overlay is open, consume input in winsys (no click-through).
+    winsys_set_config_overlay_active(optionsActive);
 }
 
 void DrawConfigOverlay() {
