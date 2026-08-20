@@ -330,6 +330,193 @@ void draw_display_frame() {
     ImGui::EndChild();
 }
 
+// ---------------------------------------------------------------------------
+// Flight Control + Mouse + Joystick (ported from vs-05 modern_ui.cpp)
+// ---------------------------------------------------------------------------
+
+// Mouse flight-mode names (the Mouse preset options in engine.json).
+static const char *mouse_mode_names[] = { "glide_mouse", "inv_glide_mouse", "warp_mouse", "inv_warp_mouse", "no_mouse" };
+
+// Mouse staging.
+struct MouseStaging {
+    bool cam_pancam = false, cam_pantgt = false, cam_chasecam = true;
+    char warp_zone[8] = "200", exponent[8] = "1.5", deadband[8] = "0.05";
+};
+static MouseStaging mouse_stg;
+
+// Joystick flight roles (x/y/z/throttle).
+static const char *joy_role_names[] = { "x", "y", "z", "throttle" };
+static int  joy_bind_stick[4] = { 0, 0, 0, 0 };
+static int  joy_bind_axis[4] = { -1, -1, -1, -1 };
+static bool joy_bind_inv[4] = { false, false, false, false };
+static char joy_deadband[8] = "0.05";
+static bool joy_ffb = false;
+static char joy_ff_device[8] = "0";
+
+// Load mouse staging from Configuration.joystick.
+static void load_mouse_staging() {
+    const auto &j = configuration().joystick;
+    mouse_stg.cam_pancam = j.mouse_cursor_pancam;
+    mouse_stg.cam_pantgt = j.mouse_cursor_pantgt;
+    mouse_stg.cam_chasecam = j.mouse_cursor_chasecam;
+    snprintf(mouse_stg.warp_zone, sizeof(mouse_stg.warp_zone), "%d", j.warp_mouse_zone);
+    snprintf(mouse_stg.exponent, sizeof(mouse_stg.exponent), "%.1f", j.mouse_exponent_flt);
+    snprintf(mouse_stg.deadband, sizeof(mouse_stg.deadband), "%.2f", j.mouse_deadband_flt);
+}
+
+// Load joystick staging from Configuration.joystick + input.axes.
+static void load_joystick_staging() {
+    const auto &j = configuration().joystick;
+    snprintf(joy_deadband, sizeof(joy_deadband), "%.2f", j.deadband_flt);
+    joy_ffb = j.force_feedback;
+    snprintf(joy_ff_device, sizeof(joy_ff_device), "%d", j.ff_device);
+    const auto &axes = configuration().axes;
+    for (int r = 0; r < 4; ++r) {
+        joy_bind_stick[r] = 0; joy_bind_axis[r] = -1; joy_bind_inv[r] = false;
+        auto it = axes.find(joy_role_names[r]);
+        if (it != axes.end() && it->second.axis >= 0) {
+            joy_bind_stick[r] = it->second.joystick;
+            joy_bind_axis[r] = it->second.axis;
+            joy_bind_inv[r] = it->second.inverse;
+        }
+    }
+}
+
+// Apply flight-control exclusivity to Configuration.joystick.
+static void apply_flight_to_config() {
+    auto &j = cfg().joystick;
+    if (flight_control == FC_MOUSE) {
+        j.force_use_of_joystick = false;
+        j.warp_mouse = true;
+    } else if (flight_control == FC_JOYSTICK) {
+        j.force_use_of_joystick = true;
+    } else {
+        j.force_use_of_joystick = false;
+        j.warp_mouse = false;
+    }
+}
+
+// Apply mouse staging to Configuration.joystick.
+static void apply_mouse_to_config() {
+    auto &j = cfg().joystick;
+    j.mouse_cursor_pancam = mouse_stg.cam_pancam;
+    j.mouse_cursor_pantgt = mouse_stg.cam_pantgt;
+    j.mouse_cursor_chasecam = mouse_stg.cam_chasecam;
+    j.warp_mouse_zone = atoi(mouse_stg.warp_zone);
+    j.mouse_exponent_flt = (float)atof(mouse_stg.exponent);
+    j.mouse_deadband_flt = (float)atof(mouse_stg.deadband);
+    // Mouse flight mode -> warp_mouse + the x/y axis source.
+    bool warp = (std::string(mouse_mode_names[flight_control == FC_MOUSE ? 0 : 0]).find("warp") != std::string::npos);
+    // The active mouse mode names warp_* -> warp_mouse true, glide_* -> false.
+    std::string mode = mouse_mode_names[0];
+    j.warp_mouse = (mode.find("warp") != std::string::npos);
+}
+
+// Apply joystick staging to Configuration.joystick + input.axes.
+static void apply_joystick_to_config() {
+    if (flight_control != FC_JOYSTICK) return;
+    auto &j = cfg().joystick;
+    j.deadband_flt = (float)atof(joy_deadband);
+    j.force_feedback = joy_ffb;
+    j.ff_device = atoi(joy_ff_device);
+    // Write the x/y/z/throttle axes.
+    auto &axes = cfg().axes;
+    for (int r = 0; r < 4; ++r) {
+        const char *role = joy_role_names[r];
+        if (joy_bind_axis[r] < 0) {
+            axes.erase(role);
+        } else {
+            axes[role].source = "joystick";
+            axes[role].joystick = joy_bind_stick[r];
+            axes[role].axis = joy_bind_axis[r];
+            axes[role].inverse = joy_bind_inv[r];
+        }
+    }
+}
+
+// Flight Control picker + Mouse/Joystick buttons.
+static void draw_flight_frame() {
+    if (ImGui::Button(("Flight Control: " + std::string(fc_names[flight_control])).c_str(), ImVec2(-1, 0)))
+        ImGui::OpenPopup("##flight");
+    if (ImGui::BeginPopup("##flight")) {
+        for (int i = 0; i < 3; ++i) {
+            if (ImGui::MenuItem(fc_names[i])) {
+                flight_control = i;
+                if (i == FC_MOUSE) load_mouse_staging();
+                else if (i == FC_JOYSTICK) load_joystick_staging();
+                dirty = true;
+            }
+        }
+        ImGui::EndPopup();
+    }
+    ImGui::Separator();
+    ImGui::Text("Input");
+    if (ImGui::Button("Mouse Settings")) { load_mouse_staging(); mouse_dialog_open = true; }
+    ImGui::SameLine();
+    if (ImGui::Button("Joystick Settings")) { load_joystick_staging(); joy_dialog_open = true; }
+}
+
+// Mouse Settings dialog.
+static bool mouse_dialog_open = false;
+static void draw_mouse_dialog() {
+    if (!mouse_dialog_open) return;
+    ImGui::SetNextWindowSize(ImVec2(360, 0), ImGuiCond_Appearing);
+    if (ImGui::BeginPopupModal("Mouse Settings", &mouse_dialog_open, ImGuiWindowFlags_AlwaysAutoResize)) {
+        // Flight mode (Mouse preset).
+        int sel = 0;
+        ImGui::Text("Flight mode"); ImGui::SameLine(); ImGui::SetNextItemWidth(180);
+        if (ImGui::Combo("##mmode", &sel, mouse_mode_names, 5)) { dirty = true; }
+        ImGui::Separator();
+        ImGui::Checkbox("Mouse cursor on pan camera", &mouse_stg.cam_pancam);
+        ImGui::Checkbox("Mouse cursor on target pan camera", &mouse_stg.cam_pantgt);
+        ImGui::Checkbox("Mouse cursor on chase camera", &mouse_stg.cam_chasecam);
+        ImGui::Separator();
+        ImGui::Text("Warp zone"); ImGui::SameLine(); ImGui::SetNextItemWidth(90);
+        if (ImGui::InputText("##wz", mouse_stg.warp_zone, sizeof(mouse_stg.warp_zone), ImGuiInputTextFlags_CharsDecimal)) dirty = true;
+        ImGui::Text("Exponent"); ImGui::SameLine(); ImGui::SetNextItemWidth(90);
+        if (ImGui::InputText("##exp", mouse_stg.exponent, sizeof(mouse_stg.exponent), ImGuiInputTextFlags_CharsDecimal)) dirty = true;
+        ImGui::Text("Deadband"); ImGui::SameLine(); ImGui::SetNextItemWidth(90);
+        if (ImGui::InputText("##db", mouse_stg.deadband, sizeof(mouse_stg.deadband), ImGuiInputTextFlags_CharsDecimal)) dirty = true;
+        ImGui::Separator();
+        if (ImGui::Button("Accept")) { mouse_dialog_open = false; dirty = true; ImGui::CloseCurrentPopup(); }
+        ImGui::SameLine();
+        if (ImGui::Button("Close")) { mouse_dialog_open = false; ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
+    }
+}
+
+// Joystick Settings dialog.
+static bool joy_dialog_open = false;
+static void draw_joystick_dialog() {
+    if (!joy_dialog_open) return;
+    ImGui::SetNextWindowSize(ImVec2(420, 0), ImGuiCond_Appearing);
+    if (ImGui::BeginPopupModal("Joystick Settings", &joy_dialog_open, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Bind each flight role to a joystick axis (joystick index, axis index).");
+        ImGui::Separator();
+        static const char *roles[] = { "x", "y", "z", "throttle" };
+        for (int r = 0; r < 4; ++r) {
+            ImGui::Text("%s", roles[r]); ImGui::SameLine();
+            ImGui::SetNextItemWidth(50);
+            if (ImGui::InputInt(("##jstick" + std::string(roles[r])).c_str(), &joy_bind_stick[r])) dirty = true;
+            ImGui::SameLine(); ImGui::SetNextItemWidth(50);
+            if (ImGui::InputInt(("##jaxis" + std::string(roles[r])).c_str(), &joy_bind_axis[r])) dirty = true;
+            ImGui::SameLine();
+            if (ImGui::Checkbox(("inv##" + std::string(roles[r])).c_str(), &joy_bind_inv[r])) dirty = true;
+        }
+        ImGui::Separator();
+        ImGui::Text("Deadband"); ImGui::SameLine(); ImGui::SetNextItemWidth(90);
+        if (ImGui::InputText("##jdb", joy_deadband, sizeof(joy_deadband), ImGuiInputTextFlags_CharsDecimal)) dirty = true;
+        ImGui::Checkbox("Force feedback", &joy_ffb);
+        ImGui::Text("FF device"); ImGui::SameLine(); ImGui::SetNextItemWidth(90);
+        if (ImGui::InputText("##jff", joy_ff_device, sizeof(joy_ff_device), ImGuiInputTextFlags_CharsDecimal)) dirty = true;
+        ImGui::Separator();
+        if (ImGui::Button("Accept")) { joy_dialog_open = false; dirty = true; ImGui::CloseCurrentPopup(); }
+        ImGui::SameLine();
+        if (ImGui::Button("Close")) { joy_dialog_open = false; ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
+    }
+}
+
 } // namespace
 
 void DrawConfigScreen() {
@@ -351,12 +538,19 @@ void DrawConfigScreen() {
     // Rendered crosshair toggle (vs-05 had it in the display/button area).
     if (ImGui::Checkbox("Rendered Crosshair", &rendered_crosshair)) dirty = true;
 
+    // Flight Control + Input (Mouse/Joystick).
+    ImGui::Separator();
+    draw_flight_frame();
+
     ImGui::Separator();
     ImGui::TextUnformatted(dirty ? "(unsaved changes)" : "(saved)");
 
     if (ImGui::Button("Save")) {
         if (dirty) {
             apply_display_to_config();
+            apply_flight_to_config();
+            apply_mouse_to_config();
+            apply_joystick_to_config();
             dirty = false;
         }
     }
@@ -367,6 +561,12 @@ void DrawConfigScreen() {
             _Universe->ToggleOptionsActive();   // close the overlay; hide cursor on inactive
         }
     }
+
+    // Input dialogs (open as modals on top).
+    if (mouse_dialog_open) ImGui::OpenPopup("Mouse Settings");
+    if (joy_dialog_open) ImGui::OpenPopup("Joystick Settings");
+    draw_mouse_dialog();
+    draw_joystick_dialog();
 
     ImGui::End();
 }
