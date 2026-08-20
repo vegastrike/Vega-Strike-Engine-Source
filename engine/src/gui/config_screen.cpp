@@ -42,6 +42,7 @@ std::string screen_aspect_text;
 bool display_inited = false;
 
 bool rendered_crosshair = true;
+bool cfg_full_screen = true;
 
 enum { FONT_AA_VEC = 0, FONT_VEC, FONT_HELVETICA, FONT_TIMES, FONT_FIXED };
 static const char *font_type_names[] = { "Antialiased Vector", "Vector", "Helvetica", "Times", "Fixed" };
@@ -153,6 +154,7 @@ static void load_display_from_config() {
     sel_res_w = g.resolution_x;
     sel_res_h = g.resolution_y;
     rendered_crosshair = g.draw_rendered_crosshairs;
+    cfg_full_screen = g.full_screen;
     int fp = (int)g.font_point_flt;
     snprintf(text_height_buf, sizeof(text_height_buf), "%d", fp);
     // screen (monitor) index.
@@ -179,9 +181,9 @@ static void apply_display_to_config() {
     auto &g = cfg().graphics;
     // Apply the resolution/fullscreen live to the running game (reuses the
     // windowed-mode resize cascade: SetWindowSize -> WINDOW_RESIZED ->
-    // get_screen_measurements + Reshape). The config screen is fullscreen, so
-    // keep full_screen true.
-    winsys_apply_resolution(sel_res_w, sel_res_h, true);
+    // get_screen_measurements + Reshape). Respects the current windowed/fullscreen
+    // choice.
+    winsys_apply_resolution(sel_res_w, sel_res_h, cfg_full_screen);
     g.font_point_flt = (float)atoi(text_height_buf);
     if (sel_font_type == FONT_AA_VEC) {
         g.high_quality_font = false;
@@ -342,6 +344,9 @@ void DrawConfigScreen() {
     ImGui::Separator();
 
     draw_display_frame();
+
+    // Fullscreen / windowed toggle (live-applied on Save).
+    if (ImGui::Checkbox("Fullscreen", &cfg_full_screen)) dirty = true;
 
     // Rendered crosshair toggle (vs-05 had it in the display/button area).
     if (ImGui::Checkbox("Rendered Crosshair", &rendered_crosshair)) dirty = true;
