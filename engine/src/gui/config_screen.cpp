@@ -83,6 +83,17 @@ static const BitmapFamily bitmap_families[] = {
 
 bool dirty = false;
 
+// The set of config paths changed (dirty). Populated by the apply_*_to_config
+// functions on Save; consumed by write_out_dirty() (the single write-out entry
+// point, deferred to Layer 3) so it knows exactly what to persist.
+static std::set<std::string> g_dirty_paths;
+
+// Record a changed config path and mark the config dirty.
+static void mark_dirty(const std::string &path) {
+    dirty = true;
+    g_dirty_paths.insert(path);
+}
+
 // ---------------------------------------------------------------------------
 // Display-frame helpers (from vs-05)
 // ---------------------------------------------------------------------------
@@ -194,7 +205,11 @@ static void apply_display_to_config() {
     // get_screen_measurements + Reshape). Respects the current windowed/fullscreen
     // choice.
     winsys_apply_resolution(sel_res_w, sel_res_h, cfg_full_screen);
+    mark_dirty("graphics.resolution_x");
+    mark_dirty("graphics.resolution_y");
+    mark_dirty("graphics.full_screen");
     g.font_point_flt = (float)atoi(text_height_buf);
+    mark_dirty("graphics.font_point");
     if (sel_font_type == FONT_AA_VEC) {
         g.high_quality_font = false;
         g.high_quality_font_computer = false;
@@ -217,12 +232,19 @@ static void apply_display_to_config() {
         else if (fam == 1) nm = "times" + std::string(f.size_names[sz]);
         else nm = "fixed" + std::string(f.size_names[sz]).substr(2);
         g.font = nm;
+        mark_dirty("graphics.font");
     }
+    mark_dirty("graphics.high_quality_font");
+    mark_dirty("graphics.high_quality_font_computer");
+    mark_dirty("graphics.font_antialias");
     g.aspect_flt = sel_screen_aspect >= 0 ? aspect_vals[sel_screen_aspect] : current_screen_aspect();
+    mark_dirty("graphics.aspect");
     g.draw_rendered_crosshairs = rendered_crosshair;
+    mark_dirty("graphics.draw_rendered_crosshairs");
     // base_max_width/height and monitor (screen) selection: Configuration lacks
     // base_max fields; screen index is stored in g.screen.
     g.screen = sel_monitor;
+    mark_dirty("graphics.screen");
 }
 
 // ---------------------------------------------------------------------------
@@ -461,6 +483,8 @@ static void apply_flight_to_config() {
         j.force_use_of_joystick = false;
         j.warp_mouse = false;
     }
+    mark_dirty("joystick.force_use_of_joystick");
+    mark_dirty("joystick.warp_mouse");
 }
 
 // Apply mouse staging to Configuration.joystick.
@@ -472,11 +496,12 @@ static void apply_mouse_to_config() {
     j.warp_mouse_zone = atoi(mouse_stg.warp_zone);
     j.mouse_exponent_flt = (float)atof(mouse_stg.exponent);
     j.mouse_deadband_flt = (float)atof(mouse_stg.deadband);
-    // Mouse flight mode -> warp_mouse + the x/y axis source.
-    bool warp = (std::string(mouse_mode_names[flight_control == FC_MOUSE ? 0 : 0]).find("warp") != std::string::npos);
-    // The active mouse mode names warp_* -> warp_mouse true, glide_* -> false.
-    std::string mode = mouse_mode_names[0];
-    j.warp_mouse = (mode.find("warp") != std::string::npos);
+    mark_dirty("joystick.mouse_cursor_pancam");
+    mark_dirty("joystick.mouse_cursor_pantgt");
+    mark_dirty("joystick.mouse_cursor_chasecam");
+    mark_dirty("joystick.warp_mouse_zone");
+    mark_dirty("joystick.mouse_exponent");
+    mark_dirty("joystick.mouse_deadband");
 }
 
 // Apply joystick staging to Configuration.joystick + input.axes.
@@ -487,6 +512,10 @@ static void apply_joystick_to_config() {
     j.force_feedback = joy_ffb;
     j.ff_device = atoi(joy_ff_device);
     j.mouse_cursor = joy_mouse_cursor;
+    mark_dirty("joystick.deadband");
+    mark_dirty("joystick.force_feedback");
+    mark_dirty("joystick.ff_device");
+    mark_dirty("joystick.mouse_cursor");
     // Write the x/y/z/throttle axes.
     auto &axes = cfg().axes;
     for (int r = 0; r < 4; ++r) {
@@ -500,6 +529,18 @@ static void apply_joystick_to_config() {
             axes[role].inverse = joy_bind_inv[r];
         }
     }
+}
+
+// Write the accumulated dirty config paths out to the user config files.
+// Single write-out entry point — deferred to Layer 3. g_dirty_paths holds exactly
+// what changed, so once the write-back is implemented this persists just those.
+// For now it logs what would be written.
+static void write_out_dirty() {
+    if (g_dirty_paths.empty()) return;
+    fprintf(stderr, "[vs-settings-ng] config write-out deferred; %zu dirty path(s):\n", g_dirty_paths.size());
+    for (const auto &p : g_dirty_paths)
+        fprintf(stderr, "  %s\n", p.c_str());
+    g_dirty_paths.clear();
 }
 
 // Mouse Settings dialog.
@@ -649,22 +690,61 @@ void DrawConfigScreen() {
     ImGui::Separator();
     ImGui::TextUnformatted(dirty ? "(unsaved changes)" : "(saved)");
 
-    if (ImGui::Button("Save")) {
+    // Bottom button bar.
+    //  Preview: live-apply all changes to Configuration, stay open (green when dirty).
+    //  Save:     live-apply + write out + close (green when dirty).
+    //  Close:    don't save anything, just close (red when dirty).
+    auto apply_all = [&]() {
+        apply_display_to_config();
+        apply_flight_to_config();
+        apply_mouse_to_config();
+        apply_joystick_to_config();
+    };
+    auto close_overlay = [&]() {
+        if (_Universe) _Universe->ToggleOptionsActive();   // close; hide cursor on inactive
+    };
+    float btnw = ImGui::CalcTextSize("Save").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
+
+    // Preview (green when dirty): live-apply, stay open.
+    if (dirty) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.45f, 0.22f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
+    }
+    if (ImGui::Button("Preview", ImVec2(btnw, 0))) {
         if (dirty) {
-            apply_display_to_config();
-            apply_flight_to_config();
-            apply_mouse_to_config();
-            apply_joystick_to_config();
-            dirty = false;
+            apply_all();
+            // Stay open; changes are live in Configuration but not written out yet.
         }
     }
+    if (dirty) ImGui::PopStyleColor(2);
     ImGui::SameLine();
-    if (ImGui::Button("Close")) {
-        display_inited = false;   // reload from Configuration next open
-        if (_Universe) {
-            _Universe->ToggleOptionsActive();   // close the overlay; hide cursor on inactive
+
+    // Save (green when dirty): apply + write out + close.
+    if (dirty) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.45f, 0.22f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
+    }
+    if (ImGui::Button("Save", ImVec2(btnw, 0))) {
+        if (dirty) {
+            apply_all();
+            write_out_dirty();   // deferred; records the dirty paths
+            dirty = false;
+            close_overlay();
         }
     }
+    if (dirty) ImGui::PopStyleColor(2);
+    ImGui::SameLine();
+
+    // Close (red when dirty): don't save anything, just close.
+    if (dirty) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
+    }
+    if (ImGui::Button("Close", ImVec2(btnw, 0))) {
+        // Don't save anything; just close. Dirty state is intentionally discarded.
+        close_overlay();
+    }
+    if (dirty) ImGui::PopStyleColor(2);
 
     // Input dialogs (open as modals on top).
     if (mouse_dialog_open) ImGui::OpenPopup("Mouse Settings");
