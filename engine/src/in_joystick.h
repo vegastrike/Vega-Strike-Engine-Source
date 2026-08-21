@@ -77,6 +77,11 @@ class JoyStick {
 public:
 //initializes the joystick
     JoyStick(int which, SDL_JoystickID instance_id);
+    ~JoyStick();
+// Re-point this slot at a real SDL joystick (hotplug attach). Closes any
+// existing/fake handle, opens the new device, and refreshes the axis/button/hat
+// counts. The slot's bindings (keyed by slot index) are untouched.
+    void Attach(SDL_JoystickID instance_id);
 //engine calls GetJoyStick to get coordinates and buttons
     void GetJoyStick(float &x, float &y, float &z, long long& buttons);
     bool isAvailable(void);

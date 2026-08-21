@@ -678,11 +678,30 @@ void winsys_set_config_overlay_active(bool active) {
 // actions/axes to the (now present or now absent) device. bindKeys() is
 // idempotent (it clears then re-binds), so this is safe to call any time.
 static void winsys_refresh_joysticks() {
-    DeInitJoystick();
-    InitJoystick();
-    if (vs_config != nullptr) {
-        vs_config->bindKeys();
+    // Hotplug attach (fake-joystick approach): a real joystick appeared. Find the
+    // first physical slot without a real device attached and Attach() the new
+    // device to it. Bindings were set up at startup (fake-present slots), so we
+    // do NOT re-run InitJoystick/bindKeys — re-binding mid-game is what caused
+    // the autofire/input inconsistency. Attaching swaps the SDL handle in place;
+    // the slot's bindings stay valid.
+    int n = 0;
+    SDL_JoystickID *ids = SDL_GetJoysticks(&n);
+    if (!ids || n <= 0) {
+        if (ids) SDL_free(ids);
+        return;
     }
+    // Attach up to the real devices present, starting from the first slot.
+    for (int dev = 0; dev < n; ++dev) {
+        for (int i = 0; i < MAX_JOYSTICKS; ++i) {
+            if (i == MOUSE_JOYSTICK) continue;
+            if (joystick[i] != nullptr && joystick[i]->joy == nullptr) {
+                joystick[i]->Attach(ids[dev]);
+                VS_LOG(important_info, (boost::format("[hotplug] attached device %1% to slot %2%") % dev % i));
+                break;
+            }
+        }
+    }
+    SDL_free(ids);
 }
 
 // Apply a new resolution/fullscreen to the live window. Reuses the existing
@@ -839,12 +858,16 @@ void winsys_process_events() {
                     break;
 
                 case SDL_EVENT_JOYSTICK_ADDED:
-                case SDL_EVENT_JOYSTICK_REMOVED:
                 case SDL_EVENT_GAMEPAD_ADDED:
-                case SDL_EVENT_GAMEPAD_REMOVED:
-                    // Re-enumerate + re-bind so a hotplugged joystick is
-                    // discovered and its bindings take effect immediately.
+                    // A joystick appeared: attach the new device to a fake slot
+                    // (no re-bind — bindings are set at startup).
                     winsys_refresh_joysticks();
+                    break;
+
+                case SDL_EVENT_JOYSTICK_REMOVED:
+                case SDL_EVENT_GAMEPAD_REMOVED:
+                    // Joystick removed: the fake slot stays; the device simply
+                    // detaches. Nothing to re-init.
                     break;
 
                 case SDL_EVENT_QUIT:
