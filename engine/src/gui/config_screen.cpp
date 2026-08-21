@@ -1651,24 +1651,10 @@ void DrawConfigScreen() {
     // Reserve space at the bottom for the button row (separator + buttons), centered.
     ImGui::SetCursorPosY(ImGui::GetWindowHeight() - btn_h * 2);
     float avail = ImGui::GetContentRegionAvail().x;
-    ImGui::SetCursorPosX(fmaxf(0.0f, (avail - (btnw * 3 + ImGui::GetStyle().ItemSpacing.x * 2)) * 0.5f));
+    ImGui::SetCursorPosX(fmaxf(0.0f, (avail - (btnw * 2 + ImGui::GetStyle().ItemSpacing.x)) * 0.5f));
     ImGui::Separator();
 
-    // Preview (green when dirty): live-apply, stay open.
-    if (dirty) {
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.45f, 0.22f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
-    }
-    if (ImGui::Button("Preview", ImVec2(btnw, 0))) {
-        if (dirty) {
-            apply_all();
-            // Stay open; changes are live in Configuration but not written out yet.
-        }
-    }
-    if (dirty) ImGui::PopStyleColor(2);
-    ImGui::SameLine();
-
-    // Save (green when dirty): apply + write out + close.
+    // Save (green when dirty): apply + persist, stay open. Only Close closes.
     if (dirty) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.45f, 0.22f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
@@ -1676,9 +1662,9 @@ void DrawConfigScreen() {
     if (ImGui::Button("Save", ImVec2(btnw, 0))) {
         if (dirty) {
             apply_all();
-            write_out_dirty();   // deferred; records the dirty paths
+            write_out_dirty();   // persist the dirty paths to the user overlay
             dirty = false;
-            close_overlay();
+            // Stay open: the player can keep tweaking and Save again.
         }
     }
     if (dirty) ImGui::PopStyleColor(2);
