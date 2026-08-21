@@ -421,6 +421,9 @@ void Universe::StartDraw() {
                             configuration().graphics.resolution_y);
     ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
 
+    // hide the mouse cursor, we got a cooler one!
+    ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+
     size_t i;
     StarSystem* lastStarSystem = nullptr;
     ImGui::Begin("main_window", nullptr, window_flags);

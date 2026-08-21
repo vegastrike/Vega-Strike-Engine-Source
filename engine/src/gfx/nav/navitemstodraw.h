@@ -25,409 +25,313 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 // NO HEADER GUARD
+#include "imgui/imgui.h"
+#include <cmath>
 
-//This draws the mouse cursor
-//**********************************
-void NavigationSystem::DrawCursor(float x, float y, float wid, float hei, const GFXColor &col) {
-    float sizex, sizey;
-    const bool modern_nav_cursor = configuration().graphics.nav.modern_mouse_cursor;
-    if (modern_nav_cursor) {
-        const std::string mouse_cursor_sprite = configuration().graphics.nav.mouse_cursor_sprite;
-        static VSSprite MouseVSSprite(mouse_cursor_sprite.c_str(), BILINEAR, GFXTRUE);
-        GFXBlendMode(SRCALPHA, INVSRCALPHA);
-        GFXColorf(GUI_OPAQUE_WHITE());
+static constexpr float NAV_LINE_WEIGHT = 2.0f; // Adjust as needed
 
-        //Draw the cursor sprite.
-        GFXEnable(TEXTURE0);
-        GFXDisable(DEPTHTEST);
-        GFXDisable(TEXTURE1);
-        MouseVSSprite.GetSize(sizex, sizey);
-        MouseVSSprite.SetPosition(x + sizex / 2, y + sizey / 2);
-        MouseVSSprite.Draw();
-    } else {
-        GFXColorf(col);
-        GFXDisable(TEXTURE0);
-        GFXDisable(LIGHTING);
-        GFXBlendMode(SRCALPHA, INVSRCALPHA);
-
-        const float verts[8 * 3] = {
-                x, y, 0,
-                x, y - hei, 0,
-                x, y, 0,
-                x + wid, y - 0.75f * hei, 0,
-                x, y - hei, 0,
-                x + 0.35f * wid, y - 0.6f * hei, 0,
-                x + 0.35f * wid, y - 0.6f * hei, 0,
-                x + wid, y - 0.75f * hei, 0,
-        };
-        GFXDraw(GFXLINE, verts, 8);
-
-        GFXEnable(TEXTURE0);
-    }
+// Helper to convert GFXColor/GFXColorf to ImU32 packed color
+static inline ImU32 ToImColor(const GFXColor &col) {
+    return IM_COL32(
+        static_cast<int>(col.r * 255.0f),
+        static_cast<int>(col.g * 255.0f),
+        static_cast<int>(col.b * 255.0f),
+        static_cast<int>(col.a * 255.0f)
+    );
 }
-//**********************************
 
-//This draws the grid over the nav screen area
+// Converts normalized screen coordinates to ImGui pixel screen coordinates
+static inline ImVec2 NormToPixel(float x, float y) {
+    return ImVec2(
+        static_cast<float>(Coordinates::normToPixelX(x)),
+        static_cast<float>(Coordinates::normToPixelY(y))
+    );
+}
+
+// Helper to retrieve current ImGui draw list (Background layer)
+static inline ImDrawList* GetNavDrawList() {
+    return ImGui::GetBackgroundDrawList();
+}
+
+//**********************************
+// Draws a 10x10 coordinate grid over the nav screen area
 //**********************************
 void NavigationSystem::DrawGrid(float &x1, float &x2, float &y1, float &y2, const GFXColor &col) {
     if (!configuration().graphics.hud.draw_nav_grid) {
         return;
     }
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
 
-    float deltax = x2 - x1;
-    deltax = deltax / 10;
-    float deltay = y2 - y1;
-    deltay = deltay / 10;
+    ImDrawList* drawList = GetNavDrawList();
+    ImU32 color = ToImColor(col);
 
-    static VertexBuilder<> verts;
-    verts.clear();
+    float deltax = (x2 - x1) / 10.0f;
+    float deltay = (y2 - y1) / 10.0f;
+
+    // Vertical grid lines
     for (int i = 1; i < 10; i++) {
-        verts.insert(x1 + i * deltax, y1, 0);
-        verts.insert(x1 + i * deltax, y2, 0);
+        float x = x1 + i * deltax;
+        drawList->AddLine(NormToPixel(x, y1), NormToPixel(x, y2), color, 1.0f);
     }
-    for (int i = 1; i < 10; i++) {
-        verts.insert(x1, y1 + i * deltay, 0);
-        verts.insert(x2, y1 + i * deltay, 0);
-    }
-    GFXDraw(GFXLINE, verts);
 
-    GFXEnable(TEXTURE0);
+    // Horizontal grid lines
+    for (int i = 1; i < 10; i++) {
+        float y = y1 + i * deltay;
+        drawList->AddLine(NormToPixel(x1, y), NormToPixel(x2, y), color, 1.0f);
+    }
 }
-//**********************************
 
-//This will draw a circle over the screen
+//**********************************
+// Draws a circle icon centered at (x, y)
 //**********************************
 void NavigationSystem::DrawCircle(float x, float y, float size, const GFXColor &col) {
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
+    ImDrawList* drawList = GetNavDrawList();
+    ImU32 color = ToImColor(col);
 
-    // 20 segments
-    static VertexBuilder<> verts;
-    verts.clear();
-    for (float i = 0; i < 2 * M_PI + M_PI / 10; i += M_PI / 10) {
-        verts.insert(
-                x + 0.5 * size * cos(i),
-                y + 0.5 * size * sin(i),
-                0
-        );
-    }
-    GFXDraw(GFXLINESTRIP, verts);
+    float pixelRadius = Coordinates::normToPixelW(0.5f * size);
 
-    GFXEnable(TEXTURE0);
+    drawList->AddCircle(NormToPixel(x, y), pixelRadius, color, 0, NAV_LINE_WEIGHT);
 }
-//**********************************
 
-//This will draw a half circle, centered at the top 1/4 center
+//**********************************
+// Draws a half circle centered at top 1/4 center
 //**********************************
 void NavigationSystem::DrawHalfCircleTop(float x, float y, float size, const GFXColor &col) {
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
+    ImDrawList* drawList = GetNavDrawList();
+    ImU32 color = ToImColor(col);
 
-    // 10 segments
-    static VertexBuilder<> verts;
-    verts.clear();
-    for (float i = 0; i < M_PI + M_PI / 10; i += M_PI / 10) {
-        verts.insert(
-                x + 0.5 * size * cos(i),
-                y + 0.5 * size * sin(i) - 0.25 * size,
-                0
-        );
-    }
-    GFXDraw(GFXLINESTRIP, verts);
+    float radiusPx = Coordinates::normToPixelW(0.5f * size);
+    ImVec2 center = NormToPixel(x, y);
+    center.y -= radiusPx * 0.5f; // Offset in pixel space
 
-    GFXEnable(TEXTURE0);
+    drawList->PathClear();
+    // PathArcTo(center, radius, a_min, a_max, num_segments)
+    // 0 to PI draws the arc
+    drawList->PathArcTo(center, radiusPx, 0.0f, static_cast<float>(M_PI), 16);
+    drawList->PathStroke(color, 0, NAV_LINE_WEIGHT);
 }
-//**********************************
 
-//This will draw a half circle, centered at the bottom 1/4 center
+//**********************************
+// Draws a half circle centered at bottom 1/4 center
 //**********************************
 void NavigationSystem::DrawHalfCircleBottom(float x, float y, float size, const GFXColor &col) {
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
+    ImDrawList* drawList = GetNavDrawList();
+    ImU32 color = ToImColor(col);
 
-    // 10 segments
-    static VertexBuilder<> verts;
-    verts.clear();
-    for (float i = M_PI; i < 2 * M_PI + M_PI / 10; i += M_PI / 10) {
-        verts.insert(
-                x + 0.5 * size * cos(i),
-                y + 0.5 * size * sin(i) + 0.25 * size,
-                0
-        );
-    }
-    GFXDraw(GFXLINESTRIP, verts);
+    float radiusPx = Coordinates::normToPixelW(0.5f * size);
+    ImVec2 center = NormToPixel(x, y);
+    center.y += radiusPx * 0.5f; // Offset in pixel space
 
-    GFXEnable(TEXTURE0);
+    drawList->PathClear();
+    // PI to 2*PI draws the opposite arc
+    drawList->PathArcTo(center, radiusPx, static_cast<float>(M_PI), static_cast<float>(M_PI * 2.0), 16);
+    drawList->PathStroke(color, 0, NAV_LINE_WEIGHT);
 }
-//**********************************
 
-//This will draw a planet icon. circle + lightning thingy
+//**********************************
+// Draws a planet icon (Circle with central axis lines)
 //**********************************
 void NavigationSystem::DrawPlanet(float x, float y, float size, const GFXColor &col) {
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
+    ImDrawList* drawList = GetNavDrawList();
+    ImU32 color = ToImColor(col);
 
-    static VertexBuilder<> verts;
-    verts.clear();
-    for (float i = 0; i < 2 * M_PI; i += M_PI / 10) {
-        verts.insert(
-                x + 0.5 * size * cos(i),
-                y + 0.5 * size * sin(i),
-                0
-        );
-        verts.insert(
-                x + 0.5 * size * cos(i + M_PI / 10),
-                y + 0.5 * size * sin(i + M_PI / 10),
-                0
-        );
-    }
-    verts.insert(x - 0.5 * size, y, 0);
-    verts.insert(x, y + 0.2 * size, 0);
-    verts.insert(x, y + 0.2 * size, 0);
-    verts.insert(x, y - 0.2 * size, 0);
-    verts.insert(x, y - 0.2 * size, 0);
-    verts.insert(x + 0.5 * size, y, 0);
-    GFXDraw(GFXLINE, verts);
+    ImVec2 c = NormToPixel(x, y);
+    float r = Coordinates::normToPixelW(0.5f * size);
 
-    GFXEnable(TEXTURE0);
+    // Outer circle
+    drawList->AddCircle(c, r, color, 0, NAV_LINE_WEIGHT);
+
+    // Planet interior lines (all calculated in pure pixel space relative to center)
+    drawList->AddLine(ImVec2(c.x - r, c.y), ImVec2(c.x, c.y + r * 0.4f), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x, c.y + r * 0.4f), ImVec2(c.x, c.y - r * 0.4f), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x, c.y - r * 0.4f), ImVec2(c.x + r, c.y), color, NAV_LINE_WEIGHT);
 }
-//**********************************
 
-//This will draw a station icon. 3x3 grid
+//**********************************
+// Draws a station icon (Square 3x3 grid pattern)
 //**********************************
 void NavigationSystem::DrawStation(float x, float y, float size, const GFXColor &col) {
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
+    ImDrawList* drawList = GetNavDrawList();
+    ImU32 color = ToImColor(col);
 
-    float segment = size / 3;
-    static VertexBuilder<> verts;
-    verts.clear();
-    for (int i = 0; i < 4; i++) {
-        verts.insert(
-                x - 0.5 * size,
-                y - 0.5 * size + i * segment,
-                0
-        );
-        verts.insert(
-                x + 0.5 * size,
-                y - 0.5 * size + i * segment,
-                0
-        );
-    }
-    for (int i = 0; i < 4; i++) {
-        verts.insert(
-                x - 0.5 * size + i * segment,
-                y - 0.5 * size,
-                0
-        );
-        verts.insert(
-                x - 0.5 * size + i * segment,
-                y + 0.5 * size,
-                0
-        );
-    }
-    GFXDraw(GFXLINE, verts);
+    ImVec2 c = NormToPixel(x, y);
+    float halfSizePx = Coordinates::normToPixelW(0.5f * size);
+    float segmentPx = (halfSizePx * 2.0f) / 3.0f;
 
-    GFXEnable(TEXTURE0);
+    float startX = c.x - halfSizePx;
+    float startY = c.y - halfSizePx;
+    float endX   = c.x + halfSizePx;
+    float endY   = c.y + halfSizePx;
+
+    // Horizontal grid lines
+    for (int i = 0; i < 4; i++) {
+        float curY = startY + i * segmentPx;
+        drawList->AddLine(ImVec2(startX, curY), ImVec2(endX, curY), color, NAV_LINE_WEIGHT);
+    }
+
+    // Vertical grid lines
+    for (int i = 0; i < 4; i++) {
+        float curX = startX + i * segmentPx;
+        drawList->AddLine(ImVec2(curX, startY), ImVec2(curX, endY), color, NAV_LINE_WEIGHT);
+    }
 }
-//**********************************
 
-//This will draw a jump node icon
+//**********************************
+// Draws a jump node icon (Circle with cardinal arrow indicators)
 //**********************************
 void NavigationSystem::DrawJump(float x, float y, float size, const GFXColor &col) {
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
+    ImDrawList* drawList = GetNavDrawList();
+    ImU32 color = ToImColor(col);
 
-    static VertexBuilder<> verts;
-    verts.clear();
-    for (float i = 0; i < 2 * M_PI; i += M_PI / 10) {
-        verts.insert(
-                x + 0.5 * size * cos(i),
-                y + 0.5 * size * sin(i),
-                0
-        );
-        verts.insert(
-                x + 0.5 * size * cos(i + M_PI / 10),
-                y + 0.5 * size * sin(i + M_PI / 10),
-                0
-        );
-    }
-    verts.insert(x, y + 0.5 * size, 0);
-    verts.insert(x + 0.125 * size, y + 0.125 * size, 0);
-    verts.insert(x, y + 0.5 * size, 0);
-    verts.insert(x - 0.125 * size, y + 0.125 * size, 0);
-    verts.insert(x, y - 0.5 * size, 0);
-    verts.insert(x + 0.125 * size, y - 0.125 * size, 0);
-    verts.insert(x, y - 0.5 * size, 0);
-    verts.insert(x - 0.125 * size, y - 0.125 * size, 0);
-    verts.insert(x - 0.5 * size, y, 0);
-    verts.insert(x - 0.125 * size, y + 0.125 * size, 0);
-    verts.insert(x - 0.5 * size, y, 0);
-    verts.insert(x - 0.125 * size, y - 0.125 * size, 0);
-    verts.insert(x + 0.5 * size, y, 0);
-    verts.insert(x + 0.125 * size, y + 0.125 * size, 0);
-    verts.insert(x + 0.5 * size, y, 0);
-    verts.insert(x + 0.125 * size, y - 0.125 * size, 0);
-    GFXDraw(GFXLINE, verts);
+    ImVec2 c = NormToPixel(x, y);
+    float r = Coordinates::normToPixelW(0.5f * size);
+    float off = r * 0.25f; // Offset relative to radius in pixel space
 
-    GFXEnable(TEXTURE0);
+    // Outer circle
+    drawList->AddCircle(c, r, color, 0, NAV_LINE_WEIGHT);
+
+    // Cardinal arrows in pixel space
+    // Top
+    drawList->AddLine(ImVec2(c.x, c.y - r), ImVec2(c.x + off, c.y - off), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x, c.y - r), ImVec2(c.x - off, c.y - off), color, NAV_LINE_WEIGHT);
+    // Bottom
+    drawList->AddLine(ImVec2(c.x, c.y + r), ImVec2(c.x + off, c.y + off), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x, c.y + r), ImVec2(c.x - off, c.y + off), color, NAV_LINE_WEIGHT);
+    // Left
+    drawList->AddLine(ImVec2(c.x - r, c.y), ImVec2(c.x - off, c.y + off), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x - r, c.y), ImVec2(c.x - off, c.y - off), color, NAV_LINE_WEIGHT);
+    // Right
+    drawList->AddLine(ImVec2(c.x + r, c.y), ImVec2(c.x + off, c.y + off), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x + r, c.y), ImVec2(c.x + off, c.y - off), color, NAV_LINE_WEIGHT);
 }
 
 //**********************************
-
-//This will draw a missile icon
+// Draws a missile warning/target icon
 //**********************************
 void NavigationSystem::DrawMissile(float x, float y, float size, const GFXColor &col) {
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
+    ImDrawList* drawList = GetNavDrawList();
+    ImU32 color = ToImColor(col);
 
-    const float verts[12 * 3] = {
-            x - 0.5f * size, y - 0.125f * size, 0,
-            x, y + 0.375f * size, 0,
-            x + 0.5f * size, y - 0.125f * size, 0,
-            x, y + 0.375f * size, 0,
-            x - 0.25f * size, y - 0.125f * size, 0,
-            x - 0.25f * size, y + 0.125f * size, 0,
-            x + 0.25f * size, y - 0.125f * size, 0,
-            x + 0.25f * size, y + 0.125f * size, 0,
-            x - 0.25f * size, y + 0.125f * size, 0,
-            x, y - 0.125f * size, 0,
-            x + 0.25f * size, y + 0.125f * size, 0,
-            x, y - 0.125f * size, 0,
-    };
-    GFXDraw(GFXLINE, verts, 12);
+    ImVec2 c = NormToPixel(x, y);
+    float s = Coordinates::normToPixelW(size);
 
-    GFXEnable(TEXTURE0);
+    drawList->AddLine(ImVec2(c.x - 0.5f * s, c.y + 0.125f * s), ImVec2(c.x, c.y - 0.375f * s), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x + 0.5f * s, c.y + 0.125f * s), ImVec2(c.x, c.y - 0.375f * s), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x - 0.25f * s, c.y + 0.125f * s), ImVec2(c.x - 0.25f * s, c.y - 0.125f * s), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x + 0.25f * s, c.y + 0.125f * s), ImVec2(c.x + 0.25f * s, c.y - 0.125f * s), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x - 0.25f * s, c.y - 0.125f * s), ImVec2(c.x, c.y + 0.125f * s), color, NAV_LINE_WEIGHT);
+    drawList->AddLine(ImVec2(c.x + 0.25f * s, c.y - 0.125f * s), ImVec2(c.x, c.y + 0.125f * s), color, NAV_LINE_WEIGHT);
 }
-//**********************************
 
-//This will draw a square set of corners
+//**********************************
+// Draws corner brackets for targeting frames
 //**********************************
 void NavigationSystem::DrawTargetCorners(float x, float y, float size, const GFXColor &col) {
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
+    ImDrawList* drawList = GetNavDrawList();
+    ImU32 color = ToImColor(col);
 
-    const float verts[16 * 3] = {
-            x - 0.5f * size, y + 0.5f * size, 0,
-            x - 0.3f * size, y + 0.5f * size, 0,
-            x - 0.5f * size, y + 0.5f * size, 0,
-            x - 0.5f * size, y + 0.3f * size, 0,
-            x + 0.5f * size, y + 0.5f * size, 0,
-            x + 0.3f * size, y + 0.5f * size, 0,
-            x + 0.5f * size, y + 0.5f * size, 0,
-            x + 0.5f * size, y + 0.3f * size, 0,
-            x - 0.5f * size, y - 0.5f * size, 0,
-            x - 0.3f * size, y - 0.5f * size, 0,
-            x - 0.5f * size, y - 0.5f * size, 0,
-            x - 0.5f * size, y - 0.3f * size, 0,
-            x + 0.5f * size, y - 0.5f * size, 0,
-            x + 0.3f * size, y - 0.5f * size, 0,
-            x + 0.5f * size, y - 0.5f * size, 0,
-            x + 0.5f * size, y - 0.3f * size, 0,
-    };
-    GFXDraw(GFXLINE, verts, 16);
+    ImVec2 c = NormToPixel(x, y);
+    float half  = Coordinates::normToPixelW(0.5f * size);
+    float inner = Coordinates::normToPixelW(0.3f * size);
 
-    GFXEnable(TEXTURE0);
+    // Top-Left corner
+    drawList->AddLine(ImVec2(c.x - half, c.y - half), ImVec2(c.x - inner, c.y - half), color, NAV_LINE_WEIGHT * 2);
+    drawList->AddLine(ImVec2(c.x - half, c.y - half), ImVec2(c.x - half, c.y - inner), color, NAV_LINE_WEIGHT * 2);
+
+    // Top-Right corner
+    drawList->AddLine(ImVec2(c.x + half, c.y - half), ImVec2(c.x + inner, c.y - half), color, NAV_LINE_WEIGHT * 2);
+    drawList->AddLine(ImVec2(c.x + half, c.y - half), ImVec2(c.x + half, c.y - inner), color, NAV_LINE_WEIGHT * 2);
+
+    // Bottom-Left corner
+    drawList->AddLine(ImVec2(c.x - half, c.y + half), ImVec2(c.x - inner, c.y + half), color, NAV_LINE_WEIGHT * 2);
+    drawList->AddLine(ImVec2(c.x - half, c.y + half), ImVec2(c.x - half, c.y + inner), color, NAV_LINE_WEIGHT * 2);
+
+    // Bottom-Right corner
+    drawList->AddLine(ImVec2(c.x + half, c.y + half), ImVec2(c.x + inner, c.y + half), color, NAV_LINE_WEIGHT * 2);
+    drawList->AddLine(ImVec2(c.x + half, c.y + half), ImVec2(c.x + half, c.y + inner), color, NAV_LINE_WEIGHT * 2);
 }
-//**********************************
 
-//This will draw an oriented circle
+//**********************************
+// Draws a 3D projected/oriented navigation circle grid (Accurate 3D perspective)
 //**********************************
 void NavigationSystem::DrawNavCircle(float x, float y, float size, float rot_x, float rot_y, const GFXColor &col) {
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
+    ImDrawList* drawList = GetNavDrawList();
 
-    const int circles = 4;
-    const int segments = 20;
-    const int segments2 = 12;
-    const int vnum = 2 * (circles * segments + segments2);
-    static VertexBuilder<float, 3, 0, 4> verts;
-    verts.clear();
-    verts.reserve(vnum);
-    for (float i = 0; i < 2 * M_PI; i += (2 * M_PI / segments)) {
-        GFXColor ci(col.r, col.g, col.b * fabs(sin(i / 2.0)), col.a);
-        QVector pos1((0.6 * size * cos(i)), (0.6 * size * sin(i)), 0);
-        QVector pos2((0.6 * size * cos(i + (2 * M_PI / segments))), (0.6 * size * sin(i + (6.28 / segments))), 0);
+    constexpr int circles = 4;
+    constexpr int segments = 20;
+    constexpr int segments2 = 12;
+    constexpr float TWO_PI = 2.0f * static_cast<float>(M_PI);
+
+    // 1. Concentric web circles in true 3D projection
+    for (int i = 0; i < segments; ++i) {
+        float angle1 = i * (TWO_PI / segments);
+        float angle2 = (i + 1) * (TWO_PI / segments);
+
+        GFXColor ci(col.r, col.g, col.b * std::fabs(std::sin(angle1 / 2.0f)), col.a);
+        ImU32 segmentColor = ToImColor(ci);
+
+        QVector pos1(0.6 * size * std::cos(angle1), 0.6 * size * std::sin(angle1), 0.0);
+        QVector pos2(0.6 * size * std::cos(angle2), 0.6 * size * std::sin(angle2), 0.0);
 
         pos1 = dxyz(pos1, 0, 0, rot_y);
         pos1 = dxyz(pos1, rot_x, 0, 0);
         pos2 = dxyz(pos2, 0, 0, rot_y);
         pos2 = dxyz(pos2, rot_x, 0, 0);
 
-        float standard_unit = 0.25 * 1.2 * size;
-        float zdistance1 = ((1.2 * size) - pos1.k);
-        float zdistance2 = ((1.2 * size) - pos2.k);
+        float standard_unit = 0.25f * 1.2f * size;
+        float zdistance1 = (1.2f * size) - pos1.k;
+        float zdistance2 = (1.2f * size) - pos2.k;
         float zscale1 = standard_unit / zdistance1;
         float zscale2 = standard_unit / zdistance2;
-        pos1 *= (zscale1 * 5.0);
-        pos2 *= (zscale2 * 5.0);
+
+        pos1 *= (zscale1 * 5.0f);
+        pos2 *= (zscale2 * 5.0f);
 
         for (int j = circles; j > 0; j--) {
-            pos1 *= (float(j) / float(circles));
-            pos2 *= (float(j) / float(circles));
+            float scale = static_cast<float>(j) / static_cast<float>(circles);
+            QVector p1 = pos1 * scale;
+            QVector p2 = pos2 * scale;
 
-            Vector pos1t((x + pos1.i), (y + (pos1.j)), 0);
-            Vector pos2t((x + pos2.i), (y + (pos2.j)), 0);
-
-            verts.insert(GFXColorVertex(pos1t, ci));
-            verts.insert(GFXColorVertex(pos2t, ci));
+            drawList->AddLine(
+                NormToPixel(x + p1.i, y + p1.j),
+                NormToPixel(x + p2.i, y + p2.j),
+                segmentColor, NAV_LINE_WEIGHT
+            );
         }
     }
-    for (float i = 0; i < 2 * M_PI; i += (2 * M_PI / segments2)) {
-        GFXColor ci(col.r, col.g, col.b * fabs(sin(i / 2.0)), col.a);
-        QVector pos1((0.6 * size * cos(i) / float(circles * 2)), (0.6 * size * sin(i) / float(circles * 2)), 0);
-        QVector pos2((0.6 * size * cos(i)), (0.6 * size * sin(i)), 0);
 
-        if ((fabs(i - 1.57) < 0.01) || (fabs(i - 3.14) < 0.01) || (fabs(i - 4.71) < 0.01) || (i < 0.01)) {
-            pos2 *= 1.1;
+    // 2. Radial spoke lines in true 3D projection
+    for (int i = 0; i < segments2; ++i) {
+        float angle = i * (TWO_PI / segments2);
+
+        GFXColor ci(col.r, col.g, col.b * std::fabs(std::sin(angle / 2.0f)), col.a);
+        ImU32 spokeColor = ToImColor(ci);
+
+        QVector pos1(0.6 * size * std::cos(angle) / (circles * 2), 0.6 * size * std::sin(angle) / (circles * 2), 0.0);
+        QVector pos2(0.6 * size * std::cos(angle), 0.6 * size * std::sin(angle), 0.0);
+
+        if ((std::fabs(angle - 1.57f) < 0.01f) || (std::fabs(angle - 3.14f) < 0.01f) || 
+            (std::fabs(angle - 4.71f) < 0.01f) || (angle < 0.01f)) {
+            pos2 *= 1.1f;
         }
+
         pos1 = dxyz(pos1, 0, 0, rot_y);
         pos1 = dxyz(pos1, rot_x, 0, 0);
         pos2 = dxyz(pos2, 0, 0, rot_y);
         pos2 = dxyz(pos2, rot_x, 0, 0);
 
-        float standard_unit = 0.25 * 1.2 * size;
-        float zdistance1 = ((1.2 * size) - pos1.k);
-        float zdistance2 = ((1.2 * size) - pos2.k);
+        float standard_unit = 0.25f * 1.2f * size;
+        float zdistance1 = (1.2f * size) - pos1.k;
+        float zdistance2 = (1.2f * size) - pos2.k;
         float zscale1 = standard_unit / zdistance1;
         float zscale2 = standard_unit / zdistance2;
-        pos1 *= (zscale1 * 5.0);
-        pos2 *= (zscale2 * 5.0);
 
-        pos1.i += x;
-        pos1.j += y;
-        pos2.i += x;
-        pos2.j += y;
+        pos1 *= (zscale1 * 5.0f);
+        pos2 *= (zscale2 * 5.0f);
 
-        // pos, col
-        verts.insert(GFXColorVertex(pos1.Cast(), ci));
-        verts.insert(GFXColorVertex(pos2.Cast(), ci));
+        drawList->AddLine(
+            NormToPixel(x + pos1.i, y + pos1.j),
+            NormToPixel(x + pos2.i, y + pos2.j),
+            spokeColor, NAV_LINE_WEIGHT
+        );
     }
-    GFXDraw(GFXLINE, verts);
-
-    GFXEnable(TEXTURE0);
 }
-//**********************************
-

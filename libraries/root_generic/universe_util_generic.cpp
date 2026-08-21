@@ -166,6 +166,38 @@ namespace UniverseUtil {
     }
 
     std::string vsConfig(std::string category, std::string option, std::string def) {
+        // The old vegastrike.config XML map_variables is gone; resolve known
+        // settings from the merged JSON config (configuration()). Unknown keys
+        // return the caller's default (mop-up: migrate remaining vsConfig call sites).
+        if (category == "graphics") {
+            if (option == "x_resolution") {
+                return std::to_string(configuration().graphics.resolution_x);
+            }
+            if (option == "y_resolution") {
+                return std::to_string(configuration().graphics.resolution_y);
+            }
+            if (option == "base_max_width") {
+                // The GUI uses base_max_width as its screen width; in the old
+                // XML it always matched the render resolution (x_resolution),
+                // and bases.max_width (1440x1080) is the art's virtual size,
+                // not what the GUI should lay out at.
+                return std::to_string(configuration().graphics.resolution_x);
+            }
+            if (option == "base_max_height") {
+                return std::to_string(configuration().graphics.resolution_y);
+            }
+            if (option == "aspect") {
+                return std::to_string(configuration().graphics.aspect_flt);
+            }
+        }
+        if (category == "splash") {
+            if (option == "loading_sprite") {
+                return configuration().splash.loading_sprite;
+            }
+            if (option == "loading_message") {
+                return configuration().splash.loading_message;
+            }
+        }
         return vs_config->getVariable(category, option, def);
     }
 

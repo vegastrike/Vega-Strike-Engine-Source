@@ -54,7 +54,7 @@
 
 #include "cargo_hold.h"
 
-#include <vector>
+#include <map>
 
 /** A collection of components. This class is really a proto-ship,
  * with mass and serving as a stand-in for the Unit sub-class.
@@ -66,7 +66,7 @@ class ComponentsManager {
     // Instead we only do this when something changes
     std::string hud_text;
 
-    std::vector<std::pair<const std::string, const int>> prohibited_upgrades;
+    std::map<std::string, int> prohibited_upgrades;
 
     friend class CargoHold;
     friend class Movable;
