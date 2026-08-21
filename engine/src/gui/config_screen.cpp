@@ -1312,6 +1312,54 @@ static void load_presets() {
     g_presets_loaded = true;
 }
 
+// Map a bare preset variable name (as used in engine.json preset options, e.g.
+// "fog", "music_volume", "game_speed") to its dotted config.json path (e.g.
+// "graphics.fog", "audio.music_volume", "physics.game_speed"). This is what
+// read_config_value()/write_out_dirty() persist, so the resolved preset value
+// reaches config.json and survives a restart. Returns "" if the name is unknown
+// (not persistable).
+static std::string preset_var_path(const std::string &name) {
+    // graphics
+    if (name=="fog") return "graphics.fog"; else if (name=="background") return "graphics.background";
+    else if (name=="blend_panels") return "graphics.blend_panels"; else if (name=="cockpit") return "graphics.cockpit";
+    else if (name=="color_depth") return "graphics.color_depth"; else if (name=="force_lighting") return "graphics.force_lighting";
+    else if (name=="full_screen") return "graphics.full_screen"; else if (name=="reflection") return "graphics.reflection";
+    else if (name=="smooth_lines") return "graphics.smooth_lines"; else if (name=="star_blend") return "graphics.star_blend";
+    else if (name=="draw_star_body") return "graphics.draw_star_body"; else if (name=="draw_star_glow") return "graphics.draw_star_glow";
+    else if (name=="high_quality_font") return "graphics.high_quality_font"; else if (name=="high_quality_font_computer") return "graphics.high_quality_font_computer";
+    else if (name=="high_quality_sprites") return "graphics.high_quality_sprites"; else if (name=="per_pixel_lighting") return "graphics.per_pixel_lighting";
+    else if (name=="specmap_with_reflection") return "graphics.specmap_with_reflection";
+    else if (name=="gl_accelerated_visual") return "graphics.gl_accelerated_visual";
+    else if (name=="aspect") return "graphics.aspect"; else if (name=="font_point") return "graphics.font_point";
+    else if (name=="model_detail") return "graphics.model_detail"; else if (name=="mipmap_detail") return "graphics.mipmap_detail";
+    else if (name=="planet_detail_level") return "graphics.planet_detail_level";
+    else if (name=="resolution_x") return "graphics.resolution_x"; else if (name=="resolution_y") return "graphics.resolution_y";
+    else if (name=="max_cubemap_size") return "graphics.max_cubemap_size"; else if (name=="max_movie_dimension") return "graphics.max_movie_dimension";
+    else if (name=="max_texture_dimension") return "graphics.max_texture_dimension";
+    else if (name=="technique_set") return "graphics.technique_set"; else if (name=="mac_shader_name") return "graphics.mac_shader_name";
+    else if (name=="default_full_technique") return "graphics.default_full_technique"; else if (name=="default_simple_technique") return "graphics.default_simple_technique";
+    else if (name=="faction_dependent_textures") return "graphics.faction_dependent_textures";
+    // audio
+    else if (name=="ai_sound") return "audio.ai_sound"; else if (name=="every_other_mount") return "audio.every_other_mount";
+    else if (name=="music") return "audio.music"; else if (name=="sound") return "audio.sound";
+    else if (name=="positional") return "audio.positional"; else if (name=="music_volume") return "audio.music_volume";
+    else if (name=="volume") return "audio.volume"; else if (name=="max_single_sounds") return "audio.max_single_sounds";
+    else if (name=="max_total_sounds") return "audio.max_total_sounds";
+    else if (name=="sounds_extension_1") return "audio.sounds_extension_1"; else if (name=="sounds_extension_2") return "audio.sounds_extension_2";
+    // physics
+    else if (name=="game_speed") return "physics.game_speed"; else if (name=="game_accel") return "physics.game_accel";
+    else if (name=="inactive_system_time") return "physics.inactive_system_time"; else if (name=="num_running_systems") return "physics.num_running_systems";
+    // general
+    else if (name=="num_old_systems") return "general.num_old_systems"; else if (name=="simulation_atom") return "general.simulation_atom";
+    // joystick (input.joystick)
+    else if (name=="mouse_cursor") return "input.joystick.mouse_cursor"; else if (name=="mouse_sensitivity") return "input.joystick.mouse_sensitivity";
+    else if (name=="reverse_mouse_spr") return "input.joystick.reverse_mouse_spr"; else if (name=="warp_mouse") return "input.joystick.warp_mouse";
+    else if (name=="force_use_of_joystick") return "input.joystick.force_use_of_joystick";
+    // splash / test
+    else if (name=="loading_sprite") return "splash.loading_sprite"; else if (name=="autodocker") return "test.autodocker";
+    else return "";
+}
+
 // Apply one preset variable (name,value) to the engine's Configuration, using
 // the field names the engine's load_config reads. Returns true if it set something.
 static bool apply_preset_var(const std::string &name, const std::string &value) {
@@ -1374,8 +1422,30 @@ static bool apply_preset_var(const std::string &name, const std::string &value) 
     else if (name=="loading_sprite") c.splash.loading_sprite=value;
     else if (name=="autodocker") c.test.autodocker=b;
     else { set = false; }
-    if (set) mark_dirty("preset_var." + name);
+    if (set) {
+        // Persist the resolved value to config.json via its real dotted path
+        // (so it survives a restart), not the synthetic preset_var.<name> path.
+        const std::string p = preset_var_path(name);
+        if (!p.empty()) mark_dirty(p);
+    }
     return set;
+}
+
+// Apply the currently-selected option's vars for every displayed preset group
+// (the active preset selection), so the displayed presets are always persisted
+// to config.json on Save — not only when the user happens to change a combo.
+// Called from the Save/Preview apply_all path.
+static void apply_presets_to_config() {
+    for (const auto &g : g_preset_groups) {
+        std::string cur = configuration().preset.count(g.key) ? configuration().preset.at(g.key) : "";
+        if (cur.empty()) continue;
+        for (const auto &o : g.options) {
+            if (o.name == cur) {
+                for (const auto &kv : o.vars) apply_preset_var(kv.first, kv.second);
+                break;
+            }
+        }
+    }
 }
 
 // Read the current value of a Configuration field given its dotted path (the
@@ -1561,6 +1631,7 @@ void DrawConfigScreen() {
     // Bottom button bar, pinned to the bottom of the window and centered.
     auto apply_all = [&]() {
         apply_display_to_config();
+        apply_presets_to_config();
         apply_flight_to_config();
         apply_mouse_to_config();
         apply_joystick_to_config();
