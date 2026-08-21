@@ -1565,12 +1565,14 @@ static void draw_presets_frame() {
     float row_h = ImGui::GetFrameHeight() + ImGui::GetTextLineHeight()
                   + ImGui::GetStyle().ItemSpacing.y;
     float content_h = rows * row_h + ImGui::GetStyle().WindowPadding.y * 2;
-    // Fill the space between here and the bottom button bar (which reserves
-    // btn_h*2 from the window bottom), but never shrink below the grid content.
+    // Fill the space between here and the bottom button bar (which reserves one
+    // button row + separator at the bottom, btn_h). The frame should reach the
+    // buttons so there is no dead space, and be tall enough that all presets are
+    // visible without a scrollbar.
     float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
-    float avail_h = ImGui::GetWindowHeight() - ImGui::GetCursorPosY() - btn_h * 2
+    float avail_h = ImGui::GetContentRegionAvail().y - btn_h
                     - ImGui::GetStyle().WindowPadding.y;
-    float pres_h = std::max(content_h, avail_h);
+    float pres_h = fmaxf(content_h, avail_h);
     ImGui::BeginChild("presetsframe", ImVec2(-1.0f, pres_h), ImGuiChildFlags_Borders);
     std::vector<float> colw(cols, 0.0f);
     for (size_t i = 0; i < g_preset_groups.size(); i++) {
@@ -1677,8 +1679,9 @@ void DrawConfigScreen() {
     };
     float btnw = ImGui::CalcTextSize("Save").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
     float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
-    // Reserve space at the bottom for the button row (separator + buttons), centered.
-    ImGui::SetCursorPosY(ImGui::GetWindowHeight() - btn_h * 2);
+    // Reserve space at the bottom for the button row (separator + buttons), just
+    // tall enough to contain the buttons, centered.
+    ImGui::SetCursorPosY(ImGui::GetWindowHeight() - btn_h);
     float avail = ImGui::GetContentRegionAvail().x;
     ImGui::SetCursorPosX(fmaxf(0.0f, (avail - (btnw * 2 + ImGui::GetStyle().ItemSpacing.x)) * 0.5f));
     ImGui::Separator();
