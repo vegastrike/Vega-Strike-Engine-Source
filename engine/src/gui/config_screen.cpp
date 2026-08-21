@@ -43,9 +43,9 @@ SDL_DisplayID sel_display_id = 0;
 int  sel_res_w = 0, sel_res_h = 0;
 std::string monitor_text, resolution_text;
 char text_height_buf[16] = "16";
-static const char *aspect_opts[] = { "4:3 (1.33)", "16:10 (1.6)", "16:9 (1.78)", "5:4 (1.25)", "1:1 (1.0)" };
-static const float aspect_vals[] = { 4.0f / 3.0f, 1.6f, 16.0f / 9.0f, 1.25f, 1.0f };
-int  sel_base_aspect = 0;
+static const char *aspect_opts[] = { "16:10 (1.6)", "16:9 (1.78)", "4:3 (1.33)", "5:4 (1.25)", "1:1 (1.0)" };
+static const float aspect_vals[] = { 1.6f, 16.0f / 9.0f, 4.0f / 3.0f, 1.25f, 1.0f };
+int  sel_base_aspect = 0;      // aspect_opts[0] = 16:10 (default base aspect)
 std::string base_aspect_text = aspect_opts[0];
 int  sel_screen_aspect = -1;      // -1 = auto (W/H)
 std::string screen_aspect_text;
@@ -178,6 +178,26 @@ static void compute_base_max(int &w, int &h) {
     else { h = sel_res_h; w = (int)(sel_res_h * A); }
 }
 
+// Derive sel_base_aspect from the stored base viewport (bases.max_width/height)
+// so reopening the screen reflects the saved base aspect (default 16:10).
+static void load_base_aspect_from_config() {
+    const auto &g = configuration().graphics;
+    int bw = g.bases.max_width;
+    int bh = g.bases.max_height;
+    sel_base_aspect = 0;      // default = aspect_opts[0] (16:10)
+    if (bw > 0 && bh > 0) {
+        float ratio = (float)bw / (float)bh;
+        int best = 0;
+        float best_d = fabsf(ratio - aspect_vals[0]);
+        for (size_t i = 1; i < sizeof(aspect_vals) / sizeof(aspect_vals[0]); ++i) {
+            float d = fabsf(ratio - aspect_vals[i]);
+            if (d < best_d) { best_d = d; best = (int)i; }
+        }
+        sel_base_aspect = best;
+    }
+    base_aspect_text = aspect_opts[sel_base_aspect];
+}
+
 // ---------------------------------------------------------------------------
 // Configuration read/write (the vs-05 model_set_var/get_var, mapped to the
 // engine's Configuration struct).
@@ -209,7 +229,7 @@ static void load_display_from_config() {
     if (!g.high_quality_font && g.font_antialias) sel_font_type = FONT_AA_VEC;
     else if (!g.high_quality_font && !g.font_antialias) sel_font_type = FONT_VEC;
     else sel_font_type = FONT_HELVETICA;   // bitmap (font name will refine; v1 defaults)
-    base_aspect_text = aspect_opts[sel_base_aspect];
+    load_base_aspect_from_config();
     refresh_screen_aspect_text();
     resolution_text = std::to_string(sel_res_w) + "x" + std::to_string(sel_res_h);
     display_inited = true;
@@ -259,8 +279,20 @@ static void apply_display_to_config() {
     mark_dirty("graphics.aspect");
     g.draw_rendered_crosshairs = rendered_crosshair;
     mark_dirty("graphics.draw_rendered_crosshairs");
-    // base_max_width/height and monitor (screen) selection: Configuration lacks
-    // base_max fields; screen index is stored in g.screen.
+    // Base viewport (graphics.bases.max_width/height) from the base aspect ratio.
+    // compute_base_max() yields the largest viewport of the chosen aspect that fits
+    // the selected resolution; the imgui bases render into this letterboxed viewport.
+    {
+        int bw = 0, bh = 0;
+        compute_base_max(bw, bh);
+        if (bw > 0 && bh > 0) {
+            g.bases.max_width = bw;
+            g.bases.max_height = bh;
+            mark_dirty("graphics.bases.max_width");
+            mark_dirty("graphics.bases.max_height");
+        }
+    }
+    // screen (monitor) index.
     g.screen = sel_monitor;
     mark_dirty("graphics.screen");
 }
