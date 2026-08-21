@@ -86,6 +86,7 @@ bool HandleGlobalKey(unsigned int ch, unsigned int mod, bool down, int x, int y)
 void ProcessKB();
 void BindKey(int key, unsigned int modifiers, unsigned int player, KBHandler handler, const KBData &data);
 void UnbindKey(int key, unsigned int modifiers);
+void ClearKeyBindings();
 void InitKB();
 void RestoreKB();
 

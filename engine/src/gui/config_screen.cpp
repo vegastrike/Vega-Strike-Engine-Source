@@ -14,6 +14,8 @@
 #include "gldrv/winsys.h"
 #include "universe.h"
 #include "vegadisk/vsfilesystem.h"
+#include "root_generic/vs_globals.h"
+#include "config_xml.h"
 #include <boost/json.hpp>
 #include <boost/filesystem.hpp>
 #include <imgui.h>
@@ -1642,6 +1644,20 @@ void DrawConfigScreen() {
         apply_flight_to_config();
         apply_mouse_to_config();
         apply_joystick_to_config();
+        // Live-apply input bindings/axes/device: re-run the bind path so key,
+        // mouse, joystick and flight-device changes take effect immediately
+        // (not just after a restart). Only when an input-related setting changed.
+        static const char *input_prefixes[] = {"bindings.", "input.", nullptr};
+        bool input_changed = false;
+        for (const auto &path : g_dirty_paths) {
+            for (const char **p = input_prefixes; *p; ++p) {
+                if (path.rfind(*p, 0) == 0) { input_changed = true; break; }
+            }
+            if (input_changed) break;
+        }
+        if (input_changed && vs_config != nullptr) {
+            vs_config->bindKeys();   // virtual: GameVegaConfig::bindKeys()
+        }
     };
     auto close_overlay = [&]() {
         if (_Universe) _Universe->ToggleOptionsActive();   // close; hide cursor on inactive

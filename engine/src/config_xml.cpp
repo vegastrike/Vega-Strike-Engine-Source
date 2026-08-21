@@ -43,6 +43,7 @@
 #include "gfx/loc_select.h"
 #include "src/audiolib.h"
 #include "src/in_joystick.h"
+#include "src/in_kb.h"
 #include "src/main_loop.h" //for CockpitKeys
 #include "gfx/cockpit.h"
 #include "src/in_kb_data.h"
@@ -264,6 +265,29 @@ void GameVegaConfig::initCommandMap() // DELETE ME
 void GameVegaConfig::bindKeys() {
     const auto & cfg = configuration();
     CommandMap & cmd_map = commandMap;  // command name -> handler (initGlobalCommandMap)
+
+    // Idempotent reset: clear any previously-applied bindings and axis routing
+    // so this can be re-run live (config screen Save) without leaving stale
+    // entries. Mirrors the startup reset (InitJoystick) plus the keyboard and
+    // axis-array clearing.
+    ClearKeyBindings();
+    for (int b = 0; b < NUMJBUTTONS; ++b)
+        for (int j = 0; j < MAX_JOYSTICKS; ++j) UnbindJoyKey(j, b);
+    for (int j = 0; j < MAX_JOYSTICKS; ++j)
+        for (int h = 0; h < MAX_DIGITAL_HATSWITCHES; ++h)
+            for (int v = 0; v < MAX_DIGITAL_VALUES; ++v) UnbindDigitalHatswitchKey(j, h, v);
+    for (int a = 0; a < MAX_AXIS; ++a) {
+        axis_joy[a] = -1;
+        axis_axis[a] = -1;
+        axis_inverse[a] = false;
+    }
+    for (int j = 0; j < MAX_JOYSTICKS; ++j) {
+        if (joystick[j] == nullptr) continue;
+        for (int a = 0; a < MAX_AXES; ++a) {
+            joystick[j]->axis_axis[a] = -1;
+            joystick[j]->axis_inverse[a] = false;
+        }
+    }
 
     // Bind one keyboard entry (a single printable char, or a named special key).
     auto bind_keyboard = [&](const std::string & cmd, const vega_config::Configuration::ActionBinding & b) {

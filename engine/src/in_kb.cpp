@@ -264,3 +264,11 @@ void BindKey(int key, unsigned int mod, unsigned int player, KBHandler handler, 
     keyBindings[map_key].state = RESET;
 }
 
+// Clear all keyboard bindings. Used to make a re-run of the bind path
+// (GameVegaConfig::bindKeys) idempotent so bindings can be re-applied live
+// without leaving stale entries behind.
+void ClearKeyBindings() {
+    keyBindings.clear();
+    playerBindings.clear();
+}
+
