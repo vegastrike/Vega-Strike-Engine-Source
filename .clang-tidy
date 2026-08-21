@@ -26,3 +26,5 @@ Checks:
 CheckOptions:
   - key: modernize-use-auto.MinTypeNameLength
     value: '999'
+ExtraArgs:
+  - '-std=c++14'
