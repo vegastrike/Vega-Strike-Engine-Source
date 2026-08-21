@@ -318,7 +318,9 @@ int main(int argc, char *argv[]) {
         VS_LOG(info, (boost::format("GOT SUBDIR ARG = %1%") % subdir));
         if (CONFIGFILE == nullptr) {
             CONFIGFILE = new char[42];
-            snprintf(CONFIGFILE, 41, "vegastrike.config");
+            // The engine reads the merged JSON config (config.json in the
+            // assets); vegastrike.config is no longer parsed.
+            snprintf(CONFIGFILE, 41, "config.json");
             CONFIGFILE[41] = '\0';
         }
         //Specify the config file and the possible mod subdir to play
@@ -842,7 +844,7 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
         int num_players = cmd_args["num-players"].as<int>();
         if (num_players > 1 && num_players <= 9) {
             CONFIGFILE = new char[42];
-            snprintf(CONFIGFILE, 42, "vegastrike.config.%dplayer", num_players);
+            snprintf(CONFIGFILE, 42, "config.json.%dplayer", num_players);
         } else if (num_players != 1) {
             VS_LOG(warning, "Specified number of players out of range (1-9)");
         }

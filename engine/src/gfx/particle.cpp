@@ -239,23 +239,21 @@ void ParticleTrail::Config::init() {
         return;
     }
 
-    use = XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix, "true"));
-    use_points = XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix + "point", "false"));
-    pblend = XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix + "blend", "false"));
-    pgrow = XMLSupport::parse_floatf(vs_config->getVariable("graphics",
-            prefix + "growrate",
-            "50.0"));     //50x size when disappearing
-    ptrans = XMLSupport::parse_floatf(vs_config->getVariable("graphics",
-            prefix + "alpha",
-            "2.5"));     //NOTE: It's the base transparency, before surface attenuation, so it needn't be within the [0-1] range.
-    pfade = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "fade", "0.1"));
+    // These trail-rendering knobs were never customized in vegastrike.config
+    // (the XML only had sparkle emitter values); they keep their defaults.
+    // No longer read from vs_config (the XML is gone).
+    use = true;
+    use_points = false;
+    pblend = false;
+    pgrow = 50.0;   //50x size when disappearing
+    ptrans = 2.5;   //base transparency, before surface attenuation (needn't be in [0-1])
+    pfade = 0.1;
 
     if (use_points) {
-        psize = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "size", "1.5"));
-        psmooth = XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix + "smooth", "false"));
+        psize = 1.5;
+        psmooth = false;
     } else {
-        std::string s = vs_config->getVariable("graphics", prefix + "texture", "supernova.bmp");
-        texture = new Texture(s.c_str());
+        texture = new Texture("supernova.bmp");
     }
 
     initialized = true;
@@ -264,13 +262,17 @@ void ParticleTrail::Config::init() {
 ParticleTrail::Config::Config() : texture(nullptr), initialized(false), prefix("") {}
 
 void ParticleEmitter::Config::init(const std::string &prefix) {
-    rate = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "scale", "8"));
-    speed = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "speed", ".5"));
-    locSpread = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "flare", ".15"));
-    spread = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "spread", ".04"));
-    absSpeed = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "absolutespeed", ".02"));
-    relSize = XMLSupport::parse_floatf(vs_config->getVariable("graphics", prefix + "sizerelative", ".125"));
-    fixedSize = XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix + "fixedsize", "0"));
+    // Particle emitter tuning now comes from the merged JSON config
+    // (engine.json -> base.graphics). Only the 'sparkle' emitter is active;
+    // values without a config member keep their defaults.
+    (void)prefix;
+    rate = configuration().graphics.sparkle_rate_flt;
+    speed = 0.5F;
+    locSpread = 0.15F;
+    spread = 0.04F;
+    absSpeed = configuration().graphics.sparkle_absolute_speed_flt;
+    relSize = configuration().graphics.sparkle_engine_size_relative_to_ship_flt;
+    fixedSize = false;
 }
 
 void ParticleTrail::DrawAndUpdate() {
