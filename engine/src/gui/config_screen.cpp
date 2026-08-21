@@ -1398,129 +1398,156 @@ static void load_presets() {
     g_presets_loaded = true;
 }
 
-// Map a bare preset variable name (as used in engine.json preset options, e.g.
-// "fog", "music_volume", "game_speed") to its dotted config.json path (e.g.
-// "graphics.fog", "audio.music_volume", "physics.game_speed"). This is what
-// read_config_value()/write_out_dirty() persist, so the resolved preset value
-// reaches config.json and survives a restart. Returns "" if the name is unknown
-// (not persistable).
-static std::string preset_var_path(const std::string &name) {
-    // graphics
-    if (name=="fog") return "graphics.fog"; else if (name=="background") return "graphics.background";
-    else if (name=="blend_panels") return "graphics.blend_panels"; else if (name=="cockpit") return "graphics.cockpit";
-    else if (name=="color_depth") return "graphics.color_depth"; else if (name=="force_lighting") return "graphics.force_lighting";
-    else if (name=="full_screen") return "graphics.full_screen"; else if (name=="reflection") return "graphics.reflection";
-    else if (name=="smooth_lines") return "graphics.smooth_lines"; else if (name=="star_blend") return "graphics.star_blend";
-    else if (name=="draw_star_body") return "graphics.draw_star_body"; else if (name=="draw_star_glow") return "graphics.draw_star_glow";
-    else if (name=="high_quality_font") return "graphics.high_quality_font"; else if (name=="high_quality_font_computer") return "graphics.high_quality_font_computer";
-    else if (name=="high_quality_sprites") return "graphics.high_quality_sprites"; else if (name=="per_pixel_lighting") return "graphics.per_pixel_lighting";
-    else if (name=="specmap_with_reflection") return "graphics.specmap_with_reflection";
-    else if (name=="gl_accelerated_visual") return "graphics.gl_accelerated_visual";
-    else if (name=="aspect") return "graphics.aspect"; else if (name=="font_point") return "graphics.font_point";
-    else if (name=="model_detail") return "graphics.model_detail"; else if (name=="mipmap_detail") return "graphics.mipmap_detail";
-    else if (name=="planet_detail_level") return "graphics.planet_detail_level";
-    else if (name=="resolution_x") return "graphics.resolution_x"; else if (name=="resolution_y") return "graphics.resolution_y";
-    else if (name=="max_cubemap_size") return "graphics.max_cubemap_size"; else if (name=="max_movie_dimension") return "graphics.max_movie_dimension";
-    else if (name=="max_texture_dimension") return "graphics.max_texture_dimension";
-    else if (name=="technique_set") return "graphics.technique_set"; else if (name=="mac_shader_name") return "graphics.mac_shader_name";
-    else if (name=="default_full_technique") return "graphics.default_full_technique"; else if (name=="default_simple_technique") return "graphics.default_simple_technique";
-    else if (name=="faction_dependent_textures") return "graphics.faction_dependent_textures";
-    // audio
-    else if (name=="ai_sound") return "audio.ai_sound"; else if (name=="every_other_mount") return "audio.every_other_mount";
-    else if (name=="music") return "audio.music"; else if (name=="sound") return "audio.sound";
-    else if (name=="positional") return "audio.positional"; else if (name=="music_volume") return "audio.music_volume";
-    else if (name=="volume") return "audio.volume"; else if (name=="max_single_sounds") return "audio.max_single_sounds";
-    else if (name=="max_total_sounds") return "audio.max_total_sounds";
-    else if (name=="sounds_extension_1") return "audio.sounds_extension_1"; else if (name=="sounds_extension_2") return "audio.sounds_extension_2";
-    // physics
-    else if (name=="game_speed") return "physics.game_speed"; else if (name=="game_accel") return "physics.game_accel";
-    else if (name=="inactive_system_time") return "physics.inactive_system_time"; else if (name=="num_running_systems") return "physics.num_running_systems";
-    // general
-    else if (name=="num_old_systems") return "general.num_old_systems"; else if (name=="simulation_atom") return "general.simulation_atom";
-    // joystick (input.joystick)
-    else if (name=="mouse_cursor") return "input.joystick.mouse_cursor"; else if (name=="mouse_sensitivity") return "input.joystick.mouse_sensitivity";
-    else if (name=="reverse_mouse_spr") return "input.joystick.reverse_mouse_spr"; else if (name=="warp_mouse") return "input.joystick.warp_mouse";
-    else if (name=="force_use_of_joystick") return "input.joystick.force_use_of_joystick";
-    // splash / test
-    else if (name=="loading_sprite") return "splash.loading_sprite"; else if (name=="autodocker") return "test.autodocker";
-    else return "";
+// ---- Single source of truth: config path <-> Configuration field ----
+//
+// C++ has no reflection, so every direction of config traffic (preset apply,
+// write-back serialize, dirty-path tracking) used to hand-encode the same
+// path<->field relationship as three separate if/else chains that could drift
+// apart (and did: graphics.bases.max_*, graphics.screen, graphics.font and
+// graphics.font_antialias were marked dirty but not readable, so they never
+// persisted). This table is the only place that maps a dotted config path to its
+// Configuration field.
+
+struct ConfigAccessor {
+    const char* path;   // dotted config.json path, e.g. "graphics.fog"
+    // Read the field's current value (used by write_out_dirty). Never null.
+    boost::json::value (*get)(const vega_config::Configuration&);
+    // Apply a preset string value (used by apply_preset_var). Null if the key is
+    // not settable from a preset (it is set by a dedicated apply_* function).
+    void (*set)(vega_config::Configuration&, const std::string&);
+};
+
+static const ConfigAccessor kConfigAccessors[] = {
+    // ---- graphics ----
+    {"graphics.fog",                     [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.fog;},                   [](vega_config::Configuration&c,const std::string&v){c.graphics.fog=(v=="true"||v=="1");}},
+    {"graphics.background",              [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.background;},            [](vega_config::Configuration&c,const std::string&v){c.graphics.background=(v=="true"||v=="1");}},
+    {"graphics.blend_panels",            [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.blend_panels;},          [](vega_config::Configuration&c,const std::string&v){c.graphics.blend_panels=(v=="true"||v=="1");}},
+    {"graphics.cockpit",                 [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.cockpit;},               [](vega_config::Configuration&c,const std::string&v){c.graphics.cockpit=(v=="true"||v=="1");}},
+    {"graphics.color_depth",             [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.color_depth;},           [](vega_config::Configuration&c,const std::string&v){c.graphics.color_depth=atoi(v.c_str());}},
+    {"graphics.force_lighting",          [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.force_lighting;},        [](vega_config::Configuration&c,const std::string&v){c.graphics.force_lighting=(v=="true"||v=="1");}},
+    {"graphics.full_screen",             [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.full_screen;},           [](vega_config::Configuration&c,const std::string&v){c.graphics.full_screen=(v=="true"||v=="1");}},
+    {"graphics.reflection",              [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.reflection;},            [](vega_config::Configuration&c,const std::string&v){c.graphics.reflection=(v=="true"||v=="1");}},
+    {"graphics.smooth_lines",            [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.smooth_lines;},          [](vega_config::Configuration&c,const std::string&v){c.graphics.smooth_lines=(v=="true"||v=="1");}},
+    {"graphics.star_blend",              [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.star_blend;},            [](vega_config::Configuration&c,const std::string&v){c.graphics.star_blend=(v=="true"||v=="1");}},
+    {"graphics.draw_star_body",          [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.draw_star_body;},        [](vega_config::Configuration&c,const std::string&v){c.graphics.draw_star_body=(v=="true"||v=="1");}},
+    {"graphics.draw_star_glow",          [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.draw_star_glow;},        [](vega_config::Configuration&c,const std::string&v){c.graphics.draw_star_glow=(v=="true"||v=="1");}},
+    {"graphics.high_quality_font",       [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.high_quality_font;},     [](vega_config::Configuration&c,const std::string&v){c.graphics.high_quality_font=(v=="true"||v=="1");}},
+    {"graphics.high_quality_font_computer",[](const vega_config::Configuration&c)->boost::json::value{return c.graphics.high_quality_font_computer;},[](vega_config::Configuration&c,const std::string&v){c.graphics.high_quality_font_computer=(v=="true"||v=="1");}},
+    {"graphics.high_quality_sprites",    [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.high_quality_sprites;},  [](vega_config::Configuration&c,const std::string&v){c.graphics.high_quality_sprites=(v=="true"||v=="1");}},
+    {"graphics.per_pixel_lighting",      [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.per_pixel_lighting;},    [](vega_config::Configuration&c,const std::string&v){c.graphics.per_pixel_lighting=(v=="true"||v=="1");}},
+    {"graphics.specmap_with_reflection", [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.specmap_with_reflection;},[](vega_config::Configuration&c,const std::string&v){c.graphics.specmap_with_reflection=(v=="true"||v=="1");}},
+    {"graphics.gl_accelerated_visual",   [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.gl_accelerated_visual;}, [](vega_config::Configuration&c,const std::string&v){c.graphics.gl_accelerated_visual=(v=="true"||v=="1");}},
+    {"graphics.aspect",                  [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.aspect_flt;},            [](vega_config::Configuration&c,const std::string&v){c.graphics.aspect_flt=(float)atof(v.c_str());c.graphics.aspect_dbl=atof(v.c_str());}},
+    {"graphics.font_point",              [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.font_point_flt;},        [](vega_config::Configuration&c,const std::string&v){c.graphics.font_point_flt=(float)atof(v.c_str());c.graphics.font_point_dbl=atof(v.c_str());}},
+    {"graphics.model_detail",            [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.model_detail_flt;},      [](vega_config::Configuration&c,const std::string&v){c.graphics.model_detail_flt=(float)atof(v.c_str());c.graphics.model_detail_dbl=atof(v.c_str());}},
+    {"graphics.mipmap_detail",           [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.mipmap_detail;},         [](vega_config::Configuration&c,const std::string&v){c.graphics.mipmap_detail=atoi(v.c_str());}},
+    {"graphics.planet_detail_level",     [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.planet_detail_level;},   [](vega_config::Configuration&c,const std::string&v){c.graphics.planet_detail_level=atoi(v.c_str());}},
+    {"graphics.resolution_x",            [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.resolution_x;},          [](vega_config::Configuration&c,const std::string&v){c.graphics.resolution_x=atoi(v.c_str());}},
+    {"graphics.resolution_y",            [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.resolution_y;},          [](vega_config::Configuration&c,const std::string&v){c.graphics.resolution_y=atoi(v.c_str());}},
+    {"graphics.max_cubemap_size",        [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.max_cubemap_size;},      [](vega_config::Configuration&c,const std::string&v){c.graphics.max_cubemap_size=atoi(v.c_str());}},
+    {"graphics.max_movie_dimension",     [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.max_movie_dimension;},   [](vega_config::Configuration&c,const std::string&v){c.graphics.max_movie_dimension=atoi(v.c_str());}},
+    {"graphics.max_texture_dimension",   [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.max_texture_dimension;}, [](vega_config::Configuration&c,const std::string&v){c.graphics.max_texture_dimension=atoi(v.c_str());}},
+    {"graphics.technique_set",           [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.technique_set);},         [](vega_config::Configuration&c,const std::string&v){c.graphics.technique_set=v;}},
+    {"graphics.mac_shader_name",         [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.mac_shader_name);},       [](vega_config::Configuration&c,const std::string&v){c.graphics.mac_shader_name=v;}},
+    {"graphics.default_full_technique",  [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.default_full_technique);},[](vega_config::Configuration&c,const std::string&v){c.graphics.default_full_technique=v;}},
+    {"graphics.default_simple_technique",[](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.default_simple_technique);},[](vega_config::Configuration&c,const std::string&v){c.graphics.default_simple_technique=v;}},
+    {"graphics.faction_dependent_textures",[](const vega_config::Configuration&c)->boost::json::value{return c.graphics.faction_dependent_textures;},[](vega_config::Configuration&c,const std::string&v){c.graphics.faction_dependent_textures=(v=="true"||v=="1");}},
+    {"graphics.draw_rendered_crosshairs",[](const vega_config::Configuration&c)->boost::json::value{return c.graphics.draw_rendered_crosshairs;},nullptr},
+    {"graphics.bases.max_width",         [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.bases.max_width;},        nullptr},
+    {"graphics.bases.max_height",        [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.bases.max_height;},       nullptr},
+    {"graphics.font",                    [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.font);},                  nullptr},
+    {"graphics.font_antialias",          [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.font_antialias;},        nullptr},
+    {"graphics.screen",                  [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.screen;},                nullptr},
+    // ---- audio ----
+    {"audio.ai_sound",                   [](const vega_config::Configuration&c)->boost::json::value{return c.audio.ai_sound;},                 [](vega_config::Configuration&c,const std::string&v){c.audio.ai_sound=(v=="true"||v=="1");}},
+    {"audio.every_other_mount",          [](const vega_config::Configuration&c)->boost::json::value{return c.audio.every_other_mount;},        [](vega_config::Configuration&c,const std::string&v){c.audio.every_other_mount=(v=="true"||v=="1");}},
+    {"audio.music",                      [](const vega_config::Configuration&c)->boost::json::value{return c.audio.music;},                    [](vega_config::Configuration&c,const std::string&v){c.audio.music=(v=="true"||v=="1");}},
+    {"audio.sound",                      [](const vega_config::Configuration&c)->boost::json::value{return c.audio.sound;},                    [](vega_config::Configuration&c,const std::string&v){c.audio.sound=(v=="true"||v=="1");}},
+    {"audio.positional",                 [](const vega_config::Configuration&c)->boost::json::value{return c.audio.positional;},               [](vega_config::Configuration&c,const std::string&v){c.audio.positional=(v=="true"||v=="1");}},
+    {"audio.music_volume",               [](const vega_config::Configuration&c)->boost::json::value{return c.audio.music_volume_flt;},         [](vega_config::Configuration&c,const std::string&v){c.audio.music_volume_flt=(float)atof(v.c_str());c.audio.music_volume_dbl=atof(v.c_str());}},
+    {"audio.volume",                     [](const vega_config::Configuration&c)->boost::json::value{return c.audio.volume_flt;},               [](vega_config::Configuration&c,const std::string&v){c.audio.volume_flt=(float)atof(v.c_str());c.audio.volume_dbl=atof(v.c_str());}},
+    {"audio.max_single_sounds",          [](const vega_config::Configuration&c)->boost::json::value{return c.audio.max_single_sounds;},        [](vega_config::Configuration&c,const std::string&v){c.audio.max_single_sounds=atoi(v.c_str());}},
+    {"audio.max_total_sounds",           [](const vega_config::Configuration&c)->boost::json::value{return c.audio.max_total_sounds;},         [](vega_config::Configuration&c,const std::string&v){c.audio.max_total_sounds=atoi(v.c_str());}},
+    {"audio.sounds_extension_1",         [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.cockpit_audio.sounds_extension_1);},[](vega_config::Configuration&c,const std::string&v){c.cockpit_audio.sounds_extension_1=v;}},
+    {"audio.sounds_extension_2",         [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.cockpit_audio.sounds_extension_2);},[](vega_config::Configuration&c,const std::string&v){c.cockpit_audio.sounds_extension_2=v;}},
+    // ---- physics ----
+    {"physics.game_speed",               [](const vega_config::Configuration&c)->boost::json::value{return c.physics.game_speed_flt;},         [](vega_config::Configuration&c,const std::string&v){c.physics.game_speed_flt=(float)atof(v.c_str());c.physics.game_speed_dbl=atof(v.c_str());}},
+    {"physics.game_accel",               [](const vega_config::Configuration&c)->boost::json::value{return c.physics.game_accel_flt;},         [](vega_config::Configuration&c,const std::string&v){c.physics.game_accel_flt=(float)atof(v.c_str());c.physics.game_accel_dbl=atof(v.c_str());}},
+    {"physics.inactive_system_time",     [](const vega_config::Configuration&c)->boost::json::value{return c.physics.inactive_system_time_flt;},[](vega_config::Configuration&c,const std::string&v){c.physics.inactive_system_time_flt=(float)atof(v.c_str());c.physics.inactive_system_time_dbl=atof(v.c_str());}},
+    {"physics.num_running_systems",      [](const vega_config::Configuration&c)->boost::json::value{return c.physics.num_running_systems;},    [](vega_config::Configuration&c,const std::string&v){c.physics.num_running_systems=atoi(v.c_str());}},
+    // ---- general ----
+    {"general.num_old_systems",          [](const vega_config::Configuration&c)->boost::json::value{return c.general.num_old_systems;},        [](vega_config::Configuration&c,const std::string&v){c.general.num_old_systems=atoi(v.c_str());}},
+    {"general.simulation_atom",          [](const vega_config::Configuration&c)->boost::json::value{return c.general.simulation_atom_flt;},    [](vega_config::Configuration&c,const std::string&v){c.general.simulation_atom_flt=(float)atof(v.c_str());c.general.simulation_atom_dbl=atof(v.c_str());}},
+    // ---- joystick (input.joystick) ----
+    {"input.joystick.mouse_cursor",      [](const vega_config::Configuration&c)->boost::json::value{return c.joystick.mouse_cursor;},          [](vega_config::Configuration&c,const std::string&v){c.joystick.mouse_cursor=(v=="true"||v=="1");}},
+    {"input.joystick.mouse_sensitivity", [](const vega_config::Configuration&c)->boost::json::value{return c.joystick.mouse_sensitivity_flt;}, [](vega_config::Configuration&c,const std::string&v){c.joystick.mouse_sensitivity_flt=(float)atof(v.c_str());c.joystick.mouse_sensitivity_dbl=atof(v.c_str());}},
+    {"input.joystick.reverse_mouse_spr", [](const vega_config::Configuration&c)->boost::json::value{return c.joystick.reverse_mouse_spr;},     [](vega_config::Configuration&c,const std::string&v){c.joystick.reverse_mouse_spr=(v=="true"||v=="1");}},
+    {"input.joystick.warp_mouse",        [](const vega_config::Configuration&c)->boost::json::value{return c.joystick.warp_mouse;},            [](vega_config::Configuration&c,const std::string&v){c.joystick.warp_mouse=(v=="true"||v=="1");}},
+    {"input.joystick.force_use_of_joystick",[](const vega_config::Configuration&c)->boost::json::value{return c.joystick.force_use_of_joystick;},[](vega_config::Configuration&c,const std::string&v){c.joystick.force_use_of_joystick=(v=="true"||v=="1");}},
+    {"input.joystick.mouse_cursor_pancam",[](const vega_config::Configuration&c)->boost::json::value{return c.joystick.mouse_cursor_pancam;},  nullptr},
+    {"input.joystick.mouse_cursor_pantgt",[](const vega_config::Configuration&c)->boost::json::value{return c.joystick.mouse_cursor_pantgt;},  nullptr},
+    {"input.joystick.mouse_cursor_chasecam",[](const vega_config::Configuration&c)->boost::json::value{return c.joystick.mouse_cursor_chasecam;},nullptr},
+    {"input.joystick.warp_mouse_zone",   [](const vega_config::Configuration&c)->boost::json::value{return c.joystick.warp_mouse_zone;},       nullptr},
+    {"input.joystick.mouse_exponent",    [](const vega_config::Configuration&c)->boost::json::value{return c.joystick.mouse_exponent_flt;},   nullptr},
+    {"input.joystick.mouse_deadband",    [](const vega_config::Configuration&c)->boost::json::value{return c.joystick.mouse_deadband_flt;},   nullptr},
+    {"input.joystick.deadband",          [](const vega_config::Configuration&c)->boost::json::value{return c.joystick.deadband_flt;},         nullptr},
+    {"input.joystick.force_feedback",    [](const vega_config::Configuration&c)->boost::json::value{return c.joystick.force_feedback;},       nullptr},
+    {"input.joystick.ff_device",         [](const vega_config::Configuration&c)->boost::json::value{return c.joystick.ff_device;},            nullptr},
+    {"input.joystick.enabled",           [](const vega_config::Configuration&c)->boost::json::value{return c.joystick.enabled;},              nullptr},
+    // ---- input ----
+    {"input.device",                     [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.input.device);},                  nullptr},
+    {"input.mouse_preset",               [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.input.mouse_preset);},            nullptr},
+    {"input.mouse.enabled",              [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.enabled;},                 nullptr},
+    {"input.mouse.inverse_x",            [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.inverse_x;},               nullptr},
+    {"input.mouse.inverse_y",            [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.inverse_y;},               nullptr},
+    // ---- splash / test ----
+    {"splash.loading_sprite",            [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.splash.loading_sprite);},          [](vega_config::Configuration&c,const std::string&v){c.splash.loading_sprite=v;}},
+    {"test.autodocker",                  [](const vega_config::Configuration&c)->boost::json::value{return c.test.autodocker;},                [](vega_config::Configuration&c,const std::string&v){c.test.autodocker=(v=="true"||v=="1");}},
+};
+
+static const ConfigAccessor* by_path(const std::string &path) {
+    for (const auto &a : kConfigAccessors) {
+        if (path == a.path) return &a;
+    }
+    return nullptr;
+}
+
+// Resolve a bare preset variable name (e.g. "fog") to its accessor by matching
+// the leaf of the dotted path. Preset names are always the path leaf; a few leaves
+// are ambiguous ("enabled": input.mouse vs input.joystick) but those are never
+// preset-applied (their set is null), so leaf lookup is unambiguous for the
+// preset set.
+static const ConfigAccessor* by_leaf(const std::string &leaf) {
+    for (const auto &a : kConfigAccessors) {
+        std::string p(a.path);
+        if (p.substr(p.find_last_of('.') + 1) == leaf) return &a;
+    }
+    return nullptr;
+}
+
+// Read the current value of a Configuration field given its dotted path. Returns
+// a JSON value, or null if unknown.
+static boost::json::value read_config_value(const std::string &path) {
+    const ConfigAccessor* a = by_path(path);
+    return a ? a->get(configuration()) : boost::json::value(nullptr);
 }
 
 // Apply one preset variable (name,value) to the engine's Configuration, using
 // the field names the engine's load_config reads. Returns true if it set something.
 static bool apply_preset_var(const std::string &name, const std::string &value) {
-    auto &c = cfg();
-    bool b = (value == "true" || value == "1");
-    int  i = atoi(value.c_str());
-    float f = (float)atof(value.c_str());
-    double d = (double)atof(value.c_str());
-    bool set = true;
-    // graphics
-    if (name=="fog") c.graphics.fog=b; else if (name=="background") c.graphics.background=b;
-    else if (name=="blend_panels") c.graphics.blend_panels=b; else if (name=="cockpit") c.graphics.cockpit=b;
-    else if (name=="color_depth") c.graphics.color_depth=i; else if (name=="force_lighting") c.graphics.force_lighting=b;
-    else if (name=="full_screen") c.graphics.full_screen=b; else if (name=="reflection") c.graphics.reflection=b;
-    else if (name=="smooth_lines") c.graphics.smooth_lines=b; else if (name=="star_blend") c.graphics.star_blend=b;
-    else if (name=="draw_star_body") c.graphics.draw_star_body=b; else if (name=="draw_star_glow") c.graphics.draw_star_glow=b;
-    else if (name=="high_quality_font") c.graphics.high_quality_font=b; else if (name=="high_quality_font_computer") c.graphics.high_quality_font_computer=b;
-    else if (name=="high_quality_sprites") c.graphics.high_quality_sprites=b; else if (name=="per_pixel_lighting") c.graphics.per_pixel_lighting=b;
-    else if (name=="specmap_with_reflection") c.graphics.specmap_with_reflection=b;
-    else if (name=="gl_accelerated_visual") c.graphics.gl_accelerated_visual=b;
-    else if (name=="aspect") { c.graphics.aspect_flt=f; c.graphics.aspect_dbl=d; }
-    else if (name=="font_point") { c.graphics.font_point_flt=f; c.graphics.font_point_dbl=d; }
-    else if (name=="model_detail") { c.graphics.model_detail_flt=f; c.graphics.model_detail_dbl=d; }
-    else if (name=="mipmap_detail") c.graphics.mipmap_detail=i;
-    else if (name=="planet_detail_level") c.graphics.planet_detail_level=i;
-    else if (name=="resolution_x") c.graphics.resolution_x=i; else if (name=="resolution_y") c.graphics.resolution_y=i;
-    else if (name=="max_cubemap_size") c.graphics.max_cubemap_size=i;
-    else if (name=="max_movie_dimension") c.graphics.max_movie_dimension=i;
-    else if (name=="max_texture_dimension") c.graphics.max_texture_dimension=i;
-    else if (name=="technique_set") c.graphics.technique_set=value;
-    else if (name=="mac_shader_name") c.graphics.mac_shader_name=value;
-    else if (name=="default_full_technique") c.graphics.default_full_technique=value;
-    else if (name=="default_simple_technique") c.graphics.default_simple_technique=value;
-    else if (name=="faction_dependent_textures") c.graphics.faction_dependent_textures=b;
-    // audio
-    else if (name=="ai_sound") c.audio.ai_sound=b; else if (name=="every_other_mount") c.audio.every_other_mount=b;
-    else if (name=="music") c.audio.music=b; else if (name=="sound") c.audio.sound=b;
-    else if (name=="positional") c.audio.positional=b;
-    else if (name=="music_volume") { c.audio.music_volume_flt=f; c.audio.music_volume_dbl=d; }
-    else if (name=="volume") { c.audio.volume_flt=f; c.audio.volume_dbl=d; }
-    else if (name=="max_single_sounds") c.audio.max_single_sounds=i;
-    else if (name=="max_total_sounds") c.audio.max_total_sounds=i;
-    else if (name=="sounds_extension_1") c.cockpit_audio.sounds_extension_1=value;
-    else if (name=="sounds_extension_2") c.cockpit_audio.sounds_extension_2=value;
-    // physics
-    else if (name=="game_speed") { c.physics.game_speed_flt=f; c.physics.game_speed_dbl=d; }
-    else if (name=="game_accel") { c.physics.game_accel_flt=f; c.physics.game_accel_dbl=d; }
-    else if (name=="inactive_system_time") { c.physics.inactive_system_time_flt=f; c.physics.inactive_system_time_dbl=d; }
-    else if (name=="num_running_systems") c.physics.num_running_systems=i;
-    // general
-    else if (name=="num_old_systems") c.general.num_old_systems=i;
-    else if (name=="simulation_atom") { c.general.simulation_atom_flt=f; c.general.simulation_atom_dbl=d; }
-    // joystick
-    else if (name=="mouse_cursor") c.joystick.mouse_cursor=b;
-    else if (name=="mouse_sensitivity") { c.joystick.mouse_sensitivity_flt=f; c.joystick.mouse_sensitivity_dbl=d; }
-    else if (name=="reverse_mouse_spr") c.joystick.reverse_mouse_spr=b;
-    else if (name=="warp_mouse") c.joystick.warp_mouse=b;
-    else if (name=="force_use_of_joystick") c.joystick.force_use_of_joystick=b;
-    // splash / test
-    else if (name=="loading_sprite") c.splash.loading_sprite=value;
-    else if (name=="autodocker") c.test.autodocker=b;
-    else { set = false; }
-    if (set) {
-        // Persist the resolved value to config.json via its real dotted path
-        // (so it survives a restart), not the synthetic preset_var.<name> path.
-        const std::string p = preset_var_path(name);
-        if (!p.empty()) mark_dirty(p);
-    }
-    return set;
+    const ConfigAccessor* a = by_leaf(name);
+    if (!a || !a->set) return false;
+    a->set(cfg(), value);
+    // Persist the resolved value to config.json via its real dotted path (so it
+    // survives a restart), not the synthetic preset_var.<name> path.
+    mark_dirty(a->path);
+    return true;
 }
 
 // Apply the currently-selected option's vars for every displayed preset group
 // (the active preset selection), so the displayed presets are always persisted
 // to config.json on Save — not only when the user happens to change a combo.
-// Called from the Save/Preview apply_all path.
+// Called from the Save/apply_all path.
 static void apply_presets_to_config() {
     for (const auto &g : g_preset_groups) {
         std::string cur = configuration().preset.count(g.key) ? configuration().preset.at(g.key) : "";
@@ -1532,96 +1559,6 @@ static void apply_presets_to_config() {
             }
         }
     }
-}
-
-// Read the current value of a Configuration field given its dotted path (the
-// reverse of apply_preset_var). Returns a JSON value, or null if unknown.
-static boost::json::value read_config_value(const std::string &path) {
-    const auto &c = configuration();
-    // graphics
-    if (path=="graphics.fog") return c.graphics.fog;
-    else if (path=="graphics.background") return c.graphics.background;
-    else if (path=="graphics.blend_panels") return c.graphics.blend_panels;
-    else if (path=="graphics.cockpit") return c.graphics.cockpit;
-    else if (path=="graphics.color_depth") return c.graphics.color_depth;
-    else if (path=="graphics.force_lighting") return c.graphics.force_lighting;
-    else if (path=="graphics.full_screen") return c.graphics.full_screen;
-    else if (path=="graphics.reflection") return c.graphics.reflection;
-    else if (path=="graphics.smooth_lines") return c.graphics.smooth_lines;
-    else if (path=="graphics.star_blend") return c.graphics.star_blend;
-    else if (path=="graphics.draw_star_body") return c.graphics.draw_star_body;
-    else if (path=="graphics.draw_star_glow") return c.graphics.draw_star_glow;
-    else if (path=="graphics.high_quality_font") return c.graphics.high_quality_font;
-    else if (path=="graphics.high_quality_font_computer") return c.graphics.high_quality_font_computer;
-    else if (path=="graphics.high_quality_sprites") return c.graphics.high_quality_sprites;
-    else if (path=="graphics.per_pixel_lighting") return c.graphics.per_pixel_lighting;
-    else if (path=="graphics.specmap_with_reflection") return c.graphics.specmap_with_reflection;
-    else if (path=="graphics.gl_accelerated_visual") return c.graphics.gl_accelerated_visual;
-    else if (path=="graphics.aspect") return c.graphics.aspect_flt;
-    else if (path=="graphics.font_point") return c.graphics.font_point_flt;
-    else if (path=="graphics.model_detail") return c.graphics.model_detail_flt;
-    else if (path=="graphics.mipmap_detail") return c.graphics.mipmap_detail;
-    else if (path=="graphics.planet_detail_level") return c.graphics.planet_detail_level;
-    else if (path=="graphics.resolution_x") return c.graphics.resolution_x;
-    else if (path=="graphics.resolution_y") return c.graphics.resolution_y;
-    else if (path=="graphics.max_cubemap_size") return c.graphics.max_cubemap_size;
-    else if (path=="graphics.max_movie_dimension") return c.graphics.max_movie_dimension;
-    else if (path=="graphics.max_texture_dimension") return c.graphics.max_texture_dimension;
-    else if (path=="graphics.technique_set") return boost::json::value(c.graphics.technique_set);
-    else if (path=="graphics.mac_shader_name") return boost::json::value(c.graphics.mac_shader_name);
-    else if (path=="graphics.default_full_technique") return boost::json::value(c.graphics.default_full_technique);
-    else if (path=="graphics.default_simple_technique") return boost::json::value(c.graphics.default_simple_technique);
-    else if (path=="graphics.faction_dependent_textures") return c.graphics.faction_dependent_textures;
-    else if (path=="graphics.draw_rendered_crosshairs") return c.graphics.draw_rendered_crosshairs;
-    else if (path=="graphics.bases.max_width") return c.graphics.bases.max_width;
-    else if (path=="graphics.bases.max_height") return c.graphics.bases.max_height;
-    // audio
-    else if (path=="audio.ai_sound") return c.audio.ai_sound;
-    else if (path=="audio.every_other_mount") return c.audio.every_other_mount;
-    else if (path=="audio.music") return c.audio.music;
-    else if (path=="audio.sound") return c.audio.sound;
-    else if (path=="audio.positional") return c.audio.positional;
-    else if (path=="audio.music_volume") return c.audio.music_volume_flt;
-    else if (path=="audio.volume") return c.audio.volume_flt;
-    else if (path=="audio.max_single_sounds") return c.audio.max_single_sounds;
-    else if (path=="audio.max_total_sounds") return c.audio.max_total_sounds;
-    else if (path=="audio.sounds_extension_1") return boost::json::value(c.cockpit_audio.sounds_extension_1);
-    else if (path=="audio.sounds_extension_2") return boost::json::value(c.cockpit_audio.sounds_extension_2);
-    // physics
-    else if (path=="physics.game_speed") return c.physics.game_speed_flt;
-    else if (path=="physics.game_accel") return c.physics.game_accel_flt;
-    else if (path=="physics.inactive_system_time") return c.physics.inactive_system_time_flt;
-    else if (path=="physics.num_running_systems") return c.physics.num_running_systems;
-    // general
-    else if (path=="general.num_old_systems") return c.general.num_old_systems;
-    else if (path=="general.simulation_atom") return c.general.simulation_atom_flt;
-    // joystick (input.joystick)
-    else if (path=="input.joystick.mouse_cursor") return c.joystick.mouse_cursor;
-    else if (path=="input.joystick.mouse_sensitivity") return c.joystick.mouse_sensitivity_flt;
-    else if (path=="input.joystick.reverse_mouse_spr") return c.joystick.reverse_mouse_spr;
-    else if (path=="input.joystick.warp_mouse") return c.joystick.warp_mouse;
-    else if (path=="input.joystick.force_use_of_joystick") return c.joystick.force_use_of_joystick;
-    else if (path=="input.joystick.mouse_cursor_pancam") return c.joystick.mouse_cursor_pancam;
-    else if (path=="input.joystick.mouse_cursor_pantgt") return c.joystick.mouse_cursor_pantgt;
-    else if (path=="input.joystick.mouse_cursor_chasecam") return c.joystick.mouse_cursor_chasecam;
-    else if (path=="input.joystick.warp_mouse_zone") return c.joystick.warp_mouse_zone;
-    else if (path=="input.joystick.mouse_exponent") return c.joystick.mouse_exponent_flt;
-    else if (path=="input.joystick.mouse_deadband") return c.joystick.mouse_deadband_flt;
-    else if (path=="input.joystick.deadband") return c.joystick.deadband_flt;
-    else if (path=="input.joystick.force_feedback") return c.joystick.force_feedback;
-    else if (path=="input.joystick.ff_device") return c.joystick.ff_device;
-    else if (path=="input.device") return boost::json::value(c.input.device);
-    else if (path=="input.mouse_preset") return boost::json::value(c.input.mouse_preset);
-    else if (path=="input.mouse.enabled") return c.mouse.enabled;
-    else if (path=="input.mouse.inverse_x") return c.mouse.inverse_x;
-    else if (path=="input.mouse.inverse_y") return c.mouse.inverse_y;
-    else if (path=="input.joystick.enabled") return c.joystick.enabled;
-    // splash / test
-    else if (path=="splash.loading_sprite") return boost::json::value(c.splash.loading_sprite);
-    else if (path=="test.autodocker") return c.test.autodocker;
-    else if (path=="preset_var.model_detail") return c.graphics.model_detail_flt;
-    else if (path=="preset_var.font_point") return c.graphics.font_point_flt;
-    return boost::json::value(nullptr);
 }
 
 // Draw the preset grid (vs-05 layout: group + combo, centered, 3 columns).
