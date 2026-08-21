@@ -1554,11 +1554,9 @@ static void draw_presets_frame() {
     }
     int cols = 3;
     // Wrap the grid in its own bordered frame (own frame, above the button bar).
-    // Auto-scale with the window: pick the column count from the available
-    // width, and let the frame fill the available height (down to the button
-    // bar) so it scales with the screen size.
+    // Auto-scale with the window: more columns when there's width, and the
+    // frame fills the vertical space down to the bottom button bar.
     const float avail_w = ImGui::GetContentRegionAvail().x;
-    // Use more columns when there's room, fewer on narrow windows.
     if (avail_w < 700) cols = 1;
     else if (avail_w < 1200) cols = 2;
     else cols = 3;
@@ -1567,12 +1565,12 @@ static void draw_presets_frame() {
     float row_h = ImGui::GetFrameHeight() + ImGui::GetTextLineHeight()
                   + ImGui::GetStyle().ItemSpacing.y;
     float content_h = rows * row_h + ImGui::GetStyle().WindowPadding.y * 2;
-    // Cap the frame height to the space between here and the bottom button bar
-    // so it scales with (and never overflows) the window.
-    float avail_h = ImGui::GetWindowHeight() - ImGui::GetCursorPosY()
-                    - (ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y) * 2
-                    - ImGui::GetStyle().WindowPadding.y * 2;
-    float pres_h = fminf(content_h, avail_h);
+    // Fill the space between here and the bottom button bar (which reserves
+    // btn_h*2 from the window bottom), but never shrink below the grid content.
+    float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
+    float avail_h = ImGui::GetWindowHeight() - ImGui::GetCursorPosY() - btn_h * 2
+                    - ImGui::GetStyle().WindowPadding.y;
+    float pres_h = std::max(content_h, avail_h);
     ImGui::BeginChild("presetsframe", ImVec2(-1.0f, pres_h), ImGuiChildFlags_Borders);
     std::vector<float> colw(cols, 0.0f);
     for (size_t i = 0; i < g_preset_groups.size(); i++) {
