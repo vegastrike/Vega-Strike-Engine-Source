@@ -1,5 +1,6 @@
 Checks:
   - -*
+  - clang-diagnostic-double-promotion
   - cppcoreguidelines-interfaces-global-init
   - cppcoreguidelines-narrowing-conversions
   - cppcoreguidelines-pro-type-member-init
