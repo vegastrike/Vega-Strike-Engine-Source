@@ -196,6 +196,16 @@ void InitMouse() {
     RestoreMouse();
 }
 
+// Clear all mouse button states to RELEASE. Called when the config overlay
+// closes so a button pressed inside it (whose release was swallowed by the
+// overlay input path) doesn't stay DOWN and fire a command continuously (e.g.
+// FireKey looping while polling the mouse/joystick slot).
+void ResetMouseState() {
+    for (int a = 0; a < NUM_BUTTONS + 1; a++) {
+        MouseState[a] = RELEASE;
+    }
+}
+
 void ProcessMouse() {
     warpallowage = 2;
     while (eventQueue.size()) {

@@ -1729,7 +1729,8 @@ void DrawConfigScreen() {
     ImGui::Separator();
 
     // Save (green when dirty): apply + persist, stay open. Only Close closes.
-    if (dirty) {
+    const bool save_was_dirty = dirty;
+    if (save_was_dirty) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.45f, 0.22f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
     }
@@ -1741,7 +1742,7 @@ void DrawConfigScreen() {
             // Stay open: the player can keep tweaking and Save again.
         }
     }
-    if (dirty) ImGui::PopStyleColor(2);
+    if (save_was_dirty) ImGui::PopStyleColor(2);
     ImGui::SameLine();
 
     // Close (red when dirty): don't save anything, just close.
