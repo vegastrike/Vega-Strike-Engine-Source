@@ -47,6 +47,7 @@
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
 #include "src/config_xml.h"
+#include "src/in_joystick.h"
 #include "root_generic/vs_globals.h"
 #include "src/vs_logging.h"
 #include "root_generic/options.h"
@@ -671,6 +672,19 @@ void winsys_set_config_overlay_active(bool active) {
     config_overlay_active = active;
 }
 
+// Re-enumerate joysticks and re-bind the actions/axes when a joystick is
+// hotplugged or removed (SDL_EVENT_JOYSTICK_ADDED/REMOVED). DeInit + Init
+// recreate the joystick slots from SDL; bindKeys() re-applies the bound
+// actions/axes to the (now present or now absent) device. bindKeys() is
+// idempotent (it clears then re-binds), so this is safe to call any time.
+static void winsys_refresh_joysticks() {
+    DeInitJoystick();
+    InitJoystick();
+    if (vs_config != nullptr) {
+        vs_config->bindKeys();
+    }
+}
+
 // Apply a new resolution/fullscreen to the live window. Reuses the existing
 // windowed-mode resize cascade: SDL_SetWindowSize fires SDL_EVENT_WINDOW_RESIZED,
 // which triggers get_screen_measurements() + the reshape callback (Reshape), which
@@ -822,6 +836,15 @@ void winsys_process_events() {
                         (*reshape_func)(native_resolution_x,
                                 native_resolution_y);
                     }
+                    break;
+
+                case SDL_EVENT_JOYSTICK_ADDED:
+                case SDL_EVENT_JOYSTICK_REMOVED:
+                case SDL_EVENT_GAMEPAD_ADDED:
+                case SDL_EVENT_GAMEPAD_REMOVED:
+                    // Re-enumerate + re-bind so a hotplugged joystick is
+                    // discovered and its bindings take effect immediately.
+                    winsys_refresh_joysticks();
                     break;
 
                 case SDL_EVENT_QUIT:
