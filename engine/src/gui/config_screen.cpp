@@ -628,6 +628,35 @@ static void json_set_path(boost::json::object &root, const std::string &path, co
     json_set_path(root[head].as_object(), rest, val);
 }
 
+// Deep-merge src into dst (src's values win). Objects merge recursively; all
+// other types are replaced. Used to overlay the dirty paths onto the existing
+// user overlay so a Save does not drop previously-saved overrides.
+static void json_merge(boost::json::value &dst, const boost::json::value &src) {
+    if (!src.is_object() || !dst.is_object()) { dst = src; return; }
+    auto &d = dst.as_object();
+    for (const auto &kv : src.as_object()) {
+        if (d.contains(kv.key()) && d[kv.key()].is_object() && kv.value().is_object()) {
+            json_merge(d[kv.key()], kv.value());
+        } else {
+            d[kv.key()] = kv.value();
+        }
+    }
+}
+
+// Read an existing user overlay file (if any) into an object, else empty.
+static boost::json::object read_existing_overlay(const std::string &path) {
+    boost::json::object obj;
+    std::ifstream in(path);
+    if (in) {
+        std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+        try {
+            boost::json::value v = boost::json::parse(text);
+            if (v.is_object()) obj = v.as_object();
+        } catch (...) { /* corrupt/partial — start fresh */ }
+    }
+    return obj;
+}
+
 // Write the accumulated dirty config paths out to the user config files
 // (VSFileSystem::homedir/config.json + bindings.json). Single write-out entry point.
 static void write_out_dirty() {
@@ -653,12 +682,18 @@ static void write_out_dirty() {
         if (!v.is_null()) json_set_path(config_out, path, v);
     }
 
-    // Write config.json overlay (if any config changes).
+    // Write config.json overlay (if any config changes). Merge onto the existing
+    // user overlay so a Save only updates the dirty subset and never drops
+    // previously-saved overrides (preset, audio, physics, etc.).
     if (!config_out.empty()) {
         fs::create_directories(VSFileSystem::homedir);
-        std::ofstream out(VSFileSystem::homedir + "/config.json");
-        out << boost::json::serialize(config_out) << "\n";
-        fprintf(stderr, "[vs-settings-ng] wrote config overlay to %s/config.json\n", VSFileSystem::homedir.c_str());
+        const std::string path = VSFileSystem::homedir + "/config.json";
+        boost::json::object existing = read_existing_overlay(path);
+        boost::json::value merged = std::move(existing);
+        json_merge(merged, boost::json::value(std::move(config_out)));
+        std::ofstream out(path);
+        out << boost::json::serialize(merged) << "\n";
+        fprintf(stderr, "[vs-settings-ng] wrote config overlay to %s\n", path.c_str());
     }
     // Write bindings.json overlay (if bindings changed).
     if (has_bindings || g_dirty_paths.count("bindings.axes")) {
