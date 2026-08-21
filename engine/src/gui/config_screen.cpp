@@ -431,7 +431,6 @@ static bool joy_bind_inv[4] = { false, false, false, false };
 static char joy_deadband[8] = "0.05";
 static bool joy_ffb = false;
 static char joy_ff_device[8] = "0";
-static bool joy_mouse_cursor = false;
 static bool joy_auto_sampling = false;
 static float joy_auto_timer = 0.0f, joy_auto_max = 0.0f;
 
@@ -483,7 +482,6 @@ static void load_joystick_staging() {
     snprintf(joy_deadband, sizeof(joy_deadband), "%.2f", j.deadband_flt);
     joy_ffb = j.force_feedback;
     snprintf(joy_ff_device, sizeof(joy_ff_device), "%d", j.ff_device);
-    joy_mouse_cursor = j.mouse_cursor;
     const auto &axes = configuration().axes;
     for (int r = 0; r < 4; ++r) {
         joy_bind_stick[r] = 0; joy_bind_axis[r] = -1; joy_bind_inv[r] = false;
@@ -589,7 +587,10 @@ static void apply_joystick_to_config() {
     j.deadband_flt = (float)atof(joy_deadband);
     j.force_feedback = joy_ffb;
     j.ff_device = atoi(joy_ff_device);
-    j.mouse_cursor = joy_mouse_cursor;
+    // Joystick mode never shows a mouse cursor in flight (mouse_cursor is only
+    // meaningful for mouse flight, where the glide preset sets it). Force it off
+    // so switching from mouse back to joystick clears the cursor.
+    j.mouse_cursor = false;
     mark_dirty("input.joystick.deadband");
     mark_dirty("input.joystick.force_feedback");
     mark_dirty("input.joystick.ff_device");
@@ -854,7 +855,6 @@ static void draw_joystick_dialog() {
             }
         }
         if (ImGui::Checkbox("Force feedback", &joy_ffb)) dirty = true;
-        if (ImGui::Checkbox("Mouse cursor in flight", &joy_mouse_cursor)) dirty = true;
         ImGui::Text("FFB device"); ImGui::SameLine(); ImGui::SetNextItemWidth(50);
         if (ImGui::InputText("##jff", joy_ff_device, sizeof(joy_ff_device), ImGuiInputTextFlags_CharsDecimal)) dirty = true;
         ImGui::Separator();
