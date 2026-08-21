@@ -594,19 +594,26 @@ static void apply_joystick_to_config() {
     mark_dirty("input.joystick.force_feedback");
     mark_dirty("input.joystick.ff_device");
     mark_dirty("input.joystick.mouse_cursor");
-    // Write the x/y/z/throttle axes.
+    // Write the x/y/z/throttle axes. An unbound role is kept with axis=-1 (the
+    // engine's "unbound" sentinel) rather than erased, so parseAxes' overlay
+    // merge preserves the unbind on restart (an absent key would fall back to
+    // the datadir default and re-bind it).
     auto &axes = cfg().axes;
     for (int r = 0; r < 4; ++r) {
         const char *role = joy_role_names[r];
+        vega_config::Configuration::AxisRole &ar = axes[role];   // ensures the role exists (even if unbound)
         if (joy_bind_axis[r] < 0) {
-            axes.erase(role);
+            ar.source = "joystick"; ar.joystick = 0; ar.axis = -1; ar.inverse = false;
         } else {
-            axes[role].source = "joystick";
-            axes[role].joystick = joy_bind_stick[r];
-            axes[role].axis = joy_bind_axis[r];
-            axes[role].inverse = joy_bind_inv[r];
+            ar.source = "joystick";
+            ar.joystick = joy_bind_stick[r];
+            ar.axis = joy_bind_axis[r];
+            ar.inverse = joy_bind_inv[r];
         }
     }
+    // Persist the axes (including unbinds like a removed throttle) so they
+    // survive a restart; write_out_dirty serializes cfg().axes to bindings.json.
+    mark_dirty("bindings.axes");
 }
 
 // Write the accumulated dirty config paths out to the user config files.
