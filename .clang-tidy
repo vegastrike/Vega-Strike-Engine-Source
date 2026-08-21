@@ -22,3 +22,6 @@ Checks:
   - performance-*
   - portability-*
   - readability-*
+CheckOptions:
+  - key: modernize-use-auto.MinTypeNameLength
+    value: '999'
