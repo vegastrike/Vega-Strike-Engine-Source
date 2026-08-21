@@ -73,6 +73,7 @@
 #include "gui/imgui_support.h"
 #include "gldrv/winsys.h"
 #include "in_mouse.h"
+#include "in_joystick.h"
 
 #include "imgui/imgui.h"
 #include "backends/imgui_impl_sdl3.h"
@@ -875,11 +876,13 @@ void Universe::ToggleOptionsActive() {
     winsys_show_cursor(optionsActive);
     // While the config overlay is open, consume input in winsys (no click-through).
     winsys_set_config_overlay_active(optionsActive);
-    // On close, clear any mouse button still stuck DOWN (its release was
-    // swallowed by the overlay input path) so it doesn't fire a command
-    // continuously once flight polling resumes.
+    // On close, clear any input (mouse/joystick/keyboard) still stuck DOWN
+    // (its release was swallowed by the overlay input path) so it doesn't fire
+    // a command continuously once flight polling resumes.
     if (!optionsActive) {
         ResetMouseState();
+        RestoreJoystickState();
+        RestoreKB();
     }
 }
 

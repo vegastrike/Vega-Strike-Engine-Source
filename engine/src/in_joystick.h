@@ -126,6 +126,7 @@ extern JoyStick *joystick[MAX_JOYSTICKS];
 typedef void (*JoyHandler)(KBSTATE, float x, float y, int mod);
 void BindJoyKey(int key, int joystick, KBHandler handler, const KBData &data);
 void UnbindJoyKey(int joystick, int key);
+void RestoreJoystickState();
 
 void UnbindHatswitchKey(int hatswitch, int val_index);
 void BindHatswitchKey(int hatswitch, int val_index, KBHandler handler, const KBData &data);
