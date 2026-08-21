@@ -50,6 +50,7 @@
 #ifdef HAVE_SDL
 #include <SDL3/SDL_joystick.h>
 #include <SDL3/SDL_error.h>
+#include <SDL3/SDL_video.h>
 #endif
 #include "configuration/configuration.h"
 #include "gldrv/mouse_cursor.h"
@@ -305,13 +306,23 @@ extern void GetMouseXY(int &mousex, int &mousey);
 
 void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     std::pair<double, double> pair = GetJoystickFromMouse();
-    x = pair.first;
-    y = pair.second;
+    // Sensitivity scales the -1..1 deflection (50 = baseline; higher = more
+    // axis per mouse move). Glide uses absolute position; warp recenters the
+    // cursor each frame so the next read is relative to center.
+    const float sensitivity = configuration().joystick.mouse_sensitivity_flt / 50.0F;
+    x = static_cast<float>(pair.first) * sensitivity;
+    y = static_cast<float>(pair.second) * sensitivity;
     z = 0;
     joy_axis[0] = x;
     joy_axis[1] = y;
     joy_axis[2] = z = 0;
     buttons = getMouseButtonStatus();
+    if (configuration().joystick.warp_mouse) {
+        // Recenter the cursor so warp-mode mouse is relative, not absolute.
+        int w = 0, h = 0;
+        SDL_GetWindowSize(SDL_GL_GetCurrentWindow(), &w, &h);
+        SetMousePosition(w / 2, h / 2);
+    }
 }
 
 void JoyStick::GetJoyStick(float &x, float &y, float &z, long long& buttons) {
