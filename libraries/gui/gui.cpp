@@ -90,6 +90,11 @@ void ImGui_ApplyPendingFontSize() {
     io.FontDefault = io.Fonts->AddFontDefault(&cfg);
     io.Fonts->Build();
     ImGui_ImplOpenGL3_CreateFontsTexture();
+    // FontSizeBase (the render size, distinct from the atlas rasterization size) is
+    // only derived from the font's LegacySize on the first frame and then cached, so
+    // a rebuild alone would change the glyph rasterization but NOT the on-screen size
+    // (blurry text at the old size). Set it explicitly so the render size follows.
+    ImGui::GetStyle().FontSizeBase = s_pending_font_size;
     s_pending_font_size = 0.0f;
 }
 

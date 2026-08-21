@@ -1572,6 +1572,8 @@ static boost::json::value read_config_value(const std::string &path) {
     else if (path=="graphics.default_simple_technique") return boost::json::value(c.graphics.default_simple_technique);
     else if (path=="graphics.faction_dependent_textures") return c.graphics.faction_dependent_textures;
     else if (path=="graphics.draw_rendered_crosshairs") return c.graphics.draw_rendered_crosshairs;
+    else if (path=="graphics.bases.max_width") return c.graphics.bases.max_width;
+    else if (path=="graphics.bases.max_height") return c.graphics.bases.max_height;
     // audio
     else if (path=="audio.ai_sound") return c.audio.ai_sound;
     else if (path=="audio.every_other_mount") return c.audio.every_other_mount;
