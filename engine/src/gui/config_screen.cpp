@@ -565,11 +565,18 @@ static void apply_mouse_to_config() {
     mark_dirty("input.joystick.reverse_mouse_spr");
     mark_dirty("input.joystick.warp_mouse");
     mark_dirty("input.joystick.mouse_sensitivity");
-    // Axis routing: warp/glide (non-inv) invert y; inv_* modes do not.
+    // Axis routing + y-inversion come from the mouse preset (glide/warp vs
+    // inv_glide/inv_warp), matching the vs-05 convention: the non-inverted
+    // modes (glide_mouse, warp_mouse) invert y (top-down screen y needs the
+    // flip); the "inv_" modes do not. bindKeys() reads the mouse y-inversion
+    // from cfg.mouse.inverse_y (not axes.y.inverse), so set and persist that.
+    const bool invert_y = (std::string(mode).rfind("inv_", 0) == std::string::npos);
     auto &axes = cfg().axes;
     axes["x"].source = "mouse"; axes["x"].axis = 0; axes["x"].inverse = false;
     axes["y"].source = "mouse"; axes["y"].axis = 1;
-    axes["y"].inverse = !std::string(mode).rfind("inv_", 0);
+    axes["y"].inverse = invert_y;
+    cfg().mouse.inverse_y = invert_y;
+    mark_dirty("input.mouse.inverse_y");
     mark_dirty("bindings.axes");
 }
 
