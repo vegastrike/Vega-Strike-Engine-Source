@@ -45,6 +45,11 @@ bool gui_initialized = false;
 SDL_Window* current_window = nullptr;
 ImFont* roboto_18_font;
 
+// Font size requested by a settings change, applied on the next frame. Stored as a
+// float so we can defer the atlas rebuild to a safe point (start of a frame, before
+// any text is laid out), avoiding mid-frame texture destruction.
+static float s_pending_font_size = 0.0f;
+
 void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontSize) {
     current_window = window;
     SDL_GLContext gl_context = *context;
@@ -64,6 +69,28 @@ void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontS
     io.FontDefault = io.Fonts->AddFontDefault(&cfg);
 
     gui_initialized = true;
+}
+
+void RequestImGuiFontSize(float fontSize) {
+    s_pending_font_size = fontSize;
+}
+
+// Apply a pending font-size change by rebuilding the ImGui font atlas. Call at the
+// start of each frame, before ImGui::NewFrame(), so the new atlas is in place for
+// the whole frame and no glyphs reference a destroyed texture.
+void ImGui_ApplyPendingFontSize() {
+    if (s_pending_font_size <= 0.0f) {
+        return;
+    }
+    ImGuiIO &io = ImGui::GetIO();
+    ImGui_ImplOpenGL3_DestroyFontsTexture();
+    io.Fonts->Clear();
+    ImFontConfig cfg;
+    cfg.SizePixels = s_pending_font_size;
+    io.FontDefault = io.Fonts->AddFontDefault(&cfg);
+    io.Fonts->Build();
+    ImGui_ImplOpenGL3_CreateFontsTexture();
+    s_pending_font_size = 0.0f;
 }
 
 void CleanupGui() {

@@ -86,6 +86,7 @@
 #include "src/vs_exit.h"
 
 #include "imgui/imgui.h"
+#include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
@@ -478,6 +479,7 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
             ImGuiWindowFlags_NoDecoration;   // makes it transparent
 
     // ImGui Init
+    ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();

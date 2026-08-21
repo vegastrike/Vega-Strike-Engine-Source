@@ -763,6 +763,7 @@ void base_main_loop() {
     }
 
     // ImGui Init
+    ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();

@@ -19,6 +19,7 @@
 #include <boost/json.hpp>
 #include <boost/filesystem.hpp>
 #include <imgui.h>
+#include "libraries/gui/gui.h"
 #include <SDL3/SDL.h>
 #include <algorithm>
 #include <vector>
@@ -248,6 +249,7 @@ static void apply_display_to_config() {
     mark_dirty("graphics.full_screen");
     g.font_point_flt = (float)atoi(text_height_buf);
     mark_dirty("graphics.font_point");
+    RequestImGuiFontSize(g.font_point_flt);   // live-rebuild the ImGui font atlas at the new size
     if (sel_font_type == FONT_AA_VEC) {
         g.high_quality_font = false;
         g.high_quality_font_computer = false;
