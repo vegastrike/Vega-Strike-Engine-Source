@@ -356,14 +356,27 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     // axis per mouse move).
     const float sensitivity = configuration().joystick.mouse_sensitivity_flt / 50.0F;
     if (configuration().joystick.warp_mouse) {
-        // Warp (relative) mode: use the movement deltas between mouse samples.
-        // This is independent of the cursor's absolute position, so it keeps
-        // working even when the cursor hits a screen edge, and never moves the
-        // cursor itself. The OS/SDL cursor is left wherever it is.
+        // Warp (relative) mode: integrate the movement deltas into a virtual
+        // stick deflection, and decay it back toward neutral each frame. The
+        // flight controller reads joy_axis as a continuous -1..1 deflection, so
+        // a real stick held at a deflection gives continuous turning. Using the
+        // raw delta directly would produce a single one-shot pulse per motion
+        // event ("one step" behavior). Deltas are independent of absolute
+        // cursor position (works at screen edges) and never move the OS cursor.
         int dx = 0, dy = 0;
         GetMouseDelta(dx, dy);
-        x = static_cast<float>(dx) / (native_resolution_x / 2.0F) * sensitivity;
-        y = static_cast<float>(dy) / (native_resolution_y / 2.0F) * sensitivity;
+        warp_x += static_cast<float>(dx) / (native_resolution_x / 2.0F);
+        warp_y += static_cast<float>(dy) / (native_resolution_y / 2.0F);
+        // Decay toward neutral (stick returns to center as you stop moving).
+        warp_x *= 0.82F;
+        warp_y *= 0.82F;
+        // Clamp to valid deflection range.
+        if (warp_x > 1.0F) warp_x = 1.0F;
+        if (warp_x < -1.0F) warp_x = -1.0F;
+        if (warp_y > 1.0F) warp_y = 1.0F;
+        if (warp_y < -1.0F) warp_y = -1.0F;
+        x = warp_x * sensitivity;
+        y = warp_y * sensitivity;
     } else {
         // Glide (absolute) mode: axis = normalized absolute cursor position.
         std::pair<double, double> pair = GetJoystickFromMouse();
