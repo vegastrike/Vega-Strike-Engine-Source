@@ -96,7 +96,7 @@ std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFi
 static std::vector<double> splitAndConvert (const std::string &s, char delim) {
     std::vector<double> result;
     std::istringstream overall_ss (s);
-    overall_ss.imbue(our_numeric_locale);
+    overall_ss.imbue(GetGlobalLocale());
     std::string item;
 
     while (std::getline(overall_ss, item, delim)) {
