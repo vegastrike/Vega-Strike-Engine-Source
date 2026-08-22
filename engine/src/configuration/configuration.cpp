@@ -81,7 +81,8 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         // config.json / theme.json / bindings.json have no "base", so they keep
         // parsing from the document root unchanged.
         const boost::json::object * root_ptr = &json_value.get_object();
-        if (const auto * base_value = root_ptr->if_contains("base"); base_value && base_value->is_object()) {
+        const boost::json::value * base_value = root_ptr->if_contains("base");
+        if (base_value != nullptr && base_value->is_object()) {
             root_ptr = &base_value->get_object();
         }
         const boost::json::object & root_object = *root_ptr;
