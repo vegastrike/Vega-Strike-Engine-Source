@@ -25,8 +25,8 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "gui/imguitext.h"
+#include "imgui.h"
 #include "src/vs_logging.h"
-#include "configuration/configuration.h"
 #include "imgui_internal.h"
 
 void FormattedLayout::endLine(Line& line) {
@@ -35,8 +35,8 @@ void FormattedLayout::endLine(Line& line) {
         this->push_back(line);
     // }
     line.clear();
-    line.width = 0.0f;
-    currentLineSpacing = line.lineSpacing = 0.0f;
+    line.width = 0.0F;
+    currentLineSpacing = line.lineSpacing = 0.0F;
 }
 
 // UI functions
@@ -48,7 +48,9 @@ void ImGuiText::draw(int firstLineToDraw) {
         return; // Safe exit: No active window context
     }
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    if ( !draw_list ) return;
+    if ( draw_list == nullptr ) {
+        return;
+    }
     // const float lineHeight = ImGui::CalcTextSize("Hg").y; // this should give us the the full height of a text line
     // Calculate the Pixel Rect for Clipping
     float pMinX = Coordinates::normToPixelX(m_rect.left());
@@ -61,13 +63,13 @@ void ImGuiText::draw(int firstLineToDraw) {
 
     float pixelX = Coordinates::normToPixelX(m_rect.left());
     // position text in middle of rect for single line text
-    float pixelY = m_multiLine ? Coordinates::normToPixelY(m_rect.top()) : Coordinates::normToPixelY((m_rect.top() + m_rect.bottom()) *0.5f);
+    float pixelY = m_multiLine ? Coordinates::normToPixelY(m_rect.top()) : Coordinates::normToPixelY((m_rect.top() + m_rect.bottom()) * 0.5F);
     float pixelWidth = Coordinates::normToPixelW(m_rect.size.width);
 
-    ImVec2 textSize = getTextWidth(m_text.c_str(), m_font.size());
+    ImVec2 textSize = getTextWidth(m_text, m_font);
     // position single-line text half a line down so it is perfectly centered
     if(!m_multiLine) {
-        pixelY -= (textSize.y * 0.5f);
+        pixelY -= (textSize.y * 0.5F);
     }
     // ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(m_color.r, m_color.g, m_color.b, m_color.a));
     
@@ -85,20 +87,15 @@ void ImGuiText::draw(int firstLineToDraw) {
         const auto& line = m_layout[i];
         float currentX = pixelX;
         if (m_justification == CENTER_JUSTIFY && (pixelWidth - line.width) > 0) { 
-            currentX += (pixelWidth - line.width) * 0.5f;
+            currentX += (pixelWidth - line.width) * 0.5F;
         }
         
         for (const auto& frag : line) {
             float pixelFontSize = Coordinates::normToPixelFontSize(frag.font.size());
-            // Draw Bold "shadow"
-            if (frag.isBold || m_font.strokeWeight() == BOLD_STROKE) {
-                draw_list->AddText(nullptr, pixelFontSize, 
-                    ImVec2(currentX, currentY + 2.0f), frag.color, frag.text.c_str(), nullptr, 0.0f, &clipRect);
-            }
 
             // Draw Main Text
-            draw_list->AddText(nullptr, pixelFontSize, 
-                ImVec2(currentX, currentY), frag.color, frag.text.c_str(), nullptr, 0.0f, &clipRect);
+            draw_list->AddText(frag.font.getFont(), pixelFontSize, 
+                ImVec2(currentX, currentY), frag.color, frag.text.c_str(), nullptr, 0.0F, &clipRect);
             
             currentX += frag.width; // Move pen right
         }
@@ -228,17 +225,15 @@ int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) 
     return result;
 }
 
-ImVec2 ImGuiText::getTextWidth(const std::string text, const float fontSize) {
-    // ImFont* font = ImGui::GetFont();
-    ImVec2 size2,size = ImVec2(0,0);
-    float scaleFactor = fontSize * configuration().graphics.resolution_y / configuration().graphics.font_point_flt * 0.5;
-    // FIXME normally this would be te way, but it throws exceptions, scalefactor as workaround
-    // if (font && font->IsLoaded()) {
-    //     size = font->CalcTextSizeA(Coordinates::normToPixelFontSize(fontSize), FLT_MAX, -1.0f, text.c_str());
-    // } else {
+ImVec2 ImGuiText::getTextWidth(const std::string& text, const Font& font) {
+    ImVec2 size = ImVec2(0,0);
+    ImFont* imFont = font.getFont();
+    if (imFont != nullptr && imFont->IsLoaded()) {
+        size = imFont->CalcTextSizeA(Coordinates::normToPixelFontSize(font.size()), FLT_MAX, -1.0F, text.c_str());
+    } else {
         size = ImGui::CalcTextSize(text.c_str());
-    // }
-    return ImVec2(size.x * scaleFactor, size.y * scaleFactor);
+    }
+    return size;
 }
 
 //Get a floating-point argument for a PaintText format command.
@@ -412,7 +407,7 @@ void ImGuiText::parseFormat(std::string input, size_t startPos, //Location of be
     *resultPos = curPos;
 }
 
-FormattedLayout ImGuiText::parseText(const std::string& input, const float widthInPixels) {
+auto ImGuiText::parseText(const std::string& input, const float widthInPixels) -> FormattedLayout {
     FormattedLayout layout;
     Line currentLine;
     
@@ -421,7 +416,7 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
     // Helper to add fragment
     auto addFragment = [&](const std::string& text) {
         // if (text.empty()) return;
-        ImVec2 dimensions = getTextWidth(text,  m_fontStack.back().size());
+        ImVec2 dimensions = getTextWidth(text,  m_fontStack.back());
         currentLine.push_back({text, m_fontStack.back(), m_colorStack.back(), m_fontStack.back().strokeWeight() == BOLD_STROKE, dimensions.x});
         currentLine.width += dimensions.x;
         // update lineheight if fragment is larger
@@ -446,7 +441,9 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
             }
             // Process format
             curPos++; // Move past '#'
-            if (curPos >= endPos) break;
+            if (curPos >= endPos) {
+                break;
+            }
 
             if (input[curPos] == DT_FORMAT_CHAR) {
                 // Handle double hash "##" -> treat as a single "#"
@@ -455,21 +452,22 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
                 // currentLine.width += ImGui::CalcTextSize(charStr.c_str()).x;
                 fragmentStartPos = curPos;
                 continue;
-            } else {
-                bool forceEndLine = false;
-                
-                // keep consuming all subsequent control sequences
-                size_t oldPos = 0;
-                // consume all subsequent control sequences, position will remain the same when no more found
-                while(oldPos < curPos){
-                    oldPos = curPos;
-                    parseFormat(input, curPos, &curPos, &forceEndLine);
-                    if (forceEndLine) {
-                        layout.endLine(currentLine);
-                        break;
-                    }
+            }
+
+            bool forceEndLine = false;
+            
+            // keep consuming all subsequent control sequences
+            size_t oldPos = 0;
+            // consume all subsequent control sequences, position will remain the same when no more found
+            while(oldPos < curPos){
+                oldPos = curPos;
+                parseFormat(input, curPos, &curPos, &forceEndLine);
+                if (forceEndLine) {
+                    layout.endLine(currentLine);
+                    break;
                 }
             }
+
             // consider control chars are word breaks
             lastWordBreakPos = curPos;
             fragmentStartPos = curPos;
@@ -483,12 +481,6 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
             // special news handling
             switch (input[curPos]) {
                 case '\\':
-                    addFragment(input.substr(fragmentStartPos, curPos - fragmentStartPos));
-                    fragmentStartPos = curPos + 2;
-                    layout.endLine(currentLine);
-                    // we skipt the \\, +1 here and +1 at the end of the loop
-                    curPos++;
-                    break;
                 case '\n':
                     // create a new line and continue
                     addFragment(input.substr(fragmentStartPos, curPos - fragmentStartPos));
@@ -502,7 +494,7 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
                     if(!m_multiLine) {
                         currentFragmentText += ELLIPSIS_STRING;
                     }
-                    if(currentLine.width + getTextWidth(currentFragmentText,  m_fontStack.back().size()).x > widthInPixels) {
+                    if(currentLine.width + getTextWidth(currentFragmentText,  m_fontStack.back()).x > widthInPixels) {
                         // break at last word break
                         addFragment(input.substr(fragmentStartPos, lastWordBreakPos - fragmentStartPos) + (m_multiLine ? "" : ELLIPSIS_STRING));
                         fragmentStartPos = lastWordBreakPos;
@@ -523,7 +515,9 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
         }
 
     }
-    if (!currentLine.empty()) layout.push_back(currentLine);
+    if (!currentLine.empty()) {
+        layout.push_back(currentLine);
+    }
     m_colorStack.clear();
     m_fontStack.clear();
     return layout;

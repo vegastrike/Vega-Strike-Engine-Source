@@ -32,6 +32,7 @@ ADD_LIBRARY(vegastrike_gui STATIC
     gui.cpp
     main_menu.cpp
     pause_screen.cpp
+    fonts.h
 )
 
 

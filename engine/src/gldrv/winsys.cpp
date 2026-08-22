@@ -58,6 +58,7 @@
 
 #include "gldrv/mouse_cursor.h"
 #include "backends/imgui_impl_sdl3.h"
+#include "vegadisk/vsfilesystem.h"
 /*
  * Windowing System Abstraction Layer
  * Abstracts creation of windows, handling of events, etc.
@@ -559,7 +560,16 @@ static bool setup_sdl_video_mode() {
     get_screen_measurements();
 
     // Initialize imgui
-    InitGui(window, &context, configuration().graphics.font_point_dbl);
+    namespace fs = boost::filesystem;
+    fs::path fontPath = fs::path(VSFileSystem::datadir) / "fonts" / configuration().graphics.font;
+    if (fs::exists(fontPath) && fs::is_regular_file(fontPath)) {
+        VS_LOG(info, (boost::format("Loading font from: %1%") % fontPath.string()));
+    } else {
+        VS_LOG(info, (boost::format("Font file not found at: %1%! Falling back to default font.") % fontPath.string()));
+        // Use RobotoMono as default font which ships with the engine
+        fontPath = fs::path(VSFileSystem::programdir) / "fonts/RobotoMono-Regular.ttf";
+    }
+    InitGui(window, &context, fontPath.string(), configuration().graphics.font_point_flt);
 
     return true;
 }
