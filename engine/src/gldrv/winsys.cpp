@@ -672,6 +672,10 @@ void winsys_set_config_overlay_active(bool active) {
     config_overlay_active = active;
 }
 
+bool winsys_config_overlay_active() {
+    return config_overlay_active;
+}
+
 // Re-enumerate joysticks and re-bind the actions/axes when a joystick is
 // hotplugged or removed (SDL_EVENT_JOYSTICK_ADDED/REMOVED). DeInit + Init
 // recreate the joystick slots from SDL; bindKeys() re-applies the bound

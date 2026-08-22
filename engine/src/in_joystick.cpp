@@ -54,7 +54,6 @@
 #endif
 #include "configuration/configuration.h"
 #include "gldrv/mouse_cursor.h"
-#include "gldrv/winsys.h"
 
 
 //Used for storing the max and min values of the tree Joystick Axes - Okona
@@ -352,37 +351,13 @@ struct mouseData {
 extern void GetMouseXY(int &mousex, int &mousey);
 
 void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
+    std::pair<double, double> pair = GetJoystickFromMouse();
     // Sensitivity scales the -1..1 deflection (50 = baseline; higher = more
-    // axis per mouse move).
+    // axis per mouse move). Glide uses absolute position; warp reads deltas via
+    // DealWithWarp (in_mouse.cpp), which keeps the cursor centered as needed.
     const float sensitivity = configuration().joystick.mouse_sensitivity_flt / 50.0F;
-    if (configuration().joystick.warp_mouse) {
-        // Warp (relative) mode: integrate the movement deltas into a virtual
-        // stick deflection, and decay it back toward neutral each frame. The
-        // flight controller reads joy_axis as a continuous -1..1 deflection, so
-        // a real stick held at a deflection gives continuous turning. Using the
-        // raw delta directly would produce a single one-shot pulse per motion
-        // event ("one step" behavior). Deltas are independent of absolute
-        // cursor position (works at screen edges) and never move the OS cursor.
-        int dx = 0, dy = 0;
-        GetMouseDelta(dx, dy);
-        warp_x += static_cast<float>(dx) / (native_resolution_x / 2.0F);
-        warp_y += static_cast<float>(dy) / (native_resolution_y / 2.0F);
-        // Decay toward neutral (stick returns to center as you stop moving).
-        warp_x *= 0.82F;
-        warp_y *= 0.82F;
-        // Clamp to valid deflection range.
-        if (warp_x > 1.0F) warp_x = 1.0F;
-        if (warp_x < -1.0F) warp_x = -1.0F;
-        if (warp_y > 1.0F) warp_y = 1.0F;
-        if (warp_y < -1.0F) warp_y = -1.0F;
-        x = warp_x * sensitivity;
-        y = warp_y * sensitivity;
-    } else {
-        // Glide (absolute) mode: axis = normalized absolute cursor position.
-        std::pair<double, double> pair = GetJoystickFromMouse();
-        x = static_cast<float>(pair.first) * sensitivity;
-        y = static_cast<float>(pair.second) * sensitivity;
-    }
+    x = static_cast<float>(pair.first) * sensitivity;
+    y = static_cast<float>(pair.second) * sensitivity;
     z = 0;
     joy_axis[0] = x;
     joy_axis[1] = y;
