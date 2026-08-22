@@ -81,7 +81,8 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         // config.json / theme.json / bindings.json have no "base", so they keep
         // parsing from the document root unchanged.
         const boost::json::object * root_ptr = &json_value.get_object();
-        if (const auto * base_value = root_ptr->if_contains("base"); base_value && base_value->is_object()) {
+        const boost::json::value * base_value = root_ptr->if_contains("base");
+        if (base_value != nullptr && base_value->is_object()) {
             root_ptr = &base_value->get_object();
         }
         const boost::json::object & root_object = *root_ptr;
@@ -94,11 +95,14 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         const boost::json::object * input_object = (input_value_ptr && input_value_ptr->is_object())
                                                     ? &input_value_ptr->get_object() : nullptr;
         if (input_object) {
-            if (const auto * dv = input_object->if_contains("device"); dv && dv->is_string())
+            const boost::json::value * dv = input_object->if_contains("device");
+            if (dv != nullptr && dv->is_string())
                 input.device = boost::json::value_to<std::string>(*dv);
-            if (const auto * mp = input_object->if_contains("mouse_preset"); mp && mp->is_string())
+            const boost::json::value * mp = input_object->if_contains("mouse_preset");
+            if (mp != nullptr && mp->is_string())
                 input.mouse_preset = boost::json::value_to<std::string>(*mp);
-            if (const auto * jp = input_object->if_contains("joystick_preset"); jp && jp->is_string())
+            const boost::json::value * jp = input_object->if_contains("joystick_preset");
+            if (jp != nullptr && jp->is_string())
                 input.joystick_preset = boost::json::value_to<std::string>(*jp);
         }
 
