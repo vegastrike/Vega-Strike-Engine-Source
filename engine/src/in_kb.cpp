@@ -31,6 +31,7 @@
 #include "root_generic/vs_globals.h"
 #include "src/in_kb.h"
 #include "src/in_handler.h"
+#include "cmd/ai/firekeyboard.h"
 #include "gldrv/winsys.h"
 #include "src/in_kb_data.h"
 #include "src/universe.h"
@@ -60,6 +61,45 @@ static bool kbHasBinding(int key, int modifiers) {
     const std::string map_key = std::to_string(key) + "-" + std::to_string(modifiers);
     static HandlerCall defaultHandler;
     return keyBindings[map_key].function != defaultHandler.function;
+}
+
+// Global (always-active) actions fire in ANY context (in-flight, docked, nav, text),
+// not just the HUD. Add handlers here as more global actions are needed.
+static const KBHandler kGlobalActionHandlers[] = {
+    FireKeyboard::ToggleConfigScreen,
+};
+
+bool HandleGlobalKey(unsigned int ch, unsigned int mod, bool down, int x, int y) {
+    // Normalize modifiers the same way glut_keyboard_cb does.
+    bool shifton = false, alton = false, ctrlon = false;
+    unsigned int modmask = KB_MOD_MASK;
+    if ((WSK_MOD_LSHIFT == (mod & WSK_MOD_LSHIFT)) || (WSK_MOD_RSHIFT == (mod & WSK_MOD_RSHIFT))) {
+        shifton = true;
+    }
+    if ((WSK_MOD_LALT == (mod & WSK_MOD_LALT)) || (WSK_MOD_RALT == (mod & WSK_MOD_RALT))) {
+        alton = true;
+    }
+    if ((WSK_MOD_LCTRL == (mod & WSK_MOD_LCTRL)) || (WSK_MOD_RCTRL == (mod & WSK_MOD_RCTRL))) {
+        ctrlon = true;
+    }
+    int curmod = getModifier(alton, ctrlon, shifton) & modmask;
+    const std::string map_key = std::to_string(ch) + "-" + std::to_string(curmod);
+    auto it = keyBindings.find(map_key);
+    if (it == keyBindings.end()) {
+        return false;
+    }
+    bool isGlobal = false;
+    for (KBHandler h : kGlobalActionHandlers) {
+        if (h == it->second.function) {
+            isGlobal = true;
+            break;
+        }
+    }
+    if (!isGlobal) {
+        return false;
+    }
+    kbGetInput(ch, curmod, down, x, y);
+    return true;
 }
 
 static const char _lomap[] = "0123456789-=\';/.,`\\";
@@ -222,5 +262,13 @@ void BindKey(int key, unsigned int mod, unsigned int player, KBHandler handler, 
     playerBindings[map_key] = player;
     handler(std::string(), RESET);     //key is not used in handler
     keyBindings[map_key].state = RESET;
+}
+
+// Clear all keyboard bindings. Used to make a re-run of the bind path
+// (GameVegaConfig::bindKeys) idempotent so bindings can be re-applied live
+// without leaving stale entries behind.
+void ClearKeyBindings() {
+    keyBindings.clear();
+    playerBindings.clear();
 }
 

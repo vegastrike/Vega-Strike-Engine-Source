@@ -146,8 +146,37 @@ std::vector<unsigned int> base_keyboard_queue;
 
 #define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
 
+// Letterboxed base viewport rect (in configured-resolution space), centered, from
+// graphics.bases.max_width/height. Returns false if no letterbox applies (the base
+// should fill the whole screen). This is the base-aspect viewport the imgui bases
+// render into; the GL viewport maps it onto native pixels.
+static bool base_viewport_rect(int &x, int &y, int &w, int &h) {
+    const int sw = configuration().graphics.resolution_x;
+    const int sh = configuration().graphics.resolution_y;
+    const int mw = configuration().graphics.bases.max_width;
+    const int mh = configuration().graphics.bases.max_height;
+    if (mw <= 0 || mh <= 0) return false;
+    int rw = std::min(sw, mw);
+    int rh = std::min(sh, mh);
+    if (rw >= sw && rh >= sh) return false;      // base fills the screen
+    x = (sw - rw) / 2;
+    y = (sh - rh) / 2;
+    w = rw; h = rh;
+    return true;
+}
+
 static void SetupViewport() {
-    glViewport(0, 0, native_resolution_x, native_resolution_y);
+    int vx = 0, vy = 0, vw = 0, vh = 0;
+    if (base_viewport_rect(vx, vy, vw, vh)) {
+        // Map the configured-resolution letterbox onto native (actual) pixels.
+        const int sw = configuration().graphics.resolution_x;
+        const int sh = configuration().graphics.resolution_y;
+        float sx = sw > 0 ? (float)native_resolution_x / sw : 1.0f;
+        float sy = sh > 0 ? (float)native_resolution_y / sh : 1.0f;
+        glViewport((int)(vx * sx), (int)(vy * sy), (int)(vw * sx), (int)(vh * sy));
+    } else {
+        glViewport(0, 0, native_resolution_x, native_resolution_y);
+    }
 }
 
 #undef mymin
@@ -734,15 +763,23 @@ void base_main_loop() {
     }
 
     // ImGui Init
+    ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
     // End ImGui Init
 
-    ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
-    const ImVec2 window_size(configuration().graphics.resolution_x,
-                             configuration().graphics.resolution_y);
-    ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
+    // The base screen is a letterboxed viewport (base-aspect). Size/position the
+    // main window to that rect; fall back to fullscreen when no letterbox applies.
+    int vx = 0, vy = 0, vw = 0, vh = 0;
+    if (base_viewport_rect(vx, vy, vw, vh)) {
+        ImGui::SetNextWindowPos(ImVec2((float)vx, (float)vy), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2((float)vw, (float)vh), ImGuiCond_Always);
+    } else {
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2((float)configuration().graphics.resolution_x,
+                                       (float)configuration().graphics.resolution_y), ImGuiCond_Always);
+    }
     ImGui::Begin("main_window", nullptr, window_flags);
 
     // hide the mouse cursor, we got a cooler one!
@@ -752,6 +789,7 @@ void base_main_loop() {
 
     // ImGui End Frame
     ImGui::End();
+    DrawConfigOverlay();  // config overlay on top (no-op unless optionsActive)
     // Rendering
     ImGui::Render();
 

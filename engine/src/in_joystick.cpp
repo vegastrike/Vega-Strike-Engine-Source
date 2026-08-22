@@ -50,6 +50,7 @@
 #ifdef HAVE_SDL
 #include <SDL3/SDL_joystick.h>
 #include <SDL3/SDL_error.h>
+#include <SDL3/SDL_video.h>
 #endif
 #include "configuration/configuration.h"
 #include "gldrv/mouse_cursor.h"
@@ -187,18 +188,29 @@ void InitJoystick() {
     }
     VS_LOG(important_info, (boost::format("%1% joysticks were found.\n\n") % num_joysticks));
     VS_LOG(important_info, "The names of the joysticks are:\n");
-    if (joysticks) {
-        for (int i1 = 0; i1 < MAX_JOYSTICKS; ++i1) {
-            if (i1 < num_joysticks) {
-                const SDL_JoystickID instance_id = joysticks[i1];
-                VS_LOG(important_info, (boost::format("    %1%\n") % SDL_GetJoystickNameForID(instance_id)));
-                joystick[i1] = new JoyStick(i1, instance_id);
-            } else {
-                joystick[i1] = new JoyStick(i1, 0);
-            }
+    for (int i1 = 0; i1 < MAX_JOYSTICKS; ++i1) {
+        if (i1 == MOUSE_JOYSTICK) {
+            // The mouse-joystick slot is always created as the mouse.
+            joystick[i1] = new JoyStick(i1, 0);
+            continue;
+        }
+        // Always create a fake-present physical slot so bindKeys() binds it
+        // normally (no "not available" refusals / inconsistent half-bound state).
+        // It reports available but has a null SDL handle until a real device
+        // attaches via JoyStick::Attach() on hotplug. GetJoyStick guards the null
+        // handle and returns zeros, so reads on an unattached slot are safe.
+        joystick[i1] = new JoyStick(i1, 0);   // no device yet
+        joystick[i1]->joy = nullptr;
+        joystick[i1]->joy_available = true;
+        joystick[i1]->nr_of_axes = 0;
+        joystick[i1]->nr_of_buttons = 0;
+        joystick[i1]->nr_of_hats = 0;
+        if (joysticks && i1 < num_joysticks) {
+            // A real device is present at startup: attach it to this slot.
+            joystick[i1]->Attach(joysticks[i1]);
         }
     }
-    SDL_free(joysticks);
+    if (joysticks) SDL_free(joysticks);
 
 #endif
 }
@@ -271,6 +283,41 @@ JoyStick::JoyStick(const int which, const SDL_JoystickID instance_id) : mouse(wh
     VS_LOG(info, (boost::format("axes: %1% buttons: %2% hats: %3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats));
 }
 
+JoyStick::~JoyStick() {
+#if defined (HAVE_SDL)
+    if (joy != nullptr) {
+        SDL_CloseJoystick(joy);
+        joy = nullptr;
+    }
+#endif
+}
+
+// Re-point this slot at a real SDL joystick (hotplug attach). Closes any
+// existing/fake handle, opens the new device, and refreshes the axis/button/hat
+// counts. The slot's bindings (keyed by slot index) are untouched.
+void JoyStick::Attach(SDL_JoystickID instance_id) {
+#if defined (HAVE_SDL)
+    if (joy != nullptr) {
+        SDL_CloseJoystick(joy);
+        joy = nullptr;
+    }
+    instanceID = instance_id;
+    joy = SDL_OpenJoystick(instance_id);
+    if (joy == nullptr) {
+        joy_available = false;
+        return;
+    }
+    joy_available = true;
+    nr_of_axes = SDL_GetNumJoystickAxes(joy);
+    nr_of_buttons = SDL_GetNumJoystickButtons(joy);
+    nr_of_hats = SDL_GetNumJoystickHats(joy);
+    nr_of_axes = std::min(nr_of_axes, MAX_AXES);
+    nr_of_buttons = std::min(nr_of_buttons, MAX_BUTTONS);
+    nr_of_hats = std::min(nr_of_hats, MAX_DIGITAL_HATSWITCHES);
+    VS_LOG(important_info, (boost::format("[joy] attached slot: axes=%1% buttons=%2% hats=%3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats));
+#endif
+}
+
 void JoyStick::InitMouse(int which) {
     player = 0;     //default to first player
     joy_available = true;
@@ -305,8 +352,12 @@ extern void GetMouseXY(int &mousex, int &mousey);
 
 void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     std::pair<double, double> pair = GetJoystickFromMouse();
-    x = pair.first;
-    y = pair.second;
+    // Sensitivity scales the -1..1 deflection (50 = baseline; higher = more
+    // axis per mouse move). Glide uses absolute position; warp reads deltas via
+    // DealWithWarp (in_mouse.cpp), which keeps the cursor centered as needed.
+    const float sensitivity = configuration().joystick.mouse_sensitivity_flt / 50.0F;
+    x = static_cast<float>(pair.first) * sensitivity;
+    y = static_cast<float>(pair.second) * sensitivity;
     z = 0;
     joy_axis[0] = x;
     joy_axis[1] = y;
@@ -316,7 +367,10 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
 
 void JoyStick::GetJoyStick(float &x, float &y, float &z, long long& buttons) {
     //int status;
-    if (!joy_available) {
+    if (!joy_available || joy == nullptr) {
+        // Unavailable, or a fake slot with no real device attached yet: return
+        // zeros safely so bindings stay bound but produce no input until a real
+        // joystick attaches (JoyStick::Attach).
         for (int a = 0; a < MAX_AXES; a++) {
             joy_axis[a] = 0;
         }
