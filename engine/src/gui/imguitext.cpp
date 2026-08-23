@@ -156,16 +156,11 @@ static ImU32 parseColorU32(const std::string &spec) {
 
 // Draw one complete line of color runs at the given pen position and advance the pen
 // down one line with the raw glyph height.  Returns the height used (for line spacing).
-static float drawLine(const std::vector<TextPlaneRun> &runs, ImVec2 &pen, ImDrawList *draw_list,
-        ImU32 background_color, bool drawBg, const ImVec2 &pad) {
+static float drawLine(const std::vector<TextPlaneRun> &runs, ImVec2 &pen, ImDrawList *draw_list) {
     float lineHeight = ImGui::CalcTextSize("hello world").y;
     for (const auto &run : runs) {
         ImVec2 sz = ImGui::CalcTextSize(run.text.c_str());
         if (sz.y > lineHeight) lineHeight = sz.y;
-        if (drawBg) {
-            draw_list->AddRectFilled(ImVec2(pen.x - pad.x, pen.y - pad.y),
-                    ImVec2(pen.x + sz.x + pad.x, pen.y + sz.y + pad.y), background_color, 0.0f);
-        }
         draw_list->AddText(nullptr, 0.0f, pen, run.color, run.text.c_str(), nullptr, 0.0f, nullptr);
         pen.x += sz.x;
     }
@@ -201,8 +196,7 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
         position.y -= ImGui::CalcTextSize("hello world").y;
     }
 
-    const ImVec2 pad(4.0f, 2.0f);
-    const bool drawBg = (!isTransparent(m_backgroundColor) && !automatte);
+    // (background rectangle removed for the width-overlap test)
     // Negative/zero rect width -> no wrapping (TextPlane treated negative as infinite).
     const float wrapWidth = Coordinates::normToPixelW(m_rect.size.width) * 1.05f;
     const bool doWrap = (wrapWidth > 0.0f);
@@ -274,7 +268,7 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
     // Draw the lines, skipping `offset` leading lines.
     for (size_t li = 0; li < lines.size(); ++li) {
         if (static_cast<int>(li) < offset) continue;
-        drawLine(lines[li], position, draw_list, m_backgroundColor, drawBg, pad);
+        drawLine(lines[li], position, draw_list);
         position.x = leftX;
     }
     return 1;
