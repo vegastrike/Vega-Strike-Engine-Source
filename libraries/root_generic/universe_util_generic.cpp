@@ -177,14 +177,13 @@ namespace UniverseUtil {
                 return std::to_string(configuration().graphics.resolution_y);
             }
             if (option == "base_max_width") {
-                // The GUI uses base_max_width as its screen width; in the old
-                // XML it always matched the render resolution (x_resolution),
-                // and bases.max_width (1440x1080) is the art's virtual size,
-                // not what the GUI should lay out at.
-                return std::to_string(configuration().graphics.resolution_x);
+                // The GUI uses base_max_width as its screen width; this can be
+                // a lower value than the actual max width to preserve the aspect ratio
+                // of the original game assets
+                return std::to_string(configuration().graphics.bases.max_width);
             }
             if (option == "base_max_height") {
-                return std::to_string(configuration().graphics.resolution_y);
+                return std::to_string(configuration().graphics.bases.max_height);
             }
             if (option == "aspect") {
                 return std::to_string(configuration().graphics.aspect_flt);
@@ -199,6 +198,7 @@ namespace UniverseUtil {
             }
         }
         return vs_config->getVariable(category, option, def);
+
     }
 
     Unit *launchJumppoint(string name_string,
