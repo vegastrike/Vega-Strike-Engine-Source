@@ -554,10 +554,13 @@ static void apply_flight_to_config() {
     // existing axis/joystick numbers so we don't clobber joystick config).
     auto &axes = cfg().axes;
     if (flight_control == FC_MOUSE) {
-        axes["x"].source = "mouse"; axes["x"].axis = 0;
-        axes["x"].inverse = cfg().mouse.inverse_x;
-        axes["y"].source = "mouse"; axes["y"].axis = 1;
-        axes["y"].inverse = cfg().mouse.inverse_y;
+        // Mark x/y as mouse-driven.  We deliberately do NOT overwrite the stored
+        // axis/joystick numbers here -- bindKeys() forces the mouse x/y physical
+        // axes (0/1) at bind time, so writing them would clobber the joystick
+        // numbers and lose them on the next switch back to Joystick.  The inverse
+        // flag is only what Mouse still needs from the role entry.
+        axes["x"].source = "mouse"; axes["x"].inverse = cfg().mouse.inverse_x;
+        axes["y"].source = "mouse"; axes["y"].inverse = cfg().mouse.inverse_y;
     } else {
         for (const char *role : {"x", "y"}) {
             auto it = axes.find(role);

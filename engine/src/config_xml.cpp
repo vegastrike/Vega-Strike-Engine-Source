@@ -383,11 +383,24 @@ void GameVegaConfig::bindKeys() {
         else if (role == "throttle") { idx = AXIS_THROTTLE; }
         else { VS_LOG(warning, (boost::format("unknown axis %1%") % role)); continue; }
 
+        // Bind the axes according to the selected flight-control device
+        // (input.device), WITHOUT mutating the stored config (so the joystick
+        // bindings survive a mode switch and come back when Joystick is re-selected).
+        //   - Keyboard: no device drives any axis -> all roles unbind.
+        //   - Mouse: only x/y (source=mouse) bind; z/throttle unbind.
+        //   - Joystick: the configured roles bind (joystick.enabled governs).
+        const std::string & device = cfg.input.device;
+        bool is_mouse_axis = (ar.source == "mouse");
+        if (device == "keyboard") {
+            continue;  // keyboard drives no axes
+        }
+        if (device == "mouse" && idx != AXIS_X && idx != AXIS_Y) {
+            continue;  // mouse drives only x/y; keep z/throttle unbound
+        }
         // The device for x/y is decided by the per-role source in bindings.json
         // (axes.x/y.source), NOT by the global mouse.enabled flag - otherwise
         // enabling the mouse would steal x/y away from the joystick. Mouse only
         // drives x/y when that role is explicitly configured as source=mouse.
-        bool is_mouse_axis = (ar.source == "mouse");
         // Joystick axes only apply when the joystick is enabled (Keyboard/Mouse modes disable it).
         if (!is_mouse_axis && !cfg.joystick.enabled) {
             continue;
