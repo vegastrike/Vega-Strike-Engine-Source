@@ -65,7 +65,14 @@ void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontS
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->Clear();
     ImFontConfig cfg;
+    // Bake the glyphs at higher detail than the requested render size so the base
+    // computer (which renders each control at font_point * scale, scale up to ~1.5)
+    // scales DOWN from a high-detail rasterization rather than UP from a single
+    // low-res bake.  Scaling a crisp high-detail bake is sharp; scaling up a 1x bake
+    // (the default) is blurry.  RasterizerDensity is the legacy-backend (locked atlas)
+    // knob for this -- it does not alter font metrics, only the rasterization detail.
     cfg.SizePixels = fontSize;
+    cfg.RasterizerDensity = 2.0f;  // bake at 2x detail; covers base control scales up to ~2x
     io.FontDefault = io.Fonts->AddFontDefault(&cfg);
 
     gui_initialized = true;
@@ -87,6 +94,7 @@ void ImGui_ApplyPendingFontSize() {
     io.Fonts->Clear();
     ImFontConfig cfg;
     cfg.SizePixels = s_pending_font_size;
+    cfg.RasterizerDensity = 2.0f;  // keep the 2x-detail bake on rebuild (see InitGui)
     io.FontDefault = io.Fonts->AddFontDefault(&cfg);
     io.Fonts->Build();
     ImGui_ImplOpenGL3_CreateFontsTexture();
