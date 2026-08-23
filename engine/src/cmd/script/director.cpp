@@ -192,7 +192,7 @@ void Mission::BriefingLoop() {
     }
 }
 
-class TextPlane *Mission::BriefingRender() {
+class ImGuiText *Mission::BriefingRender() {
     if (briefing) {
         vector<std::string> who;
         who.push_back("briefing");
@@ -204,7 +204,7 @@ class TextPlane *Mission::BriefingRender() {
         if (msgcenter->last(1, g2, who)) {
             str1 = str1 + string("\n") + g2.message;
         }
-        briefing->tp.SetText(str1);
+        briefing->tp.setText(str1);
         briefing->Render();
         return &briefing->tp;
     }

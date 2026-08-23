@@ -490,7 +490,7 @@ public:
     void DirectorShipDestroyed(Unit *unit);
     void BriefingStart();
 //clobbers the cam view & renders btw 0,0, and 1,1
-    class TextPlane *BriefingRender();
+    class ImGuiText *BriefingRender();
     void BriefingLoop();
     void BriefingUpdate();
     void BriefingEnd();

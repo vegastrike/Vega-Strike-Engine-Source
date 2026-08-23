@@ -34,6 +34,12 @@ static bool isTransparent(ImU32 color) {
     return ((color >> IM_COL32_A_SHIFT) & 0xFF) == 0;
 }
 
+// Normalized glyph height, driven by configuration font_point (relocated from the
+// removed TextPlane implementation so other code can keep linking against it).
+float getFontHeight() {
+    return configuration().graphics.font_point_flt / configuration().graphics.resolution_y;
+}
+
 void FormattedLayout::endLine(Line& line) {
     // if (!line.empty()) {
         line.lineSpacing = currentLineSpacing;
