@@ -42,9 +42,11 @@ static const float BOLD_STROKE = 1.5;
 //a lighter look.
 class Font {
 public:
-//Font size.  Vertical distance in identity space.
+// Font size in pixels (glyph height). No resolution-relative scaling: the size
+// is the actual pixel height used to bake/draw the font, so text is crisp and
+// consistent regardless of the window or base-computer resolution.
     float size(void) const {
-        return m_size * 0.5;
+        return m_size;
     }
 
     void setSize(float s) {
@@ -84,7 +86,7 @@ public:
     double descent(void) const;
 
 //CONSTRUCTION
-    Font(float newsize = .1, float weight = NORMAL_STROKE) :
+    Font(float newsize = 16.0f, float weight = NORMAL_STROKE) :
             m_size(newsize),
             m_strokeWeight(weight),
             m_needMetrics(true),

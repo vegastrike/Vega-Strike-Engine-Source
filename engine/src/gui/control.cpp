@@ -55,7 +55,7 @@ Control::Control(void) :
         m_color(GUI_OPAQUE_WHITE()),
         m_outlineColor(GUI_CLEAR),
         m_textColor(GUI_OPAQUE_BLACK()),
-        m_font(0.1),
+        m_font(16.0f),
         m_hidden(false) {
 }
 
