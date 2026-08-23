@@ -70,6 +70,7 @@
 #include "root_generic/options.h"
 
 #include "gui/pause_screen.h"
+#include "libraries/gui/gui.h"
 
 #include "imgui/imgui.h"
 #include "backends/imgui_impl_sdl3.h"
@@ -414,6 +415,7 @@ void Universe::StartDraw() {
     // ImGui Init
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
+    ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
     ImGui::NewFrame();
     // End ImGui Init
     ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);

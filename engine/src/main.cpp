@@ -58,6 +58,7 @@
 #include "vegadisk/savegame.h"
 #include "src/force_feedback.h"
 #include "gui/imguitext.h"
+#include "libraries/gui/gui.h"
 #include "gldrv/winsys.h"
 #include "src/universe_util.h"
 #include "src/universe.h"
@@ -480,6 +481,7 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     // ImGui Init
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
+    ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
     ImGui::NewFrame();
     // End ImGui Init
 
