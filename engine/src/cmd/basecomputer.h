@@ -305,13 +305,6 @@ protected:
 //Contruct the controls in code.
     void constructControls(void);
 
-// Set configuration().graphics.resolution_x/y to the base's own resolution
-// (bases.max_width/height) for the base session, and restore the saved global
-// resolution.  Called from init()/~BaseComputer() so controls_factory computes
-// the base font size at the base resolution consistently.
-    void setBaseResolution(void);
-    void restoreResolution(void);
-
     GFXColor getColorForGroup(std::string id);
 
 //Get a filtered list of items from a unit.
@@ -337,8 +330,6 @@ protected:
     TransactionList *m_selectedList;        //Which transaction list has the selection. NULL = none.
     Control *m_modeGroups[RAW_DISPLAY_MODE(DisplayMode::DISPLAY_MODE_COUNT)]; //Array of GroupControls, one for each mode.
     bool m_playingMuzak;                //True = We are playing muzak for some mode.
-    int m_savedResX = 0;                //Global resolution saved on base entry, restored on exit.
-    int m_savedResY = 0;
 
 //INTERNAL CLASSES.
     class UpgradeOperation;

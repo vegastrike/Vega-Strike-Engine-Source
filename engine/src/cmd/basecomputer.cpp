@@ -470,8 +470,6 @@ BaseComputer::BaseComputer(Unit *player, Unit *base, const std::vector<DisplayMo
 BaseComputer::~BaseComputer(void) {
     m_player.SetUnit(nullptr);
     m_base.SetUnit(nullptr);
-    //Restore the global resolution we saved on base entry (if init() ran).
-    restoreResolution();
     //Delete any group controls that the window doesn't "own".
     for (uint_fast32_t i = 0; i < RAW_DISPLAY_MODE(DisplayMode::DISPLAY_MODE_COUNT); ++i) {
         if (m_modeGroups[i] != nullptr) {
@@ -663,42 +661,10 @@ bool BaseComputer::changeToNetworkMode(const EventCommandId &command, Control *c
 
 
 //Set up the window and get everything ready.
-// Set the global resolution to the base computer's own resolution (bases.max_width/height)
-// for the whole base session, saving the prior global value.  controls_factory computes
-// the base font size from resolution_y, so it must see the base resolution -- otherwise the
-// font is sized for the global window resolution and then measured/positioned at the base
-// one mid-frame (the source of the base-text blur).
-void BaseComputer::setBaseResolution(void) {
-    const int base_w = configuration().graphics.bases.max_width;
-    const int base_h = configuration().graphics.bases.max_height;
-    m_savedResX = configuration().graphics.resolution_x;
-    m_savedResY = configuration().graphics.resolution_y;
-    if (base_w > 0 && base_h > 0) {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = base_w;
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = base_h;
-    }
-}
-
-// Restore the global resolution saved on base entry.
-void BaseComputer::restoreResolution(void) {
-    if (m_savedResX > 0 && m_savedResY > 0) {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = m_savedResX;
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = m_savedResY;
-    }
-}
-
 void BaseComputer::init(void) {
     //Create a new window.
     Window *w = new Window;
     setWindow(w);
-
-    // Establish the base's own resolution (bases.max_width/height) for the whole
-    // base session, BEFORE the controls are built.  controls_factory computes the
-    // base-computer font size from resolution_y, so it must see the base resolution
-    // (not the global window one), or the font is baked for one resolution and then
-    // measured/positioned at another mid-frame (the source of the base-text blur).
-    // We restore the global resolution in the destructor on exit.
-    setBaseResolution();
 
     //Read in the controls for all the modes.
     createControls();
