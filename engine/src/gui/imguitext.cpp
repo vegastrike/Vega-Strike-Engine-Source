@@ -29,6 +29,11 @@
 #include "configuration/configuration.h"
 #include "imgui_internal.h"
 
+// Whether a packed ImU32 color is fully transparent (alpha == 0).
+static bool isTransparent(ImU32 color) {
+    return ((color >> IM_COL32_A_SHIFT) & 0xFF) == 0;
+}
+
 void FormattedLayout::endLine(Line& line) {
     // if (!line.empty()) {
         line.lineSpacing = currentLineSpacing;
@@ -104,6 +109,64 @@ void ImGuiText::draw(int firstLineToDraw) {
         }
         currentY += line.lineHeight + (line.lineSpacing * line.lineHeight); // Move pen down
     }
+}
+
+// TextPlane-compatible drawing path.  Replicates the legacy TextPlane::Draw semantics
+// (top-left anchor, optional one-line-up for !start_lower, per-fragment background
+// rectangle gated by automatte) but consumes the *unified* ImGuiText layout/parser so
+// there is one text box and one format parser.  Text is drawn at the current ImGui font
+// size, as TextPlane did, to preserve the rendered look.
+int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
+        bool force_highquality, bool automatte) {
+    setText(newText);
+    // Force multi-line so width-based wrapping still applies and newlines expand.
+    m_multiLine = true;
+    parseTextIfNeeded();
+    if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
+        return 1;
+    }
+    ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
+    if ( !draw_list ) return 1;
+
+    // Top-left anchor (TextPlane passed its pos through CalculateAbsoluteXY, which is
+    // identical to normToPixelX/Y for a -1..1 normalized coordinate).
+    ImVec2 position;
+    position.x = Coordinates::normToPixelX(m_rect.origin.x);
+    position.y = Coordinates::normToPixelY(m_rect.origin.y);
+
+    // Move one line up if !start_lower (as TextPlane did).
+    if (!start_lower) {
+        ImVec2 dummy = ImGui::CalcTextSize("hello world");
+        position.y -= dummy.y;
+    }
+
+    const ImVec2 pad(4.0f, 2.0f);
+    const bool drawBg = (!isTransparent(m_backgroundColor) && !automatte);
+
+    for (size_t i = 0; i < m_layout.size(); ++i) {
+        if (i < static_cast<size_t>(offset)) continue;
+        const auto& line = m_layout[i];
+        ImVec2 lineStart = position;
+        for (const auto& frag : line) {
+            ImVec2 text_size = ImGui::CalcTextSize(frag.text.c_str());
+            if (drawBg) {
+                const ImVec2 start_position(position.x - pad.x, position.y - pad.y);
+                const ImVec2 end_position(position.x + text_size.x + pad.x,
+                        position.y + text_size.y + pad.y);
+                draw_list->AddRectFilled(start_position, end_position, m_backgroundColor, 0.0f);
+            }
+            draw_list->AddText(nullptr, 0.0f, position, frag.color, frag.text.c_str(), nullptr, 0.0f, nullptr);
+            position.x += text_size.x;
+        }
+        if (line.empty()) {
+            ImVec2 dummy = ImGui::CalcTextSize("hello world");
+            position.y += dummy.y;
+        } else {
+            position.y += line.lineHeight + (line.lineSpacing * line.lineHeight);
+        }
+        position.x = lineStart.x;
+    }
+    return 1;
 }
 
 // Helper to convert 2 hex chars to an integer (0-255)
@@ -429,7 +492,7 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
     };
 
     // Initialise stacks for top level color and font weight
-    m_colorStack.push_back(ImGui::ColorConvertFloat4ToU32(ImVec4(m_color.r, m_color.g, m_color.b, m_color.a)));
+    m_colorStack.push_back(m_colorU32);
     m_fontStack.push_back(m_font);
     size_t curPos = 0;
     size_t lastWordBreakPos = 0;

@@ -71,15 +71,29 @@ struct FormattedLayout : public std::vector<Line> {
 
 class ImGuiText {
 public:
+    // TextPlane-compatible constructor: text color + background color.
+    ImGuiText(const GFXColor &col = GFXColor(1, 1, 1, 1),
+            const GFXColor &bgcol = GFXColor(0, 0, 0, 0))
+            : m_color(col), m_colorU32(static_cast<ImU32>(col)),
+              m_backgroundColor(static_cast<ImU32>(bgcol)) {}
     void setRect(const Rect &r) { m_rect = r; }
     void setText(const std::string &text);
     std::string text( void ) { return m_text; }
+    std::string getText() { return m_text; }
     void setFont(const Font &f) { m_font = f; }
     Font font(void) { return m_font; }
     void setJustification(Justification j) { m_justification = j; }
     Justification justification(void) { return m_justification; };
-    void setColor(const GFXColor &c) { m_color = c; }
+    void setColor(const GFXColor &c) { m_color = c; m_colorU32 = static_cast<ImU32>(c); }
     GFXColor color() { return m_color; };
+    // Set the text color from a packed ImU32 (TextPlane-compatible interface).
+    void setColorU32(ImU32 c) { m_colorU32 = c; m_color = GFXColor(c); }
+    // Background rectangle behind the text (TextPlane `background_color`).
+    void setBackgroundColor(ImU32 c) { m_backgroundColor = c; }
+    ImU32 backgroundColor() const { return m_backgroundColor; }
+    // Whether to suppress the background rectangle (TextPlane `automatte`).
+    void setAutomatte(bool a) { m_automatte = a; }
+    bool automatte() const { return m_automatte; }
     int lineCount(void) const { return m_layout.size(); };
     int layoutVersion(void) const { return m_layoutVersion; };
     int visibleLineCountStartingWith(int lineNumber, float vertInterval);
@@ -92,6 +106,21 @@ public:
     }    
     // Draws the text
     void draw(int firstLineToDraw=0);
+    // TextPlane-compatible convenience: set position (normalized top-left origin),
+    // size (normalized width/height), and char size (glyph width/height).
+    void setPos(float x, float y) { m_rect.origin.x = x; m_rect.origin.y = y; }
+    void setSize(float w, float h) { m_rect.size.width = w; m_rect.size.height = h; }
+    void setCharSize(float w, float h) { m_charW = w; m_charH = h; }
+    void getCharSize(float &x, float &y) { x = m_charW; y = m_charH; }
+    // TextPlane-compatible drawing entry point. Replicates TextPlane::Draw semantics
+    // (top-left anchor, optional one-line-lower, force_highquality, automatte background)
+    // using the unified ImGuiText parser. Returns line count.
+    int Draw(const std::string &newText,
+            int offset = 0,
+            bool start_lower = false,
+            bool force_highquality = false,
+            bool automatte = false);
+    int Draw(int offset = 0) { return Draw(m_text, offset, false, false, m_automatte); }
     ImVec2 getTextWidth(const std::string text, const float fontSize);
 private:
     Rect m_rect;
@@ -100,6 +129,11 @@ private:
     Justification m_justification = LEFT_JUSTIFY;
     bool m_multiLine = false;
     GFXColor m_color;
+    ImU32 m_colorU32 = IM_COL32(255, 255, 255, 255);
+    ImU32 m_backgroundColor = IM_COL32(0, 0, 0, 0);
+    bool m_automatte = false;
+    float m_charW = 0.06f;
+    float m_charH = 0.08f;
     FormattedLayout m_layout;
     int m_layoutVersion = 0;
 
