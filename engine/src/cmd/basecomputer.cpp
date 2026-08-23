@@ -3714,7 +3714,7 @@ void BaseComputer::LoadSaveQuitConfirm::init(void) {
     text->setTextColor(GFXColor(.7, 1, .4));
     text->setMultiLine(true);
     text->setColor(GUI_CLEAR);
-    text->setFont(Font(13, 1.25));
+    text->setFont(Font(.07, 1.25));
     text->setId("Information");
     //Put it on the window.
     window->addControl(text);
@@ -3729,7 +3729,7 @@ void BaseComputer::LoadSaveQuitConfirm::init(void) {
     cont->setDownColor(GFXColor(1, .5, 0, .6));
     cont->setDownTextColor(GUI_OPAQUE_BLACK());
     cont->setHighlightColor(GFXColor(0, 1, 0, .4));
-    cont->setFont(Font(15, BOLD_STROKE));
+    cont->setFont(Font(.08, BOLD_STROKE));
     //Put the button on the window.
     window->addControl(cont);
 
@@ -3743,7 +3743,7 @@ void BaseComputer::LoadSaveQuitConfirm::init(void) {
     resume->setDownColor(GFXColor(0, 1, 0, .6));
     resume->setDownTextColor(GUI_OPAQUE_BLACK());
     resume->setHighlightColor(GFXColor(0, 1, 0, .4));
-    resume->setFont(Font(15, BOLD_STROKE));
+    resume->setFont(Font(.08, BOLD_STROKE));
     //Put the button on the window.
     window->addControl(resume);
 
