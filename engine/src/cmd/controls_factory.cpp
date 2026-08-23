@@ -39,6 +39,7 @@
 #include "src/vega_cast_utils.h"
 #include "cmd/drawable.h"
 
+#include "configuration/configuration.h"
 #include "gui/staticdisplay.h"
 #include "gui/newbutton.h"
 #include "gui/scroller.h"
@@ -392,11 +393,19 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
                 break;
             }
             case ControlProp::Font: {
+                // The first value is a RELATIVE glyph-height scale on the global font_point
+                // (default 1.0), NOT an absolute size.  The second is the stroke weight.
+                //   size = font_point * scale * 4 / resolution_y
+                // so a control renders at font_point * scale pixels (at the configured res),
+                // and scales with the display exactly like the fixed rect boxes do.
                 auto font_array = splitAndConvert(value, ',');
-                if (font_array.size() == 1) {
-                    c->setFont(Font(font_array[0]));
-                } else if (font_array.size() >= 2) {
-                    c->setFont(Font(font_array[0], font_array[1]));
+                if (font_array.size() >= 1) {
+                    const double scale = font_array[0];
+                    const double weight =
+                            (font_array.size() >= 2 ? font_array[1] : NORMAL_STROKE);
+                    const double size = configuration().graphics.font_point_flt * scale * 4.0
+                            / configuration().graphics.resolution_y;
+                    c->setFont(Font(size, weight));
                 } else {
                     VS_LOG(error, "getControl(): 'font' requires at least 1 value");
                 }
