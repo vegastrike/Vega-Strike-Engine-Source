@@ -363,7 +363,6 @@ SET(LIBGFXCLIENT_SOURCES
     src/gfx/gauge.cpp
     src/gfx/halo_system.cpp
     src/gfx/halo.cpp
-    src/gfx/hud.cpp
     src/gfx/jpeg_memory.cpp
     src/gfx/loc_select.cpp
     src/gfx/masks.cpp

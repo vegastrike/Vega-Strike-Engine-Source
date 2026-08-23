@@ -54,7 +54,6 @@ class Planet;
 class Stars;
 
 class Terrain;
-class TextPlane;
 class Texture;
 class Unit;
 class Universe;

@@ -30,7 +30,7 @@
 #include <vector>
 #include <string>
 #include "cmd/basecomputer.h"
-#include "gfx/hud.h"
+#include "gui/imguitext.h"
 #include "gfx/sprite.h"
 #include <cstdio>
 #include "vsdraw/imgui_support.h"
@@ -52,7 +52,7 @@ class BaseInterface {
     bool enabledj;
     bool terminate_scheduled;
     bool midloop;
-    TextPlane curtext;
+    ImGuiText curtext;
 public:
     class Room {
     public:
@@ -221,7 +221,7 @@ public:
         };
         class BaseText : public BaseObj {
         public:
-            TextPlane text;
+            ImGuiText text;
 
             void Draw(::BaseInterface *base) override;
 #ifdef BASE_MAKER
@@ -240,26 +240,26 @@ public:
                     GFXColor backcol,
                     GFXColor forecol,
                     const std::string &ind) : BaseObj(ind), text(forecol, backcol) {
-                text.SetPos(posx, posy);
-                text.SetSize(wid, hei);
+                text.setPos(posx, posy);
+                text.setSize(wid, hei);
                 float cx = 0, cy = 0;
-                text.GetCharSize(cx, cy);
+                text.getCharSize(cx, cy);
                 cx *= charsizemult;
                 cy *= charsizemult;
-                text.SetCharSize(cx, cy);
-                text.SetText(texts);
+                text.setCharSize(cx, cy);
+                text.setText(texts);
             }
 
             void SetText(const std::string &newtext) {
-                text.SetText(newtext);
+                text.setText(newtext);
             }
 
             void SetPos(float posx, float posy) {
-                text.SetPos(posx, posy);
+                text.setPos(posx, posy);
             }
 
             void SetSize(float wid, float hei) {
-                text.SetSize(wid, hei);
+                text.setSize(wid, hei);
             }
         };
         class BaseShip : public BaseObj {
@@ -393,7 +393,7 @@ public:
     friend class Room::BaseTalk;
     int curroom;
     std::vector<Room *> rooms;
-    TextPlane othtext;
+    ImGuiText othtext;
     static BaseInterface *CurrentBase;
     bool CallComp;
     UnitContainer caller;

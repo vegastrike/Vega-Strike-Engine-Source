@@ -28,7 +28,7 @@
 
 #include "gfx_generic/matrix.h"
 #include "gfx/camera.h"
-#include "gfx/hud.h"
+#include "gui/imguitext.h"
 #include <list>
 #include <vector>
 using std::list;
@@ -72,7 +72,7 @@ public:
         void EnqueueOrder(const Vector &destination, float time);
     };
     Camera cam;
-    TextPlane tp;
+    ImGuiText tp;
     vector<Ship *> starships;
     void Render();
     void Update();
