@@ -34,7 +34,7 @@
 #include <vector>
 #include <list>
 
-class TextPlane;
+class ImGuiText;
 class VSSprite;
 class Gauge;
 class Unit;
@@ -122,7 +122,7 @@ class GameCockpit : public Cockpit {
     ///Color of cockpit default text
     GFXColor textcol;
     ///The font that the entire cockpit will use. Currently without color
-    TextPlane *text;
+    ImGuiText *text;
     Gauge *gauges[UnitImages<void>::NUMGAUGES];
     ///holds misc panels.  Panel[0] is always crosshairs (and adjusted to be in center of view screen, not cockpit)
     std::vector<VSSprite *> Panel;

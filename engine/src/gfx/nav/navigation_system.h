@@ -36,6 +36,7 @@
 #include "gfxlib_struct.h"
 #include "navcomputer.h"
 #include "navpath.h"
+#include "gui/imguitext.h"
 
 #include "gfx_generic/vec.h"
 
@@ -243,7 +244,7 @@ private:
     float buttonskipby4_5[4];
     float buttonskipby4_6[4];
     float buttonskipby4_7[4];
-    TextPlane screen_objectives;
+    ImGuiText screen_objectives;
     float meshcoordinate_x[NAVTOTALMESHCOUNT];
     float meshcoordinate_y[NAVTOTALMESHCOUNT];
     float meshcoordinate_z[NAVTOTALMESHCOUNT];

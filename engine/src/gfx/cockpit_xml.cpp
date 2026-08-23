@@ -30,7 +30,7 @@
 #include "root_generic/xml_support.h"
 #include "gfx/gauge.h"
 #include <float.h>
-#include "gfx/hud.h"
+#include "gui/imguitext.h"
 #include "gfx_generic/mesh.h"
 #include "root_generic/configxml.h"
 
@@ -390,7 +390,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                         break;
                 }
             }
-            text = new TextPlane();
+            text = new ImGuiText();
             for (counter = 0; counter < 4; ++counter) {
                 if (!replaced[counter]) {
                     delete Pit[counter];

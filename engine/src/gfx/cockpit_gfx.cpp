@@ -321,7 +321,7 @@ void DrawCommunicatingBoxes(std::vector< VDU* >vdu)
 
 
 void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
-                 float gauge_time[], float cockpit_time, TextPlane *text,
+                 float gauge_time[], float cockpit_time, ImGuiText *text,
                  GFXColor textcol) {
     int i;
     for (i = 0; i < UnitImages< void >::TARGETSHIELDF; i++) {
@@ -342,20 +342,20 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
     if (!text)
         return;
     GFXColorf( textcol );
-    GFXColor origbgcol(text->background_color);
+    GFXColor origbgcol(text->backgroundColor());
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     bool automatte = (0 == origbgcol.a);
     if (automatte) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
-        text->background_color = static_cast<ImU32>(temp_background_color);
+        text->setBackgroundColor(static_cast<ImU32>(temp_background_color));
     }
     for (i = UnitImages< void >::KPS; i < UnitImages< void >::AUTOPILOT_MODAL; i++) {
         if (gauges[i]) {
             float sx, sy, px, py;
             gauges[i]->GetSize( sx, sy );
             gauges[i]->GetPosition( px, py );
-            text->SetCharSize( sx, sy );
-            text->SetPos( px, py );
+            text->setCharSize( sx, sy );
+            text->setPos( px, py );
             float tmp  = cockpit->LookupUnitStat( i, un );
             float tmp2 = 0;
             char  ourchar[64];
@@ -370,7 +370,7 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
             if (i == UnitImages< void >::MASSEFFECT)
                 sprintf( ourchar, "MASS:%.0f%% (base)", tmp );
             GFXColorf( textcol );
-            text->SetSize( 2, -2 );
+            text->setSize( 2, -2 );
             text->Draw( string( ourchar ), 0, false, false, automatte );
         }
     }
@@ -379,8 +379,8 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
             float sx, sy, px, py;
             gauges[i]->GetSize( sx, sy );
             gauges[i]->GetPosition( px, py );
-            text->SetCharSize( sx, sy );
-            text->SetPos( px, py );
+            text->setCharSize( sx, sy );
+            text->setPos( px, py );
             float tmp    = cockpit->LookupUnitStat( i, un );
             int   ivalue = (int) tmp;
             std::string modename;
@@ -482,12 +482,12 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
                 modevalue = "MALFUNCTION!";
             }
             GFXColorf( textcol );
-            //text->SetSize(px+textwidthapproxHACK*(modename.size()+modevalue.size()), -2);
-            text->SetSize( 2, -2 );
+            //text->setSize(px+textwidthapproxHACK*(modename.size()+modevalue.size()), -2);
+            text->setSize( 2, -2 );
             text->Draw( modename+modevalue, 0, false, false, automatte );
         }
     }
-    text->background_color = static_cast<ImU32>(origbgcol);
+    text->setBackgroundColor(static_cast<ImU32>(origbgcol));
     GFXColor4f( 1, 1, 1, 1 );
 }
 
