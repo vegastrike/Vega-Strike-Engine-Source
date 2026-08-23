@@ -415,17 +415,17 @@ void NavigationSystem::DrawGalaxy() {
     Beautify(getCurrentSystem(), csector, csystem);
     //what's my name
     //***************************
-    TextPlane systemname;       //will be used to display shits names
+    ImGuiText systemname;       //will be used to display shits names
     string systemnamestring = "Current System : " + csystem + " in the " + csector + " Sector.";
 
 //int length = systemnamestring.size();
 //float offset = (float(length)*0.005);
     GFXColor temp_system_color(1, 1, .7, 1);
-    systemname.color = static_cast<ImU32>(temp_system_color);
-    systemname.SetPos(screenskipby4[0], screenskipby4[3]);     //Looks ugly when name is too long and goes off the edge.
-//systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
-    systemname.SetText(systemnamestring);
-//systemname.SetCharSize(1, 1);
+    systemname.setColorU32(static_cast<ImU32>(temp_system_color));
+    systemname.setPos(screenskipby4[0], screenskipby4[3]);     //Looks ugly when name is too long and goes off the edge.
+//systemname.setPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
+    systemname.setText(systemnamestring);
+//systemname.setCharSize(1, 1);
     systemname.Draw();
     //***************************
 

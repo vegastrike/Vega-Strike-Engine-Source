@@ -40,7 +40,7 @@ class GameCockpit;
 class Gauge;
 struct GFXColor;
 class NavigationSystem;
-class TextPlane;
+class ImGuiText;
 class VSSprite;
 class VDU;
 
@@ -68,7 +68,7 @@ void DrawCommunicatingBoxes(std::vector< VDU* >vdu);
 
 ///Draws unit gauges
 void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
-                 float gauge_time[], float cockpit_time, TextPlane *text,
+                 float gauge_time[], float cockpit_time, ImGuiText *text,
                  GFXColor textcol);
 
 ///draws the navigation symbol around targetted location

@@ -28,7 +28,7 @@
 
 #include "vsdraw/glut_support.h"
 
-#include "gfx/hud.h"
+#include "gui/imguitext.h"
 
 #include "cmd/unit_generic.h"
 
@@ -191,31 +191,31 @@ void drawdescription(string text,
     if (text.size() == 0) {
         return;
     }
-    TextPlane displayname;      //will be used to display shits names
+    ImGuiText displayname;      //will be used to display shits names
 
-    displayname.color = static_cast<ImU32>(col);
+    displayname.setColorU32(static_cast<ImU32>(col));
 
     int length = text.size();
     float offset = (float(length) * 0.005);
     if (ignore_occupied_areas) {
-        displayname.SetPos((x_ - offset), y_);
-        displayname.SetText(text);
-        displayname.SetCharSize(size_x, size_y);
+        displayname.setPos((x_ - offset), y_);
+        displayname.setText(text);
+        displayname.setCharSize(size_x, size_y);
     } else {
         float new_y = screenoccupation->findfreesector(x_, y_);
-        displayname.SetPos((x_ - offset), new_y);
-        displayname.SetText(text);
-        displayname.SetCharSize(size_x, size_y);
+        displayname.setPos((x_ - offset), new_y);
+        displayname.setText(text);
+        displayname.setCharSize(size_x, size_y);
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg(displayname.background_color);
+    GFXColor tpbg(displayname.backgroundColor());
     bool automatte = (0 == tpbg.a);
     if (automatte) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
-        displayname.background_color = static_cast<ImU32>(temp_background_color);
+        displayname.setBackgroundColor(static_cast<ImU32>(temp_background_color));
     }
     displayname.Draw(text, 0, true, false, automatte);
-    displayname.background_color = static_cast<ImU32>(tpbg);
+    displayname.setBackgroundColor(static_cast<ImU32>(tpbg));
 }
 
 Unit *navdrawlist::gettailunit() {

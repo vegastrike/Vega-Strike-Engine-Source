@@ -36,7 +36,7 @@
 #include "src/star_system.h"
 #include "cmd/unit_generic.h"
 #include "cmd/collection.h"
-#include "gfx/hud.h"
+#include "gui/imguitext.h"
 #include "root_generic/lin_time.h" //for fps
 #include "src/config_xml.h"
 #include "root_generic/lin_time.h"
@@ -81,32 +81,32 @@ void NavigationSystem::DrawSystem() {
 
     //what's my name
     //***************************
-    TextPlane systemname;       //will be used to display shits names
+    ImGuiText systemname;       //will be used to display shits names
     int faction =
             FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(_Universe->activeStarSystem()->getFileName()));
     //GFXColor factioncolor = factioncolours[faction];
     string systemnamestring =
-            "#ff0000Sector: #ffff00" + getStarSystemSector(_Universe->activeStarSystem()->getFileName())
-                    + "  #ff0000Current System: #ffff00" + _Universe->activeStarSystem()->getName() + " ("
+            "#c1:0:0#Sector: #c1:1:0#" + getStarSystemSector(_Universe->activeStarSystem()->getFileName())
+                    + "  #c1:0:0#Current System: #c1:1:0#" + _Universe->activeStarSystem()->getName() + " ("
                     + FactionUtil::GetFactionName(faction)
-                    + "#ffff00)";
+                    + "#c1:1:0#)";
     //int length = systemnamestring.size();
     //float offset = (float(length)*0.001);
     //systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]); // middle position
-    systemname.SetPos(screenskipby4[0] + 0.03, screenskipby4[3] + 0.02);     //left position
+    systemname.setPos(screenskipby4[0] + 0.03, screenskipby4[3] + 0.02);     //left position
     GFXColor temp_color(1, 1, .7, 1);
-    systemname.color = static_cast<ImU32>(temp_color);
-    systemname.SetText(systemnamestring);
+    systemname.setColorU32(static_cast<ImU32>(temp_color));
+    systemname.setText(systemnamestring);
 //systemname.SetCharSize(1, 1);
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg(systemname.background_color);
+    GFXColor tpbg(systemname.backgroundColor());
     bool automatte = (0 == tpbg.a);
     if (automatte) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
-        systemname.background_color = static_cast<ImU32>(temp_background_color);
+        systemname.setBackgroundColor(static_cast<ImU32>(temp_background_color));
     }
     systemname.Draw(systemnamestring, 0, true, false, automatte);
-    systemname.background_color = static_cast<ImU32>(tpbg);
+    systemname.setBackgroundColor(static_cast<ImU32>(tpbg));
     //***************************
 
 //navdrawlist mainlist(0, screenoccupation, factioncolours);		//	lists of items to draw

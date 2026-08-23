@@ -112,6 +112,10 @@ public:
     void setSize(float w, float h) { m_rect.size.width = w; m_rect.size.height = h; }
     void setCharSize(float w, float h) { m_charW = w; m_charH = h; }
     void getCharSize(float &x, float &y) { x = m_charW; y = m_charH; }
+    // TextPlane-compatible reads.  Note the argument order matches TextPlane:
+    // getPos(y, x) and getSize(x, y), reading back the stored rect.
+    void getPos(float &y, float &x) { y = m_rect.origin.y; x = m_rect.origin.x; }
+    void getSize(float &x, float &y) { x = m_rect.size.width; y = m_rect.size.height; }
     // TextPlane-compatible drawing entry point. Replicates TextPlane::Draw semantics
     // (top-left anchor, optional one-line-lower, force_highquality, automatte background)
     // using the unified ImGuiText parser. Returns line count.

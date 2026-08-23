@@ -54,7 +54,7 @@
 #include "cmd/movable.h"
 #include "cmd/unit_util.h"
 #include "cmd/base_util.h"
-#include "gfx/hud.h"
+#include "gui/imguitext.h"
 #include "root_generic/lin_time.h" //for fps
 #include "cmd/beam.h"
 #include "src/config_xml.h"
@@ -1790,7 +1790,7 @@ void GameCockpit::Draw() {
             //process VDU, damage VDU, targetting VDU
             //////////////////// DISPLAY CURRENT POSITION ////////////////////
             if (configuration().graphics.hud.debug_position) {
-                TextPlane tp;
+                ImGuiText tp;
                 std::string str;
                 Unit *you = parent.GetUnit();
                 if (you) {
@@ -1814,8 +1814,8 @@ void GameCockpit::Draw() {
                                 % queryTime()).str();
                     }
                 }
-                tp.SetPos(-0.8, -0.8);
-                tp.SetText(str);
+                tp.setPos(-0.8, -0.8);
+                tp.setText(str);
                 tp.Draw();
             }
             //////////////////////////////////////////////////////////////////////////
@@ -1893,7 +1893,7 @@ void GameCockpit::Draw() {
         if (die) {
             if (text) {
                 GFXColor4f(1, 1, 1, 1);
-                text->SetSize(1, -1);
+                text->setSize(1, -1);
                 float x;
                 float y;
                 if (dietime == 0) {
@@ -1904,15 +1904,15 @@ void GameCockpit::Draw() {
                             respawnunit[_Universe->CurrentCockpit()] = 0;
                         }
                     }
-                    text->GetCharSize(x, y);
-                    text->SetCharSize(x * 4, y * 4);
-                    text->SetPos(0 - (x * 2 * 14), 0 - (y * 2));
+                    text->getCharSize(x, y);
+                    text->setCharSize(x * 4, y * 4);
+                    text->setPos(0 - (x * 2 * 14), 0 - (y * 2));
                 }
                 GFXColorf(textcol);
                 const bool show_died_text = configuration().graphics.show_respawn_text;
                 if (show_died_text) {
                     text->Draw(
-                            "#ff5555You Have Died!\n#000000Press #8080FF;#000000 (semicolon) to respawn\nOr Press #8080FFEsc and 'q'#000000 to quit");
+                            "#c1:.333:.333#You Have Died!\n#-cPress #c.502:.502:1#;#-c (semicolon) to respawn\nOr Press #c.502:.502:1#Esc and 'q'#-c to quit");
                 }
                 GFXColor4f(1, 1, 1, 1);
 

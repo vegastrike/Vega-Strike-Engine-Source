@@ -33,9 +33,9 @@
 #include <vector>
 
 class Unit;
-class TextPlane;
+class ImGuiText;
 
-void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent);
+void DrawObjectivesTextPlane(ImGuiText *tp, int scrolloffset, Unit *parent);
 
 /**
  * Holds information for dedicated computer output
@@ -52,7 +52,7 @@ private:
     float *StartArmor;
     float *maxhull;
 ///Holds a pointer to the font used to render text in the vdu
-    TextPlane *tp;
+    ImGuiText *tp;
 ///potential modes this computer is equipped for
     unsigned int posmodes;
 ///The current mode (VDU_MODE) that this unit is in is in back of this vector
@@ -120,7 +120,7 @@ public:
         WEBCAM = 0x2000
     };
     VDU(const char *file,
-            TextPlane *textp,
+            ImGuiText *textp,
             unsigned short modes,
             short rows,
             short cols);

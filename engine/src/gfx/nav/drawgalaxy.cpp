@@ -39,7 +39,7 @@
 #include "src/star_system.h"
 #include "cmd/unit_generic.h"
 #include "cmd/collection.h"
-#include "gfx/hud.h"
+#include "gui/imguitext.h"
 #include "root_generic/lin_time.h" //for fps
 #include "src/config_xml.h"
 #include "root_generic/lin_time.h"
@@ -80,37 +80,37 @@ void DrawNodeDescription(string text,
     if (text.size() == 0) {
         return;
     }
-    TextPlane displayname;   //will be used to display shits names
-    displayname.color = static_cast<ImU32>(col);
+    ImGuiText displayname;   //will be used to display shits names
+    displayname.setColorU32(static_cast<ImU32>(col));
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     int length = text.size();
     float offset = (float(length) * 0.005);
     if (ignore_occupied_areas) {
-        displayname.SetPos((x_ - offset), y_);
-        displayname.SetText(text);
-        displayname.SetCharSize(size_x, size_y);
+        displayname.setPos((x_ - offset), y_);
+        displayname.setText(text);
+        displayname.setCharSize(size_x, size_y);
 
-        GFXColor tpbg(displayname.background_color);
+        GFXColor tpbg(displayname.backgroundColor());
         bool automatte = (0 == tpbg.a);
         if (automatte) {
             GFXColor temp_background_color( 0, 0, 0, background_alpha );
-            displayname.background_color = static_cast<ImU32>(temp_background_color);
+            displayname.setBackgroundColor(static_cast<ImU32>(temp_background_color));
         }
         displayname.Draw(text, 0, true, false, automatte);
-        displayname.background_color = static_cast<ImU32>(tpbg);
+        displayname.setBackgroundColor(static_cast<ImU32>(tpbg));
     } else {
         float new_y = screenoccupation->findfreesector(x_, y_);
-        displayname.SetPos((x_ - offset), new_y);
-        displayname.SetText(text);
-        displayname.SetCharSize(size_x, size_y);
-        GFXColor tpbg(displayname.background_color);
+        displayname.setPos((x_ - offset), new_y);
+        displayname.setText(text);
+        displayname.setCharSize(size_x, size_y);
+        GFXColor tpbg(displayname.backgroundColor());
         bool automatte = (0 == tpbg.a);
         if (automatte) {
             GFXColor temp_background_color( 0, 0, 0, background_alpha );
-            displayname.background_color = static_cast<ImU32>(temp_background_color);
+            displayname.setBackgroundColor(static_cast<ImU32>(temp_background_color));
         }
         displayname.Draw(text, 0, true, false, automatte);
-        displayname.background_color = static_cast<ImU32>(tpbg);
+        displayname.setBackgroundColor(static_cast<ImU32>(tpbg));
     }
 }
 

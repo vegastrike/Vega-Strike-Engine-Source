@@ -273,8 +273,8 @@ bool NavigationSystem::ParseFile(string filename) {
                     ScreenToCoord(dx_);
                     ScreenToCoord(dy_);
 
-                    screen_objectives.SetPos(x_, dy_);
-                    screen_objectives.SetSize(dx_ - x_, y_ - dy_);
+                    screen_objectives.setPos(x_, dy_);
+                    screen_objectives.setSize(dx_ - x_, y_ - dy_);
                     dosetbit(whattodraw, 4);
                 } else if (tag == "systemiteminfo") {
                     float scale_ = atof((retrievedata(data, "itemscale")).c_str());

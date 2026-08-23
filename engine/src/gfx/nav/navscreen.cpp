@@ -664,11 +664,11 @@ void NavigationSystem::DrawMission() {
 //float love_from_rlaan = FactionUtil::getRelation(2);
 //float love_from_aera = FactionUtil::getRelation(3);
 
-    TextPlane displayname;
+    ImGuiText displayname;
     GFXColor temp_color(1, 1, 1, 1);
-    displayname.color = static_cast<ImU32>(temp_color);
-    displayname.SetSize(.62, -.7);
-    displayname.SetPos(originx + (.1 * deltax) + .37, originy /*+(1*deltay)*/ );
+    displayname.setColorU32(static_cast<ImU32>(temp_color));
+    displayname.setSize(.62, -.7);
+    displayname.setPos(originx + (.1 * deltax) + .37, originy /*+(1*deltay)*/ );
     std::string text;
     if (active_missions.size() > 1) {
         for (unsigned int i = 1; i < active_missions.size(); ++i) {
@@ -681,9 +681,9 @@ void NavigationSystem::DrawMission() {
         text += "\n";
     }
     text +=
-            "#FFA000     PRESS SHIFT-M TO TOGGLE THIS MENU    \n\n\n\n#000000*******#00a6FFVega Strike 0.10.0#000000*********\nWelcome to VS. Your ship undocks stopped; #8080FFArrow keys/mouse/joystick#000000 steer your ship. Use #8080FF+#000000 & #8080FF-#000000 to adjust cruise control, or #8080FF/#000000 & #8080FF[backspace]#000000 to go to max governor setting or full-stop, respectively. Use #8080FFy#000000 to toggle between maneuver and travel settings for your relative velocity governors. Use #8080ff[home]#000000 & #8080FF[end]#000000 to set and unset velocity reference point to the current target (non-hostile targets only). Use #8080FFTab#000000 to activate Overdrive(if present).\n\nPress #8080FFn#000000 to cycle nav points, #8080FFt#000000 to cycle targets, and #8080FFp#000000 to target objects in front of you.\n\n#8080FF[space]#000000 fires guns, and #8080ff[Enter]#000000 fires missiles.\n\nThe #8080FFa#000000 key activates SPEC drive for insystem FTL.\nInterstellar Travel requires a #FFBB11 jump drive#000000 and #FFBB11FTL Capacitors#000000 to be installed. To jump, fly into the green wireframe nav-marker; hit #8080FFj#000000 to jump to the linked system.\n\nTo dock, target a base, planet or large vessel and hail with #8080FF0#000000 to request docking clearance. When you get close, a green box will appear. Fly to the box. When inside the box, #8080FFd#000000 will dock.\n\n#FF0000If Vega Strike halts or acts oddly,#000000\n#FFFF00immediately#000000 post the latest log\nfile from $HOME/.vegastrike/logs/\nto https://forums.vega-strike.org/\nbefore you restart Vega Strike.\n";
-    displayname.SetText(text);
-    displayname.SetCharSize(1, 1);
+            "#c1:.627:0#     PRESS SHIFT-M TO TOGGLE THIS MENU    \n\n\n\n#-c*******#c0:.651:1#Vega Strike 0.10.0#-c*********\nWelcome to VS. Your ship undocks stopped; #c.502:.502:1#Arrow keys/mouse/joystick#-c steer your ship. Use #c.502:.502:1#+#-c & #c.502:.502:1#-#-c to adjust cruise control, or #c.502:.502:1#/#-c & #c.502:.502:1#[backspace]#-c to go to max governor setting or full-stop, respectively. Use #c.502:.502:1#y#-c to toggle between maneuver and travel settings for your relative velocity governors. Use #c.502:.502:1#[home]#-c & #c.502:.502:1#[end]#-c to set and unset velocity reference point to the current target (non-hostile targets only). Use #c.502:.502:1#Tab#-c to activate Overdrive(if present).\n\nPress #c.502:.502:1#n#-c to cycle nav points, #c.502:.502:1#t#-c to cycle targets, and #c.502:.502:1#p#-c to target objects in front of you.\n\n#c.502:.502:1#[space]#-c fires guns, and #c.502:.502:1#[Enter]#-c fires missiles.\n\nThe #c.502:.502:1#a#-c key activates SPEC drive for insystem FTL.\nInterstellar Travel requires a #c1:.733:.067# jump drive#-c and #c1:.733:.067#FTL Capacitors#-c to be installed. To jump, fly into the green wireframe nav-marker; hit #c.502:.502:1#j#-c to jump to the linked system.\n\nTo dock, target a base, planet or large vessel and hail with #c.502:.502:1#0#-c to request docking clearance. When you get close, a green box will appear. Fly to the box. When inside the box, #c.502:.502:1#d#-c will dock.\n\n#c1:0:0#If Vega Strike halts or acts oddly,#-c\n#c1:1:0#immediately#-c post the latest log\nfile from $HOME/.vegastrike/logs/\nto https://forums.vega-strike.org/\nbefore you restart Vega Strike.\n";
+    displayname.setText(text);
+    displayname.setCharSize(1, 1);
     displayname.Draw();
 /*
  *       string exitinfo("To exit help press #8080FFshift-M#000000\n#8080FFShift-M#000000 will bring up this\nhelp menu any time.\nThe right buttons access the galaxy and system maps");
@@ -716,22 +716,22 @@ void NavigationSystem::DrawShip() {
     if ((par = _Universe->AccessCockpit()->GetParent())) {
         writethis = MakeUnitXMLPretty(par->WriteUnitString(), par);
     }
-    TextPlane displayname;
+    ImGuiText displayname;
     GFXColor temp_color(.3, 1, .3, 1);
-    displayname.color = static_cast<ImU32>(temp_color);
-    displayname.SetSize(.7, -.8);
-    displayname.SetPos(originx - (.1 * deltax), originy /*+(1*deltay)*/ );
-    displayname.SetText(writethis);
-    displayname.SetCharSize(1, 1);
+    displayname.setColorU32(static_cast<ImU32>(temp_color));
+    displayname.setSize(.7, -.8);
+    displayname.setPos(originx - (.1 * deltax), originy /*+(1*deltay)*/ );
+    displayname.setText(writethis);
+    displayname.setCharSize(1, 1);
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg(displayname.background_color);
+    GFXColor tpbg(displayname.backgroundColor());
     bool automatte = (0 == tpbg.a);
     if (automatte) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
-        displayname.background_color = static_cast<ImU32>(temp_background_color);
+        displayname.setBackgroundColor(static_cast<ImU32>(temp_background_color));
     }
     displayname.Draw(writethis, 0, true, false, automatte);
-    displayname.background_color = static_cast<ImU32>(tpbg);
+    displayname.setBackgroundColor(static_cast<ImU32>(tpbg));
 
 //factionlist.drawdescription(writethis, (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 1, GFXColor(1,1,1,1));
 
@@ -1132,26 +1132,26 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
             label = "Nav Comp";
         }
     }
-    TextPlane a_label;
+    ImGuiText a_label;
     GFXColor temp_color(1, 1, 1, 1);
-    a_label.color = static_cast<ImU32>(temp_color);
+    a_label.setColorU32(static_cast<ImU32>(temp_color));
     int length = label.size();
     float offset = (float(length) * 0.0065);
     float xl = (x1 + x2) / 2.0;
     float yl = (y1 + y2) / 2.0;
-    a_label.SetPos((xl - offset) - (checkbit(buttonstates, button_number - 1) ? 0.006 : 0), (yl + 0.025));
-    a_label.SetText(label);
+    a_label.setPos((xl - offset) - (checkbit(buttonstates, button_number - 1) ? 0.006 : 0), (yl + 0.025));
+    a_label.setText(label);
     const bool nav_button_labels = configuration().graphics.draw_nav_button_labels;
     if (nav_button_labels) {
         const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-        GFXColor tpbg(a_label.background_color);
+        GFXColor tpbg(a_label.backgroundColor());
         bool automatte = (0 == tpbg.a);
         if (automatte) {
             GFXColor temp_background_color( 0, 0, 0, background_alpha );
-            a_label.background_color = static_cast<ImU32>(temp_background_color);
+            a_label.setBackgroundColor(static_cast<ImU32>(temp_background_color));
         }
         a_label.Draw(label, 0, true, false, automatte);
-        a_label.background_color = static_cast<ImU32>(tpbg);
+        a_label.setBackgroundColor(static_cast<ImU32>(tpbg));
     }
     //!!! DEPRESS !!!
     if ((inrange == 1) && (mouse_wentdown[0] == 1)) {
