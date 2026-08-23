@@ -472,16 +472,16 @@ unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &node) {
         }
         if (player_un != NULL) {
             if (player_un == un) {
-                myname = ownname_RGBstr + myname + "#000000";
+                myname = ownname_RGBstr + myname + "#-c";
             } else {
                 float rel = un->getRelation(player_un);
-                myname = GetRelationshipColorString(rel) + myname + "#000000";
+                myname = GetRelationshipColorString(rel) + myname + "#-c";
             }
         }
     }
     mission->msgcenter->add(myname, "all",
             GetRelationshipColorString(node.messagedelta * scale_rel_color) + speech
-                    + "#000000");     //multiply by 2 so colors are easier to tell
+                    + "#-c");     //multiply by 2 so colors are easier to tell
     return dummy;
 }
 
