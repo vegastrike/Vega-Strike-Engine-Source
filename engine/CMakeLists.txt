@@ -254,7 +254,6 @@ SET(LIBGUI_SOURCES
     src/gui/imguitext.cpp
     src/gui/modaldialog.cpp
     src/gui/newbutton.cpp
-    src/gui/painttext.cpp
     src/gui/picker.cpp
     src/gui/scroller.cpp
     src/gui/simplepicker.cpp
