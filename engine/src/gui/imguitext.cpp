@@ -581,6 +581,42 @@ void ImGuiText::parseFormat(std::string input, size_t startPos, //Location of be
                 }
                 curPos++;
                 break;
+            default: {
+                // Backward-compat: legacy color tag "#RRGGBB" (6 hex digits, no '#c'
+                // prefix).  Match the removed TextPlane::ParseText semantics: a hex
+                // color sets the current color; "#000000" (black) is treated as a
+                // RESET to the default color (bottom of the stack), not literal black.
+                if (curPos + 6 <= endPos
+                        && std::isxdigit(static_cast<unsigned char>(input[curPos]))
+                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 1]))
+                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 2]))
+                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 3]))
+                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 4]))
+                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 5]))) {
+                    auto hexValue = [](char c) -> float {
+                        if (c >= '0' && c <= '9') return static_cast<float>(c - '0');
+                        if (c >= 'a' && c <= 'f') return static_cast<float>(10 + c - 'a');
+                        return static_cast<float>(10 + c - 'A');
+                    };
+                    auto twoChar = [&](char a, char b) -> float {
+                        return (16.0f * hexValue(a) + hexValue(b)) / 255.0f;
+                    };
+                    const float r = twoChar(input[curPos], input[curPos + 1]);
+                    const float g = twoChar(input[curPos + 2], input[curPos + 3]);
+                    const float b = twoChar(input[curPos + 4], input[curPos + 5]);
+                    if (r == 0.0f && g == 0.0f && b == 0.0f) {
+                        // Reset to the default color (bottom of stack).
+                        while (m_colorStack.size() > 1) {
+                            m_colorStack.pop_back();
+                        }
+                    } else {
+                        m_colorStack.push_back(ImGui::ColorConvertFloat4ToU32(
+                                ImVec4(r, g, b, 1.0f)));
+                    }
+                    curPos += 6;  // Consume the 6 hex digits.
+                }
+                break;
+            }
         }
     }
     *resultPos = curPos;
