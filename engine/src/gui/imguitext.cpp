@@ -134,6 +134,9 @@ struct TextPlaneRun {
 };
 
 // Parse a #cR:G:B[:A]# color argument (each float in 0..1) into a packed ImU32.
+// Forward declaration: parse 2 hex chars into a 0-255 byte (defined below).
+static int ParseHexByte(const char* hex);
+
 static ImU32 parseColorU32(const std::string &spec) {
     float r = 1, g = 1, b = 1, a = 1;
     std::vector<float> comps;
@@ -260,6 +263,26 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
                 pushWord(true);
                 currentColor = parseColorU32(newText.substr(i + 2, end - (i + 2)));
                 i = end;
+        // Backward-compat: legacy "#RRGGBB" color tag (6 hex digits, no '#c' prefix).
+        // Match the removed TextPlane::ParseText semantics: sets the color; "#000000"
+        // (black) is a RESET to the default color, not literal black.
+        } else if (c == '#' && i + 6 < n
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 1]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 2]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 3]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 4]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 5]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 6]))) {
+            pushWord(true);
+            const int r = ParseHexByte(&newText[i + 1]);
+            const int g = ParseHexByte(&newText[i + 3]);
+            const int b = ParseHexByte(&newText[i + 5]);
+            if (r == 0 && g == 0 && b == 0) {
+                currentColor = m_colorU32;      // Reset to default color.
+            } else {
+                currentColor = IM_COL32(r, g, b, 255);
+            }
+            i += 6;
             } else {
                 word += c;
                 wordWidth += ImGui::CalcTextSize(&c, &c + 1).x;
