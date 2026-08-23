@@ -29,6 +29,8 @@
 #include "configuration/configuration.h"
 #include "imgui_internal.h"
 
+#include <cmath>  // std::round
+
 // Whether a packed ImU32 color is fully transparent (alpha == 0).
 static bool isTransparent(ImU32 color) {
     return ((color >> IM_COL32_A_SHIFT) & 0xFF) == 0;
@@ -101,6 +103,13 @@ void ImGuiText::draw(int firstLineToDraw) {
         
         for (const auto& frag : line) {
             float pixelFontSize = Coordinates::normToPixelFontSize(frag.font.size());
+            // GetFontBaked() truncates the requested size to a whole pixel, then
+            // RenderText() rescales glyphs by 'size / baked->Size'. If size is
+            // fractional (e.g. font_point 16 * scale 1.35 = 21.6) the bake is made
+            // at the rounded integer and then fractionally rescaled -- which is
+            // what makes large base-computer text soft. Round to a whole pixel so
+            // baked->Size == size and the rescale is exactly 1.0 (crisp, sharp).
+            pixelFontSize = std::round(pixelFontSize);
             // Draw Bold "shadow"
             if (frag.isBold || m_font.strokeWeight() == BOLD_STROKE) {
                 draw_list->AddText(nullptr, pixelFontSize, 
