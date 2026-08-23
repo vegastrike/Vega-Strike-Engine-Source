@@ -117,17 +117,64 @@ void ImGuiText::draw(int firstLineToDraw) {
     }
 }
 
+// A run of text sharing one color, used by the TextPlane-compatible Draw() path
+// (which measures with raw ImGui font metrics, not ImGuiText's scaled layout).
+struct TextPlaneRun {
+    std::string text;
+    ImU32 color;
+};
+
+// Parse a #cR:G:B[:A]# color argument (each float in 0..1) into a packed ImU32.
+static ImU32 parseColorU32(const std::string &spec) {
+    float r = 1, g = 1, b = 1, a = 1;
+    std::vector<float> comps;
+    std::string cur;
+    for (char c : spec) {
+        if (c == ':') {
+            comps.push_back(static_cast<float>(atof(cur.c_str())));
+            cur.clear();
+        } else {
+            cur += c;
+        }
+    }
+    if (!cur.empty()) comps.push_back(static_cast<float>(atof(cur.c_str())));
+    if (comps.size() > 0) r = comps[0];
+    if (comps.size() > 1) g = comps[1];
+    if (comps.size() > 2) b = comps[2];
+    if (comps.size() > 3) a = comps[3];
+    return IM_COL32(int(r * 255), int(g * 255), int(b * 255), int(a * 255));
+}
+
+// Draw one complete line of color runs at the given pen position and advance the pen
+// down one line with the raw glyph height.  Returns the height used (for line spacing).
+static float drawLine(const std::vector<TextPlaneRun> &runs, ImVec2 &pen, ImDrawList *draw_list,
+        ImU32 background_color, bool drawBg, const ImVec2 &pad) {
+    float lineHeight = ImGui::CalcTextSize("hello world").y;
+    for (const auto &run : runs) {
+        ImVec2 sz = ImGui::CalcTextSize(run.text.c_str());
+        if (sz.y > lineHeight) lineHeight = sz.y;
+        if (drawBg) {
+            draw_list->AddRectFilled(ImVec2(pen.x - pad.x, pen.y - pad.y),
+                    ImVec2(pen.x + sz.x + pad.x, pen.y + sz.y + pad.y), background_color, 0.0f);
+        }
+        draw_list->AddText(nullptr, 0.0f, pen, run.color, run.text.c_str(), nullptr, 0.0f, nullptr);
+        pen.x += sz.x;
+    }
+    pen.y += lineHeight;
+    return lineHeight;
+}
+
 // TextPlane-compatible drawing path.  Replicates the legacy TextPlane::Draw semantics
-// (top-left anchor, optional one-line-up for !start_lower, per-fragment background
-// rectangle gated by automatte) but consumes the *unified* ImGuiText layout/parser so
-// there is one text box and one format parser.  Text is drawn at the current ImGui font
-// size, as TextPlane did, to preserve the rendered look.
+// (top-left anchor, optional one-line-up for !start_lower, per-run background rectangle
+// gated by automatte).  It keeps TextPlane's raw-ImGui-font rendering behaviour: glyphs
+// are drawn at the default ImGui font size and lines advance/wrap by the *unscaled*
+// CalcTextSize metrics (ImGuiText::getTextWidth applies a scaleFactor meant only for the
+// native GUI draw() path; using it here would inflate line spacing).  Format codes
+// consumed: #cR:G:B[:A]# pushes a color, #-c pops back to the default color.  Newlines
+// are honoured; a long line wraps at the rect width.  '_' is kept literal (the old
+// TextPlane turned it into a space, which broke long '_'-separated names).
 int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
         bool force_highquality, bool automatte) {
-    setText(newText);
-    // Force multi-line so width-based wrapping still applies and newlines expand.
-    m_multiLine = true;
-    parseTextIfNeeded();
     if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
         return 1;
     }
@@ -142,35 +189,84 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
 
     // Move one line up if !start_lower (as TextPlane did).
     if (!start_lower) {
-        ImVec2 dummy = ImGui::CalcTextSize("hello world");
-        position.y -= dummy.y;
+        position.y -= ImGui::CalcTextSize("hello world").y;
     }
 
     const ImVec2 pad(4.0f, 2.0f);
     const bool drawBg = (!isTransparent(m_backgroundColor) && !automatte);
+    // Negative/zero rect width -> no wrapping (TextPlane treated negative as infinite).
+    const float wrapWidth = Coordinates::normToPixelW(m_rect.size.width) * 1.05f;
+    const bool doWrap = (wrapWidth > 0.0f);
+    const float leftX = position.x;
 
-    for (size_t i = 0; i < m_layout.size(); ++i) {
-        if (i < static_cast<size_t>(offset)) continue;
-        const auto& line = m_layout[i];
-        ImVec2 lineStart = position;
-        for (const auto& frag : line) {
-            ImVec2 text_size = ImGui::CalcTextSize(frag.text.c_str());
-            if (drawBg) {
-                const ImVec2 start_position(position.x - pad.x, position.y - pad.y);
-                const ImVec2 end_position(position.x + text_size.x + pad.x,
-                        position.y + text_size.y + pad.y);
-                draw_list->AddRectFilled(start_position, end_position, m_backgroundColor, 0.0f);
+    // Split the text into lines of color runs, wrapping at rect width.  Wrapping is
+    // word-granular: a line is broken at a space when it would exceed wrapWidth, keeping
+    // words together.  Lines are collected first so `offset` can skip leading lines.
+    std::vector<std::vector<TextPlaneRun>> lines;
+    ImU32 currentColor = m_colorU32;
+    std::string word;
+    float wordWidth = 0.0f;
+    float lineWidth = 0.0f;
+    auto finishLine = [&]() {
+        if (!word.empty()) {
+            lines.back().push_back({word, currentColor});
+            word.clear();
+        }
+        lines.emplace_back();
+        lineWidth = 0.0f;
+    };
+    lines.emplace_back();
+
+    // Push the current word (already rendered color) onto the line wrapWidth-aware.
+    auto pushWord = [&](bool hardBreak) {
+        if (word.empty()) return;
+        if (doWrap && !hardBreak && lineWidth + wordWidth > wrapWidth) {
+            // Wraps mid-line, still keeping the word intact on the new line.
+            lines.emplace_back();
+            lineWidth = 0.0f;
+        }
+        lines.back().push_back({word, currentColor});
+        lineWidth += wordWidth;
+        word.clear();
+        wordWidth = 0.0f;
+    };
+
+    const size_t n = newText.size();
+    for (size_t i = 0; i < n; ++i) {
+        char c = newText[i];
+        if (c == '\n') {
+            pushWord(true);
+            finishLine();
+        } else if (c == ' ' && doWrap) {
+            pushWord(true);
+            lines.back().push_back({" ", currentColor});
+            lineWidth += ImGui::CalcTextSize(" ").x;
+        } else if (c == '#' && i + 2 < n && newText[i + 1] == '-' && newText[i + 2] == 'c') {
+            pushWord(true);
+            currentColor = m_colorU32;
+            i += 2;
+        } else if (c == '#' && i + 1 < n && newText[i + 1] == 'c') {
+            const size_t end = newText.find('#', i + 2);
+            if (end != std::string::npos) {
+                pushWord(true);
+                currentColor = parseColorU32(newText.substr(i + 2, end - (i + 2)));
+                i = end;
+            } else {
+                word += c;
+                wordWidth += ImGui::CalcTextSize(&c, &c + 1).x;
             }
-            draw_list->AddText(nullptr, 0.0f, position, frag.color, frag.text.c_str(), nullptr, 0.0f, nullptr);
-            position.x += text_size.x;
-        }
-        if (line.empty()) {
-            ImVec2 dummy = ImGui::CalcTextSize("hello world");
-            position.y += dummy.y;
         } else {
-            position.y += line.lineHeight + (line.lineSpacing * line.lineHeight);
+            word += c;
+            wordWidth += ImGui::CalcTextSize(&c, &c + 1).x;
         }
-        position.x = lineStart.x;
+    }
+    pushWord(true);
+
+    // Draw the lines, skipping `offset` leading lines.
+    for (size_t li = 0; li < lines.size(); ++li) {
+        if (static_cast<int>(li) < offset) continue;
+        drawLine(lines[li], position, draw_list, m_backgroundColor, drawBg, pad);
+        position.x = leftX;
     }
     return 1;
 }
