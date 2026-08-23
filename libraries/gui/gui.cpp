@@ -40,10 +40,15 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
 
+// TrueType font (Roboto-Medium) embedded as a compressed base85 array so the engine
+// needs no font file on disk at runtime (no data-dir/path dependency). This is how
+// Dear ImGui itself embeds its default ProggyClean.ttf. Loaded via the dynamic font
+// atlas, which bakes each requested glyph size on demand (RendererHasTextures).
+#include "roboto_font.h"
+
 
 bool gui_initialized = false;
 SDL_Window* current_window = nullptr;
-ImFont* roboto_18_font;
 
 // Font size requested by a settings change, applied on the next frame. Stored as a
 // float so we can defer the atlas rebuild to a safe point (start of a frame, before
@@ -65,15 +70,13 @@ void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontS
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->Clear();
     ImFontConfig cfg;
-    // Bake the glyphs at higher detail than the requested render size so the base
-    // computer (which renders each control at font_point * scale, scale up to ~1.5)
-    // scales DOWN from a high-detail rasterization rather than UP from a single
-    // low-res bake.  Scaling a crisp high-detail bake is sharp; scaling up a 1x bake
-    // (the default) is blurry.  RasterizerDensity is the legacy-backend (locked atlas)
-    // knob for this -- it does not alter font metrics, only the rasterization detail.
     cfg.SizePixels = fontSize;
-    cfg.RasterizerDensity = 2.0f;  // bake at 2x detail; covers base control scales up to ~2x
-    io.FontDefault = io.Fonts->AddFontDefault(&cfg);
+    // Load a real TrueType font, not the default embedded ProggyClean pixel font.
+    // With the synced OpenGL3 backend (RendererHasTextures) the atlas is dynamic:
+    // each glyph size (e.g. base computer font_point * scale, scale 0.9-1.5) is baked
+    // crisp on demand, so no RasterizerDensity workaround is needed.
+    io.FontDefault = io.Fonts->AddFontFromMemoryCompressedBase85TTF(
+        RobotoMediumFont_compressed_data_base85, fontSize, &cfg);
 
     gui_initialized = true;
 }
@@ -82,26 +85,15 @@ void RequestImGuiFontSize(float fontSize) {
     s_pending_font_size = fontSize;
 }
 
-// Apply a pending font-size change by rebuilding the ImGui font atlas. Call at the
-// start of each frame, before ImGui::NewFrame(), so the new atlas is in place for
-// the whole frame and no glyphs reference a destroyed texture.
+// Apply a pending font-size change. With the dynamic font atlas (RendererHasTextures)
+// the atlas bakes glyphs on demand, so a resize needs no manual Clear()/Build() or
+// backend texture-upload calls. Setting FontSizeBase (the render size, distinct from
+// the per-glyph rasterization size) is enough; subsequent text draws bake fresh glyphs
+// at their requested size. Call at the start of each frame, before ImGui::NewFrame().
 void ImGui_ApplyPendingFontSize() {
     if (s_pending_font_size <= 0.0f) {
         return;
     }
-    ImGuiIO &io = ImGui::GetIO();
-    ImGui_ImplOpenGL3_DestroyFontsTexture();
-    io.Fonts->Clear();
-    ImFontConfig cfg;
-    cfg.SizePixels = s_pending_font_size;
-    cfg.RasterizerDensity = 2.0f;  // keep the 2x-detail bake on rebuild (see InitGui)
-    io.FontDefault = io.Fonts->AddFontDefault(&cfg);
-    io.Fonts->Build();
-    ImGui_ImplOpenGL3_CreateFontsTexture();
-    // FontSizeBase (the render size, distinct from the atlas rasterization size) is
-    // only derived from the font's LegacySize on the first frame and then cached, so
-    // a rebuild alone would change the glyph rasterization but NOT the on-screen size
-    // (blurry text at the old size). Set it explicitly so the render size follows.
     ImGui::GetStyle().FontSizeBase = s_pending_font_size;
     s_pending_font_size = 0.0f;
 }
