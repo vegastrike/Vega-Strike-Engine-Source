@@ -21,7 +21,6 @@ three coordinate interpretations, and a duplicated format parser.
 4. **Font size from `font_point`**, glyph + line spacing computed fresh from rendered metrics — never
    a per-screen literal.
 5. **Line spacing from the rendered glyph height**, never `font.size()` or a hardcoded value.
-
 ## The two layers
 
 | Layer | Where | What it does |
@@ -128,12 +127,18 @@ method — not three divergent helpers.
 
 ## 3. Font size & line spacing
 
-- **Glyph size from `font_point`** (`configuration().graphics.font_point_flt`), converted via
-  `Coordinates::normToPixelFontSize`. Do **not** hardcode a per-control font size.
-- **Line spacing from the RENDERED glyph height** (`Font::verticalScaling()` metrics), never
-  `font.size()` or a literal — so a future config font-height change propagates automatically.
-- The base computer currently sets font from `controls.json`'s per-control `font` literal. After the
-  unification it becomes a *relative scale* (default 1.0), not an override.
+- **Glyph size from `font_point`** (`configuration().graphics.font_point_flt`). Author a
+  *relative scale* on `font_point` (default 1.0); the engine renders it as a pixel glyph height
+  (`font_point * scale`). Do **not** hardcode a per-control font size, and do **not** do
+  resolution-relative math — the engine's standard font metrics handle resolution.
+- **Line spacing from the RENDERED glyph height.** `ImGuiText` measures each line with ImGui's
+  rendered metrics (`CalcTextSizeA` / `dimensions.y`), never `font.size()` or a literal — so a
+  future config font-height change propagates automatically.
+- The base computer sets font from `controls.json`'s per-control `font`, which is now a *relative
+  scale* (`font_point * scale`), not an override.
+- The engine's `Font` class is a thin `{size, strokeWeight}` carrier feeding `ImGuiText`. It does
+  **not** implement its own glyph metrics/renderer; the glyphs come from ImGui's font atlas.
+  (`Font::verticalScaling()` and the old metrics subsystem were removed as dead code.)
 
 ### Special text scaling (per-text-box `textScale`)
 
