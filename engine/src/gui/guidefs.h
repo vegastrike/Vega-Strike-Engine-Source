@@ -59,6 +59,14 @@ namespace Coordinates {
         return Coordinates::normToPixelH(val);
     }
 
+    /// Inverse of normToPixelH: converts a pixel height/length to normalized [-1..1] units.
+    /// Used where a pixel-size (e.g. a font_point-relative Font::size()) must be laid out
+    /// against a normalized -1..1 rect, so the two spaces stay consistent. 2.0 normalized
+    /// == DisplaySize.y pixels.
+    [[nodiscard]] inline float pixelToNormH(float pix) noexcept {
+        return pix * 2.0f / ImGui::GetIO().DisplaySize.y;
+    }
+
 } // namespace Coordinates
 
 //Location in 2d.
