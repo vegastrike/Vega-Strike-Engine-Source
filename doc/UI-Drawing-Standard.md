@@ -196,6 +196,9 @@ If bases are unified onto the `Control`/`ImGuiText` world, they inherit this the
 - In engine C++, don't use a *pixel* quantity (e.g. `Font::size()`, now a `font_point`-relative
   pixel height) directly against a *normalized* rect — convert it first with
   `Coordinates::pixelToNormH`. (The base-computer picker cells broke this exact way; see `932827d08`.)
+- Prefer fixing rendering behavior **at the call site** (e.g. choose the right `automatte`/background
+  flag when you draw). If a genuinely new capability is needed in the shared drawing library, add it
+  as an **opt-in** flag, defaulting to the current behavior, so other screens are unaffected.
 
 ## See also
 
