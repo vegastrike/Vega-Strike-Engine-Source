@@ -8,8 +8,7 @@ three coordinate interpretations, and a duplicated format parser.
 
 > **Rule:** before writing a new screen, label, text box, hotspot, or rect, read this. Use the
 > standard API. If it doesn't cover your case, **extend the standard** — don't fork it. This is a
-> **living reference**; it evolves with the unification work (`plan-unify-textboxes-coordinates.md`
-> in the Obsidian planning notes).
+> **living reference**.
 
 ## TL;DR — the rules
 
@@ -180,7 +179,5 @@ If bases are unified onto the `Control`/`ImGuiText` world, they inherit this the
 
 ## See also
 
-- Obsidian planning: `plan-unify-textboxes-coordinates.md` (unification Phases A–D) and
-  `investigation-coordinate-systems.md` (the divergence deep-dive).
 - Engine: `engine/src/gui/imguitext.{h,cpp}`, `engine/src/gui/guidefs.h`.
 - Assets: `modules/GUI.py`, `controls.json`.
