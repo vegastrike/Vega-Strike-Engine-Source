@@ -93,6 +93,18 @@ float ph = Coordinates::normToPixelH(nh);   // height [0,2] -> pixels
 float ps = Coordinates::normToPixelFontSize(ns);  // font size [0,2] -> pixels
 ```
 
+Convert display pixels → canonical normalized `-1..1` (inverse, for laying out a *pixel* size
+against a normalized rect — e.g. the picker uses this for cell height):
+
+```cpp
+float nh = Coordinates::pixelToNormH(pix);  // pixels -> [0,2] height (2.0 == DisplaySize.y)
+```
+
+> **Rule:** never mix pixel and normalized units in one rect/layout math. If you start from a
+> pixel quantity (like a `font_point`-relative `Font::size()`), convert it with `pixelToNormH`
+> before using it against a normalized rect — this is what broke the base-computer picker cells
+> (fixed in `932827d08`).
+
 ### Assets: `GUIRect` (`modules/GUI.py`)
 
 Author a rect; it converts into the canonical space.
@@ -181,6 +193,9 @@ If bases are unified onto the `Control`/`ImGuiText` world, they inherit this the
   rendered metrics.
 - Don't add a new `GUIRect` mode or a new coordinate-origin helper.
 - Don't mix `pixel`-basis and `normalized`-basis ad hoc — author in one, via `GUIRect`.
+- In engine C++, don't use a *pixel* quantity (e.g. `Font::size()`, now a `font_point`-relative
+  pixel height) directly against a *normalized* rect — convert it first with
+  `Coordinates::pixelToNormH`. (The base-computer picker cells broke this exact way; see `932827d08`.)
 
 ## See also
 
