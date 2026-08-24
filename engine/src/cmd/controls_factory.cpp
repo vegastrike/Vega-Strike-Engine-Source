@@ -205,6 +205,7 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
 
     const std::string& type = itType->second;
     Control* c = nullptr;
+    bool font_set = false;   // Whether an explicit per-control 'font' was applied.
 
     // --- Type-Specific Construction & Configuration ---
     if (type == "staticDisplay") {
@@ -405,6 +406,7 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
                             (font_array.size() >= 2 ? font_array[1] : NORMAL_STROKE);
                     const double size = configuration().graphics.font_point_flt * scale;
                     c->setFont(Font(size, weight));
+                    font_set = true;
                 } else {
                     VS_LOG(error, "getControl(): 'font' requires at least 1 value");
                 }
@@ -413,6 +415,12 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
             default:
                 break;
         }
+    }
+
+    // A control with no per-box 'font' defaults to the global font_point (scale 1.0);
+    // the base computer never scales against resolution.
+    if (!font_set) {
+        c->setFont(Font(configuration().graphics.font_point_flt, NORMAL_STROKE));
     }
 
     return c;
