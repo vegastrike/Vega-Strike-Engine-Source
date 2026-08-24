@@ -86,6 +86,10 @@ public:
     Justification justification(void) { return m_justification; };
     void setColor(const GFXColor &c) { m_color = c; m_colorU32 = static_cast<ImU32>(c); }
     GFXColor color() { return m_color; };
+    // Text render scale (1.0 = normal). The base-room word-by-word streaming text
+    // (othtext) sets this to 2.0 so it renders larger; other text stays at 1.0.
+    void setTextScale(float s) { m_textScale = s; }
+    float textScale() const { return m_textScale; }
     // Set the text color from a packed ImU32 (TextPlane-compatible interface).
     void setColorU32(ImU32 c) { m_colorU32 = c; m_color = GFXColor(c); }
     // Background rectangle behind the text (TextPlane `background_color`).
@@ -134,6 +138,7 @@ private:
     bool m_multiLine = false;
     GFXColor m_color;
     ImU32 m_colorU32 = IM_COL32(255, 255, 255, 255);
+    float m_textScale = 1.0f;    // Text render scale (1.0 = normal).
     ImU32 m_backgroundColor = IM_COL32(0, 0, 0, 0);
     bool m_automatte = false;
     float m_charW = 0.06f;

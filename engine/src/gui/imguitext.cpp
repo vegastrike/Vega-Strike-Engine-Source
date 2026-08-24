@@ -157,13 +157,14 @@ static ImU32 parseColorU32(const std::string &spec) {
 // Draw one complete line of color runs at the given pen position and advance the pen
 // down one line with the raw glyph height.  Returns the height used (for line spacing).
 static float drawLine(const std::vector<TextPlaneRun> &runs, ImVec2 &pen, ImDrawList *draw_list,
-        ImU32 background_color, bool drawBg) {
-    // Render this line's text at 2x the current font size (the base-room streaming
-    // text is intentionally larger); measure with the same scaled size so the
-    // pen advance and line height stay consistent with what is actually drawn.
+        ImU32 background_color, bool drawBg, float textScale) {
+    // Render this line's text at textScale * the current font size (the base-room
+    // streaming word-by-word text sets textScale=2.0; everything else is 1.0).
+    // Measure with the same scaled size so the pen advance and line height stay
+    // consistent with what is actually drawn.
     ImFont *font = ImGui::GetFont();
     const float font_size = ImGui::GetFontSize();
-    const float scale = 2.0f;              // 2x text
+    const float scale = textScale;
     const float draw_size = font_size * scale;
 
     auto measure = [&](const std::string &s) -> ImVec2 {
@@ -298,7 +299,7 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
     // Draw the lines, skipping `offset` leading lines.
     for (size_t li = 0; li < lines.size(); ++li) {
         if (static_cast<int>(li) < offset) continue;
-        drawLine(lines[li], position, draw_list, dark_bg, drawBg);
+        drawLine(lines[li], position, draw_list, dark_bg, drawBg, m_textScale);
         position.x = leftX;
     }
     return 1;

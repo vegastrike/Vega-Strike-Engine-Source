@@ -1214,6 +1214,9 @@ BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
     CurrentBase = this;
     CallComp = false;
     lastmouseindex = 0;
+    // The fixer/campaign streaming text (dialogue typed word by word) renders at 2x;
+    // curtext and other base-room text stay at the normal size.
+    othtext.setTextScale(2.0f);
     enabledj = true;
     createdbase = true;
     midloop = false;
