@@ -245,7 +245,6 @@ SET(LIBGUI_SOURCES
     src/gui/control.cpp
     src/gui/eventmanager.cpp
     src/gui/eventresponder.cpp
-    src/gui/font.cpp
     src/gui/glut_support.cpp
     src/gui/imgui_support.cpp
     src/gui/groupcontrol.cpp

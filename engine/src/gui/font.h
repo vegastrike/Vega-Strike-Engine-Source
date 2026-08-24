@@ -35,23 +35,19 @@ static const float NORMAL_STROKE = 1.0;
 static const float BOLD_STROKE = 1.5;
 
 //Font object.
-//Right now, this only supports the GLUT outline font.
-//We try to choose the best options for a given Font size.  May or may not do
-//antialiasing.  The line width goes up as the font size goes up.  You can
-//add extra line width to make a bolder look, or use negative line width to give it
-//a lighter look.
+//This is a thin {size, strokeWeight} carrier: it drives the size/weight of text rendered
+//through ImGuiText's ImGui draw path. The actual glyphs and metrics come from ImGui's font
+//atlas; the engine does not implement its own glyph renderer anymore. Callers author a
+//font_point-relative size (font_point * scale) and the standard scaling handles the rest.
 class Font {
 public:
-// Font size in pixels (glyph height). The engine resolves resolution via
-// Font::calcMetrics (m_verticalScaling); callers author a font_point-relative
-// size and the standard scaling handles the rest.
+// Font size in pixels (glyph height), font_point-relative.
     float size(void) const {
         return m_size;
     }
 
     void setSize(float s) {
         m_size = s;
-        m_needMetrics = true;
     }
 
 //The "boldness" of the font.  See predefined weights above for examples.
@@ -61,44 +57,13 @@ public:
 
     void setStrokeWeight(float w) {
         m_strokeWeight = w;
-        m_needMetrics = true;
     }
-
-//Draw a character.  Assumes scaling is done, current color set, etc.
-    float drawChar(char c, float xOffset = 0) const;
-
-//The width of a character in reference units.
-    double charWidth(char c) const;
-
-//The width of a string in reference units.
-    double stringWidth(const std::string &str) const;
-
-//Vertical scaling factor from char reference space to identity space to be used to image this font.
-    double verticalScaling(void) const;
-
-//Horizontal scaling factor from char reference space to identity space to be used to image this font.
-    double horizontalScaling(void) const;
-
-// Returns the font ascent
-    double ascent(void) const;
-
-// Returns the font descent
-    double descent(void) const;
 
 //CONSTRUCTION
     Font(float newsize = .1, float weight = NORMAL_STROKE) :
             m_size(newsize),
-            m_strokeWeight(weight),
-            m_needMetrics(true),
-            m_strokeWidth(1.0),
-            m_extraCharWidth(0.5),
-            m_spaceCharFixup(10.0),
-            m_verticalScaling(1.0),
-            m_horizontalScaling(1.0) {
+            m_strokeWeight(weight) {
     }
-
-//METRICS
-    double strokeWidth(void) const; //Get the stroke width.
 
 //OPERATORS
     bool operator==(const Font &other) {
@@ -110,27 +75,9 @@ public:
     }
 
 protected:
-//INTERNAL IMPLEMENTATION
-
-//Calculate the metrics for this font.
-//This does the real work, and doesn't check whether it needs to be done.
-    void calcMetrics(void);
-
-    // Check whether we need to recalc the metrics, and do it in const object.
-    void calcMetricsIfNeeded(void) const;
-
-protected:
 //VARIABLES
-    float m_size;          //Size of font. Vertical distance in identity space.
+    float m_size;          //Size of font (pixel glyph height, font_point-relative).
     float m_strokeWeight;  //"Look" of stroke font.  Weight of stroke in characters.
-
-//METRICS
-    bool m_needMetrics;       //True = we need to recalc the metrics for this font.
-    double m_strokeWidth;       //The OpenGL stroke width for this size chars.
-    double m_extraCharWidth;    //We add extra char width to compensate for stroke overlap.
-    double m_spaceCharFixup;    //Negative translation to apply to space character.
-    double m_verticalScaling;   //Vertical factor from char reference space to identity space.
-    double m_horizontalScaling; //Horizontal factor from char reference space to identity space.
 };
 
 #endif   //VEGA_STRIKE_ENGINE_GUI_FONT_H

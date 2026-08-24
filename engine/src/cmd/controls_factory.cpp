@@ -398,7 +398,8 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
                 // (default 1.0), NOT an absolute size.  The second is the stroke weight.
                 //   size = font_point * scale   (a real pixel height)
                 // The base computer does NOT know (or scale against) resolution; the engine's
-                // Font metrics (calcMetrics) handle that. Author the relative scale only.
+                // Font metrics (calcMetrics) are gone — the pixel height goes straight to the
+                // ImGui renderer. Author the relative scale only.
                 auto font_array = splitAndConvert(value, ',');
                 if (font_array.size() >= 1) {
                     const double scale = font_array[0];
