@@ -57,6 +57,7 @@ textBox.draw();                        // draws with the current ImGui draw list
 | `setColor(const GFXColor&)` / `color()` | Text color. |
 | `setJustification(Justification)` / `justification()` | LEFT / CENTER / RIGHT justify. |
 | `setMultiLine(bool)` / `multiLine()` | Single vs wrapped multi-line. |
+| `setTextScale(float)` / `textScale()` | Per-text render scale (1.0 = normal). |
 | `lineCount()` / `layoutVersion()` / `visibleLineCountStartingWith(...)` | Layout introspection (scrolling). |
 | `draw(int firstLineToDraw=0)` | Render with the current ImGui draw list. |
 
@@ -134,6 +135,18 @@ method — not three divergent helpers.
   `font.size()` or a literal — so a future config font-height change propagates automatically.
 - The base computer currently sets font from `controls.json`'s per-control `font` literal. After the
   unification it becomes a *relative scale* (default 1.0), not an override.
+
+### Special text scaling (per-text-box `textScale`)
+
+For UI where one text box must render *larger* than another without a different config font size
+(e.g. the base-room word-by-word dialogue vs. the surrounding menu text), use the per-box
+`ImGuiText::setTextScale()` (default 1.0). The render path measures AND draws with the same scaled
+size, so pen advance and line height stay consistent. This is how the base-room streaming dialogue
+(`othtext`, the fixer/campaign text typed word-by-word via `BaseTalk`) renders at 1.4x while
+`curtext` and the rest of the base text stay at normal size.
+
+> Note: the base-room streaming text's background is drawn at each word's own left edge (never
+> offset behind the previous word), so consecutive word backgrounds do not overlap and clip glyphs.
 
 ---
 
