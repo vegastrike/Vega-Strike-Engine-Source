@@ -156,12 +156,37 @@ static ImU32 parseColorU32(const std::string &spec) {
 
 // Draw one complete line of color runs at the given pen position and advance the pen
 // down one line with the raw glyph height.  Returns the height used (for line spacing).
-static float drawLine(const std::vector<TextPlaneRun> &runs, ImVec2 &pen, ImDrawList *draw_list) {
-    float lineHeight = ImGui::CalcTextSize("hello world").y;
+static float drawLine(const std::vector<TextPlaneRun> &runs, ImVec2 &pen, ImDrawList *draw_list,
+        ImU32 background_color, bool drawBg) {
+    // Render this line's text at 2x the current font size (the base-room streaming
+    // text is intentionally larger); measure with the same scaled size so the
+    // pen advance and line height stay consistent with what is actually drawn.
+    ImFont *font = ImGui::GetFont();
+    const float font_size = ImGui::GetFontSize();
+    const float scale = 2.0f;              // 2x text
+    const float draw_size = font_size * scale;
+
+    auto measure = [&](const std::string &s) -> ImVec2 {
+        if (font && font->IsLoaded())
+            return font->CalcTextSizeA(draw_size, FLT_MAX, -1.0f, s.c_str());
+        ImVec2 r = ImGui::CalcTextSize(s.c_str());
+        return ImVec2(r.x * scale, r.y * scale);
+    };
+
+    float lineHeight = measure("hello world").y;
     for (const auto &run : runs) {
-        ImVec2 sz = ImGui::CalcTextSize(run.text.c_str());
+        ImVec2 sz = measure(run.text);
         if (sz.y > lineHeight) lineHeight = sz.y;
-        draw_list->AddText(nullptr, 0.0f, pen, run.color, run.text.c_str(), nullptr, 0.0f, nullptr);
+        // Draw the background and the text at the word's own left edge (word_pen), NOT
+        // offset behind the previous word (the old code drew bg at pen.x - pad.x, which
+        // overlapped the trailing pixels of the previous word and clipped it).
+        ImVec2 word_pen = pen;
+        if (drawBg) {
+            // Very dark, semi-transparent background rect behind the word.
+            draw_list->AddRectFilled(word_pen,
+                    ImVec2(word_pen.x + sz.x, word_pen.y + sz.y), background_color, 0.0f);
+        }
+        draw_list->AddText(nullptr, draw_size, word_pen, run.color, run.text.c_str(), nullptr, 0.0f, nullptr);
         pen.x += sz.x;
     }
     pen.y += lineHeight;
@@ -265,10 +290,15 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
     }
     pushWord(true);
 
+    // Very dark, semi-transparent word background. Drawn under each word (at the
+    // word's own left edge) so it never overlaps the previous word's glyphs.
+    const ImU32 dark_bg = IM_COL32(0, 0, 0, 90);   // black at ~35% alpha
+    const bool drawBg = (!isTransparent(m_backgroundColor) && !automatte);
+
     // Draw the lines, skipping `offset` leading lines.
     for (size_t li = 0; li < lines.size(); ++li) {
         if (static_cast<int>(li) < offset) continue;
-        drawLine(lines[li], position, draw_list);
+        drawLine(lines[li], position, draw_list, dark_bg, drawBg);
         position.x = leftX;
     }
     return 1;
