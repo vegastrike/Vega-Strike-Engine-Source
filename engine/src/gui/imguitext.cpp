@@ -293,7 +293,7 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
 
     // Very dark, semi-transparent word background. Drawn under each word (at the
     // word's own left edge) so it never overlaps the previous word's glyphs.
-    const ImU32 dark_bg = IM_COL32(0, 0, 0, 90);   // black at ~35% alpha
+    const ImU32 dark_bg = IM_COL32(0, 0, 0, 180);   // nearly opaque black (~70% alpha)
     const bool drawBg = (!isTransparent(m_backgroundColor) && !automatte);
 
     // Draw the lines, skipping `offset` leading lines.
