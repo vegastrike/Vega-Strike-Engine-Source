@@ -344,7 +344,7 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
     GFXColorf( textcol );
     GFXColor origbgcol(text->backgroundColor());
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    bool automatte = (0 == origbgcol.a);
+    bool automatte = true; // HUD: no background
     if (automatte) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
         text->setBackgroundColor(static_cast<ImU32>(temp_background_color));
