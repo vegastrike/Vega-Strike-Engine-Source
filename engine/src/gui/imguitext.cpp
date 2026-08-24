@@ -106,6 +106,8 @@ void ImGuiText::draw(int firstLineToDraw) {
             // whole pixel so GetFontBaked bakes at exactly this size and RenderText's
             // rescale is 1.0 (crisp, sharp). No resolution-relative scaling here.
             float pixelFontSize = std::round(frag.font.size());
+            fprintf(stderr, "[fontdiag] frag.font.size()=%.2f rounded=%.0f GetFontSize=%.2f\n",
+                    frag.font.size(), pixelFontSize, ImGui::GetFontSize()); fflush(stderr);
             // Draw Bold "shadow"
             if (frag.isBold || m_font.strokeWeight() == BOLD_STROKE) {
                 draw_list->AddText(nullptr, pixelFontSize, 
