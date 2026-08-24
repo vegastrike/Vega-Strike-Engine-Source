@@ -42,9 +42,11 @@ static const float BOLD_STROKE = 1.5;
 //a lighter look.
 class Font {
 public:
-//Font size.  Vertical distance in identity space.
+// Font size in pixels (glyph height). The engine resolves resolution via
+// Font::calcMetrics (m_verticalScaling); callers author a font_point-relative
+// size and the standard scaling handles the rest.
     float size(void) const {
-        return m_size * 0.5;
+        return m_size;
     }
 
     void setSize(float s) {

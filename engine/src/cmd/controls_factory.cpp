@@ -395,16 +395,15 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
             case ControlProp::Font: {
                 // The first value is a RELATIVE glyph-height scale on the global font_point
                 // (default 1.0), NOT an absolute size.  The second is the stroke weight.
-                //   size = font_point * scale * 4 / resolution_y
-                // so a control renders at font_point * scale pixels (at the configured res),
-                // and scales with the display exactly like the fixed rect boxes do.
+                //   size = font_point * scale   (a real pixel height)
+                // The base computer does NOT know (or scale against) resolution; the engine's
+                // Font metrics (calcMetrics) handle that. Author the relative scale only.
                 auto font_array = splitAndConvert(value, ',');
                 if (font_array.size() >= 1) {
                     const double scale = font_array[0];
                     const double weight =
                             (font_array.size() >= 2 ? font_array[1] : NORMAL_STROKE);
-                    const double size = configuration().graphics.font_point_flt * scale * 4.0
-                            / configuration().graphics.resolution_y;
+                    const double size = configuration().graphics.font_point_flt * scale;
                     c->setFont(Font(size, weight));
                 } else {
                     VS_LOG(error, "getControl(): 'font' requires at least 1 value");

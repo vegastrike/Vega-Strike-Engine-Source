@@ -102,14 +102,10 @@ void ImGuiText::draw(int firstLineToDraw) {
         }
         
         for (const auto& frag : line) {
-            float pixelFontSize = Coordinates::normToPixelFontSize(frag.font.size());
-            // GetFontBaked() truncates the requested size to a whole pixel, then
-            // RenderText() rescales glyphs by 'size / baked->Size'. If size is
-            // fractional (e.g. font_point 16 * scale 1.35 = 21.6) the bake is made
-            // at the rounded integer and then fractionally rescaled -- which is
-            // what makes large base-computer text soft. Round to a whole pixel so
-            // baked->Size == size and the rescale is exactly 1.0 (crisp, sharp).
-            pixelFontSize = std::round(pixelFontSize);
+            // Font::size() IS the pixel glyph height (font_point-relative). Round to a
+            // whole pixel so GetFontBaked bakes at exactly this size and RenderText's
+            // rescale is 1.0 (crisp, sharp). No resolution-relative scaling here.
+            float pixelFontSize = std::round(frag.font.size());
             // Draw Bold "shadow"
             if (frag.isBold || m_font.strokeWeight() == BOLD_STROKE) {
                 draw_list->AddText(nullptr, pixelFontSize, 
@@ -428,16 +424,15 @@ int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) 
 }
 
 ImVec2 ImGuiText::getTextWidth(const std::string text, const float fontSize) {
-    // ImFont* font = ImGui::GetFont();
-    ImVec2 size2,size = ImVec2(0,0);
-    float scaleFactor = fontSize * configuration().graphics.resolution_y / configuration().graphics.font_point_flt * 0.5;
-    // FIXME normally this would be te way, but it throws exceptions, scalefactor as workaround
-    // if (font && font->IsLoaded()) {
-    //     size = font->CalcTextSizeA(Coordinates::normToPixelFontSize(fontSize), FLT_MAX, -1.0f, text.c_str());
-    // } else {
-        size = ImGui::CalcTextSize(text.c_str());
-    // }
-    return ImVec2(size.x * scaleFactor, size.y * scaleFactor);
+    // fontSize is a real pixel size (Font::size()), matching the draw path. Measure
+    // with CalcTextSizeA at that same pixel size so layout matches rendering exactly
+    // (no resolution-relative scaleFactor fabrication). The dynamic font atlas bakes
+    // the requested size on demand, so this is accurate.
+    ImFont *font = ImGui::GetFont();
+    if (font && font->IsLoaded()) {
+        return font->CalcTextSizeA(fontSize, FLT_MAX, -1.0f, text.c_str());
+    }
+    return ImGui::CalcTextSize(text.c_str());
 }
 
 //Get a floating-point argument for a PaintText format command.
