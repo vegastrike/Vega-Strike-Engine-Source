@@ -376,6 +376,13 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         VS_LOG_FLUSH_EXIT(fatal, "No window", 1);
     }
 
+    // Always mark the window resizable (SDL_SetWindowResizable works dynamically,
+    // independent of the creation flags). On a fullscreen launch the window was
+    // created without SDL_WINDOW_RESIZABLE, so switching to windowed would lose
+    // the resize handles/maximize button. Setting it explicitly here ensures a
+    // windowed resize is possible whether we started fullscreen or windowed.
+    SDL_SetWindowResizable(window, SDL_TRUE);
+
     if(screen_number > 0) {
         // Get bounds of the secondary monitor
         SDL_Rect displayBounds;
