@@ -713,6 +713,36 @@ void winsys_apply_resolution(int width, int height, bool fullscreen) {
 extern int shiftdown(int);
 extern int shiftup(int);
 
+// Handle a window size change (resize or size-changed). Re-binds the game to the
+// new actual window size and requests a redraw so the game re-renders at the new
+// size. Called for both SDL_WINDOWEVENT_RESIZED and SDL_WINDOWEVENT_SIZE_CHANGED;
+// we re-init on every one (can't reliably know which is last across WMs).
+static void handle_window_resize(int new_w, int new_h) {
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = new_w;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = new_h;
+    if (new_h > 0) {
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.aspect_flt =
+                (float)new_w / (float)new_h;
+    }
+    // Re-bind the GL viewport to the actual drawable size, so the scene renders at
+    // the new size rather than the old.
+    if (window != nullptr) {
+        int d_w = 0, d_h = 0;
+        SDL_GL_GetDrawableSize(window, &d_w, &d_h);
+        if (d_w > 0 && d_h > 0) {
+            native_resolution_x = d_w;
+            native_resolution_y = d_h;
+        }
+    }
+    GFXReinitConfig();
+    if (reshape_func) {
+        (*reshape_func)(new_w, new_h);
+    }
+    // A resize must trigger a redraw (the event loop only redraws on redisplay,
+    // otherwise it relies on idle_func which can be paused, e.g. in the overlay).
+    redisplay = true;
+}
+
 void winsys_process_events() {
     SDL_Event event;
     int x, y;
@@ -816,32 +846,14 @@ void winsys_process_events() {
 
                 case SDL_WINDOWEVENT_RESIZED:
 #if !(defined (_WIN32) && defined (SDL_WINDOWING ))
-                    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = event.window.data1;
-                    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = event.window.data2;
-                    if (event.window.data2 > 0) {
-                        (const_cast<vega_config::Configuration &>(configuration())).graphics.aspect_flt =
-                                (float)event.window.data1 / (float)event.window.data2;
-                    }
-                    // A manual window resize must re-bind the GL viewport to the
-                    // actual drawable size, otherwise the scene renders at the old
-                    // size into the resized window. We re-init on every resize event
-                    // (we can't reliably know which is the last one across WMs); if
-                    // it thrashs we'll see it and can throttle.
-                    {
-                        int d_w = 0, d_h = 0;
-                        SDL_GL_GetDrawableSize(window, &d_w, &d_h);
-                        if (d_w > 0 && d_h > 0) {
-                            native_resolution_x = d_w;
-                            native_resolution_y = d_h;
-                        }
-                    }
-                    // Re-bind the viewport/GFX state from the new size.
-                    GFXReinitConfig();
-                    if (reshape_func) {
-                        (*reshape_func)(event.window.data1,
-                                event.window.data2);
-                    }
+                    handle_window_resize(event.window.data1, event.window.data2);
 #endif
+                    break;
+
+                case SDL_WINDOWEVENT_SIZE_CHANGED:
+                    // A size change (e.g. during a live drag, or from an API call)
+                    // must also re-bind + redraw, same as a completed resize.
+                    handle_window_resize(event.window.data1, event.window.data2);
                     break;
 
                 case SDL_JOYDEVICEADDED:
