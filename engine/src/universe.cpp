@@ -438,7 +438,11 @@ void Universe::StartDraw() {
         ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
         ImGui::Begin("main_window", nullptr, window_flags);
 
-        if (!RefreshGUI() && !UniverseUtil::isSplashScreenShowing()) {
+        // When the in-game settings overlay (alt+C) is open, skip drawing the
+        // star system/HUD entirely so ONLY the settings screen is shown (the
+        // game is paused, not just frozen). On 0.10.x the HUD draws via its own
+        // GL method (not ImGui), so an opaque ImGui window alone doesn't stop it.
+        if (!optionsActive && !RefreshGUI() && !UniverseUtil::isSplashScreenShowing()) {
             activeStarSystem()->Draw();
         }
 
