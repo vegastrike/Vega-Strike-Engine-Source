@@ -54,7 +54,7 @@
 #include "configuration/configuration.h"
 #include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl2.h"
-#include "config_screen.h"
+#include "gui/config_screen.h"
 
 #include "SDL2/SDL_video.h"
 

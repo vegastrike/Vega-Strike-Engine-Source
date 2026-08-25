@@ -66,6 +66,20 @@ void InitGui() {
     gui_initialized = true;
 }
 
+// Rebuild the ImGui font atlas at the given pixel size (settings screen).
+// 0.10.x has no pending-frame mechanism, so apply it immediately.
+void RequestImGuiFontSize(float fontSize) {
+    if (fontSize <= 0.0f) return;
+    ImGuiIO &io = ImGui::GetIO();
+    ImGui_ImplOpenGL3_DestroyFontsTexture();
+    io.Fonts->Clear();
+    ImFontConfig cfg;
+    cfg.SizePixels = fontSize;
+    io.FontDefault = io.Fonts->AddFontDefault(&cfg);
+    io.Fonts->Build();
+    ImGui_ImplOpenGL3_CreateFontsTexture();
+}
+
 void CleanupGui() {
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

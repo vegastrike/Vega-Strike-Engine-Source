@@ -36,6 +36,7 @@ extern bool gui_initialized;
 extern SDL_Window* current_window;
 
 void InitGui();
+void RequestImGuiFontSize(float fontSize);
 void CleanupGui();
 
 #endif // VEGA_STRIKE_LIBRARIES_GUI_GUI_H
