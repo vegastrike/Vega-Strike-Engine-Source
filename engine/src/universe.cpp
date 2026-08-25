@@ -856,7 +856,6 @@ unsigned int Universe::numPlayers() {
 
 void Universe::ToggleOptionsActive() {
     optionsActive = !optionsActive;
-    fprintf(stderr, "[config-screen debug] ToggleOptionsActive -> %d\n", (int)optionsActive); fflush(stderr);
     // The settings screen shows the VS default (non-crosshair) arrow cursor.
     // switch the SDL cursor TYPE immediately and show it, not just toggle a
     // raw OS cursor show/hide (which is why a stale crosshair showed briefly).
