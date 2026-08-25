@@ -725,6 +725,20 @@ static const Uint32 RESIZE_DEBOUNCE_MS = 100;
 // new actual window size and requests a redraw so the game re-renders at the new
 // size. This is the actual re-init; callers debounce it via the resize_request below.
 static void handle_window_resize(int new_w, int new_h) {
+    // Use the ACTUAL window size (SDL_GetWindowSize = logical points) for
+    // graphics.resolution_x/y, NOT the event data. On a scaled/HiDPI display the
+    // resize event reports the drawable pixel size, which differs from the logical
+    // window size that ImGui uses (io.DisplaySize = SDL_GetWindowSize). If we set
+    // graphics.resolution from pixels, the ImGui config overlay is sized at the
+    // pixel size but ImGui hit-tests in point space -> an "invisible cursor"
+    // offset (mouseover fires for the wrong position). Using the logical window
+    // size keeps graphics.resolution consistent with io.DisplaySize.
+    if (window != nullptr) {
+        int lw = 0, lh = 0;
+        SDL_GetWindowSize(window, &lw, &lh);
+        if (lw > 0) { new_w = lw; }
+        if (lh > 0) { new_h = lh; }
+    }
     (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = new_w;
     (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = new_h;
     if (new_h > 0) {
