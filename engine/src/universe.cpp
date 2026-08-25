@@ -75,6 +75,7 @@
 #include "root_generic/options.h"
 
 #include "imgui/imgui.h"
+#include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
@@ -428,6 +429,7 @@ void Universe::StartDraw() {
         const double update_gfx_end_time = realTime();
 #endif
         // ImGui Init
+        ImGui_ApplyPendingFontSize();  // apply a pending font-size change before laying out
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();

@@ -66,18 +66,36 @@ void InitGui() {
     gui_initialized = true;
 }
 
-// Rebuild the ImGui font atlas at the given pixel size (settings screen).
-// 0.10.x has no pending-frame mechanism, so apply it immediately.
+// A pending font-size change, applied synchronously at the NEXT frame start (see
+// ImGui_ApplyPendingFontSize) rather than during the settings Save, so the font
+// texture isn't destroyed/rebuilt mid-frame (which segfaults the GL HUD).
+static float s_pending_font_size = 0.0f;
+
+// Request that the ImGui font atlas be rebuilt at the given pixel size on the
+// next frame. Used by the settings screen font-point control.
 void RequestImGuiFontSize(float fontSize) {
     if (fontSize <= 0.0f) return;
+    s_pending_font_size = fontSize;
+}
+
+// Apply a pending font-size change by rebuilding the font atlas. Call at the
+// start of each ImGui frame, before ImGui::NewFrame(), so the new atlas is in
+// place for the whole frame and no glyphs reference a destroyed texture.
+void ImGui_ApplyPendingFontSize() {
+    if (s_pending_font_size <= 0.0f) {
+        return;
+    }
     ImGuiIO &io = ImGui::GetIO();
     ImGui_ImplOpenGL3_DestroyFontsTexture();
     io.Fonts->Clear();
     ImFontConfig cfg;
-    cfg.SizePixels = fontSize;
+    cfg.SizePixels = s_pending_font_size;
     io.FontDefault = io.Fonts->AddFontDefault(&cfg);
     io.Fonts->Build();
     ImGui_ImplOpenGL3_CreateFontsTexture();
+    // Set the render size explicitly so on-screen text follows the new size.
+    ImGui::GetStyle().FontSizeBase = s_pending_font_size;
+    s_pending_font_size = 0.0f;
 }
 
 void CleanupGui() {
