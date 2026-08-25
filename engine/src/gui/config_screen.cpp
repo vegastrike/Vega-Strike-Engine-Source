@@ -1695,11 +1695,13 @@ void DrawConfigScreen() {
     }
     if (ImGui::Button("Save", ImVec2(btnw, 0))) {
         if (dirty) {
+            // Detect a shader change BEFORE write_out_dirty() clears g_dirty_paths.
+            // Shaders are NOT hot-applied (unreliable live); persist the change and
+            // tell the user a restart is required.
+            const bool shader_changed = shader_config_dirty();
             apply_all();
             write_out_dirty();   // persist the dirty paths to the user overlay
-            // If a shader config path changed, we DON'T hot-apply it (unreliable
-            // live); tell the user a restart is required. The change is persisted.
-            if (shader_config_dirty()) {
+            if (shader_changed) {
                 shader_restart_notice = true;
             }
             // Re-initialize the runtime from the updated in-memory configuration().
