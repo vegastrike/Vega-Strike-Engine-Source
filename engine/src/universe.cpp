@@ -442,11 +442,14 @@ void Universe::StartDraw() {
             activeStarSystem()->Draw();
         }
 
-        // In-game config overlay (Alt+C) on top — no-op unless optionsActive.
-        DrawConfigOverlay();
-
         // ImGui End Frame
         ImGui::End();
+
+        // In-game config overlay (Alt+C) on top — a top-level window (not nested
+        // inside main_window), so it draws as an opaque fullscreen window that
+        // covers the game behind. No-op unless optionsActive.
+        DrawConfigOverlay();
+
         // Rendering
         ImGui::Render();
 

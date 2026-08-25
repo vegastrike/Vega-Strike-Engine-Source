@@ -1635,10 +1635,13 @@ void DrawConfigScreen() {
         if (flight_control == FC_MOUSE) load_mouse_staging();
         else if (flight_control == FC_JOYSTICK) load_joystick_staging();
     }
-    // Cover the whole screen (game resolution), not a floating window.
+    // Cover the whole screen (game resolution), not a floating window. The
+    // default ImGui WindowBg is only ~0.94 alpha, so the game/HUD shows through;
+    // push a fully-opaque WindowBg so the config screen hides it entirely.
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(configuration().graphics.resolution_x,
                                     configuration().graphics.resolution_y), ImGuiCond_Always);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.06f, 0.06f, 0.08f, 1.0f));
     ImGui::Begin("Config", nullptr,
                  ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
@@ -1733,6 +1736,7 @@ void DrawConfigScreen() {
     draw_bindings_dialog();
 
     ImGui::End();
+    ImGui::PopStyleColor();
 }
 
 void HandleConfigEvent(const SDL_Event *event) {
