@@ -842,6 +842,7 @@ unsigned int Universe::numPlayers() {
 
 void Universe::ToggleOptionsActive() {
     optionsActive = !optionsActive;
+    fprintf(stderr, "[config-screen debug] ToggleOptionsActive -> %d\n", (int)optionsActive); fflush(stderr);
     // Show the cursor when the config screen is open (so the user can click),
     // hide it again when closed. The in-flight HUD keeps the cursor hidden.
     winsys_show_cursor(optionsActive);

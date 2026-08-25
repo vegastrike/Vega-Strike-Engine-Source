@@ -1624,6 +1624,8 @@ static void draw_presets_frame() {
 } // namespace
 
 void DrawConfigScreen() {
+    static bool s_debug_once = false;
+    if (!s_debug_once) { fprintf(stderr, "[config-screen debug] DrawConfigScreen CALLED (overlay rendering)\n"); fflush(stderr); s_debug_once = true; }
     // Load flight-control mode from the persisted input.device once.
     static bool s_loaded = false;
     if (!s_loaded) {

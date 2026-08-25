@@ -811,6 +811,7 @@ void FireKeyboard::TogglePause(const KBData &, KBSTATE k) {
 
 void FireKeyboard::ToggleConfigScreen(const KBData &, KBSTATE k) {
     if (k == PRESS) {
+        fprintf(stderr, "[config-screen debug] ToggleConfigScreen FIRED\n"); fflush(stderr);
         VS_LOG(info, "FireKeyboard::ToggleConfigScreen(): Config key detected");
         _Universe->ToggleOptionsActive();
     }
