@@ -43,6 +43,7 @@
 #include <sstream>
 
 #include "gl_globals.h"
+#include "gl_init.h"
 #include "winsys.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
@@ -814,9 +815,11 @@ void winsys_process_events() {
                         (const_cast<vega_config::Configuration &>(configuration())).graphics.aspect_flt =
                                 (float)event.window.data1 / (float)event.window.data2;
                     }
-                    // A manual window resize must also re-bind the GL viewport to the
-                    // actual drawable size, otherwise native_resolution_x/y go stale
-                    // and the scene renders at the old size into the resized window.
+                    // A manual window resize must re-bind the GL viewport to the
+                    // actual drawable size, otherwise the scene renders at the old
+                    // size into the resized window. We re-init on every resize event
+                    // (we can't reliably know which is the last one across WMs); if
+                    // it thrashs we'll see it and can throttle.
                     {
                         int d_w = 0, d_h = 0;
                         SDL_GL_GetDrawableSize(window, &d_w, &d_h);
@@ -825,7 +828,8 @@ void winsys_process_events() {
                             native_resolution_y = d_h;
                         }
                     }
-                    //setup_sdl_video_mode(argc, argv);
+                    // Re-bind the viewport/GFX state from the new size.
+                    GFXReinitConfig();
                     if (reshape_func) {
                         (*reshape_func)(event.window.data1,
                                 event.window.data2);
