@@ -404,13 +404,32 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_ClearError();
     }
 
-    SDL_GL_GetDrawableSize(window, &width, &height);
-    // Use the measured drawable size as the render target so the viewport always
-    // matches the actual window/display mode (a mode change may resolve to the
-    // closest mode, or the window may have been clamped). This is the actual size
-    // the game renders into, regardless of the configured request.
-    native_resolution_x = width;
-    native_resolution_y = height;
+    // Measure the ACTUAL window size after creation. In windowed mode the WM /
+    // compositor may clamp a requested size down to fit the screen, so the game
+    // must adopt the window it actually got rather than assume it got the
+    // requested size (otherwise the viewport/layout render at the oversized
+    // request while the window is smaller -> cut off). The GL drawable size is
+    // the render target (native_resolution -> glViewport); the logical window
+    // size is what the layout/HUD/ImGui/config-screen read (graphics.resolution).
+    // On a non-scaling display these are equal; on a scaled display they differ
+    // (points vs pixels) and we keep them distinct.
+    int logical_w = 0, logical_h = 0;
+    SDL_GetWindowSize(window, &logical_w, &logical_h);
+    int drawable_w = 0, drawable_h = 0;
+    SDL_GL_GetDrawableSize(window, &drawable_w, &drawable_h);
+    if (logical_w <= 0) { logical_w = width; }
+    if (logical_h <= 0) { logical_h = height; }
+    if (drawable_w <= 0) { drawable_w = logical_w; }
+    if (drawable_h <= 0) { drawable_h = logical_h; }
+    native_resolution_x = drawable_w;
+    native_resolution_y = drawable_h;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = logical_w;
+    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = logical_h;
+    // Keep the screen aspect consistent with the actual window resolution.
+    if (logical_h > 0) {
+        (const_cast<vega_config::Configuration &>(configuration())).graphics.aspect_flt =
+                (float)logical_w / (float)logical_h;
+    }
 
     SDL_GLContext context = SDL_GL_CreateContext(window);
 
@@ -791,6 +810,21 @@ void winsys_process_events() {
 #if !(defined (_WIN32) && defined (SDL_WINDOWING ))
                     (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = event.window.data1;
                     (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = event.window.data2;
+                    if (event.window.data2 > 0) {
+                        (const_cast<vega_config::Configuration &>(configuration())).graphics.aspect_flt =
+                                (float)event.window.data1 / (float)event.window.data2;
+                    }
+                    // A manual window resize must also re-bind the GL viewport to the
+                    // actual drawable size, otherwise native_resolution_x/y go stale
+                    // and the scene renders at the old size into the resized window.
+                    {
+                        int d_w = 0, d_h = 0;
+                        SDL_GL_GetDrawableSize(window, &d_w, &d_h);
+                        if (d_w > 0 && d_h > 0) {
+                            native_resolution_x = d_w;
+                            native_resolution_y = d_h;
+                        }
+                    }
                     //setup_sdl_video_mode(argc, argv);
                     if (reshape_func) {
                         (*reshape_func)(event.window.data1,
