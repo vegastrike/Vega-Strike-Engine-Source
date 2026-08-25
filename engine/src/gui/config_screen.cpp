@@ -131,10 +131,14 @@ static void refresh_screen_aspect_text() {
     }
 }
 
-// The ideal font height (font_point) for the current resolution. Font size scales
-// with the horizontal resolution: ~10 at 800x600, ~32 at 2560x1440 (width / 80).
+// The ideal font height (font_point) for the current resolution. Linear scale:
+// 8 at 800x600, 16 at 1920x1080, scaling linearly across all other resolutions.
+// formula: 8 + (width - 800) / 140, rounded to the nearest integer.
 static int ideal_font_height() {
-    return sel_res_w > 0 ? sel_res_w / 80 : 16;
+    if (sel_res_w <= 0) return 16;
+    // Round to nearest integer (ideal is always positive, so +0.5 truncates to nearest).
+    float ideal = 8.0f + (float)(sel_res_w - 800) / 140.0f;
+    return (int)(ideal + 0.5f);
 }
 
 static void prefill_text_height() {
