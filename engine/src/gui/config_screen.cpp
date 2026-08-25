@@ -17,6 +17,7 @@
 #include "vegadisk/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 #include "config_xml.h"
+#include "gfxlib.h"
 #include "cmd/music.h"
 #include "src/audiolib.h"
 #include <boost/json.hpp>
@@ -708,6 +709,9 @@ static void reinit_from_saved_config() {
     // Graphics: g_game feature flags + gl_options + GL viewport (reuses initfov
     // and reapply_gl_options, the same copy code as bootstrap).
     GFXReinitConfig();
+    // Shader: re-read the configured shader name and recompile (a stale
+    // hifiProgramName otherwise yields funky colors until restart).
+    GFXApplyShaderSetting();
     // Audio/volume: re-apply the live volume functions from the new config.
     AUDReapplyConfig();
     Music::SetVolume(configuration().audio.music_volume_flt, -1, false);

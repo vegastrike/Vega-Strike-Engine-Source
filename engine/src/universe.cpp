@@ -35,6 +35,7 @@
 #include "gfx/aux_texture.h"
 #include "src/profile.h"
 #include "gfx/cockpit.h"
+#include "cmd/base.h"
 #include "root_generic/galaxy_xml.h"
 #include <algorithm>
 #include "src/config_xml.h"
@@ -863,20 +864,22 @@ void Universe::ToggleOptionsActive() {
         changeCursor(CursorType::arrow);
         showCursor();
     } else {
-        // Back in the game: the cursor depends on where the player is.
-        // If launched with --configure, the settings screen opened on the base,
-        // so closing it goes back to the base -> the VS arrow cursor. Otherwise
-        // restore the flight-control-mode cursor: warp-mode mouse (relative,
+        // Back in the game: the cursor depends on whether we're flying (HUD active)
+        // or not (docked/on a base). "Flying" = a cockpit with a player ship that is
+        // NOT docked. On a base (BaseInterface::CurrentBase or player->docked) we are
+        // not flying, so use the arrow cursor. In flight: warp-mode mouse (relative,
         // recentered) hides the cursor, glide-mode mouse (absolute) shows the
         // crosshair aim point, and joystick/keyboard (mouse not enabled) hides.
-        if (launchedWithConfigure) {
+        // This replaces the earlier --configure launch hack with a real state check,
+        // so Alt+C works everywhere (a bonus) yet the close cursor is always right
+        // whether we opened settings in flight or on a base.
+        const Unit *player_ship = _Universe->AccessCockpit()
+                ? _Universe->AccessCockpit()->GetParent() : nullptr;
+        const bool flying = !BaseInterface::CurrentBase && player_ship
+                && !(player_ship->docked & (Unit::DOCKED_INSIDE | Unit::DOCKED));
+        if (!flying) {
             changeCursor(CursorType::arrow);
             showCursor();
-            // This --configure arrow-on-close applies only the first time the
-            // screen is exited (it opened on the base at launch). Clear it so a
-            // later in-flight open/close (Alt+C in the cockpit) restores the
-            // normal flight-control-mode cursor instead of always giving arrow.
-            launchedWithConfigure = false;
         } else if (configuration().mouse.enabled) {
             if (configuration().joystick.warp_mouse) {
                 hideCursor();

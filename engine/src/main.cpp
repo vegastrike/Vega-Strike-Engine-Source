@@ -726,7 +726,6 @@ void bootstrap_main_loop() {
         // in-game frame).
         if (g_launch_configure) {
             g_launch_configure = false;
-            _Universe->MarkLaunchedWithConfigure();
             _Universe->ToggleOptionsActive();
         }
         _Universe->Loop(main_loop);
