@@ -600,6 +600,29 @@ void GFXReinitConfig() {
     initfov();
     reapply_gl_options();
     glViewport(0, 0, native_resolution_x, native_resolution_y);
+
+    // Recompute the base-computer letterbox viewport (bases.max_width/height) from
+    // the current resolution, preserving the existing base aspect ratio. This is
+    // what `apply_display_to_config` computes on a settings Save; without it a
+    // window resize leaves the base letterboxed at the old size, so base hitboxes
+    // are off. The base aspect is derived from the current bases.max_width/height
+    // (default 16:10) and the letterbox is the largest rect of that aspect that
+    // fits the current resolution.
+    auto &g = (const_cast<vega_config::Configuration &>(configuration())).graphics;
+    const int res_x = g.resolution_x;
+    const int res_y = g.resolution_y;
+    if (res_x > 0 && res_y > 0) {
+        float base_aspect = 1.6f;   // default 16:10
+        if (g.bases.max_height > 0) {
+            float cur = (float)g.bases.max_width / (float)g.bases.max_height;
+            if (cur > 0) { base_aspect = cur; }
+        }
+        int W = res_x, H = res_y;
+        if (base_aspect >= (float)res_x / res_y) { W = res_x; H = (int)(res_x / base_aspect); }
+        else { H = res_y; W = (int)(res_y * base_aspect); }
+        g.bases.max_width = W;
+        g.bases.max_height = H;
+    }
 }
 
 static void Reshape(int x, int y) {
