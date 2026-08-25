@@ -68,6 +68,9 @@ class ComponentsManager {
 
     std::vector<std::pair<const std::string, const int>> prohibited_upgrades;
 
+    // Deduplicated add — repairs the doubling-bug ballooned save lists.
+    void AddProhibitedUpgrade(const std::string& category, int limit);
+
     friend class CargoHold;
     friend class Movable;
 

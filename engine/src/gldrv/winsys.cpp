@@ -566,6 +566,27 @@ void winsys_process_events() {
                     }
                     break;
 
+                case SDL_MOUSEWHEEL:
+                    // SDL2 reports the wheel as its own event (SDL_MOUSEWHEEL,
+                    // not a button press). Synthesize wheel-up / wheel-down
+                    // button presses so the existing mouse-button pipeline
+                    // (WS_WHEEL_UP->3 / WS_WHEEL_DOWN->4 in lookupMouseButton)
+                    // keeps working -- this drives scrolling in the base
+                    // computer, navscreen, pickers, etc.
+                    if (mouse_func) {
+                        int mx = 0;
+                        int my = 0;
+                        SDL_GetMouseState(&mx, &my);
+                        if (event.wheel.y > 0) {
+                            (*mouse_func)(WS_WHEEL_UP, WS_MOUSE_DOWN, mx, my);
+                            (*mouse_func)(WS_WHEEL_UP, WS_MOUSE_UP, mx, my);
+                        } else if (event.wheel.y < 0) {
+                            (*mouse_func)(WS_WHEEL_DOWN, WS_MOUSE_DOWN, mx, my);
+                            (*mouse_func)(WS_WHEEL_DOWN, WS_MOUSE_UP, mx, my);
+                        }
+                    }
+                    break;
+
                 case SDL_MOUSEMOTION:
                     if (event.motion.state) {
                         /* buttons are down */
