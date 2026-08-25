@@ -45,6 +45,8 @@
 #include "cmd/script/mission.h"
 #include "src/in_kb.h"
 #include "src/in_kb_data.h"
+#include "src/in_mouse.h"
+#include "src/in_joystick.h"
 #include "src/in_main.h"
 #if defined (__APPLE__)
 #import <sys/param.h>
@@ -846,6 +848,16 @@ void Universe::ToggleOptionsActive() {
     // Show the cursor when the config screen is open (so the user can click),
     // hide it again when closed. The in-flight HUD keeps the cursor hidden.
     winsys_show_cursor(optionsActive);
+    // While the config overlay is open, consume input in winsys (no click-through).
+    winsys_set_config_overlay_active(optionsActive);
+    // On close, clear any input (mouse/joystick/keyboard) still stuck DOWN
+    // (its release was swallowed by the overlay input path) so it doesn't fire
+    // a command continuously once flight polling resumes.
+    if (!optionsActive) {
+        ResetMouseState();
+        RestoreJoystickState();
+        RestoreKB();
+    }
 }
 
 void DrawConfigOverlay() {

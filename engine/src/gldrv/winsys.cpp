@@ -144,6 +144,19 @@ void winsys_set_keyboard_func(winsys_keyboard_func_t func) {
     keyboard_func = func;
 }
 
+// Whether the in-game config overlay is open. While active, winsys suppresses
+// forwarding mouse/keyboard to the game handlers (the overlay consumes input) so
+// clicks don't pass through to the game behind.
+static bool config_overlay_active = false;
+
+void winsys_set_config_overlay_active(bool active) {
+    config_overlay_active = active;
+}
+
+bool winsys_config_overlay_active() {
+    return config_overlay_active;
+}
+
 /*---------------------------------------------------------------------------*/
 /*!
  *  Sets the mouse button-press callback
@@ -590,7 +603,7 @@ void winsys_process_events() {
                         break;
                     }
 
-                    if (keyboard_func) {
+                    if (!config_overlay_active && keyboard_func) {
 //                        VS_LOG(debug, (boost::format("Kbd: %1$s mod:%2$x sym:%3$x scan:%4$x")
 //                                       % ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN")
 //                                       % event.key.keysym.mod
@@ -607,7 +620,7 @@ void winsys_process_events() {
 
                 case SDL_MOUSEBUTTONDOWN:
                 case SDL_MOUSEBUTTONUP:
-                    if (mouse_func) {
+                    if (!config_overlay_active && mouse_func) {
                         (*mouse_func)(event.button.button,
                                 event.button.state,
                                 event.button.x,
@@ -637,17 +650,19 @@ void winsys_process_events() {
                     break;
 
                 case SDL_MOUSEMOTION:
-                    if (event.motion.state) {
-                        /* buttons are down */
-                        if (motion_func) {
-                            (*motion_func)(event.motion.x,
+                    if (!config_overlay_active) {
+                        if (event.motion.state) {
+                            /* buttons are down */
+                            if (motion_func) {
+                                (*motion_func)(event.motion.x,
+                                        event.motion.y);
+                            }
+                        } else
+                            /* no buttons are down */
+                        if (passive_motion_func) {
+                            (*passive_motion_func)(event.motion.x,
                                     event.motion.y);
                         }
-                    } else
-                        /* no buttons are down */
-                    if (passive_motion_func) {
-                        (*passive_motion_func)(event.motion.x,
-                                event.motion.y);
                     }
                     break;
 
