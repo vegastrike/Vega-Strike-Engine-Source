@@ -865,15 +865,11 @@ void Universe::ToggleOptionsActive() {
         showCursor();
     } else {
         // Back in the game: the cursor depends on where the player is.
-        // Docked (on a base, e.g. when --configure opens the settings screen at
-        // launch) -> the VS arrow. In-flight -> the flight-control-mode cursor
-        // (mouse glide -> crosshair, otherwise arrow; auto-hidden via the HUD).
-        const Unit *player = _Universe->AccessCockpit() ? _Universe->AccessCockpit()->GetParent() : nullptr;
-        const bool docked = player && (player->docked & (Unit::DOCKED_INSIDE | Unit::DOCKED));
-        fprintf(stderr, "[config-screen debug] close: player=%p docked=%d dockflag=%d mouse_cursor=%d\n",
-                (void*)player, (int)docked, (player ? (int)player->docked : -1),
-                (int)configuration().joystick.mouse_cursor);
-        if (docked) {
+        // If launched with --configure, the settings screen opened on the base,
+        // so closing it goes back to the base -> the VS arrow cursor. Otherwise
+        // restore the flight-control-mode cursor (mouse glide -> crosshair,
+        // else arrow, auto-hidden via the HUD).
+        if (launchedWithConfigure) {
             changeCursor(CursorType::arrow);
             showCursor();
         } else if (configuration().joystick.mouse_cursor) {

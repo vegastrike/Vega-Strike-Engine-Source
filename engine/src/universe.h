@@ -46,6 +46,7 @@
 class Universe {
     // Fields
     bool optionsActive = false;  // in-game config screen overlay is open (non-blocking pause)
+    bool launchedWithConfigure = false;  // --configure: opened settings at launch; close -> base arrow cursor
 
 public:
     StarDate current_stardate;
@@ -145,6 +146,7 @@ public:
     unsigned int numPlayers();
 
     void ToggleOptionsActive();
+    void MarkLaunchedWithConfigure() { launchedWithConfigure = true; }
     bool isOptionsActive() const { return optionsActive; }
 };
 
