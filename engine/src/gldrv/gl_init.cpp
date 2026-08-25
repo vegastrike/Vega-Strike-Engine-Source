@@ -551,7 +551,10 @@ void init_opengl_extensions() {
     VS_LOG(info, (boost::format("Max vertex array vertices: %1%") % gl_options.max_array_vertices));
 }
 
-static void initfov() {
+// Copy the model/LOD + texture feature flags from configuration() into the legacy
+// g_game global. Historical bootstrap ran this once; GFXReinitConfig re-runs it so
+// in-game settings changes (feature flags) take effect without a restart.
+void initfov() {
     g_game.detaillevel = configuration().graphics.model_detail_flt;
     g_game.use_textures = configuration().graphics.use_textures;
     g_game.use_ship_textures = configuration().graphics.use_ship_textures;
@@ -571,6 +574,32 @@ static void initfov() {
      *  VSFileSystem::Close (fp);
      *  }
      */
+}
+
+// Copy the config-driven gl_options fields from configuration(). These were set
+// inline during GFXInit (one-shot). Factored out so GFXReinitConfig can re-run them
+// after an in-game settings change. Only the fields that directly mirror a config
+// value are copied here; the hardware-limited ones (max_rect_dimension, PaletteExt,
+// max_array_*, max_texture_dimension) are one-shot GL/extension queries and are not
+// re-derived.
+static void reapply_gl_options() {
+    gl_options.wireframe = configuration().graphics.use_wireframe;
+    gl_options.smooth_shade = configuration().graphics.smooth_shade;
+    gl_options.mipmap = configuration().graphics.mipmap_detail;
+    gl_options.compression = configuration().graphics.texture_compression;
+    gl_options.Multitexture = configuration().graphics.reflection;
+    gl_options.display_lists = configuration().graphics.displaylists;
+}
+
+// Re-initialize the graphics runtime state from the in-memory configuration() after
+// an in-game settings change (the config screen's Save path). Reuses the bootstrap
+// copy code (initfov + reapply_gl_options) so the change takes effect without a
+// restart. Also re-binds the GL viewport to the current drawable size. Does NOT
+// recreate the window or GL context (those stay one-shot); see gl_init.h.
+void GFXReinitConfig() {
+    initfov();
+    reapply_gl_options();
+    glViewport(0, 0, native_resolution_x, native_resolution_y);
 }
 
 static void Reshape(int x, int y) {
@@ -629,14 +658,13 @@ void GFXInit(int argc, char **argv) {
         VS_LOG(trace, "Using NPOT video textures");
     }*/
     // Removing gl_options soon
-    gl_options.smooth_shade = configuration().graphics.smooth_shade;
-    gl_options.mipmap = configuration().graphics.mipmap_detail;
-    gl_options.compression = configuration().graphics.texture_compression;
-    gl_options.Multitexture = configuration().graphics.reflection;
+    // Config-driven gl_options copies (extracted so GFXReinitConfig can re-run them
+    // on an in-game settings change). The self-assignment lines below keep their
+    // original meaning (config already holds the value; assigned back for clarity).
+    reapply_gl_options();
     (const_cast<vega_config::Configuration &>(configuration())).graphics.smooth_lines = configuration().graphics.smooth_lines;
     (const_cast<vega_config::Configuration &>(configuration())).graphics.smooth_points = configuration().graphics.smooth_points;
 
-    gl_options.display_lists = configuration().graphics.displaylists;
     (const_cast<vega_config::Configuration &>(configuration())).graphics.s3tc = configuration().graphics.s3tc;
     (const_cast<vega_config::Configuration &>(configuration())).graphics.ext_clamp_to_edge = configuration().graphics.ext_clamp_to_edge;
     (const_cast<vega_config::Configuration &>(configuration())).graphics.ext_clamp_to_border = configuration().graphics.ext_clamp_to_border;

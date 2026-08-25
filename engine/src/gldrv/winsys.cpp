@@ -76,6 +76,7 @@
  */
 
 static SDL_Window *window = nullptr;
+static SDL_Renderer *renderer = nullptr;   // created at bootstrap; reused to re-issue logical size on resize
 static SDL_Surface *screen = nullptr;
 
 static winsys_display_func_t display_func = nullptr;
@@ -383,7 +384,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         VS_LOG_FLUSH_EXIT(fatal, "Failed to make window context current", 1);
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == nullptr) {
         VS_LOG_AND_FLUSH(error, (boost::format(
             "SDL_CreateRenderer(...) with VSync option failed; trying again without VSync option. Error was: %1%") %
@@ -555,23 +556,58 @@ void winsys_show_cursor(bool visible) {
 // SDL2, and forces the reshape so the viewport/measurements update immediately.
 void winsys_apply_resolution(int width, int height, bool fullscreen) {
     auto &g = const_cast<vega_config::Configuration &>(configuration()).graphics;
-    g.resolution_x = width;
-    g.resolution_y = height;
     g.full_screen = fullscreen;
 
     if (window == nullptr) {
+        g.resolution_x = width;
+        g.resolution_y = height;
         return;
     }
 
     if (fullscreen) {
         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-        native_resolution_x = width;
-        native_resolution_y = height;
     } else {
         SDL_SetWindowFullscreen(window, 0);
         SDL_SetWindowSize(window, width, height);
-        native_resolution_x = width;
-        native_resolution_y = height;
+    }
+
+    // Measure the ACTUAL window size after the resize. In windowed mode the WM /
+    // compositor may clamp a requested size down to fit the screen, and on a
+    // HiDPI/Wayland display the logical window size (points) differs from the GL
+    // drawable size (pixels). Using the measured sizes (rather than the requested
+    // width/height) keeps the scene viewport, ImGui overlay, and config write-out
+    // all consistent with the real window. The GL drawable size is what the legacy
+    // viewport must map to; the logical window size is what ImGui
+    // (io.DisplaySize = SDL_GetWindowSize) and the config screen use.
+    int logical_w = 0, logical_h = 0;
+    SDL_GetWindowSize(window, &logical_w, &logical_h);
+    int drawable_w = 0, drawable_h = 0;
+    SDL_GL_GetDrawableSize(window, &drawable_w, &drawable_h);
+    if (logical_w <= 0) { logical_w = width; }
+    if (logical_h <= 0) { logical_h = height; }
+    if (drawable_w <= 0) { drawable_w = logical_w; }
+    if (drawable_h <= 0) { drawable_h = logical_h; }
+
+    // In fullscreen, the legacy GL viewport should fill the whole drawable. In
+    // windowed on a scaled display the drawable is the pixel size; the legacy GL
+    // scene must render into it. The config/graphics resolution (used by ImGui and
+    // the config screen) is the logical window size.
+    native_resolution_x = drawable_w;
+    native_resolution_y = drawable_h;
+    g.resolution_x = logical_w;
+    g.resolution_y = logical_h;
+
+    // Re-issue the renderer logical size (bound once at bootstrap). Present is via
+    // SDL_GL_SwapWindow, so this mainly keeps SDL_GetRenderOutputSize consistent
+    // for anything that reads it.
+    if (renderer != nullptr) {
+        SDL_RenderSetLogicalSize(renderer, drawable_w, drawable_h);
+    }
+
+    // Recompute the screen aspect from the actual resolution so the in-game
+    // camera/cockpit viewport isn't distorted after a live change.
+    if (g.resolution_y > 0) {
+        g.aspect_flt = (float)g.resolution_x / (float)g.resolution_y;
     }
 
     // Force the reshape so native_resolution_x/y and the GL viewport update; in
