@@ -465,6 +465,7 @@ void Universe::StartDraw() {
     UpdateTime();
     UpdateTimeCompressionSounds();
     _Universe->SetActiveCockpit(randomInt(_cockpits.size() - 1, 0));
+    if (!optionsActive) {  // config screen open -> freeze the sim, keep rendering
     for (i = 0; i < star_system.size() && i < configuration().physics.num_running_systems; ++i) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double update_star_system_start_time = realTime();
@@ -487,6 +488,7 @@ void Universe::StartDraw() {
            (boost::format("%1%: Time taken by StarSystem::ProcessPendingJumps(): %2%") % __FUNCTION__ % (
                star_system_process_pending_jumps_end_time - star_system_process_pending_jumps_start_time)));
 #endif
+    }
     for (i = 0; i < _cockpits.size(); ++i) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double process_input_start_time = realTime();
