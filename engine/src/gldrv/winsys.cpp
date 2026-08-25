@@ -441,6 +441,11 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 
     // Initialize imgui
     InitGui();
+    // Apply the persisted font size (config was loaded before this). Without
+    // this the ImGui UI resets to the 18.0f hardcoded default in InitGui()
+    // regardless of the saved graphics.font_point; the pending request is
+    // applied at the next frame start via ImGui_ApplyPendingFontSize().
+    RequestImGuiFontSize(configuration().graphics.font_point_flt);
 
     return true;
 }
