@@ -446,12 +446,23 @@ void GFXReloadDefaultShader() {
     // Increasing the timestamp makes all programs elsewhere recompile
     ++programVersion;
 
-    bool islow = (lowfiprog == defaultprog);
-    if (glDeleteProgram_p && defaultprog) {
-        glDeleteProgram_p(lowfiprog);
-        glDeleteProgram_p(hifiprog);
+    // Remove the old shader programs from the program cache before deleting the GL
+    // objects. programCache/programICache map name -> program ID and are NOT cleared
+    // by glDeleteProgram; if they keep the old (now-deleted) ID, the next
+    // GFXCreateProgram for the same shader returns the stale cached ID instead of
+    // recompiling -> the shader hot-apply renders with funky/unloaded colors.
+    if (defaultprog) {
+        GFXDestroyProgram(lowfiprog);
+        GFXDestroyProgram(hifiprog);
+        if (glDeleteProgram_p) {
+            if (lowfiprog) glDeleteProgram_p(lowfiprog);
+            if (hifiprog) glDeleteProgram_p(hifiprog);
+        }
     }
     programChanged = true;
+    // For the low/high resolution split below: islow tracks which program was the
+    // default before the reload (so we re-select the same default after recompile).
+    bool islow = (lowfiprog == defaultprog);
     if (islow) {
         hifiprog = GFXCreateProgram(hifiProgramName.c_str(), hifiProgramName.c_str(), NULL);
         if (hifiprog == 0) {
