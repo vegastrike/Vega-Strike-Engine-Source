@@ -870,6 +870,9 @@ void Universe::ToggleOptionsActive() {
         // (mouse glide -> crosshair, otherwise arrow; auto-hidden via the HUD).
         const Unit *player = _Universe->AccessCockpit() ? _Universe->AccessCockpit()->GetParent() : nullptr;
         const bool docked = player && (player->docked & (Unit::DOCKED_INSIDE | Unit::DOCKED));
+        fprintf(stderr, "[config-screen debug] close: player=%p docked=%d dockflag=%d mouse_cursor=%d\n",
+                (void*)player, (int)docked, (player ? (int)player->docked : -1),
+                (int)configuration().joystick.mouse_cursor);
         if (docked) {
             changeCursor(CursorType::arrow);
             showCursor();
