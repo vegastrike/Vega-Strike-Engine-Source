@@ -809,6 +809,13 @@ void FireKeyboard::TogglePause(const KBData &, KBSTATE k) {
     }
 }
 
+void FireKeyboard::ToggleConfigScreen(const KBData &, KBSTATE k) {
+    if (k == PRESS) {
+        VS_LOG(info, "FireKeyboard::ToggleConfigScreen(): Config key detected");
+        _Universe->ToggleOptionsActive();
+    }
+}
+
 extern unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &convNode);
 extern Unit *GetThreat(const Unit *par, const Unit *leader);
 

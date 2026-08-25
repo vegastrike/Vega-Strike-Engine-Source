@@ -339,6 +339,7 @@ void winsys_set_passive_motion_func(winsys_motion_func_t func);
 void winsys_swap_buffers();
 void winsys_warp_pointer(int x, int y);
 void winsys_show_cursor(bool visible);
+void winsys_apply_resolution(int width, int height, bool fullscreen);
 
 void winsys_init(int *argc, char **argv, char const *window_title,
         char const *icon_title);

@@ -8,7 +8,7 @@
 #ifndef VS_SETTINGS_NG_CONFIG_SCREEN_H
 #define VS_SETTINGS_NG_CONFIG_SCREEN_H
 
-#include <SDL3/SDL.h>
+#include <SDL2/SDL.h>
 
 namespace vs_settings_ng {
 

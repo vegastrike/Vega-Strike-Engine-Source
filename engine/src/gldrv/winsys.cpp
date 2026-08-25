@@ -53,6 +53,8 @@
 #include "src/vs_exit.h"
 #include "configuration/configuration.h"
 #include "libraries/gui/gui.h"
+#include "backends/imgui_impl_sdl2.h"
+#include "config_screen.h"
 
 #include "SDL2/SDL_video.h"
 
@@ -503,6 +505,38 @@ void winsys_show_cursor(bool visible) {
     }
 }
 
+// Apply a new resolution/fullscreen to the live window (from the in-game config
+// screen). Sets configuration(), then applies windowed/fullscreen + size via
+// SDL2, and forces the reshape so the viewport/measurements update immediately.
+void winsys_apply_resolution(int width, int height, bool fullscreen) {
+    auto &g = const_cast<vega_config::Configuration &>(configuration()).graphics;
+    g.resolution_x = width;
+    g.resolution_y = height;
+    g.full_screen = fullscreen;
+
+    if (window == nullptr) {
+        return;
+    }
+
+    if (fullscreen) {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        native_resolution_x = width;
+        native_resolution_y = height;
+    } else {
+        SDL_SetWindowFullscreen(window, 0);
+        SDL_SetWindowSize(window, width, height);
+        native_resolution_x = width;
+        native_resolution_y = height;
+    }
+
+    // Force the reshape so native_resolution_x/y and the GL viewport update; in
+    // windowed this normally fires via SDL_WINDOWEVENT_RESIZED, but fullscreen
+    // mode changes may not, so apply it directly here.
+    if (reshape_func) {
+        (*reshape_func)(native_resolution_x, native_resolution_y);
+    }
+}
+
 /*---------------------------------------------------------------------------*/
 /*!
  *  Processes and dispatches events.  This function never returns.
@@ -532,6 +566,12 @@ void winsys_process_events() {
         SDL_LockAudio();
         SDL_UnlockAudio();
         while (SDL_PollEvent(&event)) {
+            // forward all events to ImGui (drives the config screen, and any
+            // other ImGui UI) without altering the game's own dispatch below.
+            ImGui_ImplSDL2_ProcessEvent(&event);
+            // Forward to the config screen (binding capture, joystick hotplug)
+            // while it is open.
+            vs_settings_ng::HandleConfigEvent(&event);
 
             state = false;
             switch (event.type) {

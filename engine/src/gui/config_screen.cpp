@@ -18,9 +18,9 @@
 #include "config_xml.h"
 #include <boost/json.hpp>
 #include <boost/filesystem.hpp>
-#include <imgui.h>
+#include "imgui/imgui.h"
 #include "libraries/gui/gui.h"
-#include <SDL3/SDL.h>
+#include <SDL2/SDL.h>
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -40,7 +40,7 @@ namespace {
 // Display frame state (mirrors vs-05 modern_ui.cpp)
 // ---------------------------------------------------------------------------
 int  sel_monitor = 0;
-SDL_DisplayID sel_display_id = 0;
+int  sel_display_id = 0;
 int  sel_res_w = 0, sel_res_h = 0;
 std::string monitor_text, resolution_text;
 char text_height_buf[16] = "16";
@@ -154,20 +154,23 @@ static int suggested_bitmap_size(int family) {
     return best;
 }
 
-static bool highest_monitor_resolution(SDL_DisplayID id, int &w, int &h) {
-    int cnt = 0;
-    SDL_DisplayMode **modes = SDL_GetFullscreenDisplayModes(id, &cnt);
-    if (!modes || cnt == 0) {
-        const SDL_DisplayMode *cm = SDL_GetCurrentDisplayMode(id);
-        if (cm) { w = cm->w; h = cm->h; return true; }
+static bool highest_monitor_resolution(int id, int &w, int &h) {
+    int cnt = SDL_GetNumDisplayModes(id);
+    if (cnt <= 0) {
+        SDL_DisplayMode cm;
+        if (SDL_GetCurrentDisplayMode(id, &cm) == 0) { w = cm.w; h = cm.h; return true; }
         return false;
     }
     int best_i = 0, best_area = -1;
     for (int i = 0; i < cnt; i++) {
-        int area = modes[i]->w * modes[i]->h;
+        SDL_DisplayMode mode;
+        if (SDL_GetDisplayMode(id, i, &mode) != 0) continue;
+        int area = mode.w * mode.h;
         if (area > best_area) { best_area = area; best_i = i; }
     }
-    w = modes[best_i]->w; h = modes[best_i]->h;
+    SDL_DisplayMode best;
+    if (SDL_GetDisplayMode(id, best_i, &best) != 0) return false;
+    w = best.w; h = best.h;
     return true;
 }
 
@@ -220,13 +223,12 @@ static void load_display_from_config() {
     snprintf(text_height_buf, sizeof(text_height_buf), "%d", fp);
     // screen (monitor) index.
     sel_monitor = g.screen;
-    int nd = 0; SDL_DisplayID *ids = SDL_GetDisplays(&nd);
+    int nd = SDL_GetNumVideoDisplays();
     if (nd < 1) nd = 1;
     if (sel_monitor >= nd) sel_monitor = 0;
-    sel_display_id = ids ? ids[sel_monitor] : 0;
-    const char *nm = sel_display_id ? SDL_GetDisplayName(sel_display_id) : NULL;
+    sel_display_id = sel_monitor;
+    const char *nm = sel_display_id >= 0 ? SDL_GetDisplayName(sel_display_id) : NULL;
     monitor_text = std::to_string(sel_monitor) + "  " + (nm ? nm : "(unnamed)");
-    if (ids) SDL_free(ids);
     // Font type from high_quality_font + font_antialias (vector AA / vector / bitmap).
     if (!g.high_quality_font && g.font_antialias) sel_font_type = FONT_AA_VEC;
     else if (!g.high_quality_font && !g.font_antialias) sel_font_type = FONT_VEC;
@@ -326,41 +328,39 @@ void draw_display_frame() {
     if (ImGui::Button("Monitor")) ImGui::OpenPopup("##pick_mon");
     ImGui::SameLine(); ImGui::TextUnformatted(monitor_text.c_str());
     if (ImGui::BeginPopup("##pick_mon")) {
-        int nd = 0; SDL_DisplayID *ids = SDL_GetDisplays(&nd);
+        int nd = SDL_GetNumVideoDisplays();
         for (int i = 0; i < nd; ++i) {
-            const char *nm = SDL_GetDisplayName(ids[i]);
+            const char *nm = SDL_GetDisplayName(i);
             char lbl[160]; snprintf(lbl, sizeof(lbl), "%d  %s", i, nm ? nm : "(unnamed)");
             if (ImGui::MenuItem(lbl)) {
-                sel_monitor = i; sel_display_id = ids[i];
+                sel_monitor = i; sel_display_id = i;
                 monitor_text = lbl; dirty = true;
-                const SDL_DisplayMode *cm = SDL_GetCurrentDisplayMode(ids[i]);
-                if (cm) { sel_res_w = cm->w; sel_res_h = cm->h;
-                    resolution_text = std::to_string(cm->w) + "x" + std::to_string(cm->h);
+                SDL_DisplayMode cm;
+                if (SDL_GetCurrentDisplayMode(i, &cm) == 0) { sel_res_w = cm.w; sel_res_h = cm.h;
+                    resolution_text = std::to_string(cm.w) + "x" + std::to_string(cm.h);
                     if (sel_screen_aspect < 0) refresh_screen_aspect_text(); }
             }
         }
-        if (ids) SDL_free(ids);
         ImGui::EndPopup();
     }
     // Resolution selector (detected fullscreen modes, deduplicated).
     if (ImGui::Button("Resolution")) ImGui::OpenPopup("##pick_res");
     ImGui::SameLine(); ImGui::TextUnformatted(resolution_text.c_str());
     if (ImGui::BeginPopup("##pick_res")) {
-        int cnt = 0; SDL_DisplayMode **modes = SDL_GetFullscreenDisplayModes(sel_display_id, &cnt);
-        if (modes) {
-            std::vector<std::string> seen;
-            for (int i = 0; i < cnt; ++i) {
-                char lbl[32]; snprintf(lbl, sizeof(lbl), "%dx%d", modes[i]->w, modes[i]->h);
-                if (std::find(seen.begin(), seen.end(), lbl) != seen.end()) continue;
-                seen.push_back(lbl);
-                if (ImGui::MenuItem(lbl)) {
-                    sel_res_w = modes[i]->w; sel_res_h = modes[i]->h;
-                    resolution_text = lbl; prefill_text_height(); dirty = true;
-                    if (sel_screen_aspect < 0) refresh_screen_aspect_text();
-                }
+        int cnt = SDL_GetNumDisplayModes(sel_display_id);
+        std::vector<std::string> seen;
+        for (int i = 0; i < cnt; ++i) {
+            SDL_DisplayMode mode;
+            if (SDL_GetDisplayMode(sel_display_id, i, &mode) != 0) continue;
+            char lbl[32]; snprintf(lbl, sizeof(lbl), "%dx%d", mode.w, mode.h);
+            if (std::find(seen.begin(), seen.end(), lbl) != seen.end()) continue;
+            seen.push_back(lbl);
+            if (ImGui::MenuItem(lbl)) {
+                sel_res_w = mode.w; sel_res_h = mode.h;
+                resolution_text = lbl; prefill_text_height(); dirty = true;
+                if (sel_screen_aspect < 0) refresh_screen_aspect_text();
             }
         }
-        if (modes) SDL_free(modes);
         ImGui::EndPopup();
     }
     // Screen aspect.
@@ -479,19 +479,18 @@ static int role_for_axis(int stick, int axis) {
 // Sample the bound axes for Auto Deadband (max deflection over ~1s).
 static float joy_sample_bound_axes() {
     float m = 0.0f;
-    SDL_UpdateJoysticks();
-    int n = 0; SDL_JoystickID *ids = SDL_GetJoysticks(&n);
+    SDL_JoystickUpdate();
+    int n = SDL_NumJoysticks();
     for (int r = 0; r < 4; ++r) {
         int s = joy_bind_stick[r];
         if (s < 0 || s >= n || joy_bind_axis[r] < 0) continue;
-        SDL_Joystick *joy = SDL_OpenJoystick(ids[s]);
+        SDL_Joystick *joy = SDL_JoystickOpen(s);
         if (!joy) continue;
-        float v = SDL_GetJoystickAxis(joy, joy_bind_axis[r]) / 32768.0f;
+        float v = SDL_JoystickGetAxis(joy, joy_bind_axis[r]) / 32768.0f;
         if (v < 0) v = -v;
         if (v > m) m = v;
-        SDL_CloseJoystick(joy);
+        SDL_JoystickClose(joy);
     }
-    if (ids) SDL_free(ids);
     return m;
 }
 
@@ -821,30 +820,23 @@ static void draw_joystick_dialog() {
     if (ImGui::BeginPopupModal("Joystick Settings", &joy_dialog_open, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::Text("Deflect an axis to identify it, then bind it to a flight role.");
         ImGui::Separator();
-        SDL_UpdateJoysticks();   // refresh axis state (also for a just-hotplugged joystick)
-        int n = 0; SDL_JoystickID *ids = SDL_GetJoysticks(&n);
+        SDL_JoystickUpdate();   // refresh axis state (also for a just-hotplugged joystick)
+        int n = SDL_NumJoysticks();
         // Persistent open handles: open each device once and reuse across frames so a
         // hotplugged joystick's axis state stays live.
-        static std::map<SDL_JoystickID, SDL_Joystick*> g_joy_open;
-        std::set<SDL_JoystickID> present;
-        for (int i = 0; i < n; ++i) present.insert(ids[i]);
-        // close any handle whose device was removed
-        for (auto it = g_joy_open.begin(); it != g_joy_open.end();) {
-            if (present.find(it->first) == present.end()) { SDL_CloseJoystick(it->second); it = g_joy_open.erase(it); }
-            else ++it;
-        }
-        if (n <= 0 || !ids) {
+        static std::map<int, SDL_Joystick*> g_joy_open;
+        if (n <= 0) {
             ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "No Joystick Detected");
         } else {
             static const char *dd[] = { "none", "x", "y", "z", "throttle" };
             for (int i = 0; i < n; ++i) {
-                SDL_Joystick *joy = g_joy_open[ids[i]];
-                if (!joy) { joy = SDL_OpenJoystick(ids[i]); g_joy_open[ids[i]] = joy; }
+                SDL_Joystick *joy = g_joy_open[i];
+                if (!joy) { joy = SDL_JoystickOpen(i); g_joy_open[i] = joy; }
                 if (!joy) continue;
-                const char *nm = SDL_GetJoystickName(joy);
-                int na = SDL_GetNumJoystickAxes(joy);
+                const char *nm = SDL_JoystickName(joy);
+                int na = SDL_JoystickNumAxes(joy);
                 for (int a = 0; a < na; ++a) {
-                    float val = SDL_GetJoystickAxis(joy, a) / 32768.0f;
+                    float val = SDL_JoystickGetAxis(joy, a) / 32768.0f;
                     int role = role_for_axis(i, a);
                     char id[32]; snprintf(id, sizeof(id), "##joy%d_a%d", i, a);
                     ImGui::Text("%s A%d", nm ? nm : "Joy", a); ImGui::SameLine();
@@ -873,7 +865,6 @@ static void draw_joystick_dialog() {
                 }
             }
         }
-        if (ids) SDL_free(ids);
         ImGui::Separator();
         ImGui::Text("Deadband"); ImGui::SameLine(); ImGui::SetNextItemWidth(90);
         if (ImGui::InputText("##jdb", joy_deadband, sizeof(joy_deadband), ImGuiInputTextFlags_CharsDecimal)) dirty = true;
@@ -1061,7 +1052,7 @@ static std::vector<std::string> capture_conflicts(void) {
     return out;
 }
 
-// Map an SDL3 keycode to the config's key-name convention.
+// Map an SDL keycode to the config's key-name convention.
 static const char *config_key_name(SDL_Keycode key) {
     switch (key) {
         case SDLK_RETURN: return "return";
@@ -1095,13 +1086,9 @@ static const char *config_key_name(SDL_Keycode key) {
     }
 }
 
-// Convert an SDL joystick instance ID to its index in SDL_GetJoysticks().
-static int joystick_index_of(SDL_JoystickID which) {
-    int n = 0; SDL_JoystickID *ids = SDL_GetJoysticks(&n);
-    int idx = -1;
-    for (int i = 0; i < n; i++) if (ids[i] == which) { idx = i; break; }
-    SDL_free(ids);
-    return idx;
+// In SDL2 a joystick device index is already a list index (0..NumJoysticks-1).
+static int joystick_index_of(Sint32 which) {
+    return which >= 0 && which < SDL_NumJoysticks() ? which : -1;
 }
 
 // Map an SDL_HAT_* bitmask to its direction name; NULL for CENTERED.
@@ -1149,24 +1136,24 @@ static void accept_capture(void) {
 // Handle SDL events for binding capture + joystick hotplug.
 static void handle_bindings_event(const SDL_Event *event) {
     if (bind_capturing && cap_open && !bind_capture_cmd.empty()) {
-        if (event->type == SDL_EVENT_KEY_DOWN) {
-            SDL_Keycode kc = event->key.key;
+        if (event->type == SDL_KEYDOWN) {
+            SDL_Keycode kc = event->key.keysym.sym;
             if (kc == SDLK_LSHIFT || kc == SDLK_RSHIFT || kc == SDLK_LCTRL || kc == SDLK_RCTRL
                 || kc == SDLK_LALT || kc == SDLK_RALT || kc == SDLK_LGUI || kc == SDLK_RGUI)
                 return;
             const char *nm = config_key_name(kc);
             if (nm) {
                 std::string k = nm;
-                if ((event->key.mod & SDL_KMOD_SHIFT) && k.size() == 1 && k[0] >= 'a' && k[0] <= 'z')
+                if ((event->key.keysym.mod & KMOD_SHIFT) && k.size() == 1 && k[0] >= 'a' && k[0] <= 'z')
                     k[0] = (char)(k[0] - 'a' + 'A');
                 cap_device = "key"; cap_key = k;
-                cap_modifier = (event->key.mod & SDL_KMOD_CTRL) ? "ctrl"
-                             : ((event->key.mod & SDL_KMOD_ALT) ? "alt" : "none");
+                cap_modifier = (event->key.keysym.mod & KMOD_CTRL) ? "ctrl"
+                             : ((event->key.keysym.mod & KMOD_ALT) ? "alt" : "none");
                 cap_valid = true;
             }
             return;
         }
-        if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+        if (event->type == SDL_MOUSEBUTTONDOWN) {
             bool inframe = event->button.x >= cap_frame_pos.x && event->button.x <= cap_frame_pos.x + cap_frame_size.x
                         && event->button.y >= cap_frame_pos.y && event->button.y <= cap_frame_pos.y + cap_frame_size.y;
             if (inframe) {
@@ -1175,14 +1162,14 @@ static void handle_bindings_event(const SDL_Event *event) {
                 return;
             }
         }
-        if (event->type == SDL_EVENT_JOYSTICK_BUTTON_DOWN) {
+        if (event->type == SDL_JOYBUTTONDOWN) {
             int idx = joystick_index_of(event->jbutton.which);
             cap_device = "joystick"; cap_btn = std::to_string(event->jbutton.button);
             cap_idx = (idx < 0) ? std::to_string(event->jbutton.which) : std::to_string(idx);
             cap_modifier = "none"; cap_valid = true;
             return;
         }
-        if (event->type == SDL_EVENT_JOYSTICK_HAT_MOTION) {
+        if (event->type == SDL_JOYHATMOTION) {
             const char *dir = hat_value_name(event->jhat.value);
             if (dir) {
                 int idx = joystick_index_of(event->jhat.which);
@@ -1196,8 +1183,8 @@ static void handle_bindings_event(const SDL_Event *event) {
             return;
         }
     }
-    if (event->type == SDL_EVENT_JOYSTICK_ADDED || event->type == SDL_EVENT_JOYSTICK_REMOVED)
-        SDL_UpdateJoysticks();
+    if (event->type == SDL_JOYDEVICEADDED || event->type == SDL_JOYDEVICEREMOVED)
+        SDL_JoystickUpdate();
 }
 
 // Capture Binding modal.

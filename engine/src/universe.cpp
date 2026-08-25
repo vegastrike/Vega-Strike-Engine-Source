@@ -38,6 +38,8 @@
 #include "root_generic/galaxy_xml.h"
 #include <algorithm>
 #include "src/config_xml.h"
+#include "gldrv/winsys.h"
+#include "gui/config_screen.h"
 #include "root_generic/vs_globals.h"
 #include "src/audiolib.h"
 #include "cmd/script/mission.h"
@@ -438,6 +440,9 @@ void Universe::StartDraw() {
             activeStarSystem()->Draw();
         }
 
+        // In-game config overlay (Alt+C) on top — no-op unless optionsActive.
+        DrawConfigOverlay();
+
         // ImGui End Frame
         ImGui::End();
         // Rendering
@@ -833,6 +838,20 @@ UnitCollection &Universe::getActiveStarSystemUnitList() {
 
 unsigned int Universe::numPlayers() {
     return _cockpits.size();
+}
+
+void Universe::ToggleOptionsActive() {
+    optionsActive = !optionsActive;
+    // Show the cursor when the config screen is open (so the user can click),
+    // hide it again when closed. The in-flight HUD keeps the cursor hidden.
+    winsys_show_cursor(optionsActive);
+}
+
+void DrawConfigOverlay() {
+    if (!_Universe->isOptionsActive()) {
+        return;
+    }
+    vs_settings_ng::DrawConfigScreen();
 }
 
 
