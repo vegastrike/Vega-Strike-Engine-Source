@@ -20,6 +20,7 @@
 #include "gfxlib.h"
 #include "cmd/music.h"
 #include "src/audiolib.h"
+#include "src/vs_exit.h"
 #include <boost/json.hpp>
 #include <boost/filesystem.hpp>
 #include "imgui/imgui.h"
@@ -1681,11 +1682,14 @@ void DrawConfigScreen() {
     float btnw = ImGui::CalcTextSize("Save").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
     float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
     // Reserve space at the bottom for the button row (separator + buttons), just
-    // tall enough to contain the buttons, centered.
+    // Reserve space at the bottom for the button row (separator + buttons).
     ImGui::SetCursorPosY(ImGui::GetWindowHeight() - btn_h);
-    float avail = ImGui::GetContentRegionAvail().x;
-    ImGui::SetCursorPosX(fmaxf(0.0f, (avail - (btnw * 2 + ImGui::GetStyle().ItemSpacing.x)) * 0.5f));
     ImGui::Separator();
+    // Center the three buttons (Save + Close + Quit). SetCursorPosX must be applied
+    // AFTER the Separator, which resets the cursor X to the left margin.
+    float avail = ImGui::GetContentRegionAvail().x;
+    float buttons_w = btnw * 3 + ImGui::GetStyle().ItemSpacing.x * 2;
+    ImGui::SetCursorPosX(fmaxf(0.0f, (avail - buttons_w) * 0.5f));
 
     // Save (green when dirty): apply + persist, stay open. Only Close closes.
     const bool save_was_dirty = dirty;
@@ -1728,6 +1732,16 @@ void DrawConfigScreen() {
         close_overlay();
     }
     if (dirty) ImGui::PopStyleColor(2);
+    ImGui::SameLine();
+
+    // Quit (red): exit the game entirely. Unsaved changes are discarded. The full
+    // cleanup path (flush logs, save game, close audio/window) is VSExit(0).
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
+    if (ImGui::Button("Quit", ImVec2(btnw, 0))) {
+        VSExit(0);
+    }
+    ImGui::PopStyleColor(2);
 
     // Input dialogs (open as modals on top).
     if (mouse_dialog_open) ImGui::OpenPopup("Mouse Settings");
