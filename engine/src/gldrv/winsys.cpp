@@ -713,10 +713,17 @@ void winsys_apply_resolution(int width, int height, bool fullscreen) {
 extern int shiftdown(int);
 extern int shiftup(int);
 
+// Debounce state for window resizes. A live drag fires many SIZE_CHANGED/RESIZED
+// events in quick succession; we re-init only after the resize has been quiet for
+// RESIZE_DEBOUNCE_MS, so we don't thrash the re-init on every intermediate frame.
+static int pending_resize_w = -1;
+static int pending_resize_h = -1;
+static Uint32 resize_deadline = 0;
+static const Uint32 RESIZE_DEBOUNCE_MS = 100;
+
 // Handle a window size change (resize or size-changed). Re-binds the game to the
 // new actual window size and requests a redraw so the game re-renders at the new
-// size. Called for both SDL_WINDOWEVENT_RESIZED and SDL_WINDOWEVENT_SIZE_CHANGED;
-// we re-init on every one (can't reliably know which is last across WMs).
+// size. This is the actual re-init; callers debounce it via the resize_request below.
 static void handle_window_resize(int new_w, int new_h) {
     (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = new_w;
     (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = new_h;
@@ -844,16 +851,24 @@ void winsys_process_events() {
                     }
                     break;
 
-                case SDL_WINDOWEVENT_RESIZED:
-#if !(defined (_WIN32) && defined (SDL_WINDOWING ))
-                    handle_window_resize(event.window.data1, event.window.data2);
-#endif
-                    break;
-
-                case SDL_WINDOWEVENT_SIZE_CHANGED:
-                    // A size change (e.g. during a live drag, or from an API call)
-                    // must also re-bind + redraw, same as a completed resize.
-                    handle_window_resize(event.window.data1, event.window.data2);
+                case SDL_WINDOWEVENT:
+                    // event.type == SDL_WINDOWEVENT (0x200); the actual sub-type is
+                    // event.window.event (RESIZED=5, SIZE_CHANGED=6, MOVED=3, ...).
+                    // Record the latest resize; the actual re-init is performed once
+                    // the resize has been quiet for RESIZE_DEBOUNCE_MS (debounced,
+                    // checked after the event pump), so a live drag doesn't thrash it.
+                    switch (event.window.event) {
+                        case SDL_WINDOWEVENT_RESIZED:
+                        case SDL_WINDOWEVENT_SIZE_CHANGED:
+                            pending_resize_w = event.window.data1;
+                            pending_resize_h = event.window.data2;
+                            resize_deadline = SDL_GetTicks() + RESIZE_DEBOUNCE_MS;
+                            break;
+                        default:
+                            // Other window events (moved, exposed, shown, ...)
+                            // need no re-init; ignore.
+                            break;
+                    }
                     break;
 
                 case SDL_JOYDEVICEADDED:
@@ -876,6 +891,14 @@ void winsys_process_events() {
             }
             SDL_LockAudio();
             SDL_UnlockAudio();
+        }
+        // Apply a pending debounced resize now that the resize events have quieted
+        // down (no new event for RESIZE_DEBOUNCE_MS). This re-binds the viewport /
+        // config to the final size and requests a redraw.
+        if (pending_resize_w >= 0 && SDL_GetTicks() >= resize_deadline) {
+            handle_window_resize(pending_resize_w, pending_resize_h);
+            pending_resize_w = -1;
+            pending_resize_h = -1;
         }
         if (redisplay && display_func) {
             redisplay = false;
