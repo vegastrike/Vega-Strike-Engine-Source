@@ -67,6 +67,9 @@ case "${DETECT_MAC_OS_VERSION}" in
     "15.0"|"15.1"|"15.2"|"15.3"|"15.4"|"15.5"|"15.6"|"15.7")
         MAC_OS_NAME="Sequoia"
         ;;
+    "26.0"|"26.1"|"26.2"|"26.3"|"26.4"|"26.5"|"26.6")
+        MAC_OS_NAME="Tahoe"
+        ;;
     *)
         echo "Unknown Mac Release: ${DETECT_MAC_OS_VERSION}"
         exit 1
