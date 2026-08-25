@@ -97,6 +97,8 @@ char SERVER = 0;
 
 //false if command line option --net is given to start without network
 static bool ignore_network = true;
+// Open the in-game settings screen at launch (--configure), before the game is shown.
+static bool g_launch_configure = false;
 // legacy_data_dir_mode determines whether the application should require the data directory to be specified on the command-line or not
 // true - no parameter required, application should start regardless of where it's called from
 // false - parameter required, application should only start if specified
@@ -719,6 +721,13 @@ void bootstrap_main_loop() {
         for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
             _Universe->AccessCockpit(i)->savegame->LoadSavedMissions();
         }
+        // --configure: open the in-game settings screen once bootstrap finishes,
+        // before the flight HUD draws (the game is paused/overlaid on the first
+        // in-game frame).
+        if (g_launch_configure) {
+            g_launch_configure = false;
+            _Universe->ToggleOptionsActive();
+        }
         _Universe->Loop(main_loop);
         ///return to idle func which now should call main_loop mohahahah
         if (configuration().splash.auto_hide) {
@@ -751,6 +760,7 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
         ("version", "Print the version and exit")
         ("debug", boost::program_options::value<char>()->default_value('0'), "Enable debugging output, 1 major warnings, 2 medium, 3 developer notes")
         ("benchmark", boost::program_options::value<double>(), "Benchmark")
+        ("configure", "Open the in-game settings screen at launch (before anything else)")
         ("test-audio", "Run audio tests")  // is handled in readCommandLineOptions, here is serves only for help message
         ("r", "No-op")
         ("f", "No-op")
@@ -792,6 +802,10 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     if (cmd_args.count("version")) {
         std::cout << versionmessage << std::endl;
         exit(0);
+    }
+
+    if (cmd_args.count("configure")) {
+        g_launch_configure = true;
     }
 
     if (cmd_args.count("target")) {
