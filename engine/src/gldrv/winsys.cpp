@@ -55,6 +55,7 @@
 #include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "gui/config_screen.h"
+#include "in_kb.h"
 
 #include "SDL2/SDL_video.h"
 
@@ -580,8 +581,16 @@ void winsys_process_events() {
                     //does same thing as KEYDOWN, but with different state.
                 case SDL_KEYDOWN:
 
+                    // Global (always-active) actions fire in any context (in-flight,
+                    // docked, nav, text) -- e.g. Alt+C (ConfigKey) opens the settings
+                    // screen regardless of where the player is. Handled globally so it
+                    // is not double-fired by the context-specific dispatch below.
+                    SDL_GetMouseState(&x, &y);
+                    if (HandleGlobalKey(event.key.keysym.sym, event.key.keysym.mod, !state, x, y)) {
+                        break;
+                    }
+
                     if (keyboard_func) {
-                        SDL_GetMouseState(&x, &y);
 //                        VS_LOG(debug, (boost::format("Kbd: %1$s mod:%2$x sym:%3$x scan:%4$x")
 //                                       % ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN")
 //                                       % event.key.keysym.mod
