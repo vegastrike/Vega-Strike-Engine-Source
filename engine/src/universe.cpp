@@ -47,6 +47,7 @@
 #include "src/in_kb_data.h"
 #include "src/in_mouse.h"
 #include "src/in_joystick.h"
+#include "gldrv/mouse_cursor.h"
 #include "src/in_main.h"
 #if defined (__APPLE__)
 #import <sys/param.h>
@@ -854,9 +855,24 @@ unsigned int Universe::numPlayers() {
 void Universe::ToggleOptionsActive() {
     optionsActive = !optionsActive;
     fprintf(stderr, "[config-screen debug] ToggleOptionsActive -> %d\n", (int)optionsActive); fflush(stderr);
-    // Show the cursor when the config screen is open (so the user can click),
-    // hide it again when closed. The in-flight HUD keeps the cursor hidden.
-    winsys_show_cursor(optionsActive);
+    // The settings screen shows the VS default (non-crosshair) arrow cursor.
+    // switch the SDL cursor TYPE immediately and show it, not just toggle a
+    // raw OS cursor show/hide (which is why a stale crosshair showed briefly).
+    if (optionsActive) {
+        changeCursor(CursorType::arrow);
+        showCursor();
+    } else {
+        // Back in flight: restore the cursor for the active flight control mode.
+        // Mouse glide -> crosshair, otherwise keep the VS arrow (auto-hide via
+        // the HUD where appropriate).
+        if (configuration().joystick.mouse_cursor) {
+            changeCursor(CursorType::crosshairs);
+            showCursor();
+        } else {
+            changeCursor(CursorType::arrow);
+            hideCursor();
+        }
+    }
     // While the config overlay is open, consume input in winsys (no click-through).
     winsys_set_config_overlay_active(optionsActive);
     // On close, clear any input (mouse/joystick/keyboard) still stuck DOWN
