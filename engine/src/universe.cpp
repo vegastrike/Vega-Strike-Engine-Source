@@ -866,14 +866,19 @@ void Universe::ToggleOptionsActive() {
         // Back in the game: the cursor depends on where the player is.
         // If launched with --configure, the settings screen opened on the base,
         // so closing it goes back to the base -> the VS arrow cursor. Otherwise
-        // restore the flight-control-mode cursor (mouse glide -> crosshair,
-        // else arrow, auto-hidden via the HUD).
+        // restore the flight-control-mode cursor: warp-mode mouse (relative,
+        // recentered) hides the cursor, glide-mode mouse (absolute) shows the
+        // crosshair aim point, and joystick/keyboard (mouse not enabled) hides.
         if (launchedWithConfigure) {
             changeCursor(CursorType::arrow);
             showCursor();
-        } else if (configuration().joystick.mouse_cursor) {
-            changeCursor(CursorType::crosshairs);
-            showCursor();
+        } else if (configuration().mouse.enabled) {
+            if (configuration().joystick.warp_mouse) {
+                hideCursor();
+            } else {
+                changeCursor(CursorType::crosshairs);
+                showCursor();
+            }
         } else {
             changeCursor(CursorType::arrow);
             hideCursor();
