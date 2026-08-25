@@ -75,7 +75,17 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         if (json_value.is_null()) {
             return;
         }
-        const boost::json::object & root_object = json_value.get_object();
+        // engine.json wraps its engine tuning under a "base" object (constants,
+        // components, ai, physics, ...). Parse that as the root so those keys are
+        // loaded; the config split moved them out of config.json into there.
+        // config.json / theme.json / bindings.json have no "base", so they keep
+        // parsing from the document root unchanged.
+        const boost::json::object * root_ptr = &json_value.get_object();
+        const boost::json::value * base_value = root_ptr->if_contains("base");
+        if (base_value != nullptr && base_value->is_object()) {
+            root_ptr = &base_value->get_object();
+        }
+        const boost::json::object & root_object = *root_ptr;
 
 
 
@@ -8603,6 +8613,16 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 splash.auto_hide = boost::json::value_to<bool>(*auto_hide_value_ptr);
             }
 
+            const boost::json::value * loading_sprite_value_ptr = splash_object.if_contains("loading_sprite");
+            if (loading_sprite_value_ptr != nullptr) {
+                splash.loading_sprite = boost::json::value_to<std::string>(*loading_sprite_value_ptr);
+            }
+
+            const boost::json::value * loading_message_value_ptr = splash_object.if_contains("loading_message");
+            if (loading_message_value_ptr != nullptr) {
+                splash.loading_message = boost::json::value_to<std::string>(*loading_message_value_ptr);
+            }
+
         }
 
 
@@ -8947,13 +8967,195 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
 
         }
 
+        // Colors: read straight from the merged config object. theme.json is
+        // already merged into configuration() by vsfilesystem.cpp, so parsing
+        // the "colors" section here picks up every file that contributed one
+        // (datadir defaults, then any homedir overrides).
+        parseColors(root_object);
+
+        // Actions + axes (input bindings): read from the merged object too
+        // (bindings.json). See parseActions()/parseAxes().
+        parseActions(root_object);
+        parseAxes(root_object);
 
     } catch (std::exception const& e) {
         VS_LOG(error, (boost::format("%1%: Exception loading config: '%2%'") % __FUNCTION__ % e.what()));
     }
 }
 
-const vega_config::Configuration& configuration() {
-    static const vega_config::Configuration kConfiguration{};
+// Parse the "colors" section of the merged config into this->colors
+// (section -> { name : [r,g,b,a] }). VegaConfig's ctor reads this map to seed
+// its getColor() lookup table, so all the existing vs_config->getColor(...)
+// call sites keep working unchanged.
+//
+// Schema (theme.json):
+//   "colors": {
+//     "default": { "enemy": [1.0, 0.0, 0.0, 1.0], "friend": [0.0, 1.0, 0.0, 1.0], ... },
+//     "nav":      { "current_system": [1.0, 0.3, 0.3, 1.0], ... },
+//     ...
+//   }
+//
+// Because load_config() is called once per config file (and the same file may
+// be loaded again as a homedir override), a section/name that appears more
+// than once is simply overwritten with the latest value -- later loads win,
+// which matches the overall merge precedence.
+void vega_config::Configuration::parseColors(const boost::json::object& root_object) {
+    const boost::json::value* colors_value_ptr = root_object.if_contains("colors");
+    if (colors_value_ptr == nullptr || !colors_value_ptr->is_object()) {
+        return;  // no colors in this file (e.g. config.json, engine.json)
+    }
+
+    for (const auto& section_entry : colors_value_ptr->get_object()) {
+        const std::string& section = section_entry.key();
+        if (!section_entry.value().is_object()) {
+            continue;
+        }
+        for (const auto& color_entry : section_entry.value().get_object()) {
+            const std::string& name = color_entry.key();
+            if (!color_entry.value().is_array()) {
+                continue;
+            }
+            std::vector<float> rgba;
+            for (const auto& component : color_entry.value().get_array()) {
+                rgba.push_back(boost::json::value_to<float>(component));
+            }
+            if (rgba.size() >= 4) {
+                colors[section][name] = rgba;
+            }
+        }
+    }
+}
+
+// Read one device's array of ActionBinding objects from a JSON array of
+// objects. Each object holds the fields relevant to that device type (a
+// keyboard entry has 'key'+'modifier'; a joystick entry has 'joystick'+'button';
+// etc.). We read every field we know about and let the empty/absent ones stay
+// at their defaults, so a single function can serve keyboard, mouse, joystick
+// and digital-hat arrays.
+static void readBindingArray(const boost::json::array& array, bool is_mouse, std::vector<vega_config::Configuration::ActionBinding>& out) {
+    for (const auto& entry : array) {
+        if (!entry.is_object()) {
+            continue;
+        }
+        const boost::json::object& e = entry.get_object();
+        vega_config::Configuration::ActionBinding b;
+        b.is_mouse = is_mouse;
+        const auto* key = e.if_contains("key");
+        if (key != nullptr) { b.key = boost::json::value_to<std::string>(*key); }
+        const auto* mod = e.if_contains("modifier");
+        if (mod != nullptr) { b.modifier = boost::json::value_to<std::string>(*mod); }
+        const auto* btn = e.if_contains("button");
+        if (btn != nullptr) { b.button = boost::json::value_to<int>(*btn); }
+        const auto* joy = e.if_contains("joystick");
+        if (joy != nullptr) { b.joystick = boost::json::value_to<int>(*joy); }
+        const auto* hsw = e.if_contains("hatswitch");
+        if (hsw != nullptr) { b.hatswitch = boost::json::value_to<int>(*hsw); }
+        const auto* dir = e.if_contains("direction");
+        if (dir != nullptr) { b.direction = boost::json::value_to<std::string>(*dir); }
+        out.push_back(b);
+    }
+}
+
+// Parse the "actions" section of the merged config into this->actions
+// (command -> ActionBindings). Each action has up to four device arrays.
+//
+// Schema (bindings.json):
+//   "actions": {
+//     "ABKey": {
+//       "keyboard": [ { "key": "tab", "modifier": "none" } ],
+//       "mouse":    [ { "button": 2, "modifier": "none" } ],
+//       "joystick": [ { "joystick": 0, "button": 1 } ],
+//       "hat":      [ { "joystick": 0, "hatswitch": 0, "direction": "up" } ]
+//     },
+//     ...
+//   }
+//
+// Overlay/merge semantics: because load_config() is called once per config
+// file (datadir, then homedir), an action may be re-parsed. A homedir
+// overlay array replaces the datadir array for that device (so clearing a
+// binding works); absent device arrays are left as-is. This matches the
+// overall "later loads win" merge precedence.
+void vega_config::Configuration::parseActions(const boost::json::object& root_object) {
+    const boost::json::value* actions_value_ptr = root_object.if_contains("actions");
+    if (actions_value_ptr == nullptr || !actions_value_ptr->is_object()) {
+        return;  // no actions in this file (e.g. theme.json, config.json)
+    }
+
+    for (const auto& action_entry : actions_value_ptr->get_object()) {
+        const std::string& command = action_entry.key();
+        if (!action_entry.value().is_object()) {
+            continue;
+        }
+        // Start from the existing entry (if any) so overlay passes keep any
+        // device arrays the current file does not set.
+        vega_config::Configuration::ActionBindings bindings = actions.count(command) ? actions[command] : vega_config::Configuration::ActionBindings{};
+        const boost::json::object& bindings_object = action_entry.value().get_object();
+
+        const auto* kb_ptr = bindings_object.if_contains("keyboard");
+        if (kb_ptr != nullptr && kb_ptr->is_array()) {
+            bindings.keyboard.clear();
+            readBindingArray(kb_ptr->get_array(), /*is_mouse=*/false, bindings.keyboard);
+        }
+        const auto* ms_ptr = bindings_object.if_contains("mouse");
+        if (ms_ptr != nullptr && ms_ptr->is_array()) {
+            bindings.mouse.clear();
+            readBindingArray(ms_ptr->get_array(), /*is_mouse=*/true, bindings.mouse);
+        }
+        const auto* js_ptr = bindings_object.if_contains("joystick");
+        if (js_ptr != nullptr && js_ptr->is_array()) {
+            bindings.joystick.clear();
+            readBindingArray(js_ptr->get_array(), /*is_mouse=*/false, bindings.joystick);
+        }
+        const auto* ht_ptr = bindings_object.if_contains("hat");
+        if (ht_ptr != nullptr && ht_ptr->is_array()) {
+            bindings.hat.clear();
+            readBindingArray(ht_ptr->get_array(), /*is_mouse=*/false, bindings.hat);
+        }
+        actions[command] = bindings;
+    }
+}
+
+// Parse the "axes" section of the merged config into this->axes
+// (role x/y/z/throttle -> AxisRole).
+//
+// Schema (bindings.json):
+//   "axes": {
+//     "x": { "source": "joystick", "joystick": 0, "axis": 0, "inverse": false },
+//     ...
+//   }
+//
+// Merge/overlay semantics: a homedir overlay may contain only a partial entry
+// (e.g. just { "inverse": true }) to flip a single axis. We therefore start
+// from the existing AxisRole (if any) and only overwrite the fields present,
+// so unset fields keep their datadir values instead of falling back to
+// defaults (which would unbind the axis).
+void vega_config::Configuration::parseAxes(const boost::json::object& root_object) {
+    const boost::json::value* axes_value_ptr = root_object.if_contains("axes");
+    if (axes_value_ptr == nullptr || !axes_value_ptr->is_object()) {
+        return;  // no axes in this file
+    }
+
+    for (const auto& role_entry : axes_value_ptr->get_object()) {
+        const std::string& role = role_entry.key();
+        if (!role_entry.value().is_object()) {
+            continue;
+        }
+        vega_config::Configuration::AxisRole ar = axes.count(role) ? axes[role] : vega_config::Configuration::AxisRole{};
+        const boost::json::object& role_object = role_entry.value().get_object();
+
+        const auto* src = role_object.if_contains("source");
+        if (src != nullptr) { ar.source = boost::json::value_to<std::string>(*src); }
+        const auto* joy = role_object.if_contains("joystick");
+        if (joy != nullptr) { ar.joystick = boost::json::value_to<int>(*joy); }
+        const auto* axis = role_object.if_contains("axis");
+        if (axis != nullptr) { ar.axis = boost::json::value_to<int>(*axis); }
+        const auto* inv = role_object.if_contains("inverse");
+        if (inv != nullptr) { ar.inverse = boost::json::value_to<bool>(*inv); }
+        axes[role] = ar;
+    }
+}
+
+vega_config::Configuration& configuration() {
+    static vega_config::Configuration kConfiguration{};
     return kConfiguration;
 }

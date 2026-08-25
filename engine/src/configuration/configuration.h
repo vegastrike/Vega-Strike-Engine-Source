@@ -31,7 +31,10 @@
 
 #include <string>
 #include <memory>
+#include <map>
+#include <vector>
 #include <boost/filesystem/path.hpp>
+#include <boost/json.hpp>
 
 #include "components/energy_consumer.h"
 
@@ -43,6 +46,16 @@ namespace vega_config {
 
 		void load_config(const std::string& json_text);
 		void load_config(const boost::filesystem::path & config_file_path);
+
+		// Parses the "colors" section (theme.json) into this->colors. Called
+		// from load_config() for each merged config file.
+		void parseColors(const boost::json::object& root_object);
+
+		// Parses the "actions" section (bindings.json) into this->actions.
+		void parseActions(const boost::json::object& root_object);
+
+		// Parses the "axes" section (bindings.json) into this->axes.
+		void parseAxes(const boost::json::object& root_object);
 
 
     struct {
@@ -56,6 +69,44 @@ namespace vega_config {
     struct {
 
     } advanced;
+
+    // --- Actions (input bindings) ---
+    //
+    // command -> per-device binding arrays. This replaces the old flat
+    // 'controls' struct and the vegastrike.config XML <bind> / <axis> blocks.
+    // The engine fills the same in-memory input tables (BindKey/BindJoyKey/...)
+    // from these in GameVegaConfig::bindKeys(); the runtime input system
+    // itself is unchanged.
+    //
+    // Source: bindings.json, section "actions". See parseActions().
+    struct ActionBinding {
+        std::string key;        // keyboard: key name, e.g. "a" or "tab"
+        std::string modifier;   // "none" | "alt" | "ctrl" (shift encoded in key)
+        int button = -1;        // mouse/joystick: button index
+        int joystick = -1;      // joystick: device index (mouse uses -1 + is_mouse)
+        bool is_mouse = false;  // true for mouse-button binds (mouse-as-joystick slot)
+        int hatswitch = -1;     // digital hat: hat index
+        std::string direction;  // digital hat: VS_HAT_* name ("up","right",...)
+    };
+    struct ActionBindings {
+        std::vector<ActionBinding> keyboard;
+        std::vector<ActionBinding> mouse;
+        std::vector<ActionBinding> joystick;
+        std::vector<ActionBinding> hat;
+    };
+    std::map<std::string, ActionBindings> actions;
+
+    // --- Axes (input axes) ---
+    //
+    // role (x/y/z/throttle) -> source device + physical axis + inverse flag.
+    // Source: bindings.json, section "axes". See parseAxes().
+    struct AxisRole {
+        std::string source = "joystick";  // "joystick" | "mouse"
+        int joystick = 0;
+        int axis = -1;
+        bool inverse = false;
+    };
+    std::map<std::string, AxisRole> axes;
 
     struct {
 
@@ -2651,6 +2702,8 @@ namespace vega_config {
 
     struct {
         bool auto_hide = true;
+        std::string loading_sprite = "load_screen.ani";
+        std::string loading_message = "Loading...";
 
     } splash;
 
@@ -2788,9 +2841,25 @@ namespace vega_config {
 
     } weapons;
 
+    // Colors: section -> { name : [r, g, b, a] }.
+    //
+    // Ported from the old vegastrike.config <colors> section, which now lives in
+    // theme.json. The engine merges theme.json into the configuration() object at
+    // startup, so this map is read straight from the merged config. VegaConfig's
+    // ctor seeds its getColor() lookup table from this map, so all the existing
+    // vs_config->getColor(section, name) call sites keep working unchanged.
+    //
+    // Schema (theme.json):
+    //   "colors": {
+    //     "default": { "enemy": [1.0, 0.0, 0.0, 1.0], "friend": [0.0, 1.0, 0.0, 1.0], ... },
+    //     "nav":      { "current_system": [1.0, 0.3, 0.3, 1.0], ... },
+    //     ...
+    //   }
+    std::map<std::string, std::map<std::string, std::vector<float>>> colors;
+
     };
 }
 
-extern const vega_config::Configuration& configuration();
+extern vega_config::Configuration& configuration();
 
 #endif //VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H
