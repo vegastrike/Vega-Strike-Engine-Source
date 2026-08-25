@@ -93,8 +93,8 @@ void ImGui_ApplyPendingFontSize() {
     io.FontDefault = io.Fonts->AddFontDefault(&cfg);
     io.Fonts->Build();
     ImGui_ImplOpenGL3_CreateFontsTexture();
-    // Set the render size explicitly so on-screen text follows the new size.
-    ImGui::GetStyle().FontSizeBase = s_pending_font_size;
+    // The glyph size is set by ImFontConfig.SizePixels above (0.10.x ImGui has
+    // no FontSizeBase member), so text renders at the new size via the atlas.
     s_pending_font_size = 0.0f;
 }
 
