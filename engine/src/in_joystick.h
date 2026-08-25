@@ -32,9 +32,7 @@
  */
 #include "src/in_kb_data.h"
 
-#if defined (HAVE_SDL)
 #include <SDL2/SDL.h>
-#endif //defined (HAVE_SDL)
 
 #include "src/vegastrike.h"
 //#include "glob.h"
@@ -77,17 +75,18 @@ class JoyStick {
 public:
 //initializes the joystick
     JoyStick(int);
+    ~JoyStick();
+// Re-point this slot at a real SDL joystick (hotplug attach). Closes any
+// existing/fake handle, opens the new device, refreshes axis/button/hat counts.
+// The slot's bindings (keyed by slot index) are untouched.
+    void Attach(int device_index);
 //engine calls GetJoyStick to get coordinates and buttons
     void GetJoyStick(float &x, float &y, float &z, int &buttons);
     bool isAvailable(void);
     bool is_around(float axe, float hswitch);
     int NumButtons();
 
-#if defined (HAVE_SDL)
     SDL_Joystick *joy;
-#else //defined (HAVE_SDL)
-    void   *otherdata; //bad form to have an ifdef in a struct
-#endif //defined (HAVE_SDL)
     int nr_of_axes, nr_of_buttons, nr_of_hats;
     int hat_margin;
     size_t player;

@@ -56,6 +56,7 @@
 #include "backends/imgui_impl_sdl2.h"
 #include "gui/config_screen.h"
 #include "in_kb.h"
+#include "in_joystick.h"
 
 #include "SDL2/SDL_video.h"
 
@@ -155,6 +156,31 @@ void winsys_set_config_overlay_active(bool active) {
 
 bool winsys_config_overlay_active() {
     return config_overlay_active;
+}
+
+// Re-attach joysticks when a device is hotplugged (SDL_JOYDEVICEADDED). We use
+// fake-present slots set up at startup (bindings are bound there), so a new
+// device is Attach()ed to the first free physical slot without re-binding
+// (which would cause input inconsistency). On removal the slot just stays; the
+// device detaches. bindings stay valid because they are keyed by slot index.
+static void winsys_refresh_joysticks() {
+    int n = SDL_NumJoysticks();
+    if (n > MAX_JOYSTICKS) {
+        n = MAX_JOYSTICKS;
+    }
+    // Attach each present device index to the matching free physical slot.
+    for (int dev = 0; dev < n; ++dev) {
+        for (int i = 0; i < MAX_JOYSTICKS; ++i) {
+            if (i == MOUSE_JOYSTICK) {
+                continue;
+            }
+            if (joystick[i] != nullptr && joystick[i]->joy == nullptr) {
+                joystick[i]->Attach(dev);
+                VS_LOG(important_info, (boost::format("[hotplug] attached device %1% to slot %2%") % dev % i));
+                break;
+            }
+        }
+    }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -676,6 +702,17 @@ void winsys_process_events() {
                                 event.window.data2);
                     }
 #endif
+                    break;
+
+                case SDL_JOYDEVICEADDED:
+                    // A joystick appeared: attach the new device to a free slot
+                    // (no re-bind — bindings are set at startup).
+                    winsys_refresh_joysticks();
+                    break;
+
+                case SDL_JOYDEVICEREMOVED:
+                    // Joystick removed: the fake slot stays; the device simply
+                    // detaches. Nothing to re-init.
                     break;
 
                 case SDL_QUIT:
