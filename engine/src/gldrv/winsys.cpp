@@ -248,6 +248,31 @@ int native_resolution_y;
 
 /*---------------------------------------------------------------------------*/
 /*!
+ *  Find the SDL display mode matching the requested resolution on the given
+ *  display, returning true if matched. Falls back to the desktop (native) mode
+ *  when the requested resolution isn't an available fullscreen mode, so we never
+ *  fail to enter fullscreen (per Evert: detect available resolutions and only
+ *  offer those; if not gotten, fall back to native).
+ */
+static bool find_fullscreen_display_mode(int display_index, int width, int height,
+        SDL_DisplayMode *out_mode) {
+    int nmodes = SDL_GetNumDisplayModes(display_index);
+    for (int i = 0; i < nmodes; ++i) {
+        SDL_DisplayMode mode;
+        if (SDL_GetDisplayMode(display_index, i, &mode) != 0) continue;
+        if (mode.w == width && mode.h == height) {
+            *out_mode = mode;
+            return true;
+        }
+    }
+    // Not an available fullscreen mode -> fall back to the desktop (native) mode.
+    if (SDL_GetDesktopDisplayMode(display_index, out_mode) == 0) {
+        return true;
+    }
+    return false;
+}
+
+/*!
  *  Sets up the SDL OpenGL rendering context
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
@@ -258,16 +283,25 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
     int bpp = 0; // Bits per pixel?
     int width, height;
+    // Fullscreen uses a real display mode change (SDL_WINDOW_FULLSCREEN +
+    // SDL_SetWindowDisplayMode), so the selected resolution is honored rather
+    // than always rendering at the desktop resolution (SDL_WINDOW_FULLSCREEN_DESKTOP).
+    // If the requested resolution isn't an available fullscreen mode, fall back to
+    // the native/desktop mode (see find_fullscreen_display_mode).
+    SDL_DisplayMode requested_fullscreen_mode;
+    bool have_fullscreen_mode = false;
     if (configuration().graphics.full_screen) {
-        video_flags |= SDL_WINDOW_BORDERLESS;
+        video_flags |= SDL_WINDOW_FULLSCREEN;
 
-        SDL_DisplayMode currentDisplayMode;
-        if (SDL_GetCurrentDisplayMode(screen_number, &currentDisplayMode) != 0) {
-            VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_GetCurrentDisplayMode failed: %1%") % SDL_GetError()), -1);
-        } else {
-            native_resolution_x = currentDisplayMode.w;
-            native_resolution_y = currentDisplayMode.h;
+        // Choose the display mode: the configured resolution if available, else native.
+        have_fullscreen_mode = find_fullscreen_display_mode(screen_number,
+                configuration().graphics.resolution_x, configuration().graphics.resolution_y,
+                &requested_fullscreen_mode);
+        if (!have_fullscreen_mode) {
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("Could not find any fullscreen display mode for display %1%") % screen_number), -1);
         }
+        native_resolution_x = requested_fullscreen_mode.w;
+        native_resolution_y = requested_fullscreen_mode.h;
     } else {
         video_flags |= SDL_WINDOW_RESIZABLE;
 
@@ -357,7 +391,10 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     }
 
     if (configuration().graphics.full_screen) {
-        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        if (have_fullscreen_mode) {
+            SDL_SetWindowDisplayMode(window, &requested_fullscreen_mode);
+        }
     }
 
     if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {
@@ -368,6 +405,12 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     }
 
     SDL_GL_GetDrawableSize(window, &width, &height);
+    // Use the measured drawable size as the render target so the viewport always
+    // matches the actual window/display mode (a mode change may resolve to the
+    // closest mode, or the window may have been clamped). This is the actual size
+    // the game renders into, regardless of the configured request.
+    native_resolution_x = width;
+    native_resolution_y = height;
 
     SDL_GLContext context = SDL_GL_CreateContext(window);
 
@@ -565,7 +608,18 @@ void winsys_apply_resolution(int width, int height, bool fullscreen) {
     }
 
     if (fullscreen) {
-        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        // Request a real fullscreen display mode so the selected resolution is
+        // honored (not always desktop-res). If the exact size isn't an available
+        // fullscreen mode, fall back to native. Update width/height to the mode
+        // actually used so the measurements below track the real render size.
+        SDL_DisplayMode fs_mode;
+        const int screen_number = g.screen;
+        if (find_fullscreen_display_mode(screen_number, width, height, &fs_mode)) {
+            SDL_SetWindowDisplayMode(window, &fs_mode);
+            width = fs_mode.w;
+            height = fs_mode.h;
+        }
     } else {
         SDL_SetWindowFullscreen(window, 0);
         SDL_SetWindowSize(window, width, height);
