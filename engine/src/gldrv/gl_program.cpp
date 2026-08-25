@@ -486,20 +486,6 @@ void GFXReloadDefaultShader() {
     }
 }
 
-// Live-apply the configured shader setting. The shader name is read once into the
-// file-level hifiProgramName when getDefaultProgram() first runs; on an in-game
-// settings change the config value changes but hifiProgramName stays stale, so a
-// plain GFXReloadDefaultShader would recompile the OLD shader (funky colors until
-// restart). Re-read the name from configuration() first, then reload.
-void GFXApplyShaderSetting() {
-#if defined(__APPLE__) && defined (__MACH__)
-    hifiProgramName = configuration().graphics.mac_shader_name;
-#else
-    hifiProgramName = configuration().graphics.shader_name;
-#endif
-    GFXReloadDefaultShader();
-}
-
 enum GameSpeed {
     JUSTRIGHT,
     TOOSLOW,

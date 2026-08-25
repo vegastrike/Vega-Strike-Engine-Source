@@ -73,6 +73,10 @@ static boost::json::value read_config_value(const std::string &path);
 static bool bind_dialog_open = false;
 static bool bind_capturing = false;
 static int  bind_rebind_row = -1;
+
+// Set on Save when a shader config path changed; shows a "restart required"
+// notice (shaders are written out but not hot-applied).
+static bool shader_restart_notice = false;
 static std::string bind_capture_cmd;
 
 enum { FONT_AA_VEC = 0, FONT_VEC, FONT_HELVETICA, FONT_TIMES, FONT_FIXED };
@@ -113,6 +117,20 @@ static std::set<std::string> g_dirty_paths;
 static void mark_dirty(const std::string &path) {
     dirty = true;
     g_dirty_paths.insert(path);
+}
+
+// Shader-related config paths (set by the "shaders" preset). Shaders are NOT
+// hot-applied; a change requires a restart. Flagged on Save so we can tell the
+// user rather than silently applying (or silently skipping) the change.
+static bool shader_config_dirty() {
+    static const char *shader_paths[] = {
+        "graphics.technique_set", "graphics.mac_shader_name",
+        "graphics.default_full_technique", "graphics.default_simple_technique"
+    };
+    for (const char *p : shader_paths) {
+        if (g_dirty_paths.count(p)) return true;
+    }
+    return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -660,9 +678,10 @@ static void reinit_from_saved_config() {
     // Graphics: g_game feature flags + gl_options + GL viewport (reuses initfov
     // and reapply_gl_options, the same copy code as bootstrap).
     GFXReinitConfig();
-    // Shader: re-read the configured shader name and recompile (a stale
-    // hifiProgramName otherwise yields funky colors until restart).
-    GFXApplyShaderSetting();
+    // NOTE: shaders are intentionally NOT hot-applied here. A shader change hits
+    // the OS/driver shader cache and other technique state that can't be safely
+    // reloaded live (it produced funky colors). Shader changes are written out
+    // and require a restart; the Save handler shows a dialog for this.
     // Audio/volume: re-apply the live volume functions from the new config.
     AUDReapplyConfig();
     Music::SetVolume(configuration().audio.music_volume_flt, -1, false);
@@ -1678,6 +1697,11 @@ void DrawConfigScreen() {
         if (dirty) {
             apply_all();
             write_out_dirty();   // persist the dirty paths to the user overlay
+            // If a shader config path changed, we DON'T hot-apply it (unreliable
+            // live); tell the user a restart is required. The change is persisted.
+            if (shader_config_dirty()) {
+                shader_restart_notice = true;
+            }
             // Re-initialize the runtime from the updated in-memory configuration().
             // The game assumed config never changes in-game, so config->runtime
             // copies (g_game feature flags, gl_options, GL viewport, legacy font
@@ -1712,6 +1736,21 @@ void DrawConfigScreen() {
     // Bindings dialog (modal on top).
     if (bind_dialog_open) ImGui::OpenPopup("Bindings");
     draw_bindings_dialog();
+
+    // Shader-change notice (modal on top). Shaders are written out but not
+    // hot-applied; tell the user a restart is required. Dismissed on OK.
+    if (shader_restart_notice) {
+        ImGui::OpenPopup("Shader Change");
+    }
+    if (ImGui::BeginPopupModal("Shader Change", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::TextUnformatted("Shader changes take effect after a restart.");
+        ImGui::TextUnformatted("The new settings were saved. Restart the game to apply them.");
+        if (ImGui::Button("OK", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+            shader_restart_notice = false;
+        }
+        ImGui::EndPopup();
+    }
 
     ImGui::End();
     ImGui::PopStyleColor();
