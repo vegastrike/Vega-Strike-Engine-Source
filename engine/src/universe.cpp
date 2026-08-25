@@ -872,6 +872,11 @@ void Universe::ToggleOptionsActive() {
         if (launchedWithConfigure) {
             changeCursor(CursorType::arrow);
             showCursor();
+            // This --configure arrow-on-close applies only the first time the
+            // screen is exited (it opened on the base at launch). Clear it so a
+            // later in-flight open/close (Alt+C in the cockpit) restores the
+            // normal flight-control-mode cursor instead of always giving arrow.
+            launchedWithConfigure = false;
         } else if (configuration().mouse.enabled) {
             if (configuration().joystick.warp_mouse) {
                 hideCursor();
