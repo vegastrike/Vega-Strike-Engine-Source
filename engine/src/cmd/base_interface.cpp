@@ -731,6 +731,7 @@ void base_main_loop() {
     }
 
     // ImGui Init
+    ImGui_ApplyPendingFontSize();  // apply a pending font-size change before laying out
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
@@ -746,6 +747,11 @@ void base_main_loop() {
 
     // ImGui End Frame
     ImGui::End();
+
+    // In-game config overlay (Alt+C / --configure) on top — a top-level window.
+    // Draw outside main_window so it covers it; no-op unless optionsActive.
+    DrawConfigOverlay();
+
     // Rendering
     ImGui::Render();
 
