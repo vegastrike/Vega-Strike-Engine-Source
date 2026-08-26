@@ -46,6 +46,7 @@
 class Universe {
     // Fields
     bool paused = false;
+    bool optionsActive = false;  // in-game config screen overlay is open (non-blocking pause)
 
 public:
     StarDate current_stardate;
@@ -81,6 +82,8 @@ public:
     }
 
     void TogglePause();
+    void ToggleOptionsActive();
+    bool isOptionsActive() const { return optionsActive; }
 
     //Update starsystems (for server side)
     void Update();
@@ -146,5 +149,10 @@ public:
     UnitCollection &getActiveStarSystemUnitList();
     unsigned int numPlayers();
 };
+
+// Draw the in-game config overlay (transparent, on top) when optionsActive.
+// Called from both the in-flight loop (Universe::StartDraw) and the docked
+// base loop (base_main_loop) so it shows in any context.
+void DrawConfigOverlay();
 
 #endif //VEGA_STRIKE_ENGINE_UNIVERSE_H
