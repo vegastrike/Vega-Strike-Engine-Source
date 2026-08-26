@@ -289,8 +289,12 @@ extern void GetMouseXY(int &mousex, int &mousey);
 
 void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     std::pair<double, double> pair = GetJoystickFromMouse();
-    x = pair.first;
-    y = pair.second;
+    // Sensitivity scales the -1..1 deflection (50 = baseline; higher = more
+    // axis per mouse move). Glide uses absolute position; warp reads deltas via
+    // DealWithWarp (in_mouse.cpp), which keeps the cursor centered as needed.
+    const float sensitivity = configuration().joystick.mouse_sensitivity_flt / 50.0F;
+    x = static_cast<float>(pair.first) * sensitivity;
+    y = static_cast<float>(pair.second) * sensitivity;
     z = 0;
     joy_axis[0] = x;
     joy_axis[1] = y;
