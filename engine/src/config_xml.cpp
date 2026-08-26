@@ -43,6 +43,7 @@
 #include "gfx/loc_select.h"
 #include "src/audiolib.h"
 #include "src/in_joystick.h"
+#include "src/in_kb.h"
 #include "src/main_loop.h" //for CockpitKeys
 #include "gfx/cockpit.h"
 #include "src/in_kb_data.h"
@@ -265,6 +266,29 @@ void GameVegaConfig::bindKeys() {
     const auto & cfg = configuration();
     CommandMap & cmd_map = commandMap;  // command name -> handler (initGlobalCommandMap)
 
+    // Idempotent reset: clear any previously-applied bindings and axis routing
+    // so this can be re-run live (config screen Save) without leaving stale
+    // entries. Mirrors the startup reset (InitJoystick) plus the keyboard and
+    // axis-array clearing.
+    ClearKeyBindings();
+    for (int b = 0; b < NUMJBUTTONS; ++b)
+        for (int j = 0; j < MAX_JOYSTICKS; ++j) UnbindJoyKey(j, b);
+    for (int j = 0; j < MAX_JOYSTICKS; ++j)
+        for (int h = 0; h < MAX_DIGITAL_HATSWITCHES; ++h)
+            for (int v = 0; v < MAX_DIGITAL_VALUES; ++v) UnbindDigitalHatswitchKey(j, h, v);
+    for (int a = 0; a < MAX_AXIS; ++a) {
+        axis_joy[a] = -1;
+        axis_axis[a] = -1;
+        axis_inverse[a] = false;
+    }
+    for (int j = 0; j < MAX_JOYSTICKS; ++j) {
+        if (joystick[j] == nullptr) continue;
+        for (int a = 0; a < MAX_AXES; ++a) {
+            joystick[j]->axis_axis[a] = -1;
+            joystick[j]->axis_inverse[a] = false;
+        }
+    }
+
     // Bind one keyboard entry (a single printable char, or a named special key).
     auto bind_keyboard = [&](const std::string & cmd, const vega_config::Configuration::ActionBinding & b) {
         KBHandler handler = cmd_map[cmd];
@@ -359,11 +383,24 @@ void GameVegaConfig::bindKeys() {
         else if (role == "throttle") { idx = AXIS_THROTTLE; }
         else { VS_LOG(warning, (boost::format("unknown axis %1%") % role)); continue; }
 
+        // Bind the axes according to the selected flight-control device
+        // (input.device), WITHOUT mutating the stored config (so the joystick
+        // bindings survive a mode switch and come back when Joystick is re-selected).
+        //   - Keyboard: no device drives any axis -> all roles unbind.
+        //   - Mouse: only x/y (source=mouse) bind; z/throttle unbind.
+        //   - Joystick: the configured roles bind (joystick.enabled governs).
+        const std::string & device = cfg.input.device;
+        bool is_mouse_axis = (ar.source == "mouse");
+        if (device == "keyboard") {
+            continue;  // keyboard drives no axes
+        }
+        if (device == "mouse" && idx != AXIS_X && idx != AXIS_Y) {
+            continue;  // mouse drives only x/y; keep z/throttle unbound
+        }
         // The device for x/y is decided by the per-role source in bindings.json
         // (axes.x/y.source), NOT by the global mouse.enabled flag - otherwise
         // enabling the mouse would steal x/y away from the joystick. Mouse only
         // drives x/y when that role is explicitly configured as source=mouse.
-        bool is_mouse_axis = (ar.source == "mouse");
         // Joystick axes only apply when the joystick is enabled (Keyboard/Mouse modes disable it).
         if (!is_mouse_axis && !cfg.joystick.enabled) {
             continue;
@@ -436,6 +473,7 @@ CommandMap initGlobalCommandMap() {
     commandMap["SheltonKey"] = FlyByKeyboard::SheltonKey;
     commandMap["MatchSpeedKey"] = FlyByKeyboard::MatchSpeedKey;
     commandMap["PauseKey"] = FireKeyboard::TogglePause;
+    commandMap["ConfigKey"] = FireKeyboard::ToggleConfigScreen;
     commandMap["JumpKey"] = FlyByKeyboard::JumpKey;
     commandMap["AutoKey"] = FlyByKeyboard::AutoKey;
     commandMap["SwitchCombatMode"] = FlyByKeyboard::SwitchCombatModeKey;
