@@ -94,6 +94,11 @@ public:
     bool axis_inverse[MAX_AXES];
     int axis_axis[MAX_AXES];
     float joy_axis[MAX_AXES];
+    // Warp (relative) mouse deflection accumulator: deltas build up a virtual
+    // target deflection that decays back toward center, so the flight controller
+    // turns the ship toward it and stops when it reaches center.
+    float warp_x = 0.0F;
+    float warp_y = 0.0F;
     JoyStick();
     unsigned char digital_hat[MAX_DIGITAL_HATSWITCHES];
 

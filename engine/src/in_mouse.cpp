@@ -104,6 +104,12 @@ int warpallowage = 2;
 // config screen's cursor moves freely. When disabled (glide mode) this is a
 // no-op and the mouse reads absolute position (glide).
 void DealWithWarp(int x, int y) {
+    // Warp (relative) mouse: when the OS cursor reaches the edge warp zone, pull
+    // it back toward the center so it can keep feeding deltas (otherwise the
+    // cursor pins at the screen edge and the warp deflection can't grow further).
+    // Compensate mousex/mousey and queued event positions so the delta stays
+    // correct. Gated: only in warp_mouse mode, only when the mouse-as-joystick is
+    // the active player's controller, and never while the config overlay is open.
     if (configuration().joystick.warp_mouse && !winsys_config_overlay_active()) {
         if (joystick[MOUSE_JOYSTICK]->player < _Universe->numPlayers()) {
             if (x < configuration().joystick.warp_mouse_zone

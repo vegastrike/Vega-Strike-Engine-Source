@@ -40,6 +40,16 @@
 #include "src/in_mouse.h"
 
 #include "root_generic/options.h"
+
+// ANGLE-BASED warp-mouse scale: accumulate this many pixels of physical mouse
+// travel to reach a full -1..1 deflection (at the baseline sensitivity of 50).
+// Kept resolution-independent so a mouse movement means the same ship turn on
+// any display. Tunable like the other response vars.
+static const float MOUSE_PIXELS_PER_FULL = 250.0f;
+// Warp mouse decay time constant (seconds): the accumulated deflection decays
+// exponentially back toward center with this time constant, so the turn eases
+// off over a couple of seconds regardless of frame rate.
+static const float WARP_DECAY_TAU = 0.4f;
 #include <SDL2/SDL_joystick.h>
 #include "configuration/configuration.h"
 #include "gldrv/mouse_cursor.h"
@@ -288,13 +298,75 @@ struct mouseData {
 extern void GetMouseXY(int &mousex, int &mousey);
 
 void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
-    std::pair<double, double> pair = GetJoystickFromMouse();
     // Sensitivity scales the -1..1 deflection (50 = baseline; higher = more
-    // axis per mouse move). Glide uses absolute position; warp reads deltas via
-    // DealWithWarp (in_mouse.cpp), which keeps the cursor centered as needed.
+    // axis per mouse move).
     const float sensitivity = configuration().joystick.mouse_sensitivity_flt / 50.0F;
-    x = static_cast<float>(pair.first) * sensitivity;
-    y = static_cast<float>(pair.second) * sensitivity;
+    if (configuration().joystick.warp_mouse) {
+        // Warp (relative mouse): the mouse movement (delta) deflects a virtual
+        // stick away from center; that deflection then decays back toward center
+        // each frame. The flight controller reads joy_axis as a continuous -1..1
+        // deflection and turns the ship toward it, so as the deflection decays the
+        // ship stops when it reaches center. This gives "move to deflect, then
+        // decay toward a stop" instead of turning forever.
+        //
+        // model:  warp += (delta * gain) [movement builds it, angle-based]
+        //         warp *= decay        [spring back to center]
+        //         clamp to -1..1
+        // The mouse_exponent shapes the response curve, and mouse_deadband gives a
+        // neutral zone so tiny jitter doesn't move the ship.
+        int dx = 0, dy = 0;
+        GetMouseDelta(dx, dy);
+        // ANGLE-BASED: map a fixed physical mouse travel to a fixed deflection,
+        // independent of screen resolution. The deflection is the NET accumulated
+        // relative mouse displacement: moving in one direction builds it, moving
+        // back subtracts it (cancels), so the ship steers to where the cursor
+        // has "displaced" regardless of absolute position.
+        const float gain = sensitivity / MOUSE_PIXELS_PER_FULL;
+        warp_x += static_cast<float>(dx) * gain;
+        warp_y += static_cast<float>(dy) * gain;
+        // Clamp the accumulated displacement to +/-5 so a huge flick doesn't
+        // overdrive the ship, while still letting the deflection move freely
+        // toward/past zero so opposite movement cancels it (the actual turn rate
+        // is clamped to -1..1 downstream in flyjoystick).
+        if (warp_x > 5.0f) { warp_x = 5.0f; }
+        if (warp_x < -5.0f) { warp_x = -5.0f; }
+        if (warp_y > 5.0f) { warp_y = 5.0f; }
+        if (warp_y < -5.0f) { warp_y = -5.0f; }
+        // Time-based decay toward center (frame-rate independent): the deflection
+        // eases back to center over WARP_DECAY_TAU seconds regardless of frame
+        // rate. This is separate from the cancel behavior (opposite movement
+        // subtracts via the accumulation above).
+        const float dt = static_cast<float>(GetElapsedTime());
+        const float decay = std::exp(-dt / WARP_DECAY_TAU);
+        warp_x *= decay;
+        warp_y *= decay;
+        // Dead-band (noise floor) and the response curve. Apply a smooth
+        // deadband that nips tiny jitter but lets the value cross through center
+        // freely so opposite movement cancels symmetrically. Use the full
+        // mouse_exponent as the response curve (warp-only knob; mouse_sensitivity
+        // is shared with glide).
+        const float dead = configuration().joystick.mouse_deadband_flt;
+        const float mexp = configuration().joystick.mouse_exponent_flt > 0.0f
+                ? configuration().joystick.mouse_exponent_flt : 1.0f;
+        auto shape = [&](float v) {
+            float a = std::fabs(v);
+            if (a <= dead) { return 0.0f; }              // neutral/noise floor
+            float s = a - dead;
+            return (v < 0.0f ? -1.0f : 1.0f) * std::pow(s, mexp);
+        };
+        // Do NOT clamp the virtual deflection tightly here: a large displacement
+        // can exceed a full deflection (so it decays over a longer time), and
+        // crucially the value must be able to move freely toward and past zero so
+        // opposite movement cancels it. The actual ship turn rate is clamped to
+        // -1..1 downstream in flyjoystick.
+        x = shape(warp_x) * sensitivity;
+        y = shape(warp_y) * sensitivity;
+    } else {
+        // Glide (absolute) mode: axis = normalized absolute cursor position.
+        std::pair<double, double> pair = GetJoystickFromMouse();
+        x = static_cast<float>(pair.first) * sensitivity;
+        y = static_cast<float>(pair.second) * sensitivity;
+    }
     z = 0;
     joy_axis[0] = x;
     joy_axis[1] = y;
