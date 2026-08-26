@@ -250,6 +250,7 @@ SET(LIBGUI_SOURCES
     src/gui/glut_support.cpp
     src/gui/imgui_support.cpp
     src/gui/config_screen.cpp
+    src/gui/config_screen.h
     src/gui/groupcontrol.cpp
     src/gui/guidefs.cpp
     src/gui/guitexture.cpp
