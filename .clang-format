@@ -1,0 +1,80 @@
+---
+BasedOnStyle: Google
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+---
+Language: Cpp
+InsertBraces: true
+ColumnLimit: 120
+AccessModifierOffset: 0
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossComments: false
+  AcrossEmptyLines: false
+  AlignCompound: true
+  PadOperators: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossComments: false
+  AcrossEmptyLines: false
+  AlignFunctionPointers: true
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossComments: false
+  AcrossEmptyLines: false
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 2
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseExpressionOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBraces: Attach
+ContinuationIndentWidth: 8
+EmptyLineBeforeAccessModifier: LogicalBlock
+FixNamespaceComments: true
+ForEachMacros: [RANGES_FOR, FOREACH, BOOST_FOREACH]
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^((<|")boost/python\.hpp("|>))$'
+    Priority: -2
+  - Regex: '^((<|")Python\.h("|>))$'
+    Priority: -1
+  - Regex: '^<[[:alnum:]._]+>$'
+    Priority: 1
+  - Regex: '^((<|")boost/)'
+    Priority: 2
+  - Regex: '^<[[:alnum:]./_]+>$'
+    Priority: 3
+  - Regex: '^"[[:alnum:]./_]+"$'
+    Priority: 4
+  - Regex: '.*'
+    Priority: 5
+IndentAccessModifiers: false
+IndentExternBlock: Indent
+IndentPPDirectives: AfterHash
+InsertNewlineAtEOF: true
+IntegerLiteralSeparator:
+  Binary: 0
+  Decimal: 3
+  Hex: 0
+KeepEmptyLines:
+  AtEndOfFile: false
+  AtStartOfBlock: false
+  AtStartOfFile: false
+LineEnding: LF
+MaxEmptyLinesToKeep: 3
+NamespaceIndentation: None
+PointerAlignment: Right
+ReferenceAlignment: Pointer
+RemoveParentheses: Leave
+SeparateDefinitionBlocks: Always
+SortIncludes: CaseInsensitive
+SortUsingDeclarations: LexicographicNumeric
+Standard: Latest
+WhitespaceSensitiveMacros: [STRINGIZE, PP_STRINGIZE, BOOST_PP_STRINGIZE]

@@ -158,8 +158,3 @@ std::pair<int, int> GetMousePosition() {
                             static_cast<int>(std::rint(y)));
 }
 
-void SetMousePosition(int x, int y) {
-    SDL_Window *window = SDL_GL_GetCurrentWindow();
-    SDL_WarpMouseInWindow(window, x, y);
-}
-

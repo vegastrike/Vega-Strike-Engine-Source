@@ -191,6 +191,7 @@ SET(LIBVS_LOGGING
 SET(LIBCONFIG
     src/configuration/configuration.cpp
     src/configuration/game_config.cpp
+    src/configuration/json_config_model.cpp
 )
 
 SET(LIBDAMAGE
@@ -248,6 +249,8 @@ SET(LIBGUI_SOURCES
     src/gui/font.cpp
     src/gui/glut_support.cpp
     src/gui/imgui_support.cpp
+    src/gui/config_screen.cpp
+    src/gui/config_screen.h
     src/gui/groupcontrol.cpp
     src/gui/guidefs.cpp
     src/gui/guitexture.cpp
@@ -721,9 +724,6 @@ IF (NOT DISABLE_CLIENT)
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 ENDIF (NOT DISABLE_CLIENT)
 
-# vegasettings
-ADD_SUBDIRECTORY(setup)
-
 # Add other utilities here
 ADD_SUBDIRECTORY(objconv)
 
@@ -1052,6 +1052,7 @@ IF (USE_GTEST)
         src/cmd/tests/csv_tests.cpp
         src/cmd/tests/json_tests.cpp
         src/configuration/tests/configuration_tests.cpp
+        src/configuration/tests/json_config_model_tests.cpp
         src/damage/tests/layer_tests.cpp
         src/damage/tests/object_tests.cpp
         src/resource/tests/cargo_tests.cpp

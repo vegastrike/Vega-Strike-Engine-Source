@@ -87,6 +87,7 @@
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
+#include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
@@ -352,7 +353,7 @@ int main(int argc, char *argv[]) {
 
     // Override config with command line argument
     if (!mission_name.empty()) {
-        (const_cast<vega_config::Configuration &>(configuration())).game_start.default_mission = mission_name;
+        (configuration()).game_start.default_mission = mission_name;
         VS_LOG(info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
 
@@ -485,6 +486,7 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     // create new frame if none is active
     if(owns_frame) {
         // ImGui Init
+        ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
@@ -515,6 +517,7 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     // open a new frame if there was an active one
     if(!owns_frame) {
         // ImGui Init
+        ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
@@ -903,12 +906,12 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     }
 
     if (cmd_args.count("h")) {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = 1024;
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = 768;
+        (configuration()).graphics.resolution_x = 1024;
+        (configuration()).graphics.resolution_y = 768;
     }
     if (cmd_args.count("v")) {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = 1280;
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = 1024;
+        (configuration()).graphics.resolution_x = 1280;
+        (configuration()).graphics.resolution_y = 1024;
     }
 
     if (cmd_args.count("mission_name")) {
