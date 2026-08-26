@@ -38,4 +38,13 @@ extern SDL_Window* current_window;
 void InitGui(SDL_Window *window, const SDL_GLContext *context, float fontSize);
 void CleanupGui();
 
+/** Request that the ImGui font atlas be rebuilt at the given pixel size on the
+ *  next frame (used by settings changes; no-op until the next frame).
+ */
+void RequestImGuiFontSize(float fontSize);
+/** Apply a pending font-size change by rebuilding the font atlas. Call at the
+ *  start of each ImGui frame, before ImGui::NewFrame(). No-op when nothing pending.
+ */
+void ImGui_ApplyPendingFontSize();
+
 #endif // VEGA_STRIKE_LIBRARIES_GUI_GUI_H

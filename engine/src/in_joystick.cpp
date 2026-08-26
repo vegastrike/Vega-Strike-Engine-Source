@@ -47,9 +47,20 @@
 #endif
 
 #include "root_generic/options.h"
+
+// ANGLE-BASED warp-mouse scale: accumulate this many pixels of physical mouse
+// travel to reach a full -1..1 deflection (at the baseline sensitivity of 50).
+// Kept resolution-independent so a mouse movement means the same ship turn on
+// any display. Tunable like the other response vars.
+static const float MOUSE_PIXELS_PER_FULL = 250.0f;
+// Warp mouse decay time constant (seconds): the accumulated deflection decays
+// exponentially back toward center with this time constant, so the turn eases
+// off over a couple of seconds regardless of frame rate.
+static const float WARP_DECAY_TAU = 0.4f;
 #ifdef HAVE_SDL
 #include <SDL3/SDL_joystick.h>
 #include <SDL3/SDL_error.h>
+#include <SDL3/SDL_video.h>
 #endif
 #include "configuration/configuration.h"
 #include "gldrv/mouse_cursor.h"
@@ -187,18 +198,31 @@ void InitJoystick() {
     }
     VS_LOG(important_info, (boost::format("%1% joysticks were found.\n\n") % num_joysticks));
     VS_LOG(important_info, "The names of the joysticks are:\n");
-    if (joysticks) {
-        for (int i1 = 0; i1 < MAX_JOYSTICKS; ++i1) {
-            if (i1 < num_joysticks) {
-                const SDL_JoystickID instance_id = joysticks[i1];
-                VS_LOG(important_info, (boost::format("    %1%\n") % SDL_GetJoystickNameForID(instance_id)));
-                joystick[i1] = new JoyStick(i1, instance_id);
-            } else {
-                joystick[i1] = new JoyStick(i1, 0);
-            }
+    for (int i1 = 0; i1 < MAX_JOYSTICKS; ++i1) {
+        if (i1 == MOUSE_JOYSTICK) {
+            // The mouse-joystick slot is always created as the mouse.
+            joystick[i1] = new JoyStick(i1, 0);
+            continue;
+        }
+        // Always create a fake-present physical slot so bindKeys() binds it
+        // normally (no "not available" refusals / inconsistent half-bound state).
+        // It reports available but has a null SDL handle until a real device
+        // attaches via JoyStick::Attach() on hotplug. GetJoyStick guards the null
+        // handle and returns zeros, so reads on an unattached slot are safe.
+        joystick[i1] = new JoyStick(i1, 0);   // no device yet
+        joystick[i1]->joy = nullptr;
+        joystick[i1]->joy_available = true;
+        joystick[i1]->nr_of_axes = 0;
+        joystick[i1]->nr_of_buttons = 0;
+        joystick[i1]->nr_of_hats = 0;
+        if (joysticks && i1 < num_joysticks) {
+            // A real device is present at startup: attach it to this slot.
+            joystick[i1]->Attach(joysticks[i1]);
         }
     }
-    SDL_free(joysticks);
+    if (joysticks) {
+        SDL_free(joysticks);
+    }
 
 #endif
 }
@@ -271,6 +295,41 @@ JoyStick::JoyStick(const int which, const SDL_JoystickID instance_id) : mouse(wh
     VS_LOG(info, (boost::format("axes: %1% buttons: %2% hats: %3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats));
 }
 
+JoyStick::~JoyStick() {
+#if defined (HAVE_SDL)
+    if (joy != nullptr) {
+        SDL_CloseJoystick(joy);
+        joy = nullptr;
+    }
+#endif
+}
+
+// Re-point this slot at a real SDL joystick (hotplug attach). Closes any
+// existing/fake handle, opens the new device, and refreshes the axis/button/hat
+// counts. The slot's bindings (keyed by slot index) are untouched.
+void JoyStick::Attach(SDL_JoystickID instance_id) {
+#if defined (HAVE_SDL)
+    if (joy != nullptr) {
+        SDL_CloseJoystick(joy);
+        joy = nullptr;
+    }
+    instanceID = instance_id;
+    joy = SDL_OpenJoystick(instance_id);
+    if (joy == nullptr) {
+        joy_available = false;
+        return;
+    }
+    joy_available = true;
+    nr_of_axes = SDL_GetNumJoystickAxes(joy);
+    nr_of_buttons = SDL_GetNumJoystickButtons(joy);
+    nr_of_hats = SDL_GetNumJoystickHats(joy);
+    nr_of_axes = std::min(nr_of_axes, MAX_AXES);
+    nr_of_buttons = std::min(nr_of_buttons, MAX_BUTTONS);
+    nr_of_hats = std::min(nr_of_hats, MAX_DIGITAL_HATSWITCHES);
+    VS_LOG(important_info, (boost::format("[joy] attached slot: axes=%1% buttons=%2% hats=%3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats));
+#endif
+}
+
 void JoyStick::InitMouse(int which) {
     player = 0;     //default to first player
     joy_available = true;
@@ -304,9 +363,75 @@ struct mouseData {
 extern void GetMouseXY(int &mousex, int &mousey);
 
 void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
-    std::pair<double, double> pair = GetJoystickFromMouse();
-    x = pair.first;
-    y = pair.second;
+    // Sensitivity scales the -1..1 deflection (50 = baseline; higher = more
+    // axis per mouse move).
+    const float sensitivity = configuration().joystick.mouse_sensitivity_flt / 50.0F;
+    if (configuration().joystick.warp_mouse) {
+        // Warp (relative mouse): the mouse movement (delta) deflects a virtual
+        // stick away from center; that deflection then decays back toward center
+        // each frame. The flight controller reads joy_axis as a continuous -1..1
+        // deflection and turns the ship toward it, so as the deflection decays the
+        // ship stops when it reaches center. This gives "move to deflect, then
+        // decay toward a stop" instead of turning forever.
+        //
+        // model:  warp += (delta * gain) [movement builds it, angle-based]
+        //         warp *= decay        [spring back to center]
+        //         clamp to -1..1
+        // The mouse_exponent shapes the response curve, and mouse_deadband gives a
+        // neutral zone so tiny jitter doesn't move the ship.
+        int dx = 0, dy = 0;
+        GetMouseDelta(dx, dy);
+        // ANGLE-BASED: map a fixed physical mouse travel to a fixed deflection,
+        // independent of screen resolution. The deflection is the NET accumulated
+        // relative mouse displacement: moving in one direction builds it, moving
+        // back subtracts it (cancels), so the ship steers to where the cursor
+        // has "displaced" regardless of absolute position.
+        const float gain = sensitivity / MOUSE_PIXELS_PER_FULL;
+        warp_x += static_cast<float>(dx) * gain;
+        warp_y += static_cast<float>(dy) * gain;
+        // Clamp the accumulated displacement to +/-5 so a huge flick doesn't
+        // overdrive the ship, while still letting the deflection move freely
+        // toward/past zero so opposite movement cancels it (the actual turn rate
+        // is clamped to -1..1 downstream in flyjoystick).
+        if (warp_x > 5.0f) { warp_x = 5.0f; }
+        if (warp_x < -5.0f) { warp_x = -5.0f; }
+        if (warp_y > 5.0f) { warp_y = 5.0f; }
+        if (warp_y < -5.0f) { warp_y = -5.0f; }
+        // Time-based decay toward center (frame-rate independent): the deflection
+        // eases back to center over WARP_DECAY_TAU seconds regardless of frame
+        // rate. This is separate from the cancel behavior (opposite movement
+        // subtracts via the accumulation above).
+        const float dt = static_cast<float>(GetElapsedTime());
+        const float decay = std::exp(-dt / WARP_DECAY_TAU);
+        warp_x *= decay;
+        warp_y *= decay;
+        // Dead-band (noise floor) and the response curve. Apply a smooth
+        // deadband that nips tiny jitter but lets the value cross through center
+        // freely so opposite movement cancels symmetrically. Use the full
+        // mouse_exponent as the response curve (warp-only knob; mouse_sensitivity
+        // is shared with glide).
+        const float dead = configuration().joystick.mouse_deadband_flt;
+        const float mexp = configuration().joystick.mouse_exponent_flt > 0.0f
+                ? configuration().joystick.mouse_exponent_flt : 1.0f;
+        auto shape = [&](float v) {
+            float a = std::fabs(v);
+            if (a <= dead) { return 0.0f; }              // neutral/noise floor
+            float s = a - dead;
+            return (v < 0.0f ? -1.0f : 1.0f) * std::pow(s, mexp);
+        };
+        // Do NOT clamp the virtual deflection tightly here: a large displacement
+        // can exceed a full deflection (so it decays over a longer time), and
+        // crucially the value must be able to move freely toward and past zero so
+        // opposite movement cancels it. The actual ship turn rate is clamped to
+        // -1..1 downstream in flyjoystick.
+        x = shape(warp_x) * sensitivity;
+        y = shape(warp_y) * sensitivity;
+    } else {
+        // Glide (absolute) mode: axis = normalized absolute cursor position.
+        std::pair<double, double> pair = GetJoystickFromMouse();
+        x = static_cast<float>(pair.first) * sensitivity;
+        y = static_cast<float>(pair.second) * sensitivity;
+    }
     z = 0;
     joy_axis[0] = x;
     joy_axis[1] = y;
@@ -316,7 +441,10 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
 
 void JoyStick::GetJoyStick(float &x, float &y, float &z, long long& buttons) {
     //int status;
-    if (!joy_available) {
+    if (!joy_available || joy == nullptr) {
+        // Unavailable, or a fake slot with no real device attached yet: return
+        // zeros safely so bindings stay bound but produce no input until a real
+        // joystick attaches (JoyStick::Attach).
         for (int a = 0; a < MAX_AXES; a++) {
             joy_axis[a] = 0;
         }

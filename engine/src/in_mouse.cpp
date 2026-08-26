@@ -93,13 +93,54 @@ void AddDelta(int dx, int dy) {
 
 int warpallowage = 2;
 
+// Original warp (relative) mouse: only warp the OS cursor when it reaches the
+// edge warp zone, and compensate the internal mouse/event positions so the
+// delta (`x - mousex`) stays correct. This makes warp flight continuous even at
+// the screen edge (the cursor is pulled back to center so motion keeps flowing)
+// without dragging the cursor around in the middle of the screen.
+//
+// Gated: only in warp_mouse mode, only when the mouse-as-joystick is the active
+// player's controller, and (new) never while the config overlay is open so the
+// config screen's cursor moves freely.
+void DealWithWarp(int x, int y) {
+    // Warp (relative) mouse: when the OS cursor reaches the edge warp zone, pull
+    // it back toward the center so it can keep feeding deltas (otherwise the
+    // cursor pins at the screen edge and the warp deflection can't grow further).
+    // Compensate mousex/mousey and queued event positions so the delta stays
+    // correct. Gated: only in warp_mouse mode, only when the mouse-as-joystick is
+    // the active player's controller, and never while the config overlay is open.
+    if (configuration().joystick.warp_mouse && !winsys_config_overlay_active()) {
+        if (joystick[MOUSE_JOYSTICK]->player < _Universe->numPlayers()) {
+            if (x < configuration().joystick.warp_mouse_zone
+                    || y < configuration().joystick.warp_mouse_zone
+                    || x > configuration().graphics.resolution_x - configuration().joystick.warp_mouse_zone
+                    || y > configuration().graphics.resolution_y - configuration().joystick.warp_mouse_zone) {
+
+                int delx = -x + configuration().graphics.resolution_x / 2;
+                int dely = -y + configuration().graphics.resolution_y / 2;
+                mousex += delx;
+                mousey += dely;
+                deque<MouseEvent>::iterator i;
+                for (i = eventQueue.begin(); i != eventQueue.end(); i++) {
+                    i->x += delx;
+                    i->y += dely;
+                }
+                if (warpallowage-- >= 0) {
+                    winsys_warp_pointer(configuration().graphics.resolution_x / 2, configuration().graphics.resolution_y / 2);
+                }
+            }
+        }
+    }
+}
 
 void mouseDragQueue(int x, int y) {
     eventQueue.push_back(MouseEvent(MouseEvent::DRAG, -1, -1, -1, x, y));
+    DealWithWarp(x, y);
 }
 
 void mouseMotionQueue(int x, int y) {
     eventQueue.push_back(MouseEvent(MouseEvent::MOTION, -1, -1, -1, x, y));
+    DealWithWarp(x, y);
 }
 
 int lookupMouseButton(int b) {
@@ -194,6 +235,16 @@ void InitMouse() {
         UnbindMouse(a);
     }
     RestoreMouse();
+}
+
+// Clear all mouse button states to RELEASE. Called when the config overlay
+// closes so a button pressed inside it (whose release was swallowed by the
+// overlay input path) doesn't stay DOWN and fire a command continuously (e.g.
+// FireKey looping while polling the mouse/joystick slot).
+void ResetMouseState() {
+    for (int a = 0; a < NUM_BUTTONS + 1; a++) {
+        MouseState[a] = RELEASE;
+    }
 }
 
 void ProcessMouse() {
