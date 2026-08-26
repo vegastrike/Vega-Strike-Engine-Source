@@ -27,18 +27,10 @@
 
 #include <png.h>
 #include "glut_support.h"
-#include "gfx/sprite.h"
-#include "root_generic/vs_globals.h"
-#include "gfx/aux_texture.h"
-#include "root_generic/vs_globals.h"
-#include "src/config_xml.h"
-#include "gfx/vsimage.h"
-#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "gldrv/gl_globals.h"
 #include "configuration/configuration.h"
 
-using namespace VSFileSystem;
 
 #define isspAce(chr)                                                                  \
     ( (chr == '\t') || (chr == '\n') || (chr == '\v') || (chr == '\f') || (chr == '\r') \
@@ -151,80 +143,3 @@ float WidthOfChar(char chr) {
     width /= 2500;
     return width;
 }
-
-static int mmx = 0;
-static int mmy = 0;
-
-void SetSoftwareMousePosition(int x, int y) {
-    mmx = x;
-    mmy = y;
-}
-
-/** Starts a Frame of OpenGL with proper parameters and mouse
- */
-void StartGUIFrame(GFXBOOL clr) {
-    //glutSetCursor(GLUT_CURSOR_INHERIT);
-    //GFXViewPort (0,0,configuration().graphics.resolution_x,configuration().graphics.resolution_y);
-    GFXHudMode(true);
-    GFXColor4f(1, 1, 1, 1);
-
-    GFXDisable(DEPTHTEST);
-    GFXEnable(DEPTHWRITE);
-    GFXDisable(LIGHTING);
-    GFXDisable(CULLFACE);
-    GFXClear(clr);
-    GFXDisable(DEPTHWRITE);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
-    GFXDisable(TEXTURE1);
-    GFXEnable(TEXTURE0);
-}
-
-void DrawGlutMouse(int mousex, int mousey, VSSprite *spr) {
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
-    GFXColor4f(1, 1, 1, 1);
-    GFXDisable(TEXTURE1);
-    GFXEnable(TEXTURE0);
-    GFXDisable(DEPTHTEST);
-    GFXDisable(LIGHTING);
-    float sizex = 0, sizey = 0;
-    spr->GetSize(sizex, sizey);
-    float tempx = 0, tempy = 0;
-    spr->GetPosition(tempx, tempy);
-    spr->SetPosition(tempx + -1 + .5 * sizex + float(mousex)
-            / (.5 * configuration().graphics.resolution_x), tempy + 1 + .5 * sizey - float(mousey) / (.5 * configuration().graphics.resolution_y));
-    spr->Draw();
-    GFXDisable(TEXTURE0);
-    GFXEnable(TEXTURE0);
-    spr->SetPosition(tempx, tempy);
-}
-
-extern void ConditionalCursorDraw(bool);
-
-void EndGUIFrame(MousePointerStyle pointerStyle) {
-    static VSSprite MouseOverVSSprite("mouseover.spr", BILINEAR, GFXTRUE);
-    static VSSprite MouseVSSprite("mouse.spr", BILINEAR, GFXTRUE);
-    static Texture dummy("white.bmp", 0, NEAREST, TEXTURE2D, TEXTURE_2D, GFXTRUE);
-
-    if (pointerStyle != MOUSE_POINTER_NONE) {
-        dummy.MakeActive();
-        GFXDisable(CULLFACE);
-
-        VSSprite *whichSprite = &MouseVSSprite;
-        switch (pointerStyle) {
-            case MOUSE_POINTER_NORMAL:
-                whichSprite = &MouseVSSprite;
-                break;
-            case MOUSE_POINTER_HOVER:
-                whichSprite = &MouseOverVSSprite;
-                break;
-            case MOUSE_POINTER_NONE:
-                return;
-        }
-
-        //GFXEndScene();bad things...only call this once
-        GFXHudMode(false);
-        GFXEnable(CULLFACE);
-        ConditionalCursorDraw(true);
-    }
-}
-

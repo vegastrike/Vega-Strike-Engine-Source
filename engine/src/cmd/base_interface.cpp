@@ -70,7 +70,6 @@
 #include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_sdlrenderer3.h"
 
 VegaRandom base_interface_random{};
 
@@ -117,7 +116,8 @@ static bool createdbase = false;
 static int createdmusic = -1;
 
 void ModifyMouseSensitivity(int &x, int &y) {
-    biModifyMouseSensitivity(x, y, false);
+    // FIXME enabling this breaks mouse over events in the main menu
+    // biModifyMouseSensitivity(x, y, false);
 }
 
 #ifdef BASE_MAKER
@@ -146,8 +146,37 @@ std::vector<unsigned int> base_keyboard_queue;
 
 #define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
 
+// Letterboxed base viewport rect (in configured-resolution space), centered, from
+// graphics.bases.max_width/height. Returns false if no letterbox applies (the base
+// should fill the whole screen). This is the base-aspect viewport the imgui bases
+// render into; the GL viewport maps it onto native pixels.
+static bool base_viewport_rect(int &x, int &y, int &w, int &h) {
+    const int sw = configuration().graphics.resolution_x;
+    const int sh = configuration().graphics.resolution_y;
+    const int mw = configuration().graphics.bases.max_width;
+    const int mh = configuration().graphics.bases.max_height;
+    if (mw <= 0 || mh <= 0) return false;
+    int rw = std::min(sw, mw);
+    int rh = std::min(sh, mh);
+    if (rw >= sw && rh >= sh) return false;      // base fills the screen
+    x = (sw - rw) / 2;
+    y = (sh - rh) / 2;
+    w = rw; h = rh;
+    return true;
+}
+
 static void SetupViewport() {
-    glViewport(0, 0, native_resolution_x, native_resolution_y);
+    int vx = 0, vy = 0, vw = 0, vh = 0;
+    if (base_viewport_rect(vx, vy, vw, vh)) {
+        // Map the configured-resolution letterbox onto native (actual) pixels.
+        const int sw = configuration().graphics.resolution_x;
+        const int sh = configuration().graphics.resolution_y;
+        float sx = sw > 0 ? (float)native_resolution_x / sw : 1.0f;
+        float sy = sh > 0 ? (float)native_resolution_y / sh : 1.0f;
+        glViewport((int)(vx * sx), (int)(vy * sy), (int)(vw * sx), (int)(vh * sy));
+    } else {
+        glViewport(0, 0, native_resolution_x, native_resolution_y);
+    }
 }
 
 #undef mymin
@@ -312,7 +341,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         GFXHudMode(GFXFALSE);
         float tmp = configuration().graphics.fov_flt;
         const float standard_fov = configuration().graphics.bases.fov_flt;
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.fov_flt = standard_fov;
+        (configuration()).graphics.fov_flt = standard_fov;
         float tmp1 = _Universe->AccessCamera()->GetFov();
         _Universe->AccessCamera()->SetFov(standard_fov);
         Vector p, q, r;
@@ -358,7 +387,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         _Universe->AccessCamera()->UpdateGFX();
         SetupViewport();
         GFXHudMode(GFXTRUE);
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.fov_flt = tmp;
+        (configuration()).graphics.fov_flt = tmp;
         _Universe->AccessCamera()->SetFov(tmp1);
     }
 }
@@ -569,10 +598,10 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
     const int base_max_height = configuration().graphics.bases.max_height;
     if (base_max_width && base_max_height) {
         if (base_max_width < tmpx) {
-            (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = base_max_width;
+            (configuration()).graphics.resolution_x = base_max_width;
         }
         if (base_max_height < tmpy) {
-            (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = base_max_height;
+            (configuration()).graphics.resolution_y = base_max_height;
         }
     }
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
@@ -600,8 +629,8 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         text.Draw(text.GetText(), 0, true, false, automatte);
     }
     text.background_color= static_cast<ImU32>(tmpbg);
-    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = tmpx;
-    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = tmpy;
+    (configuration()).graphics.resolution_x = tmpx;
+    (configuration()).graphics.resolution_y = tmpy;
 }
 
 void RunPython(const char *filnam) {
@@ -734,21 +763,33 @@ void base_main_loop() {
     }
 
     // ImGui Init
+    ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
     // End ImGui Init
 
-    ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
-    const ImVec2 window_size(configuration().graphics.resolution_x,
-                             configuration().graphics.resolution_y);
-    ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
+    // The base screen is a letterboxed viewport (base-aspect). Size/position the
+    // main window to that rect; fall back to fullscreen when no letterbox applies.
+    int vx = 0, vy = 0, vw = 0, vh = 0;
+    if (base_viewport_rect(vx, vy, vw, vh)) {
+        ImGui::SetNextWindowPos(ImVec2((float)vx, (float)vy), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2((float)vw, (float)vh), ImGuiCond_Always);
+    } else {
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2((float)configuration().graphics.resolution_x,
+                                       (float)configuration().graphics.resolution_y), ImGuiCond_Always);
+    }
     ImGui::Begin("main_window", nullptr, window_flags);
+
+    // hide the mouse cursor, we got a cooler one!
+    ImGui::SetMouseCursor(ImGuiMouseCursor_None);
     
     bool refresh_result = RefreshGUI();
 
     // ImGui End Frame
     ImGui::End();
+    DrawConfigOverlay();  // config overlay on top (no-op unless optionsActive)
     // Rendering
     ImGui::Render();
 
@@ -957,6 +998,8 @@ void BaseInterface::Click(int xint, int yint, int button, int state) {
 }
 
 void BaseInterface::ClickWin(int button, int state, int x, int y) {
+    ModifyMouseSensitivity(x, y);
+    SetSoftwareMousePosition(x, y);
     if (state == WS_MOUSE_DOWN) {
         getMouseButtonMask() |= (1 << (button - 1));
     } else if (state == WS_MOUSE_UP) {
@@ -1533,7 +1576,7 @@ void BaseInterface::Draw() {
 
     GFXColor(0, 0, 0, 0);
     SetupViewport();
-    StartGUIFrame(GFXTRUE);
+    StartGUIFrame();
     if (GetElapsedTime() < 1) {
         AnimatedTexture::UpdateAllFrame();
     }

@@ -27,9 +27,8 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_SPRITE_H
 #define VEGA_STRIKE_ENGINE_GFX_SPRITE_H
 
+#include "imgui/imgui.h"
 #include "src/gfxlib.h"
-
-#include "gfx_generic/quaternion.h"
 
 #include "audio/Types.h"
 #include "audio/Source.h"
@@ -73,6 +72,7 @@ public:
 //Return true if sprite was loaded successfully
     bool LoadSuccess() const;
     void Draw();
+    void DrawWithImGui(ImDrawList *drawList);
 /**
  * Draw at specified coordinates given by 4 endpoints.
  *

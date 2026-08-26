@@ -27,7 +27,6 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_H
 #define VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_H
 
-#include "gui/glut_support.h"
 #include "gfx/nav/navscreenoccupied.h"
 #include "gfx/nav/drawlist.h"
 #include "gfx/nav/navitemtypes.h"
