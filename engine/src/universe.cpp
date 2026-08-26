@@ -70,11 +70,17 @@
 #include "root_generic/options.h"
 
 #include "gui/pause_screen.h"
+#include "gui/imgui_support.h"
+#include "gldrv/winsys.h"
+#include "in_mouse.h"
+#include "in_joystick.h"
 
 #include "imgui/imgui.h"
+#include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
+#include "gui/config_screen.h"
 
 // Using
 using namespace VSFileSystem;
@@ -412,6 +418,7 @@ void Universe::StartDraw() {
 #endif
     GFXBeginScene();
     // ImGui Init
+    ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
@@ -466,6 +473,7 @@ void Universe::StartDraw() {
     UpdateTime();
     UpdateTimeCompressionSounds();
     _Universe->SetActiveCockpit(randomInt(_cockpits.size() - 1, 0));
+    if (!optionsActive) {  // config screen open -> freeze the sim, keep rendering
     for (i = 0; i < star_system.size() && i < configuration().physics.num_running_systems; ++i) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double update_star_system_start_time = realTime();
@@ -488,6 +496,7 @@ void Universe::StartDraw() {
            (boost::format("%1%: Time taken by StarSystem::ProcessPendingJumps(): %2%") % __FUNCTION__ % (
                star_system_process_pending_jumps_end_time - star_system_process_pending_jumps_start_time)));
 #endif
+    }
     for (i = 0; i < _cockpits.size(); ++i) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double process_input_start_time = realTime();
@@ -517,6 +526,7 @@ void Universe::StartDraw() {
 #if defined(LOG_TIME_TAKEN_DETAILS)
     const double gfx_end_scene_start_time = realTime();
 #endif
+    DrawConfigOverlay();  // config overlay on top (no-op unless optionsActive)
     // Rendering imgui frame
     ImGui::Render();
 
@@ -859,6 +869,33 @@ unsigned int Universe::numPlayers() {
 
 void Universe::TogglePause() {
     paused = !paused;
+}
+
+void Universe::ToggleOptionsActive() {
+    optionsActive = !optionsActive;
+    // Show the cursor when the config screen is open (so the user can click),
+    // hide it again when closed. The in-flight HUD keeps the cursor hidden.
+    winsys_show_cursor(optionsActive);
+    // While the config overlay is open, consume input in winsys (no click-through).
+    winsys_set_config_overlay_active(optionsActive);
+    // On close, clear any input (mouse/joystick/keyboard) still stuck DOWN
+    // (its release was swallowed by the overlay input path) so it doesn't fire
+    // a command continuously once flight polling resumes.
+    if (!optionsActive) {
+        ResetMouseState();
+        RestoreJoystickState();
+        RestoreKB();
+    }
+}
+
+void DrawConfigOverlay() {
+    if (!_Universe->isOptionsActive()) {
+        return;
+    }
+    vs_settings_ng::DrawConfigScreen();
+    // The config screen is a clickable GUI overlay; draw the software cursor on
+    // top (the in-flight HUD path otherwise leaves the cursor hidden).
+    DrawMouseCursor(MOUSE_POINTER_NORMAL);
 }
 
 /////////////////////////////////////////////////////////

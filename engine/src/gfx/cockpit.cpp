@@ -1959,7 +1959,35 @@ void GameCockpit::Draw() {
         if ((view == CP_PAN
                 && !mousecursor_pancam)
                 || (view == CP_PANTARGET && !mousecursor_pantgt) || (view == CP_CHASE && !mousecursor_chasecam)) {
-        } 
+        } else {
+            // Mouse flight: draw the crosshair sprite at the mouse position as
+            // the aim point (glide mode; warp mode hides the cursor). Restored
+            // from the vs-05 behavior that commit 58b0fb148 removed.
+            GFXBlendMode(SRCALPHA, INVSRCALPHA);
+            GFXColor4f(1, 1, 1, 1);
+            GFXEnable(TEXTURE0);
+            const float deadband = configuration().joystick.mouse_deadband_flt;
+            const int reverse_spr = configuration().joystick.reverse_mouse_spr ? 1 : -1;
+            const std::string &spr_name = configuration().joystick.mouse_crosshair;
+            static VSSprite MouseVSSprite(spr_name.c_str(), BILINEAR, GFXTRUE);
+            float xcoord = (-1.0F + static_cast<float>(mousex) / (0.5F * configuration().graphics.resolution_x));
+            float ycoord = (-reverse_spr + static_cast<float>(reverse_spr * mousey) / (0.5F * configuration().graphics.resolution_y));
+            MouseVSSprite.SetPosition(xcoord, ycoord);
+            float xs, ys;
+            MouseVSSprite.GetSize(xs, ys);
+            if (xcoord < deadband && ycoord < deadband && xcoord > -deadband && ycoord > -deadband) {
+                // Near the center: shrink so the crosshair doesn't hide the
+                // target, but keep it visible so the player knows where the
+                // mouse actually is.
+                MouseVSSprite.SetSize(xs / 2, ys / 2);
+            } else if (xcoord < deadband && xcoord > -deadband) {
+                MouseVSSprite.SetSize(xs / 2, ys * 5 / 6);
+            } else if (ycoord < deadband && ycoord > -deadband) {
+                MouseVSSprite.SetSize(xs * 5 / 6, ys / 2);
+            }
+            MouseVSSprite.Draw();
+            MouseVSSprite.SetSize(xs, ys);
+        }
     }
     if (view < CP_CHASE && damage_flash_first == false && getNewTime() - shake_time < damage_flash_length) {
         DrawDamageFlash(shake_type);
