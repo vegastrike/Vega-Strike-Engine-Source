@@ -290,8 +290,8 @@ extern void GetMouseXY(int &mousex, int &mousey);
 void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     std::pair<double, double> pair = GetJoystickFromMouse();
     // Sensitivity scales the -1..1 deflection (50 = baseline; higher = more
-    // axis per mouse move). Glide uses absolute position; warp reads deltas via
-    // DealWithWarp (in_mouse.cpp), which keeps the cursor centered as needed.
+    // axis per mouse move). Glide uses absolute position; warp recenters the
+    // cursor each frame so the next read is relative to center.
     const float sensitivity = configuration().joystick.mouse_sensitivity_flt / 50.0F;
     x = static_cast<float>(pair.first) * sensitivity;
     y = static_cast<float>(pair.second) * sensitivity;
@@ -300,6 +300,16 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     joy_axis[1] = y;
     joy_axis[2] = z = 0;
     buttons = getMouseButtonStatus();
+    // Warp (relative) mouse: recenter the OS cursor to the window center each
+    // frame so the deflection read next frame is relative to center (continuous
+    // relative stick). Without this the cursor drifts to the edges and reads as
+    // absolute (glide). This is what makes warp kick in whenever the cursor
+    // moves away from center, not just at the screen edge.
+    if (configuration().joystick.warp_mouse && !winsys_config_overlay_active()) {
+        int w = 0, h = 0;
+        SDL_GetWindowSize(SDL_GL_GetCurrentWindow(), &w, &h);
+        SetMousePosition(w / 2, h / 2);
+    }
 }
 
 void JoyStick::GetJoyStick(float &x, float &y, float &z, int &buttons) {
