@@ -220,7 +220,9 @@ void InitJoystick() {
             joystick[i1]->Attach(joysticks[i1]);
         }
     }
-    if (joysticks) SDL_free(joysticks);
+    if (joysticks) {
+        SDL_free(joysticks);
+    }
 
 #endif
 }
