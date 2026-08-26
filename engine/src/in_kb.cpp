@@ -27,6 +27,7 @@
 
 #include <queue>
 #include <list>
+#include <unordered_set>
 #include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
 #include "src/in_kb.h"
@@ -65,7 +66,7 @@ static bool kbHasBinding(int key, int modifiers) {
 
 // Global (always-active) actions fire in ANY context (in-flight, docked, nav, text),
 // not just the HUD. Add handlers here as more global actions are needed.
-static const KBHandler kGlobalActionHandlers[] = {
+static const std::unordered_set<KBHandler> kGlobalActionHandlers = {
     FireKeyboard::ToggleConfigScreen,
 };
 
@@ -88,13 +89,7 @@ bool HandleGlobalKey(unsigned int ch, unsigned int mod, bool down, int x, int y)
     if (it == keyBindings.end()) {
         return false;
     }
-    bool isGlobal = false;
-    for (KBHandler h : kGlobalActionHandlers) {
-        if (h == it->second.function) {
-            isGlobal = true;
-            break;
-        }
-    }
+    bool isGlobal = kGlobalActionHandlers.count(it->second.function) != 0;
     if (!isGlobal) {
         return false;
     }
