@@ -314,7 +314,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
     if (configuration().graphics.rgb_pixel_format == "undefined") {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
+        (configuration()).graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
     if ((configuration().graphics.rgb_pixel_format.length() == 3) && isdigit(configuration().graphics.rgb_pixel_format[0])
             && isdigit(configuration().graphics.rgb_pixel_format[1]) && isdigit(configuration().graphics.rgb_pixel_format[2])) {
@@ -431,11 +431,11 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     if (drawable_h <= 0) { drawable_h = logical_h; }
     native_resolution_x = drawable_w;
     native_resolution_y = drawable_h;
-    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = logical_w;
-    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = logical_h;
+    (configuration()).graphics.resolution_x = logical_w;
+    (configuration()).graphics.resolution_y = logical_h;
     // Keep the screen aspect consistent with the actual window resolution.
     if (logical_h > 0) {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.aspect_flt =
+        (configuration()).graphics.aspect_flt =
                 (float)logical_w / (float)logical_h;
     }
 
@@ -495,7 +495,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
             SDL_ClearError();
             freeMouseCursors();
             SDL_Quit();
-            (const_cast<vega_config::Configuration &>(configuration())).graphics.gl_accelerated_visual = false;
+            (configuration()).graphics.gl_accelerated_visual = false;
             return false;
         } else {
             VS_LOG(error, "GDI Generic software driver reported, reset failed.");
@@ -625,7 +625,7 @@ void winsys_show_cursor(bool visible) {
 // screen). Sets configuration(), then applies windowed/fullscreen + size via
 // SDL2, and forces the reshape so the viewport/measurements update immediately.
 void winsys_apply_resolution(int width, int height, bool fullscreen) {
-    auto &g = const_cast<vega_config::Configuration &>(configuration()).graphics;
+    auto &g = configuration().graphics;
     g.full_screen = fullscreen;
 
     if (window == nullptr) {
@@ -739,10 +739,10 @@ static void handle_window_resize(int new_w, int new_h) {
         if (lw > 0) { new_w = lw; }
         if (lh > 0) { new_h = lh; }
     }
-    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = new_w;
-    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = new_h;
+    (configuration()).graphics.resolution_x = new_w;
+    (configuration()).graphics.resolution_y = new_h;
     if (new_h > 0) {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.aspect_flt =
+        (configuration()).graphics.aspect_flt =
                 (float)new_w / (float)new_h;
     }
     // Re-bind the GL viewport to the actual drawable size, so the scene renders at
