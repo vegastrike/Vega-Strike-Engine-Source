@@ -305,7 +305,15 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     // relative stick). Without this the cursor drifts to the edges and reads as
     // absolute (glide). This is what makes warp kick in whenever the cursor
     // moves away from center, not just at the screen edge.
-    if (configuration().joystick.warp_mouse && !winsys_config_overlay_active()) {
+    //
+    // Warp is only active in free flight: whenever the cursor is shown (settings
+    // app, docked/base, nav screen, glide-mode crosshair) warp is disabled and
+    // the mouse reads absolute (glide-like) so UI/hud interactions aren't
+    // disrupted by recentering. Cursor visibility is the single robust signal
+    // for "something else is on screen"; the game shows the cursor in those
+    // contexts and hides it only in flight.
+    if (configuration().joystick.warp_mouse && !winsys_config_overlay_active()
+            && SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE) {
         int w = 0, h = 0;
         SDL_GetWindowSize(SDL_GL_GetCurrentWindow(), &w, &h);
         SetMousePosition(w / 2, h / 2);
