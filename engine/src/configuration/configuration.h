@@ -34,7 +34,7 @@
 #include <map>
 #include <vector>
 #include <boost/filesystem/path.hpp>
-#include <boost/json.hpp>
+#include <boost/json/fwd.hpp>
 
 #include "components/energy_consumer.h"
 
