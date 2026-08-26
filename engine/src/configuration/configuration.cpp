@@ -75,7 +75,17 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         if (json_value.is_null()) {
             return;
         }
-        const boost::json::object & root_object = json_value.get_object();
+        // engine.json wraps its engine tuning under a "base" object (constants,
+        // components, ai, physics, ...). Parse that as the root so those keys are
+        // loaded; the config split moved them out of config.json into there.
+        // config.json / theme.json / bindings.json have no "base", so they keep
+        // parsing from the document root unchanged.
+        const boost::json::object * root_ptr = &json_value.get_object();
+        const boost::json::value * base_value = root_ptr->if_contains("base");
+        if (base_value != nullptr && base_value->is_object()) {
+            root_ptr = &base_value->get_object();
+        }
+        const boost::json::object & root_object = *root_ptr;
 
 
 

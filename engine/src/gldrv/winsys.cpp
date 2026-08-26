@@ -713,6 +713,24 @@ void winsys_process_events() {
                     }
                     break;
 
+                case SDL_EVENT_MOUSE_WHEEL:
+                    // SDL3 reports the wheel as its own event (not a button).
+                    // Synthesize wheel-up / wheel-down button presses so the
+                    // existing mouse-button pipeline (lookupMouseButton maps
+                    // WS_WHEEL_UP->3 / WS_WHEEL_DOWN->4) keeps working -- this
+                    // is what drives scrolling in the base computer etc.
+                    if (mouse_func) {
+                        const float wheel_y = event.wheel.y;
+                        if (wheel_y > 0.0F) {
+                            (*mouse_func)(WS_WHEEL_UP, WS_MOUSE_DOWN, event.wheel.mouse_x, event.wheel.mouse_y);
+                            (*mouse_func)(WS_WHEEL_UP, WS_MOUSE_UP, event.wheel.mouse_x, event.wheel.mouse_y);
+                        } else if (wheel_y < 0.0F) {
+                            (*mouse_func)(WS_WHEEL_DOWN, WS_MOUSE_DOWN, event.wheel.mouse_x, event.wheel.mouse_y);
+                            (*mouse_func)(WS_WHEEL_DOWN, WS_MOUSE_UP, event.wheel.mouse_x, event.wheel.mouse_y);
+                        }
+                    }
+                    break;
+
                 case SDL_EVENT_MOUSE_MOTION:
                     if (event.motion.state) {
                         /* buttons are down */
