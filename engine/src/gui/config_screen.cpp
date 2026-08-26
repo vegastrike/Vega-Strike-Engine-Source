@@ -509,6 +509,13 @@ static void apply_flight_to_config() {
     cfg().input.device = (flight_control == FC_MOUSE) ? "mouse"
                        : (flight_control == FC_JOYSTICK) ? "joystick" : "keyboard";
     mark_dirty("input.device");
+    // The enabled flags reflect the active flight-control device (mutually exclusive),
+    // so the cursor logic (mouse.enabled) and bindKeys gating stay consistent on
+    // hot-apply, matching a restart with the saved mode.
+    cfg().mouse.enabled = (flight_control == FC_MOUSE);
+    j.enabled = (flight_control == FC_JOYSTICK);
+    mark_dirty("input.mouse.enabled");
+    mark_dirty("input.joystick.enabled");
     if (flight_control == FC_MOUSE) {
         j.force_use_of_joystick = false;
         j.warp_mouse = true;

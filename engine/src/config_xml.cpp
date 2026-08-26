@@ -359,6 +359,18 @@ void GameVegaConfig::bindKeys() {
         else if (role == "throttle") { idx = AXIS_THROTTLE; }
         else { VS_LOG(warning, (boost::format("unknown axis %1%") % role)); continue; }
 
+        // Unbind this axis up front so a mode switch clears the previous mode's
+        // binding. Otherwise axis_joy[] keeps the stale value (e.g. MOUSE_JOYSTICK
+        // for x/y) when the new mode skips binding this axis via a continue below,
+        // so the old input device still flies the ship on hot-apply. Each device
+        // re-binds only what it owns; the rest stay unbound (-1).
+        axis_joy[idx] = -1;
+        for (int js = 0; js < MAX_JOYSTICKS; ++js) {
+            if (joystick[js] != nullptr) {
+                joystick[js]->axis_axis[idx] = -1;
+            }
+        }
+
         // Bind the axes according to the selected flight-control device
         // (input.device), WITHOUT mutating the stored config (so the joystick
         // bindings survive a mode switch and come back when Joystick is re-selected).

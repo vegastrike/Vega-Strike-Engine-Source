@@ -881,11 +881,12 @@ void Universe::ToggleOptionsActive() {
             changeCursor(CursorType::arrow);
             showCursor();
         } else if (configuration().mouse.enabled) {
-            if (configuration().joystick.warp_mouse) {
-                hideCursor();
-            } else {
+            // Only glide mouse modes show a cursor; warp and no_mouse modes hide it.
+            if (configuration().joystick.mouse_cursor) {
                 changeCursor(CursorType::crosshairs);
                 showCursor();
+            } else {
+                hideCursor();
             }
         } else {
             changeCursor(CursorType::arrow);
