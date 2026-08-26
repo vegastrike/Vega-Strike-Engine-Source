@@ -58,6 +58,12 @@ void InitGui() {
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     ImGuiIO& io = ImGui::GetIO();
+    // The game manages its own cursor (changeCursor/hideCursor/showCursor: arrow in
+    // bases, crosshair in glide mouse, hidden otherwise). By default the ImGui SDL2
+    // backend forces the OS cursor on/off every frame based on ImGui::GetMouseCursor(),
+    // which overrides hideCursor and re-shows the arrow in flight. Stop ImGui from
+    // changing the OS cursor so the game's cursor model wins.
+    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
     io.Fonts->Clear();
     ImFontConfig cfg;
     cfg.SizePixels = 18.0f;
