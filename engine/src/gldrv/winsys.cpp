@@ -376,8 +376,8 @@ static bool get_screen_measurements() {
     if (SDL_GetCurrentRenderOutputSize(renderer, &usable_logical_window_size.w, &usable_logical_window_size.h)) {
         VS_LOG_SDL_SUCCESS(operation_description);
         VS_LOG_SDL_INFO((boost::format("usable logical window size: w=%1%, h=%2%") % usable_logical_window_size.w % usable_logical_window_size.h).str());
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = usable_logical_window_size.w;
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = usable_logical_window_size.h;
+        (configuration()).graphics.resolution_x = usable_logical_window_size.w;
+        (configuration()).graphics.resolution_y = usable_logical_window_size.h;
     } else {
         VS_LOG_SDL_ERROR(operation_description);
         return false;
@@ -409,7 +409,7 @@ static bool setup_sdl_video_mode() {
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
     if (configuration().graphics.rgb_pixel_format == "undefined") {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
+        (configuration()).graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
     if ((configuration().graphics.rgb_pixel_format.length() == 3) && isdigit(configuration().graphics.rgb_pixel_format[0])
             && isdigit(configuration().graphics.rgb_pixel_format[1]) && isdigit(configuration().graphics.rgb_pixel_format[2])) {
@@ -491,7 +491,7 @@ static bool setup_sdl_video_mode() {
             VS_LOG_AND_FLUSH(serious_warning, (boost::format("Creating window and renderer failed with error: %1%") % SDL_GetError()));
             VS_LOG_AND_FLUSH(serious_warning, "Please make sure a graphics card driver is installed and functioning properly.");
             SDL_ClearError();
-            (const_cast<vega_config::Configuration &>(configuration())).graphics.gl_accelerated_visual = false;
+            (configuration()).graphics.gl_accelerated_visual = false;
 
             result = try_creating_window_and_renderer("Vega Strike", width, height, "software", video_flags, &window, &renderer);
             if (result == false) {
@@ -715,7 +715,7 @@ static void winsys_refresh_joysticks() {
 // In fullscreen, SDL_SetWindowSize is ignored; instead match and set a fullscreen
 // display mode (as the startup path does).
 void winsys_apply_resolution(int width, int height, bool fullscreen) {
-    auto &g = const_cast<vega_config::Configuration &>(configuration()).graphics;
+    auto &g = configuration().graphics;
     g.resolution_x = width;
     g.resolution_y = height;
     g.full_screen = fullscreen;

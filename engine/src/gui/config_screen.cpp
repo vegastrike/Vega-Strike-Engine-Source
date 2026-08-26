@@ -207,7 +207,7 @@ static void load_base_aspect_from_config() {
 // ---------------------------------------------------------------------------
 
 static vega_config::Configuration &cfg() {
-    return const_cast<vega_config::Configuration &>(configuration());
+    return configuration();
 }
 
 // Load the display-frame state from Configuration (on first open).

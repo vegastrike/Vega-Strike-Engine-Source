@@ -352,7 +352,7 @@ int main(int argc, char *argv[]) {
 
     // Override config with command line argument
     if (!mission_name.empty()) {
-        (const_cast<vega_config::Configuration &>(configuration())).game_start.default_mission = mission_name;
+        (configuration()).game_start.default_mission = mission_name;
         VS_LOG(info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
 
@@ -890,12 +890,12 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     }
 
     if (cmd_args.count("h")) {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = 1024;
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = 768;
+        (configuration()).graphics.resolution_x = 1024;
+        (configuration()).graphics.resolution_y = 768;
     }
     if (cmd_args.count("v")) {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = 1280;
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = 1024;
+        (configuration()).graphics.resolution_x = 1280;
+        (configuration()).graphics.resolution_y = 1024;
     }
 
     if (cmd_args.count("mission_name")) {
