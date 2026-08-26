@@ -876,11 +876,11 @@ void InitPaths(string conf, string subdir) {
     //   3. Within each group, config.json loads last, so a user-facing setting in config.json
     //      overwrites the same key in engine.json/theme.json/bindings.json.
     for (const std::string & config_file_name : {"bindings.json", "theme.json", "engine.json", "config.json"}) {
-        (const_cast<vega_config::Configuration&>(configuration())).load_config(
+        (configuration()).load_config(
             boost::filesystem::path(datadir + "/" + config_file_name));
     }
     for (const std::string & config_file_name : {"bindings.json", "theme.json", "engine.json", "config.json"}) {
-        (const_cast<vega_config::Configuration&>(configuration())).load_config(
+        (configuration()).load_config(
             boost::filesystem::path(homedir + "/" + config_file_name));
     }
 
