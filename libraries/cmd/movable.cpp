@@ -682,66 +682,8 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     if (amt1.k > ablimit) {
         Res.k = ablimit;
     }
-    // Retro (braking) thrust: afterburn also boosts deceleration, so the
-    // afterburner's extra thrust is available when braking just as it is when
-    // accelerating forward. Mirrors the forward ablimit formula.
-    float retro_limit = unit->drive.retro.Value();
-    if (afterburn) {
-        retro_limit =
-                (unit->afterburner.thrust - unit->drive.retro.Value()) * abfuelclamp
-                + unit->drive.retro.Value() * fuelclamp;
-    }
-    if (amt1.k < -retro_limit) {
-        Res.k = -retro_limit;
-    }
-    if (!afterburn) {
-        // At or above the set speed and moving forward, the FCMP may only
-        // REDIRECT the velocity, not accelerate it. After the per-axis
-        // clamps, remove the component of the final thrust parallel to the
-        // current velocity. The remaining thrust is perpendicular to the
-        // velocity: it rotates the velocity toward the intended (forward)
-        // direction while keeping the speed constant, so the total speed can
-        // never overshoot the set point. This continues until all speed is in
-        // the intended direction.
-        //
-        // IMPORTANT: use the FRESH local velocity (UpCoordinateLevel of the
-        // world velocity), exactly as the FCMP does. The raw Velocity member
-        // is not re-expressed when the ship rotates, so it is stale/mixed
-        // after a turn and projecting against it leaves residuals that
-        // accumulate into overshoot.
-        //
-        // If the perpendicular result exceeds a per-axis thruster limit,
-        // scale it down PRESERVING DIRECTION (never re-clamp per-axis, which
-        // would reintroduce the accelerating component).
-        //
-        // Deceleration is never affected: moving backward (Velocity.k < 0)
-        // skips this, and retro thrust is parallel-negative so it is kept.
-        // Afterburn is exempt: it is meant to accelerate.
-        const Vector local_vel = UpCoordinateLevel(GetVelocity());
-        const float speed = local_vel.Magnitude();
-        if (speed >= unit->computer.set_speed && local_vel.k > 0 && speed > 0) {
-            const Vector vhat = local_vel / speed;
-            const double parallel = Res.Dot(vhat);
-            if (parallel > 0) {
-                Res -= vhat * parallel;
-                // Scale the whole vector down (preserving direction) so each
-                // axis stays within its physical thruster limit.
-                float scale = 1.0f;
-                const float lim_i = fabs(fuelclamp * unit->drive.lateral);
-                const float lim_j = fabs(fuelclamp * unit->drive.vertical);
-                const float lim_k = (Res.k > 0) ? ablimit : retro_limit;
-                if (lim_i > 0 && fabs(Res.i) > lim_i) {
-                    scale = std::min(scale, lim_i / fabs(Res.i));
-                }
-                if (lim_j > 0 && fabs(Res.j) > lim_j) {
-                    scale = std::min(scale, lim_j / fabs(Res.j));
-                }
-                if (lim_k > 0 && fabs(Res.k) > lim_k) {
-                    scale = std::min(scale, lim_k / fabs(Res.k));
-                }
-                Res *= scale;
-            }
-        }
+    if (amt1.k < -unit->drive.retro) {
+        Res.k = -unit->drive.retro;
     }
 
     if (afterburn) {
