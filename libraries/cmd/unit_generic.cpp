@@ -2116,17 +2116,12 @@ bool Unit::UnDock(Unit *utdw) {
 
             // In flight: only glide mouse modes show the crosshair aim point.
             // Warp and no_mouse modes (relative/recentered) hide it, and joystick
-            // / keyboard (mouse not enabled) hides it too.
+            // / keyboard (mouse not enabled) hides it too. In glide the OS cursor
+            // is hidden and the in-game crosshair sprite (drawn in
+            // GameCockpit::Draw) is shown instead (so it can be deadband-scaled
+            // and Y-mirrored for inverse-glide).
             if(IsPlayerShip()) {
-                if(configuration().mouse.enabled) {
-                    if (configuration().joystick.mouse_cursor) {
-                        changeCursor(CursorType::crosshairs);
-                    } else {
-                        hideCursor();
-                    }
-                } else {
-                    hideCursor();
-                }
+                hideCursor();
             }
 
             return true;

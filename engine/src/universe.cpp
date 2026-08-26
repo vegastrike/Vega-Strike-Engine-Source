@@ -881,13 +881,11 @@ void Universe::ToggleOptionsActive() {
             changeCursor(CursorType::arrow);
             showCursor();
         } else if (configuration().mouse.enabled) {
-            // Only glide mouse modes show a cursor; warp and no_mouse modes hide it.
-            if (configuration().joystick.mouse_cursor) {
-                changeCursor(CursorType::crosshairs);
-                showCursor();
-            } else {
-                hideCursor();
-            }
+            // Glide mouse flight: the in-game crosshair sprite (drawn in
+            // GameCockpit::Draw) renders the cursor so we can scale it within the
+            // deadband and mirror its Y for inverse-glide. Hide the OS cursor to
+            // avoid drawing both. Warp and no_mouse modes hide it too.
+            hideCursor();
         } else {
             changeCursor(CursorType::arrow);
             hideCursor();
