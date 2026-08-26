@@ -1250,7 +1250,7 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
     GFXEnable(DEPTHWRITE);
     VIEWSTYLE which = viewStyle;
     float tmpaspect = configuration().graphics.aspect_flt;
-    (const_cast<vega_config::Configuration &>(configuration())).graphics.aspect_flt = w / h;
+    (configuration()).graphics.aspect_flt = w / h;
     _Universe->AccessCamera(which)->SetSubwindow(x, y, w, h);
     _Universe->SelectCamera(which);
     VIEWSTYLE tmp = _Universe->AccessCockpit()->GetView();
@@ -1260,7 +1260,7 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
     GFXClear(GFXFALSE);
     GFXColor4f(1, 1, 1, 1);
     _Universe->activeStarSystem()->Draw(false);
-    (const_cast<vega_config::Configuration &>(configuration())).graphics.aspect_flt = tmpaspect;
+    (configuration()).graphics.aspect_flt = tmpaspect;
     _Universe->AccessCamera(which)->SetSubwindow(0, 0, 1, 1);
     _Universe->AccessCockpit()->SetView(tmp);
     _Universe->AccessCockpit()->SelectProperCamera();

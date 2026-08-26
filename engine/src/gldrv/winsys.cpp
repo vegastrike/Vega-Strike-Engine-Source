@@ -47,12 +47,15 @@
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
 #include "src/config_xml.h"
+#include "src/in_joystick.h"
 #include "root_generic/vs_globals.h"
 #include "src/vs_logging.h"
 #include "root_generic/options.h"
 #include "src/vs_exit.h"
 #include "configuration/configuration.h"
 #include "libraries/gui/gui.h"
+#include "backends/imgui_impl_sdl3.h"
+#include "gui/config_screen.h"
 
 #include <SDL3/SDL_video.h>
 
@@ -373,8 +376,8 @@ static bool get_screen_measurements() {
     if (SDL_GetCurrentRenderOutputSize(renderer, &usable_logical_window_size.w, &usable_logical_window_size.h)) {
         VS_LOG_SDL_SUCCESS(operation_description);
         VS_LOG_SDL_INFO((boost::format("usable logical window size: w=%1%, h=%2%") % usable_logical_window_size.w % usable_logical_window_size.h).str());
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = usable_logical_window_size.w;
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = usable_logical_window_size.h;
+        (configuration()).graphics.resolution_x = usable_logical_window_size.w;
+        (configuration()).graphics.resolution_y = usable_logical_window_size.h;
     } else {
         VS_LOG_SDL_ERROR(operation_description);
         return false;
@@ -406,7 +409,7 @@ static bool setup_sdl_video_mode() {
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
     if (configuration().graphics.rgb_pixel_format == "undefined") {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
+        (configuration()).graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
     if ((configuration().graphics.rgb_pixel_format.length() == 3) && isdigit(configuration().graphics.rgb_pixel_format[0])
             && isdigit(configuration().graphics.rgb_pixel_format[1]) && isdigit(configuration().graphics.rgb_pixel_format[2])) {
@@ -488,7 +491,7 @@ static bool setup_sdl_video_mode() {
             VS_LOG_AND_FLUSH(serious_warning, (boost::format("Creating window and renderer failed with error: %1%") % SDL_GetError()));
             VS_LOG_AND_FLUSH(serious_warning, "Please make sure a graphics card driver is installed and functioning properly.");
             SDL_ClearError();
-            (const_cast<vega_config::Configuration &>(configuration())).graphics.gl_accelerated_visual = false;
+            (configuration()).graphics.gl_accelerated_visual = false;
 
             result = try_creating_window_and_renderer("Vega Strike", width, height, "software", video_flags, &window, &renderer);
             if (result == false) {
@@ -660,6 +663,95 @@ void winsys_show_cursor(bool visible) {
     }
 }
 
+// Whether the in-game config overlay is open. While active, winsys suppresses
+// forwarding mouse/keyboard to the game handlers (the overlay consumes input) so
+// clicks don't pass through to the game behind.
+static bool config_overlay_active = false;
+
+void winsys_set_config_overlay_active(bool active) {
+    config_overlay_active = active;
+}
+
+bool winsys_config_overlay_active() {
+    return config_overlay_active;
+}
+
+// Re-enumerate joysticks and re-bind the actions/axes when a joystick is
+// hotplugged or removed (SDL_EVENT_JOYSTICK_ADDED/REMOVED). DeInit + Init
+// recreate the joystick slots from SDL; bindKeys() re-applies the bound
+// actions/axes to the (now present or now absent) device. bindKeys() is
+// idempotent (it clears then re-binds), so this is safe to call any time.
+static void winsys_refresh_joysticks() {
+    // Hotplug attach (fake-joystick approach): a real joystick appeared. Find the
+    // first physical slot without a real device attached and Attach() the new
+    // device to it. Bindings were set up at startup (fake-present slots), so we
+    // do NOT re-run InitJoystick/bindKeys — re-binding mid-game is what caused
+    // the autofire/input inconsistency. Attaching swaps the SDL handle in place;
+    // the slot's bindings stay valid.
+    int n = 0;
+    SDL_JoystickID *ids = SDL_GetJoysticks(&n);
+    if (!ids || n <= 0) {
+        if (ids) SDL_free(ids);
+        return;
+    }
+    // Attach up to the real devices present, starting from the first slot.
+    for (int dev = 0; dev < n; ++dev) {
+        for (int i = 0; i < MAX_JOYSTICKS; ++i) {
+            if (i == MOUSE_JOYSTICK) continue;
+            if (joystick[i] != nullptr && joystick[i]->joy == nullptr) {
+                joystick[i]->Attach(ids[dev]);
+                VS_LOG(important_info, (boost::format("[hotplug] attached device %1% to slot %2%") % dev % i));
+                break;
+            }
+        }
+    }
+    SDL_free(ids);
+}
+
+// Apply a new resolution/fullscreen to the live window. Reuses the existing
+// windowed-mode resize cascade: SDL_SetWindowSize fires SDL_EVENT_WINDOW_RESIZED,
+// which triggers get_screen_measurements() + the reshape callback (Reshape), which
+// re-inits the viewport and updates configuration().graphics.resolution_x/y.
+// In fullscreen, SDL_SetWindowSize is ignored; instead match and set a fullscreen
+// display mode (as the startup path does).
+void winsys_apply_resolution(int width, int height, bool fullscreen) {
+    auto &g = configuration().graphics;
+    g.resolution_x = width;
+    g.resolution_y = height;
+    g.full_screen = fullscreen;
+
+    int screen_number = g.screen;
+    std::string screen_name;
+    SDL_DisplayID instance_ID = 0;
+    get_sdl_display_name_by_number(screen_number, screen_name, instance_ID);
+
+    if (fullscreen) {
+        SDL_SetWindowFullscreen(window, true);
+        int num_modes = 0;
+        SDL_DisplayMode **modes = SDL_GetFullscreenDisplayModes(instance_ID, &num_modes);
+        if (modes) {
+            for (int i = 0; i < num_modes; ++i) {
+                if (modes[i]->w == width && modes[i]->h == height) {
+                    SDL_SetWindowFullscreenMode(window, modes[i]);
+                    break;
+                }
+            }
+        }
+        if (modes) SDL_free(modes);
+    } else {
+        SDL_SetWindowFullscreen(window, false);
+        SDL_SetWindowSize(window, width, height);
+    }
+
+    // Refresh the measurements + reshape callback so native_resolution_x/y and the
+    // GL viewport update for the new mode. In windowed this normally fires via
+    // SDL_EVENT_WINDOW_RESIZED; fullscreen mode changes may not, so force it here.
+    get_screen_measurements();
+    if (reshape_func) {
+        (*reshape_func)(native_resolution_x, native_resolution_y);
+    }
+}
+
 /*---------------------------------------------------------------------------*/
 /*!
  *  Processes and dispatches events.  This function never returns.
@@ -690,6 +782,12 @@ void winsys_process_events() {
             // forward all events to ImGUI
             ImGui_ImplSDL3_ProcessEvent(&event);
 
+            // Forward to the config screen (binding capture, joystick hotplug)
+            // while it is open.
+            if (config_overlay_active) {
+                vs_settings_ng::HandleConfigEvent(&event);
+            }
+
             // now the VS processing of events
             state = false;
             switch (event.type) {
@@ -697,7 +795,14 @@ void winsys_process_events() {
                     state = true;
                     //does same thing as KEYDOWN, but with different state.
                 case SDL_EVENT_KEY_DOWN:
-                    if (keyboard_func) {
+                    // Global (always-active) actions fire in any context (e.g. ConfigKey/Alt+C).
+                    // Handled globally -> skip the context-specific dispatch so it doesn't double-fire.
+                    if (HandleGlobalKey(event.key.key, event.key.mod, event.key.down, x, y)) {
+                        break;
+                    }
+                    // While the config overlay is open, consume input (don't forward to the
+                    // game) so clicks/keys don't pass through to the game behind.
+                    if (!config_overlay_active && keyboard_func) {
                         SDL_GetMouseState(&x, &y);
                         (*keyboard_func)(event.key.key, event.key.mod, event.key.down, x, y);
                     }
@@ -705,7 +810,7 @@ void winsys_process_events() {
 
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
                 case SDL_EVENT_MOUSE_BUTTON_UP:
-                    if (mouse_func) {
+                    if (!config_overlay_active && mouse_func) {
                         (*mouse_func)(event.button.button,
                             event.button.down,
                             event.button.x,
@@ -734,13 +839,13 @@ void winsys_process_events() {
                 case SDL_EVENT_MOUSE_MOTION:
                     if (event.motion.state) {
                         /* buttons are down */
-                        if (motion_func) {
+                        if (!config_overlay_active && motion_func) {
                             (*motion_func)(event.motion.x,
                                 event.motion.y);
                         }
                     } else {
                         /* no buttons are down */
-                        if (passive_motion_func) {
+                        if (!config_overlay_active && passive_motion_func) {
                             (*passive_motion_func)(event.motion.x,
                                     event.motion.y);
                         }
@@ -754,6 +859,19 @@ void winsys_process_events() {
                         (*reshape_func)(native_resolution_x,
                                 native_resolution_y);
                     }
+                    break;
+
+                case SDL_EVENT_JOYSTICK_ADDED:
+                case SDL_EVENT_GAMEPAD_ADDED:
+                    // A joystick appeared: attach the new device to a fake slot
+                    // (no re-bind — bindings are set at startup).
+                    winsys_refresh_joysticks();
+                    break;
+
+                case SDL_EVENT_JOYSTICK_REMOVED:
+                case SDL_EVENT_GAMEPAD_REMOVED:
+                    // Joystick removed: the fake slot stays; the device simply
+                    // detaches. Nothing to re-init.
                     break;
 
                 case SDL_EVENT_QUIT:
