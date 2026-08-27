@@ -262,6 +262,10 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
         if (c == '\n') {
             pushWord(true);
             finishLine();
+            // Per-line color: each new line starts at the default color, so a
+            // #cR:G:B# tag colors only its own line and the content below it
+            // reverts to white (e.g. the credits headers vs. the body text).
+            currentColor = m_colorU32;
         } else if (c == ' ' && doWrap) {
             pushWord(true);
             lines.back().push_back({" ", currentColor});
