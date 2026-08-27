@@ -43,6 +43,10 @@ Resource<double> ComponentsManager::credits = Resource<double>(0.0, 0.0);
 void ComponentsManager::Load(std::string unit_key) {
     mass = base_mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 0.0);
 
+    // Clear any previously-loaded prohibited upgrades so repeated Load() calls
+    // (e.g. the two calls made from Unit::LoadRow) do not accumulate duplicates.
+    prohibited_upgrades.clear();
+
     // Consumer
     std::string prohibited_upgrades_string = UnitCSVFactory::GetVariable(unit_key, "Prohibited_Upgrades", std::string());
 
@@ -57,17 +61,26 @@ void ComponentsManager::Load(std::string unit_key) {
         std::vector<std::string> parts;
         boost::split(parts, upgrade, boost::is_any_of(":"));
         if (parts.size() == 1) {
-            const std::string& category = parts[0];
-            prohibited_upgrades.emplace_back(category, 0);
+            AddProhibitedUpgrade(parts[0], 0);
         } else if (parts.size() == 2) {
-            const std::string& category = parts[0];
-            const int limit = locale_aware_stoi(parts[1]);
-            //const std::pair<const std::string, const int> pair(category, limit);
-            prohibited_upgrades.emplace_back(category, limit);
+            AddProhibitedUpgrade(parts[0], locale_aware_stoi(parts[1]));
         } else {
             VS_LOG(error, (boost::format("%1%: Invalid format in prohibited upgrades string: %2%") % __FUNCTION__ % upgrade));
         }
     }
+}
+
+// The pre-existing doubling bug (Load() called twice per unit construction)
+// could have left many identical duplicate groups in a save's string. Adding
+// is done deduplicated so a bloated save is collapsed to one copy and repaired
+// on the next save.
+void ComponentsManager::AddProhibitedUpgrade(const std::string& category, int limit) {
+    for (const auto& existing : prohibited_upgrades) {
+        if (existing.first == category && existing.second == limit) {
+            return;
+        }
+    }
+    prohibited_upgrades.emplace_back(category, limit);
 }
 
 void ComponentsManager::Serialize(std::map<std::string, std::string>& unit) const {

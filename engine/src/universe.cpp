@@ -35,14 +35,20 @@
 #include "gfx/aux_texture.h"
 #include "src/profile.h"
 #include "gfx/cockpit.h"
+#include "cmd/base.h"
 #include "root_generic/galaxy_xml.h"
 #include <algorithm>
 #include "src/config_xml.h"
+#include "gldrv/winsys.h"
+#include "gui/config_screen.h"
 #include "root_generic/vs_globals.h"
 #include "src/audiolib.h"
 #include "cmd/script/mission.h"
 #include "src/in_kb.h"
 #include "src/in_kb_data.h"
+#include "src/in_mouse.h"
+#include "src/in_joystick.h"
+#include "gldrv/mouse_cursor.h"
 #include "src/in_main.h"
 #if defined (__APPLE__)
 #import <sys/param.h>
@@ -70,6 +76,7 @@
 #include "root_generic/options.h"
 
 #include "imgui/imgui.h"
+#include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
@@ -423,6 +430,7 @@ void Universe::StartDraw() {
         const double update_gfx_end_time = realTime();
 #endif
         // ImGui Init
+        ImGui_ApplyPendingFontSize();  // apply a pending font-size change before laying out
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
@@ -434,12 +442,22 @@ void Universe::StartDraw() {
         ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
         ImGui::Begin("main_window", nullptr, window_flags);
 
-        if (!RefreshGUI() && !UniverseUtil::isSplashScreenShowing()) {
+        // When the in-game settings overlay (alt+C) is open, skip drawing the
+        // star system/HUD entirely so ONLY the settings screen is shown (the
+        // game is paused, not just frozen). On 0.10.x the HUD draws via its own
+        // GL method (not ImGui), so an opaque ImGui window alone doesn't stop it.
+        if (!optionsActive && !RefreshGUI() && !UniverseUtil::isSplashScreenShowing()) {
             activeStarSystem()->Draw();
         }
 
         // ImGui End Frame
         ImGui::End();
+
+        // In-game config overlay (Alt+C) on top — a top-level window (not nested
+        // inside main_window), so it draws as an opaque fullscreen window that
+        // covers the game behind. No-op unless optionsActive.
+        DrawConfigOverlay();
+
         // Rendering
         ImGui::Render();
 
@@ -458,6 +476,7 @@ void Universe::StartDraw() {
     UpdateTime();
     UpdateTimeCompressionSounds();
     _Universe->SetActiveCockpit(randomInt(_cockpits.size() - 1, 0));
+    if (!optionsActive) {  // config screen open -> freeze the sim, keep rendering
     for (i = 0; i < star_system.size() && i < configuration().physics.num_running_systems; ++i) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double update_star_system_start_time = realTime();
@@ -480,6 +499,7 @@ void Universe::StartDraw() {
            (boost::format("%1%: Time taken by StarSystem::ProcessPendingJumps(): %2%") % __FUNCTION__ % (
                star_system_process_pending_jumps_end_time - star_system_process_pending_jumps_start_time)));
 #endif
+    }
     for (i = 0; i < _cockpits.size(); ++i) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double process_input_start_time = realTime();
@@ -833,6 +853,61 @@ UnitCollection &Universe::getActiveStarSystemUnitList() {
 
 unsigned int Universe::numPlayers() {
     return _cockpits.size();
+}
+
+void Universe::ToggleOptionsActive() {
+    optionsActive = !optionsActive;
+    // The settings screen shows the VS default (non-crosshair) arrow cursor.
+    // switch the SDL cursor TYPE immediately and show it, not just toggle a
+    // raw OS cursor show/hide (which is why a stale crosshair showed briefly).
+    if (optionsActive) {
+        changeCursor(CursorType::arrow);
+        showCursor();
+    } else {
+        // Back in the game: the cursor depends on whether we're flying (HUD active)
+        // or not (docked/on a base). "Flying" = a cockpit with a player ship that is
+        // NOT docked. On a base (BaseInterface::CurrentBase or player->docked) we are
+        // not flying, so use the arrow cursor. In flight: warp-mode mouse (relative,
+        // recentered) hides the cursor, glide-mode mouse (absolute) shows the
+        // crosshair aim point, and joystick/keyboard (mouse not enabled) hides.
+        // This replaces the earlier --configure launch hack with a real state check,
+        // so Alt+C works everywhere (a bonus) yet the close cursor is always right
+        // whether we opened settings in flight or on a base.
+        const Unit *player_ship = _Universe->AccessCockpit()
+                ? _Universe->AccessCockpit()->GetParent() : nullptr;
+        const bool flying = !BaseInterface::CurrentBase && player_ship
+                && !(player_ship->docked & (Unit::DOCKED_INSIDE | Unit::DOCKED));
+        if (!flying) {
+            changeCursor(CursorType::arrow);
+            showCursor();
+        } else if (configuration().mouse.enabled) {
+            // Glide mouse flight: the in-game crosshair sprite (drawn in
+            // GameCockpit::Draw) renders the cursor so we can scale it within the
+            // deadband and mirror its Y for inverse-glide. Hide the OS cursor to
+            // avoid drawing both. Warp and no_mouse modes hide it too.
+            hideCursor();
+        } else {
+            changeCursor(CursorType::arrow);
+            hideCursor();
+        }
+    }
+    // While the config overlay is open, consume input in winsys (no click-through).
+    winsys_set_config_overlay_active(optionsActive);
+    // On close, clear any input (mouse/joystick/keyboard) still stuck DOWN
+    // (its release was swallowed by the overlay input path) so it doesn't fire
+    // a command continuously once flight polling resumes.
+    if (!optionsActive) {
+        ResetMouseState();
+        RestoreJoystickState();
+        RestoreKB();
+    }
+}
+
+void DrawConfigOverlay() {
+    if (!_Universe->isOptionsActive()) {
+        return;
+    }
+    vs_settings_ng::DrawConfigScreen();
 }
 
 

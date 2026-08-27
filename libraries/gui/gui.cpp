@@ -58,12 +58,50 @@ void InitGui() {
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     ImGuiIO& io = ImGui::GetIO();
+    // The game manages its own cursor (changeCursor/hideCursor/showCursor: arrow in
+    // bases, crosshair in glide mouse, hidden otherwise). By default the ImGui SDL2
+    // backend forces the OS cursor on/off every frame based on ImGui::GetMouseCursor(),
+    // which overrides hideCursor and re-shows the arrow in flight. Stop ImGui from
+    // changing the OS cursor so the game's cursor model wins.
+    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
     io.Fonts->Clear();
     ImFontConfig cfg;
     cfg.SizePixels = 18.0f;
     io.FontDefault = io.Fonts->AddFontDefault(&cfg);
 
     gui_initialized = true;
+}
+
+// A pending font-size change, applied synchronously at the NEXT frame start (see
+// ImGui_ApplyPendingFontSize) rather than during the settings Save, so the font
+// texture isn't destroyed/rebuilt mid-frame (which segfaults the GL HUD).
+static float s_pending_font_size = 0.0f;
+
+// Request that the ImGui font atlas be rebuilt at the given pixel size on the
+// next frame. Used by the settings screen font-point control.
+void RequestImGuiFontSize(float fontSize) {
+    if (fontSize <= 0.0f) return;
+    s_pending_font_size = fontSize;
+}
+
+// Apply a pending font-size change by rebuilding the font atlas. Call at the
+// start of each ImGui frame, before ImGui::NewFrame(), so the new atlas is in
+// place for the whole frame and no glyphs reference a destroyed texture.
+void ImGui_ApplyPendingFontSize() {
+    if (s_pending_font_size <= 0.0f) {
+        return;
+    }
+    ImGuiIO &io = ImGui::GetIO();
+    ImGui_ImplOpenGL3_DestroyFontsTexture();
+    io.Fonts->Clear();
+    ImFontConfig cfg;
+    cfg.SizePixels = s_pending_font_size;
+    io.FontDefault = io.Fonts->AddFontDefault(&cfg);
+    io.Fonts->Build();
+    ImGui_ImplOpenGL3_CreateFontsTexture();
+    // The glyph size is set by ImFontConfig.SizePixels above (0.10.x ImGui has
+    // no FontSizeBase member), so text renders at the new size via the atlas.
+    s_pending_font_size = 0.0f;
 }
 
 void CleanupGui() {

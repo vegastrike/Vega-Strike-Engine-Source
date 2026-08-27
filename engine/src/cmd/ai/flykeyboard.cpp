@@ -255,6 +255,12 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
                 KeyboardRollRight(-1);
             }
         }
+        if (SSCK.accelpress > 0) {
+            Accel(1);
+        }
+        if (SSCK.decelpress > 0) {
+            Accel(-1);
+        }
         if (SSCK.ABpress >= 1) {
             Afterburn(1);
         } else {
@@ -274,12 +280,6 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
         }
         if (SSCK.inertialflightpress > 0) {
             InertialFlight(!initial_inertial_mode);
-        }
-        if (SSCK.accelpress > 0) {
-            Accel(1);
-        }
-        if (SSCK.decelpress > 0) {
-            Accel(-1);
         }
     } else {
         if (SSCK.uppress == 0 && SSCK.downpress == 0) {

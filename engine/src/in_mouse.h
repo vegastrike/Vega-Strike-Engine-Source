@@ -34,6 +34,7 @@ int getMouseButtonStatus();  //returns button status that are bitwise anded (i.e
 void InitMouse();
 void RestoreMouse();
 void ProcessMouse();
+void ResetMouseState();
 void BindKey(int key, MouseHandler handler);
 void UnbindMouse(int key);
 int getMouseDrawFunc();

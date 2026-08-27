@@ -80,10 +80,13 @@ unsigned int pullActiveModifiers();
 void setActiveModifiers(unsigned int mask);
 
 unsigned int getModifier(const std::string modifier);
+int getModifier(bool alton, bool cntrlon, bool shifton);
 void ProcessKB();
 void BindKey(int key, unsigned int modifiers, unsigned int player, KBHandler handler, const KBData &data);
 void UnbindKey(int key, unsigned int modifiers);
 void InitKB();
 void RestoreKB();
+// Fire a global (always-active) action if the key maps to one; true if handled.
+bool HandleGlobalKey(unsigned int ch, unsigned int mod, bool down, int x, int y);
 
 #endif //VEGA_STRIKE_ENGINE_IN_KB_H

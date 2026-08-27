@@ -45,6 +45,8 @@
  */
 class Universe {
     // Fields
+    bool optionsActive = false;  // in-game config screen overlay is open (non-blocking pause)
+
 public:
     StarDate current_stardate;
     vector<StarSystem *> star_system;
@@ -141,6 +143,12 @@ public:
     void LoadFactionXML(const char *factfile);
     UnitCollection &getActiveStarSystemUnitList();
     unsigned int numPlayers();
+
+    void ToggleOptionsActive();
+    bool isOptionsActive() const { return optionsActive; }
 };
+
+// Draw the in-game config overlay (transparent, on top) when optionsActive.
+void DrawConfigOverlay();
 
 #endif //VEGA_STRIKE_ENGINE_UNIVERSE_H

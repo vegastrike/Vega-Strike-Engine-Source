@@ -263,6 +263,8 @@ SET(LIBCOMPONENT
 
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
+    src/gui/config_screen.cpp
+    src/gui/config_screen.h
     src/gui/control.cpp
     src/gui/eventmanager.cpp
     src/gui/eventresponder.cpp

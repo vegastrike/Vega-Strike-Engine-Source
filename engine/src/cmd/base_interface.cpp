@@ -309,7 +309,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         GFXHudMode(GFXFALSE);
         float tmp = configuration().graphics.fov_flt;
         const float standard_fov = configuration().graphics.bases.fov_flt;
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.fov_flt = standard_fov;
+        (configuration()).graphics.fov_flt = standard_fov;
         float tmp1 = _Universe->AccessCamera()->GetFov();
         _Universe->AccessCamera()->SetFov(standard_fov);
         Vector p, q, r;
@@ -355,7 +355,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         _Universe->AccessCamera()->UpdateGFX();
         SetupViewport();
         GFXHudMode(GFXTRUE);
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.fov_flt = tmp;
+        (configuration()).graphics.fov_flt = tmp;
         _Universe->AccessCamera()->SetFov(tmp1);
     }
 }
@@ -566,10 +566,10 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
     const int base_max_height = configuration().graphics.bases.max_height;
     if (base_max_width && base_max_height) {
         if (base_max_width < tmpx) {
-            (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = base_max_width;
+            (configuration()).graphics.resolution_x = base_max_width;
         }
         if (base_max_height < tmpy) {
-            (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = base_max_height;
+            (configuration()).graphics.resolution_y = base_max_height;
         }
     }
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
@@ -597,8 +597,8 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         text.Draw(text.GetText(), 0, true, false, automatte);
     }
     text.background_color= static_cast<ImU32>(tmpbg);
-    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = tmpx;
-    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = tmpy;
+    (configuration()).graphics.resolution_x = tmpx;
+    (configuration()).graphics.resolution_y = tmpy;
 }
 
 void RunPython(const char *filnam) {
@@ -731,6 +731,7 @@ void base_main_loop() {
     }
 
     // ImGui Init
+    ImGui_ApplyPendingFontSize();  // apply a pending font-size change before laying out
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
@@ -746,6 +747,11 @@ void base_main_loop() {
 
     // ImGui End Frame
     ImGui::End();
+
+    // In-game config overlay (Alt+C / --configure) on top — a top-level window.
+    // Draw outside main_window so it covers it; no-op unless optionsActive.
+    DrawConfigOverlay();
+
     // Rendering
     ImGui::Render();
 
@@ -976,7 +982,11 @@ void BaseInterface::ClickWin(int button, int state, int x, int y) {
 }
 
 void BaseInterface::PassiveMouseOverWin(int x, int y) {
-    ModifyMouseSensitivity(x, y);
+    // Do NOT apply ModifyMouseSensitivity here. It doubles the mouse position
+    // (a low-res workaround) and clamps at the screen edges, which corrupts
+    // coordinates near the border. The click path (ClickWin) uses raw pixels,
+    // and the computer path applies its own sensitivity handling in
+    // EventManager. Passing raw pixels keeps hover consistent with clicks.
     SetSoftwareMousePosition(x, y);
     if (CurrentBase) {
         if (CurrentBase->CallComp) {
@@ -995,7 +1005,7 @@ void BaseInterface::PassiveMouseOverWin(int x, int y) {
 }
 
 void BaseInterface::ActiveMouseOverWin(int x, int y) {
-    ModifyMouseSensitivity(x, y);
+    // See PassiveMouseOverWin: do NOT apply ModifyMouseSensitivity here.
     SetSoftwareMousePosition(x, y);
     if (CurrentBase) {
         if (CurrentBase->CallComp) {
