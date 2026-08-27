@@ -28,6 +28,7 @@
 #include "control.h"
 #include <vector>
 #include <string>
+#include <cctype>
 #include "guidefs.h"
 #include "imgui/imgui.h"
 
@@ -48,6 +49,27 @@ static const float BOGUS_LINE_SPACING = -100.0; //"NULL" value for line spacing.
 //the fragment with this constant as the start position.
 static const size_t ELLIPSIS_FRAGMENT = 64; //@
 static const std::string ELLIPSIS_STRING = "...";
+
+// Display helper: turn underscores into spaces and capitalize the first letter
+// of each word. Used for base/link labels authored with underscores (e.g.
+// "Upgrade_Ship" -> "Upgrade Ship"). Lives here because it is a text-display
+// concern of the shared drawing library.
+inline std::string beautify(const std::string &input) {
+    std::string result;
+    bool wordStart = true;
+    for (auto i = input.begin(); i != input.end(); ++i) {
+        if (*i == '_') {
+            result += ' ';
+            wordStart = true;
+        } else if (wordStart) {
+            result += static_cast<char>(std::toupper(static_cast<unsigned char>(*i)));
+            wordStart = false;
+        } else {
+            result += *i;
+        }
+    }
+    return result;
+}
 
 struct TextFragment {
     std::string text;

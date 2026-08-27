@@ -463,7 +463,7 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
                     if (draw_text) {
                         GFXDisable(TEXTURE0);
                         ImGuiText text_marker;
-                        text_marker.setText(links[i]->text);
+                        text_marker.setText(beautify(links[i]->text));
                         text_marker.getCharSize(text_wid,
                                 text_hei);                           //get average charactersize
                         float text_pos_x = x + text_offset_x;                                  //align right ...
