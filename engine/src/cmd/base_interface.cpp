@@ -179,6 +179,30 @@ static void SetupViewport() {
     }
 }
 
+// Convert a mouse position (SDL logical window points, i.e. io.DisplaySize space)
+// to base normalized -1..1 coordinates, mapping through the base letterbox window.
+// Returns false if the mouse is outside the base letterbox (in the letterbox bars),
+// in which case the base normalized coords are left untouched.
+static bool mouseToBaseNormalized(int mx, int my, float &nx, float &ny) {
+    // The base letterbox is expressed in configured/logical resolution space, which
+    // is the same space the mouse arrives in (SDL logical points == io.DisplaySize).
+    const int sw = configuration().graphics.resolution_x;
+    const int sh = configuration().graphics.resolution_y;
+    if (sw <= 0 || sh <= 0) return false;
+    int vx = 0, vy = 0, vw = 0, vh = 0;
+    bool letterboxed = base_viewport_rect(vx, vy, vw, vh);
+    if (!letterboxed) {
+        vx = 0; vy = 0; vw = sw; vh = sh;
+    }
+    if (mx < vx || mx >= vx + vw || my < vy || my >= vy + vh) {
+        return false;   // mouse is in the letterbox bars, not over the base
+    }
+    // Map into the letterbox window -> [0,1] -> normalized -1..1 (Y-inverted).
+    nx = 2.0f * static_cast<float>(mx - vx) / static_cast<float>(vw) - 1.0f;
+    ny = 1.0f - 2.0f * static_cast<float>(my - vy) / static_cast<float>(vh);
+    return true;
+}
+
 #undef mymin
 
 BaseInterface::Room::~Room() {
@@ -935,13 +959,13 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
 }
 
 void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
-    // Base-room hitboxes lay out against the base resolution (like the base text),
-    // so the mouse->normalized mapping uses it too.
-    const int brx = configuration().graphics.bases.max_width;
-    const int bry = configuration().graphics.bases.max_height;
-    const std::pair<float,float> pair = CalculateRelativeXY(xbeforecalc, ybeforecalc, brx, bry);
-    const float x = pair.first;
-    const float y = pair.second;
+    // Base-room hitboxes lay out against the base resolution (like the base text), so
+    // map the logical mouse position through the base letterbox into base normalized
+    // -1..1 coordinates. A mouse in the letterbox bars is not over the base.
+    float x = 0.0f, y = 0.0f;
+    if (!mouseToBaseNormalized(xbeforecalc, ybeforecalc, x, y)) {
+        x = 2.0f; y = 2.0f;   // far outside [-1,1] -> MouseOver finds no link
+    }
 
     int i = rooms[curroom]->MouseOver(this,
             x,
@@ -997,10 +1021,10 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
 }
 
 void BaseInterface::Click(int xint, int yint, int button, int state) {
-    const int brx = configuration().graphics.bases.max_width;
-    const int bry = configuration().graphics.bases.max_height;
-    const std::pair<float,float> pair = CalculateRelativeXY(xint, yint, brx, bry);
-    rooms[curroom]->Click(this, pair.first, pair.second, button, state);
+    float nx = 0.0f, ny = 0.0f;
+    if (mouseToBaseNormalized(xint, yint, nx, ny)) {
+        rooms[curroom]->Click(this, nx, ny, button, state);
+    }
 }
 
 void BaseInterface::ClickWin(int button, int state, int x, int y) {
@@ -1586,6 +1610,15 @@ void BaseInterface::Draw() {
     GFXColor(0, 0, 0, 0);
     SetupViewport();
     StartGUIFrame();
+    // Base room text (curtext = room default/link text, othtext = talk text) lays out
+    // against the base resolution, matching the rest of the base (BaseText, link labels,
+    // hitboxes).
+    const float base_max_w = static_cast<float>(configuration().graphics.bases.max_width);
+    const float base_max_h = static_cast<float>(configuration().graphics.bases.max_height);
+    if (base_max_w > 0.0f && base_max_h > 0.0f) {
+        curtext.setResolution(base_max_w, base_max_h);
+        othtext.setResolution(base_max_w, base_max_h);
+    }
     if (GetElapsedTime() < 1) {
         AnimatedTexture::UpdateAllFrame();
     }
