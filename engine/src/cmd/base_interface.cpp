@@ -203,6 +203,15 @@ static bool mouseToBaseNormalized(int mx, int my, float &nx, float &ny) {
     return true;
 }
 
+// The base letterbox window offset (vx, vy) in logical pixels, or (0,0) if the base
+// fills the screen (no letterbox). Base text drawn on the screen-absolute background
+// draw list adds this offset so it lands inside the letterboxed base window.
+static void baseLetterboxOffset(int &ox, int &oy) {
+    int vx = 0, vy = 0, vw = 0, vh = 0;
+    base_viewport_rect(vx, vy, vw, vh);
+    ox = vx; oy = vy;
+}
+
 #undef mymin
 
 BaseInterface::Room::~Room() {
@@ -489,6 +498,9 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
                         ImGuiText text_marker;
                         text_marker.setResolution(static_cast<float>(configuration().graphics.bases.max_width),
                                                   static_cast<float>(configuration().graphics.bases.max_height));
+                        int lb_ox = 0, lb_oy = 0;
+                        baseLetterboxOffset(lb_ox, lb_oy);
+                        text_marker.setOffset(static_cast<float>(lb_ox), static_cast<float>(lb_oy));
                         text_marker.setText(beautify(links[i]->text));
                         text_marker.getCharSize(text_wid,
                                 text_hei);                           //get average charactersize
@@ -550,6 +562,9 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
                     ImGuiText text_marker;
                     text_marker.setResolution(static_cast<float>(configuration().graphics.bases.max_width),
                                               static_cast<float>(configuration().graphics.bases.max_height));
+                    int lb_ox2 = 0, lb_oy2 = 0;
+                    baseLetterboxOffset(lb_ox2, lb_oy2);
+                    text_marker.setOffset(static_cast<float>(lb_ox2), static_cast<float>(lb_oy2));
                     text_marker.setText(links[i]->index);
                     text_marker.getCharSize(text_wid, text_hei);                       //get average charactersize
                     float text_pos_x = x + text_offset_x;                              //align right ...
@@ -628,6 +643,9 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
     const int base_max_height = configuration().graphics.bases.max_height;
     if (base_max_width > 0 && base_max_height > 0) {
         text.setResolution(static_cast<float>(base_max_width), static_cast<float>(base_max_height));
+        int ox = 0, oy = 0;
+        baseLetterboxOffset(ox, oy);
+        text.setOffset(static_cast<float>(ox), static_cast<float>(oy));
     }
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
     GFXColor tmpbg((text).backgroundColor());
@@ -1618,6 +1636,10 @@ void BaseInterface::Draw() {
     if (base_max_w > 0.0f && base_max_h > 0.0f) {
         curtext.setResolution(base_max_w, base_max_h);
         othtext.setResolution(base_max_w, base_max_h);
+        int lb_ox3 = 0, lb_oy3 = 0;
+        baseLetterboxOffset(lb_ox3, lb_oy3);
+        curtext.setOffset(static_cast<float>(lb_ox3), static_cast<float>(lb_oy3));
+        othtext.setOffset(static_cast<float>(lb_ox3), static_cast<float>(lb_oy3));
     }
     if (GetElapsedTime() < 1) {
         AnimatedTexture::UpdateAllFrame();

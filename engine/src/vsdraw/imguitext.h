@@ -157,6 +157,10 @@ public:
     // and HUD (C++-driven) leave the default, which uses the screen/ImGui DisplaySize.
     // 0/0 = use the screen DisplaySize.
     void setResolution(float w, float h) { m_resW = w; m_resH = h; }
+    // Pixel offset (screen-absolute) to add to the drawn position. Used by base text
+    // (which draws on the screen-absolute background draw list) to land inside the
+    // base's letterboxed window: the letterbox window offset (vx,vy). Default 0.
+    void setOffset(float x, float y) { m_offX = x; m_offY = y; }
 private:
     // Effective layout resolution: the caller-set base resolution if provided,
     // otherwise the screen / ImGui DisplaySize (0 = use screen).
@@ -176,6 +180,8 @@ private:
     float m_charH = 0.08f;
     float m_resW = 0.0f;   // target layout resolution (0 = use screen DisplaySize)
     float m_resH = 0.0f;
+    float m_offX = 0.0f;   // screen-absolute pixel offset for the drawn position
+    float m_offY = 0.0f;
     FormattedLayout m_layout;
     int m_layoutVersion = 0;
 
