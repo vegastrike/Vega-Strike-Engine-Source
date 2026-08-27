@@ -206,9 +206,13 @@ static void refresh_screen_aspect_text() {
 }
 
 // The ideal font height (font_point) for the current resolution. Font size scales
-// with the horizontal resolution: ~10 at 800x600, ~32 at 2560x1440 (width / 80).
+// linearly with the horizontal resolution: 14 at 1368x768, 27 at 2560x1440.
+// Linear fit through those two points: font = (13/1192) * width - 0.919, rounded.
 static int ideal_font_height() {
-    return sel_res_w > 0 ? sel_res_w / 80 : 16;
+    if (sel_res_w <= 0) {
+        return 16;
+    }
+    return static_cast<int>(std::lround((13.0 / 1192.0) * sel_res_w - 0.919));
 }
 
 static void prefill_text_height() {
