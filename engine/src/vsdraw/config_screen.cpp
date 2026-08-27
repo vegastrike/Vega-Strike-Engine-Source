@@ -1574,21 +1574,13 @@ static void draw_presets_frame() {
     else if (avail_w < 1200) cols = 2;
     else cols = 3;
     cols = std::min(cols, (int)g_preset_groups.size());
-    int rows = (int)ceil((double)g_preset_groups.size() / (double)cols);
-    float row_h = ImGui::GetFrameHeight() + ImGui::GetTextLineHeight()
-                  + ImGui::GetStyle().ItemSpacing.y;
-    float content_h = rows * row_h + ImGui::GetStyle().WindowPadding.y * 2;
-    // Fill the space between here and the bottom button bar (which reserves one
-    // button row + separator at the bottom, btn_h). The frame should reach the
-    // buttons so there is no dead space, and be tall enough that all presets are
-    // visible without a scrollbar.
+    // The frame always fills the space above the bottom button bar (stretches to
+    // fit); the child window clips and scrolls any content that does not fit, so it
+    // never spills over the frame's borders or the buttons.
     float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
     float avail_h = ImGui::GetContentRegionAvail().y - btn_h
                     - ImGui::GetStyle().WindowPadding.y;
-    // The frame fills the space above the bottom button bar but never overlaps it:
-    // cap at the available height (avail_h). If the presets are taller than that,
-    // the frame's scroller handles the overflow instead of growing over the buttons.
-    float pres_h = fminf(content_h, avail_h);
+    float pres_h = avail_h;
     ImGui::BeginChild("presetsframe", ImVec2(-1.0f, pres_h), ImGuiChildFlags_Borders);
     std::vector<float> colw(cols, 0.0f);
     for (size_t i = 0; i < g_preset_groups.size(); i++) {
