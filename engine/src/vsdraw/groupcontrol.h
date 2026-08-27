@@ -27,7 +27,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GUI_GROUP_CONTROL_H
 #define VEGA_STRIKE_ENGINE_GUI_GROUP_CONTROL_H
 
-#include "gui/control.h"
+#include "vsdraw/control.h"
 
 //See cpp file for detailed descriptions of classes, functions, etc.
 

@@ -53,9 +53,9 @@
 #include "root_generic/options.h"
 #include "src/vs_exit.h"
 #include "configuration/configuration.h"
-#include "libraries/gui/gui.h"
+#include "libraries/imgui-backend/gui.h"
 #include "backends/imgui_impl_sdl3.h"
-#include "gui/config_screen.h"
+#include "vsdraw/config_screen.h"
 
 #include <SDL3/SDL_video.h>
 

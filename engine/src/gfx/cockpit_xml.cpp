@@ -30,7 +30,7 @@
 #include "root_generic/xml_support.h"
 #include "gfx/gauge.h"
 #include <float.h>
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 #include "gfx_generic/mesh.h"
 #include "root_generic/configxml.h"
 

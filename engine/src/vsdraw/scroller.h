@@ -27,7 +27,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GUI_SCROLLER_H
 #define VEGA_STRIKE_ENGINE_GUI_SCROLLER_H
 
-#include "gui/groupcontrol.h"
+#include "vsdraw/groupcontrol.h"
 
 //See cpp file for detailed descriptions of classes, functions, etc.
 

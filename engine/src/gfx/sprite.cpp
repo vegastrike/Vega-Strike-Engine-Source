@@ -41,7 +41,7 @@
 #include <math.h>
 #include "src/gnuhash.h"
 #include "imgui/imgui.h"
-#include "gui/guidefs.h"
+#include "vsdraw/guidefs.h"
 
 #ifdef _WIN32
 #include <direct.h>

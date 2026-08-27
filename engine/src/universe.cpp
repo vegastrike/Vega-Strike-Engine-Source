@@ -69,19 +69,19 @@
 #include "resource/random_utils.h"
 #include "root_generic/options.h"
 
-#include "gui/pause_screen.h"
-#include "gui/imgui_support.h"
+#include "libraries/imgui-backend/pause_screen.h"
+#include "vsdraw/imgui_support.h"
 #include "gldrv/winsys.h"
 #include "in_mouse.h"
 #include "in_joystick.h"
-#include "libraries/gui/gui.h"
+#include "libraries/imgui-backend/gui.h"
 
 #include "imgui/imgui.h"
-#include "libraries/gui/gui.h"
+#include "libraries/imgui-backend/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
-#include "gui/config_screen.h"
+#include "vsdraw/config_screen.h"
 
 // Using
 using namespace VSFileSystem;

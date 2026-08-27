@@ -36,7 +36,7 @@
 #include "gfxlib_struct.h"
 #include "navcomputer.h"
 #include "navpath.h"
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 
 #include "gfx_generic/vec.h"
 

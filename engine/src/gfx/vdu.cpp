@@ -34,7 +34,7 @@
 
 #include "src/vega_cast_utils.h"
 #include "cmd/unit_util.h"
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 #include "root_generic/vs_globals.h"
 #include "gfx/cockpit.h"
 #include "cmd/script/mission.h"

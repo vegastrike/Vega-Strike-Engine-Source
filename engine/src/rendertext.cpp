@@ -35,7 +35,7 @@
 #ifdef HAVE_SDL
 #include <SDL3/SDL.h>
 #endif
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 #include "gldrv/winsys.h"
 #include <sstream>
 #include <string>

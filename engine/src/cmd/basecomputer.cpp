@@ -46,13 +46,13 @@ using VSFileSystem::SaveFile;
 #include "cmd/unit_util.h"
 #include "cmd/music.h"
 #include "cmd/unit_const_cache.h"
-#include "gui/modaldialog.h"
-#include "gui/imguitext.h"
+#include "vsdraw/modaldialog.h"
+#include "vsdraw/imguitext.h"
 #include "src/main_loop.h"              //For QuitNow().
 //FIXME mbyron -- Hack instead of reading XML.
-#include "gui/newbutton.h"
-#include "gui/staticdisplay.h"
-#include "gui/simplepicker.h"
+#include "vsdraw/newbutton.h"
+#include "vsdraw/staticdisplay.h"
+#include "vsdraw/simplepicker.h"
 #include "cmd/unit_xml.h"
 #include "gfx/sprite.h"
 #include "gfx/aux_texture.h"

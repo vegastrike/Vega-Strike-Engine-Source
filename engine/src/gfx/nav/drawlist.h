@@ -31,7 +31,7 @@
 #include <string>
 #include "cmd/unit_generic.h"
 #include "gfx/nav/navscreenoccupied.h"
-#include "gui/glut_support.h"
+#include "vsdraw/glut_support.h"
 
 //#include "masks.h"
 #include "gfx/nav/navscreen.h"

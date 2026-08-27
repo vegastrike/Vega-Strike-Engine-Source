@@ -32,8 +32,8 @@
 #include <map>
 
 #include "vegadisk/vsfilesystem.h"
-#include "gui/window.h"
-#include "gui/control.h"
+#include "vsdraw/window.h"
+#include "vsdraw/control.h"
 
 std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFileSystem::VSFile &file, // parse controls from a given VSFile
     std::vector<unsigned int>* base_keyboard_queue); // the keyboard queue

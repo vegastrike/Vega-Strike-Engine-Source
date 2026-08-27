@@ -30,10 +30,10 @@
 #include <vector>
 #include <string>
 #include "cmd/basecomputer.h"
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 #include "gfx/sprite.h"
 #include <cstdio>
-#include "gui/imgui_support.h"
+#include "vsdraw/imgui_support.h"
 
 #include "audio/Types.h"
 #include "audio/Source.h"

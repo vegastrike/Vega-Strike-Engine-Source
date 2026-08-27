@@ -29,8 +29,8 @@
 
 #include "gfx/nav/navscreen.h"
 #include "gfx/nav/navpath.h"
-#include "gui/windowcontroller.h"
-#include "gui/simplepicker.h"
+#include "vsdraw/windowcontroller.h"
+#include "vsdraw/simplepicker.h"
 
 class PathManager;
 class NavigationSystem;

@@ -28,7 +28,7 @@
 
 #include "gfx_generic/matrix.h"
 #include "gfx/camera.h"
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 #include <list>
 #include <vector>
 using std::list;

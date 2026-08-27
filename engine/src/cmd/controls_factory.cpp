@@ -40,12 +40,12 @@
 #include "cmd/drawable.h"
 
 #include "configuration/configuration.h"
-#include "gui/staticdisplay.h"
-#include "gui/newbutton.h"
-#include "gui/scroller.h"
-#include "gui/control.h"
-#include "gui/simplepicker.h"
-#include "gui/textinputdisplay.h"
+#include "vsdraw/staticdisplay.h"
+#include "vsdraw/newbutton.h"
+#include "vsdraw/scroller.h"
+#include "vsdraw/control.h"
+#include "vsdraw/simplepicker.h"
+#include "vsdraw/textinputdisplay.h"
 
 // All supported UI control property keys
 enum class ControlProp {

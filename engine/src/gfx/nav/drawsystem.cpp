@@ -36,7 +36,7 @@
 #include "src/star_system.h"
 #include "cmd/unit_generic.h"
 #include "cmd/collection.h"
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 #include "root_generic/lin_time.h" //for fps
 #include "src/config_xml.h"
 #include "root_generic/lin_time.h"
@@ -53,7 +53,7 @@
 #include "gfx_generic/mesh.h"
 #include "src/universe_util.h"
 #include "src/in_mouse.h"
-#include "gui/glut_support.h"
+#include "vsdraw/glut_support.h"
 #include "cmd/unit_util.h"
 #include "math.h"
 #include "src/save_util.h"

@@ -25,7 +25,7 @@ three coordinate interpretations, and a duplicated format parser.
 
 | Layer | Where | What it does |
 |---|---|---|
-| Engine C++ | `engine/src/gui/` | The actual text box / renderer / coordinate converter. |
+| Engine C++ | `engine/src/vsdraw/` | The actual text box / renderer / coordinate converter. |
 | Assets Python | `modules/GUI.py` (Assets-Production) | The authoring API (`GUIRect`, `GUIRoom`, `GUIStaticText`, ...) that builds the engine objects. |
 
 ---
@@ -45,7 +45,7 @@ textBox.setMultiLine(true);
 textBox.draw();                        // draws with the current ImGui draw list
 ```
 
-**Public API** (`engine/src/gui/imguitext.h`):
+**Public API** (`engine/src/vsdraw/imguitext.h`):
 
 | Method | Purpose |
 |---|---|
@@ -81,7 +81,7 @@ textBox.draw();                        // draws with the current ImGui draw list
 (screen Y is top-down; base Y is bottom-up). This is what `GUIRect.getNormalXYWH()` returns and what
 the engine consumes.
 
-### Engine: `Coordinates::` (`engine/src/gui/guidefs.h`)
+### Engine: `Coordinates::` (`engine/src/vsdraw/guidefs.h`)
 
 Convert canonical normalized → display pixels:
 
@@ -202,5 +202,5 @@ If bases are unified onto the `Control`/`ImGuiText` world, they inherit this the
 
 ## See also
 
-- Engine: `engine/src/gui/imguitext.{h,cpp}`, `engine/src/gui/guidefs.h`.
+- Engine: `engine/src/vsdraw/imguitext.{h,cpp}`, `engine/src/vsdraw/guidefs.h`.
 - Assets: `modules/GUI.py`, `controls.json`.
