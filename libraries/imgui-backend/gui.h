@@ -42,7 +42,12 @@ void CleanupGui();
  *  next frame (used by settings changes; no-op until the next frame).
  */
 void RequestImGuiFontSize(float fontSize);
-/** Apply a pending font-size change by rebuilding the font atlas. Call at the
+/** Request that the ImGui font be swapped to the given .ttf file (path into the
+ *  data fonts/ directory) on the next frame; pass nullptr/empty to use Roboto.
+ *  Used by settings changes; no-op until the next frame.
+ */
+void RequestImGuiFont(const char *fontFile);
+/** Apply a pending font-size/font change by rebuilding the font atlas. Call at the
  *  start of each ImGui frame, before ImGui::NewFrame(). No-op when nothing pending.
  */
 void ImGui_ApplyPendingFontSize();

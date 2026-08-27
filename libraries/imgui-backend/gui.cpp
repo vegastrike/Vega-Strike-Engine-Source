@@ -55,6 +55,12 @@ SDL_Window* current_window = nullptr;
 // any text is laid out), avoiding mid-frame texture destruction.
 static float s_pending_font_size = 0.0f;
 
+// Font file requested by a settings change, applied on the next frame. Empty means
+// "use the embedded Roboto". When s_font_file_pending is set, the atlas is rebuilt
+// with the new .ttf.
+static std::string s_pending_font_file;
+static bool s_font_file_pending = false;
+
 void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontSize, const char *fontFile) {
     current_window = window;
     SDL_GLContext gl_context = *context;
@@ -89,17 +95,40 @@ void RequestImGuiFontSize(float fontSize) {
     s_pending_font_size = fontSize;
 }
 
-// Apply a pending font-size change. With the dynamic font atlas (RendererHasTextures)
-// the atlas bakes glyphs on demand, so a resize needs no manual Clear()/Build() or
-// backend texture-upload calls. Setting FontSizeBase (the render size, distinct from
-// the per-glyph rasterization size) is enough; subsequent text draws bake fresh glyphs
-// at their requested size. Call at the start of each frame, before ImGui::NewFrame().
+void RequestImGuiFont(const char *fontFile) {
+    s_pending_font_file = (fontFile != nullptr) ? fontFile : "";
+    s_font_file_pending = true;
+}
+
+// Apply a pending font-size / font change. A font-size change only needs FontSizeBase
+// (the dynamic atlas bakes glyphs on demand); a font FACE change requires a real
+// atlas rebuild (clear fonts, add the new .ttf or Roboto, rebuild the texture).
+// Call at the start of each frame, before ImGui::NewFrame().
 void ImGui_ApplyPendingFontSize() {
-    if (s_pending_font_size <= 0.0f) {
+    if (s_pending_font_size <= 0.0f && !s_font_file_pending) {
         return;
     }
-    ImGui::GetStyle().FontSizeBase = s_pending_font_size;
-    s_pending_font_size = 0.0f;
+    if (s_pending_font_size > 0.0f) {
+        ImGui::GetStyle().FontSizeBase = s_pending_font_size;
+        s_pending_font_size = 0.0f;
+    }
+    if (s_font_file_pending) {
+        ImGuiIO &io = ImGui::GetIO();
+        io.Fonts->Clear();
+        ImFontConfig cfg;
+        cfg.SizePixels = ImGui::GetStyle().FontSizeBase;
+        ImFont *f = (!s_pending_font_file.empty())
+                ? io.Fonts->AddFontFromFileTTF(s_pending_font_file.c_str(), cfg.SizePixels, &cfg)
+                : nullptr;
+        if (f == nullptr) {
+            f = io.Fonts->AddFontFromMemoryCompressedBase85TTF(
+                RobotoMediumFont_compressed_data_base85, cfg.SizePixels, &cfg);
+        }
+        io.FontDefault = f;
+        io.Fonts->Build();   // the dynamic-atlas backend updates the texture on NewFrame
+        s_font_file_pending = false;
+        s_pending_font_file.clear();
+    }
 }
 
 void CleanupGui() {

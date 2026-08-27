@@ -267,10 +267,16 @@ static void apply_display_to_config() {
     g.font_point_flt = (float)atoi(text_height_buf);
     mark_dirty("graphics.font_point");
     RequestImGuiFontSize(g.font_point_flt);   // live-rebuild the ImGui font atlas at the new size
-    // Persist the selected font ("Roboto" sentinel or a .ttf filename).
+    // Persist the selected font ("Roboto" sentinel or a .ttf filename) and hot-apply it.
     if (sel_font >= 0 && sel_font < static_cast<int>(s_font_values.size())) {
-        g.font = s_font_values[sel_font];
+        const std::string &new_font = s_font_values[sel_font];
+        g.font = new_font;
         mark_dirty("graphics.font");
+        std::string font_path;
+        if (new_font != "Roboto") {
+            font_path = VSFileSystem::datadir + "/fonts/" + new_font;
+        }
+        RequestImGuiFont(font_path.c_str());   // live-reload the ImGui font atlas
     }
     mark_dirty("graphics.font_antialias");
     g.aspect_flt = sel_screen_aspect >= 0 ? aspect_vals[sel_screen_aspect] : current_screen_aspect();
