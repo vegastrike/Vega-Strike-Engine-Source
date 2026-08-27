@@ -177,14 +177,14 @@ namespace UniverseUtil {
                 return std::to_string(configuration().graphics.resolution_y);
             }
             if (option == "base_max_width") {
-                // The GUI uses base_max_width as its screen width; in the old
-                // XML it always matched the render resolution (x_resolution),
-                // and bases.max_width (1440x1080) is the art's virtual size,
-                // not what the GUI should lay out at.
-                return std::to_string(configuration().graphics.resolution_x);
+                // The GUI lays out the base against the persisted base resolution
+                // (graphics.bases.max_width/height, set from the settings screen),
+                // so base artwork keeps its intended aspect ratio regardless of the
+                // monitor/screen resolution.
+                return std::to_string(configuration().graphics.bases.max_width);
             }
             if (option == "base_max_height") {
-                return std::to_string(configuration().graphics.resolution_y);
+                return std::to_string(configuration().graphics.bases.max_height);
             }
             if (option == "aspect") {
                 return std::to_string(configuration().graphics.aspect_flt);

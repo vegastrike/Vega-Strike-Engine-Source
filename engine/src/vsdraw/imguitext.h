@@ -152,7 +152,16 @@ public:
             bool automatte = false);
     int Draw(int offset = 0) { return Draw(m_text, offset, false, false, m_automatte); }
     ImVec2 getTextWidth(const std::string text, const float fontSize);
+    // The target resolution to lay out against. Bases (Python-driven) set this to
+    // the persisted base resolution (graphics.bases.max_width/height); base computer
+    // and HUD (C++-driven) leave the default, which uses the screen/ImGui DisplaySize.
+    // 0/0 = use the screen DisplaySize.
+    void setResolution(float w, float h) { m_resW = w; m_resH = h; }
 private:
+    // Effective layout resolution: the caller-set base resolution if provided,
+    // otherwise the screen / ImGui DisplaySize (0 = use screen).
+    float resW() const { return m_resW > 0.0f ? m_resW : ImGui::GetIO().DisplaySize.x; }
+    float resH() const { return m_resH > 0.0f ? m_resH : ImGui::GetIO().DisplaySize.y; }
     Rect m_rect;
     Font m_font;
     std::string m_text;
@@ -165,6 +174,8 @@ private:
     bool m_automatte = false;
     float m_charW = 0.06f;
     float m_charH = 0.08f;
+    float m_resW = 0.0f;   // target layout resolution (0 = use screen DisplaySize)
+    float m_resH = 0.0f;
     FormattedLayout m_layout;
     int m_layoutVersion = 0;
 

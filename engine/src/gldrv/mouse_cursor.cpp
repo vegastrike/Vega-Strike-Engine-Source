@@ -90,10 +90,10 @@ void changeCursor(const CursorType type) {
 
 // This is simpler code that disregards the mouse sensitivity and returns
 // mouse cursor behavior to the standard operating system one.
-std::pair<float, float> CalculateRelativeXY(int orig_x, int orig_y) {
+std::pair<float, float> CalculateRelativeXY(int orig_x, int orig_y, int res_x, int res_y) {
     // Center of the window
-    float center_x = native_resolution_x / 2;
-    float center_y = native_resolution_y / 2;
+    float center_x = res_x / 2;
+    float center_y = res_y / 2;
 
     // Location of mouse relative to the center
     float relative_x = orig_x - center_x;
@@ -106,14 +106,24 @@ std::pair<float, float> CalculateRelativeXY(int orig_x, int orig_y) {
     return std::pair<float,float>(fraction_x, fraction_y);
 }
 
-std::pair<int, int> CalculateAbsoluteXY(float fraction_x, float fraction_y) {
-    float center_x = native_resolution_x / 2;
-    float center_y = native_resolution_y / 2;
+// Same as above, using the native (screen) resolution.
+std::pair<float, float> CalculateRelativeXY(int orig_x, int orig_y) {
+    return CalculateRelativeXY(orig_x, orig_y, native_resolution_x, native_resolution_y);
+}
+
+std::pair<int, int> CalculateAbsoluteXY(float fraction_x, float fraction_y, int res_x, int res_y) {
+    float center_x = res_x / 2;
+    float center_y = res_y / 2;
 
     int orig_x = static_cast<int>(center_x + fraction_x * center_x);
     int orig_y = static_cast<int>(center_y - fraction_y * center_y);
 
     return std::make_pair(orig_x, orig_y);
+}
+
+// Same as above, using the native (screen) resolution.
+std::pair<int, int> CalculateAbsoluteXY(float fraction_x, float fraction_y) {
+    return CalculateAbsoluteXY(fraction_x, fraction_y, native_resolution_x, native_resolution_y);
 }
 
 double GetRelativeJoystickCoordinatesForAxis(const double x, const double max_x) {

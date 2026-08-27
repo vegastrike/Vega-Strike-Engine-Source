@@ -463,6 +463,8 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
                     if (draw_text) {
                         GFXDisable(TEXTURE0);
                         ImGuiText text_marker;
+                        text_marker.setResolution(static_cast<float>(configuration().graphics.bases.max_width),
+                                                  static_cast<float>(configuration().graphics.bases.max_height));
                         text_marker.setText(beautify(links[i]->text));
                         text_marker.getCharSize(text_wid,
                                 text_hei);                           //get average charactersize
@@ -522,6 +524,8 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
                     x = (links[i]->x + (links[i]->wid / 2));                         //get the center of the location
                     y = (links[i]->y + (links[i]->hei / 2));                         //get the center of the location
                     ImGuiText text_marker;
+                    text_marker.setResolution(static_cast<float>(configuration().graphics.bases.max_width),
+                                              static_cast<float>(configuration().graphics.bases.max_height));
                     text_marker.setText(links[i]->index);
                     text_marker.getCharSize(text_wid, text_hei);                       //get average charactersize
                     float text_pos_x = x + text_offset_x;                              //align right ...
@@ -592,17 +596,14 @@ BaseInterface::Room::BaseTalk::BaseTalk(const std::string &msg, const std::strin
 }
 
 void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
-    int tmpx = configuration().graphics.resolution_x;
-    int tmpy = configuration().graphics.resolution_y;
+    // Base text lays out against the persisted base resolution so it preserves the
+    // aspect ratio the base artwork was authored for. The ImGuiText resolution
+    // (passed in here) drives the normalized->pixel mapping; the base computer and
+    // HUD (C++-driven) leave it at the screen/DisplaySize default.
     const int base_max_width = configuration().graphics.bases.max_width;
     const int base_max_height = configuration().graphics.bases.max_height;
-    if (base_max_width && base_max_height) {
-        if (base_max_width < tmpx) {
-            (configuration()).graphics.resolution_x = base_max_width;
-        }
-        if (base_max_height < tmpy) {
-            (configuration()).graphics.resolution_y = base_max_height;
-        }
+    if (base_max_width > 0 && base_max_height > 0) {
+        text.setResolution(static_cast<float>(base_max_width), static_cast<float>(base_max_height));
     }
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
     GFXColor tmpbg((text).backgroundColor());
@@ -629,8 +630,6 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         text.Draw(text.getText(), 0, true, false, automatte);
     }
     text.setBackgroundColor(static_cast<ImU32>(tmpbg));
-    (configuration()).graphics.resolution_x = tmpx;
-    (configuration()).graphics.resolution_y = tmpy;
 }
 
 void RunPython(const char *filnam) {
@@ -936,7 +935,11 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
 }
 
 void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
-    const std::pair<float,float> pair = CalculateRelativeXY(xbeforecalc, ybeforecalc);
+    // Base-room hitboxes lay out against the base resolution (like the base text),
+    // so the mouse->normalized mapping uses it too.
+    const int brx = configuration().graphics.bases.max_width;
+    const int bry = configuration().graphics.bases.max_height;
+    const std::pair<float,float> pair = CalculateRelativeXY(xbeforecalc, ybeforecalc, brx, bry);
     const float x = pair.first;
     const float y = pair.second;
 
@@ -994,7 +997,9 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
 }
 
 void BaseInterface::Click(int xint, int yint, int button, int state) {
-    const std::pair<float,float> pair = CalculateRelativeXY(xint, yint);
+    const int brx = configuration().graphics.bases.max_width;
+    const int bry = configuration().graphics.bases.max_height;
+    const std::pair<float,float> pair = CalculateRelativeXY(xint, yint, brx, bry);
     rooms[curroom]->Click(this, pair.first, pair.second, button, state);
 }
 
