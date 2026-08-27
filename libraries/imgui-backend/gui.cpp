@@ -55,7 +55,7 @@ SDL_Window* current_window = nullptr;
 // any text is laid out), avoiding mid-frame texture destruction.
 static float s_pending_font_size = 0.0f;
 
-void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontSize) {
+void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontSize, const char *fontFile) {
     current_window = window;
     SDL_GLContext gl_context = *context;
 
@@ -71,12 +71,16 @@ void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontS
     io.Fonts->Clear();
     ImFontConfig cfg;
     cfg.SizePixels = fontSize;
-    // Load a real TrueType font, not the default embedded ProggyClean pixel font.
-    // With the synced OpenGL3 backend (RendererHasTextures) the atlas is dynamic:
-    // each glyph size (e.g. base computer font_point * scale, scale 0.9-1.5) is baked
-    // crisp on demand, so no RasterizerDensity workaround is needed.
-    io.FontDefault = io.Fonts->AddFontFromMemoryCompressedBase85TTF(
-        RobotoMediumFont_compressed_data_base85, fontSize, &cfg);
+    // Load the configured .ttf font file if provided (a path into the data fonts/
+    // directory); otherwise fall back to the embedded Roboto TrueType. With the
+    // synced OpenGL3 backend (RendererHasTextures) the atlas is dynamic: each glyph
+    // size is baked crisp on demand, so no RasterizerDensity workaround is needed.
+    io.FontDefault = (fontFile != nullptr && fontFile[0] != '\0')
+            ? io.Fonts->AddFontFromFileTTF(fontFile, fontSize, &cfg) : nullptr;
+    if (io.FontDefault == nullptr) {
+        io.FontDefault = io.Fonts->AddFontFromMemoryCompressedBase85TTF(
+            RobotoMediumFont_compressed_data_base85, fontSize, &cfg);
+    }
 
     gui_initialized = true;
 }
