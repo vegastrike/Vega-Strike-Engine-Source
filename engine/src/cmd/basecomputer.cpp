@@ -47,6 +47,7 @@ using VSFileSystem::SaveFile;
 #include "cmd/music.h"
 #include "cmd/unit_const_cache.h"
 #include "vsdraw/modaldialog.h"
+#include "vsdraw/imguitext.h"
 #include "src/main_loop.h"              //For QuitNow().
 //FIXME mbyron -- Hack instead of reading XML.
 #include "vsdraw/newbutton.h"
@@ -368,28 +369,6 @@ inline T mymin(T a, T b) {
 template<typename T>
 inline T mymax(T a, T b) {
     return (a > b) ? a : b;
-}
-
-//Take underscores out of a string and capitalize letters after spaces.
-static std::string beautify(const string &input) {
-    std::string result;
-
-    bool wordStart = true;
-    for (auto i = input.begin(); i != input.end(); ++i) {
-        if (*i == '_') {
-            //Turn this into a space, and make sure next letter is capitalized.
-            result += ' ';
-            wordStart = true;
-        } else if (wordStart) {
-            //Start of a word.  Capitalize the character, and turn off start of word.
-            result += toupper(*i);
-            wordStart = false;
-        } else {
-            //Normal character in middle of word.
-            result += *i;
-        }
-    }
-    return result;
 }
 
 //The "used" value of an item.
