@@ -422,7 +422,8 @@ void draw_display_frame() {
         if (ids) SDL_free(ids);
         ImGui::EndPopup();
     }
-    // Resolution selector (detected fullscreen modes, deduplicated).
+    // Resolution selector (detected fullscreen modes, deduplicated). Each entry
+    // also shows its aspect ratio (width/height).
     if (ImGui::Button("Resolution")) ImGui::OpenPopup("##pick_res");
     ImGui::SameLine(); ImGui::TextUnformatted(resolution_text.c_str());
     if (ImGui::BeginPopup("##pick_res")) {
@@ -430,7 +431,9 @@ void draw_display_frame() {
         if (modes) {
             std::vector<std::string> seen;
             for (int i = 0; i < cnt; ++i) {
-                char lbl[32]; snprintf(lbl, sizeof(lbl), "%dx%d", modes[i]->w, modes[i]->h);
+                char lbl[40];
+                float aspect = modes[i]->h > 0 ? static_cast<float>(modes[i]->w) / static_cast<float>(modes[i]->h) : 0.0f;
+                snprintf(lbl, sizeof(lbl), "%dx%d (%.2f)", modes[i]->w, modes[i]->h, aspect);
                 if (std::find(seen.begin(), seen.end(), lbl) != seen.end()) continue;
                 seen.push_back(lbl);
                 if (ImGui::MenuItem(lbl)) {
