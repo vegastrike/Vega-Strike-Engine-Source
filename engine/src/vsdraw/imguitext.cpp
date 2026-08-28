@@ -30,6 +30,7 @@
 #include "imgui_internal.h"
 
 #include <cmath>  // std::round
+#include <cctype>  // std::isxdigit
 
 // Whether a packed ImU32 color is fully transparent (alpha == 0).
 static bool isTransparent(ImU32 color) {
@@ -190,6 +191,9 @@ static float drawLine(const std::vector<TextPlaneRun> &runs, ImVec2 &pen, ImDraw
     return lineHeight;
 }
 
+// Forward declaration: parse 2 hex chars into a 0-255 byte (defined below).
+static int ParseHexByte(const char* hex);
+
 // TextPlane-compatible drawing path.  Replicates the legacy TextPlane::Draw semantics
 // (top-left anchor, optional one-line-up for !start_lower, per-run background rectangle
 // gated by automatte).  It keeps TextPlane's raw-ImGui-font rendering behaviour: glyphs
@@ -286,6 +290,26 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
                 word += c;
                 wordWidth += ImGui::CalcTextSize(&c, &c + 1).x;
             }
+        } else if (c == '#' && i + 6 < n
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 1]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 2]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 3]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 4]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 5]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 6]))) {
+            // Legacy '#RRGGBB' (6 hex digits, no prefix) sets the color; '#000000'
+            // (black) is a RESET to the default color -- matching the removed
+            // TextPlane::ParseText semantics.
+            pushWord(true);
+            const int r = ParseHexByte(&newText[i + 1]);
+            const int g = ParseHexByte(&newText[i + 3]);
+            const int b = ParseHexByte(&newText[i + 5]);
+            if (r == 0 && g == 0 && b == 0) {
+                currentColor = m_colorU32;
+            } else {
+                currentColor = IM_COL32(r, g, b, 255);
+            }
+            i += 6;
         } else {
             word += c;
             wordWidth += ImGui::CalcTextSize(&c, &c + 1).x;
@@ -606,6 +630,30 @@ void ImGuiText::parseFormat(std::string input, size_t startPos, //Location of be
                     }
                 }
                 curPos++;
+                break;
+            default:
+                // Legacy '#RRGGBB' (6 hex digits, no '#c' prefix) sets the current
+                // color; '#000000' (black) is a RESET to the default color (bottom of
+                // the stack), not literal black -- matching the removed TextPlane::ParseText.
+                if (curPos + 6 <= endPos
+                        && std::isxdigit(static_cast<unsigned char>(input[curPos]))
+                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 1]))
+                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 2]))
+                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 3]))
+                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 4]))
+                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 5]))) {
+                    const int r = ParseHexByte(&input[curPos]);
+                    const int g = ParseHexByte(&input[curPos + 2]);
+                    const int b = ParseHexByte(&input[curPos + 4]);
+                    if (r == 0 && g == 0 && b == 0) {
+                        while (m_colorStack.size() > 1) {
+                            m_colorStack.pop_back();
+                        }
+                    } else {
+                        m_colorStack.push_back(IM_COL32(r, g, b, 255));
+                    }
+                    curPos += 6;
+                }
                 break;
         }
     }
