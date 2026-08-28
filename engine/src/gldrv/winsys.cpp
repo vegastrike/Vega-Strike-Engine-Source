@@ -800,6 +800,15 @@ void winsys_process_events() {
     }
     while (keepRunning) {
         while (SDL_PollEvent(&event)) {
+            // Snapshot the overlay state BEFORE ImGui processes the event: ImGui's
+            // handling can close the overlay (e.g. a click on the Close button), which
+            // sets config_overlay_active=false mid-event. Without the snapshot, the very
+            // event that closed the overlay would then pass the !config_overlay_active
+            // gate and leak through to the game, firing a bound command (button-press
+            // sound / nav-target change). The game must never see input that arrived
+            // while the overlay was open.
+            const bool overlay_was_active = config_overlay_active;
+
             // forward all events to ImGUI
             ImGui_ImplSDL3_ProcessEvent(&event);
 
@@ -823,7 +832,7 @@ void winsys_process_events() {
                     }
                     // While the config overlay is open, consume input (don't forward to the
                     // game) so clicks/keys don't pass through to the game behind.
-                    if (!config_overlay_active && keyboard_func) {
+                    if (!overlay_was_active && keyboard_func) {
                         SDL_GetMouseState(&x, &y);
                         (*keyboard_func)(event.key.key, event.key.mod, event.key.down, x, y);
                     }
@@ -831,7 +840,7 @@ void winsys_process_events() {
 
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
                 case SDL_EVENT_MOUSE_BUTTON_UP:
-                    if (!config_overlay_active && mouse_func) {
+                    if (!overlay_was_active && mouse_func) {
                         (*mouse_func)(event.button.button,
                             event.button.down,
                             event.button.x,
@@ -845,7 +854,9 @@ void winsys_process_events() {
                     // existing mouse-button pipeline (lookupMouseButton maps
                     // WS_WHEEL_UP->3 / WS_WHEEL_DOWN->4) keeps working -- this
                     // is what drives scrolling in the base computer etc.
-                    if (mouse_func) {
+                    // Gated on overlay_was_active like the other game-forwarding
+                    // so scrolling the config screen doesn't leak to the game.
+                    if (!overlay_was_active && mouse_func) {
                         const float wheel_y = event.wheel.y;
                         if (wheel_y > 0.0F) {
                             (*mouse_func)(WS_WHEEL_UP, WS_MOUSE_DOWN, event.wheel.mouse_x, event.wheel.mouse_y);
@@ -860,13 +871,13 @@ void winsys_process_events() {
                 case SDL_EVENT_MOUSE_MOTION:
                     if (event.motion.state) {
                         /* buttons are down */
-                        if (!config_overlay_active && motion_func) {
+                        if (!overlay_was_active && motion_func) {
                             (*motion_func)(event.motion.x,
                                 event.motion.y);
                         }
                     } else {
                         /* no buttons are down */
-                        if (!config_overlay_active && passive_motion_func) {
+                        if (!overlay_was_active && passive_motion_func) {
                             (*passive_motion_func)(event.motion.x,
                                     event.motion.y);
                         }
