@@ -1811,18 +1811,13 @@ static void draw_presets_frame() {
             std::string lbl = "##mpre_" + g.key;
             if (ImGui::Combo(lbl.c_str(), &sel, items.data(), (int)items.size())) {
                 if (sel >= 0) {
-                    const auto shader_before = shader_values_snapshot();
                     cfg().preset[g.key] = g.options[sel].name;
                     mark_dirty("preset." + g.key);
-                    // Apply the preset's vars to Configuration.
-                    for (auto &kv : g.options[sel].vars) apply_preset_var(kv.first, kv.second);
-                    // If applying this preset actually changed a shader value, flag
-                    // the restart-required notice. Detected here because presets are
-                    // applied at selection time (not on Save), so a Save-time
-                    // before/after compare can't see the change.
-                    if (shader_values_snapshot() != shader_before) {
-                        shader_restart_notice = true;
-                    }
+                    // The preset's vars are NOT applied here: they are applied (and
+                    // persisted) by apply_presets_to_config() on Save, so a preset
+                    // change (e.g. shaders/techniques) does NOT take effect instantly
+                    // when the dropdown is clicked - it applies when Save is hit.
+                    // Shader changes still require a restart (see the Save handler).
                 }
             }
         }
@@ -1926,11 +1921,17 @@ void DrawConfigScreen() {
     }
     if (ImGui::Button("Save", ImVec2(btnw, 0))) {
         if (dirty) {
+            // Snapshot the shader settings before applying, so we can detect an
+            // ACTUAL shader change (the presets' vars are applied here, by
+            // apply_presets_to_config, on Save - not at selection). If a shader
+            // value changed, we DON'T hot-apply it (unreliable live); a restart is
+            // required, so flag the notice.
+            const auto shader_before = shader_values_snapshot();
             apply_all();
             write_out_dirty();   // persist the dirty paths to the user overlay
-            // (Shader changes are detected at selection time in draw_presets_frame,
-            // where the preset vars are applied. Shaders aren't hot-applied; the
-            // 'Shader Change' restart-required notice is set there.)
+            if (shader_values_snapshot() != shader_before) {
+                shader_restart_notice = true;
+            }
             // Re-initialize the runtime from the updated in-memory configuration().
             // The game assumed config never changes in-game, so config->runtime
             // copies (g_game feature flags, gl_options, GL viewport, legacy font
