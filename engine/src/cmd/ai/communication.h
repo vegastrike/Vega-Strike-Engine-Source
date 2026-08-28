@@ -131,9 +131,7 @@ public:
 };
 
 struct RGBstring {
-    // Holds a unified '#c<r>:<g>:<b>#' color tag (floats 0-1).  Widened from the old
-    // 8-byte hex '#RRGGBB' to fit the float form, matching GetColorFromSuccess.
-    char str[24];
+    char str[8];
 };
 
 RGBstring colToString(GFXColor col);

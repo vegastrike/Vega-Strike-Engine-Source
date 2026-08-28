@@ -35,7 +35,6 @@
 #include "src/audiolib.h"
 #include "root_generic/options.h"
 #include "src/universe.h"
-#include <cstdio>
 
 using namespace XMLSupport;
 
@@ -413,12 +412,27 @@ CommunicationMessage::CommunicationMessage(Unit *send,
     assert(this->curstate >= 0);
 }
 
+char tohexdigit(int x) {
+    if (x <= 9 && x >= 0) {
+        return (char) (x + '0');
+    } else {
+        return (char) (x - 10 + 'A');
+    }
+}
 
 RGBstring colToString(GFXColor col) {
-    // Emit the unified '#cR:G:B#' format (floats 0-1) rather than the old '#RRGGBB'
-    // hex, which the ImGui text parser no longer understands (would render literally).
+    unsigned char r = (unsigned char) (col.r * 255);
+    unsigned char g = (unsigned char) (col.g * 255);
+    unsigned char b = (unsigned char) (col.b * 255);
     RGBstring ret;
-    snprintf(ret.str, sizeof(ret.str), "#c%.3f:%.3f:%.3f#", col.r, col.g, col.b);
+    ret.str[0] = '#';
+    ret.str[7] = '\0';
+    ret.str[1] = tohexdigit(r / 16);
+    ret.str[2] = tohexdigit(r % 16);
+    ret.str[3] = tohexdigit(g / 16);
+    ret.str[4] = tohexdigit(g % 16);
+    ret.str[5] = tohexdigit(b / 16);
+    ret.str[6] = tohexdigit(b % 16);
     return ret;
 }
 
