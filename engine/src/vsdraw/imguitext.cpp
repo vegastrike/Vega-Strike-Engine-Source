@@ -348,7 +348,7 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
             // reverts to white (e.g. the credits headers vs. the body text).
             currentColor = m_colorU32;
         } else if (c == ' ' && doWrap) {
-            pushWord(true);
+            pushWord(false);
             lines.back().push_back({" ", currentColor});
             lineWidth += measure(" ");
         } else if (c == '#' && isIncompleteColorToken(i)) {
@@ -357,7 +357,7 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
             // whole token is re-parsed correctly once the reveal completes it.
             break;
         } else if (c == '#' && i + 2 < n && newText[i + 1] == '-' && newText[i + 2] == 'c') {
-            pushWord(true);
+            pushWord(false);
             currentColor = m_colorU32;
             i += 2;
         } else if (c == '#' && i + 6 < n
@@ -371,7 +371,7 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
             // (black) is a RESET to the default color -- matching the removed
             // TextPlane::ParseText semantics. Checked before the '#c' float form so
             // hex colors beginning with 'b' or 'c' (e.g. #cccccc) aren't misparsed.
-            pushWord(true);
+            pushWord(false);
             const int r = ParseHexByte(&newText[i + 1]);
             const int g = ParseHexByte(&newText[i + 3]);
             const int b = ParseHexByte(&newText[i + 5]);
@@ -384,7 +384,7 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
         } else if (c == '#' && i + 1 < n && newText[i + 1] == 'c') {
             const size_t end = newText.find('#', i + 2);
             if (end != std::string::npos) {
-                pushWord(true);
+                pushWord(false);
                 currentColor = parseColorU32(newText.substr(i + 2, end - (i + 2)));
                 i = end;
             } else {
@@ -394,7 +394,7 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
             word += c;
         }
     }
-    pushWord(true);
+    pushWord(false);
 
     // Very dark, semi-transparent word background. Drawn under each word (at the
     // word's own left edge) so it never overlaps the previous word's glyphs.
