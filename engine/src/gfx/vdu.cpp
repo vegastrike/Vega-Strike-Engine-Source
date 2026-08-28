@@ -645,6 +645,11 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     // One text flow down the VDU: unit name/faction/label, then the range and any
     // docking text beneath it. No newline-padding to push text to the bottom.
     std::string display = unitandfg;
+    // unitandfg ends with a newline when the target label is empty; strip trailing
+    // newlines so the range/status line follows directly on the next line.
+    while (!display.empty() && display.back() == '\n') {
+        display.pop_back();
+    }
     if (inrange) {
         if (draw_auto_message) {
             display += "\n" + cp->autoMessage;
