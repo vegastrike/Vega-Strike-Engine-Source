@@ -162,7 +162,9 @@ static float drawLine(const std::vector<TextPlaneRun> &runs, ImVec2 &pen, ImDraw
     ImFont *font = ImGui::GetFont();
     const float font_size = ImGui::GetFontSize();
     const float scale = textScale;
-    const float draw_size = font_size * scale;
+    // Round to a whole pixel so the dynamic atlas bakes at exactly this size and
+    // the glyphs stay crisp (a fractional size lands between pixel boundaries).
+    const float draw_size = std::round(font_size * scale);
 
     auto measure = [&](const std::string &s) -> ImVec2 {
         if (font && font->IsLoaded())
@@ -237,7 +239,9 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
     // pixels; convert to normalized units (fraction of screen width) so the comparison
     // stays resolution-independent. The screen width is only the pixel basis.
     ImFont *font = ImGui::GetFont();
-    const float draw_size = ImGui::GetFontSize() * m_textScale;
+    // Round to a whole pixel (matching drawLine) so the wrap measurement matches the
+    // crisp baked size used for drawing.
+    const float draw_size = std::round(ImGui::GetFontSize() * m_textScale);
     const float displayW = ImGui::GetIO().DisplaySize.x;
     const float wrapWidthPx = wrapWidth * displayW;   // for ImGui's pixel-based wrap
     auto measure = [&](const std::string &s) -> float {
