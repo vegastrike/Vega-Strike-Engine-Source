@@ -12,11 +12,14 @@
 
 #include "configuration/configuration.h"
 #include "gldrv/winsys.h"
+#include "gldrv/gl_init.h"
 #include "universe.h"
 #include "vegadisk/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 #include "config_xml.h"
 #include "src/vs_exit.h"
+#include "cmd/music.h"
+#include "src/audiolib.h"
 #include <boost/json.hpp>
 #include <boost/filesystem.hpp>
 #include <imgui.h>
@@ -782,6 +785,21 @@ static void write_out_dirty() {
         fprintf(stderr, "[vs-settings-ng] wrote bindings overlay to %s/bindings.json\n", VSFileSystem::homedir.c_str());
     }
     g_dirty_paths.clear();
+}
+
+// Re-initialize the runtime from the in-memory configuration() after an in-game
+// settings Save. The game historically assumed the config never changes in-game:
+// config->runtime copies (g_game feature flags, gl_options, GL viewport, legacy
+// font metrics, audio/music volume) ran once at bootstrap and went stale on an
+// in-game change. This re-binds them so the change takes effect without a restart.
+// A brief re-orient pause is expected (and acceptable). See gldrv/gl_init.h.
+static void reinit_from_saved_config() {
+    // Graphics: g_game feature flags + gl_options + GL viewport (reuses initfov
+    // and reapply_gl_options, the same copy code as bootstrap).
+    GFXReinitConfig();
+    // Audio/volume: re-apply the live volume functions from the new config.
+    AUDReapplyConfig();
+    Music::SetVolume(configuration().audio.music_volume_flt, -1, false);
 }
 
 // Mouse Settings dialog.
@@ -1718,6 +1736,13 @@ void DrawConfigScreen() {
         if (dirty) {
             apply_all();
             write_out_dirty();   // persist the dirty paths to the user overlay
+            // Re-initialize the runtime from the updated in-memory configuration().
+            // The game assumed config never changes in-game, so config->runtime
+            // copies (g_game feature flags, gl_options, GL viewport, legacy font
+            // metrics, audio volume) ran only at bootstrap and went stale on an
+            // in-game change. This re-binds them so the change takes effect
+            // without a restart. A brief re-orient pause is expected.
+            reinit_from_saved_config();
             dirty = false;
             // Stay open: the player can keep tweaking and Save again.
         }
