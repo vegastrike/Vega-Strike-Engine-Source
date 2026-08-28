@@ -106,6 +106,10 @@ static const BitmapFamily bitmap_families[] = {
 
 bool dirty = false;
 
+// Set on Save when a shader config path changed; shows a "restart required"
+// notice (shaders are written out but not hot-applied).
+static bool shader_restart_notice = false;
+
 // The set of config paths changed (dirty). Populated by the apply_*_to_config
 // functions on Save; consumed by write_out_dirty() (the single write-out entry
 // point, deferred to Layer 3) so it knows exactly what to persist.
@@ -115,6 +119,24 @@ static std::set<std::string> g_dirty_paths;
 static void mark_dirty(const std::string &path) {
     dirty = true;
     g_dirty_paths.insert(path);
+}
+
+// Shader-related config paths (set by the "shaders" preset). Shaders are NOT
+// hot-applied; a change requires a restart. Flagged on Save so we can tell the
+// user rather than silently applying (or silently skipping) the change.
+//
+// Snapshot the current shader-related config values. Used on Save to detect an
+// ACTUAL shader change: the presets re-apply the selected 'shaders' preset on
+// every Save (marking these paths dirty even when nothing changed), so dirty-ness
+// alone can't gate the restart-required notice — only a value change can.
+static std::vector<boost::json::value> shader_values_snapshot() {
+    static const char *shader_paths[] = {
+        "graphics.technique_set", "graphics.mac_shader_name",
+        "graphics.default_full_technique", "graphics.default_simple_technique"
+    };
+    std::vector<boost::json::value> vals;
+    for (const char *p : shader_paths) vals.push_back(read_config_value(p));
+    return vals;
 }
 
 // ---------------------------------------------------------------------------
@@ -1641,10 +1663,18 @@ static void draw_presets_frame() {
             std::string lbl = "##mpre_" + g.key;
             if (ImGui::Combo(lbl.c_str(), &sel, items.data(), (int)items.size())) {
                 if (sel >= 0) {
+                    const auto shader_before = shader_values_snapshot();
                     cfg().preset[g.key] = g.options[sel].name;
                     mark_dirty("preset." + g.key);
                     // Apply the preset's vars to Configuration.
                     for (auto &kv : g.options[sel].vars) apply_preset_var(kv.first, kv.second);
+                    // If applying this preset actually changed a shader value, flag
+                    // the restart-required notice. Detected here because presets are
+                    // applied at selection time (not on Save), so a Save-time
+                    // before/after compare can't see the change.
+                    if (shader_values_snapshot() != shader_before) {
+                        shader_restart_notice = true;
+                    }
                 }
             }
         }
@@ -1736,6 +1766,9 @@ void DrawConfigScreen() {
         if (dirty) {
             apply_all();
             write_out_dirty();   // persist the dirty paths to the user overlay
+            // (Shader changes are detected at selection time in draw_presets_frame,
+            // where the preset vars are applied. Shaders aren't hot-applied; the
+            // 'Shader Change' restart-required notice is set there.)
             // Re-initialize the runtime from the updated in-memory configuration().
             // The game assumed config never changes in-game, so config->runtime
             // copies (g_game feature flags, gl_options, GL viewport, legacy font
@@ -1780,6 +1813,21 @@ void DrawConfigScreen() {
     // Bindings dialog (modal on top).
     if (bind_dialog_open) ImGui::OpenPopup("Bindings");
     draw_bindings_dialog();
+
+    // Shader-change notice (modal on top). Shaders are written out but not
+    // hot-applied; tell the user a restart is required. Dismissed on OK.
+    if (shader_restart_notice) {
+        ImGui::OpenPopup("Shader Change");
+    }
+    if (ImGui::BeginPopupModal("Shader Change", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::TextUnformatted("Shader changes take effect after a restart.");
+        ImGui::TextUnformatted("The new settings were saved. Restart the game to apply them.");
+        if (ImGui::Button("OK", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+            shader_restart_notice = false;
+        }
+        ImGui::EndPopup();
+    }
 
     ImGui::End();
 }
