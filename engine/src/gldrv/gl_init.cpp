@@ -557,12 +557,21 @@ void init_opengl_extensions() {
 // config value are copied here; the hardware-limited ones (max_rect_dimension,
 // max_array_*, max_texture_dimension) are one-shot GL/extension queries and are
 // not re-derived.
-static void reapply_gl_options() {
+//
+// `apply_technique` controls whether the technique/shader-affecting fields are
+// copied: applied at startup (GFXInit), but NOT on a live re-init (GFXReinitConfig).
+// gl_options.Multitexture (the reflection flag) drives how many texture layers a
+// sprite/technique draws; changing it mid-game forces the technique rendering to
+// re-evaluate and produces broken visuals until a restart. So like shaders, a
+// reflection/technique change is written out but only takes effect on restart.
+static void reapply_gl_options(bool apply_technique) {
     gl_options.wireframe = configuration().graphics.use_wireframe;
     gl_options.smooth_shade = configuration().graphics.smooth_shade;
     gl_options.mipmap = configuration().graphics.mipmap_detail;
     gl_options.compression = configuration().graphics.texture_compression;
-    gl_options.Multitexture = configuration().graphics.reflection;
+    if (apply_technique) {
+        gl_options.Multitexture = configuration().graphics.reflection;
+    }
     gl_options.display_lists = configuration().graphics.displaylists;
 }
 
@@ -595,7 +604,10 @@ static void initfov() {
 // recreate the window or GL context (those stay one-shot); see gl_init.h.
 void GFXReinitConfig() {
     initfov();
-    reapply_gl_options();
+    // Do NOT re-apply the technique/shader-affecting gl_options (Multitexture /
+    // reflection): changing it mid-game breaks the technique rendering (see
+    // reapply_gl_options). Reflection/technique changes apply on restart.
+    reapply_gl_options(/*apply_technique=*/false);
     glViewport(0, 0, native_resolution_x, native_resolution_y);
 }
 
@@ -657,7 +669,7 @@ void GFXInit(int argc, char **argv) {
     // Config-driven gl_options copies (extracted so GFXReinitConfig can re-run them
     // on an in-game settings change). The self-assignment lines below keep their
     // original meaning (config already holds the value; assigned back for clarity).
-    reapply_gl_options();
+    reapply_gl_options(/*apply_technique=*/true);   // startup: apply all config-driven gl_options
     (configuration()).graphics.smooth_lines = configuration().graphics.smooth_lines;
     (configuration()).graphics.smooth_points = configuration().graphics.smooth_points;
     (configuration()).graphics.s3tc = configuration().graphics.s3tc;
