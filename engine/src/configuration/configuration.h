@@ -1498,7 +1498,7 @@ namespace vega_config {
     struct {
         std::string campaigns = "privateer_campaign vegastrike_campaign";
         std::string default_mission = "main_menu.mission";
-        std::string introduction = "Welcome to Vega Strike!\nUse #c.5:.5:1#Tab#-c to afterburn (#c.5:.5:1#+,-#-c cruise control),\n#c.5:.5:1#arrows#-c to steer.\nThe #c.5:.5:1#t#-c key targets objects; #c.5:.5:1#space#-c fires at them & #c.5:.5:1#a#-c activates the SPEC drive.\nTo go to another star system, buy a jump drive for about 10000 credits,\nfly to a wireframe jump-point and press #c.5:.5:1#j#-c to warp to a near star.\nTarget a base or planet;\nWhen you get close a green box will appear. Inside the box, #c.5:.5:1#d#-c will land.";
+        std::string introduction = "Welcome to Vega Strike!\nUse #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control),\n#8080FFarrows#000000 to steer.\nThe #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 activates the SPEC drive.\nTo go to another star system, buy a jump drive for about 10000 credits,\nfly to a wireframe jump-point and press #8080FFj#000000 to warp to a near star.\nTarget a base or planet;\nWhen you get close a green box will appear. Inside the box, #8080FFd#000000 will land.";
         std::string galaxy = "milky_way.xml";
 
     } game_start;
@@ -2037,17 +2037,17 @@ namespace vega_config {
         } glow_flicker;
 
         struct {
-            std::string already_near_message = "#c1:0:0#Already Near#-c";
+            std::string already_near_message = "#ff0000Already Near#000000";
             double armor_hull_size_dbl = 0.55;
         float armor_hull_size_flt = 0.55;
-            std::string asteroids_near_message = "#c1:0:0#Asteroids Near#-c";
+            std::string asteroids_near_message = "#ff0000Asteroids Near#000000";
             bool basename_colon_basename = true;
             double box_line_thickness_dbl = 1.0;
         float box_line_thickness_flt = 1.0;
             bool completed_objectives_last = true;
             bool crosshairs_on_chase_cam = false;
             bool crosshairs_on_padlock = false;
-            std::string damage_report_heading = "#c0:1:0#DAMAGE REPORT";
+            std::string damage_report_heading = "#00ff00DAMAGE REPORT";
             bool debug_position = false;
             double diamond_line_thickness_dbl = 1.0;
         float diamond_line_thickness_flt = 1.0;
@@ -2080,7 +2080,7 @@ namespace vega_config {
             bool draw_unit_on_chase_cam = true;
             bool draw_vdu_view_shields = true;
             bool draw_weapon_sprite = false;
-            std::string enemy_near_message = "#c1:0:0#Enemy Near#-c";
+            std::string enemy_near_message = "#ff0000Enemy Near#000000";
             int gun_list_columns = 1;
             bool invert_friendly_shields = false;
             bool invert_friendly_sprite = false;
@@ -2116,7 +2116,7 @@ namespace vega_config {
         float padlock_view_lag_flt = 1.5;
             double padlock_view_lag_fix_zone_dbl = 0.0872;
         float padlock_view_lag_fix_zone_flt = 0.0872;
-            std::string planet_near_message = "#c1:0:0#Planetary Hazard Near#-c";
+            std::string planet_near_message = "#ff0000Planetary Hazard Near#000000";
             bool print_damage_percent = true;
             bool print_faction = true;
             bool print_fg_name = true;
@@ -2143,7 +2143,7 @@ namespace vega_config {
         float shield_vdu_thresh2_flt = 0.75;
             bool show_negative_blips_as_positive = true;
             bool simple_manifest = false;
-            std::string starship_near_message = "#c1:0:0#Starship Near#-c";
+            std::string starship_near_message = "#ff0000Starship Near#000000";
             bool switch_to_target_mode_on_key = true;
             bool switch_back_from_comms = true;
             double tac_target_foci_dbl = 0.5;
