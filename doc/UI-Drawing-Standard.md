@@ -64,7 +64,16 @@ textBox.draw();                        // draws with the current ImGui draw list
 - `#c<color>` push color, `#-` pop, `#!` reset.
 - `#n` newline, `#l<spacing>` line spacing (per-line or permanent).
 - `#b<width>` bold / stroke width.
-- `#cR:G:B#` / `#cR:G:B:A#` for colors.
+
+**Color notations** — the parser accepts **both**, so authors use whichever fits:
+
+- `#RRGGBB` — industry-standard hex (the primary authoring form; artists know it).
+  `#000000` (black) is a **reset to the default color**, not literal black.
+- `#cR:G:B#` / `#cR:G:B:A#` — float 0..1 channels, for colors that need alpha or
+  fractional channels.
+
+> `#c` and `#b` are reserved prefixes for the float-color / stroke codes, so a hex
+> color must not begin with `b` or `c` (e.g. write `#bb0000`, not `#b0000`).
 
 ### `TextPlane` (legacy — migrating)
 `TextPlane` (`engine/src/gfx/hud.cpp`) is the base/HUD text box. It is being migrated onto
