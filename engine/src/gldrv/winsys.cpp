@@ -43,6 +43,7 @@
 #include <sstream>
 
 #include "gl_globals.h"
+#include "gl_init.h"
 #include "winsys.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
@@ -53,6 +54,10 @@
 #include "src/vs_exit.h"
 #include "configuration/configuration.h"
 #include "libraries/gui/gui.h"
+#include "backends/imgui_impl_sdl2.h"
+#include "gui/config_screen.h"
+#include "in_kb.h"
+#include "in_joystick.h"
 
 #include "SDL2/SDL_video.h"
 
@@ -72,6 +77,7 @@
  */
 
 static SDL_Window *window = nullptr;
+static SDL_Renderer *renderer = nullptr;   // created at bootstrap; reused to re-issue logical size on resize
 static SDL_Surface *screen = nullptr;
 
 static winsys_display_func_t display_func = nullptr;
@@ -141,6 +147,44 @@ void winsys_set_keyboard_func(winsys_keyboard_func_t func) {
     keyboard_func = func;
 }
 
+// Whether the in-game config overlay is open. While active, winsys suppresses
+// forwarding mouse/keyboard to the game handlers (the overlay consumes input) so
+// clicks don't pass through to the game behind.
+static bool config_overlay_active = false;
+
+void winsys_set_config_overlay_active(bool active) {
+    config_overlay_active = active;
+}
+
+bool winsys_config_overlay_active() {
+    return config_overlay_active;
+}
+
+// Re-attach joysticks when a device is hotplugged (SDL_JOYDEVICEADDED). We use
+// fake-present slots set up at startup (bindings are bound there), so a new
+// device is Attach()ed to the first free physical slot without re-binding
+// (which would cause input inconsistency). On removal the slot just stays; the
+// device detaches. bindings stay valid because they are keyed by slot index.
+static void winsys_refresh_joysticks() {
+    int n = SDL_NumJoysticks();
+    if (n > MAX_JOYSTICKS) {
+        n = MAX_JOYSTICKS;
+    }
+    // Attach each present device index to the matching free physical slot.
+    for (int dev = 0; dev < n; ++dev) {
+        for (int i = 0; i < MAX_JOYSTICKS; ++i) {
+            if (i == MOUSE_JOYSTICK) {
+                continue;
+            }
+            if (joystick[i] != nullptr && joystick[i]->joy == nullptr) {
+                joystick[i]->Attach(dev);
+                VS_LOG(important_info, (boost::format("[hotplug] attached device %1% to slot %2%") % dev % i));
+                break;
+            }
+        }
+    }
+}
+
 /*---------------------------------------------------------------------------*/
 /*!
  *  Sets the mouse button-press callback
@@ -205,6 +249,31 @@ int native_resolution_y;
 
 /*---------------------------------------------------------------------------*/
 /*!
+ *  Find the SDL display mode matching the requested resolution on the given
+ *  display, returning true if matched. Falls back to the desktop (native) mode
+ *  when the requested resolution isn't an available fullscreen mode, so we never
+ *  fail to enter fullscreen (per Evert: detect available resolutions and only
+ *  offer those; if not gotten, fall back to native).
+ */
+static bool find_fullscreen_display_mode(int display_index, int width, int height,
+        SDL_DisplayMode *out_mode) {
+    int nmodes = SDL_GetNumDisplayModes(display_index);
+    for (int i = 0; i < nmodes; ++i) {
+        SDL_DisplayMode mode;
+        if (SDL_GetDisplayMode(display_index, i, &mode) != 0) continue;
+        if (mode.w == width && mode.h == height) {
+            *out_mode = mode;
+            return true;
+        }
+    }
+    // Not an available fullscreen mode -> fall back to the desktop (native) mode.
+    if (SDL_GetDesktopDisplayMode(display_index, out_mode) == 0) {
+        return true;
+    }
+    return false;
+}
+
+/*!
  *  Sets up the SDL OpenGL rendering context
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
@@ -215,16 +284,25 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
     int bpp = 0; // Bits per pixel?
     int width, height;
+    // Fullscreen uses a real display mode change (SDL_WINDOW_FULLSCREEN +
+    // SDL_SetWindowDisplayMode), so the selected resolution is honored rather
+    // than always rendering at the desktop resolution (SDL_WINDOW_FULLSCREEN_DESKTOP).
+    // If the requested resolution isn't an available fullscreen mode, fall back to
+    // the native/desktop mode (see find_fullscreen_display_mode).
+    SDL_DisplayMode requested_fullscreen_mode;
+    bool have_fullscreen_mode = false;
     if (configuration().graphics.full_screen) {
-        video_flags |= SDL_WINDOW_BORDERLESS;
+        video_flags |= SDL_WINDOW_FULLSCREEN;
 
-        SDL_DisplayMode currentDisplayMode;
-        if (SDL_GetCurrentDisplayMode(screen_number, &currentDisplayMode) != 0) {
-            VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_GetCurrentDisplayMode failed: %1%") % SDL_GetError()), -1);
-        } else {
-            native_resolution_x = currentDisplayMode.w;
-            native_resolution_y = currentDisplayMode.h;
+        // Choose the display mode: the configured resolution if available, else native.
+        have_fullscreen_mode = find_fullscreen_display_mode(screen_number,
+                configuration().graphics.resolution_x, configuration().graphics.resolution_y,
+                &requested_fullscreen_mode);
+        if (!have_fullscreen_mode) {
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("Could not find any fullscreen display mode for display %1%") % screen_number), -1);
         }
+        native_resolution_x = requested_fullscreen_mode.w;
+        native_resolution_y = requested_fullscreen_mode.h;
     } else {
         video_flags |= SDL_WINDOW_RESIZABLE;
 
@@ -236,7 +314,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
     if (configuration().graphics.rgb_pixel_format == "undefined") {
-        (const_cast<vega_config::Configuration &>(configuration())).graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
+        (configuration()).graphics.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
     if ((configuration().graphics.rgb_pixel_format.length() == 3) && isdigit(configuration().graphics.rgb_pixel_format[0])
             && isdigit(configuration().graphics.rgb_pixel_format[1]) && isdigit(configuration().graphics.rgb_pixel_format[2])) {
@@ -298,6 +376,13 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         VS_LOG_FLUSH_EXIT(fatal, "No window", 1);
     }
 
+    // Always mark the window resizable (SDL_SetWindowResizable works dynamically,
+    // independent of the creation flags). On a fullscreen launch the window was
+    // created without SDL_WINDOW_RESIZABLE, so switching to windowed would lose
+    // the resize handles/maximize button. Setting it explicitly here ensures a
+    // windowed resize is possible whether we started fullscreen or windowed.
+    SDL_SetWindowResizable(window, SDL_TRUE);
+
     if(screen_number > 0) {
         // Get bounds of the secondary monitor
         SDL_Rect displayBounds;
@@ -314,7 +399,10 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     }
 
     if (configuration().graphics.full_screen) {
-        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        if (have_fullscreen_mode) {
+            SDL_SetWindowDisplayMode(window, &requested_fullscreen_mode);
+        }
     }
 
     if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {
@@ -324,7 +412,32 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_ClearError();
     }
 
-    SDL_GL_GetDrawableSize(window, &width, &height);
+    // Measure the ACTUAL window size after creation. In windowed mode the WM /
+    // compositor may clamp a requested size down to fit the screen, so the game
+    // must adopt the window it actually got rather than assume it got the
+    // requested size (otherwise the viewport/layout render at the oversized
+    // request while the window is smaller -> cut off). The GL drawable size is
+    // the render target (native_resolution -> glViewport); the logical window
+    // size is what the layout/HUD/ImGui/config-screen read (graphics.resolution).
+    // On a non-scaling display these are equal; on a scaled display they differ
+    // (points vs pixels) and we keep them distinct.
+    int logical_w = 0, logical_h = 0;
+    SDL_GetWindowSize(window, &logical_w, &logical_h);
+    int drawable_w = 0, drawable_h = 0;
+    SDL_GL_GetDrawableSize(window, &drawable_w, &drawable_h);
+    if (logical_w <= 0) { logical_w = width; }
+    if (logical_h <= 0) { logical_h = height; }
+    if (drawable_w <= 0) { drawable_w = logical_w; }
+    if (drawable_h <= 0) { drawable_h = logical_h; }
+    native_resolution_x = drawable_w;
+    native_resolution_y = drawable_h;
+    (configuration()).graphics.resolution_x = logical_w;
+    (configuration()).graphics.resolution_y = logical_h;
+    // Keep the screen aspect consistent with the actual window resolution.
+    if (logical_h > 0) {
+        (configuration()).graphics.aspect_flt =
+                (float)logical_w / (float)logical_h;
+    }
 
     SDL_GLContext context = SDL_GL_CreateContext(window);
 
@@ -341,7 +454,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         VS_LOG_FLUSH_EXIT(fatal, "Failed to make window context current", 1);
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == nullptr) {
         VS_LOG_AND_FLUSH(error, (boost::format(
             "SDL_CreateRenderer(...) with VSync option failed; trying again without VSync option. Error was: %1%") %
@@ -382,7 +495,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
             SDL_ClearError();
             freeMouseCursors();
             SDL_Quit();
-            (const_cast<vega_config::Configuration &>(configuration())).graphics.gl_accelerated_visual = false;
+            (configuration()).graphics.gl_accelerated_visual = false;
             return false;
         } else {
             VS_LOG(error, "GDI Generic software driver reported, reset failed.");
@@ -399,6 +512,11 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 
     // Initialize imgui
     InitGui();
+    // Apply the persisted font size (config was loaded before this). Without
+    // this the ImGui UI resets to the 18.0f hardcoded default in InitGui()
+    // regardless of the saved graphics.font_point; the pending request is
+    // applied at the next frame start via ImGui_ApplyPendingFontSize().
+    RequestImGuiFontSize(configuration().graphics.font_point_flt);
 
     return true;
 }
@@ -503,6 +621,84 @@ void winsys_show_cursor(bool visible) {
     }
 }
 
+// Apply a new resolution/fullscreen to the live window (from the in-game config
+// screen). Sets configuration(), then applies windowed/fullscreen + size via
+// SDL2, and forces the reshape so the viewport/measurements update immediately.
+void winsys_apply_resolution(int width, int height, bool fullscreen) {
+    auto &g = configuration().graphics;
+    g.full_screen = fullscreen;
+
+    if (window == nullptr) {
+        g.resolution_x = width;
+        g.resolution_y = height;
+        return;
+    }
+
+    if (fullscreen) {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        // Request a real fullscreen display mode so the selected resolution is
+        // honored (not always desktop-res). If the exact size isn't an available
+        // fullscreen mode, fall back to native. Update width/height to the mode
+        // actually used so the measurements below track the real render size.
+        SDL_DisplayMode fs_mode;
+        const int screen_number = g.screen;
+        if (find_fullscreen_display_mode(screen_number, width, height, &fs_mode)) {
+            SDL_SetWindowDisplayMode(window, &fs_mode);
+            width = fs_mode.w;
+            height = fs_mode.h;
+        }
+    } else {
+        SDL_SetWindowFullscreen(window, 0);
+        SDL_SetWindowSize(window, width, height);
+    }
+
+    // Measure the ACTUAL window size after the resize. In windowed mode the WM /
+    // compositor may clamp a requested size down to fit the screen, and on a
+    // HiDPI/Wayland display the logical window size (points) differs from the GL
+    // drawable size (pixels). Using the measured sizes (rather than the requested
+    // width/height) keeps the scene viewport, ImGui overlay, and config write-out
+    // all consistent with the real window. The GL drawable size is what the legacy
+    // viewport must map to; the logical window size is what ImGui
+    // (io.DisplaySize = SDL_GetWindowSize) and the config screen use.
+    int logical_w = 0, logical_h = 0;
+    SDL_GetWindowSize(window, &logical_w, &logical_h);
+    int drawable_w = 0, drawable_h = 0;
+    SDL_GL_GetDrawableSize(window, &drawable_w, &drawable_h);
+    if (logical_w <= 0) { logical_w = width; }
+    if (logical_h <= 0) { logical_h = height; }
+    if (drawable_w <= 0) { drawable_w = logical_w; }
+    if (drawable_h <= 0) { drawable_h = logical_h; }
+
+    // In fullscreen, the legacy GL viewport should fill the whole drawable. In
+    // windowed on a scaled display the drawable is the pixel size; the legacy GL
+    // scene must render into it. The config/graphics resolution (used by ImGui and
+    // the config screen) is the logical window size.
+    native_resolution_x = drawable_w;
+    native_resolution_y = drawable_h;
+    g.resolution_x = logical_w;
+    g.resolution_y = logical_h;
+
+    // Re-issue the renderer logical size (bound once at bootstrap). Present is via
+    // SDL_GL_SwapWindow, so this mainly keeps SDL_GetRenderOutputSize consistent
+    // for anything that reads it.
+    if (renderer != nullptr) {
+        SDL_RenderSetLogicalSize(renderer, drawable_w, drawable_h);
+    }
+
+    // Recompute the screen aspect from the actual resolution so the in-game
+    // camera/cockpit viewport isn't distorted after a live change.
+    if (g.resolution_y > 0) {
+        g.aspect_flt = (float)g.resolution_x / (float)g.resolution_y;
+    }
+
+    // Force the reshape so native_resolution_x/y and the GL viewport update; in
+    // windowed this normally fires via SDL_WINDOWEVENT_RESIZED, but fullscreen
+    // mode changes may not, so apply it directly here.
+    if (reshape_func) {
+        (*reshape_func)(native_resolution_x, native_resolution_y);
+    }
+}
+
 /*---------------------------------------------------------------------------*/
 /*!
  *  Processes and dispatches events.  This function never returns.
@@ -516,6 +712,57 @@ void winsys_show_cursor(bool visible) {
  */
 extern int shiftdown(int);
 extern int shiftup(int);
+
+// Debounce state for window resizes. A live drag fires many SIZE_CHANGED/RESIZED
+// events in quick succession; we re-init only after the resize has been quiet for
+// RESIZE_DEBOUNCE_MS, so we don't thrash the re-init on every intermediate frame.
+static int pending_resize_w = -1;
+static int pending_resize_h = -1;
+static Uint32 resize_deadline = 0;
+static const Uint32 RESIZE_DEBOUNCE_MS = 100;
+
+// Handle a window size change (resize or size-changed). Re-binds the game to the
+// new actual window size and requests a redraw so the game re-renders at the new
+// size. This is the actual re-init; callers debounce it via the resize_request below.
+static void handle_window_resize(int new_w, int new_h) {
+    // Use the ACTUAL window size (SDL_GetWindowSize = logical points) for
+    // graphics.resolution_x/y, NOT the event data. On a scaled/HiDPI display the
+    // resize event reports the drawable pixel size, which differs from the logical
+    // window size that ImGui uses (io.DisplaySize = SDL_GetWindowSize). If we set
+    // graphics.resolution from pixels, the ImGui config overlay is sized at the
+    // pixel size but ImGui hit-tests in point space -> an "invisible cursor"
+    // offset (mouseover fires for the wrong position). Using the logical window
+    // size keeps graphics.resolution consistent with io.DisplaySize.
+    if (window != nullptr) {
+        int lw = 0, lh = 0;
+        SDL_GetWindowSize(window, &lw, &lh);
+        if (lw > 0) { new_w = lw; }
+        if (lh > 0) { new_h = lh; }
+    }
+    (configuration()).graphics.resolution_x = new_w;
+    (configuration()).graphics.resolution_y = new_h;
+    if (new_h > 0) {
+        (configuration()).graphics.aspect_flt =
+                (float)new_w / (float)new_h;
+    }
+    // Re-bind the GL viewport to the actual drawable size, so the scene renders at
+    // the new size rather than the old.
+    if (window != nullptr) {
+        int d_w = 0, d_h = 0;
+        SDL_GL_GetDrawableSize(window, &d_w, &d_h);
+        if (d_w > 0 && d_h > 0) {
+            native_resolution_x = d_w;
+            native_resolution_y = d_h;
+        }
+    }
+    GFXReinitConfig();
+    if (reshape_func) {
+        (*reshape_func)(new_w, new_h);
+    }
+    // A resize must trigger a redraw (the event loop only redraws on redisplay,
+    // otherwise it relies on idle_func which can be paused, e.g. in the overlay).
+    redisplay = true;
+}
 
 void winsys_process_events() {
     SDL_Event event;
@@ -532,6 +779,12 @@ void winsys_process_events() {
         SDL_LockAudio();
         SDL_UnlockAudio();
         while (SDL_PollEvent(&event)) {
+            // forward all events to ImGui (drives the config screen, and any
+            // other ImGui UI) without altering the game's own dispatch below.
+            ImGui_ImplSDL2_ProcessEvent(&event);
+            // Forward to the config screen (binding capture, joystick hotplug)
+            // while it is open.
+            vs_settings_ng::HandleConfigEvent(&event);
 
             state = false;
             switch (event.type) {
@@ -540,8 +793,16 @@ void winsys_process_events() {
                     //does same thing as KEYDOWN, but with different state.
                 case SDL_KEYDOWN:
 
-                    if (keyboard_func) {
-                        SDL_GetMouseState(&x, &y);
+                    // Global (always-active) actions fire in any context (in-flight,
+                    // docked, nav, text) -- e.g. Alt+C (ConfigKey) opens the settings
+                    // screen regardless of where the player is. Handled globally so it
+                    // is not double-fired by the context-specific dispatch below.
+                    SDL_GetMouseState(&x, &y);
+                    if (HandleGlobalKey(event.key.keysym.sym, event.key.keysym.mod, !state, x, y)) {
+                        break;
+                    }
+
+                    if (!config_overlay_active && keyboard_func) {
 //                        VS_LOG(debug, (boost::format("Kbd: %1$s mod:%2$x sym:%3$x scan:%4$x")
 //                                       % ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN")
 //                                       % event.key.keysym.mod
@@ -558,7 +819,7 @@ void winsys_process_events() {
 
                 case SDL_MOUSEBUTTONDOWN:
                 case SDL_MOUSEBUTTONUP:
-                    if (mouse_func) {
+                    if (!config_overlay_active && mouse_func) {
                         (*mouse_func)(event.button.button,
                                 event.button.state,
                                 event.button.x,
@@ -566,31 +827,73 @@ void winsys_process_events() {
                     }
                     break;
 
-                case SDL_MOUSEMOTION:
-                    if (event.motion.state) {
-                        /* buttons are down */
-                        if (motion_func) {
-                            (*motion_func)(event.motion.x,
-                                    event.motion.y);
+                case SDL_MOUSEWHEEL:
+                    // SDL2 reports the wheel as its own event (SDL_MOUSEWHEEL,
+                    // not a button press). Synthesize wheel-up / wheel-down
+                    // button presses so the existing mouse-button pipeline
+                    // (WS_WHEEL_UP->3 / WS_WHEEL_DOWN->4 in lookupMouseButton)
+                    // keeps working -- this drives scrolling in the base
+                    // computer, navscreen, pickers, etc.
+                    if (mouse_func) {
+                        int mx = 0;
+                        int my = 0;
+                        SDL_GetMouseState(&mx, &my);
+                        if (event.wheel.y > 0) {
+                            (*mouse_func)(WS_WHEEL_UP, WS_MOUSE_DOWN, mx, my);
+                            (*mouse_func)(WS_WHEEL_UP, WS_MOUSE_UP, mx, my);
+                        } else if (event.wheel.y < 0) {
+                            (*mouse_func)(WS_WHEEL_DOWN, WS_MOUSE_DOWN, mx, my);
+                            (*mouse_func)(WS_WHEEL_DOWN, WS_MOUSE_UP, mx, my);
                         }
-                    } else
-                        /* no buttons are down */
-                    if (passive_motion_func) {
-                        (*passive_motion_func)(event.motion.x,
-                                event.motion.y);
                     }
                     break;
 
-                case SDL_WINDOWEVENT_RESIZED:
-#if !(defined (_WIN32) && defined (SDL_WINDOWING ))
-                    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_x = event.window.data1;
-                    (const_cast<vega_config::Configuration &>(configuration())).graphics.resolution_y = event.window.data2;
-                    //setup_sdl_video_mode(argc, argv);
-                    if (reshape_func) {
-                        (*reshape_func)(event.window.data1,
-                                event.window.data2);
+                case SDL_MOUSEMOTION:
+                    if (!config_overlay_active) {
+                        if (event.motion.state) {
+                            /* buttons are down */
+                            if (motion_func) {
+                                (*motion_func)(event.motion.x,
+                                        event.motion.y);
+                            }
+                        } else
+                            /* no buttons are down */
+                        if (passive_motion_func) {
+                            (*passive_motion_func)(event.motion.x,
+                                    event.motion.y);
+                        }
                     }
-#endif
+                    break;
+
+                case SDL_WINDOWEVENT:
+                    // event.type == SDL_WINDOWEVENT (0x200); the actual sub-type is
+                    // event.window.event (RESIZED=5, SIZE_CHANGED=6, MOVED=3, ...).
+                    // Record the latest resize; the actual re-init is performed once
+                    // the resize has been quiet for RESIZE_DEBOUNCE_MS (debounced,
+                    // checked after the event pump), so a live drag doesn't thrash it.
+                    switch (event.window.event) {
+                        case SDL_WINDOWEVENT_RESIZED:
+                        case SDL_WINDOWEVENT_SIZE_CHANGED:
+                            pending_resize_w = event.window.data1;
+                            pending_resize_h = event.window.data2;
+                            resize_deadline = SDL_GetTicks() + RESIZE_DEBOUNCE_MS;
+                            break;
+                        default:
+                            // Other window events (moved, exposed, shown, ...)
+                            // need no re-init; ignore.
+                            break;
+                    }
+                    break;
+
+                case SDL_JOYDEVICEADDED:
+                    // A joystick appeared: attach the new device to a free slot
+                    // (no re-bind — bindings are set at startup).
+                    winsys_refresh_joysticks();
+                    break;
+
+                case SDL_JOYDEVICEREMOVED:
+                    // Joystick removed: the fake slot stays; the device simply
+                    // detaches. Nothing to re-init.
                     break;
 
                 case SDL_QUIT:
@@ -602,6 +905,14 @@ void winsys_process_events() {
             }
             SDL_LockAudio();
             SDL_UnlockAudio();
+        }
+        // Apply a pending debounced resize now that the resize events have quieted
+        // down (no new event for RESIZE_DEBOUNCE_MS). This re-binds the viewport /
+        // config to the final size and requests a redraw.
+        if (pending_resize_w >= 0 && SDL_GetTicks() >= resize_deadline) {
+            handle_window_resize(pending_resize_w, pending_resize_h);
+            pending_resize_w = -1;
+            pending_resize_h = -1;
         }
         if (redisplay && display_func) {
             redisplay = false;

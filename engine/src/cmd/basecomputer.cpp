@@ -3312,8 +3312,12 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
 
     if(playerUnit->BuyUpgrade(baseUnit, &m_part, quantity)) {
         double percent = 0;
-        // Modify upgrade quantity according to cargo quantity
-        m_newPart->mounts[0].ammo = quantity;
+        // Only missiles carry ammo. Non-missile weapons (beams, bolts) are
+        // energy weapons with unlimited ammo (-1); setting ammo here to 1
+        // burned bought guns out after a single shot (regression c3b14b93f).
+        if(m_newPart->mounts[0].IsMissileMount()) {
+            m_newPart->mounts[0].ammo = quantity;
+        }
 
         //Upgrade the ship.
         playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, 0, true, percent);

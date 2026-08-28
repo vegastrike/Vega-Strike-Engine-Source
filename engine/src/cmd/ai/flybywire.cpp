@@ -155,6 +155,17 @@ void MatchVelocity::Execute() {
     MatchAngularVelocity::Execute();
 
     MATCHLINVELSETUP();
+    // Also cap the desired velocity to set_speed (afterburn-aware) so the
+    // flight computer stops requesting more than the set speed while turning.
+    // This prevents the thrust from pushing the velocity past the limit in the
+    // first place; the physics clamp in UpdatePhysics is the hard backstop.
+    if (parent->graphicOptions.WarpFieldStrength == 1.0) {
+        const double limit = afterburn ? parent->MaxAfterburnerSpeed() : parent->computer.set_speed;
+        const double dmag = desired.Magnitude();
+        if (limit > 0 && dmag > limit) {
+            desired *= (limit / dmag);
+        }
+    }
     if (willfinish) {
         if ((done = done && fabs(desired.i - velocity.i) < VELTHRESHOLD && fabs(desired.j - velocity.j) < VELTHRESHOLD
                 && fabs(desired.k - velocity.k) < VELTHRESHOLD)) {

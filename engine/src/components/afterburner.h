@@ -43,6 +43,12 @@ public:
 
     Resource<double> speed;
 
+    // Whether the afterburner is actively engaged this step. Set in
+    // Movable::Thrust; the velocity clamp in Movable::UpdatePhysics reads this to
+    // allow afterburn speed only when the burner is truly active (not merely when
+    // fuel exists).
+    bool active = false;
+
     explicit Afterburner(EnergyContainer *source = nullptr);
 
     // Component Methods

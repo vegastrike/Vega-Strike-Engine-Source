@@ -46,6 +46,7 @@
 #include "src/vegastrike.h"
 #include "gfx/gauge.h"
 #include "gfx/cockpit.h"
+#include "gldrv/mouse_cursor.h"
 #include "src/universe.h"
 #include "src/star_system.h"
 #include "cmd/unit_generic.h"
@@ -1900,7 +1901,48 @@ void GameCockpit::Draw() {
         if ((view == CP_PAN
                 && !mousecursor_pancam)
                 || (view == CP_PANTARGET && !mousecursor_pantgt) || (view == CP_CHASE && !mousecursor_chasecam)) {
-        } 
+        } else {
+            // Glide mouse flight: the OS cursor is hidden (see universe.cpp) and we
+            // draw an in-game crosshair sprite instead, so we can (a) mirror its Y
+            // movement to match the inverted flight axis in inverse-glide (the OS
+            // cursor cannot be inverted) and (b) scale it down near the center
+            // within the glide deadzone. Both apply to normal glide; only the Y
+            // mirror is specific to inverse-glide (reverse_mouse_spr).
+            static VSSprite MouseVSSprite(configuration().joystick.mouse_crosshair.c_str(), BILINEAR, GFXTRUE);
+            const std::pair<int, int> mp = GetMousePosition();
+            const float mousex = static_cast<float>(mp.first);
+            const float mousey = static_cast<float>(mp.second);
+            const float sgn = configuration().joystick.reverse_mouse_spr ? -1.0f : 1.0f;
+            // Normalized -1..1 coordinates. ycoord uses sgn * (1 - mousey/.5res):
+            //   normal glide (sgn=+1): ycoord =  1 - mousey/(.5*res) (follows mouse)
+            //   inverse glide (sgn=-1): ycoord = -1 + mousey/(.5*res) (mirrored Y)
+            float xcoord = -1.0f + mousex / (0.5f * static_cast<float>(configuration().graphics.resolution_x));
+            float ycoord = sgn * (1.0f - mousey / (0.5f * static_cast<float>(configuration().graphics.resolution_y)));
+            GFXBlendMode(SRCALPHA, INVSRCALPHA);
+            GFXColor4f(1, 1, 1, 1);
+            GFXEnable(TEXTURE0);
+            GFXDisable(DEPTHTEST);
+            GFXDisable(LIGHTING);
+            // Deadband resize: shrink the crosshair when near the center. Use the
+            // same hardcoded deadzone (0.15) as the glide flight path
+            // (GetRelativeJoystickCoordinatesForAxis) so the scaling lines up with
+            // where the ship actually stops responding. The joystick deadzone
+            // config (deadband_flt) is for real joysticks, not the mouse.
+            float sx = 0.0f, sy = 0.0f;
+            MouseVSSprite.GetSize(sx, sy);
+            const float deadband = 0.15f;
+            if (xcoord < deadband && ycoord < deadband && xcoord > -deadband && ycoord > -deadband) {
+                MouseVSSprite.SetSize(sx / 2.0f, sy / 2.0f);
+            } else if (xcoord < deadband && xcoord > -deadband) {
+                MouseVSSprite.SetSize(sx / 2.0f, sy * 5.0f / 6.0f);
+            } else if (ycoord < deadband && ycoord > -deadband) {
+                MouseVSSprite.SetSize(sx * 5.0f / 6.0f, sy / 2.0f);
+            }
+            MouseVSSprite.SetPosition(xcoord, ycoord);
+            MouseVSSprite.Draw();
+            MouseVSSprite.SetSize(sx, sy);
+            GFXDisable(TEXTURE0);
+        }
     }
     if (view < CP_CHASE && damage_flash_first == false && getNewTime() - shake_time < damage_flash_length) {
         DrawDamageFlash(shake_type);

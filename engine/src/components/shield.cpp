@@ -340,6 +340,18 @@ void Shield::Regenerate(const bool player_ship) {
     * Finally, you adjust whatever used it to the value in question
     */
 
+    // Fully charged shields need no energy - return before any consumption.
+    // (Regression fix: the maintenance drain below used to run even at full
+    // shields, draining the primary capacitor (which the weapons also use) at
+    // max_shield x maintenance_factor per second. For ships whose shield max
+    // exceeds their reactor output - e.g. a Mule (18600 shields) or any
+    // capital ship - that left the capacitor empty, so neither the shields nor
+    // the weapons could ever function. See the 'capacitor never refills after
+    // firing' / 'AI ships never fire' reports.)
+    if (TotalLayerValue() == TotalMaxLayerValue()) {
+        return;
+    }
+
     // Shield Maintenance
     // TODO: lib_damage restore efficiency by replacing with shield->efficiency
     //const double efficiency = 1;
@@ -359,11 +371,6 @@ void Shield::Regenerate(const bool player_ship) {
     }
 
     // Shield Regeneration
-    if(TotalLayerValue() == TotalMaxLayerValue()) {
-        // Fully charged. No need for more action or energy consumption
-        return;
-    }
-
     const double shield_regeneration_cost = regeneration.AdjustedValue() * configuration().components.shield.regeneration_factor_dbl;
     SetConsumption(shield_regeneration_cost);
     const double actual_regeneration_percent = Consume();

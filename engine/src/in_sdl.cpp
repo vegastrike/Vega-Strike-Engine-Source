@@ -99,6 +99,18 @@ void BindHatswitchKey(int joystick, int key, KBHandler handler, const KBData &da
     GenBindJoyKey(HATSWITCH, joystick, key, handler, data);
 }
 
+// Reset every joystick/hatswitch button state to UP. Called when the config
+// overlay closes so a button whose release was swallowed by the overlay input
+// path doesn't stay DOWN and fire a command continuously once flight polling
+// resumes (mirrors RestoreKB for the keyboard).
+void RestoreJoystickState() {
+    for (int sw = 0; sw < NUMSWITCHES; ++sw)
+        for (int j = 0; j < MAXOR(MAX_HATSWITCHES, MAX_JOYSTICKS); ++j)
+            for (int k = 0; k < MAXOR(NUMJBUTTONS, MAXOR(MAX_VALUES,
+                    MAX_DIGITAL_HATSWITCHES * MAX_DIGITAL_VALUES)); ++k)
+                JoystickState[sw][j][k] = UP;
+}
+
 void UnbindDigitalHatswitchKey(int joystick, int key, int dir) {
     GenUnbindJoyKey(DIGHATSWITCH, joystick, key * MAX_DIGITAL_VALUES + dir);
 }
