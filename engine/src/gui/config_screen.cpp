@@ -189,24 +189,6 @@ static void remove_json_path(boost::json::object &root, const std::string &path)
     if (it->value().as_object().empty()) root.erase(it);
 }
 
-// Shader-related config paths (set by the "shaders" preset). Shaders are NOT
-// hot-applied; a change requires a restart. Flagged on Save so we can tell the
-// user rather than silently applying (or silently skipping) the change.
-//
-// Snapshot the current shader-related config values. Used on Save to detect an
-// ACTUAL shader change: the presets re-apply the selected 'shaders' preset on
-// every Save (marking these paths dirty even when nothing changed), so dirty-ness
-// alone can't gate the restart-required notice — only a value change can.
-static std::vector<boost::json::value> shader_values_snapshot() {
-    static const char *shader_paths[] = {
-        "graphics.technique_set", "graphics.mac_shader_name",
-        "graphics.default_full_technique", "graphics.default_simple_technique"
-    };
-    std::vector<boost::json::value> vals;
-    for (const char *p : shader_paths) vals.push_back(read_config_value(p));
-    return vals;
-}
-
 // ---------------------------------------------------------------------------
 // Display-frame helpers (from vs-05)
 // ---------------------------------------------------------------------------
@@ -1724,6 +1706,41 @@ static boost::json::value read_config_value_from(const vega_config::Configuratio
     return a ? a->get(c) : boost::json::value(nullptr);
 }
 
+// ---------------------------------------------------------------------------
+// Shader / technique handling
+// ---------------------------------------------------------------------------
+// The 4 shader/technique config paths set by the "shaders" preset. A shader
+// change is PERSISTED on Save but is NOT applied to the running game in the hot
+// path (it breaks the technique/shader rendering); it only takes effect on
+// restart. The restart-required dialog tells the user this.
+static const char *kShaderPaths[] = {
+    "graphics.technique_set", "graphics.mac_shader_name",
+    "graphics.default_full_technique", "graphics.default_simple_technique"
+};
+
+// Snapshot the current shader/technique values (as strings). Used on Save to
+// detect an ACTUAL shader change: the presets re-apply the selected 'shaders'
+// preset on every Save, so dirty-ness alone can't gate the notice — only a value
+// change can.
+static std::vector<std::string> shader_values_snapshot() {
+    std::vector<std::string> vals;
+    for (const char *p : kShaderPaths) {
+        boost::json::value v = read_config_value(p);
+        vals.push_back(v.is_string() ? std::string(v.as_string().c_str()) : "");
+    }
+    return vals;
+}
+
+// Restore the shader/technique values from a snapshot. Used after a Save so a
+// shader change is written out but the running game keeps the previous shaders
+// until a restart (the hot path must not apply a shader change).
+static void restore_shader_values(const std::vector<std::string> &vals) {
+    for (size_t i = 0; i < 4 && i < vals.size(); ++i) {
+        const ConfigAccessor *a = by_path(kShaderPaths[i]);
+        if (a != nullptr) a->set(configuration(), vals[i]);
+    }
+}
+
 // Apply one preset variable (name,value) to the engine's Configuration, using
 // the field names the engine's load_config reads. Returns true if it set something.
 static bool apply_preset_var(const std::string &name, const std::string &value) {
@@ -1923,14 +1940,18 @@ void DrawConfigScreen() {
         if (dirty) {
             // Snapshot the shader settings before applying, so we can detect an
             // ACTUAL shader change (the presets' vars are applied here, by
-            // apply_presets_to_config, on Save - not at selection). If a shader
-            // value changed, we DON'T hot-apply it (unreliable live); a restart is
-            // required, so flag the notice.
+            // apply_presets_to_config, on Save - not at selection). A shader
+            // change is NOT applied in the hot path (it breaks the technique/
+            // shader rendering); it's written out and takes effect on restart.
             const auto shader_before = shader_values_snapshot();
             apply_all();
             write_out_dirty();   // persist the dirty paths to the user overlay
             if (shader_values_snapshot() != shader_before) {
+                // Tell the user the change takes effect on restart, and restore
+                // the running shader state so the current visuals are kept until
+                // then (the change is already persisted above).
                 shader_restart_notice = true;
+                restore_shader_values(shader_before);
             }
             // Re-initialize the runtime from the updated in-memory configuration().
             // The game assumed config never changes in-game, so config->runtime
