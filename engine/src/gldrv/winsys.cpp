@@ -684,6 +684,15 @@ void winsys_set_config_overlay_active(bool active) {
     config_overlay_active = active;
 }
 
+// Debounce for persisting the window's resolution after a manual resize. A live
+// drag fires many SDL_EVENT_WINDOW_RESIZED events; we write the resolution to the
+// user config only after the resize has been quiet for RESIZE_PERSIST_DEBOUNCE_MS,
+// so the config.json overlay isn't rewritten on every intermediate frame.
+static int s_persist_resize_w = -1;
+static int s_persist_resize_h = -1;
+static Uint64 s_persist_resize_deadline = 0;
+static const Uint64 RESIZE_PERSIST_DEBOUNCE_MS = 250;
+
 bool winsys_config_overlay_active() {
     return config_overlay_active;
 }
@@ -867,6 +876,21 @@ void winsys_process_events() {
                 case SDL_EVENT_WINDOW_RESIZED:
                     get_screen_measurements();
                     //setup_sdl_video_mode(argc, argv);
+                    {
+                        // A manual window resize must also keep the in-game projection
+                        // aspect consistent with the actual window size (otherwise the
+                        // camera/cockpit renders at a stale aspect into the resized
+                        // window). And persist the settled size so a manual resize
+                        // survives a restart (debounced below; a live drag fires many
+                        // RESIZED events).
+                        auto &g = configuration().graphics;
+                        if (g.resolution_y > 0) {
+                            g.aspect_flt = (float)g.resolution_x / (float)g.resolution_y;
+                        }
+                        s_persist_resize_w = g.resolution_x;
+                        s_persist_resize_h = g.resolution_y;
+                        s_persist_resize_deadline = SDL_GetTicks() + RESIZE_PERSIST_DEBOUNCE_MS;
+                    }
                     if (reshape_func) {
                         (*reshape_func)(native_resolution_x,
                                 native_resolution_y);
@@ -894,6 +918,15 @@ void winsys_process_events() {
                 default:
                     break;
             }
+        }
+        // Apply a pending debounced resolution persistence once the resize events
+        // have quieted down (no new event for RESIZE_PERSIST_DEBOUNCE_MS). Writes
+        // the settled window size to the user config so a manual resize survives a
+        // restart.
+        if (s_persist_resize_w >= 0 && SDL_GetTicks() >= s_persist_resize_deadline) {
+            vs_settings_ng::PersistWindowResolution(s_persist_resize_w, s_persist_resize_h);
+            s_persist_resize_w = -1;
+            s_persist_resize_h = -1;
         }
         if (redisplay && display_func) {
             redisplay = false;

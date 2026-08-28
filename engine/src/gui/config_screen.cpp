@@ -1685,6 +1685,20 @@ static void draw_presets_frame() {
 
 } // namespace
 
+// Persist the current window resolution to the user config overlay so a manual
+// window resize survives a restart. The game re-creates the window at
+// graphics.resolution_x/y on next launch, so a resized-to size is restored.
+// Marked dirty + written out; does NOT hot-apply anything. Called from winsys on
+// a settled (debounced) window resize.
+void PersistWindowResolution(int w, int h) {
+    auto &g = configuration().graphics;
+    g.resolution_x = w;
+    g.resolution_y = h;
+    mark_dirty("graphics.resolution_x");
+    mark_dirty("graphics.resolution_y");
+    write_out_dirty();
+}
+
 void DrawConfigScreen() {
     // Load flight-control mode from the persisted input.device once.
     static bool s_loaded = false;
