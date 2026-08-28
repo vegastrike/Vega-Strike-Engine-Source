@@ -75,8 +75,36 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         if (json_value.is_null()) {
             return;
         }
-        const boost::json::object & root_object = json_value.get_object();
+        // engine.json wraps its engine tuning under a "base" object (constants,
+        // components, ai, physics, ...). Parse that as the root so those keys are
+        // loaded; the config split moved them out of config.json into there.
+        // config.json / theme.json / bindings.json have no "base", so they keep
+        // parsing from the document root unchanged.
+        const boost::json::object * root_ptr = &json_value.get_object();
+        const boost::json::value * base_value = root_ptr->if_contains("base");
+        if (base_value != nullptr && base_value->is_object()) {
+            root_ptr = &base_value->get_object();
+        }
+        const boost::json::object & root_object = *root_ptr;
 
+        // The `input` section holds the triple-state device switch and the
+        // per-device sub-objects (mouse/joystick/keyboard). Resolve it once so
+        // the mouse/joystick/keyboard blocks below read from input.* with a
+        // fallback to top-level keys (legacy homedir overlays).
+        const boost::json::value * input_value_ptr = root_object.if_contains("input");
+        const boost::json::object * input_object = (input_value_ptr && input_value_ptr->is_object())
+                                                    ? &input_value_ptr->get_object() : nullptr;
+        if (input_object) {
+            const boost::json::value * dv = input_object->if_contains("device");
+            if (dv != nullptr && dv->is_string())
+                input.device = boost::json::value_to<std::string>(*dv);
+            const boost::json::value * mp = input_object->if_contains("mouse_preset");
+            if (mp != nullptr && mp->is_string())
+                input.mouse_preset = boost::json::value_to<std::string>(*mp);
+            const boost::json::value * jp = input_object->if_contains("joystick_preset");
+            if (jp != nullptr && jp->is_string())
+                input.joystick_preset = boost::json::value_to<std::string>(*jp);
+        }
 
 
         const boost::json::value * settings_app_value_ptr = root_object.if_contains("settings_app");
@@ -102,6 +130,16 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 settings_app.physics = boost::json::value_to<std::string>(*physics_value_ptr);
             }
 
+        }
+
+        // Parse the "preset" section (config.json) into this->preset selectors.
+        const boost::json::value * preset_value_ptr = root_object.if_contains("preset");
+        if (preset_value_ptr != nullptr && preset_value_ptr->is_object()) {
+            for (const auto & kv : preset_value_ptr->get_object()) {
+                if (kv.value().is_string()) {
+                    preset[kv.key()] = boost::json::value_to<std::string>(kv.value());
+                }
+            }
         }
 
 
@@ -2081,7 +2119,8 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         }
 
 
-        const boost::json::value * mouse_value_ptr = root_object.if_contains("mouse");
+        const boost::json::value * mouse_value_ptr = input_object ? input_object->if_contains("mouse")
+                                                                    : root_object.if_contains("mouse");
         if (mouse_value_ptr != nullptr) {
             boost::json::object mouse_object = mouse_value_ptr->get_object();
             const boost::json::value * enabled_value_ptr = mouse_object.if_contains("enabled");
@@ -6813,7 +6852,8 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         }
 
 
-        const boost::json::value * joystick_value_ptr = root_object.if_contains("joystick");
+        const boost::json::value * joystick_value_ptr = input_object ? input_object->if_contains("joystick")
+                                                                      : root_object.if_contains("joystick");
         if (joystick_value_ptr != nullptr) {
             boost::json::object joystick_object = joystick_value_ptr->get_object();
             const boost::json::value * enabled_value_ptr = joystick_object.if_contains("enabled");
@@ -7014,7 +7054,8 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         }
 
 
-        const boost::json::value * keyboard_value_ptr = root_object.if_contains("keyboard");
+        const boost::json::value * keyboard_value_ptr = input_object ? input_object->if_contains("keyboard")
+                                                                      : root_object.if_contains("keyboard");
         if (keyboard_value_ptr != nullptr) {
             boost::json::object keyboard_object = keyboard_value_ptr->get_object();
             const boost::json::value * enable_unicode_value_ptr = keyboard_object.if_contains("enable_unicode");
