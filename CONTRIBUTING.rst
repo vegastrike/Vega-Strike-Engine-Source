@@ -34,6 +34,22 @@ Below are the official places to find the current developers:
 * FreeNode IRC: #vegastrike
 * Vega Strike Forums: https://forums.vega-strike.org/
 
+AI :robot:
+==========
+
+The adoption of artificial intelligence presents both significant opportunities and legitimate ethical, security, and operational
+concerns. Recognizing the magnitude of these challenges, we take the risks associated with AI seriously. Rather than prohibiting
+its use—which risks driving adoption unmonitored into the shadows—this policy establishes clear guidelines for its safe,
+transparent, and responsible integration. By defining explicit boundaries, we ensure that our teams can leverage AI effectively
+while maintaining strict oversight, quality control, and risk mitigation across all projects.
+
+As a general rule, we follow the same policies on AI contributions as the `Linux Kernel: AI Policy`_ with the following changes:
+- Use only our accepted licenses, see `Vega Strike: Licensing`_ for details.
+- Follow our coding style
+- AI agents may not be added to the licensing statements in the files, only the human author making the contribution.
+- Like with human contributed changes all changes must be play tested by the author as appropriate. Do not simply use the AI to make a contribution that has never been actually appropriately tested. Lack of testing will have your PR closed.
+- Code requires comments; do not outright remove comments. Comments carry the intent; while code tells what actually happens.
+
 Licensing
 =========
 
@@ -143,3 +159,4 @@ Please join us at `Vega Strike: Gitter - Packagers`_ to if you have any question
 .. _`Vega Strike: Pull Request Validation` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/wiki/Pull-Request-Validation
 .. _`Vega Strike: Pull Requests` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/pulls
 .. _`Vega Strike: Gitter - Packagers` :: https://gitter.im/vegastrike/vegastrike-packaging?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
+.. _`Linux Kernel: AI Policy` :: https://docs.kernel.org/process/coding-assistants.html
