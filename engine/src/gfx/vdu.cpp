@@ -1608,6 +1608,9 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
     w = fabs(w / 2);
     tp->setPos(x - w, y + h);
     tp->setSize(x + w, y - h - .5 * fabs(w / cols));
+    // Wrap HUD/message text to 66% of the screen so long lines (e.g. the welcome
+    // message) don't spill into neighbouring VDUs.
+    tp->setWrapWidth(0.66f);
     targ = parent->Target();
     if (thismode.back() != COMM && comm_ani != NULL) {
         if (comm_ani->Done()) {

@@ -112,6 +112,11 @@ public:
     // (othtext) sets this to 2.0 so it renders larger; other text stays at 1.0.
     void setTextScale(float s) { m_textScale = s; }
     float textScale() const { return m_textScale; }
+    // Horizontal word-wrap width as a fraction of the layout width (0 = unset; fall
+    // back to the rect width). Used by the TextPlane Draw() path to wrap text to a
+    // chosen fraction of the screen instead of the whole rect.
+    void setWrapWidth(float fraction) { m_wrapWidth = fraction; }
+    float wrapWidth() const { return m_wrapWidth; }
     // Set the text color from a packed ImU32 (TextPlane-compatible interface).
     void setColorU32(ImU32 c) { m_colorU32 = c; m_color = GFXColor(c); }
     // Background rectangle behind the text (TextPlane `background_color`).
@@ -174,6 +179,7 @@ private:
     GFXColor m_color;
     ImU32 m_colorU32 = IM_COL32(255, 255, 255, 255);
     float m_textScale = 1.0f;    // Text render scale (1.0 = normal).
+    float m_wrapWidth = 0.0f;    // horizontal word-wrap fraction of screen (0 = use rect)
     ImU32 m_backgroundColor = IM_COL32(0, 0, 0, 0);
     bool m_automatte = false;
     float m_charW = 0.06f;

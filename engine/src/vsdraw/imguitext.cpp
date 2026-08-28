@@ -224,19 +224,33 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
         position.y -= ImGui::CalcTextSize("hello world").y;
     }
 
-    // (background rectangle removed for the width-overlap test)
-    // Negative/zero rect width -> no wrapping (TextPlane treated negative as infinite).
-    const float wrapWidth = Coordinates::normToPixelW(m_rect.size.width, resW()) * 1.05f;
+    // Word-wrap width in pixels. An explicit setWrapWidth() fraction wins; otherwise
+    // fall back to the rect width. No fudge factor: text must not exceed the box, so
+    // it cannot spill into a neighbouring element.
+    const float wrapWidth = m_wrapWidth > 0.0f
+            ? Coordinates::normToPixelW(m_wrapWidth, resW())
+            : Coordinates::normToPixelW(m_rect.size.width, resW());
     const bool doWrap = (wrapWidth > 0.0f);
     const float leftX = position.x;
 
-    // Split the text into lines of color runs, wrapping at rect width.  Wrapping is
-    // word-granular: a line is broken at a space when it would exceed wrapWidth, keeping
-    // words together.  Lines are collected first so `offset` can skip leading lines.
+    // Measure text at the size it is actually drawn (draw_size = font * textScale) so
+    // the wrap decision matches the rendered width. ImGui metrics are used throughout.
+    ImFont *font = ImGui::GetFont();
+    const float draw_size = ImGui::GetFontSize() * m_textScale;
+    auto measure = [&](const std::string &s) -> float {
+        if (font && font->IsLoaded()) {
+            return font->CalcTextSizeA(draw_size, FLT_MAX, -1.0f, s.c_str()).x;
+        }
+        return ImGui::CalcTextSize(s.c_str()).x * m_textScale;
+    };
+
+    // Split the text into lines of color runs, wrapping at wrapWidth. Wrapping is
+    // word-granular: a line is broken at a space when it would exceed wrapWidth. A
+    // word wider than the box is split so it cannot spill horizontally. Lines are
+    // collected first so `offset` can skip leading lines.
     std::vector<std::vector<TextPlaneRun>> lines;
     ImU32 currentColor = m_colorU32;
     std::string word;
-    float wordWidth = 0.0f;
     float lineWidth = 0.0f;
     auto finishLine = [&]() {
         if (!word.empty()) {
@@ -248,18 +262,45 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
     };
     lines.emplace_back();
 
-    // Push the current word (already rendered color) onto the line wrapWidth-aware.
+    // Push the current word (already rendered color) onto the line, wrapping at
+    // wrapWidth. A word wider than the box is broken into chunks that fit, using
+    // ImGui's wrap algorithm to find the break points.
     auto pushWord = [&](bool hardBreak) {
         if (word.empty()) return;
-        if (doWrap && !hardBreak && lineWidth + wordWidth > wrapWidth) {
-            // Wraps mid-line, still keeping the word intact on the new line.
+        const float ww = measure(word);
+        const bool tooWide = doWrap && ww > wrapWidth;
+        if (doWrap && !tooWide && !hardBreak && lineWidth + ww > wrapWidth) {
+            // Wraps mid-line, keeping the word intact on the new line.
             lines.emplace_back();
             lineWidth = 0.0f;
         }
-        lines.back().push_back({word, currentColor});
-        lineWidth += wordWidth;
+        if (!tooWide) {
+            lines.back().push_back({word, currentColor});
+            lineWidth += ww;
+        } else {
+            // Oversized word: split into chunks, each on a fresh line, so nothing
+            // spills past the box. ImGui's wrap finds the break points.
+            const char *start = word.c_str();
+            const char *end = start + word.size();
+            while (start < end) {
+                if (lineWidth > 0.0f) {   // finish the current line first
+                    lines.emplace_back();
+                    lineWidth = 0.0f;
+                }
+                const char *brk = (font && font->IsLoaded())
+                        ? font->CalcWordWrapPosition(draw_size, start, end, wrapWidth)
+                        : end;
+                if (brk <= start) {
+                    brk = start + 1;   // guard: a single glyph wider than the box
+                }
+                std::string chunk(start, brk);
+                const float cw = measure(chunk);
+                lines.back().push_back({chunk, currentColor});
+                lineWidth = cw;
+                start = brk;
+            }
+        }
         word.clear();
-        wordWidth = 0.0f;
     };
 
     const size_t n = newText.size();
@@ -309,7 +350,7 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
         } else if (c == ' ' && doWrap) {
             pushWord(true);
             lines.back().push_back({" ", currentColor});
-            lineWidth += ImGui::CalcTextSize(" ").x;
+            lineWidth += measure(" ");
         } else if (c == '#' && isIncompleteColorToken(i)) {
             // The reveal has cut through a color token: don't render the partial
             // token as literal text. Break -- nothing valid follows it, and the
@@ -348,11 +389,9 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
                 i = end;
             } else {
                 word += c;
-                wordWidth += ImGui::CalcTextSize(&c, &c + 1).x;
             }
         } else {
             word += c;
-            wordWidth += ImGui::CalcTextSize(&c, &c + 1).x;
         }
     }
     pushWord(true);

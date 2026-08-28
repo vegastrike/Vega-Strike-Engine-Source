@@ -1302,6 +1302,8 @@ BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
     // The fixer/campaign streaming text (dialogue typed word by word) renders at
     // 1.4x; curtext and other base-room text stay at the normal size.
     othtext.setTextScale(1.4f);
+    // Wrap the talk text to 66% of the screen so long sentences don't scroll off.
+    othtext.setWrapWidth(0.66f);
     enabledj = true;
     createdbase = true;
     midloop = false;

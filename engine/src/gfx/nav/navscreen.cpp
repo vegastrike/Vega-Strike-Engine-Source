@@ -668,6 +668,7 @@ void NavigationSystem::DrawMission() {
     GFXColor temp_color(1, 1, 1, 1);
     displayname.setColorU32(static_cast<ImU32>(temp_color));
     displayname.setSize(.62, -.7);
+    displayname.setWrapWidth(0.50f);
     displayname.setPos(originx + (.1 * deltax) + .37, originy /*+(1*deltay)*/ );
     std::string text;
     if (active_missions.size() > 1) {
