@@ -224,24 +224,30 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
         position.y -= ImGui::CalcTextSize("hello world").y;
     }
 
-    // Word-wrap width in pixels. An explicit setWrapWidth() fraction wins; otherwise
-    // fall back to the rect width. No fudge factor: text must not exceed the box, so
+    // Word-wrap width in normalized units: a fraction of the full screen width
+    // (1.0 == full width). Callers specify normalized coords; the library converts
+    // to pixels for measurement. No fudge factor: text must not exceed the box, so
     // it cannot spill into a neighbouring element.
-    const float wrapWidth = m_wrapWidth > 0.0f
-            ? Coordinates::normToPixelW(m_wrapWidth, resW())
-            : Coordinates::normToPixelW(m_rect.size.width, resW());
+    const float wrapWidth = m_wrapWidth > 0.0f ? m_wrapWidth : m_rect.size.width;
     const bool doWrap = (wrapWidth > 0.0f);
     const float leftX = position.x;
 
     // Measure text at the size it is actually drawn (draw_size = font * textScale) so
-    // the wrap decision matches the rendered width. ImGui metrics are used throughout.
+    // the wrap decision matches the rendered width. Glyph widths come from ImGui in
+    // pixels; convert to normalized units (fraction of screen width) so the comparison
+    // stays resolution-independent. The screen width is only the pixel basis.
     ImFont *font = ImGui::GetFont();
     const float draw_size = ImGui::GetFontSize() * m_textScale;
+    const float displayW = ImGui::GetIO().DisplaySize.x;
+    const float wrapWidthPx = wrapWidth * displayW;   // for ImGui's pixel-based wrap
     auto measure = [&](const std::string &s) -> float {
+        float px;
         if (font && font->IsLoaded()) {
-            return font->CalcTextSizeA(draw_size, FLT_MAX, -1.0f, s.c_str()).x;
+            px = font->CalcTextSizeA(draw_size, FLT_MAX, -1.0f, s.c_str()).x;
+        } else {
+            px = ImGui::CalcTextSize(s.c_str()).x * m_textScale;
         }
-        return ImGui::CalcTextSize(s.c_str()).x * m_textScale;
+        return (displayW > 0.0f) ? px / displayW : 0.0f;
     };
 
     // Split the text into lines of color runs, wrapping at wrapWidth. Wrapping is
@@ -288,7 +294,7 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
                     lineWidth = 0.0f;
                 }
                 const char *brk = (font && font->IsLoaded())
-                        ? font->CalcWordWrapPosition(draw_size, start, end, wrapWidth)
+                        ? font->CalcWordWrapPosition(draw_size, start, end, wrapWidthPx)
                         : end;
                 if (brk <= start) {
                     brk = start + 1;   // guard: a single glyph wider than the box
