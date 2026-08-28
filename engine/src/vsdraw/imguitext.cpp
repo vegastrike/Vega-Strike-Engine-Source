@@ -280,16 +280,6 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
             pushWord(true);
             currentColor = m_colorU32;
             i += 2;
-        } else if (c == '#' && i + 1 < n && newText[i + 1] == 'c') {
-            const size_t end = newText.find('#', i + 2);
-            if (end != std::string::npos) {
-                pushWord(true);
-                currentColor = parseColorU32(newText.substr(i + 2, end - (i + 2)));
-                i = end;
-            } else {
-                word += c;
-                wordWidth += ImGui::CalcTextSize(&c, &c + 1).x;
-            }
         } else if (c == '#' && i + 6 < n
                 && std::isxdigit(static_cast<unsigned char>(newText[i + 1]))
                 && std::isxdigit(static_cast<unsigned char>(newText[i + 2]))
@@ -299,7 +289,8 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
                 && std::isxdigit(static_cast<unsigned char>(newText[i + 6]))) {
             // Legacy '#RRGGBB' (6 hex digits, no prefix) sets the color; '#000000'
             // (black) is a RESET to the default color -- matching the removed
-            // TextPlane::ParseText semantics.
+            // TextPlane::ParseText semantics. Checked before the '#c' float form so
+            // hex colors beginning with 'b' or 'c' (e.g. #cccccc) aren't misparsed.
             pushWord(true);
             const int r = ParseHexByte(&newText[i + 1]);
             const int g = ParseHexByte(&newText[i + 3]);
@@ -310,6 +301,16 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
                 currentColor = IM_COL32(r, g, b, 255);
             }
             i += 6;
+        } else if (c == '#' && i + 1 < n && newText[i + 1] == 'c') {
+            const size_t end = newText.find('#', i + 2);
+            if (end != std::string::npos) {
+                pushWord(true);
+                currentColor = parseColorU32(newText.substr(i + 2, end - (i + 2)));
+                i = end;
+            } else {
+                word += c;
+                wordWidth += ImGui::CalcTextSize(&c, &c + 1).x;
+            }
         } else {
             word += c;
             wordWidth += ImGui::CalcTextSize(&c, &c + 1).x;
@@ -552,8 +553,31 @@ void ImGuiText::parseFormat(std::string input, size_t startPos, //Location of be
     bool formatSuccess = false;
     size_t curPos = startPos;
     if (curPos < endPos) {
-        //Make sure we have some chars to process.
-        switch (input[curPos]) {
+        // Legacy '#RRGGBB' (6 hex digits, no prefix) is checked BEFORE the format
+        // switch, so a hex color that begins with 'b' or 'c' (e.g. #cccccc, #b0b0b0)
+        // is not captured by the reserved stroke/color codes. A '#000000' (black)
+        // tag resets to the default color (bottom of the stack), not literal black.
+        if (curPos + 6 <= endPos
+                && std::isxdigit(static_cast<unsigned char>(input[curPos]))
+                && std::isxdigit(static_cast<unsigned char>(input[curPos + 1]))
+                && std::isxdigit(static_cast<unsigned char>(input[curPos + 2]))
+                && std::isxdigit(static_cast<unsigned char>(input[curPos + 3]))
+                && std::isxdigit(static_cast<unsigned char>(input[curPos + 4]))
+                && std::isxdigit(static_cast<unsigned char>(input[curPos + 5]))) {
+            const int r = ParseHexByte(&input[curPos]);
+            const int g = ParseHexByte(&input[curPos + 2]);
+            const int b = ParseHexByte(&input[curPos + 4]);
+            if (r == 0 && g == 0 && b == 0) {
+                while (m_colorStack.size() > 1) {
+                    m_colorStack.pop_back();
+                }
+            } else {
+                m_colorStack.push_back(IM_COL32(r, g, b, 255));
+            }
+            curPos += 6;
+        } else {
+            //Make sure we have some chars to process.
+            switch (input[curPos]) {
             case DT_FORMAT_NEWLINE_CHAR:
                 //End of line.
             {
@@ -631,30 +655,7 @@ void ImGuiText::parseFormat(std::string input, size_t startPos, //Location of be
                 }
                 curPos++;
                 break;
-            default:
-                // Legacy '#RRGGBB' (6 hex digits, no '#c' prefix) sets the current
-                // color; '#000000' (black) is a RESET to the default color (bottom of
-                // the stack), not literal black -- matching the removed TextPlane::ParseText.
-                if (curPos + 6 <= endPos
-                        && std::isxdigit(static_cast<unsigned char>(input[curPos]))
-                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 1]))
-                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 2]))
-                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 3]))
-                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 4]))
-                        && std::isxdigit(static_cast<unsigned char>(input[curPos + 5]))) {
-                    const int r = ParseHexByte(&input[curPos]);
-                    const int g = ParseHexByte(&input[curPos + 2]);
-                    const int b = ParseHexByte(&input[curPos + 4]);
-                    if (r == 0 && g == 0 && b == 0) {
-                        while (m_colorStack.size() > 1) {
-                            m_colorStack.pop_back();
-                        }
-                    } else {
-                        m_colorStack.push_back(IM_COL32(r, g, b, 255));
-                    }
-                    curPos += 6;
-                }
-                break;
+            }
         }
     }
     *resultPos = curPos;
