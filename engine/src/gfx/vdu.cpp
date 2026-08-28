@@ -876,12 +876,12 @@ void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
     int faction =
             FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(_Universe->activeStarSystem()->getFileName()));
     std::string navdata =
-            std::string("#c1:0:0#Sector:\n     #c1:1:0#" + getStarSystemSector(
+            std::string("#ff0000Sector:\n     #ffff00" + getStarSystemSector(
                     _Universe->activeStarSystem()->getFileName())
-                    + "\n\n#c1:0:0#System:\n     #c1:1:0#") + _Universe->activeStarSystem()->getName() + " ("
+                    + "\n\n#ff0000System:\n     #ffff00") + _Universe->activeStarSystem()->getName() + " ("
                     + FactionUtil::GetFactionName(faction)
-                    + ")\n\n#c1:0:0#Target:\n  #c1:1:0#" + (targ ? getUnitNameAndFgNoBase(targ) : std::string("Nothing"))
-                    + "\n\n#c1:0:0#Range: #c1:1:0#"
+                    + ")\n\n#ff0000Target:\n  #ffff00" + (targ ? getUnitNameAndFgNoBase(targ) : std::string("Nothing"))
+                    + "\n\n#ff0000Range: #ffff00"
                     + PrettyDistanceString(((you && targ) ? DistanceTwoTargets(you, targ) : 0.0));
     const float auto_message_lim = configuration().graphics.auto_message_time_lim_flt;
     float delautotime = UniverseUtil::GetGameTime() - cp->autoMessageTime;
@@ -892,7 +892,7 @@ void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
         msg = msg.substr(0, where) + msg.substr(where + 7);
         where = msg.find("#");
     }
-    msg = std::string("\n\n#c1:1:0#     ") + msg;
+    msg = std::string("\n\n#ffff00     ") + msg;
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     GFXColor tpbg(tp->backgroundColor());
     bool automatte = true; // HUD: no background
@@ -1388,8 +1388,8 @@ void VDU::DrawWeapon(Unit *parent) {
 //  without fixed font we would need some sneaky tweaking to make it a table, probably with multiple TPs
     float x, y, w, h;
     const float percent = .6;
-    string buf("#c0:1:0#WEAPONS\n\n#c1:1:1#Guns:#-c");
-    string mbuf("\n#c1:1:1#Missiles:#-c");
+    string buf("#00ff00WEAPONS\n\n#ffffffGuns:#000000");
+    string mbuf("\n#ffffffMissiles:#000000");
     string::size_type mlen = mbuf.length();
     GFXEnable(TEXTURE0);
     DrawTargetSpr(draw_weapon_sprite ? parent->getHudImage() : NULL, percent, x, y, w, h);
@@ -1474,9 +1474,9 @@ char printHex(unsigned int hex) {
     return hex - 10 + 'A';
 }
 
-static char suc_col_str[24] = "#-c";
-static const char suc_gt_plusone[9] = "#c0:1:0#";
-static const char suc_gt_minusone[9] = "#c1:0:0#";
+static char suc_col_str[8] = "#000000";
+static const char suc_gt_plusone[8] = "#00FF00";
+static const char suc_gt_minusone[8] = "#FF0000";
 
 inline const char *GetColorFromSuccess(float suc) {
     if (suc >= 1) {
@@ -1489,9 +1489,13 @@ inline const char *GetColorFromSuccess(float suc) {
     suc *= 128;
     unsigned int tmp2 = (unsigned int) suc;
     unsigned int tmp1 = (unsigned int) (255 - suc);
-    // Legacy hex '#RRGGBB' was replaced with the '#cR:G:B#' float format.
-    // Build '#c<r>:<g>:0#' (blue always 0) from the red/green byte values.
-    snprintf(suc_col_str, sizeof(suc_col_str), "#c%.3f:%.3f:0#", tmp1 / 255.0f, tmp2 / 255.0f);
+    suc_col_str[0] = '#';
+    suc_col_str[1] = printHex(tmp1 / 16);
+    suc_col_str[2] = printHex(tmp1 % 16);
+    suc_col_str[3] = printHex(tmp2 / 16);
+    suc_col_str[4] = printHex(tmp2 % 16);
+    suc_col_str[5] = '0';
+    suc_col_str[6] = '0';
 
     return suc_col_str;
 }
@@ -1501,7 +1505,7 @@ void DrawObjectivesTextPlane(ImGuiText *tp, int scrolloffset, Unit *parent) {
     std::string rezcompleted("");
     for (unsigned int i = 0; i < active_missions.size(); ++i) {
         if (!active_missions[i]->objectives.empty()) {
-            rez += "#c1:1:1#";
+            rez += "#FFFFFF";
             const bool force_anonymous_missions = configuration().general.force_anonymous_mission_names;
             const bool completed_objectives_last = configuration().graphics.hud.completed_objectives_last;
             if (active_missions[i]->mission_name.empty() || force_anonymous_missions) {
