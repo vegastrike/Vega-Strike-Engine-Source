@@ -263,6 +263,40 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
     };
 
     const size_t n = newText.size();
+
+    // Readahead: detect a '#' that begins a color token but is truncated by the
+    // word-by-word reveal (the token is not fully present in the revealed prefix).
+    // A partial token must NOT be rendered as literal text -- Draw() re-parses the
+    // whole prefix every frame, so once the reveal exposes the full token it will
+    // be recognized as a color command and rendered correctly. The reveal only ever
+    // truncates at the tail, so nothing valid follows a partial token (break is safe).
+    auto isIncompleteColorToken = [&](size_t idx) -> bool {
+        if (newText[idx] != '#') {
+            return false;
+        }
+        if (idx + 1 >= n) {
+            return true;   // lone trailing '#': the first char of a not-yet-revealed token
+        }
+        const char next = newText[idx + 1];
+        if (next == 'c') {
+            // '#cR:G:B#' form: incomplete until the closing '#' is revealed.
+            return newText.find('#', idx + 2) == std::string::npos;
+        }
+        if (next == '-') {
+            // '#-c' reset: incomplete only while the reveal is at a trailing '#-'.
+            return idx + 2 >= n;
+        }
+        if (std::isxdigit(static_cast<unsigned char>(next))) {
+            // Legacy '#RRGGBB': incomplete if the hex run hits the end before 6 digits.
+            size_t k = idx + 1;
+            while (k < n && std::isxdigit(static_cast<unsigned char>(newText[k]))) {
+                ++k;
+            }
+            return (k == n) && (k - (idx + 1)) < 6;
+        }
+        return false;
+    };
+
     for (size_t i = 0; i < n; ++i) {
         char c = newText[i];
         if (c == '\n') {
@@ -276,6 +310,11 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
             pushWord(true);
             lines.back().push_back({" ", currentColor});
             lineWidth += ImGui::CalcTextSize(" ").x;
+        } else if (c == '#' && isIncompleteColorToken(i)) {
+            // The reveal has cut through a color token: don't render the partial
+            // token as literal text. Break -- nothing valid follows it, and the
+            // whole token is re-parsed correctly once the reveal completes it.
+            break;
         } else if (c == '#' && i + 2 < n && newText[i + 1] == '-' && newText[i + 2] == 'c') {
             pushWord(true);
             currentColor = m_colorU32;
