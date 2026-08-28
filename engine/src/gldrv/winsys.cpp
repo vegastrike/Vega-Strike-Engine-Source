@@ -467,7 +467,19 @@ static bool setup_sdl_video_mode() {
             }
         }
         if (found == false) {
-            VS_LOG_FLUSH_EXIT(fatal, (boost::format("Could not find desktop display mode with specified width %1% and specified height %2%") % width % height), -42);
+            // The requested resolution isn't an available fullscreen mode. Fall
+            // back to the native/desktop mode rather than aborting, so a stale or
+            // unsupported resolution doesn't prevent the game from starting in
+            // fullscreen. The settings UI only offers detected modes, so this only
+            // trips on a bad/legacy configured resolution.
+            VS_LOG_AND_FLUSH(serious_warning, (boost::format("Requested fullscreen resolution %1%x%2% not available; falling back to the native/desktop mode") % width % height));
+            const SDL_DisplayMode *desktop_mode = SDL_GetDesktopDisplayMode(instance_ID);
+            if (desktop_mode != nullptr) {
+                std::memcpy(mode_for_ID, desktop_mode, sizeof(SDL_DisplayMode));
+                SDL_GetDisplayBounds(instance_ID, &display_bounds);
+            } else {
+                VS_LOG_FLUSH_EXIT(fatal, "Could not get desktop display mode", 1);
+            }
         }
         SDL_free(modes);
     } else { // Not full screen
