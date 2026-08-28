@@ -224,11 +224,11 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
         position.y -= ImGui::CalcTextSize("hello world").y;
     }
 
-    // Word-wrap width in normalized units: a fraction of the full screen width
-    // (1.0 == full width). Callers specify normalized coords; the library converts
-    // to pixels for measurement. No fudge factor: text must not exceed the box, so
-    // it cannot spill into a neighbouring element.
-    const float wrapWidth = m_wrapWidth > 0.0f ? m_wrapWidth : m_rect.size.width;
+    // Word wrapping is opt-in: it happens only when setWrapWidth() was called
+    // (m_wrapWidth > 0). By default text does NOT wrap, so it never reflows onto
+    // new lines or overlays neighbouring elements unless a caller explicitly asks
+    // for it. The width is a normalized fraction (1.0 == full screen width).
+    const float wrapWidth = m_wrapWidth;
     const bool doWrap = (wrapWidth > 0.0f);
     const float leftX = position.x;
 
