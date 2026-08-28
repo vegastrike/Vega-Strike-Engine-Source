@@ -75,7 +75,7 @@ string getdatadir() {
         if (chdir(datadirs[i])) {
             continue;
         }
-        FILE *tfp = fopen("vegastrike.config", "r");
+        FILE *tfp = fopen("config.json", "r");
         if (tfp) {
             fclose(tfp);
             //We have found the data directory

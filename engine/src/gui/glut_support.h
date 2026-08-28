@@ -30,24 +30,14 @@
 /* If you have functions that perform the same operation, but use different parameters,
  * It may be best if you replace the following functions with wrappers to your own functions
  */
-#include <stdio.h>
 #include <vector>
-#include "src/gfxlib.h"
 using std::vector;
+#include "gfxlib.h"
 
-enum MousePointerStyle {
-    MOUSE_POINTER_NONE,
-    MOUSE_POINTER_NORMAL,
-    MOUSE_POINTER_HOVER
-};
 
 void ShowColor(float x, float y, float wid, float hei, float red, float green, float blue, float alpha);
 void ShowText(float x, float y, float wid, int size, const char *string, int no_end);
 float WidthOfChar(char chr);
-void SetSoftwareMousePosition(int x, int y);
-void StartGUIFrame(GFXBOOL clear = GFXTRUE);
-void DrawGlutMouse(int mousex, int mousey, class VSSprite *spr);
-void EndGUIFrame(MousePointerStyle pointerStyle);
 extern int HAS_ALPHA;
 
 #endif    //VEGA_STRIKE_ENGINE_GUI_GLUT_SUPPORT_H

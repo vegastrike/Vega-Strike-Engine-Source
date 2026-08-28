@@ -1959,7 +1959,35 @@ void GameCockpit::Draw() {
         if ((view == CP_PAN
                 && !mousecursor_pancam)
                 || (view == CP_PANTARGET && !mousecursor_pantgt) || (view == CP_CHASE && !mousecursor_chasecam)) {
-        } 
+        } else {
+            // Mouse flight: draw the crosshair sprite at the mouse position as
+            // the aim point (glide mode; warp mode hides the cursor). Restored
+            // from the vs-05 behavior that commit 58b0fb148 removed.
+            GFXBlendMode(SRCALPHA, INVSRCALPHA);
+            GFXColor4f(1, 1, 1, 1);
+            GFXEnable(TEXTURE0);
+            const float deadband = configuration().joystick.mouse_deadband_flt;
+            const int reverse_spr = configuration().joystick.reverse_mouse_spr ? 1 : -1;
+            const std::string &spr_name = configuration().joystick.mouse_crosshair;
+            static VSSprite MouseVSSprite(spr_name.c_str(), BILINEAR, GFXTRUE);
+            float xcoord = (-1.0F + static_cast<float>(mousex) / (0.5F * configuration().graphics.resolution_x));
+            float ycoord = (-reverse_spr + static_cast<float>(reverse_spr * mousey) / (0.5F * configuration().graphics.resolution_y));
+            MouseVSSprite.SetPosition(xcoord, ycoord);
+            float xs, ys;
+            MouseVSSprite.GetSize(xs, ys);
+            if (xcoord < deadband && ycoord < deadband && xcoord > -deadband && ycoord > -deadband) {
+                // Near the center: shrink so the crosshair doesn't hide the
+                // target, but keep it visible so the player knows where the
+                // mouse actually is.
+                MouseVSSprite.SetSize(xs / 2, ys / 2);
+            } else if (xcoord < deadband && xcoord > -deadband) {
+                MouseVSSprite.SetSize(xs / 2, ys * 5 / 6);
+            } else if (ycoord < deadband && ycoord > -deadband) {
+                MouseVSSprite.SetSize(xs * 5 / 6, ys / 2);
+            }
+            MouseVSSprite.Draw();
+            MouseVSSprite.SetSize(xs, ys);
+        }
     }
     if (view < CP_CHASE && damage_flash_first == false && getNewTime() - shake_time < damage_flash_length) {
         DrawDamageFlash(shake_type);
@@ -1994,11 +2022,20 @@ string GameCockpit::getsoundending(int which) {
     static bool gotten = false;
     static std::string strs[9];
     if (gotten == false) {
-        char tmpstr[2] = {'\0'};
+        // Sound extension names now come from the merged JSON config
+        // (engine.json -> base.cockpit_audio.sounds_extension_N).
         for (int i = 0; i < 9; ++i) {
-            tmpstr[0] = i + '1';
-            string vsconfigvar = string("sounds_extension_") + tmpstr;
-            strs[i] = vs_config->getVariable("cockpitaudio", vsconfigvar, "\n");
+            switch (i) {
+            case 0: strs[i] = configuration().cockpit_audio.sounds_extension_1; break;
+            case 1: strs[i] = configuration().cockpit_audio.sounds_extension_2; break;
+            case 2: strs[i] = configuration().cockpit_audio.sounds_extension_3; break;
+            case 3: strs[i] = configuration().cockpit_audio.sounds_extension_4; break;
+            case 4: strs[i] = configuration().cockpit_audio.sounds_extension_5; break;
+            case 5: strs[i] = configuration().cockpit_audio.sounds_extension_6; break;
+            case 6: strs[i] = configuration().cockpit_audio.sounds_extension_7; break;
+            case 7: strs[i] = configuration().cockpit_audio.sounds_extension_8; break;
+            default: strs[i] = configuration().cockpit_audio.sounds_extension_9; break;
+            }
             if (strs[i] == "\n") {
                 strs[i] = "";
                 break;

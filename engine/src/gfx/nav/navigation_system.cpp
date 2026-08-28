@@ -406,14 +406,6 @@ NavigationSystem::CachedSectorIterator NavigationSystem::CachedSectorIterator::o
 }
 
 void NavigationSystem::DrawGalaxy() {
-    // Obscure cockpit almost completely.
-    const ImVec2 start_position(0,0);
-    const ImVec2 end_position(configuration().graphics.resolution_x,
-                              configuration().graphics.resolution_y);
-    const ImU32 background_color = IM_COL32(0,0,0,224);
-    ImGui::GetForegroundDrawList()->AddRectFilled(start_position, end_position, background_color,
-                    0.0f // No rounded borders
-    );
 
     // (1, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
     std::vector<SystemDrawNode> mouselist;     
@@ -666,11 +658,11 @@ void NavigationSystem::DrawGalaxy() {
         }
         unsigned destsize = systemIter->GetDestinationSize();
         if (destsize != 0) {
-            GFXDisable(LIGHTING);
-            GFXDisable(TEXTURE0);
-            const int vsize = 3 + 4;
-            std::vector<float> verts(2 * destsize * vsize);
-            std::vector<float>::iterator v = verts.begin();
+            ImDrawList* drawList = ImGui::GetForegroundDrawList();
+
+            // Line thickness constant (adjust as needed, e.g., 1.5f or 2.0f)
+            const float line_thickness = 2.0f;
+
             for (unsigned i = 0; i < destsize; ++i) {
                 CachedSystemIterator::SystemInfo &oth = systemIter[systemIter->GetDestinationIndex(i)];
                 if (oth.isDrawable()) {
@@ -678,7 +670,7 @@ void NavigationSystem::DrawGalaxy() {
                     ReplaceAxes(posoth);
 
                     float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat;
-                    //WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
+                    // WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
                     TranslateCoordinates(posoth,
                             pos_flat,
                             center_nav_x,
@@ -692,11 +684,11 @@ void NavigationSystem::DrawGalaxy() {
                             the_new_y_flat,
                             new_system_item_scale_temp,
                             0);
+
                     GFXColor othcol = oth.GetColor();
-                    othcol.a =
-                            (new_system_item_scale_temp
-                                    - minimumitemscaledown) / (maximumitemscaleup - minimumitemscaledown) + alphaadd;
-                    //GetAlpha(oldposoth,center_x,center_y,center_z,zdistance);
+                    othcol.a = (new_system_item_scale_temp - minimumitemscaledown) / 
+                            (maximumitemscaleup - minimumitemscaledown) + alphaadd;
+
                     IntersectBorder(the_new_x, the_new_y, the_x, the_y);
 
                     bool isConnectionPath = false;
@@ -708,43 +700,48 @@ void NavigationSystem::DrawGalaxy() {
                                     && (*paths)->isNeighborPath(temp, systemIter->GetDestinationIndex(i));
                         }
                     }
+
+                    // Screen pixel coordinate projection
+                    ImVec2 p1(
+                        static_cast<float>(Coordinates::normToPixelX(the_x)),
+                        static_cast<float>(Coordinates::normToPixelY(the_y))
+                    );
+                    ImVec2 p2(
+                        static_cast<float>(Coordinates::normToPixelX(the_new_x)),
+                        static_cast<float>(Coordinates::normToPixelY(the_new_y))
+                    );
+
                     if (isConnectionPath) {
-                        *v++ = the_x;
-                        *v++ = the_y;
-                        *v++ = 0;
-                        *v++ = pathcol.r;
-                        *v++ = pathcol.g;
-                        *v++ = pathcol.b;
-                        *v++ = pathcol.a;
-                        *v++ = the_new_x;
-                        *v++ = the_new_y;
-                        *v++ = 0;
-                        *v++ = pathcol.r;
-                        *v++ = pathcol.g;
-                        *v++ = pathcol.b;
-                        *v++ = pathcol.a;
+                        // Connection path line with uniform path color
+                        ImU32 cPath = IM_COL32(
+                            static_cast<int>(pathcol.r * 255.0f),
+                            static_cast<int>(pathcol.g * 255.0f),
+                            static_cast<int>(pathcol.b * 255.0f),
+                            static_cast<int>(pathcol.a * 255.0f)
+                        );
+
+                        drawList->AddLine(p1, p2, cPath, line_thickness);
+
                     } else if (path_view != PATH_ONLY) {
-                        *v++ = the_x;
-                        *v++ = the_y;
-                        *v++ = 0;
-                        *v++ = col.r;
-                        *v++ = col.g;
-                        *v++ = col.b;
-                        *v++ = col.a;
-                        *v++ = the_new_x;
-                        *v++ = the_new_y;
-                        *v++ = 0;
-                        *v++ = othcol.r;
-                        *v++ = othcol.g;
-                        *v++ = othcol.b;
-                        *v++ = othcol.a;
+                        // Standard system link (Gouraud shaded line between origin color and target color)
+                        ImU32 cStart = IM_COL32(
+                            static_cast<int>(col.r * 255.0f),
+                            static_cast<int>(col.g * 255.0f),
+                            static_cast<int>(col.b * 255.0f),
+                            static_cast<int>(col.a * 255.0f)
+                        );
+                        ImU32 cEnd = IM_COL32(
+                            static_cast<int>(othcol.r * 255.0f),
+                            static_cast<int>(othcol.g * 255.0f),
+                            static_cast<int>(othcol.b * 255.0f),
+                            static_cast<int>(othcol.a * 255.0f)
+                        );
+
+                        //  Multi-color line segment with gradient transition across the line
+                        drawList->AddLine(p1, p2, cStart, line_thickness); // Primary line
                     }
                 }
             }
-            if (v != verts.end()) {
-                verts.erase(v, verts.end());
-            }
-            GFXDraw(GFXLINE, &verts[0], verts.size() / vsize, 3, 4);
         }
         ++systemIter;
     }

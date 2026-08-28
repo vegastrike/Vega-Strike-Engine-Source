@@ -25,76 +25,23 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+#include <cstddef>
 #include <vector>
 #include <string>
 #include <utility>
 
-#include <ctype.h>
-#include "src/gfxlib.h"
-#include "cmd/unit_generic.h"
+#include "configuration/configuration.h"
 #include "gfx/hud.h"
-#include "src/file_main.h"
-#include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
-#include "cmd/base.h"
-//#include "glut.h"
-#include "src/universe.h"
 #include "gldrv/mouse_cursor.h"
 
-#include "gldrv/gl_globals.h"
-
-#include "libraries/gui/gui.h"
 #include "imgui.h"
-
-
-static bool isInside() {
-    if (BaseInterface::CurrentBase) {
-        return true;
-    }
-    return false;
-}
-
-
-
-const std::string &getStringFontForHeight(bool &changed) {
-    const bool inside = isInside();
-    static bool lastinside = inside;
-    if (lastinside != inside) {
-        changed = true;
-        lastinside = inside;
-    } else {
-        changed = false;
-    }
-    return inside ? configuration().graphics.bases.font : configuration().graphics.font;
-}
-
+#include "gui/guidefs.h"
 
 
 float getFontHeight() {
-    bool changed = false;
-    std::string whichfont = getStringFontForHeight(changed);
-    static float point = 0;
-    if (changed) {
-        point = 0;
-    }
-    if (point == 0) {
-        if (whichfont == "helvetica10") {
-            point = 22;
-        } else if (whichfont == "helvetica18") {
-            point = 40;
-        } else if (whichfont == "times24") {
-            point = 50;
-        } else if (whichfont == "times10") {
-            point = 22;
-        } else if (whichfont == "fixed13") {
-            point = 30;
-        } else if (whichfont == "fixed15") {
-            point = 34;
-        } else {
-            point = 26;
-        }
-    }
-    return point / configuration().graphics.resolution_y;
+    return configuration().graphics.font_point_flt / configuration().graphics.resolution_y;
 }
 
 TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol) {
@@ -132,18 +79,6 @@ static float TwoCharToFloat(char a, char b) {
     return TwoCharToByte(a, b) / 255.;
 }
 
-
-// Text in a specific color
-struct TextSegment {
-    std::string text;
-    ImU32 color;
-};
-
-struct TextLine {
-    float width;
-    std::vector<TextSegment> segments;
-};
-
 static ImU32 MakeColorU32(float r, float g, float b, float a) {
     return IM_COL32(
         int(r * 255.0f),
@@ -163,21 +98,34 @@ static void FlushBuffer(std::vector<TextSegment>& segments, std::string& buffer,
 }
 
 
-static std::vector<TextLine> ParseText(const std::string& text, ImU32 default_color) {
+std::vector<TextLine> TextPlane::ParseText(const std::string& text, ImU32 default_color) {
     std::vector<TextLine> lines;
     std::vector<TextSegment> segments;
 
     ImU32 current_color = default_color;
     std::string buffer;
     std::string current_line;
+    size_t lastWordSeparator = 0;
+    size_t lastWordSeparatorInBuffer = 0;
+    // we need a slight margin as otherwise some texts won't fit
+    float widthInPixels = Coordinates::normToPixelW(myDims.i) * 1.05f;
+    if(widthInPixels < 0) {
+        widthInPixels = INFINITY;
+    }
 
     // Can't use for-each because we need i to move forward and back
     for (size_t i = 0; i < text.size(); ++i) {
         char c = text[i];
 
         // '_' is rendered as space
-        if (c == '_')
+        if (c == '_') {
             c = ' ';
+        }
+
+        if (c == ' ') {
+            lastWordSeparator = i;
+            lastWordSeparatorInBuffer = buffer.size();
+        }
 
         // Color tag: #RRGGBB
         if (c == '#' && i + 6 < text.size()) {
@@ -193,19 +141,45 @@ static std::vector<TextLine> ParseText(const std::string& text, ImU32 default_co
                 current_color = MakeColorU32(r, g, b, 1.0);
 
             i += 6;
+            lastWordSeparator = i;
+            lastWordSeparatorInBuffer = 0;
             continue;
         }
 
-        // Newline
-        if(c=='\n') {
-            FlushBuffer(segments, buffer, current_color);
-            current_color = default_color;
+        // Newline - either because of a newline char or because we are out of space
+        const float currentSize = ImGui::CalcTextSize(current_line.c_str()).x;
+        if(c=='\n' || currentSize > widthInPixels) {
+            // if line is too wide and word not too long for the line
+            if( currentSize > widthInPixels && lastWordSeparatorInBuffer > 0 ) {
+                // clear the current incomplete word
+                buffer.resize(lastWordSeparatorInBuffer);
+                FlushBuffer(segments, buffer, current_color);
+            } else if (c=='\n') {
+                FlushBuffer(segments, buffer, current_color);
+            }
+            // keep color when we need to break the line becaus of length, otherwise reset
+            if(c=='\n') {
+                current_color = default_color;
+            }
 
             TextLine line;
-            line.width = ImGui::CalcTextSize(current_line.c_str()).x;
+            line.width = currentSize;
             line.segments = segments;
             lines.emplace_back(line);
             segments.clear();
+            current_line = "";
+
+            if( currentSize > widthInPixels) {
+                // we go one back to the last word separator to preserve the chars
+                if( lastWordSeparatorInBuffer > 0 ) {
+                    i = lastWordSeparator;
+                } else {
+                    i--;
+                }
+                
+            }
+            lastWordSeparator = i;
+            lastWordSeparatorInBuffer = 0;
 
             continue;
         }
@@ -247,7 +221,7 @@ bool isTransparent(ImU32 color) {
 
 void drawBackground(ImDrawList* draw_list, ImU32 background_color, 
                     ImVec2 position, ImVec2 size, bool automatte) {
-    const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
+    //const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
 }
 
 void drawBackgroundAroundText(ImDrawList* draw_list, ImU32 background_color, 
@@ -264,7 +238,7 @@ int TextPlane::Draw(const string &newText, int offset, bool start_lower, bool fo
 
     std::vector<TextLine> lines = ParseText(newText, color);
     ImVec2 text_size;
-    ImDrawList* draw_list = ImGui::GetForegroundDrawList();
+    ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
     const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
     
     // Move one line up if not start_lower 
@@ -273,6 +247,11 @@ int TextPlane::Draw(const string &newText, int offset, bool start_lower, bool fo
         text_size = ImGui::CalcTextSize("hello world");
         position.y -= text_size.y;
     }
+
+    // Clipping coords to avoid overrunning text
+    // ImVec4 clipRect(position.x, position.y - 5, position.x + Coordinates::normToPixelW(myDims.i), position.y + Coordinates::normToPixelH(myDims.y) + 10);
+    // debug rectangle for clipping
+    // ImGui::GetForegroundDrawList()->AddRect(ImVec2(clipRect.x, clipRect.y), ImVec2(clipRect.z, clipRect.w), IM_COL32(255, 0, 0, 255));
 
     for (TextLine& line : lines) {
         for(TextSegment& segment : line.segments) {
@@ -295,7 +274,8 @@ int TextPlane::Draw(const string &newText, int offset, bool start_lower, bool fo
 
             }
 
-            draw_list->AddText(position, segment.color, segment.text.c_str());
+            // FIXME last param should be proper cliprect
+            draw_list->AddText(nullptr, 0.0f, position, segment.color, segment.text.c_str(), nullptr, 0.0f, nullptr);
              
             position.x += text_size.x;
         }
