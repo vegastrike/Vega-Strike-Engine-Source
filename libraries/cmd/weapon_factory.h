@@ -28,7 +28,6 @@
 #define VEGA_STRIKE_ENGINE_CMD_WEAPON_FACTORY_H
 
 #include <string>
-#include <boost/json.hpp>
 
 class WeaponFactory {
 public:
