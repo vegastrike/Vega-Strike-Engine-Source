@@ -692,9 +692,16 @@ void AutoLongHaul::Execute() {
 
         QVector sum(0.0f, 0.0f, 0.0f);
         bool any = false;
+        // The destination must never be a repulsor -- it is where we want to go and
+        // it is fine that it compresses our SPEC bubble. The autopilot target can be
+        // a subunit of the station, so match the whole unit (target and its owner).
+        Unit *target_root = target;
+        if (target != nullptr && target->isSubUnit()) {
+            target_root = UnitUtil::owner(target);
+        }
         for (const auto &pr : ranked) {
             Unit *o = pr.second;
-            if (o == nullptr || o == target) {
+            if (o == nullptr || o == parent || o == target || o == target_root) {
                 continue;
             }
             double sig = pr.first;
