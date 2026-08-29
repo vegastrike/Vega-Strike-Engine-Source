@@ -1919,24 +1919,29 @@ void DrawConfigScreen() {
     auto close_overlay = [&]() {
         if (_Universe) _Universe->ToggleOptionsActive();   // close; hide cursor on inactive
     };
-    float btnw = ImGui::CalcTextSize("Save").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
+    // Width from the longest button label so all three fit their text.
+    float btnw = fmaxf(ImGui::CalcTextSize("Save and Apply").x,
+                       fmaxf(ImGui::CalcTextSize("Close Settings").x,
+                             ImGui::CalcTextSize("Exit VegaStrike").x))
+                 + ImGui::GetStyle().FramePadding.x * 2 + 20;
     float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
     // Reserve space at the bottom for the button row (separator + buttons).
     ImGui::SetCursorPosY(ImGui::GetWindowHeight() - btn_h);
     ImGui::Separator();
-    // Center the three buttons (Save + Close + Quit). SetCursorPosX must be applied
-    // AFTER the Separator, which resets the cursor X to the left margin.
+    // Center the three buttons (Save and Apply + Close Settings + Exit VegaStrike).
+    // SetCursorPosX must be applied AFTER the Separator, which resets the cursor
+    // X to the left margin.
     float avail = ImGui::GetContentRegionAvail().x;
     float buttons_w = btnw * 3 + ImGui::GetStyle().ItemSpacing.x * 2;
     ImGui::SetCursorPosX(fmaxf(0.0f, (avail - buttons_w) * 0.5f));
 
-    // Save (green when dirty): apply + persist, stay open. Only Close closes.
+    // Save (green when dirty): apply + persist, stay open. Only Close Settings closes.
     const bool save_was_dirty = dirty;
     if (save_was_dirty) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.45f, 0.22f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
     }
-    if (ImGui::Button("Save", ImVec2(btnw, 0))) {
+    if (ImGui::Button("Save and Apply", ImVec2(btnw, 0))) {
         if (dirty) {
             // Snapshot the shader settings before applying, so we can detect an
             // ACTUAL shader change (the presets' vars are applied here, by
@@ -1967,23 +1972,23 @@ void DrawConfigScreen() {
     if (save_was_dirty) ImGui::PopStyleColor(2);
     ImGui::SameLine();
 
-    // Close (red when dirty): don't save anything, just close.
+    // Close Settings (red when dirty): don't save anything, just close.
     if (dirty) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
     }
-    if (ImGui::Button("Close", ImVec2(btnw, 0))) {
+    if (ImGui::Button("Close Settings", ImVec2(btnw, 0))) {
         // Don't save anything; just close. Dirty state is intentionally discarded.
         close_overlay();
     }
     if (dirty) ImGui::PopStyleColor(2);
     ImGui::SameLine();
 
-    // Quit (red): exit the game entirely. Unsaved changes are discarded. The full
+    // Quit/Exit (red): exit the game entirely. Unsaved changes are discarded. The full
     // cleanup path (flush logs, save game, close audio/window) is VSExit(0).
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
-    if (ImGui::Button("Quit", ImVec2(btnw, 0))) {
+    if (ImGui::Button("Exit VegaStrike", ImVec2(btnw, 0))) {
         VSExit(0);
     }
     ImGui::PopStyleColor(2);
