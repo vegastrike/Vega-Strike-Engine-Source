@@ -593,7 +593,6 @@ void AutoLongHaul::Execute() {
         parent->autopilotactive = false;
         return;
     }
-    const bool compensate_for_interdiction = configuration().physics.auto_pilot_compensate_for_interdiction;
     const float enough_warp_for_cruise = configuration().physics.enough_warp_for_cruise_flt;
     const float go_perpendicular_speed = configuration().physics.warp_perpendicular_flt;
     const float min_warp_orbit_radius = configuration().physics.min_warp_orbit_radius_flt;
@@ -624,9 +623,18 @@ void AutoLongHaul::Execute() {
             && (parent->graphicOptions.RampCounter == 0)) {
         //face target unless warp ramping is done and warp is less than some intolerable ammt
         Unit *obstacle = NULL;
-        float maxmultiplier = parent->CalculateNearestWarpUnit(FLT_MAX,
-                &obstacle,
-                compensate_for_interdiction);         //find the unit affecting our spec
+        // The thing affecting our SPEC bubble is simply the nearest object in space.
+        // Get the nearest one (so we can steer around it) and derive how much it
+        // weakens SPEC from its distance, mirroring GetMaxWarpFieldStrength.
+        float nearest = parent->GetNearestObjectSignificantDistance(&obstacle);
+        float maxmultiplier = configuration().warp.warp_multiplier_max_flt * parent->graphicOptions.MaxWarpMultiplier;
+        const float max_compression_range = configuration().warp.max_effective_velocity_flt;
+        if (nearest < max_compression_range) {
+            maxmultiplier *= nearest / max_compression_range;
+        }
+        if (maxmultiplier < 1.0f) {
+            maxmultiplier = 1.0f;
+        }
         bool currently_inside_landing_zone = false;
         if (obstacle) {
             currently_inside_landing_zone = InsideLandingPort(obstacle);

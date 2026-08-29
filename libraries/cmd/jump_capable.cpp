@@ -469,9 +469,12 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
 // the nearest object in space (the closest thing the warp bubble has to contend
 // with). Anything counts -- planets, bases, asteroids, and other ships -- and only the
 // nearest one matters.
-float JumpCapable::GetNearestObjectSignificantDistance() const {
+float JumpCapable::GetNearestObjectSignificantDistance(Unit **nearest_unit) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     float nearest = FLT_MAX;
+    if (nearest_unit) {
+        *nearest_unit = nullptr;
+    }
     Unit *planet;
     Unit *testthis = nullptr;
     {
@@ -495,6 +498,9 @@ float JumpCapable::GetNearestObjectSignificantDistance() const {
             float sigdist = UnitUtil::getSignificantDistance(unit, planet);
             if (sigdist < nearest) {
                 nearest = sigdist;
+                if (nearest_unit) {
+                    *nearest_unit = planet;
+                }
             }
             if (!testthis) {
                 break;
