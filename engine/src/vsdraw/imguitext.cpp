@@ -51,18 +51,18 @@ void ImGuiText::draw(int firstLineToDraw) {
     if ( !draw_list ) return;
     // const float lineHeight = ImGui::CalcTextSize("Hg").y; // this should give us the the full height of a text line
     // Calculate the Pixel Rect for Clipping
-    float pMinX = Coordinates::normToPixelX(m_rect.left());
-    float pMinY = Coordinates::normToPixelY(m_rect.top()) - 5; // Top of rect
-    float pMaxX = Coordinates::normToPixelX(m_rect.right());
-    float pMaxY = Coordinates::normToPixelY(m_rect.bottom()) + 10; // Bottom of rect
+    float pMinX = Coordinates::normToPixelX(m_rect.left(), resW());
+    float pMinY = Coordinates::normToPixelY(m_rect.top(), resH()) - 5; // Top of rect
+    float pMaxX = Coordinates::normToPixelX(m_rect.right(), resW());
+    float pMaxY = Coordinates::normToPixelY(m_rect.bottom(), resH()) + 10; // Bottom of rect
 
     // Clipping coords to avoid overrunning text
     ImVec4 clipRect(pMinX, pMinY, pMaxX, pMaxY);
 
-    float pixelX = Coordinates::normToPixelX(m_rect.left());
+    float pixelX = Coordinates::normToPixelX(m_rect.left(), resW());
     // position text in middle of rect for single line text
-    float pixelY = m_multiLine ? Coordinates::normToPixelY(m_rect.top()) : Coordinates::normToPixelY((m_rect.top() + m_rect.bottom()) *0.5f);
-    float pixelWidth = Coordinates::normToPixelW(m_rect.size.width);
+    float pixelY = m_multiLine ? Coordinates::normToPixelY(m_rect.top(), resH()) : Coordinates::normToPixelY((m_rect.top() + m_rect.bottom()) *0.5f, resH());
+    float pixelWidth = Coordinates::normToPixelW(m_rect.size.width, resW());
 
     ImVec2 textSize = getTextWidth(m_text.c_str(), m_font.size());
     // position single-line text half a line down so it is perfectly centered
@@ -79,7 +79,7 @@ void ImGuiText::draw(int firstLineToDraw) {
         }
 
         // Stop if the line is going to be drawn below the bottom of the clipping rect
-        if (currentY > Coordinates::normToPixelY(m_rect.origin.y)) {
+        if (currentY > Coordinates::normToPixelY(m_rect.origin.y, resH())) {
             break;
         }
         const auto& line = m_layout[i];
@@ -203,7 +203,7 @@ void ImGuiText::parseTextIfNeeded() {
     // only process the text upon change
     if(m_layout.needsProcessing) {
         VS_LOG(debug, (boost::format("Raw text set for GUI control: %1%") % m_text));
-        m_layout = parseText(m_text, Coordinates::normToPixelW(m_rect.size.width)); // Parser runs only when text changes
+        m_layout = parseText(m_text, Coordinates::normToPixelW(m_rect.size.width, resW())); // Parser runs only when text changes
         m_layoutVersion++; // Text has changed, outside logic uses this information to update GUI state
     }
     m_layout.needsProcessing = false;
@@ -212,7 +212,7 @@ void ImGuiText::parseTextIfNeeded() {
 int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) {
     parseTextIfNeeded();
     int result = 0;
-    float currentHeight = Coordinates::normToPixelH(vertInterval)*0.95; // Have a little safety margin, otherwise the last line looks sometimes cut
+    float currentHeight = Coordinates::normToPixelH(vertInterval, resH())*0.95; // Have a little safety margin, otherwise the last line looks sometimes cut
 
     // 2. Iterate through m_layout starting from lineNumber
     for (size_t i = lineNumber; i < m_layout.size(); ++i) {

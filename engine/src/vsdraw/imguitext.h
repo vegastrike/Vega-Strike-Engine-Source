@@ -93,6 +93,10 @@ public:
     // Draws the text
     void draw(int firstLineToDraw=0);
     ImVec2 getTextWidth(const std::string text, const float fontSize);
+    // The resolution to lay out against (defaults to the screen DisplaySize).
+    void setResolution(float w, float h) { m_resW = w; m_resH = h; }
+    float resW() const { return m_resW > 0.0f ? m_resW : ImGui::GetIO().DisplaySize.x; }
+    float resH() const { return m_resH > 0.0f ? m_resH : ImGui::GetIO().DisplaySize.y; }
 private:
     Rect m_rect;
     Font m_font;
@@ -102,6 +106,8 @@ private:
     GFXColor m_color;
     FormattedLayout m_layout;
     int m_layoutVersion = 0;
+    float m_resW = 0.0f;   // target layout resolution (0 = use screen DisplaySize)
+    float m_resH = 0.0f;
 
     vector<ImU32> m_colorStack;        //Color stack.
     vector<Font> m_fontStack;             //Font stack.
