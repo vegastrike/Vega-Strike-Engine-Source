@@ -606,6 +606,18 @@ void AutoLongHaul::Execute() {
     destinationdirection =
             destinationdirection * (1. / destinationdistance);       //this is a direction, so it is normalize
 
+    // Distance to stop from the ship's current speed (including SPEC). The autopilot
+    // flies straight to this braking point, winds down SPEC there and brakes to a
+    // stop. Used both to gate obstacle avoidance (don't dodge objects farther away
+    // than we can already stop) and as the clean disengage point.
+    const double current_speed = parent->Velocity.Magnitude();
+    const double ship_mass = parent->GetMass();
+    double brake_distance = 0.0;
+    if (ship_mass > 0.0 && parent->drive.retro > 0.0) {
+        brake_distance = (current_speed * current_speed)
+                / (2.0 * (parent->drive.retro / ship_mass));
+    }
+
     StraightToTarget = true;    // free to fly
 
     if ((parent->graphicOptions.WarpFieldStrength < enough_warp_for_cruise)
@@ -633,6 +645,7 @@ void AutoLongHaul::Execute() {
                     * (1. / obstacledistance);               //normalize the obstacle direction as well
             float angle = obstacledirection.Dot(destinationdirection);
             if ((obstacledistance - obstacle->rSize() < destinationdistance - target->rSize())
+                    && (obstacledistance - obstacle->rSize() < brake_distance)
                     && (angle > warp_behind_angle)) {
                 StraightToTarget = false;
                 //if our obstacle is closer than obj and the obstacle is not behind us
@@ -725,17 +738,12 @@ void AutoLongHaul::Execute() {
     const float distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt;
     const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
-    bool stopnow = false;
-    maxspeed = parent->afterburner.speed;
-    if (maxspeed && parent->drive.retro) {
-        double time_to_destination = dis / maxspeed;         //conservative
-        double time_to_stop = speed * mass / parent->drive.retro;
-        if (time_to_destination <= time_to_stop) {
-            stopnow = true;
-        }
-    }
+    // Disengage when we're within the distance it takes to stop from our current
+    // (SPEC) speed -- fly straight to that point, then brake cleanly instead of
+    // overshooting. distance_to_stop remains a hard floor.
     if (do_auto_finish
-            && (stopnow || dis < distance_to_stop || (target->Target() == parent && dis < enemy_distance_to_stop))) {
+            && (dis <= brake_distance || dis < distance_to_stop
+                    || (target->Target() == parent && dis < enemy_distance_to_stop))) {
         parent->autopilotactive = false;
         WarpRampOff(parent, rampdown);
         done = true;
