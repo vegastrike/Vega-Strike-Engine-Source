@@ -37,7 +37,7 @@
 #include "gldrv/mouse_cursor.h"
 
 #include "imgui.h"
-#include "gui/guidefs.h"
+#include "vsdraw/guidefs.h"
 
 
 float getFontHeight() {

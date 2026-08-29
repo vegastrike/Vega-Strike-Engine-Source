@@ -33,7 +33,7 @@
 
 //For drawing the cursor.
 #include "imgui/imgui.h"
-#include "gui/imgui_support.h"
+#include "vsdraw/imgui_support.h"
 
 //The outside boundaries of the window.
 void Window::setRect(const Rect &r) {

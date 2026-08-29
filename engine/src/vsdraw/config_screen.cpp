@@ -20,7 +20,7 @@
 #include <boost/json.hpp>
 #include <boost/filesystem.hpp>
 #include <imgui.h>
-#include "libraries/gui/gui.h"
+#include "libraries/imgui-backend/gui.h"
 #include <SDL3/SDL.h>
 #include <algorithm>
 #include <vector>

@@ -67,7 +67,7 @@
 #include "gldrv/mouse_cursor.h"
 
 #include "imgui/imgui.h"
-#include "libraries/gui/gui.h"
+#include "libraries/imgui-backend/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
 
@@ -137,7 +137,7 @@ bool BaseInterface::Room::BaseTalk::hastalked = false;
 
 #ifdef NEW_GUI
 #include "cmd/basecomputer.h"
-#include "../gui/eventmanager.h"
+#include "../vsdraw/eventmanager.h"
 #endif
 
 using namespace VSFileSystem;

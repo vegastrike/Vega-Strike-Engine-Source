@@ -28,7 +28,7 @@
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 
-ADD_LIBRARY(vegastrike_gui STATIC
+ADD_LIBRARY(vegastrike_imgui_backend STATIC
     gui.cpp
     main_menu.cpp
     pause_screen.cpp
@@ -38,19 +38,19 @@ ADD_LIBRARY(vegastrike_gui STATIC
 ADD_EXECUTABLE(test_gui 
                test_gui.cpp) 
 
-SET_PROPERTY(TARGET vegastrike_gui PROPERTY CXX_STANDARD 14)
-SET_PROPERTY(TARGET vegastrike_gui PROPERTY CXX_STANDARD_REQUIRED TRUE)
-SET_PROPERTY(TARGET vegastrike_gui PROPERTY CXX_EXTENSIONS ON)
-SET_PROPERTY(TARGET vegastrike_gui PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+SET_PROPERTY(TARGET vegastrike_imgui_backend PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vegastrike_imgui_backend PROPERTY CXX_STANDARD_REQUIRED TRUE)
+SET_PROPERTY(TARGET vegastrike_imgui_backend PROPERTY CXX_EXTENSIONS ON)
+SET_PROPERTY(TARGET vegastrike_imgui_backend PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
-TARGET_INCLUDE_DIRECTORIES(vegastrike_gui 
+TARGET_INCLUDE_DIRECTORIES(vegastrike_imgui_backend 
     PUBLIC 
         ${Vega_Strike_SOURCE_DIR}/libraries/gui
     SYSTEM PRIVATE 
         ${Vega_Strike_SOURCE_DIR}/libraries/imgui
         SDL3::Headers)
 
-TARGET_LINK_LIBRARIES(vegastrike_gui
+TARGET_LINK_LIBRARIES(vegastrike_imgui_backend
     SDL3::SDL3
     vegastrike_imgui
 )
@@ -58,6 +58,6 @@ TARGET_LINK_LIBRARIES(vegastrike_gui
 TARGET_LINK_LIBRARIES(test_gui
     SDL3::SDL3
     vegastrike_imgui
-    vegastrike_gui
+    vegastrike_imgui_backend
 )
     

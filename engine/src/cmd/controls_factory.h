@@ -32,7 +32,7 @@
 #include <map>
 
 #include "vegadisk/vsfilesystem.h"
-#include "gui/control.h"
+#include "vsdraw/control.h"
 
 std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFileSystem::VSFile &file);
 Control* getControl(std::map<std::string, std::string> attributes);

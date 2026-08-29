@@ -29,7 +29,7 @@
 
 #include "control.h"
 #include "guitexture.h"
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 
 //See cpp file for detailed descriptions of classes, functions, etc.
 

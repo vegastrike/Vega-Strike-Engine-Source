@@ -28,7 +28,7 @@
 #define VEGA_STRIKE_ENGINE_GUI_BUTTON_H
 
 #include "control.h"
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 
 //See cpp file for detailed descriptions of classes, functions, etc.
 

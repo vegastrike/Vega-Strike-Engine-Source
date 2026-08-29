@@ -56,7 +56,7 @@
 #include "gfx_generic/mesh.h"
 #include "src/universe_util.h"
 #include "src/in_mouse.h"
-#include "gui/glut_support.h"
+#include "vsdraw/glut_support.h"
 #include "cmd/unit_util.h"
 #include "src/hashtable.h"
 #include "gfx/nav/navscreen.h"

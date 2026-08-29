@@ -42,11 +42,11 @@
 #include "root_generic/configxml.h"
 #include "resource/json_utils.h"
 
-#include "gui/staticdisplay.h"
-#include "gui/newbutton.h"
-#include "gui/scroller.h"
-#include "gui/control.h"
-#include "gui/simplepicker.h"
+#include "vsdraw/staticdisplay.h"
+#include "vsdraw/newbutton.h"
+#include "vsdraw/scroller.h"
+#include "vsdraw/control.h"
+#include "vsdraw/simplepicker.h"
 
 const std::string keys[] = {"name", "type", "rect",	"text", "textColor",
                             "defaultTextColor", "color", "font", "id",

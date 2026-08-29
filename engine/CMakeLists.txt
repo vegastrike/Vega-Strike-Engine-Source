@@ -242,31 +242,31 @@ SET(LIBCOMPONENT
     )
 
 SET(LIBGUI_SOURCES
-    src/gui/button.cpp
-    src/gui/control.cpp
-    src/gui/eventmanager.cpp
-    src/gui/eventresponder.cpp
-    src/gui/font.cpp
-    src/gui/glut_support.cpp
-    src/gui/imgui_support.cpp
-    src/gui/config_screen.cpp
-    src/gui/config_screen.h
-    src/gui/groupcontrol.cpp
-    src/gui/guidefs.cpp
-    src/gui/guitexture.cpp
-    src/gui/imguitext.cpp
-    src/gui/modaldialog.cpp
-    src/gui/newbutton.cpp
-    src/gui/painttext.cpp
-    src/gui/picker.cpp
-    src/gui/scroller.cpp
-    src/gui/simplepicker.cpp
-    src/gui/slider.cpp
-    src/gui/staticdisplay.cpp
-    src/gui/text_area.cpp
-    src/gui/textinputdisplay.cpp
-    src/gui/window.cpp
-    src/gui/windowcontroller.cpp
+    src/vsdraw/button.cpp
+    src/vsdraw/control.cpp
+    src/vsdraw/eventmanager.cpp
+    src/vsdraw/eventresponder.cpp
+    src/vsdraw/font.cpp
+    src/vsdraw/glut_support.cpp
+    src/vsdraw/imgui_support.cpp
+    src/vsdraw/config_screen.cpp
+    src/vsdraw/config_screen.h
+    src/vsdraw/groupcontrol.cpp
+    src/vsdraw/guidefs.cpp
+    src/vsdraw/guitexture.cpp
+    src/vsdraw/imguitext.cpp
+    src/vsdraw/modaldialog.cpp
+    src/vsdraw/newbutton.cpp
+    src/vsdraw/painttext.cpp
+    src/vsdraw/picker.cpp
+    src/vsdraw/scroller.cpp
+    src/vsdraw/simplepicker.cpp
+    src/vsdraw/slider.cpp
+    src/vsdraw/staticdisplay.cpp
+    src/vsdraw/text_area.cpp
+    src/vsdraw/textinputdisplay.cpp
+    src/vsdraw/window.cpp
+    src/vsdraw/windowcontroller.cpp
 )
 
 SET(LIBPYTHON_SOURCES
@@ -717,7 +717,7 @@ IF (NOT DISABLE_CLIENT)
                           vegastrike_vegadisk
                           vegastrike_posh
                           vegastrike_imgui
-                          vegastrike_gui
+                          vegastrike_imgui_backend
                           vegastrike_cmd
                           vegastrike-OPcollide
     )

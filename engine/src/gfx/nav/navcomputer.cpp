@@ -41,14 +41,14 @@
 #include "gfx/cockpit.h"
 #include "src/main_loop.h"
 #include "root_generic/lin_time.h"
-#include "gui/modaldialog.h"
-#include "gui/eventmanager.h"
-#include "gui/newbutton.h"
-#include "gui/staticdisplay.h"
-#include "gui/textinputdisplay.h"
-#include "gui/simplepicker.h"
-#include "gui/groupcontrol.h"
-#include "gui/scroller.h"
+#include "vsdraw/modaldialog.h"
+#include "vsdraw/eventmanager.h"
+#include "vsdraw/newbutton.h"
+#include "vsdraw/staticdisplay.h"
+#include "vsdraw/textinputdisplay.h"
+#include "vsdraw/simplepicker.h"
+#include "vsdraw/groupcontrol.h"
+#include "vsdraw/scroller.h"
 
 vector<unsigned int> nav_keyboard_queue;
 

@@ -26,13 +26,13 @@
  */
 
 
-#include "gui/glut_support.h"
+#include "vsdraw/glut_support.h"
 
 #include "gfx/hud.h"
 
 #include "cmd/unit_generic.h"
 
-#include "gui/glut_support.h"
+#include "vsdraw/glut_support.h"
 
 #include "src/universe_util.h"
 

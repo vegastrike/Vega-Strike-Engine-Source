@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 #include "src/vs_logging.h"
 #include "configuration/configuration.h"
 #include "imgui_internal.h"

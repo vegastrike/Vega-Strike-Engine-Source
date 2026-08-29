@@ -27,9 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_BASECOMPUTER_H
 #define VEGA_STRIKE_ENGINE_CMD_BASECOMPUTER_H
 
-#include "gui/windowcontroller.h"
+#include "vsdraw/windowcontroller.h"
 #include "cmd/unit_generic.h"
-#include "gui/simplepicker.h"
+#include "vsdraw/simplepicker.h"
 #include "cmd/cargo_color.h"
 #include "common/enum_iterator.h"
 
