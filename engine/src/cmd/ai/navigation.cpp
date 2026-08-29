@@ -73,6 +73,73 @@ struct ClearSpaceCollector {
     }
 };
 
+// Coarse traffic-avoidance: scan the traffic over a large region and return a
+// heading that vectors away from the dense corridors (ships underway between
+// populated points) while still heading toward the destination, so the autopilot
+// travels through emptier space instead of down a busy lane. Also reports whether
+// we are still inside a busy lane -- i.e. there are several ships between us and
+// the destination -- which is how we know when we are clear and can fly straight.
+struct TrafficResult {
+    QVector heading;
+    bool in_lane;
+};
+static TrafficResult ComputeTrafficHeading(const Unit *parent, Unit *target,
+        const QVector &dest_dir, double destinationdistance) {
+    StarSystem *ss = _Universe->activeStarSystem();
+    const float scan_radius = configuration().physics.warp_traffic_scan_radius_flt;
+    const float repel = configuration().physics.warp_clearance_repel_flt;
+    const float attract = configuration().physics.warp_clearance_attract_flt;
+    const unsigned int kMaxTrafficShips = 128;
+
+    std::vector<Unit *> ships;
+    if (!is_null(parent->location[Unit::UNIT_ONLY])) {
+        UnitWithinRangeLocator<ClearSpaceCollector> locator(scan_radius, 0.0f);
+        locator.action.init(ships, kMaxTrafficShips);
+        findObjects(ss->collide_map[Unit::UNIT_ONLY], parent->location[Unit::UNIT_ONLY], &locator);
+    }
+
+    QVector sum(0.0f, 0.0f, 0.0f);
+    unsigned int between = 0;
+    // Inverse-distance weighting: a dense cluster (a traffic lane) pushes strongly
+    // away from its direction, while sparse directions barely push at all.
+    auto addRepulsion = [&](Unit *o) {
+        if (o == nullptr || o == parent || o == target || o->Killed()) {
+            return;
+        }
+        QVector to_o = o->LocalPosition() - parent->LocalPosition();
+        double dist = to_o.Magnitude();
+        if (dist < 0.0001) {
+            return;
+        }
+        // A ship between us and the destination (roughly ahead, closer than the
+        // target) means we are still inside the traffic lane.
+        QVector dir_o = to_o / dist;
+        if (dist < destinationdistance && dir_o.Dot(dest_dir) > 0.6) {
+            ++between;
+        }
+        const double w = repel / (dist + 1.0);
+        sum += (-to_o / dist) * static_cast<float>(w);
+    };
+    for (Unit *o : ships) {
+        addRepulsion(o);
+    }
+    Unit *u;
+    for (un_fiter iter = ss->gravitationalUnits().fastIterator(); (u = *iter); ++iter) {
+        addRepulsion(u);
+    }
+
+    sum += dest_dir * attract;
+    double mag = sum.Magnitude();
+    TrafficResult result;
+    result.in_lane = between >= 3;
+    if (mag > 0.0001) {
+        result.heading = sum / mag;
+    } else {
+        result.heading = dest_dir;
+    }
+    return result;
+};
+
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
@@ -526,6 +593,10 @@ AutoLongHaul::AutoLongHaul(bool fini, int accuracy) : ChangeHeading(QVector(0, 0
     deactivatewarp = false;
     StraightToTarget = true;
     inside_landing_zone = false;
+    coarse_scan_timer = 0.0;
+    coarse_scan_target = nullptr;
+    coarse_heading = QVector(0, 0, 1);
+    coarse_in_lane = false;
 }
 
 void AutoLongHaul::MakeLinearVelocityOrder() {
@@ -616,6 +687,47 @@ void AutoLongHaul::Execute() {
     double destinationdistance = destinationdirection.Magnitude();
     destinationdirection =
             destinationdirection * (1. / destinationdistance);       //this is a direction, so it is normalize
+
+    // Coarse traffic-avoidance routing: every ~scan_interval we scan the surrounding
+    // traffic and pick a heading that vectors away from the busy lanes; that heading
+    // then fades in influence until the next scan, so we smoothly work our way out of
+    // the immediate traffic corridor while still heading for the destination.
+    const float scan_interval = configuration().physics.warp_traffic_scan_interval_flt;
+    if (target != coarse_scan_target) {
+        coarse_scan_target = target;
+        coarse_scan_timer = 0.0;                 // scan immediately on a new destination
+    }
+    coarse_scan_timer -= simulation_atom_var;
+    if (coarse_scan_timer <= 0.0) {
+        coarse_scan_timer = scan_interval;
+        TrafficResult traffic = ComputeTrafficHeading(parent, target, destinationdirection, destinationdistance);
+        coarse_heading = traffic.heading;
+        coarse_in_lane = traffic.in_lane;
+    }
+    float fade = 1.0f;
+    if (scan_interval > 0.0f) {
+        fade = static_cast<float>(coarse_scan_timer / scan_interval);
+    }
+    if (fade < 0.0f) {
+        fade = 0.0f;
+    }
+    if (fade > 1.0f) {
+        fade = 1.0f;
+    }
+    // Only divert around the traffic lane while there are ships between us and the
+    // destination; once we are clear of the lane, fly straight to the target.
+    QVector attract_dir;
+    if (coarse_in_lane) {
+        attract_dir = destinationdirection * (1.0f - fade) + coarse_heading * fade;
+    } else {
+        attract_dir = destinationdirection;
+    }
+    const double attract_dir_mag = attract_dir.Magnitude();
+    if (attract_dir_mag > 0.0001) {
+        attract_dir = attract_dir * (1.0 / attract_dir_mag);
+    } else {
+        attract_dir = destinationdirection;
+    }
 
     // Distance to stop from the ship's current speed (including SPEC). The autopilot
     // flies straight to this braking point, winds down SPEC there and brakes to a
@@ -743,7 +855,7 @@ void AutoLongHaul::Execute() {
                 repulsion_damp = 1.0;
             }
             sum *= static_cast<float>(repulsion_damp);
-            sum += destinationdirection * static_cast<float>(attract_strength);
+            sum += attract_dir * static_cast<float>(attract_strength);
             QVector desired;
             double mag = sum.Magnitude();
             if (mag > 0.0001) {

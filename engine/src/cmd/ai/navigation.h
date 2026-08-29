@@ -183,6 +183,14 @@ class AutoLongHaul : public ChangeHeading {
     bool StraightToTarget;
     bool inside_landing_zone;
 
+    // Coarse traffic-avoidance routing state: every ~warp_traffic_scan_interval we
+    // scan the surrounding traffic and pick a heading that vectors away from the
+    // dense corridors between populated points, so we travel through empty space.
+    double coarse_scan_timer;
+    QVector coarse_heading;
+    Unit *coarse_scan_target;
+    bool coarse_in_lane;
+
     void MakeLinearVelocityOrder();
     bool InsideLandingPort(const Unit *obstacle) const;
 public:
