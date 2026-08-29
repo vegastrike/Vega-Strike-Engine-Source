@@ -246,6 +246,7 @@ SET(LIBGUI_SOURCES
     src/vsdraw/control.cpp
     src/vsdraw/eventmanager.cpp
     src/vsdraw/eventresponder.cpp
+    src/vsdraw/font.cpp
     src/vsdraw/glut_support.cpp
     src/vsdraw/imgui_support.cpp
     src/vsdraw/config_screen.cpp
@@ -256,6 +257,7 @@ SET(LIBGUI_SOURCES
     src/vsdraw/imguitext.cpp
     src/vsdraw/modaldialog.cpp
     src/vsdraw/newbutton.cpp
+    src/vsdraw/painttext.cpp
     src/vsdraw/picker.cpp
     src/vsdraw/scroller.cpp
     src/vsdraw/simplepicker.cpp

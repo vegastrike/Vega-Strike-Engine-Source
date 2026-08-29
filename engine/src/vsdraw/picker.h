@@ -224,11 +224,8 @@ public:
 protected:
 //INTERNAL IMPLEMENTATION
 //The total vertical space between displayed cells.
-    // m_font.size() is a pixel glyph height (font_point-relative); m_rect is normalized
-    // -1..1. Convert the pixel height to normalized units so cell layout stays in one
-    // coordinate space (this is the inverse of the standard normToPixelH).
     float totalCellHeight(void) {
-        return Coordinates::pixelToNormH(m_font.size()) + m_extraCellHeight;
+        return m_font.size() + m_extraCellHeight;
     }
 
 //Find the cell that corresponds to a point in the control.
