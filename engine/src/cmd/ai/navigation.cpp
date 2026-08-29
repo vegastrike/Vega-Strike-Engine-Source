@@ -655,11 +655,17 @@ void AutoLongHaul::Execute() {
         StarSystem *ss = _Universe->activeStarSystem();
         const float repel = configuration().physics.warp_clearance_repel_flt;
         const float attract = configuration().physics.warp_clearance_attract_flt;
-        // The bubble holds at a full SPEC sphere until the target enters it, then
-        // shrinks with the distance to the target (never larger than that distance),
-        // so on arrival we no longer care about the bubble and just get to the target.
-        const double bubble = (destinationdistance < max_compression_range)
-                ? destinationdistance : max_compression_range;
+        // The bubble stays at a full SPEC sphere while the target is outside the
+        // gather range (warp_clearance_range_mult x the bubble). Once the target
+        // enters that range we collapse the bubble, so that it is already gone by the
+        // time the target reaches the 1x bubble itself -- on arrival we simply get to
+        // the target instead of dodging ships there.
+        double bubble = max_compression_range;
+        if (destinationdistance < gather_range) {
+            const double ratio = (destinationdistance - max_compression_range)
+                    / (gather_range - max_compression_range);
+            bubble = max_compression_range * ((ratio < 0.0) ? 0.0 : ratio);
+        }
 
         // Cull the interfering objects to only the closest handful so a crowd of
         // ships in the vicinity can't dominate or cost too much -- the nearest matter
