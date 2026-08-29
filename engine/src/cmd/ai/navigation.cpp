@@ -722,23 +722,6 @@ void AutoLongHaul::Execute() {
         }
         if (any) {
             StraightToTarget = false;
-            // Once the destination is inside the SPEC sphere we are committing to
-            // arrive, so repulsors may only nudge the course a tiny amount -- just
-            // enough to avoid a crash -- rather than divert us. Beyond the sphere,
-            // clear-space steering is free.
-            const float arrive_damp = configuration().physics.warp_clearance_arrive_damp_flt;
-            const float fraction = destinationdistance / max_compression_range;
-            float repulsion_damp = 1.0f;
-            if (fraction < 1.0f) {
-                repulsion_damp = arrive_damp;                 // tiny inside the sphere
-                if (fraction > 0.8f) {                         // smooth edge band out to the boundary
-                    repulsion_damp = arrive_damp + (1.0f - arrive_damp)
-                            * (fraction - 0.8f) / 0.2f;
-                }
-            }
-            if (repulsion_damp < 1.0f) {
-                sum *= repulsion_damp;
-            }
             // The destination pull has a long reach (it is where we want to go) and
             // grows almost logarithmically as we near it, so it overrides the
             // repulsion of ships clustered at the target instead of the autopilot
@@ -746,6 +729,20 @@ void AutoLongHaul::Execute() {
             // very close it spikes.
             const double attract_strength = attract
                     + std::log1p(attract_gain / (destinationdistance + 1.0));
+            // Repulsors are almost the inverse of the attractor: strong while the
+            // destination is far away, then fading continuously as we get closer, so
+            // they cause less and less of a detour until the destination is in range
+            // -- just enough left to avoid a crash. The strength tracks the inverse
+            // of the destination pull, floored at warp_clearance_arrive_damp.
+            const float arrive_damp = configuration().physics.warp_clearance_arrive_damp_flt;
+            double repulsion_damp = attract / attract_strength;
+            if (repulsion_damp < arrive_damp) {
+                repulsion_damp = arrive_damp;
+            }
+            if (repulsion_damp > 1.0) {
+                repulsion_damp = 1.0;
+            }
+            sum *= static_cast<float>(repulsion_damp);
             sum += destinationdirection * static_cast<float>(attract_strength);
             QVector desired;
             double mag = sum.Magnitude();
