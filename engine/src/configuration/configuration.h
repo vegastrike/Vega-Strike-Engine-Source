@@ -2567,10 +2567,6 @@ namespace vega_config {
         float warp_clearance_arrive_damp_flt = 0.1;
         double warp_clearance_range_mult_dbl = 5.0;
         float warp_clearance_range_mult_flt = 5.0;
-        double warp_traffic_scan_interval_dbl = 1.0;
-        float warp_traffic_scan_interval_flt = 1.0;
-        double warp_traffic_scan_radius_dbl = 100000000000.0;
-        float warp_traffic_scan_radius_flt = 100000000000.0;
         double weapon_damage_efficiency_dbl = 1.0;
         float weapon_damage_efficiency_flt = 1.0;
         double year_scale_dbl = 16.0;

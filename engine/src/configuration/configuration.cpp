@@ -8013,18 +8013,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.warp_clearance_range_mult_flt = boost::json::value_to<float>(*warp_clearance_range_mult_value_ptr);
             }
 
-            const boost::json::value * warp_traffic_scan_interval_value_ptr = physics_object.if_contains("warp_traffic_scan_interval");
-            if (warp_traffic_scan_interval_value_ptr != nullptr) {
-                physics.warp_traffic_scan_interval_dbl = boost::json::value_to<double>(*warp_traffic_scan_interval_value_ptr);
-                physics.warp_traffic_scan_interval_flt = boost::json::value_to<float>(*warp_traffic_scan_interval_value_ptr);
-            }
-
-            const boost::json::value * warp_traffic_scan_radius_value_ptr = physics_object.if_contains("warp_traffic_scan_radius");
-            if (warp_traffic_scan_radius_value_ptr != nullptr) {
-                physics.warp_traffic_scan_radius_dbl = boost::json::value_to<double>(*warp_traffic_scan_radius_value_ptr);
-                physics.warp_traffic_scan_radius_flt = boost::json::value_to<float>(*warp_traffic_scan_radius_value_ptr);
-            }
-
             const boost::json::value * weapon_damage_efficiency_value_ptr = physics_object.if_contains("weapon_damage_efficiency");
             if (weapon_damage_efficiency_value_ptr != nullptr) {
                 physics.weapon_damage_efficiency_dbl = boost::json::value_to<double>(*weapon_damage_efficiency_value_ptr);
