@@ -655,6 +655,9 @@ void AutoLongHaul::Execute() {
         StarSystem *ss = _Universe->activeStarSystem();
         const float repel = configuration().physics.warp_clearance_repel_flt;
         const float attract = configuration().physics.warp_clearance_attract_flt;
+        // The bubble holds at a full SPEC sphere until the target enters it, then
+        // shrinks with the distance to the target (never larger than that distance),
+        // so on arrival we no longer care about the bubble and just get to the target.
         const double bubble = (destinationdistance < max_compression_range)
                 ? destinationdistance : max_compression_range;
 
