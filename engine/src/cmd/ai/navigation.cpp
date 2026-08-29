@@ -646,17 +646,17 @@ void AutoLongHaul::Execute() {
         }
         // Steer into clear space so SPEC works at full. Vector-sum steering: each
         // object that compresses our SPEC bubble pushes us directly away from it,
-        // weighted by how close (and thus how much it interferes) it is. The
-        // destination pulls us in, and that pull builds as we clear the objects --
-        // once outside the interfering vectors we steer for the destination. A close
-        // base dominates; ships around it add up; far objects barely matter.
+        // weighted by how close (and thus how much it interferes) it is. The bubble we
+        // care about keeping clear shrinks as we near the destination: far away we
+        // keep a full SPEC sphere clear (so we travel through empty space), and on
+        // arrival we no longer care about the bubble and just get to the target.
         const float gather_range = max_compression_range
                 * configuration().physics.warp_clearance_range_mult_flt;
         StarSystem *ss = _Universe->activeStarSystem();
         const float repel = configuration().physics.warp_clearance_repel_flt;
         const float attract = configuration().physics.warp_clearance_attract_flt;
-        const float attract_gain = configuration().physics.warp_clearance_attract_gain_flt;
-        const float falloff = configuration().physics.warp_clearance_falloff_flt;
+        const double bubble = (destinationdistance < max_compression_range)
+                ? destinationdistance : max_compression_range;
 
         // Cull the interfering objects to only the closest handful so a crowd of
         // ships in the vicinity can't dominate or cost too much -- the nearest matter
@@ -705,7 +705,7 @@ void AutoLongHaul::Execute() {
                 continue;
             }
             double sig = pr.first;
-            if (sig >= gather_range) {
+            if (sig >= bubble) {
                 continue;
             }
             QVector to_obj = o->LocalPosition() - myposition;
@@ -713,7 +713,7 @@ void AutoLongHaul::Execute() {
             if (dist < 0.0001) {
                 continue;
             }
-            float weight = repel * (falloff / static_cast<float>(falloff + sig));
+            float weight = repel * static_cast<float>(1.0 - sig / bubble);
             if (weight <= 0.0f) {
                 continue;
             }
@@ -722,28 +722,10 @@ void AutoLongHaul::Execute() {
         }
         if (any) {
             StraightToTarget = false;
-            // The destination pull has a long reach (it is where we want to go) and
-            // grows almost logarithmically as we near it, so it overrides the
-            // repulsion of ships clustered at the target instead of the autopilot
-            // avoiding them. Far from the target it stays near the base attract;
-            // very close it spikes.
-            const double attract_strength = attract
-                    + std::log1p(attract_gain / (destinationdistance + 1.0));
-            // Repulsors are almost the inverse of the attractor: strong while the
-            // destination is far away, then fading continuously as we get closer, so
-            // they cause less and less of a detour until the destination is in range
-            // -- just enough left to avoid a crash. The strength tracks the inverse
-            // of the destination pull, floored at warp_clearance_arrive_damp.
-            const float arrive_damp = configuration().physics.warp_clearance_arrive_damp_flt;
-            double repulsion_damp = attract / attract_strength;
-            if (repulsion_damp < arrive_damp) {
-                repulsion_damp = arrive_damp;
-            }
-            if (repulsion_damp > 1.0) {
-                repulsion_damp = 1.0;
-            }
-            sum *= static_cast<float>(repulsion_damp);
-            sum += destinationdirection * static_cast<float>(attract_strength);
+            // A steady pull toward the destination (it is where we want to go). With
+            // the bubble shrinking as we approach, repulsion fades and this takes
+            // over, so on arrival we simply fly to the target.
+            sum += destinationdirection * attract;
             QVector desired;
             double mag = sum.Magnitude();
             if (mag > 0.0001) {
