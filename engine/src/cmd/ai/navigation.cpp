@@ -29,6 +29,9 @@
 #include "navigation.h"
 #include "root_generic/macosx_math.h"
 #include <math.h>
+#include <vector>
+#include "cmd/unit_find.h"
+#include "src/universe.h"
 #ifndef _WIN32
 #include <assert.h>
 #endif
@@ -48,6 +51,22 @@
 using namespace Orders;
 
 constexpr float M_PI_FLT = M_PI;
+
+// Collects the units (other than ourselves) in range for the SPEC clear-space
+// steering -- used as the action for UnitWithinRangeLocator over the UNIT_ONLY map.
+struct ClearSpaceCollector {
+    std::vector<Unit *> *units;
+    ClearSpaceCollector() : units(nullptr) {}
+    void init(std::vector<Unit *> &u) {
+        units = &u;
+    }
+    bool acquire(Unit *unit, float /*distance*/) {
+        if (units != nullptr) {
+            units->push_back(unit);
+        }
+        return true;
+    }
+};
 
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
@@ -528,14 +547,6 @@ void AutoLongHaul::SetParent(Unit *parent1) {
 
 extern bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following);
 
-QVector AutoLongHaul::NewDestination(const QVector &curnewdestination, double magnitude) {
-    return curnewdestination;
-}
-
-static float mymax(float a, float b) {
-    return a > b ? a : b;
-}
-
 static float mymin(float a, float b) {
     return a < b ? a : b;
 }
@@ -593,11 +604,7 @@ void AutoLongHaul::Execute() {
         parent->autopilotactive = false;
         return;
     }
-    const float enough_warp_for_cruise = configuration().physics.enough_warp_for_cruise_flt;
-    const float go_perpendicular_speed = configuration().physics.warp_perpendicular_flt;
-    const float min_warp_orbit_radius = configuration().physics.min_warp_orbit_radius_flt;
-    const float warp_orbit_multiplier = configuration().physics.warp_orbit_multiplier_flt;
-    const float warp_behind_angle = cos(M_PI_FLT * configuration().physics.warp_behind_angle_flt / 180.0F);
+    const float max_compression_range = configuration().warp.max_effective_velocity_flt;
     QVector myposition = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();     //get unit pos
     QVector destination = target->isSubUnit() ? target->Position() : target->LocalPosition();     //get destination
     QVector destinationdirection = (destination - myposition);       //find vector from us to destination
@@ -619,22 +626,11 @@ void AutoLongHaul::Execute() {
 
     StraightToTarget = true;    // free to fly
 
-    if ((parent->graphicOptions.WarpFieldStrength < enough_warp_for_cruise)
-            && (parent->graphicOptions.RampCounter == 0)) {
-        //face target unless warp ramping is done and warp is less than some intolerable ammt
+    if (parent->graphicOptions.RampCounter == 0) {
+        //face target unless warp ramping is done
         Unit *obstacle = NULL;
-        // The thing affecting our SPEC bubble is simply the nearest object in space.
-        // Get the nearest one (so we can steer around it) and derive how much it
-        // weakens SPEC from its distance, mirroring GetMaxWarpFieldStrength.
-        float nearest = parent->GetNearestObjectSignificantDistance(&obstacle);
-        float maxmultiplier = configuration().warp.warp_multiplier_max_flt * parent->graphicOptions.MaxWarpMultiplier;
-        const float max_compression_range = configuration().warp.max_effective_velocity_flt;
-        if (nearest < max_compression_range) {
-            maxmultiplier *= nearest / max_compression_range;
-        }
-        if (maxmultiplier < 1.0f) {
-            maxmultiplier = 1.0f;
-        }
+        // The thing compressing our SPEC bubble is the nearest object in space.
+        parent->GetNearestObjectSignificantDistance(&obstacle);
         bool currently_inside_landing_zone = false;
         if (obstacle) {
             currently_inside_landing_zone = InsideLandingPort(obstacle);
@@ -643,50 +639,66 @@ void AutoLongHaul::Execute() {
             inside_landing_zone = currently_inside_landing_zone;
             MakeLinearVelocityOrder();
         }
-        if (obstacle != NULL && obstacle != target) {
-            //if it exists and is not our destination
-            QVector obstacledirection =
-                    (obstacle->LocalPosition() - myposition);               //find vector from us to obstacle
-            double obstacledistance = obstacledirection.Magnitude();
-
-            obstacledirection = obstacledirection
-                    * (1. / obstacledistance);               //normalize the obstacle direction as well
-            float angle = obstacledirection.Dot(destinationdirection);
-            if ((obstacledistance - obstacle->rSize() < destinationdistance - target->rSize())
-                    && (obstacledistance - obstacle->rSize() < brake_distance)
-                    && (angle > warp_behind_angle)) {
-                StraightToTarget = false;
-                //if our obstacle is closer than obj and the obstacle is not behind us
-                QVector planetdest =
-                        destination - obstacle->LocalPosition();                 //find the vector from planet to dest
-                QVector planetme = -obstacledirection;                 //obstacle to me
-                QVector planetperp = planetme.Cross(planetdest);                 //find vector out of that plane
-                QVector detourvector =
-                        destinationdirection.Cross(planetperp);                 //find vector perpendicular to our desired course emerging from planet
-                double renormalizedetour = detourvector.Magnitude();
-                if (renormalizedetour > .01) {
-                    detourvector = detourvector * (1. / renormalizedetour);
-                }                     //normalize it
-                double finaldetourdistance = mymax(obstacle->rSize() * warp_orbit_multiplier,
-                        min_warp_orbit_radius);                //scale that direction by some multiplier of obstacle size and a constant
-                detourvector = detourvector
-                        * finaldetourdistance;                 //we want to go perpendicular to our transit direction by that ammt
-                QVector newdestination = NewDestination(obstacle->LocalPosition() + detourvector,
-                        finaldetourdistance);                 //add to our position
-                float weight = (maxmultiplier - go_perpendicular_speed) / (enough_warp_for_cruise
-                        - go_perpendicular_speed);                   //find out how close we are to our desired warp multiplier and weight our direction by that
-                weight *= weight;                 //
-                if (maxmultiplier < go_perpendicular_speed) {
-                    QVector perpendicular = myposition + planetme * (finaldetourdistance / planetme.Magnitude());
-                    weight = (go_perpendicular_speed - maxmultiplier) / go_perpendicular_speed;
-                    destination = weight * perpendicular + (1 - weight) * newdestination;
-                } else {
-                    QVector olddestination = myposition + destinationdirection
-                            * finaldetourdistance;                     //destination direction in the same magnitude as the newdestination from the ship
-                    destination = newdestination * (1 - weight) + olddestination
-                            * weight;                       //use the weight to combine our direction and the dest
-                }
+        // Steer into clear space so SPEC works at full. Vector-sum steering: each
+        // object that compresses our SPEC bubble pushes us directly away from it,
+        // weighted by how close (and thus how much it interferes) it is. The
+        // destination pulls us in, and that pull builds as we clear the objects --
+        // once outside the interfering vectors we steer for the destination. A close
+        // base dominates; ships around it add up; far objects barely matter.
+        const float gather_range = max_compression_range
+                * configuration().physics.warp_clearance_range_mult_flt;
+        std::vector<Unit *> nearby;
+        // large bodies and bases are gravitational units
+        StarSystem *ss = _Universe->activeStarSystem();
+        Unit *u;
+        for (un_fiter iter = ss->gravitationalUnits().fastIterator(); (u = *iter); ++iter) {
+            if (u != nullptr && !u->Killed() && u != parent) {
+                nearby.push_back(u);
             }
+        }
+        // nearby ships from the UNIT_ONLY collide map
+        if (!is_null(parent->location[Unit::UNIT_ONLY])) {
+            UnitWithinRangeLocator<ClearSpaceCollector> locator(gather_range, 0.0f);
+            locator.action.init(nearby);
+            findObjects(ss->collide_map[Unit::UNIT_ONLY], parent->location[Unit::UNIT_ONLY], &locator);
+        }
+
+        const float repel = configuration().physics.warp_clearance_repel_flt;
+        const float attract = configuration().physics.warp_clearance_attract_flt;
+        QVector sum(0.0f, 0.0f, 0.0f);
+        bool any = false;
+        for (Unit *o : nearby) {
+            if (o == nullptr || o == target) {
+                continue;
+            }
+            QVector to_obj = o->LocalPosition() - myposition;
+            double dist = to_obj.Magnitude();
+            if (dist < 0.0001) {
+                continue;
+            }
+            double sig = UnitUtil::getSignificantDistance(parent, o);
+            if (sig >= gather_range) {
+                continue;
+            }
+            float weight = repel * static_cast<float>(1.0 - sig / gather_range);
+            if (weight <= 0.0f) {
+                continue;
+            }
+            sum += (-to_obj / dist) * weight;
+            any = true;
+        }
+        if (any) {
+            StraightToTarget = false;
+            sum += destinationdirection * attract;
+            QVector desired;
+            double mag = sum.Magnitude();
+            if (mag > 0.0001) {
+                desired = sum / mag;
+            } else {
+                desired = destinationdirection;
+            }
+            double clear_distance = mymin(destinationdistance, gather_range);
+            destination = myposition + desired * clear_distance;
         }
     }
     if (!parent->ftl_drive.Enabled() && parent->graphicOptions.RampCounter == 0) {
