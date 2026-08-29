@@ -464,6 +464,46 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
     return minmultiplier;
 }
 
+// SPEC is space compression: how much space can be compressed depends on what is in
+// it. The relevant quantity for the compression model is the significant distance to
+// the nearest object in space (the closest thing the warp bubble has to contend
+// with). Anything counts -- planets, bases, asteroids, and other ships -- and only the
+// nearest one matters.
+float JumpCapable::GetNearestObjectSignificantDistance() const {
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
+    float nearest = FLT_MAX;
+    Unit *planet;
+    Unit *testthis = nullptr;
+    {
+        NearestUnitLocator locatespec;
+        findObjects(_Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY],
+                unit->location[Unit::UNIT_ONLY],
+                &locatespec);
+        testthis = locatespec.retval.unit;
+    }
+    for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();
+            (planet = *iter) || testthis;
+            ++iter) {
+        if (!planet || !planet->Killed()) {
+            if (planet == nullptr) {
+                planet = testthis;
+                testthis = nullptr;
+            }
+            if (planet == this) {
+                continue;
+            }
+            float sigdist = UnitUtil::getSignificantDistance(unit, planet);
+            if (sigdist < nearest) {
+                nearest = sigdist;
+            }
+            if (!testthis) {
+                break;
+            }
+        }
+    }
+    return nearest;
+}
+
 float JumpCapable::CourseDeviation(const Vector &OriginalCourse, const Vector &FinalCourse) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     if (unit->MaxAfterburnerSpeed() > .001) {

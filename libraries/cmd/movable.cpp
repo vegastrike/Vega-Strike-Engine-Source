@@ -475,10 +475,17 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     Vector v = unit->GetWarpRefVelocity();
 //    QVector qv = v.Cast();
 
-    //inverse fractional effect of ship vs real big object
+    // SPEC is space compression. The amount of space we can compress -- the warp
+    // multiplier -- depends only on the nearest object in space. Full speed requires
+    // the whole column of space the ship will cover in one second at 100x light speed
+    // to be clear (max_effective_velocity); anything closer compresses less, scaling
+    // the multiplier down proportionally to the significant distance to the object.
+    const float max_compression_range = configuration().warp.max_effective_velocity_flt;
+    float nearest = unit->GetNearestObjectSignificantDistance();
     float minimum_multiplier = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
-    Unit *nearest_unit = nullptr;
-    minimum_multiplier = unit->CalculateNearestWarpUnit(minimum_multiplier, &nearest_unit, true);
+    if (nearest < max_compression_range) {
+        minimum_multiplier *= nearest / max_compression_range;
+    }
     float minWarp = configuration().warp.warp_multiplier_min_flt * graphicOptions.MinWarpMultiplier;
     float maxWarp = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     if (minimum_multiplier < minWarp) {
