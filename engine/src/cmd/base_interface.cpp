@@ -203,6 +203,18 @@ static bool mouseToBaseNormalized(int mx, int my, float &nx, float &ny) {
     return true;
 }
 
+// The base letterbox window offset (in configured-resolution space). 0,0 if the
+// base fills the whole screen. Used to offset base text so it lands inside the
+// letterboxed base window instead of at the screen edge.
+static void baseLetterboxOffset(int &ox, int &oy) {
+    int vx = 0, vy = 0, vw = 0, vh = 0;
+    if (base_viewport_rect(vx, vy, vw, vh)) {
+        ox = vx; oy = vy;
+    } else {
+        ox = 0; oy = 0;
+    }
+}
+
 #undef mymin
 
 BaseInterface::Room::~Room() {
@@ -488,6 +500,12 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
                         GFXDisable(TEXTURE0);
                         TextPlane text_marker;
                         text_marker.SetText(links[i]->text);
+                        text_marker.setResolution(
+                                static_cast<float>(configuration().graphics.bases.max_width),
+                                static_cast<float>(configuration().graphics.bases.max_height));
+                        int marker_ox = 0, marker_oy = 0;
+                        baseLetterboxOffset(marker_ox, marker_oy);
+                        text_marker.setOffset(static_cast<float>(marker_ox), static_cast<float>(marker_oy));
                         text_marker.GetCharSize(text_wid,
                                 text_hei);                           //get average charactersize
                         float text_pos_x = x + text_offset_x;                                  //align right ...
@@ -547,6 +565,12 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
                     y = (links[i]->y + (links[i]->hei / 2));                         //get the center of the location
                     TextPlane text_marker;
                     text_marker.SetText(links[i]->index);
+                    text_marker.setResolution(
+                            static_cast<float>(configuration().graphics.bases.max_width),
+                            static_cast<float>(configuration().graphics.bases.max_height));
+                    int marker_ox = 0, marker_oy = 0;
+                    baseLetterboxOffset(marker_ox, marker_oy);
+                    text_marker.setOffset(static_cast<float>(marker_ox), static_cast<float>(marker_oy));
                     text_marker.GetCharSize(text_wid, text_hei);                       //get average charactersize
                     float text_pos_x = x + text_offset_x;                              //align right ...
                     float text_pos_y = y + text_offset_y + text_hei;                     //...and on top
@@ -616,17 +640,13 @@ BaseInterface::Room::BaseTalk::BaseTalk(const std::string &msg, const std::strin
 }
 
 void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
-    int tmpx = configuration().graphics.resolution_x;
-    int tmpy = configuration().graphics.resolution_y;
     const int base_max_width = configuration().graphics.bases.max_width;
     const int base_max_height = configuration().graphics.bases.max_height;
-    if (base_max_width && base_max_height) {
-        if (base_max_width < tmpx) {
-            (configuration()).graphics.resolution_x = base_max_width;
-        }
-        if (base_max_height < tmpy) {
-            (configuration()).graphics.resolution_y = base_max_height;
-        }
+    if (base_max_width > 0 && base_max_height > 0) {
+        text.setResolution(static_cast<float>(base_max_width), static_cast<float>(base_max_height));
+        int ox = 0, oy = 0;
+        baseLetterboxOffset(ox, oy);
+        text.setOffset(static_cast<float>(ox), static_cast<float>(oy));
     }
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
     GFXColor tmpbg(text.background_color);
@@ -653,8 +673,6 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         text.Draw(text.GetText(), 0, true, false, automatte);
     }
     text.background_color= static_cast<ImU32>(tmpbg);
-    (configuration()).graphics.resolution_x = tmpx;
-    (configuration()).graphics.resolution_y = tmpy;
 }
 
 void RunPython(const char *filnam) {
@@ -1613,6 +1631,19 @@ void BaseInterface::Draw() {
     Room::BaseTalk::hastalked = false;
     rooms[curroom]->Draw(this);
     AnimationDraw();
+
+    // Base room text lays out against the base resolution, matching the base art,
+    // and is offset by the letterbox window position so it lands inside the window.
+    const float base_max_w = static_cast<float>(configuration().graphics.bases.max_width);
+    const float base_max_h = static_cast<float>(configuration().graphics.bases.max_height);
+    if (base_max_w > 0.0f && base_max_h > 0.0f) {
+        int lb_ox = 0, lb_oy = 0;
+        baseLetterboxOffset(lb_ox, lb_oy);
+        curtext.setResolution(base_max_w, base_max_h);
+        curtext.setOffset(static_cast<float>(lb_ox), static_cast<float>(lb_oy));
+        othtext.setResolution(base_max_w, base_max_h);
+        othtext.setOffset(static_cast<float>(lb_ox), static_cast<float>(lb_oy));
+    }
 
     float x, y;
     glViewport(0, 0, native_resolution_x, native_resolution_y);
