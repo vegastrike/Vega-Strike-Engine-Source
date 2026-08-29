@@ -100,10 +100,8 @@ static TrafficResult ComputeTrafficHeading(const Unit *parent, Unit *target,
 
     QVector sum(0.0f, 0.0f, 0.0f);
     unsigned int between = 0;
-    // Keep the whole SPEC bubble clear, not just the ship: anything inside the
-    // bubble radius pushes the course away, most when closest, fading to zero at the
-    // bubble edge -- so we steer wide enough for the bubble to fit past the lane.
-    const double bubble = configuration().warp.max_effective_velocity_flt;
+    // Inverse-distance weighting: a dense cluster (a traffic lane) pushes strongly
+    // away from its direction, while sparse directions barely push at all.
     auto addRepulsion = [&](Unit *o) {
         if (o == nullptr || o == parent || o == target || o->Killed()) {
             return;
@@ -119,10 +117,8 @@ static TrafficResult ComputeTrafficHeading(const Unit *parent, Unit *target,
         if (dist < destinationdistance && dir_o.Dot(dest_dir) > 0.6) {
             ++between;
         }
-        const double w = repel * (1.0 - dist / bubble);
-        if (w > 0.0) {
-            sum += (-to_o / dist) * static_cast<float>(w);
-        }
+        const double w = repel / (dist + 1.0);
+        sum += (-to_o / dist) * static_cast<float>(w);
     };
     for (Unit *o : ships) {
         addRepulsion(o);
