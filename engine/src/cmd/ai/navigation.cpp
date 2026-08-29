@@ -684,40 +684,20 @@ void AutoLongHaul::Execute() {
     if (!parent->ftl_drive.Enabled() && parent->graphicOptions.RampCounter == 0) {
         deactivatewarp = false;
     }
-    double mass = parent->GetMass();
-    double minaccel =
-            mymin(parent->drive.lateral,
-                    mymin(parent->drive.vertical, mymin(parent->drive.forward, parent->drive.retro)));
-    if (mass) {
-        minaccel /= mass;
-    }
-    QVector cfacing = parent->cumulative_transformation_matrix.getR();         //velocity.Cast();
-    double speed = cfacing.Magnitude();
-    if (StraightToTarget && useJitteryAutopilot(parent, target, minaccel)) {
-        if (speed > .01) {
-            cfacing = cfacing * (1. / speed);
-        }
-        const float dotLimit = cos(M_PI_FLT * configuration().physics.auto_pilot_spec_lining_up_angle_flt / 180.0F);
-        if (cfacing.Dot(destinationdirection) < dotLimit) {          //if wanting to face target but overshooting.
-            deactivatewarp = true;
-        }              //turn off drive
-    }
+    const double dis = UnitUtil::getSignificantDistance(parent, target);
+
+    // SPEC stays on while flying toward the destination -- including during any turn
+    // (lining up with the destination, or a detour) -- and only winds down once we're
+    // within the braking distance (about to disengage). The old auto_pilot_spec_lining_
+    // up_angle check dropped out of warp whenever the facing briefly deviated from the
+    // target, which made SPEC flicker in and out whenever the ship turned -- e.g. leaving
+    // a planet (now behind us) to head for a faraway object, with nothing to avoid.
+    const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
     const float min_warpfield_to_enter_warp = configuration().ai.min_warp_to_try_flt;
     if (parent->GetMaxWarpFieldStrength() < min_warpfield_to_enter_warp) {
         deactivatewarp = true;
     }
-    double maxspeed =
-            mymax(speed, parent->graphicOptions.WarpFieldStrength * parent->afterburner.speed);
-    double dis = UnitUtil::getSignificantDistance(parent, target);
-    float time_to_destination = dis / maxspeed;
-
-    const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
-    const float warprampdowntime = configuration().physics.warp_ramp_down_time_flt;
-    float time_to_stop = simulation_atom_var;
-    if (rampdown) {
-        time_to_stop += warprampdowntime;
-    }
-    if (time_to_destination <= time_to_stop) {
+    if (dis <= brake_distance) {
         deactivatewarp = true;
     }
     if (DistanceWarrantsWarpTo(parent,
