@@ -722,6 +722,23 @@ void AutoLongHaul::Execute() {
         }
         if (any) {
             StraightToTarget = false;
+            // Once the destination is inside the SPEC sphere we are committing to
+            // arrive, so repulsors may only nudge the course a tiny amount -- just
+            // enough to avoid a crash -- rather than divert us. Beyond the sphere,
+            // clear-space steering is free.
+            const float arrive_damp = configuration().physics.warp_clearance_arrive_damp_flt;
+            const float fraction = destinationdistance / max_compression_range;
+            float repulsion_damp = 1.0f;
+            if (fraction < 1.0f) {
+                repulsion_damp = arrive_damp;                 // tiny inside the sphere
+                if (fraction > 0.8f) {                         // smooth edge band out to the boundary
+                    repulsion_damp = arrive_damp + (1.0f - arrive_damp)
+                            * (fraction - 0.8f) / 0.2f;
+                }
+            }
+            if (repulsion_damp < 1.0f) {
+                sum *= repulsion_damp;
+            }
             // The destination pull has a long reach (it is where we want to go) and
             // grows almost logarithmically as we near it, so it overrides the
             // repulsion of ships clustered at the target instead of the autopilot

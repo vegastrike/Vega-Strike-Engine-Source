@@ -2563,6 +2563,8 @@ namespace vega_config {
         float warp_clearance_attract_gain_flt = 100000.0;
         double warp_clearance_falloff_dbl = 50000.0;
         float warp_clearance_falloff_flt = 50000.0;
+        double warp_clearance_arrive_damp_dbl = 0.1;
+        float warp_clearance_arrive_damp_flt = 0.1;
         double warp_clearance_range_mult_dbl = 5.0;
         float warp_clearance_range_mult_flt = 5.0;
         double weapon_damage_efficiency_dbl = 1.0;

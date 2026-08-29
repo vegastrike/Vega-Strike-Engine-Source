@@ -8001,6 +8001,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.warp_clearance_falloff_flt = boost::json::value_to<float>(*warp_clearance_falloff_value_ptr);
             }
 
+            const boost::json::value * warp_clearance_arrive_damp_value_ptr = physics_object.if_contains("warp_clearance_arrive_damp");
+            if (warp_clearance_arrive_damp_value_ptr != nullptr) {
+                physics.warp_clearance_arrive_damp_dbl = boost::json::value_to<double>(*warp_clearance_arrive_damp_value_ptr);
+                physics.warp_clearance_arrive_damp_flt = boost::json::value_to<float>(*warp_clearance_arrive_damp_value_ptr);
+            }
+
             const boost::json::value * warp_clearance_range_mult_value_ptr = physics_object.if_contains("warp_clearance_range_mult");
             if (warp_clearance_range_mult_value_ptr != nullptr) {
                 physics.warp_clearance_range_mult_dbl = boost::json::value_to<double>(*warp_clearance_range_mult_value_ptr);
