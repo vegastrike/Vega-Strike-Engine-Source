@@ -52,18 +52,23 @@ using namespace Orders;
 
 constexpr float M_PI_FLT = M_PI;
 
-// Collects the units (other than ourselves) in range for the SPEC clear-space
-// steering -- used as the action for UnitWithinRangeLocator over the UNIT_ONLY map.
+// Collects up to a bounded number of units (other than ourselves) in range for the
+// SPEC clear-space steering -- used as the action for UnitWithinRangeLocator over
+// the UNIT_ONLY map. Capping the count keeps the per-frame cost bounded even with
+// hundreds of ships in the vicinity.
 struct ClearSpaceCollector {
     std::vector<Unit *> *units;
-    ClearSpaceCollector() : units(nullptr) {}
-    void init(std::vector<Unit *> &u) {
+    std::size_t max_units;
+    ClearSpaceCollector() : units(nullptr), max_units(0) {}
+    void init(std::vector<Unit *> &u, std::size_t maxn) {
         units = &u;
+        max_units = maxn;
     }
     bool acquire(Unit *unit, float /*distance*/) {
-        if (units != nullptr) {
-            units->push_back(unit);
+        if (units == nullptr || units->size() >= max_units) {
+            return false;
         }
+        units->push_back(unit);
         return true;
     }
 };
@@ -647,28 +652,53 @@ void AutoLongHaul::Execute() {
         // base dominates; ships around it add up; far objects barely matter.
         const float gather_range = max_compression_range
                 * configuration().physics.warp_clearance_range_mult_flt;
-        std::vector<Unit *> nearby;
-        // large bodies and bases are gravitational units
         StarSystem *ss = _Universe->activeStarSystem();
+        const float repel = configuration().physics.warp_clearance_repel_flt;
+        const float attract = configuration().physics.warp_clearance_attract_flt;
+        const float attract_gain = configuration().physics.warp_clearance_attract_gain_flt;
+        const float falloff = configuration().physics.warp_clearance_falloff_flt;
+
+        // Cull the interfering objects to only the closest handful so a crowd of
+        // ships in the vicinity can't dominate or cost too much -- the nearest matter
+        // most anyway.
+        const unsigned int kMaxShips = 8;
+        const unsigned int kMaxObjects = 5;
+        std::vector<Unit *> ships;
+        if (!is_null(parent->location[Unit::UNIT_ONLY])) {
+            UnitWithinRangeLocator<ClearSpaceCollector> locator(gather_range, 0.0f);
+            locator.action.init(ships, kMaxShips);
+            findObjects(ss->collide_map[Unit::UNIT_ONLY], parent->location[Unit::UNIT_ONLY], &locator);
+        }
+        std::vector<std::pair<double, Unit *>> ranked;
+        // gravitational bodies (few, large -- always considered)
         Unit *u;
         for (un_fiter iter = ss->gravitationalUnits().fastIterator(); (u = *iter); ++iter) {
             if (u != nullptr && !u->Killed() && u != parent) {
-                nearby.push_back(u);
+                ranked.emplace_back(UnitUtil::getSignificantDistance(parent, u), u);
             }
         }
-        // nearby ships from the UNIT_ONLY collide map
-        if (!is_null(parent->location[Unit::UNIT_ONLY])) {
-            UnitWithinRangeLocator<ClearSpaceCollector> locator(gather_range, 0.0f);
-            locator.action.init(nearby);
-            findObjects(ss->collide_map[Unit::UNIT_ONLY], parent->location[Unit::UNIT_ONLY], &locator);
+        for (Unit *o : ships) {
+            if (o != nullptr && o != parent) {
+                ranked.emplace_back(UnitUtil::getSignificantDistance(parent, o), o);
+            }
+        }
+        std::sort(ranked.begin(), ranked.end(),
+                [](const std::pair<double, Unit *> &a, const std::pair<double, Unit *> &b) {
+                    return a.first < b.first;
+                });
+        if (ranked.size() > kMaxObjects) {
+            ranked.resize(kMaxObjects);
         }
 
-        const float repel = configuration().physics.warp_clearance_repel_flt;
-        const float attract = configuration().physics.warp_clearance_attract_flt;
         QVector sum(0.0f, 0.0f, 0.0f);
         bool any = false;
-        for (Unit *o : nearby) {
+        for (const auto &pr : ranked) {
+            Unit *o = pr.second;
             if (o == nullptr || o == target) {
+                continue;
+            }
+            double sig = pr.first;
+            if (sig >= gather_range) {
                 continue;
             }
             QVector to_obj = o->LocalPosition() - myposition;
@@ -676,11 +706,7 @@ void AutoLongHaul::Execute() {
             if (dist < 0.0001) {
                 continue;
             }
-            double sig = UnitUtil::getSignificantDistance(parent, o);
-            if (sig >= gather_range) {
-                continue;
-            }
-            float weight = repel * static_cast<float>(1.0 - sig / gather_range);
+            float weight = repel * (falloff / static_cast<float>(falloff + sig));
             if (weight <= 0.0f) {
                 continue;
             }
@@ -689,7 +715,14 @@ void AutoLongHaul::Execute() {
         }
         if (any) {
             StraightToTarget = false;
-            sum += destinationdirection * attract;
+            // The destination pull has a long reach (it is where we want to go) and
+            // grows almost logarithmically as we near it, so it overrides the
+            // repulsion of ships clustered at the target instead of the autopilot
+            // avoiding them. Far from the target it stays near the base attract;
+            // very close it spikes.
+            const double attract_strength = attract
+                    + std::log1p(attract_gain / (destinationdistance + 1.0));
+            sum += destinationdirection * static_cast<float>(attract_strength);
             QVector desired;
             double mag = sum.Magnitude();
             if (mag > 0.0001) {
