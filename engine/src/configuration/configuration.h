@@ -2338,8 +2338,8 @@ namespace vega_config {
         float debris_mass_flt = 1e-05;
         double debris_time_dbl = 500.0;
         float debris_time_flt = 500.0;
-        double default_interdiction_dbl = 0.01;
-        float default_interdiction_flt = 0.01;
+        double default_interdiction_dbl = 1.0;
+        float default_interdiction_flt = 1.0;
         double default_shield_tightness_dbl = 0.0;
         float default_shield_tightness_flt = 0.0;
         double definite_damage_chance_dbl = 0.1;
