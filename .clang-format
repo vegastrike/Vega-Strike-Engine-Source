@@ -76,5 +76,5 @@ RemoveParentheses: Leave
 SeparateDefinitionBlocks: Always
 SortIncludes: CaseInsensitive
 SortUsingDeclarations: LexicographicNumeric
-Standard: Latest
+Standard: c++14
 WhitespaceSensitiveMacros: [STRINGIZE, PP_STRINGIZE, BOOST_PP_STRINGIZE]
