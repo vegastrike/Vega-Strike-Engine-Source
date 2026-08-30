@@ -179,6 +179,13 @@ static FIREKEYBOARDTYPE &g() {
     return vectorOfKeyboardInput[_Universe->CurrentCockpit()];
 }
 
+// Reset all per-key controller state (weapk, misk, firekey, target keys, ...) to
+// a clean UP state. Used when the config screen closes so a key state left stale
+// by a config-screen rebind doesn't fire a command once game input resumes.
+void FireKeyboard::ResetKeys() {
+    g() = FIREKEYBOARDTYPE();
+}
+
 FIREKEYBOARDTYPE &FireKeyboard::f() {
     return vectorOfKeyboardInput[whichplayer];
 }
