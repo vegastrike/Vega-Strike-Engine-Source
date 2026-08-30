@@ -28,7 +28,7 @@
 
 #include "vsdraw/glut_support.h"
 
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 
 #include "cmd/unit_generic.h"
 

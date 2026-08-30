@@ -33,7 +33,7 @@
 #include "gfx/masks.h"
 #include "gfx/nav/navcomputer.h"
 #include "gfx/nav/navpath.h"
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 #include "src/gnuhash.h"
 
 #include <map>

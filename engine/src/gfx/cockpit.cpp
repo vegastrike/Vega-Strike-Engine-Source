@@ -54,7 +54,7 @@
 #include "cmd/movable.h"
 #include "cmd/unit_util.h"
 #include "cmd/base_util.h"
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 #include "root_generic/lin_time.h" //for fps
 #include "cmd/beam.h"
 #include "src/config_xml.h"
