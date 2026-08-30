@@ -30,7 +30,7 @@
 #include <vector>
 #include <string>
 #include "cmd/basecomputer.h"
-#include "gui/imguitext.h"
+#include "vsdraw/imguitext.h"
 #include "gfx/sprite.h"
 #include <cstdio>
 #include "vsdraw/imgui_support.h"

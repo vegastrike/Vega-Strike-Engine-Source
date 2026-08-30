@@ -130,6 +130,8 @@ public:
     void setResolution(float w, float h) { m_resW = w; m_resH = h; }
     float resW() const { return m_resW > 0.0f ? m_resW : ImGui::GetIO().DisplaySize.x; }
     float resH() const { return m_resH > 0.0f ? m_resH : ImGui::GetIO().DisplaySize.y; }
+    // Screen-absolute pixel offset added to the drawn position (base letterbox).
+    void setOffset(float x, float y) { m_offX = x; m_offY = y; }
 private:
     Rect m_rect;
     Font m_font;
@@ -146,6 +148,8 @@ private:
     int m_layoutVersion = 0;
     float m_resW = 0.0f;   // target layout resolution (0 = use screen DisplaySize)
     float m_resH = 0.0f;
+    float m_offX = 0.0f;   // screen-absolute pixel offset (base letterbox)
+    float m_offY = 0.0f;
 
     vector<ImU32> m_colorStack;        //Color stack.
     vector<Font> m_fontStack;             //Font stack.

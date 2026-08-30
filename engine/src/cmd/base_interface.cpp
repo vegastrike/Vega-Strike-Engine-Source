@@ -570,7 +570,8 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
                     int marker_ox = 0, marker_oy = 0;
                     baseLetterboxOffset(marker_ox, marker_oy);
                     text_marker.setOffset(static_cast<float>(marker_ox), static_cast<float>(marker_oy));
-                    text_marker.getCharSize(text_wid, text_hei);                       //get average charactersize                    float text_pos_x = x + text_offset_x;                              //align right ...
+                    text_marker.getCharSize(text_wid, text_hei);                       //get average charactersize
+                    float text_pos_x = x + text_offset_x;                              //align right ...
                     float text_pos_y = y + text_offset_y + text_hei;                     //...and on top
                     text_wid = text_wid * links[i]->text.length()
                             * 0.25;                             //calc ~width of text (=multiply the average characterwidth with the number of characters)

@@ -134,10 +134,11 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
     if ( !draw_list ) return 1;
 
     // Top-left anchor (TextPlane passed its pos through CalculateAbsoluteXY, which is
-    // identical to normToPixelX/Y for a -1..1 normalized coordinate).
+    // identical to normToPixelX/Y for a -1..1 normalized coordinate); add the base
+    // letterbox offset.
     ImVec2 position;
-    position.x = Coordinates::normToPixelX(m_rect.origin.x);
-    position.y = Coordinates::normToPixelY(m_rect.origin.y);
+    position.x = Coordinates::normToPixelX(m_rect.origin.x, resW()) + m_offX;
+    position.y = Coordinates::normToPixelY(m_rect.origin.y, resH()) + m_offY;
 
     // Move one line up if !start_lower (as TextPlane did).
     if (!start_lower) {
