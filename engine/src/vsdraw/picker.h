@@ -223,9 +223,11 @@ public:
 
 protected:
 //INTERNAL IMPLEMENTATION
-//The total vertical space between displayed cells.
+//The total vertical space between displayed cells. m_font.size() is now a pixel
+//height, but the Picker lays out in a normalized -1..1 rect, so convert it with
+//pixelToNormH to keep the two spaces consistent (fixes empty Mission/News lists).
     float totalCellHeight(void) {
-        return m_font.size() + m_extraCellHeight;
+        return Coordinates::pixelToNormH(m_font.size()) + m_extraCellHeight;
     }
 
 //Find the cell that corresponds to a point in the control.
