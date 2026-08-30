@@ -640,7 +640,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     unitandfg += cp->getTargetLabel();
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     GFXColor tpbg(tp->backgroundColor());
-    bool automatte = (0 == tpbg.a);
+    bool automatte = true; // HUD: no background
     if (automatte) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
         tp->setBackgroundColor(static_cast<ImU32>(temp_background_color));
@@ -672,7 +672,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         newst += string("\nRange: ") + PrettyDistanceString(actual_range);
         const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
         GFXColor tpbg(tp->backgroundColor());
-        bool automatte = (0 == tpbg.a);
+        bool automatte = true; // HUD: no background
         if (automatte) {
             GFXColor temp_background_color( 0, 0, 0, background_alpha );
             tp->setBackgroundColor(static_cast<ImU32>(temp_background_color));
@@ -709,7 +709,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     } else {
         const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
         GFXColor tpbg(tp->backgroundColor());
-        bool automatte = (0 == tpbg.a);
+        bool automatte = true; // HUD: no background
         if (automatte) {
             GFXColor temp_background_color( 0, 0, 0, background_alpha );
             tp->setBackgroundColor(static_cast<ImU32>(temp_background_color));
@@ -818,7 +818,7 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
     fullstr = targetstr + fullstr;
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     GFXColor tpbg(tp->backgroundColor());
-    bool automatte = (0 == tpbg.a);
+    bool automatte = true; // HUD: no background
     if (automatte) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
         tp->setBackgroundColor(static_cast<ImU32>(temp_background_color));
@@ -895,7 +895,7 @@ void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
     msg = std::string("\n\n#ffff00     ") + msg;
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     GFXColor tpbg(tp->backgroundColor());
-    bool automatte = (0 == tpbg.a);
+    bool automatte = true; // HUD: no background
     if (automatte) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
         tp->setBackgroundColor(static_cast<ImU32>(temp_background_color));
@@ -934,7 +934,7 @@ void VDU::DrawComm() {
         const string message_prefix = configuration().graphics.hud.message_prefix;
         const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
         GFXColor tpbg(tp->backgroundColor());
-        bool automatte = (0 == tpbg.a);
+        bool automatte = true; // HUD: no background
         if (automatte) {
             GFXColor temp_background_color( 0, 0, 0, background_alpha );
             tp->setBackgroundColor(static_cast<ImU32>(temp_background_color));
@@ -1224,7 +1224,7 @@ void VDU::DrawDamage(Unit *parent) {
 
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     GFXColor tpbg(tp->backgroundColor());
-    bool automatte = (0 == tpbg.a);
+    bool automatte = true; // HUD: no background
     if (automatte) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
         tp->setBackgroundColor(static_cast<ImU32>(temp_background_color));
@@ -1283,7 +1283,7 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     GFXColor tpbg(tp->backgroundColor());
-    bool automatte = (0 == tpbg.a);
+    bool automatte = true; // HUD: no background
     if (automatte) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
         tp->setBackgroundColor(static_cast<ImU32>(temp_background_color));
@@ -1448,7 +1448,7 @@ void VDU::DrawWeapon(Unit *parent) {
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     GFXColor tpbg(tp->backgroundColor());
-    bool automatte = (0 == tpbg.a);
+    bool automatte = true; // HUD: no background
     if (automatte) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
         tp->setBackgroundColor(static_cast<ImU32>(temp_background_color));
@@ -1536,7 +1536,7 @@ void DrawObjectivesTextPlane(ImGuiText *tp, int scrolloffset, Unit *parent) {
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     GFXColor tpbg(tp->backgroundColor());
-    bool automatte = (0 == tpbg.a);
+    bool automatte = true; // HUD: no background
     if (automatte) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
         tp->setBackgroundColor(static_cast<ImU32>(temp_background_color));
