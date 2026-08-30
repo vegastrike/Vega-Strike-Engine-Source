@@ -483,9 +483,10 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     const float max_compression_range = configuration().warp.max_effective_velocity_flt;
     float nearest = unit->GetNearestObjectSignificantDistance();
     // SPEC is space compression and needs empty space: it does not work at all below
-    // the 3 km weapons range. The linear speed-assist scale starts at that inner
-    // radius (0 there) and reaches full speed at the compression range.
-    const float kWeaponsRange = 3000.0f;  // 3 km
+    // the minimum warp effect range (the 3 km weapons range). The linear
+    // speed-assist scale starts at that inner radius (0 there) and reaches full
+    // speed at the compression range.
+    const float kWeaponsRange = configuration().physics.warp_min_range_flt;
     float minimum_multiplier = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     if (nearest < max_compression_range) {
         minimum_multiplier *= (nearest - kWeaponsRange) / (max_compression_range - kWeaponsRange);

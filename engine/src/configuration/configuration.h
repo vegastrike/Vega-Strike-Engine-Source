@@ -2561,6 +2561,8 @@ namespace vega_config {
         float warp_clearance_attract_flt = 1.0;
         double warp_clearance_range_mult_dbl = 5.0;
         float warp_clearance_range_mult_flt = 5.0;
+        double warp_min_range_dbl = 3000.0;
+        float warp_min_range_flt = 3000.0;
         double weapon_damage_efficiency_dbl = 1.0;
         float weapon_damage_efficiency_flt = 1.0;
         double year_scale_dbl = 16.0;
