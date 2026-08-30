@@ -42,9 +42,9 @@ static const float BOLD_STROKE = 1.5;
 //a lighter look.
 class Font {
 public:
-//Font size.  Vertical distance in identity space.
+//Font size. Pixel glyph height (font_point-relative).
     float size(void) const {
-        return m_size * 0.5;
+        return m_size;
     }
 
     void setSize(float s) {
