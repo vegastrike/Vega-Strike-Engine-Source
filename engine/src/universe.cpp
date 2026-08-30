@@ -43,6 +43,7 @@
 #include "cmd/script/mission.h"
 #include "src/in_kb.h"
 #include "src/in_kb_data.h"
+#include "cmd/ai/firekeyboard.h"
 #include "src/in_main.h"
 #if defined (__APPLE__)
 #import <sys/param.h>
@@ -401,6 +402,14 @@ static constexpr ImGuiWindowFlags window_flags =
         ImGuiWindowFlags_NoBackground |
         ImGuiWindowFlags_NoDecoration;   // makes it transparent
 
+// Frames to suppress game input after the config overlay closes, so a button or
+// key that is still physically held at the moment of closing (e.g. the click that
+// closed the screen, or a joystick/mouse button pressed while the flight device
+// got re-bound by Save) settles before game input resumes. Without this,
+// ProcessJoystick(MOUSE_JOYSTICK) reads the RAW button state on the resume frame
+// and a still-held button fires a bound command (button-press sound / nav change).
+static int s_options_input_suppress = 0;
+
 void Universe::StartDraw() {
     // Handle game pausing -stop the loop and enter a new loop until a key is pressed
     if(paused) {
@@ -506,7 +515,17 @@ void Universe::StartDraw() {
         
         // continue drawing in the main window as events can add to the drawlist
         ImGui::Begin("main_window");
-        ProcessInput(i);                       //input neesd to be taken care of;
+        // Don't process game input while the config overlay is open (the sim is
+        // frozen there). The overlay consumes its own input via winsys/ImGui.
+        // Without this gate, ProcessJoystick(MOUSE_JOYSTICK) still polls the mouse
+        // buttons during the overlay, so clicking a config-screen control fired the
+        // bound game command (button-press sound / nav-target change). Also skip a
+        // few frames after the overlay closes (s_options_input_suppress) so a
+        // button/key held at close settles and doesn't fire on the resume frame.
+        if (s_options_input_suppress > 0) s_options_input_suppress--;
+        if (!optionsActive && s_options_input_suppress == 0) {
+            ProcessInput(i);                       //input neesd to be taken care of;
+        }
                 // ImGui End Frame
         ImGui::End();
 
@@ -885,6 +904,14 @@ void Universe::ToggleOptionsActive() {
         ResetMouseState();
         RestoreJoystickState();
         RestoreKB();
+        // Clear any stale per-key controller state (weapk/firekey/target keys)
+        // left by a config-screen rebind, so it doesn't fire a command once input
+        // resumes.
+        FireKeyboard::ResetKeys();
+        // Also hold off game input for a few frames so a button/key still held at
+        // close (the click that closed it, or one pressed during a Save re-bind)
+        // settles and isn't read as a fresh PRESS once polling resumes.
+        s_options_input_suppress = 3;
     }
 }
 
