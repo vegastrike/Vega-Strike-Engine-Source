@@ -468,7 +468,19 @@ static bool setup_sdl_video_mode() {
             }
         }
         if (found == false) {
-            VS_LOG_FLUSH_EXIT(fatal, (boost::format("Could not find desktop display mode with specified width %1% and specified height %2%") % width % height), -42);
+            // The requested resolution isn't an available fullscreen mode. Fall
+            // back to the native/desktop mode rather than aborting, so a stale or
+            // unsupported resolution doesn't prevent the game from starting in
+            // fullscreen. The settings UI only offers detected modes, so this only
+            // trips on a bad/legacy configured resolution.
+            VS_LOG_AND_FLUSH(serious_warning, (boost::format("Requested fullscreen resolution %1%x%2% not available; falling back to the native/desktop mode") % width % height));
+            const SDL_DisplayMode *desktop_mode = SDL_GetDesktopDisplayMode(instance_ID);
+            if (desktop_mode != nullptr) {
+                std::memcpy(mode_for_ID, desktop_mode, sizeof(SDL_DisplayMode));
+                SDL_GetDisplayBounds(instance_ID, &display_bounds);
+            } else {
+                VS_LOG_FLUSH_EXIT(fatal, "Could not get desktop display mode", 1);
+            }
         }
         SDL_free(modes);
     } else { // Not full screen
@@ -680,6 +692,15 @@ void winsys_set_config_overlay_active(bool active) {
     config_overlay_active = active;
 }
 
+// Debounce for persisting the window's resolution after a manual resize. A live
+// drag fires many SDL_EVENT_WINDOW_RESIZED events; we write the resolution to the
+// user config only after the resize has been quiet for RESIZE_PERSIST_DEBOUNCE_MS,
+// so the config.json overlay isn't rewritten on every intermediate frame.
+static int s_persist_resize_w = -1;
+static int s_persist_resize_h = -1;
+static Uint64 s_persist_resize_deadline = 0;
+static const Uint64 RESIZE_PERSIST_DEBOUNCE_MS = 250;
+
 bool winsys_config_overlay_active() {
     return config_overlay_active;
 }
@@ -787,6 +808,15 @@ void winsys_process_events() {
     }
     while (keepRunning) {
         while (SDL_PollEvent(&event)) {
+            // Snapshot the overlay state BEFORE ImGui processes the event: ImGui's
+            // handling can close the overlay (e.g. a click on the Close button), which
+            // sets config_overlay_active=false mid-event. Without the snapshot, the very
+            // event that closed the overlay would then pass the !config_overlay_active
+            // gate and leak through to the game, firing a bound command (button-press
+            // sound / nav-target change). The game must never see input that arrived
+            // while the overlay was open.
+            const bool overlay_was_active = config_overlay_active;
+
             // forward all events to ImGUI
             ImGui_ImplSDL3_ProcessEvent(&event);
 
@@ -810,7 +840,7 @@ void winsys_process_events() {
                     }
                     // While the config overlay is open, consume input (don't forward to the
                     // game) so clicks/keys don't pass through to the game behind.
-                    if (!config_overlay_active && keyboard_func) {
+                    if (!overlay_was_active && keyboard_func) {
                         SDL_GetMouseState(&x, &y);
                         (*keyboard_func)(event.key.key, event.key.mod, event.key.down, x, y);
                     }
@@ -818,7 +848,7 @@ void winsys_process_events() {
 
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
                 case SDL_EVENT_MOUSE_BUTTON_UP:
-                    if (!config_overlay_active && mouse_func) {
+                    if (!overlay_was_active && mouse_func) {
                         (*mouse_func)(event.button.button,
                             event.button.down,
                             event.button.x,
@@ -832,7 +862,9 @@ void winsys_process_events() {
                     // existing mouse-button pipeline (lookupMouseButton maps
                     // WS_WHEEL_UP->3 / WS_WHEEL_DOWN->4) keeps working -- this
                     // is what drives scrolling in the base computer etc.
-                    if (mouse_func) {
+                    // Gated on overlay_was_active like the other game-forwarding
+                    // so scrolling the config screen doesn't leak to the game.
+                    if (!overlay_was_active && mouse_func) {
                         const float wheel_y = event.wheel.y;
                         if (wheel_y > 0.0F) {
                             (*mouse_func)(WS_WHEEL_UP, WS_MOUSE_DOWN, event.wheel.mouse_x, event.wheel.mouse_y);
@@ -847,13 +879,13 @@ void winsys_process_events() {
                 case SDL_EVENT_MOUSE_MOTION:
                     if (event.motion.state) {
                         /* buttons are down */
-                        if (!config_overlay_active && motion_func) {
+                        if (!overlay_was_active && motion_func) {
                             (*motion_func)(event.motion.x,
                                 event.motion.y);
                         }
                     } else {
                         /* no buttons are down */
-                        if (!config_overlay_active && passive_motion_func) {
+                        if (!overlay_was_active && passive_motion_func) {
                             (*passive_motion_func)(event.motion.x,
                                     event.motion.y);
                         }
@@ -863,6 +895,21 @@ void winsys_process_events() {
                 case SDL_EVENT_WINDOW_RESIZED:
                     get_screen_measurements();
                     //setup_sdl_video_mode(argc, argv);
+                    {
+                        // A manual window resize must also keep the in-game projection
+                        // aspect consistent with the actual window size (otherwise the
+                        // camera/cockpit renders at a stale aspect into the resized
+                        // window). And persist the settled size so a manual resize
+                        // survives a restart (debounced below; a live drag fires many
+                        // RESIZED events).
+                        auto &g = configuration().graphics;
+                        if (g.resolution_y > 0) {
+                            g.aspect_flt = (float)g.resolution_x / (float)g.resolution_y;
+                        }
+                        s_persist_resize_w = g.resolution_x;
+                        s_persist_resize_h = g.resolution_y;
+                        s_persist_resize_deadline = SDL_GetTicks() + RESIZE_PERSIST_DEBOUNCE_MS;
+                    }
                     if (reshape_func) {
                         (*reshape_func)(native_resolution_x,
                                 native_resolution_y);
@@ -890,6 +937,15 @@ void winsys_process_events() {
                 default:
                     break;
             }
+        }
+        // Apply a pending debounced resolution persistence once the resize events
+        // have quieted down (no new event for RESIZE_PERSIST_DEBOUNCE_MS). Writes
+        // the settled window size to the user config so a manual resize survives a
+        // restart.
+        if (s_persist_resize_w >= 0 && SDL_GetTicks() >= s_persist_resize_deadline) {
+            vs_settings_ng::PersistWindowResolution(s_persist_resize_w, s_persist_resize_h);
+            s_persist_resize_w = -1;
+            s_persist_resize_h = -1;
         }
         if (redisplay && display_func) {
             redisplay = false;
