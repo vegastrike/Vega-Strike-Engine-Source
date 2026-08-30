@@ -35,7 +35,7 @@
 #ifdef HAVE_SDL
 #include <SDL3/SDL.h>
 #endif
-#include "gfx/hud.h"
+#include "vsdraw/imguitext.h"
 #include "gldrv/winsys.h"
 #include <sstream>
 #include <string>
@@ -92,9 +92,9 @@ void RText::draw_text(std::string &str, float left, float top, int gl_num) {
 
     GFXColor foreground(1, 1, 1, 1);
     GFXColor background(0.05f, 0.05f, 0.2f, 0.5f);
-    TextPlane newTextPlane(foreground, background);
-    newTextPlane.SetPos(x, y);
-    newTextPlane.SetCharSize(.8, .12);
+    ImGuiText newTextPlane(foreground, background);
+    newTextPlane.setPos(x, y);
+    newTextPlane.setCharSize(.8, .12);
     newTextPlane.Draw(str);
 }
 

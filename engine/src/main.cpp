@@ -57,7 +57,7 @@
 #include "src/python/init.h"
 #include "vegadisk/savegame.h"
 #include "src/force_feedback.h"
-#include "gfx/hud.h"
+#include "vsdraw/imguitext.h"
 #include "gldrv/winsys.h"
 #include "src/universe_util.h"
 #include "src/universe.h"
@@ -95,7 +95,7 @@
  * Globals
  */
 Universe *_Universe;
-TextPlane *bs_tp = nullptr;
+ImGuiText *bs_tp = nullptr;
 char SERVER = 0;
 
 //false if command line option --net is given to start without network
@@ -455,8 +455,8 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     GFXLoadMatrixModel(tmp);
     GFXBeginScene();
 
-    bs_tp->SetPos(-.99, -.97);     //Leave a little bit of room for the bottoms of characters.
-    bs_tp->SetCharSize(.4, .8);
+    bs_tp->setPos(-.99, -.97);     //Leave a little bit of room for the bottoms of characters.
+    bs_tp->setCharSize(.4, .8);
     ScaleMatrix(tmp, Vector(6500, 6500, 0));
     GFXLoadMatrixModel(tmp);
     GFXHudMode(GFXTRUE);
@@ -566,7 +566,7 @@ void bootstrap_first_loop() {
         if (!sa.empty() && sa[0].length()) {
             muzak->GotoSong(sa[snum % sa.size()]);
         }
-        bs_tp = new TextPlane();
+        bs_tp = new ImGuiText();
     }
     bootstrap_draw("Vegastrike Loading...", SplashScreen);
     if (i++ > 4) {
