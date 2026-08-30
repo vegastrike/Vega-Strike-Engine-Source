@@ -132,6 +132,15 @@ public:
     float resH() const { return m_resH > 0.0f ? m_resH : ImGui::GetIO().DisplaySize.y; }
     // Screen-absolute pixel offset added to the drawn position (base letterbox).
     void setOffset(float x, float y) { m_offX = x; m_offY = y; }
+    // Text render scale (1.0 = normal). The base-room word-by-word streaming text
+    // (othtext) sets this larger so it renders bigger; other text stays at 1.0.
+    void setTextScale(float s) { m_textScale = s; }
+    float textScale() const { return m_textScale; }
+    // Horizontal word-wrap width as a fraction of the layout width (0 = unset; the
+    // TextPlane Draw() path then does not wrap). Used by Draw() to wrap text to a
+    // chosen fraction of the screen instead of the whole rect.
+    void setWrapWidth(float fraction) { m_wrapWidth = fraction; }
+    float wrapWidth() const { return m_wrapWidth; }
 private:
     Rect m_rect;
     Font m_font;
@@ -150,6 +159,8 @@ private:
     float m_resH = 0.0f;
     float m_offX = 0.0f;   // screen-absolute pixel offset (base letterbox)
     float m_offY = 0.0f;
+    float m_textScale = 1.0f;    // text render scale (1.0 = normal)
+    float m_wrapWidth = 0.0f;    // horizontal word-wrap fraction of screen (0 = no wrap)
 
     vector<ImU32> m_colorStack;        //Color stack.
     vector<Font> m_fontStack;             //Font stack.

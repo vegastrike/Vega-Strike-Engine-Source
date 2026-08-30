@@ -1314,6 +1314,7 @@ BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
     othtext.getCharSize(x, y);
     othtext.setCharSize(x * 2, y * 2);
     othtext.setSize(1 - .01, -.75);
+    othtext.setWrapWidth(0.66f);
 
     std::string fac = base ? FactionUtil::GetFaction(base->faction) : "neutral";
     if (base && fac == "neutral") {

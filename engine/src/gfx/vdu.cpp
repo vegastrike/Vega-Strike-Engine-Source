@@ -1608,6 +1608,7 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
     w = fabs(w / 2);
     tp->setPos(x - w, y + h);
     tp->setSize(x + w, y - h - .5 * fabs(w / cols));
+    tp->setWrapWidth(0.66f);
     targ = parent->Target();
     if (thismode.back() != COMM && comm_ani != NULL) {
         if (comm_ani->Done()) {

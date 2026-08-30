@@ -121,12 +121,81 @@ void ImGuiText::draw(int firstLineToDraw) {
 // (top-left anchor, optional one-line-up for !start_lower, per-fragment background
 // rectangle gated by automatte) but consumes the unified ImGuiText layout/parser so
 // there is one text box and one format parser.
+// A run of text sharing one color, used by the TextPlane-compatible Draw() path
+// (which measures with raw ImGui font metrics, not ImGuiText's scaled layout).
+struct TextPlaneRun {
+    std::string text;
+    ImU32 color;
+};
+
+// Parse a #cR:G:B[:A]# color argument (each float in 0..1) into a packed ImU32.
+static ImU32 parseColorU32(const std::string &spec) {
+    float r = 1, g = 1, b = 1, a = 1;
+    std::vector<float> comps;
+    std::string cur;
+    for (char c : spec) {
+        if (c == ':') {
+            comps.push_back(static_cast<float>(atof(cur.c_str())));
+            cur.clear();
+        } else {
+            cur += c;
+        }
+    }
+    if (!cur.empty()) comps.push_back(static_cast<float>(atof(cur.c_str())));
+    if (comps.size() > 0) r = comps[0];
+    if (comps.size() > 1) g = comps[1];
+    if (comps.size() > 2) b = comps[2];
+    if (comps.size() > 3) a = comps[3];
+    return IM_COL32(int(r * 255), int(g * 255), int(b * 255), int(a * 255));
+}
+
+// Draw one complete line of color runs at the given pen position and advance the pen
+// down one line with the raw glyph height. Returns the height used (for line spacing).
+static float drawLine(const std::vector<TextPlaneRun> &runs, ImVec2 &pen, ImDrawList *draw_list,
+        ImU32 background_color, bool drawBg, float textScale) {
+    ImFont *font = ImGui::GetFont();
+    const float font_size = ImGui::GetFontSize();
+    const float scale = textScale;
+    // Round to a whole pixel so the dynamic atlas bakes at exactly this size and
+    // the glyphs stay crisp (a fractional size lands between pixel boundaries).
+    const float draw_size = std::round(font_size * scale);
+
+    auto measure = [&](const std::string &s) -> ImVec2 {
+        if (font && font->IsLoaded())
+            return font->CalcTextSizeA(draw_size, FLT_MAX, -1.0f, s.c_str());
+        ImVec2 r = ImGui::CalcTextSize(s.c_str());
+        return ImVec2(r.x * scale, r.y * scale);
+    };
+
+    float lineHeight = measure("hello world").y;
+    for (const auto &run : runs) {
+        ImVec2 sz = measure(run.text);
+        if (sz.y > lineHeight) lineHeight = sz.y;
+        // Draw the background and text at the word's own left edge (word_pen), NOT
+        // offset behind the previous word.
+        ImVec2 word_pen = pen;
+        if (drawBg) {
+            draw_list->AddRectFilled(word_pen,
+                    ImVec2(word_pen.x + sz.x, word_pen.y + sz.y), background_color, 0.0f);
+        }
+        draw_list->AddText(nullptr, draw_size, word_pen, run.color, run.text.c_str(), nullptr, 0.0f, nullptr);
+        pen.x += sz.x;
+    }
+    pen.y += lineHeight;
+    return lineHeight;
+}
+
+// Forward declaration: parse 2 hex chars into a 0-255 byte (defined below).
+static int ParseHexByte(const char* hex);
+
+// TextPlane-compatible drawing path. Replicates the legacy TextPlane::Draw semantics
+// (top-left anchor, optional one-line-up for !start_lower, per-run background rectangle
+// gated by automatte). Format codes: #cR:G:B[:A]# pushes a color, #-c pops back to the
+// default, legacy #RRGGBB sets a color (#000000 = reset). Newlines are honoured; a long
+// line wraps at setWrapWidth() (opt-in, normalized fraction of screen width). '_' is
+// kept literal.
 int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
         bool force_highquality, bool automatte) {
-    setText(newText);
-    // Force multi-line so width-based wrapping still applies and newlines expand.
-    m_multiLine = true;
-    parseTextIfNeeded();
     if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
         return 1;
     }
@@ -142,35 +211,168 @@ int ImGuiText::Draw(const std::string &newText, int offset, bool start_lower,
 
     // Move one line up if !start_lower (as TextPlane did).
     if (!start_lower) {
-        ImVec2 dummy = ImGui::CalcTextSize("hello world");
-        position.y -= dummy.y;
+        position.y -= ImGui::CalcTextSize("hello world").y;
     }
 
-    const ImVec2 pad(4.0f, 2.0f);
+    // Word wrapping is opt-in: it happens only when setWrapWidth() was called
+    // (m_wrapWidth > 0). By default text does NOT wrap, so it never reflows onto
+    // new lines or overlays neighbouring elements unless a caller asks for it.
+    const float wrapWidth = m_wrapWidth;
+    const bool doWrap = (wrapWidth > 0.0f);
+    const float leftX = position.x;
+
+    // Measure text at the size it is actually drawn (draw_size = font * textScale).
+    ImFont *font = ImGui::GetFont();
+    const float draw_size = std::round(ImGui::GetFontSize() * m_textScale);
+    const float displayW = ImGui::GetIO().DisplaySize.x;
+    const float wrapWidthPx = wrapWidth * displayW;   // for ImGui's pixel-based wrap
+    auto measure = [&](const std::string &s) -> float {
+        float px;
+        if (font && font->IsLoaded()) {
+            px = font->CalcTextSizeA(draw_size, FLT_MAX, -1.0f, s.c_str()).x;
+        } else {
+            px = ImGui::CalcTextSize(s.c_str()).x * m_textScale;
+        }
+        return (displayW > 0.0f) ? px / displayW : 0.0f;
+    };
+
+    // Split the text into lines of color runs, wrapping at wrapWidth. Wrapping is
+    // word-granular; a word wider than the box is split so it cannot spill.
+    std::vector<std::vector<TextPlaneRun>> lines;
+    ImU32 currentColor = m_colorU32;
+    std::string word;
+    float lineWidth = 0.0f;
+    auto finishLine = [&]() {
+        if (!word.empty()) {
+            lines.back().push_back({word, currentColor});
+            word.clear();
+        }
+        lines.emplace_back();
+        lineWidth = 0.0f;
+    };
+    lines.emplace_back();
+
+    auto pushWord = [&](bool hardBreak) {
+        if (word.empty()) return;
+        const float ww = measure(word);
+        const bool tooWide = doWrap && ww > wrapWidth;
+        if (doWrap && !tooWide && !hardBreak && lineWidth + ww > wrapWidth) {
+            lines.emplace_back();
+            lineWidth = 0.0f;
+        }
+        if (!tooWide) {
+            lines.back().push_back({word, currentColor});
+            lineWidth += ww;
+        } else {
+            const char *start = word.c_str();
+            const char *end = start + word.size();
+            while (start < end) {
+                if (lineWidth > 0.0f) {
+                    lines.emplace_back();
+                    lineWidth = 0.0f;
+                }
+                const char *brk = (font && font->IsLoaded())
+                        ? font->CalcWordWrapPosition(draw_size, start, end, wrapWidthPx)
+                        : end;
+                if (brk <= start) {
+                    brk = start + 1;   // guard: a single glyph wider than the box
+                }
+                std::string chunk(start, brk);
+                const float cw = measure(chunk);
+                lines.back().push_back({chunk, currentColor});
+                lineWidth = cw;
+                start = brk;
+            }
+        }
+        word.clear();
+    };
+
+    const size_t n = newText.size();
+
+    // Readahead: detect a '#' that begins a color token but is truncated by the
+    // word-by-word reveal; don't render the partial token as literal text.
+    auto isIncompleteColorToken = [&](size_t idx) -> bool {
+        if (newText[idx] != '#') {
+            return false;
+        }
+        if (idx + 1 >= n) {
+            return true;   // lone trailing '#': first char of a not-yet-revealed token
+        }
+        const char next = newText[idx + 1];
+        if (next == 'c') {
+            return newText.find('#', idx + 2) == std::string::npos;
+        }
+        if (next == '-') {
+            return idx + 2 >= n;
+        }
+        if (std::isxdigit(static_cast<unsigned char>(next))) {
+            size_t k = idx + 1;
+            while (k < n && std::isxdigit(static_cast<unsigned char>(newText[k]))) {
+                ++k;
+            }
+            return (k == n) && (k - (idx + 1)) < 6;
+        }
+        return false;
+    };
+
+    for (size_t i = 0; i < n; ++i) {
+        char c = newText[i];
+        if (c == '\n') {
+            pushWord(true);
+            finishLine();
+            currentColor = m_colorU32;
+        } else if (c == ' ' && doWrap) {
+            pushWord(false);
+            lines.back().push_back({" ", currentColor});
+            lineWidth += measure(" ");
+        } else if (c == '#' && isIncompleteColorToken(i)) {
+            break;
+        } else if (c == '#' && i + 2 < n && newText[i + 1] == '-' && newText[i + 2] == 'c') {
+            pushWord(false);
+            currentColor = m_colorU32;
+            i += 2;
+        } else if (c == '#' && i + 6 < n
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 1]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 2]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 3]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 4]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 5]))
+                && std::isxdigit(static_cast<unsigned char>(newText[i + 6]))) {
+            pushWord(false);
+            const int r = ParseHexByte(&newText[i + 1]);
+            const int g = ParseHexByte(&newText[i + 3]);
+            const int b = ParseHexByte(&newText[i + 5]);
+            if (r == 0 && g == 0 && b == 0) {
+                currentColor = m_colorU32;
+            } else {
+                currentColor = IM_COL32(r, g, b, 255);
+            }
+            i += 6;
+        } else if (c == '#' && i + 1 < n && newText[i + 1] == 'c') {
+            const size_t end = newText.find('#', i + 2);
+            if (end != std::string::npos) {
+                pushWord(false);
+                currentColor = parseColorU32(newText.substr(i + 2, end - (i + 2)));
+                i = end;
+            } else {
+                word += c;
+            }
+        } else {
+            word += c;
+        }
+    }
+    pushWord(false);
+
+    // Very dark, semi-transparent word background. Drawn under each word (at the
+    // word's own left edge) so it never overlaps the previous word's glyphs.
+    const ImU32 dark_bg = IM_COL32(0, 0, 0, 180);   // nearly opaque black (~70% alpha)
     const bool drawBg = (!isTransparent(m_backgroundColor) && !automatte);
 
-    for (size_t i = 0; i < m_layout.size(); ++i) {
-        if (i < static_cast<size_t>(offset)) continue;
-        const auto& line = m_layout[i];
-        ImVec2 lineStart = position;
-        for (const auto& frag : line) {
-            ImVec2 text_size = ImGui::CalcTextSize(frag.text.c_str());
-            if (drawBg) {
-                const ImVec2 start_position(position.x - pad.x, position.y - pad.y);
-                const ImVec2 end_position(position.x + text_size.x + pad.x,
-                        position.y + text_size.y + pad.y);
-                draw_list->AddRectFilled(start_position, end_position, m_backgroundColor, 0.0f);
-            }
-            draw_list->AddText(nullptr, 0.0f, position, frag.color, frag.text.c_str(), nullptr, 0.0f, nullptr);
-            position.x += text_size.x;
-        }
-        if (line.empty()) {
-            ImVec2 dummy = ImGui::CalcTextSize("hello world");
-            position.y += dummy.y;
-        } else {
-            position.y += line.lineHeight + (line.lineSpacing * line.lineHeight);
-        }
-        position.x = lineStart.x;
+    // Draw the lines, skipping `offset` leading lines.
+    for (size_t li = 0; li < lines.size(); ++li) {
+        if (static_cast<int>(li) < offset) continue;
+        drawLine(lines[li], position, draw_list, dark_bg, drawBg, m_textScale);
+        position.x = leftX;
     }
     return 1;
 }
