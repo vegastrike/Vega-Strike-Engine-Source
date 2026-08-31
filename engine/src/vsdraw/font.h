@@ -42,7 +42,9 @@ static const float BOLD_STROKE = 1.5;
 //a lighter look.
 class Font {
 public:
-//Font size. Pixel glyph height (font_point-relative).
+//Font size. Normalized -1..1 glyph height, resolution-relative (0.04 = 2% of the
+// screen height, the default). The renderer converts to pixels via
+// normToPixelFontSize and rounds to a whole pixel.
     float size(void) const {
         return m_size;
     }
@@ -84,7 +86,8 @@ public:
     double descent(void) const;
 
 //CONSTRUCTION
-    Font(float newsize = .1, float weight = NORMAL_STROKE) :
+    // Default font = 2% of the screen height (0.04 in the -1..1 normalized space).
+    Font(float newsize = .04, float weight = NORMAL_STROKE) :
             m_size(newsize),
             m_strokeWeight(weight),
             m_needMetrics(true),
@@ -119,7 +122,7 @@ protected:
 
 protected:
 //VARIABLES
-    float m_size;          //Size of font. Vertical distance in identity space.
+    float m_size;          //Size of font. Normalized -1..1 glyph height.
     float m_strokeWeight;  //"Look" of stroke font.  Weight of stroke in characters.
 
 //METRICS
