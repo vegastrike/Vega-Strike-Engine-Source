@@ -45,7 +45,6 @@
 #include "vsdraw/control.h"
 #include "vsdraw/simplepicker.h"
 #include "vsdraw/textinputdisplay.h"
-#include "configuration/configuration.h"
 
 // All supported UI control property keys
 enum class ControlProp {
@@ -205,7 +204,6 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
 
     const std::string& type = itType->second;
     Control* c = nullptr;
-    bool font_set = false;
 
     // --- Type-Specific Construction & Configuration ---
     if (type == "staticDisplay") {
@@ -394,17 +392,11 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
                 break;
             }
             case ControlProp::Font: {
-                // The first value is a RELATIVE glyph-height scale on the global
-                // font_point (1.0 = the default font height); the engine computes the
-                // real pixel height as size = font_point * scale. The base computer
-                // never scales against resolution; the ImGui renderer bakes glyphs at
-                // exactly that pixel size.
                 auto font_array = splitAndConvert(value, ',');
-                if (font_array.size() >= 1) {
-                    const float scale = font_array[0];
-                    const float weight = font_array.size() >= 2 ? font_array[1] : NORMAL_STROKE;
-                    c->setFont(Font(configuration().graphics.font_point_flt * scale, weight));
-                    font_set = true;
+                if (font_array.size() == 1) {
+                    c->setFont(Font(font_array[0]));
+                } else if (font_array.size() >= 2) {
+                    c->setFont(Font(font_array[0], font_array[1]));
                 } else {
                     VS_LOG(error, "getControl(): 'font' requires at least 1 value");
                 }
@@ -413,12 +405,6 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
             default:
                 break;
         }
-    }
-
-    // A control with no per-box 'font' defaults to the global font_point (scale 1.0);
-    // the base computer never scales against resolution.
-    if (!font_set) {
-        c->setFont(Font(configuration().graphics.font_point_flt, NORMAL_STROKE));
     }
 
     return c;

@@ -34,6 +34,13 @@ static bool isTransparent(ImU32 color) {
     return ((color >> IM_COL32_A_SHIFT) & 0xFF) == 0;
 }
 
+// Convert a resolution-relative normalized font size to the whole-pixel height that
+// will actually be baked and drawn. Rounding to a whole pixel keeps the dynamic-atlas
+// glyphs crisp while staying as close as possible to the author's intended size.
+static float PixelFontSizeFor(float normalizedSize) {
+    return std::round(Coordinates::normToPixelFontSize(normalizedSize));
+}
+
 // Normalized glyph height, driven by configuration font_point (relocated from the
 // removed TextPlane implementation so other code can keep linking against it).
 float getFontHeight() {
@@ -75,7 +82,7 @@ void ImGuiText::draw(int firstLineToDraw) {
     float pixelY = m_multiLine ? Coordinates::normToPixelY(m_rect.top(), resH()) : Coordinates::normToPixelY((m_rect.top() + m_rect.bottom()) *0.5f, resH());
     float pixelWidth = Coordinates::normToPixelW(m_rect.size.width, resW());
 
-    ImVec2 textSize = getTextWidth(m_text.c_str(), m_font.size());
+    ImVec2 textSize = getTextWidth(m_text.c_str(), PixelFontSizeFor(m_font.size()));
     // position single-line text half a line down so it is perfectly centered
     if(!m_multiLine) {
         pixelY -= (textSize.y * 0.5f);
@@ -100,7 +107,7 @@ void ImGuiText::draw(int firstLineToDraw) {
         }
         
         for (const auto& frag : line) {
-            float pixelFontSize = std::round(frag.font.size());
+            float pixelFontSize = PixelFontSizeFor(frag.font.size());
             // Draw Bold "shadow"
             if (frag.isBold || m_font.strokeWeight() == BOLD_STROKE) {
                 draw_list->AddText(nullptr, pixelFontSize, 
@@ -691,7 +698,7 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
     // Helper to add fragment
     auto addFragment = [&](const std::string& text) {
         // if (text.empty()) return;
-        ImVec2 dimensions = getTextWidth(text,  m_fontStack.back().size());
+        ImVec2 dimensions = getTextWidth(text, PixelFontSizeFor(m_fontStack.back().size()));
         currentLine.push_back({text, m_fontStack.back(), m_colorStack.back(), m_fontStack.back().strokeWeight() == BOLD_STROKE, dimensions.x});
         currentLine.width += dimensions.x;
         // update lineheight if fragment is larger
@@ -772,7 +779,7 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
                     if(!m_multiLine) {
                         currentFragmentText += ELLIPSIS_STRING;
                     }
-                    if(currentLine.width + getTextWidth(currentFragmentText,  m_fontStack.back().size()).x > widthInPixels) {
+                    if(currentLine.width + getTextWidth(currentFragmentText, PixelFontSizeFor(m_fontStack.back().size())).x > widthInPixels) {
                         // break at last word break
                         addFragment(input.substr(fragmentStartPos, lastWordBreakPos - fragmentStartPos) + (m_multiLine ? "" : ELLIPSIS_STRING));
                         fragmentStartPos = lastWordBreakPos;
