@@ -205,10 +205,11 @@ static void refresh_screen_aspect_text() {
     }
 }
 
-// The ideal font height (font_point) for the current resolution. Font size scales
-// with the horizontal resolution: ~10 at 800x600, ~32 at 2560x1440 (width / 80).
+// The ideal font height (font_point) for the current resolution. Default to 2% of the
+// screen height (e.g. ~22 at 1920x1080, ~29 at 2560x1440) so the default font is a
+// consistent fraction of the screen regardless of resolution.
 static int ideal_font_height() {
-    return sel_res_w > 0 ? sel_res_w / 80 : 16;
+    return sel_res_h > 0 ? static_cast<int>(sel_res_h * 0.02f) : 16;
 }
 
 static void prefill_text_height() {
