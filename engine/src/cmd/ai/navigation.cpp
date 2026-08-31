@@ -29,6 +29,7 @@
 #include "navigation.h"
 #include "root_generic/macosx_math.h"
 #include <math.h>
+#include <algorithm>
 #include <vector>
 #include "cmd/unit_find.h"
 #include "src/universe.h"
@@ -53,7 +54,7 @@ using namespace Orders;
 constexpr float M_PI_FLT = M_PI;
 
 // Collects up to a bounded number of units (other than ourselves) in range for the
-// SPEC clear-space steering -- used as the action for UnitWithinRangeLocator over
+// ftl clear-space steering -- used as the action for UnitWithinRangeLocator over
 // the UNIT_ONLY map. Capping the count keeps the per-frame cost bounded even with
 // hundreds of ships in the vicinity.
 struct ClearSpaceCollector {
@@ -552,10 +553,6 @@ void AutoLongHaul::SetParent(Unit *parent1) {
 
 extern bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following);
 
-static float mymin(float a, float b) {
-    return a < b ? a : b;
-}
-
 // TODO: move this kludge to FtlDrive
 inline void WarpRampOff(Unit *un, bool rampdown) {
     if (un->ftl_drive.Enabled()) {
@@ -617,8 +614,8 @@ void AutoLongHaul::Execute() {
     destinationdirection =
             destinationdirection * (1. / destinationdistance);       //this is a direction, so it is normalize
 
-    // Distance to stop from the ship's current speed (including SPEC). The autopilot
-    // flies straight to this braking point, winds down SPEC there and brakes to a
+    // Distance to stop from the ship's current speed (including ftl). The autopilot
+    // flies straight to this braking point, winds down ftl there and brakes to a
     // stop. Used both to gate obstacle avoidance (don't dodge objects farther away
     // than we can already stop) and as the clean disengage point.
     const double current_speed = parent->Velocity.Magnitude();
@@ -634,7 +631,7 @@ void AutoLongHaul::Execute() {
     if (parent->graphicOptions.RampCounter == 0) {
         //face target unless warp ramping is done
         Unit *obstacle = NULL;
-        // The thing compressing our SPEC bubble is the nearest object in space.
+        // The thing compressing our ftl bubble is the nearest object in space.
         parent->GetNearestObjectSignificantDistance(&obstacle);
         bool currently_inside_landing_zone = false;
         if (obstacle) {
@@ -644,18 +641,18 @@ void AutoLongHaul::Execute() {
             inside_landing_zone = currently_inside_landing_zone;
             MakeLinearVelocityOrder();
         }
-        // Steer into clear space so SPEC works at full. Vector-sum steering: each
-        // object that compresses our SPEC bubble pushes us directly away from it,
+        // Steer into clear space so ftl works at full. Vector-sum steering: each
+        // object that compresses our ftl bubble pushes us directly away from it,
         // weighted by how close (and thus how much it interferes) it is. The bubble we
         // care about keeping clear shrinks as we near the destination: far away we
-        // keep a full SPEC sphere clear (so we travel through empty space), and on
+        // keep a full ftl sphere clear (so we travel through empty space), and on
         // arrival we no longer care about the bubble and just get to the target.
         const float gather_range = max_compression_range
                 * configuration().physics.warp_clearance_range_mult_flt;
         StarSystem *ss = _Universe->activeStarSystem();
         const float repel = configuration().physics.warp_clearance_repel_flt;
         const float attract = configuration().physics.warp_clearance_attract_flt;
-        // The bubble stays at a full SPEC sphere while the target is outside the
+        // The bubble stays at a full ftl sphere while the target is outside the
         // gather range (warp_clearance_range_mult x the bubble). Once the target
         // enters that range we collapse the bubble, so that it is already gone by the
         // time the target reaches the 1x bubble itself -- on arrival we simply get to
@@ -702,7 +699,7 @@ void AutoLongHaul::Execute() {
         QVector sum(0.0f, 0.0f, 0.0f);
         bool any = false;
         // The destination must never be a repulsor -- it is where we want to go and
-        // it is fine that it compresses our SPEC bubble. The autopilot target can be
+        // it is fine that it compresses our ftl bubble. The autopilot target can be
         // a subunit of the station, so match the whole unit (target and its owner).
         Unit *target_root = target;
         if (target != nullptr && target->isSubUnit()) {
@@ -742,7 +739,7 @@ void AutoLongHaul::Execute() {
             } else {
                 desired = destinationdirection;
             }
-            double clear_distance = mymin(destinationdistance, gather_range);
+            double clear_distance = std::min(destinationdistance, static_cast<double>(gather_range));
             destination = myposition + desired * clear_distance;
         }
     }
@@ -751,11 +748,11 @@ void AutoLongHaul::Execute() {
     }
     const double dis = UnitUtil::getSignificantDistance(parent, target);
 
-    // SPEC stays on while flying toward the destination -- including during any turn
+    // ftl stays on while flying toward the destination -- including during any turn
     // (lining up with the destination, or a detour) -- and only winds down once we're
     // within the braking distance (about to disengage). The old auto_pilot_spec_lining_
     // up_angle check dropped out of warp whenever the facing briefly deviated from the
-    // target, which made SPEC flicker in and out whenever the ship turned -- e.g. leaving
+    // target, which made ftl flicker in and out whenever the ship turned -- e.g. leaving
     // a planet (now behind us) to head for a faraway object, with nothing to avoid.
     const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
     const float min_warpfield_to_enter_warp = configuration().ai.min_warp_to_try_flt;
@@ -784,7 +781,7 @@ void AutoLongHaul::Execute() {
     const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
     // Disengage when we're within the distance it takes to stop from our current
-    // (SPEC) speed -- fly straight to that point, then brake cleanly instead of
+    // (ftl) speed -- fly straight to that point, then brake cleanly instead of
     // overshooting. distance_to_stop remains a hard floor.
     if (do_auto_finish
             && (dis <= brake_distance || dis < distance_to_stop

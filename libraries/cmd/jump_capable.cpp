@@ -371,7 +371,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     return ok;
 }
 
-// SPEC is space compression: how much space can be compressed depends on what is in
+// ftl is space compression: how much space can be compressed depends on what is in
 // it. The relevant quantity for the compression model is the significant distance to
 // the nearest object in space (the closest thing the warp bubble has to contend
 // with). Anything counts -- planets, bases, asteroids, and other ships -- and only the
