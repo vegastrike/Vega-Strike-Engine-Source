@@ -114,8 +114,8 @@ public:
     void setBackgroundColor(ImU32 c) { m_backgroundColor = c; }
     ImU32 backgroundColor() const { return m_backgroundColor; }
     // Whether to suppress the background rectangle (TextPlane `automatte`).
-    void setAutomatte(bool a) { m_automatte = a; }
-    bool automatte() const { return m_automatte; }
+    void setTransparent(bool a) { m_transparent = a; }
+    bool transparent() const { return m_transparent; }
     int lineCount(void) const { return m_layout.size(); };
     int layoutVersion(void) const { return m_layoutVersion; };
     int visibleLineCountStartingWith(int lineNumber, float vertInterval);
@@ -146,7 +146,7 @@ public:
             bool start_lower = false,
             bool force_highquality = false,
             bool automatte = false);
-    int Draw(int offset = 0) { return Draw(m_text, offset, false, false, m_automatte); }
+    int Draw(int offset = 0) { return Draw(m_text, offset, false, false, m_transparent); }
     ImVec2 getTextWidth(const std::string text, const float fontSize);
     // The resolution to lay out against (defaults to the screen DisplaySize).
     void setResolution(float w, float h) { m_resW = w; m_resH = h; }
@@ -172,7 +172,7 @@ private:
     GFXColor m_color;
     ImU32 m_colorU32 = IM_COL32(255, 255, 255, 255);
     ImU32 m_backgroundColor = IM_COL32(0, 0, 0, 0);
-    bool m_automatte = false;
+    bool m_transparent = false;
     float m_charW = 0.06f;
     float m_charH = 0.08f;
     FormattedLayout m_layout;
