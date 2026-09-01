@@ -888,16 +888,18 @@ const Dictionary &GetEventData() {
     return _GetEventData();
 }
 
-//  Python accessor, not used in cpp
+//  Returns the norm text height of the given text - Python accessor, not used in cpp
 float GetTextHeight(std::string text, Vector widheimult) {
-    const float font_point = configuration().graphics.font_point_flt;
-    return font_point * 2 / configuration().graphics.resolution_y;
+    ImVec2 size = ImVec2(0,0);
+    size = ImGui::CalcTextSize(text.c_str());
+    return size.y * widheimult.y * 2 / configuration().graphics.resolution_y;
 }
 
-//  Python accessor, not used in cpp
+//  Returns the norm text width of the given text - Python accessor, not used in cpp
 float GetTextWidth(std::string text, Vector widheimult) {
-    //Unsupported for now
-    return 0;
+    ImVec2 size = ImVec2(0,0);
+    size = ImGui::CalcTextSize(text.c_str());
+    return size.x * widheimult.x * 2 / configuration().graphics.resolution_x;
 }
 
 void LoadBaseInterface(string name) {
