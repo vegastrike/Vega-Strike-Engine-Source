@@ -20,6 +20,12 @@ void DrawConfigScreen();
 // loop. No-op unless the config screen is active.
 void HandleConfigEvent(const SDL_Event *event);
 
+// Persist the current window resolution to the user config overlay so a manual
+// window resize survives a restart (the game re-creates the window at
+// graphics.resolution_x/y on next launch). Marked dirty + written out; does not
+// hot-apply anything. Called from winsys on a settled window resize.
+void PersistWindowResolution(int w, int h);
+
 } // namespace vs_settings_ng
 
 #endif
