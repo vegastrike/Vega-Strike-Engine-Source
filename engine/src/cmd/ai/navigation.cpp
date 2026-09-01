@@ -659,8 +659,10 @@ void AutoLongHaul::Execute() {
         // the target instead of dodging ships there.
         double bubble = max_compression_range;
         if (destinationdistance < gather_range) {
-            const double ratio = (destinationdistance - max_compression_range)
-                    / (gather_range - max_compression_range);
+            const double ratio = (
+                    (destinationdistance - max_compression_range)
+                    / (gather_range - max_compression_range)
+            );
             bubble = max_compression_range * ((ratio < 0.0) ? 0.0 : ratio);
         }
 
