@@ -77,6 +77,9 @@ void AUDPlay(const int sound, const QVector &pos, const Vector &vel, const float
 void AUDPausePlaying(const int sound);
 ///Changes the volume (generally 0 or between 1 and 1000)
 void AUDChangeVolume(float volume);
+///Re-applies the audio volume/doppler from configuration() after an in-game settings
+///change (matches the bootstrap assignment in AUDInit, incl. the platform linuxadjust).
+void AUDReapplyConfig();
 float AUDGetVolume();
 ///changes the scale used for doppler...generally between 0 for off or .01 and 10
 void AUDChangeDoppler(float doppler);

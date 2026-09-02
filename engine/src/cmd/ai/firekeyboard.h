@@ -45,6 +45,11 @@ class FireKeyboard : public Order {
     std::list<CommunicationMessage> resp;
 public:
     virtual void SetParent(Unit *parent1);
+    // Reset the per-key controller state (weapk, misk, firekey, target keys, ...)
+    // to a clean UP state, so a stale state left over from a config-screen rebind
+    // doesn't fire a command once game input resumes after the settings screen
+    // closes.
+    static void ResetKeys();
     static void SetShieldsOff(const KBData &, KBSTATE);
     static void SetShieldsOneThird(const KBData &, KBSTATE);
     static void SetShieldsTwoThird(const KBData &, KBSTATE);
