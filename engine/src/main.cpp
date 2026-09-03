@@ -86,6 +86,7 @@
 #include "src/vs_exit.h"
 
 #include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 #include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -469,6 +470,10 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
         }
     }
 
+    // Automatically detect if ImGui is currently between NewFrame() and Render()
+    ImGuiContext* g = ImGui::GetCurrentContext();
+    const bool owns_frame = (g == nullptr || !g->WithinFrameScope);
+
     static constexpr ImGuiWindowFlags window_flags =
             ImGuiWindowFlags_NoTitleBar |
             ImGuiWindowFlags_NoResize |
@@ -478,13 +483,15 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
             ImGuiWindowFlags_NoBackground |
             ImGuiWindowFlags_NoDecoration;   // makes it transparent
 
-    // ImGui Init
-    ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL3_NewFrame();
-    ImGui::NewFrame();
-    // End ImGui Init
-
+    // create new frame if none is active
+    if(owns_frame) {
+        // ImGui Init
+        ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
+        // End ImGui Init
+    }
 
     ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
     const ImVec2 window_size(configuration().graphics.resolution_x,
@@ -499,13 +506,23 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
 
     // ImGui End Frame
     ImGui::End();
-    // Rendering
-    ImGui::Render();
 
+    // Always render the frame
+    ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SDL_Window* current_window = SDL_GL_GetCurrentWindow();
     SDL_GL_SwapWindow(current_window);
     // End ImGui
+
+    // open a new frame if there was an active one
+    if(!owns_frame) {
+        // ImGui Init
+        ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
+        // End ImGui Init
+    }
 
     GFXHudMode(GFXFALSE);
     GFXEndScene();
@@ -640,7 +657,6 @@ void bootstrap_main_loop() {
 
         _Universe->SetupCockpits(playername);
 
-        vector<std::string>::iterator it, jt;
         unsigned int k = 0;
 
         Cockpit *cp = _Universe->AccessCockpit(k);
