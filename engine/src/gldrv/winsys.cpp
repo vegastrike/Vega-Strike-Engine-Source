@@ -53,6 +53,7 @@
 #include "root_generic/options.h"
 #include "src/vs_exit.h"
 #include "configuration/configuration.h"
+#include "vegadisk/vsfilesystem.h"
 #include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "gui/config_screen.h"
@@ -573,8 +574,15 @@ static bool setup_sdl_video_mode() {
 
     get_screen_measurements();
 
-    // Initialize imgui
-    InitGui(window, &context, configuration().graphics.font_point_dbl);
+    // Initialize imgui with the configured font. graphics.font is "Roboto" (the
+    // embedded engine font) or a .ttf filename in the data fonts/ directory.
+    std::string font_file;
+    const std::string &font_name = configuration().graphics.font;
+    if (!font_name.empty() && font_name != "Roboto") {
+        font_file = VSFileSystem::datadir + "/fonts/" + font_name;
+    }
+    InitGui(window, &context, configuration().graphics.font_point_dbl,
+            font_file.empty() ? nullptr : font_file.c_str());
 
     return true;
 }

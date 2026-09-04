@@ -80,32 +80,56 @@ static bool bind_capturing = false;
 static int  bind_rebind_row = -1;
 static std::string bind_capture_cmd;
 
-enum { FONT_AA_VEC = 0, FONT_VEC, FONT_HELVETICA, FONT_TIMES, FONT_FIXED };
-static const char *font_type_names[] = { "Antialiased Vector", "Vector", "Helvetica", "Times", "Fixed" };
-int  sel_font_type = FONT_AA_VEC;
-int  sel_bitmap_size[3] = { -1, -1, -1 };   // 0=Helvetica 1=Times 2=Fixed
-
 enum { FC_KEYBOARD = 0, FC_MOUSE = 1, FC_JOYSTICK = 2 };
 int  flight_control = FC_KEYBOARD;
 static const char *fc_names[] = { "Keyboard", "Mouse", "Joystick" };
 
-struct BitmapFamily {
-    const char *name;
-    int  n;
-    const char **size_names;
-    const int *px;
-};
-static const char *helv_sizes[] = { "10", "12", "18" };
-static const int   helv_px[]    = { 14, 16, 23 };
-static const char *times_sizes[] = { "10", "24" };
-static const int   times_px[]   = { 14, 29 };
-static const char *fixed_sizes[] = { "8x13", "9x15" };
-static const int   fixed_px[]   = { 14, 16 };
-static const BitmapFamily bitmap_families[] = {
-    { "Helvetica", 3, helv_sizes, helv_px },
-    { "Times", 2, times_sizes, times_px },
-    { "Fixed", 2, fixed_sizes, fixed_px },
-};
+// Selectable fonts: index 0 is always the engine's embedded Roboto; the rest are
+// the .ttf files found in the data fonts/ directory (e.g. Saira variants).
+// graphics.font stores the value to persist: "Roboto" (sentinel) or a .ttf filename.
+static std::vector<std::string> s_font_list;
+static std::vector<std::string> s_font_values;   // parallel: graphics.font value for each entry
+static int sel_font = 0;
+
+// Scan the data fonts/ directory for .ttf files and (re)build the selectable font
+// list. Roboto (engine-provided) is always first.
+static void refresh_font_list() {
+    s_font_list.clear();
+    s_font_values.clear();
+    s_font_list.push_back("Roboto");
+    s_font_values.push_back("Roboto");
+    const fs::path fonts_dir = VSFileSystem::datadir + "/fonts";
+    if (fs::exists(fonts_dir) && fs::is_directory(fonts_dir)) {
+        std::vector<std::string> ttf;
+        for (fs::directory_iterator it(fonts_dir), end; it != end; ++it) {
+            if (it->path().extension() == ".ttf") {
+                ttf.push_back(it->path().filename().string());
+            }
+        }
+        std::sort(ttf.begin(), ttf.end());
+        for (const auto &f : ttf) {
+            s_font_list.push_back(f);
+            s_font_values.push_back(f);
+        }
+    }
+    if (sel_font < 0 || sel_font >= static_cast<int>(s_font_list.size())) {
+        sel_font = 0;
+    }
+}
+
+// Set sel_font from a persisted graphics.font value ("Roboto" or a .ttf filename).
+static void select_font_from_value(const std::string &value) {
+    if (s_font_values.empty()) {
+        refresh_font_list();
+    }
+    sel_font = 0;
+    for (size_t i = 0; i < s_font_values.size(); ++i) {
+        if (s_font_values[i] == value) {
+            sel_font = static_cast<int>(i);
+            return;
+        }
+    }
+}
 
 bool dirty = false;
 
@@ -206,9 +230,13 @@ static void refresh_screen_aspect_text() {
 }
 
 // The ideal font height (font_point) for the current resolution. Font size scales
-// with the horizontal resolution: ~10 at 800x600, ~32 at 2560x1440 (width / 80).
+// linearly with the horizontal resolution: 14 at 1368x768, 27 at 2560x1440.
+// Linear fit through those two points: font = (13/1192) * width - 0.919, rounded.
 static int ideal_font_height() {
-    return sel_res_w > 0 ? sel_res_w / 80 : 16;
+    if (sel_res_w <= 0) {
+        return 16;
+    }
+    return static_cast<int>(std::lround((13.0 / 1192.0) * sel_res_w - 0.919));
 }
 
 static void prefill_text_height() {
@@ -216,18 +244,6 @@ static void prefill_text_height() {
         int fp = ideal_font_height();
         snprintf(text_height_buf, sizeof(text_height_buf), "%d", fp);
     }
-}
-
-// Suggest the bitmap size (index) nearest the ideal vector height.
-static int suggested_bitmap_size(int family) {
-    const BitmapFamily &f = bitmap_families[family];
-    int ideal = ideal_font_height();
-    int best = 0, bestdiff = 1000000;
-    for (int i = 0; i < f.n; i++) {
-        int d = f.px[i] < ideal ? ideal - f.px[i] : f.px[i] - ideal;
-        if (d < bestdiff) { bestdiff = d; best = i; }
-    }
-    return best;
 }
 
 static bool highest_monitor_resolution(SDL_DisplayID id, int &w, int &h) {
@@ -303,10 +319,9 @@ static void load_display_from_config() {
     const char *nm = sel_display_id ? SDL_GetDisplayName(sel_display_id) : NULL;
     monitor_text = std::to_string(sel_monitor) + "  " + (nm ? nm : "(unnamed)");
     if (ids) SDL_free(ids);
-    // Font type from high_quality_font + font_antialias (vector AA / vector / bitmap).
-    if (!g.high_quality_font && g.font_antialias) sel_font_type = FONT_AA_VEC;
-    else if (!g.high_quality_font && !g.font_antialias) sel_font_type = FONT_VEC;
-    else sel_font_type = FONT_HELVETICA;   // bitmap (font name will refine; v1 defaults)
+    // Select the configured font (Roboto or a .ttf filename) in the dropdown list.
+    refresh_font_list();
+    select_font_from_value(g.font);
     load_base_aspect_from_config();
     refresh_screen_aspect_text();
     resolution_text = std::to_string(sel_res_w) + "x" + std::to_string(sel_res_h);
@@ -327,32 +342,22 @@ static void apply_display_to_config() {
     g.font_point_flt = (float)atoi(text_height_buf);
     mark_dirty("graphics.font_point");
     RequestImGuiFontSize(g.font_point_flt);   // live-rebuild the ImGui font atlas at the new size
-    if (sel_font_type == FONT_AA_VEC) {
-        g.high_quality_font = false;
-        g.high_quality_font_computer = false;
-        g.font_antialias = true;
-    } else if (sel_font_type == FONT_VEC) {
-        g.high_quality_font = false;
-        g.high_quality_font_computer = false;
-        g.font_antialias = false;
-    } else {
-        int fam = sel_font_type - FONT_HELVETICA;
-        const BitmapFamily &f = bitmap_families[fam];
-        int sz = sel_bitmap_size[fam];
-        if (sz < 0) sz = suggested_bitmap_size(fam);
-        if (sz < 0 || sz >= f.n) sz = 0;
-        g.high_quality_font = true;
-        g.high_quality_font_computer = true;
-        g.font_antialias = false;
-        std::string nm;
-        if (fam == 0) nm = "helvetica" + std::string(f.size_names[sz]);
-        else if (fam == 1) nm = "times" + std::string(f.size_names[sz]);
-        else nm = "fixed" + std::string(f.size_names[sz]).substr(2);
-        g.font = nm;
+    // Persist the selected font ("Roboto" sentinel or a .ttf filename); only hot-apply
+    // a font change when the selection actually differs from the current font, so a
+    // size-only Save does not force an atlas rebuild.
+    if (sel_font >= 0 && sel_font < static_cast<int>(s_font_values.size())) {
+        const std::string &new_font = s_font_values[sel_font];
+        const bool font_changed = (new_font != g.font);
+        g.font = new_font;
         mark_dirty("graphics.font");
+        if (font_changed) {
+            std::string font_path;
+            if (new_font != "Roboto") {
+                font_path = VSFileSystem::datadir + "/fonts/" + new_font;
+            }
+            RequestImGuiFont(font_path.c_str());   // live-reload the ImGui font atlas
+        }
     }
-    mark_dirty("graphics.high_quality_font");
-    mark_dirty("graphics.high_quality_font_computer");
     mark_dirty("graphics.font_antialias");
     g.aspect_flt = sel_screen_aspect >= 0 ? aspect_vals[sel_screen_aspect] : current_screen_aspect();
     mark_dirty("graphics.aspect");
@@ -418,7 +423,8 @@ void draw_display_frame() {
         if (ids) SDL_free(ids);
         ImGui::EndPopup();
     }
-    // Resolution selector (detected fullscreen modes, deduplicated).
+    // Resolution selector (detected fullscreen modes, deduplicated). Each entry
+    // also shows its aspect ratio (width/height).
     if (ImGui::Button("Resolution")) ImGui::OpenPopup("##pick_res");
     ImGui::SameLine(); ImGui::TextUnformatted(resolution_text.c_str());
     if (ImGui::BeginPopup("##pick_res")) {
@@ -426,7 +432,9 @@ void draw_display_frame() {
         if (modes) {
             std::vector<std::string> seen;
             for (int i = 0; i < cnt; ++i) {
-                char lbl[32]; snprintf(lbl, sizeof(lbl), "%dx%d", modes[i]->w, modes[i]->h);
+                char lbl[40];
+                float aspect = modes[i]->h > 0 ? static_cast<float>(modes[i]->w) / static_cast<float>(modes[i]->h) : 0.0f;
+                snprintf(lbl, sizeof(lbl), "%dx%d (%.2f)", modes[i]->w, modes[i]->h, aspect);
                 if (std::find(seen.begin(), seen.end(), lbl) != seen.end()) continue;
                 seen.push_back(lbl);
                 if (ImGui::MenuItem(lbl)) {
@@ -449,37 +457,22 @@ void draw_display_frame() {
             if (ImGui::MenuItem(aspect_opts[i])) { sel_screen_aspect = (int)i; refresh_screen_aspect_text(); dirty = true; }
         ImGui::EndPopup();
     }
-    // Font type picker.
+    // Font picker: Roboto (engine default) + .ttf fonts from the data fonts/ dir.
+    if (s_font_list.empty()) {
+        refresh_font_list();
+    }
     ImGui::Text("Font"); ImGui::SameLine();
-    if (ImGui::Button(font_type_names[sel_font_type])) ImGui::OpenPopup("##pick_font");
+    if (ImGui::Button(s_font_list[sel_font].c_str())) ImGui::OpenPopup("##pick_font");
     if (ImGui::BeginPopup("##pick_font")) {
-        for (size_t i = 0; i < sizeof(font_type_names) / sizeof(font_type_names[0]); ++i)
-            if (ImGui::MenuItem(font_type_names[i])) { sel_font_type = (int)i; dirty = true; }
+        for (size_t i = 0; i < s_font_list.size(); ++i)
+            if (ImGui::MenuItem(s_font_list[i].c_str())) { sel_font = (int)i; dirty = true; }
         ImGui::EndPopup();
     }
-    if (sel_font_type == FONT_AA_VEC || sel_font_type == FONT_VEC) {
-        // Text Height input for vector fonts.
-        ImGui::SameLine(); ImGui::Text("Text Height"); ImGui::SameLine();
-        ImGui::SetNextItemWidth(60);
-        if (ImGui::InputText("##textheight", text_height_buf, sizeof(text_height_buf), ImGuiInputTextFlags_CharsDecimal))
-            dirty = true;
-    } else {
-        // Bitmap size picker for Helvetica/Times/Fixed.
-        int fam = sel_font_type - FONT_HELVETICA;
-        const BitmapFamily &f = bitmap_families[fam];
-        int sz = sel_bitmap_size[fam];
-        if (sz < 0) sz = suggested_bitmap_size(fam);
-        if (sz < 0 || sz >= f.n) sz = 0;
-        ImGui::SameLine();
-        if (ImGui::Button(f.size_names[sz])) ImGui::OpenPopup("##pick_bsize");
-        if (ImGui::BeginPopup("##pick_bsize")) {
-            for (int i = 0; i < f.n; i++) {
-                bool sel = (i == sz);
-                if (ImGui::Selectable(f.size_names[i], sel)) { sel_bitmap_size[fam] = i; dirty = true; }
-            }
-            ImGui::EndPopup();
-        }
-    }
+    // Text Height input (font_point) — the size, independent of the font choice.
+    ImGui::SameLine(); ImGui::Text("Text Height"); ImGui::SameLine();
+    ImGui::SetNextItemWidth(60);
+    if (ImGui::InputText("##textheight", text_height_buf, sizeof(text_height_buf), ImGuiInputTextFlags_CharsDecimal))
+        dirty = true;
     // Base aspect ratio.
     if (ImGui::Button("Base Aspect Ratio")) ImGui::OpenPopup("##pick_asp");
     ImGui::SameLine(); ImGui::TextUnformatted(base_aspect_text.c_str());
@@ -1786,18 +1779,13 @@ static void draw_presets_frame() {
     else if (avail_w < 1200) cols = 2;
     else cols = 3;
     cols = std::min(cols, (int)g_preset_groups.size());
-    int rows = (int)ceil((double)g_preset_groups.size() / (double)cols);
-    float row_h = ImGui::GetFrameHeight() + ImGui::GetTextLineHeight()
-                  + ImGui::GetStyle().ItemSpacing.y;
-    float content_h = rows * row_h + ImGui::GetStyle().WindowPadding.y * 2;
-    // Fill the space between here and the bottom button bar (which reserves one
-    // button row + separator at the bottom, btn_h). The frame should reach the
-    // buttons so there is no dead space, and be tall enough that all presets are
-    // visible without a scrollbar.
+    // The frame always fills the space above the bottom button bar (stretches to
+    // fit); the child window clips and scrolls any content that does not fit, so it
+    // never spills over the frame's borders or the buttons.
     float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
     float avail_h = ImGui::GetContentRegionAvail().y - btn_h
                     - ImGui::GetStyle().WindowPadding.y;
-    float pres_h = fmaxf(content_h, avail_h);
+    float pres_h = avail_h;
     ImGui::BeginChild("presetsframe", ImVec2(-1.0f, pres_h), ImGuiChildFlags_Borders);
     std::vector<float> colw(cols, 0.0f);
     for (size_t i = 0; i < g_preset_groups.size(); i++) {
