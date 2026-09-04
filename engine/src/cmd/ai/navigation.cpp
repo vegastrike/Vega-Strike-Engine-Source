@@ -598,6 +598,18 @@ bool AutoLongHaul::InsideLandingPort(const Unit *obstacle) const {
             < -landing_port_limit * parent->afterburner.speed;
 }
 
+// A body the autopilot can never fly through or around the far side of: planets,
+// suns (suns are planets) and bases/stations. These are treated as hard walls --
+// they are never culled from the ftl-bubble avoidance and their apparent radius is
+// inflated by the SPEC warp_min_range drop-out zone (see Execute). Asteroids are
+// NOT hard (you can fly through/thread them).
+static bool IsHardBody(const Unit *u) {
+    if (u == nullptr) {
+        return false;
+    }
+    return u->isPlanet() || UnitUtil::getFlightgroupName(u) == "Base";
+}
+
 void AutoLongHaul::Execute() {
     Unit *target = group.GetUnit();
     if (target == NULL) {
@@ -628,122 +640,153 @@ void AutoLongHaul::Execute() {
 
     StraightToTarget = true;    // free to fly
 
-    if (parent->graphicOptions.RampCounter == 0) {
-        //face target unless warp ramping is done
-        Unit *obstacle = NULL;
-        // The thing compressing our ftl bubble is the nearest object in space.
-        parent->GetNearestObjectSignificantDistance(&obstacle);
-        bool currently_inside_landing_zone = false;
-        if (obstacle) {
-            currently_inside_landing_zone = InsideLandingPort(obstacle);
-        }
-        if (currently_inside_landing_zone != inside_landing_zone) {
-            inside_landing_zone = currently_inside_landing_zone;
-            MakeLinearVelocityOrder();
-        }
-        // Steer into clear space so ftl works at full. Vector-sum steering: each
-        // object that compresses our ftl bubble pushes us directly away from it,
-        // weighted by how close (and thus how much it interferes) it is. The bubble we
-        // care about keeping clear shrinks as we near the destination: far away we
-        // keep a full ftl sphere clear (so we travel through empty space), and on
-        // arrival we no longer care about the bubble and just get to the target.
-        const float gather_range = max_compression_range
-                * configuration().physics.warp_clearance_range_mult_flt;
-        StarSystem *ss = _Universe->activeStarSystem();
-        const float repel = configuration().physics.warp_clearance_repel_flt;
-        const float attract = configuration().physics.warp_clearance_attract_flt;
-        // The bubble stays at a full ftl sphere while the target is outside the
-        // gather range (warp_clearance_range_mult x the bubble). Once the target
-        // enters that range we collapse the bubble, so that it is already gone by the
-        // time the target reaches the 1x bubble itself -- on arrival we simply get to
-        // the target instead of dodging ships there.
-        double bubble = max_compression_range;
-        if (destinationdistance < gather_range) {
-            const double ratio = (
-                    (destinationdistance - max_compression_range)
-                    / (gather_range - max_compression_range)
-            );
-            bubble = max_compression_range * ((ratio < 0.0) ? 0.0 : ratio);
-        }
+    //face target unless warp ramping is done
+    Unit *obstacle = NULL;
+    // The thing compressing our ftl bubble is the nearest object in space.
+    parent->GetNearestObjectSignificantDistance(&obstacle);
+    bool currently_inside_landing_zone = false;
+    if (obstacle) {
+        currently_inside_landing_zone = InsideLandingPort(obstacle);
+    }
+    if (currently_inside_landing_zone != inside_landing_zone) {
+        inside_landing_zone = currently_inside_landing_zone;
+        MakeLinearVelocityOrder();
+    }
+    // Steer into clear space so ftl works at full. Vector-sum steering: each
+    // object that compresses our ftl bubble pushes us directly away from it,
+    // weighted by how close (and thus how much it interferes) it is. The bubble we
+    // care about keeping clear shrinks as we near the destination: far away we
+    // keep a full ftl sphere clear (so we travel through empty space), and on
+    // arrival we no longer care about the bubble and just get to the target.
+    const float gather_range = max_compression_range
+            * configuration().physics.warp_clearance_range_mult_flt;
+    StarSystem *ss = _Universe->activeStarSystem();
+    const float repel = configuration().physics.warp_clearance_repel_flt;
+    const float attract = configuration().physics.warp_clearance_attract_flt;
+    // The bubble stays at a full ftl sphere while the target is outside the
+    // gather range (warp_clearance_range_mult x the bubble). Once the target
+    // enters that range we collapse the bubble, so that it is already gone by the
+    // time the target reaches the 1x bubble itself -- on arrival we simply get to
+    // the target instead of dodging ships there.
+    double bubble = max_compression_range;
+    if (destinationdistance < gather_range) {
+        const double ratio = (
+                (destinationdistance - max_compression_range)
+                / (gather_range - max_compression_range)
+        );
+        bubble = max_compression_range * ((ratio < 0.0) ? 0.0 : ratio);
+    }
 
-        // Cull the interfering objects to only the closest handful so a crowd of
-        // ships in the vicinity can't dominate or cost too much -- the nearest matter
-        // most anyway.
-        const unsigned int kMaxShips = 8;
-        const unsigned int kMaxObjects = 5;
-        std::vector<Unit *> ships;
-        if (!is_null(parent->location[Unit::UNIT_ONLY])) {
-            UnitWithinRangeLocator<ClearSpaceCollector> locator(gather_range, 0.0f);
-            locator.action.init(ships, kMaxShips);
-            findObjects(ss->collide_map[Unit::UNIT_ONLY], parent->location[Unit::UNIT_ONLY], &locator);
+    // Cull the interfering objects to only the closest handful so a crowd of
+    // ships in the vicinity can't dominate or cost too much -- the nearest matter
+    // most anyway.
+    const unsigned int kMaxShips = 8;
+    const unsigned int kMaxObjects = 5;
+    // A planet-like body (hard body) in the bubble that isn't the target strongly
+    // repels the autopilot -- you can't fly through it or around its far side, and
+    // SPEC can't operate near it, so steer well clear.
+    constexpr float kHardBodyRepelMultiplier = 15.0f;
+    std::vector<Unit *> ships;
+    if (!is_null(parent->location[Unit::UNIT_ONLY])) {
+        UnitWithinRangeLocator<ClearSpaceCollector> locator(gather_range, 0.0f);
+        locator.action.init(ships, kMaxShips);
+        findObjects(ss->collide_map[Unit::UNIT_ONLY], parent->location[Unit::UNIT_ONLY], &locator);
+    }
+    std::vector<std::pair<double, Unit *>> ranked;
+    // gravitational bodies (few, large -- always considered)
+    Unit *u;
+    for (un_fiter iter = ss->gravitationalUnits().fastIterator(); (u = *iter); ++iter) {
+        if (u != nullptr && !u->Killed() && u != parent) {
+            ranked.emplace_back(UnitUtil::getSignificantDistance(parent, u), u);
         }
-        std::vector<std::pair<double, Unit *>> ranked;
-        // gravitational bodies (few, large -- always considered)
-        Unit *u;
-        for (un_fiter iter = ss->gravitationalUnits().fastIterator(); (u = *iter); ++iter) {
-            if (u != nullptr && !u->Killed() && u != parent) {
-                ranked.emplace_back(UnitUtil::getSignificantDistance(parent, u), u);
-            }
+    }
+    for (Unit *o : ships) {
+        if (o != nullptr && o != parent) {
+            ranked.emplace_back(UnitUtil::getSignificantDistance(parent, o), o);
         }
-        for (Unit *o : ships) {
-            if (o != nullptr && o != parent) {
-                ranked.emplace_back(UnitUtil::getSignificantDistance(parent, o), o);
-            }
-        }
-        std::sort(ranked.begin(), ranked.end(),
-                [](const std::pair<double, Unit *> &a, const std::pair<double, Unit *> &b) {
-                    return a.first < b.first;
-                });
-        if (ranked.size() > kMaxObjects) {
-            ranked.resize(kMaxObjects);
-        }
-
-        QVector sum(0.0f, 0.0f, 0.0f);
-        bool any = false;
-        // The destination must never be a repulsor -- it is where we want to go and
-        // it is fine that it compresses our ftl bubble. The autopilot target can be
-        // a subunit of the station, so match the whole unit (target and its owner).
-        Unit *target_root = target;
-        if (target != nullptr && target->isSubUnit()) {
-            target_root = UnitUtil::owner(target);
-        }
+    }
+    std::sort(ranked.begin(), ranked.end(),
+            [](const std::pair<double, Unit *> &a, const std::pair<double, Unit *> &b) {
+                return a.first < b.first;
+            });
+    // Cull only the soft, threadable obstacles once the count is capped. Never drop a
+    // hard body (planet/sun/base): you can't fly through or around its far side, so if
+    // it is in the ftl bubble it must always be accounted for, even when a crowd of
+    // closer ships would otherwise push it out of the top-N set.
+    {
+        std::vector<std::pair<double, Unit *>> kept;
+        size_t soft_kept = 0;
+        kept.reserve(ranked.size());
         for (const auto &pr : ranked) {
-            Unit *o = pr.second;
-            if (o == nullptr || o == parent || o == target || o == target_root) {
-                continue;
+            const bool hard = IsHardBody(pr.second);
+            if (hard || soft_kept < kMaxObjects) {
+                kept.push_back(pr);
+                if (!hard) {
+                    ++soft_kept;
+                }
             }
-            double sig = pr.first;
-            if (sig >= bubble) {
-                continue;
-            }
-            QVector to_obj = o->LocalPosition() - myposition;
-            double dist = to_obj.Magnitude();
-            if (dist < 0.0001) {
-                continue;
-            }
-            float weight = repel * static_cast<float>(1.0 - sig / bubble);
-            if (weight <= 0.0f) {
-                continue;
-            }
-            sum += (-to_obj / dist) * weight;
-            any = true;
         }
-        if (any) {
-            StraightToTarget = false;
-            // A steady pull toward the destination (it is where we want to go). With
-            // the bubble shrinking as we approach, repulsion fades and this takes
-            // over, so on arrival we simply fly to the target.
-            sum += destinationdirection * attract;
-            QVector desired;
-            double mag = sum.Magnitude();
-            if (mag > 0.0001) {
-                desired = sum / mag;
-            } else {
-                desired = destinationdirection;
-            }
-            double clear_distance = std::min(destinationdistance, static_cast<double>(gather_range));
-            destination = myposition + desired * clear_distance;
+        ranked = std::move(kept);
+    }
+
+    QVector sum(0.0f, 0.0f, 0.0f);
+    bool any = false;
+    // The destination must never be a repulsor -- it is where we want to go and
+    // it is fine that it compresses our ftl bubble. The autopilot target can be
+    // a subunit of the station, so match the whole unit (target and its owner).
+    Unit *target_root = target;
+    if (target != nullptr && target->isSubUnit()) {
+        target_root = UnitUtil::owner(target);
+    }
+    for (const auto &pr : ranked) {
+        Unit *o = pr.second;
+        if (o == nullptr || o == parent || o == target || o == target_root) {
+            continue;
         }
+        const bool hard = IsHardBody(o);
+        double sig = pr.first;
+        // A hard body (planet/sun/base) is a wall that also carries a SPEC exclusion
+        // zone around it (physics.warp_min_range) in which SPEC cannot operate. Treat
+        // its effective radius as being warp_min_range bigger, so the autopilot keeps
+        // the whole drop-out zone clear rather than only dodging the surface.
+        if (hard) {
+            sig -= static_cast<double>(configuration().physics.warp_min_range_flt);
+            if (sig < 0.0) {
+                sig = 0.0;
+            }
+        }
+        if (sig >= bubble) {
+            continue;
+        }
+        QVector to_obj = o->LocalPosition() - myposition;
+        double dist = to_obj.Magnitude();
+        if (dist < 0.0001) {
+            continue;
+        }
+        const float weight = repel
+                * (hard ? kHardBodyRepelMultiplier : 1.0f)
+                * static_cast<float>(1.0 - sig / bubble);
+        if (weight <= 0.0f) {
+            continue;
+        }
+        sum += (-to_obj / dist) * weight;
+        any = true;
+    }
+    if (any) {
+        StraightToTarget = false;
+        // A steady pull toward the destination (it is where we want to go). With
+        // the bubble shrinking as we approach, repulsion fades and this takes
+        // over, so on arrival we simply fly to the target.
+        sum += destinationdirection * attract;
+        QVector desired;
+        double mag = sum.Magnitude();
+        if (mag > 0.0001) {
+            desired = sum / mag;
+        } else {
+            desired = destinationdirection;
+        }
+        double clear_distance = std::min(destinationdistance, static_cast<double>(gather_range));
+        destination = myposition + desired * clear_distance;
     }
     if (!parent->ftl_drive.Enabled() && parent->graphicOptions.RampCounter == 0) {
         deactivatewarp = false;
