@@ -43,8 +43,12 @@ static const float BOLD_STROKE = 1.5;
 class Font {
 public:
 //Font size.  Vertical distance in identity space.
+    //
+    // Removed the legacy `* 0.5` (added 2011, commit e3b743d16a, as a scoped
+    // "stroke font size" fix) so size() returns the honest m_size. The font
+    // authoring values are re-scaled to compensate in a separate change.
     float size(void) const {
-        return m_size * 0.5;
+        return m_size;
     }
 
     void setSize(float s) {
