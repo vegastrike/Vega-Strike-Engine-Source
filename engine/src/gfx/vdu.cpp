@@ -816,6 +816,23 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
     }
     const std::string message_prefix = configuration().graphics.hud.message_prefix;
     fullstr = targetstr + fullstr;
+
+    // The Message VDU's shared text-plane width (set in VDU::Draw from the sprite
+    // geometry) is quite narrow, so long messages wrap onto many lines and overlap.
+    // Widen the wrap box to ~66% of the screen for messages only (this function is
+    // reached solely from the MSG case); the anchor (left edge) and height are kept,
+    // and other VDU types / the nav computer are untouched.
+    {
+        float cw = 0.0f, ch = 0.0f;
+        tp->GetSize(cw, ch);
+        // Full screen width == myDims.i = 2.0 (normToPixelW(2.0) == screen width).
+        const float full_screen_width = 2.0f;
+        const float message_wrap_width = full_screen_width * 0.66f;
+        if (cw < message_wrap_width) {
+            tp->SetSize(message_wrap_width, ch);
+        }
+    }
+
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     GFXColor tpbg(tp->background_color);
     bool automatte = (0 == tpbg.a);
