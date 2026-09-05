@@ -419,16 +419,8 @@ static float SellPrice(Unit *playerUnit, const Cargo *item) {
 const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0);
 
 
-std::string prettyPrintFloat(float value, int precision = 2) {
-    // TODO: Need to place this somewhere else
-    // Call this once if you want your whole program to follow system locale
-
-    std::locale::global(std::locale(""));
-
+std::string prettyPrintFloat(const float value, const int precision = 2) {
     std::ostringstream out;
-
-    // Use the user's global locale (setlocale/std::locale::global)
-    out.imbue(std::locale(""));
 
     // Fixed n digits after decimal + locale separators
     out << std::fixed << std::setprecision(precision) << value;
