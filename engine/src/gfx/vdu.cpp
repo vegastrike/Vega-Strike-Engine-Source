@@ -638,6 +638,34 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     }
     unitandfg += std::string("\n");
     unitandfg += cp->getTargetLabel();
+    const float auto_message_lim = configuration().graphics.auto_message_time_lim_flt;
+    float delautotime = UniverseUtil::GetGameTime() - cp->autoMessageTime;
+    bool draw_auto_message = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
+
+    // One text flow down the VDU: unit name/faction/label, then the range and any
+    // docking text beneath it. No newline-padding to push text to the bottom.
+    std::string display = unitandfg;
+    // unitandfg ends with a newline when the target label is empty; strip trailing
+    // newlines so the range/status line follows directly on the next line.
+    while (!display.empty() && display.back() == '\n') {
+        display.pop_back();
+    }
+    if (inrange) {
+        if (draw_auto_message) {
+            display += "\n" + cp->autoMessage;
+        }
+        const double actual_range = DistanceTwoTargets(parent, target);
+        display += string("\nRange: ") + PrettyDistanceString(actual_range);
+        const std::string docking = GetDockingText(parent, target, actual_range);
+        if (!docking.empty()) {
+            display += "\n" + docking;
+        }
+    } else if (draw_auto_message) {
+        display += "\n" + cp->autoMessage;
+    } else {
+        display += "\n[OutOfRange]";
+    }
+
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
     GFXColor tpbg(tp->background_color);
     bool automatte = (0 == tpbg.a);
@@ -645,44 +673,13 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         GFXColor temp_background_color( 0, 0, 0, background_alpha );
         tp->background_color = static_cast<ImU32>(temp_background_color);
     }
-    tp->Draw(MangleString(unitandfg, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
+    tp->Draw(MangleString(display, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
             0,
             true,
             false,
             automatte);
     tp->background_color = static_cast<ImU32>(tpbg);
-    const float auto_message_lim = configuration().graphics.auto_message_time_lim_flt;
-    float delautotime = UniverseUtil::GetGameTime() - cp->autoMessageTime;
-    bool draw_auto_message = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
     if (inrange) {
-        char st[1024];
-        memset(st, '\n', 1023);
-        int tmplim = rows - 3;
-        if (draw_auto_message == true) {
-            tmplim--;
-        }
-        st[tmplim] = '\0';
-        std::string newst(st);
-        if (draw_auto_message) {
-            newst += cp->autoMessage + "\n";
-        }
-        newst += '\n';
-        double actual_range = DistanceTwoTargets(parent, target);
-        newst += GetDockingText(parent, target, actual_range);
-        newst += string("\nRange: ") + PrettyDistanceString(actual_range);
-        const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-        GFXColor tpbg(tp->background_color);
-        bool automatte = (0 == tpbg.a);
-        if (automatte) {
-            GFXColor temp_background_color( 0, 0, 0, background_alpha );
-            tp->background_color = static_cast<ImU32>(temp_background_color);
-        }
-        tp->Draw(MangleString(newst, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
-                0,
-                true,
-                false,
-                automatte);
-        tp->background_color = static_cast<ImU32>(tpbg);
         static float ishieldcolor[4] = {.4, .4, 1, 1};
         static float mshieldcolor[4] = {.4, .4, 1, 1};
         static float oshieldcolor[4] = {.4, .4, 1, 1};
@@ -706,26 +703,6 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
  *   GFXDisable (TEXTURE0);
  *  }*/
         GFXColor4f(1, 1, 1, 1);
-    } else {
-        const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-        GFXColor tpbg(tp->background_color);
-        bool automatte = (0 == tpbg.a);
-        if (automatte) {
-            GFXColor temp_background_color( 0, 0, 0, background_alpha );
-            tp->background_color = static_cast<ImU32>(temp_background_color);
-        }
-        if (draw_auto_message) {
-            tp->Draw(MangleString(std::string("\n") + cp->autoMessage, _Universe->AccessCamera()->GetNebula()
-                            != NULL ? .4 : 0),
-                    0,
-                    true,
-                    false,
-                    automatte);
-        } else {
-            tp->Draw(MangleString("\n[OutOfRange]",
-                    _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
-        }
-        tp->background_color = static_cast<ImU32>(tpbg);
     }
 }
 
