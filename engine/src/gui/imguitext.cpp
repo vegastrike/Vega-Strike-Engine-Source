@@ -64,7 +64,7 @@ void ImGuiText::draw(int firstLineToDraw) {
     float pixelY = m_multiLine ? Coordinates::normToPixelY(m_rect.top()) : Coordinates::normToPixelY((m_rect.top() + m_rect.bottom()) *0.5f);
     float pixelWidth = Coordinates::normToPixelW(m_rect.size.width);
 
-    ImVec2 textSize = getTextWidth(m_text.c_str(), m_font.size());
+    ImVec2 textSize = getTextWidth(m_text.c_str());
     // position single-line text half a line down so it is perfectly centered
     if(!m_multiLine) {
         pixelY -= (textSize.y * 0.5f);
@@ -230,14 +230,10 @@ int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) 
     return result;
 }
 
-ImVec2 ImGuiText::getTextWidth(const std::string text, const float fontSize) {
-    // fontSize is a normalized font size (fraction of screen height). Measure the
-    // text at the SAME pixel size the draw() path renders its glyphs at
-    // (Coordinates::normToPixelFontSize), so layout (wrap width, line height,
-    // centering, scroll counts) agrees with what is actually drawn. This replaces
-    // the old hand-rolled font_point/resolution-relative scaleFactor, which was a
-    // second, incompatible size convention that drifted from rendering.
-    // Measure at the same user-set glyph height (font_point) that draw() renders at.
+ImVec2 ImGuiText::getTextWidth(const std::string text) {
+    // Glyph height comes from the user-set Text Height (font_point), matching what
+    // draw() renders at, so layout (wrap width, line height, centering, scroll
+    // counts) agrees with what is actually drawn.
     const float pixelFontSize = configuration().graphics.font_point_flt;
     ImFont* font = ImGui::GetFont();
     if (font && font->IsLoaded()) {
@@ -428,7 +424,7 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
     // Helper to add fragment
     auto addFragment = [&](const std::string& text) {
         // if (text.empty()) return;
-        ImVec2 dimensions = getTextWidth(text,  m_fontStack.back().size());
+        ImVec2 dimensions = getTextWidth(text);
         currentLine.push_back({text, m_fontStack.back(), m_colorStack.back(), m_fontStack.back().strokeWeight() == BOLD_STROKE, dimensions.x});
         currentLine.width += dimensions.x;
         // update lineheight if fragment is larger
@@ -509,7 +505,7 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
                     if(!m_multiLine) {
                         currentFragmentText += ELLIPSIS_STRING;
                     }
-                    if(currentLine.width + getTextWidth(currentFragmentText,  m_fontStack.back().size()).x > widthInPixels) {
+                    if(currentLine.width + getTextWidth(currentFragmentText).x > widthInPixels) {
                         // break at last word break
                         addFragment(input.substr(fragmentStartPos, lastWordBreakPos - fragmentStartPos) + (m_multiLine ? "" : ELLIPSIS_STRING));
                         fragmentStartPos = lastWordBreakPos;
