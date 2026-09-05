@@ -53,7 +53,6 @@ public:
 
     void setSize(float s) {
         m_size = s;
-        m_needMetrics = true;
     }
 
 //The "boldness" of the font.  See predefined weights above for examples.
@@ -63,76 +62,17 @@ public:
 
     void setStrokeWeight(float w) {
         m_strokeWeight = w;
-        m_needMetrics = true;
     }
-
-//Draw a character.  Assumes scaling is done, current color set, etc.
-    float drawChar(char c, float xOffset = 0) const;
-
-//The width of a character in reference units.
-    double charWidth(char c) const;
-
-//The width of a string in reference units.
-    double stringWidth(const std::string &str) const;
-
-//Vertical scaling factor from char reference space to identity space to be used to image this font.
-    double verticalScaling(void) const;
-
-//Horizontal scaling factor from char reference space to identity space to be used to image this font.
-    double horizontalScaling(void) const;
-
-// Returns the font ascent
-    double ascent(void) const;
-
-// Returns the font descent
-    double descent(void) const;
 
 //CONSTRUCTION
     Font(float newsize = .1, float weight = NORMAL_STROKE) :
             m_size(newsize),
-            m_strokeWeight(weight),
-            m_needMetrics(true),
-            m_strokeWidth(1.0),
-            m_extraCharWidth(0.5),
-            m_spaceCharFixup(10.0),
-            m_verticalScaling(1.0),
-            m_horizontalScaling(1.0) {
+            m_strokeWeight(weight) {
     }
 
-//METRICS
-    double strokeWidth(void) const; //Get the stroke width.
-
-//OPERATORS
-    bool operator==(const Font &other) {
-        return m_size == other.m_size && m_strokeWeight == other.m_strokeWeight;
-    }
-
-    bool operator!=(const Font &other) {
-        return !(*this == other);
-    }
-
-protected:
-//INTERNAL IMPLEMENTATION
-
-//Calculate the metrics for this font.
-//This does the real work, and doesn't check whether it needs to be done.
-    void calcMetrics(void);
-
-    // Check whether we need to recalc the metrics, and do it in const object.
-    void calcMetricsIfNeeded(void) const;
-
-protected:
 //VARIABLES
     float m_size;          //Size of font. Vertical distance in identity space.
     float m_strokeWeight;  //"Look" of stroke font.  Weight of stroke in characters.
-
-//METRICS
-    bool m_needMetrics;       //True = we need to recalc the metrics for this font.
-    double m_strokeWidth;       //The OpenGL stroke width for this size chars.
-    double m_extraCharWidth;    //We add extra char width to compensate for stroke overlap.
-    double m_spaceCharFixup;    //Negative translation to apply to space character.
-    double m_verticalScaling;   //Vertical factor from char reference space to identity space.
-    double m_horizontalScaling; //Horizontal factor from char reference space to identity space.
 };
 
 #endif   //VEGA_STRIKE_ENGINE_GUI_FONT_H
