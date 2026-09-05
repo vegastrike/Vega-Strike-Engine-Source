@@ -89,7 +89,9 @@ void ImGuiText::draw(int firstLineToDraw) {
         }
         
         for (const auto& frag : line) {
-            float pixelFontSize = Coordinates::normToPixelFontSize(frag.font.size());
+            // Glyph height comes from the user-set Text Height (font_point); no
+            // resolution-derived font-height calculation here.
+            float pixelFontSize = configuration().graphics.font_point_flt;
             // Draw Bold "shadow"
             if (frag.isBold || m_font.strokeWeight() == BOLD_STROKE) {
                 draw_list->AddText(nullptr, pixelFontSize, 
@@ -235,7 +237,8 @@ ImVec2 ImGuiText::getTextWidth(const std::string text, const float fontSize) {
     // centering, scroll counts) agrees with what is actually drawn. This replaces
     // the old hand-rolled font_point/resolution-relative scaleFactor, which was a
     // second, incompatible size convention that drifted from rendering.
-    const float pixelFontSize = Coordinates::normToPixelFontSize(fontSize);
+    // Measure at the same user-set glyph height (font_point) that draw() renders at.
+    const float pixelFontSize = configuration().graphics.font_point_flt;
     ImFont* font = ImGui::GetFont();
     if (font && font->IsLoaded()) {
         return font->CalcTextSizeA(pixelFontSize, FLT_MAX, -1.0f, text.c_str());
