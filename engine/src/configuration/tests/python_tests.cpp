@@ -82,6 +82,8 @@ TEST(Python, Call_Function) {
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
 
+    py_pre_config.coerce_c_locale = 1;
+
     PyStatus status;
 
     status = Py_PreInitialize(&py_pre_config);
