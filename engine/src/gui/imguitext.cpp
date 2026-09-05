@@ -229,16 +229,20 @@ int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) 
 }
 
 ImVec2 ImGuiText::getTextWidth(const std::string text, const float fontSize) {
-    // ImFont* font = ImGui::GetFont();
-    ImVec2 size2,size = ImVec2(0,0);
-    float scaleFactor = fontSize * configuration().graphics.resolution_y / configuration().graphics.font_point_flt * 0.5;
-    // FIXME normally this would be te way, but it throws exceptions, scalefactor as workaround
-    // if (font && font->IsLoaded()) {
-    //     size = font->CalcTextSizeA(Coordinates::normToPixelFontSize(fontSize), FLT_MAX, -1.0f, text.c_str());
-    // } else {
-        size = ImGui::CalcTextSize(text.c_str());
-    // }
-    return ImVec2(size.x * scaleFactor, size.y * scaleFactor);
+    // fontSize is a normalized font size (fraction of screen height). Measure the
+    // text at the SAME pixel size the draw() path renders its glyphs at
+    // (Coordinates::normToPixelFontSize), so layout (wrap width, line height,
+    // centering, scroll counts) agrees with what is actually drawn. This replaces
+    // the old hand-rolled font_point/resolution-relative scaleFactor, which was a
+    // second, incompatible size convention that drifted from rendering.
+    const float pixelFontSize = Coordinates::normToPixelFontSize(fontSize);
+    ImFont* font = ImGui::GetFont();
+    if (font && font->IsLoaded()) {
+        return font->CalcTextSizeA(pixelFontSize, FLT_MAX, -1.0f, text.c_str());
+    }
+    // No font bound yet (measuring outside a render window): fall back to the
+    // default-font measure rather than the per-size one.
+    return ImGui::CalcTextSize(text.c_str());
 }
 
 //Get a floating-point argument for a PaintText format command.
