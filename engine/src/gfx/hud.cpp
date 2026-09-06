@@ -233,8 +233,18 @@ void drawBackgroundAroundText(ImDrawList* draw_list, ImU32 background_color,
 
 
 int TextPlane::Draw(const string &newText, int offset, bool start_lower, bool force_highquality, bool automatte) {
-    std::pair<int,int> pair = CalculateAbsoluteXY(myDims.k, myFontMetrics.k);
-    ImVec2 position(pair.first, pair.second);
+    // Anchor: when a per-text resolution is set, map normalized coords against it and
+    // shift by the letterbox offset; otherwise use the legacy native-pixel mapping.
+    float anchor_x = 0.0f, anchor_y = 0.0f;
+    if (m_resW > 0.0f && m_resH > 0.0f) {
+        anchor_x = Coordinates::normToPixelX(myDims.k, m_resW) + m_offX;
+        anchor_y = Coordinates::normToPixelY(myFontMetrics.k, m_resH) + m_offY;
+    } else {
+        std::pair<int,int> native = CalculateAbsoluteXY(myDims.k, myFontMetrics.k);
+        anchor_x = static_cast<float>(native.first);
+        anchor_y = static_cast<float>(native.second);
+    }
+    ImVec2 position(anchor_x, anchor_y);
 
     std::vector<TextLine> lines = ParseText(newText, color);
     ImVec2 text_size;
@@ -285,7 +295,7 @@ int TextPlane::Draw(const string &newText, int offset, bool start_lower, bool fo
         }
 
         position.y += text_size.y;
-        position.x = pair.first;
+        position.x = anchor_x;
     }
 
     return 1;
