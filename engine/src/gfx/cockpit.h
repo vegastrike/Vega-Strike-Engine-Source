@@ -47,7 +47,7 @@ class NavigationSystem;
 #include "nav/navscreen.h"
 #include "nav/navigation_system.h"
 
-using namespace XMLSupport;   // DONT PUT THIS ABOVE HEADERS
+using namespace XMLSupport; // DONT PUT THIS ABOVE HEADERS
 #define NUM_CAM CP_NUMVIEWS
 /**
  * The Cockpit Contains all displayable information about a particular Unit *
@@ -55,7 +55,7 @@ using namespace XMLSupport;   // DONT PUT THIS ABOVE HEADERS
  * The ones starting from KPS are digital with text readout
  */
 
-struct soundContainer   //used to contain static sounds that will only be
+struct soundContainer //used to contain static sounds that will only be
 {
     //created once and will get deleted automatically
     int sound;
@@ -65,7 +65,9 @@ struct soundContainer   //used to contain static sounds that will only be
     }
 
     void loadsound(string sooundfile, bool looping = false);
+
     void playsound();
+
     ~soundContainer();
 };
 
@@ -164,57 +166,94 @@ class GameCockpit : public Cockpit {
     float projection_limit_x, projection_limit_y;
     float inv_screen_aspect_ratio; //Precomputed division 1 / configuration().graphics.aspect.
     void SetParent(Unit *unit, const QVector &startloc) override;
+
     void LoadXML(const char *file) override;
+
     void LoadXML(VSFileSystem::VSFile &f) override;
+
     void beginElement(const string &name, const AttributeList &attributes) override;
+
     void endElement(const string &name) override;
+
     ///Destructs cockpit info for new loading
     void Delete() override;
+
     ///Trigger scripted events
     void TriggerEvents(Unit *un);
+
     NavigationSystem ThisNav;
+
     void updateRadar(Unit *un);
+
 public:
     std::string textMessage;
     bool editingTextMessage;
     std::string autoMessage;
     float autoMessageTime;
+
     void setTargetLabel(const string &msg) override;
+
     string getTargetLabel() override;
+
     void ReceivedTargetInfo() override;
+
     static void NavScreen(const KBData &, KBSTATE k); //scheherazade
     static string getsoundending(int which = 0);
+
     static string getsoundfile(string filename);
+
     void InitStatic() override;
-    void Shake(float amt, int level /*0= shield 1=armor 2=hull*/ ) override;
+
+    void Shake(float amt, int level /*0= shield 1=armor 2=hull*/) override;
+
     int Autopilot(Unit *target) override;
+
     ///Restores the view from the IDentity Matrix needed to draw sprites
     void RestoreViewPort() override;
+
     GameCockpit(const char *file, Unit *parent, const std::string &pilotname);
+
     ~GameCockpit() override;
 
     ///Looks up a particular Gauge stat on unit
     float LookupUnitStat(int stat, Unit *target);
+
     ///Loads cockpit info...just as constructor
     void Init(const char *file);
+
     ///Draws Cockpit then restores viewport
     void Draw() override;
+
     //void Update();//respawns and the like.
     void UpdAutoPilot() override;
+
     ///Sets up the world for rendering...call before draw
     void SetupViewPort(bool clip = true) override;
+
     int getVDUMode(int vdunum) override;
+
     void VDUSwitch(int vdunum) override;
+
     void ScrollVDU(int vdunum, int howmuch) override;
+
     void ScrollAllVDU(int howmuch) override;
+
     int getScrollOffset(unsigned int whichtype) override;
+
     void SelectProperCamera() override;
+
     void Eject() override;
+
     void EjectDock() override;
+
     static void Respawn(const KBData &, KBSTATE);
+
     static void SwitchControl(const KBData &, KBSTATE);
+
     static void ForceSwitchControl(const KBData &, KBSTATE);
+
     static void TurretControl(const KBData &, KBSTATE);
+
     void SetSoundFile(std::string sound);
 
     int GetSoundFile() const {
@@ -222,6 +261,7 @@ public:
     }
 
     void SetCommAnimation(Animation *ani, Unit *un) override;
+
     void SetStaticAnimation() override;
 
     ///Accesses the current navigationsystem
@@ -238,6 +278,7 @@ public:
 
     ///Returns the passed in cam
     Camera *AccessCamera(int) override;
+
     ///Changes current camera to selected camera
     void SelectCamera(int) override;
 
@@ -247,23 +288,34 @@ public:
     }
 
     bool SetDrawNavSystem(bool) override;
+
     bool CanDrawNavSystem() override;
+
     bool CheckCommAnimation(Unit *un) override;
+
     void visitSystem(std::string systemName) override;
+
     void AutoLanding();
+
     void DoAutoLanding(Unit *, Unit *);
 
     void SetInsidePanYawSpeed(float speed) override;
+
     void SetInsidePanPitchSpeed(float speed) override;
 
     bool IsPaused() const;
+
     // Game is paused
     void OnPauseBegin() override;
+
     void OnPauseEnd() override;
+
     // Ship has undocked from station
     void OnDockEnd(Unit *station, Unit *unit) override;
+
     // Ship is jumping
     void OnJumpBegin(Unit *unit) override;
+
     void OnJumpEnd(Unit *unit) override;
 
 protected:
