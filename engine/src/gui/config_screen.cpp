@@ -19,6 +19,7 @@
 #include "config_xml.h"
 #include "src/vs_exit.h"
 #include "cmd/music.h"
+#include "vega_cast_utils.h"
 #include "src/audiolib.h"
 #include <boost/json.hpp>
 #include <boost/filesystem.hpp>
@@ -48,6 +49,7 @@ SDL_DisplayID sel_display_id = 0;
 int  sel_res_w = 0, sel_res_h = 0;
 std::string monitor_text, resolution_text;
 char text_height_buf[16] = "16";
+char hud_fov_buf[16] = "37.5";
 static const char *aspect_opts[] = { "16:10 (1.6)", "16:9 (1.78)", "4:3 (1.33)", "5:4 (1.25)", "1:1 (1.0)" };
 static const float aspect_vals[] = { 1.6f, 16.0f / 9.0f, 4.0f / 3.0f, 1.25f, 1.0f };
 int  sel_base_aspect = 0;      // aspect_opts[0] = 16:10 (default base aspect)
@@ -310,6 +312,7 @@ static void load_display_from_config() {
     cfg_full_screen = g.full_screen;
     int fp = (int)g.font_point_flt;
     snprintf(text_height_buf, sizeof(text_height_buf), "%d", fp);
+    snprintf(hud_fov_buf, sizeof(hud_fov_buf), "%g", g.fov_flt);
     // screen (monitor) index.
     sel_monitor = g.screen;
     int nd = 0; SDL_DisplayID *ids = SDL_GetDisplays(&nd);
@@ -342,6 +345,13 @@ static void apply_display_to_config() {
     g.font_point_flt = (float)atoi(text_height_buf);
     mark_dirty("graphics.font_point");
     RequestImGuiFontSize(g.font_point_flt);   // live-rebuild the ImGui font atlas at the new size
+    // HUD FOV: persist and hot-apply to the camera.
+    g.fov_flt = locale_aware_stof(std::string(hud_fov_buf));
+    g.fov_dbl = locale_aware_stod(std::string(hud_fov_buf));
+    mark_dirty("graphics.fov");
+    if (_Universe && _Universe->AccessCamera()) {
+        _Universe->AccessCamera()->SetFov(g.fov_flt);
+    }
     // Persist the selected font ("Roboto" sentinel or a .ttf filename); only hot-apply
     // a font change when the selection actually differs from the current font, so a
     // size-only Save does not force an atlas rebuild.
@@ -481,6 +491,11 @@ void draw_display_frame() {
             if (ImGui::MenuItem(aspect_opts[i])) { sel_base_aspect = (int)i; base_aspect_text = aspect_opts[i]; dirty = true; }
         ImGui::EndPopup();
     }
+    // HUD FOV.
+    ImGui::Text("HUD FOV"); ImGui::SameLine();
+    ImGui::SetNextItemWidth(60);
+    if (ImGui::InputText("##hudfov", hud_fov_buf, sizeof(hud_fov_buf), ImGuiInputTextFlags_CharsDecimal))
+        dirty = true;
     ImGui::EndChild();   // end dpyframe (left column)
 
     // Right column: Flight Control + Input buttons + Rendered Crosshair, side by
@@ -1602,6 +1617,7 @@ static const ConfigAccessor kConfigAccessors[] = {
     {"graphics.gl_accelerated_visual",   [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.gl_accelerated_visual;}, [](vega_config::Configuration&c,const std::string&v){c.graphics.gl_accelerated_visual=(v=="true"||v=="1");}},
     {"graphics.aspect",                  [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.aspect_flt;},            [](vega_config::Configuration&c,const std::string&v){c.graphics.aspect_flt=(float)atof(v.c_str());c.graphics.aspect_dbl=atof(v.c_str());}},
     {"graphics.font_point",              [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.font_point_flt;},        [](vega_config::Configuration&c,const std::string&v){c.graphics.font_point_flt=(float)atof(v.c_str());c.graphics.font_point_dbl=atof(v.c_str());}},
+    {"graphics.fov",                     [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.fov_flt;},               [](vega_config::Configuration&c,const std::string&v){c.graphics.fov_flt=locale_aware_stof(v.c_str());c.graphics.fov_dbl=locale_aware_stod(v.c_str());}},
     {"graphics.model_detail",            [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.model_detail_flt;},      [](vega_config::Configuration&c,const std::string&v){c.graphics.model_detail_flt=(float)atof(v.c_str());c.graphics.model_detail_dbl=atof(v.c_str());}},
     {"graphics.mipmap_detail",           [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.mipmap_detail;},         [](vega_config::Configuration&c,const std::string&v){c.graphics.mipmap_detail=atoi(v.c_str());}},
     {"graphics.planet_detail_level",     [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.planet_detail_level;},   [](vega_config::Configuration&c,const std::string&v){c.graphics.planet_detail_level=atoi(v.c_str());}},
