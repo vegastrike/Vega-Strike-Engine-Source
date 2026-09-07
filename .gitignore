@@ -16,7 +16,6 @@ packages/
 engine/.idea/
 .idea/
 .venv/
-.editorconfig
 
 engine/src/version.h
 engine/setup/src/include/version.h
