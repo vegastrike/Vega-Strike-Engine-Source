@@ -754,6 +754,13 @@ const std::string &Unit::getCockpit() const {
     return pImage->cockpitImage.get();
 }
 
+float Unit::GetMoment() const {
+    // Moment of inertia is treated as the ship's current mass (base + cargo +
+    // upgrades), not a load-time snapshot. Tracking the live mass keeps turning
+    // responsive to what the ship is actually carrying; see the header comment.
+    return static_cast<float>(GetMass());
+}
+
 void Unit::Select() {
     selected = true;
 }
