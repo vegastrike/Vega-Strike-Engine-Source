@@ -1066,7 +1066,7 @@ void RestoreSpecMapState(bool envMap, bool detailMap, bool write_to_depthmap, fl
     GFXPopBlendMode();
 }
 
-void Mesh::ProcessDrawQueue(size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {
+void Mesh::ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {
     //Process the pass for all queued instances
     const Pass &pass = technique->getPass(whichpass);
     if (pass.type == Pass::ShaderPass) {
