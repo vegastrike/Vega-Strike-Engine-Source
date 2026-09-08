@@ -42,11 +42,6 @@ static const float BOLD_STROKE = 1.5;
 //a lighter look.
 class Font {
 public:
-//Font size.  Vertical distance in identity space.
-    //
-    // Removed the legacy `* 0.5` (added 2011, commit e3b743d16a, as a scoped
-    // "stroke font size" fix) so size() returns the honest m_size. The font
-    // authoring values are re-scaled to compensate in a separate change.
     float size(void) const {
         return m_size;
     }
@@ -71,7 +66,7 @@ public:
     }
 
 //VARIABLES
-    float m_size;          //Size of font. Vertical distance in identity space.
+    float m_size;          // Font size, as a fraction of the screen height.
     float m_strokeWeight;  //"Look" of stroke font.  Weight of stroke in characters.
 };
 
