@@ -598,12 +598,6 @@ public:
     ///Resolves forces of given unit on a physics frame
     Vector ResolveForces(const Transformation &, const Matrix &) override;
 
-    /// Moment of inertia tracks the ship's current mass (base + cargo + upgrades).
-    /// The base Movable stores a load-time snapshot (Momentofinertia = GetMass() in
-    /// LoadRow) that goes stale as cargo changes during a session; returning the live
-    /// mass keeps turning/handling in sync with what the ship is actually carrying.
-    float GetMoment() const override;
-
 //What's the size of this unit
     float rSize() const {
         return radial_size;

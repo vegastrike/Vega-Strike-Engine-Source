@@ -201,7 +201,7 @@ public:
     void SetVelocity(const Vector &);
     void SetAngularVelocity(const Vector &);
 
-    virtual float GetMoment() const {
+    float GetMoment() const {
         return Momentofinertia; // TODO: subclass with return Momentofinertia+fuel;
     }
 
