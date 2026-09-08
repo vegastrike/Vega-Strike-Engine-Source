@@ -357,8 +357,8 @@ string createPipedString(vector<string> s) {
 
 
 // Writes the player fleet to the given save slot's serialized dir. The slot is passed in
-// explicitly so an autosave can NEVER write the fleet into a named/loaded save slot (which
-// would clobber it with unsaved changes). See save-slot-model-design.md.
+// explicitly so an autosave can NEVER write the fleet into a named/loaded save slot, which
+// would clobber it with unsaved changes.
 void WriteUnits(const std::string& slot) {
     const std::string savegame_root_dir = homedir + "/";
     const std::string save_dir = savegame_root_dir + VSFileSystem::savedunitpath + "/" + slot;
