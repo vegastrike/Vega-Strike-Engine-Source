@@ -356,9 +356,12 @@ string createPipedString(vector<string> s) {
 
 
 
-void WriteUnits() {
+// Writes the player fleet to the given save slot's serialized dir. The slot is passed in
+// explicitly so an autosave can NEVER write the fleet into a named/loaded save slot (which
+// would clobber it with unsaved changes). See save-slot-model-design.md.
+void WriteUnits(const std::string& slot) {
     const std::string savegame_root_dir = homedir + "/";
-    const std::string save_dir = savegame_root_dir + VSFileSystem::savedunitpath + "/" + current_savegame_name;
+    const std::string save_dir = savegame_root_dir + VSFileSystem::savedunitpath + "/" + slot;
     const std::string file_path = save_dir + "/player_fleet.json";
     
     if(boost::filesystem::exists(save_dir)) {
@@ -418,7 +421,9 @@ void WriteSaveGame(Cockpit *cp, bool auto_save) {
         cp->savegame->SetPlayerLocation(un->LocalPosition());
     }
 
-    WriteUnits();
+    // Autosaves write the fleet ONLY to the Autosave working slot. A named/loaded
+    // save slot is written only by an explicit manual save (auto_save == false).
+    WriteUnits(auto_save ? std::string("Autosave") : current_savegame_name);
 }
 
 int hopto(char *buf, char endln, char endln2, int readlen) {
