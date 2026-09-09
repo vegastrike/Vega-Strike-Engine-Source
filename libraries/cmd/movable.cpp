@@ -323,9 +323,9 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     if (NetTorque.i || NetTorque.j || NetTorque.k) {
         temp1 += InvTransformNormal(transmat, NetTorque);
     }
-    const double angular_mass = unit->GetMass();
+    const float angular_mass = unit->GetMass();
     if (angular_mass != 0) {
-        temp1 = temp1 / static_cast<float>(angular_mass);
+        temp1 = temp1 / angular_mass;
     }
 
     // TODO: restore this with the unit name
