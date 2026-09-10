@@ -123,4 +123,55 @@ void DrawTextBox(ImDrawList *draw_list,
     DrawTextLayout(draw_list, origin, laid_out.layout, laid_out.font_px, default_color, &clip, box.scroll_start_line);
 }
 
+void DrawPicker(ImDrawList *draw_list,
+                const PickerStyle &style,
+                const std::vector<PickerRow> &rows,
+                const Viewport &viewport,
+                const PickerColors &colors,
+                int selected_index,
+                int highlighted_index,
+                float scroll_px) {
+    if (draw_list == nullptr) {
+        return;
+    }
+    const ImGuiTextMeasurer measurer;
+    const PickerLayout layout = LayoutPicker(style, rows, viewport, measurer, scroll_px);
+    const ImVec2 clip_min(layout.viewport_x, layout.viewport_y);
+    const ImVec2 clip_max(layout.viewport_x + layout.viewport_width, layout.viewport_y + layout.viewport_height);
+    const ImVec4 clip(clip_min.x, clip_min.y, clip_max.x, clip_max.y);
+    const float font_px = FontGridToPixel(style.font_grid, viewport);
+
+    draw_list->PushClipRect(clip_min, clip_max, true);
+    for (std::size_t i = 0; i < layout.visible_rows.size(); ++i) {
+        const PickerRowLayout &row = layout.visible_rows[i];
+        const float row_top = layout.viewport_y + row.y - layout.scroll_px;
+        const float row_bottom = row_top + row.height;
+
+        const bool selected = (row.index == selected_index);
+        const bool highlighted = (row.index == highlighted_index);
+        ImU32 background = colors.background;
+        ImU32 text_color = colors.text;
+        if (selected) {
+            background = colors.selection_background;
+            text_color = colors.selection_text;
+        } else if (highlighted) {
+            background = colors.highlight_background;
+            text_color = colors.highlight_text;
+        }
+
+        const bool opaque = ((background >> IM_COL32_A_SHIFT) & 0xFF) != 0;
+        if (opaque) {
+            draw_list->AddRectFilled(ImVec2(clip_min.x, row_top), ImVec2(clip_max.x, row_bottom), background);
+        }
+
+        // A row's explicit colour overrides the per-state default. The row colour
+        // is stored on the row; the laid-out text carries it too, so pass the state
+        // colour as the fallback.
+        const ImU32 row_default = ToImU32(row.text_color, text_color);
+        const ImVec2 origin(layout.viewport_x + row.indent_px, row_top + row.padding_px);
+        DrawTextLayout(draw_list, origin, row.text, font_px, row_default, &clip);
+    }
+    draw_list->PopClipRect();
+}
+
 } // namespace vega_draw
