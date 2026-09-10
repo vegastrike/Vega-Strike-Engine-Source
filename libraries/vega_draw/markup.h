@@ -76,6 +76,10 @@ struct Run {
 struct Line {
     std::vector<Run> runs;
     bool manual_break = false;
+    // Extra line advance after this line, as a fraction of the line height
+    // (0 = the font's natural line advance). Carried by the legacy '#n'/'#l'
+    // codes; a backend may ignore it and use its own spacing.
+    float line_spacing = 0.0f;
 };
 
 using TextLines = std::vector<Line>;
