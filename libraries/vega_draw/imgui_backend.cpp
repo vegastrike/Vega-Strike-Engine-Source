@@ -154,8 +154,8 @@ void DrawPicker(ImDrawList *draw_list,
 
         const bool selected = (row.index == selected_index);
         const bool highlighted = (row.index == highlighted_index);
-        ImU32 background = colors.background;
-        ImU32 text_color = colors.text;
+        Color background = colors.background;
+        Color text_color = colors.text;
         if (selected) {
             background = colors.selection_background;
             text_color = colors.selection_text;
@@ -164,15 +164,16 @@ void DrawPicker(ImDrawList *draw_list,
             text_color = colors.highlight_text;
         }
 
-        const bool opaque = ((background >> IM_COL32_A_SHIFT) & 0xFF) != 0;
-        if (opaque) {
-            draw_list->AddRectFilled(ImVec2(clip_min.x, row_top), ImVec2(clip_max.x, row_bottom), background);
+        if (background.a != 0) {
+            const ImU32 bg = IM_COL32(background.r, background.g, background.b, background.a);
+            draw_list->AddRectFilled(ImVec2(clip_min.x, row_top), ImVec2(clip_max.x, row_bottom), bg);
         }
+        const ImU32 text_color_u32 = IM_COL32(text_color.r, text_color.g, text_color.b, text_color.a);
 
         // A row's explicit colour overrides the per-state default. The row colour
         // is stored on the row; the laid-out text carries it too, so pass the state
         // colour as the fallback.
-        const ImU32 row_default = ToImU32(row.text_color, text_color);
+        const ImU32 row_default = ToImU32(row.text_color, text_color_u32);
         const ImVec2 origin(layout.viewport_x + row.indent_px, row_top + row.padding_px);
         DrawTextLayout(draw_list, origin, row.text, font_px, row_default, &clip);
     }

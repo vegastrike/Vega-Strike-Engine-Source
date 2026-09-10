@@ -92,17 +92,6 @@ void DrawTextBox(ImDrawList *draw_list,
                  const Viewport &viewport,
                  ImU32 default_color);
 
-// Per-row colours for a picker. Backgrounds with zero alpha are not painted.
-// Selection takes precedence over highlight, as in the existing base pickers.
-struct PickerColors {
-    ImU32 text = IM_COL32(255, 255, 255, 255);
-    ImU32 background = 0;             // transparent (no per-row background)
-    ImU32 selection_background = 0;
-    ImU32 selection_text = 0;
-    ImU32 highlight_background = 0;
-    ImU32 highlight_text = 0;
-};
-
 // Draw a picker: lay out the rows (indent/wrap applied), paint a per-row
 // selection/highlight background, and draw each row's text, all clipped to the
 // row viewport. `selected_index`/`highlighted_index` index into `rows` (-1 for

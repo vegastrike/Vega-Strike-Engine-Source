@@ -69,6 +69,17 @@ struct PickerStyle {
     bool wrap_rows = false;        // rows grow to fit wrapped text
 };
 
+// Per-row colours. Zero-alpha backgrounds are not painted; selection takes
+// precedence over highlight. Renderer-agnostic (the adapter converts to ImU32).
+struct PickerColors {
+    Color text{255, 255, 255, 255, true};
+    Color background{0, 0, 0, 0, true};
+    Color selection_background{0, 0, 0, 0, true};
+    Color selection_text{255, 255, 255, 255, true};
+    Color highlight_background{0, 0, 0, 0, true};
+    Color highlight_text{255, 255, 255, 255, true};
+};
+
 struct PickerRowLayout {
     int index = 0;             // index into the supplied rows
     std::uint64_t id = 0;      // caller identity of the row
