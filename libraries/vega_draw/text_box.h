@@ -74,6 +74,10 @@ struct TextBox {
     float autofit_max_grid = 120.0f;
 };
 
+// Value equality (used for change detection by TextBoxLayoutCache).
+bool operator==(const TextBox &a, const TextBox &b);
+bool operator!=(const TextBox &a, const TextBox &b);
+
 // Inner text region in pixels (the region inset by the margins).
 struct BoxRect {
     float x = 0.0f;
@@ -103,6 +107,34 @@ int TextBoxVisibleLineCount(const TextBox &box,
                             const TextLayout &layout,
                             const Viewport &viewport,
                             int start_line);
+
+// Caches a box's layout and re-computes it only when an input (box config, text,
+// viewport) changes -- so an owner can lay out once per change rather than every
+// frame. `version()` increments on each recompute, giving a change signal an owner
+// (e.g. a scroller) can poll to resync.
+class TextBoxLayoutCache {
+public:
+    const TextBoxLayout &Update(const TextBox &box,
+                                const std::string &markup,
+                                const Viewport &viewport,
+                                const TextMeasurer &measurer);
+
+    int version() const {
+        return m_version;
+    }
+
+    bool hasLayout() const {
+        return m_has_layout;
+    }
+
+private:
+    TextBox m_box;
+    std::string m_markup;
+    Viewport m_viewport;
+    TextBoxLayout m_layout;
+    int m_version = 0;
+    bool m_has_layout = false;
+};
 
 } // namespace vega_draw
 

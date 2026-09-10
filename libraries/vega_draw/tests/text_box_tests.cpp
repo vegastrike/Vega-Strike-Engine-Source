@@ -159,3 +159,41 @@ TEST(TextBox, SingleLineBoxShowsOnlyFirstLine) {
     ASSERT_EQ(result.layout.lines[0].runs.size(), 1u);
     EXPECT_EQ(result.layout.lines[0].runs[0].text, "a");
 }
+
+TEST(TextBox, SingleLineOverflowIsEllipsised) {
+    const FakeMeasurer measurer;
+    TextBox box;
+    box.region_w = 40.0f; // 8 chars at font 10 (char width 5)
+    box.multiline = false;
+    box.font_grid = 10.0f;
+
+    const TextBoxLayout result = LayoutTextBox(box, "0123456789", kUnit, measurer);
+    ASSERT_EQ(result.layout.lines.size(), 1u);
+
+    std::string text;
+    for (std::size_t i = 0; i < result.layout.lines[0].runs.size(); ++i) {
+        text += result.layout.lines[0].runs[i].text;
+    }
+    EXPECT_EQ(text, "01234...");
+    EXPECT_FLOAT_EQ(result.layout.lines[0].width, 40.0f);
+}
+
+TEST(TextBox, LayoutCacheVersionChangesOnlyOnInputChange) {
+    const FakeMeasurer measurer;
+    TextBox box;
+    box.font_grid = 10.0f;
+    TextBoxLayoutCache cache;
+
+    cache.Update(box, "hello", kUnit, measurer);
+    const int v1 = cache.version();
+    cache.Update(box, "hello", kUnit, measurer); // unchanged
+    EXPECT_EQ(cache.version(), v1);
+
+    cache.Update(box, "hello world", kUnit, measurer); // text changed
+    const int v2 = cache.version();
+    EXPECT_GT(v2, v1);
+
+    box.font_grid = 20.0f;
+    cache.Update(box, "hello world", kUnit, measurer); // config changed
+    EXPECT_GT(cache.version(), v2);
+}

@@ -27,6 +27,7 @@
 #ifndef VEGA_STRIKE_LIBRARIES_VEGA_DRAW_PICKER_H
 #define VEGA_STRIKE_LIBRARIES_VEGA_DRAW_PICKER_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -48,6 +49,7 @@ struct PickerRow {
     std::string text;    // markup for the row
     int level = 0;       // indent level (0 = none)
     Color text_color;    // optional explicit row colour (set == false -> default)
+    std::uint64_t id = 0; // caller identity (selection / hit-testing); 0 = none
 };
 
 struct PickerStyle {
@@ -62,12 +64,14 @@ struct PickerStyle {
     float font_grid = 20.0f;
     float indent_grid = 20.0f;     // indent per level
     float row_padding_grid = 4.0f; // vertical padding added to each row (top and bottom)
+    float extra_row_height_grid = 0.0f; // extra height added to every row
     float line_spacing = 0.0f;
     bool wrap_rows = false;        // rows grow to fit wrapped text
 };
 
 struct PickerRowLayout {
     int index = 0;             // index into the supplied rows
+    std::uint64_t id = 0;      // caller identity of the row
     float y = 0.0f;            // content-space top (before scrolling)
     float height = 0.0f;
     float indent_px = 0.0f;
@@ -78,6 +82,7 @@ struct PickerRowLayout {
 
 struct PickerLayout {
     std::vector<PickerRowLayout> visible_rows;
+    std::vector<float> row_tops; // content-space top of every row (size == rows.size())
     float viewport_x = 0.0f;     // top-left of the row viewport, in pixels
     float viewport_y = 0.0f;
     float viewport_width = 0.0f;
@@ -92,6 +97,18 @@ PickerLayout LayoutPicker(const PickerStyle &style,
                           const Viewport &viewport,
                           const TextMeasurer &measurer,
                           float scroll_px = 0.0f);
+
+// The row index under a pixel y (in the drawn viewport space, i.e. the same
+// coordinates the adapter draws with). Returns -1 if the y is not over a row.
+int PickerRowAt(const PickerLayout &layout, float y_px);
+
+// The pixel scroll that brings `row_index` to the top of the viewport (clamped to
+// the scrollable range). Returns 0 for an out-of-range row.
+float PickerScrollToRow(const PickerStyle &style,
+                        const std::vector<PickerRow> &rows,
+                        const Viewport &viewport,
+                        const TextMeasurer &measurer,
+                        int row_index);
 
 } // namespace vega_draw
 

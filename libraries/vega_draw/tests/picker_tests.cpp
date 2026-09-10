@@ -142,3 +142,58 @@ TEST(Picker, NonWrappingRowStaysOneLine) {
     ASSERT_EQ(layout.visible_rows.size(), 1u);
     EXPECT_FLOAT_EQ(layout.visible_rows[0].height, 10.0f);
 }
+
+TEST(Picker, ExtraRowHeightIsAdded) {
+    const FakeMeasurer measurer;
+    PickerStyle style = BaseStyle();
+    style.extra_row_height_grid = 6.0f;
+
+    const std::vector<PickerRow> rows = {{"a", 0, Color{}}};
+    const PickerLayout layout = LayoutPicker(style, rows, kUnit, measurer);
+    ASSERT_EQ(layout.visible_rows.size(), 1u);
+    EXPECT_FLOAT_EQ(layout.visible_rows[0].height, 16.0f); // 10 text + 6 extra
+}
+
+TEST(Picker, RowIdIsPreserved) {
+    const FakeMeasurer measurer;
+    const PickerStyle style = BaseStyle();
+    std::vector<PickerRow> rows = {{"a", 0, Color{}}, {"b", 0, Color{}}};
+    rows[1].id = 42;
+
+    const PickerLayout layout = LayoutPicker(style, rows, kUnit, measurer);
+    ASSERT_EQ(layout.visible_rows.size(), 2u);
+    EXPECT_EQ(layout.visible_rows[1].id, 42u);
+}
+
+TEST(Picker, RowTopsAreRecorded) {
+    const FakeMeasurer measurer;
+    const PickerStyle style = BaseStyle();
+    const std::vector<PickerRow> rows = {{"a", 0, Color{}}, {"bb", 0, Color{}}};
+
+    const PickerLayout layout = LayoutPicker(style, rows, kUnit, measurer);
+    ASSERT_EQ(layout.row_tops.size(), 2u);
+    EXPECT_FLOAT_EQ(layout.row_tops[0], 0.0f);
+    EXPECT_FLOAT_EQ(layout.row_tops[1], 10.0f);
+}
+
+TEST(Picker, RowAtHitTestsViewportCoordinates) {
+    const FakeMeasurer measurer;
+    const PickerStyle style = BaseStyle();
+    const std::vector<PickerRow> rows = {{"a", 0, Color{}}, {"b", 0, Color{}}};
+
+    const PickerLayout layout = LayoutPicker(style, rows, kUnit, measurer);
+    EXPECT_EQ(PickerRowAt(layout, 5.0f), 0);
+    EXPECT_EQ(PickerRowAt(layout, 15.0f), 1);
+    EXPECT_EQ(PickerRowAt(layout, 25.0f), -1);
+}
+
+TEST(Picker, ScrollToRowClampsToRange) {
+    const FakeMeasurer measurer;
+    PickerStyle style = BaseStyle();
+    style.region_h = 10.0f; // three 10px rows, viewport 10 -> max_scroll 20
+    const std::vector<PickerRow> rows = {{"a", 0, Color{}}, {"b", 0, Color{}}, {"c", 0, Color{}}};
+
+    EXPECT_FLOAT_EQ(PickerScrollToRow(style, rows, kUnit, measurer, 0), 0.0f);
+    EXPECT_FLOAT_EQ(PickerScrollToRow(style, rows, kUnit, measurer, 1), 10.0f);
+    EXPECT_FLOAT_EQ(PickerScrollToRow(style, rows, kUnit, measurer, 2), 20.0f);
+}

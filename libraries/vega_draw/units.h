@@ -46,6 +46,14 @@ struct Viewport {
     float height_px = 0.0f;
 };
 
+inline bool operator==(const Viewport &a, const Viewport &b) noexcept {
+    return a.width_px == b.width_px && a.height_px == b.height_px;
+}
+
+inline bool operator!=(const Viewport &a, const Viewport &b) noexcept {
+    return !(a == b);
+}
+
 // 1000-grid x -> pixel x (x maps across the width).
 inline float GridToPixelX(float grid_x, const Viewport &viewport) noexcept {
     return grid_x / kGridExtent * viewport.width_px;

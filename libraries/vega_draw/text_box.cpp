@@ -30,6 +30,20 @@
 
 namespace vega_draw {
 
+bool operator==(const TextBox &a, const TextBox &b) {
+    return a.region_x == b.region_x && a.region_y == b.region_y && a.region_w == b.region_w &&
+           a.region_h == b.region_h && a.margin_x == b.margin_x && a.margin_y == b.margin_y &&
+           a.font_grid == b.font_grid && a.multiline == b.multiline && a.wrap == b.wrap &&
+           a.line_spacing == b.line_spacing && a.justification == b.justification &&
+           a.overflow == b.overflow && a.scroll_start_line == b.scroll_start_line &&
+           a.autofit == b.autofit && a.autofit_min_grid == b.autofit_min_grid &&
+           a.autofit_max_grid == b.autofit_max_grid;
+}
+
+bool operator!=(const TextBox &a, const TextBox &b) {
+    return !(a == b);
+}
+
 BoxRect TextBoxInnerRectPx(const TextBox &box, const Viewport &viewport) {
     const float inset_x = GridToPixelW(box.margin_x, viewport);
     const float inset_y = GridToPixelH(box.margin_y, viewport);
@@ -92,6 +106,12 @@ TextBoxLayout LayoutTextBox(const TextBox &box,
     TextBoxLayout result;
     result.font_px = FontGridToPixel(font_grid, viewport);
     result.layout = BuildLayout(box, parsed, viewport, measurer, font_grid, inner.width);
+
+    // A single-line box shows one line and ellipsises it if it overflows.
+    if (!box.multiline && !result.layout.lines.empty()) {
+        TruncateLineWithEllipsis(result.layout.lines[0], inner.width, result.font_px, measurer);
+        result.layout.width = result.layout.lines[0].width;
+    }
     return result;
 }
 
@@ -111,6 +131,21 @@ int TextBoxVisibleLineCount(const TextBox &box,
         ++count;
     }
     return count;
+}
+
+const TextBoxLayout &TextBoxLayoutCache::Update(const TextBox &box,
+                                                const std::string &markup,
+                                                const Viewport &viewport,
+                                                const TextMeasurer &measurer) {
+    if (!m_has_layout || box != m_box || markup != m_markup || viewport != m_viewport) {
+        m_layout = LayoutTextBox(box, markup, viewport, measurer);
+        m_box = box;
+        m_markup = markup;
+        m_viewport = viewport;
+        ++m_version;
+        m_has_layout = true;
+    }
+    return m_layout;
 }
 
 } // namespace vega_draw

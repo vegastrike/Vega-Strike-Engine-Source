@@ -57,6 +57,7 @@ PickerLayout LayoutPicker(const PickerStyle &style,
     PickerLayout result;
     const float font_px = FontGridToPixel(style.font_grid, viewport);
     const float padding = GridToPixelH(style.row_padding_grid, viewport);
+    const float extra_height = GridToPixelH(style.extra_row_height_grid, viewport);
     const float indent_step = GridToPixelW(style.indent_grid, viewport);
     const float width = inner_width(style, viewport);
     result.viewport_x = inner_x0(style, viewport);
@@ -88,12 +89,14 @@ PickerLayout LayoutPicker(const PickerStyle &style,
 
         PickerRowLayout laid_out;
         laid_out.index = static_cast<int>(i);
+        laid_out.id = row.id;
         laid_out.y = y;
-        laid_out.height = text.height + 2.0f * padding;
+        laid_out.height = text.height + 2.0f * padding + extra_height;
         laid_out.indent_px = indent;
         laid_out.padding_px = padding;
         laid_out.text_color = row.text_color;
         laid_out.text = text;
+        result.row_tops.push_back(y);
         y += laid_out.height;
         all.push_back(std::move(laid_out));
     }
@@ -117,6 +120,39 @@ PickerLayout LayoutPicker(const PickerStyle &style,
         }
     }
     return result;
+}
+
+int PickerRowAt(const PickerLayout &layout, float y_px) {
+    for (std::size_t i = 0; i < layout.visible_rows.size(); ++i) {
+        const PickerRowLayout &row = layout.visible_rows[i];
+        const float top = layout.viewport_y + row.y - layout.scroll_px;
+        if (y_px >= top && y_px < top + row.height) {
+            return row.index;
+        }
+    }
+    return -1;
+}
+
+float PickerScrollToRow(const PickerStyle &style,
+                        const std::vector<PickerRow> &rows,
+                        const Viewport &viewport,
+                        const TextMeasurer &measurer,
+                        int row_index) {
+    if (row_index < 0) {
+        return 0.0f;
+    }
+    const PickerLayout layout = LayoutPicker(style, rows, viewport, measurer, 0.0f);
+    if (row_index >= static_cast<int>(layout.row_tops.size())) {
+        return 0.0f;
+    }
+    float scroll = layout.row_tops[row_index];
+    if (scroll > layout.max_scroll_px) {
+        scroll = layout.max_scroll_px;
+    }
+    if (scroll < 0.0f) {
+        scroll = 0.0f;
+    }
+    return scroll;
 }
 
 } // namespace vega_draw

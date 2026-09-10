@@ -91,6 +91,15 @@ struct TextLayout {
 // additional opt-in that only reflows within a parsed line.
 TextLayout LayoutText(const TextLines &parsed, const TextStyle &style, const TextMeasurer &measurer);
 
+// Truncate `line` so it fits within `max_width` pixels, appending `ellipsis` if it
+// was cut. Advances whole UTF-8 sequences (never splits a multi-byte character).
+// Does nothing when the line already fits.
+void TruncateLineWithEllipsis(LaidOutLine &line,
+                              float max_width,
+                              float font_px,
+                              const TextMeasurer &measurer,
+                              const std::string &ellipsis = "...");
+
 } // namespace vega_draw
 
 #endif // VEGA_STRIKE_LIBRARIES_VEGA_DRAW_TEXT_LAYOUT_H

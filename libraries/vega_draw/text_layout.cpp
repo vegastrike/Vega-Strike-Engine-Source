@@ -121,6 +121,27 @@ float justification_factor(Justification j) {
 
 } // namespace
 
+namespace {
+
+// Byte length of the UTF-8 sequence starting with `lead` (1 on an invalid lead).
+std::size_t utf8_sequence_length(unsigned char lead) {
+    if (lead < 0x80) {
+        return 1;
+    }
+    if ((lead >> 5) == 0x6) {
+        return 2;
+    }
+    if ((lead >> 4) == 0xE) {
+        return 3;
+    }
+    if ((lead >> 3) == 0x1E) {
+        return 4;
+    }
+    return 1;
+}
+
+} // namespace
+
 TextLayout LayoutText(const TextLines &parsed, const TextStyle &style, const TextMeasurer &measurer) {
     TextLayout layout;
     // Line advance = the font's line height plus any extra spacing; used both for
@@ -189,6 +210,69 @@ TextLayout LayoutText(const TextLines &parsed, const TextStyle &style, const Tex
 
     layout.height = y;
     return layout;
+}
+
+void TruncateLineWithEllipsis(LaidOutLine &line,
+                              float max_width,
+                              float font_px,
+                              const TextMeasurer &measurer,
+                              const std::string &ellipsis) {
+    if (line.width <= max_width) {
+        return;
+    }
+    const float ellipsis_width = measurer.Measure(ellipsis, font_px).width;
+
+    std::vector<LaidOutRun> kept_runs;
+    float width = 0.0f;
+    bool truncated = false;
+    Style last_style;
+    bool have_style = false;
+
+    for (std::size_t r = 0; r < line.runs.size() && !truncated; ++r) {
+        const LaidOutRun &run = line.runs[r];
+        last_style = run.style;
+        have_style = true;
+        const float run_x = width;
+        std::string kept;
+        std::size_t i = 0;
+        while (i < run.text.size()) {
+            const unsigned char lead = static_cast<unsigned char>(run.text[i]);
+            std::size_t len = utf8_sequence_length(lead);
+            if (i + len > run.text.size()) {
+                len = 1;
+            }
+            const std::string ch = run.text.substr(i, len);
+            const float ch_width = measurer.Measure(ch, font_px).width;
+            if (width + ch_width + ellipsis_width > max_width) {
+                truncated = true;
+                break;
+            }
+            kept += ch;
+            width += ch_width;
+            i += len;
+        }
+        if (!kept.empty()) {
+            LaidOutRun placed;
+            placed.text = kept;
+            placed.style = run.style;
+            placed.x = run_x;
+            placed.width = width - run_x;
+            kept_runs.push_back(std::move(placed));
+        }
+    }
+
+    if (truncated && have_style) {
+        LaidOutRun dotdotdot;
+        dotdotdot.text = ellipsis;
+        dotdotdot.style = last_style;
+        dotdotdot.x = width;
+        dotdotdot.width = ellipsis_width;
+        kept_runs.push_back(std::move(dotdotdot));
+        width += ellipsis_width;
+    }
+
+    line.runs.swap(kept_runs);
+    line.width = width;
 }
 
 } // namespace vega_draw
