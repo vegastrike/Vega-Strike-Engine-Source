@@ -40,6 +40,14 @@ TEST(Units, GridMapsAcrossViewport) {
     EXPECT_FLOAT_EQ(GridToPixelH(1000.0f, v), 1080.0f);
 }
 
+TEST(Units, FontHeightTiers) {
+    EXPECT_FLOAT_EQ(ToFontGrid(FontHeight::ExtraSmall), 40.0f);
+    EXPECT_FLOAT_EQ(ToFontGrid(FontHeight::Small), 45.0f);
+    EXPECT_FLOAT_EQ(ToFontGrid(FontHeight::Medium), 50.0f);
+    EXPECT_FLOAT_EQ(ToFontGrid(FontHeight::Large), 55.0f);
+    EXPECT_FLOAT_EQ(ToFontGrid(FontHeight::ExtraLarge), 60.0f);
+}
+
 TEST(Units, FontSizeIsFractionOfHeightRoundedToWholePixel) {
     const Viewport v{1920.0f, 1080.0f};
     EXPECT_FLOAT_EQ(FontGridToPixel(20.0f, v), 22.0f); // 0.02 * 1080 = 21.6 -> 22

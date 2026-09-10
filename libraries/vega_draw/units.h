@@ -82,6 +82,22 @@ inline float FontGridToPixel(float font_grid, const Viewport &viewport) noexcept
     return std::round(px);
 }
 
+// Standard font-height tiers, authored per-1000 (a fraction of the space height).
+// The values are integers, so they can be a real enum -- the old fractional sizes
+// (0.04..0.06) could not. These are the single source of truth for the standard
+// text sizes used by code and by data (controls.json names resolve to these).
+enum class FontHeight : int {
+    ExtraSmall = 40, // was 0.04
+    Small = 45,      // was 0.045
+    Medium = 50,     // was 0.05
+    Large = 55,      // was 0.055
+    ExtraLarge = 60  // was 0.06
+};
+
+constexpr float ToFontGrid(FontHeight height) noexcept {
+    return static_cast<float>(static_cast<int>(height));
+}
+
 } // namespace vega_draw
 
 #endif // VEGA_STRIKE_LIBRARIES_VEGA_DRAW_UNITS_H
