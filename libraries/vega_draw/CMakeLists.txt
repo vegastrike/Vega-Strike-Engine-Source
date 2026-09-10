@@ -35,6 +35,8 @@ ADD_LIBRARY(vegastrike_vega_draw STATIC
     text_layout.cpp
     text_layout.h
     units.h
+    imgui_backend.cpp
+    imgui_backend.h
 )
 
 SET_PROPERTY(TARGET vegastrike_vega_draw PROPERTY CXX_STANDARD 14)
@@ -46,6 +48,9 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike_vega_draw
     PUBLIC
         ${Vega_Strike_SOURCE_DIR}/libraries
 )
+
+# The ImGui adapter lives in this library; consumers of it need ImGui too.
+TARGET_LINK_LIBRARIES(vegastrike_vega_draw PUBLIC vegastrike_imgui)
 
 IF (USE_GTEST)
     SET(TEST_NAME ${PROJECT_NAME}_vega_draw_tests)
