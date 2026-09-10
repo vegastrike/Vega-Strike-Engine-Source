@@ -50,16 +50,16 @@ TEST(Scroller, ThumbIsProportionalAndTracksPosition) {
 
     model.position = 0.0f;
     Rect thumb = ScrollerThumbRect(style, model);
-    EXPECT_FLOAT_EQ(thumb.height, 80.0f);
-    EXPECT_FLOAT_EQ(thumb.y, 100.0f);
+    EXPECT_FLOAT_EQ(thumb.size.height, 80.0f);
+    EXPECT_FLOAT_EQ(thumb.origin.y, 100.0f);
 
     model.position = 400.0f; // half way -> offset (400-80)*0.5 = 160
     thumb = ScrollerThumbRect(style, model);
-    EXPECT_FLOAT_EQ(thumb.y, 260.0f);
+    EXPECT_FLOAT_EQ(thumb.origin.y, 260.0f);
 
     model.position = 800.0f; // end -> offset 320
     thumb = ScrollerThumbRect(style, model);
-    EXPECT_FLOAT_EQ(thumb.y, 420.0f);
+    EXPECT_FLOAT_EQ(thumb.origin.y, 420.0f);
 }
 
 TEST(Scroller, ThumbFillsTrackWhenContentFits) {
@@ -69,8 +69,8 @@ TEST(Scroller, ThumbFillsTrackWhenContentFits) {
     model.viewport_extent = 200.0f;
 
     const Rect thumb = ScrollerThumbRect(style, model);
-    EXPECT_FLOAT_EQ(thumb.height, 400.0f);
-    EXPECT_FLOAT_EQ(thumb.y, 100.0f);
+    EXPECT_FLOAT_EQ(thumb.size.height, 400.0f);
+    EXPECT_FLOAT_EQ(thumb.origin.y, 100.0f);
 }
 
 TEST(Scroller, ThumbHasMinimumLength) {
@@ -80,7 +80,7 @@ TEST(Scroller, ThumbHasMinimumLength) {
     model.viewport_extent = 1.0f;
 
     const Rect thumb = ScrollerThumbRect(style, model);
-    EXPECT_FLOAT_EQ(thumb.height, 20.0f);
+    EXPECT_FLOAT_EQ(thumb.size.height, 20.0f);
 }
 
 TEST(Scroller, MaxPositionAndClamp) {
@@ -121,8 +121,8 @@ TEST(Scroller, HorizontalThumb) {
     model.position = 400.0f;
 
     const Rect thumb = ScrollerThumbRect(style, model);
-    EXPECT_FLOAT_EQ(thumb.width, 80.0f);
-    EXPECT_FLOAT_EQ(thumb.x, 260.0f);
-    EXPECT_FLOAT_EQ(thumb.y, 100.0f);
-    EXPECT_FLOAT_EQ(thumb.height, 20.0f);
+    EXPECT_FLOAT_EQ(thumb.size.width, 80.0f);
+    EXPECT_FLOAT_EQ(thumb.origin.x, 260.0f);
+    EXPECT_FLOAT_EQ(thumb.origin.y, 100.0f);
+    EXPECT_FLOAT_EQ(thumb.size.height, 20.0f);
 }

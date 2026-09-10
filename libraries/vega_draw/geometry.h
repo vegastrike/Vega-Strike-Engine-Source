@@ -46,46 +46,57 @@ struct Size {
 };
 
 struct Rect {
-    float x = 0.0f;
-    float y = 0.0f;
-    float width = 0.0f;
-    float height = 0.0f;
+    Point origin;
+    Size size;
+
+    Rect() = default;
+    Rect(float x, float y, float width, float height) : origin{x, y}, size{width, height} {
+    }
+    Rect(const Point &o, const Size &s) : origin(o), size(s) {
+    }
 
     float left() const {
-        return x;
+        return origin.x;
     }
     float right() const {
-        return x + width;
+        return origin.x + size.width;
     }
     float top() const {
-        return y; // y-down: the top edge is the smaller y
+        return origin.y; // y-down: the top edge is the smaller y
     }
     float bottom() const {
-        return y + height;
+        return origin.y + size.height;
     }
     Point center() const {
-        return Point{x + width * 0.5f, y + height * 0.5f};
+        return Point{origin.x + size.width * 0.5f, origin.y + size.height * 0.5f};
     }
     bool inside(const Point &p) const {
-        return p.x >= x && p.x <= (x + width) && p.y >= y && p.y <= (y + height);
+        return p.x >= left() && p.x < right() && p.y >= top() && p.y < bottom();
     }
-    // A copy with `s` trimmed off every edge. `width`/`height` may go negative if
-    // the inset exceeds the rect; callers clamp where it matters.
-    Rect inset(const Size &s) const {
-        return Rect{x + s.width, y + s.height, width - 2.0f * s.width, height - 2.0f * s.height};
+    // Trim `s` off every edge, in place (width/height may go negative; callers clamp).
+    void inset(const Size &s) {
+        origin.x += s.width;
+        origin.y += s.height;
+        size.width -= 2.0f * s.width;
+        size.height -= 2.0f * s.height;
+    }
+    Rect copyAndInset(const Size &s) const {
+        Rect result = *this;
+        result.inset(s);
+        return result;
     }
     Rect translated(float dx, float dy) const {
-        return Rect{x + dx, y + dy, width, height};
+        return Rect{origin.x + dx, origin.y + dy, size.width, size.height};
     }
 };
 
 // Map a grid rect to pixels against a viewport.
 inline Rect GridToPixelRect(const Rect &grid, const Viewport &viewport) noexcept {
     return Rect{
-        GridToPixelX(grid.x, viewport),
-        GridToPixelY(grid.y, viewport),
-        GridToPixelW(grid.width, viewport),
-        GridToPixelH(grid.height, viewport),
+        GridToPixelX(grid.origin.x, viewport),
+        GridToPixelY(grid.origin.y, viewport),
+        GridToPixelW(grid.size.width, viewport),
+        GridToPixelH(grid.size.height, viewport),
     };
 }
 

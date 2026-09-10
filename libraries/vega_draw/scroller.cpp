@@ -30,19 +30,19 @@ namespace vega_draw {
 namespace {
 
 float axis_length(const Rect &track, ScrollOrientation orientation) {
-    return (orientation == ScrollOrientation::Vertical) ? track.height : track.width;
+    return (orientation == ScrollOrientation::Vertical) ? track.size.height : track.size.width;
 }
 
 float axis_origin(const Rect &track, ScrollOrientation orientation) {
-    return (orientation == ScrollOrientation::Vertical) ? track.y : track.x;
+    return (orientation == ScrollOrientation::Vertical) ? track.origin.y : track.origin.x;
 }
 
 float cross_origin(const Rect &track, ScrollOrientation orientation) {
-    return (orientation == ScrollOrientation::Vertical) ? track.x : track.y;
+    return (orientation == ScrollOrientation::Vertical) ? track.origin.x : track.origin.y;
 }
 
 float cross_length(const Rect &track, ScrollOrientation orientation) {
-    return (orientation == ScrollOrientation::Vertical) ? track.width : track.height;
+    return (orientation == ScrollOrientation::Vertical) ? track.size.width : track.size.height;
 }
 
 float thumb_length(const ScrollerStyle &style, const ScrollerModel &model) {

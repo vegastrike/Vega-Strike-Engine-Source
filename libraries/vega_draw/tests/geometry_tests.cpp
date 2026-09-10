@@ -41,10 +41,11 @@ TEST(Geometry, EdgesAreTopLeftYDown) {
     EXPECT_FLOAT_EQ(c.y, 400.0f);
 }
 
-TEST(Geometry, InsideIsInclusive) {
+TEST(Geometry, InsideIsHalfOpen) {
     const Rect r{0.0f, 0.0f, 100.0f, 100.0f};
     EXPECT_TRUE(r.inside(Point{0.0f, 0.0f}));
-    EXPECT_TRUE(r.inside(Point{100.0f, 100.0f}));
+    EXPECT_FALSE(r.inside(Point{100.0f, 100.0f})); // [left,right) x [top,bottom)
+    EXPECT_TRUE(r.inside(Point{99.0f, 99.0f}));
     EXPECT_TRUE(r.inside(Point{50.0f, 50.0f}));
     EXPECT_FALSE(r.inside(Point{-1.0f, 50.0f}));
     EXPECT_FALSE(r.inside(Point{50.0f, 101.0f}));
@@ -52,25 +53,25 @@ TEST(Geometry, InsideIsInclusive) {
 
 TEST(Geometry, InsetTrimsEveryEdge) {
     const Rect r{0.0f, 0.0f, 100.0f, 100.0f};
-    const Rect inner = r.inset(Size{10.0f, 20.0f});
-    EXPECT_FLOAT_EQ(inner.x, 10.0f);
-    EXPECT_FLOAT_EQ(inner.y, 20.0f);
-    EXPECT_FLOAT_EQ(inner.width, 80.0f);
-    EXPECT_FLOAT_EQ(inner.height, 60.0f);
+    const Rect inner = r.copyAndInset(Size{10.0f, 20.0f});
+    EXPECT_FLOAT_EQ(inner.origin.x, 10.0f);
+    EXPECT_FLOAT_EQ(inner.origin.y, 20.0f);
+    EXPECT_FLOAT_EQ(inner.size.width, 80.0f);
+    EXPECT_FLOAT_EQ(inner.size.height, 60.0f);
 }
 
 TEST(Geometry, GridRectMapsToPixels) {
     const Viewport v{1000.0f, 1000.0f}; // 1 grid unit == 1 px
     const Rect px = GridToPixelRect(Rect{100.0f, 200.0f, 300.0f, 400.0f}, v);
-    EXPECT_FLOAT_EQ(px.x, 100.0f);
-    EXPECT_FLOAT_EQ(px.y, 200.0f);
-    EXPECT_FLOAT_EQ(px.width, 300.0f);
-    EXPECT_FLOAT_EQ(px.height, 400.0f);
+    EXPECT_FLOAT_EQ(px.origin.x, 100.0f);
+    EXPECT_FLOAT_EQ(px.origin.y, 200.0f);
+    EXPECT_FLOAT_EQ(px.size.width, 300.0f);
+    EXPECT_FLOAT_EQ(px.size.height, 400.0f);
 
     const Viewport hd{1920.0f, 1080.0f};
     const Rect hp = GridToPixelRect(Rect{0.0f, 0.0f, 1000.0f, 1000.0f}, hd);
-    EXPECT_FLOAT_EQ(hp.width, 1920.0f);
-    EXPECT_FLOAT_EQ(hp.height, 1080.0f);
+    EXPECT_FLOAT_EQ(hp.size.width, 1920.0f);
+    EXPECT_FLOAT_EQ(hp.size.height, 1080.0f);
 }
 
 TEST(Geometry, GridPointMapsToPixels) {
