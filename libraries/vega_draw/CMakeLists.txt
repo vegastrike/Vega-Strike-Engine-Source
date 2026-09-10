@@ -32,6 +32,9 @@ MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 ADD_LIBRARY(vegastrike_vega_draw STATIC
     markup.cpp
     markup.h
+    text_layout.cpp
+    text_layout.h
+    units.h
 )
 
 SET_PROPERTY(TARGET vegastrike_vega_draw PROPERTY CXX_STANDARD 14)
@@ -49,6 +52,8 @@ IF (USE_GTEST)
     ADD_EXECUTABLE(
         ${TEST_NAME}
         tests/markup_tests.cpp
+        tests/text_layout_tests.cpp
+        tests/units_tests.cpp
     )
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PRIVATE
