@@ -44,6 +44,9 @@
 // It requires an active ImGui context/font (i.e. call it inside a frame).
 namespace vega_draw {
 
+// The current ImGui display size, as a Viewport for the grid->pixel mapper.
+Viewport DisplayViewport();
+
 // A TextMeasurer backed by the current ImGui font. Measure("") returns the line
 // height (taken from a representative string, since empty text has no height).
 class ImGuiTextMeasurer : public TextMeasurer {
@@ -122,6 +125,19 @@ void DrawRectOutline(ImDrawList *draw_list,
                      const Viewport &viewport,
                      ImU32 color,
                      float thickness_px = 1.0f);
+
+// Button-beam shadows: the top+left edges (up-left) and bottom+right edges
+// (low-right) of a rectangle, on the 1000-grid.
+void DrawUpLeftShadow(ImDrawList *draw_list,
+                      const Rect &grid_rect,
+                      const Viewport &viewport,
+                      ImU32 color,
+                      float thickness_px = 1.0f);
+void DrawLowRightShadow(ImDrawList *draw_list,
+                        const Rect &grid_rect,
+                        const Viewport &viewport,
+                        ImU32 color,
+                        float thickness_px = 1.0f);
 
 // Scroller track/thumb colours.
 struct ScrollerColors {

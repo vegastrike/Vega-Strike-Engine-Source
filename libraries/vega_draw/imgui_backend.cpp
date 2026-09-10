@@ -30,6 +30,11 @@
 
 namespace vega_draw {
 
+Viewport DisplayViewport() {
+    const ImVec2 size = ImGui::GetIO().DisplaySize;
+    return Viewport{size.x, size.y};
+}
+
 TextMetrics ImGuiTextMeasurer::Measure(const std::string &text, float font_px) const {
     TextMetrics metrics;
     ImFont *font = ImGui::GetFont();
@@ -193,6 +198,36 @@ void DrawRectOutline(ImDrawList *draw_list,
     const Rect rect = GridToPixelRect(grid_rect, viewport);
     draw_list->AddRect(ImVec2(rect.left(), rect.top()),
                        ImVec2(rect.right(), rect.bottom()), color, 0.0f, 0, thickness_px);
+}
+
+void DrawUpLeftShadow(ImDrawList *draw_list,
+                      const Rect &grid_rect,
+                      const Viewport &viewport,
+                      ImU32 color,
+                      float thickness_px) {
+    if (draw_list == nullptr) {
+        return;
+    }
+    const Rect r = GridToPixelRect(grid_rect, viewport);
+    const ImVec2 points[3] = {
+        {r.right(), r.top()}, {r.left(), r.top()}, {r.left(), r.bottom()},
+    };
+    draw_list->AddPolyline(points, 3, color, 0, thickness_px);
+}
+
+void DrawLowRightShadow(ImDrawList *draw_list,
+                        const Rect &grid_rect,
+                        const Viewport &viewport,
+                        ImU32 color,
+                        float thickness_px) {
+    if (draw_list == nullptr) {
+        return;
+    }
+    const Rect r = GridToPixelRect(grid_rect, viewport);
+    const ImVec2 points[3] = {
+        {r.left(), r.bottom()}, {r.right(), r.bottom()}, {r.right(), r.top()},
+    };
+    draw_list->AddPolyline(points, 3, color, 0, thickness_px);
 }
 
 void DrawScroller(ImDrawList *draw_list,
