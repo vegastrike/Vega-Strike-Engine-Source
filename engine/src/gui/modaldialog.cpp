@@ -86,7 +86,7 @@ static void CreateControlsForAlertWindow(Window *window) {
     title->setJustification(CENTER_JUSTIFY);
     title->setTextColor(GUI_OPAQUE_WHITE());
     title->setColor(GUI_CLEAR);
-    title->setFont(Font(.07, BOLD_STROKE));
+    title->setFont(Font(.045, BOLD_STROKE));
     title->setId("Title");
     //Put it on the window.
     window->addControl(title);
@@ -101,7 +101,7 @@ static void CreateControlsForAlertWindow(Window *window) {
     ok->setDownColor(GFXColor(1, 0, 0, .6));
     ok->setDownTextColor(GUI_OPAQUE_BLACK());
     ok->setHighlightColor(GFXColor(1, 0, 0, .4));
-    ok->setFont(Font(.08, BOLD_STROKE));
+    ok->setFont(Font(.05, BOLD_STROKE));
     //Put the button on the window.
     window->addControl(ok);
 }
@@ -121,7 +121,7 @@ static void CreateControlsForYesNoWindow(Window *window) {
     title->setJustification(CENTER_JUSTIFY);
     title->setTextColor(GUI_OPAQUE_WHITE());
     title->setColor(GUI_CLEAR);
-    title->setFont(Font(.07, BOLD_STROKE));
+    title->setFont(Font(.045, BOLD_STROKE));
     title->setId("Title");
     //Put it on the window.
     window->addControl(title);
@@ -136,7 +136,7 @@ static void CreateControlsForYesNoWindow(Window *window) {
     yes->setDownColor(GFXColor(1, 0, 0, .6));
     yes->setDownTextColor(GUI_OPAQUE_BLACK());
     yes->setHighlightColor(GFXColor(1, 0, 0, .4));
-    yes->setFont(Font(.08, BOLD_STROKE));
+    yes->setFont(Font(.05, BOLD_STROKE));
     //Put the button on the window.
     window->addControl(yes);
 
@@ -150,7 +150,7 @@ static void CreateControlsForYesNoWindow(Window *window) {
     no->setDownColor(GFXColor(1, 0, 0, .6));
     no->setDownTextColor(GUI_OPAQUE_BLACK());
     no->setHighlightColor(GFXColor(1, 0, 0, .4));
-    no->setFont(Font(.08, BOLD_STROKE));
+    no->setFont(Font(.05, BOLD_STROKE));
     //Put the button on the window.
     window->addControl(no);
 }
@@ -170,7 +170,7 @@ void ListQuestionDialog::CreateControlsForListWindow(Window *window) {
     title->setJustification(CENTER_JUSTIFY);
     title->setTextColor(GUI_OPAQUE_WHITE());
     title->setColor(GUI_CLEAR);
-    title->setFont(Font(.08, BOLD_STROKE));
+    title->setFont(Font(.05, BOLD_STROKE));
     title->setId("Title");
     //Put it on the window.
     window->addControl(title);
@@ -185,7 +185,7 @@ void ListQuestionDialog::CreateControlsForListWindow(Window *window) {
     ok->setDownColor(GFXColor(0, 0, 1, .6));
     ok->setDownTextColor(GUI_OPAQUE_BLACK());
     ok->setHighlightColor(GFXColor(0, 0, 1, .4));
-    ok->setFont(Font(.08, BOLD_STROKE));
+    ok->setFont(Font(.05, BOLD_STROKE));
     ok->setId("OK");
     //Put the button on the window.
     window->addControl(ok);
@@ -200,7 +200,7 @@ void ListQuestionDialog::CreateControlsForListWindow(Window *window) {
     cancel->setDownColor(GFXColor(0, 0, 1, .6));
     cancel->setDownTextColor(GUI_OPAQUE_BLACK());
     cancel->setHighlightColor(GFXColor(0, 0, 1, .4));
-    cancel->setFont(Font(.08, BOLD_STROKE));
+    cancel->setFont(Font(.05, BOLD_STROKE));
     cancel->setId("Cancel");
     //Put the button on the window.
     window->addControl(cancel);
@@ -223,7 +223,7 @@ void ListQuestionDialog::CreateControlsForListWindow(Window *window) {
     pick->setSelectionColor(SaturatedColor(.2, .2, .7, .8));
     pick->setHighlightColor(SaturatedColor(0, 0, .6, .35));
     pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
-    pick->setFont(Font(.065));
+    pick->setFont(Font(.04));
     pick->setTextMargins(Size(0.02, 0.01));
     pick->setId("Picker");
     pick->setScroller(pickScroller);
