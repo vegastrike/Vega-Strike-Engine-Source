@@ -31,6 +31,7 @@
 
 #include "imgui/imgui.h"
 
+#include "vega_draw/geometry.h"
 #include "vega_draw/markup.h"
 #include "vega_draw/picker.h"
 #include "vega_draw/scroller.h"
@@ -111,6 +112,16 @@ void DrawPicker(ImDrawList *draw_list,
                 int selected_index,
                 int highlighted_index,
                 float scroll_px = 0.0f);
+
+// Filled rectangle on the 1000-grid.
+void DrawRectFill(ImDrawList *draw_list, const Rect &grid_rect, const Viewport &viewport, ImU32 color);
+
+// Outlined rectangle on the 1000-grid (thickness in pixels).
+void DrawRectOutline(ImDrawList *draw_list,
+                     const Rect &grid_rect,
+                     const Viewport &viewport,
+                     ImU32 color,
+                     float thickness_px = 1.0f);
 
 // Scroller track/thumb colours.
 struct ScrollerColors {

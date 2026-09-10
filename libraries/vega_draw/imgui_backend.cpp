@@ -174,6 +174,27 @@ void DrawPicker(ImDrawList *draw_list,
     draw_list->PopClipRect();
 }
 
+void DrawRectFill(ImDrawList *draw_list, const Rect &grid_rect, const Viewport &viewport, ImU32 color) {
+    if (draw_list == nullptr) {
+        return;
+    }
+    const Rect rect = GridToPixelRect(grid_rect, viewport);
+    draw_list->AddRectFilled(ImVec2(rect.left(), rect.top()), ImVec2(rect.right(), rect.bottom()), color);
+}
+
+void DrawRectOutline(ImDrawList *draw_list,
+                     const Rect &grid_rect,
+                     const Viewport &viewport,
+                     ImU32 color,
+                     float thickness_px) {
+    if (draw_list == nullptr) {
+        return;
+    }
+    const Rect rect = GridToPixelRect(grid_rect, viewport);
+    draw_list->AddRect(ImVec2(rect.left(), rect.top()),
+                       ImVec2(rect.right(), rect.bottom()), color, 0.0f, 0, thickness_px);
+}
+
 void DrawScroller(ImDrawList *draw_list,
                   const ScrollerStyle &style,
                   const ScrollerModel &model,
