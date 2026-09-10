@@ -47,6 +47,10 @@ ADD_LIBRARY(vegastrike_vega_draw STATIC
     button.h
     panel.cpp
     panel.h
+    text_display.cpp
+    text_display.h
+    scroll_bar.cpp
+    scroll_bar.h
     event_manager.cpp
     event_manager.h
     units.h
@@ -80,6 +84,7 @@ IF (USE_GTEST)
         tests/units_tests.cpp
         tests/widget_tests.cpp
         tests/button_tests.cpp
+        tests/scroll_bar_tests.cpp
         tests/event_manager_tests.cpp
     )
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${TST_INCLUDES})
