@@ -32,6 +32,7 @@ MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 ADD_LIBRARY(vegastrike_vega_draw STATIC
     markup.cpp
     markup.h
+    geometry.h
     text_layout.cpp
     text_layout.h
     text_box.cpp
@@ -60,6 +61,7 @@ IF (USE_GTEST)
     SET(TEST_NAME ${PROJECT_NAME}_vega_draw_tests)
     ADD_EXECUTABLE(
         ${TEST_NAME}
+        tests/geometry_tests.cpp
         tests/markup_tests.cpp
         tests/text_layout_tests.cpp
         tests/text_box_tests.cpp
