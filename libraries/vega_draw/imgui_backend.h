@@ -32,6 +32,7 @@
 #include "imgui/imgui.h"
 
 #include "vega_draw/markup.h"
+#include "vega_draw/text_box.h"
 #include "vega_draw/text_layout.h"
 #include "vega_draw/units.h"
 
@@ -54,13 +55,14 @@ ImU32 ToImU32(const Color &color, ImU32 fallback);
 // Draw a laid-out text block. `origin` is the layout's top-left in pixels; each
 // run is drawn at origin + (run.x, line.y). `default_color` applies where a run
 // carries no explicit colour. `clip_rect`, when non-null, is an ImGui
-// pixel-space clip rectangle.
+// pixel-space clip rectangle. Lines before `first_line` are skipped (scrolling).
 void DrawTextLayout(ImDrawList *draw_list,
                     const ImVec2 &origin,
                     const TextLayout &layout,
                     float font_px,
                     ImU32 default_color,
-                    const ImVec4 *clip_rect = nullptr);
+                    const ImVec4 *clip_rect = nullptr,
+                    int first_line = 0);
 
 // Text primitive: parse `markup` and draw it at a 1000-grid position with a
 // per-1000 font size (a fraction of the space height). Returns the drawn height
@@ -74,6 +76,15 @@ float DrawText(ImDrawList *draw_list,
                const std::string &markup,
                ImU32 default_color,
                const ImVec4 *clip_rect = nullptr);
+
+// Draw a text box: lay out `markup` inside the box (autofit/wrap/margins applied)
+// and draw it, clipped to the inner region and starting at the box's scroll line.
+// Draws no background (the caller owns any panel background).
+void DrawTextBox(ImDrawList *draw_list,
+                 const TextBox &box,
+                 const std::string &markup,
+                 const Viewport &viewport,
+                 ImU32 default_color);
 
 } // namespace vega_draw
 

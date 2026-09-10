@@ -60,11 +60,13 @@ void DrawTextLayout(ImDrawList *draw_list,
                     const TextLayout &layout,
                     float font_px,
                     ImU32 default_color,
-                    const ImVec4 *clip_rect) {
+                    const ImVec4 *clip_rect,
+                    int first_line) {
     if (draw_list == nullptr) {
         return;
     }
-    for (std::size_t li = 0; li < layout.lines.size(); ++li) {
+    const int start = (first_line < 0) ? 0 : first_line;
+    for (std::size_t li = static_cast<std::size_t>(start); li < layout.lines.size(); ++li) {
         const LaidOutLine &line = layout.lines[li];
         const float y = origin.y + line.y;
         for (std::size_t ri = 0; ri < line.runs.size(); ++ri) {
@@ -103,6 +105,22 @@ float DrawText(ImDrawList *draw_list,
     const ImVec2 origin(GridToPixelX(grid_x, viewport), GridToPixelY(grid_y, viewport));
     DrawTextLayout(draw_list, origin, layout, font_px, default_color, clip_rect);
     return layout.height;
+}
+
+void DrawTextBox(ImDrawList *draw_list,
+                 const TextBox &box,
+                 const std::string &markup,
+                 const Viewport &viewport,
+                 ImU32 default_color) {
+    if (draw_list == nullptr) {
+        return;
+    }
+    const ImGuiTextMeasurer measurer;
+    const TextBoxLayout laid_out = LayoutTextBox(box, markup, viewport, measurer);
+    const BoxRect inner = TextBoxInnerRectPx(box, viewport);
+    const ImVec4 clip(inner.x, inner.y, inner.x + inner.width, inner.y + inner.height);
+    const ImVec2 origin(inner.x, inner.y);
+    DrawTextLayout(draw_list, origin, laid_out.layout, laid_out.font_px, default_color, &clip, box.scroll_start_line);
 }
 
 } // namespace vega_draw

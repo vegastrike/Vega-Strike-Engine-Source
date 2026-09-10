@@ -123,7 +123,9 @@ float justification_factor(Justification j) {
 
 TextLayout LayoutText(const TextLines &parsed, const TextStyle &style, const TextMeasurer &measurer) {
     TextLayout layout;
-    const float line_height = measurer.Measure("", style.font_px).height;
+    // Line advance = the font's line height plus any extra spacing; used both for
+    // drawing (via line.y) and for fitting/visible-line counts.
+    const float line_height = measurer.Measure("", style.font_px).height * (1.0f + style.line_spacing);
     const bool do_wrap = style.wrap && style.wrap_width_px > 0.0f;
     const float factor = justification_factor(style.justification);
 

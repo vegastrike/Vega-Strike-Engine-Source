@@ -61,6 +61,7 @@ struct TextStyle {
     bool wrap = false;            // opt-in word wrap (never reflows a manual <br>)
     float wrap_width_px = 0.0f;   // breaking width, used only when wrap is on
     float region_width_px = 0.0f; // width used for justification; 0 -> no shift
+    float line_spacing = 0.0f;    // extra spacing between lines, as a fraction of the line height
     Justification justification = Justification::Left;
 };
 
