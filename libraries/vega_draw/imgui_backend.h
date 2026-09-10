@@ -33,6 +33,7 @@
 
 #include "vega_draw/markup.h"
 #include "vega_draw/picker.h"
+#include "vega_draw/scroller.h"
 #include "vega_draw/text_box.h"
 #include "vega_draw/text_layout.h"
 #include "vega_draw/units.h"
@@ -110,6 +111,19 @@ void DrawPicker(ImDrawList *draw_list,
                 int selected_index,
                 int highlighted_index,
                 float scroll_px = 0.0f);
+
+// Scroller track/thumb colours.
+struct ScrollerColors {
+    ImU32 track = IM_COL32(30, 30, 30, 160);
+    ImU32 thumb = IM_COL32(150, 150, 150, 220);
+};
+
+// Draw a scroller track and thumb (1000-grid track mapped to pixels).
+void DrawScroller(ImDrawList *draw_list,
+                  const ScrollerStyle &style,
+                  const ScrollerModel &model,
+                  const Viewport &viewport,
+                  const ScrollerColors &colors);
 
 } // namespace vega_draw
 

@@ -174,4 +174,20 @@ void DrawPicker(ImDrawList *draw_list,
     draw_list->PopClipRect();
 }
 
+void DrawScroller(ImDrawList *draw_list,
+                  const ScrollerStyle &style,
+                  const ScrollerModel &model,
+                  const Viewport &viewport,
+                  const ScrollerColors &colors) {
+    if (draw_list == nullptr) {
+        return;
+    }
+    const Rect track = GridToPixelRect(style.track, viewport);
+    draw_list->AddRectFilled(ImVec2(track.left(), track.top()),
+                             ImVec2(track.right(), track.bottom()), colors.track);
+    const Rect thumb = GridToPixelRect(ScrollerThumbRect(style, model), viewport);
+    draw_list->AddRectFilled(ImVec2(thumb.left(), thumb.top()),
+                             ImVec2(thumb.right(), thumb.bottom()), colors.thumb);
+}
+
 } // namespace vega_draw

@@ -39,6 +39,8 @@ ADD_LIBRARY(vegastrike_vega_draw STATIC
     text_box.h
     picker.cpp
     picker.h
+    scroller.cpp
+    scroller.h
     units.h
     imgui_backend.cpp
     imgui_backend.h
@@ -66,6 +68,7 @@ IF (USE_GTEST)
         tests/text_layout_tests.cpp
         tests/text_box_tests.cpp
         tests/picker_tests.cpp
+        tests/scroller_tests.cpp
         tests/units_tests.cpp
     )
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${TST_INCLUDES})
