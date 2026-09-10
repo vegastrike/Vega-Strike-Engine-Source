@@ -745,12 +745,9 @@ void bootstrap_main_loop() {
             }
         }
 
-        if (configuration().general.load_last_savegame) {
-            //Don't write if we didn't load...
-            for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
-                WriteSaveGame(_Universe->AccessCockpit(i), false);
-            }
-        }
+        // load_last_savegame must only LOAD, never write. Saving here would overwrite
+        // the loaded slot (which may be Autosave or a named save) with a startup save;
+        // only autosaves may touch the Autosave slot.
         cur_check = getNewTime();
         for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
             _Universe->AccessCockpit(i)->savegame->LoadSavedMissions();
