@@ -29,6 +29,7 @@
 namespace vega_draw {
 
 void Container::addChild(std::unique_ptr<Widget> child) {
+    child->m_parent = this;
     m_children.push_back(std::move(child));
 }
 
@@ -69,12 +70,18 @@ void Container::draw(ImDrawList *draw_list, const Viewport &viewport) {
 
 bool Container::onMouseDown(const InputEvent &event) {
     Widget *child = childAt(event.loc);
-    return child != nullptr && child->onMouseDown(event);
+    if (child != nullptr && child->onMouseDown(event)) {
+        m_mouse_capture = child;
+        return true;
+    }
+    return false;
 }
 
 bool Container::onMouseUp(const InputEvent &event) {
-    Widget *child = childAt(event.loc);
-    return child != nullptr && child->onMouseUp(event);
+    Widget *target = (m_mouse_capture != nullptr) ? m_mouse_capture : childAt(event.loc);
+    const bool handled = target != nullptr && target->onMouseUp(event);
+    m_mouse_capture = nullptr;
+    return handled;
 }
 
 bool Container::onMouseMove(const InputEvent &event) {
@@ -83,8 +90,8 @@ bool Container::onMouseMove(const InputEvent &event) {
 }
 
 bool Container::onMouseDrag(const InputEvent &event) {
-    Widget *child = childAt(event.loc);
-    return child != nullptr && child->onMouseDrag(event);
+    Widget *target = (m_mouse_capture != nullptr) ? m_mouse_capture : childAt(event.loc);
+    return target != nullptr && target->onMouseDrag(event);
 }
 
 } // namespace vega_draw

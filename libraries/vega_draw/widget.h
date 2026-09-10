@@ -118,10 +118,17 @@ public:
         return false;
     }
 
+    Widget *parent() const {
+        return m_parent;
+    }
+
 protected:
     Rect m_rect;
     std::string m_id;
     bool m_hidden = false;
+    Widget *m_parent = nullptr;
+
+    friend class Container;
 };
 
 // A container holds children and routes events to the topmost hit child.
@@ -141,11 +148,17 @@ public:
         return m_children;
     }
 
+    // The widget capturing the mouse (set on mouse-down, cleared on mouse-up).
+    Widget *mouseCapture() const {
+        return m_mouse_capture;
+    }
+
 private:
     // The topmost visible child containing `p`, or nullptr.
     Widget *childAt(const Point &p) const;
 
     std::vector<std::unique_ptr<Widget>> m_children;
+    Widget *m_mouse_capture = nullptr;
 };
 
 } // namespace vega_draw

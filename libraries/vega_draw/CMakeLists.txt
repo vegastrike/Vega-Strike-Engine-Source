@@ -43,6 +43,8 @@ ADD_LIBRARY(vegastrike_vega_draw STATIC
     scroller.h
     widget.h
     container.cpp
+    button.cpp
+    button.h
     units.h
     imgui_backend.cpp
     imgui_backend.h
@@ -73,6 +75,7 @@ IF (USE_GTEST)
         tests/scroller_tests.cpp
         tests/units_tests.cpp
         tests/widget_tests.cpp
+        tests/button_tests.cpp
     )
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PRIVATE
