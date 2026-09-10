@@ -87,7 +87,7 @@ TextLines ParseMarkup(const std::string &source) {
         }
         Run run;
         run.text.swap(pending);
-        run.style.bold = (bold_depth > 0);
+        run.style.weight = (bold_depth > 0) ? kWeightBold : kWeightNormal;
         run.style.color = current_color();
         line.runs.push_back(std::move(run));
     };

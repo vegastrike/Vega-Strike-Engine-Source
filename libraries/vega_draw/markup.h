@@ -46,10 +46,22 @@ struct Color {
     bool set = false;
 };
 
+// Stroke-weight presets and the threshold at which a run counts as bold for
+// rendering. Weight is continuous (content/config may author values like 1.75);
+// how a backend renders a heavier weight is its own decision.
+constexpr float kWeightLight = 0.6f;
+constexpr float kWeightNormal = 1.0f;
+constexpr float kWeightBold = 1.5f;
+constexpr float kBoldThreshold = 1.25f;
+
+inline bool IsBoldWeight(float weight) noexcept {
+    return weight >= kBoldThreshold;
+}
+
 // Inline style of a run.
 struct Style {
-    bool bold = false;
-    Color color; // color.set == false means no colour tag applied
+    float weight = kWeightNormal; // 1.0 = normal; see the presets above
+    Color color;                  // color.set == false means no colour tag applied
 };
 
 // One contiguous run of text sharing a single style.

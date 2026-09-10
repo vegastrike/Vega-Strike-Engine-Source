@@ -76,10 +76,10 @@ void DrawTextLayout(ImDrawList *draw_list,
             }
             const ImU32 color = ToImU32(run.style.color, default_color);
             const ImVec2 pos(origin.x + run.x, y);
-            // Bold is carried in the run style but not yet rendered differently;
-            // how <b> maps to a face/weight is a separate decision (single-weight
-            // atlas today), and faking it with an offset shadow is deliberately
-            // avoided.
+            // The run's stroke weight is carried but not yet rendered differently
+            // (single-weight atlas today); faking bold with an offset shadow is
+            // deliberately avoided. IsBoldWeight() is available when a backend
+            // starts honouring it.
             draw_list->AddText(nullptr, font_px, pos, color, run.text.c_str(), nullptr, 0.0f, clip_rect);
         }
     }

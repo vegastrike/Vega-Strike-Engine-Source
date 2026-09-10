@@ -51,7 +51,11 @@ float FontGridToPixel(float font_grid, const Viewport&);  // rounds to a whole p
 namespace vega_draw {
 
 struct Color  { std::uint8_t r, g, b, a; bool set = false; };
-struct Style  { bool bold = false; Color color; };
+struct Style  { float weight = kWeightNormal; Color color; };   // weight is continuous
+
+// Weight presets and the bold threshold:
+//   kWeightLight = 0.6, kWeightNormal = 1.0, kWeightBold = 1.5, kBoldThreshold = 1.25
+bool IsBoldWeight(float weight);
 struct Run    { std::string text; Style style; };
 struct Line   { std::vector<Run> runs; bool manual_break = false; };
 using  TextLines = std::vector<Line>;
@@ -65,7 +69,7 @@ Grammar:
 | Markup | Meaning |
 |---|---|
 | `<color=RRGGBB>` … `</color>` | colour span (`RRGGBB`, or `RRGGBBAA` for alpha) |
-| `<b>` … `</b>` | bold span |
+| `<b>` … `</b>` | bold span (sets the run weight to `kWeightBold`) |
 | `<br>` | hard line break |
 | `&lt;` `&gt;` `&amp;` | escaped literal `<`, `>`, `&` |
 
@@ -330,7 +334,8 @@ deterministic `TextMeasurer` (as the existing tests do).
 
 * **Single-line ellipsis** on overflow is not implemented; a non-multiline box
   currently clips.
-* **Bold** is carried in the run style but not yet rendered differently (there is
-  a single weight in the atlas; faking bold with an offset shadow is deliberately
-  avoided pending the `<b>` face/weight decision).
+* **Stroke weight** is carried in the run style as a continuous value, but not yet
+  rendered differently (there is a single weight in the atlas; faking bold with an
+  offset shadow is deliberately avoided). `IsBoldWeight()` reports whether a weight
+  counts as bold for a backend that starts honouring it.
 * The adapter requires an active ImGui font; there is no headless drawing path.

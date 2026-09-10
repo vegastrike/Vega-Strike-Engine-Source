@@ -35,7 +35,7 @@ TEST(ParseMarkup, PlainTextIsOneUnstyledRun) {
     ASSERT_EQ(lines.size(), 1u);
     ASSERT_EQ(lines[0].runs.size(), 1u);
     EXPECT_EQ(lines[0].runs[0].text, "hello world");
-    EXPECT_FALSE(lines[0].runs[0].style.bold);
+    EXPECT_FLOAT_EQ(lines[0].runs[0].style.weight, kWeightNormal);
     EXPECT_FALSE(lines[0].runs[0].style.color.set);
     EXPECT_FALSE(lines[0].manual_break);
 }
@@ -64,17 +64,18 @@ TEST(ParseMarkup, AlphaHexIsAccepted) {
 TEST(ParseMarkup, BoldSpan) {
     const TextLines lines = ParseMarkup("a <b>bold</b> c");
     ASSERT_EQ(lines[0].runs.size(), 3u);
-    EXPECT_FALSE(lines[0].runs[0].style.bold);
-    EXPECT_TRUE(lines[0].runs[1].style.bold);
+    EXPECT_FLOAT_EQ(lines[0].runs[0].style.weight, kWeightNormal);
+    EXPECT_FLOAT_EQ(lines[0].runs[1].style.weight, kWeightBold);
     EXPECT_EQ(lines[0].runs[1].text, "bold");
-    EXPECT_FALSE(lines[0].runs[2].style.bold);
+    EXPECT_TRUE(IsBoldWeight(lines[0].runs[1].style.weight));
+    EXPECT_FLOAT_EQ(lines[0].runs[2].style.weight, kWeightNormal);
 }
 
 TEST(ParseMarkup, NestedColorAndBold) {
     const TextLines lines = ParseMarkup("<color=ff0000><b>hot</b></color>");
     ASSERT_EQ(lines[0].runs.size(), 1u);
     EXPECT_EQ(lines[0].runs[0].text, "hot");
-    EXPECT_TRUE(lines[0].runs[0].style.bold);
+    EXPECT_FLOAT_EQ(lines[0].runs[0].style.weight, kWeightBold);
     EXPECT_EQ(static_cast<int>(lines[0].runs[0].style.color.r), 0xff);
     EXPECT_EQ(static_cast<int>(lines[0].runs[0].style.color.g), 0x00);
 }
