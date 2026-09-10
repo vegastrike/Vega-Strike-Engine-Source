@@ -185,7 +185,17 @@ float PickerScrollToRow(const PickerStyle&, const std::vector<PickerRow>&,
 
 ---
 
-## 6. Scroller (`scroller.h`)
+## 6. Sprite / texture (`sprite.h`)
+
+```cpp
+using TextureId = std::uintptr_t;              // opaque backend texture handle (0 = none)
+struct TextureRegion { TextureId texture = 0; float u0, v0, u1, v1; };
+class TexturePanel : public Container;         // texture behind children; tint + fallback colour
+```
+
+---
+
+## 6a. Scroller (`scroller.h`)
 
 A scroll-bar model + thumb geometry (grid). Extents are in the content's unit
 (e.g. pixels); the track is on the grid.
@@ -238,6 +248,7 @@ class Container : public Widget {           // owns children, routes events
 | Class | Header | Notes |
 |---|---|---|
 | `Panel` | `panel.h` | `Container` + background/border (`PanelStyle`) |
+| `TexturePanel` | `sprite.h` | `Container` + a backend texture behind its children (`TextureRegion`, tint, fallback background) |
 | `PushButton` | `button.h` | `ButtonStyle` (face/down/highlight/border/text/shadows, `font_grid`, `weight`); centred mark-up label; fires a command to a target, else bubbles to the parent |
 | `TextDisplay` | `text_display.h` | shows mark-up via the text box; its rect drives the box region |
 | `ListPicker` | `list_picker.h` | selection list wrapping the picker; `rowAt(grid, viewport, measurer)`, `selectedIndex`, `scroll` |
@@ -267,6 +278,7 @@ void DrawPicker(ImDrawList*, const PickerStyle&, const std::vector<PickerRow>&, 
                 const PickerColors&, int selected_index, int highlighted_index, float scroll_px = 0.0f);
 void DrawScroller(ImDrawList*, const ScrollerStyle&, const ScrollerModel&, const Viewport&,
                   const ScrollerColors&);
+void DrawSprite(ImDrawList*, const Rect& grid_rect, const TextureRegion&, const Viewport&, ImU32 tint = IM_COL32_WHITE);
 
 void DrawRectFill(ImDrawList*, const Rect& grid_rect, const Viewport&, ImU32 color);
 void DrawRectOutline(ImDrawList*, const Rect& grid_rect, const Viewport&, ImU32 color, float thickness_px = 1.0f);
@@ -334,6 +346,4 @@ ImGui context) — they are verified in-engine.
   clips rather than ellipsising rows.
 * **Stroke weight** is carried in the run style but not yet rendered differently
   (single-weight atlas); faking bold with an offset shadow is deliberately avoided.
-* **Textures/sprites** are not yet part of the library — panels are solid-colour
-  (a sprite primitive is a later inventory iteration).
 * The adapter requires an active ImGui font; there is no headless drawing path.
