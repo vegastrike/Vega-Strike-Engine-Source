@@ -35,6 +35,7 @@
 #include "vega_draw/markup.h"
 #include "vega_draw/picker.h"
 #include "vega_draw/scroller.h"
+#include "vega_draw/sprite.h"
 #include "vega_draw/text_box.h"
 #include "vega_draw/text_layout.h"
 #include "vega_draw/units.h"
@@ -114,6 +115,14 @@ void DrawRectOutline(ImDrawList *draw_list,
                      const Viewport &viewport,
                      ImU32 color,
                      float thickness_px = 1.0f);
+
+// Draw a texture over a grid rect, tinted; `region` selects the sub-rectangle
+// (UV). A zero texture draws nothing.
+void DrawSprite(ImDrawList *draw_list,
+                const Rect &grid_rect,
+                const TextureRegion &region,
+                const Viewport &viewport,
+                ImU32 tint = IM_COL32_WHITE);
 
 // Button-beam shadows: the top+left edges (up-left) and bottom+right edges
 // (low-right) of a rectangle, on the 1000-grid.

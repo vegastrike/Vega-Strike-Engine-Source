@@ -201,6 +201,24 @@ void DrawRectOutline(ImDrawList *draw_list,
                        ImVec2(rect.right(), rect.bottom()), color, 0.0f, 0, thickness_px);
 }
 
+void DrawSprite(ImDrawList *draw_list,
+                const Rect &grid_rect,
+                const TextureRegion &region,
+                const Viewport &viewport,
+                ImU32 tint) {
+    if (draw_list == nullptr || region.texture == 0) {
+        return;
+    }
+    const Rect rect = GridToPixelRect(grid_rect, viewport);
+    const ImTextureRef texture(static_cast<ImTextureID>(region.texture));
+    draw_list->AddImage(texture,
+                        ImVec2(rect.left(), rect.top()),
+                        ImVec2(rect.right(), rect.bottom()),
+                        ImVec2(region.u0, region.v0),
+                        ImVec2(region.u1, region.v1),
+                        tint);
+}
+
 void DrawUpLeftShadow(ImDrawList *draw_list,
                       const Rect &grid_rect,
                       const Viewport &viewport,

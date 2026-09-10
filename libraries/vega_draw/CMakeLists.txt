@@ -47,6 +47,8 @@ ADD_LIBRARY(vegastrike_vega_draw STATIC
     button.h
     panel.cpp
     panel.h
+    sprite.cpp
+    sprite.h
     text_display.cpp
     text_display.h
     scroll_bar.cpp
@@ -93,6 +95,7 @@ IF (USE_GTEST)
         tests/scroll_bar_tests.cpp
         tests/list_picker_tests.cpp
         tests/slider_tests.cpp
+        tests/sprite_tests.cpp
         tests/text_input_tests.cpp
         tests/event_manager_tests.cpp
     )
