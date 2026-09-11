@@ -64,7 +64,7 @@ styled lines.
 struct Color { std::uint8_t r, g, b, a; bool set = false; };
 struct Style { float weight = kWeightNormal; Color color; };   // weight is continuous
 struct Run   { std::string text; Style style; };
-struct Line  { std::vector<Run> runs; bool manual_break = false; };
+struct Line  { std::vector<Run> runs; bool manual_break = false; float line_spacing = 0.0f; };
 using  TextLines = std::vector<Line>;
 TextLines ParseMarkup(const std::string& source);
 
@@ -81,6 +81,45 @@ bool IsBoldWeight(float weight);
 
 Spans nest and are **block-scoped with explicit close tags**. Anything that is
 not a recognised tag is literal text (a lone `<` renders literally).
+
+### Legacy format (`legacy_text.h`)
+
+The engine's live text still uses the legacy '#' format. `ParseLegacyVegaText`
+produces the same `TextLines`, so layout, text boxes and the backend do not care
+which parser produced them.
+
+```cpp
+enum class LegacyTextDialect { ImGuiText, TextPlane };
+TextLines ParseLegacyVegaText(const std::string& source, LegacyTextDialect dialect,
+                              bool reveal_safe = false);
+```
+
+| Code | Meaning |
+|---|---|
+| `#RRGGBB` | colour (`#000000` resets to the default colour) |
+| `#cR:G:B[:A]#` | push colour (floats 0..1; alpha optional, default 1) |
+| `#b[weight]#` | push stroke weight (default `kWeightBold`) |
+| `#-b` / `#-c` | pop weight / colour |
+| `#!b` / `#!c` | reset weight / colour to the default |
+| `#n[spacing]#` | line break, optional extra spacing for that line |
+| `#l<spacing>#` | permanent line spacing for the following lines |
+| `##` | literal `#` |
+
+The two dialects differ where the engine historically did: `TextPlane` renders
+`_` as a space and resets the colour at every line break; `ImGuiText` treats a
+backslash (and the character after it) as a line break and keeps the colour
+across breaks. Six hex digits are always read as a colour **before** the format
+codes, so `#b0b0b0`/`#cccccc` are colours, not stroke/colour codes.
+
+`reveal_safe` is for a word-by-word reveal: a trailing token that is not complete
+yet (a lone `#`, `#c` with no closing `#`, `#-` with no target, or `#` plus fewer
+than six hex digits) is dropped instead of rendered as literal text, so a
+partially typed colour token never flashes on screen. The default keeps a
+literal `#` literal.
+
+`Color` is 8-bit and `set == false` means "no explicit colour": the legacy
+`#000000` reset and the modern `<color>` spans both map onto it, and the draw
+call supplies the default colour.
 
 ---
 
@@ -270,7 +309,8 @@ class ImGuiTextMeasurer : public TextMeasurer;    // uses ImGui::GetFont()
 ImU32 ToImU32(const Color&, ImU32 fallback);      // fallback when colour.set == false
 
 void DrawTextLayout(ImDrawList*, const ImVec2& origin, const TextLayout&, float font_px,
-                    ImU32 default_color, const ImVec4* clip_rect = nullptr, int first_line = 0);
+                    ImU32 default_color, const ImVec4* clip_rect = nullptr, int first_line = 0,
+                    ImU32 background_color = 0);
 float DrawText(ImDrawList*, const Viewport&, float grid_x, float grid_y, float font_grid,
                const std::string& markup, ImU32 default_color, const ImVec4* clip = nullptr);
 void DrawTextBox(ImDrawList*, const TextBox&, const std::string& markup, const Viewport&, ImU32 default_color);
@@ -285,6 +325,13 @@ void DrawRectOutline(ImDrawList*, const Rect& grid_rect, const Viewport&, ImU32 
 void DrawUpLeftShadow(ImDrawList*, const Rect&, const Viewport&, ImU32, float thickness_px = 1.0f);
 void DrawLowRightShadow(ImDrawList*, const Rect&, const Viewport&, ImU32, float thickness_px = 1.0f);
 ```
+
+`DrawTextLayout` renders a run whose weight counts as bold (`IsBoldWeight`) with an
+offset shadow in the same colour before the text itself -- the engine has a single
+font weight, so this is how bold is shown. When `background_color` has non-zero
+alpha, a filled rectangle is painted behind each run, anchored at the run's own
+left and right edges so it never covers a neighbouring run's glyphs.
+`DrawText`/`DrawTextBox` leave the background to the caller.
 
 ---
 
@@ -344,6 +391,20 @@ ImGui context) — they are verified in-engine.
 
 * **Single-line ellipsis** is implemented for text boxes (UTF-8 aware); the picker
   clips rather than ellipsising rows.
-* **Stroke weight** is carried in the run style but not yet rendered differently
-  (single-weight atlas); faking bold with an offset shadow is deliberately avoided.
+* **Stroke weight** is carried in the run style and rendered as the bold offset
+  shadow; no real second face is loaded (single-weight atlas).
 * The adapter requires an active ImGui font; there is no headless drawing path.
+
+---
+
+## 12. Adoption in the engine (current)
+
+The engine links `vegastrike_vega_draw`. Base room and main-menu text (the Python
+GUI's `Base.TextBox`, plus the room description and message planes) draws through
+the transitional bridge in `engine/src/gui/vega_text.{h,cpp}`: it parses with
+`ParseLegacyVegaText(..., TextPlane, reveal_safe)`, lays out at the user's Text
+Height with wrapping, and draws with `DrawTextLayout`, mapping the plane's
+position/size through its layout resolution and letterbox offset.
+
+That bridge is the only engine consumer so far; HUD, VDU, the base-computer
+controls and the base-computer screens still render through their own paths.
