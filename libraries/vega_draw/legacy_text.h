@@ -63,7 +63,15 @@ enum class LegacyTextDialect {
     TextPlane,
 };
 
-TextLines ParseLegacyVegaText(const std::string &source, LegacyTextDialect dialect);
+// Parse `source`. When `reveal_safe` is true, a trailing token that has not been
+// fully typed yet (a lone '#', '#c' with no closing '#', '#-' with no target, or
+// '#' followed by fewer than six hex digits) is dropped instead of rendered as
+// literal text. A word-by-word reveal grows the string one character at a time,
+// so without this a partial colour token flashes on screen; the flag lets a
+// reveal path stay clean while the default keeps a literal '#' literal.
+TextLines ParseLegacyVegaText(const std::string &source,
+                              LegacyTextDialect dialect,
+                              bool reveal_safe = false);
 
 } // namespace vega_draw
 

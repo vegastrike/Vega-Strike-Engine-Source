@@ -224,3 +224,47 @@ TEST(ParseLegacyVegaText, TrailingBreakDoesNotAddEmptyLine) {
     ASSERT_EQ(lines.size(), 1u);
     EXPECT_EQ(lines[0].runs[0].text, "a");
 }
+
+static TextLines ParseReveal(const std::string &source) {
+    return ParseLegacyVegaText(source, LegacyTextDialect::TextPlane, true);
+}
+
+TEST(ParseLegacyVegaText, RevealSafeDropsIncompleteColourCode) {
+    const TextLines lines = ParseReveal("hello #c1:0");
+    ASSERT_EQ(lines.size(), 1u);
+    ASSERT_EQ(lines[0].runs.size(), 1u);
+    EXPECT_EQ(lines[0].runs[0].text, "hello ");
+}
+
+TEST(ParseLegacyVegaText, RevealSafeDropsIncompleteHex) {
+    const TextLines lines = ParseReveal("a#FF00");
+    ASSERT_EQ(lines[0].runs.size(), 1u);
+    EXPECT_EQ(lines[0].runs[0].text, "a");
+}
+
+TEST(ParseLegacyVegaText, RevealSafeDropsLoneHash) {
+    const TextLines lines = ParseReveal("a#");
+    ASSERT_EQ(lines[0].runs.size(), 1u);
+    EXPECT_EQ(lines[0].runs[0].text, "a");
+}
+
+TEST(ParseLegacyVegaText, RevealSafeKeepsCompleteHex) {
+    const TextLines lines = ParseReveal("a#FF0000b");
+    ASSERT_EQ(lines[0].runs.size(), 2u);
+    EXPECT_EQ(lines[0].runs[0].text, "a");
+    EXPECT_EQ(lines[0].runs[1].text, "b");
+    EXPECT_TRUE(lines[0].runs[1].style.color.set);
+}
+
+TEST(ParseLegacyVegaText, RevealSafeKeepsCompleteColourCode) {
+    const TextLines lines = ParseReveal("a#c1:0:0#b");
+    ASSERT_EQ(lines[0].runs.size(), 2u);
+    EXPECT_EQ(lines[0].runs[1].text, "b");
+    EXPECT_EQ(static_cast<int>(lines[0].runs[1].style.color.r), 255);
+}
+
+TEST(ParseLegacyVegaText, DefaultKeepsTrailingTokenLiteral) {
+    const TextLines lines = ParseTextPlane("a#c1:0");
+    ASSERT_EQ(lines[0].runs.size(), 1u);
+    EXPECT_EQ(lines[0].runs[0].text, "a#c1:0");
+}

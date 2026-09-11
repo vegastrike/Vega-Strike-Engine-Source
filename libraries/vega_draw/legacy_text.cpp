@@ -99,9 +99,38 @@ bool is_format_code(char c) {
     return c == 'n' || c == 'l' || c == 'b' || c == 'c' || c == '-' || c == '!';
 }
 
+// True when the '#' at `idx` starts a token that is not complete at the end of
+// `source` -- the state a word-by-word reveal passes through on its way to the
+// finished token. Mirrors the legacy reveal handling so a partial colour token
+// is never rendered as literal text.
+bool is_incomplete_token_at(const std::string &source, std::size_t idx) {
+    const std::size_t n = source.size();
+    if (idx >= n || source[idx] != '#') {
+        return false;
+    }
+    if (idx + 1 >= n) {
+        return true; // lone trailing '#'
+    }
+    const char next = source[idx + 1];
+    if (next == 'c') {
+        return source.find('#', idx + 2) == std::string::npos;
+    }
+    if (next == '-') {
+        return idx + 2 >= n;
+    }
+    if (is_hex_digit(next)) {
+        std::size_t k = idx + 1;
+        while (k < n && is_hex_digit(source[k])) {
+            ++k;
+        }
+        return (k == n) && ((k - (idx + 1)) < 6);
+    }
+    return false;
+}
+
 } // namespace
 
-TextLines ParseLegacyVegaText(const std::string &source, LegacyTextDialect dialect) {
+TextLines ParseLegacyVegaText(const std::string &source, LegacyTextDialect dialect, bool reveal_safe) {
     TextLines lines;
     Line line;
     std::string pending;
@@ -154,6 +183,11 @@ TextLines ParseLegacyVegaText(const std::string &source, LegacyTextDialect diale
                 pending += '#';
                 i += 2;
                 continue;
+            }
+
+            // A reveal has typed part of a token, not the whole token yet.
+            if (reveal_safe && is_incomplete_token_at(source, i)) {
+                break;
             }
 
             // "#RRGGBB" hex colour, checked before the format codes so a six-hex

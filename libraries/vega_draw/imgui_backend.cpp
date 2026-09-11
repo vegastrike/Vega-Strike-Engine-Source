@@ -73,7 +73,7 @@ void DrawTextLayout(ImDrawList *draw_list,
     }
     const int start = (first_line < 0) ? 0 : first_line;
     const bool draw_background = ((background_color >> IM_COL32_A_SHIFT) & 0xFF) != 0;
-    const ImVec2 background_pad(4.0f, 2.0f);
+    const float background_pad_y = 2.0f;
     for (std::size_t li = static_cast<std::size_t>(start); li < layout.lines.size(); ++li) {
         const LaidOutLine &line = layout.lines[li];
         const float y = origin.y + line.y;
@@ -85,8 +85,12 @@ void DrawTextLayout(ImDrawList *draw_list,
             const ImU32 color = ToImU32(run.style.color, default_color);
             const ImVec2 pos(origin.x + run.x, y);
             if (draw_background) {
-                const ImVec2 bg_min(pos.x - background_pad.x, pos.y - background_pad.y);
-                const ImVec2 bg_max(pos.x + run.width + background_pad.x, pos.y + line.height + background_pad.y);
+                // Anchor at the run's own left edge and stop at its right edge, so
+                // a run's background never covers a neighbour's glyphs. The legacy
+                // renderer started the box a few pixels to the left, which shaved
+                // the last bit of the previous word.
+                const ImVec2 bg_min(pos.x, pos.y - background_pad_y);
+                const ImVec2 bg_max(pos.x + run.width, pos.y + line.height + background_pad_y);
                 draw_list->AddRectFilled(bg_min, bg_max, background_color);
             }
             // A heavier weight is rendered as an offset shadow in the same
