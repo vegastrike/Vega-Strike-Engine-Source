@@ -66,11 +66,14 @@ void DrawTextLayout(ImDrawList *draw_list,
                     float font_px,
                     ImU32 default_color,
                     const ImVec4 *clip_rect,
-                    int first_line) {
+                    int first_line,
+                    ImU32 background_color) {
     if (draw_list == nullptr) {
         return;
     }
     const int start = (first_line < 0) ? 0 : first_line;
+    const bool draw_background = ((background_color >> IM_COL32_A_SHIFT) & 0xFF) != 0;
+    const ImVec2 background_pad(4.0f, 2.0f);
     for (std::size_t li = static_cast<std::size_t>(start); li < layout.lines.size(); ++li) {
         const LaidOutLine &line = layout.lines[li];
         const float y = origin.y + line.y;
@@ -81,10 +84,17 @@ void DrawTextLayout(ImDrawList *draw_list,
             }
             const ImU32 color = ToImU32(run.style.color, default_color);
             const ImVec2 pos(origin.x + run.x, y);
-            // The run's stroke weight is carried but not yet rendered differently
-            // (single-weight atlas today); faking bold with an offset shadow is
-            // deliberately avoided. IsBoldWeight() is available when a backend
-            // starts honouring it.
+            if (draw_background) {
+                const ImVec2 bg_min(pos.x - background_pad.x, pos.y - background_pad.y);
+                const ImVec2 bg_max(pos.x + run.width + background_pad.x, pos.y + line.height + background_pad.y);
+                draw_list->AddRectFilled(bg_min, bg_max, background_color);
+            }
+            // A heavier weight is rendered as an offset shadow in the same
+            // colour -- the legacy behaviour with a single-weight font atlas.
+            if (IsBoldWeight(run.style.weight)) {
+                const ImVec2 shadow(pos.x, pos.y + 2.0f);
+                draw_list->AddText(nullptr, font_px, shadow, color, run.text.c_str(), nullptr, 0.0f, clip_rect);
+            }
             draw_list->AddText(nullptr, font_px, pos, color, run.text.c_str(), nullptr, 0.0f, clip_rect);
         }
     }

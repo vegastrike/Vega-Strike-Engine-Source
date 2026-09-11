@@ -63,13 +63,17 @@ ImU32 ToImU32(const Color &color, ImU32 fallback);
 // run is drawn at origin + (run.x, line.y). `default_color` applies where a run
 // carries no explicit colour. `clip_rect`, when non-null, is an ImGui
 // pixel-space clip rectangle. Lines before `first_line` are skipped (scrolling).
+// When `background_color` has non-zero alpha, a filled rectangle is painted
+// behind each run. Runs whose weight counts as bold are drawn with an offset
+// shadow in the same colour (the legacy single-weight-atlas bold).
 void DrawTextLayout(ImDrawList *draw_list,
                     const ImVec2 &origin,
                     const TextLayout &layout,
                     float font_px,
                     ImU32 default_color,
                     const ImVec4 *clip_rect = nullptr,
-                    int first_line = 0);
+                    int first_line = 0,
+                    ImU32 background_color = 0);
 
 // Text primitive: parse `markup` and draw it at a 1000-grid position with a
 // per-1000 font size (a fraction of the space height). Returns the drawn height
