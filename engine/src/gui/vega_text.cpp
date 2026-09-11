@@ -85,8 +85,10 @@ void DrawTextPlane(TextPlane &plane, const std::string &text, bool transparent) 
     // The engine draws all text at the user-set Text Height.
     const float font_px = configuration().graphics.font_point_flt;
 
+    // The base text grows one character at a time while a character speaks, so
+    // drop any not-yet-complete colour token rather than flashing it literally.
     const vega_draw::TextLines lines =
-            vega_draw::ParseLegacyVegaText(text, vega_draw::LegacyTextDialect::TextPlane);
+            vega_draw::ParseLegacyVegaText(text, vega_draw::LegacyTextDialect::TextPlane, true);
 
     vega_draw::TextStyle style;
     style.font_px = font_px;
