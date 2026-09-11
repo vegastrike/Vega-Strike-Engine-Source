@@ -67,6 +67,7 @@
 #include "gldrv/mouse_cursor.h"
 
 #include "imgui/imgui.h"
+#include "gui/vega_text.h"
 #include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -670,7 +671,7 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         };
         GFXDraw(GFXQUAD, verts, 4);
     } else {
-        text.Draw(text.GetText(), 0, true, false, automatte);
+        vega_text::DrawTextPlane(text, text.GetText(), automatte);
     }
     text.background_color= static_cast<ImU32>(tmpbg);
 }
@@ -1659,7 +1660,7 @@ void BaseInterface::Draw() {
             GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
             curtext.background_color = static_cast<ImU32>(temp_background_color);
         }
-        curtext.Draw(curtext.GetText(), 0, true, false, automatte);
+        vega_text::DrawTextPlane(curtext, curtext.GetText(), automatte);
         curtext.background_color = static_cast<ImU32>(tmpbg);
     }
     othtext.SetPos(-.99, 1);
@@ -1671,7 +1672,7 @@ void BaseInterface::Draw() {
             GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
             othtext.background_color = static_cast<ImU32>(temp_background_color);
         }
-        othtext.Draw(othtext.GetText(), 0, true, false, automatte);
+        vega_text::DrawTextPlane(othtext, othtext.GetText(), automatte);
         othtext.background_color= static_cast<ImU32>(tmpbg);
     }
     SetupViewport();
