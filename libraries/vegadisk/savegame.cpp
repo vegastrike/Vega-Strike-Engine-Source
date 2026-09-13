@@ -421,8 +421,6 @@ void WriteSaveGame(Cockpit *cp, bool auto_save) {
         cp->savegame->SetPlayerLocation(un->LocalPosition());
     }
 
-    // Autosaves write the fleet ONLY to the Autosave working slot. A named/loaded
-    // save slot is written only by an explicit manual save (auto_save == false).
     WriteUnits(auto_save ? std::string("Autosave") : current_savegame_name);
 }
 
