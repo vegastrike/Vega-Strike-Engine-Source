@@ -264,6 +264,7 @@ SET(LIBGUI_SOURCES
     src/gui/staticdisplay.cpp
     src/gui/text_area.cpp
     src/gui/textinputdisplay.cpp
+    src/gui/vega_text.cpp
     src/gui/window.cpp
     src/gui/windowcontroller.cpp
 )
@@ -717,6 +718,7 @@ IF (NOT DISABLE_CLIENT)
                           vegastrike_posh
                           vegastrike_imgui
                           vegastrike_gui
+                          vegastrike_vega_draw
                           vegastrike_cmd
                           vegastrike-OPcollide
     )
