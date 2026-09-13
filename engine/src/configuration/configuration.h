@@ -2555,12 +2555,10 @@ namespace vega_config {
         bool warp_is_interstellar = false;
         double warp_ramp_down_time_dbl = 0.1;
         float warp_ramp_down_time_flt = 0.1;
-        double warp_clearance_repel_dbl = 2.0;
-        float warp_clearance_repel_flt = 2.0;
-        double warp_clearance_attract_dbl = 1.0;
-        float warp_clearance_attract_flt = 1.0;
-        double warp_clearance_range_mult_dbl = 5.0;
-        float warp_clearance_range_mult_flt = 5.0;
+        // The destination's pull, compared directly against a normalized obstacle
+        // repulsion (0..1), so this value alone sets the balance.
+        double warp_clearance_attract_dbl = 0.7;
+        float warp_clearance_attract_flt = 0.7;
         double warp_min_range_dbl = 3000.0;
         float warp_min_range_flt = 3000.0;
         double weapon_damage_efficiency_dbl = 1.0;
