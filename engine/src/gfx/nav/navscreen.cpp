@@ -585,8 +585,8 @@ void NavigationSystem::DrawMission() {
             GFXColor(.3, 1, .3, 1));
     drawdescription(" ", (originx + (0.1 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
 
-    drawdescription(" ", (originx + (0.3 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
-    drawdescription(" ", (originx + (0.3 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
+    drawdescription(" ", (originx + (0.2 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
+    drawdescription(" ", (originx + (0.2 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
 
     size_t numfactions = FactionUtil::GetNumFactions();
     size_t i = 0;
@@ -642,7 +642,7 @@ void NavigationSystem::DrawMission() {
                 relationtext += " | ";
                 relationtext += XMLSupport::tostring((int) (*killlist)[i]);
             }
-            drawdescription(relationtext, (originx + (0.3 * deltax)), (originy), 1, 1, 0, screenoccupation,
+            drawdescription(relationtext, (originx + (0.2 * deltax)), (originy), 1, 1, 0, screenoccupation,
                     GFXColor((1.0 - relation01), (relation01), (1.0 - (2.0 * Delta(relation01, 0.5))), 1));
         }
     }
