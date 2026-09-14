@@ -90,7 +90,14 @@ void DrawMouseCursor(MousePointerStyle pointerStyle) {
 
 
         // VS_LOG(error, (boost::format("MouseLoc X: %1% | Computed Norm X: %2%") % globalEventManager().mouseLoc().x % normX).str());
-        whichSprite->SetPosition(normX, normY);
+        // A sprite is positioned by its centre, and this cursor's hotspot - the pixel
+        // the arrow points with - is the bottom-left corner of its image. Put the
+        // centre half a sprite up and to the right of the pointer, so that corner
+        // lands on it.
+        float cursor_width = 0.0f;
+        float cursor_height = 0.0f;
+        whichSprite->GetSize(cursor_width, cursor_height);
+        whichSprite->SetPosition(normX + (cursor_width * 0.5f), normY + (cursor_height * 0.5f));
 
         whichSprite->DrawWithImGui(ImGui::GetForegroundDrawList());
     }
