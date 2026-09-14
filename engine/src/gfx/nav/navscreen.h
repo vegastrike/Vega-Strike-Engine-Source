@@ -41,6 +41,9 @@
 #define NAVTOTALMESHCOUNT 8     //same as the button count, 1 mesh for screen and 1 per button(1+7)
 #define MAXZOOM 10
 
+//Vertical fov (radians) used when framing a NavMap camera to the content's extent.
+#define NAV_FIT_FOV 1.0f
+
 void Beautify(string systemfile, string &sector, string &system);
 
 #endif //VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_H
