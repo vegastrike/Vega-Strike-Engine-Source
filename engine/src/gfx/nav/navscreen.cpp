@@ -1427,6 +1427,21 @@ bool NavigationSystem::CheckDraw() {
 void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galaxy) {
     //Adjust transformation
     //**********************************
+    // Dragging with the middle or right button moves the map without changing the
+    // viewing angle, in every view. The left button does the looking around.
+    if (((mouse_previous_state[1] == 1) || (mouse_previous_state[2] == 1))
+            && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
+                    mouse_y_current)) {
+        const float ndx = -1.0f * (mouse_x_current - mouse_x_previous);
+        const float ndy = -1.0f * (mouse_y_current - mouse_y_previous);
+        if (system_vs_galaxy) {
+            rx_s -= (ndx * camera_z);
+            ry_s -= (ndy * camera_z);
+        } else {
+            rx -= (ndx * camera_z);
+            ry -= (ndy * camera_z);
+        }
+    }
     if ((mouse_previous_state[0] == 1)
             && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
                     mouse_y_current)) {
