@@ -237,10 +237,11 @@ void NavigationSystem::Setup() {
 //HERE GOES THE PARSING
 
 //*************************
-    screenskipby4[0] = .3;
-    screenskipby4[1] = .7;
-    screenskipby4[2] = .3;
-    screenskipby4[3] = .7;
+    // The map fills the whole screen. The button column is drawn over its right edge.
+    screenskipby4[0] = 0;
+    screenskipby4[1] = 1;
+    screenskipby4[2] = 0;
+    screenskipby4[3] = 1;
 
     buttonskipby4_1[0] = .75;
     buttonskipby4_1[1] = .95;
@@ -277,53 +278,9 @@ void NavigationSystem::Setup() {
     buttonskipby4_7[2] = .25;
     buttonskipby4_7[3] = .30;
     if (!ParseFile("navdata.xml")) {
-        //start DUMMP VARS
-        screenskipby4[0] = .3;
-        screenskipby4[1] = .7;
-        screenskipby4[2] = .3;
-        screenskipby4[3] = .7;
-
-        buttonskipby4_1[0] = .75;
-        buttonskipby4_1[1] = .95;
-        buttonskipby4_1[2] = .85;
-        buttonskipby4_1[3] = .90;
-
-        buttonskipby4_2[0] = .75;
-        buttonskipby4_2[1] = .95;
-        buttonskipby4_2[2] = .75;
-        buttonskipby4_2[3] = .80;
-
-        buttonskipby4_3[0] = .75;
-        buttonskipby4_3[1] = .95;
-        buttonskipby4_3[2] = .65;
-        buttonskipby4_3[3] = .70;
-
-        buttonskipby4_4[0] = .75;
-        buttonskipby4_4[1] = .95;
-        buttonskipby4_4[2] = .55;
-        buttonskipby4_4[3] = .60;
-
-        buttonskipby4_5[0] = .75;
-        buttonskipby4_5[1] = .95;
-        buttonskipby4_5[2] = .45;
-        buttonskipby4_5[3] = .50;
-
-        buttonskipby4_6[0] = .75;
-        buttonskipby4_6[1] = .95;
-        buttonskipby4_6[2] = .35;
-        buttonskipby4_6[3] = .40;
-
-        buttonskipby4_7[0] = .75;
-        buttonskipby4_7[1] = .95;
-        buttonskipby4_7[2] = .25;
-        buttonskipby4_7[3] = .30;
-
+        // Without the file there are no system item scaling parameters.
         unsetbit(whattodraw, 4);
-        for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
-            mesh[i] = NULL;
-        }
-        VS_LOG(error, "ERROR: Map mesh file not found!!! Using default: blank mesh.");
-        //end DUMMY VARS
+        VS_LOG(error, "ERROR: navdata.xml not found. Nav system items will not be scaled.");
     }
     ScreenToCoord(screenskipby4[0]);
     ScreenToCoord(screenskipby4[1]);
@@ -399,55 +356,6 @@ void NavigationSystem::Draw() {
         return;
     }
 
-    //DRAW THE SCREEN MODEL
-    //**********************************
-    Vector p, q, r;
-    const float zrange = configuration().graphics.cockpit_nav_zrange_flt;
-    const float zfloor = configuration().graphics.cockpit_nav_zfloor_flt;
-    _Universe->AccessCamera()->GetOrientation(p, q, r);
-    _Universe->AccessCamera()->UpdateGFX(GFXTRUE,
-            GFXTRUE,
-            GFXFALSE,
-            GFXTRUE,
-            zfloor,
-            zfloor + zrange);
-
-    _Universe->activateLightMap();
-    for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
-        float screen_x = 0.0;
-        float screen_y = 0.0;
-        float screen_z = 0.0;
-
-        screen_x = meshcoordinate_x[i];
-        screen_y = meshcoordinate_y[i];
-        screen_z = meshcoordinate_z[i];
-        if (checkbit(buttonstates, (i - 1))) {          //button1 = 0, starts at -1, returning 0, no addition done
-            screen_z += meshcoordinate_z_delta[i];
-        }
-        QVector pos = _Universe->AccessCamera()->GetPosition();
-
-        //offset horizontal
-        //***************
-        pos = (p.Cast() * screen_x) + pos;
-        //***************
-
-        //offset vertical
-        //***************
-        pos = (q.Cast() * screen_y) + pos;
-        //***************
-
-        //offset sink
-        //***************
-        pos = (r.Cast() * screen_z) + pos;
-        //***************
-
-        Matrix mat(p, q, r, pos);
-        if (mesh[i]) {
-            mesh[i]->Draw(FLT_MAX, mat);
-        }
-    }
-    Mesh::ProcessZFarMeshes(true);
-    Mesh::ProcessUndrawnMeshes(false, true);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXColor4f(1, 1, 1, 1);
     GFXDisable(TEXTURE0);
@@ -459,11 +367,11 @@ void NavigationSystem::Draw() {
     GFXDisable(DEPTHWRITE);
     StartGUIFrame();
  
-    // Obscure cockpit almost completely.
+    // The nav computer is a flat interface drawn over the game, so hide the game completely.
     const ImVec2 start_position(0,0);
     const ImVec2 end_position(configuration().graphics.resolution_x,
                               configuration().graphics.resolution_y);
-    const ImU32 background_color = IM_COL32(0,0,0,224);
+    const ImU32 background_color = IM_COL32(0,0,0,255);
     ImGui::GetBackgroundDrawList()->AddRectFilled(start_position, end_position, background_color,
                     0.0f // No rounded borders
     );

@@ -438,7 +438,9 @@ void NavigationSystem::DrawGalaxy() {
 
     Adjust3dTransformation(galaxy_view == VIEW_3D, 0);
 
-    float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
+    // Centre the content in the free area left of the button column, which starts at
+    // 0.5 in screen coordinates. The map itself fills the whole screen.
+    float center_nav_x = -0.25f;
     float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
     //**********************************
 
