@@ -67,6 +67,10 @@
 #include "gldrv/winsys.h"
 #include "gui/imgui_support.h"
 
+// The nav buttons are rounded rectangles, measured in pixels.
+static const float kNavButtonRounding = 3.0f;
+static const float kNavButtonOutlineThickness = 1.5f;
+
 //This sets up the items in the navscreen
 //**********************************
 
@@ -1048,18 +1052,8 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
     a_label.SetText(label);
 
     // A subtle dark fill so the button reads as a button rather than as bare text.
-    GFXColorf(GFXColor(0, 0, 0, 0.6f));
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
-    const float button_fill[4 * 3] = {
-            x1, y1, 0,
-            x2, y1, 0,
-            x2, y2, 0,
-            x1, y2, 0,
-    };
-    GFXDraw(GFXQUAD, button_fill, 4);
-    GFXColorf(GFXColor(1, 1, 1, 1));
+    ImDrawList *draw_list = GetNavDrawList();
+    draw_list->AddRectFilled(NormToPixel(x1, y2), NormToPixel(x2, y1), IM_COL32(0, 0, 0, 153), kNavButtonRounding);
 
     const bool nav_button_labels = configuration().graphics.draw_nav_button_labels;
     if (nav_button_labels) {
@@ -1235,24 +1229,8 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 //Draws the actual button outline
 //**********************************
 void NavigationSystem::DrawButtonOutline(float &x1, float &x2, float &y1, float &y2, const GFXColor &col) {
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
-
-    const float verts[8 * 3] = {
-            x1, y1, 0,
-            x1, y2, 0,
-            x2, y1, 0,
-            x2, y2, 0,
-            x1, y1, 0,
-            x2, y1, 0,
-            x1, y2, 0,
-            x2, y2, 0,
-    };
-    GFXDraw(GFXLINE, verts, 8);
-
-    GFXEnable(TEXTURE0);
+    GetNavDrawList()->AddRect(NormToPixel(x1, y2), NormToPixel(x2, y1), ToImColor(col), kNavButtonRounding, 0,
+            kNavButtonOutlineThickness);
 }
 //**********************************
 
