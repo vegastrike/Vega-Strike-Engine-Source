@@ -145,12 +145,12 @@ void NavigationSystem::Setup() {
     rx = -0.5;              //galaxy mode settings
     ry = 0.5;
     rz = 0.0;
-    zoom = 1.8;
+    zoom = 1.0;             //open zoomed out far enough that the whole map fits
 
     rx_s = -0.5;              //system mode settings
     ry_s = 1.5;
     rz_s = 0.0;
-    zoom_s = 1.8;
+    zoom_s = 1.0;             //as above, for the system map
 
     scrolloffset = 0;
 
@@ -1259,8 +1259,8 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
             //releasing #1, toggle the draw (nav / mission)
             if (checkbit(whattodraw, 1)) {
                 //if in nav system NOT mission
-                zoom = 1.8;
-                zoom_s = 1.8;
+                zoom = 1.0;
+                zoom_s = 1.0;
 
                 axis = axis - 1;
                 if (axis == 0) {
@@ -1624,8 +1624,8 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
             } else {
                 zoom_s = zoom_s + ( /*1.0 +*/ 8 * (mouse_y_current - mouse_y_previous));
             }
-            if (zoom_s < 1.2) {
-                zoom_s = 1.2;
+            if (zoom_s < 0.5) {
+                zoom_s = 0.5;
             }
             if (zoom_s > MAXZOOM) {
                 zoom_s = MAXZOOM;
@@ -1943,7 +1943,8 @@ void NavigationSystem::TranslateCoordinates(QVector &pos,
 
     float navscreen_width_delta = (screenskipby4[1] - screenskipby4[0]);
     float navscreen_height_delta = (screenskipby4[3] - screenskipby4[2]);
-    float navscreen_small_delta = std::min(navscreen_width_delta, navscreen_height_delta);
+    // Leave a little margin so labels near the top and bottom edges are not clipped.
+    float navscreen_small_delta = std::min(navscreen_width_delta, navscreen_height_delta) * 0.82f;
 
     the_x = (the_x * navscreen_small_delta);
     the_x = the_x + center_nav_x;
