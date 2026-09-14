@@ -146,6 +146,11 @@ void NavigationSystem::Setup() {
 
     axis = 3;
 
+    //Both cameras are framed to their content the first time they are drawn, and
+    //then keep whatever position and orientation the player gives them.
+    system_needs_refit = true;
+    galaxy_needs_refit = true;
+
     rx = -0.5;              //galaxy mode settings
     ry = 0.5;
     rz = 0.0;

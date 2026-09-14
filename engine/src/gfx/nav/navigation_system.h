@@ -35,6 +35,7 @@
 #include "gnuhash.h"
 #include "gfxlib_struct.h"
 #include "navcomputer.h"
+#include "navmap.h"
 #include "navpath.h"
 
 #include "gfx_generic/vec.h"
@@ -174,6 +175,13 @@ private:
     int rotations; //tried to change to unsigned but gazillions of comparisons to int crop up --chuck_starchaser
     int axis;
     int configmode;
+
+    //The camera each view projects through, and whether it still has to be framed
+    //to its content.
+    NavMap system_cam;
+    NavMap galaxy_cam;
+    bool system_needs_refit;
+    bool galaxy_needs_refit;
 
     float rx;   //galaxy
     float ry;
