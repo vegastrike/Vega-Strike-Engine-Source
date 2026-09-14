@@ -1138,6 +1138,21 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
     float yl = (y1 + y2) / 2.0;
     a_label.SetPos((xl - offset) - (checkbit(buttonstates, button_number - 1) ? 0.006 : 0), (yl + 0.025));
     a_label.SetText(label);
+
+    // A subtle dark fill so the button reads as a button rather than as bare text.
+    GFXColorf(GFXColor(0, 0, 0, 0.6f));
+    GFXDisable(TEXTURE0);
+    GFXDisable(LIGHTING);
+    GFXBlendMode(SRCALPHA, INVSRCALPHA);
+    const float button_fill[4 * 3] = {
+            x1, y1, 0,
+            x2, y1, 0,
+            x2, y2, 0,
+            x1, y2, 0,
+    };
+    GFXDraw(GFXQUAD, button_fill, 4);
+    GFXColorf(GFXColor(1, 1, 1, 1));
+
     const bool nav_button_labels = configuration().graphics.draw_nav_button_labels;
     if (nav_button_labels) {
         const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
