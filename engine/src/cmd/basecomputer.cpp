@@ -297,7 +297,12 @@ void UpdateTransportPricesForOwnedShips(const Unit* base) {
         if (destination_system != ship.system) {
             vector<string> jumps_vector;
             _Universe->getJumpPath(ship.system, destination_system,jumps_vector);
-            jumps = jumps_vector.size()-1;
+            // getJumpPath returns the systems along the route, so there is one fewer
+            // jump than systems. An empty route (no path found) must not become a
+            // negative jump count -- that would price the transfer below zero, which
+            // reads as "free" and would actually add credits on transfer.
+            const size_t systems = jumps_vector.size();
+            jumps = (systems > 0) ? static_cast<int>(systems) - 1 : 0;
         }
         ship.UpdateTransportPrice(destination_system, destination_base, jumps);
 
