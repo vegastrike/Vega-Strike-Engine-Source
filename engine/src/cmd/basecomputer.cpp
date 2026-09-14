@@ -1432,10 +1432,23 @@ bool BaseComputer::isTransactionOK(const Cargo &original_item, const Transaction
             return true;
 
         case BUY_SHIP:
-            //Either you are buying this ship for your fleet, or you already own the
-            //ship and it will be transported to you.
+            //You are either buying a ship for your fleet, or paying to have a ship
+            //you already own transported to you. The second case costs the transport
+            //price, not the ship's price -- testing against the ship's price hid the
+            //button entirely whenever the player could not afford to buy the ship
+            //outright, which made an owned ship look unreachable.
             if (base_unit) {
-                if (item.GetPrice() * quantity <= ComponentsManager::credits) {
+                double price = item.GetPrice();
+                if (item.index > 0) {
+                    try {
+                        price = PlayerShip::GetShipByIndex(item.index).transfer_price;
+                    } catch (const ShipNotFoundException &) {
+                        VS_LOG(error, (boost::format("BUY_SHIP: no fleet ship with index %1%.\n") % item.index));
+                        return false;
+                    }
+                }
+
+                if (price * quantity <= ComponentsManager::credits) {
                     return true;
                 } else {
                     transaction_color = getColor(Color::no_money);
