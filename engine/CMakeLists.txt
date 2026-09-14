@@ -376,6 +376,7 @@ SET(LIBGFXCLIENT_SOURCES
     src/gfx/nav/drawsystem.cpp
     src/gfx/nav/navcomputer.cpp
     src/gfx/nav/navgetxmldata.cpp
+    src/gfx/nav/navmap.cpp
     src/gfx/nav/navpath.cpp
     src/gfx/nav/navscreen.cpp
     src/gfx/nav/navscreenoccupied.cpp
