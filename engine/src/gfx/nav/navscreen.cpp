@@ -1433,8 +1433,11 @@ void NavigationSystem::Adjust3dTransformation(bool is_system_not_galaxy) {
             if (target != nullptr) {
                 pivot = target->Position();
             }
-        } else if (focusedsystemindex < systemIter.size()) {
-            pivot = systemIter[focusedsystemindex].Position();
+        } else if (systemselectionindex < systemIter.size()) {
+            // The system selected on the map, which is what the player expects to be
+            // circling. The focused system only changes when a selection is clicked
+            // twice, so it lags behind.
+            pivot = systemIter[systemselectionindex].Position();
         }
         const float ndx = mouse_x_current - mouse_x_previous;
         const float ndy = mouse_y_current - mouse_y_previous;
