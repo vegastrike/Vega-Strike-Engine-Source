@@ -1403,15 +1403,15 @@ void NavigationSystem::Adjust3dTransformation(bool is_system_not_galaxy) {
     // the right button looks around, the left and middle buttons move the map, and the
     // wheel moves in towards it or back out.
     //
-    // The button state indices are bits of getMouseButtonStatus(), where bit 0 is the
-    // left button, bit 1 the right and bit 2 the middle.
+    // The indices are the bits lookupMouseButton() sets: 0 is the left button, 1 the
+    // middle one and 2 the right (see in_mouse.cpp).
     NavMap &camera = is_system_not_galaxy ? system_cam : galaxy_cam;
     if (!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
             mouse_y_current)) {
         return;
     }
 
-    if (mouse_previous_state[1] == 1) {
+    if (mouse_previous_state[2] == 1) {
         // Right-drag looks around from where the camera is.
         const float ndx = mouse_x_current - mouse_x_previous;
         const float ndy = mouse_y_current - mouse_y_previous;
@@ -1444,7 +1444,7 @@ void NavigationSystem::Adjust3dTransformation(bool is_system_not_galaxy) {
         camera.orbitAround(pivot, ndx * 0.6f, -ndy * 0.6f);
     }
 
-    if (mouse_previous_state[2] == 1) {
+    if (mouse_previous_state[1] == 1) {
         // Middle-drag moves the map.
         const float ndx = mouse_x_current - mouse_x_previous;
         const float ndy = mouse_y_current - mouse_y_previous;
