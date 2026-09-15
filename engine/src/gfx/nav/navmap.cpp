@@ -27,6 +27,7 @@
 
 #include "navmap.h"
 
+#include <algorithm>
 #include <cmath>
 
 /// Longest camera-to-target distance allowed when framing. A sector spans ~1e11
@@ -59,12 +60,17 @@ void NavMap::computeBasis(QVector &forward, QVector &right, QVector &up) const {
 }
 
 void NavMap::setFraming(const QVector &center, double halfx, double halfy, double halfz, float fov_rad) {
-    // At the given field of view, the camera has to stand this far back for the
-    // extent's half-diagonal to fill the view.
-    const double half_diagonal = std::sqrt((halfx * halfx) + (halfy * halfy) + (halfz * halfz));
+    // Fit the widest extent rather than the corner-to-corner diagonal: the content of
+    // a nav map is nearly planar, and fitting the diagonal stands the camera far
+    // enough back that the map fills only about a third of the view.
+    //
+    // project() hands back a tangent, which the caller reads as a coordinate where 1.0
+    // is the edge of the view, so the field of view is the angle subtended by that
+    // edge: at 90 degrees, an extent at the framing distance lands exactly on it.
+    const double half_extent = std::max(halfx, std::max(halfy, halfz));
     const double tan_half_fov = std::tan(0.5 * (fov_rad > 0.01f ? fov_rad : 1.0f));
 
-    double distance = half_diagonal / tan_half_fov;
+    double distance = half_extent / tan_half_fov;
     if (distance < 1.0) {
         distance = 1.0;
     }

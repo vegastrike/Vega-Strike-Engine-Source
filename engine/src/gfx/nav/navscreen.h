@@ -42,7 +42,8 @@
 #define MAXZOOM 10
 
 //Vertical fov (radians) used when framing a NavMap camera to the content's extent.
-#define NAV_FIT_FOV 1.0f
+//A quarter turn, so an extent at the framing distance lands on the edge of the view.
+#define NAV_FIT_FOV 1.5708f
 
 void Beautify(string systemfile, string &sector, string &system);
 
