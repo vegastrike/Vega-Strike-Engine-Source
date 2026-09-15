@@ -430,10 +430,6 @@ void NavigationSystem::DrawGalaxy() {
     //***************************
 
     QVector pos;        //item position
-    QVector pos_flat;           //item position flat on plane
-
-    float zdistance = 0.0;
-    float zscale = 1.0;
     int l;
 
     Adjust3dTransformation(galaxy_view == VIEW_3D, 0);
@@ -528,6 +524,15 @@ void NavigationSystem::DrawGalaxy() {
 
             camera_z = sqrt((half_x * half_x) + (half_y * half_y) + (half_z * half_z));
 
+            // Frame the galaxy the first time it is drawn, and whenever the view is
+            // refitted. The camera's distance comes from the extent of the content and
+            // the field of view, so the galaxy fills the view rather than being scaled
+            // against its own bounding box.
+            if (galaxy_needs_refit) {
+                galaxy_cam.setFraming(QVector(center_x, center_y, center_z), half_x, half_y, half_z, NAV_FIT_FOV);
+                galaxy_needs_refit = false;
+            }
+
 //float halfmax = 0.5*themaxvalue;
 //camera_z = sqrt( (halfmax*halfmax) + (halfmax*halfmax) + (halfmax*halfmax) );
 //camera_z = 4.0*themaxvalue;
@@ -566,20 +571,28 @@ void NavigationSystem::DrawGalaxy() {
         //*************************
 
         GFXColor col = systemIter->GetColor();
-        float the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp;
-        TranslateCoordinates(pos,
-                pos_flat,
-                center_nav_x,
-                center_nav_y,
-                themaxvalue,
-                zscale,
-                zdistance,
-                the_x,
-                the_y,
-                the_x_flat,
-                the_y_flat,
-                system_item_scale_temp,
-                0);
+        float the_x = 0.0f;
+        float the_y = 0.0f;
+        float system_item_scale_temp = 0.0f;
+        if (!galaxy_cam.project(pos, the_x, the_y, system_item_scale_temp)) {
+            ++systemIter;
+            continue;      //behind the camera, so there is nothing to draw
+        }
+        the_x = center_nav_x + the_x;
+        the_y = center_nav_y + the_y;
+
+        // Keep an item within a readable size range however far away it is.
+        if (system_item_scale_temp > maximumitemscaleup) {
+            system_item_scale_temp = maximumitemscaleup;
+        }
+        if (system_item_scale_temp < minimumitemscaledown) {
+            system_item_scale_temp = minimumitemscaledown;
+        }
+
+        // The orientation lines run to a point on a reference plane, which the camera
+        // does not provide; they collapse to the projected point.
+        float the_x_flat = the_x;
+        float the_y_flat = the_y;
         float alphaadd;
         {
             float tmp = (1 - (zoom / MAXZOOM));
@@ -650,7 +663,8 @@ void NavigationSystem::DrawGalaxy() {
         DrawNode(insert_type, insert_size, the_x, the_y,
                 (*systemIter).GetName(), screenoccupation, moused, isPath ? pathcol : col, false, false,
                 isPath ? "" : csector);
-        if (std::fabs(zdistance) < 2.0f * camera_z) {
+        const QVector to_galaxy_system = pos - galaxy_cam.position();
+        if (to_galaxy_system.Magnitude() < (2.0 * galaxy_cam.nominalDistance())) {
             DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
         }
         if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current)) {
@@ -671,21 +685,16 @@ void NavigationSystem::DrawGalaxy() {
                     QVector posoth = oth.Position();
                     ReplaceAxes(posoth);
 
-                    float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat;
-                    // WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
-                    TranslateCoordinates(posoth,
-                            pos_flat,
-                            center_nav_x,
-                            center_nav_y,
-                            themaxvalue,
-                            zscale,
-                            zdistance,
-                            the_new_x,
-                            the_new_y,
-                            the_new_x_flat,
-                            the_new_y_flat,
-                            new_system_item_scale_temp,
-                            0);
+                    float the_new_x = 0.0f;
+                    float the_new_y = 0.0f;
+                    float new_system_item_scale_temp = 0.0f;
+                    if (!galaxy_cam.project(posoth, the_new_x, the_new_y, new_system_item_scale_temp)) {
+                        continue;      //this jump destination is behind the camera
+                    }
+                    the_new_x = center_nav_x + the_new_x;
+                    the_new_y = center_nav_y + the_new_y;
+                    float the_new_x_flat = the_new_x;
+                    float the_new_y_flat = the_new_y;
 
                     GFXColor othcol = oth.GetColor();
                     othcol.a = (new_system_item_scale_temp - minimumitemscaledown) / 
