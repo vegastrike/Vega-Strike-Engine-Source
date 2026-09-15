@@ -531,7 +531,7 @@ void NavigationSystem::DrawGalaxy() {
             // the field of view, so the galaxy fills the view rather than being scaled
             // against its own bounding box.
             if (galaxy_needs_refit) {
-                galaxy_cam.setFraming(QVector(center_x, center_y, center_z), half_x, half_y, half_z, NAV_FIT_FOV);
+                galaxy_cam.setFraming(QVector(center_x, center_y, center_z), half_x, half_y, half_z);
                 galaxy_needs_refit = false;
             }
 

@@ -377,6 +377,13 @@ void NavigationSystem::Draw() {
     GFXDisable(DEPTHWRITE);
     StartGUIFrame();
  
+    // The map is drawn with the same field of view as the world around it, so that it
+    // reads as a view of the same place rather than a differently-lensed one. It stays
+    // fixed: moving closer or further away is the camera moving, not the lens changing.
+    const float nav_fov = static_cast<float>(configuration().graphics.fov_flt * M_PI / 180.0);
+    system_cam.setFov(nav_fov);
+    galaxy_cam.setFov(nav_fov);
+
     // The nav computer is a flat interface drawn over the game, so hide the game completely.
     const ImVec2 start_position(0,0);
     const ImVec2 end_position(configuration().graphics.resolution_x,
@@ -471,10 +478,10 @@ void NavigationSystem::Draw() {
         const float help_y = screenskipby4[2] + 0.10f;
         const float help_x = (screenskipby4[0] + screenskipby4[1]) * 0.5f;
         const GFXColor helpcol(0.7f, 0.7f, 0.7f, 0.85f);
-        drawdescription("Mouse:  right-drag looks around    left/mid-drag moves the map    wheel moves in/out",
+        drawdescription("Mouse:  click selects    left-drag circles the target    middle-drag moves the map    "
+                        "right-drag looks around    wheel moves in/out",
                 help_x, help_y, 0.6f, 0.6f, true, screenoccupation, helpcol);
-        drawdescription("Keys:   arrows move the map    Shift+arrows look around    "
-                        "Alt+arrows move in/out and sideways",
+        drawdescription("Keys:   arrows move the map    Shift+arrows look around    Alt+arrows move in/out and sideways",
                 help_x, help_y + 0.05f, 0.6f, 0.6f, true, screenoccupation, helpcol);
     }
 
@@ -1405,17 +1412,37 @@ void NavigationSystem::Adjust3dTransformation(bool is_system_not_galaxy) {
     }
 
     if (mouse_previous_state[1] == 1) {
+        // Right-drag looks around from where the camera is.
         const float ndx = mouse_x_current - mouse_x_previous;
         const float ndy = mouse_y_current - mouse_y_previous;
         camera.orbitBy(ndx * 0.6f, -ndy * 0.6f);      //y flipped, so that dragging up looks up
     }
 
-    // Panning and zooming scale with the distance to the nearest thing in view, which
-    // is only known once the view has been drawn: fall back to the framing distance
-    // for the first frame, or when there was nothing in view.
+    // Panning, and moving in and out, scale with the distance to the nearest thing in
+    // view, which is only known once the view has been drawn: fall back to the framing
+    // distance for the first frame, or when there was nothing in view.
     const double scale = (nav_near_dist < 1e30) ? nav_near_dist : camera.nominalDistance();
 
-    if ((mouse_previous_state[0] == 1) || (mouse_previous_state[2] == 1)) {
+    if (mouse_previous_state[0] == 1) {
+        // Left-drag swings the camera around the target, so that the target stays where
+        // it is and the map turns around it. The target is the ship's if it has one, and
+        // otherwise whatever the camera is already looking at.
+        QVector pivot = camera.focusPoint();
+        if (is_system_not_galaxy) {
+            Unit *target = _Universe->AccessCockpit()->GetParent()->Target();
+            if (target != nullptr) {
+                pivot = target->Position();
+            }
+        } else if (focusedsystemindex < systemIter.size()) {
+            pivot = systemIter[focusedsystemindex].Position();
+        }
+        const float ndx = mouse_x_current - mouse_x_previous;
+        const float ndy = mouse_y_current - mouse_y_previous;
+        camera.orbitAround(pivot, ndx * 0.6f, -ndy * 0.6f);
+    }
+
+    if (mouse_previous_state[2] == 1) {
+        // Middle-drag moves the map.
         const float ndx = mouse_x_current - mouse_x_previous;
         const float ndy = mouse_y_current - mouse_y_previous;
         const double step = scale * 0.5;
@@ -1424,6 +1451,7 @@ void NavigationSystem::Adjust3dTransformation(bool is_system_not_galaxy) {
 
     const float wheel_zoom_level = configuration().graphics.wheel_zoom_amount_flt;
     if (mouse_wentdown[3] || mouse_wentdown[4]) {
+        // The wheel moves the camera in and out. The lens does not change.
         const double step = scale * wheel_zoom_level;
         camera.zoomBy(mouse_wentdown[3] ? step : -step);
     }
