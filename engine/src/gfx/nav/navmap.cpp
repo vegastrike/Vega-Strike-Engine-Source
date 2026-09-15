@@ -109,11 +109,28 @@ void NavMap::orbitBy(float dyaw, float dpitch) {
 }
 
 void NavMap::orbitAround(const QVector &pivot, float dyaw, float dpitch) {
-    const double radius = (pos_ - pivot).Magnitude();
+    // A rigid turn of the whole camera about the pivot: the camera's position and its view
+    // direction turn together, so whatever is at the pivot keeps the screen position it
+    // already had while everything else swings around it. Turning the position and then
+    // re-aiming at the pivot instead would drag the pivot to the middle of the screen.
+    QVector old_forward;
+    QVector old_right;
+    QVector old_up;
+    computeBasis(old_forward, old_right, old_up);
+
     orbitBy(dyaw, dpitch);
-    // Stand the same distance behind the pivot, still looking at it, so whatever is at
-    // the pivot stays where it is while everything else swings around it.
-    pos_ = pivot - (forward() * radius);
+
+    QVector new_forward;
+    QVector new_right;
+    QVector new_up;
+    computeBasis(new_forward, new_right, new_up);
+
+    // Turn the offset from the pivot by the same rotation that turned the view.
+    const QVector offset = pos_ - pivot;
+    const QVector turned = (new_right * offset.Dot(old_right))
+            + (new_up * offset.Dot(old_up))
+            + (new_forward * offset.Dot(old_forward));
+    pos_ = pivot + turned;
 }
 
 QVector NavMap::focusPoint() const {

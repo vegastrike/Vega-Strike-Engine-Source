@@ -1424,34 +1424,20 @@ void NavigationSystem::Adjust3dTransformation(bool is_system_not_galaxy) {
     const double scale = (nav_near_dist < 1e30) ? nav_near_dist : camera.nominalDistance();
 
     if (mouse_previous_state[0] == 1) {
-        // Left-drag swings the camera around what it is looking at, so the map turns
-        // around a point that stays where it is. That point is the selected target when
-        // it is under the middle of the screen, where circling it is what the player
-        // means; otherwise it is the point the camera is already looking at, so that the
-        // view never has to jump sideways to reach the pivot.
+        // Left-drag turns the map about the selected object, which is what the player is
+        // pointing at when they do this. The object keeps the place it has on the screen
+        // and everything else swings around it. With nothing selected there is no pivot to
+        // work about, so turn about the point the camera is looking at.
         QVector pivot = camera.focusPoint();
-        QVector selected;
-        bool have_selected = false;
         if (is_system_not_galaxy) {
             Unit *target = _Universe->AccessCockpit()->GetParent()->Target();
             if (target != nullptr) {
-                selected = target->Position();
-                have_selected = true;
+                pivot = target->Position();
             }
         } else if (systemselectionindex < systemIter.size()) {
             // The system selected on the map. The focused one only changes when a
             // selection is clicked twice, so it lags behind.
-            selected = systemIter[systemselectionindex].Position();
-            have_selected = true;
-        }
-        if (have_selected) {
-            float selected_x = 0.0f;
-            float selected_y = 0.0f;
-            float selected_scale = 0.0f;
-            if (camera.project(selected, selected_x, selected_y, selected_scale)
-                    && (std::fabs(selected_x) < 0.1f) && (std::fabs(selected_y) < 0.1f)) {
-                pivot = selected;
-            }
+            pivot = systemIter[systemselectionindex].Position();
         }
         const float ndx = mouse_x_current - mouse_x_previous;
         const float ndy = mouse_y_current - mouse_y_previous;
