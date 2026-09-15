@@ -572,6 +572,12 @@ void NavigationSystem::DrawGalaxy() {
     //**********************************
     systemIter.seek();
     nav_near_dist = 1e30;      //reset the nearest-thing distance for this frame
+
+    // Screen positions of the systems already named on this pass, so that a name is only
+    // drawn where it has room.
+    const float label_radius = 0.05f;
+    std::vector<QVector> named_positions;
+
     while (!systemIter.done()) {
         // Systems outside the explored region are not drawn at all.
         if (draw_systems.find(systemIter->GetName()) == draw_systems.end()) {
@@ -692,10 +698,23 @@ void NavigationSystem::DrawGalaxy() {
         if (systemselectionindex == temp) {
             DrawTargetCorners(the_x, the_y, (insert_size) * 1.4, selectcol);
         }
-        // Only the system the player is in, and the one the crosshair is on, get a name:
-        // labelling every drawn system stacks the names into one long column. An empty
-        // name draws the marker without a description.
-        const bool named = (temp == currentsystemindex) || (temp == focusedsystemindex);
+        // A name is drawn where it fits: the first system of a group of nearby markers
+        // keeps its name and the rest are drawn bare, so that the names stop stacking
+        // into a column. The system the player is in, and the one selected, are always
+        // named whatever else is near them.
+        bool fits = true;
+        for (size_t i = 0; i < named_positions.size(); ++i) {
+            const float dx = the_x - named_positions[i].i;
+            const float dy = the_y - named_positions[i].j;
+            if (((dx * dx) + (dy * dy)) < (label_radius * label_radius)) {
+                fits = false;
+                break;
+            }
+        }
+        const bool named = fits || (temp == currentsystemindex) || (temp == systemselectionindex);
+        if (named) {
+            named_positions.push_back(QVector(the_x, the_y, 0.0));
+        }
         bool moused = false;
         DrawNode(insert_type, insert_size, the_x, the_y,
                 named ? (*systemIter).GetName() : std::string(), screenoccupation, moused, isPath ? pathcol : col,
