@@ -38,6 +38,15 @@
 #include "cmd/collection.h"
 #include "gfx/hud.h"
 #include "root_generic/lin_time.h" //for fps
+
+// The smallest an item is drawn, in the units the nav positions use: the screen spans
+// two units across, so this is about 15 pixels. Items never shrink below it, which is
+// what keeps them visible when the view is zoomed out to a very large system.
+static float NavMinItemSize() {
+    const float pixels = 15.0f;
+    const float resolution = static_cast<float>(configuration().graphics.resolution_x);
+    return (resolution > 0.0f) ? ((2.0f * pixels) / resolution) : 0.015f;
+}
 #include "src/config_xml.h"
 #include "root_generic/lin_time.h"
 #include "cmd/images.h"
@@ -255,6 +264,19 @@ void NavigationSystem::DrawSystem() {
     //Enlist the items and attributes
     //**********************************
     nav_near_dist = 1e30;      //reset the nearest-thing distance for this frame
+
+    // Drawable items are collected first and drawn afterwards, so that overlapping
+    // ones can be collapsed into the largest of the group before anything is drawn.
+    struct NavItem {
+        int type;
+        float size;
+        float x;
+        float y;
+        Unit *unit;
+        double real_size;
+    };
+    std::vector<NavItem> drawn;
+
     un_iter blah = UniverseUtil::getUnitList();
     while (*blah) {
         //this draws the points
@@ -399,35 +421,108 @@ void NavigationSystem::DrawSystem() {
             system_item_scale_temp = (system_item_scale * 3);
         }
         insert_size *= system_item_scale_temp;
-        if (_Universe->AccessCockpit()->GetParent()->Target() == (*blah)) {
-            //Get a color from the config
-            static GFXColor col = vs_config->getColor("nav", "targetted_unit", GFXColor(1, 0.3, 0.3, 0.8));
-            DrawTargetCorners(the_x, the_y, insert_size, col);
+        // Keep items above a minimum on-screen size, so that they stay visible when
+        // the view is zoomed out to a very large system.
+        if (insert_size < NavMinItemSize()) {
+            insert_size = NavMinItemSize();
         }
-        bool tests_in_range = 0;
-        if (insert_type == navstation) {
-            tests_in_range = TestIfInRangeBlk(the_x, the_y, insert_size, mouse_x_current, mouse_y_current);
-        } else {
-            tests_in_range = TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current);
-        }
-        Unit *myunit = (*blah);
+
+        NavItem item;
+        item.type = insert_type;
+        item.size = insert_size;
+        item.x = the_x;
+        item.y = the_y;
+        item.unit = (*blah);
+        item.real_size = (*blah)->rSize();
+        drawn.push_back(item);
 
         ++blah;
-        if (tests_in_range) {
-            mouselist.insert(insert_type, insert_size, the_x, the_y, myunit);
+    }
+
+    // Collapse overlapping items: where several objects land on nearly the same place,
+    // keep only the largest, so a cluster draws one marker instead of a label for every
+    // object in it. The player, bases, and whatever is under the mouse are always kept.
+    // Ranked by real size rather than on-screen size, because the minimum size above
+    // makes every distant icon measure alike.
+    const float cluster_radius = 0.05f;
+    auto is_keeper = [&](const NavItem &item) {
+        if (item.unit != nullptr && UnitUtil::isPlayerStarship(item.unit) > -1) {
+            return true;
+        }
+        if (item.unit != nullptr && UnitUtil::getFlightgroupNameCR(item.unit) == "Base") {
+            return true;
+        }
+        float x = item.x;
+        float y = item.y;
+        return TestIfInRangeRad(x, y, item.size, mouse_x_current, mouse_y_current);
+    };
+
+    for (size_t i = 0; i < drawn.size(); ++i) {
+        if (drawn[i].size < 0.0f) {
+            continue;      //already collapsed into a larger neighbour
+        }
+        for (size_t j = i + 1; j < drawn.size(); ++j) {
+            if (drawn[j].size < 0.0f) {
+                continue;
+            }
+            const float dx = drawn[i].x - drawn[j].x;
+            const float dy = drawn[i].y - drawn[j].y;
+            if (((dx * dx) + (dy * dy)) >= (cluster_radius * cluster_radius)) {
+                continue;
+            }
+            const bool keep_i = is_keeper(drawn[i]);
+            const bool keep_j = is_keeper(drawn[j]);
+            if (keep_i && keep_j) {
+                continue;
+            }
+            if (drawn[j].real_size > drawn[i].real_size) {
+                if (!keep_i) {
+                    drawn[i].size = -1.0f;
+                }
+            } else if (drawn[j].real_size == drawn[i].real_size) {
+                if (!keep_j) {
+                    drawn[j].size = -1.0f;
+                }
+            } else {
+                if (!keep_j) {
+                    drawn[j].size = -1.0f;
+                }
+            }
+        }
+    }
+
+    //Draw what survived the collapse.
+    for (size_t i = 0; i < drawn.size(); ++i) {
+        if (drawn[i].size < 0.0f) {
+            continue;
+        }
+        NavItem &item = drawn[i];
+        if (_Universe->AccessCockpit()->GetParent()->Target() == item.unit) {
+            static GFXColor col = vs_config->getColor("nav", "targetted_unit", GFXColor(1, 0.3, 0.3, 0.8));
+            DrawTargetCorners(item.x, item.y, item.size, col);
+        }
+        bool tests_in_range = false;
+        if (item.type == navstation) {
+            tests_in_range = TestIfInRangeBlk(item.x, item.y, item.size, mouse_x_current, mouse_y_current);
         } else {
-            drawlistitem(insert_type,
-                    insert_size,
-                    the_x,
-                    the_y,
-                    myunit,
+            tests_in_range = TestIfInRangeRad(item.x, item.y, item.size, mouse_x_current, mouse_y_current);
+        }
+        if (tests_in_range) {
+            mouselist.insert(item.type, item.size, item.x, item.y, item.unit);
+        } else {
+            drawlistitem(item.type,
+                    item.size,
+                    item.x,
+                    item.y,
+                    item.unit,
                     screenoccupation,
                     false,
-                    (*blah) ? true : false,
+                    false,
                     unselectedalpha,
                     factioncolours);
         }
     }
+    drawn.clear();
     //**********************************	//	done enlisting items and attributes
     //Adjust mouse list for 'n' kliks
     //**********************************
