@@ -81,10 +81,6 @@ bool NavigationSystem::ParseFile(string filename) {
                 data = expression;
                 if (tag == "console") {
                     string mesh_ = retrievedata(data, "file");
-                    float x_small = atof((retrievedata(data, "x_small")).c_str());
-                    float x_large = atof((retrievedata(data, "x_large")).c_str());
-                    float y_small = atof((retrievedata(data, "y_small")).c_str());
-                    float y_large = atof((retrievedata(data, "y_large")).c_str());
                     float scale_ = atof((retrievedata(data, "scale")).c_str());
                     float x_mesh_coord = atof((retrievedata(data, "x_mesh_coord")).c_str());
                     float y_mesh_coord = atof((retrievedata(data, "y_mesh_coord")).c_str());
@@ -92,10 +88,9 @@ bool NavigationSystem::ParseFile(string filename) {
                     meshcoordinate_x[0] = x_mesh_coord;
                     meshcoordinate_y[0] = y_mesh_coord;
                     meshcoordinate_z[0] = z_mesh_coord;
-                    screenskipby4[0] = x_small;
-                    screenskipby4[1] = x_large;
-                    screenskipby4[2] = y_small;
-                    screenskipby4[3] = y_large;
+                    // This mesh's x_small/x_large/y_small/y_large used to become the map
+                    // region. The mesh is not drawn any more and the region is fixed in
+                    // the engine, so they are ignored.
                     mesh[0] = Mesh::LoadMesh(mesh_.c_str(), Vector(scale_, scale_, scale_), 0, NULL);
                 } else if (tag == "button1") {
                     string mesh_ = retrievedata(data, "file");
