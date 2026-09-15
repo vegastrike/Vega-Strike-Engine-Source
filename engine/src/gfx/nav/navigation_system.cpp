@@ -692,10 +692,14 @@ void NavigationSystem::DrawGalaxy() {
         if (systemselectionindex == temp) {
             DrawTargetCorners(the_x, the_y, (insert_size) * 1.4, selectcol);
         }
+        // Only the system the player is in, and the one the crosshair is on, get a name:
+        // labelling every drawn system stacks the names into one long column. An empty
+        // name draws the marker without a description.
+        const bool named = (temp == currentsystemindex) || (temp == focusedsystemindex);
         bool moused = false;
         DrawNode(insert_type, insert_size, the_x, the_y,
-                (*systemIter).GetName(), screenoccupation, moused, isPath ? pathcol : col, false, false,
-                isPath ? "" : csector);
+                named ? (*systemIter).GetName() : std::string(), screenoccupation, moused, isPath ? pathcol : col,
+                false, false, isPath ? "" : csector);
         if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current)) {
             mouselist.push_back(SystemDrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),
                     systemIter.getIndex(), screenoccupation, false, isPath ? pathcol : col));
