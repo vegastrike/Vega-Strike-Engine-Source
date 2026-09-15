@@ -459,8 +459,6 @@ void NavigationSystem::Draw() {
     DrawButton(buttonskipby4_3[0], buttonskipby4_3[1], buttonskipby4_3[2], buttonskipby4_3[3], 3, outlinebuttons);
     DrawButton(buttonskipby4_4[0], buttonskipby4_4[1], buttonskipby4_4[2], buttonskipby4_4[3], 4, outlinebuttons);
     DrawButton(buttonskipby4_5[0], buttonskipby4_5[1], buttonskipby4_5[2], buttonskipby4_5[3], 5, outlinebuttons);
-    DrawButton(buttonskipby4_6[0], buttonskipby4_6[1], buttonskipby4_6[2], buttonskipby4_6[3], 6, outlinebuttons);
-    DrawButton(buttonskipby4_7[0], buttonskipby4_7[1], buttonskipby4_7[2], buttonskipby4_7[3], 7, outlinebuttons);
     //**********************************
 
     // A short reminder of the controls, along the bottom of the screen.
@@ -1037,8 +1035,6 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
         label = "Nav/Info";
     } else if (button_number == 3) {
         label = "Target Selected";
-    } else if (button_number == 7) {
-        label = "2D/Ortho/3D";
     } else if (checkbit(whattodraw, 1)) {
         if (button_number == 2) {
             label = "Path On/Off/Only";
@@ -1046,8 +1042,6 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
             label = "Up";
         } else if (button_number == 5) {
             label = "Down";
-        } else if (button_number == 6) {
-            label = "Axis Swap";
         }
     } else {
         if (button_number == 2) {
@@ -1178,41 +1172,13 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
         //******************************************************
         if (button_number == 6) {
             //releasing #1, toggle the draw (nav / mission)
-            if (checkbit(whattodraw, 1)) {
-                //if in nav system NOT mission
-                zoom = 1.0;
-                zoom_s = 1.0;
-
-                axis = axis - 1;
-                if (axis == 0) {
-                    axis = 3;
-                }
-                camera_z = 0;
-            } else {
+            if (!checkbit(whattodraw, 1)) {
                 //if in mission mode
 
                 flipbit(whattodraw, 1);
             }
         }
         //******************************************************
-        //******************************************************
-        //**                 BUTTON 7 FUNCTION                **	2D/3D
-        //******************************************************
-        if (button_number == 7) {
-            if ((checkbit(whattodraw, 1)) && (checkbit(whattodraw, 2)) && galaxy_multi_dimensional) {
-                galaxy_view = (galaxy_view + 1) % VIEW_MAX;
-                rx = -0.5;
-                ry = 0.5;
-                rz = 0.0;
-            }
-            if ((checkbit(whattodraw, 1)) && (!checkbit(whattodraw, 2)) && system_multi_dimensional) {
-                system_view = (system_view + 1) % VIEW_MAX;
-                rx_s = -0.5;
-                ry_s = 0.5;
-                rz_s = 0.0;
-            }
-            camera_z = 0;
-        }
         //******************************************************
     }
     //!!! OUT OF BOUNDS !!!
