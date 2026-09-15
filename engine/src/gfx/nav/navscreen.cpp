@@ -1424,20 +1424,34 @@ void NavigationSystem::Adjust3dTransformation(bool is_system_not_galaxy) {
     const double scale = (nav_near_dist < 1e30) ? nav_near_dist : camera.nominalDistance();
 
     if (mouse_previous_state[0] == 1) {
-        // Left-drag swings the camera around the target, so that the target stays where
-        // it is and the map turns around it. The target is the ship's if it has one, and
-        // otherwise whatever the camera is already looking at.
+        // Left-drag swings the camera around what it is looking at, so the map turns
+        // around a point that stays where it is. That point is the selected target when
+        // it is under the middle of the screen, where circling it is what the player
+        // means; otherwise it is the point the camera is already looking at, so that the
+        // view never has to jump sideways to reach the pivot.
         QVector pivot = camera.focusPoint();
+        QVector selected;
+        bool have_selected = false;
         if (is_system_not_galaxy) {
             Unit *target = _Universe->AccessCockpit()->GetParent()->Target();
             if (target != nullptr) {
-                pivot = target->Position();
+                selected = target->Position();
+                have_selected = true;
             }
         } else if (systemselectionindex < systemIter.size()) {
-            // The system selected on the map, which is what the player expects to be
-            // circling. The focused system only changes when a selection is clicked
-            // twice, so it lags behind.
-            pivot = systemIter[systemselectionindex].Position();
+            // The system selected on the map. The focused one only changes when a
+            // selection is clicked twice, so it lags behind.
+            selected = systemIter[systemselectionindex].Position();
+            have_selected = true;
+        }
+        if (have_selected) {
+            float selected_x = 0.0f;
+            float selected_y = 0.0f;
+            float selected_scale = 0.0f;
+            if (camera.project(selected, selected_x, selected_y, selected_scale)
+                    && (std::fabs(selected_x) < 0.1f) && (std::fabs(selected_y) < 0.1f)) {
+                pivot = selected;
+            }
         }
         const float ndx = mouse_x_current - mouse_x_previous;
         const float ndy = mouse_y_current - mouse_y_previous;

@@ -34,10 +34,6 @@
 /// units between clusters and the galaxy is vaster still, so the whole thing has
 /// to fit inside this.
 static const double kMaxCameraDistance = 1e15;
-
-/// The camera is kept this far off the poles, where yaw stops meaning anything.
-static const double kPoleEpsilon = 0.05;
-
 void NavMap::setCamera(float yaw, float pitch) {
     yaw_ = yaw;
     pitch_ = pitch;
@@ -57,8 +53,14 @@ QVector NavMap::forward() const {
 void NavMap::computeBasis(QVector &forward, QVector &right, QVector &up) const {
     forward = this->forward();
 
+    // Looking straight up or straight down leaves the world's up axis parallel to the
+    // view, where the cross product vanishes and the camera's right axis is undefined.
+    // Use another reference there, which lets the camera carry on turning right over
+    // the pole instead of stopping at it.
     const QVector world_up(0.0, 1.0, 0.0);
-    right = forward.Cross(world_up);
+    const QVector reference = (std::fabs(forward.j) > 0.99) ? QVector(0.0, 0.0, 1.0) : world_up;
+
+    right = forward.Cross(reference);
     right.Normalize();
     up = right.Cross(forward);
     up.Normalize();
@@ -90,11 +92,19 @@ void NavMap::setFraming(const QVector &center, double halfx, double halfy, doubl
 void NavMap::orbitBy(float dyaw, float dpitch) {
     yaw_ += dyaw;
     pitch_ += dpitch;
-    if (pitch_ > (M_PI_2 - kPoleEpsilon)) {
-        pitch_ = static_cast<float>(M_PI_2 - kPoleEpsilon);
+    // Wrapped only to keep the angles small enough to stay accurate over long drags;
+    // they are periodic, so nothing else changes.
+    if (yaw_ > M_PI) {
+        yaw_ -= static_cast<float>(2.0 * M_PI);
     }
-    if (pitch_ < (-M_PI_2 + kPoleEpsilon)) {
-        pitch_ = static_cast<float>(-M_PI_2 + kPoleEpsilon);
+    if (yaw_ < -M_PI) {
+        yaw_ += static_cast<float>(2.0 * M_PI);
+    }
+    if (pitch_ > M_PI) {
+        pitch_ -= static_cast<float>(2.0 * M_PI);
+    }
+    if (pitch_ < -M_PI) {
+        pitch_ += static_cast<float>(2.0 * M_PI);
     }
 }
 
