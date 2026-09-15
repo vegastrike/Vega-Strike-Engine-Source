@@ -463,6 +463,19 @@ void NavigationSystem::Draw() {
     DrawButton(buttonskipby4_7[0], buttonskipby4_7[1], buttonskipby4_7[2], buttonskipby4_7[3], 7, outlinebuttons);
     //**********************************
 
+    // A short reminder of the controls, along the bottom of the screen.
+    static const bool draw_nav_help =
+            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_nav_help", "true"));
+    if (draw_nav_help) {
+        const float help_y = screenskipby4[2] + 0.06f;
+        const GFXColor helpcol(0.7f, 0.7f, 0.7f, 0.85f);
+        drawdescription("Mouse:  right-drag = look around   left/mid-drag = move the map   wheel = move in/out",
+                screenskipby4[0] + 0.03f, help_y, 0.6f, 0.6f, true, screenoccupation, helpcol);
+        drawdescription("Keys:   arrows = move the map   Shift+arrows = look around   "
+                        "Alt+up/down = move in/out   Alt+left/right = move sideways",
+                screenskipby4[0] + 0.03f, help_y + 0.05f, 0.6f, 0.6f, true, screenoccupation, helpcol);
+    }
+
     //Save current mouse location as previous for next cycle
     //**********************************
     mouse_x_previous = (-1 + float(mousex) / (.5 * configuration().graphics.resolution_x));
@@ -1443,6 +1456,56 @@ void NavigationSystem::Adjust3dTransformation(bool is_system_not_galaxy) {
     if (mouse_wentdown[3] || mouse_wentdown[4]) {
         const double step = scale * wheel_zoom_level;
         camera.zoomBy(mouse_wentdown[3] ? step : -step);
+    }
+}
+
+void NavigationSystem::arrowKey(int dir, unsigned int mods) {
+    // Keyboard camera control, for while the nav computer is open: the caller gates
+    // the ship's own arrow-key handlers, so these never steer the ship.
+    //   arrows         = move the map
+    //   Shift+arrows   = look around
+    //   Alt+up/down    = move in towards the map, or back out
+    //   Alt+left/right = move the map sideways
+    NavMap &camera = checkbit(whattodraw, 2) ? galaxy_cam : system_cam;
+
+    const bool shift = (mods & KB_MOD_SHIFT) != 0;
+    const bool alt = (mods & KB_MOD_ALT) != 0;
+
+    // As with the mouse, steps scale with the distance to the nearest object in view.
+    const double scale = (nav_near_dist < 1e30) ? nav_near_dist : camera.nominalDistance();
+    const double step = scale * 0.5;
+
+    if (shift) {
+        const float amount = 0.05f;
+        if (dir == 0) {
+            camera.orbitBy(0.0f, amount);
+        } else if (dir == 1) {
+            camera.orbitBy(0.0f, -amount);
+        } else if (dir == 2) {
+            camera.orbitBy(amount, 0.0f);
+        } else {
+            camera.orbitBy(-amount, 0.0f);
+        }
+    } else if (alt) {
+        if (dir == 0) {
+            camera.zoomBy(step);
+        } else if (dir == 1) {
+            camera.zoomBy(-step);
+        } else if (dir == 2) {
+            camera.panBy(-step, 0.0);
+        } else {
+            camera.panBy(step, 0.0);
+        }
+    } else {
+        if (dir == 0) {
+            camera.panBy(0.0, step);
+        } else if (dir == 1) {
+            camera.panBy(0.0, -step);
+        } else if (dir == 2) {
+            camera.panBy(-step, 0.0);
+        } else {
+            camera.panBy(step, 0.0);
+        }
     }
 }
 
