@@ -38,6 +38,50 @@
 #include "cmd/collection.h"
 #include "gfx/hud.h"
 #include "root_generic/lin_time.h" //for fps
+#include "src/config_xml.h"
+#include "gui/guidefs.h"
+#include "cmd/planetary_orbit.h"
+
+// Draws the ellipse a body travels, faintly. Pieces that fall behind the camera are
+// skipped, so an orbit the viewer is inside does not streak across the view.
+static void DrawOrbit(Unit *unit, const NavMap &camera, float center_nav_x, float center_nav_y) {
+    static const bool draw_orbits =
+            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_nav_orbits", "true"));
+    if (!draw_orbits) {
+        return;
+    }
+    PlanetaryOrbit *orbit = vega_dynamic_cast_ptr<PlanetaryOrbit>(unit->getAIState());
+    if (orbit == nullptr) {
+        return;      //a body that travels no orbit
+    }
+
+    ImDrawList *draw_list = ImGui::GetBackgroundDrawList();
+    //Faint blue, matching the nav map's own labels rather than competing with them.
+    const ImU32 colour = IM_COL32(128, 128, 255, 48);
+    const int segments = 96;
+
+    for (int i = 0; i < segments; ++i) {
+        const QVector from = orbit->orbitPoint((2.0 * M_PI * i) / segments);
+        const QVector to = orbit->orbitPoint((2.0 * M_PI * (i + 1)) / segments);
+
+        float from_x = 0.0f;
+        float from_y = 0.0f;
+        float from_scale = 0.0f;
+        float to_x = 0.0f;
+        float to_y = 0.0f;
+        float to_scale = 0.0f;
+        if (!camera.project(from, from_x, from_y, from_scale)
+                || !camera.project(to, to_x, to_y, to_scale)) {
+            continue;      //this piece is behind the camera
+        }
+
+        const ImVec2 start(Coordinates::normToPixelX(center_nav_x + from_x),
+                Coordinates::normToPixelY(center_nav_y + from_y));
+        const ImVec2 end(Coordinates::normToPixelX(center_nav_x + to_x),
+                Coordinates::normToPixelY(center_nav_y + to_y));
+        draw_list->AddLine(start, end, colour, 1.0f);
+    }
+}
 
 #include "src/config_xml.h"
 #include "root_generic/lin_time.h"
@@ -489,6 +533,10 @@ void NavigationSystem::DrawSystem() {
             continue;
         }
         NavItem &item = drawn[i];
+        if (item.unit != nullptr && ((item.type == navplanet) || (item.type == navsun))) {
+            // Draw the orbit before the marker, so that the marker sits on top of it.
+            DrawOrbit(item.unit, system_cam, center_nav_x, center_nav_y);
+        }
         if (_Universe->AccessCockpit()->GetParent()->Target() == item.unit) {
             static GFXColor col = vs_config->getColor("nav", "targetted_unit", GFXColor(1, 0.3, 0.3, 0.8));
             DrawTargetCorners(item.x, item.y, item.size, col);

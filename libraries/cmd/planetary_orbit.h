@@ -60,6 +60,11 @@ public:
             Unit *target = NULL);
     ~PlanetaryOrbit();
     void Execute();
+
+    /// A point on the orbit, in world space, at angle t: the position of the body being
+    /// orbited, less the focus, plus the two semi-axes resolved at that angle. Exposed so
+    /// that the nav map can draw the orbit without knowing how one is built.
+    QVector orbitPoint(double t) const;
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_PLANETARY_ORBIT_H
