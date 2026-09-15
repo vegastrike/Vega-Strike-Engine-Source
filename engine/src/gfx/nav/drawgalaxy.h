@@ -62,8 +62,7 @@ void DrawNode(int type,
         bool moused,
         GFXColor race,
         bool mouseover = false,
-        bool willclick = false,
-        std::string insector = "");
+        bool willclick = false);
 
 bool checkedVisited(const std::string &n);
 
