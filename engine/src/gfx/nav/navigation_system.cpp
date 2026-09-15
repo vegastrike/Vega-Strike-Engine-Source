@@ -689,6 +689,11 @@ void NavigationSystem::DrawGalaxy() {
             system_item_scale_temp = (system_item_scale * 3);
         }
         insert_size *= system_item_scale_temp / 3;
+        // Keep the marker, and the area that selects it, above a minimum size: out here a
+        // system can be a long way away, and a few pixels is neither visible nor clickable.
+        if (insert_size < NavMinItemSize()) {
+            insert_size = NavMinItemSize();
+        }
         if (currentsystemindex == temp) {
             DrawTargetCorners(the_x, the_y, (insert_size), currentcol);
         }
@@ -718,7 +723,7 @@ void NavigationSystem::DrawGalaxy() {
         bool moused = false;
         DrawNode(insert_type, insert_size, the_x, the_y,
                 named ? (*systemIter).GetName() : std::string(), screenoccupation, moused, isPath ? pathcol : col,
-                false, false, isPath ? "" : csector);
+                false, false);
         if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current)) {
             mouselist.push_back(SystemDrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),
                     systemIter.getIndex(), screenoccupation, false, isPath ? pathcol : col));

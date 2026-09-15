@@ -39,14 +39,6 @@
 #include "gfx/hud.h"
 #include "root_generic/lin_time.h" //for fps
 
-// The smallest an item is drawn, in the units the nav positions use: the screen spans
-// two units across, so this is about 15 pixels. Items never shrink below it, which is
-// what keeps them visible when the view is zoomed out to a very large system.
-static float NavMinItemSize() {
-    const float pixels = 15.0f;
-    const float resolution = static_cast<float>(configuration().graphics.resolution_x);
-    return (resolution > 0.0f) ? ((2.0f * pixels) / resolution) : 0.015f;
-}
 #include "src/config_xml.h"
 #include "root_generic/lin_time.h"
 #include "cmd/images.h"
