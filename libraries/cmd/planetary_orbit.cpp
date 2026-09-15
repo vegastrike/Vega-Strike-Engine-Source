@@ -76,6 +76,10 @@ PlanetaryOrbit::~PlanetaryOrbit() {
     parent->SetResolveForces(true);
 }
 
+QVector PlanetaryOrbit::orbitPoint(double t) const {
+    return targetlocation - focus + (std::cos(t) * x_size) + (std::sin(t) * y_size);
+}
+
 void PlanetaryOrbit::Execute() {
     bool mining = parent->rSize() > 1444 && parent->rSize() < 1445;
     bool done = this->done;
