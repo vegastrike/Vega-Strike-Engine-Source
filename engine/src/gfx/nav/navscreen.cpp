@@ -465,13 +465,17 @@ void NavigationSystem::Draw() {
     static const bool draw_nav_help =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_nav_help", "true"));
     if (draw_nav_help) {
-        const float help_y = screenskipby4[2] + 0.06f;
+        // drawdescription() centres its text on the position it is given, so these are
+        // placed around the middle of the screen rather than at the left edge, and far
+        // enough up that neither line is cut off by the bottom.
+        const float help_y = screenskipby4[2] + 0.10f;
+        const float help_x = (screenskipby4[0] + screenskipby4[1]) * 0.5f;
         const GFXColor helpcol(0.7f, 0.7f, 0.7f, 0.85f);
-        drawdescription("Mouse:  right-drag = look around   left/mid-drag = move the map   wheel = move in/out",
-                screenskipby4[0] + 0.03f, help_y, 0.6f, 0.6f, true, screenoccupation, helpcol);
-        drawdescription("Keys:   arrows = move the map   Shift+arrows = look around   "
-                        "Alt+up/down = move in/out   Alt+left/right = move sideways",
-                screenskipby4[0] + 0.03f, help_y + 0.05f, 0.6f, 0.6f, true, screenoccupation, helpcol);
+        drawdescription("Mouse:  right-drag looks around    left/mid-drag moves the map    wheel moves in/out",
+                help_x, help_y, 0.6f, 0.6f, true, screenoccupation, helpcol);
+        drawdescription("Keys:   arrows move the map    Shift+arrows look around    "
+                        "Alt+arrows move in/out and sideways",
+                help_x, help_y + 0.05f, 0.6f, 0.6f, true, screenoccupation, helpcol);
     }
 
     //Save current mouse location as previous for next cycle
