@@ -887,9 +887,9 @@ void NavigationSystem::ClearPriorities() {
 //this is an FF test. not a state test.
 //**********************************
 void NavigationSystem::SetMouseFlipStatus() {
-//getMouseButtonStatus()&1 = mouse button 1 standard = button 1 VS
-//getMouseButtonStatus()&2 = mouse button 3 standard = button 2 VS
-//getMouseButtonStatus()&4 = mouse button 2 standard = button 3 VS
+//getMouseButtonStatus()&1 = left button
+//getMouseButtonStatus()&2 = middle button
+//getMouseButtonStatus()&4 = right button
 //getMouseButtonStatus()&8 = mouse wheel up
 //getMouseButtonStatus()&16 = mouse wheel down
 
