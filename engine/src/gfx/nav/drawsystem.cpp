@@ -102,7 +102,7 @@ void NavigationSystem::DrawSystem() {
     //int length = systemnamestring.size();
     //float offset = (float(length)*0.001);
     //systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]); // middle position
-    systemname.SetPos(screenskipby4[0] + 0.03, screenskipby4[3] + 0.02);     //left position
+    systemname.SetPos(screenskipby4[0] + 0.03f, screenskipby4[3] - 0.05f);     //inset, so the text clears the top and left edges
     GFXColor temp_color(1, 1, .7, 1);
     systemname.color = static_cast<ImU32>(temp_color);
     systemname.SetText(systemnamestring);
