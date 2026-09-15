@@ -114,10 +114,6 @@ void NavigationSystem::DrawSystem() {
     navdrawlist mouselist(1, screenoccupation, factioncolours);       //lists of items to draw that are in mouse range
 
     QVector pos;    //item position
-    QVector pos_flat;       //item position flat on plane
-
-    float zdistance = 0.0;
-    float zscale = 0.0;
 
     Adjust3dTransformation(system_view == VIEW_3D, 1);
     //Set up first item to compare to + centres
@@ -155,7 +151,9 @@ void NavigationSystem::DrawSystem() {
 //float themaxvalue = fabs(pos.i);
     themaxvalue = 0.0;
 
-    float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
+    // Centre the content in the free area left of the button column, which starts at
+    // 0.5 in screen coordinates. The map itself fills the whole screen.
+    float center_nav_x = -0.25f;
     float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
     //**********************************
     //Retrieve unit data min/max
@@ -214,6 +212,15 @@ void NavigationSystem::DrawSystem() {
 
     camera_z = sqrt((half_x * half_x) + (half_y * half_y) + (half_z * half_z));
 
+    // Frame the whole system the first time the view is drawn, and whenever it is
+    // refitted. The camera's distance comes from the extent of the content and the
+    // field of view, so the system fills the view rather than being scaled against
+    // its own bounding box.
+    if (system_needs_refit) {
+        system_cam.setFraming(QVector(center_x, center_y, center_z), half_x, half_y, half_z, NAV_FIT_FOV);
+        system_needs_refit = false;
+    }
+
 //float halfmax = 0.5*themaxvalue;
 //camera_z = sqrt( (halfmax*halfmax) + (halfmax*halfmax) + (halfmax*halfmax) );
 //camera_z = 4.0*themaxvalue;
@@ -258,20 +265,28 @@ void NavigationSystem::DrawSystem() {
         pos = (*blah)->Position();
         ReplaceAxes(pos);
 
-        float the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp;
-        TranslateCoordinates(pos,
-                pos_flat,
-                center_nav_x,
-                center_nav_y,
-                themaxvalue,
-                zscale,
-                zdistance,
-                the_x,
-                the_y,
-                the_x_flat,
-                the_y_flat,
-                system_item_scale_temp,
-                1);
+        float the_x = 0.0f;
+        float the_y = 0.0f;
+        float system_item_scale_temp = 0.0f;
+        if (!system_cam.project(pos, the_x, the_y, system_item_scale_temp)) {
+            ++blah;
+            continue;      //behind the camera, so there is nothing to draw
+        }
+        the_x = center_nav_x + the_x;
+        the_y = center_nav_y + the_y;
+
+        // Keep an item within a readable size range however far away it is.
+        if (system_item_scale_temp > maximumitemscaleup) {
+            system_item_scale_temp = maximumitemscaleup;
+        }
+        if (system_item_scale_temp < minimumitemscaledown) {
+            system_item_scale_temp = minimumitemscaledown;
+        }
+
+        // The orientation lines are drawn to a point on a reference plane, which
+        // the camera does not provide; they collapse to the projected point.
+        float the_x_flat = the_x;
+        float the_y_flat = the_y;
         //IGNORE OFF SCREEN
         //**********************************
         if (!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_x, the_y)) {

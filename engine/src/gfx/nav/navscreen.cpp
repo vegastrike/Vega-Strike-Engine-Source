@@ -67,6 +67,10 @@
 #include "gldrv/winsys.h"
 #include "gui/imgui_support.h"
 
+// The nav buttons are rounded rectangles, measured in pixels.
+static const float kNavButtonRounding = 3.0f;
+static const float kNavButtonOutlineThickness = 1.5f;
+
 //This sets up the items in the navscreen
 //**********************************
 
@@ -142,15 +146,20 @@ void NavigationSystem::Setup() {
 
     axis = 3;
 
+    //Both cameras are framed to their content the first time they are drawn, and
+    //then keep whatever position and orientation the player gives them.
+    system_needs_refit = true;
+    galaxy_needs_refit = true;
+
     rx = -0.5;              //galaxy mode settings
     ry = 0.5;
     rz = 0.0;
-    zoom = 1.8;
+    zoom = 1.0;             //open zoomed out far enough that the whole map fits
 
     rx_s = -0.5;              //system mode settings
     ry_s = 1.5;
     rz_s = 0.0;
-    zoom_s = 1.8;
+    zoom_s = 1.0;             //as above, for the system map
 
     scrolloffset = 0;
 
@@ -237,10 +246,11 @@ void NavigationSystem::Setup() {
 //HERE GOES THE PARSING
 
 //*************************
-    screenskipby4[0] = .3;
-    screenskipby4[1] = .7;
-    screenskipby4[2] = .3;
-    screenskipby4[3] = .7;
+    // The map fills the whole screen. The button column is drawn over its right edge.
+    screenskipby4[0] = 0;
+    screenskipby4[1] = 1;
+    screenskipby4[2] = 0;
+    screenskipby4[3] = 1;
 
     buttonskipby4_1[0] = .75;
     buttonskipby4_1[1] = .95;
@@ -277,53 +287,9 @@ void NavigationSystem::Setup() {
     buttonskipby4_7[2] = .25;
     buttonskipby4_7[3] = .30;
     if (!ParseFile("navdata.xml")) {
-        //start DUMMP VARS
-        screenskipby4[0] = .3;
-        screenskipby4[1] = .7;
-        screenskipby4[2] = .3;
-        screenskipby4[3] = .7;
-
-        buttonskipby4_1[0] = .75;
-        buttonskipby4_1[1] = .95;
-        buttonskipby4_1[2] = .85;
-        buttonskipby4_1[3] = .90;
-
-        buttonskipby4_2[0] = .75;
-        buttonskipby4_2[1] = .95;
-        buttonskipby4_2[2] = .75;
-        buttonskipby4_2[3] = .80;
-
-        buttonskipby4_3[0] = .75;
-        buttonskipby4_3[1] = .95;
-        buttonskipby4_3[2] = .65;
-        buttonskipby4_3[3] = .70;
-
-        buttonskipby4_4[0] = .75;
-        buttonskipby4_4[1] = .95;
-        buttonskipby4_4[2] = .55;
-        buttonskipby4_4[3] = .60;
-
-        buttonskipby4_5[0] = .75;
-        buttonskipby4_5[1] = .95;
-        buttonskipby4_5[2] = .45;
-        buttonskipby4_5[3] = .50;
-
-        buttonskipby4_6[0] = .75;
-        buttonskipby4_6[1] = .95;
-        buttonskipby4_6[2] = .35;
-        buttonskipby4_6[3] = .40;
-
-        buttonskipby4_7[0] = .75;
-        buttonskipby4_7[1] = .95;
-        buttonskipby4_7[2] = .25;
-        buttonskipby4_7[3] = .30;
-
+        // Without the file there are no system item scaling parameters.
         unsetbit(whattodraw, 4);
-        for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
-            mesh[i] = NULL;
-        }
-        VS_LOG(error, "ERROR: Map mesh file not found!!! Using default: blank mesh.");
-        //end DUMMY VARS
+        VS_LOG(error, "ERROR: navdata.xml not found. Nav system items will not be scaled.");
     }
     ScreenToCoord(screenskipby4[0]);
     ScreenToCoord(screenskipby4[1]);
@@ -399,55 +365,6 @@ void NavigationSystem::Draw() {
         return;
     }
 
-    //DRAW THE SCREEN MODEL
-    //**********************************
-    Vector p, q, r;
-    const float zrange = configuration().graphics.cockpit_nav_zrange_flt;
-    const float zfloor = configuration().graphics.cockpit_nav_zfloor_flt;
-    _Universe->AccessCamera()->GetOrientation(p, q, r);
-    _Universe->AccessCamera()->UpdateGFX(GFXTRUE,
-            GFXTRUE,
-            GFXFALSE,
-            GFXTRUE,
-            zfloor,
-            zfloor + zrange);
-
-    _Universe->activateLightMap();
-    for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
-        float screen_x = 0.0;
-        float screen_y = 0.0;
-        float screen_z = 0.0;
-
-        screen_x = meshcoordinate_x[i];
-        screen_y = meshcoordinate_y[i];
-        screen_z = meshcoordinate_z[i];
-        if (checkbit(buttonstates, (i - 1))) {          //button1 = 0, starts at -1, returning 0, no addition done
-            screen_z += meshcoordinate_z_delta[i];
-        }
-        QVector pos = _Universe->AccessCamera()->GetPosition();
-
-        //offset horizontal
-        //***************
-        pos = (p.Cast() * screen_x) + pos;
-        //***************
-
-        //offset vertical
-        //***************
-        pos = (q.Cast() * screen_y) + pos;
-        //***************
-
-        //offset sink
-        //***************
-        pos = (r.Cast() * screen_z) + pos;
-        //***************
-
-        Matrix mat(p, q, r, pos);
-        if (mesh[i]) {
-            mesh[i]->Draw(FLT_MAX, mat);
-        }
-    }
-    Mesh::ProcessZFarMeshes(true);
-    Mesh::ProcessUndrawnMeshes(false, true);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXColor4f(1, 1, 1, 1);
     GFXDisable(TEXTURE0);
@@ -459,11 +376,11 @@ void NavigationSystem::Draw() {
     GFXDisable(DEPTHWRITE);
     StartGUIFrame();
  
-    // Obscure cockpit almost completely.
+    // The nav computer is a flat interface drawn over the game, so hide the game completely.
     const ImVec2 start_position(0,0);
     const ImVec2 end_position(configuration().graphics.resolution_x,
                               configuration().graphics.resolution_y);
-    const ImU32 background_color = IM_COL32(0,0,0,224);
+    const ImU32 background_color = IM_COL32(0,0,0,255);
     ImGui::GetBackgroundDrawList()->AddRectFilled(start_position, end_position, background_color,
                     0.0f // No rounded borders
     );
@@ -535,10 +452,7 @@ void NavigationSystem::Draw() {
 
     //Draw Button Outlines
     //**********************************
-    bool outlinebuttons = 0;
-    if (configmode > 0) {
-        outlinebuttons = 1;
-    }
+    const bool outlinebuttons = true;
     DrawButton(buttonskipby4_1[0], buttonskipby4_1[1], buttonskipby4_1[2], buttonskipby4_1[3], 1, outlinebuttons);
     DrawButton(buttonskipby4_2[0], buttonskipby4_2[1], buttonskipby4_2[2], buttonskipby4_2[3], 2, outlinebuttons);
     DrawButton(buttonskipby4_3[0], buttonskipby4_3[1], buttonskipby4_3[2], buttonskipby4_3[3], 3, outlinebuttons);
@@ -588,8 +502,8 @@ void NavigationSystem::DrawMission() {
             GFXColor(.3, 1, .3, 1));
     drawdescription(" ", (originx + (0.1 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
 
-    drawdescription(" ", (originx + (0.3 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
-    drawdescription(" ", (originx + (0.3 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
+    drawdescription(" ", (originx + (0.2 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
+    drawdescription(" ", (originx + (0.2 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
 
     size_t numfactions = FactionUtil::GetNumFactions();
     size_t i = 0;
@@ -645,7 +559,7 @@ void NavigationSystem::DrawMission() {
                 relationtext += " | ";
                 relationtext += XMLSupport::tostring((int) (*killlist)[i]);
             }
-            drawdescription(relationtext, (originx + (0.3 * deltax)), (originy), 1, 1, 0, screenoccupation,
+            drawdescription(relationtext, (originx + (0.2 * deltax)), (originy), 1, 1, 0, screenoccupation,
                     GFXColor((1.0 - relation01), (relation01), (1.0 - (2.0 * Delta(relation01, 0.5))), 1));
         }
     }
@@ -1141,6 +1055,11 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
     float yl = (y1 + y2) / 2.0;
     a_label.SetPos((xl - offset) - (checkbit(buttonstates, button_number - 1) ? 0.006 : 0), (yl + 0.025));
     a_label.SetText(label);
+
+    // A subtle dark fill so the button reads as a button rather than as bare text.
+    ImDrawList *draw_list = GetNavDrawList();
+    draw_list->AddRectFilled(NormToPixel(x1, y2), NormToPixel(x2, y1), IM_COL32(0, 0, 0, 153), kNavButtonRounding);
+
     const bool nav_button_labels = configuration().graphics.draw_nav_button_labels;
     if (nav_button_labels) {
         const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
@@ -1247,8 +1166,8 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
             //releasing #1, toggle the draw (nav / mission)
             if (checkbit(whattodraw, 1)) {
                 //if in nav system NOT mission
-                zoom = 1.8;
-                zoom_s = 1.8;
+                zoom = 1.0;
+                zoom_s = 1.0;
 
                 axis = axis - 1;
                 if (axis == 0) {
@@ -1315,24 +1234,8 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 //Draws the actual button outline
 //**********************************
 void NavigationSystem::DrawButtonOutline(float &x1, float &x2, float &y1, float &y2, const GFXColor &col) {
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
-
-    const float verts[8 * 3] = {
-            x1, y1, 0,
-            x1, y2, 0,
-            x2, y1, 0,
-            x2, y2, 0,
-            x1, y1, 0,
-            x2, y1, 0,
-            x1, y2, 0,
-            x2, y2, 0,
-    };
-    GFXDraw(GFXLINE, verts, 8);
-
-    GFXEnable(TEXTURE0);
+    GetNavDrawList()->AddRect(NormToPixel(x1, y2), NormToPixel(x2, y1), ToImColor(col), kNavButtonRounding, 0,
+            kNavButtonOutlineThickness);
 }
 //**********************************
 
@@ -1507,6 +1410,21 @@ bool NavigationSystem::CheckDraw() {
 void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galaxy) {
     //Adjust transformation
     //**********************************
+    // Dragging with the middle or right button moves the map without changing the
+    // viewing angle, in every view. The left button does the looking around.
+    if (((mouse_previous_state[1] == 1) || (mouse_previous_state[2] == 1))
+            && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
+                    mouse_y_current)) {
+        const float ndx = -1.0f * (mouse_x_current - mouse_x_previous);
+        const float ndy = -1.0f * (mouse_y_current - mouse_y_previous);
+        if (system_vs_galaxy) {
+            rx_s -= (ndx * camera_z);
+            ry_s -= (ndy * camera_z);
+        } else {
+            rx -= (ndx * camera_z);
+            ry -= (ndy * camera_z);
+        }
+    }
     if ((mouse_previous_state[0] == 1)
             && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
                     mouse_y_current)) {
@@ -1612,8 +1530,8 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
             } else {
                 zoom_s = zoom_s + ( /*1.0 +*/ 8 * (mouse_y_current - mouse_y_previous));
             }
-            if (zoom_s < 1.2) {
-                zoom_s = 1.2;
+            if (zoom_s < 0.5) {
+                zoom_s = 0.5;
             }
             if (zoom_s > MAXZOOM) {
                 zoom_s = MAXZOOM;
@@ -1931,7 +1849,8 @@ void NavigationSystem::TranslateCoordinates(QVector &pos,
 
     float navscreen_width_delta = (screenskipby4[1] - screenskipby4[0]);
     float navscreen_height_delta = (screenskipby4[3] - screenskipby4[2]);
-    float navscreen_small_delta = std::min(navscreen_width_delta, navscreen_height_delta);
+    // Leave a little margin so labels near the top and bottom edges are not clipped.
+    float navscreen_small_delta = std::min(navscreen_width_delta, navscreen_height_delta) * 0.82f;
 
     the_x = (the_x * navscreen_small_delta);
     the_x = the_x + center_nav_x;
