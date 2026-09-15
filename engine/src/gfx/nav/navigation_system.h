@@ -183,6 +183,10 @@ private:
     bool system_needs_refit;
     bool galaxy_needs_refit;
 
+    //Distance from the camera to the nearest thing it can see. Pan and zoom scale with
+    //it, so that they stay usable at any magnification. Reset as each view draws.
+    double nav_near_dist;
+
     float rx;   //galaxy
     float ry;
     float rz;
@@ -263,7 +267,7 @@ private:
 
 //Drawing helper functions
 //*************************
-    void Adjust3dTransformation(bool three_d, bool is_system_not_galaxy);
+    void Adjust3dTransformation(bool is_system_not_galaxy);
     void ReplaceAxes(QVector &pos);
     void RecordMinAndMax(const QVector &pos,
             float &min_x,

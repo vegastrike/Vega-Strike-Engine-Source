@@ -432,7 +432,7 @@ void NavigationSystem::DrawGalaxy() {
     QVector pos;        //item position
     int l;
 
-    Adjust3dTransformation(galaxy_view == VIEW_3D, 0);
+    Adjust3dTransformation(false);
 
     // Centre the content in the free area left of the button column, which starts at
     // 0.5 in screen coordinates. The map itself fills the whole screen.
@@ -546,6 +546,7 @@ void NavigationSystem::DrawGalaxy() {
     //Enlist the items and attributes
     //**********************************
     systemIter.seek();
+    nav_near_dist = 1e30;      //reset the nearest-thing distance for this frame
     while (!systemIter.done()) {
         //this draws the points
         //IGNORE UNDRAWABLE SYSTEMS
@@ -587,6 +588,12 @@ void NavigationSystem::DrawGalaxy() {
         }
         if (system_item_scale_temp < minimumitemscaledown) {
             system_item_scale_temp = minimumitemscaledown;
+        }
+
+        // Remember the nearest thing in view: panning and zooming scale with it.
+        const double item_distance = (pos - galaxy_cam.position()).Magnitude();
+        if (item_distance < nav_near_dist) {
+            nav_near_dist = item_distance;
         }
 
         // The orientation lines run to a point on a reference plane, which the camera

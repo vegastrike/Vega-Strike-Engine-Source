@@ -115,7 +115,7 @@ void NavigationSystem::DrawSystem() {
 
     QVector pos;    //item position
 
-    Adjust3dTransformation(system_view == VIEW_3D, 1);
+    Adjust3dTransformation(true);
     //Set up first item to compare to + centres
     //**********************************
     while ((*bleh) && (_Universe->AccessCockpit()->GetParent() != (*bleh))
@@ -254,6 +254,7 @@ void NavigationSystem::DrawSystem() {
 
     //Enlist the items and attributes
     //**********************************
+    nav_near_dist = 1e30;      //reset the nearest-thing distance for this frame
     un_iter blah = UniverseUtil::getUnitList();
     while (*blah) {
         //this draws the points
@@ -281,6 +282,12 @@ void NavigationSystem::DrawSystem() {
         }
         if (system_item_scale_temp < minimumitemscaledown) {
             system_item_scale_temp = minimumitemscaledown;
+        }
+
+        // Remember the nearest thing in view: panning and zooming scale with it.
+        const double item_distance = (pos - system_cam.position()).Magnitude();
+        if (item_distance < nav_near_dist) {
+            nav_near_dist = item_distance;
         }
 
         // The orientation lines are drawn to a point on a reference plane, which

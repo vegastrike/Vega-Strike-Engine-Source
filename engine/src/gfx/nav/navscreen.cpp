@@ -150,6 +150,7 @@ void NavigationSystem::Setup() {
     //then keep whatever position and orientation the player gives them.
     system_needs_refit = true;
     galaxy_needs_refit = true;
+    nav_near_dist = 1e30;         //replaced with the real distance as the view draws
 
     rx = -0.5;              //galaxy mode settings
     ry = 0.5;
@@ -1407,152 +1408,42 @@ bool NavigationSystem::CheckDraw() {
 }
 //**********************************
 
-void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galaxy) {
-    //Adjust transformation
-    //**********************************
-    // Dragging with the middle or right button moves the map without changing the
-    // viewing angle, in every view. The left button does the looking around.
-    if (((mouse_previous_state[1] == 1) || (mouse_previous_state[2] == 1))
-            && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
-                    mouse_y_current)) {
-        const float ndx = -1.0f * (mouse_x_current - mouse_x_previous);
-        const float ndy = -1.0f * (mouse_y_current - mouse_y_previous);
-        if (system_vs_galaxy) {
-            rx_s -= (ndx * camera_z);
-            ry_s -= (ndy * camera_z);
-        } else {
-            rx -= (ndx * camera_z);
-            ry -= (ndy * camera_z);
-        }
+void NavigationSystem::Adjust3dTransformation(bool is_system_not_galaxy) {
+    // Drives the camera of whichever view is showing, with the same bindings in both:
+    // the right button looks around, the left and middle buttons move the map, and the
+    // wheel moves in towards it or back out.
+    //
+    // The button state indices are bits of getMouseButtonStatus(), where bit 0 is the
+    // left button, bit 1 the right and bit 2 the middle.
+    NavMap &camera = is_system_not_galaxy ? system_cam : galaxy_cam;
+    if (!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
+            mouse_y_current)) {
+        return;
     }
-    if ((mouse_previous_state[0] == 1)
-            && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
-                    mouse_y_current)) {
-        if (system_vs_galaxy) {
-            if (three_d) {
-                float ndx = -1.0 * (mouse_y_current - mouse_y_previous);
-                float ndy = -4.0 * (mouse_x_current - mouse_x_previous);
-                float ndz = 0.0;
 
-                rx_s += ndx;
-                ry_s += ndy;
-                rz_s += ndz;
-                if (rx_s > 0.0 / 2) {
-                    rx_s = 0.0 / 2;
-                }
-                if (rx_s < -6.28 / 2) {
-                    rx_s = -6.28 / 2;
-                }
-                if (ry_s >= 6.28) {
-                    ry_s -= 6.28;
-                }
-                if (ry_s <= -6.28) {
-                    ry_s += 6.28;
-                }
-                if (rz_s >= 6.28) {
-                    rz_s -= 6.28;
-                }
-                if (rz_s <= -6.28) {
-                    rz_s += 6.28;
-                }
-            } else {
-                //rotation switches to panning
-                float ndy = -1.0 * (mouse_y_current - mouse_y_previous);
-                float ndx = -1.0 * (mouse_x_current - mouse_x_previous);
-                float ndz = 0.0;
-
-                //shift less when zoomed in more
-                //float zoom_modifier = ( (1-(((zoom_s-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / 1 );
-//float _l2 = log(2.0);
-                float zoom_modifier = 1.;                 //(log(zoom_s)/_l2);
-
-                rx_s -= ((ndx * camera_z) / zoom_modifier);
-                ry_s -= ((ndy * camera_z) / zoom_modifier);
-                rz_s -= ((ndz * camera_z) / zoom_modifier);
-            }
-        } else {
-            //galaxy
-            if (three_d) {
-                float ndx = -1.0 * (mouse_y_current - mouse_y_previous);
-                float ndy = -4.0 * (mouse_x_current - mouse_x_previous);
-                float ndz = 0.0;
-
-                rx += ndx;
-                ry += ndy;
-                rz += ndz;
-                if (rx > 0.0 / 2) {
-                    rx = 0.0 / 2;
-                }
-                if (rx < -6.28 / 2) {
-                    rx = -6.28 / 2;
-                }
-                if (ry >= 6.28) {
-                    ry -= 6.28;
-                }
-                if (ry <= -6.28) {
-                    ry += 6.28;
-                }
-                if (rz >= 6.28) {
-                    rz -= 6.28;
-                }
-                if (rz <= -6.28) {
-                    rz += 6.28;
-                }
-            } else {
-                //rotation switches to panning
-                float ndy = -1.0 * (mouse_y_current - mouse_y_previous);
-                float ndx = -1.0 * (mouse_x_current - mouse_x_previous);
-                float ndz = 0.0;
-
-                //shift less when zoomed in more
-                //float zoom_modifier = ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / 1 );
-//float _l2 = log(2.0);
-                float zoom_modifier = 1.;                 //(log(zoom)/_l2);
-
-                rx -= ((ndx * camera_z) / zoom_modifier);
-                ry -= ((ndy * camera_z) / zoom_modifier);
-                rz -= ((ndz * camera_z) / zoom_modifier);
-            }
-        }
+    if (mouse_previous_state[1] == 1) {
+        const float ndx = mouse_x_current - mouse_x_previous;
+        const float ndy = mouse_y_current - mouse_y_previous;
+        camera.orbitBy(ndx * 0.6f, -ndy * 0.6f);      //y flipped, so that dragging up looks up
     }
-    //**********************************
-    //Set the prespective zoom level
-    //**********************************
-    if (((mouse_previous_state[1] == 1)
-            && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
-                    mouse_y_current)) || (mouse_wentdown[3] || mouse_wentdown[4])) {
-        const float wheel_zoom_level = configuration().graphics.wheel_zoom_amount_flt;
-        if (system_vs_galaxy) {
-            if (mouse_wentdown[3]) {
-                zoom_s += wheel_zoom_level;
-            } else if (mouse_wentdown[4]) {
-                zoom_s -= wheel_zoom_level;
-            } else {
-                zoom_s = zoom_s + ( /*1.0 +*/ 8 * (mouse_y_current - mouse_y_previous));
-            }
-            if (zoom_s < 0.5) {
-                zoom_s = 0.5;
-            }
-            if (zoom_s > MAXZOOM) {
-                zoom_s = MAXZOOM;
-            }
-        } else {
-            if (mouse_wentdown[3]) {
-                zoom += wheel_zoom_level;
-            } else if (mouse_wentdown[4]) {
-                zoom -= wheel_zoom_level;
-            } else {
-                zoom = zoom + ( /*1.0 +*/ 8 * (mouse_y_current - mouse_y_previous));
-            }
-            if (zoom < .5) {
-                zoom = .5;
-            }
-            if (zoom > MAXZOOM / 2) {
-                zoom = MAXZOOM / 2;
-            }
-        }
+
+    // Panning and zooming scale with the distance to the nearest thing in view, which
+    // is only known once the view has been drawn: fall back to the framing distance
+    // for the first frame, or when there was nothing in view.
+    const double scale = (nav_near_dist < 1e30) ? nav_near_dist : camera.nominalDistance();
+
+    if ((mouse_previous_state[0] == 1) || (mouse_previous_state[2] == 1)) {
+        const float ndx = mouse_x_current - mouse_x_previous;
+        const float ndy = mouse_y_current - mouse_y_previous;
+        const double step = scale * 0.5;
+        camera.panBy(-ndx * step, -ndy * step);
     }
-    //**********************************
+
+    const float wheel_zoom_level = configuration().graphics.wheel_zoom_amount_flt;
+    if (mouse_wentdown[3] || mouse_wentdown[4]) {
+        const double step = scale * wheel_zoom_level;
+        camera.zoomBy(mouse_wentdown[3] ? step : -step);
+    }
 }
 
 void NavigationSystem::ReplaceAxes(QVector &pos) {
