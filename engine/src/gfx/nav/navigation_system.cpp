@@ -424,7 +424,7 @@ void NavigationSystem::DrawGalaxy() {
 //float offset = (float(length)*0.005);
     GFXColor temp_system_color(1, 1, .7, 1);
     systemname.color = static_cast<ImU32>(temp_system_color);
-    systemname.SetPos(screenskipby4[0], screenskipby4[3]);     //Looks ugly when name is too long and goes off the edge.
+    systemname.SetPos(screenskipby4[0] + 0.03f, screenskipby4[3] - 0.05f);     //inset, so the text clears the top and left edges
 //systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
     systemname.SetText(systemnamestring);
 //systemname.SetCharSize(1, 1);
@@ -703,7 +703,9 @@ void NavigationSystem::DrawGalaxy() {
         }
         unsigned destsize = systemIter->GetDestinationSize();
         if (destsize != 0) {
-            ImDrawList* drawList = ImGui::GetForegroundDrawList();
+            // The background list, not the foreground one: the buttons are drawn into it
+            // later, so they end up on top of these lines rather than under them.
+            ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 
             // Line thickness constant (adjust as needed, e.g., 1.5f or 2.0f)
             const float line_thickness = 2.0f;
