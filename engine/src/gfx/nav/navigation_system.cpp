@@ -30,6 +30,8 @@
 #include "system_draw_node.h"
 #include "universe.h"
 #include "universe_util.h"
+#include <set>
+
 #include "drawgalaxy.h"
 #include "imgui.h"
 #include "root_generic/vs_globals.h"
@@ -543,11 +545,39 @@ void NavigationSystem::DrawGalaxy() {
     }
     DrawOriginOrientationTri(center_nav_x, center_nav_y, 0);
 
+    // Only draw the systems the player has visited, plus everywhere those lead to:
+    // that shows the explored region and where it goes next, without flooding the map
+    // with the whole galaxy.
+    std::set<std::string> draw_systems;
+    for (unsigned i = 0; i < systemIter.size(); ++i) {
+        if (!checkedVisited(systemIter[i].GetName())) {
+            continue;
+        }
+        draw_systems.insert(systemIter[i].GetName());
+        for (unsigned d = 0; d < systemIter[i].GetDestinationSize(); ++d) {
+            draw_systems.insert(systemIter[systemIter[i].GetDestinationIndex(d)].GetName());
+        }
+    }
+    if (draw_systems.empty()) {
+        // Nothing visited yet, so the map would be empty: show the current system and
+        // the systems it jumps to.
+        const unsigned current = (focusedsystemindex < systemIter.size()) ? focusedsystemindex : 0;
+        draw_systems.insert(systemIter[current].GetName());
+        for (unsigned d = 0; d < systemIter[current].GetDestinationSize(); ++d) {
+            draw_systems.insert(systemIter[systemIter[current].GetDestinationIndex(d)].GetName());
+        }
+    }
+
     //Enlist the items and attributes
     //**********************************
     systemIter.seek();
     nav_near_dist = 1e30;      //reset the nearest-thing distance for this frame
     while (!systemIter.done()) {
+        // Systems outside the explored region are not drawn at all.
+        if (draw_systems.find(systemIter->GetName()) == draw_systems.end()) {
+            ++systemIter;
+            continue;
+        }
         //this draws the points
         //IGNORE UNDRAWABLE SYSTEMS
         //**********************************
