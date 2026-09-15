@@ -324,6 +324,11 @@ private:
 //*************************
 
 public:
+    //Drive the active view's camera with an arrow key: dir 0=up, 1=down, 2=left,
+    //3=right, with mods from getActiveModifiers() (Shift looks around, Alt moves in
+    //and out or sideways, nothing moves the map).
+    void arrowKey(int dir, unsigned int mods);
+
     NavigationSystem();
     ~NavigationSystem();
     static void DrawCircle(float x, float y, float size, const GFXColor &col);
