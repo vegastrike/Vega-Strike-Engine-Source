@@ -290,10 +290,6 @@ void NavigationSystem::DrawSystem() {
             nav_near_dist = item_distance;
         }
 
-        // The orientation lines are drawn to a point on a reference plane, which
-        // the camera does not provide; they collapse to the projected point.
-        float the_x_flat = the_x;
-        float the_y_flat = the_y;
         //IGNORE OFF SCREEN
         //**********************************
         if (!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_x, the_y)) {
@@ -417,7 +413,6 @@ void NavigationSystem::DrawSystem() {
         Unit *myunit = (*blah);
 
         ++blah;
-        DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 1);
         if (tests_in_range) {
             mouselist.insert(insert_type, insert_size, the_x, the_y, myunit);
         } else {

@@ -596,10 +596,6 @@ void NavigationSystem::DrawGalaxy() {
             nav_near_dist = item_distance;
         }
 
-        // The orientation lines run to a point on a reference plane, which the camera
-        // does not provide; they collapse to the projected point.
-        float the_x_flat = the_x;
-        float the_y_flat = the_y;
         float alphaadd;
         {
             float tmp = (1 - (zoom / MAXZOOM));
@@ -670,10 +666,6 @@ void NavigationSystem::DrawGalaxy() {
         DrawNode(insert_type, insert_size, the_x, the_y,
                 (*systemIter).GetName(), screenoccupation, moused, isPath ? pathcol : col, false, false,
                 isPath ? "" : csector);
-        const QVector to_galaxy_system = pos - galaxy_cam.position();
-        if (to_galaxy_system.Magnitude() < (2.0 * galaxy_cam.nominalDistance())) {
-            DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
-        }
         if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current)) {
             mouselist.push_back(SystemDrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),
                     systemIter.getIndex(), screenoccupation, false, isPath ? pathcol : col));
