@@ -43,6 +43,11 @@ void NavMap::setCamera(float yaw, float pitch) {
     pitch_ = pitch;
 }
 
+void NavMap::setFov(float fov_rad) {
+    // A field of view of zero would divide by zero when framing.
+    fov_ = (fov_rad > 0.01f) ? fov_rad : 1.5708f;
+}
+
 QVector NavMap::forward() const {
     const double cos_pitch = std::cos(pitch_);
     const double cos_yaw = std::cos(yaw_);
@@ -59,16 +64,12 @@ void NavMap::computeBasis(QVector &forward, QVector &right, QVector &up) const {
     up.Normalize();
 }
 
-void NavMap::setFraming(const QVector &center, double halfx, double halfy, double halfz, float fov_rad) {
+void NavMap::setFraming(const QVector &center, double halfx, double halfy, double halfz) {
     // Fit the widest extent rather than the corner-to-corner diagonal: the content of
-    // a nav map is nearly planar, and fitting the diagonal stands the camera far
-    // enough back that the map fills only about a third of the view.
-    //
-    // project() hands back a tangent, which the caller reads as a coordinate where 1.0
-    // is the edge of the view, so the field of view is the angle subtended by that
-    // edge: at 90 degrees, an extent at the framing distance lands exactly on it.
+    // a nav map is nearly planar, and fitting the diagonal stands the camera far enough
+    // back that the map fills only about a third of the view.
     const double half_extent = std::max(halfx, std::max(halfy, halfz));
-    const double tan_half_fov = std::tan(0.5 * (fov_rad > 0.01f ? fov_rad : 1.0f));
+    const double tan_half_fov = std::tan(0.5 * fov_);
 
     double distance = half_extent / tan_half_fov;
     if (distance < 1.0) {
@@ -95,6 +96,18 @@ void NavMap::orbitBy(float dyaw, float dpitch) {
     if (pitch_ < (-M_PI_2 + kPoleEpsilon)) {
         pitch_ = static_cast<float>(-M_PI_2 + kPoleEpsilon);
     }
+}
+
+void NavMap::orbitAround(const QVector &pivot, float dyaw, float dpitch) {
+    const double radius = (pos_ - pivot).Magnitude();
+    orbitBy(dyaw, dpitch);
+    // Stand the same distance behind the pivot, still looking at it, so whatever is at
+    // the pivot stays where it is while everything else swings around it.
+    pos_ = pivot - (forward() * radius);
+}
+
+QVector NavMap::focusPoint() const {
+    return pos_ + (forward() * nom_dist_);
 }
 
 void NavMap::panBy(float dright, float dup) {
@@ -130,13 +143,12 @@ bool NavMap::project(const QVector &world, float &sx, float &sy, float &sscale) 
         return false;      //behind the camera, so nothing to draw
     }
 
-    // Perspective: divide by the distance ahead, scaled so that an extent framed at
-    // the nominal distance covers the view.
-    const double focal = nom_dist_;
-    const double scale = focal / along;
-    sx = static_cast<float>((to_point.Dot(right) * scale) / focal);
-    sy = static_cast<float>((to_point.Dot(up) * scale) / focal);
-    sscale = static_cast<float>(scale);
+    // Perspective projection: whatever is at the distance the camera was framed for
+    // covers the view exactly, so 1.0 is the edge of the screen.
+    const double focal = 1.0 / std::tan(0.5 * fov_);
+    sx = static_cast<float>((to_point.Dot(right) / along) * focal);
+    sy = static_cast<float>((to_point.Dot(up) / along) * focal);
+    sscale = static_cast<float>(nom_dist_ / along);
 
     return true;
 }

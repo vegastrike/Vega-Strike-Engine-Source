@@ -45,8 +45,13 @@ public:
 
     void setCamera(float yaw, float pitch);
 
+    /// The vertical field of view in radians, from the game's own viewing angle so that
+    /// the map has the same perspective as the world. It stays fixed: moving closer or
+    /// further is a move of the camera, not a change of lens.
+    void setFov(float fov_rad);
+
     /// Aim at center, with an extent of the given half-widths fitted to the view.
-    void setFraming(const QVector &center, double halfx, double halfy, double halfz, float fov_rad);
+    void setFraming(const QVector &center, double halfx, double halfy, double halfz);
 
     /// Project a world point into a screen position. Returns false if the point is
     /// behind the camera. The position is in the -0.5..0.5 range at the nominal
@@ -55,6 +60,11 @@ public:
 
     /// Look around, staying where the camera is. Not to be confused with panBy().
     void orbitBy(float dyaw, float dpitch);
+
+    /// Swing the camera around pivot, keeping it aimed at pivot and at the same
+    /// distance from it, so whatever is at the pivot stays put while everything else
+    /// moves around it. Used to circle the selected target.
+    void orbitAround(const QVector &pivot, float dyaw, float dpitch);
 
     /// Move sideways, without changing the direction the camera looks in.
     void panBy(float dright, float dup);
@@ -69,6 +79,9 @@ public:
     /// The direction the camera looks in.
     QVector forward() const;
 
+    /// The point the camera is looking at, at the framing distance.
+    QVector focusPoint() const;
+
     float nominalDistance() const {
         return nom_dist_;
     }
@@ -81,6 +94,7 @@ private:
     float yaw_{-0.6f};
     float pitch_{0.35f};
     float nom_dist_{120.0f};
+    float fov_{1.5708f};                //radians; a quarter turn until the game sets it
 };
 
 #endif//VEGA_STRIKE_ENGINE_GFX_NAV_NAVMAP_H

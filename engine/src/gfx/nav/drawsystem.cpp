@@ -226,7 +226,7 @@ void NavigationSystem::DrawSystem() {
     // field of view, so the system fills the view rather than being scaled against
     // its own bounding box.
     if (system_needs_refit) {
-        system_cam.setFraming(QVector(center_x, center_y, center_z), half_x, half_y, half_z, NAV_FIT_FOV);
+        system_cam.setFraming(QVector(center_x, center_y, center_z), half_x, half_y, half_z);
         system_needs_refit = false;
     }
 
