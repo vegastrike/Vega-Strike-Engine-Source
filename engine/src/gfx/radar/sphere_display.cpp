@@ -36,7 +36,10 @@
 #include "src/physics.h"
 #include "root_generic/configxml.h"
 
+#include <map>
+
 #define TRACK_SIZE 2.0
+#define POINT_SIZE_GRANULARITY 0.5
 
 namespace {
 
@@ -60,14 +63,43 @@ float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat) {
 namespace Radar {
 
 struct SphereDisplay::Impl {
-    VertexBuilder<float, 3, 0, 3> points;
+    typedef VertexBuilder<float, 3, 0, 3> PointBuffer;
+    typedef std::map<unsigned int, PointBuffer> PointBufferMap;
+
+    PointBufferMap pointmap;
     VertexBuilder<float, 3, 0, 3> lines;
     VertexBuilder<> thinlines;
 
+    PointBuffer &getPointBuffer(float size) {
+        int isize = int(size / POINT_SIZE_GRANULARITY);
+        if (isize < 1) {
+            isize = 1;
+        }
+
+        PointBufferMap::iterator it = pointmap.find(isize);
+        if (it == pointmap.end()) {
+            it = pointmap.insert(std::pair<unsigned int, PointBuffer>(isize, PointBuffer())).first;
+        }
+        return it->second;
+    }
+
     void clear() {
-        points.clear();
+        for (PointBufferMap::iterator it = pointmap.begin(); it != pointmap.end(); ++it) {
+            it->second.clear();
+        }
+
         lines.clear();
         thinlines.clear();
+    }
+
+    void flushPoints() {
+        for (PointBufferMap::reverse_iterator it = pointmap.rbegin(); it != pointmap.rend(); ++it) {
+            PointBuffer &points = it->second;
+            if (points.size() > 0) {
+                GFXPointSize(it->first * POINT_SIZE_GRANULARITY);
+                GFXDraw(GFXPOINT, points);
+            }
+        }
     }
 };
 
@@ -118,8 +150,7 @@ void SphereDisplay::Draw(const Sensor &sensor,
         }
     }
 
-    GFXPointSize(TRACK_SIZE);
-    GFXDraw(GFXPOINT, impl->points);
+    impl->flushPoints();
 
     GFXLineWidth(TRACK_SIZE);
     GFXDraw(GFXLINE, impl->lines);
@@ -191,16 +222,30 @@ void SphereDisplay::DrawTrack(const Sensor &sensor,
             headColor.a *= cosf(dangerRate * radarTime);
         }
     }
+    if (sensor.IsRepulsor(track)) {
+        // Blinking repulsor blip
+        headColor.a *= cosf(kRepulsorBlinkRate * radarTime);
+    }
     // Fade out dying ships
     if (track.IsExploding()) {
         headColor.a *= (1.0 - track.ExplodingProgress());
     }
 
     if (sensor.IsTracking(track)) {
-        DrawTargetMarker(head, headColor, TRACK_SIZE);
+        GFXColor markerColor = headColor;
+        if (sensor.IsSpecActive()) {
+            markerColor = sensor.GetSpecTargetColor();
+        }
+        DrawTargetMarker(head, markerColor, TRACK_SIZE);
     }
 
-    impl->points.insert(GFXColorVertex(head, headColor));
+    float blipSize = TRACK_SIZE;
+    const double repulsor_effect = sensor.GetRepulsorEffect(track);
+    if (repulsor_effect > 0.0) {
+        // Size the blip by how strongly the object compresses SPEC
+        blipSize = RepulsorBlipSize(repulsor_effect);
+    }
+    impl->getPointBuffer(blipSize).insert(GFXColorVertex(head, headColor));
 }
 
 void SphereDisplay::DrawTargetMarker(const Vector &position, const GFXColor &color, float trackSize) {
