@@ -191,6 +191,68 @@ void winsys_swap_buffers() {
     SDL_GL_SwapWindow(current_window);
 }
 
+// The effective software frame cap (0 = none), recomputed from the config and the
+// monitor refresh whenever the setting or monitor changes.
+static int g_frame_rate_limit = 0;
+
+int winsys_frame_rate_limit() {
+    return g_frame_rate_limit;
+}
+
+int winsys_monitor_refresh() {
+    SDL_Window *window = SDL_GL_GetCurrentWindow();
+    if (!window) {
+        return 0;
+    }
+    const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode(SDL_GetDisplayForWindow(window));
+    if (!mode) {
+        return 0;
+    }
+    return static_cast<int>(mode->refresh_rate + 0.5f);
+}
+
+void winsys_apply_frame_limit() {
+    const auto &g = configuration().graphics;
+
+    int interval = 1; // on (monitor)
+    if (g.vsync == "off") {
+        interval = 0;
+    } else if (g.vsync == "adaptive") {
+        interval = -1;
+    }
+    SDL_ClearError();
+    if (SDL_GL_SetSwapInterval(interval) != 0) {
+        VS_LOG(warning, (boost::format("SDL_GL_SetSwapInterval(%1%) failed: %2%") % interval % SDL_GetError()).str());
+    }
+    int limit = 0;
+    if (g.frame_limit_mode == "half") {
+        limit = winsys_monitor_refresh() / 2;
+    } else if (g.frame_limit_mode == "fixed") {
+        limit = g.max_framerate;
+    }
+    g_frame_rate_limit = (limit > 0) ? limit : 0;
+}
+
+void winsys_wait_for_frame() {
+    if (g_frame_rate_limit <= 0) {
+        return;
+    }
+    const Uint64 now = SDL_GetTicks();
+    const Uint64 budget = 1000 / static_cast<Uint64>(g_frame_rate_limit);
+    static Uint64 next_frame = 0;
+    if (next_frame != 0 && now < next_frame + budget) {
+        // Within this frame's budget. Sleep only if we are ahead of schedule -- the
+        // remaining time is only positive then, so there is no unsigned underflow.
+        if (now < next_frame) {
+            SDL_Delay(static_cast<Uint32>(next_frame - now));
+        }
+        next_frame += budget;
+    } else {
+        // First frame, or we fell a whole frame behind: start a fresh schedule.
+        next_frame = now + budget;
+    }
+}
+
 /*---------------------------------------------------------------------------*/
 /*!
  *  Moves the mouse pointer to (x,y)
@@ -568,6 +630,9 @@ static bool setup_sdl_video_mode() {
         VS_LOG_SDL_ERROR(operation_description);
         VS_LOG_FLUSH_EXIT(fatal, "Failed to make window context current", 1);
     }
+
+    // Apply the configured vsync/frame-rate limit now that the context is current.
+    winsys_apply_frame_limit();
 
     SDL_ShowWindow(window);
     SDL_SyncWindow(window);
