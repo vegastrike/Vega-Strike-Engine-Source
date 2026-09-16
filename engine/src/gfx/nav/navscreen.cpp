@@ -137,8 +137,6 @@ void NavigationSystem::mouseClick(int button, int state, int x, int y) {
 void NavigationSystem::Setup() {
     _Universe->AccessCockpit()->visitSystem(_Universe->activeStarSystem()->getFileName());
 
-    configmode = 0;
-
     rotations = 0;
 
     minimumitemscaledown = 0.2;
@@ -174,8 +172,6 @@ void NavigationSystem::Setup() {
     const bool start_sec_ortho = configuration().graphics.sector_map_ortho_view;
     system_view = start_sys_ortho ? VIEW_ORTHO : VIEW_2D;
     galaxy_view = start_sec_ortho ? VIEW_ORTHO : VIEW_2D;
-    system_multi_dimensional = 1;
-    galaxy_multi_dimensional = 1;
 
     zshiftmultiplier = 2.5;     //shrink the output
     item_zscalefactor = 1.0;            //camera distance prespective multiplier for affecting item sizes

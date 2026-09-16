@@ -174,8 +174,6 @@ private:
     int reverse;
     int rotations; //tried to change to unsigned but gazillions of comparisons to int crop up --chuck_starchaser
     int axis;
-    int configmode;
-
     //The camera each view projects through, and whether it still has to be framed
     //to its content.
     NavMap system_cam;
@@ -211,8 +209,6 @@ private:
     int path_view;
     enum PathType { PATH_OFF, PATH_ON, PATH_ONLY, PATH_MAXIMUM };
 
-    bool system_multi_dimensional;
-    bool galaxy_multi_dimensional;
 
     float center_x;
     float center_y;

@@ -306,8 +306,6 @@ bool NavigationSystem::ParseFile(string filename) {
                 } else if (tag == "dimensions") {
                     int how_many_sys = atoi((retrievedata(data, "system")).c_str());
                     int how_many_gal = atoi((retrievedata(data, "galaxy")).c_str());
-                    string multi_sys = retrievedata(data, "systemmultidimensional");
-                    string multi_gal = retrievedata(data, "galaxymultidimensional");
                     if (how_many_sys == 3) {
                         system_view = VIEW_3D;
                     } else {
@@ -317,16 +315,6 @@ bool NavigationSystem::ParseFile(string filename) {
                         galaxy_view = VIEW_3D;
                     } else {
                         galaxy_view = VIEW_2D;
-                    }
-                    if (multi_sys == "yes") {
-                        system_multi_dimensional = 1;
-                    } else {
-                        system_multi_dimensional = 0;
-                    }
-                    if (multi_gal == "yes") {
-                        galaxy_multi_dimensional = 1;
-                    } else {
-                        galaxy_multi_dimensional = 0;
                     }
                 } else if (tag == "factioncolours") {
                     string factionname = retrievedata(data, "faction");
@@ -342,9 +330,6 @@ bool NavigationSystem::ParseFile(string filename) {
                             factioncolours[k].a = a_;
                         }
                     }
-                } else if (tag == "configmode") {
-                    int configmode_ = atoi((retrievedata(data, "configmode")).c_str());
-                    configmode = configmode_;
                 }
                 data = "";
                 //tag = "";
