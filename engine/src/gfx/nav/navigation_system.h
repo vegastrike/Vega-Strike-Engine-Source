@@ -308,7 +308,6 @@ public:
     static void DrawJump(float x, float y, float size, const GFXColor &col);
     static void DrawMissile(float x, float y, float size, const GFXColor &col);
     static void DrawTargetCorners(float x, float y, float size, const GFXColor &col);
-    static void DrawNavCircle(float x, float y, float rot_x, float rot_y, float size, const GFXColor &col);
     void setCurrentSystem(string newSystem);
     std::string getCurrentSystem();
     std::string getSelectedSystem();
