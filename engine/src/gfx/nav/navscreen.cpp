@@ -410,39 +410,14 @@ void NavigationSystem::Draw() {
     //Draw the Navscreen Functions
     //**********************************
     if (checkbit(whattodraw, 1)) {
+        DrawGrid(screenskipby4[0],
+                screenskipby4[1],
+                screenskipby4[2],
+                screenskipby4[3],
+                GFXColor(1, 1, 1, 0.2));
         if (checkbit(whattodraw, 2)) {
-            if (galaxy_view == VIEW_3D) {
-                DrawNavCircle(((screenskipby4[0] + screenskipby4[1]) / 2.0),
-                        ((screenskipby4[2] + screenskipby4[3]) / 2.0),
-                        0.6,
-                        rx,
-                        ry,
-                        GFXColor(1, 1, 1,
-                                0.2));
-            } else {
-                DrawGrid(screenskipby4[0],
-                        screenskipby4[1],
-                        screenskipby4[2],
-                        screenskipby4[3],
-                        GFXColor(1, 1, 1, 0.2));
-            }
             DrawGalaxy();
         } else {
-            if (system_view == VIEW_3D) {
-                DrawNavCircle(((screenskipby4[0] + screenskipby4[1]) / 2.0),
-                        ((screenskipby4[2] + screenskipby4[3]) / 2.0),
-                        0.6,
-                        rx_s,
-                        ry_s,
-                        GFXColor(1, 1, 1,
-                                0.2));
-            } else {
-                DrawGrid(screenskipby4[0],
-                        screenskipby4[1],
-                        screenskipby4[2],
-                        screenskipby4[3],
-                        GFXColor(1, 1, 1, 0.2));
-            }
             DrawSystem();
         }
     } else {
