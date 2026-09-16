@@ -142,7 +142,6 @@ void NavigationSystem::Setup() {
     minimumitemscaledown = 0.2;
     maximumitemscaleup = 3.0;
 
-    axis = 3;
 
     //Both cameras are framed to their content the first time they are drawn, and
     //then keep whatever position and orientation the player gives them.
@@ -168,10 +167,6 @@ void NavigationSystem::Setup() {
     center_z = 0.0;     //updated after a pass
 
     path_view = PATH_ON;
-    const bool start_sys_ortho = configuration().graphics.system_map_ortho_view;
-    const bool start_sec_ortho = configuration().graphics.sector_map_ortho_view;
-    system_view = start_sys_ortho ? VIEW_ORTHO : VIEW_2D;
-    galaxy_view = start_sec_ortho ? VIEW_ORTHO : VIEW_2D;
 
     zshiftmultiplier = 2.5;     //shrink the output
     item_zscalefactor = 1.0;            //camera distance prespective multiplier for affecting item sizes
@@ -942,13 +937,9 @@ void NavigationSystem::setCurrentSystem(string newSystem) {
 void NavigationSystem::setFocusedSystemIndex(unsigned newSystemIndex) {
     focusedsystemindex = newSystemIndex;
     themaxvalue = 0;
-    if (galaxy_view != VIEW_3D) {
-        //This resets the panning position when not in 3d view.
-        //Otehrwise, the focused system may end up off screen which will cause a lot of confusion.
-        rx = -0.5;                      //galaxy mode settings
-        ry = 0.5;
-        rz = 0.0;
-    }
+    // Frame the galaxy on the newly focused system, which is what resetting the old pan
+    // position used to achieve.
+    galaxy_needs_refit = true;
     camera_z = 0;     //calculate camera distance again... it may have changed.
 }
 
@@ -1481,30 +1472,6 @@ void NavigationSystem::arrowKey(int dir, unsigned int mods) {
     }
 }
 
-void NavigationSystem::ReplaceAxes(QVector &pos) {
-    //replace axes
-    //*************************
-    if (axis != 3) {
-        //3 == z == default
-        if (axis == 2) {
-            float old_i = pos.i;
-            float old_j = pos.j;
-            float old_k = pos.k;
-            pos.i = old_i;
-            pos.j = -old_k;
-            pos.k = old_j;
-        } else {
-            //(axis == 1)
-            float old_i = pos.i;
-            float old_j = pos.j;
-            float old_k = pos.k;
-            pos.i = old_j;
-            pos.j = -old_k;
-            pos.k = old_i;
-        }
-    }
-    //*************************
-}
 
 void NavigationSystem::RecordMinAndMax(const QVector &pos,
         float &min_x,
@@ -1552,83 +1519,6 @@ void NavigationSystem::RecordMinAndMax(const QVector &pos,
     //**********************************
 }
 
-/*
- * Draws the origin orientation triad (X, Y, Z axes widget) using ImGui DrawList
- * and normalized-to-pixel coordinate conversion.
- */
-void NavigationSystem::DrawOriginOrientationTri(float center_nav_x, float center_nav_y, bool system_not_galaxy) {
-    // Determine basis vectors based on active axis alignment
-    QVector directionx, directiony, directionz;
-
-    if (axis == 2) {
-        directionx = QVector(0.1f, 0.0f, 0.0f);
-        directionz = QVector(0.0f, 0.1f, 0.0f);
-        directiony = QVector(0.0f, 0.0f, 0.1f);
-    } else if (axis == 1) {
-        directiony = QVector(0.1f, 0.0f, 0.0f);
-        directionz = QVector(0.0f, 0.1f, 0.0f);
-        directionx = QVector(0.0f, 0.0f, 0.1f);
-    } else {
-        // (axis == 3)
-        directionx = QVector(0.1f, 0.0f, 0.0f);
-        directiony = QVector(0.0f, 0.1f, 0.0f);
-        directionz = QVector(0.0f, 0.0f, 0.1f);
-    }
-
-    // Apply 3D rotation matrix transformations if in 3D view mode
-    if (system_not_galaxy) {
-        if (system_view == VIEW_3D) {
-            directionx = dxyz(directionx, 0, 0, ry_s);
-            directionx = dxyz(directionx, rx_s, 0, 0);
-
-            directiony = dxyz(directiony, 0, 0, ry_s);
-            directiony = dxyz(directiony, rx_s, 0, 0);
-
-            directionz = dxyz(directionz, 0, 0, ry_s);
-            directionz = dxyz(directionz, rx_s, 0, 0);
-        }
-    } else if (galaxy_view == VIEW_3D) {
-        directionx = dxyz(directionx, 0, 0, ry);
-        directionx = dxyz(directionx, rx, 0, 0);
-
-        directiony = dxyz(directiony, 0, 0, ry);
-        directiony = dxyz(directiony, rx, 0, 0);
-
-        directionz = dxyz(directionz, 0, 0, ry);
-        directionz = dxyz(directionz, rx, 0, 0);
-    }
-
-    // Compute normalized origin and axis endpoint coordinates
-    float x0 = center_nav_x - 0.8f * ((screenskipby4[1] - screenskipby4[0]) / 2.0f);
-    float y0 = center_nav_y - 0.8f * ((screenskipby4[3] - screenskipby4[2]) / 2.0f);
-
-    float x1 = x0 + (directionx.i * (0.3f / (0.3f - directionx.k)));
-    float y1 = y0 + (directionx.j * (0.3f / (0.3f - directionx.k)));
-
-    float x2 = x0 + (directiony.i * (0.3f / (0.3f - directiony.k)));
-    float y2 = y0 + (directiony.j * (0.3f / (0.3f - directiony.k)));
-
-    float x3 = x0 + (directionz.i * (0.3f / (0.3f - directionz.k)));
-    float y3 = y0 + (directionz.j * (0.3f / (0.3f - directionz.k)));
-
-    // Convert normalized coordinates to screen pixels
-    ImVec2 p0(static_cast<float>(Coordinates::normToPixelX(x0)), static_cast<float>(Coordinates::normToPixelY(y0)));
-    ImVec2 p1(static_cast<float>(Coordinates::normToPixelX(x1)), static_cast<float>(Coordinates::normToPixelY(y1)));
-    ImVec2 p2(static_cast<float>(Coordinates::normToPixelX(x2)), static_cast<float>(Coordinates::normToPixelY(y2)));
-    ImVec2 p3(static_cast<float>(Coordinates::normToPixelX(x3)), static_cast<float>(Coordinates::normToPixelY(y3)));
-
-    ImDrawList* drawList = ImGui::GetForegroundDrawList();
-
-    // Packed RGB colors with 0.5 (128) Alpha
-    const ImU32 red   = IM_COL32(255,   0,   0, 128); // X Axis
-    const ImU32 green = IM_COL32(  0, 255,   0, 128); // Y Axis
-    const ImU32 blue  = IM_COL32(  0,   0, 255, 128); // Z Axis
-
-    // Draw origin triad lines
-    drawList->AddLine(p0, p1, red,   2.0f);
-    drawList->AddLine(p0, p2, green, 2.0f);
-    drawList->AddLine(p0, p3, blue,  2.0f);
-}
 
 /*
  * Display orientation projection lines using ImGui DrawList and pixel projection.

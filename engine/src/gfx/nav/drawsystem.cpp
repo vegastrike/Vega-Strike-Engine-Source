@@ -174,7 +174,6 @@ void NavigationSystem::DrawSystem() {
     //GET THE POSITION
     //*************************
     pos = (*bleh)->Position();
-    ReplaceAxes(pos);
     //*************************
 
     //Modify by old rotation amount
@@ -209,7 +208,6 @@ void NavigationSystem::DrawSystem() {
         }
         string temp = (*bleh)->name;
         pos = (*bleh)->Position();
-        ReplaceAxes(pos);
         //Modify by old rotation amount
         //*************************
 //if(system_view==VIEW_3D)
@@ -269,7 +267,6 @@ void NavigationSystem::DrawSystem() {
 
     //**********************************
 
-    DrawOriginOrientationTri(center_nav_x, center_nav_y, 1);
 
 /*
  *       string mystr ("max x "+XMLSupport::tostring (max_x));
@@ -318,7 +315,6 @@ void NavigationSystem::DrawSystem() {
         string temp = (*blah)->name;
 
         pos = (*blah)->Position();
-        ReplaceAxes(pos);
 
         float the_x = 0.0f;
         float the_y = 0.0f;

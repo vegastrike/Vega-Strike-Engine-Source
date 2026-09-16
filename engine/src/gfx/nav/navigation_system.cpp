@@ -460,7 +460,6 @@ void NavigationSystem::DrawGalaxy() {
             {
                 systemIter.seek(focusedsystemindex);
                 pos = systemIter->Position();
-                ReplaceAxes(pos);
 
                 max_x = (float) pos.i;
                 min_x = (float) pos.i;
@@ -481,7 +480,6 @@ void NavigationSystem::DrawGalaxy() {
                 if (destsize != 0) {
                     for (unsigned i = 0; i < destsize; ++i) {
                         QVector posoth = systemIter[systemIter->GetDestinationIndex(i)].Position();
-                        ReplaceAxes(posoth);
 
                         RecordMinAndMax(posoth, min_x, max_x, min_y, max_y, min_z, max_z, themaxvalue);
                     }
@@ -541,7 +539,6 @@ void NavigationSystem::DrawGalaxy() {
 
         //**********************************
     }
-    DrawOriginOrientationTri(center_nav_x, center_nav_y, 0);
 
     // Only draw the systems the player has visited, plus everywhere those lead to:
     // that shows the explored region and where it goes next, without flooding the map
@@ -597,7 +594,6 @@ void NavigationSystem::DrawGalaxy() {
 
         pos = systemIter->Position();
 
-        ReplaceAxes(pos);             //poop
 
         //Modify by old rotation amount
         //*************************
@@ -739,7 +735,6 @@ void NavigationSystem::DrawGalaxy() {
                 CachedSystemIterator::SystemInfo &oth = systemIter[systemIter->GetDestinationIndex(i)];
                 if (oth.isDrawable()) {
                     QVector posoth = oth.Position();
-                    ReplaceAxes(posoth);
 
                     float the_new_x = 0.0f;
                     float the_new_y = 0.0f;

@@ -303,19 +303,6 @@ bool NavigationSystem::ParseFile(string filename) {
                     } else {
                         item_zscalefactor = zfactor_;
                     }
-                } else if (tag == "dimensions") {
-                    int how_many_sys = atoi((retrievedata(data, "system")).c_str());
-                    int how_many_gal = atoi((retrievedata(data, "galaxy")).c_str());
-                    if (how_many_sys == 3) {
-                        system_view = VIEW_3D;
-                    } else {
-                        system_view = VIEW_2D;
-                    }
-                    if (how_many_gal == 3) {
-                        galaxy_view = VIEW_3D;
-                    } else {
-                        galaxy_view = VIEW_2D;
-                    }
                 } else if (tag == "factioncolours") {
                     string factionname = retrievedata(data, "faction");
                     float r_ = atof((retrievedata(data, "r")).c_str());
