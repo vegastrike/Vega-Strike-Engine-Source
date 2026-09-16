@@ -173,7 +173,6 @@ private:
     class Mesh *mesh[NAVTOTALMESHCOUNT];
     int reverse;
     int rotations; //tried to change to unsigned but gazillions of comparisons to int crop up --chuck_starchaser
-    int axis;
     //The camera each view projects through, and whether it still has to be framed
     //to its content.
     NavMap system_cam;
@@ -201,10 +200,6 @@ private:
     float item_zscalefactor;
     float minimumitemscaledown;
     float maximumitemscaleup;
-
-    enum ViewType { VIEW_2D, VIEW_ORTHO, VIEW_3D, VIEW_MAX };
-    int system_view;
-    int galaxy_view;
 
     int path_view;
     enum PathType { PATH_OFF, PATH_ON, PATH_ONLY, PATH_MAXIMUM };
@@ -264,7 +259,6 @@ private:
 //Drawing helper functions
 //*************************
     void Adjust3dTransformation(bool is_system_not_galaxy);
-    void ReplaceAxes(QVector &pos);
     void RecordMinAndMax(const QVector &pos,
             float &min_x,
             float &max_x,
@@ -273,7 +267,6 @@ private:
             float &min_z,
             float &max_z,
             float &max_all);
-    void DrawOriginOrientationTri(float center_nav_x, float center_nav_y, bool system_not_galaxy);
 
 
 
