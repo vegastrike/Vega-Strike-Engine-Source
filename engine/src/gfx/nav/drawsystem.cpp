@@ -181,8 +181,6 @@ void NavigationSystem::DrawSystem() {
     //*************************
 //if(system_view==VIEW_3D)
 //{
-//pos = dxyz(pos, 0, ry_s, 0);
-//pos = dxyz(pos, rx_s, 0, 0);
 //}
     //*************************
 
@@ -216,8 +214,6 @@ void NavigationSystem::DrawSystem() {
         //*************************
 //if(system_view==VIEW_3D)
 //{
-//pos = dxyz(pos, 0, ry_s, 0);
-//pos = dxyz(pos, rx_s, 0, 0);
 //}
         //*************************
         //*************************
