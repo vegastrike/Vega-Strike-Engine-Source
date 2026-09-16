@@ -65,6 +65,7 @@ static const char *frame_limit_opts[] = { "Unlimited", "Half monitor", "Fixed" }
 static const char *frame_limit_vals[] = { "unlimited", "half", "fixed" };
 int  sel_frame_limit = 0;
 char max_framerate_buf[16] = "60";
+bool show_fps = false;
 bool display_inited = false;
 
 bool rendered_crosshair = true;
@@ -343,6 +344,7 @@ static void load_display_from_config() {
     sel_frame_limit = 0;
     for (int i = 0; i < 3; ++i) if (g.frame_limit_mode == frame_limit_vals[i]) sel_frame_limit = i;
     snprintf(max_framerate_buf, sizeof(max_framerate_buf), "%d", g.max_framerate > 0 ? g.max_framerate : 60);
+    show_fps = g.show_fps;
     display_inited = true;
 }
 
@@ -412,6 +414,8 @@ static void apply_display_to_config() {
     mark_dirty("graphics.vsync");
     mark_dirty("graphics.frame_limit_mode");
     mark_dirty("graphics.max_framerate");
+    g.show_fps = show_fps;
+    mark_dirty("graphics.show_fps");
     winsys_apply_frame_limit();
 }
 
@@ -541,6 +545,7 @@ void draw_display_frame() {
             if (ImGui::MenuItem(frame_limit_opts[i])) { sel_frame_limit = i; dirty = true; }
         ImGui::EndPopup();
     }
+    if (ImGui::Checkbox("Show FPS", &show_fps)) dirty = true;
     ImGui::EndChild();   // end dpyframe (left column)
 
     // Right column: Flight Control + Input buttons + Rendered Crosshair, side by

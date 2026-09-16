@@ -2009,6 +2009,15 @@ void GameCockpit::Draw() {
         }
     }
 
+    // Optional FPS readout, drawn over everything. The shipped cockpits have no FPS
+    // gauge, so this is the only way to show it.
+    if (configuration().graphics.show_fps) {
+        const float fps = LookupUnitStat(UnitImages<void>::COCKPIT_FPS, GetParent());
+        char fps_text[32];
+        snprintf(fps_text, sizeof(fps_text), "FPS: %.1f", fps);
+        ImGui::GetForegroundDrawList()->AddText(ImVec2(10.0f, 10.0f), IM_COL32(255, 255, 255, 255), fps_text);
+    }
+
     GFXEnable(DEPTHWRITE);
     GFXEnable(DEPTHTEST);
     GFXEnable(TEXTURE0);

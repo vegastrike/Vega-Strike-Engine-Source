@@ -4995,6 +4995,11 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 graphics.max_framerate = boost::json::value_to<int>(*max_framerate_value_ptr);
             }
 
+            const boost::json::value * show_fps_value_ptr = graphics_object.if_contains("show_fps");
+            if (show_fps_value_ptr != nullptr) {
+                graphics.show_fps = boost::json::value_to<bool>(*show_fps_value_ptr);
+            }
+
             const boost::json::value * full_screen_value_ptr = graphics_object.if_contains("full_screen");
             if (full_screen_value_ptr != nullptr) {
                 graphics.full_screen = boost::json::value_to<bool>(*full_screen_value_ptr);
