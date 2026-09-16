@@ -527,16 +527,21 @@ void NavigationSystem::DrawSystem() {
         }
     }
 
+    // Draw the orbits before the markers, and for every body that has one. The collapse
+    // below is about markers and the names they carry, and an orbit is neither: a body
+    // whose marker is merged into a larger neighbour still travels its own ellipse.
+    for (size_t i = 0; i < drawn.size(); ++i) {
+        if (drawn[i].unit != nullptr && ((drawn[i].type == navplanet) || (drawn[i].type == navsun))) {
+            DrawOrbit(drawn[i].unit, system_cam, center_nav_x, center_nav_y);
+        }
+    }
+
     //Draw what survived the collapse.
     for (size_t i = 0; i < drawn.size(); ++i) {
         if (drawn[i].size < 0.0f) {
             continue;
         }
         NavItem &item = drawn[i];
-        if (item.unit != nullptr && ((item.type == navplanet) || (item.type == navsun))) {
-            // Draw the orbit before the marker, so that the marker sits on top of it.
-            DrawOrbit(item.unit, system_cam, center_nav_x, center_nav_y);
-        }
         if (_Universe->AccessCockpit()->GetParent()->Target() == item.unit) {
             static GFXColor col = vs_config->getColor("nav", "targetted_unit", GFXColor(1, 0.3, 0.3, 0.8));
             DrawTargetCorners(item.x, item.y, item.size, col);
