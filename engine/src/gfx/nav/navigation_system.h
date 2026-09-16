@@ -279,40 +279,9 @@ private:
             float &max_all);
     void DrawOriginOrientationTri(float center_nav_x, float center_nav_y, bool system_not_galaxy);
 
-    float CalculatePerspectiveAdjustment(float &zscale,
-            float &zdistance,
-            QVector &pos,
-            QVector &pos_flat,
-            float &system_item_scale_temp,
-            bool system_not_galaxy);
 
-    void TranslateCoordinates(QVector &pos,
-            QVector &pos_flat,
-            float center_nav_x,
-            float center_nav_y,
-            float themaxvalue,
-            float &zscale,
-            float &zdistance,
-            float &the_x,
-            float &the_y,
-            float &the_x_flat,
-            float &the_y_flat,
-            float &system_item_scale_temp,
-            bool system_not_galaxy);
 
-    void TranslateAndDisplay(QVector &pos,
-            QVector &pos_flat,
-            float center_nav_x,
-            float center_nav_y,
-            float themaxvalue,
-            float &zscale,
-            float &zdistance,
-            float &the_x,
-            float &the_y,
-            float &system_item_scale_temp,
-            bool system_not_galaxy);
 
-    void DisplayOrientationLines(float the_x, float the_y, float the_x_flat, float the_y_flat, bool system_not_galaxy);
 
     bool CheckForSelectionQuery();
     void setCurrentSystemIndex(unsigned newSystemIndex);

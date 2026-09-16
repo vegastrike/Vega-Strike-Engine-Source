@@ -461,7 +461,6 @@ void NavigationSystem::DrawGalaxy() {
                 systemIter.seek(focusedsystemindex);
                 pos = systemIter->Position();
                 ReplaceAxes(pos);
-//if(galaxy_view==VIEW_3D){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
 
                 max_x = (float) pos.i;
                 min_x = (float) pos.i;
@@ -483,7 +482,6 @@ void NavigationSystem::DrawGalaxy() {
                     for (unsigned i = 0; i < destsize; ++i) {
                         QVector posoth = systemIter[systemIter->GetDestinationIndex(i)].Position();
                         ReplaceAxes(posoth);
-//if(galaxy_view==VIEW_3D){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
 
                         RecordMinAndMax(posoth, min_x, max_x, min_y, max_y, min_z, max_z, themaxvalue);
                     }
@@ -603,7 +601,6 @@ void NavigationSystem::DrawGalaxy() {
 
         //Modify by old rotation amount
         //*************************
-//if(galaxy_view==VIEW_3D){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
         //*************************
         //*************************
 
