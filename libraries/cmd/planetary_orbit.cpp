@@ -50,6 +50,7 @@ PlanetaryOrbit::PlanetaryOrbit(Unit *p,
     }
     orbiting_last_simatom = simulation_atom_var;
     orbit_list_filled = false;
+    orbit_phase_initialized = false;
     p->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
     if (delta == 0) {
@@ -181,6 +182,24 @@ void PlanetaryOrbit::Execute() {
             sum_orbiting_average += orbiting_average[o];
         }
         sum_orbiting_average *= 1. / (limit == 0 ? 1 : limit);
+    }
+    if (!orbit_phase_initialized) {
+        // theta starts at the "position" attribute, and a saved game does not carry an
+        // orbit's phase - so when a unit loads, theta restarts at its initial value while
+        // the unit keeps the position it was saved at. Recover the phase from that
+        // position instead: otherwise the first frame reads the whole gap between the two
+        // as one frame of travel and hands the unit a velocity that flies it back onto
+        // the orbit, which is how a docked station ends up launching ships at speed.
+        orbit_phase_initialized = true;
+        const QVector orbit_centre = origin - focus + sum_orbiting_average;
+        const QVector offset = parent->LocalPosition() - orbit_centre;
+        const double x2 = x_size.MagnitudeSquared();
+        const double y2 = y_size.MagnitudeSquared();
+        if (x2 > 0 && y2 > 0) {
+            //x_size and y_size are the orbit's semi-axes and are orthogonal, so the phase
+            //is just the offset resolved against each of them.
+            theta = std::atan2(offset.Dot(y_size) / y2, offset.Dot(x_size) / x2);
+        }
     }
     const double div2pi = (1.0 / (2.0 * PI));
     theta += velocity * simulation_atom_var * div2pi;
