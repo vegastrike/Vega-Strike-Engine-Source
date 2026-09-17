@@ -2077,7 +2077,10 @@ extern vector<int> switchunit;
 //frame to frame: a correction to the docked-to unit's position, or simply a long stretch
 //docked, can leave the ship sitting at a stale offset - and then it launches from there.
 static void LaunchFromDockingPort(Unit *ship, Unit *base, unsigned int port) {
-    const float launch_clearance = base->rSize() + (ship->rSize() * 2.0f);
+    //Sit at the range the body counts as dockable at, so leaving it puts us where we could
+    //dock with it again - and never inside its hull.
+    const double launch_distance =
+            std::max(DockingRange(base), static_cast<double>(base->rSize() + ship->rSize()));
     QVector outward = ship->LocalPosition() - base->LocalPosition();
     if (outward.MagnitudeSquared() < 1.0f && port < base->DockingPortLocations().size()) {
         //Docked dead centre - a planet can be docked to anywhere on its surface - so fall
@@ -2088,7 +2091,7 @@ static void LaunchFromDockingPort(Unit *ship, Unit *base, unsigned int port) {
         outward = QVector(0, 1, 0);
     }
     outward.Normalize();
-    ship->SetCurPosition(base->LocalPosition() + (outward * launch_clearance));
+    ship->SetCurPosition(base->LocalPosition() + (outward * launch_distance));
 }
 
 bool Unit::UnDock(Unit *utdw) {
