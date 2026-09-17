@@ -81,6 +81,52 @@ QVector PlanetaryOrbit::orbitPoint(double t) const {
     return targetlocation - focus + (std::cos(t) * x_size) + (std::sin(t) * y_size);
 }
 
+//A point on the orbit, as an offset from the orbit's centre.
+static QVector OrbitOffset(double t, const QVector &x_size, const QVector &y_size) {
+    return (std::cos(t) * x_size) + (std::sin(t) * y_size);
+}
+
+//The phase whose point on the orbit lies nearest to a given offset from the orbit's centre.
+//The two axes are not always perpendicular - some systems author them anti-parallel, which
+//collapses the orbit to a line segment - so this searches the orbit rather than projecting
+//the offset onto each axis.
+static double NearestOrbitPhase(const QVector &x_size, const QVector &y_size, const QVector &offset) {
+    const int kCoarseSteps = 64;
+    int nearest_step = 0;
+    double nearest_distance = -1.0;
+    for (int step = 0; step < kCoarseSteps; ++step) {
+        const double candidate = (2.0 * PI * step) / kCoarseSteps;
+        const double distance = (OrbitOffset(candidate, x_size, y_size) - offset).MagnitudeSquared();
+        if (nearest_distance < 0.0 || distance < nearest_distance) {
+            nearest_distance = distance;
+            nearest_step = step;
+        }
+    }
+    //A coarse step is a whole degree of the orbit, which at orbital distances is far too
+    //coarse to leave a body where it stands, so narrow the phase down within the
+    //neighbourhood of the nearest step.
+    const double step_size = (2.0 * PI) / kCoarseSteps;
+    double low = (nearest_step - 1) * step_size;
+    double high = (nearest_step + 1) * step_size;
+    const double kGoldenRatio = 0.6180339887498949;
+    double left = high - (kGoldenRatio * (high - low));
+    double right = low + (kGoldenRatio * (high - low));
+    for (int step = 0; step < 64; ++step) {
+        const double left_distance = (OrbitOffset(left, x_size, y_size) - offset).MagnitudeSquared();
+        const double right_distance = (OrbitOffset(right, x_size, y_size) - offset).MagnitudeSquared();
+        if (left_distance < right_distance) {
+            high = right;
+            right = left;
+            left = high - (kGoldenRatio * (high - low));
+        } else {
+            low = left;
+            left = right;
+            right = low + (kGoldenRatio * (high - low));
+        }
+    }
+    return (low + high) / 2.0;
+}
+
 void PlanetaryOrbit::Execute() {
     bool mining = parent->rSize() > 1444 && parent->rSize() < 1445;
     bool done = this->done;
@@ -186,31 +232,32 @@ void PlanetaryOrbit::Execute() {
     if (!orbit_phase_initialized) {
         // theta starts at the "position" attribute, and a saved game does not carry an
         // orbit's phase - so when a unit loads, theta restarts at its initial value while
-        // the unit keeps the position it was saved at. Recover the phase from that
-        // position instead: otherwise the first frame reads the whole gap between the two
-        // as one frame of travel and hands the unit a velocity that flies it back onto
-        // the orbit, which is how a docked station ends up launching ships at speed.
+        // the unit keeps the position it was saved at. Recover the phase from that position
+        // instead, so the body stays where it is rather than being moved onto the orbit.
         orbit_phase_initialized = true;
         const QVector orbit_centre = origin - focus + sum_orbiting_average;
-        const QVector offset = parent->LocalPosition() - orbit_centre;
-        const double x2 = x_size.MagnitudeSquared();
-        const double y2 = y_size.MagnitudeSquared();
-        if (x2 > 0 && y2 > 0) {
-            //x_size and y_size are the orbit's semi-axes and are orthogonal, so the phase
-            //is just the offset resolved against each of them.
-            theta = std::atan2(offset.Dot(y_size) / y2, offset.Dot(x_size) / x2);
-        }
+        theta = NearestOrbitPhase(x_size, y_size, parent->LocalPosition() - orbit_centre);
     }
     const double div2pi = (1.0 / (2.0 * PI));
-    theta += velocity * simulation_atom_var * div2pi;
+    const double theta_rate = velocity * div2pi;      //radians per second
+    theta += theta_rate * simulation_atom_var;
 
-    QVector x_offset = cos(theta) * x_size;
-    QVector y_offset = sin(theta) * y_size;
+    QVector destination = origin - focus + sum_orbiting_average
+            + OrbitOffset(theta, x_size, y_size);
 
-    QVector destination = origin - focus + sum_orbiting_average + x_offset + y_offset;
-    double mag = (destination - parent->LocalPosition()).Magnitude();
-    parent->Velocity = parent->cumulative_velocity =
-            (((destination - parent->LocalPosition()) * (1. / simulation_atom_var)).Cast());
+    //The velocity is the orbit's own motion in closed form: the derivative of
+    //cos(theta)*x_size + sin(theta)*y_size, plus whatever the body being orbited is doing
+    //(which is how the body is carried along with its parent). Taking it instead from the
+    //difference between this body's position and the orbit point would turn a position
+    //error into speed, so any body that had drifted off its orbit - a loaded game, or a
+    //system that places a body off the orbit it gives it - would fling itself, and
+    //anything docked to it, across the system.
+    QVector orbit_velocity = ((-std::sin(theta) * x_size) + (std::cos(theta) * y_size)) * theta_rate;
+    Unit *orbitee = (subtype & SSELF) ? group.GetUnit() : nullptr;
+    if (orbitee != nullptr) {
+        orbit_velocity += orbitee->Velocity.Cast();
+    }
+    parent->Velocity = parent->cumulative_velocity = orbit_velocity.Cast();
     const float Unreasonable_value = configuration().physics.planet_ejection_stophack_flt;
     float v2 = parent->Velocity.Dot(parent->Velocity);
     if (v2 > Unreasonable_value * Unreasonable_value) {
@@ -220,6 +267,8 @@ void PlanetaryOrbit::Execute() {
                         % this->parent->name));
         parent->Velocity.Set(0, 0, 0);
         parent->cumulative_velocity.Set(0, 0, 0);
-        parent->SetCurPosition(origin - focus + sum_orbiting_average + x_offset + y_offset);
     }
+    //The orbit is the authority for where this body is, and that correction stays
+    //positional: routing it back through Velocity is what made it a speed.
+    parent->SetCurPosition(destination);
 }
