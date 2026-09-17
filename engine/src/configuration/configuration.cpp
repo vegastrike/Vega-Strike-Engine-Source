@@ -7034,12 +7034,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.auto_pilot_planet_radius_percent_flt = boost::json::value_to<float>(*auto_pilot_planet_radius_percent_value_ptr);
             }
 
-            const boost::json::value * auto_pilot_spec_lining_up_angle_value_ptr = physics_object.if_contains("auto_pilot_spec_lining_up_angle");
-            if (auto_pilot_spec_lining_up_angle_value_ptr != nullptr) {
-                physics.auto_pilot_spec_lining_up_angle_dbl = boost::json::value_to<double>(*auto_pilot_spec_lining_up_angle_value_ptr);
-                physics.auto_pilot_spec_lining_up_angle_flt = boost::json::value_to<float>(*auto_pilot_spec_lining_up_angle_value_ptr);
-            }
-
             const boost::json::value * auto_pilot_terminate_value_ptr = physics_object.if_contains("auto_pilot_terminate");
             if (auto_pilot_terminate_value_ptr != nullptr) {
                 physics.auto_pilot_terminate = boost::json::value_to<bool>(*auto_pilot_terminate_value_ptr);
@@ -7977,22 +7971,10 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.warp_ramp_down_time_flt = boost::json::value_to<float>(*warp_ramp_down_time_value_ptr);
             }
 
-            const boost::json::value * warp_clearance_repel_value_ptr = physics_object.if_contains("warp_clearance_repel");
-            if (warp_clearance_repel_value_ptr != nullptr) {
-                physics.warp_clearance_repel_dbl = boost::json::value_to<double>(*warp_clearance_repel_value_ptr);
-                physics.warp_clearance_repel_flt = boost::json::value_to<float>(*warp_clearance_repel_value_ptr);
-            }
-
             const boost::json::value * warp_clearance_attract_value_ptr = physics_object.if_contains("warp_clearance_attract");
             if (warp_clearance_attract_value_ptr != nullptr) {
                 physics.warp_clearance_attract_dbl = boost::json::value_to<double>(*warp_clearance_attract_value_ptr);
                 physics.warp_clearance_attract_flt = boost::json::value_to<float>(*warp_clearance_attract_value_ptr);
-            }
-
-            const boost::json::value * warp_clearance_range_mult_value_ptr = physics_object.if_contains("warp_clearance_range_mult");
-            if (warp_clearance_range_mult_value_ptr != nullptr) {
-                physics.warp_clearance_range_mult_dbl = boost::json::value_to<double>(*warp_clearance_range_mult_value_ptr);
-                physics.warp_clearance_range_mult_flt = boost::json::value_to<float>(*warp_clearance_range_mult_value_ptr);
             }
 
             const boost::json::value * warp_min_range_value_ptr = physics_object.if_contains("warp_min_range");
