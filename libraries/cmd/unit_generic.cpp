@@ -2089,7 +2089,13 @@ bool Unit::UnDock(Unit *utdw) {
             SetVisible(true);
             docked &= (~(DOCKED_INSIDE | DOCKED));
             pImage->DockedTo.SetUnit(nullptr);
-            Velocity = utdw->Velocity;
+            // Leave the pad at rest. The docked-to unit's Velocity member is not
+            // trustworthy: a station that is held in place (docked, a subunit, or
+            // driven by an orbit order) can carry a stale velocity that its own
+            // position never follows, and the ship would then fly away with it.
+            Velocity = Vector(0, 0, 0);
+            cumulative_velocity = Vector(0, 0, 0);
+            computer.set_speed = 0;
             const float launch_speed = configuration().physics.launch_speed_flt;
             const bool auto_turn_towards = configuration().physics.undock_turn_away;
 
