@@ -2072,6 +2072,25 @@ bool Unit::isDocked(const Unit *d) const {
 
 extern vector<int> switchunit;
 
+//Put a ship that is leaving a docking port back where that port is now. While docked the
+//docked-to unit carries the ship along with its own movement, but it can only do that from
+//frame to frame: a correction to the docked-to unit's position, or simply a long stretch
+//docked, can leave the ship sitting at a stale offset - and then it launches from there.
+static void LaunchFromDockingPort(Unit *ship, Unit *base, unsigned int port) {
+    const float launch_clearance = base->rSize() + (ship->rSize() * 2.0f);
+    QVector outward = ship->LocalPosition() - base->LocalPosition();
+    if (outward.MagnitudeSquared() < 1.0f && port < base->DockingPortLocations().size()) {
+        //Docked dead centre - a planet can be docked to anywhere on its surface - so fall
+        //back to the direction of the port the ship was occupying.
+        outward = base->DockingPortLocations()[port].GetPosition().Cast();
+    }
+    if (outward.MagnitudeSquared() < 1.0f) {
+        outward = QVector(0, 1, 0);
+    }
+    outward.Normalize();
+    ship->SetCurPosition(base->LocalPosition() + (outward * launch_clearance));
+}
+
 bool Unit::UnDock(Unit *utdw) {
     unsigned int i = 0;
     if (this->name == "return_to_cockpit") {
@@ -2084,6 +2103,7 @@ bool Unit::UnDock(Unit *utdw) {
     VS_LOG(trace, "Asking to undock");
     for (i = 0; i < utdw->pImage->dockedunits.size(); ++i) {
         if (utdw->pImage->dockedunits[i]->uc.GetUnit() == this) {
+            LaunchFromDockingPort(this, utdw, utdw->pImage->dockedunits[i]->whichdock);
             utdw->FreeDockingPort(i);
             i--;
             SetVisible(true);
