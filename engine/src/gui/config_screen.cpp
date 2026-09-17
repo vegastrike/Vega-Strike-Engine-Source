@@ -1687,6 +1687,10 @@ static const ConfigAccessor kConfigAccessors[] = {
     {"graphics.font",                    [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.font);},                  nullptr},
     {"graphics.font_antialias",          [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.font_antialias;},        nullptr},
     {"graphics.screen",                  [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.screen;},                nullptr},
+    {"graphics.vsync",                   [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.vsync);},             nullptr},
+    {"graphics.frame_limit_mode",        [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.frame_limit_mode);},  nullptr},
+    {"graphics.max_framerate",           [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.max_framerate;},           nullptr},
+    {"graphics.show_fps",                [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.show_fps;},                nullptr},
     // ---- audio ----
     {"audio.ai_sound",                   [](const vega_config::Configuration&c)->boost::json::value{return c.audio.ai_sound;},                 [](vega_config::Configuration&c,const std::string&v){c.audio.ai_sound=(v=="true"||v=="1");}},
     {"audio.every_other_mount",          [](const vega_config::Configuration&c)->boost::json::value{return c.audio.every_other_mount;},        [](vega_config::Configuration&c,const std::string&v){c.audio.every_other_mount=(v=="true"||v=="1");}},
