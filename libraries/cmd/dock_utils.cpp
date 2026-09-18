@@ -71,6 +71,21 @@ double DockingRange(const Unit *dock) {
 }
 
 /**
+ * @brief The clearance within which a body counts as dockable
+ * @param dock - the body being docked with
+ * @return the distance outside its hull (or from its centre, for a ship)
+ */
+double DockingClearance(const Unit *dock) {
+    // CanDock's own test, named: a planet, whose docking port is sized to its radius and
+    // which can be landed on anywhere, counts as dockable within a fraction of its radius
+    // of its surface; anything else within the simple docking range of its centre.
+    if (dock->getUnitType() == Vega_UnitType::planet) {
+        return dock->rSize() * (configuration().dock.dock_planet_radius_percent_dbl - 1.0);
+    }
+    return configuration().dock.simple_dock_range_dbl;
+}
+
+/**
  * @brief check whether a ship can dock
  * @param dock - the dock unit
  * @param ship - the docking unit
@@ -100,8 +115,7 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
 
     // Planet Code
     if (dock->getUnitType() == Vega_UnitType::planet) {
-        range -= dock->rSize() * (configuration().dock.dock_planet_radius_percent_dbl - 1.0);
-        if (range < 0) {
+        if (range < DockingClearance(dock)) {
             return 0;
         } else {
             return -1;
@@ -109,7 +123,7 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
     }
 
     if (configuration().dock.simple_dock) {
-        if (range < configuration().dock.simple_dock_range_dbl) {
+        if (range < DockingClearance(dock)) {
             return 0;
         } else {
             return -1;
