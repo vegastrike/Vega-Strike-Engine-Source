@@ -2288,8 +2288,6 @@ namespace vega_config {
         float auto_pilot_no_enemies_distance_multiplier_flt = 4.0;
         double auto_pilot_planet_radius_percent_dbl = 0.495;
         float auto_pilot_planet_radius_percent_flt = 0.495;
-        double auto_pilot_spec_lining_up_angle_dbl = 3.0;
-        float auto_pilot_spec_lining_up_angle_flt = 3.0;
         bool auto_pilot_terminate = true;
         double auto_pilot_termination_distance_dbl = 2500.0;
         float auto_pilot_termination_distance_flt = 2500.0;
@@ -2555,12 +2553,10 @@ namespace vega_config {
         bool warp_is_interstellar = false;
         double warp_ramp_down_time_dbl = 0.1;
         float warp_ramp_down_time_flt = 0.1;
-        double warp_clearance_repel_dbl = 2.0;
-        float warp_clearance_repel_flt = 2.0;
-        double warp_clearance_attract_dbl = 1.0;
-        float warp_clearance_attract_flt = 1.0;
-        double warp_clearance_range_mult_dbl = 5.0;
-        float warp_clearance_range_mult_flt = 5.0;
+        // The destination's pull, compared directly against a normalized obstacle
+        // repulsion (0..1), so this value alone sets the balance.
+        double warp_clearance_attract_dbl = 0.7;
+        float warp_clearance_attract_flt = 0.7;
         double warp_min_range_dbl = 3000.0;
         float warp_min_range_flt = 3000.0;
         double weapon_damage_efficiency_dbl = 1.0;
