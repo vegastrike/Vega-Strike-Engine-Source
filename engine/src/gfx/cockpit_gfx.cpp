@@ -325,6 +325,13 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
                  GFXColor textcol) {
     int i;
     for (i = 0; i < UnitImages< void >::TARGETSHIELDF; i++) {
+        //Some cockpits carry an FPS readout of their own. The graphics option is the one place
+        //that decides whether an FPS counter is shown. Decided here rather than when the
+        //cockpit is parsed, which happens once: the gauge exists either way, so the setting
+        //takes effect as soon as it is saved.
+        if ((int) i == (int) UnitImages< void >::COCKPIT_FPS && !configuration().graphics.show_fps) {
+            continue;
+        }
         if (gauges[i]) {
             gauges[i]->Draw( cockpit->LookupUnitStat( i, un ) );
             float damage =
