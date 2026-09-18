@@ -320,6 +320,11 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
     VSSprite *oldpit = NULL;
     bool replaced[4] = {false, false, false, false};
     int counter = 0;
+    //Some cockpits carry an FPS readout of their own. The graphics option is the one place that
+    //decides whether an FPS counter is shown, so ignore the element while it is off.
+    if (((int) elem == (int) UnitImages<void>::COCKPIT_FPS) && !configuration().graphics.show_fps) {
+        return;
+    }
     switch ((int) elem) {
         case COCKPIT:
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
