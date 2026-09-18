@@ -64,7 +64,7 @@ int  sel_vsync = 1;
 static const char *frame_limit_opts[] = { "Unlimited", "Half monitor", "Fixed" };
 static const char *frame_limit_vals[] = { "unlimited", "half", "fixed" };
 int  sel_frame_limit = 0;
-char max_framerate_buf[16] = "60";
+int  sel_max_framerate = 60;
 bool show_fps = false;
 bool display_inited = false;
 
@@ -343,7 +343,7 @@ static void load_display_from_config() {
     for (int i = 0; i < 3; ++i) if (g.vsync == vsync_vals[i]) sel_vsync = i;
     sel_frame_limit = 0;
     for (int i = 0; i < 3; ++i) if (g.frame_limit_mode == frame_limit_vals[i]) sel_frame_limit = i;
-    snprintf(max_framerate_buf, sizeof(max_framerate_buf), "%d", g.max_framerate > 0 ? g.max_framerate : 60);
+    sel_max_framerate = g.max_framerate > 0 ? g.max_framerate : 60;
     show_fps = g.show_fps;
     display_inited = true;
 }
@@ -410,7 +410,7 @@ static void apply_display_to_config() {
     // from the now-current monitor, so switching monitors recomputes it here.
     g.vsync = vsync_vals[sel_vsync];
     g.frame_limit_mode = frame_limit_vals[sel_frame_limit];
-    g.max_framerate = atoi(max_framerate_buf);
+    g.max_framerate = sel_max_framerate;
     mark_dirty("graphics.vsync");
     mark_dirty("graphics.frame_limit_mode");
     mark_dirty("graphics.max_framerate");
@@ -536,9 +536,35 @@ void draw_display_frame() {
     if (ImGui::Button("Frame Rate")) ImGui::OpenPopup("##pick_fr");
     ImGui::SameLine(); ImGui::TextUnformatted(frame_limit_opts[sel_frame_limit]);
     if (sel_frame_limit == 2) {
-        ImGui::SameLine(); ImGui::SetNextItemWidth(60);
-        if (ImGui::InputText("##maxfr", max_framerate_buf, sizeof(max_framerate_buf), ImGuiInputTextFlags_CharsDecimal))
-            dirty = true;
+        // Fixed cap: pick from the refresh rates the selected monitor reports, rather than
+        // typing a number and hoping the display can hold it. Same mode list the Resolution
+        // selector walks.
+        if (ImGui::Button("Refresh Rate")) ImGui::OpenPopup("##pick_rate_hz");
+        ImGui::SameLine();
+        char rate_text[24];
+        snprintf(rate_text, sizeof(rate_text), "%d Hz", sel_max_framerate);
+        ImGui::TextUnformatted(rate_text);
+        if (ImGui::BeginPopup("##pick_rate_hz")) {
+            int mode_count = 0;
+            SDL_DisplayMode **modes = SDL_GetFullscreenDisplayModes(sel_display_id, &mode_count);
+            if (modes != nullptr) {
+                std::vector<int> rates;
+                for (int i = 0; i < mode_count; ++i) {
+                    const int rate = modes[i]->refresh_rate;
+                    if (rate > 0 && std::find(rates.begin(), rates.end(), rate) == rates.end()) {
+                        rates.push_back(rate);
+                    }
+                }
+                std::sort(rates.begin(), rates.end());
+                for (size_t i = 0; i < rates.size(); ++i) {
+                    char lbl[24];
+                    snprintf(lbl, sizeof(lbl), "%d Hz", rates[i]);
+                    if (ImGui::MenuItem(lbl)) { sel_max_framerate = rates[i]; dirty = true; }
+                }
+                SDL_free(modes);
+            }
+            ImGui::EndPopup();
+        }
     }
     if (ImGui::BeginPopup("##pick_fr")) {
         for (int i = 0; i < 3; ++i)
