@@ -294,16 +294,16 @@ MoveTo::~MoveTo() {
 }
 
 bool ChangeHeading::OptimizeAngSpeed(float optimal_speed_pos, float optimal_speed_neg, float v, float &a) {
-    v += (a / parent->GetMoment()) * simulation_atom_var;
+    v += (a / static_cast<float>(parent->GetMass())) * simulation_atom_var;
     if ((optimal_speed_pos == 0 && optimal_speed_neg == 0) || (v >= -optimal_speed_neg && v <= optimal_speed_pos)) {
         return true;
     }
     if (v > 0) {
-        float deltaa = parent->GetMoment() * (v - optimal_speed_pos)
+        float deltaa = static_cast<float>(parent->GetMass()) * (v - optimal_speed_pos)
                 / simulation_atom_var;           //clamping should take care of it
         a -= deltaa;
     } else {
-        float deltaa = parent->GetMoment() * (-v - optimal_speed_neg)
+        float deltaa = static_cast<float>(parent->GetMass()) * (-v - optimal_speed_neg)
                 / simulation_atom_var;           //clamping should take care of it
         a += deltaa;
     }
@@ -317,7 +317,7 @@ bool ChangeHeading::OptimizeAngSpeed(float optimal_speed_pos, float optimal_spee
 void ChangeHeading::TurnToward(float atancalc, float ang_veli, float &torquei) {
     //We need to end up at destination with positive velocity, but no more than we can decelerate from in a single simulation_atom_var
     if (1) {
-        float mass = parent->GetMoment();
+        float mass = static_cast<float>(parent->GetMass());
         float max_arrival_speed = torquei * simulation_atom_var / mass;
         float accel_needed = (atancalc / simulation_atom_var - ang_veli) / simulation_atom_var;
         float arrival_velocity = accel_needed * simulation_atom_var + ang_veli;
@@ -329,21 +329,21 @@ void ChangeHeading::TurnToward(float atancalc, float ang_veli, float &torquei) {
     float t = CalculateBalancedDecelTime(atancalc,
             ang_veli,
             torquei,
-            parent->GetMoment());     //calculate when we should decel
+            static_cast<float>(parent->GetMass()));     //calculate when we should decel
     if (t < 0) {
         //if it can't make it: try the other way
         torquei = fabs(torquei);         //copy sign again
         t = CalculateBalancedDecelTime(atancalc > 0 ? atancalc - 2 * PI : atancalc + 2 * PI,
                 ang_veli,
                 torquei,
-                parent->GetMoment());
+                static_cast<float>(parent->GetMass()));
     }
     if (t > 0) {
         if (t < simulation_atom_var) {
             torquei *= ((t / simulation_atom_var) - ((simulation_atom_var - t) / simulation_atom_var));
         }
     } else {
-        torquei = -parent->GetMoment() * ang_veli / simulation_atom_var;         //clamping should take care of it
+        torquei = -static_cast<float>(parent->GetMass()) * ang_veli / simulation_atom_var;         //clamping should take care of it
     }
 }
 
@@ -428,7 +428,7 @@ void ChangeHeading::Execute() {
             }
             return;
         }
-        torque = (-parent->GetMoment() / simulation_atom_var) * local_velocity;
+        torque = (-static_cast<float>(parent->GetMass()) / simulation_atom_var) * local_velocity;
     } else {
         TurnToward(atan2(local_heading.j, local_heading.k),
                 local_velocity.i,
@@ -443,7 +443,7 @@ void ChangeHeading::Execute() {
                 turningspeed * parent->drive.max_yaw_right,
                 local_velocity.j,
                 torque.j);
-        torque.k = -parent->GetMoment() * local_velocity.k / simulation_atom_var;         //try to counteract roll;
+        torque.k = -static_cast<float>(parent->GetMass()) * local_velocity.k / simulation_atom_var;         //try to counteract roll;
     }
     if (!cheater) {
         parent->ApplyLocalTorque(torque);
