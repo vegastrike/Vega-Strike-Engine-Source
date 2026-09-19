@@ -105,31 +105,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 input.joystick_preset = boost::json::value_to<std::string>(*jp);
         }
 
-        const boost::json::value * settings_app_value_ptr = root_object.if_contains("settings_app");
-        if (settings_app_value_ptr != nullptr) {
-            boost::json::object settings_app_object = settings_app_value_ptr->get_object();
-            const boost::json::value * details_value_ptr = settings_app_object.if_contains("details");
-            if (details_value_ptr != nullptr) {
-                settings_app.details = boost::json::value_to<std::string>(*details_value_ptr);
-            }
-
-            const boost::json::value * shaders_value_ptr = settings_app_object.if_contains("shaders");
-            if (shaders_value_ptr != nullptr) {
-                settings_app.shaders = boost::json::value_to<std::string>(*shaders_value_ptr);
-            }
-
-            const boost::json::value * audio_value_ptr = settings_app_object.if_contains("audio");
-            if (audio_value_ptr != nullptr) {
-                settings_app.audio = boost::json::value_to<std::string>(*audio_value_ptr);
-            }
-
-            const boost::json::value * physics_value_ptr = settings_app_object.if_contains("physics");
-            if (physics_value_ptr != nullptr) {
-                settings_app.physics = boost::json::value_to<std::string>(*physics_value_ptr);
-            }
-
-        }
-
         // Parse the "preset" section (config.json) into this->preset selectors.
         const boost::json::value * preset_value_ptr = root_object.if_contains("preset");
         if (preset_value_ptr != nullptr && preset_value_ptr->is_object()) {
@@ -4978,6 +4953,26 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
             const boost::json::value * framerate_changes_shader_value_ptr = graphics_object.if_contains("framerate_changes_shader");
             if (framerate_changes_shader_value_ptr != nullptr) {
                 graphics.framerate_changes_shader = boost::json::value_to<bool>(*framerate_changes_shader_value_ptr);
+            }
+
+            const boost::json::value * vsync_value_ptr = graphics_object.if_contains("vsync");
+            if (vsync_value_ptr != nullptr) {
+                graphics.vsync = boost::json::value_to<std::string>(*vsync_value_ptr);
+            }
+
+            const boost::json::value * frame_limit_mode_value_ptr = graphics_object.if_contains("frame_limit_mode");
+            if (frame_limit_mode_value_ptr != nullptr) {
+                graphics.frame_limit_mode = boost::json::value_to<std::string>(*frame_limit_mode_value_ptr);
+            }
+
+            const boost::json::value * max_framerate_value_ptr = graphics_object.if_contains("max_framerate");
+            if (max_framerate_value_ptr != nullptr) {
+                graphics.max_framerate = boost::json::value_to<int>(*max_framerate_value_ptr);
+            }
+
+            const boost::json::value * show_fps_value_ptr = graphics_object.if_contains("show_fps");
+            if (show_fps_value_ptr != nullptr) {
+                graphics.show_fps = boost::json::value_to<bool>(*show_fps_value_ptr);
             }
 
             const boost::json::value * full_screen_value_ptr = graphics_object.if_contains("full_screen");

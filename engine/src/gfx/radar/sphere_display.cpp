@@ -36,9 +36,20 @@
 #include "src/physics.h"
 #include "root_generic/configxml.h"
 
+#include <algorithm>
+#include <cmath>
+#include <map>
+
 #define TRACK_SIZE 2.0
+#define POINT_SIZE_GRANULARITY 0.5
 
 namespace {
+
+bool IsBody(const Radar::Track::Type::Value type) {
+    return type == Radar::Track::Type::Planet
+            || type == Radar::Track::Type::DeadPlanet
+            || type == Radar::Track::Type::Star;
+}
 
 float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat) {
     using namespace Radar;
@@ -60,14 +71,43 @@ float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat) {
 namespace Radar {
 
 struct SphereDisplay::Impl {
-    VertexBuilder<float, 3, 0, 3> points;
+    typedef VertexBuilder<float, 3, 0, 3> PointBuffer;
+    typedef std::map<unsigned int, PointBuffer> PointBufferMap;
+
+    PointBufferMap pointmap;
     VertexBuilder<float, 3, 0, 3> lines;
     VertexBuilder<> thinlines;
 
+    PointBuffer &getPointBuffer(float size) {
+        int isize = int(size / POINT_SIZE_GRANULARITY);
+        if (isize < 1) {
+            isize = 1;
+        }
+
+        PointBufferMap::iterator it = pointmap.find(isize);
+        if (it == pointmap.end()) {
+            it = pointmap.insert(std::pair<unsigned int, PointBuffer>(isize, PointBuffer())).first;
+        }
+        return it->second;
+    }
+
     void clear() {
-        points.clear();
+        for (PointBufferMap::iterator it = pointmap.begin(); it != pointmap.end(); ++it) {
+            it->second.clear();
+        }
+
         lines.clear();
         thinlines.clear();
+    }
+
+    void flushPoints() {
+        for (PointBufferMap::reverse_iterator it = pointmap.rbegin(); it != pointmap.rend(); ++it) {
+            PointBuffer &points = it->second;
+            if (points.size() > 0) {
+                GFXPointSize(it->first * POINT_SIZE_GRANULARITY);
+                GFXDraw(GFXPOINT, points);
+            }
+        }
     }
 };
 
@@ -107,6 +147,13 @@ void SphereDisplay::Draw(const Sensor &sensor,
     DrawBackground(sensor, rightRadar);
 
     for (Sensor::TrackCollection::const_iterator it = tracks.begin(); it != tracks.end(); ++it) {
+        if (IsBody(it->GetType())) {
+            // A body's disc can straddle the hemisphere boundary, so draw the half
+            // visible on each radar rather than assigning the whole thing to one.
+            DrawBody(sensor, rightRadar, *it, true);
+            DrawBody(sensor, leftRadar, *it, false);
+            continue;
+        }
         const bool draw_both = configuration().graphics.hud.draw_blips_on_both_radar;
         if (it->GetPosition().z < 0 || draw_both) {
             // Draw tracks behind the ship
@@ -118,8 +165,7 @@ void SphereDisplay::Draw(const Sensor &sensor,
         }
     }
 
-    GFXPointSize(TRACK_SIZE);
-    GFXDraw(GFXPOINT, impl->points);
+    impl->flushPoints();
 
     GFXLineWidth(TRACK_SIZE);
     GFXDraw(GFXLINE, impl->lines);
@@ -191,16 +237,105 @@ void SphereDisplay::DrawTrack(const Sensor &sensor,
             headColor.a *= cosf(dangerRate * radarTime);
         }
     }
+    if (sensor.IsRepulsor(track)) {
+        // Blinking repulsor blip
+        headColor.a *= cosf(kRepulsorBlinkRate * radarTime);
+    }
     // Fade out dying ships
     if (track.IsExploding()) {
         headColor.a *= (1.0 - track.ExplodingProgress());
     }
 
     if (sensor.IsTracking(track)) {
-        DrawTargetMarker(head, headColor, TRACK_SIZE);
+        GFXColor markerColor = headColor;
+        if (sensor.IsSpecActive()) {
+            markerColor = sensor.GetSpecTargetColor();
+        }
+        DrawTargetMarker(head, markerColor, TRACK_SIZE);
     }
 
-    impl->points.insert(GFXColorVertex(head, headColor));
+    float blipSize = TRACK_SIZE;
+    const double repulsor_effect = sensor.GetRepulsorEffect(track);
+    if (repulsor_effect > 0.0) {
+        // Size the blip by how strongly the object compresses SPEC
+        blipSize = RepulsorBlipSize(repulsor_effect);
+    }
+    impl->getPointBuffer(blipSize).insert(GFXColorVertex(head, headColor));
+}
+
+void SphereDisplay::DrawBody(const Sensor &sensor,
+        const ViewArea &radarView,
+        const Track &track,
+        bool negate_z) {
+    if (!radarView.IsActive()) {
+        return;
+    }
+
+    const Vector position = track.GetPosition();
+    const float distance = position.Magnitude();
+    const float body_radius = track.GetSize();
+    if (distance < 0.0001f || body_radius <= 0.0f) {
+        return;
+    }
+    const Vector center = position / distance;
+
+    // The body is a cloud of points on its surface. Every point is a real direction
+    // from the ship, so it always lands inside the radar circle, and the front/back
+    // split falls out per point -- no projection tricks, no folding. The count tracks
+    // the apparent area, so a close body is finely sampled and a distant one is a
+    // single point.
+    const float angular_radius = asinf(std::min(1.0f, body_radius / distance));
+    const float apparent_radius = sinf(angular_radius);
+    int point_count = static_cast<int>(3000.0f * apparent_radius * apparent_radius);
+    if (point_count > 3000) {
+        point_count = 3000;
+    }
+
+    const bool owns = (negate_z ? -position.z : position.z) >= 0.0f;
+    const Vector head = radarView.Scale(Vector(-center.x, center.y, 0.0f));
+    const float body_z = std::max(head.z, 0.02f);
+    const GFXColor color = sensor.GetColor(track);
+    const float point_size = 1.5f;
+
+    if (point_count < 8) {
+        // Too small to resolve: a single point at the body's centre.
+        const float z = negate_z ? -center.z : center.z;
+        if (z >= 0.0f) {
+            Vector point = radarView.Scale(Vector(-center.x, center.y, 0.0f));
+            point.z = body_z;
+            impl->getPointBuffer(point_size).insert(GFXColorVertex(point, color));
+        }
+    } else {
+        const float golden_angle = 2.39996323f; // pi * (3 - sqrt(5))
+        for (int i = 0; i < point_count; ++i) {
+            const float y = 1.0f - 2.0f * (static_cast<float>(i) + 0.5f) / point_count;
+            const float ring = sqrtf(std::max(0.0f, 1.0f - y * y));
+            const float angle = golden_angle * static_cast<float>(i);
+            const Vector normal(cosf(angle) * ring, y, sinf(angle) * ring);
+            const Vector surface = center * distance + normal * body_radius;
+            const float surface_distance = surface.Magnitude();
+            if (surface_distance < 0.0001f) {
+                continue;
+            }
+            const Vector direction = surface / surface_distance;
+            const float z = negate_z ? -direction.z : direction.z;
+            if (z < 0.0f) {
+                continue; // belongs to the other radar
+            }
+            Vector point = radarView.Scale(Vector(-direction.x, direction.y, 0.0f));
+            point.z = body_z;
+            impl->getPointBuffer(point_size).insert(GFXColorVertex(point, color));
+        }
+    }
+
+    // The tracking cross belongs to the radar whose hemisphere holds the centre.
+    if (owns && sensor.IsTracking(track)) {
+        GFXColor markerColor = sensor.GetColor(track);
+        if (sensor.IsSpecActive()) {
+            markerColor = sensor.GetSpecTargetColor();
+        }
+        DrawTargetMarker(head, markerColor, TRACK_SIZE);
+    }
 }
 
 void SphereDisplay::DrawTargetMarker(const Vector &position, const GFXColor &color, float trackSize) {

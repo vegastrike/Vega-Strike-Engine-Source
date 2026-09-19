@@ -33,6 +33,16 @@
 class Unit;
 
 double DistanceTwoTargets(Unit *parent, Unit *target);
+
+/// The distance beyond a body's hull (or from its centre, for a ship) within which docking
+/// with it becomes possible, in the same terms as UnitUtil::getSignificantDistance. This is
+/// the clearance a ship leaves between itself and a body it can dock with.
+double DockingClearance(const Unit *dock);
+
+/// The distance from a body's centre at which it counts as dockable, which is also the
+/// distance to sit at when leaving it. Mirrors the ranges CanDock tests.
+double DockingRange(const Unit *dock);
+
 int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy = false);
 std::string GetDockingText(Unit *unit, Unit *target, double range);
 std::string PrettyDistanceString(double distance);
