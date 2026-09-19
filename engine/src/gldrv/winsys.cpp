@@ -39,6 +39,7 @@
  */
 
 
+#include <cmath>
 #include <assert.h>
 #include <sstream>
 
@@ -208,20 +209,36 @@ int winsys_monitor_refresh() {
     if (!mode) {
         return 0;
     }
-    // Refresh rates are floats (59.94 and the like) and the cap is whole Hz, so round to the
-    // nearest rather than truncating.
-    return static_cast<int>(mode->refresh_rate + 0.5f);
+    // Refresh rates are floats (59.94 and the like) and the cap is whole Hz. The floating point
+    // rounding mode is the default round-to-nearest, and nothing in the engine changes it, so this
+    // is "round to the nearest whole Hz" spelled out.
+    return static_cast<int>(std::nearbyint(mode->refresh_rate));
+}
+
+// SDL's swap-interval values are exactly what these carry, so there is nothing to translate at the
+// point the mode is used.
+enum class VegaVSyncMode {
+    kOff = 0,
+    kOnMonitor = 1,
+    kAdaptive = -1,
+};
+
+// The config keeps vsync as a string, which is what the config file and the settings screen speak,
+// so turn it into the mode here.
+static VegaVSyncMode ParseVSyncMode(const std::string &mode) {
+    if (mode == "off") {
+        return VegaVSyncMode::kOff;
+    }
+    if (mode == "adaptive") {
+        return VegaVSyncMode::kAdaptive;
+    }
+    return VegaVSyncMode::kOnMonitor;      // "on", or anything not recognised
 }
 
 void winsys_apply_frame_limit() {
     const auto &g = configuration().graphics;
 
-    int interval = 1; // on (monitor)
-    if (g.vsync == "off") {
-        interval = 0;
-    } else if (g.vsync == "adaptive") {
-        interval = -1;
-    }
+    const int interval = static_cast<int>(ParseVSyncMode(g.vsync));
     SDL_ClearError();
     if (SDL_GL_SetSwapInterval(interval) != 0) {
         VS_LOG(warning, (boost::format("SDL_GL_SetSwapInterval(%1%) failed: %2%") % interval % SDL_GetError()).str());
