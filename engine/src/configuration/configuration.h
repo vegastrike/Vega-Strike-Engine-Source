@@ -1724,6 +1724,12 @@ namespace vega_config {
         double fov_dbl = 37.5;
         float fov_flt = 37.5;
         bool framerate_changes_shader = false;
+        // Frame-rate limiting: vsync mode, and a software cap when it is below what
+        // the GPU would otherwise produce.
+        std::string vsync = "on";                    // "off" | "on" | "adaptive"
+        std::string frame_limit_mode = "unlimited";   // "unlimited" | "half" | "fixed"
+        int max_framerate = 0;                        // fixed cap, frames per second
+        bool show_fps = true;
         bool full_screen = false;
         std::string gauge_static = "static.ani";
         double generic_cargo_rotation_speed_dbl = 1.0;
