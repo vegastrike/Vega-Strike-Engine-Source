@@ -34,7 +34,6 @@
 #include "damage/damage.h"
 #include "src/vega_cast_utils.h"
 
-#include <algorithm>
 #include <boost/format.hpp>
 
 int Shield::front = 0;
@@ -359,20 +358,20 @@ void Shield::Regenerate(const bool player_ship) {
         return;
     }
 
-    // Shield Regeneration
-    //
-    // Energy-limited recharge: the cost scales with the shields being rebuilt
-    // (the deficit), and Consume() returns the fraction of it the reactor could
-    // actually supply, which in turn throttles the recharge rate. As the shields
-    // fill, the cost falls towards zero, so they can always finish charging; a
-    // full shield is free (see the gate above). Charging a fraction of the whole
-    // shield pool instead let a large shield out-draw a small reactor, so the
-    // shields stalled just short of full and drained the primary capacitor.
-    const double shield_deficit = std::max(0.0, TotalMaxLayerValue() - TotalLayerValue());
-    const double shield_regeneration_cost = shield_deficit * configuration().components.shield.regeneration_factor_dbl;
+    // Shield Regeneration. The shield draws its rated recharge rate from the
+    // capacitor (Shield_Recharge, mj/s), scaled by its efficiency: a damaged
+    // shield recharges more slowly and draws more energy for the same charge,
+    // but still reaches full (see the gate above).
+    const double shield_efficiency = PercentOperational();
+    if (shield_efficiency <= 0.0) {
+        return;
+    }
+
+    const double shield_regeneration_cost = regeneration.MaxValue() / shield_efficiency;
     SetConsumption(shield_regeneration_cost);
     const double actual_regeneration_percent = Consume();
-    double regen = actual_regeneration_percent * regeneration.AdjustedValue() * simulation_atom_var;
+    double regen = actual_regeneration_percent * regeneration.MaxValue() * shield_efficiency
+            * simulation_atom_var;
 
     for (Resource<double> &facet : facets) {
         facet += regen;
