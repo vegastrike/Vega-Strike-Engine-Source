@@ -208,6 +208,8 @@ int winsys_monitor_refresh() {
     if (!mode) {
         return 0;
     }
+    // Refresh rates are floats (59.94 and the like) and the cap is whole Hz, so round to the
+    // nearest rather than truncating.
     return static_cast<int>(mode->refresh_rate + 0.5f);
 }
 
