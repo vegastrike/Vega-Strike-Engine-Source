@@ -2009,8 +2009,9 @@ void GameCockpit::Draw() {
         }
     }
 
-    // Optional FPS readout, drawn over everything. The shipped cockpits have no FPS
-    // gauge, so this is the only way to show it.
+    // Optional FPS readout, drawn over everything. Some cockpits' own layouts carry an FPS
+    // display already; this one is there whatever the cockpit art does. The graphics option
+    // decides whether an FPS counter is shown at all, so the two go on and off together.
     if (configuration().graphics.show_fps) {
         const float fps = LookupUnitStat(UnitImages<void>::COCKPIT_FPS, GetParent());
         char fps_text[32];
