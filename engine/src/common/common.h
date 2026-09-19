@@ -27,7 +27,7 @@
 // NO HEADER GUARD
 
 
-/* This file is for common (as in shared between vegastrike, vegasettings as vsconfig) stuff
+/* This file is for common (as in shared across the engine) stuff
  * that is not important enough to warrant its own file.
  */
 
