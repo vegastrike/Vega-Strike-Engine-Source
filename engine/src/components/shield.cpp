@@ -352,29 +352,26 @@ void Shield::Regenerate(const bool player_ship) {
         return;
     }
 
-    // Shield Maintenance
-    // TODO: lib_damage restore efficiency by replacing with shield->efficiency
-    //const double efficiency = 1;
-
-    const double shield_maintenance_cost = TotalMaxLayerValue() * configuration().components.shield.maintenance_factor_dbl;
-    SetConsumption(shield_maintenance_cost);
-    const double actual_maintenance_percent = Consume();
-    if(Percent() > actual_maintenance_percent) {
-        Decrease();
-        return;
-    }
-
     // Manually throttle shield strength
     if(Percent() > max_power) {
         Decrease();
         return;
     }
 
-    // Shield Regeneration
-    const double shield_regeneration_cost = regeneration.AdjustedValue() * configuration().components.shield.regeneration_factor_dbl;
+    // Shield Regeneration. The shield draws its rated recharge rate from the
+    // capacitor (Shield_Recharge, mj/s), scaled by its efficiency: a damaged
+    // shield recharges more slowly and draws more energy for the same charge,
+    // but still reaches full (see the gate above).
+    const double shield_efficiency = PercentOperational();
+    if (shield_efficiency <= 0.0) {
+        return;
+    }
+
+    const double shield_regeneration_cost = regeneration.MaxValue() / shield_efficiency;
     SetConsumption(shield_regeneration_cost);
     const double actual_regeneration_percent = Consume();
-    double regen = actual_regeneration_percent * regeneration.AdjustedValue() * simulation_atom_var;
+    double regen = actual_regeneration_percent * regeneration.MaxValue() * shield_efficiency
+            * simulation_atom_var;
 
     for (Resource<double> &facet : facets) {
         facet += regen;
