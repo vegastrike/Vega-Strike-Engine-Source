@@ -1729,7 +1729,7 @@ namespace vega_config {
         std::string vsync = "on";                    // "off" | "on" | "adaptive"
         std::string frame_limit_mode = "unlimited";   // "unlimited" | "half" | "fixed"
         int max_framerate = 0;                        // fixed cap, frames per second
-        bool show_fps = false;
+        bool show_fps = true;
         bool full_screen = false;
         std::string gauge_static = "static.ani";
         double generic_cargo_rotation_speed_dbl = 1.0;
