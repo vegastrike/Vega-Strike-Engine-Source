@@ -2559,6 +2559,11 @@ namespace vega_config {
         // repulsion (0..1), so this value alone sets the balance.
         double warp_clearance_attract_dbl = 0.7;
         float warp_clearance_attract_flt = 0.7;
+        // Exponent for the proximity repulsion: weight = (1 - sig/bubble)^p.
+        // p=1 is a straight ramp; p>1 quiets the far field and concentrates the
+        // push near the object, so the ship flies straighter until it is close.
+        double warp_clearance_repel_exponent_dbl = 2.0;
+        float warp_clearance_repel_exponent_flt = 2.0;
         double warp_min_range_dbl = 3000.0;
         float warp_min_range_flt = 3000.0;
         double weapon_damage_efficiency_dbl = 1.0;
