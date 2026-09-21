@@ -2759,6 +2759,12 @@ namespace vega_config {
         float warp_ramp_down_time_flt = 0.1;
         double warp_ramp_up_time_dbl = 5.0;
         float warp_ramp_up_time_flt = 5.0;
+        // SPEC speed curve: the multiplier is 1 - (1-x)^q, where x is the nearest-object
+        // distance normalized between the weapons range and the clear-space range.
+        // q=1 is the old linear falloff; q<1 cuts speed hard as soon as something enters
+        // the clear range, rather than only when it is close.
+        double warp_speed_curve_exponent_dbl = 0.2;
+        float warp_speed_curve_exponent_flt = 0.2;
         double warp_stretch_cutoff_dbl = 500000.0;
         float warp_stretch_cutoff_flt = 500000.0;
         double warp_stretch_decel_cutoff_dbl = 2500000.0;

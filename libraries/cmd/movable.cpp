@@ -43,6 +43,7 @@
 #include <string>
 #include "src/vega_cast_utils.h"
 #include <climits>
+#include <cmath>
 #include <utility>
 
 #include "resource/random_utils.h"
@@ -484,13 +485,16 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     const float max_compression_range = configuration().warp.max_effective_velocity_flt;
     float nearest = unit->GetNearestObjectSignificantDistance();
     // ftl is space compression and needs empty space: it does not work at all below
-    // the minimum warp effect range (the 3 km weapons range). The linear
-    // speed-assist scale starts at that inner radius (0 there) and reaches full
-    // speed at the compression range.
+    // the minimum warp effect range (the 3 km weapons range). The speed-assist scale
+    // starts at that inner radius (0 there) and reaches full speed at the compression
+    // range; it is curved (1 - (1-x)^q) so speed is shed hard as soon as an object
+    // enters the bubble, rather than only when it is close.
     const float kWeaponsRange = configuration().physics.warp_min_range_flt;
     float minimum_multiplier = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     if (nearest < max_compression_range) {
-        minimum_multiplier *= (nearest - kWeaponsRange) / (max_compression_range - kWeaponsRange);
+        const double compression = (nearest - kWeaponsRange) / (max_compression_range - kWeaponsRange);
+        minimum_multiplier *= static_cast<float>(1.0 - std::pow(
+                1.0 - compression, configuration().warp.warp_speed_curve_exponent_dbl));
     }
     float minWarp = configuration().warp.warp_multiplier_min_flt * graphicOptions.MinWarpMultiplier;
     float maxWarp = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
