@@ -8533,6 +8533,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 warp.warp_multiplier_min_flt = boost::json::value_to<float>(*warp_multiplier_min_value_ptr);
             }
 
+            const boost::json::value * warp_speed_curve_exponent_value_ptr = warp_object.if_contains("warp_speed_curve_exponent");
+            if (warp_speed_curve_exponent_value_ptr != nullptr) {
+                warp.warp_speed_curve_exponent_dbl = boost::json::value_to<double>(*warp_speed_curve_exponent_value_ptr);
+                warp.warp_speed_curve_exponent_flt = boost::json::value_to<float>(*warp_speed_curve_exponent_value_ptr);
+            }
+
             const boost::json::value * warp_ramp_down_time_value_ptr = warp_object.if_contains("warp_ramp_down_time");
             if (warp_ramp_down_time_value_ptr != nullptr) {
                 warp.warp_ramp_down_time_dbl = boost::json::value_to<double>(*warp_ramp_down_time_value_ptr);
