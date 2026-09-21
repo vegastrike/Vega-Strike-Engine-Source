@@ -2557,8 +2557,8 @@ namespace vega_config {
         float warp_ramp_down_time_flt = 0.1;
         // The destination's pull, compared directly against a normalized obstacle
         // repulsion (0..1), so this value alone sets the balance.
-        double warp_clearance_attract_dbl = 0.7;
-        float warp_clearance_attract_flt = 0.7;
+        double warp_clearance_attract_dbl = 0.9;
+        float warp_clearance_attract_flt = 0.9;
         // Exponent for the proximity repulsion: weight = (1 - sig/bubble)^p.
         // p=1 is a straight ramp; p>1 quiets the far field and concentrates the
         // push near the object, so the ship flies straighter until it is close.
