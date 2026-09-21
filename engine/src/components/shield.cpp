@@ -34,6 +34,7 @@
 #include "damage/damage.h"
 #include "src/vega_cast_utils.h"
 
+#include <algorithm>
 #include <boost/format.hpp>
 
 int Shield::front = 0;
@@ -358,20 +359,30 @@ void Shield::Regenerate(const bool player_ship) {
         return;
     }
 
-    // Shield Regeneration. The shield draws its rated recharge rate from the
-    // capacitor (Shield_Recharge, mj/s), scaled by its efficiency: a damaged
-    // shield recharges more slowly and draws more energy for the same charge,
-    // but still reaches full (see the gate above).
-    const double shield_efficiency = PercentOperational();
+    // Shield Regeneration. The generator's own efficiency sets the recharge rate and the
+    // power drawn: a damaged generator recharges more slowly and costs more, but the
+    // shields still reach full (see the gate above).
+    const double shield_efficiency = (regeneration.MaxValue() > 0.0)
+            ? regeneration.AdjustedValue() / regeneration.MaxValue() : 1.0;
     if (shield_efficiency <= 0.0) {
         return;
     }
 
-    const double shield_regeneration_cost = regeneration.MaxValue() / shield_efficiency;
-    SetConsumption(shield_regeneration_cost);
+    // Upkeep while below full, plus the cost of the charge being rebuilt (capped at the
+    // regeneration rate); both scale with the generator's efficiency.
+    const double vsd_percent = configuration().components.fuel.vsd_mj_yield_dbl / 100.0;
+    const double shield_maintenance_cost = regeneration.MaxValue() * vsd_percent
+            / shield_efficiency
+            / configuration().physics.shield_energy_capacitance_dbl
+            * static_cast<double>(number_of_facets)
+            * configuration().physics.shield_maintenance_charge_dbl;
+    const double shield_deficit = TotalMaxLayerValue() - TotalLayerValue();
+    const double maximum_charge = std::min(shield_deficit, regeneration.AdjustedValue());
+    const double shield_regeneration_cost = maximum_charge * vsd_percent;
+
+    SetConsumption(shield_maintenance_cost + shield_regeneration_cost);
     const double actual_regeneration_percent = Consume();
-    double regen = actual_regeneration_percent * regeneration.MaxValue() * shield_efficiency
-            * simulation_atom_var;
+    double regen = actual_regeneration_percent * maximum_charge * simulation_atom_var;
 
     for (Resource<double> &facet : facets) {
         facet += regen;
