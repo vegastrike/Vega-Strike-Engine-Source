@@ -341,15 +341,12 @@ void Shield::Regenerate(const bool player_ship) {
     * Finally, you adjust whatever used it to the value in question
     */
 
-    // Fully charged shields need no energy - return before any consumption.
-    // (Regression fix: the maintenance drain below used to run even at full
-    // shields, draining the primary capacitor (which the weapons also use) at
-    // max_shield x maintenance_factor per second. For ships whose shield max
-    // exceeds their reactor output - e.g. a Mule (18600 shields) or any
-    // capital ship - that left the capacitor empty, so neither the shields nor
-    // the weapons could ever function. See the 'capacitor never refills after
-    // firing' / 'AI ships never fire' reports.)
-    if (TotalLayerValue() == TotalMaxLayerValue()) {
+    // "Full" is this shield's damaged maximum, scaled by the generator's health: damaged
+    // facets lower what the emitter holds and a damaged generator builds a weaker shield.
+    // Stopping there is still free - this used to draw at full shields and empty the capacitor.
+    const double shield_efficiency = regeneration.Percent();
+    const double shield_capacity = shield_efficiency * TotalAdjustedLayerValue();
+    if (TotalLayerValue() >= shield_capacity) {
         return;
     }
 
@@ -359,24 +356,15 @@ void Shield::Regenerate(const bool player_ship) {
         return;
     }
 
-    // Shield Regeneration. The generator's own efficiency sets the recharge rate and the
-    // power drawn: a damaged generator recharges more slowly and costs more, but the
-    // shields still reach full (see the gate above).
-    const double shield_efficiency = (regeneration.MaxValue() > 0.0)
-            ? regeneration.AdjustedValue() / regeneration.MaxValue() : 1.0;
-    if (shield_efficiency <= 0.0) {
-        return;
-    }
-
-    // Upkeep while below full, plus the cost of the charge being rebuilt (capped at the
-    // regeneration rate); both scale with the generator's efficiency.
+    // Upkeep while below full, plus the cost of the charge being rebuilt - capped at the
+    // rated regeneration, as the pre-component-refactor model did.
     const double vsd_percent = configuration().components.fuel.vsd_mj_yield_dbl / 100.0;
     const double shield_maintenance_cost = regeneration.MaxValue() * vsd_percent
             / shield_efficiency
             / configuration().physics.shield_energy_capacitance_dbl
             * static_cast<double>(number_of_facets)
             * configuration().physics.shield_maintenance_charge_dbl;
-    const double shield_deficit = TotalMaxLayerValue() - TotalLayerValue();
+    const double shield_deficit = shield_capacity - TotalLayerValue();
     const double maximum_charge = std::min(shield_deficit, regeneration.AdjustedValue());
     const double shield_regeneration_cost = maximum_charge * vsd_percent;
 
