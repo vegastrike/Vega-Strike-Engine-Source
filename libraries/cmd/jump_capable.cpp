@@ -188,9 +188,10 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         float aptne =
                 (target->getUnitType() == Vega_UnitType::planet) ? (atd_no_enemies + target->rSize()
                         * UniverseUtil::getPlanetRadiusPercent()) : atd_no_enemies;
-        // apt / aptne are the autopilot's stand-off distances (with, and without, enemies
-        // nearby); percent / percentne below turn them into the point along the path that
-        // the ship flies to. The docking clearance keeps that point outside docking range.
+        // apt / aptne are the auto-pilot termination distances: apt the normal one, aptne
+        // the no-enemies one (auto_pilot_termination_distance / _no_enemies). percent /
+        // percentne turn them into the point along the path the ship flies to, and the
+        // docking clearance keeps that point outside docking range.
         apt += static_cast<float>(DockingClearance(target));
         aptne += static_cast<float>(DockingClearance(target));
         float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
