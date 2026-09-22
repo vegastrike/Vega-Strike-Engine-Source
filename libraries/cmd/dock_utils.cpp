@@ -98,21 +98,9 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
 
     double range = DistanceTwoTargets(dock, ship);
 
-    // Planet Code
-    if (dock->getUnitType() == Vega_UnitType::planet) {
-        if (range < DockingClearance(dock)) {
-            return 0;
-        } else {
-            return -1;
-        }
-    }
-
-    if (configuration().dock.simple_dock) {
-        if (range < DockingClearance(dock)) {
-            return 0;
-        } else {
-            return -1;
-        }
+    // A planet, and anything when simple docking is on, is dockable within its clearance.
+    if (dock->getUnitType() == Vega_UnitType::planet || configuration().dock.simple_dock) {
+        return range < DockingClearance(dock) ? 0 : -1;
     }
 
     if (range > kDefinitelyTooFar) {

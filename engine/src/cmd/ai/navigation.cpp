@@ -803,9 +803,8 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    //Hand over outside the range at which the target could be docked with. Inside that
-    //range the player can dock while the autopilot is still flying, which it should never
-    //be doing -- docking is the player's own move, not something an autopilot delivers.
+    // Distance where the autopilot terminates and docking begins: its normal termination
+    // distance plus the target's docking range, so it never hands over already dockable.
     const float distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt
             + static_cast<float>(DockingClearance(target));
     const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
