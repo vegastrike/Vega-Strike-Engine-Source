@@ -4980,6 +4980,26 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 graphics.framerate_changes_shader = boost::json::value_to<bool>(*framerate_changes_shader_value_ptr);
             }
 
+            const boost::json::value * vsync_value_ptr = graphics_object.if_contains("vsync");
+            if (vsync_value_ptr != nullptr) {
+                graphics.vsync = boost::json::value_to<std::string>(*vsync_value_ptr);
+            }
+
+            const boost::json::value * frame_limit_mode_value_ptr = graphics_object.if_contains("frame_limit_mode");
+            if (frame_limit_mode_value_ptr != nullptr) {
+                graphics.frame_limit_mode = boost::json::value_to<std::string>(*frame_limit_mode_value_ptr);
+            }
+
+            const boost::json::value * max_framerate_value_ptr = graphics_object.if_contains("max_framerate");
+            if (max_framerate_value_ptr != nullptr) {
+                graphics.max_framerate = boost::json::value_to<int>(*max_framerate_value_ptr);
+            }
+
+            const boost::json::value * show_fps_value_ptr = graphics_object.if_contains("show_fps");
+            if (show_fps_value_ptr != nullptr) {
+                graphics.show_fps = boost::json::value_to<bool>(*show_fps_value_ptr);
+            }
+
             const boost::json::value * full_screen_value_ptr = graphics_object.if_contains("full_screen");
             if (full_screen_value_ptr != nullptr) {
                 graphics.full_screen = boost::json::value_to<bool>(*full_screen_value_ptr);
