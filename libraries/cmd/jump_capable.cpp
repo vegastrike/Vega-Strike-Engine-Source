@@ -189,8 +189,9 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         float aptne =
                 (target->getUnitType() == Vega_UnitType::planet) ? (atd_no_enemies + target->rSize()
                         * UniverseUtil::getPlanetRadiusPercent()) : atd_no_enemies;
-        //Stand off beyond the range at which the target becomes dockable, so the autopilot
-        //hands over rather than delivering the player already inside docking range.
+        // apt / aptne are the autopilot's stand-off distances (with, and without, enemies
+        // nearby); percent / percentne below turn them into the point along the path that
+        // the ship flies to. The docking clearance keeps that point outside docking range.
         apt += static_cast<float>(DockingClearance(target));
         aptne += static_cast<float>(DockingClearance(target));
         float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
