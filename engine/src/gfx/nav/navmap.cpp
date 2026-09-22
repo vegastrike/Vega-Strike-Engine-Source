@@ -38,6 +38,11 @@ static const double kMaxCameraDistance = 1e15;
 /// The camera is kept this far off the poles, where the view direction lines up with
 /// the world's up axis and the camera's right axis stops being defined.
 static const double kPoleEpsilon = 0.05;
+
+/// Pi and half pi, named here rather than using M_PI / M_PI_2: M_PI_2 is a glibc
+/// extension that MSVC does not define, and M_PI only arrives via _USE_MATH_DEFINES.
+static const double kPi = 3.14159265358979323846;
+static const double kPiHalf = 1.57079632679489661923;
 void NavMap::setCamera(float yaw, float pitch) {
     yaw_ = yaw;
     pitch_ = pitch;
@@ -92,19 +97,19 @@ void NavMap::orbitBy(float dyaw, float dpitch) {
     pitch_ += dpitch;
     // Held just short of the poles, where the view direction would line up with the
     // world's up axis.
-    if (pitch_ > (M_PI_2 - kPoleEpsilon)) {
-        pitch_ = static_cast<float>(M_PI_2 - kPoleEpsilon);
+    if (pitch_ > (kPiHalf - kPoleEpsilon)) {
+        pitch_ = static_cast<float>(kPiHalf - kPoleEpsilon);
     }
-    if (pitch_ < (-M_PI_2 + kPoleEpsilon)) {
-        pitch_ = static_cast<float>(-M_PI_2 + kPoleEpsilon);
+    if (pitch_ < (-kPiHalf + kPoleEpsilon)) {
+        pitch_ = static_cast<float>(-kPiHalf + kPoleEpsilon);
     }
     // The yaw is still wrapped, only to keep it accurate over long drags; it is periodic,
     // so nothing else changes.
-    if (yaw_ > M_PI) {
-        yaw_ -= static_cast<float>(2.0 * M_PI);
+    if (yaw_ > kPi) {
+        yaw_ -= static_cast<float>(2.0 * kPi);
     }
-    if (yaw_ < -M_PI) {
-        yaw_ += static_cast<float>(2.0 * M_PI);
+    if (yaw_ < -kPi) {
+        yaw_ += static_cast<float>(2.0 * kPi);
     }
 }
 
