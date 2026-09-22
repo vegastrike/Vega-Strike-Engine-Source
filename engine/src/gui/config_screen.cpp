@@ -56,6 +56,16 @@ int  sel_base_aspect = 0;      // aspect_opts[0] = 16:10 (default base aspect)
 std::string base_aspect_text = aspect_opts[0];
 int  sel_screen_aspect = -1;      // -1 = auto (W/H)
 std::string screen_aspect_text;
+
+// Frame-rate limiting.
+static const char *vsync_opts[] = { "Off", "On (monitor)", "Adaptive" };
+static const char *vsync_vals[] = { "off", "on", "adaptive" };
+int  sel_vsync = 1;
+static const char *frame_limit_opts[] = { "Unlimited", "Half monitor", "Fixed" };
+static const char *frame_limit_vals[] = { "unlimited", "half", "fixed" };
+int  sel_frame_limit = 0;
+int  sel_max_framerate = 60;
+bool show_fps = false;
 bool display_inited = false;
 
 bool rendered_crosshair = true;
@@ -328,6 +338,13 @@ static void load_display_from_config() {
     load_base_aspect_from_config();
     refresh_screen_aspect_text();
     resolution_text = std::to_string(sel_res_w) + "x" + std::to_string(sel_res_h);
+    // vsync / frame-rate limit.
+    sel_vsync = 1;
+    for (int i = 0; i < 3; ++i) if (g.vsync == vsync_vals[i]) sel_vsync = i;
+    sel_frame_limit = 0;
+    for (int i = 0; i < 3; ++i) if (g.frame_limit_mode == frame_limit_vals[i]) sel_frame_limit = i;
+    sel_max_framerate = g.max_framerate > 0 ? g.max_framerate : 60;
+    show_fps = g.show_fps;
     display_inited = true;
 }
 
@@ -389,6 +406,17 @@ static void apply_display_to_config() {
     // screen (monitor) index.
     g.screen = sel_monitor;
     mark_dirty("graphics.screen");
+    // Frame-rate limiting: persist and hot-apply. The half-monitor cap is computed
+    // from the now-current monitor, so switching monitors recomputes it here.
+    g.vsync = vsync_vals[sel_vsync];
+    g.frame_limit_mode = frame_limit_vals[sel_frame_limit];
+    g.max_framerate = sel_max_framerate;
+    mark_dirty("graphics.vsync");
+    mark_dirty("graphics.frame_limit_mode");
+    mark_dirty("graphics.max_framerate");
+    g.show_fps = show_fps;
+    mark_dirty("graphics.show_fps");
+    winsys_apply_frame_limit();
 }
 
 // ---------------------------------------------------------------------------
@@ -412,7 +440,7 @@ void draw_display_frame() {
     float dpy_w = avail_w * 0.72f;
     float side_w = avail_w - dpy_w;
 
-    ImGui::BeginChild("dpyframe", ImVec2(dpy_w, 6 * btn_h), ImGuiChildFlags_Borders);
+    ImGui::BeginChild("dpyframe", ImVec2(dpy_w, 8 * btn_h), ImGuiChildFlags_Borders);
     // Monitor selector.
     if (ImGui::Button("Monitor")) ImGui::OpenPopup("##pick_mon");
     ImGui::SameLine(); ImGui::TextUnformatted(monitor_text.c_str());
@@ -496,12 +524,60 @@ void draw_display_frame() {
     ImGui::SetNextItemWidth(60);
     if (ImGui::InputText("##hudfov", hud_fov_buf, sizeof(hud_fov_buf), ImGuiInputTextFlags_CharsDecimal))
         dirty = true;
+    // Vsync (monitor sync).
+    if (ImGui::Button("Vsync")) ImGui::OpenPopup("##pick_vsync");
+    ImGui::SameLine(); ImGui::TextUnformatted(vsync_opts[sel_vsync]);
+    if (ImGui::BeginPopup("##pick_vsync")) {
+        for (int i = 0; i < 3; ++i)
+            if (ImGui::MenuItem(vsync_opts[i])) { sel_vsync = i; dirty = true; }
+        ImGui::EndPopup();
+    }
+    // Frame rate limit (unlimited / half the monitor / a fixed number).
+    if (ImGui::Button("Frame Rate")) ImGui::OpenPopup("##pick_fr");
+    ImGui::SameLine(); ImGui::TextUnformatted(frame_limit_opts[sel_frame_limit]);
+    if (sel_frame_limit == 2) {
+        // Fixed cap: pick from the refresh rates the selected monitor reports, rather than
+        // typing a number and hoping the display can hold it. Same mode list the Resolution
+        // selector walks.
+        if (ImGui::Button("Refresh Rate")) ImGui::OpenPopup("##pick_rate_hz");
+        ImGui::SameLine();
+        char rate_text[24];
+        snprintf(rate_text, sizeof(rate_text), "%d Hz", sel_max_framerate);
+        ImGui::TextUnformatted(rate_text);
+        if (ImGui::BeginPopup("##pick_rate_hz")) {
+            int mode_count = 0;
+            SDL_DisplayMode **modes = SDL_GetFullscreenDisplayModes(sel_display_id, &mode_count);
+            if (modes != nullptr) {
+                std::vector<int> rates;
+                for (int i = 0; i < mode_count; ++i) {
+                    const int rate = modes[i]->refresh_rate;
+                    if (rate > 0 && std::find(rates.begin(), rates.end(), rate) == rates.end()) {
+                        rates.push_back(rate);
+                    }
+                }
+                std::sort(rates.begin(), rates.end());
+                for (size_t i = 0; i < rates.size(); ++i) {
+                    char lbl[24];
+                    snprintf(lbl, sizeof(lbl), "%d Hz", rates[i]);
+                    if (ImGui::MenuItem(lbl)) { sel_max_framerate = rates[i]; dirty = true; }
+                }
+                SDL_free(modes);
+            }
+            ImGui::EndPopup();
+        }
+    }
+    if (ImGui::BeginPopup("##pick_fr")) {
+        for (int i = 0; i < 3; ++i)
+            if (ImGui::MenuItem(frame_limit_opts[i])) { sel_frame_limit = i; dirty = true; }
+        ImGui::EndPopup();
+    }
+    if (ImGui::Checkbox("Show FPS", &show_fps)) dirty = true;
     ImGui::EndChild();   // end dpyframe (left column)
 
     // Right column: Flight Control + Input buttons + Rendered Crosshair, side by
     // side with the monitor/resolution/display controls (as vs-05).
     ImGui::SameLine();
-    ImGui::BeginChild("dpybtns", ImVec2(side_w, 6 * btn_h), ImGuiChildFlags_Borders);
+    ImGui::BeginChild("dpybtns", ImVec2(side_w, 8 * btn_h), ImGuiChildFlags_Borders);
     if (ImGui::Button(("Flight Control: " + std::string(fc_names[flight_control])).c_str(), ImVec2(-1, 0)))
         ImGui::OpenPopup("##flight");
     if (ImGui::BeginPopup("##flight")) {
@@ -1637,6 +1713,10 @@ static const ConfigAccessor kConfigAccessors[] = {
     {"graphics.font",                    [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.font);},                  nullptr},
     {"graphics.font_antialias",          [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.font_antialias;},        nullptr},
     {"graphics.screen",                  [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.screen;},                nullptr},
+    {"graphics.vsync",                   [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.vsync);},             nullptr},
+    {"graphics.frame_limit_mode",        [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.frame_limit_mode);},  nullptr},
+    {"graphics.max_framerate",           [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.max_framerate;},           nullptr},
+    {"graphics.show_fps",                [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.show_fps;},                nullptr},
     // ---- audio ----
     {"audio.ai_sound",                   [](const vega_config::Configuration&c)->boost::json::value{return c.audio.ai_sound;},                 [](vega_config::Configuration&c,const std::string&v){c.audio.ai_sound=(v=="true"||v=="1");}},
     {"audio.every_other_mount",          [](const vega_config::Configuration&c)->boost::json::value{return c.audio.every_other_mount;},        [](vega_config::Configuration&c,const std::string&v){c.audio.every_other_mount=(v=="true"||v=="1");}},
