@@ -63,8 +63,7 @@ Movable::Movable() : sim_atom_multiplier(1),
         cumulative_transformation_matrix(identity_matrix),
         corner_min(Vector(FLT_MAX, FLT_MAX, FLT_MAX)),
         corner_max(Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX)),
-        radial_size(0),
-        Momentofinertia(0.01) {
+        radial_size(0) {
     cur_sim_queue_slot = VegaRandom::Instance().RandomSizeTLessThan(SIM_QUEUE_SIZE);
     const Vector default_angular_velocity(configuration().general.pitch_flt,
             configuration().general.yaw_flt,
@@ -115,11 +114,12 @@ Vector Movable::GetNetAcceleration() const {
 }
 
 Vector Movable::GetNetAngularAcceleration() const {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     Vector p, q, r;
     GetOrientation(p, q, r);
     Vector res(NetLocalTorque.i * p + NetLocalTorque.j * q + NetLocalTorque.k * r);
     res += NetTorque;
-    return res / GetMoment();
+    return res / static_cast<float>(unit->GetMass());
 }
 
 float Movable::GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn) const {
@@ -323,8 +323,9 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     if (NetTorque.i || NetTorque.j || NetTorque.k) {
         temp1 += InvTransformNormal(transmat, NetTorque);
     }
-    if (GetMoment()) {
-        temp1 = temp1 / GetMoment();
+    const float angular_mass = unit->GetMass();
+    if (angular_mass != 0) {
+        temp1 = temp1 / angular_mass;
     }
 
     // TODO: restore this with the unit name
