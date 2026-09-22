@@ -2018,6 +2018,7 @@ void GameCockpit::Draw() {
         snprintf(fps_text, sizeof(fps_text), "FPS: %.1f", fps);
         ImGui::GetForegroundDrawList()->AddText(ImVec2(10.0f, 10.0f), IM_COL32(255, 255, 255, 255), fps_text);
     }
+
     GFXEnable(DEPTHWRITE);
     GFXEnable(DEPTHTEST);
     GFXEnable(TEXTURE0);
