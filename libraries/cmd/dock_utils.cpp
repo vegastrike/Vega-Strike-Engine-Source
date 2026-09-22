@@ -55,15 +55,7 @@ double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
     return std::max(0.0, distance);
 }
 
-/**
- * @brief The clearance within which a body counts as dockable
- * @param dock - the body being docked with
- * @return the distance outside its hull (or from its centre, for a ship)
- */
 double DockingClearance(const Unit *dock) {
-    // CanDock's own test, named: a planet, whose docking port is sized to its radius and
-    // which can be landed on anywhere, counts as dockable within a fraction of its radius
-    // of its surface; anything else within the simple docking range of its centre.
     if (dock->getUnitType() == Vega_UnitType::planet) {
         return dock->rSize() * (configuration().dock.dock_planet_radius_percent_dbl - 1.0);
     }
