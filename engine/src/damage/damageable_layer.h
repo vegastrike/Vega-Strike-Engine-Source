@@ -74,6 +74,7 @@ public:
 
     double TotalLayerValue() const;
     double TotalMaxLayerValue() const;
+    double TotalAdjustedLayerValue() const;
     double AverageLayerValue() const;
     double AverageMaxLayerValue() const;
 
