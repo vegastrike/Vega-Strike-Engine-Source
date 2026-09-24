@@ -121,8 +121,8 @@ void Orders::MatchRoll::Execute() {
         }
     }
     //prevent matchangvel from resetting this (kinda a hack)
-    parent->ApplyLocalTorque(parent->GetMoment() * Vector(0, 0, desired_roll - angvel.k) / simulation_atom_var);
-    parent->ApplyLocalTorque(parent->GetMoment() * Vector(0, 0, desired_roll - angvel.k) / simulation_atom_var);
+    parent->ApplyLocalTorque(static_cast<float>(parent->GetMass()) * Vector(0, 0, desired_roll - angvel.k) / simulation_atom_var);
+    parent->ApplyLocalTorque(static_cast<float>(parent->GetMass()) * Vector(0, 0, desired_roll - angvel.k) / simulation_atom_var);
 }
 
 void MatchAngularVelocity::Execute() {
@@ -141,7 +141,7 @@ void MatchAngularVelocity::Execute() {
             return;
         }
     }
-    parent->ApplyLocalTorque(parent->GetMoment() * (desired - parent->UpCoordinateLevel(
+    parent->ApplyLocalTorque(static_cast<float>(parent->GetMass()) * (desired - parent->UpCoordinateLevel(
             parent->GetAngularVelocity())) / simulation_atom_var);
 }
 
