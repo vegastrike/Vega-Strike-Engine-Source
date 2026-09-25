@@ -255,6 +255,9 @@ public:
 	void Load(const char * filename, const char * time_of_day, const char * faction);
 	static void ClickWin (int x, int y, int button, int state);
 	void Click (int x, int y, int button, int state);
+	// Remote control: press and release the left mouse button over link
+	// number linknum of the current room, like a real mouse click would.
+	bool ScriptedClick (int linknum);
 	void Key(unsigned int ch, unsigned int mod, bool release, int x, int y);
 	static void PassiveMouseOverWin (int x, int y);
 	static void ActiveMouseOverWin (int x, int y);

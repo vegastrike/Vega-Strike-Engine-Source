@@ -348,6 +348,7 @@ SET(LIBROOTCLIENT_SOURCES src/cg_global.cpp
 						  src/in_mouse.cpp
 						  src/in_sdl.cpp 
 						  src/main_loop.cpp
+						  src/remote_control.cpp
 						  src/physics.cpp
 						  src/rendertext.cpp
 						  src/ship_commands.cpp
@@ -483,7 +484,7 @@ SET( CMAKE_C_FLAGS_RELEASE " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -
     "Flags used by the C compiler during release builds."
     FORCE )
 
-SET(CMAKE_CXX_FLAGS_REWITHDEBINFO " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE )
 SET( CMAKE_C_FLAGS_RELWITHDEBINFO " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING

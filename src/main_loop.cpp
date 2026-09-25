@@ -60,6 +60,7 @@
 #include "vs_random.h"
 
 #include "options.h"
+#include "remote_control.h"
 
 extern vs_options game_options;
 
@@ -1098,6 +1099,7 @@ void main_loop() {
   if (i>1000)
   i=0;*/
 
+  RemoteControl::Tick(false);
   // Execute DJ script
   Music::MuzakCycle();
 

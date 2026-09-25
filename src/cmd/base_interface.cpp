@@ -29,6 +29,7 @@
 #include "main_loop.h"
 #include "in_mouse.h"
 #include "in_kb.h"
+#include "remote_control.h"
 
 static unsigned int& getMouseButtonMask()
 {
@@ -551,6 +552,7 @@ bool RefreshGUI(void) {
 
 void base_main_loop() {
 	UpdateTime();
+	RemoteControl::Tick(true);
     Music::MuzakCycle();
 	if( Network!=NULL)
 	{
@@ -757,6 +759,51 @@ void BaseInterface::Click (int xint, int yint, int button, int state) {
 	float x,y;
 	CalculateRealXAndY(xint,yint,&x,&y);
 	rooms[curroom]->Click(this,x,y,button,state);
+}
+
+bool BaseInterface::ScriptedClick (int linknum) {
+	Room *room=rooms[curroom];
+	int which=linknum;
+	if (which<0||which>=room->links.size()||!room->links[which])
+		return false;
+	Room::Link *link=room->links[which];
+	const std::string linkindex=link->index;
+	// Find a point of the link that is not covered by an earlier link, so
+	// the click goes through Room::Click/MouseOver exactly like the mouse.
+	float px=link->x+link->wid/2, py=link->y+link->hei/2;
+	bool hit=(room->MouseOver(this,px,py)==which);
+	for (int i=1;i<8&&!hit;i++) {
+		for (int j=1;j<8&&!hit;j++) {
+			float tx=link->x+link->wid*i/8, ty=link->y+link->hei*j/8;
+			if (room->MouseOver(this,tx,ty)==which) {
+				px=tx;
+				py=ty;
+				hit=true;
+			}
+		}
+	}
+	BaseInterface *self=this;
+	getMouseButtonMask() |=  (1<<(WS_LEFT_BUTTON-1));
+	if (hit)
+		room->Click(this,px,py,WS_LEFT_BUTTON,WS_MOUSE_DOWN);
+	else
+		link->Click(this,px,py,WS_LEFT_BUTTON,WS_MOUSE_DOWN);
+	getMouseButtonMask() &= ~(1<<(WS_LEFT_BUTTON-1));
+	if (CurrentBase!=self)
+		return true; // the down event left the base, 'this' may be gone
+	if (hit) {
+		rooms[curroom]->Click(this,px,py,WS_LEFT_BUTTON,WS_MOUSE_UP);
+	} else {
+		// the down event may have changed the links: look it up again
+		room=rooms[curroom];
+		for (int i=0;i<room->links.size();i++) {
+			if (room->links[i]&&room->links[i]->index==linkindex) {
+				room->links[i]->Click(this,px,py,WS_LEFT_BUTTON,WS_MOUSE_UP);
+				break;
+			}
+		}
+	}
+	return true;
 }
 
 void BaseInterface::ClickWin (int button, int state, int x, int y) {

@@ -231,6 +231,13 @@ extern void VolDown(const KBData&,KBSTATE a);
 CommandMap initGlobalCommandMap();
 static CommandMap commandMap=initGlobalCommandMap();
 
+KBHandler LookupKeyCommand(const std::string & name) {
+  CommandMap::iterator i = commandMap.find(name);
+  if (i!=commandMap.end())
+    return (*i).second;
+  return NULL;
+}
+
 static void ComposeFunctions(const KBData& composition, KBSTATE k) {
   std::string s=composition.data;
   while (s.length()){

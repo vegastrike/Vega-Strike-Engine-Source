@@ -554,6 +554,10 @@ std::string vegastrike_cwd;
 		}
 		string user_home_path( chome_path);
 		homedir = user_home_path+"/"+HOMESUBDIR;
+		// For automated test runs: keep saves etc. out of the user's profile
+		const char * override_home = getenv("VS_HOMEDIR");
+		if (override_home && override_home[0])
+			homedir = override_home;
 #else
 		homedir = datadir+"/"+HOMESUBDIR;
 #endif
