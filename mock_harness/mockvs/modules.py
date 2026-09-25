@@ -988,6 +988,7 @@ def install(data_root, main_globals=None):
 
     Like Python::initpaths() this also runs ``import sys`` in __main__,
     which scripts executed there (base links, Python AIs) rely on."""
+    sys.dont_write_bytecode = True     # keep __pycache__ out of the data pack
     sys.modules['VS'] = build_vs_module()
     sys.modules['Director'] = build_director_module()
     sys.modules['Briefing'] = build_briefing_module()

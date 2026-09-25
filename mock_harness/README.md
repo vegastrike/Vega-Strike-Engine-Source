@@ -10,6 +10,7 @@ logic bugs without having to play the game by hand.
 python3 mock_harness/run_campaign.py                     # full playthrough
 python3 mock_harness/run_campaign.py --scenario all      # every scenario
 python3 mock_harness/run_campaign.py --scenario main --report r.txt --events e.txt
+python3 mock_harness/crawl_bases.py                      # click everything in every Gemini base
 python3 -m unittest discover -s mock_harness/tests
 ```
 
@@ -63,6 +64,10 @@ takes about 25 seconds.
   * `campaign_driver.py` - the main loop, fixer conversations, choices,
     progress/stall detection.
   * `scenario.py` - which branches to take and how to tune the universe.
+  * `crawler.py` - docks at every base in Gemini and clicks every link,
+    then fuzzes the GUI rooms (commodity exchange, ship dealer, upgrades,
+    repair, computer) with random clicks.  Bases and planets are stocked
+    from `Cargo_Import` like the engine's `Unit::ImportPartList`.
 
 ## Scenarios
 

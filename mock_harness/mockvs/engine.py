@@ -596,6 +596,11 @@ class Engine:
                 elif u.fullname == 'invisible' or u.name.lower().startswith('nav'):
                     u.kind = 'nav'
                 u.docking_ports = not u.destinations and not u.lights and u.fullname != 'invisible'
+                if u.docking_ports:
+                    prow = self.data.units.lookup(u.fullname, current or 'neutral')
+                    if prow is not None:
+                        self.import_cargo(u, prow.get('Cargo_Import', ''))
+                        u.cargo.sort(key=lambda c: c.sort_key())
                 if self.data.config.get('physics', 'planets_always_neutral', 'true') != 'true':
                     u.faction = current or 'neutral'
                 u.hull = u.max_hull = 1e12
@@ -701,6 +706,7 @@ class Engine:
                 u.cargo.append(carg)
             except (ValueError, IndexError):
                 pass
+        self.import_cargo(u, row.get('Cargo_Import', ''))
         u.cargo.sort(key=lambda c: c.sort_key())
         u.docking_ports = bool((row.get('Dock') or '').strip()) or role == 'BASE'
         if role == 'BASE':
@@ -722,6 +728,47 @@ class Engine:
         u.damage = self.opts.damage if any(m['weapon'] for m in u.mounts) else 0.0
         u.spawn_time = self.game_time_total()
         return u
+
+    def import_cargo(self, u, spec):
+        """Unit::ImportCargo -> ImportPartList for every {cat;price;pricedev;quant;quantdev}."""
+        for fields in vsdata.parse_cargo_import(spec):
+            if not fields or not fields[0]:
+                continue
+
+            def f(i):
+                try:
+                    return float(fields[i]) if len(fields) > i and fields[i].strip() else 0.0
+                except ValueError:
+                    return 0.0
+            self.import_part_list(u, fields[0], f(1), f(2), f(3), f(4))
+
+    def import_part_list(self, u, category, price, pricedev, quantity, quantdev):
+        mpl = self.get_master_part_list()
+        cats = [c for c in mpl.cargo if c._category == category]
+        if not cats:
+            return
+        prices = [c._price for c in cats]
+        minprice, maxprice = min(prices), max(prices)
+        for proto in cats:
+            c = proto.copy()
+            baseprice = c._price
+            q = int(quantity - quantdev)
+            c._price *= price - pricedev
+            q += int((quantdev * 2 + 1) * self.rng.random())
+            c._price += pricedev * 2 * self.rng.random()
+            c._price = abs(c._price)
+            if q <= 0:
+                q = 0
+            elif maxprice > minprice + .01:
+                renorm = (baseprice - minprice) / (maxprice - minprice) * (5 - 1) + 1
+                if renorm > .001:
+                    q = int(q / int(renorm)) if int(renorm) else q
+                    if q < 1:
+                        q = 1
+            if c._price < .01:
+                c._price = .01
+            c._quantity = abs(q)
+            u.cargo.append(c)
 
     def assign_combat_stats(self, u):
         """Simple hit point model: the player has player_hp, everyone else
