@@ -533,6 +533,41 @@ void AnyStringSkipInString (char * &buf) {
 string AnyStringWriteString (string input) {
   return XMLSupport::tostring ((int)input.length())+" "+input;
 }
+// Saves written by the Python 2 era engine contain Latin-1 text (e.g.
+// flightgroup names such as "Nyk\xf6ping" in New_Game).  Python 3 decodes
+// every std::string handed to it as UTF-8, so such strings would raise
+// UnicodeDecodeError in the scripts; convert them when loading.
+static bool IsValidUTF8 (const string &s) {
+  size_t i=0, n=s.size();
+  while (i<n) {
+    unsigned char c=s[i];
+    int extra = c<0x80?0:(c>>5)==6?1:(c>>4)==14?2:(c>>3)==30?3:-1;
+    if (extra<0||i+extra>=n)
+      return false;
+    for (int k=1;k<=extra;k++)
+      if ((((unsigned char)s[i+k])>>6)!=2)
+        return false;
+    i+=extra+1;
+  }
+  return true;
+}
+static string Latin1ToUTF8 (const string &s) {
+  string ret;
+  for (size_t i=0;i<s.size();i++) {
+    unsigned char c=s[i];
+    if (c<0x80) {
+      ret+=(char)c;
+    } else {
+      ret+=(char)(0xc0|(c>>6));
+      ret+=(char)(0x80|(c&0x3f));
+    }
+  }
+  return ret;
+}
+static string SaveStringToUTF8 (const string &s) {
+  return IsValidUTF8(s)?s:Latin1ToUTF8(s);
+}
+
 void SaveGame::ReadMissionStringData (char * &buf, bool select_data, const std::set<std::string> &select_data_filter) {
   missionstringdata->m.clear();
   int mdsize;
@@ -557,7 +592,7 @@ void SaveGame::ReadMissionStringData (char * &buf, bool select_data, const std::
     for (int j=0;j<md_i_size;j++) {
 		if (skip)
 			AnyStringSkipInString(buf2); else
-			vecstring->push_back (AnyStringScanInString(buf2));
+			vecstring->push_back (SaveStringToUTF8(AnyStringScanInString(buf2)));
     }
   }
   buf = buf2;
@@ -704,7 +739,7 @@ void SaveGame::LoadSavedMissions() {
   unsigned int i;
   vector<string> scripts = getMissionStringData("active_scripts");
   vector<string> missions = getMissionStringData("active_missions");
-  PyRun_SimpleString("import VS\nVS.loading_active_missions=True\nprint \"Loading active missions \"+str(VS.loading_active_missions)\n");
+  PyRun_SimpleString("import VS\nVS.loading_active_missions=True\nprint(\"Loading active missions \"+str(VS.loading_active_missions))\n");
   // kill any leftovers so they don't get loaded twice.
   Mission *ignoreMission = Mission::getNthPlayerMission(_Universe->CurrentCockpit(), 0);
   for (i=active_missions.size()-1;i>0;--i){// don't terminate zeroth mission

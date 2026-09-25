@@ -3,6 +3,7 @@ void DefineOddUnitFunctions (boost::python::class_builder <UnitWrapper> &Class) 
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::setNull,"setNull");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::isNull,"isNull");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::notNull,"__nonzero__");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::notNull,"__bool__"); // Python 3 ignores __nonzero__
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::Kill,"Kill");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::SetTarget,"SetTarget");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetTarget,"GetTarget");
