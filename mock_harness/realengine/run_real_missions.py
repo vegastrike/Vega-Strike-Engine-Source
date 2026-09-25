@@ -5,8 +5,10 @@ remote-control interface (see README.md).
     python3 mock_harness/realengine/run_real_missions.py --binary build/vegastrike [--mission cargo]
 
 The engine runs under Xvfb with its own home directory, so the user's
-saves are never touched.  Exit status 0 means every step worked and the
-data pack raised no Python exception.
+saves are never touched.  Exit status 0 means the mission reached an
+outcome (completed, or lost because the player was shot down) and the data
+pack raised no Python exception; being stuck, an engine crash or a Python
+exception is a failure.
 """
 
 import argparse
@@ -30,8 +32,14 @@ def log(msg):
 T0 = time.time()
 
 
+SEED = None
+
+
 def new_game(s):
     s.wait_base(need='New Game', timeout=240)
+    if SEED is not None:
+        # the data pack's random numbers (mission offers, encounters...)
+        s.e.exec('import vsrandom, random\nvsrandom.seed(%d)\nrandom.seed(%d)' % (SEED, SEED))
     s.click('New Game')
     s.wait_base(need='Launch', timeout=240)
     log('new game: docked in %s, %s credits' % (s.system(), s.e.eval('VS.getPlayer().getCredits()')))
@@ -61,6 +69,8 @@ def offers_until(s, pattern, max_offers=40):
     s.click('Activate_Computer')
     seen = []
     for _ in range(max_offers):
+        if not s.find_link('View next Mission Description'):
+            break
         s.click('View next Mission Description')
         text = s.texts().get('miscompbox', '')
         head = text.split('\n\n', 1)[-1]
@@ -82,17 +92,28 @@ def full_system_name(s, short):
     return None
 
 
+PLAYER_SHIP = []
+
+
 def launch(s):
     s.goto_link(kind='launch')
     s.click(kind='launch')
     s.wait_space()
+    if not PLAYER_SHIP:
+        PLAYER_SHIP.append(s.e.eval('VS.getPlayer().getName()'))
     time.sleep(1.0)
     log('launched in %s' % s.system())
 
 
 def destination_base(s):
-    """The base the mission wants: the dockable unit named in an objective
-    or a recent message."""
+    """The base the mission wants: the unit of a 'Visit <name>' objective
+    (go_somewhere_significant), else a dockable unit named in a message."""
+    for o in s.e.eval('VSRemote.GetObjectives()'):
+        if o[1].startswith('Visit ') and o[2] < 1.0:
+            name = o[1][len('Visit '):].strip()
+            for cut in (name, ' '.join(name.split(' ')[:2]), name.split(' ')[0]):
+                if s.e.eval('find_by_display_name(%r) is not None' % cut):
+                    return ({'name': cut}, 'find_by_display_name(%r)' % cut)
     words = ' '.join([o[1] for o in s.e.eval('VSRemote.GetObjectives()')] +
                      [m[3] for m in s.e.eval('VSRemote.GetMessages(20)')])
     best = None
@@ -111,29 +132,12 @@ def cargo_mission(s, report):
     if not ensure_jump_drive(s, report):
         report['result'] = 'could not buy a jump drive'
         return False
-    text = offers_until(s, r'CARGO MISSION')
-    if not text:
-        report['result'] = 'no cargo mission offered'
-        return False
-    dest = None
-    for m in re.finditer(r'((?:[A-Z][\w-]*\s+){0,3})([A-Z][\w-]*) system', text):
-        words = m.group(1).split() + [m.group(2)]
-        for k in range(len(words)):          # longest name first
-            dest = full_system_name(s, ' '.join(words[k:]))
-            if dest:
-                break
-        if dest:
-            break
-    if not dest:
-        report['result'] = 'could not parse destination from %r' % text
-        return False
     credits0 = s.e.eval('VS.getPlayer().getCredits()')
-    s.click('Accept this Mission')
-    time.sleep(1.0)
-    cargo = s.e.eval('player_cargo()')
-    mission_cargo = [c for c in cargo if c[3]]
-    log('accepted; mission cargo %s; objectives %s' % (mission_cargo, s.e.eval('VSRemote.GetObjectives()')))
-    report['accepted'] = text
+    dest = accept_offer(s, report, r'CARGO MISSION')
+    if not dest:
+        return False
+    mission_cargo = [c for c in s.e.eval('player_cargo()') if c[3]]
+    log('mission cargo %s' % (mission_cargo,))
     if not mission_cargo:
         report['result'] = 'accepted but no mission cargo was loaded'
         return False
@@ -164,7 +168,131 @@ def cargo_mission(s, report):
     return ok
 
 
-MISSIONS = {'cargo': cargo_mission}
+def accept_offer(s, report, pattern, max_bases=4):
+    """Accept the first offer matching ``pattern`` (trying the other bases of
+    the system when this one has none); returns its destination system."""
+    text = offers_until(s, pattern)
+    tried = set()
+    def by_distance():
+        me = s.e.eval('VS.getPlayer().Position()')
+        bases = [u for u in s.e.eval('system_units()') if u['dockable'] and not u['jump']]
+        return sorted(bases, key=lambda u: sum((a - b) ** 2 for a, b in zip(u['pos'], me)))
+    while not text and len(tried) < max_bases:
+        launch(s)
+        bases = by_distance()
+        if bases and not tried:
+            tried.add(bases[0]['name'])       # the base we just left
+        others = [u for u in bases if u['name'] not in tried]
+        if not others:
+            break
+        other = others[0]
+        tried.add(other['name'])
+        log('no offer here; trying %s' % (other['fullname'] or other['name']))
+        s.dock(other['name'])
+        text = offers_until(s, pattern)
+    if not text:
+        report['result'] = 'no offer matching %r' % pattern
+        return None
+    dest = None
+    for m in re.finditer(r'((?:[A-Z][\w-]*\s+){0,3})([A-Z][\w-]*) system', text):
+        words = m.group(1).split() + [m.group(2)]
+        for k in range(len(words)):
+            dest = full_system_name(s, ' '.join(words[k:]))
+            if dest:
+                break
+        if dest:
+            break
+    if not dest:
+        report['result'] = 'could not parse destination from %r' % text
+        return None
+    s.click('Accept this Mission')
+    time.sleep(1.0)
+    report['accepted'] = text
+    log('accepted; objectives %s' % s.e.eval('VSRemote.GetObjectives()'))
+    return dest
+
+
+class PlayerDestroyed(Exception):
+    pass
+
+
+def check_alive(s, ship):
+    """After the player's ship is destroyed the cockpit gets a new unit
+    (an ejected pilot / dumbfire), so the ship name changes."""
+    if s.e.eval('VS.getPlayer().getName()') != ship:
+        raise PlayerDestroyed('player ship destroyed (%s)' % s.e.eval('VSRemote.GetMessages(1)'))
+
+
+def keep_alive(s, report, hull0):
+    """Test cheat: top the hull up so a lost fight does not end the run."""
+    hull = s.e.eval('VS.getPlayer().GetHull()')
+    if hull < hull0 * 0.5:
+        s.e.eval('VS.getPlayer().SetHull(%f)' % hull0)
+        report.setdefault('cheats', []).append('hull topped up from %.1f' % hull)
+
+
+def patrol_mission(s, report):
+    new_game(s)
+    if not ensure_jump_drive(s, report):
+        report['result'] = 'could not buy a jump drive'
+        return False
+    credits0 = s.e.eval('VS.getPlayer().getCredits()')
+    # ATTACK missions are patrols of nav points with enemies (patrol_enemies)
+    dest = accept_offer(s, report, r'(?s)PATROL MISSION|ATTACK MISSION:.*nav point')
+    if not dest:
+        return False
+    log('destination system %s' % dest)
+    launch(s)
+    hull0 = s.e.eval('VS.getPlayer().GetHull()')
+    ship = s.e.eval('VS.getPlayer().getName()')
+    s.goto_system(dest)
+    log('arrived in %s; objectives %s' % (s.system(), s.e.eval('VSRemote.GetObjectives()')))
+    t0 = time.time()
+    attempts = {}
+    while time.time() - t0 < 300:
+        if s.in_base():
+            # got too close to a planet: automatic landing zone
+            log('  landed by accident, launching again')
+            launch(s)
+        check_alive(s, ship)
+        keep_alive(s, report, hull0)
+        if s.e.eval('VS.getPlayer().getCredits()') > credits0:
+            break
+        todo = [o[1] for o in s.e.eval('VSRemote.GetObjectives()')
+                if o[1].startswith('Scan ') and o[2] < 1.0]
+        target = None
+        for text in sorted(todo, key=lambda t: attempts.get(t, 0)):
+            for prefix in ('Scan Jumppoint ', 'Scan Natural Phenomenon: ', 'Scan '):
+                if text.startswith(prefix):
+                    name = text[len(prefix):]
+                    if s.e.eval('find_by_display_name(%r) is not None' % name):
+                        target = name
+                    break
+            if target:
+                break
+        if target is None:
+            time.sleep(1.0)
+            continue
+        n = attempts.get(target, 0)
+        attempts[target] = n + 1
+        if n == 0:
+            log('  scanning %s' % target)
+        # a name can belong to several units (base and planet): try each;
+        # planets have an automatic landing zone, scan them from farther out
+        s.e.exec('u = find_by_display_name(%r, %d)\nVS.getPlayer().SetTarget(u)\n'
+                 'teleport_near(u, 300.0 if u.isPlanet() and not u.isJumppoint() else 100.0)' % (target, n))
+        time.sleep(2.0)
+    credits1 = s.e.eval('VS.getPlayer().getCredits()')
+    for msg in s.e.eval('VSRemote.GetMessages(6)'):
+        log('  message: %s: %s' % (msg[1], msg[3]))
+    report['credits'] = (credits0, credits1)
+    ok = credits1 > credits0
+    report['result'] = ('patrol complete, paid %.0f' % (credits1 - credits0)) if ok else \
+        'patrol not completed; objectives %s' % s.e.eval('VSRemote.GetObjectives()')
+    return ok
+
+
+MISSIONS = {'cargo': cargo_mission, 'patrol': patrol_mission}
 
 
 def main():
@@ -174,7 +302,10 @@ def main():
     ap.add_argument('--mission', default='cargo', choices=sorted(MISSIONS))
     ap.add_argument('--workdir', help='keep logs/home here (default: a temp dir)')
     ap.add_argument('--display', help='use this X display instead of Xvfb (to watch)')
+    ap.add_argument('--seed', type=int, help='seed the data pack random numbers (mission offers...)')
     args = ap.parse_args()
+    global SEED
+    SEED = args.seed
     workdir = args.workdir or tempfile.mkdtemp(prefix='vs_real_')
     e = Engine(os.path.abspath(args.binary), args.data, workdir=workdir, display=args.display)
     s = Session(e, log=log)
@@ -183,10 +314,20 @@ def main():
     try:
         e.connect()
         ok = MISSIONS[args.mission](s, report)
+    except PlayerDestroyed as ex:
+        # a legitimate way to lose a mission: the engine and scripts worked
+        report['result'] = 'lost: %s' % ex
+        ok = True
     except EngineGone as ex:
         report['result'] = 'ENGINE DIED: %s' % ex
     except RemoteError as ex:
         report['result'] = 'stuck: %s' % ex
+        try:
+            if PLAYER_SHIP and e.eval('VS.getPlayer().getName()') != PLAYER_SHIP[0]:
+                report['result'] = 'lost: player ship destroyed while: %s' % ex
+                ok = True
+        except RemoteError:
+            pass
     finally:
         e.stop()
     errors = e.python_errors()

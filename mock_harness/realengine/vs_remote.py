@@ -83,6 +83,30 @@ def find_unit(name):
     return None
 
 
+def find_all_by_display_name(text):
+    """Units that the data pack's unit.getUnitFullName() calls ``text`` (the
+    name missions put in objectives such as 'Scan <name>'); a base and its
+    planet can share one."""
+    import unit as vsunit
+    out = []
+    i = VS.getUnitList()
+    while i.notDone():
+        u = i.current()
+        if u and not u.isNull():
+            try:
+                if vsunit.getUnitFullName(u) == text or vsunit.getUnitFullName(u, True) == text:
+                    out.append(u)
+            except Exception:
+                pass
+        i.advance()
+    return out
+
+
+def find_by_display_name(text, which=0):
+    units = find_all_by_display_name(text)
+    return units[which % len(units)] if units else None
+
+
 def player_cargo():
     p = VS.getPlayer()
     out = []
@@ -131,6 +155,7 @@ def _setup():
     _ns.update({'VS': VS, 'Base': Base, 'Director': Director, 'VSRemote': VSRemote,
                 'unit_info': unit_info, 'system_units': system_units, 'find_unit': find_unit,
                 'player_cargo': player_cargo, 'state': state, 'teleport_near': teleport_near,
+                'find_by_display_name': find_by_display_name,
                 'json': json, 'sys': sys})
     sys.stderr.write('vs_remote: listening on 127.0.0.1:%d\n' % PORT)
 

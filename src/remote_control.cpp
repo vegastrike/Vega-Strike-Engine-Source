@@ -14,6 +14,16 @@
 #include "universe_generic.h"
 #include "star_system_generic.h"
 #include "cmd/unit_generic.h"
+#include "cmd/container.h"
+#include "python/init.h"
+#include "gfx/vec.h"
+#include "universe_util.h"
+#include "cmd/unit_util.h"
+#include "faction_generic.h"
+#include "cmd/ai/fire.h"
+#include "cmd/images.h"
+typedef boost::python::dict BoostPythonDictionary;
+#include "python/unit_wrapper_class.h"
 
 #include <boost/python.hpp>
 
@@ -175,7 +185,23 @@ static boost::python::list GetJumpPoints() {
 	return ret;
 }
 
+// World positions and radii of a unit's docking ports: (x, y, z, radius)
+static boost::python::list GetDockingPorts(boost::python::object o) {
+	boost::python::list ret;
+	UnitWrapper *w=boost::python::extract<UnitWrapper*>(o);
+	Unit *un=w?w->GetUnit():NULL;
+	if (!un)
+		return ret;
+	for (unsigned int i=0;i<un->image->dockingports.size();i++) {
+		const DockingPorts &d=un->image->dockingports[i];
+		QVector p=Transform(un->cumulative_transformation_matrix,d.pos.Cast());
+		ret.append(VS_BOOST_MAKE_TUPLE_4(p.i,p.j,p.k,d.radius));
+	}
+	return ret;
+}
+
 PYTHON_BEGIN_MODULE(VSRemote)
+	PYTHON_DEFINE_GLOBAL(VSRemote,&GetDockingPorts,"GetDockingPorts");
 	PYTHON_DEFINE_GLOBAL(VSRemote,&GetJumpPoints,"GetJumpPoints");
 	PYTHON_DEFINE_GLOBAL(VSRemote,&GetSaveStringBytes,"GetSaveStringBytes");
 	PYTHON_DEFINE_GLOBAL(VSRemote,&GetLinks,"GetLinks");

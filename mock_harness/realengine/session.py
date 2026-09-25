@@ -156,16 +156,23 @@ class Session:
             dest = prev[dest]
         return path[::-1]
 
+    @staticmethod
+    def _unit(name):
+        """Python expression (in the engine) for a unit given by name, or
+        an expression already (e.g. "find_by_display_name('drayman 0')")."""
+        return name if '(' in name else 'find_unit(%r)' % name
+
     def fly_to(self, name, near=200.0):
         """Real autopilot first, then close the remaining gap directly (the
         mock-free way to 'fly' until a real flight AI exists)."""
-        self.e.exec("u = find_unit(%r)\np = VS.getPlayer()\np.SetTarget(u)\n_ = p.AutoPilotTo(u, True)" % name)
+        u = self._unit(name)
+        self.e.exec("u = %s\np = VS.getPlayer()\np.SetTarget(u)\n_ = p.AutoPilotTo(u, True)" % u)
         time.sleep(0.5)
-        d = self.e.eval('VS.getPlayer().getDistance(find_unit(%r))' % name)
+        d = self.e.eval('VS.getPlayer().getDistance(%s)' % u)
         if d > near:
-            self.e.exec('teleport_near(find_unit(%r), %f)' % (name, near / 2))
+            self.e.exec('teleport_near(%s, %f)' % (u, near / 2))
             time.sleep(0.2)
-        return self.e.eval('VS.getPlayer().getDistance(find_unit(%r))' % name)
+        return self.e.eval('VS.getPlayer().getDistance(%s)' % u)
 
     def jump_to(self, dest):
         jps = [name for name, dests in self.e.eval('VSRemote.GetJumpPoints()') if dest in dests]
@@ -174,16 +181,20 @@ class Session:
         jp = jps[0]
         self.log('  jumping %s -> %s via %s' % (self.system(), dest, jp))
         self.fly_to(jp)
-        self.e.exec('teleport_near(find_unit(%r), -find_unit(%r).rSize()*0.9)' % (jp, jp))
-        self.e.eval("VSRemote.KeyCommand('JumpKey', 'tap')")
+        # into the jump point with the jump drive on (the unit is gone
+        # from the list once the jump happened)
+        enter = ("u = find_unit(%r)\n"
+                 "if u is not None:\n"
+                 "    teleport_near(u, -u.rSize() * 0.9)\n"
+                 "    VSRemote.KeyCommand('JumpKey', 'tap')\n" % jp)
+        self.e.exec(enter)
         t0 = time.time()
         while self.system() != dest:
             if time.time() - t0 > 60:
                 raise RemoteError('jump to %s did not happen (jump status %s)'
                                   % (dest, self.e.eval('VS.getPlayer().GetJumpStatus()')))
             if int(time.time() - t0) % 5 == 4:
-                self.e.exec('teleport_near(find_unit(%r), -find_unit(%r).rSize()*0.9)' % (jp, jp))
-                self.e.eval("VSRemote.KeyCommand('JumpKey', 'tap')")
+                self.e.exec(enter)
             time.sleep(0.5)
         time.sleep(1.0)
 
@@ -196,13 +207,25 @@ class Session:
 
     def dock(self, name, timeout=30.0):
         self.log('  docking at %s' % name)
+        u = self._unit(name)
         self.fly_to(name, near=50.0)
-        self.e.exec("VS.getPlayer().SetTarget(find_unit(%r))" % name)
+        self.e.exec("VS.getPlayer().SetTarget(%s)" % u)
         t0 = time.time()
+        tries = 0
         while not self.in_base():
             if time.time() - t0 > timeout:
-                raise RemoteError('could not dock at %s (distance %.0f)'
-                                  % (name, self.e.eval('VS.getPlayer().getDistance(find_unit(%r))' % name)))
+                raise RemoteError('could not dock at %s (distance %.0f, ports %s)'
+                                  % (name, self.e.eval('VS.getPlayer().getDistance(%s)' % u),
+                                     self.e.eval('VSRemote.GetDockingPorts(%s)' % u)))
+            if tries >= 3:
+                # capital ships only dock at their docking ports (Unit::CanDockWithMe)
+                self.e.exec("ports = VSRemote.GetDockingPorts(%s)\n"
+                            "if ports:\n"
+                            "    x, y, z, r = ports[%d %% len(ports)]\n"
+                            "    VS.getPlayer().SetCurPosition((x, y, z))\n"
+                            "    VS.getPlayer().SetVelocity((0.0, 0.0, 0.0))\n" % (u, tries - 3))
+                time.sleep(0.3)
             self.e.eval("VSRemote.KeyCommand('DockKey', 'tap')")
+            tries += 1
             time.sleep(1.0)
         return True
