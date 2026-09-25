@@ -20,6 +20,12 @@ a failure.  Mission offers are random (`--seed` seeds the scripts' random
 numbers but the offers still vary), so a run may use another base of the
 system when the first has no matching offer.
 
+Python exceptions in mission scripts and Python AIs no longer end the
+game: the engine prints `CRITICAL: Python exception in ...` with the
+traceback (the first three times, then counts) and skips that script for
+the frame.  The run collects these as errors.  Set `VS_STRICT_PYTHON=1`
+to make the engine stop at the first one, as it used to.
+
 ## How it works
 
 * `VS_REMOTE_CONTROL=<file.py>` makes the engine import that file and call

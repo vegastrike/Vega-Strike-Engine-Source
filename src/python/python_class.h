@@ -37,6 +37,7 @@ class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
 #endif
 
 #include "init.h"
+#include "script_errors.h"
 #include "cmd/script/pythonmission.h"
 #include <compile.h>
 #include <ceval.h>
@@ -208,7 +209,7 @@ template <class SuperClass> class PythonClass:public SuperClass {
     return myclass;
   }
   virtual void callFunction (std::string str) {
-    PYTHONCALLBACK(void, self, str.c_str());
+    VS_PYTHON_GUARDED("callFunction", PYTHONCALLBACK(void, self, str.c_str()));
   }
   static PythonClass * Factory(const std::string &file) {
     CompileRunPython (file);
@@ -229,14 +230,14 @@ public:
   PythonAI (PyObject * self_):PythonClass<SuperClass>(self_) {
   }
   virtual void Execute () {
-    PYTHONCALLBACK(void, this->self, "Execute");
+    VS_PYTHON_GUARDED("Python AI Execute", PYTHONCALLBACK(void, this->self, "Execute"));
   }
   virtual void ChooseTarget () {
-    PYTHONCALLBACK(void, this->self, "ChooseTarget");
+    VS_PYTHON_GUARDED("Python AI ChooseTarget", PYTHONCALLBACK(void, this->self, "ChooseTarget"));
   }
   virtual void SetParent (Unit * parent) {
     SuperClass::SetParent (parent);
-    PYTHONCALLBACK2(void, this->self, "init", parent);
+    VS_PYTHON_GUARDED("Python AI init", PYTHONCALLBACK2(void, this->self, "init", parent));
   }
   static void default_Execute(SuperClass & self_) {
     (self_).SuperClass::Execute();
@@ -262,18 +263,19 @@ public:
   pythonMission (PyObject * self_):PythonClass<PythonMissionBaseClass>(self_) {
   }
   virtual void Execute () {
-    PYTHONCALLBACK(void, self, "Execute");
+    VS_PYTHON_GUARDED("mission Execute", PYTHONCALLBACK(void, self, "Execute"));
     Python::reseterrors();
   }
   virtual std::string Pickle() {
     Python::reseterrors();
-    std::string ret=PYTHONCALLBACK(std::string, self, "Pickle");
+    std::string ret;
+    VS_PYTHON_GUARDED("mission Pickle", ret=PYTHONCALLBACK(std::string, self, "Pickle"));
     Python::reseterrors();
     return ret;
   }
   virtual void UnPickle(std::string s)  {
     Python::reseterrors();
-    PYTHONCALLBACK2(void, self, "UnPickle",s);
+    VS_PYTHON_GUARDED("mission UnPickle", PYTHONCALLBACK2(void, self, "UnPickle",s));
     Python::reseterrors();
   }
   static void default_Execute(PythonMissionBaseClass & self_) {

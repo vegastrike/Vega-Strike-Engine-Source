@@ -1,3 +1,4 @@
+#include "python/script_errors.h"
 #include <assert.h>
 #include "star_system_generic.h"
 #include "gfx/vec.h"
@@ -424,14 +425,9 @@ void StarSystem::ExecuteUnitAI ()
 			unit->ResetThreatLevel();
 		}
 	}
-	catch (const boost::python::error_already_set) {
-		if (PyErr_Occurred()) {
-			PyErr_Print();
-			PyErr_Clear();
-			fflush(stderr);
-			fflush(stdout);
-		}
-		throw;
+	catch (const boost::python::error_already_set &) {
+		if (PythonScripts::ReportScriptException("unit AI"))
+			throw;
 	}
 
 }
@@ -711,14 +707,9 @@ void StarSystem::UpdateUnitPhysics (bool firstframe)
 					unit->predicted_priority=predprior;
 				}
 			}
-			catch (const boost::python::error_already_set) {
-				if (PyErr_Occurred()) {
-					PyErr_Print();
-					PyErr_Clear();
-					fflush(stderr);
-					fflush(stdout);
-				}
-				throw;
+			catch (const boost::python::error_already_set &) {
+				if (PythonScripts::ReportScriptException("unit AI/physics"))
+					throw;
 			}
 			double c0=queryTime();
 			Bolt::UpdatePhysics(this);

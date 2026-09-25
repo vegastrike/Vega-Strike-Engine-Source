@@ -22,6 +22,7 @@
 /*
   xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
+#include "python/script_errors.h"
 #include "config.h"
 #ifdef HAVE_PYTHON
 #include <Python.h>
@@ -75,11 +76,14 @@ void Mission::DirectorLoop(){
    try {
       if (runtime.pymissions)
          runtime.pymissions->Execute();
+   }catch (const boost::python::error_already_set &) {
+      if (PythonScripts::ReportScriptException("mission"))
+         throw;
    }catch (...) {
       if (PyErr_Occurred()) {
          PyErr_Print();
          PyErr_Clear();
-         fflush(stderr);         
+         fflush(stderr);
          fflush(stdout);
       }
       throw;

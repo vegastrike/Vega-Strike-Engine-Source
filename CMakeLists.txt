@@ -102,6 +102,7 @@ SET(LIBGUI_SOURCES src/gui/button.cpp
 
 SET(LIBPYTHON_SOURCES src/python/init.cpp
 					  src/python/python_compile.cpp
+					  src/python/script_errors.cpp
 					  src/python/unit_exports.cpp
 					  src/python/unit_exports1.cpp
 					  src/python/unit_exports2.cpp
