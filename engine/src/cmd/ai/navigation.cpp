@@ -754,7 +754,10 @@ void AutoLongHaul::Execute() {
         if (dist < 0.0001) {
             continue;
         }
-        const float weight = static_cast<float>(1.0 - sig / bubble);
+        // Curved proximity repulsion: weight = (1 - sig/bubble)^p, so it is weak
+        // far out and concentrated near the object (warp_clearance_repel_exponent).
+        const float weight = static_cast<float>(std::pow(1.0 - sig / bubble,
+                configuration().physics.warp_clearance_repel_exponent_dbl));
         if (weight <= 0.0f) {
             continue;
         }
