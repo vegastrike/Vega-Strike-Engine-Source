@@ -113,8 +113,6 @@ public:
         graphic_options();
     } graphicOptions;
 protected:
-    //Moment of intertia of this unit
-    float Momentofinertia; // Was 0 but Init says 0.01
     Vector SavedAccel;
     Vector SavedAngAccel;
     float cutsqr{0.0F};
@@ -200,10 +198,6 @@ public:
 
     void SetVelocity(const Vector &);
     void SetAngularVelocity(const Vector &);
-
-    float GetMoment() const {
-        return Momentofinertia; // TODO: subclass with return Momentofinertia+fuel;
-    }
 
     //Sets if forces should resolve on this unit or not
     void SetResolveForces(bool);

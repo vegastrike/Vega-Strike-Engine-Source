@@ -294,16 +294,16 @@ MoveTo::~MoveTo() {
 }
 
 bool ChangeHeading::OptimizeAngSpeed(float optimal_speed_pos, float optimal_speed_neg, float v, float &a) {
-    v += (a / parent->GetMoment()) * simulation_atom_var;
+    v += (a / static_cast<float>(parent->GetMass())) * simulation_atom_var;
     if ((optimal_speed_pos == 0 && optimal_speed_neg == 0) || (v >= -optimal_speed_neg && v <= optimal_speed_pos)) {
         return true;
     }
     if (v > 0) {
-        float deltaa = parent->GetMoment() * (v - optimal_speed_pos)
+        float deltaa = static_cast<float>(parent->GetMass()) * (v - optimal_speed_pos)
                 / simulation_atom_var;           //clamping should take care of it
         a -= deltaa;
     } else {
-        float deltaa = parent->GetMoment() * (-v - optimal_speed_neg)
+        float deltaa = static_cast<float>(parent->GetMass()) * (-v - optimal_speed_neg)
                 / simulation_atom_var;           //clamping should take care of it
         a += deltaa;
     }
@@ -317,7 +317,7 @@ bool ChangeHeading::OptimizeAngSpeed(float optimal_speed_pos, float optimal_spee
 void ChangeHeading::TurnToward(float atancalc, float ang_veli, float &torquei) {
     //We need to end up at destination with positive velocity, but no more than we can decelerate from in a single simulation_atom_var
     if (1) {
-        float mass = parent->GetMoment();
+        float mass = static_cast<float>(parent->GetMass());
         float max_arrival_speed = torquei * simulation_atom_var / mass;
         float accel_needed = (atancalc / simulation_atom_var - ang_veli) / simulation_atom_var;
         float arrival_velocity = accel_needed * simulation_atom_var + ang_veli;
@@ -329,21 +329,21 @@ void ChangeHeading::TurnToward(float atancalc, float ang_veli, float &torquei) {
     float t = CalculateBalancedDecelTime(atancalc,
             ang_veli,
             torquei,
-            parent->GetMoment());     //calculate when we should decel
+            static_cast<float>(parent->GetMass()));     //calculate when we should decel
     if (t < 0) {
         //if it can't make it: try the other way
         torquei = fabs(torquei);         //copy sign again
         t = CalculateBalancedDecelTime(atancalc > 0 ? atancalc - 2 * PI : atancalc + 2 * PI,
                 ang_veli,
                 torquei,
-                parent->GetMoment());
+                static_cast<float>(parent->GetMass()));
     }
     if (t > 0) {
         if (t < simulation_atom_var) {
             torquei *= ((t / simulation_atom_var) - ((simulation_atom_var - t) / simulation_atom_var));
         }
     } else {
-        torquei = -parent->GetMoment() * ang_veli / simulation_atom_var;         //clamping should take care of it
+        torquei = -static_cast<float>(parent->GetMass()) * ang_veli / simulation_atom_var;         //clamping should take care of it
     }
 }
 
@@ -428,7 +428,7 @@ void ChangeHeading::Execute() {
             }
             return;
         }
-        torque = (-parent->GetMoment() / simulation_atom_var) * local_velocity;
+        torque = (-static_cast<float>(parent->GetMass()) / simulation_atom_var) * local_velocity;
     } else {
         TurnToward(atan2(local_heading.j, local_heading.k),
                 local_velocity.i,
@@ -443,7 +443,7 @@ void ChangeHeading::Execute() {
                 turningspeed * parent->drive.max_yaw_right,
                 local_velocity.j,
                 torque.j);
-        torque.k = -parent->GetMoment() * local_velocity.k / simulation_atom_var;         //try to counteract roll;
+        torque.k = -static_cast<float>(parent->GetMass()) * local_velocity.k / simulation_atom_var;         //try to counteract roll;
     }
     if (!cheater) {
         parent->ApplyLocalTorque(torque);
@@ -626,10 +626,8 @@ void AutoLongHaul::Execute() {
     destinationdirection =
             destinationdirection * (1. / destinationdistance);       //this is a direction, so it is normalize
 
-    // Distance to stop from the ship's current speed (including ftl). The autopilot
-    // flies straight to this braking point, winds down ftl there and brakes to a
-    // stop. Used both to gate obstacle avoidance (don't dodge objects farther away
-    // than we can already stop) and as the clean disengage point.
+    // Distance to stop from the ship's current speed (including ftl). Ftl winds down
+    // inside it and the autopilot brakes cleanly instead of overshooting.
     const double current_speed = parent->Velocity.Magnitude();
     const double ship_mass = parent->GetMass();
     double brake_distance = 0.0;
@@ -652,29 +650,24 @@ void AutoLongHaul::Execute() {
         inside_landing_zone = currently_inside_landing_zone;
         MakeLinearVelocityOrder();
     }
-    // Steer into clear space so ftl works at full. Vector-sum steering: each
-    // object that compresses our ftl bubble pushes us directly away from it,
-    // weighted by how close (and thus how much it interferes) it is. The bubble we
-    // care about keeping clear shrinks as we near the destination: far away we
-    // keep a full ftl sphere clear (so we travel through empty space), and on
-    // arrival we no longer care about the bubble and just get to the target.
-    const float gather_range = max_compression_range
-            * configuration().physics.warp_clearance_range_mult_flt;
+    // Vector-sum steering: obstacles push us away by proximity (full strength at the
+    // object, nothing at the edge of the bubble), so their weight is directly
+    // comparable to the destination's pull. Hard bodies get no extra weight -- the
+    // significant distance already accounts for their size.
     StarSystem *ss = _Universe->activeStarSystem();
-    const float repel = configuration().physics.warp_clearance_repel_flt;
     const float attract = configuration().physics.warp_clearance_attract_flt;
-    // The bubble stays at a full ftl sphere while the target is outside the
-    // gather range (warp_clearance_range_mult x the bubble). Once the target
-    // enters that range we collapse the bubble, so that it is already gone by the
-    // time the target reaches the 1x bubble itself -- on arrival we simply get to
-    // the target instead of dodging ships there.
+    // The bubble never reaches past the target, so it is gone exactly on arrival and
+    // the ship flies in instead of dodging objects next to the destination.
     double bubble = max_compression_range;
-    if (destinationdistance < gather_range) {
-        const double ratio = (
-                (destinationdistance - max_compression_range)
-                / (gather_range - max_compression_range)
-        );
-        bubble = max_compression_range * ((ratio < 0.0) ? 0.0 : ratio);
+    if (destinationdistance < max_compression_range) {
+        bubble = destinationdistance;
+    }
+
+    // The pull ramps up as the ship closes, measured against the full bubble radius
+    // because it is the target's own distance that shrinks the bubble.
+    double attract_effective = attract;
+    if (destinationdistance < max_compression_range) {
+        attract_effective += 1.0 - destinationdistance / max_compression_range;
     }
 
     // Cull the interfering objects to only the closest handful so a crowd of
@@ -682,13 +675,10 @@ void AutoLongHaul::Execute() {
     // most anyway.
     const unsigned int kMaxShips = 8;
     const unsigned int kMaxObjects = 5;
-    // A planet-like body (hard body) in the bubble that isn't the target strongly
-    // repels the autopilot -- you can't fly through it or around its far side, and
-    // SPEC can't operate near it, so steer well clear.
-    constexpr float kHardBodyRepelMultiplier = 15.0f;
     std::vector<Unit *> ships;
     if (!is_null(parent->location[Unit::UNIT_ONLY])) {
-        UnitWithinRangeLocator<ClearSpaceCollector> locator(gather_range, 0.0f);
+        // No look-ahead wider than the bubble: nothing beyond it can contribute.
+        UnitWithinRangeLocator<ClearSpaceCollector> locator(static_cast<float>(bubble), 0.0f);
         locator.action.init(ships, kMaxShips);
         findObjects(ss->collide_map[Unit::UNIT_ONLY], parent->location[Unit::UNIT_ONLY], &locator);
     }
@@ -763,9 +753,10 @@ void AutoLongHaul::Execute() {
         if (dist < 0.0001) {
             continue;
         }
-        const float weight = repel
-                * (hard ? kHardBodyRepelMultiplier : 1.0f)
-                * static_cast<float>(1.0 - sig / bubble);
+        // Curved proximity repulsion: weight = (1 - sig/bubble)^p, so it is weak
+        // far out and concentrated near the object (warp_clearance_repel_exponent).
+        const float weight = static_cast<float>(std::pow(1.0 - sig / bubble,
+                configuration().physics.warp_clearance_repel_exponent_dbl));
         if (weight <= 0.0f) {
             continue;
         }
@@ -774,10 +765,7 @@ void AutoLongHaul::Execute() {
     }
     if (any) {
         StraightToTarget = false;
-        // A steady pull toward the destination (it is where we want to go). With
-        // the bubble shrinking as we approach, repulsion fades and this takes
-        // over, so on arrival we simply fly to the target.
-        sum += destinationdirection * attract;
+        sum += destinationdirection * attract_effective;
         QVector desired;
         double mag = sum.Magnitude();
         if (mag > 0.0001) {
@@ -785,8 +773,7 @@ void AutoLongHaul::Execute() {
         } else {
             desired = destinationdirection;
         }
-        double clear_distance = std::min(destinationdistance, static_cast<double>(gather_range));
-        destination = myposition + desired * clear_distance;
+        destination = myposition + desired * destinationdistance;
     }
     if (!parent->ftl_drive.Enabled() && parent->graphicOptions.RampCounter == 0) {
         deactivatewarp = false;
@@ -794,11 +781,7 @@ void AutoLongHaul::Execute() {
     const double dis = UnitUtil::getSignificantDistance(parent, target);
 
     // ftl stays on while flying toward the destination -- including during any turn
-    // (lining up with the destination, or a detour) -- and only winds down once we're
-    // within the braking distance (about to disengage). The old auto_pilot_spec_lining_
-    // up_angle check dropped out of warp whenever the facing briefly deviated from the
-    // target, which made ftl flicker in and out whenever the ship turned -- e.g. leaving
-    // a planet (now behind us) to head for a faraway object, with nothing to avoid.
+    // (lining up, or a detour) -- and only winds down inside the braking distance.
     const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
     const float min_warpfield_to_enter_warp = configuration().ai.min_warp_to_try_flt;
     if (parent->GetMaxWarpFieldStrength() < min_warpfield_to_enter_warp) {
