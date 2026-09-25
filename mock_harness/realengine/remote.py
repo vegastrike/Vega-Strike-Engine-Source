@@ -35,7 +35,8 @@ class Engine:
         self.port = port or _free_port()
         env = dict(os.environ)
         env.update({'VS_REMOTE_CONTROL': AGENT, 'VS_REMOTE_PORT': str(self.port),
-                    'VS_HOMEDIR': self.home})
+                    'VS_HOMEDIR': self.home,
+                    'PYTHONDONTWRITEBYTECODE': '1'})   # keep __pycache__ out of the data
         env.update(extra_env or {})
         cmd = [binary]
         if display:
