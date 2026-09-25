@@ -105,31 +105,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 input.joystick_preset = boost::json::value_to<std::string>(*jp);
         }
 
-        const boost::json::value * settings_app_value_ptr = root_object.if_contains("settings_app");
-        if (settings_app_value_ptr != nullptr) {
-            boost::json::object settings_app_object = settings_app_value_ptr->get_object();
-            const boost::json::value * details_value_ptr = settings_app_object.if_contains("details");
-            if (details_value_ptr != nullptr) {
-                settings_app.details = boost::json::value_to<std::string>(*details_value_ptr);
-            }
-
-            const boost::json::value * shaders_value_ptr = settings_app_object.if_contains("shaders");
-            if (shaders_value_ptr != nullptr) {
-                settings_app.shaders = boost::json::value_to<std::string>(*shaders_value_ptr);
-            }
-
-            const boost::json::value * audio_value_ptr = settings_app_object.if_contains("audio");
-            if (audio_value_ptr != nullptr) {
-                settings_app.audio = boost::json::value_to<std::string>(*audio_value_ptr);
-            }
-
-            const boost::json::value * physics_value_ptr = settings_app_object.if_contains("physics");
-            if (physics_value_ptr != nullptr) {
-                settings_app.physics = boost::json::value_to<std::string>(*physics_value_ptr);
-            }
-
-        }
-
         // Parse the "preset" section (config.json) into this->preset selectors.
         const boost::json::value * preset_value_ptr = root_object.if_contains("preset");
         if (preset_value_ptr != nullptr && preset_value_ptr->is_object()) {

@@ -675,7 +675,6 @@ void DrawTargetBoxes(const Radar::Sensor& sensor)
     }
 }
 
-
 void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool draw_line_to_targets_target,
                    bool always_itts, float locking_percent, bool draw_line_to_itts, bool steady_itts)
 {

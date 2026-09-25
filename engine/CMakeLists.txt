@@ -264,6 +264,7 @@ SET(LIBGUI_SOURCES
     src/gui/staticdisplay.cpp
     src/gui/text_area.cpp
     src/gui/textinputdisplay.cpp
+    src/gui/vega_text.cpp
     src/gui/window.cpp
     src/gui/windowcontroller.cpp
 )
@@ -376,6 +377,7 @@ SET(LIBGFXCLIENT_SOURCES
     src/gfx/nav/drawsystem.cpp
     src/gfx/nav/navcomputer.cpp
     src/gfx/nav/navgetxmldata.cpp
+    src/gfx/nav/navmap.cpp
     src/gfx/nav/navpath.cpp
     src/gfx/nav/navscreen.cpp
     src/gfx/nav/navscreenoccupied.cpp
@@ -717,6 +719,7 @@ IF (NOT DISABLE_CLIENT)
                           vegastrike_posh
                           vegastrike_imgui
                           vegastrike_gui
+                          vegastrike_vega_draw
                           vegastrike_cmd
                           vegastrike-OPcollide
     )

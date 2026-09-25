@@ -56,6 +56,28 @@ double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
 }
 
 /**
+ * @brief The distance from a body's centre at which a ship counts as dockable with it
+ * @param dock - the body being docked with
+ * @return the distance, centre to centre
+ */
+double DockingRange(const Unit *dock) {
+    // Keep these in step with the ranges CanDock tests: a planet counts as dockable within
+    // a multiple of its own radius (its docking port is sized to its radius, and a ship can
+    // land anywhere on it), and everything else within the simple docking range.
+    if (dock->getUnitType() == Vega_UnitType::planet) {
+        return dock->rSize() * configuration().dock.dock_planet_radius_percent_dbl;
+    }
+    return configuration().dock.simple_dock_range_dbl;
+}
+
+double DockingClearance(const Unit *dock) {
+    if (dock->getUnitType() == Vega_UnitType::planet) {
+        return dock->rSize() * (configuration().dock.dock_planet_radius_percent_dbl - 1.0);
+    }
+    return configuration().dock.simple_dock_range_dbl;
+}
+
+/**
  * @brief check whether a ship can dock
  * @param dock - the dock unit
  * @param ship - the docking unit
@@ -83,22 +105,9 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
 
     double range = DistanceTwoTargets(dock, ship);
 
-    // Planet Code
-    if (dock->getUnitType() == Vega_UnitType::planet) {
-        range -= dock->rSize() * (configuration().dock.dock_planet_radius_percent_dbl - 1.0);
-        if (range < 0) {
-            return 0;
-        } else {
-            return -1;
-        }
-    }
-
-    if (configuration().dock.simple_dock) {
-        if (range < configuration().dock.simple_dock_range_dbl) {
-            return 0;
-        } else {
-            return -1;
-        }
+    // A planet, and anything when simple docking is on, is dockable within its clearance.
+    if (dock->getUnitType() == Vega_UnitType::planet || configuration().dock.simple_dock) {
+        return range < DockingClearance(dock) ? 0 : -1;
     }
 
     if (range > kDefinitelyTooFar) {

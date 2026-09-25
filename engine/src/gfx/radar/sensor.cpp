@@ -34,6 +34,7 @@
 #include "sensor.h"
 #include "src/universe.h"
 #include "root_generic/configxml.h"
+#include <cfloat>
 
 extern Unit *getTopLevelOwner(); // located in star_system.cpp
 
@@ -105,6 +106,59 @@ bool Sensor::IsTracking(const Track &track) const {
     assert(player);
 
     return (track.target == player->Target());
+}
+
+bool Sensor::IsRepulsor(const Track &track) const {
+    return GetRepulsorEffect(track) > 0.0;
+}
+
+double Sensor::GetRepulsorEffect(const Track &track) const {
+    assert(player);
+
+    if (!player->ftl_drive.Enabled()) {
+        return 0.0;
+    }
+    const Unit *other = track.target;
+    if (other == nullptr || other == player) {
+        return 0.0;
+    }
+    const Unit *target = player->Target();
+    double target_range = FLT_MAX;
+    if (target != nullptr) {
+        // The destination is never a repulsor: it is where we want to go, and it is
+        // fine that it compresses our ftl bubble. The target can be a subunit of a
+        // station, so match the whole unit (target and its owner).
+        const Unit *target_root = target;
+        if (target->isSubUnit()) {
+            target_root = UnitUtil::owner(target);
+        }
+        if (other == target || other == target_root) {
+            return 0.0;
+        }
+        const QVector myposition = player->isSubUnit() ? player->Position() : player->LocalPosition();
+        const QVector destination = target->isSubUnit() ? target->Position() : target->LocalPosition();
+        target_range = (destination - myposition).Magnitude();
+    }
+    const double bubble = JumpCapable::WarpClearanceRadius(target_range);
+    if (bubble <= 0.0) {
+        return 0.0;
+    }
+    const double sig = player->GetWarpClearanceDistance(other);
+    if (sig >= bubble) {
+        return 0.0;
+    }
+    return 1.0 - sig / bubble;
+}
+
+bool Sensor::IsSpecActive() const {
+    assert(player);
+
+    return player->ftl_drive.Enabled();
+}
+
+GFXColor Sensor::GetSpecTargetColor() const {
+    static GFXColor specTargetColor = vs_config->getColor("spec_target", GFXColor(0.5, 1.0, 0.0, 1.0));
+    return specTargetColor;
 }
 
 bool Sensor::InsideNebula() const {
@@ -272,6 +326,11 @@ GFXColor Sensor::GetColor(const Track &track) const {
     static GFXColor missileColor = vs_config->getColor("missile", GFXColor(.25, 0, .5, 1));
     static GFXColor cargoColor = vs_config->getColor("cargo", GFXColor(.6, .2, 0, 1));
     static GFXColor noColor = vs_config->getColor("black_and_white", GFXColor(.5, .5, .5));
+    static GFXColor repulsorColor = vs_config->getColor("repulsor", GFXColor(1.0, 0.5, 0.0, 1.0));
+
+    if (IsRepulsor(track)) {
+        return repulsorColor;
+    }
 
     Track::Type::Value trackType = track.GetType();
     ThreatLevel::Value threatLevel = IdentifyThreat(track);

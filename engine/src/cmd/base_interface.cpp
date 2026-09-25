@@ -67,6 +67,7 @@
 #include "gldrv/mouse_cursor.h"
 
 #include "imgui/imgui.h"
+#include "gui/vega_text.h"
 #include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -650,12 +651,12 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
     }
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
     GFXColor tmpbg(text.background_color);
-    bool automatte = (0 == tmpbg.a);
-    if (automatte) {
+    bool transparent = (0 == tmpbg.a);
+    if (transparent) {
         GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
         text.background_color = static_cast<ImU32>(temp_background_color);
     }
-    if (!automatte && text.GetText().empty()) {
+    if (!transparent && text.GetText().empty()) {
         float posx, posy, wid, hei;
         text.GetPos(posy, posx);
         text.GetSize(wid, hei);
@@ -670,7 +671,7 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         };
         GFXDraw(GFXQUAD, verts, 4);
     } else {
-        text.Draw(text.GetText(), 0, true, false, automatte);
+        vega_text::DrawTextPlane(text, text.GetText(), transparent);
     }
     text.background_color= static_cast<ImU32>(tmpbg);
 }
@@ -1654,24 +1655,24 @@ void BaseInterface::Draw() {
 
     if (curtext.GetText().find("XXX") != 0) {
         GFXColor tmpbg(curtext.background_color);
-        bool automatte = (0 == tmpbg.a);
-        if (automatte) {
+        bool transparent = (0 == tmpbg.a);
+        if (transparent) {
             GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
             curtext.background_color = static_cast<ImU32>(temp_background_color);
         }
-        curtext.Draw(curtext.GetText(), 0, true, false, automatte);
+        vega_text::DrawTextPlane(curtext, curtext.GetText(), transparent);
         curtext.background_color = static_cast<ImU32>(tmpbg);
     }
     othtext.SetPos(-.99, 1);
 
     if (othtext.GetText().length() != 0) {
         GFXColor tmpbg(othtext.background_color);
-        bool automatte = (0 == tmpbg.a);
-        if (automatte) {
+        bool transparent = (0 == tmpbg.a);
+        if (transparent) {
             GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
             othtext.background_color = static_cast<ImU32>(temp_background_color);
         }
-        othtext.Draw(othtext.GetText(), 0, true, false, automatte);
+        vega_text::DrawTextPlane(othtext, othtext.GetText(), transparent);
         othtext.background_color= static_cast<ImU32>(tmpbg);
     }
     SetupViewport();

@@ -36,6 +36,8 @@
 #include "src/vs_exit.h"
 #include "src/vega_cast_utils.h"
 #include "root_generic/configxml.h"
+#include "configuration/configuration.h"
+#include "cmd/dock_utils.h"
 
 // TODO: once implementation is refactored, deal with this too
 extern QVector RealPosition(const Unit *un);
@@ -187,6 +189,12 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         float aptne =
                 (target->getUnitType() == Vega_UnitType::planet) ? (atd_no_enemies + target->rSize()
                         * UniverseUtil::getPlanetRadiusPercent()) : atd_no_enemies;
+        // apt / aptne are the auto-pilot termination distances: apt the normal one, aptne
+        // the no-enemies one (auto_pilot_termination_distance / _no_enemies). percent /
+        // percentne turn them into the point along the path the ship flies to, and the
+        // docking clearance keeps that point outside docking range.
+        apt += static_cast<float>(DockingClearance(target));
+        aptne += static_cast<float>(DockingClearance(target));
         float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
         float percentne = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
         if (percentne > 1) {
@@ -415,6 +423,33 @@ float JumpCapable::GetNearestObjectSignificantDistance(Unit **nearest_unit) cons
         }
     }
     return nearest;
+}
+
+bool JumpCapable::IsHardBody(const Unit *unit) {
+    if (unit == nullptr) {
+        return false;
+    }
+    return unit->isPlanet() || UnitUtil::getFlightgroupName(unit) == "Base";
+}
+
+double JumpCapable::WarpClearanceRadius(double target_range) {
+    const double max_compression_range = configuration().warp.max_effective_velocity_dbl;
+    if (target_range < max_compression_range) {
+        return target_range;
+    }
+    return max_compression_range;
+}
+
+double JumpCapable::GetWarpClearanceDistance(const Unit *other) const {
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
+    double sig = UnitUtil::getSignificantDistance(unit, other);
+    if (IsHardBody(other)) {
+        sig -= configuration().physics.warp_min_range_dbl;
+        if (sig < 0.0) {
+            sig = 0.0;
+        }
+    }
+    return sig;
 }
 
 float JumpCapable::CourseDeviation(const Vector &OriginalCourse, const Vector &FinalCourse) const {

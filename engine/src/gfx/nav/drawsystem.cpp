@@ -39,6 +39,51 @@
 #include "gfx/hud.h"
 #include "root_generic/lin_time.h" //for fps
 #include "src/config_xml.h"
+#include "gui/guidefs.h"
+#include "cmd/planetary_orbit.h"
+
+// Draws the ellipse a body travels, faintly. Pieces that fall behind the camera are
+// skipped, so an orbit the viewer is inside does not streak across the view.
+static void DrawOrbit(Unit *unit, const NavMap &camera, float center_nav_x, float center_nav_y) {
+    static const bool draw_orbits =
+            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_nav_orbits", "true"));
+    if (!draw_orbits) {
+        return;
+    }
+    PlanetaryOrbit *orbit = vega_dynamic_cast_ptr<PlanetaryOrbit>(unit->getAIState());
+    if (orbit == nullptr) {
+        return;      //a body that travels no orbit
+    }
+
+    ImDrawList *draw_list = ImGui::GetBackgroundDrawList();
+    //Faint blue, matching the nav map's own labels rather than competing with them.
+    const ImU32 colour = IM_COL32(128, 128, 255, 48);
+    const int segments = 96;
+
+    for (int i = 0; i < segments; ++i) {
+        const QVector from = orbit->orbitPoint((2.0 * M_PI * i) / segments);
+        const QVector to = orbit->orbitPoint((2.0 * M_PI * (i + 1)) / segments);
+
+        float from_x = 0.0f;
+        float from_y = 0.0f;
+        float from_scale = 0.0f;
+        float to_x = 0.0f;
+        float to_y = 0.0f;
+        float to_scale = 0.0f;
+        if (!camera.project(from, from_x, from_y, from_scale)
+                || !camera.project(to, to_x, to_y, to_scale)) {
+            continue;      //this piece is behind the camera
+        }
+
+        const ImVec2 start(Coordinates::normToPixelX(center_nav_x + from_x),
+                Coordinates::normToPixelY(center_nav_y + from_y));
+        const ImVec2 end(Coordinates::normToPixelX(center_nav_x + to_x),
+                Coordinates::normToPixelY(center_nav_y + to_y));
+        draw_list->AddLine(start, end, colour, 1.0f);
+    }
+}
+
+#include "src/config_xml.h"
 #include "root_generic/lin_time.h"
 #include "cmd/images.h"
 #include "cmd/script/mission.h"
@@ -93,7 +138,7 @@ void NavigationSystem::DrawSystem() {
     //int length = systemnamestring.size();
     //float offset = (float(length)*0.001);
     //systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]); // middle position
-    systemname.SetPos(screenskipby4[0] + 0.03, screenskipby4[3] + 0.02);     //left position
+    systemname.SetPos(screenskipby4[0] + 0.03f, screenskipby4[3] - 0.05f);     //inset, so the text clears the top and left edges
     GFXColor temp_color(1, 1, .7, 1);
     systemname.color = static_cast<ImU32>(temp_color);
     systemname.SetText(systemnamestring);
@@ -114,12 +159,8 @@ void NavigationSystem::DrawSystem() {
     navdrawlist mouselist(1, screenoccupation, factioncolours);       //lists of items to draw that are in mouse range
 
     QVector pos;    //item position
-    QVector pos_flat;       //item position flat on plane
 
-    float zdistance = 0.0;
-    float zscale = 0.0;
-
-    Adjust3dTransformation(system_view == VIEW_3D, 1);
+    Adjust3dTransformation(true);
     //Set up first item to compare to + centres
     //**********************************
     while ((*bleh) && (_Universe->AccessCockpit()->GetParent() != (*bleh))
@@ -133,15 +174,12 @@ void NavigationSystem::DrawSystem() {
     //GET THE POSITION
     //*************************
     pos = (*bleh)->Position();
-    ReplaceAxes(pos);
     //*************************
 
     //Modify by old rotation amount
     //*************************
 //if(system_view==VIEW_3D)
 //{
-//pos = dxyz(pos, 0, ry_s, 0);
-//pos = dxyz(pos, rx_s, 0, 0);
 //}
     //*************************
 
@@ -155,7 +193,9 @@ void NavigationSystem::DrawSystem() {
 //float themaxvalue = fabs(pos.i);
     themaxvalue = 0.0;
 
-    float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
+    // Centre the content in the free area left of the button column, which starts at
+    // 0.5 in screen coordinates. The map itself fills the whole screen.
+    float center_nav_x = -0.25f;
     float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
     //**********************************
     //Retrieve unit data min/max
@@ -168,13 +208,10 @@ void NavigationSystem::DrawSystem() {
         }
         string temp = (*bleh)->name;
         pos = (*bleh)->Position();
-        ReplaceAxes(pos);
         //Modify by old rotation amount
         //*************************
 //if(system_view==VIEW_3D)
 //{
-//pos = dxyz(pos, 0, ry_s, 0);
-//pos = dxyz(pos, rx_s, 0, 0);
 //}
         //*************************
         //*************************
@@ -214,6 +251,15 @@ void NavigationSystem::DrawSystem() {
 
     camera_z = sqrt((half_x * half_x) + (half_y * half_y) + (half_z * half_z));
 
+    // Frame the whole system the first time the view is drawn, and whenever it is
+    // refitted. The camera's distance comes from the extent of the content and the
+    // field of view, so the system fills the view rather than being scaled against
+    // its own bounding box.
+    if (system_needs_refit) {
+        system_cam.setFraming(QVector(center_x, center_y, center_z), half_x, half_y, half_z);
+        system_needs_refit = false;
+    }
+
 //float halfmax = 0.5*themaxvalue;
 //camera_z = sqrt( (halfmax*halfmax) + (halfmax*halfmax) + (halfmax*halfmax) );
 //camera_z = 4.0*themaxvalue;
@@ -221,7 +267,6 @@ void NavigationSystem::DrawSystem() {
 
     //**********************************
 
-    DrawOriginOrientationTri(center_nav_x, center_nav_y, 1);
 
 /*
  *       string mystr ("max x "+XMLSupport::tostring (max_x));
@@ -247,6 +292,20 @@ void NavigationSystem::DrawSystem() {
 
     //Enlist the items and attributes
     //**********************************
+    nav_near_dist = 1e30;      //reset the nearest-thing distance for this frame
+
+    // Drawable items are collected first and drawn afterwards, so that overlapping
+    // ones can be collapsed into the largest of the group before anything is drawn.
+    struct NavItem {
+        int type;
+        float size;
+        float x;
+        float y;
+        Unit *unit;
+        double real_size;
+    };
+    std::vector<NavItem> drawn;
+
     un_iter blah = UniverseUtil::getUnitList();
     while (*blah) {
         //this draws the points
@@ -256,22 +315,31 @@ void NavigationSystem::DrawSystem() {
         string temp = (*blah)->name;
 
         pos = (*blah)->Position();
-        ReplaceAxes(pos);
 
-        float the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp;
-        TranslateCoordinates(pos,
-                pos_flat,
-                center_nav_x,
-                center_nav_y,
-                themaxvalue,
-                zscale,
-                zdistance,
-                the_x,
-                the_y,
-                the_x_flat,
-                the_y_flat,
-                system_item_scale_temp,
-                1);
+        float the_x = 0.0f;
+        float the_y = 0.0f;
+        float system_item_scale_temp = 0.0f;
+        if (!system_cam.project(pos, the_x, the_y, system_item_scale_temp)) {
+            ++blah;
+            continue;      //behind the camera, so there is nothing to draw
+        }
+        the_x = center_nav_x + the_x;
+        the_y = center_nav_y + the_y;
+
+        // Keep an item within a readable size range however far away it is.
+        if (system_item_scale_temp > maximumitemscaleup) {
+            system_item_scale_temp = maximumitemscaleup;
+        }
+        if (system_item_scale_temp < minimumitemscaledown) {
+            system_item_scale_temp = minimumitemscaledown;
+        }
+
+        // Remember the nearest thing in view: panning and zooming scale with it.
+        const double item_distance = (pos - system_cam.position()).Magnitude();
+        if (item_distance < nav_near_dist) {
+            nav_near_dist = item_distance;
+        }
+
         //IGNORE OFF SCREEN
         //**********************************
         if (!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_x, the_y)) {
@@ -381,36 +449,117 @@ void NavigationSystem::DrawSystem() {
             system_item_scale_temp = (system_item_scale * 3);
         }
         insert_size *= system_item_scale_temp;
-        if (_Universe->AccessCockpit()->GetParent()->Target() == (*blah)) {
-            //Get a color from the config
-            static GFXColor col = vs_config->getColor("nav", "targetted_unit", GFXColor(1, 0.3, 0.3, 0.8));
-            DrawTargetCorners(the_x, the_y, insert_size, col);
+        // Keep items above a minimum on-screen size, so that they stay visible when
+        // the view is zoomed out to a very large system.
+        if (insert_size < NavMinItemSize()) {
+            insert_size = NavMinItemSize();
         }
-        bool tests_in_range = 0;
-        if (insert_type == navstation) {
-            tests_in_range = TestIfInRangeBlk(the_x, the_y, insert_size, mouse_x_current, mouse_y_current);
-        } else {
-            tests_in_range = TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current);
-        }
-        Unit *myunit = (*blah);
+
+        NavItem item;
+        item.type = insert_type;
+        item.size = insert_size;
+        item.x = the_x;
+        item.y = the_y;
+        item.unit = (*blah);
+        item.real_size = (*blah)->rSize();
+        drawn.push_back(item);
 
         ++blah;
-        DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 1);
-        if (tests_in_range) {
-            mouselist.insert(insert_type, insert_size, the_x, the_y, myunit);
+    }
+
+    // Collapse overlapping items: where several objects land on nearly the same place,
+    // keep only the largest, so a cluster draws one marker instead of a label for every
+    // object in it. The player, bases, and whatever is under the mouse are always kept.
+    // Ranked by real size rather than on-screen size, because the minimum size above
+    // makes every distant icon measure alike.
+    const float cluster_radius = 0.05f;
+    auto is_keeper = [&](const NavItem &item) {
+        if (item.unit != nullptr && UnitUtil::isPlayerStarship(item.unit) > -1) {
+            return true;
+        }
+        if (item.unit != nullptr && UnitUtil::getFlightgroupNameCR(item.unit) == "Base") {
+            return true;
+        }
+        float x = item.x;
+        float y = item.y;
+        return TestIfInRangeRad(x, y, item.size, mouse_x_current, mouse_y_current);
+    };
+
+    for (size_t i = 0; i < drawn.size(); ++i) {
+        if (drawn[i].size < 0.0f) {
+            continue;      //already collapsed into a larger neighbour
+        }
+        for (size_t j = i + 1; j < drawn.size(); ++j) {
+            if (drawn[j].size < 0.0f) {
+                continue;
+            }
+            const float dx = drawn[i].x - drawn[j].x;
+            const float dy = drawn[i].y - drawn[j].y;
+            if (((dx * dx) + (dy * dy)) >= (cluster_radius * cluster_radius)) {
+                continue;
+            }
+            const bool keep_i = is_keeper(drawn[i]);
+            const bool keep_j = is_keeper(drawn[j]);
+            if (keep_i && keep_j) {
+                continue;
+            }
+            if (drawn[j].real_size > drawn[i].real_size) {
+                if (!keep_i) {
+                    drawn[i].size = -1.0f;
+                }
+            } else if (drawn[j].real_size == drawn[i].real_size) {
+                if (!keep_j) {
+                    drawn[j].size = -1.0f;
+                }
+            } else {
+                if (!keep_j) {
+                    drawn[j].size = -1.0f;
+                }
+            }
+        }
+    }
+
+    // Draw the orbits before the markers, and for every body that has one. The collapse
+    // below is about markers and the names they carry, and an orbit is neither: a body
+    // whose marker is merged into a larger neighbour still travels its own ellipse.
+    for (size_t i = 0; i < drawn.size(); ++i) {
+        if (drawn[i].unit != nullptr && ((drawn[i].type == navplanet) || (drawn[i].type == navsun))) {
+            DrawOrbit(drawn[i].unit, system_cam, center_nav_x, center_nav_y);
+        }
+    }
+
+    //Draw what survived the collapse.
+    for (size_t i = 0; i < drawn.size(); ++i) {
+        if (drawn[i].size < 0.0f) {
+            continue;
+        }
+        NavItem &item = drawn[i];
+        if (_Universe->AccessCockpit()->GetParent()->Target() == item.unit) {
+            static GFXColor col = vs_config->getColor("nav", "targetted_unit", GFXColor(1, 0.3, 0.3, 0.8));
+            DrawTargetCorners(item.x, item.y, item.size, col);
+        }
+        bool tests_in_range = false;
+        if (item.type == navstation) {
+            tests_in_range = TestIfInRangeBlk(item.x, item.y, item.size, mouse_x_current, mouse_y_current);
         } else {
-            drawlistitem(insert_type,
-                    insert_size,
-                    the_x,
-                    the_y,
-                    myunit,
+            tests_in_range = TestIfInRangeRad(item.x, item.y, item.size, mouse_x_current, mouse_y_current);
+        }
+        if (tests_in_range) {
+            mouselist.insert(item.type, item.size, item.x, item.y, item.unit);
+        } else {
+            drawlistitem(item.type,
+                    item.size,
+                    item.x,
+                    item.y,
+                    item.unit,
                     screenoccupation,
                     false,
-                    (*blah) ? true : false,
+                    false,
                     unselectedalpha,
                     factioncolours);
         }
     }
+    drawn.clear();
     //**********************************	//	done enlisting items and attributes
     //Adjust mouse list for 'n' kliks
     //**********************************

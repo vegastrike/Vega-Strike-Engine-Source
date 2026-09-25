@@ -43,6 +43,21 @@ namespace Radar {
 // Sensor is a proxy for two types of information:
 //   1. The operational parameters of the radar (e.g. range)
 //   2. Information detected by the radar (e.g. tracks)
+//
+// Blink rate for SPEC repulsor blips. Slower than the threat rates (7.5 medium /
+// 20 fast) so a repulsor does not read as an incoming threat.
+constexpr float kRepulsorBlinkRate = 5.0f;
+
+// Radar blip size (pixels) for a repulsor: scaled linearly by its effect on SPEC,
+// from a single pixel at the bubble edge up to five at the object.
+constexpr float kRepulsorBlipSizeMin = 1.0f;
+constexpr float kRepulsorBlipSizeMax = 5.0f;
+
+inline float RepulsorBlipSize(double effect) {
+    return kRepulsorBlipSizeMin
+            + static_cast<float>(effect) * (kRepulsorBlipSizeMax - kRepulsorBlipSizeMin);
+}
+
 class Sensor {
 public:
     typedef std::vector<Track> TrackCollection;
@@ -85,6 +100,17 @@ public:
 
     // I am tracking target
     bool IsTracking(const Track &) const;
+    // Is the track an object currently compressing our SPEC field -- within the
+    // clear-space bubble the autopilot steers around? Always false when SPEC is
+    // not active, or for our own ship and our target.
+    bool IsRepulsor(const Track &) const;
+    // How strongly the track compresses the SPEC field: the autopilot's proximity
+    // weight (1 - sig / bubble), 0 when it is not a repulsor at all.
+    double GetRepulsorEffect(const Track &) const;
+    // Is the SPEC (in-system ftl) drive currently active on the player ship?
+    bool IsSpecActive() const;
+    // The colour a tracked target's radar cross is drawn in while SPEC is active.
+    GFXColor GetSpecTargetColor() const;
     bool InsideNebula() const;
     bool InRange(const Track &) const;
 

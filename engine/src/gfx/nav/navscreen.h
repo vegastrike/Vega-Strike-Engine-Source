@@ -41,6 +41,15 @@
 #define NAVTOTALMESHCOUNT 8     //same as the button count, 1 mesh for screen and 1 per button(1+7)
 #define MAXZOOM 10
 
+// The smallest an item is drawn, in the units the nav positions use: the screen spans two
+// units across, so this is about 15 pixels. Items never shrink below it, which is what
+// keeps a distant item visible and gives it a click area worth aiming at.
+static inline float NavMinItemSize() {
+    const float pixels = 15.0f;
+    const float resolution = static_cast<float>(g_game.x_resolution);
+    return (resolution > 0.0f) ? ((2.0f * pixels) / resolution) : 0.015f;
+}
+
 void Beautify(string systemfile, string &sector, string &system);
 
 #endif //VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_H
