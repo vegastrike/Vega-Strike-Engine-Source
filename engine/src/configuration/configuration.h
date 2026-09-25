@@ -58,17 +58,10 @@ namespace vega_config {
 		void parseAxes(const boost::json::object& root_object);
 
 
-    struct {
-        std::string details = "High";
-        std::string shaders = "Average";
-        std::string audio = "All Sounds";
-        std::string physics = "Default (1.0)";
-
-    } settings_app;
-
     // Preset selectors from config.json's "preset" section (e.g.
-    // computer="4000MHz", shaders="highshader"). Metadata for the settings app;
-    // the engine does not expand these itself. Key is the lowercase category.
+    // computer="4000MHz", shaders="highshader"). Written and consumed by the
+    // in-game config screen; the engine does not expand these itself. Key is
+    // the lowercase category.
     std::map<std::string, std::string> preset;
 
     struct {

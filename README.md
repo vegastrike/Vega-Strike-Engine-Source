@@ -50,8 +50,8 @@ Vega Strike is a Space Flight Simulator that allows a player to explore, trade, 
 
 Either install Vega Strike from the binary installer for your platform, if available, or follow the instructions for compiling from source. (`Compiling Vegastrike`, below.)
 
-- First change settings with `bin/vegasettings`
 - Then run `bin/vegastrike-engine`
+- Press Alt-C in-game to change settings
 
 ### Please Note
 
@@ -98,9 +98,11 @@ will force the bomber mission to run in the vega sector.
 
 ### Executable Name Changes
 
-Note that the executable names have changed since the 0.5.x releases. Now, you configure game settings using `vegasettings`, and run the game itself using `vegastrike-engine`. With the latter, the data directory (`-d...`)  is now a required parameter. This is to allow using the Vega Strike Game Engine with multiple games (asset sets), including Upon the Coldest Sea (vsUtCS), PWCU, and others.
+Note that the executable names have changed since the 0.5.x releases. Now you run the game itself using `vegastrike-engine`. The data directory (`-d...`)  is now a required parameter. This is to allow using the Vega Strike Game Engine with multiple games (asset sets), including Upon the Coldest Sea (vsUtCS), PWCU, and others.
 
-Also note that when you install vsUtCS, it comes with a script called `vsettings` that automatically runs `vegasettings` with the correct data directory, and another script called `vs` that automatically runs `vegastrike-engine` with the correct data directory. These scripts are the recommended way to run the game Vega Strike: Upon the Coldest Sea. You should see shortcuts to them on your desktop, Start Menu, or similar.
+Game settings are edited in-game with the settings screen (Alt-C), and are stored in the JSON config files (`config.json`, `bindings.json`, `theme.json` and `engine.json`). There is no separate settings executable.
+
+Also note that when you install vsUtCS, it comes with a script called `vs` that automatically runs `vegastrike-engine` with the correct data directory. This script is the recommended way to run the game Vega Strike: Upon the Coldest Sea. You should see a shortcut to it on your desktop, Start Menu, or similar.
 
 If you encounter any issues while playing, please create an issue with the Vega Strike development team by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
 
@@ -111,20 +113,14 @@ If you encounter any issues while playing, please create an issue with the Vega 
       The vegastrike engine, requires `-d` to specify the data set.
   /usr/bin/vegastrike
       The vegastrike engine with legacy data set search support
-  /usr/local/bin/vsinstall
-      The Setup utility.
-  /usr/local/bin/vslauncher
-      The vegastrike save game and mission selection utility
-  /usr/local/bin/vegasettings
-      Internal installer program
   /usr/local/share/vegastrike
       The vegastrike data files
   /usr/local/lib/man/man1
       Directory containg the manual files
   ~/.vegastrike
       Directory containing user specific data managed by vegastrike.
-  ~/.vegastrike/vegastrike.config
-      User-specific configuration file
+  ~/.vegastrike/config.json
+      User-specific configuration file (written by the in-game settings screen)
 ```
 
 ## Compiling Vegastrike
@@ -198,7 +194,7 @@ This will produce a significantly smaller download - in the order of 22-30 MB; w
    $ cd ..
    $ cmake --build ./build -j $(getconf _NPROCESSORS_ONLN) # (where the getconf clause returns the number of available CPU threads/cores on the system)
    $ mkdir bin
-   $ cp build/vegastrike-engine build/setup/vegasettings bin
+   $ cp build/vegastrike-engine bin
    ```
 
    c. *OR* configure and compile VS manually, using the command-line cmake frontend:
@@ -210,7 +206,7 @@ This will produce a significantly smaller download - in the order of 22-30 MB; w
    $ cd ..
    $ cmake --build ./build -j $(getconf _NPROCESSORS_ONLN) # (where the getconf clause returns the number of available CPU threads/cores on the system)
    $ mkdir bin
-   $ cp build/vegastrike-engine build/setup/vegasettings bin
+   $ cp build/vegastrike-engine bin
    ```
 
    __TIPS__:
@@ -250,19 +246,13 @@ This will produce a significantly smaller download - in the order of 22-30 MB; w
 
 3. Download a copy of the assets/game data from [here](https://github.com/vegastrike/Assets-Production). You can either `git clone` this repository, or download it as a ZIP file and unzip it.
 
-4. When you run vegasettings, specify the path to the assets/game data on the command line with `--target` followed by a space. E.g.:
-
-   ```bash
-   $ ./bin/vegasettings --target $(pwd)/../Assets-Production
-   ```
-
-   The absolute path may need to be supplied, rather than a relative path.
-
-   Do the same with vegastrike-engine using `-d` and no space. E.g.:
+4. Run vegastrike-engine with the path to the assets/game data using `-d` and no space. E.g.:
 
    ```bash
    $ ./bin/vegastrike-engine -d$(pwd)/../Assets-Production
    ```
+
+   The absolute path may need to be supplied, rather than a relative path.
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
 
@@ -296,7 +286,7 @@ Once that finishes, reboot your computer again. Finally, open `Developer PowerSh
 
 (The build type can also be `Debug` or `Release`. Just make sure that it matches the build type stanza at the end of the preset name.)
 
-Assuming all the above steps succeed, you are now ready to run Vega Strike. Note that `vegasettings` is not currently building on Windows, so you will need to edit `vegastrike.config` manually as needed.
+Assuming all the above steps succeed, you are now ready to run Vega Strike. Game settings are edited in-game with the settings screen (Alt-C).
 
 Finally, note that the location of the `.vegastrike` folder has changed since v0.5.1r1. It will now be located here: `C:\Users\<YourUserName>\AppData\Local\.vegastrike`.
 
