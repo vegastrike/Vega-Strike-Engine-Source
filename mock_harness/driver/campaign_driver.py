@@ -113,11 +113,33 @@ class CampaignDriver:
         msgs = self.eng.base.last_messages(1)
         return msgs[-1] if msgs else ''
 
+    JUMP_DRIVE_PRICE = 10000
+
+    def ensure_jump_drive(self):
+        """The starting Tarsus has no jump drive; a player has to earn the
+        credits and buy one before leaving Troy.  The harness does not play
+        the money game: it tops up the credits (recorded in the report) and
+        buys the drive through the upgrade room GUI."""
+        p = self.eng.player
+        if p is None or p.jump_drive or self.eng.base is None:
+            return
+        if not any(r.text == 'Repair/Upgrade' for r in self.eng.base.rooms):
+            return
+        if self.eng.credits < self.JUMP_DRIVE_PRICE:
+            gift = self.JUMP_DRIVE_PRICE - self.eng.credits
+            self.eng.credits += gift
+            self.report.add('harness gave %.0f credits for the jump drive' % gift)
+        msg = self.game.buy_upgrade('Jump_Drive')
+        self.say('  bought jump drive: %r (jump drive %s)' % (msg, p.jump_drive))
+        if not p.jump_drive:
+            self.report.problems.append('could not buy a jump drive at %s: %r' % (self.eng.base.basefile, msg))
+
     def handle_base(self):
         """Talk to every campaign fixer here until nothing changes."""
         base = self.eng.base
         if base is None:
             return False
+        self.ensure_jump_drive()
         progressed = False
         tried = set()
         seen_nodes = {self.node_state()}

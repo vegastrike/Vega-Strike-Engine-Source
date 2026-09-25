@@ -169,6 +169,8 @@ class Pilot:
 
     def jump_to_adjacent(self, dest):
         p = self.player
+        if not p.jump_drive:
+            raise Stuck('no jump drive (cannot jump to %s)' % dest)
         jp = None
         for u in self.game.units_here(lambda u: u.is_jumppoint()):
             if dest in u.destinations:

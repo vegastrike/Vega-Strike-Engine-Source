@@ -52,6 +52,8 @@ takes about 25 seconds.
     pack to record where two ints were divided with a non-integral
     result (Python 2 would have floored).  On by default; the report
     lists suspicious sites.
+* `realengine/` - drives the *real* engine through a small remote-control
+  hook (see `realengine/README.md`).
 * `driver/` - the automated player.
   * `game.py` / `pilot.py` - the "hands": click links, launch, route
     across jump points, fly, fight, dock, tractor.
@@ -91,6 +93,9 @@ takes about 25 seconds.
 * The Steltek gun needed to start Righteous Fire is picked up from the
   derelict in Delta Prime when the driver passes by (a human has to know
   to do this too).
+* The starting Tarsus has no jump drive (10000 credits) and the player
+  starts with 2000.  The driver tops up the credits (noted in the report)
+  and buys the drive through the upgrade room GUI at the first base.
 
 ## Known differences from the real engine
 
@@ -101,6 +106,13 @@ takes about 25 seconds.
   `__nonzero__`, which Python 3 ignores (every unit is truthy there,
   making loops like `while (un): ... un = VS.getUnit(i)` spin forever);
   that is an engine fix, see the report.
+* Save strings are modelled as C++ std::strings: text is UTF-8 encoded
+  going in and strictly decoded coming out, like Boost.Python, so Latin-1
+  bytes raise UnicodeDecodeError as in the engine.  Loading a save
+  converts Latin-1 strings to UTF-8 like `SaveGame::ReadMissionStringData`.
+* `VS.sendCustom` runs `custom.processMessage` synchronously, as the
+  single-player engine does (upgrade/repair/ship purchases go this way).
+* Only the player needs a jump drive to jump; NPC drives are not modelled.
 * Time does not pass while docked (matching the engine's default
   `simulate_while_docked=false`), except for the 16 director frames the
   engine runs when a base is created.

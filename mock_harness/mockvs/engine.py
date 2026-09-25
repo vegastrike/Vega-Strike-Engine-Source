@@ -64,6 +64,17 @@ class Options:
         self.__dict__.update(kw)
 
 
+def _save_string_to_utf8(s):
+    """SaveGame::ReadMissionStringData: Latin-1 strings from Python 2 era
+    saves are converted to UTF-8 (s holds one code point per byte)."""
+    raw = s.encode('latin-1')
+    try:
+        raw.decode('utf-8')
+        return s
+    except UnicodeDecodeError:
+        return raw.decode('latin-1').encode('utf-8').decode('latin-1')
+
+
 class ScriptError:
     def __init__(self, context, exc_type, message, tb_text, gametime):
         self.context = context
@@ -1351,6 +1362,12 @@ class Engine:
         for u, sysname, via in jumps:
             if u.killed:
                 continue
+            if u is self.player and via is not None and not u.jump_drive:
+                # Unit::jumpReactToCollision needs jump.drive >= 0, which a
+                # ship without a jump drive (e.g. the starting tarsus.begin)
+                # never gets.  (NPC drives are not modelled.)
+                self.event('jump_refused', unit=repr(u), to=sysname)
+                continue
             followers = []
             if u is self.player:
                 for x in list(u.system.units):
@@ -1472,7 +1489,7 @@ class Engine:
         if self.player is not None:
             self.kill_unit(self.player, None)
         self.floats = {k: [f32(x) for x in v] for k, v in sg.floats.items()}
-        self.strings = {k: list(v) for k, v in sg.strings.items()}
+        self.strings = {k: [_save_string_to_utf8(x) for x in v] for k, v in sg.strings.items()}
         self.credits = sg.credits
         self.player_fg = Flightgroup('Privateer', 'privateer', sg.ships[0] if sg.ships else 'tarsus.begin')
         self.new_player(sg.ships[0] if sg.ships else 'tarsus.begin', sg.system, sg.position)

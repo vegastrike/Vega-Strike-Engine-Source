@@ -686,14 +686,26 @@ def saveGame(name):
     E().save_game(name)
 
 
+def _secure_python_str(s):
+    return s.replace("'", '"').replace('\\', '/').replace('\n', ' ').replace('\r', ' ')
+
+
 @exported('VS.sendCustom', B.INT, B.STR, B.STR, B.STR)
 def sendCustom(cp, cmd, args, id_):
-    E().warn('sendCustom called in single player (%s)' % cmd)
+    # single player: UniverseUtil::sendCustom calls receivedCustom directly
+    if cp < 0 or cp > 0:
+        return
+    receivedCustom(cp, True, cmd, args, id_)
 
 
 @exported('VS.receivedCustom', B.INT, B.BOOL, B.STR, B.STR, B.STR)
 def receivedCustom(cp, trusted, cmd, args, id_):
-    pass
+    eng = E()
+    custompython = eng.data.config.get('general', 'custompython', 'import custom;custom.processMessage')
+    code = "%s(%s, r'%s', r'%s', r'%s')\n" % (custompython, 'True' if trusted else 'False',
+                                             _secure_python_str(cmd), _secure_python_str(args),
+                                             _secure_python_str(id_))
+    eng.run_string(code, 'receivedCustom(%s)' % cmd)
 
 
 @exported('VS.showSplashScreen', B.STR)
@@ -881,19 +893,33 @@ def getSaveDataLength(cp, key):
     return E().get_save_data_length(cp, key)
 
 
+# Save strings are C++ std::strings.  The mock keeps them as the raw bytes
+# (a str holding one code point per byte, the way save files are read), and
+# converts at the boundary like Boost.Python: str -> UTF-8 bytes on the way
+# in, strict UTF-8 decoding on the way out.  Latin-1 text in a save game
+# (e.g. flightgroup names like 'Nyk\xf6ping' in New_Game) therefore raises
+# UnicodeDecodeError here exactly as it does in the engine.
+def to_cpp_string(s):
+    return s.encode('utf-8').decode('latin-1')
+
+
+def from_cpp_string(s):
+    return s.encode('latin-1').decode('utf-8')
+
+
 @exported('Director.putSaveString', B.INT, B.STR, B.UINT, B.STR)
 def putSaveString(cp, key, num, val):
-    E().put_save_string(cp, key, num, val)
+    E().put_save_string(cp, key, num, to_cpp_string(val))
 
 
 @exported('Director.pushSaveString', B.INT, B.STR, B.STR)
 def pushSaveString(cp, key, val):
-    return E().push_save_string(cp, key, val)
+    return E().push_save_string(cp, key, to_cpp_string(val))
 
 
 @exported('Director.getSaveString', B.INT, B.STR, B.UINT)
 def getSaveString(cp, key, num):
-    return E().get_save_string(cp, key, num)
+    return from_cpp_string(E().get_save_string(cp, key, num))
 
 
 @exported('Director.getSaveStringLength', B.INT, B.STR)

@@ -148,6 +148,34 @@ class Game:
         basemod.click_link(self.eng, link)
         self.eng.process_pending_load()
 
+    def gui_texts(self):
+        room = self.base.room(self.base.curroom) if self.base else None
+        if room is None:
+            return {}
+        return {o.index: o.text for o in room.objs
+                if o.kind == 'text' and getattr(o, 'text', None) is not None}
+
+    def buy_upgrade(self, name, max_items=80):
+        """Buy an upgrade in the Repair/Upgrade room's GUI (Buy Mode, Next
+        Item until ``name`` shows, Select Items).  Returns the GUI message."""
+        rooms = [i for i, r in enumerate(self.base.rooms) if r.text == 'Repair/Upgrade']
+        if not rooms:
+            return None
+        self.goto_room(rooms[0])
+
+        def press(text):
+            l = self.find_link(lambda l: l.text == text, room=self.base.curroom)
+            if l is None:
+                raise Stuck('no %r button in the upgrade room' % text)
+            self.click(l)
+        press('Buy Mode')
+        for _ in range(max_items):
+            if self.gui_texts().get('txt_name') == name:
+                press('Select Items')
+                return self.gui_texts().get('txt_message', '')
+            press('Next Item')
+        return None
+
     def launch(self):
         if not self.docked():
             return
