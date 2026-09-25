@@ -4955,6 +4955,26 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 graphics.framerate_changes_shader = boost::json::value_to<bool>(*framerate_changes_shader_value_ptr);
             }
 
+            const boost::json::value * vsync_value_ptr = graphics_object.if_contains("vsync");
+            if (vsync_value_ptr != nullptr) {
+                graphics.vsync = boost::json::value_to<std::string>(*vsync_value_ptr);
+            }
+
+            const boost::json::value * frame_limit_mode_value_ptr = graphics_object.if_contains("frame_limit_mode");
+            if (frame_limit_mode_value_ptr != nullptr) {
+                graphics.frame_limit_mode = boost::json::value_to<std::string>(*frame_limit_mode_value_ptr);
+            }
+
+            const boost::json::value * max_framerate_value_ptr = graphics_object.if_contains("max_framerate");
+            if (max_framerate_value_ptr != nullptr) {
+                graphics.max_framerate = boost::json::value_to<int>(*max_framerate_value_ptr);
+            }
+
+            const boost::json::value * show_fps_value_ptr = graphics_object.if_contains("show_fps");
+            if (show_fps_value_ptr != nullptr) {
+                graphics.show_fps = boost::json::value_to<bool>(*show_fps_value_ptr);
+            }
+
             const boost::json::value * full_screen_value_ptr = graphics_object.if_contains("full_screen");
             if (full_screen_value_ptr != nullptr) {
                 graphics.full_screen = boost::json::value_to<bool>(*full_screen_value_ptr);
@@ -7952,6 +7972,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.warp_clearance_attract_flt = boost::json::value_to<float>(*warp_clearance_attract_value_ptr);
             }
 
+            const boost::json::value * warp_clearance_repel_exponent_value_ptr = physics_object.if_contains("warp_clearance_repel_exponent");
+            if (warp_clearance_repel_exponent_value_ptr != nullptr) {
+                physics.warp_clearance_repel_exponent_dbl = boost::json::value_to<double>(*warp_clearance_repel_exponent_value_ptr);
+                physics.warp_clearance_repel_exponent_flt = boost::json::value_to<float>(*warp_clearance_repel_exponent_value_ptr);
+            }
+
             const boost::json::value * warp_min_range_value_ptr = physics_object.if_contains("warp_min_range");
             if (warp_min_range_value_ptr != nullptr) {
                 physics.warp_min_range_dbl = boost::json::value_to<double>(*warp_min_range_value_ptr);
@@ -8500,6 +8526,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
             if (warp_multiplier_min_value_ptr != nullptr) {
                 warp.warp_multiplier_min_dbl = boost::json::value_to<double>(*warp_multiplier_min_value_ptr);
                 warp.warp_multiplier_min_flt = boost::json::value_to<float>(*warp_multiplier_min_value_ptr);
+            }
+
+            const boost::json::value * warp_speed_curve_exponent_value_ptr = warp_object.if_contains("warp_speed_curve_exponent");
+            if (warp_speed_curve_exponent_value_ptr != nullptr) {
+                warp.warp_speed_curve_exponent_dbl = boost::json::value_to<double>(*warp_speed_curve_exponent_value_ptr);
+                warp.warp_speed_curve_exponent_flt = boost::json::value_to<float>(*warp_speed_curve_exponent_value_ptr);
             }
 
             const boost::json::value * warp_ramp_down_time_value_ptr = warp_object.if_contains("warp_ramp_down_time");
