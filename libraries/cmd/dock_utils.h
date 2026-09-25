@@ -33,6 +33,11 @@
 class Unit;
 
 double DistanceTwoTargets(Unit *parent, Unit *target);
+
+/// The distance from a body's centre at which it counts as dockable, which is also the
+/// distance to sit at when leaving it. Mirrors the ranges CanDock tests.
+double DockingRange(const Unit *dock);
+
 int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy = false);
 std::string GetDockingText(Unit *unit, Unit *target, double range);
 std::string PrettyDistanceString(double distance);
