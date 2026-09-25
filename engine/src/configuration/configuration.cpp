@@ -7997,6 +7997,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.warp_clearance_attract_flt = boost::json::value_to<float>(*warp_clearance_attract_value_ptr);
             }
 
+            const boost::json::value * warp_clearance_repel_exponent_value_ptr = physics_object.if_contains("warp_clearance_repel_exponent");
+            if (warp_clearance_repel_exponent_value_ptr != nullptr) {
+                physics.warp_clearance_repel_exponent_dbl = boost::json::value_to<double>(*warp_clearance_repel_exponent_value_ptr);
+                physics.warp_clearance_repel_exponent_flt = boost::json::value_to<float>(*warp_clearance_repel_exponent_value_ptr);
+            }
+
             const boost::json::value * warp_min_range_value_ptr = physics_object.if_contains("warp_min_range");
             if (warp_min_range_value_ptr != nullptr) {
                 physics.warp_min_range_dbl = boost::json::value_to<double>(*warp_min_range_value_ptr);
@@ -8545,6 +8551,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
             if (warp_multiplier_min_value_ptr != nullptr) {
                 warp.warp_multiplier_min_dbl = boost::json::value_to<double>(*warp_multiplier_min_value_ptr);
                 warp.warp_multiplier_min_flt = boost::json::value_to<float>(*warp_multiplier_min_value_ptr);
+            }
+
+            const boost::json::value * warp_speed_curve_exponent_value_ptr = warp_object.if_contains("warp_speed_curve_exponent");
+            if (warp_speed_curve_exponent_value_ptr != nullptr) {
+                warp.warp_speed_curve_exponent_dbl = boost::json::value_to<double>(*warp_speed_curve_exponent_value_ptr);
+                warp.warp_speed_curve_exponent_flt = boost::json::value_to<float>(*warp_speed_curve_exponent_value_ptr);
             }
 
             const boost::json::value * warp_ramp_down_time_value_ptr = warp_object.if_contains("warp_ramp_down_time");
