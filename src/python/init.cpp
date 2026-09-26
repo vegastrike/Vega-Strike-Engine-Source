@@ -237,7 +237,6 @@ void Python::initpaths(){
   // Find all the mods dir (ignore homedir)
   for( int i=1; i<VSFileSystem::Rootdir.size(); i++)
   {
-	  modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+ PATHSEP "builtin\",";
       modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+ PATHSEP "quests\",";
       modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+ PATHSEP "missions\",";
       modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+ PATHSEP "ai\",";
@@ -251,7 +250,10 @@ void Python::initpaths(){
   while ((backslash=modpaths.find("\\"))!=std::string::npos) {
      modpaths[backslash]='/';
      }*/
-   std::string changepath ("import sys\nprint sys.path\nsys.path = ["+modpaths+"]\n");
+   // Extend (not replace) sys.path: Py_Initialize() already populated it with
+   // the real Python 3 stdlib, which modules/builtin used to shadow with a
+   // bundled Python 2 stdlib copy back when this engine embedded Python 2.
+   std::string changepath ("import sys\nsys.path = sys.path + ["+modpaths+"]\n");
   /*
    std::string changepath ("import sys\nprint sys.path\nsys.path = ["
 			  "\""+VSFileSystem::datadir+DELIMSTR"modules"DELIMSTR"builtin\""
@@ -337,7 +339,7 @@ void Python::init() {
 	InitBriefing ();
 	InitVS ();
 	VSFileSystem::vs_fprintf (stderr,"testing VS random");
-	std::string changepath ("import sys\nprint sys.path\n");
+	std::string changepath ("import sys\nprint(sys.path)\n");
 	VSFileSystem::vs_fprintf (stderr,"running %s",changepath.c_str());
 	char * temppython = strdup(changepath.c_str());
 	PyRun_SimpleString(temppython);	
