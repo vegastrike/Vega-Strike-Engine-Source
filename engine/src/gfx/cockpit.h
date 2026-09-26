@@ -196,7 +196,7 @@ public:
     ///Looks up a particular Gauge stat on unit
     float LookupUnitStat(int stat, Unit *target);
     ///Loads cockpit info...just as constructor
-    void Init(const char *file);
+    void Init(const char *file, bool defaultCockpit = false);
     ///Draws Cockpit then restores viewport
     void Draw() override;
     //void Update();//respawns and the like.
