@@ -26,5 +26,9 @@ Checks:
 CheckOptions:
   - key: modernize-use-auto.MinTypeNameLength
     value: '999'
+  - key: modernize-use-trailing-return-type.TransformFunctions
+    value: false
+  - key: modernize-use-trailing-return-type.TransformLambdas
+    value: all_except_auto
 ExtraArgs:
   - '-std=c++14'
