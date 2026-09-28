@@ -2781,23 +2781,6 @@ Vector Unit::MountPercentOperational(int whichmount) {
                     == Mount::INACTIVE) ? 0.0 : (mounts[whichmount].status == Mount::UNCHOSEN ? 2.0 : 1.0)));
 }
 
-// TODO: remove function
-// We no longer do repair through basic repair.
-// Kept for compatibility with python API.
-int Unit::RepairCost() {
-    return 0;
-}
-
-// TODO: remove
-// This was called when performing a BASIC_REPAIR
-// This function doesn't do anything anymore
-// Kept for compatibility with python API.
-int Unit::RepairUpgrade() {
-    return 1;
-}
-
-
-
 bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, double repair_price) {
     assert((item != nullptr) | !"Unit::RepairUpgradeCargo got a null item.");
     assert((baseUnit != nullptr) | !"Unit::RepairUpgradeCargo got a null baseUnit.");

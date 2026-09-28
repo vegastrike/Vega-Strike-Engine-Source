@@ -541,13 +541,6 @@ int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero) {
 }
 
 
-bool repair(Unit *my_unit) {
-    if (!my_unit) {
-        return false;
-    }
-    return my_unit->RepairUpgrade();
-}
-
 float upgrade(Unit *my_unit, string file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) {
     if (!my_unit) {
         return 0;

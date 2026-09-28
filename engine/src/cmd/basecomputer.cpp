@@ -1188,9 +1188,9 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     //Basic repair is implemented entirely in this module.
                     //PriceCargo() doesn't know about it.
                     Unit *playerUnit = m_player.GetUnit();
-                    int multiplier = 1;
+                    int multiplier = 0;
                     if (playerUnit) {
-                        multiplier = playerUnit->RepairCost();
+                        multiplier = playerUnit->DamagedComponentCount();
                     }
                     tempString = (boost::format("Price: #b#%1$.2f#-b#n1.5#")
                             % (basicRepairPrice() * multiplier))
@@ -2242,7 +2242,7 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     //Add Basic Repair.
     CargoColor repair;
     repair.cargo.SetName(BASIC_REPAIR_NAME);
-    repair.cargo.SetPrice(basicRepairPrice() * playerUnit->RepairCost());
+    repair.cargo.SetPrice(basicRepairPrice() * playerUnit->DamagedComponentCount());
     repair.cargo.SetDescription(BASIC_REPAIR_DESC);
     tlist.masterList.push_back(repair);
 
@@ -2323,8 +2323,24 @@ bool BaseComputer::changeToUpgradeMode(const EventCommandId &command, Control *c
 
 
 static void BasicRepair(Unit *parent) {
-    // This function does nothing. Kept for compatibility with python API.
-    // TODO: remove
+    if (parent == nullptr) {
+        return;
+    }
+
+    const int damaged_components = parent->DamagedComponentCount();
+    if (damaged_components == 0) {
+        showAlert("Your ship has no damage.  No charge.");
+        return;
+    }
+
+    const double price = basicRepairPrice() * damaged_components;
+    if (ComponentsManager::credits.Value() < price) {
+        showAlert("You don't have enough credits to repair your ship.");
+        return;
+    }
+
+    parent->RepairDamagedComponents();
+    ComponentsManager::credits -= price;
 }
 
 //The "Operation" classes deal with upgrades.

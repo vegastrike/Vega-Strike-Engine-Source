@@ -230,30 +230,8 @@ bool ComponentsManager::UpgradeAlreadyInstalled(const Cargo& upgrade) const {
     return true;
 }
 
-/** A convenience struct to hold the data used below */
-struct HudText {
-    const Component *component;
-    const std::string name;
-    const bool damageable;
-
-    HudText(Component *component, std::string name, bool damageable):
-        component(component), name(name), damageable(damageable) {}
-};
-
-/* This function is run when:
-    1. A player ship is created
-    2. A player ship is loaded from a saved game
-    3. An upgrade/downgrade has occured
-    4. DamageRandomSystem above is called
-*/
-
-void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
-    std::string report;
-
-    report += configuration().graphics.hud.damage_report_heading + "\n\n";
-
-    // TODO: this should be taken from assets so "FTL Drive" would be "SPEC Drive"
-    const HudText hud_texts[] = {
+std::vector<HudText> ComponentsManager::Components() {
+    return {
         HudText(&hull, "Hull", true),
         HudText(&armor, "Armor", true),
         HudText(&shield, "Shield", true),
@@ -271,9 +249,57 @@ void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
         HudText(&cloak, "Cloak", true),
         HudText(&repair_bot, "Repair System", false)
     };
+}
 
+bool ComponentsManager::ComponentNeedsRepair(Component *component) {
+    // Refuelling is a separate service, and an empty tank is not damage.
+    if (component == &fuel) {
+        return false;
+    }
+    // A shield reports its charge as operational, so ask the generator instead.
+    if (component == &shield) {
+        return shield.GeneratorDamaged();
+    }
+    // Everything else reports the condition of the component itself, which is what
+    // repair fixes - a capacitor below full charge is not damaged.
+    return component->PercentOperational() < 1.0;
+}
 
-    for(const HudText& text : hud_texts) {
+int ComponentsManager::DamagedComponentCount() {
+    int count = 0;
+    for (HudText &text : Components()) {
+        if (text.component->Installed() && ComponentNeedsRepair(text.component)) {
+            ++count;
+        }
+    }
+    return count;
+}
+
+bool ComponentsManager::RepairDamagedComponents() {
+    bool repaired = false;
+    for (HudText &text : Components()) {
+        if (text.component->Installed() && ComponentNeedsRepair(text.component)) {
+            text.component->Repair();
+            repaired = true;
+        }
+    }
+    return repaired;
+}
+
+/* This function is run when:
+    1. A player ship is created
+    2. A player ship is loaded from a saved game
+    3. An upgrade/downgrade has occured
+    4. DamageRandomSystem above is called
+*/
+
+void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
+    std::string report;
+
+    report += configuration().graphics.hud.damage_report_heading + "\n\n";
+
+    // TODO: this should be taken from assets so "FTL Drive" would be "SPEC Drive"
+    for(const HudText& text : Components()) {
         if(text.component->Installed()) {
             std::string new_hud_text = PrintFormattedComponentInHud(
                 text.component->PercentOperational(),
