@@ -265,25 +265,41 @@ bool ComponentsManager::ComponentNeedsRepair(Component *component) {
     return component->PercentOperational() < 1.0;
 }
 
-int ComponentsManager::DamagedComponentCount() {
-    int count = 0;
+std::vector<HudText> ComponentsManager::DamagedComponents() {
+    std::vector<HudText> damaged_components;
     for (HudText &text : Components()) {
         if (text.component->Installed() && ComponentNeedsRepair(text.component)) {
-            ++count;
+            damaged_components.push_back(text);
         }
     }
-    return count;
+    return damaged_components;
 }
 
-bool ComponentsManager::RepairDamagedComponents() {
-    bool repaired = false;
-    for (HudText &text : Components()) {
-        if (text.component->Installed() && ComponentNeedsRepair(text.component)) {
-            text.component->Repair();
-            repaired = true;
+int ComponentsManager::DamagedComponentCount() {
+    return static_cast<int>(DamagedComponents().size());
+}
+
+int ComponentsManager::RepairDamagedComponents() {
+    int repaired = 0;
+    for (HudText &text : DamagedComponents()) {
+        text.component->Repair();
+        // Repair() does not always succeed - a destroyed Resource cannot be repaired -
+        // so count what it actually fixed and let only that be paid for.
+        if (!ComponentNeedsRepair(text.component)) {
+            ++repaired;
         }
     }
     return repaired;
+}
+
+bool ComponentsManager::RepairComponent(const std::string &name) {
+    for (HudText &text : DamagedComponents()) {
+        if (text.name == name) {
+            text.component->Repair();
+            return !ComponentNeedsRepair(text.component);
+        }
+    }
+    return false;
 }
 
 /* This function is run when:

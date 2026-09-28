@@ -141,11 +141,16 @@ public:
 
     /** The ship's components, as the damage report lists them */
     std::vector<HudText> Components();
-    /** How many components are damaged. Fuel is not included, and a shield's charge
-        is not damage - only a damaged shield generator counts. */
+    /** The components that are damaged - fuel is not included, and a shield's charge
+        is not damage, so only a damaged shield generator counts. */
+    std::vector<HudText> DamagedComponents();
+    /** How many components are damaged */
     int DamagedComponentCount();
-    /** Repair every damaged component. Returns true if there was anything to repair. */
-    bool RepairDamagedComponents();
+    /** Repair every damaged component. Returns how many were actually repaired. */
+    int RepairDamagedComponents();
+    /** Repair one component, named as the damage report names it. Returns false if
+        there is no such damaged component, or if the repair did not take. */
+    bool RepairComponent(const std::string &name);
 
     /** place stuff here for now. maybe move to subclass */
     bool BuyCargo(ComponentsManager *seller, Cargo *item, int quantity);
