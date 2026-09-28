@@ -86,6 +86,7 @@ public:
     void DamageByPercent(double percent) override;
 
     void Repair() override;
+    void Replace() override;
 
     bool Damaged() const override;
     bool Installed() const override;

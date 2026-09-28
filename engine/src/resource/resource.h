@@ -120,6 +120,9 @@ public:
     void DamageByPercent(const T &value);
     bool Damaged() const;
     void RepairFully();
+    /** Restores a destroyed resource as well, which RepairFully() refuses to do - a base
+        replaces the part rather than repairing it. */
+    void ReplaceFully();
     void RepairByValue(const T &value);
     void RepairByPercent(const T &value);
 

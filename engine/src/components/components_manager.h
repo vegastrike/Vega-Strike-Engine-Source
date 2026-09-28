@@ -67,6 +67,13 @@ struct HudText {
         component(component), name(name), damageable(damageable) {}
 };
 
+/** What putting a damaged component right took */
+enum class ComponentService {
+    None,       // No such component, or it could not be put right
+    Repaired,
+    Replaced    // Repair() could not fix it, so it was replaced
+};
+
 /** A collection of components. This class is really a proto-ship,
  * with mass and serving as a stand-in for the Unit sub-class.
  */
@@ -146,11 +153,11 @@ public:
     std::vector<HudText> DamagedComponents();
     /** How many components are damaged */
     int DamagedComponentCount();
-    /** Repair every damaged component. Returns how many were actually repaired. */
-    int RepairDamagedComponents();
-    /** Repair one component, named as the damage report names it. Returns false if
-        there is no such damaged component, or if the repair did not take. */
-    bool RepairComponent(const std::string &name);
+    /** The damaged component with this damage report name, or nullptr */
+    Component *DamagedComponent(const std::string &name);
+    /** Puts a damaged component right, by repairing it or - when Repair() cannot fix it,
+        as for a destroyed one - by replacing it. */
+    ComponentService ServiceComponent(const std::string &name);
 
     /** place stuff here for now. maybe move to subclass */
     bool BuyCargo(ComponentsManager *seller, Cargo *item, int quantity);

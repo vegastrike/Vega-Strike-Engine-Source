@@ -408,6 +408,17 @@ static double basicRepairPrice(void) {
     return price * g_game.difficulty;
 }
 
+//What the base charges to replace a component: the price of the part, or the flat repair
+//fee when the component has no part of its own to price (a ship's own hull, armour and
+//shields are not bought parts).
+static double ReplacementPrice(Unit *base_unit, const Component *component) {
+    const std::string upgrade_key = component->GetUpgradeKey();
+    if (upgrade_key.empty()) {
+        return basicRepairPrice();
+    }
+    return base_unit->PriceCargo(upgrade_key);
+}
+
 static double GetOperational(Unit *playerUnit, const Cargo *item) {
     ComponentType type = GetComponentTypeFromName(item->GetName());
     Component* component = playerUnit->GetComponentByType(type);
@@ -2343,27 +2354,40 @@ bool BaseComputer::changeToUpgradeMode(const EventCommandId &command, Control *c
 }
 
 
-static void BasicRepair(Unit *parent) {
-    if (parent == nullptr) {
+static void BasicRepair(Unit *parent, Unit *base_unit) {
+    if (parent == nullptr || base_unit == nullptr) {
         return;
     }
 
-    const int damaged_components = parent->DamagedComponentCount();
-    if (damaged_components == 0) {
+    const std::vector<HudText> damaged_components = parent->DamagedComponents();
+    if (damaged_components.empty()) {
         showAlert("Your ship has no damage.  No charge.");
         return;
     }
 
-    const double price = basicRepairPrice() * damaged_components;
-    if (ComponentsManager::credits.Value() < price) {
+    //Put right as much of it as the player can pay for, one component at a time. A
+    //component that Repair() cannot fix is replaced, which costs the price of the part.
+    double spent = 0.0;
+    for (const HudText &component : damaged_components) {
+        const double repair_price = basicRepairPrice();
+        const double replace_price = ReplacementPrice(base_unit, component.component);
+        if (ComponentsManager::credits.Value() - spent < std::max(repair_price, replace_price)) {
+            break;
+        }
+        const ComponentService service = parent->ServiceComponent(component.name);
+        if (service == ComponentService::Repaired) {
+            spent += repair_price;
+        } else if (service == ComponentService::Replaced) {
+            spent += replace_price;
+        }
+    }
+
+    if (spent == 0.0) {
         showAlert("You don't have enough credits to repair your ship.");
         return;
     }
 
-    // Charge for the components that were actually repaired - a destroyed component
-    // cannot be repaired, and is not paid for.
-    const int repaired_components = parent->RepairDamagedComponents();
-    ComponentsManager::credits -= basicRepairPrice() * repaired_components;
+    ComponentsManager::credits -= spent;
 }
 
 //The "Operation" classes deal with upgrades.
@@ -2909,7 +2933,7 @@ bool BaseComputer::buyUpgrade(const EventCommandId &command, Control *control) {
         Unit *player_unit = m_player.GetUnit();
         if (item->GetName() == BASIC_REPAIR_NAME) {
             if (player_unit) {
-                BasicRepair(player_unit);
+                BasicRepair(player_unit, m_base.GetUnit());
                 if (m_selectedList == nullptr) {
                     return true;
                 }
@@ -2919,18 +2943,28 @@ bool BaseComputer::buyUpgrade(const EventCommandId &command, Control *control) {
             return true;
         }
 
-        //A damaged component's row repairs that component alone, at the same fee as its
-        //share of the Basic Repair price.
+        //A damaged component's row puts that component right on its own, at the same fees
+        //Basic Repair charges for it.
         if (item->GetName().rfind(REPAIR_COMPONENT_PREFIX, 0) == 0) {
-            if (player_unit) {
+            Unit *base_unit = m_base.GetUnit();
+            if (player_unit && base_unit) {
                 const std::string component_name = item->GetName().substr(REPAIR_COMPONENT_PREFIX.size());
-                const double price = item->GetPrice();
-                if (ComponentsManager::credits.Value() < price) {
-                    showAlert("You don't have enough credits to repair that.");
-                } else if (player_unit->RepairComponent(component_name)) {
-                    ComponentsManager::credits -= price;
-                } else {
-                    showAlert("That component is too damaged to be replaced.");
+                Component *component = player_unit->DamagedComponent(component_name);
+                if (component != nullptr) {
+                    const double repair_price = item->GetPrice();
+                    const double replace_price = ReplacementPrice(base_unit, component);
+                    if (ComponentsManager::credits.Value() < std::max(repair_price, replace_price)) {
+                        showAlert("You don't have enough credits to repair that.");
+                    } else {
+                        const ComponentService service = player_unit->ServiceComponent(component_name);
+                        if (service == ComponentService::Replaced) {
+                            ComponentsManager::credits -= replace_price;
+                        } else if (service == ComponentService::Repaired) {
+                            ComponentsManager::credits -= repair_price;
+                        } else {
+                            showAlert("That component cannot be put right.");
+                        }
+                    }
                 }
                 if (m_selectedList == nullptr) {
                     return true;

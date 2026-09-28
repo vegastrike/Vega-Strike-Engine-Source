@@ -303,6 +303,16 @@ void Shield::Repair() {
     operational = 1.0;
 }
 
+void Shield::Replace() {
+    regeneration.ReplaceFully();
+
+    for (Resource<double> &facet : facets) {
+        facet.ReplaceFully();
+    }
+
+    operational = 1.0;
+}
+
 bool Shield::Damaged() const {
     return operational.Value() < 1;
 }
