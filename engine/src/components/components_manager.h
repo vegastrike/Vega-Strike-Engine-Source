@@ -55,6 +55,17 @@
 #include "cargo_hold.h"
 
 #include <map>
+#include <vector>
+
+/** One component of a ship, with the name the damage report shows it under */
+struct HudText {
+    Component *component;
+    const std::string name;
+    const bool damageable;
+
+    HudText(Component *component, std::string name, bool damageable):
+        component(component), name(name), damageable(damageable) {}
+};
 
 /** A collection of components. This class is really a proto-ship,
  * with mass and serving as a stand-in for the Unit sub-class.
@@ -128,6 +139,14 @@ public:
     std::string GetHudText();
     std::string GetTitle(bool show_cargo, bool show_star_date, std::string date);
 
+    /** The ship's components, as the damage report lists them */
+    std::vector<HudText> Components();
+    /** How many components are damaged. Fuel is not included, and a shield's charge
+        is not damage - only a damaged shield generator counts. */
+    int DamagedComponentCount();
+    /** Repair every damaged component. Returns true if there was anything to repair. */
+    bool RepairDamagedComponents();
+
     /** place stuff here for now. maybe move to subclass */
     bool BuyCargo(ComponentsManager *seller, Cargo *item, int quantity);
     bool SellCargo(ComponentsManager *seller, Cargo *item, int quantity);
@@ -137,6 +156,8 @@ public:
     Component* GetComponentByType(const ComponentType type);
     const Component* GetComponentByType(const ComponentType type) const;
 private:
+    /** Whether a component needs repair: its own condition, not its charge */
+    bool ComponentNeedsRepair(Component *component);
     bool _Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity);
     bool _Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *item, int quantity);
 };
