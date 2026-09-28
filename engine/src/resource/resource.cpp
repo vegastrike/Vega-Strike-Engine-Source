@@ -286,6 +286,11 @@ void Resource<T>::RepairFully() {
 }
 
 template<typename T>
+void Resource<T>::ReplaceFully() {
+    value_ = adjusted_max_value_ = max_value_;
+}
+
+template<typename T>
 void Resource<T>::RepairByValue(const T &value) {
     // Can't fix a destroyed resource
     if(Destroyed()) {

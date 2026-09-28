@@ -279,27 +279,34 @@ int ComponentsManager::DamagedComponentCount() {
     return static_cast<int>(DamagedComponents().size());
 }
 
-int ComponentsManager::RepairDamagedComponents() {
-    int repaired = 0;
-    for (HudText &text : DamagedComponents()) {
-        text.component->Repair();
-        // Repair() does not always succeed - a destroyed Resource cannot be repaired -
-        // so count what it actually fixed and let only that be paid for.
-        if (!ComponentNeedsRepair(text.component)) {
-            ++repaired;
-        }
-    }
-    return repaired;
-}
-
-bool ComponentsManager::RepairComponent(const std::string &name) {
+Component *ComponentsManager::DamagedComponent(const std::string &name) {
     for (HudText &text : DamagedComponents()) {
         if (text.name == name) {
-            text.component->Repair();
-            return !ComponentNeedsRepair(text.component);
+            return text.component;
         }
     }
-    return false;
+    return nullptr;
+}
+
+ComponentService ComponentsManager::ServiceComponent(const std::string &name) {
+    Component *component = DamagedComponent(name);
+    if (component == nullptr) {
+        return ComponentService::None;
+    }
+
+    component->Repair();
+    if (!ComponentNeedsRepair(component)) {
+        return ComponentService::Repaired;
+    }
+
+    // A component Repair() cannot put right is replaced instead, which is what a base can
+    // do and a repair droid cannot.
+    component->Replace();
+    if (!ComponentNeedsRepair(component)) {
+        return ComponentService::Replaced;
+    }
+
+    return ComponentService::None;
 }
 
 /* This function is run when:

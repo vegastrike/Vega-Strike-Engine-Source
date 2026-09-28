@@ -65,6 +65,7 @@ public:
     void Damage() override;
     void DamageByPercent(double percent) override;
     void Repair() override;
+    void Replace() override;
     bool Damaged() const override;
     // The shield's own condition, without its charge: a discharged shield is not damaged.
     bool GeneratorDamaged() const;
