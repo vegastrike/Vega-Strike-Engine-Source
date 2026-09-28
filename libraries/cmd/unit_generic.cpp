@@ -1426,6 +1426,27 @@ float Unit::ExplosionRadius() {
     return expsize * rSize();
 }
 
+// A unit about to be freed must not be left as anybody's target, threat or velocity
+// reference: those are cast back to Unit when read, and casting freed memory faults.
+static void ClearReferencesTo(const Unit *dying_unit) {
+    if (_Universe == nullptr || _Universe->activeStarSystem() == nullptr) {
+        return;
+    }
+    Unit *unit;
+    for (un_iter iter = _Universe->activeStarSystem()->getUnitList().createIterator();
+            (unit = *iter) != nullptr; ++iter) {
+        if (unit->Target() == dying_unit) {
+            unit->SetTarget(nullptr);
+        }
+        if (unit->Threat() == dying_unit) {
+            unit->Threaten(nullptr, 0);
+        }
+        if (unit->VelocityReference() == dying_unit) {
+            unit->VelocityReference(nullptr);
+        }
+    }
+}
+
 void Unit::ProcessDeleteQueue() {
     while (!unit_delete_queue.empty()) {
 #ifdef DESTRUCTDEBUG
@@ -1442,11 +1463,7 @@ void Unit::ProcessDeleteQueue() {
         Unit *mydeleter = unit_delete_queue.back();
         unit_delete_queue.pop_back();
 
-        // Avoid segfault when the unit getting destroyed is the player's current target
-        Unit* parent = _Universe->AccessCockpit()->GetParent();
-        if (parent && parent->Target() == mydeleter) {
-            parent->SetTarget(nullptr);
-        }
+        ClearReferencesTo(mydeleter);
 
         delete mydeleter;                        ///might modify unitdeletequeue
         mydeleter = nullptr;
