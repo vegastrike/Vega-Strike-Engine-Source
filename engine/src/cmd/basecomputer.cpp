@@ -2342,6 +2342,32 @@ bool BaseComputer::changeToUpgradeMode(const EventCommandId &command, Control *c
 }
 
 
+//Puts one of the ship's own components right, repairing it if it can be and replacing it
+//if it cannot, and charges what that took: the repair fee, or the price of the part.
+//Returns the price charged, or nothing when it could not be afforded or did not need it.
+static double RepairShipComponent(Unit *player_unit, Unit *base_unit, const std::string &name) {
+    Component *component = player_unit->ComponentByName(name);
+    if (component == nullptr) {
+        return 0.0;
+    }
+
+    const double repair_price = basicRepairPrice();
+    const double replace_price = ReplacementPrice(base_unit, component);
+    if (ComponentsManager::credits.Value() < std::max(repair_price, replace_price)) {
+        return 0.0;
+    }
+
+    const ComponentService service = player_unit->ServiceComponent(name);
+    double price = 0.0;
+    if (service == ComponentService::Repaired) {
+        price = repair_price;
+    } else if (service == ComponentService::Replaced) {
+        price = replace_price;
+    }
+    ComponentsManager::credits -= price;
+    return price;
+}
+
 static void BasicRepair(Unit *parent, Unit *base_unit) {
     if (parent == nullptr || base_unit == nullptr) {
         return;
@@ -2353,29 +2379,20 @@ static void BasicRepair(Unit *parent, Unit *base_unit) {
         return;
     }
 
-    //Put right as much of it as the player can pay for, one component at a time. A
-    //component that Repair() cannot fix is replaced, which costs the price of the part.
+    //Put right as much of it as the player can pay for, one component at a time.
     double spent = 0.0;
     for (const HudText &component : damaged_components) {
-        const double repair_price = basicRepairPrice();
-        const double replace_price = ReplacementPrice(base_unit, component.component);
-        if (ComponentsManager::credits.Value() - spent < std::max(repair_price, replace_price)) {
+        const double paid = RepairShipComponent(parent, base_unit, component.name);
+        if (paid == 0.0) {
             break;
         }
-        const ComponentService service = parent->ServiceComponent(component.name);
-        if (service == ComponentService::Repaired) {
-            spent += repair_price;
-        } else if (service == ComponentService::Replaced) {
-            spent += replace_price;
-        }
+        spent += paid;
     }
 
     if (spent == 0.0) {
         showAlert("You don't have enough credits to repair your ship.");
         return;
     }
-
-    ComponentsManager::credits -= spent;
 }
 
 //The "Operation" classes deal with upgrades.
@@ -2982,6 +2999,16 @@ bool BaseComputer::fixUpgrade(const EventCommandId &command, Control *control) {
     Unit *baseUnit = m_base.GetUnit();
 
     if (baseUnit && playerUnit && item) {
+        //One of the ship's own components is put right here, since it is not an upgrade
+        //that can be re-applied - see ServiceComponent.
+        if (playerUnit->ComponentByName(item->GetName()) != nullptr) {
+            if (RepairShipComponent(playerUnit, baseUnit, item->GetName()) == 0.0) {
+                showAlert("You don't have enough credits to repair that.");
+            }
+            refresh();
+            return true;
+        }
+
         if (playerUnit->RepairUpgradeCargo(item, baseUnit, RepairPrice(playerUnit, item))) {
             if (UnitUtil::PercentOperational(*item, playerUnit, item->GetName(), "upgrades/", false) < 1.0) {
                 emergency_downgrade_mode = "EMERGENCY MODE ";

@@ -803,6 +803,14 @@ float PercentOperational(const Cargo item, Unit *un, std::string name, std::stri
     // New Code
     // TODO: Make actually return percent damaged
 
+    // A ship's own components are listed under the name the damage report gives them,
+    // which is not a unit key - there is no armor key, only armor01 and its like. Ask
+    // the ship's components for those before falling back to the keys.
+    const Component *component = un->ComponentByName(name);
+    if (component != nullptr) {
+        return component->PercentOperational();
+    }
+
     // name is unit_key with stripped suffix. Need to add it again
     // TODO: check for prefixes: add_ mult_
     std::string unit_key = name;

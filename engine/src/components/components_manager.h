@@ -161,6 +161,8 @@ public:
     int DamagedComponentCount();
     /** The damaged component with this damage report name, or nullptr */
     Component *DamagedComponent(const std::string &name);
+    /** The component with this damage report name, damaged or not, or nullptr */
+    Component *ComponentByName(const std::string &name);
     /** Puts a damaged component right, by repairing it or - when Repair() cannot fix it,
         as for a destroyed one - by replacing it. */
     ComponentService ServiceComponent(const std::string &name);
