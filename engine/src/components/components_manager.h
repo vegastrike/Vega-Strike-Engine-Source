@@ -148,9 +148,12 @@ public:
 
     /** The ship's components, as the damage report lists them */
     std::vector<HudText> Components();
-    /** Lists the ship's own components in its upgrade space, which is where the base UI
-        reads a ship's parts from. They are part of the ship - integral, so not for sale. */
-    void AddIntegralComponents();
+    /** The ship's own components, as the rows the base UI lists them as: what the hull
+        came with, plus the parts that are never bought. Fuel is not a part, and a
+        component the ship bought is listed as the item it is instead. */
+    std::vector<Cargo> IntegralComponentItems();
+    /** Drops the rows a game saved by an earlier build carries for its own components. */
+    void RemoveLegacyIntegralItems();
     /** The components that are damaged - fuel is not included, and a shield's charge
         is not damage, so only a damaged shield generator counts. */
     std::vector<HudText> DamagedComponents();
@@ -171,6 +174,8 @@ public:
     Component* GetComponentByType(const ComponentType type);
     const Component* GetComponentByType(const ComponentType type) const;
 private:
+    /** Whether a component is part of the ship itself, and so not for sale */
+    bool ComponentIsIntegral(const Component *component) const;
     /** Whether a component needs repair: its own condition, not its charge */
     bool ComponentNeedsRepair(Component *component);
     bool _Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity);

@@ -44,6 +44,13 @@ Resource<double> ComponentsManager::credits = Resource<double>(0.0, 0.0);
 void ComponentsManager::Load(std::string unit_key) {
     mass = base_mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 0.0);
 
+    // Parts the ship is never without: whichever replacement is fitted, these belong to
+    // the ship and are not for sale.
+    hull.SetIntegral(true);
+    afterburner.SetIntegral(true);
+    drive.SetIntegral(true);
+    ftl_drive.SetIntegral(true);
+
     // Consumer
     std::string prohibited_upgrades_string = UnitCSVFactory::GetVariable(unit_key, "Prohibited_Upgrades", std::string());
 
@@ -269,22 +276,23 @@ namespace {
 // The category the base UI groups a ship's own components under.
 const char *const INTEGRAL_CATEGORY = "upgrades/integral";
 // Rows that a game saved before the ship's own components were listed this way carries,
-// named by unit key. The rows below replace them.
+// named by unit key.
 const char *const LEGACY_INTEGRAL_ITEMS[] = {"hull", "afterburner", "drive", "ftl_drive"};
 }
 
-void ComponentsManager::AddIntegralComponents() {
-    for (const char *legacy_item : LEGACY_INTEGRAL_ITEMS) {
-        upgrade_space.RemoveCargo(this, legacy_item, 1);
+bool ComponentsManager::ComponentIsIntegral(const Component *component) const {
+    // Fuel is a supply rather than a part of the ship.
+    if (component == &fuel) {
+        return false;
     }
+    // What the hull came with, or one of the parts the ship is never without.
+    return component->Integral() || component->GetUpgradeKey().empty();
+}
 
+std::vector<Cargo> ComponentsManager::IntegralComponentItems() {
+    std::vector<Cargo> items;
     for (HudText &text : Components()) {
-        // A component the ship came with is part of the ship: it cannot be sold, and it
-        // takes no space or mass of its own because the ship already counts it. A
-        // component that was bought is the item the ship carries, and is listed as that
-        // item instead.
-        if (!text.component->Installed() || !text.component->GetUpgradeKey().empty()
-                || upgrade_space.HasCargo(text.name)) {
+        if (!text.component->Installed() || !ComponentIsIntegral(text.component)) {
             continue;
         }
 
@@ -294,8 +302,17 @@ void ComponentsManager::AddIntegralComponents() {
         component_item.SetQuantity(1);
         component_item.SetInstalled(true);
         component_item.SetComponent(true);
+        // Part of the ship, so it is not for sale and takes no space of its own - the
+        // ship's own mass and volume already count it.
         component_item.SetIntegral(true);
-        upgrade_space.AddCargo(this, component_item, false);
+        items.push_back(component_item);
+    }
+    return items;
+}
+
+void ComponentsManager::RemoveLegacyIntegralItems() {
+    for (const char *legacy_item : LEGACY_INTEGRAL_ITEMS) {
+        upgrade_space.RemoveCargo(this, legacy_item, 1);
     }
 }
 
