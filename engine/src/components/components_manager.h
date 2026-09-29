@@ -148,6 +148,9 @@ public:
 
     /** The ship's components, as the damage report lists them */
     std::vector<HudText> Components();
+    /** Lists the ship's own components in its upgrade space, which is where the base UI
+        reads a ship's parts from. They are part of the ship - integral, so not for sale. */
+    void AddIntegralComponents();
     /** The components that are damaged - fuel is not included, and a shield's charge
         is not damage, so only a damaged shield generator counts. */
     std::vector<HudText> DamagedComponents();
