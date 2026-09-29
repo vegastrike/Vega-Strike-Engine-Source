@@ -1278,6 +1278,24 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
 
                 //********************************************************************************************
             {
+                //A part of the ship itself was not bought, so it has no value or purchase
+                //price, and putting it right costs the fee every component shares.
+                Component *ship_component = m_player.GetUnit()->ComponentByName(item.GetName());
+                if (ship_component != nullptr) {
+                    descString += "#b#Integral Component, not for sale#-b#n1.5#";
+                    descString += (boost::format("Percent Working: #b#%1$.2f#-b, Repair Cost: %2$.2f#n1.5#")
+                            % (ship_component->PercentOperational() * 100.0)
+                            % basicRepairPrice())
+                            .str();
+                    descString += ship_component->GetDescription();
+                    //Say what the fitted part is, when the ship is carrying one.
+                    const std::string part_key = ship_component->GetUpgradeKey();
+                    if (!part_key.empty()) {
+                        descString += Manifest::MPL().GetCargoByName(part_key).GetDescription();
+                    }
+                    break;
+                }
+
                 double percent_working = GetOperational(m_player.GetUnit(), &item);
                 if (percent_working < 1) {
                     //IF DAMAGED
