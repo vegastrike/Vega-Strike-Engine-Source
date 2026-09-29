@@ -27,6 +27,7 @@
 #ifndef VEGA_STRIKE_ENGINE_VS_GLOBALS_H
 #define VEGA_STRIKE_ENGINE_VS_GLOBALS_H
 
+#include <locale>
 #include <vector>
 #include <stddef.h>
 
@@ -139,5 +140,7 @@ class ForceFeedback;
 extern ForceFeedback *forcefeedback;
 
 extern double benchmark;
+
+std::locale &GetGlobalLocale();
 
 #endif //VEGA_STRIKE_ENGINE_VS_GLOBALS_H

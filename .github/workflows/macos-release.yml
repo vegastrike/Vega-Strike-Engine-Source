@@ -40,7 +40,7 @@ jobs:
 
     steps:
       - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: vega-py-setup
         with:
           python-version: ${{ matrix.python-version }}
@@ -53,7 +53,7 @@ jobs:
         run: brew install bash
 
       - name: Check out repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 2
           submodules: false
@@ -73,7 +73,6 @@ jobs:
 
       - name: Build it
         env:
-          MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
@@ -85,10 +84,10 @@ jobs:
           USE_GTEST: 0
           INSTALL_SDL3: 0
           INSTALL_SDL3_IMAGE: 0
-        run: script/cibuild --preset-name=${{ matrix.preset-name }}
+        run: script/cibuild --preset-name="${{ matrix.preset-name }}"
 
       - name: Package it
-        working-directory: ${{github.workspace}}
+        working-directory: "${{ github.workspace }}"
         run: cpack -V --preset-name="package-${{ matrix.preset-name }}"
 
       - name: Upload the artifacts

@@ -12,11 +12,15 @@
 
 #include "configuration/configuration.h"
 #include "gldrv/winsys.h"
+#include "gldrv/gl_init.h"
 #include "universe.h"
 #include "vegadisk/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 #include "config_xml.h"
 #include "src/vs_exit.h"
+#include "cmd/music.h"
+#include "vega_cast_utils.h"
+#include "src/audiolib.h"
 #include <boost/json.hpp>
 #include <boost/filesystem.hpp>
 #include <imgui.h>
@@ -45,12 +49,23 @@ SDL_DisplayID sel_display_id = 0;
 int  sel_res_w = 0, sel_res_h = 0;
 std::string monitor_text, resolution_text;
 char text_height_buf[16] = "16";
+char hud_fov_buf[16] = "37.5";
 static const char *aspect_opts[] = { "16:10 (1.6)", "16:9 (1.78)", "4:3 (1.33)", "5:4 (1.25)", "1:1 (1.0)" };
 static const float aspect_vals[] = { 1.6f, 16.0f / 9.0f, 4.0f / 3.0f, 1.25f, 1.0f };
 int  sel_base_aspect = 0;      // aspect_opts[0] = 16:10 (default base aspect)
 std::string base_aspect_text = aspect_opts[0];
 int  sel_screen_aspect = -1;      // -1 = auto (W/H)
 std::string screen_aspect_text;
+
+// Frame-rate limiting.
+static const char *vsync_opts[] = { "Off", "On (monitor)", "Adaptive" };
+static const char *vsync_vals[] = { "off", "on", "adaptive" };
+int  sel_vsync = 1;
+static const char *frame_limit_opts[] = { "Unlimited", "Half monitor", "Fixed" };
+static const char *frame_limit_vals[] = { "unlimited", "half", "fixed" };
+int  sel_frame_limit = 0;
+int  sel_max_framerate = 60;
+bool show_fps = false;
 bool display_inited = false;
 
 bool rendered_crosshair = true;
@@ -67,6 +82,9 @@ static void load_bindings_staging();
 static void draw_bindings_dialog();
 static void handle_bindings_event(const SDL_Event *event);
 static boost::json::value read_config_value(const std::string &path);
+// Read a config path from a specific Configuration (used to diff a changed value
+// against the datadir default to detect a revert).
+static boost::json::value read_config_value_from(const vega_config::Configuration &c, const std::string &path);
 
 // Bindings dialog state (declared here so draw_display_frame can open it).
 static bool bind_dialog_open = false;
@@ -74,34 +92,62 @@ static bool bind_capturing = false;
 static int  bind_rebind_row = -1;
 static std::string bind_capture_cmd;
 
-enum { FONT_AA_VEC = 0, FONT_VEC, FONT_HELVETICA, FONT_TIMES, FONT_FIXED };
-static const char *font_type_names[] = { "Antialiased Vector", "Vector", "Helvetica", "Times", "Fixed" };
-int  sel_font_type = FONT_AA_VEC;
-int  sel_bitmap_size[3] = { -1, -1, -1 };   // 0=Helvetica 1=Times 2=Fixed
-
 enum { FC_KEYBOARD = 0, FC_MOUSE = 1, FC_JOYSTICK = 2 };
 int  flight_control = FC_KEYBOARD;
 static const char *fc_names[] = { "Keyboard", "Mouse", "Joystick" };
 
-struct BitmapFamily {
-    const char *name;
-    int  n;
-    const char **size_names;
-    const int *px;
-};
-static const char *helv_sizes[] = { "10", "12", "18" };
-static const int   helv_px[]    = { 14, 16, 23 };
-static const char *times_sizes[] = { "10", "24" };
-static const int   times_px[]   = { 14, 29 };
-static const char *fixed_sizes[] = { "8x13", "9x15" };
-static const int   fixed_px[]   = { 14, 16 };
-static const BitmapFamily bitmap_families[] = {
-    { "Helvetica", 3, helv_sizes, helv_px },
-    { "Times", 2, times_sizes, times_px },
-    { "Fixed", 2, fixed_sizes, fixed_px },
-};
+// Selectable fonts: index 0 is always the engine's embedded Roboto; the rest are
+// the .ttf files found in the data fonts/ directory (e.g. Saira variants).
+// graphics.font stores the value to persist: "Roboto" (sentinel) or a .ttf filename.
+static std::vector<std::string> s_font_list;
+static std::vector<std::string> s_font_values;   // parallel: graphics.font value for each entry
+static int sel_font = 0;
+
+// Scan the data fonts/ directory for .ttf files and (re)build the selectable font
+// list. Roboto (engine-provided) is always first.
+static void refresh_font_list() {
+    s_font_list.clear();
+    s_font_values.clear();
+    s_font_list.push_back("Roboto");
+    s_font_values.push_back("Roboto");
+    const fs::path fonts_dir = VSFileSystem::datadir + "/fonts";
+    if (fs::exists(fonts_dir) && fs::is_directory(fonts_dir)) {
+        std::vector<std::string> ttf;
+        for (fs::directory_iterator it(fonts_dir), end; it != end; ++it) {
+            if (it->path().extension() == ".ttf") {
+                ttf.push_back(it->path().filename().string());
+            }
+        }
+        std::sort(ttf.begin(), ttf.end());
+        for (const auto &f : ttf) {
+            s_font_list.push_back(f);
+            s_font_values.push_back(f);
+        }
+    }
+    if (sel_font < 0 || sel_font >= static_cast<int>(s_font_list.size())) {
+        sel_font = 0;
+    }
+}
+
+// Set sel_font from a persisted graphics.font value ("Roboto" or a .ttf filename).
+static void select_font_from_value(const std::string &value) {
+    if (s_font_values.empty()) {
+        refresh_font_list();
+    }
+    sel_font = 0;
+    for (size_t i = 0; i < s_font_values.size(); ++i) {
+        if (s_font_values[i] == value) {
+            sel_font = static_cast<int>(i);
+            return;
+        }
+    }
+}
 
 bool dirty = false;
+
+// Set on Save when a shader config path changed; shows a "restart required"
+// notice (shaders are written out but not hot-applied).
+static bool shader_restart_notice = false;
 
 // The set of config paths changed (dirty). Populated by the apply_*_to_config
 // functions on Save; consumed by write_out_dirty() (the single write-out entry
@@ -112,6 +158,71 @@ static std::set<std::string> g_dirty_paths;
 static void mark_dirty(const std::string &path) {
     dirty = true;
     g_dirty_paths.insert(path);
+}
+
+// Set an input-axis role and mark it dirty ONLY if it actually changed, so a Save
+// writes just the changed axes (a sparse bindings.json overlay) rather than the
+// whole axes tree on every Save.
+static void mark_axis_dirty_if_changed(const std::string &role, const std::string &source, int joystick, int axis, bool inverse) {
+    auto &ar = configuration().axes[role];
+    if (ar.source != source || ar.joystick != joystick || ar.axis != axis || ar.inverse != inverse) {
+        ar.source = source;
+        ar.joystick = joystick;
+        ar.axis = axis;
+        ar.inverse = inverse;
+        mark_dirty("bindings.axes." + role);
+    }
+}
+
+// Compare two ActionBindings (keyboard/mouse/joystick/hat). Used to detect which
+// commands actually changed so a Save writes only those (sparse bindings overlay).
+static bool binding_equal(const vega_config::Configuration::ActionBinding &a,
+                          const vega_config::Configuration::ActionBinding &b) {
+    return a.key == b.key && a.modifier == b.modifier && a.button == b.button
+        && a.joystick == b.joystick && a.is_mouse == b.is_mouse
+        && a.hatswitch == b.hatswitch && a.direction == b.direction;
+}
+static bool action_bindings_equal(const vega_config::Configuration::ActionBindings &a,
+                                  const vega_config::Configuration::ActionBindings &b) {
+    if (a.keyboard.size() != b.keyboard.size() || a.mouse.size() != b.mouse.size()
+        || a.joystick.size() != b.joystick.size() || a.hat.size() != b.hat.size()) return false;
+    for (size_t i = 0; i < a.keyboard.size(); ++i) if (!binding_equal(a.keyboard[i], b.keyboard[i])) return false;
+    for (size_t i = 0; i < a.mouse.size(); ++i) if (!binding_equal(a.mouse[i], b.mouse[i])) return false;
+    for (size_t i = 0; i < a.joystick.size(); ++i) if (!binding_equal(a.joystick[i], b.joystick[i])) return false;
+    for (size_t i = 0; i < a.hat.size(); ++i) if (!binding_equal(a.hat[i], b.hat[i])) return false;
+    return true;
+}
+
+// Compare two AxisRoles (source/joystick/axis/inverse).
+static bool axis_role_equal(const vega_config::Configuration::AxisRole &a,
+                            const vega_config::Configuration::AxisRole &b) {
+    return a.source == b.source && a.joystick == b.joystick
+        && a.axis == b.axis && a.inverse == b.inverse;
+}
+
+// Build a Configuration holding ONLY the datadir defaults (no homedir overlay),
+// mirroring the default-load sequence in vsfilesystem.cpp. Used to detect when a
+// changed value has been reverted to the shipped default so the overlay can drop
+// it instead of accumulating it forever.
+static vega_config::Configuration load_default_config() {
+    vega_config::Configuration d;
+    for (const std::string &name : {"bindings.json", "theme.json", "engine.json", "config.json"}) {
+        d.load_config(boost::filesystem::path(VSFileSystem::datadir + "/" + name));
+    }
+    return d;
+}
+
+// Remove a dotted path (e.g. "graphics.fog") from a nested boost::json::object.
+// No-op if any segment is missing; prunes emptied intermediate objects.
+static void remove_json_path(boost::json::object &root, const std::string &path) {
+    size_t dot = path.find('.');
+    if (dot == std::string::npos) { root.erase(path); return; }
+    std::string head = path.substr(0, dot);
+    std::string rest = path.substr(dot + 1);
+    auto it = root.find(head);
+    if (it == root.end() || !it->value().is_object()) return;
+    remove_json_path(it->value().as_object(), rest);
+    if (it->value().as_object().empty()) root.erase(it);
 }
 
 // ---------------------------------------------------------------------------
@@ -131,9 +242,13 @@ static void refresh_screen_aspect_text() {
 }
 
 // The ideal font height (font_point) for the current resolution. Font size scales
-// with the horizontal resolution: ~10 at 800x600, ~32 at 2560x1440 (width / 80).
+// linearly with the horizontal resolution: 14 at 1368x768, 27 at 2560x1440.
+// Linear fit through those two points: font = (13/1192) * width - 0.919, rounded.
 static int ideal_font_height() {
-    return sel_res_w > 0 ? sel_res_w / 80 : 16;
+    if (sel_res_w <= 0) {
+        return 16;
+    }
+    return static_cast<int>(std::lround((13.0 / 1192.0) * sel_res_w - 0.919));
 }
 
 static void prefill_text_height() {
@@ -141,18 +256,6 @@ static void prefill_text_height() {
         int fp = ideal_font_height();
         snprintf(text_height_buf, sizeof(text_height_buf), "%d", fp);
     }
-}
-
-// Suggest the bitmap size (index) nearest the ideal vector height.
-static int suggested_bitmap_size(int family) {
-    const BitmapFamily &f = bitmap_families[family];
-    int ideal = ideal_font_height();
-    int best = 0, bestdiff = 1000000;
-    for (int i = 0; i < f.n; i++) {
-        int d = f.px[i] < ideal ? ideal - f.px[i] : f.px[i] - ideal;
-        if (d < bestdiff) { bestdiff = d; best = i; }
-    }
-    return best;
 }
 
 static bool highest_monitor_resolution(SDL_DisplayID id, int &w, int &h) {
@@ -219,6 +322,7 @@ static void load_display_from_config() {
     cfg_full_screen = g.full_screen;
     int fp = (int)g.font_point_flt;
     snprintf(text_height_buf, sizeof(text_height_buf), "%d", fp);
+    snprintf(hud_fov_buf, sizeof(hud_fov_buf), "%g", g.fov_flt);
     // screen (monitor) index.
     sel_monitor = g.screen;
     int nd = 0; SDL_DisplayID *ids = SDL_GetDisplays(&nd);
@@ -228,13 +332,19 @@ static void load_display_from_config() {
     const char *nm = sel_display_id ? SDL_GetDisplayName(sel_display_id) : NULL;
     monitor_text = std::to_string(sel_monitor) + "  " + (nm ? nm : "(unnamed)");
     if (ids) SDL_free(ids);
-    // Font type from high_quality_font + font_antialias (vector AA / vector / bitmap).
-    if (!g.high_quality_font && g.font_antialias) sel_font_type = FONT_AA_VEC;
-    else if (!g.high_quality_font && !g.font_antialias) sel_font_type = FONT_VEC;
-    else sel_font_type = FONT_HELVETICA;   // bitmap (font name will refine; v1 defaults)
+    // Select the configured font (Roboto or a .ttf filename) in the dropdown list.
+    refresh_font_list();
+    select_font_from_value(g.font);
     load_base_aspect_from_config();
     refresh_screen_aspect_text();
     resolution_text = std::to_string(sel_res_w) + "x" + std::to_string(sel_res_h);
+    // vsync / frame-rate limit.
+    sel_vsync = 1;
+    for (int i = 0; i < 3; ++i) if (g.vsync == vsync_vals[i]) sel_vsync = i;
+    sel_frame_limit = 0;
+    for (int i = 0; i < 3; ++i) if (g.frame_limit_mode == frame_limit_vals[i]) sel_frame_limit = i;
+    sel_max_framerate = g.max_framerate > 0 ? g.max_framerate : 60;
+    show_fps = g.show_fps;
     display_inited = true;
 }
 
@@ -252,32 +362,29 @@ static void apply_display_to_config() {
     g.font_point_flt = (float)atoi(text_height_buf);
     mark_dirty("graphics.font_point");
     RequestImGuiFontSize(g.font_point_flt);   // live-rebuild the ImGui font atlas at the new size
-    if (sel_font_type == FONT_AA_VEC) {
-        g.high_quality_font = false;
-        g.high_quality_font_computer = false;
-        g.font_antialias = true;
-    } else if (sel_font_type == FONT_VEC) {
-        g.high_quality_font = false;
-        g.high_quality_font_computer = false;
-        g.font_antialias = false;
-    } else {
-        int fam = sel_font_type - FONT_HELVETICA;
-        const BitmapFamily &f = bitmap_families[fam];
-        int sz = sel_bitmap_size[fam];
-        if (sz < 0) sz = suggested_bitmap_size(fam);
-        if (sz < 0 || sz >= f.n) sz = 0;
-        g.high_quality_font = true;
-        g.high_quality_font_computer = true;
-        g.font_antialias = false;
-        std::string nm;
-        if (fam == 0) nm = "helvetica" + std::string(f.size_names[sz]);
-        else if (fam == 1) nm = "times" + std::string(f.size_names[sz]);
-        else nm = "fixed" + std::string(f.size_names[sz]).substr(2);
-        g.font = nm;
-        mark_dirty("graphics.font");
+    // HUD FOV: persist and hot-apply to the camera.
+    g.fov_flt = locale_aware_stof(std::string(hud_fov_buf));
+    g.fov_dbl = locale_aware_stod(std::string(hud_fov_buf));
+    mark_dirty("graphics.fov");
+    if (_Universe && _Universe->AccessCamera()) {
+        _Universe->AccessCamera()->SetFov(g.fov_flt);
     }
-    mark_dirty("graphics.high_quality_font");
-    mark_dirty("graphics.high_quality_font_computer");
+    // Persist the selected font ("Roboto" sentinel or a .ttf filename); only hot-apply
+    // a font change when the selection actually differs from the current font, so a
+    // size-only Save does not force an atlas rebuild.
+    if (sel_font >= 0 && sel_font < static_cast<int>(s_font_values.size())) {
+        const std::string &new_font = s_font_values[sel_font];
+        const bool font_changed = (new_font != g.font);
+        g.font = new_font;
+        mark_dirty("graphics.font");
+        if (font_changed) {
+            std::string font_path;
+            if (new_font != "Roboto") {
+                font_path = VSFileSystem::datadir + "/fonts/" + new_font;
+            }
+            RequestImGuiFont(font_path.c_str());   // live-reload the ImGui font atlas
+        }
+    }
     mark_dirty("graphics.font_antialias");
     g.aspect_flt = sel_screen_aspect >= 0 ? aspect_vals[sel_screen_aspect] : current_screen_aspect();
     mark_dirty("graphics.aspect");
@@ -299,6 +406,17 @@ static void apply_display_to_config() {
     // screen (monitor) index.
     g.screen = sel_monitor;
     mark_dirty("graphics.screen");
+    // Frame-rate limiting: persist and hot-apply. The half-monitor cap is computed
+    // from the now-current monitor, so switching monitors recomputes it here.
+    g.vsync = vsync_vals[sel_vsync];
+    g.frame_limit_mode = frame_limit_vals[sel_frame_limit];
+    g.max_framerate = sel_max_framerate;
+    mark_dirty("graphics.vsync");
+    mark_dirty("graphics.frame_limit_mode");
+    mark_dirty("graphics.max_framerate");
+    g.show_fps = show_fps;
+    mark_dirty("graphics.show_fps");
+    winsys_apply_frame_limit();
 }
 
 // ---------------------------------------------------------------------------
@@ -322,7 +440,7 @@ void draw_display_frame() {
     float dpy_w = avail_w * 0.72f;
     float side_w = avail_w - dpy_w;
 
-    ImGui::BeginChild("dpyframe", ImVec2(dpy_w, 6 * btn_h), ImGuiChildFlags_Borders);
+    ImGui::BeginChild("dpyframe", ImVec2(dpy_w, 8 * btn_h), ImGuiChildFlags_Borders);
     // Monitor selector.
     if (ImGui::Button("Monitor")) ImGui::OpenPopup("##pick_mon");
     ImGui::SameLine(); ImGui::TextUnformatted(monitor_text.c_str());
@@ -343,7 +461,8 @@ void draw_display_frame() {
         if (ids) SDL_free(ids);
         ImGui::EndPopup();
     }
-    // Resolution selector (detected fullscreen modes, deduplicated).
+    // Resolution selector (detected fullscreen modes, deduplicated). Each entry
+    // also shows its aspect ratio (width/height).
     if (ImGui::Button("Resolution")) ImGui::OpenPopup("##pick_res");
     ImGui::SameLine(); ImGui::TextUnformatted(resolution_text.c_str());
     if (ImGui::BeginPopup("##pick_res")) {
@@ -351,7 +470,9 @@ void draw_display_frame() {
         if (modes) {
             std::vector<std::string> seen;
             for (int i = 0; i < cnt; ++i) {
-                char lbl[32]; snprintf(lbl, sizeof(lbl), "%dx%d", modes[i]->w, modes[i]->h);
+                char lbl[40];
+                float aspect = modes[i]->h > 0 ? static_cast<float>(modes[i]->w) / static_cast<float>(modes[i]->h) : 0.0f;
+                snprintf(lbl, sizeof(lbl), "%dx%d (%.2f)", modes[i]->w, modes[i]->h, aspect);
                 if (std::find(seen.begin(), seen.end(), lbl) != seen.end()) continue;
                 seen.push_back(lbl);
                 if (ImGui::MenuItem(lbl)) {
@@ -374,37 +495,22 @@ void draw_display_frame() {
             if (ImGui::MenuItem(aspect_opts[i])) { sel_screen_aspect = (int)i; refresh_screen_aspect_text(); dirty = true; }
         ImGui::EndPopup();
     }
-    // Font type picker.
+    // Font picker: Roboto (engine default) + .ttf fonts from the data fonts/ dir.
+    if (s_font_list.empty()) {
+        refresh_font_list();
+    }
     ImGui::Text("Font"); ImGui::SameLine();
-    if (ImGui::Button(font_type_names[sel_font_type])) ImGui::OpenPopup("##pick_font");
+    if (ImGui::Button(s_font_list[sel_font].c_str())) ImGui::OpenPopup("##pick_font");
     if (ImGui::BeginPopup("##pick_font")) {
-        for (size_t i = 0; i < sizeof(font_type_names) / sizeof(font_type_names[0]); ++i)
-            if (ImGui::MenuItem(font_type_names[i])) { sel_font_type = (int)i; dirty = true; }
+        for (size_t i = 0; i < s_font_list.size(); ++i)
+            if (ImGui::MenuItem(s_font_list[i].c_str())) { sel_font = (int)i; dirty = true; }
         ImGui::EndPopup();
     }
-    if (sel_font_type == FONT_AA_VEC || sel_font_type == FONT_VEC) {
-        // Text Height input for vector fonts.
-        ImGui::SameLine(); ImGui::Text("Text Height"); ImGui::SameLine();
-        ImGui::SetNextItemWidth(60);
-        if (ImGui::InputText("##textheight", text_height_buf, sizeof(text_height_buf), ImGuiInputTextFlags_CharsDecimal))
-            dirty = true;
-    } else {
-        // Bitmap size picker for Helvetica/Times/Fixed.
-        int fam = sel_font_type - FONT_HELVETICA;
-        const BitmapFamily &f = bitmap_families[fam];
-        int sz = sel_bitmap_size[fam];
-        if (sz < 0) sz = suggested_bitmap_size(fam);
-        if (sz < 0 || sz >= f.n) sz = 0;
-        ImGui::SameLine();
-        if (ImGui::Button(f.size_names[sz])) ImGui::OpenPopup("##pick_bsize");
-        if (ImGui::BeginPopup("##pick_bsize")) {
-            for (int i = 0; i < f.n; i++) {
-                bool sel = (i == sz);
-                if (ImGui::Selectable(f.size_names[i], sel)) { sel_bitmap_size[fam] = i; dirty = true; }
-            }
-            ImGui::EndPopup();
-        }
-    }
+    // Text Height input (font_point) — the size, independent of the font choice.
+    ImGui::SameLine(); ImGui::Text("Text Height"); ImGui::SameLine();
+    ImGui::SetNextItemWidth(60);
+    if (ImGui::InputText("##textheight", text_height_buf, sizeof(text_height_buf), ImGuiInputTextFlags_CharsDecimal))
+        dirty = true;
     // Base aspect ratio.
     if (ImGui::Button("Base Aspect Ratio")) ImGui::OpenPopup("##pick_asp");
     ImGui::SameLine(); ImGui::TextUnformatted(base_aspect_text.c_str());
@@ -413,12 +519,65 @@ void draw_display_frame() {
             if (ImGui::MenuItem(aspect_opts[i])) { sel_base_aspect = (int)i; base_aspect_text = aspect_opts[i]; dirty = true; }
         ImGui::EndPopup();
     }
+    // HUD FOV.
+    ImGui::Text("HUD FOV"); ImGui::SameLine();
+    ImGui::SetNextItemWidth(60);
+    if (ImGui::InputText("##hudfov", hud_fov_buf, sizeof(hud_fov_buf), ImGuiInputTextFlags_CharsDecimal))
+        dirty = true;
+    // Vsync (monitor sync).
+    if (ImGui::Button("Vsync")) ImGui::OpenPopup("##pick_vsync");
+    ImGui::SameLine(); ImGui::TextUnformatted(vsync_opts[sel_vsync]);
+    if (ImGui::BeginPopup("##pick_vsync")) {
+        for (int i = 0; i < 3; ++i)
+            if (ImGui::MenuItem(vsync_opts[i])) { sel_vsync = i; dirty = true; }
+        ImGui::EndPopup();
+    }
+    // Frame rate limit (unlimited / half the monitor / a fixed number).
+    if (ImGui::Button("Frame Rate")) ImGui::OpenPopup("##pick_fr");
+    ImGui::SameLine(); ImGui::TextUnformatted(frame_limit_opts[sel_frame_limit]);
+    if (sel_frame_limit == 2) {
+        // Fixed cap: pick from the refresh rates the selected monitor reports, rather than
+        // typing a number and hoping the display can hold it. Same mode list the Resolution
+        // selector walks.
+        if (ImGui::Button("Refresh Rate")) ImGui::OpenPopup("##pick_rate_hz");
+        ImGui::SameLine();
+        char rate_text[24];
+        snprintf(rate_text, sizeof(rate_text), "%d Hz", sel_max_framerate);
+        ImGui::TextUnformatted(rate_text);
+        if (ImGui::BeginPopup("##pick_rate_hz")) {
+            int mode_count = 0;
+            SDL_DisplayMode **modes = SDL_GetFullscreenDisplayModes(sel_display_id, &mode_count);
+            if (modes != nullptr) {
+                std::vector<int> rates;
+                for (int i = 0; i < mode_count; ++i) {
+                    const int rate = modes[i]->refresh_rate;
+                    if (rate > 0 && std::find(rates.begin(), rates.end(), rate) == rates.end()) {
+                        rates.push_back(rate);
+                    }
+                }
+                std::sort(rates.begin(), rates.end());
+                for (size_t i = 0; i < rates.size(); ++i) {
+                    char lbl[24];
+                    snprintf(lbl, sizeof(lbl), "%d Hz", rates[i]);
+                    if (ImGui::MenuItem(lbl)) { sel_max_framerate = rates[i]; dirty = true; }
+                }
+                SDL_free(modes);
+            }
+            ImGui::EndPopup();
+        }
+    }
+    if (ImGui::BeginPopup("##pick_fr")) {
+        for (int i = 0; i < 3; ++i)
+            if (ImGui::MenuItem(frame_limit_opts[i])) { sel_frame_limit = i; dirty = true; }
+        ImGui::EndPopup();
+    }
+    if (ImGui::Checkbox("Show FPS", &show_fps)) dirty = true;
     ImGui::EndChild();   // end dpyframe (left column)
 
     // Right column: Flight Control + Input buttons + Rendered Crosshair, side by
     // side with the monitor/resolution/display controls (as vs-05).
     ImGui::SameLine();
-    ImGui::BeginChild("dpybtns", ImVec2(side_w, 6 * btn_h), ImGuiChildFlags_Borders);
+    ImGui::BeginChild("dpybtns", ImVec2(side_w, 8 * btn_h), ImGuiChildFlags_Borders);
     if (ImGui::Button(("Flight Control: " + std::string(fc_names[flight_control])).c_str(), ImVec2(-1, 0)))
         ImGui::OpenPopup("##flight");
     if (ImGui::BeginPopup("##flight")) {
@@ -560,16 +719,15 @@ static void apply_flight_to_config() {
         // axes (0/1) at bind time, so writing them would clobber the joystick
         // numbers and lose them on the next switch back to Joystick.  The inverse
         // flag is only what Mouse still needs from the role entry.
-        axes["x"].source = "mouse"; axes["x"].inverse = cfg().mouse.inverse_x;
-        axes["y"].source = "mouse"; axes["y"].inverse = cfg().mouse.inverse_y;
+        mark_axis_dirty_if_changed("x", "mouse", axes["x"].joystick, axes["x"].axis, cfg().mouse.inverse_x);
+        mark_axis_dirty_if_changed("y", "mouse", axes["y"].joystick, axes["y"].axis, cfg().mouse.inverse_y);
     } else {
         for (const char *role : {"x", "y"}) {
             auto it = axes.find(role);
             if (it != axes.end() && it->second.source == "mouse")
-                it->second.source = "joystick";
+                mark_axis_dirty_if_changed(role, "joystick", it->second.joystick, it->second.axis, it->second.inverse);
         }
     }
-    mark_dirty("bindings.axes");
 }
 
 // Apply mouse staging to Configuration.joystick.
@@ -610,13 +768,10 @@ static void apply_mouse_to_config() {
     // flip); the "inv_" modes do not. bindKeys() reads the mouse y-inversion
     // from cfg.mouse.inverse_y (not axes.y.inverse), so set and persist that.
     const bool invert_y = (std::string(mode).rfind("inv_", 0) == std::string::npos);
-    auto &axes = cfg().axes;
-    axes["x"].source = "mouse"; axes["x"].axis = 0; axes["x"].inverse = false;
-    axes["y"].source = "mouse"; axes["y"].axis = 1;
-    axes["y"].inverse = invert_y;
+    mark_axis_dirty_if_changed("x", "mouse", cfg().axes["x"].joystick, 0, false);
+    mark_axis_dirty_if_changed("y", "mouse", cfg().axes["y"].joystick, 1, invert_y);
     cfg().mouse.inverse_y = invert_y;
     mark_dirty("input.mouse.inverse_y");
-    mark_dirty("bindings.axes");
 }
 
 // Apply joystick staging to Configuration.joystick + input.axes.
@@ -637,23 +792,17 @@ static void apply_joystick_to_config() {
     // Write the x/y/z/throttle axes. An unbound role is kept with axis=-1 (the
     // engine's "unbound" sentinel) rather than erased, so parseAxes' overlay
     // merge preserves the unbind on restart (an absent key would fall back to
-    // the datadir default and re-bind it).
-    auto &axes = cfg().axes;
+    // the datadir default and re-bind it). Only roles that actually changed are
+    // marked dirty (sparse bindings.json overlay).
     for (int r = 0; r < 4; ++r) {
         const char *role = joy_role_names[r];
-        vega_config::Configuration::AxisRole &ar = axes[role];   // ensures the role exists (even if unbound)
+        cfg().axes[role];   // ensures the role exists (even if unbound)
         if (joy_bind_axis[r] < 0) {
-            ar.source = "joystick"; ar.joystick = 0; ar.axis = -1; ar.inverse = false;
+            mark_axis_dirty_if_changed(role, "joystick", 0, -1, false);
         } else {
-            ar.source = "joystick";
-            ar.joystick = joy_bind_stick[r];
-            ar.axis = joy_bind_axis[r];
-            ar.inverse = joy_bind_inv[r];
+            mark_axis_dirty_if_changed(role, "joystick", joy_bind_stick[r], joy_bind_axis[r], joy_bind_inv[r]);
         }
     }
-    // Persist the axes (including unbinds like a removed throttle) so they
-    // survive a restart; write_out_dirty serializes cfg().axes to bindings.json.
-    mark_dirty("bindings.axes");
 }
 
 // Write the accumulated dirty config paths out to the user config files.
@@ -702,86 +851,176 @@ static boost::json::object read_existing_overlay(const std::string &path) {
 static void write_out_dirty() {
     if (g_dirty_paths.empty()) return;
     boost::json::object config_out;
-    boost::json::object bindings_out;
-    bool has_bindings = false;
+    // A config path that was changed but now equals the shipped (datadir) default
+    // is a REVERT: it must be cleared from the overlay (so the default applies),
+    // not re-written. The default reference is built from the datadir files only.
+    const vega_config::Configuration dflt = load_default_config();
+    std::set<std::string> reverted;
     for (const auto &path : g_dirty_paths) {
-        if (path == "bindings.actions") {
-            has_bindings = true;
+        // Bindings paths (whole, or per-command/per-axis) are handled by the
+        // bindings write below, not config.json.
+        if (path == "bindings.actions" || path.rfind("bindings.actions.", 0) == 0
+            || path == "bindings.axes" || path.rfind("bindings.axes.", 0) == 0) {
             continue;
         }
         if (path.rfind("preset.", 0) == 0) {
             // preset selector: config.json -> preset.<cat>
             std::string cat = path.substr(7);
+            auto it = configuration().preset.find(cat);
+            if (it == configuration().preset.end()) continue;
+            auto dit = dflt.preset.find(cat);
+            if (dit != dflt.preset.end() && dit->second == it->second) {
+                reverted.insert(path);   // selector reverted to default -> clear
+                continue;
+            }
             auto &preset_obj = config_out["preset"].is_object() ? config_out["preset"].as_object()
                                : (config_out["preset"] = boost::json::object()).as_object();
-            auto it = configuration().preset.find(cat);
-            if (it != configuration().preset.end()) preset_obj[cat] = it->second;
+            preset_obj[cat] = it->second;
             continue;
         }
         boost::json::value v = read_config_value(path);
-        if (!v.is_null()) json_set_path(config_out, path, v);
+        if (v.is_null()) continue;
+        // If the current value equals the datadir default, it was reverted -> clear.
+        if (v == read_config_value_from(dflt, path)) {
+            reverted.insert(path);
+            continue;
+        }
+        json_set_path(config_out, path, v);
     }
 
-    // Write config.json overlay (if any config changes). Merge onto the existing
-    // user overlay so a Save only updates the dirty subset and never drops
-    // previously-saved overrides (preset, audio, physics, etc.).
-    if (!config_out.empty()) {
+    // Write config.json overlay. Merge the changed values onto the existing
+    // overlay, and first clear any paths that reverted to the datadir default so
+    // the overlay stays a true sparse set of differences (matching config.json).
+    if (!config_out.empty() || !reverted.empty()) {
         fs::create_directories(VSFileSystem::homedir);
         const std::string path = VSFileSystem::homedir + "/config.json";
         boost::json::object existing = read_existing_overlay(path);
+        for (const auto &p : reverted) remove_json_path(existing, p);
         boost::json::value merged = std::move(existing);
         json_merge(merged, boost::json::value(std::move(config_out)));
         std::ofstream out(path);
         out << boost::json::serialize(merged) << "\n";
         fprintf(stderr, "[vs-settings-ng] wrote config overlay to %s\n", path.c_str());
     }
-    // Write bindings.json overlay (if bindings changed).
-    if (has_bindings || g_dirty_paths.count("bindings.axes")) {
-        // Serialize the whole actions map (the bindings dialog commits it wholesale).
-        boost::json::object actions_obj;
-        for (const auto &kv : configuration().actions) {
-            boost::json::object ab;
-            ab["keyboard"] = boost::json::array();
-            ab["mouse"] = boost::json::array();
-            ab["joystick"] = boost::json::array();
-            ab["hat"] = boost::json::array();
-            for (const auto &b : kv.second.keyboard) {
-                boost::json::object kb; kb["key"] = b.key; kb["modifier"] = b.modifier;
-                ab["keyboard"].as_array().push_back(kb);
+    // Write bindings.json overlay (only the CHANGED bindings, merged onto the
+    // existing overlay so a Save writes just the changes — matching config.json).
+    // Dirty paths: "bindings.actions.<cmd>"/"bindings.actions" (all actions) and
+    // "bindings.axes.<role>"/"bindings.axes" (all axes). The apply_* fns mark
+    // granular paths, so a device/axis or single-binding change no longer dumps
+    // the whole 125-action map (and doesn't add "hat":[] to untouched actions).
+    {
+        bool write_bindings = false;
+        for (const auto &path : g_dirty_paths) {
+            if (path == "bindings.actions" || path.rfind("bindings.actions.", 0) == 0
+                || path == "bindings.axes" || path.rfind("bindings.axes.", 0) == 0) {
+                write_bindings = true;
+                break;
             }
-            for (const auto &b : kv.second.mouse) {
-                boost::json::object mb; mb["button"] = b.button; mb["modifier"] = b.modifier;
-                ab["mouse"].as_array().push_back(mb);
-            }
-            for (const auto &b : kv.second.joystick) {
-                boost::json::object jb; jb["joystick"] = b.joystick; jb["button"] = b.button; jb["modifier"] = b.modifier;
-                ab["joystick"].as_array().push_back(jb);
-            }
-            for (const auto &b : kv.second.hat) {
-                boost::json::object hb; hb["joystick"] = b.joystick; hb["hat"] = b.hatswitch; hb["direction"] = b.direction;
-                ab["hat"].as_array().push_back(hb);
-            }
-            actions_obj[kv.first] = ab;
         }
-        bindings_out["actions"] = actions_obj;
-        // Serialize the axes tree (x/y/z/throttle) so flight-control device
-        // routing (e.g. Mouse -> axes.x.source="mouse") persists to bindings.json.
-        boost::json::object axes_obj;
-        for (const auto &kv : configuration().axes) {
-            boost::json::object ar;
-            ar["source"] = kv.second.source;
-            ar["joystick"] = kv.second.joystick;
-            ar["axis"] = kv.second.axis;
-            ar["inverse"] = kv.second.inverse;
-            axes_obj[kv.first] = ar;
+        if (write_bindings) {
+            const std::string bpath = VSFileSystem::homedir + "/bindings.json";
+            boost::json::object merged = read_existing_overlay(bpath);
+            boost::json::object merged_actions = merged["actions"].is_object()
+                    ? merged["actions"].as_object() : boost::json::object();
+            boost::json::object merged_axes = merged["axes"].is_object()
+                    ? merged["axes"].as_object() : boost::json::object();
+            // Serialize one command's ActionBindings (keyboard/mouse/joystick/hat).
+            auto serialize_action = [](const vega_config::Configuration::ActionBindings &ab) {
+                boost::json::object o;
+                o["keyboard"] = boost::json::array();
+                o["mouse"] = boost::json::array();
+                o["joystick"] = boost::json::array();
+                o["hat"] = boost::json::array();
+                for (const auto &b : ab.keyboard) {
+                    boost::json::object kb; kb["key"] = b.key; kb["modifier"] = b.modifier;
+                    o["keyboard"].as_array().push_back(kb);
+                }
+                for (const auto &b : ab.mouse) {
+                    boost::json::object mb; mb["button"] = b.button; mb["modifier"] = b.modifier;
+                    o["mouse"].as_array().push_back(mb);
+                }
+                for (const auto &b : ab.joystick) {
+                    boost::json::object jb; jb["joystick"] = b.joystick; jb["button"] = b.button; jb["modifier"] = b.modifier;
+                    o["joystick"].as_array().push_back(jb);
+                }
+                for (const auto &b : ab.hat) {
+                    boost::json::object hb; hb["joystick"] = b.joystick; hb["hat"] = b.hatswitch; hb["direction"] = b.direction;
+                    o["hat"].as_array().push_back(hb);
+                }
+                return o;
+            };
+            // Actions to write: all if "bindings.actions" dirty, else the named ones.
+            std::vector<std::string> action_names;
+            const bool all_actions = g_dirty_paths.count("bindings.actions") != 0;
+            if (all_actions) {
+                for (const auto &kv : configuration().actions) action_names.push_back(kv.first);
+            } else {
+                for (const auto &path : g_dirty_paths)
+                    if (path.rfind("bindings.actions.", 0) == 0)
+                        action_names.push_back(path.substr(std::string("bindings.actions.").size()));
+            }
+            for (const auto &name : action_names) {
+                auto it = configuration().actions.find(name);
+                if (it == configuration().actions.end()) continue;
+                auto dit = dflt.actions.find(name);
+                const vega_config::Configuration::ActionBindings empty_ab;
+                const auto &def = (dit != dflt.actions.end()) ? dit->second : empty_ab;
+                if (action_bindings_equal(it->second, def)) {
+                    merged_actions.erase(name);   // reverted to the shipped default -> clear
+                } else {
+                    merged_actions[name] = serialize_action(it->second);
+                }
+            }
+            // Axes to write: all if "bindings.axes" dirty, else the named ones.
+            std::vector<std::string> axis_names;
+            const bool all_axes = g_dirty_paths.count("bindings.axes") != 0;
+            if (all_axes) {
+                for (const auto &kv : configuration().axes) axis_names.push_back(kv.first);
+            } else {
+                for (const auto &path : g_dirty_paths)
+                    if (path.rfind("bindings.axes.", 0) == 0)
+                        axis_names.push_back(path.substr(std::string("bindings.axes.").size()));
+            }
+            for (const auto &name : axis_names) {
+                auto it = configuration().axes.find(name);
+                if (it == configuration().axes.end()) continue;
+                auto dit = dflt.axes.find(name);
+                const vega_config::Configuration::AxisRole empty_role;
+                const auto &def = (dit != dflt.axes.end()) ? dit->second : empty_role;
+                if (axis_role_equal(it->second, def)) {
+                    merged_axes.erase(name);   // reverted to the shipped default -> clear
+                } else {
+                    const auto &ar = it->second;
+                    boost::json::object aobj;
+                    aobj["source"] = ar.source; aobj["joystick"] = ar.joystick;
+                    aobj["axis"] = ar.axis; aobj["inverse"] = ar.inverse;
+                    merged_axes[name] = aobj;
+                }
+            }
+            if (!merged_actions.empty()) merged["actions"] = merged_actions;
+            if (!merged_axes.empty()) merged["axes"] = merged_axes;
+            fs::create_directories(VSFileSystem::homedir);
+            std::ofstream out(bpath);
+            out << boost::json::serialize(merged) << "\n";
+            fprintf(stderr, "[vs-settings-ng] wrote bindings overlay to %s\n", bpath.c_str());
         }
-        bindings_out["axes"] = axes_obj;
-        fs::create_directories(VSFileSystem::homedir);
-        std::ofstream out(VSFileSystem::homedir + "/bindings.json");
-        out << boost::json::serialize(bindings_out) << "\n";
-        fprintf(stderr, "[vs-settings-ng] wrote bindings overlay to %s/bindings.json\n", VSFileSystem::homedir.c_str());
     }
     g_dirty_paths.clear();
+}
+
+// Re-initialize the runtime from the in-memory configuration() after an in-game
+// settings Save. The game historically assumed the config never changes in-game:
+// config->runtime copies (g_game feature flags, gl_options, GL viewport, legacy
+// font metrics, audio/music volume) ran once at bootstrap and went stale on an
+// in-game change. This re-binds them so the change takes effect without a restart.
+// A brief re-orient pause is expected (and acceptable). See gldrv/gl_init.h.
+static void reinit_from_saved_config() {
+    // Graphics: g_game feature flags + gl_options + GL viewport (reuses initfov
+    // and reapply_gl_options, the same copy code as bootstrap).
+    GFXReinitConfig();
+    // Audio/volume: re-apply the live volume functions from the new config.
+    AUDReapplyConfig();
+    Music::SetVolume(configuration().audio.music_volume_flt, -1, false);
 }
 
 // Mouse Settings dialog.
@@ -1007,6 +1246,10 @@ static void load_bindings_staging() {
 
 // Commit the staged bindrows to Configuration.actions (on Accept).
 static void apply_bindrows_to_config() {
+    // Snapshot the current actions so we can mark only the commands that actually
+    // changed (sparse bindings.json overlay). The bindings dialog rebuilds the
+    // whole map, so we diff against the previous state to find the dirty commands.
+    const auto old_actions = cfg().actions;
     auto &actions = cfg().actions;
     actions.clear();   // rebuild from the staged rows
     for (const auto &r : bindrows) {
@@ -1025,8 +1268,15 @@ static void apply_bindrows_to_config() {
             b.button = atoi(r.button.c_str()); b.joystick = atoi(r.device_idx.c_str()); ab.joystick.push_back(b);
         }
     }
-    // Bindings changed -> mark the whole actions tree dirty (written out as bindings.json).
-    mark_dirty("bindings.actions");
+    // Mark dirty only the commands whose bindings actually changed. (Commands the
+    // dialog leaves empty are written as empty arrays, so no removal tombstone is
+    // needed.)
+    for (const auto &kv : actions) {
+        auto old_it = old_actions.find(kv.first);
+        if (old_it == old_actions.end() || !action_bindings_equal(old_it->second, kv.second)) {
+            mark_dirty("bindings.actions." + kv.first);
+        }
+    }
 }
 
 // Mark every bind row sharing the currently-captured input (other actions) as removed.
@@ -1443,6 +1693,7 @@ static const ConfigAccessor kConfigAccessors[] = {
     {"graphics.gl_accelerated_visual",   [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.gl_accelerated_visual;}, [](vega_config::Configuration&c,const std::string&v){c.graphics.gl_accelerated_visual=(v=="true"||v=="1");}},
     {"graphics.aspect",                  [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.aspect_flt;},            [](vega_config::Configuration&c,const std::string&v){c.graphics.aspect_flt=(float)atof(v.c_str());c.graphics.aspect_dbl=atof(v.c_str());}},
     {"graphics.font_point",              [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.font_point_flt;},        [](vega_config::Configuration&c,const std::string&v){c.graphics.font_point_flt=(float)atof(v.c_str());c.graphics.font_point_dbl=atof(v.c_str());}},
+    {"graphics.fov",                     [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.fov_flt;},               [](vega_config::Configuration&c,const std::string&v){c.graphics.fov_flt=locale_aware_stof(v.c_str());c.graphics.fov_dbl=locale_aware_stod(v.c_str());}},
     {"graphics.model_detail",            [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.model_detail_flt;},      [](vega_config::Configuration&c,const std::string&v){c.graphics.model_detail_flt=(float)atof(v.c_str());c.graphics.model_detail_dbl=atof(v.c_str());}},
     {"graphics.mipmap_detail",           [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.mipmap_detail;},         [](vega_config::Configuration&c,const std::string&v){c.graphics.mipmap_detail=atoi(v.c_str());}},
     {"graphics.planet_detail_level",     [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.planet_detail_level;},   [](vega_config::Configuration&c,const std::string&v){c.graphics.planet_detail_level=atoi(v.c_str());}},
@@ -1462,6 +1713,10 @@ static const ConfigAccessor kConfigAccessors[] = {
     {"graphics.font",                    [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.font);},                  nullptr},
     {"graphics.font_antialias",          [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.font_antialias;},        nullptr},
     {"graphics.screen",                  [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.screen;},                nullptr},
+    {"graphics.vsync",                   [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.vsync);},             nullptr},
+    {"graphics.frame_limit_mode",        [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.graphics.frame_limit_mode);},  nullptr},
+    {"graphics.max_framerate",           [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.max_framerate;},           nullptr},
+    {"graphics.show_fps",                [](const vega_config::Configuration&c)->boost::json::value{return c.graphics.show_fps;},                nullptr},
     // ---- audio ----
     {"audio.ai_sound",                   [](const vega_config::Configuration&c)->boost::json::value{return c.audio.ai_sound;},                 [](vega_config::Configuration&c,const std::string&v){c.audio.ai_sound=(v=="true"||v=="1");}},
     {"audio.every_other_mount",          [](const vega_config::Configuration&c)->boost::json::value{return c.audio.every_other_mount;},        [](vega_config::Configuration&c,const std::string&v){c.audio.every_other_mount=(v=="true"||v=="1");}},
@@ -1532,8 +1787,47 @@ static const ConfigAccessor* by_leaf(const std::string &leaf) {
 // Read the current value of a Configuration field given its dotted path. Returns
 // a JSON value, or null if unknown.
 static boost::json::value read_config_value(const std::string &path) {
+    return read_config_value_from(configuration(), path);
+}
+
+static boost::json::value read_config_value_from(const vega_config::Configuration &c, const std::string &path) {
     const ConfigAccessor* a = by_path(path);
-    return a ? a->get(configuration()) : boost::json::value(nullptr);
+    return a ? a->get(c) : boost::json::value(nullptr);
+}
+
+// ---------------------------------------------------------------------------
+// Shader / technique handling
+// ---------------------------------------------------------------------------
+// The 4 shader/technique config paths set by the "shaders" preset. A shader
+// change is PERSISTED on Save but is NOT applied to the running game in the hot
+// path (it breaks the technique/shader rendering); it only takes effect on
+// restart. The restart-required dialog tells the user this.
+static const char *kShaderPaths[] = {
+    "graphics.technique_set", "graphics.mac_shader_name",
+    "graphics.default_full_technique", "graphics.default_simple_technique"
+};
+
+// Snapshot the current shader/technique values (as strings). Used on Save to
+// detect an ACTUAL shader change: the presets re-apply the selected 'shaders'
+// preset on every Save, so dirty-ness alone can't gate the notice — only a value
+// change can.
+static std::vector<std::string> shader_values_snapshot() {
+    std::vector<std::string> vals;
+    for (const char *p : kShaderPaths) {
+        boost::json::value v = read_config_value(p);
+        vals.push_back(v.is_string() ? std::string(v.as_string().c_str()) : "");
+    }
+    return vals;
+}
+
+// Restore the shader/technique values from a snapshot. Used after a Save so a
+// shader change is written out but the running game keeps the previous shaders
+// until a restart (the hot path must not apply a shader change).
+static void restore_shader_values(const std::vector<std::string> &vals) {
+    for (size_t i = 0; i < 4 && i < vals.size(); ++i) {
+        const ConfigAccessor *a = by_path(kShaderPaths[i]);
+        if (a != nullptr) a->set(configuration(), vals[i]);
+    }
 }
 
 // Apply one preset variable (name,value) to the engine's Configuration, using
@@ -1581,18 +1875,13 @@ static void draw_presets_frame() {
     else if (avail_w < 1200) cols = 2;
     else cols = 3;
     cols = std::min(cols, (int)g_preset_groups.size());
-    int rows = (int)ceil((double)g_preset_groups.size() / (double)cols);
-    float row_h = ImGui::GetFrameHeight() + ImGui::GetTextLineHeight()
-                  + ImGui::GetStyle().ItemSpacing.y;
-    float content_h = rows * row_h + ImGui::GetStyle().WindowPadding.y * 2;
-    // Fill the space between here and the bottom button bar (which reserves one
-    // button row + separator at the bottom, btn_h). The frame should reach the
-    // buttons so there is no dead space, and be tall enough that all presets are
-    // visible without a scrollbar.
+    // The frame always fills the space above the bottom button bar (stretches to
+    // fit); the child window clips and scrolls any content that does not fit, so it
+    // never spills over the frame's borders or the buttons.
     float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
     float avail_h = ImGui::GetContentRegionAvail().y - btn_h
                     - ImGui::GetStyle().WindowPadding.y;
-    float pres_h = fmaxf(content_h, avail_h);
+    float pres_h = avail_h;
     ImGui::BeginChild("presetsframe", ImVec2(-1.0f, pres_h), ImGuiChildFlags_Borders);
     std::vector<float> colw(cols, 0.0f);
     for (size_t i = 0; i < g_preset_groups.size(); i++) {
@@ -1625,8 +1914,11 @@ static void draw_presets_frame() {
                 if (sel >= 0) {
                     cfg().preset[g.key] = g.options[sel].name;
                     mark_dirty("preset." + g.key);
-                    // Apply the preset's vars to Configuration.
-                    for (auto &kv : g.options[sel].vars) apply_preset_var(kv.first, kv.second);
+                    // The preset's vars are NOT applied here: they are applied (and
+                    // persisted) by apply_presets_to_config() on Save, so a preset
+                    // change (e.g. shaders/techniques) does NOT take effect instantly
+                    // when the dropdown is clicked - it applies when Save is hit.
+                    // Shader changes still require a restart (see the Save handler).
                 }
             }
         }
@@ -1636,6 +1928,20 @@ static void draw_presets_frame() {
 }
 
 } // namespace
+
+// Persist the current window resolution to the user config overlay so a manual
+// window resize survives a restart. The game re-creates the window at
+// graphics.resolution_x/y on next launch, so a resized-to size is restored.
+// Marked dirty + written out; does NOT hot-apply anything. Called from winsys on
+// a settled (debounced) window resize.
+void PersistWindowResolution(int w, int h) {
+    auto &g = configuration().graphics;
+    g.resolution_x = w;
+    g.resolution_y = h;
+    mark_dirty("graphics.resolution_x");
+    mark_dirty("graphics.resolution_y");
+    write_out_dirty();
+}
 
 void DrawConfigScreen() {
     // Load flight-control mode from the persisted input.device once.
@@ -1697,27 +2003,52 @@ void DrawConfigScreen() {
     auto close_overlay = [&]() {
         if (_Universe) _Universe->ToggleOptionsActive();   // close; hide cursor on inactive
     };
-    float btnw = ImGui::CalcTextSize("Save").x + ImGui::GetStyle().FramePadding.x * 2 + 20;
+    // Width from the longest button label so all three fit their text.
+    float btnw = fmaxf(ImGui::CalcTextSize("Save and Apply").x,
+                       fmaxf(ImGui::CalcTextSize("Close Settings").x,
+                             ImGui::CalcTextSize("Exit VegaStrike").x))
+                 + ImGui::GetStyle().FramePadding.x * 2 + 20;
     float btn_h = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
     // Reserve space at the bottom for the button row (separator + buttons).
     ImGui::SetCursorPosY(ImGui::GetWindowHeight() - btn_h);
     ImGui::Separator();
-    // Center the three buttons (Save + Close + Quit). SetCursorPosX must be applied
-    // AFTER the Separator, which resets the cursor X to the left margin.
+    // Center the three buttons (Save and Apply + Close Settings + Exit VegaStrike).
+    // SetCursorPosX must be applied AFTER the Separator, which resets the cursor
+    // X to the left margin.
     float avail = ImGui::GetContentRegionAvail().x;
     float buttons_w = btnw * 3 + ImGui::GetStyle().ItemSpacing.x * 2;
     ImGui::SetCursorPosX(fmaxf(0.0f, (avail - buttons_w) * 0.5f));
 
-    // Save (green when dirty): apply + persist, stay open. Only Close closes.
+    // Save (green when dirty): apply + persist, stay open. Only Close Settings closes.
     const bool save_was_dirty = dirty;
     if (save_was_dirty) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.45f, 0.22f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.55f, 0.30f, 1.0f));
     }
-    if (ImGui::Button("Save", ImVec2(btnw, 0))) {
+    if (ImGui::Button("Save and Apply", ImVec2(btnw, 0))) {
         if (dirty) {
+            // Snapshot the shader settings before applying, so we can detect an
+            // ACTUAL shader change (the presets' vars are applied here, by
+            // apply_presets_to_config, on Save - not at selection). A shader
+            // change is NOT applied in the hot path (it breaks the technique/
+            // shader rendering); it's written out and takes effect on restart.
+            const auto shader_before = shader_values_snapshot();
             apply_all();
             write_out_dirty();   // persist the dirty paths to the user overlay
+            if (shader_values_snapshot() != shader_before) {
+                // Tell the user the change takes effect on restart, and restore
+                // the running shader state so the current visuals are kept until
+                // then (the change is already persisted above).
+                shader_restart_notice = true;
+                restore_shader_values(shader_before);
+            }
+            // Re-initialize the runtime from the updated in-memory configuration().
+            // The game assumed config never changes in-game, so config->runtime
+            // copies (g_game feature flags, gl_options, GL viewport, legacy font
+            // metrics, audio volume) ran only at bootstrap and went stale on an
+            // in-game change. This re-binds them so the change takes effect
+            // without a restart. A brief re-orient pause is expected.
+            reinit_from_saved_config();
             dirty = false;
             // Stay open: the player can keep tweaking and Save again.
         }
@@ -1725,23 +2056,23 @@ void DrawConfigScreen() {
     if (save_was_dirty) ImGui::PopStyleColor(2);
     ImGui::SameLine();
 
-    // Close (red when dirty): don't save anything, just close.
+    // Close Settings (red when dirty): don't save anything, just close.
     if (dirty) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
     }
-    if (ImGui::Button("Close", ImVec2(btnw, 0))) {
+    if (ImGui::Button("Close Settings", ImVec2(btnw, 0))) {
         // Don't save anything; just close. Dirty state is intentionally discarded.
         close_overlay();
     }
     if (dirty) ImGui::PopStyleColor(2);
     ImGui::SameLine();
 
-    // Quit (red): exit the game entirely. Unsaved changes are discarded. The full
+    // Quit/Exit (red): exit the game entirely. Unsaved changes are discarded. The full
     // cleanup path (flush logs, save game, close audio/window) is VSExit(0).
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
-    if (ImGui::Button("Quit", ImVec2(btnw, 0))) {
+    if (ImGui::Button("Exit VegaStrike", ImVec2(btnw, 0))) {
         VSExit(0);
     }
     ImGui::PopStyleColor(2);
@@ -1755,6 +2086,21 @@ void DrawConfigScreen() {
     // Bindings dialog (modal on top).
     if (bind_dialog_open) ImGui::OpenPopup("Bindings");
     draw_bindings_dialog();
+
+    // Shader-change notice (modal on top). Shaders are written out but not
+    // hot-applied; tell the user a restart is required. Dismissed on OK.
+    if (shader_restart_notice) {
+        ImGui::OpenPopup("Shader Change");
+    }
+    if (ImGui::BeginPopupModal("Shader Change", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::TextUnformatted("Shader changes take effect after a restart.");
+        ImGui::TextUnformatted("The new settings were saved. Restart the game to apply them.");
+        if (ImGui::Button("OK", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+            shader_restart_notice = false;
+        }
+        ImGui::EndPopup();
+    }
 
     ImGui::End();
 }

@@ -35,14 +35,18 @@ class SDL_Window;
 extern bool gui_initialized;
 extern SDL_Window* current_window;
 
-void InitGui(SDL_Window *window, const SDL_GLContext *context, float fontSize);
+void InitGui(SDL_Window *window, const SDL_GLContext *context, float fontSize, const char *fontFile = nullptr);
 void CleanupGui();
 
 /** Request that the ImGui font atlas be rebuilt at the given pixel size on the
  *  next frame (used by settings changes; no-op until the next frame).
  */
 void RequestImGuiFontSize(float fontSize);
-/** Apply a pending font-size change by rebuilding the font atlas. Call at the
+/** Request that the ImGui font atlas be rebuilt with the given .ttf font file on the
+ *  next frame (empty/null means the embedded Roboto). No-op until the next frame.
+ */
+void RequestImGuiFont(const char *fontFile);
+/** Apply a pending font-size / font change by rebuilding the font atlas. Call at the
  *  start of each ImGui frame, before ImGui::NewFrame(). No-op when nothing pending.
  */
 void ImGui_ApplyPendingFontSize();

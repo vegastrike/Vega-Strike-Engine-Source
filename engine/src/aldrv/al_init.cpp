@@ -120,6 +120,30 @@ void AUDChangeVolume(float volume) {
 #endif
 }
 
+// The scalepos divisor folds the platform linuxadjust (the engine's audio units are
+// calibrated ~3x on non-Windows/macOS). Shared by AUDInit and AUDReapplyConfig so
+// the saved volume is applied faithfully in both.
+static double audio_volume_scale() {
+    double linuxadjust = 1;
+#ifndef _WIN32
+#ifndef __APPLE__
+    linuxadjust = 1.0 / 3.0;
+#endif
+#endif
+    return configuration().audio.volume_dbl * linuxadjust;
+}
+
+// Re-apply the audio volume/doppler settings from configuration() after an in-game
+// settings change. Mirrors the bootstrap assignment in AUDInit (which folds in the
+// platform linuxadjust), so the saved volume is applied faithfully (AUDChangeVolume
+// is relative/delta-based and would miss linuxadjust).
+void AUDReapplyConfig() {
+#ifdef HAVE_AL
+    scalevel = configuration().audio.doppler_scale_flt;
+    scalepos = 1.0 / audio_volume_scale();
+#endif
+}
+
 float AUDGetVolume() {
 #ifdef HAVE_AL
     return 1. / scalepos;
@@ -165,13 +189,7 @@ bool AUDInit() {
     // g_game.sound_enabled =
     usedoppler = configuration().audio.doppler;
     usepositional = configuration().audio.positional;
-    double linuxadjust = 1;
-#ifndef _WIN32
-#ifndef __APPLE__
-    linuxadjust = 1.0 / 3.0;
-#endif
-#endif
-    scalepos = 1.0 / (configuration().audio.volume_dbl * linuxadjust);
+    scalepos = 1.0 / audio_volume_scale();
     scalevel = configuration().audio.doppler_scale_flt;
     g_game.audio_frequency_mode = configuration().audio.frequency;
     maxallowedsingle = configuration().audio.max_single_sounds;

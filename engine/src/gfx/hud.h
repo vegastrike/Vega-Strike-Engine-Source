@@ -53,6 +53,13 @@ class TextPlane {
     Vector myFontMetrics;     //i = width, j = height
     Vector myDims;
     int numlet{};
+    // Per-text-box layout resolution + screen-absolute letterbox offset. When a
+    // resolution is set, normalized coords map against it (instead of native pixels)
+    // and the offset shifts the text into the letterboxed base window.
+    float m_resW = 0.0f;   // 0 = use native resolution (legacy behaviour)
+    float m_resH = 0.0f;
+    float m_offX = 0.0f;   // screen-absolute pixel offset for the drawn position
+    float m_offY = 0.0f;
 /*
  *  struct GlyphPosition {
  *       float left, right, top, bottom;
@@ -108,6 +115,17 @@ public:
 
     std::string GetText() const {
         return myText;
+    }
+
+    // The resolution to lay out against (0 = use native resolution, the legacy
+    // behaviour). Used by the base so text scales with the base art.
+    void setResolution(float w, float h) {
+        m_resW = w; m_resH = h;
+    }
+    // A screen-absolute pixel offset added to the drawn position, so text lands
+    // inside the letterboxed base window rather than at the screen edge.
+    void setOffset(float x, float y) {
+        m_offX = x; m_offY = y;
     }
 };
 

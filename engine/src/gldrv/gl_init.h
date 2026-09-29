@@ -32,6 +32,16 @@ extern "C"
 {
 #endif
 
+// Re-initialize the graphics runtime state from the (already-updated) in-memory
+// configuration(). The game historically assumed the config never changes in-game,
+// so config->runtime copies (g_game feature flags, gl_options, GL viewport) ran
+// only once at bootstrap. The in-game settings screen (Alt+C / --configure) can now
+// change any setting and Save them; call this after Save to re-bind those copies so
+// the change takes effect without a restart. Reuses the same copy code as bootstrap
+// (initfov + the gl_options config copies). Does NOT recreate the window/GL context.
+// A brief re-orient pause is acceptable (and expected) while it re-binds.
+extern void GFXReinitConfig();
+
 //#include "src/vegastrike.h"
 
 /* Hack to fix compiling problem with old gl.h's, reported by Steve

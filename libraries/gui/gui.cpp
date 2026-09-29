@@ -40,17 +40,26 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
 
+// TrueType font (Roboto-Medium) embedded as a compressed base85 array so the engine
+// needs no font file on disk at runtime. Loaded via the dynamic font atlas, which
+// bakes each requested glyph size on demand.
+#include "roboto_font.h"
+
 
 bool gui_initialized = false;
 SDL_Window* current_window = nullptr;
-ImFont* roboto_18_font;
 
 // Font size requested by a settings change, applied on the next frame. Stored as a
 // float so we can defer the atlas rebuild to a safe point (start of a frame, before
 // any text is laid out), avoiding mid-frame texture destruction.
 static float s_pending_font_size = 0.0f;
 
-void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontSize) {
+// Font file requested by a settings change, applied on the next frame. Empty means
+// "use the embedded Roboto". When set, the atlas is rebuilt with the new .ttf.
+static std::string s_pending_font_file;
+static bool s_font_file_pending = false;
+
+void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontSize, const char *fontFile) {
     current_window = window;
     SDL_GLContext gl_context = *context;
 
@@ -66,7 +75,15 @@ void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontS
     io.Fonts->Clear();
     ImFontConfig cfg;
     cfg.SizePixels = fontSize;
-    io.FontDefault = io.Fonts->AddFontDefault(&cfg);
+    // Load the configured .ttf font file if provided; otherwise use the embedded
+    // Roboto TrueType. With the synced OpenGL3 backend the atlas is dynamic: each
+    // glyph size is baked crisp on demand.
+    io.FontDefault = (fontFile != nullptr && fontFile[0] != '\0')
+            ? io.Fonts->AddFontFromFileTTF(fontFile, fontSize, &cfg) : nullptr;
+    if (io.FontDefault == nullptr) {
+        io.FontDefault = io.Fonts->AddFontFromMemoryCompressedBase85TTF(
+            RobotoMediumFont_compressed_data_base85, fontSize, &cfg);
+    }
 
     gui_initialized = true;
 }
@@ -75,27 +92,40 @@ void RequestImGuiFontSize(float fontSize) {
     s_pending_font_size = fontSize;
 }
 
-// Apply a pending font-size change by rebuilding the ImGui font atlas. Call at the
-// start of each frame, before ImGui::NewFrame(), so the new atlas is in place for
-// the whole frame and no glyphs reference a destroyed texture.
+void RequestImGuiFont(const char *fontFile) {
+    s_pending_font_file = (fontFile != nullptr) ? fontFile : "";
+    s_font_file_pending = true;
+}
+
+// Apply a pending font-size / font change. A font-size change only needs FontSizeBase
+// (the dynamic atlas bakes glyphs on demand); a font FACE change requires a real
+// atlas rebuild (clear fonts, add the new .ttf or Roboto, rebuild the texture).
+// Call at the start of each frame, before ImGui::NewFrame().
 void ImGui_ApplyPendingFontSize() {
-    if (s_pending_font_size <= 0.0f) {
+    if (s_pending_font_size <= 0.0f && !s_font_file_pending) {
         return;
     }
-    ImGuiIO &io = ImGui::GetIO();
-    ImGui_ImplOpenGL3_DestroyFontsTexture();
-    io.Fonts->Clear();
-    ImFontConfig cfg;
-    cfg.SizePixels = s_pending_font_size;
-    io.FontDefault = io.Fonts->AddFontDefault(&cfg);
-    io.Fonts->Build();
-    ImGui_ImplOpenGL3_CreateFontsTexture();
-    // FontSizeBase (the render size, distinct from the atlas rasterization size) is
-    // only derived from the font's LegacySize on the first frame and then cached, so
-    // a rebuild alone would change the glyph rasterization but NOT the on-screen size
-    // (blurry text at the old size). Set it explicitly so the render size follows.
-    ImGui::GetStyle().FontSizeBase = s_pending_font_size;
-    s_pending_font_size = 0.0f;
+    if (s_pending_font_size > 0.0f) {
+        ImGui::GetStyle().FontSizeBase = s_pending_font_size;
+        s_pending_font_size = 0.0f;
+    }
+    if (s_font_file_pending) {
+        ImGuiIO &io = ImGui::GetIO();
+        io.Fonts->Clear();
+        ImFontConfig cfg;
+        cfg.SizePixels = ImGui::GetStyle().FontSizeBase;
+        ImFont *f = (!s_pending_font_file.empty())
+                ? io.Fonts->AddFontFromFileTTF(s_pending_font_file.c_str(), cfg.SizePixels, &cfg)
+                : nullptr;
+        if (f == nullptr) {
+            f = io.Fonts->AddFontFromMemoryCompressedBase85TTF(
+                RobotoMediumFont_compressed_data_base85, cfg.SizePixels, &cfg);
+        }
+        io.FontDefault = f;
+        io.Fonts->Build();   // the dynamic-atlas backend updates the texture on NewFrame
+        s_font_file_pending = false;
+        s_pending_font_file.clear();
+    }
 }
 
 void CleanupGui() {

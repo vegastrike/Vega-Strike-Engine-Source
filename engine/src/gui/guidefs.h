@@ -34,29 +34,57 @@
 // Namespace for coordinate conversion
 namespace Coordinates {
 
+    /// Converts normalized X coordinate [-1.0, 1.0] to pixel space [0, res_x]
+    [[nodiscard]] inline float normToPixelX(float val, float res_x) noexcept {
+        return (val + 1.0f) * 0.5f * res_x;
+    }
+
     /// Converts normalized X coordinate [-1.0, 1.0] to display pixel space [0, DisplaySize.x]
     [[nodiscard]] inline float normToPixelX(float val) noexcept {
-        return (val + 1.0f) * 0.5f * ImGui::GetIO().DisplaySize.x;
+        return normToPixelX(val, ImGui::GetIO().DisplaySize.x);
+    }
+
+    /// Converts normalized Y coordinate [-1.0, 1.0] (where +1 is top) to pixel space [0, res_y]
+    [[nodiscard]] inline float normToPixelY(float val, float res_y) noexcept {
+        return (1.0f - val) * 0.5f * res_y;
     }
 
     /// Converts normalized Y coordinate [-1.0, 1.0] (where +1 is top) to display pixel space [0, DisplaySize.y]
     [[nodiscard]] inline float normToPixelY(float val) noexcept {
-        return (1.0f - val) * 0.5f * ImGui::GetIO().DisplaySize.y;
+        return normToPixelY(val, ImGui::GetIO().DisplaySize.y);
+    }
+
+    /// Scales a normalized width [0.0, 2.0] relative to a width of res_x
+    [[nodiscard]] inline float normToPixelW(float val, float res_x) noexcept {
+        return val * 0.5f * res_x;
     }
 
     /// Scales a normalized width [0.0, 2.0] relative to display width
     [[nodiscard]] inline float normToPixelW(float val) noexcept {
-        return val * 0.5f * ImGui::GetIO().DisplaySize.x;
+        return normToPixelW(val, ImGui::GetIO().DisplaySize.x);
+    }
+
+    /// Scales a normalized height/font size [0.0, 2.0] to pixel height relative to res_y
+    [[nodiscard]] inline float normToPixelH(float val, float res_y) noexcept {
+        return val * 0.5f * res_y;
     }
 
     /// Scales a normalized height/font size [0.0, 2.0] to pixel height
     [[nodiscard]] inline float normToPixelH(float val) noexcept {
-        return val * 0.5f * ImGui::GetIO().DisplaySize.y;
+        return normToPixelH(val, ImGui::GetIO().DisplaySize.y);
     }
 
     /// Scales a normalized font size font size [0.0, 2.0] pixel height 
     [[nodiscard]] inline float normToPixelFontSize(float val) noexcept {
         return Coordinates::normToPixelH(val);
+    }
+
+    /// Inverse of normToPixelH: converts a pixel height/length to normalized [-1..1] units.
+    /// Used where a pixel-size (e.g. a font_point-relative Font::size()) must be laid out
+    /// against a normalized -1..1 rect, so the two spaces stay consistent. 2.0 normalized
+    /// == DisplaySize.y pixels.
+    [[nodiscard]] inline float pixelToNormH(float pix) noexcept {
+        return pix / (0.5f * ImGui::GetIO().DisplaySize.y);
     }
 
 } // namespace Coordinates

@@ -55,6 +55,7 @@
 #include "cmd/unit_util.h"
 #include "cmd/base_util.h"
 #include "gfx/hud.h"
+#include "imgui.h"
 #include "root_generic/lin_time.h" //for fps
 #include "cmd/beam.h"
 #include "src/config_xml.h"
@@ -1859,30 +1860,6 @@ void GameCockpit::Draw() {
     }
     AutoLanding();
     GFXColor4f(1, 1, 1, 1);
-    if (QuitAllow || getTimeCompression() < .5) {
-        if (QuitAllow) {
-            if (!die) {
-                static VSSprite QuitSprite("quit.sprite", BILINEAR, GFXTRUE);
-                static VSSprite QuitCompatSprite("quit.spr", BILINEAR, GFXTRUE);
-
-                GFXEnable(TEXTURE0);
-                if (QuitSprite.LoadSuccess()) {
-                    QuitSprite.Draw();
-                } else {
-                    QuitCompatSprite.Draw();
-                }
-            }
-        } else {
-            static VSSprite PauseSprite("pause.sprite", BILINEAR, GFXTRUE);
-            static VSSprite PauseCompatSprite("pause.spr", BILINEAR, GFXTRUE);
-            GFXEnable(TEXTURE0);
-            if (PauseSprite.LoadSuccess()) {
-                PauseSprite.Draw();
-            } else {
-                PauseCompatSprite.Draw();
-            }
-        }
-    }
     static float dietime = 0;
     if (die) {
         if (un) {
@@ -2002,6 +1979,44 @@ void GameCockpit::Draw() {
         DrawNavSystem(&ThisNav, AccessCamera(), cockpit_offset);
         AccessCamera()->SetFov(oldfov);
         AccessCamera()->UpdateGFXAgain();
+    }
+
+    // The quit and pause overlays are drawn after the nav system so that they end up
+    // in front of it, and through ImGui because the nav screen draws into an ImGui
+    // draw list, which the engine renders at the very end of the frame. An
+    // immediate-mode sprite would be painted over by it.
+    if (QuitAllow || getTimeCompression() < .5) {
+        ImDrawList *overlay_list = ImGui::GetBackgroundDrawList();
+        if (QuitAllow) {
+            if (!die) {
+                static VSSprite QuitSprite("quit.sprite", BILINEAR, GFXTRUE);
+                static VSSprite QuitCompatSprite("quit.spr", BILINEAR, GFXTRUE);
+
+                if (QuitSprite.LoadSuccess()) {
+                    QuitSprite.DrawWithImGui(overlay_list);
+                } else {
+                    QuitCompatSprite.DrawWithImGui(overlay_list);
+                }
+            }
+        } else {
+            static VSSprite PauseSprite("pause.sprite", BILINEAR, GFXTRUE);
+            static VSSprite PauseCompatSprite("pause.spr", BILINEAR, GFXTRUE);
+            if (PauseSprite.LoadSuccess()) {
+                PauseSprite.DrawWithImGui(overlay_list);
+            } else {
+                PauseCompatSprite.DrawWithImGui(overlay_list);
+            }
+        }
+    }
+
+    // Optional FPS readout, drawn over everything. Some cockpits' own layouts carry an FPS
+    // display already; this one is there whatever the cockpit art does. The graphics option
+    // decides whether an FPS counter is shown at all, so the two go on and off together.
+    if (configuration().graphics.show_fps) {
+        const float fps = LookupUnitStat(UnitImages<void>::COCKPIT_FPS, GetParent());
+        char fps_text[32];
+        snprintf(fps_text, sizeof(fps_text), "FPS: %.1f", fps);
+        ImGui::GetForegroundDrawList()->AddText(ImVec2(10.0f, 10.0f), IM_COL32(255, 255, 255, 255), fps_text);
     }
 
     GFXEnable(DEPTHWRITE);

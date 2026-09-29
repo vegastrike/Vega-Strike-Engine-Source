@@ -75,6 +75,12 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
         return -1;
     }
 
+    // A sun/star is never dockable, regardless of how it is otherwise typed
+    // (a data file can mislabel a star as a normal body).
+    if (UnitUtil::isSun(dock)) {
+        return -1;
+    }
+
     double range = DistanceTwoTargets(dock, ship);
 
     // Planet Code
@@ -138,6 +144,11 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
 
     // Jump point. Exit
     if (!target->pImage->destination.empty()) {
+        return std::string();
+    }
+
+    // A sun/star is never dockable.
+    if (UnitUtil::isSun(target)) {
         return std::string();
     }
 
