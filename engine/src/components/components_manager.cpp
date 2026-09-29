@@ -354,6 +354,15 @@ Component *ComponentsManager::DamagedComponent(const std::string &name) {
     return nullptr;
 }
 
+Component *ComponentsManager::ComponentByName(const std::string &name) {
+    for (HudText &text : Components()) {
+        if (text.name == name) {
+            return text.component;
+        }
+    }
+    return nullptr;
+}
+
 ComponentService ComponentsManager::ServiceComponent(const std::string &name) {
     Component *component = DamagedComponent(name);
     if (component == nullptr) {
