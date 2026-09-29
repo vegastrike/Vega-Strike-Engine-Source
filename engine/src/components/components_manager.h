@@ -176,6 +176,8 @@ public:
 private:
     /** Whether a component is part of the ship itself, and so not for sale */
     bool ComponentIsIntegral(const Component *component) const;
+    /** Whether the ship carries an item that stands for this component */
+    bool HasItemForComponent(const Component *component) const;
     /** Whether a component needs repair: its own condition, not its charge */
     bool ComponentNeedsRepair(Component *component);
     bool _Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity);

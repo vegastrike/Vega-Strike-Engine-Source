@@ -285,8 +285,23 @@ bool ComponentsManager::ComponentIsIntegral(const Component *component) const {
     if (component == &fuel) {
         return false;
     }
-    // What the hull came with, or one of the parts the ship is never without.
-    return component->Integral() || component->GetUpgradeKey().empty();
+    // The parts a ship is never without.
+    if (component->Integral()) {
+        return true;
+    }
+    // Anything the ship is carrying is listed as that item instead. A game loaded from a
+    // save restores the items without setting the components' upgrade keys, so the items
+    // are what to go by.
+    return component->GetUpgradeKey().empty() && !HasItemForComponent(component);
+}
+
+bool ComponentsManager::HasItemForComponent(const Component *component) const {
+    for (const Cargo &item : upgrade_space.GetItems()) {
+        if (GetComponentTypeFromName(item.GetName()) == component->type) {
+            return true;
+        }
+    }
+    return false;
 }
 
 std::vector<Cargo> ComponentsManager::IntegralComponentItems() {
