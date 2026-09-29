@@ -244,9 +244,6 @@ int BaseCargoAssets(Unit *base_unit, string cargo_name);
 
 //"Basic Repair" item that is added to Buy UPGRADE mode.
 const string BASIC_REPAIR_NAME = "Basic Repair & Refuel";
-//Each damaged component is also offered as a row of its own, so that it can be repaired
-//on its own. The row is named with this prefix and the component's damage report name.
-const string REPAIR_COMPONENT_PREFIX = "Repair ";
 
 const GFXColor BASIC_REPAIR_TEXT_COLOR() {
     return GFXColor(0, 1, 1);
@@ -1209,9 +1206,6 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     tempString = (boost::format("Price: #b#%1$.2f#-b#n1.5#")
                             % (basicRepairPrice() * multiplier))
                             .str();
-                } else if (item.GetName().rfind(REPAIR_COMPONENT_PREFIX, 0) == 0) {
-                    //A damaged component's row is priced here, not by the base.
-                    tempString = (boost::format("Price: #b#%1$.2f#-b#n1.5#") % item.GetPrice()).str();
                 } else {
                     tempString = (boost::format("Price: #b#%1$.2f#-b#n1.5#") % baseUnit->PriceCargo(item.GetName()))
                             .str();
@@ -2263,31 +2257,17 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     repair.cargo.SetDescription(BASIC_REPAIR_DESC);
     tlist.masterList.push_back(repair);
 
-    //Add the damaged components, one row each.
-    for (const HudText &component : playerUnit->DamagedComponents()) {
-        CargoColor component_repair;
-        component_repair.cargo.SetName(REPAIR_COMPONENT_PREFIX + component.name);
-        component_repair.cargo.SetPrice(basicRepairPrice());
-        component_repair.cargo.SetDescription((boost::format(
-                "#c.75:.9:1#Have the mechanics replace the damaged component. #b#%1%#-b is at %2$.0f%% operational.")
-                % component.name
-                % (100.0 * component.component->PercentOperational())).str());
-        tlist.masterList.push_back(component_repair);
-    }
-
     //Load the upgrade picker from the master tlist.
     SimplePicker *basePicker = vega_dynamic_cast_ptr<SimplePicker> ( window()->findControlById("BaseUpgrades"));
     assert(basePicker != nullptr);
     loadListPicker(tlist, *basePicker, BUY_UPGRADE, true);
 
-    //Colour the rows which are not base inventory - Basic Repair and the damaged
-    //components - so they stand out from the upgrades the base is selling.
+    //Colour the Basic Repair row, which is not base inventory, so it stands out from the
+    //upgrades the base is selling.
     SimplePickerCells *baseCells = vega_dynamic_cast_ptr<SimplePickerCells> ( basePicker->cells());
     for (int i = 0; i < baseCells->count(); ++i) {
         SimplePickerCell *cell = vega_dynamic_cast_ptr<SimplePickerCell> ( baseCells->cellAt(i));
-        const bool is_repair_row = cell->text() == BASIC_REPAIR_NAME
-                || cell->text().rfind(REPAIR_COMPONENT_PREFIX, 0) == 0;
-        if (is_repair_row && isClear(cell->textColor())) {
+        if (cell->text() == BASIC_REPAIR_NAME && isClear(cell->textColor())) {
             cell->setTextColor(BASIC_REPAIR_TEXT_COLOR());
         }
     }
@@ -2934,38 +2914,6 @@ bool BaseComputer::buyUpgrade(const EventCommandId &command, Control *control) {
         if (item->GetName() == BASIC_REPAIR_NAME) {
             if (player_unit) {
                 BasicRepair(player_unit, m_base.GetUnit());
-                if (m_selectedList == nullptr) {
-                    return true;
-                }
-                refresh();
-                m_transList1.picker->selectCell(nullptr);                     //Turn off selection.
-            }
-            return true;
-        }
-
-        //A damaged component's row puts that component right on its own, at the same fees
-        //Basic Repair charges for it.
-        if (item->GetName().rfind(REPAIR_COMPONENT_PREFIX, 0) == 0) {
-            Unit *base_unit = m_base.GetUnit();
-            if (player_unit && base_unit) {
-                const std::string component_name = item->GetName().substr(REPAIR_COMPONENT_PREFIX.size());
-                Component *component = player_unit->DamagedComponent(component_name);
-                if (component != nullptr) {
-                    const double repair_price = item->GetPrice();
-                    const double replace_price = ReplacementPrice(base_unit, component);
-                    if (ComponentsManager::credits.Value() < std::max(repair_price, replace_price)) {
-                        showAlert("You don't have enough credits to repair that.");
-                    } else {
-                        const ComponentService service = player_unit->ServiceComponent(component_name);
-                        if (service == ComponentService::Replaced) {
-                            ComponentsManager::credits -= replace_price;
-                        } else if (service == ComponentService::Repaired) {
-                            ComponentsManager::credits -= repair_price;
-                        } else {
-                            showAlert("That component cannot be put right.");
-                        }
-                    }
-                }
                 if (m_selectedList == nullptr) {
                     return true;
                 }
