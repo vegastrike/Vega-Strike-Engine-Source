@@ -265,6 +265,40 @@ bool ComponentsManager::ComponentNeedsRepair(Component *component) {
     return component->PercentOperational() < 1.0;
 }
 
+namespace {
+// The category the base UI groups a ship's own components under.
+const char *const INTEGRAL_CATEGORY = "upgrades/integral";
+// Rows that a game saved before the ship's own components were listed this way carries,
+// named by unit key. The rows below replace them.
+const char *const LEGACY_INTEGRAL_ITEMS[] = {"hull", "afterburner", "drive", "ftl_drive"};
+}
+
+void ComponentsManager::AddIntegralComponents() {
+    for (const char *legacy_item : LEGACY_INTEGRAL_ITEMS) {
+        upgrade_space.RemoveCargo(this, legacy_item, 1);
+    }
+
+    for (HudText &text : Components()) {
+        // A component the ship came with is part of the ship: it cannot be sold, and it
+        // takes no space or mass of its own because the ship already counts it. A
+        // component that was bought is the item the ship carries, and is listed as that
+        // item instead.
+        if (!text.component->Installed() || !text.component->GetUpgradeKey().empty()
+                || upgrade_space.HasCargo(text.name)) {
+            continue;
+        }
+
+        Cargo component_item;
+        component_item.SetName(text.name);
+        component_item.SetCategory(INTEGRAL_CATEGORY);
+        component_item.SetQuantity(1);
+        component_item.SetInstalled(true);
+        component_item.SetComponent(true);
+        component_item.SetIntegral(true);
+        upgrade_space.AddCargo(this, component_item, false);
+    }
+}
+
 std::vector<HudText> ComponentsManager::DamagedComponents() {
     std::vector<HudText> damaged_components;
     for (HudText &text : Components()) {
