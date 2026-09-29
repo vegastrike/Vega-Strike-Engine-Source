@@ -874,7 +874,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     this->num_chunks = UnitCSVFactory::GetVariable(unit_key, "Num_Chunks", 0);
 
     // Add integral components
-    AddIntegralComponents();
+    RemoveLegacyIntegralItems();
 
     GenerateHudText(getDamageColor);
 }

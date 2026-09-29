@@ -2310,6 +2310,14 @@ void BaseComputer::loadSellUpgradeControls(void) {
     player_filter_vec.push_back("upgrades");
     loadMasterList(playerUnit, playerUnit->upgrade_space, player_filter_vec, inverse_player_filter_vec, false, tlist);     //Get upgrades, but not weapons.
 
+    //Add the ship's own parts, which are not items it carries: what the hull came with,
+    //and the parts it is never without. They are listed, and not for sale.
+    for (const Cargo &component_item : playerUnit->IntegralComponentItems()) {
+        CargoColor component_row;
+        component_row.cargo = component_item;
+        tlist.masterList.push_back(component_row);
+    }
+
     //Sort the tlist.  Better for display, easier to compile into categories, etc.
     std::sort(tlist.masterList.begin(), tlist.masterList.end(), CargoColorSort());
 
