@@ -357,7 +357,7 @@ public:
             int cloak = -1,
             float nebdist = 0); //short fix
 ///Will draw all undrawn meshes of this type
-    virtual void ProcessDrawQueue(size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr);
+    virtual void ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr);
 ///Will draw all undrawn far meshes beyond the range of zbuffer (better be convex).
     virtual void SelectCullFace(int whichdrawqueue);
     virtual void RestoreCullFace(int whichdrawqueue);
