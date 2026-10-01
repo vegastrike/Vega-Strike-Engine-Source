@@ -1724,6 +1724,12 @@ namespace vega_config {
         double fov_dbl = 37.5;
         float fov_flt = 37.5;
         bool framerate_changes_shader = false;
+        // Frame-rate limiting: vsync mode, and a software cap when it is below what
+        // the GPU would otherwise produce.
+        std::string vsync = "on";                    // "off" | "on" | "adaptive"
+        std::string frame_limit_mode = "unlimited";   // "unlimited" | "half" | "fixed"
+        int max_framerate = 0;                        // fixed cap, frames per second
+        bool show_fps = true;
         bool full_screen = false;
         std::string gauge_static = "static.ani";
         double generic_cargo_rotation_speed_dbl = 1.0;
@@ -2288,8 +2294,6 @@ namespace vega_config {
         float auto_pilot_no_enemies_distance_multiplier_flt = 4.0;
         double auto_pilot_planet_radius_percent_dbl = 0.495;
         float auto_pilot_planet_radius_percent_flt = 0.495;
-        double auto_pilot_spec_lining_up_angle_dbl = 3.0;
-        float auto_pilot_spec_lining_up_angle_flt = 3.0;
         bool auto_pilot_terminate = true;
         double auto_pilot_termination_distance_dbl = 2500.0;
         float auto_pilot_termination_distance_flt = 2500.0;
@@ -2555,12 +2559,15 @@ namespace vega_config {
         bool warp_is_interstellar = false;
         double warp_ramp_down_time_dbl = 0.1;
         float warp_ramp_down_time_flt = 0.1;
-        double warp_clearance_repel_dbl = 2.0;
-        float warp_clearance_repel_flt = 2.0;
-        double warp_clearance_attract_dbl = 1.0;
-        float warp_clearance_attract_flt = 1.0;
-        double warp_clearance_range_mult_dbl = 5.0;
-        float warp_clearance_range_mult_flt = 5.0;
+        // The destination's pull, compared directly against a normalized obstacle
+        // repulsion (0..1), so this value alone sets the balance.
+        double warp_clearance_attract_dbl = 0.9;
+        float warp_clearance_attract_flt = 0.9;
+        // Exponent for the proximity repulsion: weight = (1 - sig/bubble)^p.
+        // p=1 is a straight ramp; p>1 quiets the far field and concentrates the
+        // push near the object, so the ship flies straighter until it is close.
+        double warp_clearance_repel_exponent_dbl = 2.0;
+        float warp_clearance_repel_exponent_flt = 2.0;
         double warp_min_range_dbl = 3000.0;
         float warp_min_range_flt = 3000.0;
         double weapon_damage_efficiency_dbl = 1.0;
@@ -2756,6 +2763,12 @@ namespace vega_config {
         float warp_ramp_down_time_flt = 0.1;
         double warp_ramp_up_time_dbl = 5.0;
         float warp_ramp_up_time_flt = 5.0;
+        // SPEC speed curve: the multiplier is 1 - (1-x)^q, where x is the nearest-object
+        // distance normalized between the weapons range and the clear-space range.
+        // q=1 is the old linear falloff; q<1 cuts speed hard as soon as something enters
+        // the clear range, rather than only when it is close.
+        double warp_speed_curve_exponent_dbl = 0.2;
+        float warp_speed_curve_exponent_flt = 0.2;
         double warp_stretch_cutoff_dbl = 500000.0;
         float warp_stretch_cutoff_flt = 500000.0;
         double warp_stretch_decel_cutoff_dbl = 2500000.0;

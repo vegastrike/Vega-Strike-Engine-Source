@@ -4980,6 +4980,26 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 graphics.framerate_changes_shader = boost::json::value_to<bool>(*framerate_changes_shader_value_ptr);
             }
 
+            const boost::json::value * vsync_value_ptr = graphics_object.if_contains("vsync");
+            if (vsync_value_ptr != nullptr) {
+                graphics.vsync = boost::json::value_to<std::string>(*vsync_value_ptr);
+            }
+
+            const boost::json::value * frame_limit_mode_value_ptr = graphics_object.if_contains("frame_limit_mode");
+            if (frame_limit_mode_value_ptr != nullptr) {
+                graphics.frame_limit_mode = boost::json::value_to<std::string>(*frame_limit_mode_value_ptr);
+            }
+
+            const boost::json::value * max_framerate_value_ptr = graphics_object.if_contains("max_framerate");
+            if (max_framerate_value_ptr != nullptr) {
+                graphics.max_framerate = boost::json::value_to<int>(*max_framerate_value_ptr);
+            }
+
+            const boost::json::value * show_fps_value_ptr = graphics_object.if_contains("show_fps");
+            if (show_fps_value_ptr != nullptr) {
+                graphics.show_fps = boost::json::value_to<bool>(*show_fps_value_ptr);
+            }
+
             const boost::json::value * full_screen_value_ptr = graphics_object.if_contains("full_screen");
             if (full_screen_value_ptr != nullptr) {
                 graphics.full_screen = boost::json::value_to<bool>(*full_screen_value_ptr);
@@ -7034,12 +7054,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.auto_pilot_planet_radius_percent_flt = boost::json::value_to<float>(*auto_pilot_planet_radius_percent_value_ptr);
             }
 
-            const boost::json::value * auto_pilot_spec_lining_up_angle_value_ptr = physics_object.if_contains("auto_pilot_spec_lining_up_angle");
-            if (auto_pilot_spec_lining_up_angle_value_ptr != nullptr) {
-                physics.auto_pilot_spec_lining_up_angle_dbl = boost::json::value_to<double>(*auto_pilot_spec_lining_up_angle_value_ptr);
-                physics.auto_pilot_spec_lining_up_angle_flt = boost::json::value_to<float>(*auto_pilot_spec_lining_up_angle_value_ptr);
-            }
-
             const boost::json::value * auto_pilot_terminate_value_ptr = physics_object.if_contains("auto_pilot_terminate");
             if (auto_pilot_terminate_value_ptr != nullptr) {
                 physics.auto_pilot_terminate = boost::json::value_to<bool>(*auto_pilot_terminate_value_ptr);
@@ -7977,22 +7991,16 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.warp_ramp_down_time_flt = boost::json::value_to<float>(*warp_ramp_down_time_value_ptr);
             }
 
-            const boost::json::value * warp_clearance_repel_value_ptr = physics_object.if_contains("warp_clearance_repel");
-            if (warp_clearance_repel_value_ptr != nullptr) {
-                physics.warp_clearance_repel_dbl = boost::json::value_to<double>(*warp_clearance_repel_value_ptr);
-                physics.warp_clearance_repel_flt = boost::json::value_to<float>(*warp_clearance_repel_value_ptr);
-            }
-
             const boost::json::value * warp_clearance_attract_value_ptr = physics_object.if_contains("warp_clearance_attract");
             if (warp_clearance_attract_value_ptr != nullptr) {
                 physics.warp_clearance_attract_dbl = boost::json::value_to<double>(*warp_clearance_attract_value_ptr);
                 physics.warp_clearance_attract_flt = boost::json::value_to<float>(*warp_clearance_attract_value_ptr);
             }
 
-            const boost::json::value * warp_clearance_range_mult_value_ptr = physics_object.if_contains("warp_clearance_range_mult");
-            if (warp_clearance_range_mult_value_ptr != nullptr) {
-                physics.warp_clearance_range_mult_dbl = boost::json::value_to<double>(*warp_clearance_range_mult_value_ptr);
-                physics.warp_clearance_range_mult_flt = boost::json::value_to<float>(*warp_clearance_range_mult_value_ptr);
+            const boost::json::value * warp_clearance_repel_exponent_value_ptr = physics_object.if_contains("warp_clearance_repel_exponent");
+            if (warp_clearance_repel_exponent_value_ptr != nullptr) {
+                physics.warp_clearance_repel_exponent_dbl = boost::json::value_to<double>(*warp_clearance_repel_exponent_value_ptr);
+                physics.warp_clearance_repel_exponent_flt = boost::json::value_to<float>(*warp_clearance_repel_exponent_value_ptr);
             }
 
             const boost::json::value * warp_min_range_value_ptr = physics_object.if_contains("warp_min_range");
@@ -8543,6 +8551,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
             if (warp_multiplier_min_value_ptr != nullptr) {
                 warp.warp_multiplier_min_dbl = boost::json::value_to<double>(*warp_multiplier_min_value_ptr);
                 warp.warp_multiplier_min_flt = boost::json::value_to<float>(*warp_multiplier_min_value_ptr);
+            }
+
+            const boost::json::value * warp_speed_curve_exponent_value_ptr = warp_object.if_contains("warp_speed_curve_exponent");
+            if (warp_speed_curve_exponent_value_ptr != nullptr) {
+                warp.warp_speed_curve_exponent_dbl = boost::json::value_to<double>(*warp_speed_curve_exponent_value_ptr);
+                warp.warp_speed_curve_exponent_flt = boost::json::value_to<float>(*warp_speed_curve_exponent_value_ptr);
             }
 
             const boost::json::value * warp_ramp_down_time_value_ptr = warp_object.if_contains("warp_ramp_down_time");

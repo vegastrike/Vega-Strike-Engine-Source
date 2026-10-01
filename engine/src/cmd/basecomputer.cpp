@@ -297,7 +297,12 @@ void UpdateTransportPricesForOwnedShips(const Unit* base) {
         if (destination_system != ship.system) {
             vector<string> jumps_vector;
             _Universe->getJumpPath(ship.system, destination_system,jumps_vector);
-            jumps = jumps_vector.size()-1;
+            // getJumpPath returns the systems along the route, so there is one fewer
+            // jump than systems. An empty route (no path found) must not become a
+            // negative jump count -- that would price the transfer below zero, which
+            // reads as "free" and would actually add credits on transfer.
+            const size_t systems = jumps_vector.size();
+            jumps = (systems > 0) ? static_cast<int>(systems) - 1 : 0;
         }
         ship.UpdateTransportPrice(destination_system, destination_base, jumps);
 
@@ -1432,10 +1437,23 @@ bool BaseComputer::isTransactionOK(const Cargo &original_item, const Transaction
             return true;
 
         case BUY_SHIP:
-            //Either you are buying this ship for your fleet, or you already own the
-            //ship and it will be transported to you.
+            //You are either buying a ship for your fleet, or paying to have a ship
+            //you already own transported to you. The second case costs the transport
+            //price, not the ship's price -- testing against the ship's price hid the
+            //button entirely whenever the player could not afford to buy the ship
+            //outright, which made an owned ship look unreachable.
             if (base_unit) {
-                if (item.GetPrice() * quantity <= ComponentsManager::credits) {
+                double price = item.GetPrice();
+                if (item.index > 0) {
+                    try {
+                        price = PlayerShip::GetShipByIndex(item.index).transfer_price;
+                    } catch (const ShipNotFoundException &) {
+                        VS_LOG(error, (boost::format("BUY_SHIP: no fleet ship with index %1%.\n") % item.index));
+                        return false;
+                    }
+                }
+
+                if (price * quantity <= ComponentsManager::credits) {
                     return true;
                 } else {
                     transaction_color = getColor(Color::no_money);
@@ -3714,7 +3732,7 @@ void BaseComputer::LoadSaveQuitConfirm::init(void) {
     text->setTextColor(GFXColor(.7, 1, .4));
     text->setMultiLine(true);
     text->setColor(GUI_CLEAR);
-    text->setFont(Font(.07, 1.25));
+    text->setFont(Font(.045, 1.25));
     text->setId("Information");
     //Put it on the window.
     window->addControl(text);
@@ -3729,7 +3747,7 @@ void BaseComputer::LoadSaveQuitConfirm::init(void) {
     cont->setDownColor(GFXColor(1, .5, 0, .6));
     cont->setDownTextColor(GUI_OPAQUE_BLACK());
     cont->setHighlightColor(GFXColor(0, 1, 0, .4));
-    cont->setFont(Font(.08, BOLD_STROKE));
+    cont->setFont(Font(.05, BOLD_STROKE));
     //Put the button on the window.
     window->addControl(cont);
 
@@ -3743,7 +3761,7 @@ void BaseComputer::LoadSaveQuitConfirm::init(void) {
     resume->setDownColor(GFXColor(0, 1, 0, .6));
     resume->setDownTextColor(GUI_OPAQUE_BLACK());
     resume->setHighlightColor(GFXColor(0, 1, 0, .4));
-    resume->setFont(Font(.08, BOLD_STROKE));
+    resume->setFont(Font(.05, BOLD_STROKE));
     //Put the button on the window.
     window->addControl(resume);
 
