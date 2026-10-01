@@ -464,9 +464,6 @@ function bootstrapOnRedHat() {
         fi
       done
 
-      if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]; then
-        dnf -y upgrade --refresh
-      fi
       dnf -y install 'dnf-command(config-manager)'
       dnf -y config-manager --set-enabled crb
       dnf -y config-manager --set-enabled devel
@@ -538,9 +535,6 @@ function bootstrapOnRockyLinux() {
         fi
       done
 
-      if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]; then
-        dnf -y upgrade --refresh
-      fi
       dnf -y install 'dnf-command(config-manager)'
       dnf -y config-manager --set-enabled crb
       dnf -y config-manager --set-enabled devel
@@ -636,7 +630,7 @@ function bootstrapOnArch() {
     pacman -Syyu --refresh --noconfirm
   fi
 
-  pacman -Syu --noconfirm \
+  pacman -Syu --needed --noconfirm \
     base-devel \
     cmake \
     gcc \
@@ -677,14 +671,14 @@ function bootstrapOnArch() {
 }
 
 function bootstrapOnManjaro() {
-  pacman -Syu --noconfirm archlinux-keyring manjaro-keyring
+  pacman -Syu --needed --noconfirm archlinux-keyring manjaro-keyring
 
   if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]; then
     pacman -Syyu --refresh --noconfirm
   fi
 
-  pacman -Syu --noconfirm base-devel --needed
-  pacman -Syu --noconfirm cmake \
+  pacman -Syu --needed --noconfirm base-devel
+  pacman -Syu --needed --noconfirm cmake \
     gcc \
     gcc-libs \
     git \
@@ -727,13 +721,13 @@ function bootstrapOnManjaro() {
 }
 
 function bootstrapOnEndeavourOS() {
-  pacman -Syu --noconfirm archlinux-keyring
+  pacman -Syu --needed --noconfirm archlinux-keyring
 
   if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]; then
     pacman -Syyu --refresh --noconfirm
   fi
 
-  pacman -Syu --noconfirm \
+  pacman -Syu --needed --noconfirm \
     base-devel \
     icu \
     cmake \
