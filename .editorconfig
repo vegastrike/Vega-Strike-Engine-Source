@@ -26,15 +26,20 @@ ij_editorconfig_space_before_comma = false
 ij_editorconfig_spaces_around_assignment_operators = true
 
 [{*.bash,*.sh,*.zsh}]
+indent_size = 2
+tab_width = 2
+ij_continuation_indent_size = 4
 ij_shell_binary_ops_start_line = false
 ij_shell_keep_column_alignment_padding = false
 ij_shell_minify_program = false
 ij_shell_redirect_followed_by_space = false
-ij_shell_switch_cases_indented = false
+ij_shell_switch_cases_indented = true
 ij_shell_use_unix_line_separator = true
 
 [{*.har,*.jsb2,*.jsb3,*.json,*.jsonc,*.postman_collection,*.postman_collection.json,*.postman_environment,*.postman_environment.json,.babelrc,.eslintrc,.prettierrc,.stylelintrc,.ws-context,jest.config}]
 indent_size = 2
+tab_width = 2
+ij_continuation_indent_size = 4
 ij_json_array_wrapping = split_into_lines
 ij_json_keep_blank_lines_in_code = 0
 ij_json_keep_indents_on_empty_lines = false
