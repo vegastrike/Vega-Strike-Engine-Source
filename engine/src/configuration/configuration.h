@@ -1953,10 +1953,13 @@ namespace vega_config {
         bool vdu_builtin_shields = false;
         double velocity_star_streak_max_dbl = 5.0;
         float velocity_star_streak_max_flt = 5.0;
-        double velocity_star_streak_min_dbl = 1.0;
-        float velocity_star_streak_min_flt = 1.0;
-        double velocity_star_streak_scale_dbl = 0.01;
-        float velocity_star_streak_scale_flt = 0.01;
+        // Star streaks span the in-system speed range: combined with the background
+        // star streak scale (0.01), this starts streaks at about 1% of the top SPEC
+        // speed and saturates at it (see graphics.background_star_streak_velocity_scale).
+        double velocity_star_streak_min_dbl = 0.05;
+        float velocity_star_streak_min_flt = 0.05;
+        double velocity_star_streak_scale_dbl = 1.7e-8;
+        float velocity_star_streak_scale_flt = 1.7e-8;
         bool vista_draw_stars = false;
         double warp_shake_magnitude_dbl = 0.125;
         float warp_shake_magnitude_flt = 0.125;
