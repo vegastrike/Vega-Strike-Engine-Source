@@ -536,7 +536,9 @@ static double ComponentRepairPrice(Unit *base_unit, const Component *component, 
     return ComponentPrice(base_unit, component, ship_price) * ComponentDamage(component);
 }
 
-// A base charges more for its services on a harder difficulty, as it always has.
+// A base charges more for its work on a harder difficulty, as it always has. This is the charge
+// for the work, not for the hardware: a replacement part costs what it costs whatever the
+// difficulty, as it would if the player bought it from the shop.
 static double ServiceCharge(double value) {
     return value * g_game.difficulty;
 }
@@ -2522,7 +2524,7 @@ static double RepairShipComponent(Unit *player_unit, Unit *base_unit, const std:
 
     const double ship_price = PlayerShipPrice();
     const double repair_price = ServiceCharge(ComponentRepairPrice(base_unit, component, ship_price));
-    const double replace_price = ServiceCharge(ComponentPrice(base_unit, component, ship_price));
+    const double replace_price = ComponentPrice(base_unit, component, ship_price);
     if (ComponentsManager::credits.Value() < std::max(repair_price, replace_price)) {
         return 0.0;
     }
