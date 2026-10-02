@@ -547,7 +547,7 @@ static double ServiceCharge(double value) {
 // is valued against.
 static double PlayerShipPrice(void) {
     try {
-        return PlayerShip::GetActiveShip().cargo.GetPrice();
+        return PlayerShip::GetActiveShip().ShipPrice();
     } catch (const NoActiveShipNotFoundException &) {
         return 0.0;
     }

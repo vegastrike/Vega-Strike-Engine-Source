@@ -28,6 +28,7 @@
 #include "player_ship.h"
 #include "components_manager.h"
 #include "configuration/configuration.h"
+#include "resource/manifest.h"
 #include "vs_logging.h"
 
 #include <algorithm>
@@ -115,8 +116,39 @@ double PlayerShip::DamagePercent() {
     return unit->DamagePercent();
 }
 
+// One credit is the price list's way of saying a ship is not for sale, which is what the
+// campaign's inherited starter ship and some variants are listed at. It is not what the ship is
+// worth, so those fall back to what the same ship actually sells for.
+static const double kPlaceholderPrice = 1.0;
+
+double PlayerShip::ShipPrice() {
+    const double own_price = cargo.GetPrice();
+    if (own_price > kPlaceholderPrice) {
+        return own_price;
+    }
+
+    // "Llama.begin" is a Llama, and "Plowshare__pirates" is a Plowshare.
+    std::string base_name = cargo.GetName();
+    const std::string::size_type variant = base_name.find_last_of("._");
+    if (variant != std::string::npos) {
+        base_name = base_name.substr(0, variant);
+    }
+
+    const std::string candidates[] = {base_name + ".stock", base_name};
+    for (const std::string &candidate : candidates) {
+        if (Manifest::MPL().HasCargo(candidate)) {
+            const double price = Manifest::MPL().GetCargoByName(candidate).GetPrice();
+            if (price > kPlaceholderPrice) {
+                return price;
+            }
+        }
+    }
+
+    return own_price;
+}
+
 double PlayerShip::SalePrice() {
-    const double price = cargo.GetPrice();
+    const double price = ShipPrice();
     const double resale = configuration().economics.ship_sellback_price_dbl * price * (1.0 - DamagePercent());
     const double mass = unit != nullptr ? unit->GetBaseMass() : 0.0;
     return std::max(resale, ScrapValue(price, mass));
