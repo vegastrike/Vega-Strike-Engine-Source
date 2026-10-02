@@ -1909,7 +1909,9 @@ void BaseComputer::loadListPicker(TransactionList &transaction_list,
                     ? ship_component->PercentOperational()
                     : UnitUtil::PercentOperational(item, m_player.GetUnit(), item.GetName(), item.GetCategory(), false);
             if (percent_working < 1.0) {
-                itemName += (boost::format(" (%1$.0f%% working)") % (percent_working * 100.0)).str();
+                //A tenth of a percent, so a row that is charged for never reads as though it works
+                //perfectly: 99.7% working rounds to "100% working" at whole numbers.
+                itemName += (boost::format(" (%1$.1f%% working)") % (percent_working * 100.0)).str();
             }
         }
 
