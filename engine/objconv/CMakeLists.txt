@@ -182,4 +182,7 @@ IF (WIN32)
 ENDIF()
 
 TARGET_LINK_LIBRARIES(vega-meshtool ${MSH_LIBS})
-INSTALL(TARGETS vega-meshtool DESTINATION bin)
+INSTALL(
+        TARGETS vega-meshtool
+        RUNTIME_DEPENDENCIES
+        DESTINATION bin)
