@@ -498,20 +498,6 @@ static double ComponentPrice(Unit *base_unit, const Component *component, double
     return configuration().economics.component_share_dbl * ship_price;
 }
 
-// How much of a component is damaged. Damage is the condition of the component itself rather
-// than its charge: a capacitor below full or a discharged shield is not damage, and fuel is a
-// supply rather than a part of the ship.
-static double ComponentDamage(const Component *component) {
-    if (component->type == ComponentType::Fuel) {
-        return 0.0;
-    }
-    if (component->type == ComponentType::Shield) {
-        // A shield reports its charge as its operational percent, so ask the generator instead.
-        return 1.0 - vega_dynamic_cast_ptr<const Shield>(component)->GeneratorPercent();
-    }
-    return 1.0 - component->PercentOperational();
-}
-
 // Putting a damaged component right costs its value in proportion to how much of it is damaged;
 // replacing a destroyed one costs its value. Nothing caps the bill: a wreck can cost more to put
 // right than the ship is worth, as a car can.
@@ -566,7 +552,10 @@ static double RepairPrice(Unit *playerUnit, const Cargo *item) {
 
 
 static float SellPrice(Unit *playerUnit, const Cargo *item) {
-    return usedValue(item->GetPrice()) - RepairPrice(playerUnit, item);
+    //A destroyed part is worth less than nothing once its repair cost is taken off, so a dealer
+    //never offers less than what the part weighs in scrap.
+    const double used_price = usedValue(item->GetPrice()) - RepairPrice(playerUnit, item);
+    return static_cast<float>(std::max(used_price, ScrapValue(item->GetPrice(), item->GetMass())));
 }
 
 
@@ -3642,15 +3631,12 @@ void BaseComputer::loadShipDealerControls(void) {
 // TODO: move this to ComponentsManager
 bool sellShip(Unit *baseUnit, Unit *playerUnit, Cargo* item, BaseComputer *bcomputer) {
     PlayerShip& ship = PlayerShip::GetShipByIndex(item->index);
-    const double purchase_price = ship.cargo.GetPrice();
+
+    //Selling the ship is the dealer paying for it and charging for getting it here, and never
+    //taking money off the player for a ship that is worth less than the trip to the dealer.
+    const double sale_price = ship.SalePrice();
     const double shipping_price = ship.transfer_price;
-
-    // Transfer the ship to the dealer
-    ComponentsManager::credits -= shipping_price; //transportation cost
-
-    // Sell the ship
-    const double ship_sellback_factor = configuration().economics.ship_sellback_price_dbl;
-    ComponentsManager::credits += ship_sellback_factor * purchase_price; //sellback cost
+    ComponentsManager::credits += std::max(0.0, sale_price - shipping_price);
 
     // Remove the ship and add to base
     // This will strip the ship of any modifications including damage and upgrades.

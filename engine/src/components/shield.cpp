@@ -316,10 +316,6 @@ bool Shield::Damaged() const {
     return operational.Value() < 1;
 }
 
-bool Shield::GeneratorDamaged() const {
-    return regeneration.Damaged();
-}
-
 double Shield::MaxRegeneration() const {
     return regeneration.MaxValue();
 }

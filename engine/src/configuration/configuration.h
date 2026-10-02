@@ -1439,6 +1439,12 @@ namespace vega_config {
         // the ship carrying it: the shops' ladders stop well below what capital ships mount.
         double component_share_dbl = 0.05;
         float component_share_flt = 0.05;
+        // What a ship too damaged to sell as a ship is worth: never more than this share of what
+        // it cost, and never more than its weight in the cheapest metal.
+        double scrap_price_fraction_dbl = 0.05;
+        float scrap_price_fraction_flt = 0.05;
+        double scrap_price_per_mass_dbl = 5.0;
+        float scrap_price_per_mass_flt = 5.0;
         double sellback_shipping_price_dbl = 6000.0;
         float sellback_shipping_price_flt = 6000.0;
         double ship_sellback_price_dbl = 0.5;

@@ -38,6 +38,11 @@
 /** A collection of utility functions for lib component. */
 const ComponentType GetComponentTypeFromName(const std::string name);
 
+/** How much of a component is damaged - its own condition, not its charge. Fuel is a supply
+    rather than a part of the ship, so it is never damaged, and a shield reports its charge as
+    its operational percent, so a shield is asked through its generator instead. */
+double ComponentDamage(const Component *component);
+
 EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel,
                            EnergyContainer* energy, EnergyContainer* ftl_energy);
 

@@ -44,12 +44,27 @@
 #include "components/jump_drive.h"
 #include "ftl_drive.h"
 #include "components/cloak.h"
+#include "components/shield.h"
 
 #include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
 
 
+
+double ComponentDamage(const Component *component) {
+    if (component->type == ComponentType::Fuel) {
+        // Fuel is a supply rather than a part of the ship.
+        return 0.0;
+    }
+
+    if (component->type == ComponentType::Shield) {
+        // A shield reports its charge as its operational percent, so ask its generator instead.
+        return 1.0 - vega_dynamic_cast_ptr<const Shield>(component)->GeneratorPercent();
+    }
+
+    return 1.0 - component->PercentOperational();
+}
 
 const ComponentType GetComponentTypeFromName(const std::string name) {
     std::string upgrade_key = name + "__upgrades";
