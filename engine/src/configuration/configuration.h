@@ -1435,6 +1435,10 @@ namespace vega_config {
     struct {
         double repair_price_dbl = 5000.0;
         float repair_price_flt = 5000.0;
+        // What a component with no listed part of its own is worth, as a share of the price of
+        // the ship carrying it: the shops' ladders stop well below what capital ships mount.
+        double component_share_dbl = 0.05;
+        float component_share_flt = 0.05;
         double sellback_shipping_price_dbl = 6000.0;
         float sellback_shipping_price_flt = 6000.0;
         double ship_sellback_price_dbl = 0.5;
