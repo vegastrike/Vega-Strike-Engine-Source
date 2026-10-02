@@ -25,96 +25,98 @@ jobs:
           - FROM:     'ubuntu:resolute'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
-            INSTALL_GTEST: 1
-            USE_GTEST: 1
-            allow_failure: false
-          - FROM:     'ubuntu:questing'
-            COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'ubuntu:noble'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'linuxmintd/mint22.3-amd64'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'linuxmintd/mint22.2-amd64'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'linuxmintd/mint22-amd64'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'dhi.io/python:3.13-debian13-dev'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'debian:bookworm'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'fedora:44'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'fedora:43'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'fedora:42'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'fedora:41'
             COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'opensuse/leap:16.0'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
-          - FROM:     'rockylinux/rockylinux:10.1'
+          - FROM:     'rockylinux/rockylinux:10.2'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
-            INSTALL_GTEST: 1
-            USE_GTEST: 1
-            allow_failure: false
-          - FROM:     'rockylinux/rockylinux:10.0'
-            COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
@@ -146,7 +148,7 @@ jobs:
           INSTALL_GTEST: ${{ matrix.INSTALL_GTEST }}
           USE_GTEST: ${{ matrix.USE_GTEST }}
           IS_RELEASE: 0
-        run: script/cibuild --preset-name="${{ matrix.preset-name }}"
+        run: script/cibuild --preset-name=${{ matrix.preset-name }} --build-type=${{ matrix.build-type }}
 
       - name: Upload test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
