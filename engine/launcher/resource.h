@@ -1,10 +1,10 @@
 /*
- * common.h
+ * resource.h
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2026 The Vega Strike Contributors:
  * Project creator: Daniel Horn
- * Original development team: As listed in the AUTHORS file. Specifically: jhunt
+ * Original development team: As listed in the AUTHORS file
  * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -24,18 +24,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
 
+//{{NO_DEPENDENCIES}}
+// Microsoft Developer Studio generated include file.
+// Used by launcher.rc
+//
+#define IDI_ICON1                       101
 
-/* This file is for common (as in shared between the engine and the launcher) stuff
- * that is not important enough to warrant its own file.
- */
-
-#ifndef _WIN32
-#include <string>
-
-//Returns where the data directory is. Returns the cwd if it can't find the data dir.
-//Note: When it returns it has already changed dir to where the data directory is
-std::string getdatadir();
-
+// Next default values for new objects
+// 
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_NEXT_RESOURCE_VALUE        102
+#define _APS_NEXT_COMMAND_VALUE         40001
+#define _APS_NEXT_CONTROL_VALUE         1000
+#define _APS_NEXT_SYMED_VALUE           101
+#endif
 #endif

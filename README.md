@@ -113,6 +113,8 @@ If you encounter any issues while playing, please create an issue with the Vega 
       The vegastrike engine, requires `-d` to specify the data set.
   /usr/bin/vegastrike
       The vegastrike engine with legacy data set search support
+  /usr/local/bin/vslauncher
+      The vegastrike save game and mission selection utility
   /usr/local/share/vegastrike
       The vegastrike data files
   /usr/local/lib/man/man1
