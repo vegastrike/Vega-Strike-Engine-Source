@@ -4,21 +4,13 @@
 Vega Strike: Upon The Coldest Sea - Trade, Fight, and Explore the Universe
 .SH SYNOPSIS
 .SS
-vegasettings
-.PP
-Vega Strike Configuration
-.SS
 vegastrike-engine -ddata_dir [-px,y,z] [-jsector/starsystem] [missionname]
 .SS
 vegastrike [-ddata_dir] [-px,y,z] [-jsector/starsystem] [missionname]
 .PP
 Vega Strike Game Engine
 .PP
-It is recommended to run 
-.ft I
-vegasettings
-.ft P
-first to configure your system, then invoke
+Invoke
 .ft I
 vegastrike-engine
 .ft P
@@ -26,12 +18,8 @@ or
 .ft I
 vegastrike
 .ft P
-to start a New Game.
+to start a New Game. Settings are configured in-game with the settings screen (Alt-C).
 .SH DESCRIPTION
-.SS
-vegasettings
-.PP
-Program to create and edit the settings for Vega Strike.
 .SS
 vegastrike-engine
 .PP
@@ -53,11 +41,7 @@ known installation points for the data assets.
 .SS Installation
 For general installation instructions see https://www.vega-strike.org/install/.
 .SS Initial Configuration
-On the first use one must run
-.ft I
-vegasettings
-.ft P
-in order to configure the game. Once run it only needs to be run again if you want to change the configuration.
+On the first use the game can be started directly; sensible defaults are used. Press Alt-C in-game to open the settings screen and configure your system. Changes are saved to the user configuration files, and only need to be made again if you want to change the configuration.
 .SS
 General Documentation
 .PP
@@ -67,7 +51,8 @@ documentation is also available at https://wiki.vega-strike.org/Manual:Tutorial.
 Key Bindings
 .PP
 Some information about key bindings can be found at https://wiki.vega-strike.org/Manual:Keyboard_layout; however,
-the authoritative key bindings are stored in the configuration file under <bindings>.
+the authoritative key bindings are stored in bindings.json (sections "actions" and "axes"), and are most easily
+edited in-game with the settings screen (Alt-C).
 .SS
 More Information
 .PP
@@ -98,13 +83,12 @@ Default: /usr/share/vegastrike/data/mission/exploration/explore_universe.mission
 .SH
 CONFIGURATION FILE
 .PP
-The default configuration file is $HOME/.vegastrike/vegastrike.config.
+The engine reads the split JSON configuration: config.json (settings), bindings.json (actions and axes),
+theme.json (colours) and engine.json (engine tuning). The shipped defaults live in the game data directory;
+user overrides are written to $HOME/.vegastrike/.
 .PP
-The configuration file is modified by the
-.ft I
-vegasettings
-.ft P
-program for most important configuration items. Other options, such as the key bindings, may be found
+The user configuration files are modified by the in-game settings screen (Alt-C) for most important
+configuration items. Other options, such as the key bindings, may be found
 via the README included in the documentation, the Wiki Site, and other Vega Strike resources.
 .SH
 COPYRIGHT
@@ -179,15 +163,11 @@ The Vega Strike Game Engine
 .PP
 The Vega Strike Game Engine using the local directory as the default for the game assets.
 .SS
-/usr/bin/vegasettings
-.PP
-The Vega Strike Configuration Editor
-.SS
 ~/.vegastrike/
 .PP
 Configuration Directory
 .SS
-~/.vegastrike/vegastrike.config
+~/.vegastrike/config.json
 .PP
 The default user configuration file
 .SS
