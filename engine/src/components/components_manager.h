@@ -30,38 +30,33 @@
 #ifndef VEGA_STRIKE_ENGINE_COMPONENTS_MANAGER_COMPONENT_H
 #define VEGA_STRIKE_ENGINE_COMPONENTS_MANAGER_COMPONENT_H
 
-#include "energy_container.h"
-#include "reactor.h"
+#include <vector>
 
 #include "afterburner.h"
 #include "afterburner_upgrade.h"
+#include "armor.h"
+#include "cargo_hold.h"
+#include "cloak.h"
+#include "computer.h"
 #include "drive.h"
 #include "drive_upgrade.h"
-
-#include "ftl_drive.h"
-#include "jump_drive.h"
-
-#include "armor.h"
-#include "hull.h"
-#include "shield.h"
-
-#include "computer.h"
-#include "radar.h"
-#include "cloak.h"
 #include "ecm.h"
+#include "energy_container.h"
+#include "ftl_drive.h"
+#include "hull.h"
+#include "jump_drive.h"
+#include "radar.h"
+#include "reactor.h"
 #include "repair_bot.h"
+#include "shield.h"
 #include "ship_functions.h"
-
-#include "cargo_hold.h"
-
-#include <vector>
 
 /** A collection of components. This class is really a proto-ship,
  * with mass and serving as a stand-in for the Unit sub-class.
  */
 class ComponentsManager {
     bool player_ship = false;
-    
+
     // Here we store hud text so we won't have to generate it every cycle
     // Instead we only do this when something changes
     std::string hud_text;
@@ -69,7 +64,7 @@ class ComponentsManager {
     std::vector<std::pair<const std::string, const int>> prohibited_upgrades;
 
     // Deduplicated add — repairs the doubling-bug ballooned save lists.
-    void AddProhibitedUpgrade(const std::string& category, int limit);
+    void AddProhibitedUpgrade(const std::string &category, int limit);
 
     friend class CargoHold;
     friend class Movable;
@@ -78,56 +73,57 @@ protected:
     // TODO: make it change with fuel consumption
     double mass;
     double base_mass;
+
 public:
     static Resource<double> credits;
 
     virtual ~ComponentsManager() = default;
 
     void Load(std::string unit_key);
-    void Serialize(std::map<std::string, std::string>& unit) const;
+    void Serialize(std::map<std::string, std::string> &unit) const;
 
     double GetMass() const;
-    void SetMass(double mass);
+    void   SetMass(double mass);
 
     double PriceCargo(const std::string &cargo_name);
-    void SetPlayerShip();
-    bool IsPlayerShip() const;
+    void   SetPlayerShip();
+    bool   IsPlayerShip() const;
 
-// Components
-    EnergyContainer fuel = EnergyContainer(ComponentType::Fuel);
-    EnergyContainer energy = EnergyContainer(ComponentType::Capacitor);
+    // Components
+    EnergyContainer fuel       = EnergyContainer(ComponentType::Fuel);
+    EnergyContainer energy     = EnergyContainer(ComponentType::Capacitor);
     EnergyContainer ftl_energy = EnergyContainer(ComponentType::FtlCapacitor);
 
     // TODO: move this to a single constructor?!
     Reactor reactor = Reactor(&fuel, &energy, &ftl_energy);
 
-    Afterburner afterburner;
+    Afterburner        afterburner;
     AfterburnerUpgrade afterburner_upgrade = AfterburnerUpgrade(&afterburner);
-    Cloak cloak = Cloak();
-    Drive drive;
-    DriveUpgrade drive_upgrade = DriveUpgrade(&drive);
-    FtlDrive ftl_drive = FtlDrive(&ftl_energy);
-    JumpDrive jump_drive = JumpDrive(&ftl_energy);
-    CRadar radar;
+    Cloak              cloak               = Cloak();
+    Drive              drive;
+    DriveUpgrade       drive_upgrade = DriveUpgrade(&drive);
+    FtlDrive           ftl_drive     = FtlDrive(&ftl_energy);
+    JumpDrive          jump_drive    = JumpDrive(&ftl_energy);
+    CRadar             radar;
 
-    Armor armor;
-    Hull hull;
+    Armor  armor;
+    Hull   hull;
     Shield shield = Shield(&energy, &ftl_drive, &cloak);
 
-    Computer computer;
-    ECM ecm;
-    RepairBot repair_bot;
+    Computer      computer;
+    ECM           ecm;
+    RepairBot     repair_bot;
     ShipFunctions ship_functions;
 
-    CargoHold cargo_hold = CargoHold(HoldType::cargo);
-    CargoHold hidden_hold = CargoHold(HoldType::hidden);
+    CargoHold cargo_hold    = CargoHold(HoldType::cargo);
+    CargoHold hidden_hold   = CargoHold(HoldType::hidden);
     CargoHold upgrade_space = CargoHold(HoldType::upgrade);
 
-    bool ShipDamaged() const;
-    bool AllowedUpgrade(const Cargo& upgrade) const;
-    bool UpgradeAlreadyInstalled(const Cargo& upgrade) const;
-    void DamageRandomSystem();
-    void GenerateHudText(std::string getDamageColor(double));
+    bool        ShipDamaged() const;
+    bool        AllowedUpgrade(const Cargo &upgrade) const;
+    bool        UpgradeAlreadyInstalled(const Cargo &upgrade) const;
+    void        DamageRandomSystem();
+    void        GenerateHudText(std::string getDamageColor(double));
     std::string GetHudText();
     std::string GetTitle(bool show_cargo, bool show_star_date, std::string date);
 
@@ -137,11 +133,12 @@ public:
     bool BuyUpgrade(ComponentsManager *seller, Cargo *item, int quantity);
     bool SellUpgrade(ComponentsManager *seller, Cargo *item, int quantity);
 
-    Component* GetComponentByType(const ComponentType type);
-    const Component* GetComponentByType(const ComponentType type) const;
+    Component       *GetComponentByType(const ComponentType type);
+    const Component *GetComponentByType(const ComponentType type) const;
+
 private:
     bool _Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity);
     bool _Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *item, int quantity);
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_MANAGER_COMPONENT_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_MANAGER_COMPONENT_H

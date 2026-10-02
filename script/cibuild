@@ -31,7 +31,7 @@
 set -e
 
 echo "----------------------------"
-echo "--- cibuild | 2026-01-20 ---"
+echo "--- cibuild | 2026-10-01 ---"
 echo "----------------------------"
 
 #----------------------------------
@@ -91,6 +91,11 @@ then
     preset_name="${PRESET_NAME}"
 fi
 
+if [ -z "$build_type" ] && [ -n "$BUILD_TYPE" ]
+then
+  build_type="${BUILD_TYPE}"
+fi
+
 platform="$(uname | tr '[:upper:]' '[:lower:]')"
 
 case "$platform" in
@@ -99,10 +104,11 @@ case "$platform" in
         DST_DOCKER_IMG_NAME="building-vega-strike:$(echo "$from" | sed 's/:/_/' | sed 's/\//_/')"
         DOCKER_CONTAINER_NAME="building-vega-strike_$(echo "$from" | sed 's/:/_/' | sed 's/\//_/')"
         PRESET_NAME="${preset_name}"
+        BUILD_TYPE="${build_type}"
         echo "Building docker image for $from / $COMPILER"
         docker build --build-arg from="$SRC_DOCKER_IMG_NAME" -t "$DST_DOCKER_IMG_NAME" .
         echo "Running docker image for $from / $COMPILER"
-        docker run --env CC="$CC" --env CXX="$CXX" --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env TAG_NAME="$TAG_NAME" --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA="$SHORT_SHA" --env PRESET_NAME="$PRESET_NAME" --name "$DOCKER_CONTAINER_NAME" "$DST_DOCKER_IMG_NAME"
+        docker run --env CC="$CC" --env CXX="$CXX" --env IS_RELEASE=$IS_RELEASE --env INSTALL_GTEST=$INSTALL_GTEST --env USE_GTEST=$USE_GTEST --env TAG_NAME="$TAG_NAME" --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA="$SHORT_SHA" --env PRESET_NAME="$PRESET_NAME" --env BUILD_TYPE="$BUILD_TYPE" --name "$DOCKER_CONTAINER_NAME" "$DST_DOCKER_IMG_NAME"
         docker cp "$DOCKER_CONTAINER_NAME":/usr/local/src/Vega-Strike-Engine-Source/bin .
         if [ $IS_RELEASE -eq 1 ]
         then
@@ -168,7 +174,7 @@ case "$platform" in
         echo "                   CFlags: ${CFLAGS}"
         echo "                  LDFlags: ${LDFLAGS}"
 
-        script/build --preset-name="${preset_name}"
+        script/build --preset-name="${preset_name}" --build-type="${build_type}"
         # On macOS, the following is done by the calling CI workflow
         # ctest -V
         ;;
