@@ -155,6 +155,10 @@ public:
         came with, plus the parts that are never bought. Fuel is not a part, and a
         component the ship bought is listed as the item it is instead. */
     std::vector<Cargo> IntegralComponentItems();
+    /** The part the ship carries for a component - its own fitted part, when the component is not
+        itself a bought one - or an empty string when it carries none. What such a component is
+        worth: the part that would replace it is the part the ship already has. */
+    std::string CarriedPartKey(const Component *component) const;
     /** Drops the rows a game saved by an earlier build carries for its own components. */
     void RemoveLegacyIntegralItems();
     /** The components that are damaged - fuel is not included, and a shield's charge

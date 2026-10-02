@@ -302,13 +302,17 @@ bool ComponentsManager::ComponentIsIntegral(const Component *component) const {
     return component->GetUpgradeKey().empty() && !HasItemForComponent(component);
 }
 
-bool ComponentsManager::HasItemForComponent(const Component *component) const {
+std::string ComponentsManager::CarriedPartKey(const Component *component) const {
     for (const Cargo &item : upgrade_space.GetItems()) {
         if (GetComponentTypeFromName(item.GetName()) == component->type) {
-            return true;
+            return item.GetName();
         }
     }
-    return false;
+    return "";
+}
+
+bool ComponentsManager::HasItemForComponent(const Component *component) const {
+    return !CarriedPartKey(component).empty();
 }
 
 std::vector<Cargo> ComponentsManager::IntegralComponentItems() {
