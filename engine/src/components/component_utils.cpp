@@ -58,11 +58,8 @@ double ComponentDamage(const Component *component) {
         return 0.0;
     }
 
-    if (component->type == ComponentType::Shield) {
-        // A shield reports its charge as its operational percent, so ask its generator instead.
-        return 1.0 - vega_dynamic_cast_ptr<const Shield>(component)->GeneratorPercent();
-    }
-
+    // Every component reports its own condition as its operational percent. A shield's is its
+    // generator's health, its facets being its charge.
     return 1.0 - component->PercentOperational();
 }
 
