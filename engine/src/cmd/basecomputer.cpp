@@ -1898,6 +1898,21 @@ void BaseComputer::loadListPicker(TransactionList &transaction_list,
         if (itemName == "") {
             itemName = beautify(item.GetName());
         }
+
+        //How much of this works, which is what the row says and is coloured by, and what the repair
+        //bill charges against. A component of the ship itself is not a part, so it has no part entry
+        //to look up: ask the component, or every one of them reads as undamaged.
+        double percent_working = 1.0;
+        if (transaction_type == SELL_UPGRADE && m_player.GetUnit()) {
+            const Component *ship_component = m_player.GetUnit()->ComponentByName(item.GetName());
+            percent_working = ship_component != nullptr
+                    ? ship_component->PercentOperational()
+                    : UnitUtil::PercentOperational(item, m_player.GetUnit(), item.GetName(), item.GetCategory(), false);
+            if (percent_working < 1.0) {
+                itemName += (boost::format(" (%1$.0f%% working)") % (percent_working * 100.0)).str();
+            }
+        }
+
         if (item.GetQuantity() > 1) {
             //If there is more than one item, show the number of items.
             itemName += " (" + tostring(item.GetQuantity()) + ")";
@@ -1907,9 +1922,6 @@ void BaseComputer::loadListPicker(TransactionList &transaction_list,
         GFXColor final_color;
         if (transaction_type == SELL_UPGRADE && m_player.GetUnit()) {
             //Adjust the base color if the item is 'damaged'
-            double percent_working =
-                    UnitUtil::PercentOperational(item, m_player.GetUnit(), item.GetName(), item.GetCategory(), false);
-
             final_color = GFXColor(
                     (1.0 * percent_working) + (1.0 * (1.0 - percent_working)),
                     (1.0 * percent_working) + (0.0 * (1.0 - percent_working)),
