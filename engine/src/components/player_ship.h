@@ -68,6 +68,10 @@ struct PlayerShip {
     std::string GetPurchaseHeader();
     /** How much of the ship is damaged, from 0.0 to 1.0 */
     double DamagePercent();
+    /** What the ship is worth. The price list's placeholder price for a ship that is not for
+        sale - the campaign's inherited starter ship, say - is replaced by the price of the same
+        ship's stock variant. */
+    double ShipPrice();
     /** What the dealer pays for this ship: its resale value less a share of the damage it carries,
         and never less than its weight in scrap. */
     double SalePrice();
