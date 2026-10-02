@@ -69,6 +69,10 @@ public:
     bool Damaged() const override;
     // The shield's own condition, without its charge: a discharged shield is not damaged.
     bool GeneratorDamaged() const;
+    // The rated recharge: the figure the shields are ranked by in the shops.
+    double MaxRegeneration() const;
+    // The generator's own health, without the shield's charge. 1.0 on an undamaged generator.
+    double GeneratorPercent() const;
 
     void Regenerate(const bool player_ship);
 

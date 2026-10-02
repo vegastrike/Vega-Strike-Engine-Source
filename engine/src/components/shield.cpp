@@ -321,6 +321,14 @@ bool Shield::GeneratorDamaged() const {
     return regeneration.Damaged();
 }
 
+double Shield::MaxRegeneration() const {
+    return regeneration.MaxValue();
+}
+
+double Shield::GeneratorPercent() const {
+    return regeneration.Percent();
+}
+
 
 void Shield::Regenerate(const bool player_ship) {
     //const bool apply_difficulty_shields = configuration().physics.difficulty_based_shield_recharge;
