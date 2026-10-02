@@ -1730,7 +1730,8 @@ bool BaseComputer::isTransactionOK(const Cargo &original_item, const Transaction
             //A repair installs nothing, so it needs no room in the upgrade space.
             have_space = item.GetName() == BASIC_REPAIR_NAME
                     || player_unit->upgrade_space.CanAddCargo(item) || item.IsWeapon();
-            upgrade_already_installed = player_unit->UpgradeAlreadyInstalled(item);
+            upgrade_already_installed = item.GetName() != BASIC_REPAIR_NAME
+                    && player_unit->UpgradeAlreadyInstalled(item);
 
             // Simply not allowed
             if (!UpgradeAllowed(item, player_unit)) {
