@@ -453,8 +453,27 @@ static const char *ComponentLadderPrefix(const Component *component, const Compo
     return ladder->prefix;
 }
 
+// The price lists, and a base's own inventory, name a part without the units.json suffix:
+// armor03, not armor03__upgrades. Manifest::GetCargoByName() tolerates the suffix but HasCargo()
+// does not, so PriceCargo() silently falls back to the space junk price for a suffixed key. That
+// is how every component came to be worth 10 credits.
+static std::string PartPriceKey(const std::string &key) {
+    const std::string suffix = "__upgrades";
+    if (key.length() > suffix.length()
+            && key.compare(key.length() - suffix.length(), suffix.length(), suffix) == 0) {
+        return key.substr(0, key.length() - suffix.length());
+    }
+    return key;
+}
+
+// Whether the shops list a part at all. A name they do not know is not a price.
+static bool PartIsListed(const std::string &key) {
+    return Manifest::MPL().HasCargo(PartPriceKey(key));
+}
+
 // The price of the tier nearest this component's figure, or zero when its type is not sold in a
-// ladder or it has no figure to rank.
+// ladder, it has no figure to rank, or its figure is beyond both ends of the ladder - which is
+// the capital ship case, and is priced against the ship instead.
 static double NearestTierPrice(Unit *base_unit, const Component *component) {
     const ComponentTier *ladder = ComponentLadder(component);
     const double figure = ComponentFigure(component);
@@ -465,17 +484,29 @@ static double NearestTierPrice(Unit *base_unit, const Component *component) {
     const char *prefix = ComponentLadderPrefix(component, ladder);
     double nearest_tier_price = 0.0;
     double nearest_distance = -1.0;
+    double lowest_figure = -1.0;
+    double highest_figure = -1.0;
     for (int tier = 1; tier <= ladder->tiers; ++tier) {
         const std::string tier_key = (boost::format("%1%%2$02d__upgrades") % prefix % tier).str();
         const double tier_figure = UnitCSVFactory::GetVariable(tier_key, ladder->figure, 0.0);
-        if (tier_figure <= 0.0) {
+        if (tier_figure <= 0.0 || !PartIsListed(tier_key)) {
             continue;
+        }
+        if (lowest_figure < 0.0 || tier_figure < lowest_figure) {
+            lowest_figure = tier_figure;
+        }
+        if (tier_figure > highest_figure) {
+            highest_figure = tier_figure;
         }
         const double distance = std::fabs(tier_figure - figure);
         if (nearest_distance < 0.0 || distance < nearest_distance) {
             nearest_distance = distance;
-            nearest_tier_price = base_unit->PriceCargo(tier_key);
+            nearest_tier_price = base_unit->PriceCargo(PartPriceKey(tier_key));
         }
+    }
+
+    if (lowest_figure < 0.0 || figure < lowest_figure || figure > highest_figure) {
+        return 0.0;
     }
     return nearest_tier_price;
 }
@@ -486,8 +517,8 @@ static double NearestTierPrice(Unit *base_unit, const Component *component) {
 // the ship's own price: capital ships mount equipment the shops never stock.
 static double ComponentPrice(Unit *base_unit, const Component *component, double ship_price) {
     const std::string part_key = component->GetUpgradeKey();
-    if (!part_key.empty()) {
-        return base_unit->PriceCargo(part_key);
+    if (!part_key.empty() && PartIsListed(part_key)) {
+        return base_unit->PriceCargo(PartPriceKey(part_key));
     }
 
     const double tier_price = NearestTierPrice(base_unit, component);
