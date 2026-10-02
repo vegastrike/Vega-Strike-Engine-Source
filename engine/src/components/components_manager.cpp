@@ -104,6 +104,10 @@ void ComponentsManager::SetMass(double mass) {
     this->mass = mass;
 }
 
+double ComponentsManager::GetBaseMass() const {
+    return base_mass;
+}
+
 void ComponentsManager::SetPlayerShip() {
     player_ship = true;
 }
@@ -259,17 +263,20 @@ std::vector<HudText> ComponentsManager::Components() {
 }
 
 bool ComponentsManager::ComponentNeedsRepair(Component *component) {
-    // Refuelling is a separate service, and an empty tank is not damage.
-    if (component == &fuel) {
-        return false;
+    return ComponentDamage(component) > 0.0;
+}
+
+double ComponentsManager::DamagePercent() {
+    const std::vector<HudText> components = Components();
+    if (components.empty()) {
+        return 0.0;
     }
-    // A shield reports its charge as operational, so ask the generator instead.
-    if (component == &shield) {
-        return shield.GeneratorDamaged();
+
+    double damage = 0.0;
+    for (const HudText &component : components) {
+        damage += ComponentDamage(component.component);
     }
-    // Everything else reports the condition of the component itself, which is what
-    // repair fixes - a capacitor below full charge is not damaged.
-    return component->PercentOperational() < 1.0;
+    return damage / components.size();
 }
 
 namespace {

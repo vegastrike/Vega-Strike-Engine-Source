@@ -103,6 +103,9 @@ public:
 
     double GetMass() const;
     void SetMass(double mass);
+    /** The mass of the ship itself, without its cargo or its fuel. What its weight in scrap is
+        priced by, since a hold full of goods is not part of the hull. */
+    double GetBaseMass() const;
 
     double PriceCargo(const std::string &cargo_name);
     void SetPlayerShip();
@@ -166,6 +169,9 @@ public:
     /** Puts a damaged component right, by repairing it or - when Repair() cannot fix it,
         as for a destroyed one - by replacing it. */
     ComponentService ServiceComponent(const std::string &name);
+    /** How much of the ship is damaged: the average of its components. Fuel is a supply rather
+        than a part of the ship, and is left out of it. */
+    double DamagePercent();
 
     /** place stuff here for now. maybe move to subclass */
     bool BuyCargo(ComponentsManager *seller, Cargo *item, int quantity);
