@@ -102,16 +102,19 @@ static double NearestOrbitPhase(const QVector &x_size, const QVector &y_size, co
             nearest_step = step;
         }
     }
-    //A coarse step is a whole degree of the orbit, which at orbital distances is far too
-    //coarse to leave a body where it stands, so narrow the phase down within the
-    //neighbourhood of the nearest step.
+    //A coarse step spans 360/kCoarseSteps degrees of the orbit - 5.625 at the value above -
+    //which at orbital distances is far too coarse to leave a body where it stands, so narrow
+    //the phase down within the neighbourhood of the nearest step.
     const double step_size = (2.0 * PI) / kCoarseSteps;
     double low = (nearest_step - 1) * step_size;
     double high = (nearest_step + 1) * step_size;
     const double kGoldenRatio = 0.6180339887498949;
+    //The refinement is a golden-section search, so this counts iterations rather than points
+    //on the orbit, and each one narrows the bracket to kGoldenRatio of its width.
+    const int kRefinementIterations = 64;
     double left = high - (kGoldenRatio * (high - low));
     double right = low + (kGoldenRatio * (high - low));
-    for (int step = 0; step < 64; ++step) {
+    for (int iteration = 0; iteration < kRefinementIterations; ++iteration) {
         const double left_distance = (OrbitOffset(left, x_size, y_size) - offset).MagnitudeSquared();
         const double right_distance = (OrbitOffset(right, x_size, y_size) - offset).MagnitudeSquared();
         if (left_distance < right_distance) {
