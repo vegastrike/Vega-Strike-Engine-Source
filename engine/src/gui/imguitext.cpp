@@ -64,7 +64,7 @@ void ImGuiText::draw(int firstLineToDraw) {
     float pixelY = m_multiLine ? Coordinates::normToPixelY(m_rect.top()) : Coordinates::normToPixelY((m_rect.top() + m_rect.bottom()) *0.5f);
     float pixelWidth = Coordinates::normToPixelW(m_rect.size.width);
 
-    ImVec2 textSize = getTextWidth(m_text.c_str(), m_font.size());
+    ImVec2 textSize = getTextWidth(m_text.c_str());
     // position single-line text half a line down so it is perfectly centered
     if(!m_multiLine) {
         pixelY -= (textSize.y * 0.5f);
@@ -89,7 +89,9 @@ void ImGuiText::draw(int firstLineToDraw) {
         }
         
         for (const auto& frag : line) {
-            float pixelFontSize = Coordinates::normToPixelFontSize(frag.font.size());
+            // Glyph height comes from the user-set Text Height (font_point); no
+            // resolution-derived font-height calculation here.
+            float pixelFontSize = configuration().graphics.font_point_flt;
             // Draw Bold "shadow"
             if (frag.isBold || m_font.strokeWeight() == BOLD_STROKE) {
                 draw_list->AddText(nullptr, pixelFontSize, 
@@ -228,17 +230,18 @@ int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) 
     return result;
 }
 
-ImVec2 ImGuiText::getTextWidth(const std::string text, const float fontSize) {
-    // ImFont* font = ImGui::GetFont();
-    ImVec2 size2,size = ImVec2(0,0);
-    float scaleFactor = fontSize * configuration().graphics.resolution_y / configuration().graphics.font_point_flt * 0.5;
-    // FIXME normally this would be te way, but it throws exceptions, scalefactor as workaround
-    // if (font && font->IsLoaded()) {
-    //     size = font->CalcTextSizeA(Coordinates::normToPixelFontSize(fontSize), FLT_MAX, -1.0f, text.c_str());
-    // } else {
-        size = ImGui::CalcTextSize(text.c_str());
-    // }
-    return ImVec2(size.x * scaleFactor, size.y * scaleFactor);
+ImVec2 ImGuiText::getTextWidth(const std::string text) {
+    // Glyph height comes from the user-set Text Height (font_point), matching what
+    // draw() renders at, so layout (wrap width, line height, centering, scroll
+    // counts) agrees with what is actually drawn.
+    const float pixelFontSize = configuration().graphics.font_point_flt;
+    ImFont* font = ImGui::GetFont();
+    if (font && font->IsLoaded()) {
+        return font->CalcTextSizeA(pixelFontSize, FLT_MAX, -1.0f, text.c_str());
+    }
+    // No font bound yet (measuring outside a render window): fall back to the
+    // default-font measure rather than the per-size one.
+    return ImGui::CalcTextSize(text.c_str());
 }
 
 //Get a floating-point argument for a PaintText format command.
@@ -421,7 +424,7 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
     // Helper to add fragment
     auto addFragment = [&](const std::string& text) {
         // if (text.empty()) return;
-        ImVec2 dimensions = getTextWidth(text,  m_fontStack.back().size());
+        ImVec2 dimensions = getTextWidth(text);
         currentLine.push_back({text, m_fontStack.back(), m_colorStack.back(), m_fontStack.back().strokeWeight() == BOLD_STROKE, dimensions.x});
         currentLine.width += dimensions.x;
         // update lineheight if fragment is larger
@@ -502,7 +505,7 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
                     if(!m_multiLine) {
                         currentFragmentText += ELLIPSIS_STRING;
                     }
-                    if(currentLine.width + getTextWidth(currentFragmentText,  m_fontStack.back().size()).x > widthInPixels) {
+                    if(currentLine.width + getTextWidth(currentFragmentText).x > widthInPixels) {
                         // break at last word break
                         addFragment(input.substr(fragmentStartPos, lastWordBreakPos - fragmentStartPos) + (m_multiLine ? "" : ELLIPSIS_STRING));
                         fragmentStartPos = lastWordBreakPos;

@@ -745,12 +745,6 @@ void bootstrap_main_loop() {
             }
         }
 
-        if (configuration().general.load_last_savegame) {
-            //Don't write if we didn't load...
-            for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
-                WriteSaveGame(_Universe->AccessCockpit(i), false);
-            }
-        }
         cur_check = getNewTime();
         for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
             _Universe->AccessCockpit(i)->savegame->LoadSavedMissions();
