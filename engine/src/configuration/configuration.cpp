@@ -3914,18 +3914,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         const boost::json::value * economics_value_ptr = root_object.if_contains("economics");
         if (economics_value_ptr != nullptr) {
             boost::json::object economics_object = economics_value_ptr->get_object();
-            const boost::json::value * repair_price_value_ptr = economics_object.if_contains("repair_price");
-            if (repair_price_value_ptr != nullptr) {
-                economics.repair_price_dbl = boost::json::value_to<double>(*repair_price_value_ptr);
-                economics.repair_price_flt = boost::json::value_to<float>(*repair_price_value_ptr);
-            }
-
-            const boost::json::value * sellback_shipping_price_value_ptr = economics_object.if_contains("sellback_shipping_price");
-            if (sellback_shipping_price_value_ptr != nullptr) {
-                economics.sellback_shipping_price_dbl = boost::json::value_to<double>(*sellback_shipping_price_value_ptr);
-                economics.sellback_shipping_price_flt = boost::json::value_to<float>(*sellback_shipping_price_value_ptr);
-            }
-
             const boost::json::value * ship_sellback_price_value_ptr = economics_object.if_contains("ship_sellback_price");
             if (ship_sellback_price_value_ptr != nullptr) {
                 economics.ship_sellback_price_dbl = boost::json::value_to<double>(*ship_sellback_price_value_ptr);
