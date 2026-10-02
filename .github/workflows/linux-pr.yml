@@ -29,15 +29,15 @@ jobs:
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
-          - FROM:     'ubuntu:noble'
-            COMPILER: 'gcc'
+          - FROM:     'ubuntu:resolute'
+            COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
           - FROM:     'ubuntu:noble'
-            COMPILER: 'clang'
+            COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
@@ -78,6 +78,13 @@ jobs:
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
+          - FROM:     'fedora:45'
+            COMPILER: 'gcc'
+            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
+            INSTALL_GTEST: 1
+            USE_GTEST: 1
+            allow_failure: false
           - FROM:     'fedora:44'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
@@ -87,20 +94,6 @@ jobs:
             allow_failure: false
           - FROM:     'fedora:43'
             COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
-            build-type: 'RelWithDebInfo'
-            INSTALL_GTEST: 1
-            USE_GTEST: 1
-            allow_failure: false
-          - FROM:     'fedora:42'
-            COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
-            build-type: 'RelWithDebInfo'
-            INSTALL_GTEST: 1
-            USE_GTEST: 1
-            allow_failure: false
-          - FROM:     'fedora:41'
-            COMPILER: 'clang'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
             build-type: 'RelWithDebInfo'
             INSTALL_GTEST: 1
