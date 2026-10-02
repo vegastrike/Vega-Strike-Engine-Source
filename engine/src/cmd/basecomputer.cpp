@@ -527,6 +527,15 @@ static bool PartIsListed(const std::string &key) {
     return Manifest::MPL().HasCargo(PartPriceKey(key));
 }
 
+// What a new part costs, which is what putting a part right is priced against. A name the shops
+// do not list has no new price of its own.
+static double NewPartPrice(const std::string &name) {
+    if (!PartIsListed(name)) {
+        return 0.0;
+    }
+    return Manifest::MPL().GetCargoByName(PartPriceKey(name)).GetPrice();
+}
+
 // The price of the tier nearest this component's figure, or zero when its type is not sold in a
 // ladder, it has no figure to rank, or its figure is beyond the ladder - which is the capital
 // ship case, and is priced against the ship instead.
@@ -575,12 +584,25 @@ static double NearestTierPrice(Unit *base_unit, const Component *component) {
 
 // What a component is worth. A component the ship bought is worth its own part. One with no part
 // of its own - the hull, the armour, the shields, and the rest of what the ship came with - is
-// worth the nearest tier the shops would sell, and where they sell nothing like it, a share of
-// the ship's own price: capital ships mount equipment the shops never stock.
-static double ComponentPrice(Unit *base_unit, const Component *component, double ship_price) {
+// worth the part the ship carries for it, else the nearest tier the shops would sell, and where
+// there is neither, a share of the ship's own price: capital ships mount equipment the shops
+// never stock.
+static double ComponentPrice(Unit *player_unit, Unit *base_unit, const Component *component, double ship_price) {
     const std::string part_key = component->GetUpgradeKey();
     if (!part_key.empty() && PartIsListed(part_key)) {
         return base_unit->PriceCargo(PartPriceKey(part_key));
+    }
+
+    // The part the ship carries for this component is the part that would replace it, so it is
+    // what the component is worth - and it is exact, where a tier or a share is a guess.
+    if (player_unit != nullptr) {
+        const std::string carried_key = player_unit->CarriedPartKey(component);
+        if (!carried_key.empty()) {
+            const double carried_price = NewPartPrice(carried_key);
+            if (carried_price > 0.0) {
+                return carried_price;
+            }
+        }
     }
 
     const double tier_price = NearestTierPrice(base_unit, component);
@@ -609,8 +631,8 @@ static double ServiceCharge(double value) {
 // What putting a component right costs. A damaged one is repaired, costing its value in
 // proportion to its damage; a destroyed one is replaced whole, which costs its value in full.
 // Nothing caps the bill: a wreck can cost more to put right than the ship is worth, as a car can.
-static ServiceQuote ServiceQuoteFor(Unit *base_unit, const Component *component, double ship_price) {
-    const double value = ComponentPrice(base_unit, component, ship_price);
+static ServiceQuote ServiceQuoteFor(Unit *player_unit, Unit *base_unit, const Component *component, double ship_price) {
+    const double value = ComponentPrice(player_unit, base_unit, component, ship_price);
     // Nothing left of it: Resource::RepairFully() refuses a destroyed component, so a base
     // replaces one rather than repairing it.
     if (component->PercentOperational() <= 0.0) {
@@ -635,7 +657,7 @@ static double BasicRepairPrice(Unit *player_unit, Unit *base_unit) {
     const double ship_price = PlayerShipPrice();
     double price = 0.0;
     for (const HudText &component : player_unit->DamagedComponents()) {
-        price += ServiceQuoteFor(base_unit, component.component, ship_price).price;
+        price += ServiceQuoteFor(player_unit, base_unit, component.component, ship_price).price;
     }
     return price;
 }
@@ -653,13 +675,6 @@ static double GetOperational(Unit *playerUnit, const Cargo *item) {
 
 // What a new part costs, which is what putting a part right is priced against. A name the shops
 // do not list has no new price of its own.
-static double NewPartPrice(const std::string &name) {
-    if (!PartIsListed(name)) {
-        return 0.0;
-    }
-    return Manifest::MPL().GetCargoByName(PartPriceKey(name)).GetPrice();
-}
-
 // What the base charges to put a part right: what a new one costs, in proportion to how much of
 // this one is damaged. What the player paid for this part does not come into it - a cheap
 // second-hand part costs as much to mend as a new one - and the difficulty scales the work, as
@@ -1519,11 +1534,11 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 Component *ship_component = m_player.GetUnit()->ComponentByName(item.GetName());
                 if (ship_component != nullptr) {
                     const double ship_price = PlayerShipPrice();
-                    const ServiceQuote quote = ServiceQuoteFor(baseUnit, ship_component, ship_price);
+                    const ServiceQuote quote = ServiceQuoteFor(m_player.GetUnit(), baseUnit, ship_component, ship_price);
                     descString += "#b#Integral Component, not for sale#-b#n1.5#";
                     descString += (boost::format("Percent Working: #b#%1$.2f#-b, Value: %2$.2f#n1.5#")
                             % (ship_component->PercentOperational() * 100.0)
-                            % ComponentPrice(baseUnit, ship_component, ship_price))
+                            % ComponentPrice(m_player.GetUnit(), baseUnit, ship_component, ship_price))
                             .str();
                     descString += (boost::format(quote.replacement ? "Replace Cost: #b#%1$.2f#-b#n1.5#"
                                                                    : "Repair Cost: #b#%1$.2f#-b#n1.5#")
@@ -2616,7 +2631,7 @@ static double RepairShipComponent(Unit *player_unit, Unit *base_unit, const std:
     }
 
     //What the base charges is what it quoted, which is what the row showed.
-    const ServiceQuote quote = ServiceQuoteFor(base_unit, component, PlayerShipPrice());
+    const ServiceQuote quote = ServiceQuoteFor(player_unit, base_unit, component, PlayerShipPrice());
     if (ComponentsManager::credits.Value() < quote.price) {
         return 0.0;
     }
