@@ -146,7 +146,9 @@ public:
     bool UpgradeAlreadyInstalled(const Cargo& upgrade) const;
     void DamageRandomSystem();
     void GenerateHudText(std::string getDamageColor(double));
-    std::string GetHudText();
+    /** The damage report: generated when it is asked for, because it is derived from the
+        components' condition and a repair changes that condition. */
+    std::string GetHudText(std::string getDamageColor(double));
     std::string GetTitle(bool show_cargo, bool show_star_date, std::string date);
 
     /** The ship's components, as the damage report lists them */

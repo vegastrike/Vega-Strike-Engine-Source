@@ -423,7 +423,11 @@ void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
     hud_text = report;
 }
 
-std::string ComponentsManager::GetHudText() {
+std::string ComponentsManager::GetHudText(std::string getDamageColor(double)) {
+    //The report is derived from the components' condition, so it is generated when it is asked for.
+    //Repairing a component changes that condition without any of the events that refresh a cached
+    //copy, so the HUD went on showing the damage until the ship was reloaded from a save.
+    GenerateHudText(getDamageColor);
     return hud_text;
 }
 
