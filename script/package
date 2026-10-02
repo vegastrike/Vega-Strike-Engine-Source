@@ -47,7 +47,6 @@ BUILD_DIR=$ROOT_DIR/build
 BIN_DIR=$ROOT_DIR/bin
 PACKAGE_DIR=$ROOT_DIR/packages
 VS_EXECUTABLE=${BUILD_DIR}/vegastrike-engine
-VS_CONFIG_EXECUTABLE=${BUILD_DIR}/vegasettings
 VS_MESH_EXECUTABLE=${BUILD_DIR}/vega-meshtool
 DEPS_LOOKUP_FILE=${BUILD_DIR}/dependency.lookup
 DEPS_FINALIZED=${BUILD_DIR}/dependency.list
@@ -95,7 +94,7 @@ function buildDependencyList()
 	# binaries. This probably doesn't account for dependencies
 	# already filled by the libraries, but it's a good start
 	# for automated detection.
-	ldd ${VS_EXECUTABLE} ${VS_CONFIG_EXECUTABLE} ${VS_MESH_EXECUTABLE} > ${DEPS_INPUT_FILE}
+	ldd ${VS_EXECUTABLE} ${VS_MESH_EXECUTABLE} > ${DEPS_INPUT_FILE}
 	cat ${DEPS_INPUT_FILE} | grep "=>" | tr -s '\t ' ';' | cut -f 4 -d ';' | sort | uniq > ${DEPS_FILTERED_FILE}
 
 	# clear the dependency file
