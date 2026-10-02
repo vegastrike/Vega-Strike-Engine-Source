@@ -636,13 +636,23 @@ static double GetOperational(Unit *playerUnit, const Cargo *item) {
     return 0.0;
 }
 
+// What a new part costs, which is what putting a part right is priced against. A name the shops
+// do not list has no new price of its own.
+static double NewPartPrice(const std::string &name) {
+    if (!PartIsListed(name)) {
+        return 0.0;
+    }
+    return Manifest::MPL().GetCargoByName(PartPriceKey(name)).GetPrice();
+}
+
+// What the base charges to put a part right: what a new one costs, in proportion to how much of
+// this one is damaged. What the player paid for this part does not come into it - a cheap
+// second-hand part costs as much to mend as a new one - and the difficulty scales the work, as
+// it does for a component.
 static double RepairPrice(Unit *playerUnit, const Cargo *item) {
-    // TODO: * configuration()->general.difficulty;
-
-    // TODO: add this to configuration
-    constexpr double kRepairPriceCoefficient = 0.8;
-
-    return kRepairPriceCoefficient * (1-GetOperational(playerUnit, item)) * item->GetPrice();
+    Component *component = playerUnit->GetComponentByType(GetComponentTypeFromName(item->GetName()));
+    const double damage = component != nullptr ? ComponentDamage(component) : 0.0;
+    return ServiceCharge(NewPartPrice(item->GetName()) * damage);
 }
 
 
@@ -1200,7 +1210,8 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
         NewButton *commitButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit"));
         assert(commitButton != NULL);
         commitButton->setHidden(false);
-        commitButton->setLabel("Buy");
+        //The only row on this list that fixes rather than buys is the repair.
+        commitButton->setLabel(item.GetName() == BASIC_REPAIR_NAME ? "Fix" : "Buy");
         commitButton->setCommand("BuyUpgrade");
 
         NewButton *commitFixButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("CommitFix"));
@@ -1716,7 +1727,9 @@ bool BaseComputer::isTransactionOK(const Cargo &original_item, const Transaction
 
         case BUY_UPGRADE:
             have_money = item.GetPrice() * quantity <= ComponentsManager::credits;
-            have_space = (player_unit->upgrade_space.CanAddCargo(item) || item.IsWeapon());
+            //A repair installs nothing, so it needs no room in the upgrade space.
+            have_space = item.GetName() == BASIC_REPAIR_NAME
+                    || player_unit->upgrade_space.CanAddCargo(item) || item.IsWeapon();
             upgrade_already_installed = player_unit->UpgradeAlreadyInstalled(item);
 
             // Simply not allowed
