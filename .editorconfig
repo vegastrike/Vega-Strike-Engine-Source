@@ -72,3 +72,8 @@ ij_markdown_min_lines_around_header = 1
 ij_markdown_min_lines_between_paragraphs = 1
 ij_markdown_wrap_text_if_long = true
 ij_markdown_wrap_text_inside_blockquotes = true
+
+[{*.yaml,*.yml}]
+indent_size = 2
+tab_width = 2
+ij_continuation_indent_size = 4
