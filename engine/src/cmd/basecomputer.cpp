@@ -591,18 +591,32 @@ static double ComponentPrice(Unit *base_unit, const Component *component, double
     return configuration().economics.component_share_dbl * ship_price;
 }
 
-// Putting a damaged component right costs its value in proportion to how much of it is damaged;
-// replacing a destroyed one costs its value. Nothing caps the bill: a wreck can cost more to put
-// right than the ship is worth, as a car can.
-static double ComponentRepairPrice(Unit *base_unit, const Component *component, double ship_price) {
-    return ComponentPrice(base_unit, component, ship_price) * ComponentDamage(component);
-}
+// What putting a component right takes: repairing it, or replacing it when Repair() cannot - a
+// destroyed one. The decision and the price are made in one place, or the price on the row and
+// the base's charge come out different.
+struct ServiceQuote {
+    double price;
+    bool replacement;
+};
 
 // A base charges more for its work on a harder difficulty, as it always has. This is the charge
 // for the work, not for the hardware: a replacement part costs what it costs whatever the
 // difficulty, as it would if the player bought it from the shop.
 static double ServiceCharge(double value) {
     return value * g_game.difficulty;
+}
+
+// What putting a component right costs. A damaged one is repaired, costing its value in
+// proportion to its damage; a destroyed one is replaced whole, which costs its value in full.
+// Nothing caps the bill: a wreck can cost more to put right than the ship is worth, as a car can.
+static ServiceQuote ServiceQuoteFor(Unit *base_unit, const Component *component, double ship_price) {
+    const double value = ComponentPrice(base_unit, component, ship_price);
+    // Nothing left of it: Resource::RepairFully() refuses a destroyed component, so a base
+    // replaces one rather than repairing it.
+    if (component->PercentOperational() <= 0.0) {
+        return ServiceQuote{value, true};
+    }
+    return ServiceQuote{ServiceCharge(value * ComponentDamage(component)), false};
 }
 
 // The price of the ship the player is flying, which is what a component with no price of its own
@@ -615,14 +629,15 @@ static double PlayerShipPrice(void) {
     }
 }
 
-// What one round of Basic Repair costs: every damaged component put right.
+// What one round of Basic Repair costs: every damaged component put right, at the price the base
+// will charge for it.
 static double BasicRepairPrice(Unit *player_unit, Unit *base_unit) {
     const double ship_price = PlayerShipPrice();
     double price = 0.0;
     for (const HudText &component : player_unit->DamagedComponents()) {
-        price += ComponentRepairPrice(base_unit, component.component, ship_price);
+        price += ServiceQuoteFor(base_unit, component.component, ship_price).price;
     }
-    return ServiceCharge(price);
+    return price;
 }
 
 static double GetOperational(Unit *playerUnit, const Cargo *item) {
@@ -1504,13 +1519,15 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 Component *ship_component = m_player.GetUnit()->ComponentByName(item.GetName());
                 if (ship_component != nullptr) {
                     const double ship_price = PlayerShipPrice();
+                    const ServiceQuote quote = ServiceQuoteFor(baseUnit, ship_component, ship_price);
                     descString += "#b#Integral Component, not for sale#-b#n1.5#";
                     descString += (boost::format("Percent Working: #b#%1$.2f#-b, Value: %2$.2f#n1.5#")
                             % (ship_component->PercentOperational() * 100.0)
                             % ComponentPrice(baseUnit, ship_component, ship_price))
                             .str();
-                    descString += (boost::format("Repair Cost: #b#%1$.2f#-b#n1.5#")
-                            % ServiceCharge(ComponentRepairPrice(baseUnit, ship_component, ship_price)))
+                    descString += (boost::format(quote.replacement ? "Replace Cost: #b#%1$.2f#-b#n1.5#"
+                                                                   : "Repair Cost: #b#%1$.2f#-b#n1.5#")
+                            % quote.price)
                             .str();
                     descString += ship_component->GetDescription();
                     //Say what the fitted part is, when the ship is carrying one.
@@ -2598,22 +2615,19 @@ static double RepairShipComponent(Unit *player_unit, Unit *base_unit, const std:
         return 0.0;
     }
 
-    const double ship_price = PlayerShipPrice();
-    const double repair_price = ServiceCharge(ComponentRepairPrice(base_unit, component, ship_price));
-    const double replace_price = ComponentPrice(base_unit, component, ship_price);
-    if (ComponentsManager::credits.Value() < std::max(repair_price, replace_price)) {
+    //What the base charges is what it quoted, which is what the row showed.
+    const ServiceQuote quote = ServiceQuoteFor(base_unit, component, PlayerShipPrice());
+    if (ComponentsManager::credits.Value() < quote.price) {
         return 0.0;
     }
 
     const ComponentService service = player_unit->ServiceComponent(name);
-    double price = 0.0;
-    if (service == ComponentService::Repaired) {
-        price = repair_price;
-    } else if (service == ComponentService::Replaced) {
-        price = replace_price;
+    if (service == ComponentService::None) {
+        return 0.0;
     }
-    ComponentsManager::credits -= price;
-    return price;
+
+    ComponentsManager::credits -= quote.price;
+    return quote.price;
 }
 
 static void BasicRepair(Unit *parent, Unit *base_unit) {
