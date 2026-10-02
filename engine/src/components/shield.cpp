@@ -341,30 +341,24 @@ void Shield::Regenerate(const bool player_ship) {
     * Finally, you adjust whatever used it to the value in question
     */
 
-    // "Full" is this shield's damaged maximum, scaled by the generator's health: damaged
-    // facets lower what the emitter holds and a damaged generator builds a weaker shield.
-    // Stopping there is still free - this used to draw at full shields and empty the capacitor.
-    const double shield_efficiency = regeneration.Percent();
-    const double shield_capacity = shield_efficiency * TotalAdjustedLayerValue();
-    if (TotalLayerValue() >= shield_capacity) {
-        return;
-    }
-
     // Manually throttle shield strength
     if(Percent() > max_power) {
         Decrease();
         return;
     }
 
-    // Upkeep while below full, plus the cost of the charge being rebuilt - capped at the
-    // rated regeneration, as the pre-component-refactor model did.
+    // The upkeep is charged even at full shields; only the deficit below removes the cost of
+    // the charge being rebuilt.
+    const double generator_health = regeneration.Percent();
+    // A destroyed generator leaves nothing to divide by, so fall back to full efficiency.
+    const double shield_efficiency = generator_health != 0.0 ? generator_health : 1.0;
     const double vsd_percent = configuration().components.fuel.vsd_mj_yield_dbl / 100.0;
     const double shield_maintenance_cost = regeneration.MaxValue() * vsd_percent
             / shield_efficiency
             / configuration().physics.shield_energy_capacitance_dbl
             * static_cast<double>(number_of_facets)
             * configuration().physics.shield_maintenance_charge_dbl;
-    const double shield_deficit = shield_capacity - TotalLayerValue();
+    const double shield_deficit = TotalAdjustedLayerValue() - TotalLayerValue();
     const double maximum_charge = std::min(shield_deficit, regeneration.AdjustedValue());
     const double shield_regeneration_cost = maximum_charge * vsd_percent;
 
