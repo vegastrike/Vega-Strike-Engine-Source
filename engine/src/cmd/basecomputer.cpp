@@ -402,24 +402,67 @@ static double usedValue(double originalValue) {
 }
 
 
-// The component types the shops sell in ranked ladders, and the units.json column each ladder
-// is ranked by. A component with no part of its own is priced at the nearest tier of these.
-struct ComponentTier {
-    ComponentType type;
+// One family of parts the shops sell in a ranked ladder: the units.json key prefix, how many
+// tiers it has, and the column the ladder is ranked by.
+struct ComponentLadder {
     const char *prefix;     // units.json key prefix: <prefix>01__upgrades, <prefix>02__upgrades ...
     int tiers;
     const char *figure;
 };
 
-static const ComponentTier kComponentTiers[] = {
-        {ComponentType::Reactor, "reactor", 15, "Reactor_Recharge"},
-        {ComponentType::Shield, "quadshield", 15, "Shield_Recharge"},
-        {ComponentType::Armor, "armor", 6, "armor"},
+// The families a component type is sold in. The sensors are sold in five, which is why this is a
+// list: a component is priced at the nearest tier of any family that applies to it.
+struct ComponentLadders {
+    ComponentType type;
+    const ComponentLadder *families;
+    int count;
 };
 
-// The figure a component's ladder is ranked by - the rated recharge of a reactor or a shield,
-// the rating of an armour facet. Zero when the component has no figure to be ranked by, and so
-// no tier to be priced at.
+static const ComponentLadder kReactorLadders[] = {
+        {"reactor", 15, "Reactor_Recharge"},
+};
+static const ComponentLadder kShieldLadders[] = {
+        {"quadshield", 15, "Shield_Recharge"},
+        {"dualshield", 15, "Shield_Recharge"},
+};
+static const ComponentLadder kArmorLadders[] = {
+        {"armor", 6, "armor"},
+};
+static const ComponentLadder kCapacitorLadders[] = {
+        {"capacitor", 15, "Primary_Capacitor"},
+};
+static const ComponentLadder kRadarLadders[] = {
+        {"skyscope", 3, "Radar_Range"},
+        {"starscanner", 4, "Radar_Range"},
+        {"hawkeye", 4, "Radar_Range"},
+        {"surveyor", 2, "Radar_Range"},
+        {"rlaantracker", 1, "Radar_Range"},
+};
+static const ComponentLadder kEcmLadders[] = {
+        {"ecm_package", 3, "ecm"},
+};
+static const ComponentLadder kRepairBotLadders[] = {
+        {"repair_droid", 5, "repair"},
+};
+static const ComponentLadder kJumpDriveLadders[] = {
+        {"jump_drive", 1, "Jump_Drive_Present"},
+};
+
+static const ComponentLadders kComponentLadders[] = {
+        {ComponentType::Reactor, kReactorLadders, 1},
+        {ComponentType::Shield, kShieldLadders, 2},
+        {ComponentType::Armor, kArmorLadders, 1},
+        {ComponentType::Capacitor, kCapacitorLadders, 1},
+        {ComponentType::Radar, kRadarLadders, 5},
+        {ComponentType::ECM, kEcmLadders, 1},
+        {ComponentType::RepairBot, kRepairBotLadders, 1},
+        {ComponentType::JumpDrive, kJumpDriveLadders, 1},
+};
+
+// The figure a component's ladder is ranked by - the rated recharge of a reactor or a shield, the
+// rating of an armour facet, a capacitor's capacity, a radar's range, the strength of an ECM or a
+// repair system. Zero when the component has no figure to be ranked by, and so no tier to be
+// priced at.
 static double ComponentFigure(const Component *component) {
     switch (component->type) {
         case ComponentType::Reactor:
@@ -428,14 +471,25 @@ static double ComponentFigure(const Component *component) {
             return vega_dynamic_cast_ptr<const Shield>(component)->MaxRegeneration();
         case ComponentType::Armor:
             return vega_dynamic_cast_ptr<const DamageableLayer>(component)->AverageMaxLayerValue();
+        case ComponentType::Capacitor:
+            return vega_dynamic_cast_ptr<const EnergyContainer>(component)->MaxLevel();
+        case ComponentType::Radar:
+            return vega_dynamic_cast_ptr<const CRadar>(component)->GetMaxRange();
+        case ComponentType::ECM:
+            return vega_dynamic_cast_ptr<const ECM>(component)->Get();
+        case ComponentType::RepairBot:
+            return vega_dynamic_cast_ptr<const RepairBot>(component)->Get();
+        case ComponentType::JumpDrive:
+            // Presence is the figure: the shops sell one jump drive.
+            return 1.0;
         default:
             return 0.0;
     }
 }
 
-// The ladder this component's figure is ranked in, or nullptr when its type is not sold in one.
-static const ComponentTier *ComponentLadder(const Component *component) {
-    for (const ComponentTier &candidate : kComponentTiers) {
+// The families this component's type is sold in, or nullptr when its type is not sold in one.
+static const ComponentLadders *ComponentLaddersFor(const Component *component) {
+    for (const ComponentLadders &candidate : kComponentLadders) {
         if (candidate.type == component->type) {
             return &candidate;
         }
@@ -443,14 +497,16 @@ static const ComponentTier *ComponentLadder(const Component *component) {
     return nullptr;
 }
 
-// The shops sell two shield ladders, ranked by the same figures: one for a two-facet shield and
-// one for a four-facet shield.
-static const char *ComponentLadderPrefix(const Component *component, const ComponentTier *ladder) {
-    if (component->type == ComponentType::Shield) {
-        const int facets = vega_dynamic_cast_ptr<const DamageableLayer>(component)->NumberOfFacets();
-        return facets <= 2 ? "dualshield" : "quadshield";
+// A shield is sold as a two-facet or a four-facet part, ranked the same way either way, so it is
+// priced against the ladder matching its facets. Every other type has one ladder.
+static bool LadderApplies(const Component *component, const ComponentLadder &ladder) {
+    if (component->type != ComponentType::Shield) {
+        return true;
     }
-    return ladder->prefix;
+
+    const int facets = vega_dynamic_cast_ptr<const DamageableLayer>(component)->NumberOfFacets();
+    const std::string prefix = ladder.prefix;
+    return facets <= 2 ? prefix == "dualshield" : prefix == "quadshield";
 }
 
 // The price lists, and a base's own inventory, name a part without the units.json suffix:
@@ -472,36 +528,42 @@ static bool PartIsListed(const std::string &key) {
 }
 
 // The price of the tier nearest this component's figure, or zero when its type is not sold in a
-// ladder, it has no figure to rank, or its figure is beyond both ends of the ladder - which is
-// the capital ship case, and is priced against the ship instead.
+// ladder, it has no figure to rank, or its figure is beyond the ladder - which is the capital
+// ship case, and is priced against the ship instead.
 static double NearestTierPrice(Unit *base_unit, const Component *component) {
-    const ComponentTier *ladder = ComponentLadder(component);
+    const ComponentLadders *ladders = ComponentLaddersFor(component);
     const double figure = ComponentFigure(component);
-    if (ladder == nullptr || figure <= 0.0) {
+    if (ladders == nullptr || figure <= 0.0) {
         return 0.0;
     }
 
-    const char *prefix = ComponentLadderPrefix(component, ladder);
     double nearest_tier_price = 0.0;
     double nearest_distance = -1.0;
     double lowest_figure = -1.0;
     double highest_figure = -1.0;
-    for (int tier = 1; tier <= ladder->tiers; ++tier) {
-        const std::string tier_key = (boost::format("%1%%2$02d__upgrades") % prefix % tier).str();
-        const double tier_figure = UnitCSVFactory::GetVariable(tier_key, ladder->figure, 0.0);
-        if (tier_figure <= 0.0 || !PartIsListed(tier_key)) {
+    for (int family = 0; family < ladders->count; ++family) {
+        const ComponentLadder &ladder = ladders->families[family];
+        if (!LadderApplies(component, ladder)) {
             continue;
         }
-        if (lowest_figure < 0.0 || tier_figure < lowest_figure) {
-            lowest_figure = tier_figure;
-        }
-        if (tier_figure > highest_figure) {
-            highest_figure = tier_figure;
-        }
-        const double distance = std::fabs(tier_figure - figure);
-        if (nearest_distance < 0.0 || distance < nearest_distance) {
-            nearest_distance = distance;
-            nearest_tier_price = base_unit->PriceCargo(PartPriceKey(tier_key));
+
+        for (int tier = 1; tier <= ladder.tiers; ++tier) {
+            const std::string tier_key = (boost::format("%1%%2$02d__upgrades") % ladder.prefix % tier).str();
+            const double tier_figure = UnitCSVFactory::GetVariable(tier_key, ladder.figure, 0.0);
+            if (tier_figure <= 0.0 || !PartIsListed(tier_key)) {
+                continue;
+            }
+            if (lowest_figure < 0.0 || tier_figure < lowest_figure) {
+                lowest_figure = tier_figure;
+            }
+            if (tier_figure > highest_figure) {
+                highest_figure = tier_figure;
+            }
+            const double distance = std::fabs(tier_figure - figure);
+            if (nearest_distance < 0.0 || distance < nearest_distance) {
+                nearest_distance = distance;
+                nearest_tier_price = base_unit->PriceCargo(PartPriceKey(tier_key));
+            }
         }
     }
 
