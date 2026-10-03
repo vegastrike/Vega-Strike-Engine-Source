@@ -169,4 +169,10 @@ void Armor::Repair() {
     }
 }
 
+void Armor::Replace() {
+    for(auto& facet : facets) {
+        facet.ReplaceFully();
+    }
+}
+
 Armor::~Armor() = default;

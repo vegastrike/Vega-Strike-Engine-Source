@@ -93,7 +93,6 @@ void Shield::Load(std::string unit_key) {
             facets = std::vector<Resource<double>>(number_of_facets,
                 facet_strength);
 
-            CalculatePercentOperational();
             installed = true;
             return;
         } catch (std::invalid_argument const& ex) {
@@ -134,7 +133,6 @@ void Shield::Load(std::string unit_key) {
         }
 
         facets = shield_values;
-        CalculatePercentOperational();
         installed = true;
         return;
     }
@@ -162,7 +160,6 @@ void Shield::Load(std::string unit_key) {
         if (shield_count == 4 || shield_count == 2) {
             number_of_facets = shield_count;
             facets = shield_values;
-            CalculatePercentOperational();
             installed = true;
             return;
         }
@@ -173,7 +170,6 @@ void Shield::Load(std::string unit_key) {
     // This should already be set, but good practice to do it anyway.
     number_of_facets = 0;
     facets.clear();
-    operational = 0.0;
 }
 
 
@@ -245,51 +241,25 @@ bool Shield::Upgrade(const std::string upgrade_key) {
 }
 
 double Shield::PercentOperational() const {
-    return operational.Value();
-}
-
-void Shield::CalculatePercentOperational() {
-    double percent = regeneration.Percent();
-
-    for (Resource<double> &facet : facets) {
-        if(facet.MaxValue() == 0.0) {
-            continue;
-        }
-
-        percent += facet.AdjustedValue() / facet.MaxValue();
-    }
-
-    // A simple average of regeneration and facets
-    // 4 facet shields assign less importance to regeneration
-    operational = percent / (number_of_facets + 1);
+    // The generator is the shield's condition. The facets are its charge, which the shield
+    // rebuilds by charging, so a shield whose generator is undamaged is fully operational.
+    return GeneratorPercent();
 }
 
 void Shield::Damage() {
     regeneration.RandomDamage();
-    double percent = regeneration.Percent();
 
     for (Resource<double> &facet : facets) {
         facet.RandomDamage();
-        percent += facet.Percent();
     }
-
-    // A simple average of regeneration and facets
-    // 4 facet shields assign less importance to regeneration
-    operational = percent / (number_of_facets + 1);
 }
 
 void Shield::DamageByPercent(double percent) {
     regeneration.DamageByPercent(percent);
-    double sum_of_percents = regeneration.Percent();
 
     for (Resource<double> &facet : facets) {
         facet.DamageByPercent(percent);
-        sum_of_percents += facet.Percent();
     }
-
-    // A simple average of regeneration and facets
-    // 4 facet shields assign less importance to regeneration
-    operational = sum_of_percents / (number_of_facets + 1);
 }
 
 void Shield::Repair() {
@@ -298,12 +268,26 @@ void Shield::Repair() {
     for (Resource<double> &facet : facets) {
         facet.RepairFully();
     }
+}
 
-    operational = 1.0;
+void Shield::Replace() {
+    regeneration.ReplaceFully();
+
+    for (Resource<double> &facet : facets) {
+        facet.ReplaceFully();
+    }
 }
 
 bool Shield::Damaged() const {
-    return operational.Value() < 1;
+    return PercentOperational() < 1;
+}
+
+double Shield::MaxRegeneration() const {
+    return regeneration.MaxValue();
+}
+
+double Shield::GeneratorPercent() const {
+    return regeneration.Percent();
 }
 
 
