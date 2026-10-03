@@ -34,6 +34,7 @@
 #include "damage/damage.h"
 #include "src/vega_cast_utils.h"
 
+#include <algorithm>
 #include <boost/format.hpp>
 
 int Shield::front = 0;
@@ -93,7 +94,6 @@ void Shield::Load(std::string unit_key) {
             facets = std::vector<Resource<double>>(number_of_facets,
                 facet_strength);
 
-            CalculatePercentOperational();
             installed = true;
             return;
         } catch (std::invalid_argument const& ex) {
@@ -134,7 +134,6 @@ void Shield::Load(std::string unit_key) {
         }
 
         facets = shield_values;
-        CalculatePercentOperational();
         installed = true;
         return;
     }
@@ -162,7 +161,6 @@ void Shield::Load(std::string unit_key) {
         if (shield_count == 4 || shield_count == 2) {
             number_of_facets = shield_count;
             facets = shield_values;
-            CalculatePercentOperational();
             installed = true;
             return;
         }
@@ -173,7 +171,6 @@ void Shield::Load(std::string unit_key) {
     // This should already be set, but good practice to do it anyway.
     number_of_facets = 0;
     facets.clear();
-    operational = 0.0;
 }
 
 
@@ -245,51 +242,25 @@ bool Shield::Upgrade(const std::string upgrade_key) {
 }
 
 double Shield::PercentOperational() const {
-    return operational.Value();
-}
-
-void Shield::CalculatePercentOperational() {
-    double percent = regeneration.Percent();
-
-    for (Resource<double> &facet : facets) {
-        if(facet.MaxValue() == 0.0) {
-            continue;
-        }
-
-        percent += facet.AdjustedValue() / facet.MaxValue();
-    }
-
-    // A simple average of regeneration and facets
-    // 4 facet shields assign less importance to regeneration
-    operational = percent / (number_of_facets + 1);
+    // The generator is the shield's condition. The facets are its charge, which the shield
+    // rebuilds by charging, so a shield whose generator is undamaged is fully operational.
+    return GeneratorPercent();
 }
 
 void Shield::Damage() {
     regeneration.RandomDamage();
-    double percent = regeneration.Percent();
 
     for (Resource<double> &facet : facets) {
         facet.RandomDamage();
-        percent += facet.Percent();
     }
-
-    // A simple average of regeneration and facets
-    // 4 facet shields assign less importance to regeneration
-    operational = percent / (number_of_facets + 1);
 }
 
 void Shield::DamageByPercent(double percent) {
     regeneration.DamageByPercent(percent);
-    double sum_of_percents = regeneration.Percent();
 
     for (Resource<double> &facet : facets) {
         facet.DamageByPercent(percent);
-        sum_of_percents += facet.Percent();
     }
-
-    // A simple average of regeneration and facets
-    // 4 facet shields assign less importance to regeneration
-    operational = sum_of_percents / (number_of_facets + 1);
 }
 
 void Shield::Repair() {
@@ -298,12 +269,26 @@ void Shield::Repair() {
     for (Resource<double> &facet : facets) {
         facet.RepairFully();
     }
+}
 
-    operational = 1.0;
+void Shield::Replace() {
+    regeneration.ReplaceFully();
+
+    for (Resource<double> &facet : facets) {
+        facet.ReplaceFully();
+    }
 }
 
 bool Shield::Damaged() const {
-    return operational.Value() < 1;
+    return PercentOperational() < 1;
+}
+
+double Shield::MaxRegeneration() const {
+    return regeneration.MaxValue();
+}
+
+double Shield::GeneratorPercent() const {
+    return regeneration.Percent();
 }
 
 
@@ -340,41 +325,30 @@ void Shield::Regenerate(const bool player_ship) {
     * Finally, you adjust whatever used it to the value in question
     */
 
-    // Fully charged shields need no energy - return before any consumption.
-    // (Regression fix: the maintenance drain below used to run even at full
-    // shields, draining the primary capacitor (which the weapons also use) at
-    // max_shield x maintenance_factor per second. For ships whose shield max
-    // exceeds their reactor output - e.g. a Mule (18600 shields) or any
-    // capital ship - that left the capacitor empty, so neither the shields nor
-    // the weapons could ever function. See the 'capacitor never refills after
-    // firing' / 'AI ships never fire' reports.)
-    if (TotalLayerValue() == TotalMaxLayerValue()) {
-        return;
-    }
-
-    // Shield Maintenance
-    // TODO: lib_damage restore efficiency by replacing with shield->efficiency
-    //const double efficiency = 1;
-
-    const double shield_maintenance_cost = TotalMaxLayerValue() * configuration().components.shield.maintenance_factor_dbl;
-    SetConsumption(shield_maintenance_cost);
-    const double actual_maintenance_percent = Consume();
-    if(Percent() > actual_maintenance_percent) {
-        Decrease();
-        return;
-    }
-
     // Manually throttle shield strength
     if(Percent() > max_power) {
         Decrease();
         return;
     }
 
-    // Shield Regeneration
-    const double shield_regeneration_cost = regeneration.AdjustedValue() * configuration().components.shield.regeneration_factor_dbl;
-    SetConsumption(shield_regeneration_cost);
+    // The upkeep is charged even at full shields; only the deficit below removes the cost of
+    // the charge being rebuilt.
+    const double generator_health = regeneration.Percent();
+    // A destroyed generator leaves nothing to divide by, so fall back to full efficiency.
+    const double shield_efficiency = generator_health != 0.0 ? generator_health : 1.0;
+    const double vsd_percent = configuration().components.fuel.vsd_mj_yield_dbl / 100.0;
+    const double shield_maintenance_cost = regeneration.MaxValue() * vsd_percent
+            / shield_efficiency
+            / configuration().physics.shield_energy_capacitance_dbl
+            * static_cast<double>(number_of_facets)
+            * configuration().physics.shield_maintenance_charge_dbl;
+    const double shield_deficit = TotalAdjustedLayerValue() - TotalLayerValue();
+    const double maximum_charge = std::min(shield_deficit, regeneration.AdjustedValue());
+    const double shield_regeneration_cost = maximum_charge * vsd_percent;
+
+    SetConsumption(shield_maintenance_cost + shield_regeneration_cost);
     const double actual_regeneration_percent = Consume();
-    double regen = actual_regeneration_percent * regeneration.AdjustedValue() * simulation_atom_var;
+    double regen = actual_regeneration_percent * maximum_charge * simulation_atom_var;
 
     for (Resource<double> &facet : facets) {
         facet += regen;

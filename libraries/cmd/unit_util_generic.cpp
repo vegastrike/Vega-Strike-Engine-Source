@@ -541,13 +541,6 @@ int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero) {
 }
 
 
-bool repair(Unit *my_unit) {
-    if (!my_unit) {
-        return false;
-    }
-    return my_unit->RepairUpgrade();
-}
-
 float upgrade(Unit *my_unit, string file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) {
     if (!my_unit) {
         return 0;
@@ -809,6 +802,14 @@ float PercentOperational(const Cargo item, Unit *un, std::string name, std::stri
 
     // New Code
     // TODO: Make actually return percent damaged
+
+    // A ship's own components are listed under the name the damage report gives them,
+    // which is not a unit key - there is no armor key, only armor01 and its like. Ask
+    // the ship's components for those before falling back to the keys.
+    const Component *component = un->ComponentByName(name);
+    if (component != nullptr) {
+        return component->PercentOperational();
+    }
 
     // name is unit_key with stripped suffix. Need to add it again
     // TODO: check for prefixes: add_ mult_

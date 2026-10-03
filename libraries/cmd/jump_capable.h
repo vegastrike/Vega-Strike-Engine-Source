@@ -47,6 +47,19 @@ public:
     bool AutoPilotToErrorMessage(const Unit *un, bool automaticenergyrealloc,
             std::string &failuremessage, int recursive_level = 2);
     float GetNearestObjectSignificantDistance(Unit **nearest_unit = nullptr) const;
+    // A body the ship can never fly through or around the far side of: planets,
+    // suns (suns are planets) and bases/stations. The SPEC clear-space model never
+    // culls these. Asteroids are NOT hard (you can fly through/thread them).
+    static bool IsHardBody(const Unit *unit);
+    // The clear-space bubble radius: the full SPEC compression range, capped at the
+    // range to the target so the bubble shrinks to nothing on arrival. Pass the
+    // target range, or a large value when there is no target.
+    static double WarpClearanceRadius(double target_range);
+    // Significant distance to another unit, shortened by the SPEC drop-out zone
+    // (warp_min_range) when that unit is a hard body, so the whole zone is cleared
+    // rather than only the object's surface. This is what the clear-space model
+    // compares against WarpClearanceRadius.
+    double GetWarpClearanceDistance(const Unit *other) const;
     float CourseDeviation(const Vector &OriginalCourse, const Vector &FinalCourse) const;
     void DeactivateJumpDrive();
     const std::vector<std::string> &GetDestinations() const;

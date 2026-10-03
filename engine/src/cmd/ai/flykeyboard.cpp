@@ -27,6 +27,7 @@
 
 
 #include "src/in_joystick.h"
+#include "src/in_kb.h"
 #include "flykeyboard.h"
 #include "cmd/unit_generic.h"
 #include "navigation.h"
@@ -762,6 +763,14 @@ void FlyByKeyboard::JumpKey(const KBData &, KBSTATE k) {
 }
 
 void FlyByKeyboard::UpKey(const KBData &, KBSTATE k) {
+    // While the nav computer is open, the arrow keys drive the nav camera instead of
+    // the ship, so nothing the player does up there changes what the ship is doing.
+    if (_Universe->AccessCockpit() && _Universe->AccessCockpit()->CanDrawNavSystem()) {
+        if (k == PRESS || k == DOWN) {
+            _Universe->AccessCockpit()->AccessNavSystem()->arrowKey(0, getActiveModifiers());
+        }
+        return;
+    }
     if (g().dirty) {
         g().UnDirty();
     }
@@ -881,6 +890,12 @@ void FlyByKeyboard::KThrustBack(const KBData &, KBSTATE k) {
 }
 
 void FlyByKeyboard::DownKey(const KBData &, KBSTATE k) {
+    if (_Universe->AccessCockpit() && _Universe->AccessCockpit()->CanDrawNavSystem()) {
+        if (k == PRESS || k == DOWN) {
+            _Universe->AccessCockpit()->AccessNavSystem()->arrowKey(1, getActiveModifiers());
+        }
+        return;
+    }
     if (g().dirty) {
         g().UnDirty();
     }
@@ -904,6 +919,12 @@ void FlyByKeyboard::DownKey(const KBData &, KBSTATE k) {
 }
 
 void FlyByKeyboard::LeftKey(const KBData &, KBSTATE k) {
+    if (_Universe->AccessCockpit() && _Universe->AccessCockpit()->CanDrawNavSystem()) {
+        if (k == PRESS || k == DOWN) {
+            _Universe->AccessCockpit()->AccessNavSystem()->arrowKey(2, getActiveModifiers());
+        }
+        return;
+    }
     if (g().dirty) {
         g().UnDirty();
     }
@@ -940,6 +961,12 @@ void FlyByKeyboard::KSwitchFlightMode(const KBData &, KBSTATE k) {
 }
 
 void FlyByKeyboard::RightKey(const KBData &, KBSTATE k) {
+    if (_Universe->AccessCockpit() && _Universe->AccessCockpit()->CanDrawNavSystem()) {
+        if (k == PRESS || k == DOWN) {
+            _Universe->AccessCockpit()->AccessNavSystem()->arrowKey(3, getActiveModifiers());
+        }
+        return;
+    }
     if (g().dirty) {
         g().UnDirty();
     }

@@ -45,6 +45,7 @@
 #include "warpto.h"
 #include "flybywire.h"
 #include "cmd/unit_util.h"
+#include "cmd/dock_utils.h"
 #include "root_generic/vega_random.h"
 #include "src/star_system.h"
 #include "src/universe.h"
@@ -598,18 +599,6 @@ bool AutoLongHaul::InsideLandingPort(const Unit *obstacle) const {
             < -landing_port_limit * parent->afterburner.speed;
 }
 
-// A body the autopilot can never fly through or around the far side of: planets,
-// suns (suns are planets) and bases/stations. These are treated as hard walls --
-// they are never culled from the ftl-bubble avoidance and their apparent radius is
-// inflated by the SPEC warp_min_range drop-out zone (see Execute). Asteroids are
-// NOT hard (you can fly through/thread them).
-static bool IsHardBody(const Unit *u) {
-    if (u == nullptr) {
-        return false;
-    }
-    return u->isPlanet() || UnitUtil::getFlightgroupName(u) == "Base";
-}
-
 void AutoLongHaul::Execute() {
     Unit *target = group.GetUnit();
     if (target == NULL) {
@@ -658,10 +647,7 @@ void AutoLongHaul::Execute() {
     const float attract = configuration().physics.warp_clearance_attract_flt;
     // The bubble never reaches past the target, so it is gone exactly on arrival and
     // the ship flies in instead of dodging objects next to the destination.
-    double bubble = max_compression_range;
-    if (destinationdistance < max_compression_range) {
-        bubble = destinationdistance;
-    }
+    const double bubble = JumpCapable::WarpClearanceRadius(destinationdistance);
 
     // The pull ramps up as the ship closes, measured against the full bubble radius
     // because it is the target's own distance that shrinks the bubble.
@@ -708,7 +694,7 @@ void AutoLongHaul::Execute() {
         size_t soft_kept = 0;
         kept.reserve(ranked.size());
         for (const auto &pr : ranked) {
-            const bool hard = IsHardBody(pr.second);
+            const bool hard = JumpCapable::IsHardBody(pr.second);
             if (hard || soft_kept < kMaxObjects) {
                 kept.push_back(pr);
                 if (!hard) {
@@ -733,18 +719,7 @@ void AutoLongHaul::Execute() {
         if (o == nullptr || o == parent || o == target || o == target_root) {
             continue;
         }
-        const bool hard = IsHardBody(o);
-        double sig = pr.first;
-        // A hard body (planet/sun/base) is a wall that also carries a SPEC exclusion
-        // zone around it (physics.warp_min_range) in which SPEC cannot operate. Treat
-        // its effective radius as being warp_min_range bigger, so the autopilot keeps
-        // the whole drop-out zone clear rather than only dodging the surface.
-        if (hard) {
-            sig -= static_cast<double>(configuration().physics.warp_min_range_flt);
-            if (sig < 0.0) {
-                sig = 0.0;
-            }
-        }
+        double sig = parent->GetWarpClearanceDistance(o);
         if (sig >= bubble) {
             continue;
         }
@@ -805,7 +780,10 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    const float distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt;
+    // Distance where the autopilot terminates and docking begins: its normal termination
+    // distance plus the target's docking range, so it never hands over already dockable.
+    const float distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt
+            + static_cast<float>(DockingClearance(target));
     const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
     // Disengage when we're within the distance it takes to stop from our current

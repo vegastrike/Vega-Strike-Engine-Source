@@ -30,6 +30,8 @@
 #include "system_draw_node.h"
 #include "universe.h"
 #include "universe_util.h"
+#include <set>
+
 #include "drawgalaxy.h"
 #include "imgui.h"
 #include "root_generic/vs_globals.h"
@@ -422,7 +424,7 @@ void NavigationSystem::DrawGalaxy() {
 //float offset = (float(length)*0.005);
     GFXColor temp_system_color(1, 1, .7, 1);
     systemname.color = static_cast<ImU32>(temp_system_color);
-    systemname.SetPos(screenskipby4[0], screenskipby4[3]);     //Looks ugly when name is too long and goes off the edge.
+    systemname.SetPos(screenskipby4[0] + 0.03f, screenskipby4[3] - 0.05f);     //inset, so the text clears the top and left edges
 //systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
     systemname.SetText(systemnamestring);
 //systemname.SetCharSize(1, 1);
@@ -430,15 +432,13 @@ void NavigationSystem::DrawGalaxy() {
     //***************************
 
     QVector pos;        //item position
-    QVector pos_flat;           //item position flat on plane
-
-    float zdistance = 0.0;
-    float zscale = 1.0;
     int l;
 
-    Adjust3dTransformation(galaxy_view == VIEW_3D, 0);
+    Adjust3dTransformation(false);
 
-    float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
+    // Centre the content in the free area left of the button column, which starts at
+    // 0.5 in screen coordinates. The map itself fills the whole screen.
+    float center_nav_x = -0.25f;
     float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
     //**********************************
 
@@ -460,8 +460,6 @@ void NavigationSystem::DrawGalaxy() {
             {
                 systemIter.seek(focusedsystemindex);
                 pos = systemIter->Position();
-                ReplaceAxes(pos);
-//if(galaxy_view==VIEW_3D){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
 
                 max_x = (float) pos.i;
                 min_x = (float) pos.i;
@@ -482,8 +480,6 @@ void NavigationSystem::DrawGalaxy() {
                 if (destsize != 0) {
                     for (unsigned i = 0; i < destsize; ++i) {
                         QVector posoth = systemIter[systemIter->GetDestinationIndex(i)].Position();
-                        ReplaceAxes(posoth);
-//if(galaxy_view==VIEW_3D){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
 
                         RecordMinAndMax(posoth, min_x, max_x, min_y, max_y, min_z, max_z, themaxvalue);
                     }
@@ -526,6 +522,15 @@ void NavigationSystem::DrawGalaxy() {
 
             camera_z = sqrt((half_x * half_x) + (half_y * half_y) + (half_z * half_z));
 
+            // Frame the galaxy the first time it is drawn, and whenever the view is
+            // refitted. The camera's distance comes from the extent of the content and
+            // the field of view, so the galaxy fills the view rather than being scaled
+            // against its own bounding box.
+            if (galaxy_needs_refit) {
+                galaxy_cam.setFraming(QVector(center_x, center_y, center_z), half_x, half_y, half_z);
+                galaxy_needs_refit = false;
+            }
+
 //float halfmax = 0.5*themaxvalue;
 //camera_z = sqrt( (halfmax*halfmax) + (halfmax*halfmax) + (halfmax*halfmax) );
 //camera_z = 4.0*themaxvalue;
@@ -534,12 +539,46 @@ void NavigationSystem::DrawGalaxy() {
 
         //**********************************
     }
-    DrawOriginOrientationTri(center_nav_x, center_nav_y, 0);
+
+    // Only draw the systems the player has visited, plus everywhere those lead to:
+    // that shows the explored region and where it goes next, without flooding the map
+    // with the whole galaxy.
+    std::set<std::string> draw_systems;
+    for (unsigned i = 0; i < systemIter.size(); ++i) {
+        if (!checkedVisited(systemIter[i].GetName())) {
+            continue;
+        }
+        draw_systems.insert(systemIter[i].GetName());
+        for (unsigned d = 0; d < systemIter[i].GetDestinationSize(); ++d) {
+            draw_systems.insert(systemIter[systemIter[i].GetDestinationIndex(d)].GetName());
+        }
+    }
+    if (draw_systems.empty()) {
+        // Nothing visited yet, so the map would be empty: show the current system and
+        // the systems it jumps to.
+        const unsigned current = (focusedsystemindex < systemIter.size()) ? focusedsystemindex : 0;
+        draw_systems.insert(systemIter[current].GetName());
+        for (unsigned d = 0; d < systemIter[current].GetDestinationSize(); ++d) {
+            draw_systems.insert(systemIter[systemIter[current].GetDestinationIndex(d)].GetName());
+        }
+    }
 
     //Enlist the items and attributes
     //**********************************
     systemIter.seek();
+    nav_near_dist = 1e30;      //reset the nearest-thing distance for this frame
+
+    // Screen positions of the systems already named on this pass, so that a name is only
+    // drawn where it has room.
+    const float label_radius = 0.05f;
+    std::vector<QVector> named_positions;
+
     while (!systemIter.done()) {
+        // Systems outside the explored region are not drawn at all.
+        if (draw_systems.find(systemIter->GetName()) == draw_systems.end()) {
+            ++systemIter;
+            continue;
+        }
         //this draws the points
         //IGNORE UNDRAWABLE SYSTEMS
         //**********************************
@@ -555,29 +594,37 @@ void NavigationSystem::DrawGalaxy() {
 
         pos = systemIter->Position();
 
-        ReplaceAxes(pos);             //poop
 
         //Modify by old rotation amount
         //*************************
-//if(galaxy_view==VIEW_3D){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
         //*************************
         //*************************
 
         GFXColor col = systemIter->GetColor();
-        float the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp;
-        TranslateCoordinates(pos,
-                pos_flat,
-                center_nav_x,
-                center_nav_y,
-                themaxvalue,
-                zscale,
-                zdistance,
-                the_x,
-                the_y,
-                the_x_flat,
-                the_y_flat,
-                system_item_scale_temp,
-                0);
+        float the_x = 0.0f;
+        float the_y = 0.0f;
+        float system_item_scale_temp = 0.0f;
+        if (!galaxy_cam.project(pos, the_x, the_y, system_item_scale_temp)) {
+            ++systemIter;
+            continue;      //behind the camera, so there is nothing to draw
+        }
+        the_x = center_nav_x + the_x;
+        the_y = center_nav_y + the_y;
+
+        // Keep an item within a readable size range however far away it is.
+        if (system_item_scale_temp > maximumitemscaleup) {
+            system_item_scale_temp = maximumitemscaleup;
+        }
+        if (system_item_scale_temp < minimumitemscaledown) {
+            system_item_scale_temp = minimumitemscaledown;
+        }
+
+        // Remember the nearest thing in view: panning and zooming scale with it.
+        const double item_distance = (pos - galaxy_cam.position()).Magnitude();
+        if (item_distance < nav_near_dist) {
+            nav_near_dist = item_distance;
+        }
+
         float alphaadd;
         {
             float tmp = (1 - (zoom / MAXZOOM));
@@ -635,6 +682,11 @@ void NavigationSystem::DrawGalaxy() {
             system_item_scale_temp = (system_item_scale * 3);
         }
         insert_size *= system_item_scale_temp / 3;
+        // Keep the marker, and the area that selects it, above a minimum size: out here a
+        // system can be a long way away, and a few pixels is neither visible nor clickable.
+        if (insert_size < NavMinItemSize()) {
+            insert_size = NavMinItemSize();
+        }
         if (currentsystemindex == temp) {
             DrawTargetCorners(the_x, the_y, (insert_size), currentcol);
         }
@@ -644,13 +696,27 @@ void NavigationSystem::DrawGalaxy() {
         if (systemselectionindex == temp) {
             DrawTargetCorners(the_x, the_y, (insert_size) * 1.4, selectcol);
         }
+        // A name is drawn where it fits: the first system of a group of nearby markers
+        // keeps its name and the rest are drawn bare, so that the names stop stacking
+        // into a column. The system the player is in, and the one selected, are always
+        // named whatever else is near them.
+        bool fits = true;
+        for (size_t i = 0; i < named_positions.size(); ++i) {
+            const float dx = the_x - named_positions[i].i;
+            const float dy = the_y - named_positions[i].j;
+            if (((dx * dx) + (dy * dy)) < (label_radius * label_radius)) {
+                fits = false;
+                break;
+            }
+        }
+        const bool named = fits || (temp == currentsystemindex) || (temp == systemselectionindex);
+        if (named) {
+            named_positions.push_back(QVector(the_x, the_y, 0.0));
+        }
         bool moused = false;
         DrawNode(insert_type, insert_size, the_x, the_y,
-                (*systemIter).GetName(), screenoccupation, moused, isPath ? pathcol : col, false, false,
-                isPath ? "" : csector);
-        if (std::fabs(zdistance) < 2.0f * camera_z) {
-            DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
-        }
+                named ? (*systemIter).GetName() : std::string(), screenoccupation, moused, isPath ? pathcol : col,
+                false, false);
         if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current)) {
             mouselist.push_back(SystemDrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),
                     systemIter.getIndex(), screenoccupation, false, isPath ? pathcol : col));
@@ -658,7 +724,9 @@ void NavigationSystem::DrawGalaxy() {
         }
         unsigned destsize = systemIter->GetDestinationSize();
         if (destsize != 0) {
-            ImDrawList* drawList = ImGui::GetForegroundDrawList();
+            // The background list, not the foreground one: the buttons are drawn into it
+            // later, so they end up on top of these lines rather than under them.
+            ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 
             // Line thickness constant (adjust as needed, e.g., 1.5f or 2.0f)
             const float line_thickness = 2.0f;
@@ -667,23 +735,17 @@ void NavigationSystem::DrawGalaxy() {
                 CachedSystemIterator::SystemInfo &oth = systemIter[systemIter->GetDestinationIndex(i)];
                 if (oth.isDrawable()) {
                     QVector posoth = oth.Position();
-                    ReplaceAxes(posoth);
 
-                    float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat;
-                    // WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
-                    TranslateCoordinates(posoth,
-                            pos_flat,
-                            center_nav_x,
-                            center_nav_y,
-                            themaxvalue,
-                            zscale,
-                            zdistance,
-                            the_new_x,
-                            the_new_y,
-                            the_new_x_flat,
-                            the_new_y_flat,
-                            new_system_item_scale_temp,
-                            0);
+                    float the_new_x = 0.0f;
+                    float the_new_y = 0.0f;
+                    float new_system_item_scale_temp = 0.0f;
+                    if (!galaxy_cam.project(posoth, the_new_x, the_new_y, new_system_item_scale_temp)) {
+                        continue;      //this jump destination is behind the camera
+                    }
+                    the_new_x = center_nav_x + the_new_x;
+                    the_new_y = center_nav_y + the_new_y;
+                    float the_new_x_flat = the_new_x;
+                    float the_new_y_flat = the_new_y;
 
                     GFXColor othcol = oth.GetColor();
                     othcol.a = (new_system_item_scale_temp - minimumitemscaledown) / 

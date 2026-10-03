@@ -44,6 +44,13 @@ Resource<double> ComponentsManager::credits = Resource<double>(0.0, 0.0);
 void ComponentsManager::Load(std::string unit_key) {
     mass = base_mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 0.0);
 
+    // Parts the ship is never without: whichever replacement is fitted, these belong to
+    // the ship and are not for sale.
+    hull.SetIntegral(true);
+    afterburner.SetIntegral(true);
+    drive.SetIntegral(true);
+    ftl_drive.SetIntegral(true);
+
     // Consumer
     std::string prohibited_upgrades_string = UnitCSVFactory::GetVariable(unit_key, "Prohibited_Upgrades", std::string());
 
@@ -95,6 +102,10 @@ double ComponentsManager::GetMass() const {
 
 void ComponentsManager::SetMass(double mass) {
     this->mass = mass;
+}
+
+double ComponentsManager::GetBaseMass() const {
+    return base_mass;
 }
 
 void ComponentsManager::SetPlayerShip() {
@@ -230,30 +241,8 @@ bool ComponentsManager::UpgradeAlreadyInstalled(const Cargo& upgrade) const {
     return true;
 }
 
-/** A convenience struct to hold the data used below */
-struct HudText {
-    const Component *component;
-    const std::string name;
-    const bool damageable;
-
-    HudText(Component *component, std::string name, bool damageable):
-        component(component), name(name), damageable(damageable) {}
-};
-
-/* This function is run when:
-    1. A player ship is created
-    2. A player ship is loaded from a saved game
-    3. An upgrade/downgrade has occured
-    4. DamageRandomSystem above is called
-*/
-
-void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
-    std::string report;
-
-    report += configuration().graphics.hud.damage_report_heading + "\n\n";
-
-    // TODO: this should be taken from assets so "FTL Drive" would be "SPEC Drive"
-    const HudText hud_texts[] = {
+std::vector<HudText> ComponentsManager::Components() {
+    return {
         HudText(&hull, "Hull", true),
         HudText(&armor, "Armor", true),
         HudText(&shield, "Shield", true),
@@ -271,9 +260,155 @@ void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
         HudText(&cloak, "Cloak", true),
         HudText(&repair_bot, "Repair System", false)
     };
+}
 
+bool ComponentsManager::ComponentNeedsRepair(Component *component) {
+    return ComponentDamage(component) > 0.0;
+}
 
-    for(const HudText& text : hud_texts) {
+double ComponentsManager::DamagePercent() {
+    const std::vector<HudText> components = Components();
+    if (components.empty()) {
+        return 0.0;
+    }
+
+    double damage = 0.0;
+    for (const HudText &component : components) {
+        damage += ComponentDamage(component.component);
+    }
+    return damage / components.size();
+}
+
+namespace {
+// The category the base UI groups a ship's own components under.
+const char *const INTEGRAL_CATEGORY = "upgrades/integral";
+// Rows that a game saved before the ship's own components were listed this way carries,
+// named by unit key.
+const char *const LEGACY_INTEGRAL_ITEMS[] = {"hull", "afterburner", "drive", "ftl_drive"};
+}
+
+bool ComponentsManager::ComponentIsIntegral(const Component *component) const {
+    // Fuel is a supply rather than a part of the ship.
+    if (component == &fuel) {
+        return false;
+    }
+    // The parts a ship is never without.
+    if (component->Integral()) {
+        return true;
+    }
+    // Anything the ship is carrying is listed as that item instead. A game loaded from a
+    // save restores the items without setting the components' upgrade keys, so the items
+    // are what to go by.
+    return component->GetUpgradeKey().empty() && !HasItemForComponent(component);
+}
+
+std::string ComponentsManager::CarriedPartKey(const Component *component) const {
+    for (const Cargo &item : upgrade_space.GetItems()) {
+        if (GetComponentTypeFromName(item.GetName()) == component->type) {
+            return item.GetName();
+        }
+    }
+    return "";
+}
+
+bool ComponentsManager::HasItemForComponent(const Component *component) const {
+    return !CarriedPartKey(component).empty();
+}
+
+std::vector<Cargo> ComponentsManager::IntegralComponentItems() {
+    std::vector<Cargo> items;
+    for (HudText &text : Components()) {
+        if (!text.component->Installed() || !ComponentIsIntegral(text.component)) {
+            continue;
+        }
+
+        Cargo component_item;
+        component_item.SetName(text.name);
+        component_item.SetCategory(INTEGRAL_CATEGORY);
+        component_item.SetQuantity(1);
+        component_item.SetInstalled(true);
+        component_item.SetComponent(true);
+        // Part of the ship, so it is not for sale and takes no space of its own - the
+        // ship's own mass and volume already count it.
+        component_item.SetIntegral(true);
+        items.push_back(component_item);
+    }
+    return items;
+}
+
+void ComponentsManager::RemoveLegacyIntegralItems() {
+    for (const char *legacy_item : LEGACY_INTEGRAL_ITEMS) {
+        upgrade_space.RemoveCargo(this, legacy_item, 1);
+    }
+}
+
+std::vector<HudText> ComponentsManager::DamagedComponents() {
+    std::vector<HudText> damaged_components;
+    for (HudText &text : Components()) {
+        if (text.component->Installed() && ComponentNeedsRepair(text.component)) {
+            damaged_components.push_back(text);
+        }
+    }
+    return damaged_components;
+}
+
+int ComponentsManager::DamagedComponentCount() {
+    return static_cast<int>(DamagedComponents().size());
+}
+
+Component *ComponentsManager::DamagedComponent(const std::string &name) {
+    for (HudText &text : DamagedComponents()) {
+        if (text.name == name) {
+            return text.component;
+        }
+    }
+    return nullptr;
+}
+
+Component *ComponentsManager::ComponentByName(const std::string &name) {
+    for (HudText &text : Components()) {
+        if (text.name == name) {
+            return text.component;
+        }
+    }
+    return nullptr;
+}
+
+ComponentService ComponentsManager::ServiceComponent(const std::string &name) {
+    Component *component = DamagedComponent(name);
+    if (component == nullptr) {
+        return ComponentService::None;
+    }
+
+    component->Repair();
+    if (!ComponentNeedsRepair(component)) {
+        return ComponentService::Repaired;
+    }
+
+    // A component Repair() cannot put right is replaced instead, which is what a base can
+    // do and a repair droid cannot.
+    component->Replace();
+    if (!ComponentNeedsRepair(component)) {
+        return ComponentService::Replaced;
+    }
+
+    return ComponentService::None;
+}
+
+/* This function is run when:
+    1. A player ship is created
+    2. A player ship is loaded from a saved game
+    3. An upgrade/downgrade has occured
+    4. DamageRandomSystem above is called
+*/
+
+void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
+    std::string report;
+
+    report += configuration().graphics.hud.damage_report_heading + "\n\n";
+
+    // TODO: this should be taken from assets so "FTL Drive" would be "SPEC Drive"
+    for(const HudText& text : Components()) {
         if(text.component->Installed()) {
             std::string new_hud_text = PrintFormattedComponentInHud(
                 text.component->PercentOperational(),
@@ -288,7 +423,11 @@ void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
     hud_text = report;
 }
 
-std::string ComponentsManager::GetHudText() {
+std::string ComponentsManager::GetHudText(std::string getDamageColor(double)) {
+    //The report is derived from the components' condition, so it is generated when it is asked for.
+    //Repairing a component changes that condition without any of the events that refresh a cached
+    //copy, so the HUD went on showing the damage until the ship was reloaded from a save.
+    GenerateHudText(getDamageColor);
     return hud_text;
 }
 

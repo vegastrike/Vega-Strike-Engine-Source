@@ -147,8 +147,7 @@ void DrawNode(int type,
         bool moused,
         GFXColor race,
         bool mouseover,
-        bool willclick,
-        string insector) {
+        bool willclick) {
     char color = GetSystemColor(source);
     if (moused) {
         return;
@@ -176,6 +175,10 @@ void DrawNode(int type,
         }
     }
     NavigationSystem::DrawCircle(x, y, size, race);
+    if (source.empty()) {
+        //A bare marker: the caller decided that there is no room for a name here.
+        return;
+    }
     if ((!mouseover) || (willclick)) {
         string tsector, nam;
         Beautify(source, tsector, nam);
@@ -183,9 +186,7 @@ void DrawNode(int type,
             race = highlighted_tail_text;
             nam = tsector + " / " + nam;
         }
-        if (willclick || !(insector.compare("")) || !(insector.compare(tsector))) {
-            DrawNodeDescription(nam, x, y, 1.0, 1.0, 0, race, screenoccupation);
-        }
+        DrawNodeDescription(nam, x, y, 1.0, 1.0, 0, race, screenoccupation);
     }
 }
 
