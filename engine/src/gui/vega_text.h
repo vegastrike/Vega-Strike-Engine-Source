@@ -33,6 +33,11 @@ class TextPlane;
 
 // Bridge that renders a legacy TextPlane's text through the vega_draw text
 // pipeline. The text is parsed with the legacy '#' interpreter (TextPlane
+// dialect) and laid out with word wrap against the plane's own width. Returns the
+// laid-out height, so a caller can place whatever follows below the text.
+// A plane with shrink-to-fit set has its font shrunk until the text fits the
+// plane's height instead, for text boxes whose size is fixed by the art.
+// See doc/UI-Drawing-Standard.md. HUD/VDU still render through TextPlane.
 // dialect), laid out at the font size the engine draws at (the user's Text
 // Height), and drawn at the plane's position, wrapped to its width and placed
 // against its layout resolution/letterbox offset.
@@ -44,7 +49,7 @@ namespace vega_text {
 // `transparent` replaces the old "automatte" flag: when true the text is drawn
 // with no background; when false the plane's background colour is painted
 // behind each run.
-void DrawTextPlane(TextPlane &plane, const std::string &text, bool transparent);
+float DrawTextPlane(TextPlane &plane, const std::string &text, bool transparent);
 
 } // namespace vega_text
 
