@@ -74,7 +74,10 @@ void DrawTextPlane(TextPlane &plane, const std::string &text, bool transparent) 
         // window, so the width and the position use the same space.
         anchor_x = Coordinates::normToPixelX(pos_x, res_w) + off_x;
         anchor_y = Coordinates::normToPixelY(pos_y, res_h) + off_y;
-        wrap_px = Coordinates::normToPixelW(size_w, res_w) * 1.05f;
+        // Wrap in display space, as the legacy TextPlane did (normToPixelW with no
+        // resolution): the text is drawn at a display-space font size, so wrapping
+        // against the base resolution would squeeze it into far too many lines.
+        wrap_px = Coordinates::normToPixelW(size_w) * 1.05f;
     } else {
         const std::pair<int, int> native = CalculateAbsoluteXY(pos_x, pos_y);
         anchor_x = static_cast<float>(native.first);
@@ -92,7 +95,9 @@ void DrawTextPlane(TextPlane &plane, const std::string &text, bool transparent) 
 
     vega_draw::TextStyle style;
     style.font_px = font_px;
-    style.wrap = true;
+    // A negative width meant "do not wrap" to the legacy parser, which set an infinite
+    // breaking width for it.
+    style.wrap = wrap_px > 0.0f;
     style.wrap_width_px = wrap_px;
 
     const vega_draw::ImGuiTextMeasurer measurer;
