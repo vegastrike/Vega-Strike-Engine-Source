@@ -46,11 +46,15 @@ bool IsTransparent(ImU32 color) {
     return ((color >> IM_COL32_A_SHIFT) & 0xFF) == 0;
 }
 
+// Text shrunk to fit a fixed box may get smaller, but not to the point of being
+// unreadable. A fraction of the size the caller asked for.
+constexpr float kFittedFontFloor = 0.6f;
+
 } // namespace
 
-void DrawTextPlane(TextPlane &plane, const std::string &text, bool transparent) {
+float DrawTextPlane(TextPlane &plane, const std::string &text, bool transparent) {
     if (text.empty()) {
-        return;
+        return 0.0f;
     }
 
     float pos_x = 0.0f;
@@ -94,9 +98,17 @@ void DrawTextPlane(TextPlane &plane, const std::string &text, bool transparent) 
     style.font_px = font_px;
     style.wrap = true;
     style.wrap_width_px = wrap_px;
+    if (plane.shrinkToFit()) {
+        // A box whose size is fixed by the art: fit the text to it, rather than letting it
+        // run past the box onto whatever is drawn next.
+        style.fit_height_px = (res_w > 0.0f && res_h > 0.0f)
+                ? Coordinates::normToPixelH(size_h, res_h)
+                : Coordinates::normToPixelH(size_h);
+        style.fit_min_font_px = font_px * kFittedFontFloor;
+    }
 
     const vega_draw::ImGuiTextMeasurer measurer;
-    const vega_draw::TextLayout layout = vega_draw::LayoutText(lines, style, measurer);
+    const vega_draw::TextLayout layout = vega_draw::LayoutTextFitted(lines, style, measurer);
 
     const ImU32 background = (transparent || IsTransparent(plane.background_color))
             ? 0u
@@ -110,6 +122,9 @@ void DrawTextPlane(TextPlane &plane, const std::string &text, bool transparent) 
                               nullptr,
                               0,
                               background);
+
+    // The height the text actually took, so a caller can place what follows below it.
+    return layout.height;
 }
 
 } // namespace vega_text

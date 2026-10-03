@@ -57,6 +57,7 @@ class TextPlane {
     // resolution is set, normalized coords map against it (instead of native pixels)
     // and the offset shifts the text into the letterboxed base window.
     float m_resW = 0.0f;   // 0 = use native resolution (legacy behaviour)
+    bool m_shrinkToFit = false; // opt-in: shrink the font to fit this plane's height
     float m_resH = 0.0f;
     float m_offX = 0.0f;   // screen-absolute pixel offset for the drawn position
     float m_offY = 0.0f;
@@ -131,6 +132,15 @@ public:
     // themselves (e.g. through vega_draw).
     void layoutResolution(float &w, float &h) const {
         w = m_resW; h = m_resH;
+    }
+    // Opt-in: fit the text to this plane's height by shrinking the font, rather than
+    // keeping the font and letting the text run past the box onto whatever is drawn
+    // next. Off by default - flowing text is the common case.
+    void setShrinkToFit(bool shrink) {
+        m_shrinkToFit = shrink;
+    }
+    bool shrinkToFit() const {
+        return m_shrinkToFit;
     }
     void layoutOffset(float &x, float &y) const {
         x = m_offX; y = m_offY;

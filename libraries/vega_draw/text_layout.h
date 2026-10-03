@@ -63,6 +63,12 @@ struct TextStyle {
     float region_width_px = 0.0f; // width used for justification; 0 -> no shift
     float line_spacing = 0.0f;    // extra spacing between lines, as a fraction of the line height
     Justification justification = Justification::Left;
+
+    // Opt-in height fitting: LayoutTextFitted shrinks the font until the layout fits
+    // fit_height_px, never below fit_min_font_px. Left at 0 the text keeps the size it is
+    // given, wraps, and the caller places whatever follows below the reported layout.height.
+    float fit_height_px = 0.0f;
+    float fit_min_font_px = 0.0f;
 };
 
 // One run placed on a line, x measured from the line's left edge.
@@ -90,6 +96,12 @@ struct TextLayout {
 // Lay out parsed lines. Manual <br> breaks are always honoured; word wrap is an
 // additional opt-in that only reflows within a parsed line.
 TextLayout LayoutText(const TextLines &parsed, const TextStyle &style, const TextMeasurer &measurer);
+
+// Layout with an optional height budget, for a caller whose text must fit a fixed height:
+// the largest font at or below style.font_px that fits style.fit_height_px, or the font as
+// given when no budget is set. The pixel-space twin of LayoutTextBox's grid autofit; this
+// one takes already-parsed lines, so a caller with its own text dialect can use it.
+TextLayout LayoutTextFitted(const TextLines &parsed, TextStyle style, const TextMeasurer &measurer);
 
 // Truncate `line` so it fits within `max_width` pixels, appending `ellipsis` if it
 // was cut. Advances whole UTF-8 sequences (never splits a multi-byte character).
