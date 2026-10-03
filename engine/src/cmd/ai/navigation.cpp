@@ -45,6 +45,7 @@
 #include "warpto.h"
 #include "flybywire.h"
 #include "cmd/unit_util.h"
+#include "cmd/dock_utils.h"
 #include "root_generic/vega_random.h"
 #include "src/star_system.h"
 #include "src/universe.h"
@@ -805,7 +806,10 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    const float distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt;
+    // Distance where the autopilot terminates and docking begins: its normal termination
+    // distance plus the target's docking range, so it never hands over already dockable.
+    const float distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt
+            + static_cast<float>(DockingClearance(target));
     const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
     // Disengage when we're within the distance it takes to stop from our current
