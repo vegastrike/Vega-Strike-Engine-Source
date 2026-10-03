@@ -334,11 +334,17 @@ void Shield::Regenerate(const bool player_ship) {
     // The upkeep is charged even at full shields; only the deficit below removes the cost of
     // the charge being rebuilt.
     const double generator_health = regeneration.Percent();
-    // A destroyed generator leaves nothing to divide by, so fall back to full efficiency.
-    const double shield_efficiency = generator_health != 0.0 ? generator_health : 1.0;
+    // A generator with nothing left maintains nothing and recharges nothing: the rebuild term
+    // below is already zero for it, since regeneration.AdjustedValue() caps the charge at zero.
+    // Charging upkeep for hardware that is gone is not what the old fallback meant either - there
+    // efficiency was an authored value whose 0 meant "not set", not "destroyed".
+    if (generator_health <= 0.0) {
+        SetConsumption(0.0);
+        return;
+    }
     const double vsd_percent = configuration().components.fuel.vsd_mj_yield_dbl / 100.0;
     const double shield_maintenance_cost = regeneration.MaxValue() * vsd_percent
-            / shield_efficiency
+            / generator_health
             / configuration().physics.shield_energy_capacitance_dbl
             * static_cast<double>(number_of_facets)
             * configuration().physics.shield_maintenance_charge_dbl;
