@@ -212,25 +212,6 @@ TextLayout LayoutText(const TextLines &parsed, const TextStyle &style, const Tex
     return layout;
 }
 
-TextLayout LayoutTextFitted(const TextLines &parsed, TextStyle style, const TextMeasurer &measurer) {
-    TextLayout layout = LayoutText(parsed, style, measurer);
-    if (style.fit_height_px <= 0.0f || layout.height <= style.fit_height_px) {
-        return layout;
-    }
-    // The same scan a grid box's autofit does: step the font down to the floor, stopping at
-    // the first size that fits. Font sizes here are small integers, so this is a few layouts.
-    for (float font_px = style.font_px - 1.0f; font_px >= style.fit_min_font_px; font_px -= 1.0f) {
-        style.font_px = font_px;
-        layout = LayoutText(parsed, style, measurer);
-        if (layout.height <= style.fit_height_px) {
-            break;
-        }
-    }
-    // The floor can still be too tall. Returning it is deliberate: what to do then - clip,
-    // scroll, or let it run - is the caller's policy, not the layout's.
-    return layout;
-}
-
 void TruncateLineWithEllipsis(LaidOutLine &line,
                               float max_width,
                               float font_px,

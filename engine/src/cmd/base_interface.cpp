@@ -1298,10 +1298,6 @@ BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
         othtext(vs_config->getColor("Fixer_Text_Color_Foreground", GFXColor(1, 1, .5, 1)),
                 vs_config->getColor("FixerTextColor_Background", GFXColor(0, 0, 0, 1))) {
     CurrentBase = this;
-    // The room and fixer text panels are sized by the base art, so fit their text to the
-    // panel instead of letting a long description run past it onto the buttons below.
-    curtext.setShrinkToFit(true);
-    othtext.setShrinkToFit(true);
     CallComp = false;
     lastmouseindex = 0;
     enabledj = true;
