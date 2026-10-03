@@ -100,10 +100,13 @@ float DrawTextPlane(TextPlane &plane, const std::string &text, bool transparent)
     style.wrap_width_px = wrap_px;
     if (plane.shrinkToFit()) {
         // A box whose size is fixed by the art: fit the text to it, rather than letting it
-        // run past the box onto whatever is drawn next.
+        // run past the box onto whatever is drawn next. A plane's height is signed - a
+        // negative one means the box grows upward from the anchor - so the magnitude is
+        // what bounds the text.
+        const float height = (size_h < 0.0f) ? -size_h : size_h;
         style.fit_height_px = (res_w > 0.0f && res_h > 0.0f)
-                ? Coordinates::normToPixelH(size_h, res_h)
-                : Coordinates::normToPixelH(size_h);
+                ? Coordinates::normToPixelH(height, res_h)
+                : Coordinates::normToPixelH(height);
         style.fit_min_font_px = font_px * kFittedFontFloor;
     }
 
