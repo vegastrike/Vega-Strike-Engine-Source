@@ -620,7 +620,14 @@ void AutoLongHaul::Execute() {
             inside_landing_zone = currently_inside_landing_zone;
             MakeLinearVelocityOrder();
         }
-        if (obstacle != NULL && obstacle != target) {
+        // The destination is where we are going, so it is never steered around. The autopilot
+        // target can be a subunit of a station, and then the unit that interdicts is its owner,
+        // so compare against the whole unit.
+        Unit *target_root = target;
+        if (target->isSubUnit()) {
+            target_root = UnitUtil::owner(target);
+        }
+        if (obstacle != NULL && obstacle != target && obstacle != target_root) {
             //if it exists and is not our destination
             QVector obstacledirection =
                     (obstacle->LocalPosition() - myposition);               //find vector from us to obstacle
