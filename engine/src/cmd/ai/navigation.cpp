@@ -604,7 +604,9 @@ void AutoLongHaul::Execute() {
 
     StraightToTarget = true;    // free to fly
 
-    if ((parent->graphicOptions.WarpFieldStrength < enough_warp_for_cruise)
+    //Free to fly. Read the drive's capability here rather than what the ship is currently getting:
+    //the orthogonal thrust cost is self-inflicted and passes, so steering must not react to it.
+    if ((parent->GetMaxWarpFieldStrength() < enough_warp_for_cruise)
             && (parent->graphicOptions.RampCounter == 0)) {
         //face target unless warp ramping is done and warp is less than some intolerable ammt
         Unit *obstacle = NULL;
