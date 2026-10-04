@@ -537,10 +537,6 @@ static float mymax(float a, float b) {
     return a > b ? a : b;
 }
 
-static float mymin(float a, float b) {
-    return a < b ? a : b;
-}
-
 // TODO: move this kludge to FtlDrive
 inline void WarpRampOff(Unit *un, bool rampdown) {
     if (un->ftl_drive.Enabled()) {
@@ -673,23 +669,11 @@ void AutoLongHaul::Execute() {
         deactivatewarp = false;
     }
     double mass = parent->GetMass();
-    double minaccel =
-            mymin(parent->drive.lateral,
-                    mymin(parent->drive.vertical, mymin(parent->drive.forward, parent->drive.retro)));
-    if (mass) {
-        minaccel /= mass;
-    }
-    QVector cfacing = parent->cumulative_transformation_matrix.getR();         //velocity.Cast();
-    double speed = cfacing.Magnitude();
-    if (StraightToTarget && useJitteryAutopilot(parent, target, minaccel)) {
-        if (speed > .01) {
-            cfacing = cfacing * (1. / speed);
-        }
-        const float dotLimit = cos(M_PI_FLT * configuration().physics.auto_pilot_spec_lining_up_angle_flt / 180.0F);
-        if (cfacing.Dot(destinationdirection) < dotLimit) {          //if wanting to face target but overshooting.
-            deactivatewarp = true;
-        }              //turn off drive
-    }
+    // SPEC stays on while flying toward the destination, through any turn: lining up with the
+    // destination, or taking a detour, must not drop the ship out of warp. Dropping out on a
+    // brief deviation of the facing made SPEC flicker in and out whenever the ship turned --
+    // for instance leaving a planet, now behind it, to line up with a faraway object.
+    double speed = parent->cumulative_transformation_matrix.getR().Magnitude();
     const float min_warpfield_to_enter_warp = configuration().ai.min_warp_to_try_flt;
     if (parent->GetMaxWarpFieldStrength() < min_warpfield_to_enter_warp) {
         deactivatewarp = true;
