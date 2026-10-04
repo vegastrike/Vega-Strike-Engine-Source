@@ -85,6 +85,7 @@ Movable::graphic_options::graphic_options() {
     RampCounter = 0;
     MinWarpMultiplier = MaxWarpMultiplier = 1;
     OrthoThrustFraction = 0;
+    OrthoThrustRequest = 0;
 
     // Added implementation to make var false
     // I don't like it, because it's true by default and false by default
@@ -215,10 +216,18 @@ void Movable::AddVelocity(float difficulty) {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     float lastWarpField = graphicOptions.WarpFieldStrength;
 
-    // How long the demand on the orthogonal thrusters is remembered, in seconds: long enough to cover
-    // a course change, short enough that a straight run clears it again.
-    static const float kOrthoThrustDecaySeconds = 0.5F;
-    graphicOptions.OrthoThrustFraction *= std::max(0.0F, 1.0F - simulation_atom_var / kOrthoThrustDecaySeconds);
+    // The demand on the orthogonal thrusters is ramped toward what they are being asked for, over a
+    // time the setting controls, so that a course change costs warp speed as a ramp rather than as a
+    // step.
+    const float smoothing_time = configuration().physics.flt_orthogonal_thrust_smoothing_time_flt;
+    if (smoothing_time > 0) {
+        const float step = std::min(1.0F, static_cast<float>(simulation_atom_var) / smoothing_time);
+        graphicOptions.OrthoThrustFraction +=
+                (graphicOptions.OrthoThrustRequest - graphicOptions.OrthoThrustFraction) * step;
+    } else {
+        graphicOptions.OrthoThrustFraction = graphicOptions.OrthoThrustRequest;
+    }
+    graphicOptions.OrthoThrustRequest = 0;
 
     float warprampuptime = unit->IsPlayerShip() ? configuration().warp.warp_ramp_up_time_flt : configuration().warp.computer_warp_ramp_up_time_flt;
     //Warp Turning on/off
@@ -846,7 +855,7 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
         Vector amt = ClampThrust(amt1, afterburn);
         ApplyLocalForce(amt);
 
-        // How much of the ship's orthogonal thrust is being applied: the lateral and vertical
+        // How much of the ship's orthogonal thrust is being asked for: the lateral and vertical
         // thrusters, the ones that push it off its forward axis, against what they have to give.
         // 1.0 means they are being asked for everything they have. This is the thrust a ship spends
         // to change course, and it is what should cost it warp speed -- see GetMaxWarpFieldStrength.
@@ -859,7 +868,7 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
         if (vertical_limit > 0) {
             orthogonal = std::max(orthogonal, std::abs(amt.j) / vertical_limit);
         }
-        graphicOptions.OrthoThrustFraction = std::max(graphicOptions.OrthoThrustFraction,
+        graphicOptions.OrthoThrustRequest = std::max(graphicOptions.OrthoThrustRequest,
                 std::min(1.0F, orthogonal));
     }
 

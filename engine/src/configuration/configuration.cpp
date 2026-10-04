@@ -7344,6 +7344,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.fire_missing_autotrackers = boost::json::value_to<bool>(*fire_missing_autotrackers_value_ptr);
             }
 
+            const boost::json::value * flt_orthogonal_thrust_smoothing_time_value_ptr = physics_object.if_contains("flt_orthogonal_thrust_smoothing_time");
+            if (flt_orthogonal_thrust_smoothing_time_value_ptr != nullptr) {
+                physics.flt_orthogonal_thrust_smoothing_time_dbl = boost::json::value_to<double>(*flt_orthogonal_thrust_smoothing_time_value_ptr);
+                physics.flt_orthogonal_thrust_smoothing_time_flt = boost::json::value_to<float>(*flt_orthogonal_thrust_smoothing_time_value_ptr);
+            }
+
             const boost::json::value * flt_orthogonal_thrust_speed_reduce_factor_value_ptr = physics_object.if_contains("flt_orthogonal_thrust_speed_reduce_factor");
             if (flt_orthogonal_thrust_speed_reduce_factor_value_ptr != nullptr) {
                 physics.flt_orthogonal_thrust_speed_reduce_factor_dbl = boost::json::value_to<double>(*flt_orthogonal_thrust_speed_reduce_factor_value_ptr);

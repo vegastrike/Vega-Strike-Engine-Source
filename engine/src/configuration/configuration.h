@@ -2384,6 +2384,8 @@ namespace vega_config {
         float extra_space_drag_for_cargo_flt = 0.005;
         bool face_target_on_auto = false;
         bool fire_missing_autotrackers = true;
+        double flt_orthogonal_thrust_smoothing_time_dbl = 3.0;
+        float flt_orthogonal_thrust_smoothing_time_flt = 3.0;
         double flt_orthogonal_thrust_speed_reduce_factor_dbl = 1.0;
         float flt_orthogonal_thrust_speed_reduce_factor_flt = 1.0;
         double friendly_auto_radius_dbl = 0.0;
