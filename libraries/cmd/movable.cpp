@@ -43,7 +43,6 @@
 #include <string>
 #include "src/vega_cast_utils.h"
 #include <climits>
-#include <cmath>
 #include <utility>
 
 #include "resource/random_utils.h"
@@ -171,7 +170,7 @@ void Movable::UpdatePhysics(const Transformation& trans,
         // Enforce the flight computer's set speed on the RESULTING velocity
         // magnitude (not per-axis), so turning or moving diagonally cannot push
         // the ship past the speed the pilot set. This runs after the velocity
-        // integration, so it holds for the frame. Warp (ftl) is exempt.
+        // integration, so it holds for the frame. Warp (SPEC) is exempt.
         // The limits come from the drive/afterburner Resource values via
         // MaxSpeed()/MaxAfterburnerSpeed(); the hardcoded velocity_max_flt
         // per-axis cap is no longer needed.
@@ -477,25 +476,10 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     Vector v = unit->GetWarpRefVelocity();
 //    QVector qv = v.Cast();
 
-    // ftl is space compression. The amount of space we can compress -- the warp
-    // multiplier -- depends only on the nearest object in space. Full speed requires
-    // the whole column of space the ship will cover in one second at 100x light speed
-    // to be clear (max_effective_velocity); anything closer compresses less, scaling
-    // the multiplier down proportionally to the significant distance to the object.
-    const float max_compression_range = configuration().warp.max_effective_velocity_flt;
-    float nearest = unit->GetNearestObjectSignificantDistance();
-    // ftl is space compression and needs empty space: it does not work at all below
-    // the minimum warp effect range (the 3 km weapons range). The speed-assist scale
-    // starts at that inner radius (0 there) and reaches full speed at the compression
-    // range; it is curved (1 - (1-x)^q) so speed is shed hard as soon as an object
-    // enters the bubble, rather than only when it is close.
-    const float kWeaponsRange = configuration().physics.warp_min_range_flt;
+    //inverse fractional effect of ship vs real big object
     float minimum_multiplier = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
-    if (nearest < max_compression_range) {
-        const double compression = (nearest - kWeaponsRange) / (max_compression_range - kWeaponsRange);
-        minimum_multiplier *= static_cast<float>(1.0 - std::pow(
-                1.0 - compression, configuration().warp.warp_speed_curve_exponent_dbl));
-    }
+    Unit *nearest_unit = nullptr;
+    minimum_multiplier = unit->CalculateNearestWarpUnit(minimum_multiplier, &nearest_unit, true);
     float minWarp = configuration().warp.warp_multiplier_min_flt * graphicOptions.MinWarpMultiplier;
     float maxWarp = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     if (minimum_multiplier < minWarp) {
@@ -516,10 +500,6 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     if (vmag > warp_max_effective_velocity) {
         v *= warp_max_effective_velocity / vmag; //HARD LIMIT
         minimum_multiplier *= warp_max_effective_velocity / vmag;
-    }
-    // Below the weapons range ftl does not work at all.
-    if (nearest <= kWeaponsRange) {
-        minimum_multiplier = 1.0f;
     }
     return minimum_multiplier;
 }
