@@ -84,6 +84,7 @@ Movable::graphic_options::graphic_options() {
     NumAnimationPoints = 0;
     RampCounter = 0;
     MinWarpMultiplier = MaxWarpMultiplier = 1;
+    OrthoThrustFraction = 0;
 
     // Added implementation to make var false
     // I don't like it, because it's true by default and false by default
@@ -213,6 +214,11 @@ void Movable::UpdatePhysics(const Transformation& trans,
 void Movable::AddVelocity(float difficulty) {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     float lastWarpField = graphicOptions.WarpFieldStrength;
+
+    // How long the demand on the orthogonal thrusters is remembered, in seconds: long enough to cover
+    // a course change, short enough that a straight run clears it again.
+    static const float kOrthoThrustDecaySeconds = 0.5F;
+    graphicOptions.OrthoThrustFraction *= std::max(0.0F, 1.0F - simulation_atom_var / kOrthoThrustDecaySeconds);
 
     float warprampuptime = unit->IsPlayerShip() ? configuration().warp.warp_ramp_up_time_flt : configuration().warp.computer_warp_ramp_up_time_flt;
     //Warp Turning on/off
@@ -480,6 +486,12 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     float minimum_multiplier = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     Unit *nearest_unit = nullptr;
     minimum_multiplier = unit->CalculateNearestWarpUnit(minimum_multiplier, &nearest_unit, true);
+    //Orthogonal thrust costs the field speed. The field is a straight-line field, so everything a
+    //ship spends pushing itself off its forward axis is speed it cannot spend going where it is
+    //pointed. Taking the loss off before the clamps below is what stops it at the interdiction floor
+    //rather than at a standstill.
+    minimum_multiplier *= 1.0F - configuration().physics.flt_orthogonal_thrust_speed_reduce_factor_flt
+            * graphicOptions.OrthoThrustFraction;
     float minWarp = configuration().warp.warp_multiplier_min_flt * graphicOptions.MinWarpMultiplier;
     float maxWarp = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     if (minimum_multiplier < minWarp) {
@@ -833,6 +845,22 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
     {
         Vector amt = ClampThrust(amt1, afterburn);
         ApplyLocalForce(amt);
+
+        // How much of the ship's orthogonal thrust is being applied: the lateral and vertical
+        // thrusters, the ones that push it off its forward axis, against what they have to give.
+        // 1.0 means they are being asked for everything they have. This is the thrust a ship spends
+        // to change course, and it is what should cost it warp speed -- see GetMaxWarpFieldStrength.
+        const float lateral_limit = std::abs(unit->drive.lateral.Value());
+        const float vertical_limit = std::abs(unit->drive.vertical.Value());
+        float orthogonal = 0.0F;
+        if (lateral_limit > 0) {
+            orthogonal = std::max(orthogonal, std::abs(amt.i) / lateral_limit);
+        }
+        if (vertical_limit > 0) {
+            orthogonal = std::max(orthogonal, std::abs(amt.j) / vertical_limit);
+        }
+        graphicOptions.OrthoThrustFraction = std::max(graphicOptions.OrthoThrustFraction,
+                std::min(1.0F, orthogonal));
     }
 
     const bool must_afterburn_to_buzz = configuration().audio.buzzing_needs_afterburner;

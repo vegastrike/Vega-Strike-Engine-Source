@@ -110,6 +110,7 @@ public:
         float RampCounter;
         float MinWarpMultiplier;
         float MaxWarpMultiplier;
+        float OrthoThrustFraction;
         graphic_options();
     } graphicOptions;
 protected:
