@@ -443,10 +443,6 @@ void PlaneDisplay::DrawTrack(const Sensor &sensor,
             color.a *= cosf(dangerRate * radarTime);
         }
     }
-    if (sensor.IsRepulsor(track)) {
-        // Blinking repulsor blip
-        color.a *= cosf(kRepulsorBlinkRate * radarTime);
-    }
 
     // Fade out dying ships
     if (track.IsExploding()) {
@@ -458,21 +454,11 @@ void PlaneDisplay::DrawTrack(const Sensor &sensor,
         trackSize += 1.0;
     }
 
-    const double repulsor_effect = sensor.GetRepulsorEffect(track);
-    if (repulsor_effect > 0.0) {
-        // Size the blip by how strongly the object compresses SPEC
-        trackSize = RepulsorBlipSize(repulsor_effect);
-    }
-
     DrawTarget(unitType, head, ground, trackSize, color);
 
     if (sensor.IsTracking(track)) {
         Vector center = Projection(radarView, Vector(0, 0, 0));
-        GFXColor markerColor = color;
-        if (sensor.IsSpecActive()) {
-            markerColor = sensor.GetSpecTargetColor();
-        }
-        DrawTargetMarker(head, ground, center, trackSize, markerColor, sensor.UseObjectRecognition());
+        DrawTargetMarker(head, ground, center, trackSize, color, sensor.UseObjectRecognition());
     }
 }
 

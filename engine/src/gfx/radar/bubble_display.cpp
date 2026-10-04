@@ -253,10 +253,6 @@ void BubbleDisplay::DrawTrack(const Sensor &sensor,
             headColor.a *= cosf(dangerRate * radarTime);
         }
     }
-    if (sensor.IsRepulsor(track)) {
-        // Blinking repulsor blip
-        headColor.a *= cosf(kRepulsorBlinkRate * radarTime);
-    }
 
     // Fade out dying ships
     if (track.IsExploding()) {
@@ -270,11 +266,7 @@ void BubbleDisplay::DrawTrack(const Sensor &sensor,
 
     if (sensor.IsTracking(track)) {
         currentTargetMarkerSize = trackSize;
-        GFXColor markerColor = headColor;
-        if (sensor.IsSpecActive()) {
-            markerColor = sensor.GetSpecTargetColor();
-        }
-        DrawTargetMarker(head, markerColor, trackSize);
+        DrawTargetMarker(head, headColor, trackSize);
     }
 
     const bool isNebula = (track.GetType() == Track::Type::Nebula);
@@ -282,12 +274,6 @@ void BubbleDisplay::DrawTrack(const Sensor &sensor,
     if (isNebula || isEcmActive) {
         // Vary size between 50% and 150%
         trackSize *= Jitter(0.5, 1.0);
-    }
-
-    const double repulsor_effect = sensor.GetRepulsorEffect(track);
-    if (repulsor_effect > 0.0) {
-        // Size the blip by how strongly the object compresses SPEC
-        trackSize = RepulsorBlipSize(repulsor_effect);
     }
 
     impl->getPointBuffer(trackSize).insert(GFXColorVertex(head, headColor));

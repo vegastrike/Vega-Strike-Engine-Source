@@ -54,7 +54,6 @@ private:
 protected:
     void DrawBackground(const Sensor &, const ViewArea &);
     void DrawTrack(const Sensor &, const ViewArea &, const Track &, bool negate_z = false);
-    void DrawBody(const Sensor &, const ViewArea &, const Track &, bool negate_z);
     void DrawTargetMarker(const Vector &, const GFXColor &, float);
 
 protected:
