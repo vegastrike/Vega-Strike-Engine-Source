@@ -268,7 +268,15 @@ void Movable::AddVelocity(float difficulty) {
                                     / warprampuptime)) : (graphicOptions.RampCounter
                     / configuration().warp.warp_ramp_down_time_flt) * (graphicOptions.RampCounter / configuration().warp.warp_ramp_down_time_flt);
         }
-        graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult);
+        //Orthogonal thrust costs the field speed: the field is a straight-line field, so everything a
+        //ship spends pushing itself off its forward axis is speed it cannot spend going where it is
+        //pointed. It is taken off the value the ship moves on rather than off
+        //GetMaxWarpFieldStrength, so that what the autopilot reads when it decides whether warp is
+        //worth having is still the drive's own capability. Otherwise the autopilot reads a cost its
+        //own steering just incurred as bad news about the world, and oscillates.
+        graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult)
+                * (1.0F - configuration().physics.flt_orthogonal_thrust_speed_reduce_factor_flt
+                        * graphicOptions.OrthoThrustFraction);
     } else {
         graphicOptions.WarpFieldStrength = 1;
     }
@@ -495,12 +503,6 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     float minimum_multiplier = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     Unit *nearest_unit = nullptr;
     minimum_multiplier = unit->CalculateNearestWarpUnit(minimum_multiplier, &nearest_unit, true);
-    //Orthogonal thrust costs the field speed. The field is a straight-line field, so everything a
-    //ship spends pushing itself off its forward axis is speed it cannot spend going where it is
-    //pointed. Taking the loss off before the clamps below is what stops it at the interdiction floor
-    //rather than at a standstill.
-    minimum_multiplier *= 1.0F - configuration().physics.flt_orthogonal_thrust_speed_reduce_factor_flt
-            * graphicOptions.OrthoThrustFraction;
     float minWarp = configuration().warp.warp_multiplier_min_flt * graphicOptions.MinWarpMultiplier;
     float maxWarp = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     if (minimum_multiplier < minWarp) {
