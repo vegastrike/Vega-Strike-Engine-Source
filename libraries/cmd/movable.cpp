@@ -268,15 +268,25 @@ void Movable::AddVelocity(float difficulty) {
                                     / warprampuptime)) : (graphicOptions.RampCounter
                     / configuration().warp.warp_ramp_down_time_flt) * (graphicOptions.RampCounter / configuration().warp.warp_ramp_down_time_flt);
         }
-        //Orthogonal thrust costs the field speed: the field is a straight-line field, so everything a
-        //ship spends pushing itself off its forward axis is speed it cannot spend going where it is
-        //pointed. It is taken off the value the ship moves on rather than off
-        //GetMaxWarpFieldStrength, so that what the autopilot reads when it decides whether warp is
-        //worth having is still the drive's own capability. Otherwise the autopilot reads a cost its
-        //own steering just incurred as bad news about the world, and oscillates.
-        graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult)
-                * (1.0F - configuration().physics.flt_orthogonal_thrust_speed_reduce_factor_flt
-                        * graphicOptions.OrthoThrustFraction);
+        // Orthogonal thrust costs the field speed: the field is a straight-line field, so what a ship
+        // spends pushing itself off its forward axis is speed it cannot spend going where it is
+        // pointed. The cost comes out of the speed the field delivers above the interdiction floor,
+        // never below it -- the floor is where warp ends, not where the drive does, and the field
+        // multiplier is only meaningful at 1 or above.
+        const double field_strength = GetMaxWarpFieldStrength(rampmult);
+        // The same floor GetMaxWarpFieldStrength clamps to; keep the two in step.
+        const double floor_strength = std::min(field_strength,
+                static_cast<double>(configuration().warp.warp_multiplier_min_flt
+                        * graphicOptions.MinWarpMultiplier));
+        const double orthogonal_cost = 1.0
+                - configuration().physics.flt_orthogonal_thrust_speed_reduce_factor_flt
+                        * graphicOptions.OrthoThrustFraction;
+        // Taken off the value the ship moves on rather than off GetMaxWarpFieldStrength, so that what
+        // the autopilot reads when it decides whether warp is worth having is still the drive's own
+        // capability; otherwise it reads a cost its own steering just incurred as bad news about the
+        // world, and oscillates.
+        graphicOptions.WarpFieldStrength = floor_strength
+                + (field_strength - floor_strength) * orthogonal_cost;
     } else {
         graphicOptions.WarpFieldStrength = 1;
     }
