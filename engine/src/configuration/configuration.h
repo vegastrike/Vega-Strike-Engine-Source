@@ -1946,13 +1946,10 @@ namespace vega_config {
         bool vdu_builtin_shields = false;
         double velocity_star_streak_max_dbl = 5.0;
         float velocity_star_streak_max_flt = 5.0;
-        // Star streaks span the in-system speed range: combined with the background
-        // star streak scale (0.01), this starts streaks at about 1% of the top SPEC
-        // speed and saturates at it (see graphics.background_star_streak_velocity_scale).
-        double velocity_star_streak_min_dbl = 0.05;
-        float velocity_star_streak_min_flt = 0.05;
-        double velocity_star_streak_scale_dbl = 1.7e-8;
-        float velocity_star_streak_scale_flt = 1.7e-8;
+        double velocity_star_streak_min_dbl = 1.0;
+        float velocity_star_streak_min_flt = 1.0;
+        double velocity_star_streak_scale_dbl = 0.01;
+        float velocity_star_streak_scale_flt = 0.01;
         bool vista_draw_stars = false;
         double warp_shake_magnitude_dbl = 0.125;
         float warp_shake_magnitude_flt = 0.125;
@@ -2286,6 +2283,7 @@ namespace vega_config {
         float auto_landing_port_unclamped_seconds_flt = 120.0;
         double auto_landing_warning_distance_dbl = 350.0;
         float auto_landing_warning_distance_flt = 350.0;
+        bool auto_pilot_compensate_for_interdiction = false;
         double auto_pilot_no_enemies_distance_multiplier_dbl = 4.0;
         float auto_pilot_no_enemies_distance_multiplier_flt = 4.0;
         double auto_pilot_planet_radius_percent_dbl = 0.495;
@@ -2337,6 +2335,8 @@ namespace vega_config {
         float debris_mass_flt = 1e-05;
         double debris_time_dbl = 500.0;
         float debris_time_flt = 500.0;
+        double default_interdiction_dbl = 0.01;
+        float default_interdiction_flt = 0.01;
         double default_shield_tightness_dbl = 0.0;
         float default_shield_tightness_flt = 0.0;
         double definite_damage_chance_dbl = 0.1;
@@ -2378,6 +2378,10 @@ namespace vega_config {
         float extra_space_drag_for_cargo_flt = 0.005;
         bool face_target_on_auto = false;
         bool fire_missing_autotrackers = true;
+        double flt_orthogonal_thrust_smoothing_time_dbl = 1.0;
+        float flt_orthogonal_thrust_smoothing_time_flt = 1.0;
+        double flt_orthogonal_thrust_speed_reduce_factor_dbl = 1.0;
+        float flt_orthogonal_thrust_speed_reduce_factor_flt = 1.0;
         double friendly_auto_radius_dbl = 0.0;
         float friendly_auto_radius_flt = 0.0;
         double game_accel_dbl = 1.0;
@@ -2443,6 +2447,8 @@ namespace vega_config {
         bool max_shield_lowers_capacitance = false;
         double max_torque_multiplier_dbl = 0.67;
         float max_torque_multiplier_flt = 0.67;
+        double max_warp_effect_size_dbl = 3000.0;
+        float max_warp_effect_size_flt = 3000.0;
         double min_asteroid_distance_dbl = -100.0;
         float min_asteroid_distance_flt = -100.0;
         double min_damage_dbl = 0.001;
@@ -2453,6 +2459,10 @@ namespace vega_config {
         float min_shield_speeding_discharge_flt = 0.1;
         double min_spec_interdiction_for_jittery_autopilot_dbl = 0.05;
         float min_spec_interdiction_for_jittery_autopilot_flt = 0.05;
+        double min_warp_effect_size_dbl = 100.0;
+        float min_warp_effect_size_flt = 100.0;
+        double min_warp_orbit_radius_dbl = 100000000.0;
+        float min_warp_orbit_radius_flt = 100000000.0;
         double minimum_mass_dbl = 1e-06;
         float minimum_mass_flt = 1e-06;
         double minimum_time_dbl = 0.1;
@@ -2552,20 +2562,23 @@ namespace vega_config {
         bool use_max_shield_energy_usage = false;
         double velocity_max_dbl = 10000.0;
         float velocity_max_flt = 10000.0;
+        double warp_behind_angle_dbl = 150.0;
+        float warp_behind_angle_flt = 150.0;
+        double warp_cruise_mult_dbl = 15000.0;
+        float warp_cruise_mult_flt = 15000.0;
+        double warp_curve_degree_dbl = 1.3;
+        float warp_curve_degree_flt = 1.3;
         bool warp_is_interstellar = false;
+        double warp_orbit_multiplier_dbl = 20.0;
+        float warp_orbit_multiplier_flt = 20.0;
+        double warp_perpendicular_dbl = 80.0;
+        float warp_perpendicular_flt = 80.0;
         double warp_ramp_down_time_dbl = 0.1;
         float warp_ramp_down_time_flt = 0.1;
-        // The destination's pull, compared directly against a normalized obstacle
-        // repulsion (0..1), so this value alone sets the balance.
-        double warp_clearance_attract_dbl = 0.9;
-        float warp_clearance_attract_flt = 0.9;
-        // Exponent for the proximity repulsion: weight = (1 - sig/bubble)^p.
-        // p=1 is a straight ramp; p>1 quiets the far field and concentrates the
-        // push near the object, so the ship flies straighter until it is close.
-        double warp_clearance_repel_exponent_dbl = 2.0;
-        float warp_clearance_repel_exponent_flt = 2.0;
-        double warp_min_range_dbl = 3000.0;
-        float warp_min_range_flt = 3000.0;
+        double warp_region0_dbl = 1.0;
+        float warp_region0_flt = 1.0;
+        double warp_region1_dbl = 5000000.0;
+        float warp_region1_flt = 5000000.0;
         double weapon_damage_efficiency_dbl = 1.0;
         float weapon_damage_efficiency_flt = 1.0;
         double year_scale_dbl = 16.0;
@@ -2759,12 +2772,6 @@ namespace vega_config {
         float warp_ramp_down_time_flt = 0.1;
         double warp_ramp_up_time_dbl = 5.0;
         float warp_ramp_up_time_flt = 5.0;
-        // SPEC speed curve: the multiplier is 1 - (1-x)^q, where x is the nearest-object
-        // distance normalized between the weapons range and the clear-space range.
-        // q=1 is the old linear falloff; q<1 cuts speed hard as soon as something enters
-        // the clear range, rather than only when it is close.
-        double warp_speed_curve_exponent_dbl = 0.2;
-        float warp_speed_curve_exponent_flt = 0.2;
         double warp_stretch_cutoff_dbl = 500000.0;
         float warp_stretch_cutoff_flt = 500000.0;
         double warp_stretch_decel_cutoff_dbl = 2500000.0;
