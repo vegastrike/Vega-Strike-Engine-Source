@@ -187,6 +187,17 @@ TEST(ParseLegacyVegaText, ImGuiBackslashIsALineBreak) {
     EXPECT_EQ(lines[1].runs[0].text, "b");
 }
 
+TEST(ParseLegacyVegaText, ImGuiBackslashKeepsTheNextCharacter) {
+    // A bare backslash is a line break and nothing more: the character after it
+    // belongs to the text. The base computer writes its objective separators that
+    // way ("Objectives\" then "...%\"), so consuming that character used to eat the
+    // first letter of every objective.
+    const TextLines lines = ParseImGui("Objectives\\Destroy the enemy: 0%\\");
+    ASSERT_EQ(lines.size(), 2u);
+    EXPECT_EQ(lines[0].runs[0].text, "Objectives");
+    EXPECT_EQ(lines[1].runs[0].text, "Destroy the enemy: 0%");
+}
+
 TEST(ParseLegacyVegaText, TextPlaneBackslashIsLiteral) {
     const TextLines lines = ParseTextPlane("a\\nb");
     ASSERT_EQ(lines.size(), 1u);

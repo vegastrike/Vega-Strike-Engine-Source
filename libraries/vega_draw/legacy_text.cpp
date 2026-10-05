@@ -317,10 +317,12 @@ TextLines ParseLegacyVegaText(const std::string &source, LegacyTextDialect diale
         }
 
         if (!is_text_plane && c == '\\') {
-            // The legacy parser treated a backslash (and the character after it)
-            // as a line break -- this is how "\n" inside content becomes a break.
+            // "\n" is a line break that consumes the escape. Any other backslash is only a
+            // line break -- the character after it belongs to the text. The base computer
+            // writes its objective separators that way, so consuming it ate the first
+            // letter of every objective.
             end_line(true, permanent_line_spacing);
-            i += (i + 1 < n) ? 2 : 1;
+            i += (i + 1 < n && source[i + 1] == 'n') ? 2 : 1;
             continue;
         }
 

@@ -106,9 +106,10 @@ TextLines ParseLegacyVegaText(const std::string& source, LegacyTextDialect diale
 | `##` | literal `#` |
 
 The two dialects differ where the engine historically did: `TextPlane` renders
-`_` as a space and resets the colour at every line break; `ImGuiText` treats a
-backslash (and the character after it) as a line break and keeps the colour
-across breaks. Six hex digits are always read as a colour **before** the format
+`_` as a space and resets the colour at every line break; `ImGuiText` treats `\n`
+as a line break (consuming the escape), treats any other backslash as a line break
+that **keeps** the character after it, and keeps the colour across breaks. Six hex
+digits are always read as a colour **before** the format
 codes, so `#b0b0b0`/`#cccccc` are colours, not stroke/colour codes.
 
 `reveal_safe` is for a word-by-word reveal: a trailing token that is not complete
