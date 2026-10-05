@@ -353,7 +353,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     }
 
     bool hull_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
-    bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
+    bool armor_damage = inflicted_damage.inflicted_damage_by_layer[1] > 0;
 
     // It's actually easier to read this condition than the equivalent form
     if (!(hull_damage || (configuration().physics.system_damage_on_armor && armor_damage))) {
@@ -402,7 +402,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
       }*/
 
     bool hull_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
-    bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
+    bool armor_damage = inflicted_damage.inflicted_damage_by_layer[1] > 0;
 
     // TODO: Same condition as DamageRandomSystem - move up and merge
     if (!(hull_damage || (configuration().physics.system_damage_on_armor && armor_damage))) {
