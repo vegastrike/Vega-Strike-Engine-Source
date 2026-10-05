@@ -219,7 +219,7 @@ void Movable::AddVelocity(float difficulty) {
     // The demand on the orthogonal thrusters is ramped toward what they are being asked for, over a
     // time the setting controls, so that a course change costs warp speed as a ramp rather than as a
     // step.
-    const float smoothing_time = configuration().physics.flt_orthogonal_thrust_smoothing_time_flt;
+    const float smoothing_time = configuration().physics.ftl_orthogonal_thrust_smoothing_time_flt;
     if (smoothing_time > 0) {
         const float step = std::min(1.0F, static_cast<float>(simulation_atom_var) / smoothing_time);
         graphicOptions.OrthoThrustFraction +=
@@ -279,7 +279,7 @@ void Movable::AddVelocity(float difficulty) {
                 static_cast<double>(configuration().warp.warp_multiplier_min_flt
                         * graphicOptions.MinWarpMultiplier));
         const double orthogonal_cost = 1.0
-                - configuration().physics.flt_orthogonal_thrust_speed_reduce_factor_flt
+                - configuration().physics.ftl_orthogonal_thrust_speed_reduce_factor_flt
                         * graphicOptions.OrthoThrustFraction;
         // Taken off the value the ship moves on rather than off GetMaxWarpFieldStrength, so that what
         // the autopilot reads when it decides whether warp is worth having is still the drive's own
