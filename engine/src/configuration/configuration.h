@@ -2378,10 +2378,6 @@ namespace vega_config {
         float extra_space_drag_for_cargo_flt = 0.005;
         bool face_target_on_auto = false;
         bool fire_missing_autotrackers = true;
-        double ftl_orthogonal_thrust_smoothing_time_dbl = 1.0;
-        float ftl_orthogonal_thrust_smoothing_time_flt = 1.0;
-        double ftl_orthogonal_thrust_speed_reduce_factor_dbl = 1.0;
-        float ftl_orthogonal_thrust_speed_reduce_factor_flt = 1.0;
         double friendly_auto_radius_dbl = 0.0;
         float friendly_auto_radius_flt = 0.0;
         double game_accel_dbl = 1.0;
@@ -2753,6 +2749,10 @@ namespace vega_config {
         float bleed_factor_flt = 2.0;
         double computer_warp_ramp_up_time_dbl = 10.0;
         float computer_warp_ramp_up_time_flt = 10.0;
+        double ftl_orthogonal_thrust_smoothing_time_dbl = 1.0;
+        float ftl_orthogonal_thrust_smoothing_time_flt = 1.0;
+        double ftl_orthogonal_thrust_speed_reduce_factor_dbl = 1.0;
+        float ftl_orthogonal_thrust_speed_reduce_factor_flt = 1.0;
         double in_system_jump_cost_dbl = 0.1;
         float in_system_jump_cost_flt = 0.1;
         double max_effective_velocity_dbl = 29202000000.0;
