@@ -558,6 +558,13 @@ float upgrade(Unit *my_unit, string file, int mountoffset, int subunitoffset, bo
     return percentage;
 }
 
+bool downgrade(Unit *my_unit, string upgrade_name) {
+    if (!my_unit) {
+        return false;
+    }
+    return my_unit->UpgradeUnit(upgrade_name, false, true).success;
+}
+
 int removeWeapon(Unit *my_unit, string name, int mountoffset, bool loop) {
     if (!my_unit) {
         return -1;
