@@ -57,12 +57,9 @@ bool IsStructure(const Radar::Track::Type::Value type) {
             || type == Radar::Track::Type::CapitalShip;
 }
 
-// A cloud of dots is only worth drawing while the object covers more than a pixel or two on the
-// radar; below that the ordinary single point says the same thing and costs nothing. The radar's
-// own area scales a direction by size/2, and the HUD measures a normalized length in pixels as it
-// times the resolution (`DrawTargetMarker` and `DrawBackground` both do), so the object's apparent
-// radius in pixels is its apparent radius in radar units times the radar's pixel radius.
-const float kMinCloudRadiusPixels = 1.5f;
+// An object is worth a cloud of dots once it reads as more than a dot on the radar: about a degree
+// across. Below that the ordinary single point says the same thing.
+const float kMinCloudAngleDegrees = 1.0f;
 
 // Once an object is worth a cloud, it is worth enough dots to read as a shape. The old rule sized
 // the cloud from the object's apparent area alone, which left anything but a body filling the
@@ -77,13 +74,9 @@ int CloudPointCount(const float apparent_radius) {
     return points;
 }
 
-bool CloudWorthDrawing(const Radar::ViewArea &radarView, const float apparent_radius) {
-    if (radarView.size.x <= 0.0f || radarView.size.y <= 0.0f) {
-        return true; // no extent to measure against: leave the cloud alone
-    }
-    const float radius_pixels = 0.5f * std::min(radarView.size.x * configuration().graphics.resolution_x,
-            radarView.size.y * configuration().graphics.resolution_y);
-    return (apparent_radius * radius_pixels) >= kMinCloudRadiusPixels;
+bool CloudWorthDrawing(const float angular_radius) {
+    const float diameter_degrees = 2.0f * angular_radius * (180.0f / static_cast<float>(PI));
+    return diameter_degrees >= kMinCloudAngleDegrees;
 }
 
 const int kMeshSampleBudget = 1024;
@@ -359,7 +352,7 @@ void SphereDisplay::DrawBody(const Sensor &sensor,
     const float body_z = std::max(head.z, 0.02f);
     const GFXColor color = sensor.GetColor(track);
 
-    if (!CloudWorthDrawing(radarView, apparent_radius)) {
+    if (!CloudWorthDrawing(angular_radius)) {
         // Too small to resolve: a single point at the body's centre.
         const float z = negate_z ? -center.z : center.z;
         if (z >= 0.0f) {
@@ -426,7 +419,7 @@ void SphereDisplay::DrawStructure(const Sensor &sensor,
     const GFXColor color = sensor.GetColor(track);
 
     int drawn = 0;
-    if (CloudWorthDrawing(radarView, apparent_radius)) {
+    if (CloudWorthDrawing(angular_radius)) {
         // The vertices are in the unit's own space. Rotate each one into the ship's frame using
         // the unit's current orientation -- not the draw-time cumulative matrix, which is only
         // composed for units that are being drawn -- then add the track's own position.
