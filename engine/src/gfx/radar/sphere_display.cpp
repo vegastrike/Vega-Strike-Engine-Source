@@ -30,6 +30,7 @@
 #include "root_generic/lin_time.h" // GetElapsedTime
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
+#include "gfx_generic/mesh.h"
 #include "src/gfxlib.h"
 #include "viewarea.h"
 #include "sphere_display.h"
@@ -49,6 +50,71 @@ bool IsBody(const Radar::Track::Type::Value type) {
     return type == Radar::Track::Type::Planet
             || type == Radar::Track::Type::DeadPlanet
             || type == Radar::Track::Type::Star;
+}
+
+bool IsStructure(const Radar::Track::Type::Value type) {
+    return type == Radar::Track::Type::Base
+            || type == Radar::Track::Type::CapitalShip;
+}
+
+const int kMeshSampleBudget = 512;
+
+// A structure is drawn as a cloud of its own mesh vertices, and reading those means mapping the
+// vertex list -- not something to do every frame, and not something to redo for a mesh that two
+// tracks share. So each mesh's sample is taken once and keyed by the vertex list it came from;
+// the mesh and the vertex count are kept alongside it, so a reload or a detail change re-samples
+// instead of serving the old geometry.
+struct MeshSample {
+    const void *mesh = nullptr;
+    int vertices = 0;
+    std::vector<Vector> points;
+};
+
+const int kMeshSampleCacheLimit = 64;
+std::map<const void *, MeshSample> mesh_samples;
+
+const std::vector<Vector> &MeshPoints(const Mesh *mesh) {
+    static const std::vector<Vector> no_points;
+
+    GFXVertexList *vlist = (mesh != nullptr) ? mesh->getVertexList() : nullptr;
+    if (vlist == nullptr) {
+        return no_points;
+    }
+    const int vertices = vlist->GetNumVertices();
+    if (vertices <= 0) {
+        return no_points;
+    }
+
+    if (mesh_samples.find(vlist) == mesh_samples.end()
+            && mesh_samples.size() >= kMeshSampleCacheLimit) {
+        mesh_samples.erase(mesh_samples.begin());
+    }
+
+    MeshSample &sample = mesh_samples[vlist];
+    if (sample.mesh == mesh && sample.vertices == vertices && !sample.points.empty()) {
+        return sample.points;
+    }
+
+    const int stride = std::max(1, vertices / kMeshSampleBudget);
+    const bool coloured = vlist->hasColor();
+    auto *mapped = vlist->Map(true, false);
+
+    sample.mesh = mesh;
+    sample.vertices = vertices;
+    sample.points.clear();
+    if (mapped != nullptr) {
+        sample.points.reserve(vertices / stride + 1);
+        for (int i = 0; i < vertices; i += stride) {
+            const Vector vertex = coloured
+                    ? Vector(mapped->colors[i].x, mapped->colors[i].y, mapped->colors[i].z)
+                    : Vector(mapped->vertices[i].x, mapped->vertices[i].y, mapped->vertices[i].z);
+            // Keep the mesh's own offset, so the points are in the unit's space.
+            sample.points.push_back(vertex + mesh->Position());
+        }
+    }
+    vlist->UnMap();
+
+    return sample.points;
 }
 
 float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat) {
@@ -125,6 +191,12 @@ void SphereDisplay::Draw(const Sensor &sensor,
             // each radar rather than assigning the whole body to one of them.
             DrawBody(sensor, rightRadar, *it, true);
             DrawBody(sensor, leftRadar, *it, false);
+            continue;
+        }
+        if (IsStructure(it->GetType())) {
+            // A structure is not a sphere, so it is the shape of its own meshes.
+            DrawStructure(sensor, rightRadar, *it, true);
+            DrawStructure(sensor, leftRadar, *it, false);
             continue;
         }
         const bool draw_both = configuration().graphics.hud.draw_blips_on_both_radar;
@@ -293,6 +365,92 @@ void SphereDisplay::DrawBody(const Sensor &sensor,
     }
 
     // The tracking cross belongs to the radar whose hemisphere holds the body's centre.
+    if (owns && sensor.IsTracking(track)) {
+        DrawTargetMarker(head, color, TRACK_SIZE);
+    }
+}
+
+void SphereDisplay::DrawStructure(const Sensor &sensor,
+        const ViewArea &radarView,
+        const Track &track,
+        bool negate_z) {
+    if (!radarView.IsActive()) {
+        return;
+    }
+
+    const Unit *unit = track.GetUnit();
+    Unit *player = sensor.GetPlayer();
+    const Vector position = track.GetPosition();
+    const float distance = position.Magnitude();
+    const float radius = track.GetSize();
+    if (unit == nullptr || player == nullptr || distance < 0.0001f || radius <= 0.0f) {
+        return;
+    }
+    const Vector center = position / distance;
+
+    // The same apparent-area rule a body gets: too small to resolve is a single point rather
+    // than a handful of stray dots.
+    const float angular_radius = asinf(std::min(1.0f, radius / distance));
+    const float apparent_radius = sinf(angular_radius);
+    int point_count = static_cast<int>(3000.0f * apparent_radius * apparent_radius);
+    if (point_count > 3000) {
+        point_count = 3000;
+    }
+
+    const bool owns = (negate_z ? -position.z : position.z) >= 0.0f;
+    const Vector head = radarView.Scale(Vector(-center.x, center.y, 0.0f));
+    const float body_z = std::max(head.z, 0.02f);
+    const GFXColor color = sensor.GetColor(track);
+
+    int drawn = 0;
+    if (point_count >= 8) {
+        // The vertices are in the unit's own space. Rotate each one into the ship's frame using
+        // the unit's current orientation -- not the draw-time cumulative matrix, which is only
+        // composed for units that are being drawn -- then add the track's own position.
+        Matrix unit_mat;
+        unit->curr_physical_state.to_matrix(unit_mat);
+
+        const unsigned int meshes = unit->nummesh(); // the last meshdata entry is the shield
+        const int per_mesh = std::max(1, point_count / static_cast<int>(std::max(1u, meshes)));
+        for (unsigned int m = 0; m < meshes && drawn < point_count; ++m) {
+            const std::vector<Vector> &points = MeshPoints(unit->meshdata[m]);
+            if (points.empty()) {
+                continue;
+            }
+            const int step = std::max(1, static_cast<int>(points.size()) / per_mesh);
+            for (size_t p = 0; p < points.size() && drawn < point_count; p += step) {
+                const Vector &local = points[p];
+                const QVector offset = Transform(unit_mat, QVector(local.i, local.j, local.k)) - unit_mat.p;
+                const Vector relative = position + player->ToLocalCoordinates(offset.Cast());
+                const float length = relative.Magnitude();
+                if (length < 0.0001f) {
+                    continue;
+                }
+                const Vector direction = relative / length;
+                const float z = negate_z ? -direction.z : direction.z;
+                if (z < 0.0f) {
+                    continue; // the other radar draws this half
+                }
+                Vector point = radarView.Scale(Vector(-direction.x, direction.y, 0.0f));
+                point.z = body_z;
+                impl->cloud.insert(GFXColorVertex(point, color));
+                ++drawn;
+            }
+        }
+    }
+
+    // Nothing sampled -- the mesh is not loaded at this range -- or too small to resolve: the
+    // structure is the single point its blip would have been.
+    if (drawn == 0) {
+        const float z = negate_z ? -center.z : center.z;
+        if (z >= 0.0f) {
+            Vector point = radarView.Scale(Vector(-center.x, center.y, 0.0f));
+            point.z = body_z;
+            impl->cloud.insert(GFXColorVertex(point, color));
+        }
+    }
+
+    // The tracking cross belongs to the radar whose hemisphere holds the structure's centre.
     if (owns && sensor.IsTracking(track)) {
         DrawTargetMarker(head, color, TRACK_SIZE);
     }
