@@ -144,6 +144,29 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
     return -1;
 }
 
+namespace {
+
+// The distance from the ship to the nearest of the dock's docking ports, which is what a zones-mode
+// approach is aiming for. Ports are in the dock's own frame, so they come out to world space first.
+// Returns -1 when there are none.
+double NearestPortDistance(const Unit *unit, const Unit *dock) {
+    if (dock->pImage == nullptr || dock->pImage->dockingports.empty()) {
+        return -1.0;
+    }
+    const Matrix &dock_tf = dock->GetTransformation();
+    double nearest = -1.0;
+    for (const DockingPorts &port : dock->pImage->dockingports) {
+        const QVector world = Transform(dock_tf, port.GetPosition().Cast());
+        const double distance = (world - unit->Position()).Magnitude();
+        if (nearest < 0.0 || distance < nearest) {
+            nearest = distance;
+        }
+    }
+    return nearest;
+}
+
+} // anonymous namespace
+
 std::string GetDockingText(Unit *unit, Unit *target, double range) {
     // Nowhere to dock. Exit
     if (target->pImage->dockingports.empty()) {
@@ -185,6 +208,15 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
         return std::string("Docking: Ready");
     } else if (CanDock(target, unit, true) >= 0) {
         return std::string("Docking: Auto Ready");
+    } else if (!target->pImage->dockingports.empty() && range < configuration().dock.count_to_dock_range_dbl) {
+        // Docking zones: in range of the station, but not in a port yet. Without this the player
+        // gets no readout at all until the moment it says "Ready", which is no help when the task
+        // is to find the port. The distance is to the nearest port rather than the centre, because
+        // the centre of a station is not where you are trying to put the ship.
+        const double port_range = NearestPortDistance(unit, target);
+        if (port_range >= 0.0) {
+            return std::string("Docking: ") + PrettyDistanceString(port_range);
+        }
     }
 
     return std::string();
