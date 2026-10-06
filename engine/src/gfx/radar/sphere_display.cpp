@@ -31,7 +31,6 @@
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
 #include "gfx_generic/mesh.h"
-#include "gui/guidefs.h"
 #include "src/gfxlib.h"
 #include "viewarea.h"
 #include "sphere_display.h"
@@ -60,23 +59,34 @@ bool IsStructure(const Radar::Track::Type::Value type) {
 
 // A cloud of dots is only worth drawing while the object covers more than a pixel or two on the
 // radar; below that the ordinary single point says the same thing and costs nothing. The radar's
-// own area scales points by size/2, so the object's apparent radius in pixels is its apparent
-// radius in radar units times the radar's pixel radius.
+// own area scales a direction by size/2, and the HUD measures a normalized length in pixels as it
+// times the resolution (`DrawTargetMarker` and `DrawBackground` both do), so the object's apparent
+// radius in pixels is its apparent radius in radar units times the radar's pixel radius.
 const float kMinCloudRadiusPixels = 1.5f;
 
-bool CloudWorthDrawing(const Radar::ViewArea &radarView, const float apparent_radius) {
-    if (radarView.sprite == nullptr) {
-        return true; // no sprite to measure against: leave the cloud as it was
+// Once an object is worth a cloud, it is worth enough dots to read as a shape. The old rule sized
+// the cloud from the object's apparent area alone, which left anything but a body filling the
+// radar with a handful of dots.
+const int kMinCloudPoints = 96;
+
+int CloudPointCount(const float apparent_radius) {
+    int points = static_cast<int>(3000.0f * apparent_radius * apparent_radius);
+    if (points < kMinCloudPoints) {
+        points = kMinCloudPoints;
     }
-    float width = 0.0f;
-    float height = 0.0f;
-    radarView.sprite->GetSize(width, height);
-    const float radius_pixels = 0.5f * std::min(Coordinates::normToPixelW(width),
-            Coordinates::normToPixelH(height));
+    return points;
+}
+
+bool CloudWorthDrawing(const Radar::ViewArea &radarView, const float apparent_radius) {
+    if (radarView.size.x <= 0.0f || radarView.size.y <= 0.0f) {
+        return true; // no extent to measure against: leave the cloud alone
+    }
+    const float radius_pixels = 0.5f * std::min(radarView.size.x * configuration().graphics.resolution_x,
+            radarView.size.y * configuration().graphics.resolution_y);
     return (apparent_radius * radius_pixels) >= kMinCloudRadiusPixels;
 }
 
-const int kMeshSampleBudget = 512;
+const int kMeshSampleBudget = 1024;
 
 // A structure is drawn as a cloud of its own mesh vertices, and reading those means mapping the
 // vertex list -- not something to do every frame, and not something to redo for a mesh that two
@@ -336,14 +346,11 @@ void SphereDisplay::DrawBody(const Sensor &sensor,
     // A body is a cloud of points on its surface. Every point is a real direction from the ship,
     // so it always lands inside the radar circle, and the front/back split falls out per point:
     // a body straddling the hemisphere boundary puts the points of the half facing each radar on
-    // that radar, with no projection tricks and no folding. The count tracks the apparent area,
-    // so a close body is finely sampled and a distant one is a single point.
+    // that radar, with no projection tricks and no folding. The count follows the apparent area,
+    // so a close body is finely sampled; the pixel gate below decides when it is a cloud at all.
     const float angular_radius = asinf(std::min(1.0f, body_radius / distance));
     const float apparent_radius = sinf(angular_radius);
-    int point_count = static_cast<int>(3000.0f * apparent_radius * apparent_radius);
-    if (point_count > 3000) {
-        point_count = 3000;
-    }
+    const int point_count = CloudPointCount(apparent_radius);
 
     const bool owns = (negate_z ? -position.z : position.z) >= 0.0f;
     const Vector head = radarView.Scale(Vector(-center.x, center.y, 0.0f));
@@ -407,14 +414,11 @@ void SphereDisplay::DrawStructure(const Sensor &sensor,
     }
     const Vector center = position / distance;
 
-    // The same apparent-area rule a body gets: too small to resolve is a single point rather
-    // than a handful of stray dots.
+    // The same apparent-area rule a body gets, and the same pixel gate: too small to resolve is a
+    // single point rather than a handful of stray dots.
     const float angular_radius = asinf(std::min(1.0f, radius / distance));
     const float apparent_radius = sinf(angular_radius);
-    int point_count = static_cast<int>(3000.0f * apparent_radius * apparent_radius);
-    if (point_count > 3000) {
-        point_count = 3000;
-    }
+    const int point_count = CloudPointCount(apparent_radius);
 
     const bool owns = (negate_z ? -position.z : position.z) >= 0.0f;
     const Vector head = radarView.Scale(Vector(-center.x, center.y, 0.0f));
