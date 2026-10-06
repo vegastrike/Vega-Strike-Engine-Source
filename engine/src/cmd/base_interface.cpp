@@ -412,7 +412,9 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
                         24),
                 true);
 
-        (un)->DrawNow(final, FLT_MAX);
+        // The ship in the hangar is drawn without its shield: the bubble is invisible in flight
+        // (additive blend, no env map) but the light this creates for the hangar picks it out.
+        (un)->DrawNow(final, FLT_MAX, false);
         GFXDeleteLight(light);
         GFXDisable(DEPTHTEST);
         GFXDisable(DEPTHWRITE);
