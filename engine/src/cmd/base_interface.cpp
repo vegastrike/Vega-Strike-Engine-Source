@@ -1652,12 +1652,16 @@ void BaseInterface::Draw() {
         othtext.setOffset(static_cast<float>(lb_ox), static_cast<float>(lb_oy));
     }
 
-    float x, y;
     glViewport(0, 0, native_resolution_x, native_resolution_y);
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
 
-    curtext.GetCharSize(x, y);
-    curtext.SetPos(-.99, -1 + (y * 1.5));
+    // The plane's char size is only set once, when the base is created, and nothing recomputes it
+    // in the ImGui path -- so reading it here gives a stale value and the text lands well up the
+    // screen. Work the line height out from the font the text is drawn at instead, and sit the
+    // mirrored label one and a half lines above the bottom of the base window.
+    const float base_height = std::max(1.0f, base_max_h);
+    const float line_height = 1.5f * configuration().graphics.font_point_flt / (0.5f * base_height);
+    curtext.SetPos(-.99, -1 + line_height);
 
     if (curtext.GetText().find("XXX") != 0) {
         GFXColor tmpbg(curtext.background_color);
