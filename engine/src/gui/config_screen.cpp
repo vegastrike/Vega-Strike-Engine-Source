@@ -474,7 +474,11 @@ void draw_display_frame() {
     float dpy_w = avail_w * 0.72f;
     float side_w = avail_w - dpy_w;
 
-    ImGui::BeginChild("dpyframe", ImVec2(dpy_w, 8 * btn_h), ImGuiChildFlags_Borders);
+    // The left frame carries more rows than a fixed eight-button height fits, so let it measure
+    // itself: a nested scrollbar to reach a setting is worse than a taller frame. The window is
+    // the full screen, so there is room for it.
+    ImGui::BeginChild("dpyframe", ImVec2(dpy_w, 0.0f),
+            ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
     // Monitor selector.
     if (ImGui::Button("Monitor")) ImGui::OpenPopup("##pick_mon");
     ImGui::SameLine(); ImGui::TextUnformatted(monitor_text.c_str());
@@ -560,7 +564,8 @@ void draw_display_frame() {
         dirty = true;
     // Docking. The mode picks the rule; the docking range is that rule's distance, and zones mode
     // has none -- you dock by putting your port on the station's. A planet keeps the simple rule
-    // either way, so its distance is always live.
+    // either way, so its distance is always live. The two distances get a row each: side by side
+    // the field and the next label crowd each other.
     ImGui::SeparatorText("Docking");
     if (ImGui::Button("Mode")) ImGui::OpenPopup("##pick_dockmode");
     ImGui::SameLine(); ImGui::TextUnformatted(dock_mode_opts[sel_dock_mode]);
@@ -569,14 +574,14 @@ void draw_display_frame() {
             if (ImGui::MenuItem(dock_mode_opts[i])) { sel_dock_mode = i; dirty = true; }
         ImGui::EndPopup();
     }
-    ImGui::SameLine(); ImGui::Text("Docking range"); ImGui::SameLine();
-    ImGui::SetNextItemWidth(70);
+    ImGui::Text("Docking range"); ImGui::SameLine();
+    ImGui::SetNextItemWidth(90);
     ImGui::BeginDisabled(sel_dock_mode == 1);
     if (ImGui::InputText("##dockrange", dock_range_buf, sizeof(dock_range_buf), ImGuiInputTextFlags_CharsDecimal))
         dirty = true;
     ImGui::EndDisabled();
-    ImGui::SameLine(); ImGui::Text("Planet distance (x radius)"); ImGui::SameLine();
-    ImGui::SetNextItemWidth(60);
+    ImGui::Text("Planet distance (x radius)"); ImGui::SameLine();
+    ImGui::SetNextItemWidth(90);
     if (ImGui::InputText("##planetdock", planet_dock_buf, sizeof(planet_dock_buf), ImGuiInputTextFlags_CharsDecimal))
         dirty = true;
     // Vsync (monitor sync).
