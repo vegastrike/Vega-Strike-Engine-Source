@@ -1819,6 +1819,13 @@ static const ConfigAccessor kConfigAccessors[] = {
     {"input.mouse.enabled",              [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.enabled;},                 nullptr},
     {"input.mouse.inverse_x",            [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.inverse_x;},               nullptr},
     {"input.mouse.inverse_y",            [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.inverse_y;},               nullptr},
+    // ---- dock ----
+    // Set by the docking group's apply function, so no preset setter. They must be in this table
+    // all the same: write_out_dirty() reads a dirty path's value through it and drops the path when
+    // it comes back null, which is why a mode that is not listed here never reaches the overlay.
+    {"dock.mode",                       [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.dock.mode);},        nullptr},
+    {"dock.simple_dock_range",          [](const vega_config::Configuration&c)->boost::json::value{return c.dock.simple_dock_range_dbl;},             nullptr},
+    {"dock.dock_planet_radius_percent", [](const vega_config::Configuration&c)->boost::json::value{return c.dock.dock_planet_radius_percent_dbl;},   nullptr},
     // ---- splash / test ----
     {"splash.loading_sprite",            [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.splash.loading_sprite);},          [](vega_config::Configuration&c,const std::string&v){c.splash.loading_sprite=v;}},
     {"test.autodocker",                  [](const vega_config::Configuration&c)->boost::json::value{return c.test.autodocker;},                [](vega_config::Configuration&c,const std::string&v){c.test.autodocker=(v=="true"||v=="1");}},
