@@ -1422,6 +1422,9 @@ namespace vega_config {
         bool simple_dock = true;
         double simple_dock_range_dbl = 5000.0;
         float simple_dock_range_flt = 5000.0;
+        // "simple" or "zones". Empty means the setting is not in the config, and the older
+        // simple_dock boolean decides instead, so an overlay that only sets that still works.
+        std::string mode = "";
 
     } dock;
 

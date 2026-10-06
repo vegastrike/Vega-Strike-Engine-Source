@@ -34,6 +34,20 @@
 
 #include <boost/format.hpp>
 
+// Which docking rule applies: the simple "dock when close" test, or the docking zones you fly the
+// ship into. An empty mode means the setting is not in the config yet, in which case the older
+// simple_dock boolean decides, so an overlay that only sets that still works.
+bool DockIsSimple() {
+    const std::string &mode = configuration().dock.mode;
+    if (mode == "zones") {
+        return false;
+    }
+    if (mode == "simple") {
+        return true;
+    }
+    return configuration().dock.simple_dock;
+}
+
 bool inside_usable_dock(const DockingPorts &dock, const QVector &pos, const float radius, const bool ignore_occupancy) {
     if (!ignore_occupancy && dock.IsOccupied()) {
         return false;
@@ -83,22 +97,16 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
 
     double range = DistanceTwoTargets(dock, ship);
 
-    // Planet Code
+    // A planet, and anything when simple docking is on, is dockable within its clearance. A planet
+    // is always in this branch: zones mode is about flying into a station's docking port, and a
+    // planet has no such thing to fly into.
     if (dock->getUnitType() == Vega_UnitType::planet) {
         range -= dock->rSize() * (configuration().dock.dock_planet_radius_percent_dbl - 1.0);
-        if (range < 0) {
-            return 0;
-        } else {
-            return -1;
-        }
+        return range < 0 ? 0 : -1;
     }
 
-    if (configuration().dock.simple_dock) {
-        if (range < configuration().dock.simple_dock_range_dbl) {
-            return 0;
-        } else {
-            return -1;
-        }
+    if (DockIsSimple()) {
+        return range < configuration().dock.simple_dock_range_dbl ? 0 : -1;
     }
 
     if (range > kDefinitelyTooFar) {
@@ -166,7 +174,7 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
         } else if (range < target->rSize()) {
             return std::string("Docking: ") + PrettyDistanceString(range);
         }
-    } else if (configuration().dock.simple_dock && !target->pImage->dockingports.empty() &&
+    } else if (DockIsSimple() && !target->pImage->dockingports.empty() &&
         range < configuration().dock.count_to_dock_range_dbl) {
         if (range <= configuration().dock.simple_dock_range_dbl) {
             return std::string("Docking: Ready");

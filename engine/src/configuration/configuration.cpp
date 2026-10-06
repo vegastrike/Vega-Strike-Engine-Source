@@ -3903,6 +3903,11 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 dock.simple_dock = boost::json::value_to<bool>(*simple_dock_value_ptr);
             }
 
+            const boost::json::value * mode_value_ptr = dock_object.if_contains("mode");
+            if (mode_value_ptr != nullptr) {
+                dock.mode = boost::json::value_to<std::string>(*mode_value_ptr);
+            }
+
             const boost::json::value * simple_dock_range_value_ptr = dock_object.if_contains("simple_dock_range");
             if (simple_dock_range_value_ptr != nullptr) {
                 dock.simple_dock_range_dbl = boost::json::value_to<double>(*simple_dock_range_value_ptr);
