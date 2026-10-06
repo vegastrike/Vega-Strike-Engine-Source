@@ -323,6 +323,9 @@ void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base) {
     GFXAlphaTest(GREATER, AlphaTestingCutoff);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXEnable(TEXTURE0);
+    // The colour is global, and the location-marker block and the text backgrounds both leave
+    // their own alpha in it. A base sprite is unmodulated, so set it here rather than inherit it.
+    GFXColor4f(1, 1, 1, 1);
     spr.Draw();
     GFXAlphaTest(ALWAYS, 0);
 
@@ -495,6 +498,9 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
                         GFXEnable(TEXTURE0);
                         GFXColor4f(1, 1, 1, links[i]->alpha);
                         spr_marker->Draw();
+                        // The marker fades with the cursor distance; nothing else on the base
+                        // screen is meant to.
+                        GFXColor4f(1, 1, 1, 1);
                     }                     //if spritefile
                     if (draw_text) {
                         GFXDisable(TEXTURE0);
@@ -669,6 +675,7 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
                 posx, posy, 0.0f,
         };
         GFXDraw(GFXQUAD, verts, 4);
+        GFXColor4f(1, 1, 1, 1);
     } else {
         text.Draw(text.GetText(), 0, true, false, automatte);
     }
