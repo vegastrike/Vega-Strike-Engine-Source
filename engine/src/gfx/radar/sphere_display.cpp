@@ -52,9 +52,11 @@ bool IsBody(const Radar::Track::Type::Value type) {
             || type == Radar::Track::Type::Star;
 }
 
-bool IsStructure(const Radar::Track::Type::Value type) {
-    return type == Radar::Track::Type::Base
-            || type == Radar::Track::Type::CapitalShip;
+// Anything with geometry is drawn as a cloud of its own mesh vertices. Celestial bodies are the
+// exception: they are spheres, so sampling the surface is cheaper than their mesh and reads better.
+bool HasGeometry(const Radar::Track &track) {
+    const Unit *unit = track.GetUnit();
+    return (unit != nullptr) && (unit->nummesh() > 0);
 }
 
 // An object is worth a cloud of dots once it reads as more than a dot on the radar: about a degree
@@ -81,11 +83,11 @@ bool CloudWorthDrawing(const float angular_radius) {
 
 const int kMeshSampleBudget = 1024;
 
-// A structure is drawn as a cloud of its own mesh vertices, and reading those means mapping the
-// vertex list -- not something to do every frame, and not something to redo for a mesh that two
-// tracks share. So each mesh's sample is taken once and keyed by the vertex list it came from;
-// the mesh and the vertex count are kept alongside it, so a reload or a detail change re-samples
-// instead of serving the old geometry.
+// A track with geometry is drawn as a cloud of its own mesh vertices, and reading those means
+// mapping the vertex list -- not something to do every frame, and not something to redo for a mesh
+// that two tracks share. So each mesh's sample is taken once and keyed by the vertex list it came
+// from; the mesh and the vertex count are kept alongside it, so a reload or a detail change
+// re-samples instead of serving the old geometry.
 struct MeshSample {
     const void *mesh = nullptr;
     int vertices = 0;
@@ -210,15 +212,10 @@ void SphereDisplay::Draw(const Sensor &sensor,
     for (Sensor::TrackCollection::const_iterator it = tracks.begin(); it != tracks.end(); ++it) {
         if (IsBody(it->GetType())) {
             // A body's disc can straddle the hemisphere boundary, so draw the half visible on
-            // each radar rather than assigning the whole body to one of them.
+            // each radar rather than assigning the whole body to one of them. A body is its
+            // cloud; it has no blip.
             DrawBody(sensor, rightRadar, *it, true);
             DrawBody(sensor, leftRadar, *it, false);
-            continue;
-        }
-        if (IsStructure(it->GetType())) {
-            // A structure is not a sphere, so it is the shape of its own meshes.
-            DrawStructure(sensor, rightRadar, *it, true);
-            DrawStructure(sensor, leftRadar, *it, false);
             continue;
         }
         const bool draw_both = configuration().graphics.hud.draw_blips_on_both_radar;
@@ -229,6 +226,12 @@ void SphereDisplay::Draw(const Sensor &sensor,
         if (it->GetPosition().z >= 0 || draw_both) {
             // Draw tracks in front of the ship
             DrawTrack(sensor, leftRadar, *it);
+        }
+        if (HasGeometry(*it)) {
+            // Everything else keeps the blip that carries its colour and its state -- blink,
+            // fade, jitter -- and gains the shape of its own meshes around it.
+            DrawMeshCloud(sensor, rightRadar, *it, true);
+            DrawMeshCloud(sensor, leftRadar, *it, false);
         }
     }
 
@@ -389,7 +392,7 @@ void SphereDisplay::DrawBody(const Sensor &sensor,
     }
 }
 
-void SphereDisplay::DrawStructure(const Sensor &sensor,
+void SphereDisplay::DrawMeshCloud(const Sensor &sensor,
         const ViewArea &radarView,
         const Track &track,
         bool negate_z) {
@@ -407,68 +410,53 @@ void SphereDisplay::DrawStructure(const Sensor &sensor,
     }
     const Vector center = position / distance;
 
-    // The same apparent-area rule a body gets, and the same pixel gate: too small to resolve is a
-    // single point rather than a handful of stray dots.
+    // The same apparent-area rule a body gets, and the same angle gate: an object too small to
+    // resolve is left to its blip rather than covered in stray dots.
     const float angular_radius = asinf(std::min(1.0f, radius / distance));
     const float apparent_radius = sinf(angular_radius);
     const int point_count = CloudPointCount(apparent_radius);
 
-    const bool owns = (negate_z ? -position.z : position.z) >= 0.0f;
     const Vector head = radarView.Scale(Vector(-center.x, center.y, 0.0f));
     const float body_z = std::max(head.z, 0.02f);
     const GFXColor color = sensor.GetColor(track);
 
-    int drawn = 0;
-    if (CloudWorthDrawing(angular_radius)) {
-        // The vertices are in the unit's own space. Rotate each one into the ship's frame using
-        // the unit's current orientation -- not the draw-time cumulative matrix, which is only
-        // composed for units that are being drawn -- then add the track's own position.
-        Matrix unit_mat;
-        unit->curr_physical_state.to_matrix(unit_mat);
+    if (!CloudWorthDrawing(angular_radius)) {
+        return;
+    }
 
-        const unsigned int meshes = unit->nummesh(); // the last meshdata entry is the shield
-        const int per_mesh = std::max(1, point_count / static_cast<int>(std::max(1u, meshes)));
-        for (unsigned int m = 0; m < meshes && drawn < point_count; ++m) {
-            const std::vector<Vector> &points = MeshPoints(unit->meshdata[m]);
-            if (points.empty()) {
+    // The vertices are in the unit's own space. Rotate each one into the ship's frame using the
+    // unit's current orientation -- not the draw-time cumulative matrix, which is only composed for
+    // units that are being drawn -- then add the track's own position.
+    Matrix unit_mat;
+    unit->curr_physical_state.to_matrix(unit_mat);
+
+    const unsigned int meshes = unit->nummesh(); // the last meshdata entry is the shield
+    const int per_mesh = std::max(1, point_count / static_cast<int>(std::max(1u, meshes)));
+    int drawn = 0;
+    for (unsigned int m = 0; m < meshes && drawn < point_count; ++m) {
+        const std::vector<Vector> &points = MeshPoints(unit->meshdata[m]);
+        if (points.empty()) {
+            continue;
+        }
+        const int step = std::max(1, static_cast<int>(points.size()) / per_mesh);
+        for (size_t p = 0; p < points.size() && drawn < point_count; p += step) {
+            const Vector &local = points[p];
+            const QVector offset = Transform(unit_mat, QVector(local.i, local.j, local.k)) - unit_mat.p;
+            const Vector relative = position + player->ToLocalCoordinates(offset.Cast());
+            const float length = relative.Magnitude();
+            if (length < 0.0001f) {
                 continue;
             }
-            const int step = std::max(1, static_cast<int>(points.size()) / per_mesh);
-            for (size_t p = 0; p < points.size() && drawn < point_count; p += step) {
-                const Vector &local = points[p];
-                const QVector offset = Transform(unit_mat, QVector(local.i, local.j, local.k)) - unit_mat.p;
-                const Vector relative = position + player->ToLocalCoordinates(offset.Cast());
-                const float length = relative.Magnitude();
-                if (length < 0.0001f) {
-                    continue;
-                }
-                const Vector direction = relative / length;
-                const float z = negate_z ? -direction.z : direction.z;
-                if (z < 0.0f) {
-                    continue; // the other radar draws this half
-                }
-                Vector point = radarView.Scale(Vector(-direction.x, direction.y, 0.0f));
-                point.z = body_z;
-                impl->cloud.insert(GFXColorVertex(point, color));
-                ++drawn;
+            const Vector direction = relative / length;
+            const float z = negate_z ? -direction.z : direction.z;
+            if (z < 0.0f) {
+                continue; // the other radar draws this half
             }
-        }
-    }
-
-    // Nothing sampled -- the mesh is not loaded at this range -- or too small to resolve: the
-    // structure is the single point its blip would have been.
-    if (drawn == 0) {
-        const float z = negate_z ? -center.z : center.z;
-        if (z >= 0.0f) {
-            Vector point = radarView.Scale(Vector(-center.x, center.y, 0.0f));
+            Vector point = radarView.Scale(Vector(-direction.x, direction.y, 0.0f));
             point.z = body_z;
             impl->cloud.insert(GFXColorVertex(point, color));
+            ++drawn;
         }
-    }
-
-    // The tracking cross belongs to the radar whose hemisphere holds the structure's centre.
-    if (owns && sensor.IsTracking(track)) {
-        DrawTargetMarker(head, color, TRACK_SIZE);
     }
 }
 
