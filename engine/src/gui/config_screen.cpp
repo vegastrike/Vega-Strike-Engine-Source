@@ -474,9 +474,7 @@ void draw_display_frame() {
     float dpy_w = avail_w * 0.72f;
     float side_w = avail_w - dpy_w;
 
-    // The left frame carries more rows than a fixed eight-button height fits, so let it measure
-    // itself: a nested scrollbar to reach a setting is worse than a taller frame. The window is
-    // the full screen, so there is room for it.
+    // Let the frame measure itself: it carries more rows than a fixed eight-button height fits.
     ImGui::BeginChild("dpyframe", ImVec2(dpy_w, 0.0f),
             ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
     // Monitor selector.
@@ -564,8 +562,7 @@ void draw_display_frame() {
         dirty = true;
     // Docking. The mode picks the rule; the docking range is that rule's distance, and zones mode
     // has none -- you dock by putting your port on the station's. A planet keeps the simple rule
-    // either way, so its distance is always live. The two distances get a row each: side by side
-    // the field and the next label crowd each other.
+    // either way, so its distance is always live.
     ImGui::SeparatorText("Docking");
     if (ImGui::Button("Mode")) ImGui::OpenPopup("##pick_dockmode");
     ImGui::SameLine(); ImGui::TextUnformatted(dock_mode_opts[sel_dock_mode]);
@@ -1820,9 +1817,8 @@ static const ConfigAccessor kConfigAccessors[] = {
     {"input.mouse.inverse_x",            [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.inverse_x;},               nullptr},
     {"input.mouse.inverse_y",            [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.inverse_y;},               nullptr},
     // ---- dock ----
-    // Set by the docking group's apply function, so no preset setter. They must be in this table
-    // all the same: write_out_dirty() reads a dirty path's value through it and drops the path when
-    // it comes back null, which is why a mode that is not listed here never reaches the overlay.
+    // Set by the docking group's apply function, so no preset setter. Every path a setting marks
+    // dirty also has to be readable here, or write_out_dirty() drops it.
     {"dock.mode",                       [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.dock.mode);},        nullptr},
     {"dock.simple_dock_range",          [](const vega_config::Configuration&c)->boost::json::value{return c.dock.simple_dock_range_dbl;},             nullptr},
     {"dock.dock_planet_radius_percent", [](const vega_config::Configuration&c)->boost::json::value{return c.dock.dock_planet_radius_percent_dbl;},   nullptr},

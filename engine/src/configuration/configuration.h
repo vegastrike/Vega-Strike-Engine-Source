@@ -2495,8 +2495,6 @@ namespace vega_config {
         double percent_missile_match_target_velocity_dbl = 1.0;
         float percent_missile_match_target_velocity_flt = 1.0;
         bool persistent_on_load = true;
-        double planet_dock_min_port_size_dbl = 300.0;
-        float planet_dock_min_port_size_flt = 300.0;
         double planet_ejection_stophack_dbl = 100000.0;
         float planet_ejection_stophack_flt = 100000.0;
         bool planets_always_neutral = true;

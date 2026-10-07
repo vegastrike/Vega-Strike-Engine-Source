@@ -7751,12 +7751,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.persistent_on_load = boost::json::value_to<bool>(*persistent_on_load_value_ptr);
             }
 
-            const boost::json::value * planet_dock_min_port_size_value_ptr = physics_object.if_contains("planet_dock_min_port_size");
-            if (planet_dock_min_port_size_value_ptr != nullptr) {
-                physics.planet_dock_min_port_size_dbl = boost::json::value_to<double>(*planet_dock_min_port_size_value_ptr);
-                physics.planet_dock_min_port_size_flt = boost::json::value_to<float>(*planet_dock_min_port_size_value_ptr);
-            }
-
             const boost::json::value * planet_ejection_stophack_value_ptr = physics_object.if_contains("planet_ejection_stophack");
             if (planet_ejection_stophack_value_ptr != nullptr) {
                 physics.planet_ejection_stophack_dbl = boost::json::value_to<double>(*planet_ejection_stophack_value_ptr);

@@ -209,10 +209,8 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
     } else if (CanDock(target, unit, true) >= 0) {
         return std::string("Docking: Auto Ready");
     } else if (!target->pImage->dockingports.empty() && range < configuration().dock.count_to_dock_range_dbl) {
-        // Docking zones: in range of the station, but not in a port yet. Without this the player
-        // gets no readout at all until the moment it says "Ready", which is no help when the task
-        // is to find the port. The distance is to the nearest port rather than the centre, because
-        // the centre of a station is not where you are trying to put the ship.
+        // Docking zones: in range of the station but not in a port yet. The distance is to the
+        // nearest port rather than the station's centre, which is not where the ship has to go.
         const double port_range = NearestPortDistance(unit, target);
         if (port_range >= 0.0) {
             return std::string("Docking: ") + PrettyDistanceString(port_range);
