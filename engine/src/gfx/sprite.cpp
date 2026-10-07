@@ -134,7 +134,19 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
         char texturea[127] = {0};
         f.Fscanf("%126s %126s", texture, texturea);
         f.Fscanf("%f %f", &widtho2, &heighto2);
-        f.Fscanf("%f %f", &xcenter, &ycenter);
+        // The third line is the sprite's own centre for a still sprite, but for an animated
+        // one it is the animation header - frames, time per frame, options - which belongs to
+        // AnimatedTexture. Reading it here made a number like 1000 the sprite's centre, and with
+        // graphics.offset_sprites_by_pos on that centre is added to the position the base places
+        // the sprite at, so the sprite was drawn a thousand units above the screen. Leave the
+        // line for the animation, and the centre at its default of 0.
+        const int name_len = strlen(texture);
+        const bool animated_name = name_len > 4 && texture[name_len - 1] == 'i'
+                && texture[name_len - 2] == 'n' && texture[name_len - 3] == 'a'
+                && texture[name_len - 4] == '.';
+        if (!animated_name) {
+            f.Fscanf("%f %f", &xcenter, &ycenter);
+        }
         texture[sizeof(texture) - sizeof(*texture) - 1] = 0;
         texturea[sizeof(texturea) - sizeof(*texturea) - 1] = 0;
 
