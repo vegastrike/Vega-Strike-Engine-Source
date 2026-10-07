@@ -560,9 +560,9 @@ void draw_display_frame() {
     ImGui::SetNextItemWidth(60);
     if (ImGui::InputText("##hudfov", hud_fov_buf, sizeof(hud_fov_buf), ImGuiInputTextFlags_CharsDecimal))
         dirty = true;
-    // Docking. The mode picks the rule; the docking range is that rule's distance, and zones mode
-    // has none -- you dock by putting your port on the station's. A planet keeps the simple rule
-    // either way, so its distance is always live.
+    // Docking. The mode picks how you dock -- within the range, or by putting your port on the
+    // station's -- and does not change the distance: that is the range for every body, with a
+    // planet's own zone under it as a floor, and it is also where SPEC and the autopilot stop.
     ImGui::SeparatorText("Docking");
     if (ImGui::Button("Mode")) ImGui::OpenPopup("##pick_dockmode");
     ImGui::SameLine(); ImGui::TextUnformatted(dock_mode_opts[sel_dock_mode]);
@@ -573,14 +573,14 @@ void draw_display_frame() {
     }
     ImGui::Text("Docking range"); ImGui::SameLine();
     ImGui::SetNextItemWidth(90);
-    ImGui::BeginDisabled(sel_dock_mode == 1);
     if (ImGui::InputText("##dockrange", dock_range_buf, sizeof(dock_range_buf), ImGuiInputTextFlags_CharsDecimal))
         dirty = true;
-    ImGui::EndDisabled();
-    ImGui::Text("Planet distance (x radius)"); ImGui::SameLine();
+    ImGui::TextDisabled("Where docking, SPEC and the autopilot all stop, for every body.");
+    ImGui::Text("Planet zone (x radius)"); ImGui::SameLine();
     ImGui::SetNextItemWidth(90);
     if (ImGui::InputText("##planetdock", planet_dock_buf, sizeof(planet_dock_buf), ImGuiInputTextFlags_CharsDecimal))
         dirty = true;
+    ImGui::TextDisabled("A planet's own zone: its radius times this, if that is further out.");
     // Vsync (monitor sync).
     if (ImGui::Button("Vsync")) ImGui::OpenPopup("##pick_vsync");
     ImGui::SameLine(); ImGui::TextUnformatted(vsync_opts[sel_vsync]);

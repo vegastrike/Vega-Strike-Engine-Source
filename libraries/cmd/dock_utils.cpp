@@ -33,6 +33,7 @@
 #include "physics.h"
 
 #include <boost/format.hpp>
+#include <algorithm>
 
 // Which docking rule applies: the simple "dock when close" test, or the docking zones you fly the
 // ship into. An empty mode means the setting is not in the config yet, in which case the older
@@ -55,8 +56,23 @@ bool inside_usable_dock(const DockingPorts &dock, const QVector &pos, const floa
     return IsShorterThan(pos - dock.GetPosition(), static_cast<double>(radius + dock.GetRadius()));
 }
 
+namespace {
+
+// A unit's physical transform, rather than the one the renderer last composed for it:
+// cumulative_transformation starts as the identity and is only written while the unit is drawn, so a
+// body the player has not looked at yet would measure at the origin.
+Matrix PhysicsTransform(const Unit *unit) {
+    Matrix m;
+    unit->curr_physical_state.to_matrix(m);
+    return m;
+}
+
+} // anonymous namespace
+
 double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
-    double distance = (first_unit->Position() - second_unit->Position()).Magnitude();
+    // LocalPosition, not Position: the latter is the renderer's cumulative transform, which is only
+    // written while the unit is being drawn and starts as the identity.
+    double distance = (first_unit->LocalPosition() - second_unit->LocalPosition()).Magnitude();
 
     if(first_unit->getUnitType() == Vega_UnitType::planet) {
         distance -= first_unit->rSize();
@@ -67,6 +83,20 @@ double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
     }
 
     return std::max(0.0, distance);
+}
+
+/**
+ * @brief The distance at which a body counts as dockable
+ * @param dock - the body being docked with
+ * @return the distance, measured from a planet's surface or a ship's centre
+ */
+double DockingDistance(const Unit *dock) {
+    const double range = configuration().dock.simple_dock_range_dbl;
+    if (dock->getUnitType() == Vega_UnitType::planet) {
+        const double zone = dock->rSize() * (configuration().dock.dock_planet_radius_percent_dbl - 1.0);
+        return std::max(range, zone);
+    }
+    return range;
 }
 
 /**
@@ -97,16 +127,11 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
 
     double range = DistanceTwoTargets(dock, ship);
 
-    // A planet, and anything when simple docking is on, is dockable within its clearance. A planet
-    // is always in this branch: zones mode is about flying into a station's docking port, and a
-    // planet has no such thing to fly into.
-    if (dock->getUnitType() == Vega_UnitType::planet) {
-        range -= dock->rSize() * (configuration().dock.dock_planet_radius_percent_dbl - 1.0);
-        return range < 0 ? 0 : -1;
-    }
-
-    if (DockIsSimple()) {
-        return range < configuration().dock.simple_dock_range_dbl ? 0 : -1;
+    // Dockable when inside the body's docking distance. A planet is always in this branch: zones
+    // mode is about flying into a station's docking port, and a planet has no such thing to fly
+    // into, so its own zone is the whole test either way.
+    if (dock->getUnitType() == Vega_UnitType::planet || DockIsSimple()) {
+        return range < DockingDistance(dock) ? 0 : -1;
     }
 
     if (range > kDefinitelyTooFar) {
@@ -124,8 +149,8 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
         if (!ship->pImage->dockingports.empty()) {
             for (unsigned int j = 0; j < ship->pImage->dockingports.size(); ++j) {
                 if (inside_usable_dock(dock->pImage->dockingports[i],
-                        InvTransform(dock->GetTransformation(),
-                                Transform(ship->GetTransformation(),
+                        InvTransform(PhysicsTransform(dock),
+                                Transform(PhysicsTransform(ship),
                                         ship->pImage->dockingports[j].GetPosition().Cast())),
                         ship->pImage->dockingports[j].GetRadius(), ignore_occupancy)) {
                     // We cannot dock if we are already docked
@@ -136,7 +161,7 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
             }
         }
         if (inside_usable_dock(dock->pImage->dockingports[i],
-                InvTransform(dock->GetTransformation(), ship->Position()), ship->rSize(), ignore_occupancy)) {
+                InvTransform(PhysicsTransform(dock), ship->LocalPosition()), ship->rSize(), ignore_occupancy)) {
             return i;
         }
     }
@@ -153,11 +178,11 @@ double NearestPortDistance(const Unit *unit, const Unit *dock) {
     if (dock->pImage == nullptr || dock->pImage->dockingports.empty()) {
         return -1.0;
     }
-    const Matrix &dock_tf = dock->GetTransformation();
+    const Matrix dock_tf = PhysicsTransform(dock);
     double nearest = -1.0;
     for (const DockingPorts &port : dock->pImage->dockingports) {
         const QVector world = Transform(dock_tf, port.GetPosition().Cast());
-        const double distance = (world - unit->Position()).Magnitude();
+        const double distance = (world - unit->LocalPosition()).Magnitude();
         if (nearest < 0.0 || distance < nearest) {
             nearest = distance;
         }
@@ -191,7 +216,8 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
             unit->hull.Destroy();
         }
 
-        range -= target->rSize() * (configuration().dock.dock_planet_radius_percent_dbl - 1.0);
+        const double docking_distance = DockingDistance(target);
+        range -= docking_distance;
         if (range < 0) {
             return std::string("Docking: Ready");
         } else if (range < target->rSize()) {
@@ -199,10 +225,10 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
         }
     } else if (DockIsSimple() && !target->pImage->dockingports.empty() &&
         range < configuration().dock.count_to_dock_range_dbl) {
-        if (range <= configuration().dock.simple_dock_range_dbl) {
+        if (range <= DockingDistance(target)) {
             return std::string("Docking: Ready");
         } else {
-            return std::string("Docking: ") + PrettyDistanceString(range - configuration().dock.simple_dock_range_dbl);
+            return std::string("Docking: ") + PrettyDistanceString(range - DockingDistance(target));
         }
     } else if (CanDock(target, unit, false) >= 0) {
         return std::string("Docking: Ready");
