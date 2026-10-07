@@ -134,21 +134,44 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
         char texturea[127] = {0};
         f.Fscanf("%126s %126s", texture, texturea);
         f.Fscanf("%f %f", &widtho2, &heighto2);
-        // The third line is the sprite's own centre for a still sprite, but for an animated
-        // one it is the animation header - frames, time per frame, options - which belongs to
-        // AnimatedTexture. Reading it here made a number like 1000 the sprite's centre, and with
-        // graphics.offset_sprites_by_pos on that centre is added to the position the base places
-        // the sprite at, so the sprite was drawn a thousand units above the screen. Leave the
-        // line for the animation, and the centre at its default of 0.
-        const int name_len = strlen(texture);
+        texture[sizeof(texture) - sizeof(*texture) - 1] = 0;
+        texturea[sizeof(texturea) - sizeof(*texturea) - 1] = 0;
+        const int name_len = static_cast<int>(strlen(texture));
         const bool animated_name = name_len > 4 && texture[name_len - 1] == 'i'
                 && texture[name_len - 2] == 'n' && texture[name_len - 3] == 'a'
                 && texture[name_len - 4] == '.';
         if (!animated_name) {
+            // A still sprite's third line is its own centre.
             f.Fscanf("%f %f", &xcenter, &ycenter);
+        } else {
+            // An animated sprite's third line is either the sprite's own centre - the stock
+            // cockpit sprites carry one - or the animation header, for files written without
+            // it, as the main menu's button sprites are. Reading a header as the centre gave a
+            // centre like (1, 1000), and graphics.offset_sprites_by_pos adds that centre to the
+            // position the base places the sprite at, so the sprite was drawn a thousand units
+            // above the screen. Tell them apart by what follows: after a centre comes the header,
+            // which is numbers; after a header comes a frame, which is a filename.
+            char third[512] = {0};
+            char fourth[512] = {0};
+            f.ReadLine(third, sizeof(third) - 1);
+            f.ReadLine(fourth, sizeof(fourth) - 1);
+            float cx = 0, cy = 0, first = 0, second = 0;
+            const bool third_is_two_numbers = sscanf(third, "%f %f", &cx, &cy) == 2;
+            const bool fourth_is_two_numbers = sscanf(fourth, "%f %f", &first, &second) == 2;
+            const bool header_is_line_three = third_is_two_numbers && !fourth_is_two_numbers;
+            if (!header_is_line_three) {
+                xcenter = cx;
+                ycenter = cy;
+            }
+            // Hand AnimatedTexture the file from the right line: line three for a header, line
+            // four when line three was the centre.
+            f.Begin();
+            const int lines_to_skip = header_is_line_three ? 2 : 3;
+            char skipped[512];
+            for (int i = 0; i < lines_to_skip; ++i) {
+                f.ReadLine(skipped, sizeof(skipped) - 1);
+            }
         }
-        texture[sizeof(texture) - sizeof(*texture) - 1] = 0;
-        texturea[sizeof(texturea) - sizeof(*texturea) - 1] = 0;
 
         widtho2 /= 2;
         heighto2 /= -2;
