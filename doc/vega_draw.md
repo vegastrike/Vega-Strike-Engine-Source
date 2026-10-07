@@ -233,6 +233,16 @@ struct TextureRegion { TextureId texture = 0; float u0, v0, u1, v1; };
 class TexturePanel : public Container;         // texture behind children; tint + fallback colour
 ```
 
+`TextureId` is whatever the backend calls a texture — for the ImGui adapter, an
+`ImTextureID` — and `0` means "no texture". `TextureRegion` names a rectangle
+inside one in normalised texture coordinates, so a single atlas can back many
+sprites. `TexturePanel` draws one behind its children: give it a rect and a
+`TextureRegion` and lay the children over it. With no texture (or `texture == 0`)
+it falls back to the panel's background colour, so a screen still lays out before
+its art exists.
+
+See §9 for a widget tree that uses these together.
+
 ---
 
 ## 6a. Scroller (`scroller.h`)
@@ -282,6 +292,16 @@ class Container : public Widget {           // owns children, routes events
     Widget* mouseCapture() const;                  // capture during a drag
 };
 ```
+
+`Container` is the generic base for anything that holds other widgets: it owns its
+children outright — one parent per widget — and routes input to them, topmost
+first, holding `mouseCapture()` on whatever was pressed until the button comes up.
+`addChild` therefore takes a `std::unique_ptr<Widget>` and `parent()` returns a
+non-owning `Widget*`; ownership is exclusive because it genuinely is, and it keeps
+a widget from being adopted into two trees or from keeping its parent alive.
+`Panel`, `TexturePanel`, `ListPicker`, `ScrollBar` and the rest are all
+`Container`s with a drawing job on top. The name is deliberately generic because
+the thing is — inside `namespace vega_draw` it reads as `vega_draw::Container`.
 
 **Widgets**
 
@@ -392,8 +412,13 @@ ImGui context) — they are verified in-engine.
 
 * **Single-line ellipsis** is implemented for text boxes (UTF-8 aware); the picker
   clips rather than ellipsising rows.
-* **Stroke weight** is carried in the run style and rendered as the bold offset
-  shadow; no real second face is loaded (single-weight atlas).
+* **Stroke weight** is carried in the run style as a continuous value (see §2) but
+  rendered as the bold offset shadow; no real second face is loaded yet, so a
+  weight between normal and bold has no effect of its own. The value is kept in
+  the data so a multi-weight atlas can use it without callers changing.
+* **Colour alpha** is per run and does reach the draw — `ToImU32` builds the colour
+  with all four channels. There is no widget-wide opacity, and nothing composites
+  against the 3D scene.
 * The adapter requires an active ImGui font; there is no headless drawing path.
 
 ---
