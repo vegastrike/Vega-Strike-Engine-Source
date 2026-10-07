@@ -27,6 +27,7 @@
 
 
 #include "cmd/jump_capable.h"
+#include "cmd/dock_utils.h"
 #include "cmd/ai/order.h"
 #include "cmd/unit_find.h"
 #include "src/universe.h"
@@ -181,10 +182,9 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 
     float totpercent = 1;
     if (totallength > 1) {
-        // The arrival point is the docking distance itself: docking, SPEC and the autopilot all end
-        // in the same place, so docking is available the moment the autopilot hands over. aptne is
-        // the no-enemies one, which stands off further when nothing is watching. percent / percentne
-        // turn them into the point along the path the ship flies to.
+        // The arrival is the docking distance itself, and aptne is the no-enemies one, which stands
+        // off further when nothing is watching. percent / percentne turn them into the point along
+        // the path the ship flies to.
         float apt = static_cast<float>(DockingDistance(target));
         float aptne = atd_no_enemies + static_cast<float>(DockingDistance(target));
         float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
