@@ -430,7 +430,7 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
             if (effectiverad > bigwarphack) {
                 effectiverad = bigwarphack;
             }
-            QVector dir = unit->Position() - planet->Position();
+            QVector dir = unit->LocalPosition() - planet->LocalPosition();
             double udist = dir.Magnitude();
             float sigdist = UnitUtil::getSignificantDistance(unit, planet);
             if (planet->isPlanet() && udist < (1 << 28)) {
