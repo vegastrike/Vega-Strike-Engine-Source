@@ -37,6 +37,8 @@
 
 namespace fs = boost::filesystem;
 
+#include "config_file_editor.h"
+
 namespace vs_settings_ng {
 
 namespace {
@@ -82,6 +84,14 @@ bool cfg_full_screen = true;
 // Mouse / Joystick dialog open flags.
 static bool mouse_dialog_open = false;
 static bool joy_dialog_open = false;
+
+// The JSON files the screen can edit directly: the rest of the config split. bindings.json has its
+// own dialog and config.json is what the screen itself edits, so these are engine.json and
+// theme.json.
+static vs_settings_ng::ConfigFileEditor engine_file_editor("engine.json", "Engine Config");
+static vs_settings_ng::ConfigFileEditor theme_file_editor("theme.json", "Color Config");
+static bool engine_dialog_open = false;
+static bool theme_dialog_open = false;
 
 // Forward declarations (defined below; used by draw_display_frame).
 static void load_mouse_staging();
@@ -634,7 +644,10 @@ void draw_display_frame() {
     // Right column: Flight Control + Input buttons + Rendered Crosshair, side by
     // side with the monitor/resolution/display controls (as vs-05).
     ImGui::SameLine();
-    ImGui::BeginChild("dpybtns", ImVec2(side_w, 8 * btn_h), ImGuiChildFlags_Borders);
+    // Let the right column measure itself too: the two file buttons fill its fixed eight-button
+    // height, and a scrollbar to reach a setting is worse than a taller frame.
+    ImGui::BeginChild("dpybtns", ImVec2(side_w, 0.0f),
+            ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
     if (ImGui::Button(("Flight Control: " + std::string(fc_names[flight_control])).c_str(), ImVec2(-1, 0)))
         ImGui::OpenPopup("##flight");
     if (ImGui::BeginPopup("##flight")) {
@@ -656,6 +669,8 @@ void draw_display_frame() {
     if (ImGui::Button("Joystick Settings", ImVec2(-1, 0))) { load_joystick_staging(); joy_dialog_open = true; }
     if (flight_control != FC_JOYSTICK) ImGui::EndDisabled();
     if (ImGui::Button("Bindings", ImVec2(-1, 0))) { load_bindings_staging(); bind_capture_cmd.clear(); bind_rebind_row = -1; bind_capturing = false; bind_dialog_open = true; }
+    if (ImGui::Button("Engine Config", ImVec2(-1, 0))) { engine_file_editor.Load(); engine_dialog_open = true; }
+    if (ImGui::Button("Color Config", ImVec2(-1, 0))) { theme_file_editor.Load(); theme_dialog_open = true; }
     if (ImGui::Checkbox("Rendered Crosshair", &rendered_crosshair)) dirty = true;
     ImGui::EndChild();   // end dpybtns (right column)
 }
@@ -2098,6 +2113,22 @@ void DrawConfigScreen() {
             const auto shader_before = shader_values_snapshot();
             apply_all();
             write_out_dirty();   // persist the dirty paths to the user overlay
+            // The file editors write their own overlays: only the leaves that differ from the
+            // shipped file. Written whole rather than merged, so a key the player had overridden
+            // and has now reset to the shipped value is cleared out of their file instead of being
+            // left behind. Keys the shipped file does not have are kept: the model holds whatever
+            // the player's file contained, and writes it back.
+            for (vs_settings_ng::ConfigFileEditor *editor : {&engine_file_editor, &theme_file_editor}) {
+                const boost::json::value changes = editor->Changes();
+                const std::string path = VSFileSystem::homedir + "/" + editor->FileName();
+                const bool has_content = changes.is_object() && !changes.as_object().empty();
+                if (!has_content && !std::ifstream(path).good()) {
+                    continue;   // nothing to write and nothing to clear
+                }
+                std::ofstream out(path);
+                out << boost::json::serialize(changes) << "\n";
+                fprintf(stderr, "[vs-settings-ng] wrote %s\n", path.c_str());
+            }
             if (shader_values_snapshot() != shader_before) {
                 // Tell the user the change takes effect on restart, and restore
                 // the running shader state so the current visuals are kept until
@@ -2148,6 +2179,8 @@ void DrawConfigScreen() {
 
     // Bindings dialog (modal on top).
     if (bind_dialog_open) ImGui::OpenPopup("Bindings");
+    if (engine_dialog_open) ImGui::OpenPopup("Engine Config");
+    if (theme_dialog_open) ImGui::OpenPopup("Color Config");
     draw_bindings_dialog();
 
     // Shader-change notice (modal on top). Shaders are written out but not
@@ -2155,6 +2188,37 @@ void DrawConfigScreen() {
     if (shader_restart_notice) {
         ImGui::OpenPopup("Shader Change");
     }
+    // The file editors take most of the screen: engine.json's keys are long, and a small dialog
+    // clips the names against their values.
+    const ImVec2 file_dialog_size(ImGui::GetIO().DisplaySize.x * 0.8f, ImGui::GetIO().DisplaySize.y * 0.8f);
+    const ImVec2 file_dialog_pos(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f);
+    ImGui::SetNextWindowSize(file_dialog_size, ImGuiCond_Always);
+    ImGui::SetNextWindowPos(file_dialog_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("Engine Config", &engine_dialog_open)) {
+        if (engine_file_editor.Draw()) {
+            dirty = true;
+        }
+        ImGui::Separator();
+        if (ImGui::Button("Close", ImVec2(120, 0))) {
+            engine_dialog_open = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+    ImGui::SetNextWindowSize(file_dialog_size, ImGuiCond_Always);
+    ImGui::SetNextWindowPos(file_dialog_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("Color Config", &theme_dialog_open)) {
+        if (theme_file_editor.Draw()) {
+            dirty = true;
+        }
+        ImGui::Separator();
+        if (ImGui::Button("Close", ImVec2(120, 0))) {
+            theme_dialog_open = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
     if (ImGui::BeginPopupModal("Shader Change", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::TextUnformatted("Shader changes take effect after a restart.");
         ImGui::TextUnformatted("The new settings were saved. Restart the game to apply them.");
