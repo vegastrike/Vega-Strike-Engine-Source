@@ -153,7 +153,6 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     if (Guaranteed == Mission::AUTO_OFF) {
         return false;
     }
-    const float autopilot_term_distance = configuration().physics.auto_pilot_termination_distance_flt;
     const float atd_no_enemies = configuration().physics.auto_pilot_termination_distance_no_enemies_flt;
     const float autopilot_no_enemies_multiplier = configuration().physics.auto_pilot_no_enemies_distance_multiplier_flt;
     if (unit->isSubUnit()) {
@@ -182,18 +181,12 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 
     float totpercent = 1;
     if (totallength > 1) {
-        float apt =
-                (target->getUnitType() == Vega_UnitType::planet) ? (autopilot_term_distance + target->rSize()
-                        * UniverseUtil::getPlanetRadiusPercent()) : autopilot_term_distance;
-        float aptne =
-                (target->getUnitType() == Vega_UnitType::planet) ? (atd_no_enemies + target->rSize()
-                        * UniverseUtil::getPlanetRadiusPercent()) : atd_no_enemies;
-        // apt / aptne are the auto-pilot termination distances: apt the normal one, aptne
-        // the no-enemies one (auto_pilot_termination_distance / _no_enemies). percent /
-        // percentne turn them into the point along the path the ship flies to, and the
-        // docking clearance keeps that point outside docking range.
-        apt += static_cast<float>(DockingClearance(target));
-        aptne += static_cast<float>(DockingClearance(target));
+        // The arrival point is the docking distance itself: docking, SPEC and the autopilot all end
+        // in the same place, so docking is available the moment the autopilot hands over. aptne is
+        // the no-enemies one, which stands off further when nothing is watching. percent / percentne
+        // turn them into the point along the path the ship flies to.
+        float apt = static_cast<float>(DockingDistance(target));
+        float aptne = atd_no_enemies + static_cast<float>(DockingDistance(target));
         float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
         float percentne = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
         if (percentne > 1) {
@@ -432,37 +425,38 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 }
             }
             float multipliertemp = 1;
-            float minsizeeffect = (planet->rSize() > smallwarphack) ? planet->rSize() : smallwarphack;
-            float effectiverad = minsizeeffect * (1.0f + UniverseUtil::getPlanetRadiusPercent()) + unit->rSize();
-            if (effectiverad > bigwarphack) {
-                effectiverad = bigwarphack;
-            }
-            QVector dir = unit->Position() - planet->Position();
+            QVector dir = unit->LocalPosition() - planet->LocalPosition();
+            // The body's own zone, sized by the body and weighted by its interdiction strength: a
+            // ship's own interdiction reaches almost nowhere, and a planet's is capped. This is the
+            // plain avoidance that holds a ship off everything it might hit, and a ship that merely
+            // happens to be dockable is not what stops a drive. The docking distance belongs to the
+            // arrival, where the autopilot knows what it is flying to.
             double udist = dir.Magnitude();
             float sigdist = UnitUtil::getSignificantDistance(unit, planet);
             if (planet->isPlanet() && udist < (1 << 28)) {
                 //If distance is viable as a float approximation and it's an actual celestial body
                 udist = sigdist;
             }
-            do {
-                double dist = udist;
-                if (dist < 0) {
-                    dist = 0;
-                }
-                dist *= shiphack;
-                if (dist > (effectiverad + warpregion0)) {
-                    multipliertemp = std::pow((dist - effectiverad - warpregion0), curvedegree) * upcurvek;
-                } else {
-                    multipliertemp = 1;
-                }
-                if (multipliertemp < minmultiplier) {
-                    minmultiplier = multipliertemp;
-                    *nearest_unit = planet;
-                    //eventually use new multiplier to compute
-                } else {
-                    break;
-                }
-            } while (false);
+            const double minsizeeffect = std::max(planet->rSize(), smallwarphack);
+            double standoff = minsizeeffect * (1.0 + UniverseUtil::getPlanetRadiusPercent()) + unit->rSize();
+            if (standoff > bigwarphack) {
+                standoff = bigwarphack;
+            }
+            double dist = udist;
+            if (dist < 0) {
+                dist = 0;
+            }
+            dist *= shiphack;
+            if (dist > (standoff + warpregion0)) {
+                multipliertemp = std::pow((dist - standoff - warpregion0), curvedegree) * upcurvek;
+            } else {
+                multipliertemp = 1;
+            }
+            if (multipliertemp < minmultiplier) {
+                minmultiplier = multipliertemp;
+                *nearest_unit = planet;
+                //eventually use new multiplier to compute
+            }
             if (!testthis) {
                 break;
             } //don't want the ++

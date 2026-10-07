@@ -689,7 +689,10 @@ void AutoLongHaul::Execute() {
     }
     double maxspeed =
             mymax(speed, parent->graphicOptions.WarpFieldStrength * parent->afterburner.speed);
-    double dis = UnitUtil::getSignificantDistance(parent, target);
+    // The autopilot stops at the docking distance, so measure the distance the way docking does:
+    // from a planet's surface, from a unit's centre. The significant distance subtracts a fraction
+    // of a planet's radius instead, which puts the stop 2500 past the docking distance at Atlantis.
+    const double dis = DistanceTwoTargets(target, parent);
     float time_to_destination = dis / maxspeed;
 
     const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
@@ -716,10 +719,9 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    // Distance where the autopilot terminates and docking begins: its normal termination
-    // distance plus the target's docking range, so it never hands over already dockable.
-    const float distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt
-            + static_cast<float>(DockingClearance(target));
+    // The autopilot terminates at the docking distance, where SPEC also stops: one distance
+    // governs all three, so the autopilot hands over dockable rather than short of it.
+    const float distance_to_stop = static_cast<float>(DockingDistance(target));
     const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
     bool stopnow = false;
