@@ -152,7 +152,6 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
             // above the screen. Tell them apart by what follows: after a centre comes the header,
             // which is numbers; after a header comes a frame, which is a filename.
             char third[512] = {0};
-            char fourth[512] = {0};
             char throwaway[512];
             // Read the lines from the beginning rather than from wherever the two Fscanfs above
             // left the stream: those stop at the end of the size line with its newline still
@@ -161,24 +160,25 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
             f.ReadLine(throwaway, sizeof(throwaway) - 1);
             f.ReadLine(throwaway, sizeof(throwaway) - 1);
             f.ReadLine(third, sizeof(third) - 1);
-            f.ReadLine(fourth, sizeof(fourth) - 1);
             float cx = 0, cy = 0;
+            int header_frames = 0;
+            float header_seconds = 0;
             const bool third_is_two_numbers = sscanf(third, "%f %f", &cx, &cy) == 2;
-            // Line three is the header when a frame follows it, and a frame is a filename -
-            // which is never a number, and never an empty line. Checking that rather than
-            // "line four is not two numbers" matters for the cockpit sprites: light_jump has
-            // its centre on line three and a blank line four, light_spec has the header there.
-            const bool fourth_is_a_filename = fourth[0] != '\0' && !isdigit(static_cast<unsigned char>(fourth[0]))
-                    && fourth[0] != '-' && fourth[0] != '.';
-            const bool header_is_line_three = third_is_two_numbers && fourth_is_a_filename;
-            if (!header_is_line_three) {
+            // Line three says which it is on its own: an animation header starts with a frame
+            // count of one or more, and a centre is a pair of small fractions. Looking at the
+            // line after it does not work - light_jump has a blank line there, the file reader
+            // skips blanks, and what comes back is a frame, which reads as "line three was the
+            // header" and loses the centre.
+            const bool third_is_a_header = third_is_two_numbers
+                    && sscanf(third, "%d %f", &header_frames, &header_seconds) == 2 && header_frames >= 1;
+            if (!third_is_a_header) {
                 xcenter = cx;
                 ycenter = cy;
             }
-            // Hand AnimatedTexture the file from the right line: line three for a header, line
-            // four when line three was the centre.
+            // Hand AnimatedTexture the file from the right line: line three when that is the
+            // header, line four when line three was the centre.
             f.Begin();
-            const int lines_to_skip = header_is_line_three ? 2 : 3;
+            const int lines_to_skip = third_is_a_header ? 2 : 3;
             char skipped[512];
             for (int i = 0; i < lines_to_skip; ++i) {
                 f.ReadLine(skipped, sizeof(skipped) - 1);
