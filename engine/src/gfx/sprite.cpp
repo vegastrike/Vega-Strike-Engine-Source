@@ -162,10 +162,15 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
             f.ReadLine(throwaway, sizeof(throwaway) - 1);
             f.ReadLine(third, sizeof(third) - 1);
             f.ReadLine(fourth, sizeof(fourth) - 1);
-            float cx = 0, cy = 0, first = 0, second = 0;
+            float cx = 0, cy = 0;
             const bool third_is_two_numbers = sscanf(third, "%f %f", &cx, &cy) == 2;
-            const bool fourth_is_two_numbers = sscanf(fourth, "%f %f", &first, &second) == 2;
-            const bool header_is_line_three = third_is_two_numbers && !fourth_is_two_numbers;
+            // Line three is the header when a frame follows it, and a frame is a filename -
+            // which is never a number, and never an empty line. Checking that rather than
+            // "line four is not two numbers" matters for the cockpit sprites: light_jump has
+            // its centre on line three and a blank line four, light_spec has the header there.
+            const bool fourth_is_a_filename = fourth[0] != '\0' && !isdigit(static_cast<unsigned char>(fourth[0]))
+                    && fourth[0] != '-' && fourth[0] != '.';
+            const bool header_is_line_three = third_is_two_numbers && fourth_is_a_filename;
             if (!header_is_line_three) {
                 xcenter = cx;
                 ycenter = cy;
