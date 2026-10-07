@@ -241,9 +241,6 @@ void PlanetaryOrbit::Execute() {
     const double theta_rate = velocity * div2pi;      //radians per second
     theta += theta_rate * simulation_atom_var;
 
-    QVector destination = origin - focus + sum_orbiting_average
-            + OrbitOffset(theta, x_size, y_size);
-
     //The velocity is the orbit's own motion in closed form: the derivative of
     //cos(theta)*x_size + sin(theta)*y_size, plus whatever the body being orbited is doing
     //(which is how the body is carried along with its parent). Taking it instead from the
@@ -267,7 +264,8 @@ void PlanetaryOrbit::Execute() {
         parent->Velocity.Set(0, 0, 0);
         parent->cumulative_velocity.Set(0, 0, 0);
     }
-    //The orbit is the authority for where this body is, and that correction stays
-    //positional: routing it back through Velocity is what made it a speed.
-    parent->SetCurPosition(destination);
+    // The position is not written: a body is placed when the system loads and keeps that position
+    // for the session, which is what the game shows - at year_scale 16 an orbit of 8e7 takes 0.001
+    // degrees an hour. The velocity above is what carries the motion that does happen, including a
+    // satellite's motion with whatever it orbits.
 }
