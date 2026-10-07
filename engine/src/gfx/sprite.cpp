@@ -153,6 +153,13 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
             // which is numbers; after a header comes a frame, which is a filename.
             char third[512] = {0};
             char fourth[512] = {0};
+            char throwaway[512];
+            // Read the lines from the beginning rather than from wherever the two Fscanfs above
+            // left the stream: those stop at the end of the size line with its newline still
+            // pending, so a ReadLine there returns the tail of that line, not the next one.
+            f.Begin();
+            f.ReadLine(throwaway, sizeof(throwaway) - 1);
+            f.ReadLine(throwaway, sizeof(throwaway) - 1);
             f.ReadLine(third, sizeof(third) - 1);
             f.ReadLine(fourth, sizeof(fourth) - 1);
             float cx = 0, cy = 0, first = 0, second = 0;
