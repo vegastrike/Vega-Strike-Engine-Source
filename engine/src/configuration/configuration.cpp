@@ -3892,12 +3892,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 dock.planet_dock_port_min_size_flt = boost::json::value_to<float>(*planet_dock_port_min_size_value_ptr);
             }
 
-            const boost::json::value * planet_dock_port_size_value_ptr = dock_object.if_contains("planet_dock_port_size");
-            if (planet_dock_port_size_value_ptr != nullptr) {
-                dock.planet_dock_port_size_dbl = boost::json::value_to<double>(*planet_dock_port_size_value_ptr);
-                dock.planet_dock_port_size_flt = boost::json::value_to<float>(*planet_dock_port_size_value_ptr);
-            }
-
             const boost::json::value * simple_dock_value_ptr = dock_object.if_contains("simple_dock");
             if (simple_dock_value_ptr != nullptr) {
                 dock.simple_dock = boost::json::value_to<bool>(*simple_dock_value_ptr);
@@ -7761,12 +7755,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
             if (planet_dock_min_port_size_value_ptr != nullptr) {
                 physics.planet_dock_min_port_size_dbl = boost::json::value_to<double>(*planet_dock_min_port_size_value_ptr);
                 physics.planet_dock_min_port_size_flt = boost::json::value_to<float>(*planet_dock_min_port_size_value_ptr);
-            }
-
-            const boost::json::value * planet_dock_port_size_value_ptr = physics_object.if_contains("planet_dock_port_size");
-            if (planet_dock_port_size_value_ptr != nullptr) {
-                physics.planet_dock_port_size_dbl = boost::json::value_to<double>(*planet_dock_port_size_value_ptr);
-                physics.planet_dock_port_size_flt = boost::json::value_to<float>(*planet_dock_port_size_value_ptr);
             }
 
             const boost::json::value * planet_ejection_stophack_value_ptr = physics_object.if_contains("planet_ejection_stophack");

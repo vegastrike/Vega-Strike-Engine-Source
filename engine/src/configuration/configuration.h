@@ -1417,8 +1417,6 @@ namespace vega_config {
         float dock_planet_radius_percent_flt = 1.5;
         double planet_dock_port_min_size_dbl = 300.0;
         float planet_dock_port_min_size_flt = 300.0;
-        double planet_dock_port_size_dbl = 1.2;
-        float planet_dock_port_size_flt = 1.2;
         bool simple_dock = true;
         double simple_dock_range_dbl = 5000.0;
         float simple_dock_range_flt = 5000.0;
@@ -2499,8 +2497,6 @@ namespace vega_config {
         bool persistent_on_load = true;
         double planet_dock_min_port_size_dbl = 300.0;
         float planet_dock_min_port_size_flt = 300.0;
-        double planet_dock_port_size_dbl = 1.2;
-        float planet_dock_port_size_flt = 1.2;
         double planet_ejection_stophack_dbl = 100000.0;
         float planet_ejection_stophack_flt = 100000.0;
         bool planets_always_neutral = true;
