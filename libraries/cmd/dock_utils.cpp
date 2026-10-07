@@ -85,6 +85,13 @@ double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
     return std::max(0.0, distance);
 }
 
+double DockingClearance(const Unit *dock) {
+    if (dock->getUnitType() == Vega_UnitType::planet) {
+        return dock->rSize() * (configuration().dock.dock_planet_radius_percent_dbl - 1.0);
+    }
+    return configuration().dock.simple_dock_range_dbl;
+}
+
 /**
  * @brief The distance at which a body counts as dockable
  * @param dock - the body being docked with
