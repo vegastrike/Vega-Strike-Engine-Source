@@ -97,7 +97,10 @@ void ComponentsManager::Serialize(std::map<std::string, std::string>& unit) cons
 
 
 double ComponentsManager::GetMass() const {
-    return mass;
+    // A unit whose data carries no mass is loaded with a mass of zero, and every place that turns a
+    // force into an acceleration divides by it. The collision code clamps for the same reason; doing
+    // it here covers every caller, whichever way the unit was put together.
+    return std::max(mass, configuration().physics.minimum_mass_dbl);
 }
 
 void ComponentsManager::SetMass(double mass) {
@@ -437,8 +440,9 @@ std::string ComponentsManager::GetTitle(bool show_cargo, bool show_star_date, st
     const double available_volume = show_cargo ? cargo_hold.AvailableCapacity()
                                 : upgrade_space.AvailableCapacity();
     
-    // Cargo mass renders your ship harder to manoeuver. Display it.
-    double mass_percent = mass / base_mass * 100;
+    // Cargo mass renders your ship harder to manoeuver. Display it. A unit whose data carries no
+    // mass has no base to compare against.
+    double mass_percent = base_mass > 0 ? mass / base_mass * 100 : 0;
     const std::string mass_string = (boost::format("base %1%/ current %2% (%3$.0f%%)") % base_mass % mass % mass_percent).str();
     
     if (show_star_date) {
