@@ -384,7 +384,12 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     if (NetForce.i || NetForce.j || NetForce.k) {
         temp2 += InvTransformNormal(transmat, NetForce);
     }
-    temp2 = temp2 / static_cast<float>(unit->GetMass());
+    // A unit whose row carries no Mass is loaded with a mass of zero, and dividing by it would leave
+    // the velocity non-finite - which makes the unit, and anything drawn from its transform, vanish.
+    const float unit_mass = unit->GetMass();
+    if (unit_mass != 0) {
+        temp2 = temp2 / unit_mass;
+    }
     temp = temp2 * simulation_atom_var;
     if (!(FINITE(temp2.i) && FINITE(temp2.j) && FINITE(temp2.k))) {
         VS_LOG(info, "NetForce transform skrewed");
