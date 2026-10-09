@@ -78,13 +78,6 @@ jobs:
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
-          - FROM:     'fedora:45'
-            COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
-            build-type: 'RelWithDebInfo'
-            INSTALL_GTEST: 1
-            USE_GTEST: 1
-            allow_failure: false
           - FROM:     'fedora:44'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
