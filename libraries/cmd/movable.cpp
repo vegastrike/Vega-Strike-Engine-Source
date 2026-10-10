@@ -253,7 +253,27 @@ void Movable::AddVelocity(float difficulty) {
                                     / warprampuptime)) : (graphicOptions.RampCounter
                     / configuration().warp.warp_ramp_down_time_flt) * (graphicOptions.RampCounter / configuration().warp.warp_ramp_down_time_flt);
         }
-        graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult);
+        // The autopilot caps the speed at which the ship can still turn onto what it is steering for.
+        // The cap is a speed, so it becomes a multiplier through the ship's own speed -- the speed it
+        // would be travelling at without warp. The floor is where warp ends, not where the drive
+        // does, so the cap can take the warp off the ship but never take its own speed, and the field
+        // multiplier stays at or above 1, which is what the velocity formula is written for.
+        double field_strength = GetMaxWarpFieldStrength(rampmult);
+        // The same floor GetMaxWarpFieldStrength clamps to; keep the two in step.
+        const double floor_strength = std::min(field_strength,
+                static_cast<double>(configuration().warp.warp_multiplier_min_flt
+                        * graphicOptions.MinWarpMultiplier));
+        if (unit->autopilotactive && unit->autopilot_speed_cap > 0) {
+            const double own_speed = Velocity.Magnitude();
+            if (own_speed > 0) {
+                const double capped = unit->autopilot_speed_cap / own_speed;
+                field_strength = std::max(floor_strength, std::min(field_strength, capped));
+            }
+        }
+        // The multiplier is only meaningful at 1 or above: below it, the velocity formula's
+        // (warpfield - 1) term turns negative and takes forward motion off the ship rather than
+        // slowing it.
+        graphicOptions.WarpFieldStrength = std::max(1.0, field_strength);
     } else {
         graphicOptions.WarpFieldStrength = 1;
     }

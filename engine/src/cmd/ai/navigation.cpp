@@ -705,6 +705,7 @@ void AutoLongHaul::Execute() {
     } else {
         WarpRampOff(parent, rampdown);
     }
+    parent->autopilot_speed_cap = TurnSpeedCap(destination);
     SetDest(destination);
     bool combat_mode = parent->computer.combat_mode;
     parent->computer.combat_mode = !inside_landing_zone;     //turn off limits in landing zone
@@ -731,6 +732,57 @@ void AutoLongHaul::Execute() {
         WarpRampOff(parent, rampdown);
         done = true;
     }
+}
+
+// The speed the ship may hold and still turn onto `aim` in time to reach it. The ship travels along
+// its course while it turns, so turning through the angle costs it angle / turn_rate of the time it
+// has, and the speed that fits that turn into the distance left is turn_rate * distance / angle.
+// 0 means no cap, which is what an aim already on the course asks for.
+float AutoLongHaul::TurnSpeedCap(const QVector &aim) {
+    const float factor = configuration().physics.auto_pilot_spec_turn_speed_factor_flt;
+    if (factor <= 0) {
+        return 0.0F;
+    }
+    const QVector to_aim = aim - parent->LocalPosition();
+    const double distance = to_aim.Magnitude();
+    if (distance <= 0) {
+        return 0.0F;
+    }
+    Vector nose = parent->cumulative_transformation_matrix.getR();
+    const float nose_length = nose.Magnitude();
+    if (nose_length <= 0) {
+        return 0.0F;
+    }
+    nose = nose * (1.0F / nose_length);
+
+    // The rate the ship turns at when the autopilot asks it to: its own yaw and pitch governors, the
+    // same limits ChangeHeading steers to.
+    const double turn_rate = std::max(std::max(static_cast<double>(parent->drive.max_yaw_left.Value()),
+                                              static_cast<double>(parent->drive.max_yaw_right.Value())),
+                                      std::max(static_cast<double>(parent->drive.max_pitch_up.Value()),
+                                               static_cast<double>(parent->drive.max_pitch_down.Value())));
+    if (turn_rate <= 0) {
+        return 0.0F;
+    }
+
+    // The turn left to make, taken from both where the ship points and where it is going: either one
+    // being wrong is enough that it will not reach its aim. An aim dead ahead leaves no turn to make,
+    // and so asks for no cap however fast the ship is going.
+    const Vector aim_direction = (to_aim * (1.0 / distance)).Cast();
+    const Vector velocity = parent->GetWarpVelocity();
+    const double speed = velocity.Magnitude();
+    if (speed <= 0) {
+        return 0.0F;
+    }
+    const Vector course = velocity * (1.0 / speed);
+    const double nose_dot = std::min(1.0, std::max(-1.0, static_cast<double>(nose.Dot(aim_direction))));
+    const double course_dot = std::min(1.0, std::max(-1.0, static_cast<double>(course.Dot(aim_direction))));
+    const double angle = std::max(std::acos(nose_dot), std::acos(course_dot));
+    if (angle <= 0) {
+        return 0.0F;
+    }
+
+    return static_cast<float>(factor * turn_rate * distance / angle);
 }
 
 AutoLongHaul::~AutoLongHaul() {
