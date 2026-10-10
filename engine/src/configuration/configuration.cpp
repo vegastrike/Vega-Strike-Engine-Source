@@ -8534,18 +8534,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 warp.computer_warp_ramp_up_time_flt = boost::json::value_to<float>(*computer_warp_ramp_up_time_value_ptr);
             }
 
-            const boost::json::value * ftl_orthogonal_thrust_smoothing_time_value_ptr = warp_object.if_contains("ftl_orthogonal_thrust_smoothing_time");
-            if (ftl_orthogonal_thrust_smoothing_time_value_ptr != nullptr) {
-                warp.ftl_orthogonal_thrust_smoothing_time_dbl = boost::json::value_to<double>(*ftl_orthogonal_thrust_smoothing_time_value_ptr);
-                warp.ftl_orthogonal_thrust_smoothing_time_flt = boost::json::value_to<float>(*ftl_orthogonal_thrust_smoothing_time_value_ptr);
-            }
-
-            const boost::json::value * ftl_orthogonal_thrust_speed_reduce_factor_value_ptr = warp_object.if_contains("ftl_orthogonal_thrust_speed_reduce_factor");
-            if (ftl_orthogonal_thrust_speed_reduce_factor_value_ptr != nullptr) {
-                warp.ftl_orthogonal_thrust_speed_reduce_factor_dbl = boost::json::value_to<double>(*ftl_orthogonal_thrust_speed_reduce_factor_value_ptr);
-                warp.ftl_orthogonal_thrust_speed_reduce_factor_flt = boost::json::value_to<float>(*ftl_orthogonal_thrust_speed_reduce_factor_value_ptr);
-            }
-
             const boost::json::value * in_system_jump_cost_value_ptr = warp_object.if_contains("in_system_jump_cost");
             if (in_system_jump_cost_value_ptr != nullptr) {
                 warp.in_system_jump_cost_dbl = boost::json::value_to<double>(*in_system_jump_cost_value_ptr);
