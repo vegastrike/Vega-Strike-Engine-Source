@@ -46,7 +46,11 @@ using namespace boost::filesystem;
 // just to get the python paths.
 std::string GetPythonPath() {
     Py_Initialize();
-    wchar_t* w_path_ptr = Py_GetPath();
+#   if ((PY_VERSION_HEX) < 0x030E0000)
+        wchar_t const* w_path_ptr = Py_GetPath();
+#   else
+        wchar_t const* w_path_ptr = PyConfig_Get("module_search_paths") (sys.path);
+#   endif
     Py_Finalize();
 
     std::wstring w_path_w( w_path_ptr );
