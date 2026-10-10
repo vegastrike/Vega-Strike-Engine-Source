@@ -57,7 +57,7 @@ jobs:
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             build-type: 'RelWithDebInfo'
             ARTIFACT_EXT: 'deb'
-          - FROM:     'dhi.io/python:3.13-debian13-dev'
+          - FROM:     'dhi.io/python:3.13-debian13-sfw-dev'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             build-type: 'RelWithDebInfo'

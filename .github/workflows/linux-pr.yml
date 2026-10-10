@@ -64,7 +64,7 @@ jobs:
             INSTALL_GTEST: 1
             USE_GTEST: 1
             allow_failure: false
-          - FROM:     'dhi.io/python:3.13-debian13-dev'
+          - FROM:     'dhi.io/python:3.13-debian13-sfw-dev'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
             build-type: 'RelWithDebInfo'
