@@ -49,7 +49,7 @@ std::string GetPythonPath() {
 #   if ((PY_VERSION_HEX) < 0x030E0000)
         wchar_t const* w_path_ptr = Py_GetPath();
 #   else
-        wchar_t const* w_path_ptr = PyConfig_Get("module_search_paths") (sys.path);
+        wchar_t const* w_path_ptr = PyConfig_Get("module_search_paths");
 #   endif
     Py_Finalize();
 
