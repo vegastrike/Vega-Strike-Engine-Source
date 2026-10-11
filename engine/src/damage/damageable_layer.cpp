@@ -169,6 +169,14 @@ double DamageableLayer::TotalMaxLayerValue() const {
     return total_value;
 }
 
+double DamageableLayer::TotalAdjustedLayerValue() const {
+    double total_value = 0.0f;
+    for (const Resource<double> &facet : facets) {
+        total_value += facet.AdjustedValue();
+    }
+    return total_value;
+}
+
 double DamageableLayer::AverageLayerValue() const {
     double total_value = 0.0f;
     for (const Resource<double> &facet : facets) {
