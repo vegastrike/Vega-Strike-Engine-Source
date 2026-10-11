@@ -777,10 +777,18 @@ MARK_AS_ADVANCED(FORCE
     vorbis_LIBRARY
     vorbisfile_LIBRARY
 )
-INSTALL(
-        TARGETS vegastrike-engine
-        RUNTIME_DEPENDENCIES
-        DESTINATION bin)
+# Windows ships its libraries beside the executable; elsewhere the system provides them, and
+# installing them here would put copies of the distribution's own libraries in bin.
+IF (WIN32)
+    INSTALL(
+            TARGETS vegastrike-engine
+            RUNTIME_DEPENDENCIES
+            DESTINATION bin)
+ELSE ()
+    INSTALL(
+            TARGETS vegastrike-engine
+            DESTINATION bin)
+ENDIF()
 
 
 ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/doc" "./doc")

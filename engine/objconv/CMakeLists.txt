@@ -170,7 +170,15 @@ IF (WIN32)
 ENDIF()
 
 TARGET_LINK_LIBRARIES(vega-meshtool ${MSH_LIBS})
-INSTALL(
-        TARGETS vega-meshtool
-        RUNTIME_DEPENDENCIES
-        DESTINATION bin)
+# Windows ships its libraries beside the executable; elsewhere the system provides them, and
+# installing them here would put copies of the distribution's own libraries in bin.
+IF (WIN32)
+    INSTALL(
+            TARGETS vega-meshtool
+            RUNTIME_DEPENDENCIES
+            DESTINATION bin)
+ELSE ()
+    INSTALL(
+            TARGETS vega-meshtool
+            DESTINATION bin)
+ENDIF()
