@@ -487,9 +487,14 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
             switch (input[curPos]) {
                 case '\\':
                     addFragment(input.substr(fragmentStartPos, curPos - fragmentStartPos));
-                    fragmentStartPos = curPos + 2;
+                    // "\n" is a line break that consumes the escape. Any other backslash is
+                    // only a line break, and the character after it belongs to the text: the
+                    // base computer writes "Objectives\" and "...%\" as separators, so
+                    // consuming that character ate the first letter of every objective.
+                    fragmentStartPos = curPos
+                            + ((curPos + 1 < input.size() && input[curPos + 1] == 'n') ? 2 : 1);
                     layout.endLine(currentLine);
-                    // we skipt the \\, +1 here and +1 at the end of the loop
+                    // we skipt the \, +1 here and +1 at the end of the loop
                     curPos++;
                     break;
                 case '\n':
