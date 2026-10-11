@@ -2568,6 +2568,10 @@ namespace vega_config {
         float warp_cruise_mult_flt = 15000.0;
         double warp_curve_degree_dbl = 1.3;
         float warp_curve_degree_flt = 1.3;
+        // The largest fraction of the gap to the nearest unit that one simulation atom may cover at
+        // warp: 0.5 keeps any body at least two atoms away, 0 turns the limit off.
+        double warp_max_step_fraction_dbl = 0.5;
+        float warp_max_step_fraction_flt = 0.5;
         bool warp_is_interstellar = false;
         double warp_orbit_multiplier_dbl = 20.0;
         float warp_orbit_multiplier_flt = 20.0;

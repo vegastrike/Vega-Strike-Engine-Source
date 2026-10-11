@@ -373,7 +373,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 
 float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
         Unit **nearest_unit,
-        bool count_negative_warp_units) const {
+        bool count_negative_warp_units,
+        double *nearest_distance) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     const float smallwarphack = configuration().physics.min_warp_effect_size_flt;
@@ -398,6 +399,11 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 unit->location[Unit::UNIT_ONLY],
                 &locatespec);
         testthis = locatespec.retval.unit;
+        if (nearest_distance != nullptr) {
+            // The surface-to-surface gap to the closest unit anywhere in the system, which is what
+            // the caller needs to keep an atom from crossing it. 0 when there is nothing to report.
+            *nearest_distance = (testthis != nullptr) ? locatespec.NearestDistance() : 0.0;
+        }
     }
     for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();
             (planet = *iter) || testthis;

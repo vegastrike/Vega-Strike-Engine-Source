@@ -8008,6 +8008,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.warp_curve_degree_flt = boost::json::value_to<float>(*warp_curve_degree_value_ptr);
             }
 
+            const boost::json::value * warp_max_step_fraction_value_ptr = physics_object.if_contains("warp_max_step_fraction");
+            if (warp_max_step_fraction_value_ptr != nullptr) {
+                physics.warp_max_step_fraction_dbl = boost::json::value_to<double>(*warp_max_step_fraction_value_ptr);
+                physics.warp_max_step_fraction_flt = boost::json::value_to<float>(*warp_max_step_fraction_value_ptr);
+            }
+
             const boost::json::value * warp_is_interstellar_value_ptr = physics_object.if_contains("warp_is_interstellar");
             if (warp_is_interstellar_value_ptr != nullptr) {
                 physics.warp_is_interstellar = boost::json::value_to<bool>(*warp_is_interstellar_value_ptr);
