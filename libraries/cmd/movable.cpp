@@ -504,7 +504,8 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     //inverse fractional effect of ship vs real big object
     float minimum_multiplier = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     Unit *nearest_unit = nullptr;
-    minimum_multiplier = unit->CalculateNearestWarpUnit(minimum_multiplier, &nearest_unit, true);
+    double nearest_distance = 0;
+    minimum_multiplier = unit->CalculateNearestWarpUnit(minimum_multiplier, &nearest_unit, true, &nearest_distance);
     float minWarp = configuration().warp.warp_multiplier_min_flt * graphicOptions.MinWarpMultiplier;
     float maxWarp = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     if (minimum_multiplier < minWarp) {
@@ -513,6 +514,19 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     if (minimum_multiplier > maxWarp) {
         minimum_multiplier = maxWarp;
     } //SOFT LIMIT
+    // The road to the nearest thing a ship could hit must not be crossable inside one simulation
+    // atom, or the interdiction of a body on the course is only ever sampled once the ship is past
+    // it. This is a speed, so it becomes a multiplier through the ship's own speed, and it is taken
+    // before the ramp so the ramp can only take more off, never put it back.
+    const float max_step_fraction = configuration().physics.warp_max_step_fraction_flt;
+    const double own_speed = v.Magnitude();
+    if (max_step_fraction > 0 && nearest_unit != nullptr && nearest_distance > 0 && own_speed > 0) {
+        const double step_multiplier = max_step_fraction * nearest_distance
+                / (simulation_atom_var * own_speed);
+        if (step_multiplier < minimum_multiplier) {
+            minimum_multiplier = step_multiplier;
+        }
+    }
     minimum_multiplier *= rampmult;
     if (minimum_multiplier < 1) {
         minimum_multiplier = 1;
