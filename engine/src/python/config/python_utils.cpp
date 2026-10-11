@@ -37,8 +37,6 @@
 #include <deque>
 #include <iostream>
 
-#include "../../vs_logging.h"
-
 using namespace boost::python;
 using namespace boost::filesystem;
 
@@ -64,12 +62,9 @@ std::string GetPythonPath() {
     boost::python::list const py_path_list = boost::python::extract<boost::python::list>(PyConfig_Get("module_search_paths"));
     if (!py_path_list.is_none()) {
         Py_ssize_t const list_len = boost::python::len(py_path_list);
-        VS_LOG_AND_FLUSH(debug, (boost::format("Python module search paths list length = %1%") % list_len));
         for (Py_ssize_t i = 0; i < list_len; ++i) {
             python_path_py_deque_wide.push_back(boost::python::extract<std::wstring>(py_path_list[i]));
         }
-    } else {
-        VS_LOG_AND_FLUSH(error, (boost::format("Python module search paths list empty")));
     }
 
     Py_Finalize();
