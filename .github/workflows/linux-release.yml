@@ -15,7 +15,7 @@ env:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     continue-on-error: true
 
     defaults:
@@ -29,49 +29,43 @@ jobs:
           - FROM:     'ubuntu:resolute'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
-            INSTALL_SDL3: 0
-            INSTALL_SDL3_IMAGE: 0
-            ARTIFACT_EXT: 'deb'
-          - FROM:     'ubuntu:questing'
-            COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'deb'
           # Source tarballs only
-          - FROM:     'dhi.io/python:3.13-debian13-dev'
+          - FROM:     'dhi.io/python:3.13-debian13-sfw-dev'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'tar.[xb]z*'
-          - FROM:     'dhi.io/python:3.13-debian13-dev'
+          - FROM:     'dhi.io/python:3.13-debian13-sfw-dev'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-disabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'deb'
           - FROM:     'fedora:44'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:43'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
-            INSTALL_SDL3: 0
-            INSTALL_SDL3_IMAGE: 0
-            ARTIFACT_EXT: 'rpm'
-          - FROM:     'fedora:42'
-            COMPILER: 'gcc'
-            preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'rpm'
           - FROM:     'opensuse/leap:16.0'
             COMPILER: 'gcc'
             preset-name: 'linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo'
+            build-type: 'RelWithDebInfo'
             INSTALL_SDL3: 0
             INSTALL_SDL3_IMAGE: 0
             ARTIFACT_EXT: 'rpm'
@@ -101,7 +95,7 @@ jobs:
           INSTALL_SDL3: ${{ matrix.INSTALL_SDL3 }}
           INSTALL_SDL3_IMAGE: ${{ matrix.INSTALL_SDL3_IMAGE }}
           IS_RELEASE: 1
-        run: script/cibuild --preset-name=${{ matrix.preset-name }}
+        run: script/cibuild --preset-name=${{ matrix.preset-name }} --build-type=${{ matrix.build-type }}
       - name: Upload the artifacts
         uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
         env:
