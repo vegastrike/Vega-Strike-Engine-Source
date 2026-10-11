@@ -594,7 +594,6 @@ void AutoLongHaul::Execute() {
     const bool compensate_for_interdiction = configuration().physics.auto_pilot_compensate_for_interdiction;
     const float enough_warp_for_cruise = configuration().physics.enough_warp_for_cruise_flt;
     const float go_perpendicular_speed = configuration().physics.warp_perpendicular_flt;
-    const float min_warp_orbit_radius = configuration().physics.min_warp_orbit_radius_flt;
     const float warp_orbit_multiplier = configuration().physics.warp_orbit_multiplier_flt;
     const float warp_behind_angle = cos(M_PI_FLT * configuration().physics.warp_behind_angle_flt / 180.0F);
     QVector myposition = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();     //get unit pos
@@ -645,8 +644,11 @@ void AutoLongHaul::Execute() {
                 if (renormalizedetour > .01) {
                     detourvector = detourvector * (1. / renormalizedetour);
                 }                     //normalize it
-                double finaldetourdistance = mymax(obstacle->rSize() * warp_orbit_multiplier,
-                        min_warp_orbit_radius);                //scale that direction by some multiplier of obstacle size and a constant
+                // How wide a berth to give the obstacle: a multiple of its own size, so a
+                // ship-sized obstacle costs a small course change and a large body a large one.
+                // The floor that used to be here (min_warp_orbit_radius, 1e8 units) made even a
+                // ship-sized obstacle a 100,000 km sidestep.
+                const double finaldetourdistance = obstacle->rSize() * warp_orbit_multiplier;
                 detourvector = detourvector
                         * finaldetourdistance;                 //we want to go perpendicular to our transit direction by that ammt
                 QVector newdestination = NewDestination(obstacle->LocalPosition() + detourvector,
