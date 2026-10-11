@@ -1,0 +1,24 @@
+name: clang-format Check
+permissions:
+  contents: read
+
+# Controls when the action will run.
+on:
+  push:
+    branches: [ master, 0.11.x, 0.10.x ]
+  pull_request:
+    branches: [ master, 0.11.x, 0.10.x ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  formatting-check:
+    name: Formatting Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1             # v7.0.1
+      - name: Run clang-format style check for C/C++/Protobuf programs.
+        uses: jidicula/clang-format-action@654a770daa28443dd111d133e4083e21c1075674 # v4.18.0
+        with:
+          clang-format-version: '19'
