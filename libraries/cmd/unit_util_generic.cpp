@@ -696,7 +696,7 @@ float getDistance(const Unit *my_unit, const Unit *un) {
     if (my_unit == NULL || un == NULL) {
         return FLT_MAX;
     }
-    return (my_unit->Position() - un->Position()).Magnitude() - my_unit->rSize() - un->rSize();
+    return (my_unit->LocalPosition() - un->LocalPosition()).Magnitude() - my_unit->rSize() - un->rSize();
 }
 
 float getSignificantDistance(const Unit *un, const Unit *sig) {
