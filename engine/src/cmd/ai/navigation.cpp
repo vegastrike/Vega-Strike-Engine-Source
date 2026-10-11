@@ -630,8 +630,15 @@ void AutoLongHaul::Execute() {
             obstacledirection = obstacledirection
                     * (1. / obstacledistance);               //normalize the obstacle direction as well
             float angle = obstacledirection.Dot(destinationdirection);
+            // The berth this obstacle would be given, and with it the test of whether the course
+            // passes through the obstacle at all. Something standing beside the route is not in the
+            // way however close it is, and steering around it is a course change nobody asked for.
+            const double berth = obstacle->rSize() * warp_orbit_multiplier;
+            const double off_course = obstacledirection.Cross(destinationdirection).Magnitude()
+                    * obstacledistance;
             if ((obstacledistance - obstacle->rSize() < destinationdistance - target->rSize())
-                    && (angle > warp_behind_angle)) {
+                    && (angle > warp_behind_angle)
+                    && (off_course < berth)) {
                 StraightToTarget = false;
                 //if our obstacle is closer than obj and the obstacle is not behind us
                 QVector planetdest =
@@ -644,25 +651,20 @@ void AutoLongHaul::Execute() {
                 if (renormalizedetour > .01) {
                     detourvector = detourvector * (1. / renormalizedetour);
                 }                     //normalize it
-                // How wide a berth to give the obstacle: a multiple of its own size, so a
-                // ship-sized obstacle costs a small course change and a large body a large one.
-                // The floor that used to be here (min_warp_orbit_radius, 1e8 units) made even a
-                // ship-sized obstacle a 100,000 km sidestep.
-                const double finaldetourdistance = obstacle->rSize() * warp_orbit_multiplier;
                 detourvector = detourvector
-                        * finaldetourdistance;                 //we want to go perpendicular to our transit direction by that ammt
+                        * berth;                 //we want to go perpendicular to our transit direction by that ammt
                 QVector newdestination = NewDestination(obstacle->LocalPosition() + detourvector,
-                        finaldetourdistance);                 //add to our position
+                        berth);                 //add to our position
                 float weight = (maxmultiplier - go_perpendicular_speed) / (enough_warp_for_cruise
                         - go_perpendicular_speed);                   //find out how close we are to our desired warp multiplier and weight our direction by that
                 weight *= weight;                 //
                 if (maxmultiplier < go_perpendicular_speed) {
-                    QVector perpendicular = myposition + planetme * (finaldetourdistance / planetme.Magnitude());
+                    QVector perpendicular = myposition + planetme * (berth / planetme.Magnitude());
                     weight = (go_perpendicular_speed - maxmultiplier) / go_perpendicular_speed;
                     destination = weight * perpendicular + (1 - weight) * newdestination;
                 } else {
                     QVector olddestination = myposition + destinationdirection
-                            * finaldetourdistance;                     //destination direction in the same magnitude as the newdestination from the ship
+                            * berth;                     //destination direction in the same magnitude as the newdestination from the ship
                     destination = newdestination * (1 - weight) + olddestination
                             * weight;                       //use the weight to combine our direction and the dest
                 }
