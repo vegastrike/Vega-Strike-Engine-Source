@@ -670,7 +670,6 @@ void AutoLongHaul::Execute() {
     if (!parent->ftl_drive.Enabled() && parent->graphicOptions.RampCounter == 0) {
         deactivatewarp = false;
     }
-    double mass = parent->GetMass();
     // SPEC stays on while flying toward the destination, through any turn: lining up with the
     // destination, or taking a detour, must not drop the ship out of warp. Dropping out on a
     // brief deviation of the facing made SPEC flicker in and out whenever the ship turned --
@@ -712,17 +711,8 @@ void AutoLongHaul::Execute() {
     const float distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt;
     const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
-    bool stopnow = false;
-    maxspeed = parent->afterburner.speed;
-    if (maxspeed && parent->drive.retro) {
-        double time_to_destination = dis / maxspeed;         //conservative
-        double time_to_stop = speed * mass / parent->drive.retro;
-        if (time_to_destination <= time_to_stop) {
-            stopnow = true;
-        }
-    }
     if (do_auto_finish
-            && (stopnow || dis < distance_to_stop || (target->Target() == parent && dis < enemy_distance_to_stop))) {
+            && (dis < distance_to_stop || (target->Target() == parent && dis < enemy_distance_to_stop))) {
         parent->autopilotactive = false;
         WarpRampOff(parent, rampdown);
         done = true;
