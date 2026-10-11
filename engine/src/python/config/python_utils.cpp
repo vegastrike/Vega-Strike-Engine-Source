@@ -27,14 +27,17 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
+#include <boost/python.hpp>
+
 #include "python_utils.h"
 
-#include <iostream>
-#include <boost/python.hpp>
+#include <boost/algorithm/string/join.hpp>
 #include <boost/filesystem.hpp>
 
-//#include "vegadisk/vsfilesystem.h"
-//#include "src/vs_logging.h"
+#include <deque>
+#include <iostream>
+
+#include "../../vs_logging.h"
 
 using namespace boost::python;
 using namespace boost::filesystem;
@@ -45,17 +48,41 @@ using namespace boost::filesystem;
 // This is a kludge. It runs python before
 // just to get the python paths.
 std::string GetPythonPath() {
+#if ((PY_VERSION_HEX) < 0x030E0000)
     Py_Initialize();
-    wchar_t* w_path_ptr = Py_GetPath();
+    wchar_t const* w_path_ptr = Py_GetPath();
     Py_Finalize();
 
-    std::wstring w_path_w( w_path_ptr );
-    std::string path( w_path_w.begin(), w_path_w.end() );
+    std::wstring w_path_w(w_path_ptr);
+    std::string  path(w_path_w.begin(), w_path_w.end());
 
     return path;
+#else
+    Py_Initialize();
+
+    std::deque<std::wstring> python_path_py_deque_wide{};
+    boost::python::list const py_path_list = boost::python::extract<boost::python::list>(PyConfig_Get("module_search_paths"));
+    if (!py_path_list.is_none()) {
+        Py_ssize_t const list_len = boost::python::len(py_path_list);
+        VS_LOG_AND_FLUSH(debug, (boost::format("Python module search paths list length = %1%") % list_len));
+        for (Py_ssize_t i = 0; i < list_len; ++i) {
+            python_path_py_deque_wide.push_back(boost::python::extract<std::wstring>(py_path_list[i]));
+        }
+    } else {
+        VS_LOG_AND_FLUSH(error, (boost::format("Python module search paths list empty")));
+    }
+
+    Py_Finalize();
+
+    std::deque<std::string> python_path_py_deque_narrow{};
+    for (auto wstr : python_path_py_deque_wide) {
+        std::string const path(wstr.begin(), wstr.end());
+        python_path_py_deque_narrow.push_back(path);
+    }
+
+    return boost::join(python_path_py_deque_narrow, ":");
+#endif
 }
-
-
 
 // A utility function to call a function and get a PyObject as a result
 PyObject* GetClassFromPython(
