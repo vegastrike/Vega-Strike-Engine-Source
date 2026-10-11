@@ -27,6 +27,7 @@
 
 
 #include "navigation.h"
+#include "cmd/dock_utils.h"
 #include "root_generic/macosx_math.h"
 #include <math.h>
 #ifndef _WIN32
@@ -715,7 +716,9 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    const float distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt;
+    // Distance where the autopilot terminates and docking begins: the target's docking distance,
+    // where SPEC also stops, so the autopilot hands over dockable rather than short of it.
+    const float distance_to_stop = static_cast<float>(DockingDistance(target));
     const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
     bool stopnow = false;

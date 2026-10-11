@@ -441,8 +441,10 @@ void Planet::InitPlanet(QVector x,
 
     colTrees = nullptr;
     SetAngularVelocity(rotvel);
-    // The docking port is 20% bigger than the planet
-    const float planetdockportsize = configuration().dock.planet_dock_port_size_flt;
+    // The port this creates is the planet's docking zone, so it is sized from the same setting that
+    // decides how far out a ship may dock. The minimum is a floor for small bodies, where the
+    // proportion is only a few hundred metres.
+    const float planetdockportsize = configuration().dock.dock_planet_radius_percent_flt;
     const float planetdockportminsize = configuration().dock.planet_dock_port_min_size_flt;
     if ((!atmospheric) && notJumppoint) {
         float dock = radius * planetdockportsize;
