@@ -67,6 +67,7 @@
 #include "gldrv/mouse_cursor.h"
 
 #include "imgui/imgui.h"
+#include "gui/vega_text.h"
 #include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -323,6 +324,9 @@ void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base) {
     GFXAlphaTest(GREATER, AlphaTestingCutoff);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXEnable(TEXTURE0);
+    // The colour is global, and the location-marker block and the text backgrounds both leave
+    // their own alpha in it. A base sprite is unmodulated, so set it here rather than inherit it.
+    GFXColor4f(1, 1, 1, 1);
     spr.Draw();
     GFXAlphaTest(ALWAYS, 0);
 
@@ -412,7 +416,9 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
                         24),
                 true);
 
-        (un)->DrawNow(final, FLT_MAX);
+        // The ship in the hangar is drawn without its shield: the bubble is invisible in flight
+        // (additive blend, no env map) but the light this creates for the hangar picks it out.
+        (un)->DrawNow(final, FLT_MAX, false);
         GFXDeleteLight(light);
         GFXDisable(DEPTHTEST);
         GFXDisable(DEPTHWRITE);
@@ -495,6 +501,9 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
                         GFXEnable(TEXTURE0);
                         GFXColor4f(1, 1, 1, links[i]->alpha);
                         spr_marker->Draw();
+                        // The marker fades with the cursor distance; nothing else on the base
+                        // screen is meant to.
+                        GFXColor4f(1, 1, 1, 1);
                     }                     //if spritefile
                     if (draw_text) {
                         GFXDisable(TEXTURE0);
@@ -650,12 +659,12 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
     }
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
     GFXColor tmpbg(text.background_color);
-    bool automatte = (0 == tmpbg.a);
-    if (automatte) {
+    bool transparent = (0 == tmpbg.a);
+    if (transparent) {
         GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
         text.background_color = static_cast<ImU32>(temp_background_color);
     }
-    if (!automatte && text.GetText().empty()) {
+    if (!transparent && text.GetText().empty()) {
         float posx, posy, wid, hei;
         text.GetPos(posy, posx);
         text.GetSize(wid, hei);
@@ -669,8 +678,9 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
                 posx, posy, 0.0f,
         };
         GFXDraw(GFXQUAD, verts, 4);
+        GFXColor4f(1, 1, 1, 1);
     } else {
-        text.Draw(text.GetText(), 0, true, false, automatte);
+        vega_text::DrawTextPlane(text, text.GetText(), transparent);
     }
     text.background_color= static_cast<ImU32>(tmpbg);
 }
@@ -1645,33 +1655,37 @@ void BaseInterface::Draw() {
         othtext.setOffset(static_cast<float>(lb_ox), static_cast<float>(lb_oy));
     }
 
-    float x, y;
     glViewport(0, 0, native_resolution_x, native_resolution_y);
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
 
-    curtext.GetCharSize(x, y);
-    curtext.SetPos(-.99, -1 + (y * 1.5));
+    // The plane's char size is only set once, when the base is created, and nothing recomputes it
+    // in the ImGui path -- so reading it here gives a stale value and the text lands well up the
+    // screen. Work the line height out from the font the text is drawn at instead, and sit the
+    // mirrored label one and a half lines above the bottom of the base window.
+    const float base_height = std::max(1.0f, base_max_h);
+    const float line_height = 1.5f * configuration().graphics.font_point_flt / (0.5f * base_height);
+    curtext.SetPos(-.99, -1 + line_height);
 
     if (curtext.GetText().find("XXX") != 0) {
         GFXColor tmpbg(curtext.background_color);
-        bool automatte = (0 == tmpbg.a);
-        if (automatte) {
+        bool transparent = (0 == tmpbg.a);
+        if (transparent) {
             GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
             curtext.background_color = static_cast<ImU32>(temp_background_color);
         }
-        curtext.Draw(curtext.GetText(), 0, true, false, automatte);
+        vega_text::DrawTextPlane(curtext, curtext.GetText(), transparent);
         curtext.background_color = static_cast<ImU32>(tmpbg);
     }
     othtext.SetPos(-.99, 1);
 
     if (othtext.GetText().length() != 0) {
         GFXColor tmpbg(othtext.background_color);
-        bool automatte = (0 == tmpbg.a);
-        if (automatte) {
+        bool transparent = (0 == tmpbg.a);
+        if (transparent) {
             GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
             othtext.background_color = static_cast<ImU32>(temp_background_color);
         }
-        othtext.Draw(othtext.GetText(), 0, true, false, automatte);
+        vega_text::DrawTextPlane(othtext, othtext.GetText(), transparent);
         othtext.background_color= static_cast<ImU32>(tmpbg);
     }
     SetupViewport();

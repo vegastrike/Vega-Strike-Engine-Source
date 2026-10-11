@@ -320,10 +320,6 @@ voidEXPORT_UTIL0( unsetMissionRelevant )
 
 voidEXPORT_UTIL5( orbit, UnitWrapper, orbitee,
 float, speed, QVector, R, QVector, S, QVector, center )
-WRAPPED0(int, RepairCost,
-0 )
-WRAPPED0(int, RepairUpgrade,
-0 )
 WRAPPED1( Vector, MountPercentOperational,
 int, whichMount, Vector( -1.0f, -1.0f, -1.0f ))
 #endif // (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 2)

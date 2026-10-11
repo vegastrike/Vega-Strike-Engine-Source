@@ -35,6 +35,7 @@
 #include "gnuhash.h"
 #include "gfxlib_struct.h"
 #include "navcomputer.h"
+#include "navmap.h"
 #include "navpath.h"
 
 #include "gfx_generic/vec.h"
@@ -172,8 +173,16 @@ private:
     class Mesh *mesh[NAVTOTALMESHCOUNT];
     int reverse;
     int rotations; //tried to change to unsigned but gazillions of comparisons to int crop up --chuck_starchaser
-    int axis;
-    int configmode;
+    //The camera each view projects through, and whether it still has to be framed
+    //to its content.
+    NavMap system_cam;
+    NavMap galaxy_cam;
+    bool system_needs_refit;
+    bool galaxy_needs_refit;
+
+    //Distance from the camera to the nearest thing it can see. Pan and zoom scale with
+    //it, so that they stay usable at any magnification. Reset as each view draws.
+    double nav_near_dist;
 
     float rx;   //galaxy
     float ry;
@@ -192,15 +201,9 @@ private:
     float minimumitemscaledown;
     float maximumitemscaleup;
 
-    enum ViewType { VIEW_2D, VIEW_ORTHO, VIEW_3D, VIEW_MAX };
-    int system_view;
-    int galaxy_view;
-
     int path_view;
     enum PathType { PATH_OFF, PATH_ON, PATH_ONLY, PATH_MAXIMUM };
 
-    bool system_multi_dimensional;
-    bool galaxy_multi_dimensional;
 
     float center_x;
     float center_y;
@@ -255,8 +258,7 @@ private:
 
 //Drawing helper functions
 //*************************
-    void Adjust3dTransformation(bool three_d, bool is_system_not_galaxy);
-    void ReplaceAxes(QVector &pos);
+    void Adjust3dTransformation(bool is_system_not_galaxy);
     void RecordMinAndMax(const QVector &pos,
             float &min_x,
             float &max_x,
@@ -265,42 +267,10 @@ private:
             float &min_z,
             float &max_z,
             float &max_all);
-    void DrawOriginOrientationTri(float center_nav_x, float center_nav_y, bool system_not_galaxy);
 
-    float CalculatePerspectiveAdjustment(float &zscale,
-            float &zdistance,
-            QVector &pos,
-            QVector &pos_flat,
-            float &system_item_scale_temp,
-            bool system_not_galaxy);
 
-    void TranslateCoordinates(QVector &pos,
-            QVector &pos_flat,
-            float center_nav_x,
-            float center_nav_y,
-            float themaxvalue,
-            float &zscale,
-            float &zdistance,
-            float &the_x,
-            float &the_y,
-            float &the_x_flat,
-            float &the_y_flat,
-            float &system_item_scale_temp,
-            bool system_not_galaxy);
 
-    void TranslateAndDisplay(QVector &pos,
-            QVector &pos_flat,
-            float center_nav_x,
-            float center_nav_y,
-            float themaxvalue,
-            float &zscale,
-            float &zdistance,
-            float &the_x,
-            float &the_y,
-            float &system_item_scale_temp,
-            bool system_not_galaxy);
 
-    void DisplayOrientationLines(float the_x, float the_y, float the_x_flat, float the_y_flat, bool system_not_galaxy);
 
     bool CheckForSelectionQuery();
     void setCurrentSystemIndex(unsigned newSystemIndex);
@@ -312,6 +282,11 @@ private:
 //*************************
 
 public:
+    //Drive the active view's camera with an arrow key: dir 0=up, 1=down, 2=left,
+    //3=right, with mods from getActiveModifiers() (Shift looks around, Alt moves in
+    //and out or sideways, nothing moves the map).
+    void arrowKey(int dir, unsigned int mods);
+
     NavigationSystem();
     ~NavigationSystem();
     static void DrawCircle(float x, float y, float size, const GFXColor &col);
@@ -322,7 +297,6 @@ public:
     static void DrawJump(float x, float y, float size, const GFXColor &col);
     static void DrawMissile(float x, float y, float size, const GFXColor &col);
     static void DrawTargetCorners(float x, float y, float size, const GFXColor &col);
-    static void DrawNavCircle(float x, float y, float rot_x, float rot_y, float size, const GFXColor &col);
     void setCurrentSystem(string newSystem);
     std::string getCurrentSystem();
     std::string getSelectedSystem();

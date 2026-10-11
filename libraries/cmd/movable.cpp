@@ -84,8 +84,6 @@ Movable::graphic_options::graphic_options() {
     NumAnimationPoints = 0;
     RampCounter = 0;
     MinWarpMultiplier = MaxWarpMultiplier = 1;
-    OrthoThrustFraction = 0;
-    OrthoThrustRequest = 0;
 
     // Added implementation to make var false
     // I don't like it, because it's true by default and false by default
@@ -216,19 +214,6 @@ void Movable::AddVelocity(float difficulty) {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     float lastWarpField = graphicOptions.WarpFieldStrength;
 
-    // The demand on the orthogonal thrusters is ramped toward what they are being asked for, over a
-    // time the setting controls, so that a course change costs warp speed as a ramp rather than as a
-    // step.
-    const float smoothing_time = configuration().physics.flt_orthogonal_thrust_smoothing_time_flt;
-    if (smoothing_time > 0) {
-        const float step = std::min(1.0F, static_cast<float>(simulation_atom_var) / smoothing_time);
-        graphicOptions.OrthoThrustFraction +=
-                (graphicOptions.OrthoThrustRequest - graphicOptions.OrthoThrustFraction) * step;
-    } else {
-        graphicOptions.OrthoThrustFraction = graphicOptions.OrthoThrustRequest;
-    }
-    graphicOptions.OrthoThrustRequest = 0;
-
     float warprampuptime = unit->IsPlayerShip() ? configuration().warp.warp_ramp_up_time_flt : configuration().warp.computer_warp_ramp_up_time_flt;
     //Warp Turning on/off
     if (graphicOptions.WarpRamping) {
@@ -268,15 +253,27 @@ void Movable::AddVelocity(float difficulty) {
                                     / warprampuptime)) : (graphicOptions.RampCounter
                     / configuration().warp.warp_ramp_down_time_flt) * (graphicOptions.RampCounter / configuration().warp.warp_ramp_down_time_flt);
         }
-        //Orthogonal thrust costs the field speed: the field is a straight-line field, so everything a
-        //ship spends pushing itself off its forward axis is speed it cannot spend going where it is
-        //pointed. It is taken off the value the ship moves on rather than off
-        //GetMaxWarpFieldStrength, so that what the autopilot reads when it decides whether warp is
-        //worth having is still the drive's own capability. Otherwise the autopilot reads a cost its
-        //own steering just incurred as bad news about the world, and oscillates.
-        graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult)
-                * (1.0F - configuration().physics.flt_orthogonal_thrust_speed_reduce_factor_flt
-                        * graphicOptions.OrthoThrustFraction);
+        // The autopilot caps the speed at which the ship can still turn onto what it is steering for.
+        // The cap is a speed, so it becomes a multiplier through the ship's own speed -- the speed it
+        // would be travelling at without warp. The floor is where warp ends, not where the drive
+        // does, so the cap can take the warp off the ship but never take its own speed, and the field
+        // multiplier stays at or above 1, which is what the velocity formula is written for.
+        double field_strength = GetMaxWarpFieldStrength(rampmult);
+        // The same floor GetMaxWarpFieldStrength clamps to; keep the two in step.
+        const double floor_strength = std::min(field_strength,
+                static_cast<double>(configuration().warp.warp_multiplier_min_flt
+                        * graphicOptions.MinWarpMultiplier));
+        if (unit->autopilotactive && unit->autopilot_speed_cap > 0) {
+            const double own_speed = Velocity.Magnitude();
+            if (own_speed > 0) {
+                const double capped = unit->autopilot_speed_cap / own_speed;
+                field_strength = std::max(floor_strength, std::min(field_strength, capped));
+            }
+        }
+        // The multiplier is only meaningful at 1 or above: below it, the velocity formula's
+        // (warpfield - 1) term turns negative and takes forward motion off the ship rather than
+        // slowing it.
+        graphicOptions.WarpFieldStrength = std::max(1.0, field_strength);
     } else {
         graphicOptions.WarpFieldStrength = 1;
     }
@@ -374,7 +371,12 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     if (NetForce.i || NetForce.j || NetForce.k) {
         temp2 += InvTransformNormal(transmat, NetForce);
     }
-    temp2 = temp2 / static_cast<float>(unit->GetMass());
+    // A unit whose row carries no Mass is loaded with a mass of zero, and dividing by it would leave
+    // the velocity non-finite - which makes the unit, and anything drawn from its transform, vanish.
+    const float unit_mass = unit->GetMass();
+    if (unit_mass != 0) {
+        temp2 = temp2 / unit_mass;
+    }
     temp = temp2 * simulation_atom_var;
     if (!(FINITE(temp2.i) && FINITE(temp2.j) && FINITE(temp2.k))) {
         VS_LOG(info, "NetForce transform skrewed");
@@ -856,22 +858,6 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
     {
         Vector amt = ClampThrust(amt1, afterburn);
         ApplyLocalForce(amt);
-
-        // How much of the ship's orthogonal thrust is being asked for: the lateral and vertical
-        // thrusters, the ones that push it off its forward axis, against what they have to give.
-        // 1.0 means they are being asked for everything they have. This is the thrust a ship spends
-        // to change course, and it is what should cost it warp speed -- see GetMaxWarpFieldStrength.
-        const float lateral_limit = std::abs(unit->drive.lateral.Value());
-        const float vertical_limit = std::abs(unit->drive.vertical.Value());
-        float orthogonal = 0.0F;
-        if (lateral_limit > 0) {
-            orthogonal = std::max(orthogonal, std::abs(amt.i) / lateral_limit);
-        }
-        if (vertical_limit > 0) {
-            orthogonal = std::max(orthogonal, std::abs(amt.j) / vertical_limit);
-        }
-        graphicOptions.OrthoThrustRequest = std::max(graphicOptions.OrthoThrustRequest,
-                std::min(1.0F, orthogonal));
     }
 
     const bool must_afterburn_to_buzz = configuration().audio.buzzing_needs_afterburner;

@@ -31,6 +31,7 @@
 #include <string>
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
+#include "cmd/dock_utils.h"
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
 #include "gfx_generic/cockpit_generic.h"
@@ -541,13 +542,6 @@ int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero) {
 }
 
 
-bool repair(Unit *my_unit) {
-    if (!my_unit) {
-        return false;
-    }
-    return my_unit->RepairUpgrade();
-}
-
 float upgrade(Unit *my_unit, string file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) {
     if (!my_unit) {
         return 0;
@@ -680,23 +674,22 @@ bool isDockableUnit(const Unit *my_unit) {
 }
 
 bool isCloseEnoughToDock(const Unit *my_unit, const Unit *un) {
-    const bool superdock = configuration().physics.dock_within_base_shield;
-    float dis =
-            (un->getUnitType() == Vega_UnitType::planet || superdock) ? UnitUtil::getSignificantDistance(my_unit, un)
-                    : UnitUtil::getDistance(
-                    my_unit,
-                    un);
-    if (dis < un->rSize()) {
-        return true;
+    if (my_unit == nullptr || un == nullptr) {
+        return false;
     }
-    return false;
+    // The docking distance, measured the way the docking test measures it: from a planet's
+    // surface, or from anything else's hull.
+    const double distance = (un->getUnitType() == Vega_UnitType::planet)
+            ? std::max(0.0, (my_unit->LocalPosition() - un->LocalPosition()).Magnitude() - un->rSize())
+            : UnitUtil::getDistance(my_unit, un);
+    return distance < DockingDistance(un);
 }
 
 float getDistance(const Unit *my_unit, const Unit *un) {
     if (my_unit == NULL || un == NULL) {
         return FLT_MAX;
     }
-    return (my_unit->Position() - un->Position()).Magnitude() - my_unit->rSize() - un->rSize();
+    return (my_unit->LocalPosition() - un->LocalPosition()).Magnitude() - my_unit->rSize() - un->rSize();
 }
 
 float getSignificantDistance(const Unit *un, const Unit *sig) {
@@ -809,6 +802,14 @@ float PercentOperational(const Cargo item, Unit *un, std::string name, std::stri
 
     // New Code
     // TODO: Make actually return percent damaged
+
+    // A ship's own components are listed under the name the damage report gives them,
+    // which is not a unit key - there is no armor key, only armor01 and its like. Ask
+    // the ship's components for those before falling back to the keys.
+    const Component *component = un->ComponentByName(name);
+    if (component != nullptr) {
+        return component->PercentOperational();
+    }
 
     // name is unit_key with stripped suffix. Need to add it again
     // TODO: check for prefixes: add_ mult_

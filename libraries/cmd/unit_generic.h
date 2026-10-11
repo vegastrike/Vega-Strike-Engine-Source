@@ -266,6 +266,10 @@ public:
 #define NO_MOUNT_STAR
     bool inertialmode = false;
     bool autopilotactive = false;
+    // The speed the autopilot may hold and still turn onto what it is steering for, in the units the
+    // ship moves in; 0 means no cap. Set by AutoLongHaul, applied by Movable, which is where the
+    // ship's own speed -- and so the warp multiplier that speed implies -- is known.
+    float autopilot_speed_cap = 0.0F;
 
     bool isSubUnit() const {
         return graphicOptions.SubUnit ? true : false;
@@ -311,17 +315,6 @@ public:
             const Unit *templ = NULL,
             bool force_change_on_nothing = false,
             bool gen_downgrade_list = true);
-    // TODO: remove function
-    // We no longer do repair through basic repair.
-    // Kept for compatibility with python API.
-    // Previous comment: returns how many things need to be repaired--if nothing is damaged it will return 1 for labor.  doesn't assume any given cost on such things.
-    int RepairCost();
-    // TODO: remove
-    // This was called when performing a BASIC_REPAIR
-    // This function doesn't do anything anymore
-    // Kept for compatibility with python API.
-    // Previous comment: returns how many things were repaired
-    int RepairUpgrade();
     //returns percentOperational,maxPercentOperational,and whether mount is damaged (1 is damaged, 0 is fine, -1 is invalid mount)
     bool RepairUpgradeCargo(Cargo *item,
             Unit *baseUnit, double repair_price);           //item must not be NULL but baseUnit/credits are only used for pricing.

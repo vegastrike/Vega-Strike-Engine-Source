@@ -1426,6 +1426,27 @@ float Unit::ExplosionRadius() {
     return expsize * rSize();
 }
 
+// A unit about to be freed must not be left as anybody's target, threat or velocity
+// reference: those are cast back to Unit when read, and casting freed memory faults.
+static void ClearReferencesTo(const Unit *dying_unit) {
+    if (_Universe == nullptr || _Universe->activeStarSystem() == nullptr) {
+        return;
+    }
+    Unit *unit;
+    for (un_iter iter = _Universe->activeStarSystem()->getUnitList().createIterator();
+            (unit = *iter) != nullptr; ++iter) {
+        if (unit->Target() == dying_unit) {
+            unit->SetTarget(nullptr);
+        }
+        if (unit->Threat() == dying_unit) {
+            unit->Threaten(nullptr, 0);
+        }
+        if (unit->VelocityReference() == dying_unit) {
+            unit->VelocityReference(nullptr);
+        }
+    }
+}
+
 void Unit::ProcessDeleteQueue() {
     while (!unit_delete_queue.empty()) {
 #ifdef DESTRUCTDEBUG
@@ -1442,11 +1463,7 @@ void Unit::ProcessDeleteQueue() {
         Unit *mydeleter = unit_delete_queue.back();
         unit_delete_queue.pop_back();
 
-        // Avoid segfault when the unit getting destroyed is the player's current target
-        Unit* parent = _Universe->AccessCockpit()->GetParent();
-        if (parent && parent->Target() == mydeleter) {
-            parent->SetTarget(nullptr);
-        }
+        ClearReferencesTo(mydeleter);
 
         delete mydeleter;                        ///might modify unitdeletequeue
         mydeleter = nullptr;
@@ -2072,6 +2089,30 @@ bool Unit::isDocked(const Unit *d) const {
 
 extern vector<int> switchunit;
 
+//Put a ship that is leaving a docking port back where that port is now. While docked the
+//docked-to unit carries the ship along with its own movement, but it can only do that from
+//frame to frame: a correction to the docked-to unit's position, or simply a long stretch
+//docked, can leave the ship sitting at a stale offset - and then it launches from there.
+static void LaunchFromDockingPort(Unit *ship, Unit *base, unsigned int port) {
+    //Sit at the distance the body counts as dockable at, so leaving it puts us where we could
+    //dock with it again - and never inside its hull. Docking measures a planet to its surface, so
+    //a planet's radius goes back on to get the distance from its centre.
+    const double dock_distance = DockingDistance(base) + (base->isPlanet() ? base->rSize() : 0.0);
+    const double launch_distance =
+            std::max(dock_distance, static_cast<double>(base->rSize() + ship->rSize()));
+    QVector outward = ship->LocalPosition() - base->LocalPosition();
+    if (outward.MagnitudeSquared() < 1.0f && port < base->DockingPortLocations().size()) {
+        //Docked dead centre - a planet can be docked to anywhere on its surface - so fall
+        //back to the direction of the port the ship was occupying.
+        outward = base->DockingPortLocations()[port].GetPosition().Cast();
+    }
+    if (outward.MagnitudeSquared() < 1.0f) {
+        outward = QVector(0, 1, 0);
+    }
+    outward.Normalize();
+    ship->SetCurPosition(base->LocalPosition() + (outward * launch_distance));
+}
+
 bool Unit::UnDock(Unit *utdw) {
     unsigned int i = 0;
     if (this->name == "return_to_cockpit") {
@@ -2084,6 +2125,7 @@ bool Unit::UnDock(Unit *utdw) {
     VS_LOG(trace, "Asking to undock");
     for (i = 0; i < utdw->pImage->dockedunits.size(); ++i) {
         if (utdw->pImage->dockedunits[i]->uc.GetUnit() == this) {
+            LaunchFromDockingPort(this, utdw, utdw->pImage->dockedunits[i]->whichdock);
             utdw->FreeDockingPort(i);
             i--;
             SetVisible(true);
@@ -2780,23 +2822,6 @@ Vector Unit::MountPercentOperational(int whichmount) {
             ((mounts[whichmount].status == Mount::ACTIVE || mounts[whichmount].status
                     == Mount::INACTIVE) ? 0.0 : (mounts[whichmount].status == Mount::UNCHOSEN ? 2.0 : 1.0)));
 }
-
-// TODO: remove function
-// We no longer do repair through basic repair.
-// Kept for compatibility with python API.
-int Unit::RepairCost() {
-    return 0;
-}
-
-// TODO: remove
-// This was called when performing a BASIC_REPAIR
-// This function doesn't do anything anymore
-// Kept for compatibility with python API.
-int Unit::RepairUpgrade() {
-    return 1;
-}
-
-
 
 bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, double repair_price) {
     assert((item != nullptr) | !"Unit::RepairUpgradeCargo got a null item.");

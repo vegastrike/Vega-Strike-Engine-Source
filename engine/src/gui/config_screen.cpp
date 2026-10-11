@@ -37,6 +37,8 @@
 
 namespace fs = boost::filesystem;
 
+#include "config_file_editor.h"
+
 namespace vs_settings_ng {
 
 namespace {
@@ -66,6 +68,14 @@ static const char *frame_limit_vals[] = { "unlimited", "half", "fixed" };
 int  sel_frame_limit = 0;
 int  sel_max_framerate = 60;
 bool show_fps = false;
+
+// Docking: which rule the player is under, and the distances the simple rule uses. A planet keeps
+// the simple rule in both modes -- it has no docking port to fly into -- so its distance always
+// applies.
+static const char *dock_mode_opts[] = { "Simple docking", "Docking zones" };
+int  sel_dock_mode = 0;
+char dock_range_buf[16] = "5000";
+char planet_dock_buf[16] = "1.5";
 bool display_inited = false;
 
 bool rendered_crosshair = true;
@@ -74,6 +84,14 @@ bool cfg_full_screen = true;
 // Mouse / Joystick dialog open flags.
 static bool mouse_dialog_open = false;
 static bool joy_dialog_open = false;
+
+// The JSON files the screen can edit directly: the rest of the config split. bindings.json has its
+// own dialog and config.json is what the screen itself edits, so these are engine.json and
+// theme.json.
+static vs_settings_ng::ConfigFileEditor engine_file_editor("engine.json", "Engine Config");
+static vs_settings_ng::ConfigFileEditor theme_file_editor("theme.json", "Color Config");
+static bool engine_dialog_open = false;
+static bool theme_dialog_open = false;
 
 // Forward declarations (defined below; used by draw_display_frame).
 static void load_mouse_staging();
@@ -345,6 +363,11 @@ static void load_display_from_config() {
     for (int i = 0; i < 3; ++i) if (g.frame_limit_mode == frame_limit_vals[i]) sel_frame_limit = i;
     sel_max_framerate = g.max_framerate > 0 ? g.max_framerate : 60;
     show_fps = g.show_fps;
+    // Docking. An unset mode predates the setting, and the older boolean says which rule applies.
+    const auto &dk = configuration().dock;
+    sel_dock_mode = (dk.mode == "zones") ? 1 : (dk.mode == "simple" ? 0 : (dk.simple_dock ? 0 : 1));
+    snprintf(dock_range_buf, sizeof(dock_range_buf), "%g", dk.simple_dock_range_dbl);
+    snprintf(planet_dock_buf, sizeof(planet_dock_buf), "%g", dk.dock_planet_radius_percent_dbl);
     display_inited = true;
 }
 
@@ -368,6 +391,27 @@ static void apply_display_to_config() {
     mark_dirty("graphics.fov");
     if (_Universe && _Universe->AccessCamera()) {
         _Universe->AccessCamera()->SetFov(g.fov_flt);
+    }
+    // Docking: the mode, and the two distances. Only the mode key is written -- the older
+    // simple_dock boolean is still read as a fallback, but nothing has to keep writing it.
+    {
+        auto &dk = configuration().dock;
+        dk.mode = (sel_dock_mode == 1) ? "zones" : "simple";
+        double range = locale_aware_stod(std::string(dock_range_buf));
+        if (range < 0.0) {
+            range = 0.0;
+        }
+        dk.simple_dock_range_dbl = range;
+        dk.simple_dock_range_flt = static_cast<float>(range);
+        double planet = locale_aware_stod(std::string(planet_dock_buf));
+        if (planet < 1.0) {
+            planet = 1.0;   // inside one radius there is nothing left to dock with
+        }
+        dk.dock_planet_radius_percent_dbl = planet;
+        dk.dock_planet_radius_percent_flt = static_cast<float>(planet);
+        mark_dirty("dock.mode");
+        mark_dirty("dock.simple_dock_range");
+        mark_dirty("dock.dock_planet_radius_percent");
     }
     // Persist the selected font ("Roboto" sentinel or a .ttf filename); only hot-apply
     // a font change when the selection actually differs from the current font, so a
@@ -440,7 +484,9 @@ void draw_display_frame() {
     float dpy_w = avail_w * 0.72f;
     float side_w = avail_w - dpy_w;
 
-    ImGui::BeginChild("dpyframe", ImVec2(dpy_w, 8 * btn_h), ImGuiChildFlags_Borders);
+    // Let the frame measure itself: it carries more rows than a fixed eight-button height fits.
+    ImGui::BeginChild("dpyframe", ImVec2(dpy_w, 0.0f),
+            ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
     // Monitor selector.
     if (ImGui::Button("Monitor")) ImGui::OpenPopup("##pick_mon");
     ImGui::SameLine(); ImGui::TextUnformatted(monitor_text.c_str());
@@ -524,6 +570,27 @@ void draw_display_frame() {
     ImGui::SetNextItemWidth(60);
     if (ImGui::InputText("##hudfov", hud_fov_buf, sizeof(hud_fov_buf), ImGuiInputTextFlags_CharsDecimal))
         dirty = true;
+    // Docking. The mode picks how you dock -- within the range, or by putting your port on the
+    // station's -- and does not change the distance: that is the range for every body, with a
+    // planet's own zone under it as a floor, and it is also where SPEC and the autopilot stop.
+    ImGui::SeparatorText("Docking");
+    if (ImGui::Button("Mode")) ImGui::OpenPopup("##pick_dockmode");
+    ImGui::SameLine(); ImGui::TextUnformatted(dock_mode_opts[sel_dock_mode]);
+    if (ImGui::BeginPopup("##pick_dockmode")) {
+        for (int i = 0; i < 2; ++i)
+            if (ImGui::MenuItem(dock_mode_opts[i])) { sel_dock_mode = i; dirty = true; }
+        ImGui::EndPopup();
+    }
+    ImGui::Text("Docking range"); ImGui::SameLine();
+    ImGui::SetNextItemWidth(90);
+    if (ImGui::InputText("##dockrange", dock_range_buf, sizeof(dock_range_buf), ImGuiInputTextFlags_CharsDecimal))
+        dirty = true;
+    ImGui::TextDisabled("Where docking, SPEC and the autopilot all stop, for every body.");
+    ImGui::Text("Planet zone (x radius)"); ImGui::SameLine();
+    ImGui::SetNextItemWidth(90);
+    if (ImGui::InputText("##planetdock", planet_dock_buf, sizeof(planet_dock_buf), ImGuiInputTextFlags_CharsDecimal))
+        dirty = true;
+    ImGui::TextDisabled("A planet's own zone: its radius times this, if that is further out.");
     // Vsync (monitor sync).
     if (ImGui::Button("Vsync")) ImGui::OpenPopup("##pick_vsync");
     ImGui::SameLine(); ImGui::TextUnformatted(vsync_opts[sel_vsync]);
@@ -577,7 +644,10 @@ void draw_display_frame() {
     // Right column: Flight Control + Input buttons + Rendered Crosshair, side by
     // side with the monitor/resolution/display controls (as vs-05).
     ImGui::SameLine();
-    ImGui::BeginChild("dpybtns", ImVec2(side_w, 8 * btn_h), ImGuiChildFlags_Borders);
+    // Let the right column measure itself too: the two file buttons fill its fixed eight-button
+    // height, and a scrollbar to reach a setting is worse than a taller frame.
+    ImGui::BeginChild("dpybtns", ImVec2(side_w, 0.0f),
+            ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
     if (ImGui::Button(("Flight Control: " + std::string(fc_names[flight_control])).c_str(), ImVec2(-1, 0)))
         ImGui::OpenPopup("##flight");
     if (ImGui::BeginPopup("##flight")) {
@@ -599,6 +669,8 @@ void draw_display_frame() {
     if (ImGui::Button("Joystick Settings", ImVec2(-1, 0))) { load_joystick_staging(); joy_dialog_open = true; }
     if (flight_control != FC_JOYSTICK) ImGui::EndDisabled();
     if (ImGui::Button("Bindings", ImVec2(-1, 0))) { load_bindings_staging(); bind_capture_cmd.clear(); bind_rebind_row = -1; bind_capturing = false; bind_dialog_open = true; }
+    if (ImGui::Button("Engine Config", ImVec2(-1, 0))) { engine_file_editor.Load(); engine_dialog_open = true; }
+    if (ImGui::Button("Color Config", ImVec2(-1, 0))) { theme_file_editor.Load(); theme_dialog_open = true; }
     if (ImGui::Checkbox("Rendered Crosshair", &rendered_crosshair)) dirty = true;
     ImGui::EndChild();   // end dpybtns (right column)
 }
@@ -1759,6 +1831,12 @@ static const ConfigAccessor kConfigAccessors[] = {
     {"input.mouse.enabled",              [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.enabled;},                 nullptr},
     {"input.mouse.inverse_x",            [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.inverse_x;},               nullptr},
     {"input.mouse.inverse_y",            [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.inverse_y;},               nullptr},
+    // ---- dock ----
+    // Set by the docking group's apply function, so no preset setter. Every path a setting marks
+    // dirty also has to be readable here, or write_out_dirty() drops it.
+    {"dock.mode",                       [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.dock.mode);},        nullptr},
+    {"dock.simple_dock_range",          [](const vega_config::Configuration&c)->boost::json::value{return c.dock.simple_dock_range_dbl;},             nullptr},
+    {"dock.dock_planet_radius_percent", [](const vega_config::Configuration&c)->boost::json::value{return c.dock.dock_planet_radius_percent_dbl;},   nullptr},
     // ---- splash / test ----
     {"splash.loading_sprite",            [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.splash.loading_sprite);},          [](vega_config::Configuration&c,const std::string&v){c.splash.loading_sprite=v;}},
     {"test.autodocker",                  [](const vega_config::Configuration&c)->boost::json::value{return c.test.autodocker;},                [](vega_config::Configuration&c,const std::string&v){c.test.autodocker=(v=="true"||v=="1");}},
@@ -2035,6 +2113,22 @@ void DrawConfigScreen() {
             const auto shader_before = shader_values_snapshot();
             apply_all();
             write_out_dirty();   // persist the dirty paths to the user overlay
+            // The file editors write their own overlays: only the leaves that differ from the
+            // shipped file. Written whole rather than merged, so a key the player had overridden
+            // and has now reset to the shipped value is cleared out of their file instead of being
+            // left behind. Keys the shipped file does not have are kept: the model holds whatever
+            // the player's file contained, and writes it back.
+            for (vs_settings_ng::ConfigFileEditor *editor : {&engine_file_editor, &theme_file_editor}) {
+                const boost::json::value changes = editor->Changes();
+                const std::string path = VSFileSystem::homedir + "/" + editor->FileName();
+                const bool has_content = changes.is_object() && !changes.as_object().empty();
+                if (!has_content && !std::ifstream(path).good()) {
+                    continue;   // nothing to write and nothing to clear
+                }
+                std::ofstream out(path);
+                out << boost::json::serialize(changes) << "\n";
+                fprintf(stderr, "[vs-settings-ng] wrote %s\n", path.c_str());
+            }
             if (shader_values_snapshot() != shader_before) {
                 // Tell the user the change takes effect on restart, and restore
                 // the running shader state so the current visuals are kept until
@@ -2085,6 +2179,8 @@ void DrawConfigScreen() {
 
     // Bindings dialog (modal on top).
     if (bind_dialog_open) ImGui::OpenPopup("Bindings");
+    if (engine_dialog_open) ImGui::OpenPopup("Engine Config");
+    if (theme_dialog_open) ImGui::OpenPopup("Color Config");
     draw_bindings_dialog();
 
     // Shader-change notice (modal on top). Shaders are written out but not
@@ -2092,6 +2188,37 @@ void DrawConfigScreen() {
     if (shader_restart_notice) {
         ImGui::OpenPopup("Shader Change");
     }
+    // The file editors take most of the screen: engine.json's keys are long, and a small dialog
+    // clips the names against their values.
+    const ImVec2 file_dialog_size(ImGui::GetIO().DisplaySize.x * 0.8f, ImGui::GetIO().DisplaySize.y * 0.8f);
+    const ImVec2 file_dialog_pos(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f);
+    ImGui::SetNextWindowSize(file_dialog_size, ImGuiCond_Always);
+    ImGui::SetNextWindowPos(file_dialog_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("Engine Config", &engine_dialog_open)) {
+        if (engine_file_editor.Draw()) {
+            dirty = true;
+        }
+        ImGui::Separator();
+        if (ImGui::Button("Close", ImVec2(120, 0))) {
+            engine_dialog_open = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+    ImGui::SetNextWindowSize(file_dialog_size, ImGuiCond_Always);
+    ImGui::SetNextWindowPos(file_dialog_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("Color Config", &theme_dialog_open)) {
+        if (theme_file_editor.Draw()) {
+            dirty = true;
+        }
+        ImGui::Separator();
+        if (ImGui::Button("Close", ImVec2(120, 0))) {
+            theme_dialog_open = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
     if (ImGui::BeginPopupModal("Shader Change", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::TextUnformatted("Shader changes take effect after a restart.");
         ImGui::TextUnformatted("The new settings were saved. Restart the game to apply them.");

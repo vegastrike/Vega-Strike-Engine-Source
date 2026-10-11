@@ -1417,19 +1417,26 @@ namespace vega_config {
         float dock_planet_radius_percent_flt = 1.5;
         double planet_dock_port_min_size_dbl = 300.0;
         float planet_dock_port_min_size_flt = 300.0;
-        double planet_dock_port_size_dbl = 1.2;
-        float planet_dock_port_size_flt = 1.2;
         bool simple_dock = true;
         double simple_dock_range_dbl = 5000.0;
         float simple_dock_range_flt = 5000.0;
+        // "simple" or "zones". Empty means the setting is not in the config, and the older
+        // simple_dock boolean decides instead, so an overlay that only sets that still works.
+        std::string mode = "";
 
     } dock;
 
     struct {
-        double repair_price_dbl = 5000.0;
-        float repair_price_flt = 5000.0;
-        double sellback_shipping_price_dbl = 6000.0;
-        float sellback_shipping_price_flt = 6000.0;
+        // What a component with no listed part of its own is worth, as a share of the price of
+        // the ship carrying it: the shops' ladders stop well below what capital ships mount.
+        double component_share_dbl = 0.05;
+        float component_share_flt = 0.05;
+        // What a ship too damaged to sell as a ship is worth: never more than this share of what
+        // it cost, and never more than its weight in the cheapest metal.
+        double scrap_price_fraction_dbl = 0.05;
+        float scrap_price_fraction_flt = 0.05;
+        double scrap_price_per_mass_dbl = 5.0;
+        float scrap_price_per_mass_flt = 5.0;
         double ship_sellback_price_dbl = 0.5;
         float ship_sellback_price_flt = 0.5;
         double shipping_price_base_dbl = 0.0;
@@ -2286,8 +2293,14 @@ namespace vega_config {
         bool auto_pilot_compensate_for_interdiction = false;
         double auto_pilot_no_enemies_distance_multiplier_dbl = 4.0;
         float auto_pilot_no_enemies_distance_multiplier_flt = 4.0;
+        // Fraction of a planet's radius the interdiction treats as part of the body: how far above
+        // the surface a warp field starts to be degraded. Independent of the docking settings.
         double auto_pilot_planet_radius_percent_dbl = 0.495;
         float auto_pilot_planet_radius_percent_flt = 0.495;
+        // How many times the speed at which the ship can still turn onto its aim in time it may keep:
+        // 1 is that speed exactly, lower holds it back further, 0 turns the rule off.
+        double auto_pilot_spec_turn_speed_factor_dbl = 1.0;
+        float auto_pilot_spec_turn_speed_factor_flt = 1.0;
         bool auto_pilot_terminate = true;
         double auto_pilot_termination_distance_dbl = 2500.0;
         float auto_pilot_termination_distance_flt = 2500.0;
@@ -2378,10 +2391,6 @@ namespace vega_config {
         float extra_space_drag_for_cargo_flt = 0.005;
         bool face_target_on_auto = false;
         bool fire_missing_autotrackers = true;
-        double flt_orthogonal_thrust_smoothing_time_dbl = 1.0;
-        float flt_orthogonal_thrust_smoothing_time_flt = 1.0;
-        double flt_orthogonal_thrust_speed_reduce_factor_dbl = 1.0;
-        float flt_orthogonal_thrust_speed_reduce_factor_flt = 1.0;
         double friendly_auto_radius_dbl = 0.0;
         float friendly_auto_radius_flt = 0.0;
         double game_accel_dbl = 1.0;
@@ -2494,10 +2503,6 @@ namespace vega_config {
         double percent_missile_match_target_velocity_dbl = 1.0;
         float percent_missile_match_target_velocity_flt = 1.0;
         bool persistent_on_load = true;
-        double planet_dock_min_port_size_dbl = 300.0;
-        float planet_dock_min_port_size_flt = 300.0;
-        double planet_dock_port_size_dbl = 1.2;
-        float planet_dock_port_size_flt = 1.2;
         double planet_ejection_stophack_dbl = 100000.0;
         float planet_ejection_stophack_flt = 100000.0;
         bool planets_always_neutral = true;
