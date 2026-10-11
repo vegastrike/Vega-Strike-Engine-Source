@@ -53,6 +53,6 @@ echo "deleting compiled python files (*.pyc)"
 find "$DATA_DIR" -name "*.pyc" -delete
 
 # delete home vegastrike config
-echo "deleting home vegastrike.config"
-rm ~/.vegastrike/vegastrike.config
-echo "run bin/vegasettings to create a new setup"
+echo "deleting home vegastrike config"
+rm -f ~/.vegastrike/config.json ~/.vegastrike/bindings.json ~/.vegastrike/theme.json ~/.vegastrike/engine.json
+echo "the in-game settings screen (Alt-C) recreates them on save"

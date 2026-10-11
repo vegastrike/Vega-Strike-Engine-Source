@@ -63,8 +63,7 @@ Movable::Movable() : sim_atom_multiplier(1),
         cumulative_transformation_matrix(identity_matrix),
         corner_min(Vector(FLT_MAX, FLT_MAX, FLT_MAX)),
         corner_max(Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX)),
-        radial_size(0),
-        Momentofinertia(0.01) {
+        radial_size(0) {
     cur_sim_queue_slot = VegaRandom::Instance().RandomSizeTLessThan(SIM_QUEUE_SIZE);
     const Vector default_angular_velocity(configuration().general.pitch_flt,
             configuration().general.yaw_flt,
@@ -85,6 +84,8 @@ Movable::graphic_options::graphic_options() {
     NumAnimationPoints = 0;
     RampCounter = 0;
     MinWarpMultiplier = MaxWarpMultiplier = 1;
+    OrthoThrustFraction = 0;
+    OrthoThrustRequest = 0;
 
     // Added implementation to make var false
     // I don't like it, because it's true by default and false by default
@@ -115,11 +116,12 @@ Vector Movable::GetNetAcceleration() const {
 }
 
 Vector Movable::GetNetAngularAcceleration() const {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     Vector p, q, r;
     GetOrientation(p, q, r);
     Vector res(NetLocalTorque.i * p + NetLocalTorque.j * q + NetLocalTorque.k * r);
     res += NetTorque;
-    return res / GetMoment();
+    return res / static_cast<float>(unit->GetMass());
 }
 
 float Movable::GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn) const {
@@ -170,7 +172,7 @@ void Movable::UpdatePhysics(const Transformation& trans,
         // Enforce the flight computer's set speed on the RESULTING velocity
         // magnitude (not per-axis), so turning or moving diagonally cannot push
         // the ship past the speed the pilot set. This runs after the velocity
-        // integration, so it holds for the frame. Warp (ftl) is exempt.
+        // integration, so it holds for the frame. Warp (SPEC) is exempt.
         // The limits come from the drive/afterburner Resource values via
         // MaxSpeed()/MaxAfterburnerSpeed(); the hardcoded velocity_max_flt
         // per-axis cap is no longer needed.
@@ -214,6 +216,19 @@ void Movable::AddVelocity(float difficulty) {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     float lastWarpField = graphicOptions.WarpFieldStrength;
 
+    // The demand on the orthogonal thrusters is ramped toward what they are being asked for, over a
+    // time the setting controls, so that a course change costs warp speed as a ramp rather than as a
+    // step.
+    const float smoothing_time = configuration().physics.flt_orthogonal_thrust_smoothing_time_flt;
+    if (smoothing_time > 0) {
+        const float step = std::min(1.0F, static_cast<float>(simulation_atom_var) / smoothing_time);
+        graphicOptions.OrthoThrustFraction +=
+                (graphicOptions.OrthoThrustRequest - graphicOptions.OrthoThrustFraction) * step;
+    } else {
+        graphicOptions.OrthoThrustFraction = graphicOptions.OrthoThrustRequest;
+    }
+    graphicOptions.OrthoThrustRequest = 0;
+
     float warprampuptime = unit->IsPlayerShip() ? configuration().warp.warp_ramp_up_time_flt : configuration().warp.computer_warp_ramp_up_time_flt;
     //Warp Turning on/off
     if (graphicOptions.WarpRamping) {
@@ -253,7 +268,15 @@ void Movable::AddVelocity(float difficulty) {
                                     / warprampuptime)) : (graphicOptions.RampCounter
                     / configuration().warp.warp_ramp_down_time_flt) * (graphicOptions.RampCounter / configuration().warp.warp_ramp_down_time_flt);
         }
-        graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult);
+        //Orthogonal thrust costs the field speed: the field is a straight-line field, so everything a
+        //ship spends pushing itself off its forward axis is speed it cannot spend going where it is
+        //pointed. It is taken off the value the ship moves on rather than off
+        //GetMaxWarpFieldStrength, so that what the autopilot reads when it decides whether warp is
+        //worth having is still the drive's own capability. Otherwise the autopilot reads a cost its
+        //own steering just incurred as bad news about the world, and oscillates.
+        graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult)
+                * (1.0F - configuration().physics.flt_orthogonal_thrust_speed_reduce_factor_flt
+                        * graphicOptions.OrthoThrustFraction);
     } else {
         graphicOptions.WarpFieldStrength = 1;
     }
@@ -323,8 +346,9 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     if (NetTorque.i || NetTorque.j || NetTorque.k) {
         temp1 += InvTransformNormal(transmat, NetTorque);
     }
-    if (GetMoment()) {
-        temp1 = temp1 / GetMoment();
+    const float angular_mass = unit->GetMass();
+    if (angular_mass != 0) {
+        temp1 = temp1 / angular_mass;
     }
 
     // TODO: restore this with the unit name
@@ -475,22 +499,10 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     Vector v = unit->GetWarpRefVelocity();
 //    QVector qv = v.Cast();
 
-    // ftl is space compression. The amount of space we can compress -- the warp
-    // multiplier -- depends only on the nearest object in space. Full speed requires
-    // the whole column of space the ship will cover in one second at 100x light speed
-    // to be clear (max_effective_velocity); anything closer compresses less, scaling
-    // the multiplier down proportionally to the significant distance to the object.
-    const float max_compression_range = configuration().warp.max_effective_velocity_flt;
-    float nearest = unit->GetNearestObjectSignificantDistance();
-    // ftl is space compression and needs empty space: it does not work at all below
-    // the minimum warp effect range (the 3 km weapons range). The linear
-    // speed-assist scale starts at that inner radius (0 there) and reaches full
-    // speed at the compression range.
-    const float kWeaponsRange = configuration().physics.warp_min_range_flt;
+    //inverse fractional effect of ship vs real big object
     float minimum_multiplier = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
-    if (nearest < max_compression_range) {
-        minimum_multiplier *= (nearest - kWeaponsRange) / (max_compression_range - kWeaponsRange);
-    }
+    Unit *nearest_unit = nullptr;
+    minimum_multiplier = unit->CalculateNearestWarpUnit(minimum_multiplier, &nearest_unit, true);
     float minWarp = configuration().warp.warp_multiplier_min_flt * graphicOptions.MinWarpMultiplier;
     float maxWarp = configuration().warp.warp_multiplier_max_flt * graphicOptions.MaxWarpMultiplier;
     if (minimum_multiplier < minWarp) {
@@ -511,10 +523,6 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     if (vmag > warp_max_effective_velocity) {
         v *= warp_max_effective_velocity / vmag; //HARD LIMIT
         minimum_multiplier *= warp_max_effective_velocity / vmag;
-    }
-    // Below the weapons range ftl does not work at all.
-    if (nearest <= kWeaponsRange) {
-        minimum_multiplier = 1.0f;
     }
     return minimum_multiplier;
 }
@@ -848,6 +856,22 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
     {
         Vector amt = ClampThrust(amt1, afterburn);
         ApplyLocalForce(amt);
+
+        // How much of the ship's orthogonal thrust is being asked for: the lateral and vertical
+        // thrusters, the ones that push it off its forward axis, against what they have to give.
+        // 1.0 means they are being asked for everything they have. This is the thrust a ship spends
+        // to change course, and it is what should cost it warp speed -- see GetMaxWarpFieldStrength.
+        const float lateral_limit = std::abs(unit->drive.lateral.Value());
+        const float vertical_limit = std::abs(unit->drive.vertical.Value());
+        float orthogonal = 0.0F;
+        if (lateral_limit > 0) {
+            orthogonal = std::max(orthogonal, std::abs(amt.i) / lateral_limit);
+        }
+        if (vertical_limit > 0) {
+            orthogonal = std::max(orthogonal, std::abs(amt.j) / vertical_limit);
+        }
+        graphicOptions.OrthoThrustRequest = std::max(graphicOptions.OrthoThrustRequest,
+                std::min(1.0F, orthogonal));
     }
 
     const bool must_afterburn_to_buzz = configuration().audio.buzzing_needs_afterburner;

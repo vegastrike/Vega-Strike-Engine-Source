@@ -29,10 +29,6 @@
 #include "navigation.h"
 #include "root_generic/macosx_math.h"
 #include <math.h>
-#include <algorithm>
-#include <vector>
-#include "cmd/unit_find.h"
-#include "src/universe.h"
 #ifndef _WIN32
 #include <assert.h>
 #endif
@@ -52,27 +48,6 @@
 using namespace Orders;
 
 constexpr float M_PI_FLT = M_PI;
-
-// Collects up to a bounded number of units (other than ourselves) in range for the
-// ftl clear-space steering -- used as the action for UnitWithinRangeLocator over
-// the UNIT_ONLY map. Capping the count keeps the per-frame cost bounded even with
-// hundreds of ships in the vicinity.
-struct ClearSpaceCollector {
-    std::vector<Unit *> *units;
-    std::size_t max_units;
-    ClearSpaceCollector() : units(nullptr), max_units(0) {}
-    void init(std::vector<Unit *> &u, std::size_t maxn) {
-        units = &u;
-        max_units = maxn;
-    }
-    bool acquire(Unit *unit, float /*distance*/) {
-        if (units == nullptr || units->size() >= max_units) {
-            return false;
-        }
-        units->push_back(unit);
-        return true;
-    }
-};
 
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
@@ -294,16 +269,16 @@ MoveTo::~MoveTo() {
 }
 
 bool ChangeHeading::OptimizeAngSpeed(float optimal_speed_pos, float optimal_speed_neg, float v, float &a) {
-    v += (a / parent->GetMoment()) * simulation_atom_var;
+    v += (a / static_cast<float>(parent->GetMass())) * simulation_atom_var;
     if ((optimal_speed_pos == 0 && optimal_speed_neg == 0) || (v >= -optimal_speed_neg && v <= optimal_speed_pos)) {
         return true;
     }
     if (v > 0) {
-        float deltaa = parent->GetMoment() * (v - optimal_speed_pos)
+        float deltaa = static_cast<float>(parent->GetMass()) * (v - optimal_speed_pos)
                 / simulation_atom_var;           //clamping should take care of it
         a -= deltaa;
     } else {
-        float deltaa = parent->GetMoment() * (-v - optimal_speed_neg)
+        float deltaa = static_cast<float>(parent->GetMass()) * (-v - optimal_speed_neg)
                 / simulation_atom_var;           //clamping should take care of it
         a += deltaa;
     }
@@ -317,7 +292,7 @@ bool ChangeHeading::OptimizeAngSpeed(float optimal_speed_pos, float optimal_spee
 void ChangeHeading::TurnToward(float atancalc, float ang_veli, float &torquei) {
     //We need to end up at destination with positive velocity, but no more than we can decelerate from in a single simulation_atom_var
     if (1) {
-        float mass = parent->GetMoment();
+        float mass = static_cast<float>(parent->GetMass());
         float max_arrival_speed = torquei * simulation_atom_var / mass;
         float accel_needed = (atancalc / simulation_atom_var - ang_veli) / simulation_atom_var;
         float arrival_velocity = accel_needed * simulation_atom_var + ang_veli;
@@ -329,21 +304,21 @@ void ChangeHeading::TurnToward(float atancalc, float ang_veli, float &torquei) {
     float t = CalculateBalancedDecelTime(atancalc,
             ang_veli,
             torquei,
-            parent->GetMoment());     //calculate when we should decel
+            static_cast<float>(parent->GetMass()));     //calculate when we should decel
     if (t < 0) {
         //if it can't make it: try the other way
         torquei = fabs(torquei);         //copy sign again
         t = CalculateBalancedDecelTime(atancalc > 0 ? atancalc - 2 * PI : atancalc + 2 * PI,
                 ang_veli,
                 torquei,
-                parent->GetMoment());
+                static_cast<float>(parent->GetMass()));
     }
     if (t > 0) {
         if (t < simulation_atom_var) {
             torquei *= ((t / simulation_atom_var) - ((simulation_atom_var - t) / simulation_atom_var));
         }
     } else {
-        torquei = -parent->GetMoment() * ang_veli / simulation_atom_var;         //clamping should take care of it
+        torquei = -static_cast<float>(parent->GetMass()) * ang_veli / simulation_atom_var;         //clamping should take care of it
     }
 }
 
@@ -428,7 +403,7 @@ void ChangeHeading::Execute() {
             }
             return;
         }
-        torque = (-parent->GetMoment() / simulation_atom_var) * local_velocity;
+        torque = (-static_cast<float>(parent->GetMass()) / simulation_atom_var) * local_velocity;
     } else {
         TurnToward(atan2(local_heading.j, local_heading.k),
                 local_velocity.i,
@@ -443,7 +418,7 @@ void ChangeHeading::Execute() {
                 turningspeed * parent->drive.max_yaw_right,
                 local_velocity.j,
                 torque.j);
-        torque.k = -parent->GetMoment() * local_velocity.k / simulation_atom_var;         //try to counteract roll;
+        torque.k = -static_cast<float>(parent->GetMass()) * local_velocity.k / simulation_atom_var;         //try to counteract roll;
     }
     if (!cheater) {
         parent->ApplyLocalTorque(torque);
@@ -553,6 +528,14 @@ void AutoLongHaul::SetParent(Unit *parent1) {
 
 extern bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following);
 
+QVector AutoLongHaul::NewDestination(const QVector &curnewdestination, double magnitude) {
+    return curnewdestination;
+}
+
+static float mymax(float a, float b) {
+    return a > b ? a : b;
+}
+
 // TODO: move this kludge to FtlDrive
 inline void WarpRampOff(Unit *un, bool rampdown) {
     if (un->ftl_drive.Enabled()) {
@@ -598,18 +581,6 @@ bool AutoLongHaul::InsideLandingPort(const Unit *obstacle) const {
             < -landing_port_limit * parent->afterburner.speed;
 }
 
-// A body the autopilot can never fly through or around the far side of: planets,
-// suns (suns are planets) and bases/stations. These are treated as hard walls --
-// they are never culled from the ftl-bubble avoidance and their apparent radius is
-// inflated by the SPEC warp_min_range drop-out zone (see Execute). Asteroids are
-// NOT hard (you can fly through/thread them).
-static bool IsHardBody(const Unit *u) {
-    if (u == nullptr) {
-        return false;
-    }
-    return u->isPlanet() || UnitUtil::getFlightgroupName(u) == "Base";
-}
-
 void AutoLongHaul::Execute() {
     Unit *target = group.GetUnit();
     if (target == NULL) {
@@ -618,7 +589,12 @@ void AutoLongHaul::Execute() {
         parent->autopilotactive = false;
         return;
     }
-    const float max_compression_range = configuration().warp.max_effective_velocity_flt;
+    const bool compensate_for_interdiction = configuration().physics.auto_pilot_compensate_for_interdiction;
+    const float enough_warp_for_cruise = configuration().physics.enough_warp_for_cruise_flt;
+    const float go_perpendicular_speed = configuration().physics.warp_perpendicular_flt;
+    const float min_warp_orbit_radius = configuration().physics.min_warp_orbit_radius_flt;
+    const float warp_orbit_multiplier = configuration().physics.warp_orbit_multiplier_flt;
+    const float warp_behind_angle = cos(M_PI_FLT * configuration().physics.warp_behind_angle_flt / 180.0F);
     QVector myposition = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();     //get unit pos
     QVector destination = target->isSubUnit() ? target->Position() : target->LocalPosition();     //get destination
     QVector destinationdirection = (destination - myposition);       //find vector from us to destination
@@ -626,185 +602,102 @@ void AutoLongHaul::Execute() {
     destinationdirection =
             destinationdirection * (1. / destinationdistance);       //this is a direction, so it is normalize
 
-    // Distance to stop from the ship's current speed (including ftl). The autopilot
-    // flies straight to this braking point, winds down ftl there and brakes to a
-    // stop. Used both to gate obstacle avoidance (don't dodge objects farther away
-    // than we can already stop) and as the clean disengage point.
-    const double current_speed = parent->Velocity.Magnitude();
-    const double ship_mass = parent->GetMass();
-    double brake_distance = 0.0;
-    if (ship_mass > 0.0 && parent->drive.retro > 0.0) {
-        brake_distance = (current_speed * current_speed)
-                / (2.0 * (parent->drive.retro / ship_mass));
-    }
-
     StraightToTarget = true;    // free to fly
 
-    //face target unless warp ramping is done
-    Unit *obstacle = nullptr;
-    // The thing compressing our ftl bubble is the nearest object in space.
-    parent->GetNearestObjectSignificantDistance(&obstacle);
-    bool currently_inside_landing_zone = false;
-    if (obstacle) {
-        currently_inside_landing_zone = InsideLandingPort(obstacle);
-    }
-    if (currently_inside_landing_zone != inside_landing_zone) {
-        inside_landing_zone = currently_inside_landing_zone;
-        MakeLinearVelocityOrder();
-    }
-    // Steer into clear space so ftl works at full. Vector-sum steering: each
-    // object that compresses our ftl bubble pushes us directly away from it,
-    // weighted by how close (and thus how much it interferes) it is. The bubble we
-    // care about keeping clear shrinks as we near the destination: far away we
-    // keep a full ftl sphere clear (so we travel through empty space), and on
-    // arrival we no longer care about the bubble and just get to the target.
-    const float gather_range = max_compression_range
-            * configuration().physics.warp_clearance_range_mult_flt;
-    StarSystem *ss = _Universe->activeStarSystem();
-    const float repel = configuration().physics.warp_clearance_repel_flt;
-    const float attract = configuration().physics.warp_clearance_attract_flt;
-    // The bubble stays at a full ftl sphere while the target is outside the
-    // gather range (warp_clearance_range_mult x the bubble). Once the target
-    // enters that range we collapse the bubble, so that it is already gone by the
-    // time the target reaches the 1x bubble itself -- on arrival we simply get to
-    // the target instead of dodging ships there.
-    double bubble = max_compression_range;
-    if (destinationdistance < gather_range) {
-        const double ratio = (
-                (destinationdistance - max_compression_range)
-                / (gather_range - max_compression_range)
-        );
-        bubble = max_compression_range * ((ratio < 0.0) ? 0.0 : ratio);
-    }
+    //Free to fly. Read the drive's capability here rather than what the ship is currently getting:
+    //the orthogonal thrust cost is self-inflicted and passes, so steering must not react to it.
+    if ((parent->GetMaxWarpFieldStrength() < enough_warp_for_cruise)
+            && (parent->graphicOptions.RampCounter == 0)) {
+        //face target unless warp ramping is done and warp is less than some intolerable ammt
+        Unit *obstacle = NULL;
+        float maxmultiplier = parent->CalculateNearestWarpUnit(FLT_MAX,
+                &obstacle,
+                compensate_for_interdiction);         //find the unit affecting our spec
+        bool currently_inside_landing_zone = false;
+        if (obstacle) {
+            currently_inside_landing_zone = InsideLandingPort(obstacle);
+        }
+        if (currently_inside_landing_zone != inside_landing_zone) {
+            inside_landing_zone = currently_inside_landing_zone;
+            MakeLinearVelocityOrder();
+        }
+        // The destination is where we are going, so it is never steered around. The autopilot
+        // target can be a subunit of a station, and then the unit that interdicts is its owner,
+        // so compare against the whole unit.
+        Unit *target_root = target;
+        if (target->isSubUnit()) {
+            target_root = UnitUtil::owner(target);
+        }
+        if (obstacle != NULL && obstacle != target && obstacle != target_root) {
+            //if it exists and is not our destination
+            QVector obstacledirection =
+                    (obstacle->LocalPosition() - myposition);               //find vector from us to obstacle
+            double obstacledistance = obstacledirection.Magnitude();
 
-    // Cull the interfering objects to only the closest handful so a crowd of
-    // ships in the vicinity can't dominate or cost too much -- the nearest matter
-    // most anyway.
-    const unsigned int kMaxShips = 8;
-    const unsigned int kMaxObjects = 5;
-    // A planet-like body (hard body) in the bubble that isn't the target strongly
-    // repels the autopilot -- you can't fly through it or around its far side, and
-    // SPEC can't operate near it, so steer well clear.
-    constexpr float kHardBodyRepelMultiplier = 15.0f;
-    std::vector<Unit *> ships;
-    if (!is_null(parent->location[Unit::UNIT_ONLY])) {
-        UnitWithinRangeLocator<ClearSpaceCollector> locator(gather_range, 0.0f);
-        locator.action.init(ships, kMaxShips);
-        findObjects(ss->collide_map[Unit::UNIT_ONLY], parent->location[Unit::UNIT_ONLY], &locator);
-    }
-    std::vector<std::pair<double, Unit *>> ranked;
-    // gravitational bodies (few, large -- always considered)
-    Unit *u;
-    for (un_fiter iter = ss->gravitationalUnits().fastIterator(); (u = *iter); ++iter) {
-        if (u != nullptr && !u->Killed() && u != parent) {
-            ranked.emplace_back(UnitUtil::getSignificantDistance(parent, u), u);
-        }
-    }
-    for (Unit *o : ships) {
-        if (o != nullptr && o != parent) {
-            ranked.emplace_back(UnitUtil::getSignificantDistance(parent, o), o);
-        }
-    }
-    std::sort(ranked.begin(), ranked.end(),
-            [](const std::pair<double, Unit *> &a, const std::pair<double, Unit *> &b) {
-                return a.first < b.first;
-            });
-    // Cull only the soft, threadable obstacles once the count is capped. Never drop a
-    // hard body (planet/sun/base): you can't fly through or around its far side, so if
-    // it is in the ftl bubble it must always be accounted for, even when a crowd of
-    // closer ships would otherwise push it out of the top-N set.
-    {
-        std::vector<std::pair<double, Unit *>> kept;
-        size_t soft_kept = 0;
-        kept.reserve(ranked.size());
-        for (const auto &pr : ranked) {
-            const bool hard = IsHardBody(pr.second);
-            if (hard || soft_kept < kMaxObjects) {
-                kept.push_back(pr);
-                if (!hard) {
-                    ++soft_kept;
+            obstacledirection = obstacledirection
+                    * (1. / obstacledistance);               //normalize the obstacle direction as well
+            float angle = obstacledirection.Dot(destinationdirection);
+            if ((obstacledistance - obstacle->rSize() < destinationdistance - target->rSize())
+                    && (angle > warp_behind_angle)) {
+                StraightToTarget = false;
+                //if our obstacle is closer than obj and the obstacle is not behind us
+                QVector planetdest =
+                        destination - obstacle->LocalPosition();                 //find the vector from planet to dest
+                QVector planetme = -obstacledirection;                 //obstacle to me
+                QVector planetperp = planetme.Cross(planetdest);                 //find vector out of that plane
+                QVector detourvector =
+                        destinationdirection.Cross(planetperp);                 //find vector perpendicular to our desired course emerging from planet
+                double renormalizedetour = detourvector.Magnitude();
+                if (renormalizedetour > .01) {
+                    detourvector = detourvector * (1. / renormalizedetour);
+                }                     //normalize it
+                double finaldetourdistance = mymax(obstacle->rSize() * warp_orbit_multiplier,
+                        min_warp_orbit_radius);                //scale that direction by some multiplier of obstacle size and a constant
+                detourvector = detourvector
+                        * finaldetourdistance;                 //we want to go perpendicular to our transit direction by that ammt
+                QVector newdestination = NewDestination(obstacle->LocalPosition() + detourvector,
+                        finaldetourdistance);                 //add to our position
+                float weight = (maxmultiplier - go_perpendicular_speed) / (enough_warp_for_cruise
+                        - go_perpendicular_speed);                   //find out how close we are to our desired warp multiplier and weight our direction by that
+                weight *= weight;                 //
+                if (maxmultiplier < go_perpendicular_speed) {
+                    QVector perpendicular = myposition + planetme * (finaldetourdistance / planetme.Magnitude());
+                    weight = (go_perpendicular_speed - maxmultiplier) / go_perpendicular_speed;
+                    destination = weight * perpendicular + (1 - weight) * newdestination;
+                } else {
+                    QVector olddestination = myposition + destinationdirection
+                            * finaldetourdistance;                     //destination direction in the same magnitude as the newdestination from the ship
+                    destination = newdestination * (1 - weight) + olddestination
+                            * weight;                       //use the weight to combine our direction and the dest
                 }
             }
         }
-        ranked = std::move(kept);
-    }
-
-    QVector sum(0.0f, 0.0f, 0.0f);
-    bool any = false;
-    // The destination must never be a repulsor -- it is where we want to go and
-    // it is fine that it compresses our ftl bubble. The autopilot target can be
-    // a subunit of the station, so match the whole unit (target and its owner).
-    Unit *target_root = target;
-    if (target != nullptr && target->isSubUnit()) {
-        target_root = UnitUtil::owner(target);
-    }
-    for (const auto &pr : ranked) {
-        Unit *o = pr.second;
-        if (o == nullptr || o == parent || o == target || o == target_root) {
-            continue;
-        }
-        const bool hard = IsHardBody(o);
-        double sig = pr.first;
-        // A hard body (planet/sun/base) is a wall that also carries a SPEC exclusion
-        // zone around it (physics.warp_min_range) in which SPEC cannot operate. Treat
-        // its effective radius as being warp_min_range bigger, so the autopilot keeps
-        // the whole drop-out zone clear rather than only dodging the surface.
-        if (hard) {
-            sig -= static_cast<double>(configuration().physics.warp_min_range_flt);
-            if (sig < 0.0) {
-                sig = 0.0;
-            }
-        }
-        if (sig >= bubble) {
-            continue;
-        }
-        QVector to_obj = o->LocalPosition() - myposition;
-        double dist = to_obj.Magnitude();
-        if (dist < 0.0001) {
-            continue;
-        }
-        const float weight = repel
-                * (hard ? kHardBodyRepelMultiplier : 1.0f)
-                * static_cast<float>(1.0 - sig / bubble);
-        if (weight <= 0.0f) {
-            continue;
-        }
-        sum += (-to_obj / dist) * weight;
-        any = true;
-    }
-    if (any) {
-        StraightToTarget = false;
-        // A steady pull toward the destination (it is where we want to go). With
-        // the bubble shrinking as we approach, repulsion fades and this takes
-        // over, so on arrival we simply fly to the target.
-        sum += destinationdirection * attract;
-        QVector desired;
-        double mag = sum.Magnitude();
-        if (mag > 0.0001) {
-            desired = sum / mag;
-        } else {
-            desired = destinationdirection;
-        }
-        double clear_distance = std::min(destinationdistance, static_cast<double>(gather_range));
-        destination = myposition + desired * clear_distance;
     }
     if (!parent->ftl_drive.Enabled() && parent->graphicOptions.RampCounter == 0) {
         deactivatewarp = false;
     }
-    const double dis = UnitUtil::getSignificantDistance(parent, target);
-
-    // ftl stays on while flying toward the destination -- including during any turn
-    // (lining up with the destination, or a detour) -- and only winds down once we're
-    // within the braking distance (about to disengage). The old auto_pilot_spec_lining_
-    // up_angle check dropped out of warp whenever the facing briefly deviated from the
-    // target, which made ftl flicker in and out whenever the ship turned -- e.g. leaving
-    // a planet (now behind us) to head for a faraway object, with nothing to avoid.
-    const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
+    double mass = parent->GetMass();
+    // SPEC stays on while flying toward the destination, through any turn: lining up with the
+    // destination, or taking a detour, must not drop the ship out of warp. Dropping out on a
+    // brief deviation of the facing made SPEC flicker in and out whenever the ship turned --
+    // for instance leaving a planet, now behind it, to line up with a faraway object.
+    double speed = parent->cumulative_transformation_matrix.getR().Magnitude();
     const float min_warpfield_to_enter_warp = configuration().ai.min_warp_to_try_flt;
     if (parent->GetMaxWarpFieldStrength() < min_warpfield_to_enter_warp) {
         deactivatewarp = true;
     }
-    if (dis <= brake_distance) {
+    double maxspeed =
+            mymax(speed, parent->graphicOptions.WarpFieldStrength * parent->afterburner.speed);
+    double dis = UnitUtil::getSignificantDistance(parent, target);
+    float time_to_destination = dis / maxspeed;
+
+    const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
+    const float warprampdowntime = configuration().physics.warp_ramp_down_time_flt;
+    float time_to_stop = simulation_atom_var;
+    if (rampdown) {
+        time_to_stop += warprampdowntime;
+    }
+    if (time_to_destination <= time_to_stop) {
         deactivatewarp = true;
     }
     if (DistanceWarrantsWarpTo(parent,
@@ -825,12 +718,17 @@ void AutoLongHaul::Execute() {
     const float distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt;
     const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
-    // Disengage when we're within the distance it takes to stop from our current
-    // (ftl) speed -- fly straight to that point, then brake cleanly instead of
-    // overshooting. distance_to_stop remains a hard floor.
+    bool stopnow = false;
+    maxspeed = parent->afterburner.speed;
+    if (maxspeed && parent->drive.retro) {
+        double time_to_destination = dis / maxspeed;         //conservative
+        double time_to_stop = speed * mass / parent->drive.retro;
+        if (time_to_destination <= time_to_stop) {
+            stopnow = true;
+        }
+    }
     if (do_auto_finish
-            && (dis <= brake_distance || dis < distance_to_stop
-                    || (target->Target() == parent && dis < enemy_distance_to_stop))) {
+            && (stopnow || dis < distance_to_stop || (target->Target() == parent && dis < enemy_distance_to_stop))) {
         parent->autopilotactive = false;
         WarpRampOff(parent, rampdown);
         done = true;

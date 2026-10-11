@@ -58,17 +58,10 @@ namespace vega_config {
 		void parseAxes(const boost::json::object& root_object);
 
 
-    struct {
-        std::string details = "High";
-        std::string shaders = "Average";
-        std::string audio = "All Sounds";
-        std::string physics = "Default (1.0)";
-
-    } settings_app;
-
     // Preset selectors from config.json's "preset" section (e.g.
-    // computer="4000MHz", shaders="highshader"). Metadata for the settings app;
-    // the engine does not expand these itself. Key is the lowercase category.
+    // computer="4000MHz", shaders="highshader"). Written and consumed by the
+    // in-game config screen; the engine does not expand these itself. Key is
+    // the lowercase category.
     std::map<std::string, std::string> preset;
 
     struct {
@@ -1724,6 +1717,12 @@ namespace vega_config {
         double fov_dbl = 37.5;
         float fov_flt = 37.5;
         bool framerate_changes_shader = false;
+        // Frame-rate limiting: vsync mode, and a software cap when it is below what
+        // the GPU would otherwise produce.
+        std::string vsync = "on";                    // "off" | "on" | "adaptive"
+        std::string frame_limit_mode = "unlimited";   // "unlimited" | "half" | "fixed"
+        int max_framerate = 0;                        // fixed cap, frames per second
+        bool show_fps = true;
         bool full_screen = false;
         std::string gauge_static = "static.ani";
         double generic_cargo_rotation_speed_dbl = 1.0;
@@ -2284,12 +2283,11 @@ namespace vega_config {
         float auto_landing_port_unclamped_seconds_flt = 120.0;
         double auto_landing_warning_distance_dbl = 350.0;
         float auto_landing_warning_distance_flt = 350.0;
+        bool auto_pilot_compensate_for_interdiction = false;
         double auto_pilot_no_enemies_distance_multiplier_dbl = 4.0;
         float auto_pilot_no_enemies_distance_multiplier_flt = 4.0;
         double auto_pilot_planet_radius_percent_dbl = 0.495;
         float auto_pilot_planet_radius_percent_flt = 0.495;
-        double auto_pilot_spec_lining_up_angle_dbl = 3.0;
-        float auto_pilot_spec_lining_up_angle_flt = 3.0;
         bool auto_pilot_terminate = true;
         double auto_pilot_termination_distance_dbl = 2500.0;
         float auto_pilot_termination_distance_flt = 2500.0;
@@ -2337,6 +2335,8 @@ namespace vega_config {
         float debris_mass_flt = 1e-05;
         double debris_time_dbl = 500.0;
         float debris_time_flt = 500.0;
+        double default_interdiction_dbl = 0.01;
+        float default_interdiction_flt = 0.01;
         double default_shield_tightness_dbl = 0.0;
         float default_shield_tightness_flt = 0.0;
         double definite_damage_chance_dbl = 0.1;
@@ -2378,6 +2378,10 @@ namespace vega_config {
         float extra_space_drag_for_cargo_flt = 0.005;
         bool face_target_on_auto = false;
         bool fire_missing_autotrackers = true;
+        double flt_orthogonal_thrust_smoothing_time_dbl = 1.0;
+        float flt_orthogonal_thrust_smoothing_time_flt = 1.0;
+        double flt_orthogonal_thrust_speed_reduce_factor_dbl = 1.0;
+        float flt_orthogonal_thrust_speed_reduce_factor_flt = 1.0;
         double friendly_auto_radius_dbl = 0.0;
         float friendly_auto_radius_flt = 0.0;
         double game_accel_dbl = 1.0;
@@ -2443,6 +2447,8 @@ namespace vega_config {
         bool max_shield_lowers_capacitance = false;
         double max_torque_multiplier_dbl = 0.67;
         float max_torque_multiplier_flt = 0.67;
+        double max_warp_effect_size_dbl = 3000.0;
+        float max_warp_effect_size_flt = 3000.0;
         double min_asteroid_distance_dbl = -100.0;
         float min_asteroid_distance_flt = -100.0;
         double min_damage_dbl = 0.001;
@@ -2453,6 +2459,10 @@ namespace vega_config {
         float min_shield_speeding_discharge_flt = 0.1;
         double min_spec_interdiction_for_jittery_autopilot_dbl = 0.05;
         float min_spec_interdiction_for_jittery_autopilot_flt = 0.05;
+        double min_warp_effect_size_dbl = 100.0;
+        float min_warp_effect_size_flt = 100.0;
+        double min_warp_orbit_radius_dbl = 100000000.0;
+        float min_warp_orbit_radius_flt = 100000000.0;
         double minimum_mass_dbl = 1e-06;
         float minimum_mass_flt = 1e-06;
         double minimum_time_dbl = 0.1;
@@ -2552,17 +2562,23 @@ namespace vega_config {
         bool use_max_shield_energy_usage = false;
         double velocity_max_dbl = 10000.0;
         float velocity_max_flt = 10000.0;
+        double warp_behind_angle_dbl = 150.0;
+        float warp_behind_angle_flt = 150.0;
+        double warp_cruise_mult_dbl = 15000.0;
+        float warp_cruise_mult_flt = 15000.0;
+        double warp_curve_degree_dbl = 1.3;
+        float warp_curve_degree_flt = 1.3;
         bool warp_is_interstellar = false;
+        double warp_orbit_multiplier_dbl = 20.0;
+        float warp_orbit_multiplier_flt = 20.0;
+        double warp_perpendicular_dbl = 80.0;
+        float warp_perpendicular_flt = 80.0;
         double warp_ramp_down_time_dbl = 0.1;
         float warp_ramp_down_time_flt = 0.1;
-        double warp_clearance_repel_dbl = 2.0;
-        float warp_clearance_repel_flt = 2.0;
-        double warp_clearance_attract_dbl = 1.0;
-        float warp_clearance_attract_flt = 1.0;
-        double warp_clearance_range_mult_dbl = 5.0;
-        float warp_clearance_range_mult_flt = 5.0;
-        double warp_min_range_dbl = 3000.0;
-        float warp_min_range_flt = 3000.0;
+        double warp_region0_dbl = 1.0;
+        float warp_region0_flt = 1.0;
+        double warp_region1_dbl = 5000000.0;
+        float warp_region1_flt = 5000000.0;
         double weapon_damage_efficiency_dbl = 1.0;
         float weapon_damage_efficiency_flt = 1.0;
         double year_scale_dbl = 16.0;
