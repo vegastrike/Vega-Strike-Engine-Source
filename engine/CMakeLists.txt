@@ -739,9 +739,6 @@ IF (NOT DISABLE_CLIENT)
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 ENDIF (NOT DISABLE_CLIENT)
 
-# vegasettings
-ADD_SUBDIRECTORY(setup)
-
 # Add other utilities here
 ADD_SUBDIRECTORY(objconv)
 
@@ -809,16 +806,10 @@ MARK_AS_ADVANCED(FORCE
     vorbis_LIBRARY
     vorbisfile_LIBRARY
 )
-INSTALL(TARGETS vegastrike-engine DESTINATION bin)
-
-# CMake doesn't support doing symlinks directly; however,
-# it's easy enough to mimic such behavior via CMake by installing
-# the executable a second time using a different name.
-IF (WIN32)
-    INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION bin)
-ELSE (WIN32)
-    INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
-ENDIF (WIN32)
+INSTALL(
+        TARGETS vegastrike-engine
+        RUNTIME_DEPENDENCIES
+        DESTINATION bin)
 
 
 ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/doc" "./doc")
