@@ -7034,6 +7034,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.auto_pilot_planet_radius_percent_flt = boost::json::value_to<float>(*auto_pilot_planet_radius_percent_value_ptr);
             }
 
+            const boost::json::value * auto_pilot_spec_turn_speed_factor_value_ptr = physics_object.if_contains("auto_pilot_spec_turn_speed_factor");
+            if (auto_pilot_spec_turn_speed_factor_value_ptr != nullptr) {
+                physics.auto_pilot_spec_turn_speed_factor_dbl = boost::json::value_to<double>(*auto_pilot_spec_turn_speed_factor_value_ptr);
+                physics.auto_pilot_spec_turn_speed_factor_flt = boost::json::value_to<float>(*auto_pilot_spec_turn_speed_factor_value_ptr);
+            }
+
             const boost::json::value * auto_pilot_terminate_value_ptr = physics_object.if_contains("auto_pilot_terminate");
             if (auto_pilot_terminate_value_ptr != nullptr) {
                 physics.auto_pilot_terminate = boost::json::value_to<bool>(*auto_pilot_terminate_value_ptr);
@@ -7354,18 +7360,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
             const boost::json::value * fire_missing_autotrackers_value_ptr = physics_object.if_contains("fire_missing_autotrackers");
             if (fire_missing_autotrackers_value_ptr != nullptr) {
                 physics.fire_missing_autotrackers = boost::json::value_to<bool>(*fire_missing_autotrackers_value_ptr);
-            }
-
-            const boost::json::value * flt_orthogonal_thrust_smoothing_time_value_ptr = physics_object.if_contains("flt_orthogonal_thrust_smoothing_time");
-            if (flt_orthogonal_thrust_smoothing_time_value_ptr != nullptr) {
-                physics.flt_orthogonal_thrust_smoothing_time_dbl = boost::json::value_to<double>(*flt_orthogonal_thrust_smoothing_time_value_ptr);
-                physics.flt_orthogonal_thrust_smoothing_time_flt = boost::json::value_to<float>(*flt_orthogonal_thrust_smoothing_time_value_ptr);
-            }
-
-            const boost::json::value * flt_orthogonal_thrust_speed_reduce_factor_value_ptr = physics_object.if_contains("flt_orthogonal_thrust_speed_reduce_factor");
-            if (flt_orthogonal_thrust_speed_reduce_factor_value_ptr != nullptr) {
-                physics.flt_orthogonal_thrust_speed_reduce_factor_dbl = boost::json::value_to<double>(*flt_orthogonal_thrust_speed_reduce_factor_value_ptr);
-                physics.flt_orthogonal_thrust_speed_reduce_factor_flt = boost::json::value_to<float>(*flt_orthogonal_thrust_speed_reduce_factor_value_ptr);
             }
 
             const boost::json::value * friendly_auto_radius_value_ptr = physics_object.if_contains("friendly_auto_radius");

@@ -2288,6 +2288,10 @@ namespace vega_config {
         float auto_pilot_no_enemies_distance_multiplier_flt = 4.0;
         double auto_pilot_planet_radius_percent_dbl = 0.495;
         float auto_pilot_planet_radius_percent_flt = 0.495;
+        // How many times the speed at which the ship can still turn onto its aim in time it may keep:
+        // 1 is that speed exactly, lower holds it back further, 0 turns the rule off.
+        double auto_pilot_spec_turn_speed_factor_dbl = 1.0;
+        float auto_pilot_spec_turn_speed_factor_flt = 1.0;
         bool auto_pilot_terminate = true;
         double auto_pilot_termination_distance_dbl = 2500.0;
         float auto_pilot_termination_distance_flt = 2500.0;
@@ -2378,10 +2382,6 @@ namespace vega_config {
         float extra_space_drag_for_cargo_flt = 0.005;
         bool face_target_on_auto = false;
         bool fire_missing_autotrackers = true;
-        double flt_orthogonal_thrust_smoothing_time_dbl = 1.0;
-        float flt_orthogonal_thrust_smoothing_time_flt = 1.0;
-        double flt_orthogonal_thrust_speed_reduce_factor_dbl = 1.0;
-        float flt_orthogonal_thrust_speed_reduce_factor_flt = 1.0;
         double friendly_auto_radius_dbl = 0.0;
         float friendly_auto_radius_flt = 0.0;
         double game_accel_dbl = 1.0;
