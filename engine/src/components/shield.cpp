@@ -242,9 +242,18 @@ bool Shield::Upgrade(const std::string upgrade_key) {
 }
 
 double Shield::PercentOperational() const {
-    // The generator is the shield's condition. The facets are its charge, which the shield
-    // rebuilds by charging, so a shield whose generator is undamaged is fully operational.
-    return GeneratorPercent();
+    // The generator's condition and its facets' capacity, averaged. The charge sitting in a facet
+    // is not damage -- the shield rebuilds that by charging -- but a facet that has lost capacity
+    // is, and that is what makes one facet run out before its neighbours.
+    double percent = GeneratorPercent();
+    int counted = 1;
+    for (const Resource<double> &facet : facets) {
+        if (facet.MaxValue() > 0) {
+            percent += facet.AdjustedValue() / facet.MaxValue();
+            ++counted;
+        }
+    }
+    return percent / counted;
 }
 
 void Shield::Damage() {

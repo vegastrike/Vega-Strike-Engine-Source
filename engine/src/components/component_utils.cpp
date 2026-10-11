@@ -59,7 +59,7 @@ double ComponentDamage(const Component *component) {
     }
 
     // Every component reports its own condition as its operational percent. A shield's is its
-    // generator's health, its facets being its charge.
+    // generator's health and its facets' capacity, the charge sitting in a facet not being damage.
     return 1.0 - component->PercentOperational();
 }
 
