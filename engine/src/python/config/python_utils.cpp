@@ -29,21 +29,17 @@
 
 #define PY_SSIZE_T_CLEAN
 
-#ifdef _WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-#endif
-
-#include <boost/filesystem.hpp>
 #include <boost/python.hpp>
-#include <iostream>
-#include <utility>
 
 #include "python_utils.h"
 
-#include <boost/format.hpp>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/filesystem.hpp>
+
+#include <deque>
+#include <iostream>
+
+#include "../../vs_logging.h"
 
 using namespace boost::python;
 namespace fs = boost::filesystem;
@@ -158,20 +154,55 @@ std::wstring FindPythonPath() {
 // just to get the python paths.
 [[deprecated("This was always a kludge. It also uses a wide string returned from Python after Py_Finalize() has been called, which isn't safe.")]]
 std::string GetPythonPath() {
+#if ((PY_VERSION_HEX) < 0x030E0000)
     Py_Initialize();
     wchar_t const* w_path_ptr = Py_GetPath();
     Py_Finalize();
 
-    std::wstring w_path_w( w_path_ptr );
-    std::string path( w_path_w.begin(), w_path_w.end() );
+    std::wstring w_path_w(w_path_ptr);
+    std::string  path(w_path_w.begin(), w_path_w.end());
 
     return path;
+#else
+    Py_Initialize();
+
+    std::deque<std::wstring> python_path_py_deque_wide{};
+    boost::python::list const py_path_list = boost::python::extract<boost::python::list>(PyConfig_Get("module_search_paths"));
+    if (!py_path_list.is_none()) {
+        Py_ssize_t const list_len = boost::python::len(py_path_list);
+        VS_LOG_AND_FLUSH(debug, (boost::format("Python module search paths list length = %1%") % list_len));
+        for (Py_ssize_t i = 0; i < list_len; ++i) {
+            python_path_py_deque_wide.push_back(boost::python::extract<std::wstring>(py_path_list[i]));
+        }
+    } else {
+        VS_LOG_AND_FLUSH(error, (boost::format("Python module search paths list empty")));
+    }
+
+    Py_Finalize();
+
+    std::deque<std::string> python_path_py_deque_narrow{};
+    for (auto wstr : python_path_py_deque_wide) {
+        std::string const path(wstr.begin(), wstr.end());
+        python_path_py_deque_narrow.push_back(path);
+    }
+
+    return boost::join(python_path_py_deque_narrow, ":");
+#endif
 }
 
-void InitPython(bool &was_already_initialized) {
-    was_already_initialized = Py_IsInitialized() != 0;
-    if (was_already_initialized) {
-        return;
+// A utility function to call a function and get a PyObject as a result
+PyObject* GetClassFromPython(
+    const std::string build_path,
+    const std::string path_string,
+    const std::string datadir,
+    const std::string module_name,
+    const std::string function_name) {
+    boost::filesystem::path full_path = boost::filesystem::path(path_string);
+    boost::filesystem::current_path(full_path);
+
+    if(!boost::filesystem::exists(module_name + ".py")) {
+        // TODO: throw exception
+        return nullptr;
     }
 
     PyPreConfig py_pre_config;
