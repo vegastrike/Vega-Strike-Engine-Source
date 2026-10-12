@@ -132,7 +132,8 @@ public:
             const Matrix &m = identity_matrix);
 
     ///Draws this unit with the transformation and matrix (should be equiv) separately
-    virtual void DrawNow(const Matrix &m = identity_matrix, float lod = 1000000000);
+    ///Set draw_shield false to leave the shield mesh out, e.g. for the ship shown in a base hangar.
+    virtual void DrawNow(const Matrix &m = identity_matrix, float lod = 1000000000, bool draw_shield = true);
     virtual std::string drawableGetName() = 0;
 
     void Sparkle(bool on_screen, const Matrix *ctm);
