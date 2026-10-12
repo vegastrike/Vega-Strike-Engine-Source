@@ -69,7 +69,7 @@ public:
 // recharge to full and armor can be repaired to full afterwards
 TEST(Layer, DamageKeepsMaximum) {
     InspectableLayer layer(2, FacetConfiguration::four, 200, Damage(1.0, 1.0), false);
-    InflictedDamage inflicted_damage;
+    InflictedDamage inflicted_damage(3);
     double damage = 50;
 
     layer.DealDamageComponent(0, 0, damage, 1.0, inflicted_damage);
