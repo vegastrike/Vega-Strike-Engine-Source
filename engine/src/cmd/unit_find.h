@@ -164,6 +164,11 @@ public:
         }
         return true;
     }
+
+    // The gap between the two surfaces of the nearest unit found, or FLT_MAX when none was.
+    float NearestDistance() const {
+        return rad;
+    }
 };
 class NearestBoltLocator : public NearestUnitLocator {
 public:
