@@ -333,10 +333,10 @@ void Collision::collide(Unit *unit1,
     // 2/3 constant from shell approximation -- this will disappear when moment of inertia is actually turned into a 3x3 matrix OR getter is adjusted to fix dataside issues
     // should assert: mass >0; radial_size !=0; moment !=0; -- may require data set cleaning if asserted
     double I1 =
-            std::max(static_cast<double>(unit1->GetMoment()), configuration().physics.minimum_mass_dbl) * unit1->radial_size * unit1->radial_size
+            std::max(unit1->GetMass(), configuration().physics.minimum_mass_dbl) * unit1->radial_size * unit1->radial_size
                     * 0.667; // deriving scalar moment of inertia for unit 1
     double I2 =
-            std::max(static_cast<double>(unit2->GetMoment()), configuration().physics.minimum_mass_dbl) * unit2->radial_size * unit2->radial_size
+            std::max(unit2->GetMass(), configuration().physics.minimum_mass_dbl) * unit2->radial_size * unit2->radial_size
                     * 0.667; // deriving scalar moment of inertia for unit 2
     double I1_inverse = 1.0
             / I1; // Matrix inverse for matrix version of momentof inertia I1 is computable, but probably still better to have precomputed and fetched -- not an issue when I is still scalar
