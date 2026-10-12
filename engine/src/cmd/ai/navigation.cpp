@@ -633,7 +633,7 @@ void AutoLongHaul::Execute() {
             // The berth this obstacle would be given, and with it the test of whether the course
             // passes through the obstacle at all. Something standing beside the route is not in the
             // way however close it is, and steering around it is a course change nobody asked for.
-            const double berth = obstacle->rSize() * warp_orbit_multiplier;
+            const double berth = static_cast<double>(obstacle->rSize()) * warp_orbit_multiplier;
             const double off_course = obstacledirection.Cross(destinationdirection).Magnitude()
                     * obstacledistance;
             if ((obstacledistance - obstacle->rSize() < destinationdistance - target->rSize())
