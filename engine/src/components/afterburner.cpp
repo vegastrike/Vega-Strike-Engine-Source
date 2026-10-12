@@ -65,6 +65,7 @@ void Afterburner::SaveToCSV(std::map<std::string, std::string>& unit) const {
     const double game_accel_speed = game_speed * game_accel;
     unit["Afterburner_Accel"] = thrust.Serialize(game_accel_speed);
     unit["Afterburner_Speed_Governor"] = speed.Serialize(game_speed);
+    unit["Afterburner_Usage_Cost"] = std::to_string(consumption);
 }
 
 // Afterburner is integrated and so cannot be upgraded/downgraded
