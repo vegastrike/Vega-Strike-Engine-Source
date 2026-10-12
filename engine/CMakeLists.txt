@@ -250,6 +250,7 @@ SET(LIBGUI_SOURCES
     src/gui/glut_support.cpp
     src/gui/imgui_support.cpp
     src/gui/config_screen.cpp
+    src/gui/config_file_editor.cpp
     src/gui/config_screen.h
     src/gui/groupcontrol.cpp
     src/gui/guidefs.cpp
@@ -264,6 +265,7 @@ SET(LIBGUI_SOURCES
     src/gui/staticdisplay.cpp
     src/gui/text_area.cpp
     src/gui/textinputdisplay.cpp
+    src/gui/vega_text.cpp
     src/gui/window.cpp
     src/gui/windowcontroller.cpp
 )
@@ -376,6 +378,7 @@ SET(LIBGFXCLIENT_SOURCES
     src/gfx/nav/drawsystem.cpp
     src/gfx/nav/navcomputer.cpp
     src/gfx/nav/navgetxmldata.cpp
+    src/gfx/nav/navmap.cpp
     src/gfx/nav/navpath.cpp
     src/gfx/nav/navscreen.cpp
     src/gfx/nav/navscreenoccupied.cpp
@@ -705,6 +708,7 @@ IF (NOT DISABLE_CLIENT)
                           vegastrike_posh
                           vegastrike_imgui
                           vegastrike_gui
+                          vegastrike_vega_draw
                           vegastrike_cmd
                           vegastrike-OPcollide
     )
@@ -777,10 +781,18 @@ MARK_AS_ADVANCED(FORCE
     vorbis_LIBRARY
     vorbisfile_LIBRARY
 )
-INSTALL(
-        TARGETS vegastrike-engine
-        RUNTIME_DEPENDENCIES
-        DESTINATION bin)
+# Windows ships its libraries beside the executable; elsewhere the system provides them, and
+# installing them here would put copies of the distribution's own libraries in bin.
+IF (WIN32)
+    INSTALL(
+            TARGETS vegastrike-engine
+            RUNTIME_DEPENDENCIES
+            DESTINATION bin)
+ELSE ()
+    INSTALL(
+            TARGETS vegastrike-engine
+            DESTINATION bin)
+ENDIF()
 
 
 ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/doc" "./doc")

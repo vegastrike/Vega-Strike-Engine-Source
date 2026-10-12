@@ -105,3 +105,9 @@ void Hull::Repair() {
         facet.RepairFully();
     }
 }
+
+void Hull::Replace() {
+    for(auto& facet : facets) {
+        facet.ReplaceFully();
+    }
+}

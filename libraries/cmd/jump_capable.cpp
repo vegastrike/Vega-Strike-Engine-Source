@@ -37,6 +37,7 @@
 #include "src/vs_exit.h"
 #include "src/vega_cast_utils.h"
 #include "root_generic/configxml.h"
+#include "cmd/dock_utils.h"
 
 // TODO: once implementation is refactored, deal with this too
 extern QVector RealPosition(const Unit *un);
@@ -372,7 +373,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 
 float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
         Unit **nearest_unit,
-        bool count_negative_warp_units) const {
+        bool count_negative_warp_units,
+        double *nearest_distance) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     const float smallwarphack = configuration().physics.min_warp_effect_size_flt;
@@ -397,6 +399,11 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 unit->location[Unit::UNIT_ONLY],
                 &locatespec);
         testthis = locatespec.retval.unit;
+        if (nearest_distance != nullptr) {
+            // The surface-to-surface gap to the closest unit anywhere in the system, which is what
+            // the caller needs to keep an atom from crossing it. 0 when there is nothing to report.
+            *nearest_distance = (testthis != nullptr) ? locatespec.NearestDistance() : 0.0;
+        }
     }
     for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();
             (planet = *iter) || testthis;
@@ -424,37 +431,38 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 }
             }
             float multipliertemp = 1;
-            float minsizeeffect = (planet->rSize() > smallwarphack) ? planet->rSize() : smallwarphack;
-            float effectiverad = minsizeeffect * (1.0f + UniverseUtil::getPlanetRadiusPercent()) + unit->rSize();
-            if (effectiverad > bigwarphack) {
-                effectiverad = bigwarphack;
-            }
-            QVector dir = unit->Position() - planet->Position();
+            QVector dir = unit->LocalPosition() - planet->LocalPosition();
+            // The body's own zone, sized by the body and weighted by its interdiction strength: a
+            // ship's own interdiction reaches almost nowhere, and a planet's is capped. This is the
+            // plain avoidance that holds a ship off everything it might hit, and a ship that merely
+            // happens to be dockable is not what stops a drive. The docking distance belongs to the
+            // arrival, where the autopilot knows what it is flying to.
             double udist = dir.Magnitude();
             float sigdist = UnitUtil::getSignificantDistance(unit, planet);
             if (planet->isPlanet() && udist < (1 << 28)) {
                 //If distance is viable as a float approximation and it's an actual celestial body
                 udist = sigdist;
             }
-            do {
-                double dist = udist;
-                if (dist < 0) {
-                    dist = 0;
-                }
-                dist *= shiphack;
-                if (dist > (effectiverad + warpregion0)) {
-                    multipliertemp = std::pow((dist - effectiverad - warpregion0), curvedegree) * upcurvek;
-                } else {
-                    multipliertemp = 1;
-                }
-                if (multipliertemp < minmultiplier) {
-                    minmultiplier = multipliertemp;
-                    *nearest_unit = planet;
-                    //eventually use new multiplier to compute
-                } else {
-                    break;
-                }
-            } while (false);
+            const double minsizeeffect = std::max(planet->rSize(), smallwarphack);
+            double standoff = minsizeeffect * (1.0 + UniverseUtil::getPlanetRadiusPercent()) + unit->rSize();
+            if (standoff > bigwarphack) {
+                standoff = bigwarphack;
+            }
+            double dist = udist;
+            if (dist < 0) {
+                dist = 0;
+            }
+            dist *= shiphack;
+            if (dist > (standoff + warpregion0)) {
+                multipliertemp = std::pow((dist - standoff - warpregion0), curvedegree) * upcurvek;
+            } else {
+                multipliertemp = 1;
+            }
+            if (multipliertemp < minmultiplier) {
+                minmultiplier = multipliertemp;
+                *nearest_unit = planet;
+                //eventually use new multiplier to compute
+            }
             if (!testthis) {
                 break;
             } //don't want the ++
