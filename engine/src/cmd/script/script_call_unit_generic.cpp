@@ -977,6 +977,8 @@ Unit *Mission::call_unit_launch(CreateFlightgroup *fg, Vega_UnitType type, const
             bsrc[0] = '\0';             //have at least 1 char
             bdst[0] = '\0';
             citylights[0] = '\0';
+            // "radius texture name (blendsrc blenddst) citylights"; %[^)] stops before the closing bracket
+            sscanf(fg->fg->type.c_str(), "%f %s %s (%s %[^)]) %s", &radius, tex, nam, bsrc, bdst, citylights);
             GFXMaterial mat;
             GFXGetMaterial(0, mat);
             BLENDFUNC s = ONE;
