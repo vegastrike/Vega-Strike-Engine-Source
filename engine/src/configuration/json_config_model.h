@@ -85,6 +85,8 @@ public:
 
     boost::json::value value() const { return current_; }
     boost::json::value original_value() const { return original_; }
+    /// False for a leaf that exists only in the user's file, which has no default to go back to.
+    bool has_original() const { return has_original_; }
 
     boost::json::value merged_value() const override {
         return current_;
@@ -149,6 +151,8 @@ public:
                     const boost::json::value* user_json);
 
     const JsonConfigNode* get(const std::vector<std::string>& path) const;
+    /// The same lookup for a caller that means to edit what it finds.
+    JsonConfigNode* get(const std::vector<std::string>& path);
     void set(const std::vector<std::string>& path, const boost::json::value& v);
 
     // The sparse overlay to write to the user config file.
