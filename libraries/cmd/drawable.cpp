@@ -981,8 +981,9 @@ Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
     if (unit->GetWarpVelocity().MagnitudeSquared() < (configuration().graphics.warp_stretch_cutoff_flt)
-            * configuration().graphics.warp_stretch_cutoff_flt * configuration().physics.game_speed_flt
-            || (configuration().graphics.only_stretch_in_warp && unit->ftl_drive.Enabled())) {
+            * configuration().graphics.warp_stretch_cutoff_flt
+            * configuration().physics.game_speed_flt * configuration().physics.game_speed_flt
+            || (configuration().graphics.only_stretch_in_warp && !unit->ftl_drive.Enabled())) {
         return ctm;
     } else {
         Matrix k(ctm);
