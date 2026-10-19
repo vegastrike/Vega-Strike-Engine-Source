@@ -817,6 +817,7 @@ IF (USE_GTEST)
         src/components/tests/jump_drive_tests.cpp
         src/components/tests/utils_tests.cpp
         src/components/tests/operational_tests.cpp
+        src/components/tests/shield_tests.cpp
     )
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PRIVATE
