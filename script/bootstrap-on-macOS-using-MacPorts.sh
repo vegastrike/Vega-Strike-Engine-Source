@@ -6,8 +6,8 @@
 #
 # sudo ./script/bootstrap-on-macOS-using-MacPorts.sh
 #
-# Copyright (C) 2024-2025 Stephen G. Tuggy, David Wales,
-# and other Vega Strike contributors
+# Copyright (C) 2024-2026 Stephen G. Tuggy, David Wales,
+# Benjamen R. Meyer, Roy Falk, Evert Vorster, and other Vega Strike contributors
 #
 # This file is part of Vega Strike.
 #
@@ -26,7 +26,7 @@
 
 set -e
 
-port install python312 boost181@1.81.0_12+cmake_scripts+no_single+no_static+python312 glib2 +quartz libepoxy +quartz gtk3 +quartz libsdl2 libGLU freeglut openal-soft cmake expat libjpeg-turbo libpng libvorbis ninja libarchive
+port install python312 boost181@1.81.0_12+cmake_scripts+no_single+no_static+python312 libepoxy +quartz libsdl2 libGLU freeglut openal-soft cmake expat libjpeg-turbo libpng libvorbis ninja libarchive
 
 export CMAKE_PREFIX_PATH="/opt/local/"
 
