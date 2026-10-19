@@ -1326,13 +1326,6 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 }
 
 void Unit::Kill(bool erasefromsave, bool quitting) {
-    if (this->colTrees) {
-        this->colTrees->Dec();
-    }           //might delete
-    this->colTrees = nullptr;
-    killSounds();
-    ClearMounts();
-
     if (docked & (DOCKING_UNITS)) {
         const float survival = configuration().physics.survival_chance_on_base_death_flt;
         const float player_survival = configuration().physics.player_survival_chance_on_base_death_flt;
@@ -1356,6 +1349,17 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
             dockedun.pop_back();
         }
     }
+    ScheduleDeletion();
+}
+
+void Unit::ScheduleDeletion() {
+    if (this->colTrees) {
+        this->colTrees->Dec();
+    }           //might delete
+    this->colTrees = nullptr;
+    killSounds();
+    ClearMounts();
+
     //eradicate everything. naturally (see previous line) we won't eradicate beams eradicated above
     if (!isSubUnit()) {
         RemoveFromSystem();
@@ -1376,7 +1380,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
     killed = true;
     Unit *un;
     for (un_iter iter = getSubUnits(); (un = *iter); ++iter) {
-        un->Kill();
+        un->ScheduleDeletion();
     }
 
     //if (getUnitType() != Vega_UnitType::missile) {

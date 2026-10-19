@@ -143,8 +143,7 @@ Cargo PlayerShip::RemoveShip(int index) {
             Cargo cargo = it->cargo;     // copy before erase
 
             // The unit isn't deleted here: other units may still refer to it,
-            // so the caller kills it (Unit::Kill) and it is deleted once
-            // they let go.
+            // so the caller schedules its deletion (Unit::ScheduleDeletion).
             it->unit = nullptr;
 
             player_fleet.erase(it);
