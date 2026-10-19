@@ -582,6 +582,9 @@ public:
     virtual void ActivateCloak(bool cloak);
 //deletes
     void Kill(bool eraseFromSave = true, bool quitting = false);
+// Releases the unit's references and has it deleted once nothing refers to it;
+// Kill does this too, but call it directly for a unit leaving the game without dying
+    void ScheduleDeletion();
 
 //Is dead yet?
     inline bool Killed() const {
