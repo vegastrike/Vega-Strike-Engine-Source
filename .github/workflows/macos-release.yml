@@ -84,7 +84,7 @@ jobs:
           USE_GTEST: 0
           INSTALL_SDL3: 0
           INSTALL_SDL3_IMAGE: 0
-        run: script/cibuild --preset-name="${{ matrix.preset-name }}"
+        run: script/cibuild --preset-name="${{ matrix.preset-name }}" --build-type="${{ matrix.build-type }}"
 
       - name: Package it
         working-directory: "${{ github.workspace }}"
