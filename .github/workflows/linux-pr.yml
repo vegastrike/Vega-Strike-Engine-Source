@@ -97,7 +97,7 @@ jobs:
           INSTALL_SDL3: ${{ matrix.INSTALL_SDL3 }}
           INSTALL_SDL3_IMAGE: ${{ matrix.INSTALL_SDL3_IMAGE }}
           IS_RELEASE: 0
-        run: script/cibuild --preset-name=${{ matrix.preset-name }} --build-type=${{ matrix.build-type }}
+        run: script/cibuild --preset-name="${{ matrix.preset-name }}" --build-type="${{ matrix.build-type }}"
 
       - name: Upload test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
