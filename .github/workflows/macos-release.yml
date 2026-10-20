@@ -81,7 +81,7 @@ jobs:
 
       - name: Package it
         working-directory: "${{ github.workspace }}"
-        run: cpack -V --preset-name="package-${{ matrix.preset-name }}" -G DragNDrop
+        run: cpack -V --presset "package-${{ matrix.preset-name }}" -G DragNDrop
 
       - name: Upload the artifacts
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
