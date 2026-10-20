@@ -109,11 +109,10 @@ jobs:
           FROM:       ${{ matrix.FROM }}
           COMPILER:   ${{ matrix.COMPILER }}
           IS_RELEASE: 1
-        run: script/cibuild --preset-name=${{ matrix.preset-name }} --build-type=${{ matrix.build-type }}
+        run: script/cibuild --preset-name="${{ matrix.preset-name }}" --build-type="${{ matrix.build-type }}"
       - name: Upload the artifacts
-        uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          args: "packages/*.${{ matrix.ARTIFACT_EXT }}"
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          files: "packages/*.${{ matrix.ARTIFACT_EXT }}"
