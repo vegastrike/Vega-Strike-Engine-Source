@@ -782,6 +782,9 @@ IF (WIN32)
     INSTALL(
             TARGETS vegastrike-engine
             RUNTIME_DEPENDENCIES
+            DIRECTORIES $ENV{PATH}
+            PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
+            POST_EXCLUDE_REGEXES ".*system32/.*\\.dll"
             DESTINATION bin)
 ELSE ()
     INSTALL(
