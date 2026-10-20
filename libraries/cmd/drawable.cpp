@@ -941,7 +941,7 @@ void Drawable::Split(int level) {
                             * loc / locm);
             loc.Set(rand(), rand(), rand() + .1);
             loc.Normalize();
-            splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * configuration().graphics.explosion_torque_flt
+            splitsub->ApplyLocalTorque(loc * static_cast<float>(splitsub->GetMass()) * configuration().graphics.explosion_torque_flt
                     * (1 + rand() % static_cast<int>(1 + unit->rSize())));
         }
     }
