@@ -320,7 +320,7 @@ struct PlanetInfo {
             moonlevel;  // 0==top-level planet, 1==first-level moon, 2 is second-level moon... probably won't be used.
     unsigned int numstarbases;  // Number of starbases allocated to orbit around this planet. Usually 1 or 0 but quite
                                 // possibly more.
-    unsigned int numjumps;  // Number of jump points.
+    unsigned int numjumps;      // Number of jump points.
 
     PlanetInfo() : num(0), moonlevel(0), numstarbases(0), numjumps(0) {}
 };
