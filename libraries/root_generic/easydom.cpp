@@ -29,13 +29,12 @@
  *  easyDom - easy DOM for expat - written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <expat.h>
 #include "root_generic/easydom.h"
 
-#include <assert.h>     /// needed for assert() calls.
+#include <assert.h>  /// needed for assert() calls.
+#include <expat.h>
 
-easyDomNode::easyDomNode() {
-}
+easyDomNode::easyDomNode() {}
 
 void easyDomNode::set(easyDomNode *_parent, std::string _name, const XML_Char **atts) {
     parent = _parent;
@@ -80,4 +79,3 @@ void easyDomNode::printNode(std::ostream &out, int recurse_level, int level) {
 }
 
 const char *textAttr = "Text_Attr";
-

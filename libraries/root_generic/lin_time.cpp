@@ -26,39 +26,40 @@
  */
 
 
-#include "src/vegastrike.h"
 #include "src/in_kb.h"
+#include "src/vegastrike.h"
 #include "src/vs_logging.h"
 
 static double firsttime;
 
 #ifdef WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif //tells VCC not to generate min/max macros
-#include <windows.h>
+#    ifndef NOMINMAX
+#        define NOMINMAX
+#    endif  // tells VCC not to generate min/max macros
+#    include <windows.h>
 static LARGE_INTEGER ttime{};
 static LARGE_INTEGER newtime{};
 static LARGE_INTEGER freq{};
-static double dblnewtime;
-static double lasttime;
+static double        dblnewtime;
+static double        lasttime;
 #else
-#if defined (HAVE_SDL)
-#   include <SDL3/SDL.h>
-#endif /* defined( HAVE_SDL ) */
+#    if defined(HAVE_SDL)
+#        include <SDL3/SDL.h>
+#    endif /* defined( HAVE_SDL ) */
 static double newtime;
 static double lasttime;
 
-#include <sys/time.h>
-#include <sys/types.h>
-#include <unistd.h>
+#    include <unistd.h>
+
+#    include <sys/time.h>
+#    include <sys/types.h>
 #endif
-static double elapsedtime = .1;
+static double elapsedtime     = .1;
 static double timecompression = 1;
 
 double getNewTime() {
 #ifdef _WIN32
-    return dblnewtime-firsttime;
+    return dblnewtime - firsttime;
 #else
     return newtime - firsttime;
 #endif
@@ -83,7 +84,7 @@ void dec_time_compression(const KBData &, KBSTATE a) {
 void reset_time_compression(const KBData &, KBSTATE a) {
     if (a == PRESS) {
         timecompression = 1;
-        timecount = 0;
+        timecount       = 0;
     }
 }
 
@@ -93,7 +94,7 @@ float getTimeCompression() {
 
 void setTimeCompression(float tc) {
     timecompression = tc;
-    timecount = 0;     //to avoid any problems with time compression sounds... use getTimeCompression() instead
+    timecount       = 0;  // to avoid any problems with time compression sounds... use getTimeCompression() instead
 }
 
 bool toggle_pause() {
@@ -116,25 +117,23 @@ bool toggle_pause() {
 
 #ifdef _WIN32
 
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif //tells VCC not to generate min/max macros
+#    ifndef NOMINMAX
+#        define NOMINMAX
+#    endif  // tells VCC not to generate min/max macros
 
-#include <windows.h>
+#    include <windows.h>
 
-void micro_sleep( unsigned int n )
-{
-    Sleep( n/1000 );
+void micro_sleep(unsigned int n) {
+    Sleep(n / 1'000);
 }
 
-#elif defined (IRIX)
+#elif defined(IRIX)
 
-void micro_sleep( unsigned int n )
-{
+void micro_sleep(unsigned int n) {
     usleep(static_cast<useconds_t>(n));
 }
 
-#elif defined (__APPLE__) && defined (__MACH__)
+#elif defined(__APPLE__) && defined(__MACH__)
 
 void micro_sleep(unsigned int n) {
     usleep(static_cast<useconds_t>(n));
@@ -143,12 +142,10 @@ void micro_sleep(unsigned int n) {
 #else
 
 void micro_sleep(unsigned int n) {
-    struct timeval tv = {
-            0, 0
-    };
+    struct timeval tv = {0, 0};
 
-    tv.tv_usec = n % 1000000;
-    tv.tv_sec = n / 1000000;
+    tv.tv_usec = n % 1'000'000;
+    tv.tv_sec  = n / 1'000'000;
     select(0, NULL, NULL, NULL, &tv);
 }
 
@@ -169,28 +166,28 @@ void InitTime() {
     }
     lasttime = dblnewtime - .0001;
 
-    #elif defined (_POSIX_MONOTONIC_CLOCK)
+#elif defined(_POSIX_MONOTONIC_CLOCK)
     timespec ts{};
-    #if defined(CLOCK_MONOTONIC)
+#    if defined(CLOCK_MONOTONIC)
     if (clock_gettime(CLOCK_MONOTONIC, &ts))
-    #endif
+#    endif
         clock_gettime(CLOCK_REALTIME, &ts);
-    newtime = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
+    newtime  = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
     lasttime = newtime - .0001;
 
-#elif defined (HAVE_GETTIMEOFDAY)
+#elif defined(HAVE_GETTIMEOFDAY)
     timeval tv{};
-    (void) gettimeofday( &tv, nullptr );
+    (void)gettimeofday(&tv, nullptr);
 
-    newtime  = static_cast<double>(tv.tv_sec)+static_cast<double>(tv.tv_usec)*1.e-6;
-    lasttime = newtime-.0001;
+    newtime  = static_cast<double>(tv.tv_sec) + static_cast<double>(tv.tv_usec) * 1.e-6;
+    lasttime = newtime - .0001;
 
-#elif defined (HAVE_SDL)
-    newtime  = SDL_GetTicks()*1.e-3;
-    lasttime = newtime-.0001;
+#elif defined(HAVE_SDL)
+    newtime  = SDL_GetTicks() * 1.e-3;
+    lasttime = newtime - .0001;
 
 #else
-# error "We have no way to determine the time on this system."
+#    error "We have no way to determine the time on this system."
 #endif
     elapsedtime = .0001;
 }
@@ -210,24 +207,24 @@ double queryTime() {
         tmpnewtime = static_cast<double>(ticks.QuadPart);
     }
     return tmpnewtime - firsttime;
-    #elif defined (_POSIX_MONOTONIC_CLOCK)
+#elif defined(_POSIX_MONOTONIC_CLOCK)
     timespec ts{};
-    #if defined(CLOCK_MONOTONIC)
+#    if defined(CLOCK_MONOTONIC)
     if (clock_gettime(CLOCK_MONOTONIC, &ts))
-    #endif
+#    endif
         clock_gettime(CLOCK_REALTIME, &ts);
     double tmpnewtime = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
     return tmpnewtime - firsttime;
-#elif defined (HAVE_GETTIMEOFDAY)
+#elif defined(HAVE_GETTIMEOFDAY)
     timeval tv{};
-    (void) gettimeofday( &tv, nullptr);
-    const double tmpnewtime = static_cast<double>(tv.tv_sec)+static_cast<double>(tv.tv_usec)*1.e-6;
-    return tmpnewtime-firsttime;
-#elif defined (HAVE_SDL)
-    double tmpnewtime = SDL_GetTicks()*1.e-3;
-    return tmpnewtime-firsttime;
+    (void)gettimeofday(&tv, nullptr);
+    const double tmpnewtime = static_cast<double>(tv.tv_sec) + static_cast<double>(tv.tv_usec) * 1.e-6;
+    return tmpnewtime - firsttime;
+#elif defined(HAVE_SDL)
+    double tmpnewtime = SDL_GetTicks() * 1.e-3;
+    return tmpnewtime - firsttime;
 #else
-# error "We have no way to determine the time on this system."
+#    error "We have no way to determine the time on this system."
     return 0.;
 #endif
 }
@@ -245,21 +242,21 @@ double realTime() {
     if (tmpnewtime == INFINITY) {
         tmpnewtime = 0;
     }
-#elif defined (_POSIX_MONOTONIC_CLOCK)
+#elif defined(_POSIX_MONOTONIC_CLOCK)
     timespec ts{};
-    #if defined(CLOCK_MONOTONIC)
+#    if defined(CLOCK_MONOTONIC)
     if (clock_gettime(CLOCK_MONOTONIC, &ts))
-    #endif
+#    endif
         clock_gettime(CLOCK_REALTIME, &ts);
     const double tmpnewtime = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
-#elif defined (HAVE_GETTIMEOFDAY)
+#elif defined(HAVE_GETTIMEOFDAY)
     timeval tv{};
-    (void) gettimeofday( &tv, nullptr);
-    const double tmpnewtime = static_cast<double>(tv.tv_sec)+static_cast<double>(tv.tv_usec)*1.e-6;
-#elif defined (HAVE_SDL)
-    double tmpnewtime = SDL_GetTicks()*1.e-3;
+    (void)gettimeofday(&tv, nullptr);
+    const double tmpnewtime = static_cast<double>(tv.tv_sec) + static_cast<double>(tv.tv_usec) * 1.e-6;
+#elif defined(HAVE_SDL)
+    double tmpnewtime = SDL_GetTicks() * 1.e-3;
 #else
-# error "We have no way to determine the time on this system."
+#    error "We have no way to determine the time on this system."
     double tmpnewtime = 0.;
 #endif
 
@@ -285,44 +282,46 @@ void UpdateTime() {
         dblttime = static_cast<double>(ttime.QuadPart);
     }
     elapsedtime = (dblnewtime - lasttime);
-    ttime = newtime;
-    if (first)
-    {
+    ttime       = newtime;
+    if (first) {
         firsttime = dblnewtime;
     }
-#elif defined (_POSIX_MONOTONIC_CLOCK)
+#elif defined(_POSIX_MONOTONIC_CLOCK)
     timespec ts{};
-    #if defined(CLOCK_MONOTONIC)
+#    if defined(CLOCK_MONOTONIC)
     if (clock_gettime(CLOCK_MONOTONIC, &ts))
-    #endif
+#    endif
         clock_gettime(CLOCK_REALTIME, &ts);
     lasttime    = newtime;
     newtime     = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
     elapsedtime = newtime - lasttime;
-    // VS_LOG(trace, (boost::format("lin_time.cpp: UpdateTime(): lasttime is %1%; newtime is %2%; elapsedtime before time compression is %3%") % lasttime % newtime % elapsedtime));
+    // VS_LOG(trace, (boost::format("lin_time.cpp: UpdateTime(): lasttime is %1%; newtime is %2%; elapsedtime before
+    // time compression is %3%") % lasttime % newtime % elapsedtime));
     if (first) {
         firsttime = newtime;
     }
-#elif defined (HAVE_GETTIMEOFDAY)
+#elif defined(HAVE_GETTIMEOFDAY)
     timeval tv{};
-    (void) gettimeofday( &tv, nullptr);
+    (void)gettimeofday(&tv, nullptr);
     lasttime    = newtime;
-    newtime     = static_cast<double>(tv.tv_sec)+static_cast<double>(tv.tv_usec)*1.e-6;
-    elapsedtime = newtime-lasttime;
+    newtime     = static_cast<double>(tv.tv_sec) + static_cast<double>(tv.tv_usec) * 1.e-6;
+    elapsedtime = newtime - lasttime;
     if (first) {
         firsttime = newtime;
     }
-#elif defined (HAVE_SDL)
+#elif defined(HAVE_SDL)
     lasttime    = newtime;
-    newtime     = SDL_GetTicks()*1.e-3;
-    elapsedtime = newtime-lasttime;
-    if (first)
+    newtime     = SDL_GetTicks() * 1.e-3;
+    elapsedtime = newtime - lasttime;
+    if (first) {
         firsttime = newtime;
+    }
 #else
-# error "We have no way to determine the time on this system."
+#    error "We have no way to determine the time on this system."
 #endif
     elapsedtime *= timecompression;
-    // VS_LOG(trace, (boost::format("lin_time.cpp: UpdateTime():                                  elapsedtime after  time compression is %1%") % elapsedtime));
+    // VS_LOG(trace, (boost::format("lin_time.cpp: UpdateTime():                                  elapsedtime after time
+    // compression is %1%") % elapsedtime));
     first = false;
 }
 
@@ -330,4 +329,3 @@ void setNewTime(double newnewtime) {
     firsttime -= newnewtime - queryTime();
     UpdateTime();
 }
-

@@ -27,107 +27,104 @@
 
 #include "root_generic/XMLDocument.h"
 
-#include <cassert>
-#include <fstream>
-#include <expat.h>
 #include <algorithm>
+#include <cassert>
+#include <expat.h>
+#include <fstream>
 
-#define PARSING_BUFFER_SIZE 4096
+#define PARSING_BUFFER_SIZE 4'096
 
 namespace XMLDOM {
 /******************************************************************
-*                                                                *
-*                                                                *
-*                       XMLElement implementation                *
-*                                                                *
-*                                                                *
-******************************************************************/
+ *                                                                *
+ *                                                                *
+ *                       XMLElement implementation                *
+ *                                                                *
+ *                                                                *
+ ******************************************************************/
 
-XMLElement::XMLElement() :
-        mType(XET_CDATA),
-        mAttributes(),
-        mParent(nullptr),
-        mDocument(nullptr),
-        mIdAttribute(mAttributes.end()),
-        mNameAttribute(mAttributes.end()) {
-}
+XMLElement::XMLElement()
+    : mType(XET_CDATA),
+      mAttributes(),
+      mParent(nullptr),
+      mDocument(nullptr),
+      mIdAttribute(mAttributes.end()),
+      mNameAttribute(mAttributes.end()) {}
 
-XMLElement::XMLElement(const std::string &cdata) :
-        mType(XET_CDATA),
-        mContents(cdata),
-        mAttributes(),
-        mParent(nullptr),
-        mDocument(nullptr),
-        mIdAttribute(mAttributes.end()),
-        mNameAttribute(mAttributes.end()) {
-}
+XMLElement::XMLElement(const std::string &cdata)
+    : mType(XET_CDATA),
+      mContents(cdata),
+      mAttributes(),
+      mParent(nullptr),
+      mDocument(nullptr),
+      mIdAttribute(mAttributes.end()),
+      mNameAttribute(mAttributes.end()) {}
 
-XMLElement::XMLElement(Type type, const std::string &data) :
-        mType(type), mContents((type == XET_CDATA || type == XET_COMMENT) ? data : std::string()),
-        mAttributes(),
-        mParent(nullptr),
-        mDocument(nullptr),
-        mIdAttribute(mAttributes.end()),
-        mNameAttribute(mAttributes.end()) {
-}
+XMLElement::XMLElement(Type type, const std::string &data)
+    : mType(type),
+      mContents((type == XET_CDATA || type == XET_COMMENT) ? data : std::string()),
+      mAttributes(),
+      mParent(nullptr),
+      mDocument(nullptr),
+      mIdAttribute(mAttributes.end()),
+      mNameAttribute(mAttributes.end()) {}
 
-XMLElement::XMLElement(const char *tagName, const char *const *attrValuePairList, unsigned int nAttr) :
-        mType(XET_TAG),
-        mTagName(tagName),
-        mAttributes(),
-        mParent(nullptr),
-        mDocument(nullptr),
-        mIdAttribute(mAttributes.end()),
-        mNameAttribute(mAttributes.end()) {
+XMLElement::XMLElement(const char *tagName, const char *const *attrValuePairList, unsigned int nAttr)
+    : mType(XET_TAG),
+      mTagName(tagName),
+      mAttributes(),
+      mParent(nullptr),
+      mDocument(nullptr),
+      mIdAttribute(mAttributes.end()),
+      mNameAttribute(mAttributes.end()) {
     for (; (nAttr >= 2 && attrValuePairList[0] && attrValuePairList[1]); attrValuePairList += 2) {
         setAttribute(attrValuePairList[0], attrValuePairList[1]);
     }
 }
 
-XMLElement::XMLElement(const char *tagName, const char *const *attrValuePairList) :
-        mType(XET_TAG),
-        mTagName(tagName),
-        mAttributes(),
-        mParent(nullptr),
-        mDocument(nullptr),
-        mIdAttribute(mAttributes.end()),
-        mNameAttribute(mAttributes.end()) {
+XMLElement::XMLElement(const char *tagName, const char *const *attrValuePairList)
+    : mType(XET_TAG),
+      mTagName(tagName),
+      mAttributes(),
+      mParent(nullptr),
+      mDocument(nullptr),
+      mIdAttribute(mAttributes.end()),
+      mNameAttribute(mAttributes.end()) {
     for (; (attrValuePairList[0] && attrValuePairList[1]); attrValuePairList += 2) {
         setAttribute(attrValuePairList[0], attrValuePairList[1]);
     }
 }
 
-XMLElement::XMLElement(const std::string &tagName, const std::vector<std::string> &attrValuePairList) :
-        mType(XET_TAG),
-        mTagName(tagName),
-        mAttributes(),
-        mParent(nullptr),
-        mDocument(nullptr),
-        mIdAttribute(mAttributes.end()),
-        mNameAttribute(mAttributes.end()) {
+XMLElement::XMLElement(const std::string &tagName, const std::vector<std::string> &attrValuePairList)
+    : mType(XET_TAG),
+      mTagName(tagName),
+      mAttributes(),
+      mParent(nullptr),
+      mDocument(nullptr),
+      mIdAttribute(mAttributes.end()),
+      mNameAttribute(mAttributes.end()) {
     for (std::vector<std::string>::size_type i = 0; i + 1 < attrValuePairList.size(); i += 2) {
         setAttribute(attrValuePairList[i], attrValuePairList[i + 1]);
     }
 }
 
-XMLElement::XMLElement(const std::string &tagName, const std::map<std::string, std::string> &attrValuePairList) :
-        mType(XET_TAG),
-        mTagName(tagName),
-        mAttributes(attrValuePairList),
-        mParent(nullptr),
-        mDocument(nullptr),
-        mIdAttribute(mAttributes.find("id")),
-        mNameAttribute(mAttributes.find("name")) {
-}
+XMLElement::XMLElement(const std::string &tagName, const std::map<std::string, std::string> &attrValuePairList)
+    : mType(XET_TAG),
+      mTagName(tagName),
+      mAttributes(attrValuePairList),
+      mParent(nullptr),
+      mDocument(nullptr),
+      mIdAttribute(mAttributes.find("id")),
+      mNameAttribute(mAttributes.find("name")) {}
 
 XMLElement::~XMLElement() {
     clear();
-    mParent = nullptr;
+    mParent   = nullptr;
     mDocument = nullptr;
 }
 
 void XMLElement::clear(bool doAttributes) {
-    //Remove all - quickly
+    // Remove all - quickly
     for (child_iterator cit = childrenBegin(); cit != childrenEnd(); ++cit) {
         delete *cit;
     }
@@ -143,8 +140,7 @@ void XMLElement::clear(bool doAttributes) {
 const std::string &XMLElement::contents() const {
     static std::string empty;
     switch (type()) {
-        case XET_CDATA
-            :
+        case XET_CDATA:
         case XET_COMMENT:
             return mContents;
 
@@ -162,7 +158,7 @@ const std::string &XMLElement::contents() const {
 
 std::string &XMLElement::contents() {
     assert(type() == XET_CDATA || type() == XET_COMMENT);
-    //Dirtify document
+    // Dirtify document
     if (mDocument) {
         mDocument->dirty = true;
     }
@@ -206,7 +202,7 @@ XMLElement *XMLElement::getChildByName(const std::string &name) {
 }
 
 unsigned int XMLElement::appendChild(XMLElement *newElem) {
-    //Dirtify document
+    // Dirtify document
     if (mDocument) {
         mDocument->dirty = true;
     }
@@ -218,7 +214,7 @@ unsigned int XMLElement::appendChild(XMLElement *newElem) {
 
 void XMLElement::removeChild(unsigned int idx) {
     if (idx < mChildren.size() && mChildren[idx]) {
-        //Dirtify document
+        // Dirtify document
         if (mDocument) {
             mDocument->dirty = true;
         }
@@ -238,12 +234,11 @@ void XMLElement::removeAttribute(const std::string &name) {
 void XMLElement::setAttribute(const std::string &name, const std::string &value) {
     static std::string _id("id");
     static std::string _name("name");
-    //Dirtify document
+    // Dirtify document
     if (mDocument) {
         mDocument->dirty = true;
     }
-    std::pair<attribute_iterator, bool> rv =
-            mAttributes.insert(std::pair<std::string, std::string>(name, value));
+    std::pair<attribute_iterator, bool> rv = mAttributes.insert(std::pair<std::string, std::string>(name, value));
     if (rv.second) {
         if (name == _id) {
             mIdAttribute = rv.first;
@@ -257,7 +252,7 @@ void XMLElement::appendContents(const std::string &cont) {
     switch (type()) {
         case XET_CDATA:
         case XET_COMMENT:
-            //Dirtify document
+            // Dirtify document
             if (mDocument) {
                 mDocument->dirty = true;
             }
@@ -289,8 +284,8 @@ void XMLElement::setDocument(XMLDocument *document) {
 void XMLElement::setType(Type newType) {
     if (newType != type()) {
         if (mParent) {
-            //Harder
-            //Remove children by hand - to allow them to deregister themselves.
+            // Harder
+            // Remove children by hand - to allow them to deregister themselves.
             while (numChildren()) {
                 removeChild(numChildren() - 1);
             }
@@ -298,7 +293,7 @@ void XMLElement::setType(Type newType) {
             removeAttribute("name");
             mAttributes.clear();
         } else {
-            //Faster
+            // Faster
             clear();
         }
         mType = newType;
@@ -306,7 +301,7 @@ void XMLElement::setType(Type newType) {
 }
 
 void XMLElement::JoinMaps(ElementMap &dst, const ElementMap &src) {
-    ElementMap::iterator dit = dst.begin();
+    ElementMap::iterator       dit = dst.begin();
     ElementMap::const_iterator sit = src.begin();
     while (sit != src.end()) {
         dit = dst.insert(dit, *sit);
@@ -375,53 +370,46 @@ XMLElement *XMLElement::getChildByHierarchicalName(const std::string &name) {
 }
 
 /******************************************************************
-*                                                                *
-*                                                                *
-*                       XMLParser  implementation                *
-*                                                                *
-*                                                                *
-******************************************************************/
+ *                                                                *
+ *                                                                *
+ *                       XMLParser  implementation                *
+ *                                                                *
+ *                                                                *
+ ******************************************************************/
 
 struct XMLParserContext {
     typedef std::map<std::string, XMLProcessor *> ProcessorMap;
 
-    ProcessorMap processors;
+    ProcessorMap   processors;
     XMLSerializer *xparser{};
-    XMLDocument *document{};
-    XMLElement *current{};
+    XMLDocument   *document{};
+    XMLElement    *current{};
 
     XML_Parser parser{};
 };
 
 namespace ExpatHandlers {
 /******************************************************************
-*                                                                *
-*                     XMLSerializer  implementation              *
-*                                                                *
-*                           (ExpatHandlers)                      *
-*                                                                *
-******************************************************************/
+ *                                                                *
+ *                     XMLSerializer  implementation              *
+ *                                                                *
+ *                           (ExpatHandlers)                      *
+ *                                                                *
+ ******************************************************************/
 
 
 /* atts is array of name/value pairs, terminated by 0;
  *   names and values are 0 terminated. */
 static void StartElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-    XMLParserContext *internals = (XMLParserContext *) userData;
+    XMLParserContext *internals = (XMLParserContext *)userData;
     assert(internals);
     assert(internals->current);
-    internals->current =
-            internals->current->getChild(
-                    internals->current->appendChild(
-                            new XMLElement(
-                                    (const char *) name,
-                                    (const char *const *) atts
-                            )
-                    )
-            );
+    internals->current = internals->current->getChild(
+            internals->current->appendChild(new XMLElement((const char *)name, (const char *const *)atts)));
 }
 
 static void EndElement(void *userData, const XML_Char *name) {
-    XMLParserContext *internals = (XMLParserContext *) userData;
+    XMLParserContext *internals = (XMLParserContext *)userData;
     assert(internals);
     assert(internals->current);
     internals->current = internals->current->getParent();
@@ -429,7 +417,7 @@ static void EndElement(void *userData, const XML_Char *name) {
 
 /* s is not 0 terminated. */
 static void CData(void *userData, const XML_Char *s, int len) {
-    XMLParserContext *internals = (XMLParserContext *) userData;
+    XMLParserContext *internals = (XMLParserContext *)userData;
     assert(internals);
     assert(internals->current);
     assert(internals->xparser);
@@ -441,20 +429,16 @@ static void CData(void *userData, const XML_Char *s, int len) {
 
 /* target and data are 0 terminated */
 static void PI(void *userData, const XML_Char *target, const XML_Char *data) {
-    XMLParserContext *internals = (XMLParserContext *) userData;
+    XMLParserContext *internals = (XMLParserContext *)userData;
     assert(internals);
     XMLParserContext::ProcessorMap::const_iterator it = internals->processors.find(std::string(target));
     if (it != internals->processors.end()) {
-        it->second->execute(
-                internals->xparser,
-                internals->document,
-                internals->current,
-                std::string(data));
+        it->second->execute(internals->xparser, internals->document, internals->current, std::string(data));
     }
 }
 
 static void Comment(void *userData, const XML_Char *data) {
-    XMLParserContext *internals = (XMLParserContext *) userData;
+    XMLParserContext *internals = (XMLParserContext *)userData;
     assert(internals);
     assert(internals->current);
     assert(internals->xparser);
@@ -463,18 +447,18 @@ static void Comment(void *userData, const XML_Char *data) {
     }
     internals->current->appendChild(new XMLElement(XMLElement::XET_COMMENT, std::string(data)));
 }
-};
+};  // namespace ExpatHandlers
 
 /******************************************************************
-*                                                                *
-*                     XMLSerializer  implementation              *
-*                                                                *
-*                           (member functions)                   *
-*                                                                *
-******************************************************************/
+ *                                                                *
+ *                     XMLSerializer  implementation              *
+ *                                                                *
+ *                           (member functions)                   *
+ *                                                                *
+ ******************************************************************/
 
-XMLSerializer::XMLSerializer(const char *encoding, XMLDocument *doc, XMLElement *elem) :
-        options(OPT_DEFAULT), internals(nullptr) {
+XMLSerializer::XMLSerializer(const char *encoding, XMLDocument *doc, XMLElement *elem)
+    : options(OPT_DEFAULT), internals(nullptr) {
     initialise(encoding, doc, elem);
 }
 
@@ -483,8 +467,8 @@ XMLSerializer::~XMLSerializer() {
 }
 
 bool XMLSerializer::parse(const void *buf, unsigned int len) {
-    XMLParserContext *ctxt = (XMLParserContext *) internals;
-    return XML_Parse(ctxt->parser, (const XML_Char *) buf, len, false) != 0;
+    XMLParserContext *ctxt = (XMLParserContext *)internals;
+    return XML_Parse(ctxt->parser, (const XML_Char *)buf, len, false) != 0;
 }
 
 bool XMLSerializer::importXML(const std::string &path) {
@@ -508,8 +492,8 @@ bool _exportXML(std::ostream &stream, XMLElement *elem) {
         return false;
     }
     XMLElement::attribute_iterator ait;
-    unsigned int i;
-    //Prolog
+    unsigned int                   i;
+    // Prolog
     switch (elem->type()) {
         case XMLElement::XET_TAG:
             stream << "<" << elem->tagName().c_str();
@@ -527,22 +511,22 @@ bool _exportXML(std::ostream &stream, XMLElement *elem) {
             }
             break;
         case XMLElement::XET_CDATA:
-            //To-do: Find out if it needs to be enveloped within '<![CDATA['/']]>' constructs.
+            // To-do: Find out if it needs to be enveloped within '<![CDATA['/']]>' constructs.
             stream << elem->contents().c_str();
-            return !stream.fail();         //No children
+            return !stream.fail();  // No children
 
         case XMLElement::XET_COMMENT:
             stream << "<!--" << elem->contents().c_str() << "-->";
-            return !stream.fail();         //No children
+            return !stream.fail();  // No children
 
         case XMLElement::XET_ROOT:
-            //WTF?
+            // WTF?
             return true;
     }
     if (stream.fail()) {
         return false;
     }
-    //Children
+    // Children
     for (i = 0; i < elem->numChildren(); ++i) {
         if (!_exportXML(stream, elem->getChild(i))) {
             return false;
@@ -551,7 +535,7 @@ bool _exportXML(std::ostream &stream, XMLElement *elem) {
     if (stream.fail()) {
         return false;
     }
-    //Epilog
+    // Epilog
     switch (elem->type()) {
         case XMLElement::XET_TAG:
             if (elem->numChildren() > 0) {
@@ -561,7 +545,7 @@ bool _exportXML(std::ostream &stream, XMLElement *elem) {
         case XMLElement::XET_COMMENT:
         case XMLElement::XET_CDATA:
         case XMLElement::XET_ROOT:
-            //WTF?
+            // WTF?
             return true;
     }
     if (stream.fail()) {
@@ -574,7 +558,7 @@ bool _exportXML(std::ostream &stream, XMLDocument *doc) {
     if (!doc) {
         return false;
     }
-    //Output xml && <!DOCTYPE...> tags
+    // Output xml && <!DOCTYPE...> tags
     if (doc->sysId.empty()) {
         stream << "<?xml version=\"1.0\"?>\n";
     } else {
@@ -594,14 +578,14 @@ bool _exportXML(std::ostream &stream, XMLDocument *doc) {
         }
         stream << ">\n";
     }
-    //Did we fail?
+    // Did we fail?
     if (stream.fail()) {
         return false;
     }
-    //Output the rest of the document
-    //NOTE: Although XML 1.1 requires that 'root' may only have one child,
-    //we can't make that assumption because we count as elements comments
-    //and other productions referred to as 'misc' by the standard.
+    // Output the rest of the document
+    // NOTE: Although XML 1.1 requires that 'root' may only have one child,
+    // we can't make that assumption because we count as elements comments
+    // and other productions referred to as 'misc' by the standard.
     for (unsigned int i = 0; i < doc->root.numChildren(); ++i) {
         if (!_exportXML(stream, doc->root.getChild(i))) {
             return false;
@@ -611,8 +595,7 @@ bool _exportXML(std::ostream &stream, XMLDocument *doc) {
 }
 
 bool XMLSerializer::exportXML(std::ostream &stream) {
-    return !stream.fail()
-            && _exportXML(stream, ((XMLParserContext *) internals)->document);
+    return !stream.fail() && _exportXML(stream, ((XMLParserContext *)internals)->document);
 }
 
 bool XMLSerializer::exportXML(const std::string &filename) {
@@ -623,23 +606,23 @@ bool XMLSerializer::exportXML(const std::string &filename) {
 void XMLSerializer::addProcessor(XMLProcessor *proc) {
     assert(internals);
 
-    XMLParserContext *ctxt = (XMLParserContext *) internals;
+    XMLParserContext *ctxt = (XMLParserContext *)internals;
     ctxt->processors.insert(std::pair<std::string, XMLProcessor *>(proc->getTarget(), proc));
 }
 
 bool XMLSerializer::initialise(const char *encoding, XMLDocument *doc, XMLElement *elem) {
-    //DO NOT assert encoding==0... in case an encoding natively supported by expat is passed.
-    //DO assert, though, that doc==0 => elem==0
+    // DO NOT assert encoding==0... in case an encoding natively supported by expat is passed.
+    // DO assert, though, that doc==0 => elem==0
     assert(!(!doc && elem));
 
     delete close();
     XMLParserContext *ctxt = new XMLParserContext;
-    ctxt->xparser = this;
-    ctxt->document = doc ? doc : new XMLDocument();
-    ctxt->current = elem ? elem : &(ctxt->document->root);
+    ctxt->xparser          = this;
+    ctxt->document         = doc ? doc : new XMLDocument();
+    ctxt->current          = elem ? elem : &(ctxt->document->root);
 
-    //Create Expat parser, and initialize
-    ctxt->parser = XML_ParserCreate((const XML_Char *) encoding);
+    // Create Expat parser, and initialize
+    ctxt->parser = XML_ParserCreate((const XML_Char *)encoding);
     XML_SetUserData(ctxt->parser, ctxt);
     XML_SetElementHandler(ctxt->parser, &ExpatHandlers::StartElement, &ExpatHandlers::EndElement);
     XML_SetCharacterDataHandler(ctxt->parser, &ExpatHandlers::CData);
@@ -651,8 +634,8 @@ bool XMLSerializer::initialise(const char *encoding, XMLDocument *doc, XMLElemen
 }
 
 XMLDocument *XMLSerializer::close() {
-    XMLDocument *doc = nullptr;
-    XMLParserContext *ctxt = (XMLParserContext *) internals;
+    XMLDocument      *doc  = nullptr;
+    XMLParserContext *ctxt = (XMLParserContext *)internals;
     if (ctxt) {
         XML_ParserFree(ctxt->parser);
         doc = ctxt->document;
@@ -665,5 +648,4 @@ XMLDocument *XMLSerializer::close() {
 
     return doc;
 }
-} //namespace XMLDOM
-
+}  // namespace XMLDOM

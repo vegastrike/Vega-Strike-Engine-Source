@@ -27,19 +27,19 @@
 
 
 #include <assert.h>
-#include "root_generic/faction_generic.h"
-#include "src/vs_logging.h"
-#include "src/config_xml.h"
-#include "root_generic/vs_globals.h"
-#include "gfx_generic/cockpit_generic.h"
-#include "cmd/unit_generic.h"
-#include "src/universe.h"
 
+#include "cmd/unit_generic.h"
+#include "gfx_generic/cockpit_generic.h"
+#include "root_generic/faction_generic.h"
 #include "root_generic/options.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "src/universe.h"
+#include "src/vs_logging.h"
 
 using namespace FactionUtil;
 int FactionUtil::upgradefac = 0;
-int FactionUtil::planetfac = 0;
+int FactionUtil::planetfac  = 0;
 int FactionUtil::neutralfac = 0;
 
 FSM *FactionUtil::GetConversation(int Myfaction, int TheirFaction) {
@@ -48,7 +48,7 @@ FSM *FactionUtil::GetConversation(int Myfaction, int TheirFaction) {
 }
 
 const char *FactionUtil::GetFaction(int i) {
-    if (i >= 0 && i < (int) factions.size()) {
+    if (i >= 0 && i < (int)factions.size()) {
         return factions[i]->factionname;
     }
     return "";
@@ -56,7 +56,7 @@ const char *FactionUtil::GetFaction(int i) {
 
 static int GetFactionLookup(const char *factionname) {
 #ifdef _MSC_VER
-    #define strcasecmp stricmp
+#    define strcasecmp stricmp
 #endif
     for (unsigned int i = 0; i < factions.size(); i++) {
         if (strcasecmp(factionname, factions[i]->factionname) == 0) {
@@ -77,13 +77,13 @@ Unit *FactionUtil::GetContraband(int faction) {
  */
 int FactionUtil::GetFactionIndex(const string &name) {
     static Hashtable<string, int, 47> factioncache;
-    int *tmp = factioncache.Get(name);
+    int                              *tmp = factioncache.Get(name);
     if (tmp) {
         return *tmp;
     }
     int i = GetFactionLookup(name.c_str());
-    tmp = new int;
-    *tmp = i;
+    tmp   = new int;
+    *tmp  = i;
     factioncache.Put(name, tmp);
     return i;
 }
@@ -127,18 +127,19 @@ void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction,
                     if (isPlayerFaction(TheirFaction) || configuration().ai.allow_nonplayer_faction_change) {
                         if (configuration().ai.allow_civil_war || Myfaction != TheirFaction) {
                             factions[Myfaction]->faction[TheirFaction].relationship += factor * rank;
-                            if (factions[Myfaction]->faction[TheirFaction].relationship > 1
-                                    && configuration().ai.capped_faction_rating) {
+                            if (factions[Myfaction]->faction[TheirFaction].relationship > 1 &&
+                                configuration().ai.capped_faction_rating) {
                                 factions[Myfaction]->faction[TheirFaction].relationship = 1;
                             }
-                            if (factions[Myfaction]->faction[TheirFaction].relationship
-                                    < configuration().ai.min_relationship_flt) {
-                                factions[Myfaction]->faction[TheirFaction].relationship = configuration().ai.min_relationship_flt;
+                            if (factions[Myfaction]->faction[TheirFaction].relationship <
+                                configuration().ai.min_relationship_flt) {
+                                factions[Myfaction]->faction[TheirFaction].relationship =
+                                        configuration().ai.min_relationship_flt;
                             }
                             if (!configuration().ai.allow_nonplayer_faction_change) {
                                 factions[TheirFaction]->faction[Myfaction].relationship =
                                         factions[Myfaction]->faction[TheirFaction].relationship;
-                            }                                                                                     //reflect if player
+                            }  // reflect if player
                         }
                     }
                 }
@@ -148,11 +149,11 @@ void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction,
 }
 
 int FactionUtil::GetPlaylist(const int myfaction) {
-    return factions[myfaction]->playlist;     //can be -1
+    return factions[myfaction]->playlist;  // can be -1
 }
 
 const float *FactionUtil::GetSparkColor(const int myfaction) {
-    return factions[myfaction]->sparkcolor;     //can be -1
+    return factions[myfaction]->sparkcolor;  // can be -1
 }
 
 unsigned int FactionUtil::GetNumFactions() {
@@ -169,7 +170,7 @@ void FactionUtil::SerializeFaction(FILE *fp) {
 }
 
 string FactionUtil::SerializeFaction() {
-    char temp[8192];
+    char   temp[8'192];
     string ret("");
     for (unsigned int i = 0; i < factions.size(); i++) {
         for (unsigned int j = 0; j < factions[i]->faction.size(); j++) {
@@ -203,7 +204,7 @@ void FactionUtil::LoadSerializedFaction(FILE *fp) {
             if (1 != sscanf(tmp2, "%f ", &factions[i]->faction[j].relationship)) {
                 VS_LOG(error, "err");
             }
-            int k = 0;
+            int  k        = 0;
             bool founddig = false;
             while (tmp2[k]) {
                 if (isdigit(tmp2[k])) {
@@ -255,7 +256,7 @@ void FactionUtil::LoadSerializedFaction(char *&buf) {
         }
         for (unsigned int j = 0; j < factions[i]->faction.size(); j++) {
             sscanf(buf, "%f ", &factions[i]->faction[j].relationship);
-            int k = 0;
+            int  k        = 0;
             bool founddig = false;
             while (buf[k]) {
                 if (isdigit(buf[k])) {
@@ -273,4 +274,3 @@ void FactionUtil::LoadSerializedFaction(char *&buf) {
         }
     }
 }
-

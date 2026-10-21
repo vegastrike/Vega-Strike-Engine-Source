@@ -26,8 +26,9 @@
  */
 
 #include "root_generic/options.h"
-#include "root_generic/configxml.h"
+
 #include "configuration/configuration.h"
+#include "root_generic/configxml.h"
 
 extern VegaConfig *vs_config;
 

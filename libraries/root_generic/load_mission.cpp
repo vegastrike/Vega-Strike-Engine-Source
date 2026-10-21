@@ -28,24 +28,26 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include "root_generic/configxml.h"
+
+#include "root_generic/load_mission.h"
+
+#include "cmd/ai/aggressive.h"
+#include "cmd/ai/missionscript.h"
+#include "cmd/ai/script.h"
+#include "cmd/script/flightgroup.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/pythonmission.h"
-#include "root_generic/vs_globals.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
 #include "cmd/unit_generic.h"
 #include "gfx_generic/cockpit_generic.h"
-#include "cmd/ai/aggressive.h"
-#include "cmd/ai/script.h"
-#include "cmd/ai/missionscript.h"
-#include "cmd/script/flightgroup.h"
-#include "src/python/python_class.h"
-#include "vegadisk/savegame.h"
-#include "src/save_util.h"
-#include "root_generic/load_mission.h"
-#include "src/universe.h"
+#include "root_generic/configxml.h"
 #include "root_generic/options.h"
+#include "root_generic/vs_globals.h"
+#include "src/python/python_class.h"
+#include "src/save_util.h"
+#include "src/universe.h"
+#include "src/vs_logging.h"
+#include "vegadisk/savegame.h"
+#include "vegadisk/vsfilesystem.h"
 
 std::string PickledDataSansMissionName(std::string pickled) {
     string::size_type newline = pickled.find('\n');
@@ -63,14 +65,14 @@ std::string PickledDataOnlyMissionName(std::string pickled) {
 
 int ReadIntSpace(std::string &str) {
     std::string myint;
-    bool toggle = false;
-    int i = 0;
-    while (i < (int) str.length()) {
+    bool        toggle = false;
+    int         i      = 0;
+    while (i < (int)str.length()) {
         char c[2] = {0, 0};
-        c[0] = str[i++];
+        c[0]      = str[i++];
         if (c[0] != ' ') {
-            toggle = true;
-            myint += c;
+            toggle  = true;
+            myint  += c;
         } else if (toggle) {
             break;
         }
@@ -80,21 +82,22 @@ int ReadIntSpace(std::string &str) {
 }
 
 struct delayed_mission {
-    std::string str;
-    std::string script;
+    std::string  str;
+    std::string  script;
     unsigned int player;
 
     delayed_mission(std::string str, std::string script) {
-        this->str = str;
+        this->str    = str;
         this->script = script;
-        player = _Universe->CurrentCockpit();
+        player       = _Universe->CurrentCockpit();
     }
 };
+
 vector<delayed_mission> delayed_missions;
 
 int num_delayed_missions() {
-    unsigned int cp = _Universe->CurrentCockpit();
-    int number = 0;
+    unsigned int cp     = _Universe->CurrentCockpit();
+    int          number = 0;
     for (unsigned int i = 0; i < delayed_missions.size(); ++i) {
         if (delayed_missions[i].player == cp) {
             ++number;
@@ -105,7 +108,7 @@ int num_delayed_missions() {
 
 void processDelayedMissions() {
     while (!delayed_missions.empty()) {
-        if (delayed_missions.back().player < (unsigned int) _Universe->numPlayers()) {
+        if (delayed_missions.back().player < (unsigned int)_Universe->numPlayers()) {
             int i = _Universe->CurrentCockpit();
             _Universe->SetActiveCockpit(delayed_missions.back().player);
             StarSystem *ss = _Universe->AccessCockpit()->activeStarSystem;
@@ -135,9 +138,9 @@ void SaveGame::ReloadPickledData() {
         if (!lpd.empty()) {
             unsigned int nummis = ReadIntSpace(lpd);
             for (unsigned int i = 0; i < nummis; i++) {
-                int len = ReadIntSpace(lpd);
+                int         len     = ReadIntSpace(lpd);
                 std::string pickled = lpd.substr(0, len);
-                lpd = lpd.substr(len, lpd.length() - len);
+                lpd                 = lpd.substr(len, lpd.length() - len);
                 if (i < active_missions.size()) {
                     active_missions[i]->UnPickle(PickledDataSansMissionName(pickled));
                 } else {
@@ -150,7 +153,7 @@ void SaveGame::ReloadPickledData() {
 
 void UnpickleMission(std::string pickled) {
     std::string file = PickledDataOnlyMissionName(pickled);
-    pickled = PickledDataSansMissionName(pickled);
+    pickled          = PickledDataSansMissionName(pickled);
     if (pickled.length()) {
         active_missions.push_back(new Mission(file.c_str()));
         active_missions.back()->initMission();
@@ -160,13 +163,13 @@ void UnpickleMission(std::string pickled) {
 
 std::string lengthify(std::string tp) {
     int len = tp.length();
-    tp = XMLSupport::tostring(len) + " " + tp;
+    tp      = XMLSupport::tostring(len) + " " + tp;
     return tp;
 }
 
 std::string PickleAllMissions() {
     std::string res;
-    int count = 0;
+    int         count = 0;
     for (unsigned int i = 0; i < active_missions.size(); i++) {
         string tmp = active_missions[i]->Pickle();
         if (tmp.length() || i == 0) {
@@ -179,13 +182,13 @@ std::string PickleAllMissions() {
 
 int ReadIntSpace(FILE *fp) {
     std::string myint;
-    bool toggle = false;
+    bool        toggle = false;
     while (!VSFileSystem::vs_feof(fp)) {
         char c[2] = {0, 0};
         if (1 == VSFileSystem::vs_read(&c[0], sizeof(char), 1, fp)) {
             if (c[0] != ' ') {
-                toggle = true;
-                myint += c;
+                toggle  = true;
+                myint  += c;
             } else if (toggle) {
                 break;
             }
@@ -196,13 +199,13 @@ int ReadIntSpace(FILE *fp) {
 
 int ReadIntSpace(char *&buf) {
     std::string myint;
-    bool toggle = false;
+    bool        toggle = false;
     while (*buf != 0) {
         char c[2] = {0, 0};
         if ((c[0] = *buf)) {
             if (c[0] != ' ') {
-                toggle = true;
-                myint += c;
+                toggle  = true;
+                myint  += c;
             } else if (toggle) {
                 break;
             }
@@ -213,15 +216,15 @@ int ReadIntSpace(char *&buf) {
 }
 
 std::string UnpickleAllMissions(FILE *fp) {
-    std::string retval;
-    unsigned int nummissions = ReadIntSpace(fp);
-    retval += XMLSupport::tostring((int) nummissions) + " ";
+    std::string  retval;
+    unsigned int nummissions  = ReadIntSpace(fp);
+    retval                   += XMLSupport::tostring((int)nummissions) + " ";
     for (unsigned int i = 0; i < nummissions; i++) {
-        unsigned int picklelength = ReadIntSpace(fp);
-        retval += XMLSupport::tostring((int) picklelength) + " ";
-        char *temp = (char *) malloc(sizeof(char) * (1 + picklelength));
-        temp[0] = 0;
-        temp[picklelength] = 0;
+        unsigned int picklelength  = ReadIntSpace(fp);
+        retval                    += XMLSupport::tostring((int)picklelength) + " ";
+        char *temp                 = (char *)malloc(sizeof(char) * (1 + picklelength));
+        temp[0]                    = 0;
+        temp[picklelength]         = 0;
         VSFileSystem::vs_read(temp, picklelength, 1, fp);
         retval += temp;
         if (i < active_missions.size()) {
@@ -235,18 +238,18 @@ std::string UnpickleAllMissions(FILE *fp) {
 }
 
 std::string UnpickleAllMissions(char *&buf) {
-    std::string retval;
-    unsigned int nummissions = ReadIntSpace(buf);
-    retval += XMLSupport::tostring((int) nummissions) + " ";
+    std::string  retval;
+    unsigned int nummissions  = ReadIntSpace(buf);
+    retval                   += XMLSupport::tostring((int)nummissions) + " ";
     for (unsigned int i = 0; i < nummissions; i++) {
-        unsigned int picklelength = ReadIntSpace(buf);
-        retval += XMLSupport::tostring((int) picklelength) + " ";
-        char *temp = (char *) malloc(sizeof(char) * (1 + picklelength));
-        temp[0] = 0;
-        temp[picklelength] = 0;
+        unsigned int picklelength  = ReadIntSpace(buf);
+        retval                    += XMLSupport::tostring((int)picklelength) + " ";
+        char *temp                 = (char *)malloc(sizeof(char) * (1 + picklelength));
+        temp[0]                    = 0;
+        temp[picklelength]         = 0;
         memcpy(temp, buf, picklelength);
         buf += picklelength;
-        //VSFileSystem::vs_read (temp,picklelength,1,fp);
+        // VSFileSystem::vs_read (temp,picklelength,1,fp);
         retval += temp;
         if (i < active_missions.size()) {
             active_missions[i]->SetUnpickleData(PickledDataSansMissionName(temp));
@@ -264,10 +267,10 @@ void LoadMission(const char *mn, bool loadFirstUnit) {
 
 void LoadMission(const char *nission_name, const std::string &script, bool loadFirstUnit) {
     using namespace VSFileSystem;
-    string mission_name(nission_name);
+    string      mission_name(nission_name);
     const char *friendly_mission_name = nission_name;
     if (nission_name[0] == '#') {
-        //Allows you to title a mission without loading that file.
+        // Allows you to title a mission without loading that file.
         mission_name = string();
         friendly_mission_name++;
     }
@@ -275,7 +278,7 @@ void LoadMission(const char *nission_name, const std::string &script, bool loadF
         mission_name = configuration().general.empty_mission;
     }
     VS_LOG(info, (boost::format("%1%") % script));
-    VSFile f;
+    VSFile  f;
     VSError err = f.OpenReadOnly(mission_name, MissionFile);
     if (err > Ok) {
         return;
@@ -291,16 +294,15 @@ void LoadMission(const char *nission_name, const std::string &script, bool loadF
     active_missions.back()->initMission();
 
     vector<Flightgroup *>::const_iterator siter;
-    vector<Flightgroup *> fg = active_missions.back()->flightgroups;
+    vector<Flightgroup *>                 fg = active_missions.back()->flightgroups;
 
     if (active_missions.size() > 0) {
-        //Give the mission a name.
+        // Give the mission a name.
         active_missions.back()->mission_name = friendly_mission_name;
     }
     active_missions.back()->player_num = _Universe->CurrentCockpit();
 
     active_missions.back()->DirectorInitgame();
     mission = active_missions[0];
-    //return true;
+    // return true;
 }
-

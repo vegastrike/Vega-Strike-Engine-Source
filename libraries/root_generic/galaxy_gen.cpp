@@ -27,35 +27,36 @@
  */
 
 
+#include "root_generic/galaxy_gen.h"
+
+#include <assert.h>
 #include <cstdio>
 #include <cstdlib>
-#include <vector>
-#include <string>
-#include "root_generic/macosx_math.h"
 #include <math.h>
+#include <string>
 #include <time.h>
-#include <assert.h>
+#include <vector>
 
+#include "root_generic/galaxy_xml.h"
+#include "root_generic/macosx_math.h"
+#include "root_generic/options.h"
+#include "root_generic/vega_random.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
 #include "src/gfxlib.h"
-#include "root_generic/galaxy_xml.h"
-#include "root_generic/galaxy_gen.h"
-#include "root_generic/vega_random.h"
-#include "root_generic/options.h"
 #include "src/universe.h"
 #include "src/vs_logging.h"
 
 #ifndef _WIN32
-#include <ctype.h>
+#    include <ctype.h>
 #endif
 
-#if _MSC_VER >= 1300
-#define snprintf _snprintf
+#if _MSC_VER >= 1'300
+#    define snprintf _snprintf
 #endif
 
 #ifndef M_PI
-#define M_PI 3.1415926536
+#    define M_PI 3.1415926536
 #endif
 #include "vegadisk/vsfilesystem.h"
 
@@ -83,11 +84,11 @@ static uint_fast32_t ssrand() {
 
 static string GetWrapXY(string cname, int &wrapx, int &wrapy) {
     string wrap = cname;
-    wrapx = wrapy = 1;
+    wrapx = wrapy         = 1;
     string::size_type pos = wrap.find("wrapx");
     if (pos != string::npos) {
         string Wrapx = wrap.substr(pos + 5, wrap.length());
-        cname = cname.substr(0, pos);
+        cname        = cname.substr(0, pos);
         sscanf(Wrapx.c_str(), "%d", &wrapx);
         pos = Wrapx.find("wrapy");
         if (pos != string::npos) {
@@ -127,7 +128,7 @@ string getRandName(vector<string> &s) {
         return string(nada);
     }
     const uint_fast32_t i = rnd(0, s.size());
-    string k = s.at(i);
+    string              k = s.at(i);
     s.erase(s.begin() + i);
     return k;
 }
@@ -142,6 +143,7 @@ struct Color {
         g = gg;
     }
 };
+
 class Vector {
 public:
     float i{};
@@ -154,7 +156,7 @@ public:
         i = j = k = 0;
     }
 
-    template<class vec>
+    template <class vec>
     Vector(const vec &in) {
         memcpy(this, &in, sizeof(*this));
     }
@@ -168,9 +170,9 @@ public:
     }
 
     Vector(float x, float y, float z, float s, float t) {
-        i = x;
-        j = y;
-        k = z;
+        i       = x;
+        j       = y;
+        k       = z;
         this->s = s;
         this->t = t;
     }
@@ -180,61 +182,59 @@ public:
     }
 
     Vector Cross(const Vector &v) const {
-        return Vector(this->j * v.k - this->k * v.j,
-                this->k * v.i - this->i * v.k,
-                this->i * v.j - this->j * v.i);
+        return Vector(this->j * v.k - this->k * v.j, this->k * v.i - this->i * v.k, this->i * v.j - this->j * v.i);
     }
 
-    void Yaw(float rad) //only works with unit vector
+    void Yaw(float rad)  // only works with unit vector
     {
         float theta = 0;
-        float m = Mag();
+        float m     = Mag();
         if (i > 0) {
-            theta = (float) atan(k / i);
+            theta = (float)atan(k / i);
         } else if (i < 0) {
-            theta = M_PI + (float) atan(k / i);
+            theta = M_PI + (float)atan(k / i);
         } else if (k <= 0 && i == 0) {
             theta = -M_PI / 2;
         } else if (k > 0 && i == 0) {
             theta = M_PI / 2;
         }
         theta += rad;
-        i = m * cosf(theta);
-        k = m * sinf(theta);
+        i      = m * cosf(theta);
+        k      = m * sinf(theta);
     }
 
     void Roll(float rad) {
         float theta = 0;
-        float m = Mag();
+        float m     = Mag();
         if (i > 0) {
-            theta = (float) atan(j / i);
+            theta = (float)atan(j / i);
         } else if (i < 0) {
-            theta = M_PI + (float) atan(j / i);
+            theta = M_PI + (float)atan(j / i);
         } else if (j <= 0 && i == 0) {
             theta = -M_PI / 2;
         } else if (j > 0 && i == 0) {
             theta = M_PI / 2;
         }
         theta += rad;
-        i = m * cosf(theta);
-        j = m * sinf(theta);
+        i      = m * cosf(theta);
+        j      = m * sinf(theta);
     }
 
     void Pitch(float rad) {
         float theta = 0;
-        float m = Mag();
+        float m     = Mag();
         if (k > 0) {
-            theta = (float) atan(j / k);
+            theta = (float)atan(j / k);
         } else if (k < 0) {
-            theta = M_PI + (float) atan(j / k);
+            theta = M_PI + (float)atan(j / k);
         } else if (j <= 0 && k == 0) {
             theta = -M_PI / 2;
         } else if (j > 0 && k == 0) {
             theta = M_PI / 2;
         }
         theta += rad;
-        k = m * cosf(theta);
-        j = m * sinf(theta);
+        k      = m * cosf(theta);
+        j      = m * sinf(theta);
     }
 };
 
@@ -243,8 +243,8 @@ float grand() {
 }
 
 vector<Color> lights;
-VSFile f;
-int xmllevel;
+VSFile        f;
+int           xmllevel;
 
 static void Tab() {
     for (int i = 0; i < xmllevel; i++) {
@@ -267,7 +267,7 @@ void WriteLight(unsigned int i) {
     f.Fprintf("<ambient red=\"%f\" green=\"%f\" blue=\"%f\"/>\n", ambient, ambient, ambient);
     Tab();
     f.Fprintf("<diffuse red=\"%f\" green=\"%f\" blue=\"%f\"/>\n", difffunc(lights[i].r), difffunc(lights[i].g),
-            difffunc(lights[i].b));
+              difffunc(lights[i].b));
     Tab();
     f.Fprintf("<specular red=\"%f\" green=\"%f\" blue=\"%f\"/>\n", lights[i].nr, lights[i].ng, lights[i].nb);
     xmllevel--;
@@ -283,60 +283,58 @@ struct GradColor {
     float variance;
 };
 
-const int STAR = 0;
+const int STAR   = 0;
 const int PLANET = 1;
-const int MOON = 2;
-const int JUMP = 3;
-//begin global variables
+const int MOON   = 2;
+const int JUMP   = 3;
+// begin global variables
 
-vector<string> starentities;
-vector<string> jumps;
-vector<string> gradtex;
-vector<string> naturalphenomena;
-vector<string> starbases;
-unsigned int numstarbases;
-unsigned int numnaturalphenomena;
-unsigned int numstarentities;
-vector<string> background;
-vector<string> names;
-vector<string> rings;
-const float moonofmoonprob = .01;
-string systemname;
-vector<float> radii;
-const float minspeed = .001;
-const float maxspeed = 8;
-vector<float> starradius;
-string faction;
+vector<string>    starentities;
+vector<string>    jumps;
+vector<string>    gradtex;
+vector<string>    naturalphenomena;
+vector<string>    starbases;
+unsigned int      numstarbases;
+unsigned int      numnaturalphenomena;
+unsigned int      numstarentities;
+vector<string>    background;
+vector<string>    names;
+vector<string>    rings;
+const float       moonofmoonprob = .01;
+string            systemname;
+vector<float>     radii;
+const float       minspeed = .001;
+const float       maxspeed = 8;
+vector<float>     starradius;
+string            faction;
 vector<GradColor> colorGradiant;
-float compactness = 2;
-float jumpcompactness = 2;
+float             compactness     = 2;
+float             jumpcompactness = 2;
 
 struct PlanetInfo {
-    string name;
-    string unitname;
-    string technique;
-    unsigned int num;     //The texture number for the city lights
+    string       name;
+    string       unitname;
+    string       technique;
+    unsigned int num;   // The texture number for the city lights
     unsigned int
-            moonlevel;     //0==top-level planet, 1==first-level moon, 2 is second-level moon... probably won't be used.
-    unsigned int
-            numstarbases;     //Number of starbases allocated to orbit around this planet. Usually 1 or 0 but quite possibly more.
-    unsigned int numjumps;     //Number of jump points.
-    PlanetInfo() :
-            num(0), moonlevel(0), numstarbases(0), numjumps(0) {
-    }
+            moonlevel;  // 0==top-level planet, 1==first-level moon, 2 is second-level moon... probably won't be used.
+    unsigned int numstarbases;  // Number of starbases allocated to orbit around this planet. Usually 1 or 0 but quite
+                                // possibly more.
+    unsigned int numjumps;  // Number of jump points.
+
+    PlanetInfo() : num(0), moonlevel(0), numstarbases(0), numjumps(0) {}
 };
 
 struct StarInfo {
     vector<PlanetInfo> planets;
-    unsigned int numjumps;
-    unsigned int numstarbases;
+    unsigned int       numjumps;
+    unsigned int       numstarbases;
 
-    StarInfo() :
-            numjumps(0), numstarbases(0) {
-    }
+    StarInfo() : numjumps(0), numstarbases(0) {}
 };
+
 vector<StarInfo> stars;
-unsigned int planetoffset, staroffset, moonlevel;
+unsigned int     planetoffset, staroffset, moonlevel;
 
 void ResetGlobalVariables() {
     xmllevel = 0;
@@ -345,14 +343,14 @@ void ResetGlobalVariables() {
     naturalphenomena.clear();
     starbases.clear();
     starentities.clear();
-    numstarentities = 0;
-    numstarbases = 0;
+    numstarentities     = 0;
+    numstarbases        = 0;
     numnaturalphenomena = 0;
     background.clear();
     stars.clear();
     planetoffset = 0;
-    staroffset = 0;
-    moonlevel = 0;
+    staroffset   = 0;
+    moonlevel    = 0;
     names.clear();
     jumps.clear();
     rings.clear();
@@ -360,26 +358,26 @@ void ResetGlobalVariables() {
     starradius.clear();
     faction.erase();
     colorGradiant.clear();
-    compactness = 2;
+    compactness     = 2;
     jumpcompactness = 2;
     radii.clear();
 }
 
 void readColorGrads(vector<string> &entity, const char *file) {
-    VSFile f;
+    VSFile  f;
     VSError err = f.OpenReadOnly(file, UniverseFile);
     if (err > Ok) {
         VS_LOG(error, (boost::format("Failed to load %1%") % file));
         GradColor g{};
         g.minrad = 0;
         g.r = g.g = g.b = .9;
-        g.variance = .1;
+        g.variance      = .1;
         entity.emplace_back("white_star.png");
         colorGradiant.push_back(g);
         return;
     }
-    char input_buffer[BUFFER_SIZE];
-    char output_buffer[BUFFER_SIZE];
+    char      input_buffer[BUFFER_SIZE];
+    char      output_buffer[BUFFER_SIZE];
     GradColor g{};
     while (!f.Eof()) {
         f.ReadLine(input_buffer, BUFFER_SIZE - 1);
@@ -410,7 +408,7 @@ GradColor whichGradColor(float r, unsigned int &j) {
     unsigned int i;
     if (colorGradiant.empty()) {
         vector<string> entity;
-        string fullpath = "stars.txt";
+        string         fullpath = "stars.txt";
         readColorGrads(entity, fullpath.c_str());
     }
     for (i = 1; i < colorGradiant.size(); i++) {
@@ -424,20 +422,20 @@ GradColor whichGradColor(float r, unsigned int &j) {
 
 Color StarColor(float radius, unsigned int &entityindex) {
     GradColor gc = whichGradColor(radius, entityindex);
-    float r = getcolor(gc.r, gc.variance);
-    float g = getcolor(gc.g, gc.variance);
-    float b = getcolor(gc.b, gc.variance);
+    float     r  = getcolor(gc.r, gc.variance);
+    float     g  = getcolor(gc.g, gc.variance);
+    float     b  = getcolor(gc.b, gc.variance);
     return Color(r, g, b);
 }
 
 GFXColor getStarColorFromRadius(float radius) {
     unsigned int myint = 0;
-    Color tmp = StarColor(radius * configuration().galaxy.star_radius_scale_flt, myint);
+    Color        tmp   = StarColor(radius * configuration().galaxy.star_radius_scale_flt, myint);
     return GFXColor(tmp.r, tmp.g, tmp.b, 1);
 }
 
 float LengthOfYear(Vector r, Vector s) {
-    float a = 2 * M_PI * mmax(r.Mag(), s.Mag());
+    float a     = 2 * M_PI * mmax(r.Mag(), s.Mag());
     float speed = minspeed + (maxspeed - minspeed) * grand();
     return a / speed;
 }
@@ -479,47 +477,47 @@ void CreateLight(unsigned int i) {
 
 Vector generateCenter(float minradii, bool jumppoint) {
     Vector r;
-    float tmpcompactness = compactness;
+    float  tmpcompactness = compactness;
     if (jumppoint) {
         tmpcompactness = jumpcompactness;
     }
-    r = Vector(tmpcompactness * grand() + 1, tmpcompactness * grand() + 1, tmpcompactness * grand() + 1);
+    r    = Vector(tmpcompactness * grand() + 1, tmpcompactness * grand() + 1, tmpcompactness * grand() + 1);
     r.i *= minradii;
     r.j *= minradii;
     r.k *= minradii;
     const uint_fast32_t i = (rnd(0, 8));
-    r.i = (i & 1) ? -r.i : r.i;
-    r.j = (i & 2) ? -r.j : r.j;
-    r.k = (i & 4) ? -r.k : r.k;
+    r.i                   = (i & 1) ? -r.i : r.i;
+    r.j                   = (i & 2) ? -r.j : r.j;
+    r.k                   = (i & 4) ? -r.k : r.k;
     return r;
 }
 
 float makeRS(Vector &r, Vector &s, float minradii, bool jumppoint) {
-    r = Vector(grand(), grand(), grand());
+    r               = Vector(grand(), grand(), grand());
     uint_fast32_t i = (rnd(0, 8));
-    r.i = (i & 1) ? -r.i : r.i;
-    r.j = (i & 2) ? -r.j : r.j;
-    r.k = (i & 4) ? -r.k : r.k;
+    r.i             = (i & 1) ? -r.i : r.i;
+    r.j             = (i & 2) ? -r.j : r.j;
+    r.k             = (i & 4) ? -r.k : r.k;
 
     Vector k(grand(), grand(), grand());
-    i = (rnd(0, 8));
+    i   = (rnd(0, 8));
     k.i = (i & 1) ? -k.i : k.i;
     k.j = (i & 2) ? -k.j : k.j;
     k.k = (i & 4) ? -k.k : k.k;
 
-    s = r.Cross(k);
+    s        = r.Cross(k);
     float sm = s.Mag();
     if (sm < .01) {
         return makeRS(r, s, minradii, jumppoint);
     }
-    s.i /= sm;
-    s.j /= sm;
-    s.k /= sm;
-    sm = r.Mag();
-    r.i /= sm;
-    r.j /= sm;
-    r.k /= sm;
-    bool tmp = false;
+    s.i       /= sm;
+    s.j       /= sm;
+    s.k       /= sm;
+    sm         = r.Mag();
+    r.i       /= sm;
+    r.j       /= sm;
+    r.k       /= sm;
+    bool  tmp  = false;
     float rm;
     float tmpcompactness = compactness;
     if (jumppoint) {
@@ -527,18 +525,18 @@ float makeRS(Vector &r, Vector &s, float minradii, bool jumppoint) {
     }
     rm = (tmpcompactness * grand() + 1);
     if (rm < 1) {
-        rm = (1 + grand() * .5);
+        rm  = (1 + grand() * .5);
         tmp = true;
     }
-    rm *= minradii;
+    rm  *= minradii;
     r.i *= rm;
     r.j *= rm;
     r.k *= rm;
-    sm = (tmpcompactness * grand() + 1);
+    sm   = (tmpcompactness * grand() + 1);
     if (tmp) {
         sm = (1 + grand() * .5);
     }
-    sm *= minradii;
+    sm  *= minradii;
     s.i *= sm;
     s.j *= sm;
     s.k *= sm;
@@ -547,8 +545,8 @@ float makeRS(Vector &r, Vector &s, float minradii, bool jumppoint) {
 
 void Updateradii(float orbitsize, float thisplanetradius) {
 #ifdef HUGE_SYSTEMS
-    orbitsize   += thisplanetradius;
-    radii.back() = orbitsize;
+    orbitsize    += thisplanetradius;
+    radii.back()  = orbitsize;
 #endif
 }
 
@@ -564,9 +562,9 @@ Vector generateAndUpdateRS(Vector &r, Vector &s, float thisplanetradius, bool ju
 }
 
 vector<string> parseBigUnit(const string &input) {
-    char *mystr = strdup(input.c_str());
-    char *ptr = mystr;
-    char *oldptr = mystr;
+    char          *mystr  = strdup(input.c_str());
+    char          *ptr    = mystr;
+    char          *oldptr = mystr;
     vector<string> ans;
     while (*ptr != '\0') {
         while (*ptr != '&' && *ptr != '\0') {
@@ -583,16 +581,9 @@ vector<string> parseBigUnit(const string &input) {
     return ans;
 }
 
-void WriteUnit(const string &tag,
-        const string &name,
-        const string &filename,
-        const Vector &r,
-        const Vector &s,
-        const Vector &center,
-        const string &nebfile,
-        const string &destination,
-        bool faction,
-        float thisloy = 0) {
+void WriteUnit(const string &tag, const string &name, const string &filename, const Vector &r, const Vector &s,
+               const Vector &center, const string &nebfile, const string &destination, bool faction,
+               float thisloy = 0) {
     Tab();
     f.Fprintf("<%s name=\"%s\" file=\"%s\" ", tag.c_str(), name.c_str(), filename.c_str());
     if (nebfile.length() > 0) {
@@ -637,8 +628,8 @@ string starin(const string &input) {
 }
 
 string GetNebFile(string &input) {
-    string ip = input.c_str();
-    char *ptr = strdup(ip.c_str());
+    string ip  = input.c_str();
+    char  *ptr = strdup(ip.c_str());
     for (unsigned int i = 0; ptr[i] != '\0'; i++) {
         if (ptr[i] == '^') {
             ptr[i] = '\0';
@@ -656,12 +647,12 @@ string AnalyzeType(string &input, string &nebfile, float &radius) {
     if (input.empty()) {
         return "";
     }
-    char ptr = *input.begin();
+    char   ptr = *input.begin();
     string ip;
-    int sscanf_result = sscanf(GetNebFile(input).c_str(), "%f", &radius);
+    int    sscanf_result = sscanf(GetNebFile(input).c_str(), "%f", &radius);
     if (0 == sscanf_result || EOF == sscanf_result) {
         radius = 100;
-        ip = (input.c_str() + 1);
+        ip     = (input.c_str() + 1);
     } else {
         ip = (input);
     }
@@ -669,7 +660,7 @@ string AnalyzeType(string &input, string &nebfile, float &radius) {
     switch (ptr) {
         case 'N':
             nebfile = GetNebFile(input);
-            retval = "Nebula";
+            retval  = "Nebula";
             break;
         case 'A':
             retval = "Asteroid";
@@ -693,7 +684,7 @@ void MakeSmallUnit() {
     string nam;
     string base_type;
     string s = string("");
-    nam = getRandName(names);
+    nam      = getRandName(names);
     while (s.length() == 0) {
         base_type = getRandName(starbases);
         if (base_type.length() == 0) {
@@ -702,30 +693,21 @@ void MakeSmallUnit() {
         string tmp;
         if ((tmp = starin(base_type)).length() > 0) {
             base_type = (tmp);
-            s = getRandName(jumps);
+            s         = getRandName(jumps);
         } else {
             break;
         }
     }
     numstarbases--;
     string nebfile("");
-    float radius;
-    string type = AnalyzeType(base_type, nebfile, radius);
+    float  radius;
+    string type   = AnalyzeType(base_type, nebfile, radius);
     Vector center = generateAndUpdateRS(R, S, radius, true);
     WriteUnit(type, nam, base_type, R, S, center, nebfile, s, true);
 }
 
-void MakeJump(float radius,
-        bool forceRS = false,
-        Vector R = Vector(0, 0, 0),
-        Vector S = Vector(0,
-                0,
-                0),
-        Vector center = Vector(
-                0,
-                0,
-                0),
-        float thisloy = 0) {
+void MakeJump(float radius, bool forceRS = false, Vector R = Vector(0, 0, 0), Vector S = Vector(0, 0, 0),
+              Vector center = Vector(0, 0, 0), float thisloy = 0) {
     string s = getRandName(jumps);
     if (s.length() == 0) {
         return;
@@ -744,27 +726,27 @@ void MakeJump(float radius,
         *(thisname.begin() + 8) = toupper(*(thisname.begin() + 8));
     }
     Tab();
-    //backwards compatibility
+    // backwards compatibility
     static bool usePNGFilename = (VSFileSystem::LookForFile("jump.png", VSFileSystem::TextureFile) <= VSFileSystem::Ok);
     static const char *jumpFilename = usePNGFilename ? "jump.png" : "jump.texture";
     f.Fprintf("<Jump name=\"%s\" file=\"%s\" ", thisname.c_str(), jumpFilename);
     f.Fprintf("ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ", RR.i, RR.j, RR.k, SS.i, SS.j, SS.k);
     f.Fprintf("radius=\"%f\" ", radius);
     f.Fprintf("x=\"%f\" y=\"%f\" z=\"%f\" ", center.i, center.j, center.k);
-    float loy = LengthOfYear(RR, SS);
-    float temprandom = .1 * fmod(loy, 10);     //use this so as not to alter state here
+    float loy        = LengthOfYear(RR, SS);
+    float temprandom = .1 * fmod(loy, 10);  // use this so as not to alter state here
     if (loy || thisloy) {
         f.Fprintf("year= \"%f\" ", thisloy ? thisloy : loy);
         temprandom = grand();
-        loy = 864 * temprandom;
+        loy        = 864 * temprandom;
         if (loy) {
             f.Fprintf("day=\"%f\" ", loy);
         }
     }
-    f.Fprintf("alpha=\"ONE ONE\" destination=\"%s\" faction=\"%s\" />\n", getJumpTo(
-            s).c_str(), StarSystemGent::faction.c_str());
+    f.Fprintf("alpha=\"ONE ONE\" destination=\"%s\" faction=\"%s\" />\n", getJumpTo(s).c_str(),
+              StarSystemGent::faction.c_str());
 
-    ///writes out some pretty planet tags
+    /// writes out some pretty planet tags
 }
 
 void MakeBigUnit(int callingentitytype, string name = string(), float orbitalradius = 0) {
@@ -784,29 +766,28 @@ void MakeBigUnit(int callingentitytype, string name = string(), float orbitalrad
     numnaturalphenomena--;
     Vector r, s;
 
-    float stdloy = 0;
-    bool first = false;
-    float size = 0;
+    float  stdloy = 0;
+    bool   first  = false;
+    float  size   = 0;
     string tmp;
     Vector center(0, 0, 0);
     string nebfile("");
     for (unsigned int i = 0; i < fullname.size(); i++) {
         if (1 == sscanf(fullname[i].c_str(), "jump%f", &size)) {
             if (!first) {
-                first = true;
+                first  = true;
                 center = generateAndUpdateRS(r, s, size, callingentitytype != STAR);
                 stdloy = LengthOfYear(r, s);
             }
             MakeJump(size, true, r, s, center, stdloy);
-            //We still want jumps inside asteroid fields, etcVvv.
-        } else if (1
-                == sscanf(fullname[i].c_str(), "planet%f",
-                        &size) || 1
-                == sscanf(fullname[i].c_str(), "moon%f", &size) || 1 == sscanf(fullname[i].c_str(), "gas%f", &size)) {
-            //FIXME: Obsolete/not supported/too lazy to implement.
+            // We still want jumps inside asteroid fields, etcVvv.
+        } else if (1 == sscanf(fullname[i].c_str(), "planet%f", &size) ||
+                   1 == sscanf(fullname[i].c_str(), "moon%f", &size) ||
+                   1 == sscanf(fullname[i].c_str(), "gas%f", &size)) {
+            // FIXME: Obsolete/not supported/too lazy to implement.
         } else if ((tmp = starin(fullname[i])).length() > 0) {
             if (!first) {
-                first = true;
+                first  = true;
                 center = generateAndUpdateRS(r, s, size, callingentitytype != STAR);
                 stdloy = LengthOfYear(r, s);
             }
@@ -818,7 +799,7 @@ void MakeBigUnit(int callingentitytype, string name = string(), float orbitalrad
         } else {
             string type = AnalyzeType(fullname[i], nebfile, size);
             if (!first) {
-                first = true;
+                first  = true;
                 center = generateAndUpdateRS(r, s, size, callingentitytype != STAR && type == "Unit");
                 stdloy = LengthOfYear(r, s);
             }
@@ -830,19 +811,13 @@ void MakeBigUnit(int callingentitytype, string name = string(), float orbitalrad
 void MakeMoons(float callingradius, int callingentitytype);
 void MakeJumps(float callingradius, int callingentitytype, int numberofjumps);
 
-void MakePlanet(float radius,
-        int entitytype,
-        string texturename,
-        string unitname,
-        string technique,
-        int texturenum,
-        int numberofjumps,
-        int numberofstarbases) {
+void MakePlanet(float radius, int entitytype, string texturename, string unitname, string technique, int texturenum,
+                int numberofjumps, int numberofstarbases) {
     if (entitytype == JUMP) {
         MakeJump(radius);
         return;
     }
-    if (texturename.length() == 0) {      //FIXME?
+    if (texturename.length() == 0) {  // FIXME?
         return;
     }
     Vector RR, SS;
@@ -866,7 +841,7 @@ void MakePlanet(float radius,
             lites.push_back(planetlites.find(lites.back() + 1, ' '));
         }
         size_t random_index = rnd(0, lites.size() - 1);
-        cname = planetlites.substr(lites.at(random_index) + 1, lites.at(random_index + 1));
+        cname               = planetlites.substr(lites.at(random_index) + 1, lites.at(random_index + 1));
     }
     f.Fprintf("<Planet name=\"%s\" file=\"%s\" unit=\"%s\" ", thisname.c_str(), texturename.c_str(), unitname.c_str());
     if (!technique.empty()) {
@@ -874,17 +849,18 @@ void MakePlanet(float radius,
     }
     if (texturename.find_first_of('|') != string::npos) {
         f.Fprintf(
-                "Red=\"0\" Green=\"0\" Blue=\"0\" DRed=\"0.87\" DGreen=\"0.87\" DBlue=\"0.87\" SRed=\"0.85\" SGreen=\"0.85\" SBlue=\"0.85\" ");
+                "Red=\"0\" Green=\"0\" Blue=\"0\" DRed=\"0.87\" DGreen=\"0.87\" DBlue=\"0.87\" SRed=\"0.85\" "
+                "SGreen=\"0.85\" SBlue=\"0.85\" ");
     }
     f.Fprintf("ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ", RR.i, RR.j, RR.k, SS.i, SS.j, SS.k);
     f.Fprintf("radius=\"%f\" ", radius);
     f.Fprintf("x=\"%f\" y=\"%f\" z=\"%f\" ", center.i, center.j, center.k);
-    float loy = LengthOfYear(RR, SS);
-    float temprandom = .1 * fmod(loy, 10);     //use this so as not to alter state here
+    float loy        = LengthOfYear(RR, SS);
+    float temprandom = .1 * fmod(loy, 10);  // use this so as not to alter state here
     if (loy) {
         f.Fprintf("year= \"%f\" ", loy);
         temprandom = grand();
-        loy = 864 * temprandom;
+        loy        = 864 * temprandom;
         if (loy) {
             f.Fprintf("day=\"%f\" ", loy);
         }
@@ -894,7 +870,7 @@ void MakePlanet(float radius,
     if (!cname.empty()) {
         int wrapx = 1;
         int wrapy = 1;
-        cname = GetWrapXY(cname, wrapx, wrapy);
+        cname     = GetWrapXY(cname, wrapx, wrapy);
         string::size_type t;
         while ((t = cname.find('*')) != string::npos) {
             cname.replace(t, 1, texturenum == 0 ? "" : XMLSupport::tostring(texturenum));
@@ -902,7 +878,8 @@ void MakePlanet(float radius,
         Tab();
         f.Fprintf("<CityLights file=\"%s\" wrapx=\"%d\" wrapy=\"%d\"/>\n", cname.c_str(), wrapx, wrapy);
     }
-    if ((entitytype == PLANET && temprandom < configuration().galaxy.atmosphere_probability_flt) && (!atmosphere.empty())) {
+    if ((entitytype == PLANET && temprandom < configuration().galaxy.atmosphere_probability_flt) &&
+        (!atmosphere.empty())) {
         string NAME = thisname + " Atmosphere";
         {
             bool doalphaatmosphere = (temprandom < .08 || temprandom > .3);
@@ -913,7 +890,7 @@ void MakePlanet(float radius,
                 }
                 Tab();
                 f.Fprintf("<Atmosphere file=\"%s\" alpha=\"SRCALPHA INVSRCALPHA\" radius=\"%f\"/>\n",
-                        atmosphere.c_str(), fograd);
+                          atmosphere.c_str(), fograd);
             }
             float r = .9, g = .9, b = 1, a = 1;
             float dr = .9, dg = .9, db = 1, da = 1;
@@ -929,53 +906,43 @@ void MakePlanet(float radius,
                 }
             }
 
-/*----------------------------------------------------------------------------------------*\
-| **************************************************************************************** |
-| ********************************* FIXME: USE BFXM  ************************************* |
-| **************************************************************************************** |
-\*----------------------------------------------------------------------------------------*/
+            /*----------------------------------------------------------------------------------------*\
+            | **************************************************************************************** |
+            | ********************************* FIXME: USE BFXM  ************************************* |
+            | **************************************************************************************** |
+            \*----------------------------------------------------------------------------------------*/
 
             Tab();
             f.Fprintf("<Fog>\n");
             xmllevel++;
             Tab();
             f.Fprintf(
-                    "<FogElement file=\"atmXatm.bfxm\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\".3\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",
-                    r,
-                    g,
-                    b,
-                    a,
-                    dr,
-                    dg,
-                    db,
-                    da);
+                    "<FogElement file=\"atmXatm.bfxm\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" "
+                    "green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" "
+                    "concavity=\".3\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",
+                    r, g, b, a, dr, dg, db, da);
             Tab();
             f.Fprintf(
-                    "<FogElement file=\"atmXhalo.bfxm\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"1\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",
-                    r,
-                    g,
-                    b,
-                    a,
-                    dr,
-                    dg,
-                    db,
-                    da);
+                    "<FogElement file=\"atmXhalo.bfxm\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" "
+                    "green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" "
+                    "concavity=\"1\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",
+                    r, g, b, a, dr, dg, db, da);
             xmllevel--;
             Tab();
             f.Fprintf("</Fog>\n");
         }
     }
-//FIRME: need scaling of radius based on planet type.
+    // FIRME: need scaling of radius based on planet type.
     radii.push_back(radius);
 
     if (entitytype == PLANET) {
         float ringrand = grand();
         if (ringrand < configuration().galaxy.ring_probability_flt) {
-            string ringname = getRandName(rings);
+            string ringname  = getRandName(rings);
             double inner_rad = configuration().galaxy.inner_ring_radius_dbl * (1.0 + grand() * 0.5) * radius;
             double outer_rad = inner_rad + configuration().galaxy.outer_ring_radius_dbl * grand() * radius;
-            int wrapx = 1;
-            int wrapy = 1;
+            int    wrapx     = 1;
+            int    wrapy     = 1;
             if (ringname.empty()) {
                 ringname = configuration().galaxy.default_ring_texture;
             }
@@ -997,39 +964,22 @@ void MakePlanet(float radius,
             if (ringrand < (1 - configuration().galaxy.double_ring_probability_flt)) {
                 Tab();
                 f.Fprintf(
-                        "<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />\n",
-                        ringname.c_str(),
-                        r.i,
-                        r.j,
-                        r.k,
-                        s.i,
-                        s.j,
-                        s.k,
-                        inner_rad,
-                        outer_rad,
-                        wrapx,
-                        wrapy);
+                        "<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" "
+                        "innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />\n",
+                        ringname.c_str(), r.i, r.j, r.k, s.i, s.j, s.k, inner_rad, outer_rad, wrapx, wrapy);
             }
-            if (ringrand < configuration().galaxy.double_ring_probability_flt
-                    || ringrand >= (configuration().galaxy.ring_probability_flt - configuration().galaxy.double_ring_probability_flt)) {
+            if (ringrand < configuration().galaxy.double_ring_probability_flt ||
+                ringrand >= (configuration().galaxy.ring_probability_flt -
+                             configuration().galaxy.double_ring_probability_flt)) {
                 double movable = grand();
-                inner_rad = outer_rad
-                        * (1 + .1 * (configuration().galaxy.second_ring_difference_flt + configuration().galaxy.second_ring_difference_flt * movable));
-                outer_rad = inner_rad * (configuration().galaxy.outer_ring_radius_flt * movable);
+                inner_rad      = outer_rad * (1 + .1 * (configuration().galaxy.second_ring_difference_flt +
+                                                   configuration().galaxy.second_ring_difference_flt * movable));
+                outer_rad      = inner_rad * (configuration().galaxy.outer_ring_radius_flt * movable);
                 Tab();
                 f.Fprintf(
-                        "<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />\n",
-                        ringname.c_str(),
-                        r.i,
-                        r.j,
-                        r.k,
-                        s.i,
-                        s.j,
-                        s.k,
-                        inner_rad,
-                        outer_rad,
-                        wrapx,
-                        wrapy);
+                        "<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" "
+                        "innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />\n",
+                        ringname.c_str(), r.i, r.j, r.k, s.i, s.j, s.k, inner_rad, outer_rad, wrapx, wrapy);
             }
         }
     }
@@ -1037,9 +987,9 @@ void MakePlanet(float radius,
         MakeSmallUnit();
     }
     moonlevel++;
-    MakeMoons(
-            entitytype != MOON ? configuration().galaxy.moon_relative_to_planet_flt * radius : configuration().galaxy.moon_relative_to_moon_flt * radius,
-            entitytype);
+    MakeMoons(entitytype != MOON ? configuration().galaxy.moon_relative_to_planet_flt * radius
+                                 : configuration().galaxy.moon_relative_to_moon_flt * radius,
+              entitytype);
     MakeJumps(100 + grand() * 300, entitytype, numberofjumps);
     moonlevel--;
     radii.pop_back();
@@ -1047,7 +997,7 @@ void MakePlanet(float radius,
     Tab();
     f.Fprintf("</Planet>\n");
 
-    //writes out some pretty planet tags
+    // writes out some pretty planet tags
 }
 
 void MakeJumps(float callingradius, int callingentitytype, int numberofjumps) {
@@ -1057,29 +1007,25 @@ void MakeJumps(float callingradius, int callingentitytype, int numberofjumps) {
 }
 
 void MakeMoons(float callingradius, int callingentitytype) {
-    while (planetoffset < stars[staroffset].planets.size()
-            && stars[staroffset].planets[planetoffset].moonlevel == moonlevel) {
+    while (planetoffset < stars[staroffset].planets.size() &&
+           stars[staroffset].planets[planetoffset].moonlevel == moonlevel) {
         PlanetInfo &infos = stars[staroffset].planets[planetoffset++];
-        MakePlanet(
-                (.5 + .5 * grand()) * callingradius, callingentitytype == STAR ? PLANET : MOON,
-                infos.name, infos.unitname, infos.technique,
-                infos.num, infos.numjumps,
-                infos.numstarbases);
+        MakePlanet((.5 + .5 * grand()) * callingradius, callingentitytype == STAR ? PLANET : MOON, infos.name,
+                   infos.unitname, infos.technique, infos.num, infos.numjumps, infos.numstarbases);
     }
 }
 
 void beginStar() {
-    float radius = starradius[staroffset];
-    Vector r, s;
+    float        radius = starradius[staroffset];
+    Vector       r, s;
     unsigned int i;
-    Vector center = generateAndUpdateRS(r,
-            s,
-            radius,
-            false);     //WTF why was this commented out--that means all stars start on top of each other
+    Vector       center = generateAndUpdateRS(
+            r, s, radius,
+            false);  // WTF why was this commented out--that means all stars start on top of each other
     planetoffset = 0;
 
-    char b[3] = " A";
-    b[1] += staroffset;
+    char b[3]  = " A";
+    b[1]      += staroffset;
     Tab();
     f.Fprintf("<Planet name=\"%s%s\" file=\"%s\" ", systemname.c_str(), b, starentities[staroffset].c_str());
     f.Fprintf("ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ", r.i, r.j, r.k, s.i, s.j, s.k);
@@ -1097,33 +1043,27 @@ void beginStar() {
         }
     }
     f.Fprintf(" Red=\"%f\" Green=\"%f\" Blue=\"%f\" ReflectNoLight=\"true\" light=\"%d\">\n", lights[staroffset].r,
-            lights[staroffset].g, lights[staroffset].b, staroffset);
+              lights[staroffset].g, lights[staroffset].b, staroffset);
     f.Fprintf(
-            "<fog>\n\t<FogElement file=\"atmXatm.bfxm\" ScaleAtmosphereHeight=\".900\" red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"1.0\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"1\" concavity=\".3\" focus=\".6\" minalpha=\".7\" maxalpha=\"1\"/>\n\t<FogElement file=\"atmXhalo.bfxm\" ScaleAtmosphereHeight=\".9000\" red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"1.0\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"1\" concavity=\".3\" focus=\".6\" minalpha=\".7\" maxalpha=\"1\"/>\n</fog>\n",
-            lights[staroffset].r,
-            lights[staroffset].g,
-            lights[staroffset].b,
-            lights[staroffset].r,
-            lights[staroffset].g,
-            lights[staroffset].b,
-            lights[staroffset].r,
-            lights[staroffset].g,
-            lights[staroffset].b,
-            lights[staroffset].r,
-            lights[staroffset].g,
-            lights[staroffset].b);
+            "<fog>\n\t<FogElement file=\"atmXatm.bfxm\" ScaleAtmosphereHeight=\".900\" red=\"%f\" blue=\"%f\" "
+            "green=\"%f\" alpha=\"1.0\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"1\" concavity=\".3\" "
+            "focus=\".6\" minalpha=\".7\" maxalpha=\"1\"/>\n\t<FogElement file=\"atmXhalo.bfxm\" "
+            "ScaleAtmosphereHeight=\".9000\" red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"1.0\" dired=\"%f\" "
+            "diblue=\"%f\" digreen=\"%f\" dialpha=\"1\" concavity=\".3\" focus=\".6\" minalpha=\".7\" "
+            "maxalpha=\"1\"/>\n</fog>\n",
+            lights[staroffset].r, lights[staroffset].g, lights[staroffset].b, lights[staroffset].r,
+            lights[staroffset].g, lights[staroffset].b, lights[staroffset].r, lights[staroffset].g,
+            lights[staroffset].b, lights[staroffset].r, lights[staroffset].g, lights[staroffset].b);
     radii.push_back(1.5 * radius);
     xmllevel++;
     unsigned int numu;
     if (numstarentities) {
-        numu = numnaturalphenomena
-                / (numstarentities - staroffset)
-                + (grand()
-                        < float(numnaturalphenomena % (numstarentities - staroffset)) / (numstarentities - staroffset));
+        numu = numnaturalphenomena / (numstarentities - staroffset) +
+               (grand() < float(numnaturalphenomena % (numstarentities - staroffset)) / (numstarentities - staroffset));
     } else {
         numu = 1;
     }
-    if ((int) staroffset == (int) (numstarentities - staroffset) - 1) {
+    if ((int)staroffset == (int)(numstarentities - staroffset) - 1) {
         numu = numnaturalphenomena;
     }
     for (i = 0; i < numu; ++i) {
@@ -1134,7 +1074,7 @@ void beginStar() {
     }
     MakeJumps(100 + grand() * 300, STAR, stars[staroffset].numjumps);
     MakeMoons(configuration().galaxy.rocky_relative_to_primary_flt * radius, STAR);
-    //Fixme: no jumps should be made around the star.
+    // Fixme: no jumps should be made around the star.
     if (!jumps.empty()) {
         VS_LOG(error, (boost::format("ERROR: jumps not empty() Size==%1$u!!!!!") % jumps.size()));
     }
@@ -1180,7 +1120,7 @@ void CreateStarSystem() {
     xmllevel = 0;
     Tab();
     f.Fprintf("<?xml version=\"1.0\" ?>\n<system name=\"%s\" background=\"%s\">\n", systemname.c_str(),
-            getRandName(background).c_str());
+              getRandName(background).c_str());
     xmllevel++;
     CreatePrimaries();
     xmllevel--;
@@ -1189,7 +1129,7 @@ void CreateStarSystem() {
 }
 
 void readentity(vector<string> &entity, const char *filename) {
-    VSFile f;
+    VSFile  f;
     VSError err = f.OpenReadOnly(filename, UniverseFile);
     if (err > Ok) {
         return;
@@ -1212,14 +1152,15 @@ const char *noslash(const char *in) {
         return in;
     }
     const char *tmp2 = tmp;
-    tmp2 = noslash(tmp2);
+    tmp2             = noslash(tmp2);
     if (tmp2[0] != '\0') {
         return tmp2;
     } else {
         return tmp;
     }
 }
-}
+}  // namespace StarSystemGent
+
 using namespace StarSystemGent;
 
 string getStarSystemFileName(const string &input) {
@@ -1240,7 +1181,7 @@ string getStarSystemSector(const string &in) {
 }
 
 void readnames(vector<string> &entity, const char *filename) {
-    VSFile f;
+    VSFile  f;
     VSError err = f.OpenReadOnly(filename, UniverseFile);
     if (err > Ok) {
         return;
@@ -1271,7 +1212,7 @@ void readplanetentity(vector<StarInfo> &starinfos, string planetlist, unsigned i
         VS_LOG(warning, "No stars exist in this system!");
     }
     string::size_type i, j;
-    unsigned int u;
+    unsigned int      u;
     starinfos.reserve(numstars);
     for (u = 0; u < numstars; ++u) {
         starinfos.emplace_back();
@@ -1297,10 +1238,10 @@ void readplanetentity(vector<StarInfo> &starinfos, string planetlist, unsigned i
         {
             GalaxyXML::Galaxy *galaxy = _Universe->getGalaxy();
 
-            static const string numtag("#num#");
-            static const string empty;
+            static const string            numtag("#num#");
+            static const string            empty;
             static const string::size_type numlen = numtag.length();
-            string::size_type numpos;
+            string::size_type              numpos;
 
             // Get planet name and texture
             string planetname =
@@ -1342,12 +1283,12 @@ void readplanetentity(vector<StarInfo> &starinfos, string planetlist, unsigned i
             }
 
             // Store info
-            starinfos[u % numstars].planets.back().name = texturename;
-            starinfos[u % numstars].planets.back().unitname = unitname;
+            starinfos[u % numstars].planets.back().name      = texturename;
+            starinfos[u % numstars].planets.back().unitname  = unitname;
             starinfos[u % numstars].planets.back().technique = techniquename;
         }
         starinfos[u % numstars].planets.back().numstarbases = 0;
-        starinfos[u % numstars].planets.back().numjumps = 0;
+        starinfos[u % numstars].planets.back().numjumps     = 0;
         if (i == string::npos) {
             break;
         }
@@ -1363,27 +1304,27 @@ void readplanetentity(vector<StarInfo> &starinfos, string planetlist, unsigned i
             }
         }
         if (!size) {
-            int oldjumps = jumps.size();
+            int oldjumps     = jumps.size();
             int oldstarbases = numstarbases;
             int newstuff;
             for (k = starinfos.size(); k > 0; --k) {
-                newstuff = oldjumps / k;
-                starinfos[k - 1].numjumps = newstuff;
-                oldjumps -= newstuff;
-                newstuff = oldstarbases / k;
-                starinfos[k - 1].numstarbases = newstuff;
-                oldstarbases -= newstuff;
+                newstuff                       = oldjumps / k;
+                starinfos[k - 1].numjumps      = newstuff;
+                oldjumps                      -= newstuff;
+                newstuff                       = oldstarbases / k;
+                starinfos[k - 1].numstarbases  = newstuff;
+                oldstarbases                  -= newstuff;
             }
         } else {
             for (k = 0; k < jumps.size(); ++k) {
-                vector<PlanetInfo> *temp;                 //& doesn't like me so I use *.
+                vector<PlanetInfo> *temp;  //& doesn't like me so I use *.
                 do {
                     temp = &starinfos.at(rnd(0, starinfos.size())).planets;
                 } while (temp->empty());
                 temp->at(rnd(0, temp->size())).numjumps++;
             }
             for (k = 0; k < numstarbases; ++k) {
-                vector<PlanetInfo> *temp;                 //& appears to still have dislike for me.
+                vector<PlanetInfo> *temp;  //& appears to still have dislike for me.
                 do {
                     temp = &starinfos.at(rnd(0, starinfos.size())).planets;
                 } while (temp->empty());
@@ -1418,9 +1359,9 @@ static int pushTowardsMean(int mean, int val) {
 void generateStarSystem(SystemInfo &si) {
     ResetGlobalVariables();
     si.sunradius *= configuration().galaxy.star_radius_scale_flt;
-    systemname = si.name;
+    systemname    = si.name;
 
-    compactness = si.compactness * configuration().galaxy.compactness_scale_flt;
+    compactness     = si.compactness * configuration().galaxy.compactness_scale_flt;
     jumpcompactness = si.compactness * configuration().galaxy.jump_compactness_scale_flt;
     if (si.seed) {
         seed_rand(si.seed);
@@ -1428,12 +1369,12 @@ void generateStarSystem(SystemInfo &si) {
         seed_rand(string_hash(si.sector + '/' + si.name));
     }
     VS_LOG(info, (boost::format("star %1%, natural %2%, bases %3%") % si.numstars % si.numun1 % si.numun2));
-    int nat = pushTowardsMean(configuration().galaxy.mean_natural_phenomena, si.numun1);
+    int nat             = pushTowardsMean(configuration().galaxy.mean_natural_phenomena, si.numun1);
     numnaturalphenomena = nat > si.numun1 ? si.numun1 : nat;
-    numstarbases = pushTowardsMean(configuration().galaxy.mean_star_bases, si.numun2);
-    numstarentities = si.numstars;
+    numstarbases        = pushTowardsMean(configuration().galaxy.mean_star_bases, si.numun2);
+    numstarentities     = si.numstars;
     VS_LOG(info,
-            (boost::format("star %1%, natural %2%, bases %3%") % numstarentities % numnaturalphenomena % numstarbases));
+           (boost::format("star %1%, natural %2%, bases %3%") % numstarentities % numnaturalphenomena % numstarbases));
     starradius.push_back(si.sunradius);
     readColorGrads(gradtex, (si.stars).c_str());
 
@@ -1465,60 +1406,51 @@ void generateStarSystem(SystemInfo &si) {
         CreateStarSystem();
         f.Close();
     }
-    ResetGlobalVariables();     //deallocate any unused memory in vectors.
+    ResetGlobalVariables();  // deallocate any unused memory in vectors.
 }
 
 #ifdef CONSOLE_APP
-int main( int argc, char **argv )
-{
+int main(int argc, char **argv) {
     if (argc < 9) {
         // stephengtuggy 2020-11-12: Leaving this, since it is for standalone CONSOLE_APP mode
-        VSFileSystem::vs_fprintf(stderr,
-            "Usage: starsysgen <seed> <sector>/<system> <sunradius>/<compactness> <numstars> [N][A]<numnaturalphenomena> <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...\n" );
+        VSFileSystem::vs_fprintf(
+                stderr,
+                "Usage: starsysgen <seed> <sector>/<system> <sunradius>/<compactness> <numstars> "
+                "[N][A]<numnaturalphenomena> <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...\n");
         return 1;
     }
-    int    seed;
-    if ( 1 != sscanf( argv[1], "%d", &seed ) )
+    int seed;
+    if (1 != sscanf(argv[1], "%d", &seed)) {
         return 1;
-    string sectorname( getStarSystemSector( argv[2] ) );
-    string filen( getStarSystemFileName( argv[2] ) );
-    string systemname = string( getStarSystemName( argv[2] ) );
+    }
+    string sectorname(getStarSystemSector(argv[2]));
+    string filen(getStarSystemFileName(argv[2]));
+    string systemname = string(getStarSystemName(argv[2]));
     int    numbigthings;
-    bool   nebula     = true;
-    bool   asteroid   = true;
+    bool   nebula   = true;
+    bool   asteroid = true;
     float  srad;
     float  comp;
-    sscanf( argv[3], "%f/%f", &srad, &comp );
-    vector< string >jumps;
-    for (unsigned int i = 12; i < argc; i++)
-        jumps.push_back( string( argv[i] ) );
-    if ( 1 == sscanf( argv[8], "AN%d", &numbigthings ) || 1 == sscanf( argv[8], "NA%d", &numun[0] ) )
+    sscanf(argv[3], "%f/%f", &srad, &comp);
+    vector<string> jumps;
+    for (unsigned int i = 12; i < argc; i++) {
+        jumps.push_back(string(argv[i]));
+    }
+    if (1 == sscanf(argv[8], "AN%d", &numbigthings) || 1 == sscanf(argv[8], "NA%d", &numun[0])) {
         nebula = asteroid = true;
-    else if ( 1 == sscanf( argv[8], "A%d", &numbigthings ) )
+    } else if (1 == sscanf(argv[8], "A%d", &numbigthings)) {
         asteroid = true;
-    else if ( 1 == sscanf( argv[8], "N%d", &numbigthings ) )
+    } else if (1 == sscanf(argv[8], "N%d", &numbigthings)) {
         nebula = true;
-    else if ( 1 == sscanf( argv[8], "%d", &numbigthings ) )
+    } else if (1 == sscanf(argv[8], "%d", &numbigthings)) {
         nebula = asteroid = true;
-    else
+    } else {
         return -1;
-    generateStarSystem( "./",
-                        seed,
-                        sectorname,
-                        systemname,
-                        filen,
-                        srad, comp;
-                        strtol( argv[4], NULL, 10 ),
-                        strtol( argv[5], NULL, 10 ),
-                        strtol( argv[6], NULL, 10 ),
-                        strtol( argv[7], NULL, 10 ),
-                        nebula,
-                        asteroid,
-                        numbigthings,
-                        strtol( argv[9], NULL, 10 ),
-                        argv[10],
-                        argv[11],
-                        jumps );
+    }
+    generateStarSystem("./", seed, sectorname, systemname, filen, srad, comp;
+                       strtol(argv[4], NULL, 10), strtol(argv[5], NULL, 10), strtol(argv[6], NULL, 10),
+                       strtol(argv[7], NULL, 10), nebula, asteroid, numbigthings, strtol(argv[9], NULL, 10), argv[10],
+                       argv[11], jumps);
 
     return 0;
 }

@@ -25,20 +25,21 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-#include <cctype>
-#include <cassert>
-#include <cstdarg>
 #include "root_generic/xml_support.h"
 
-#include <boost/tokenizer.hpp>
+#include <cassert>
+#include <cctype>
+#include <cstdarg>
+#include <string>
+
 #include <boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
 
 using std::string;
 
 string strtoupper(const string &foo) {
     string rval(foo);
-    for (char & it : rval) {
+    for (char &it : rval) {
         it = toupper(it);
     }
     return rval;
@@ -46,7 +47,7 @@ string strtoupper(const string &foo) {
 
 string strtolower(const string &foo) {
     string rval(foo);
-    for (char & it : rval) {
+    for (char &it : rval) {
         it = tolower(it);
     }
     return rval;
@@ -54,7 +55,7 @@ string strtolower(const string &foo) {
 
 namespace XMLSupport {
 typedef boost::char_separator<std::string::value_type> Separator;
-typedef boost::tokenizer<Separator> Tokenizer;
+typedef boost::tokenizer<Separator>                    Tokenizer;
 
 static const char *SEPARATORS = " \t,";
 
@@ -87,7 +88,7 @@ AttributeList::AttributeList(const XML_Char **atts) {
 
 string replace_space(const string &str) {
     string retval(str);
-    for (char & i : retval) {
+    for (char &i : retval) {
         if (i == ' ') {
             i = '_';
         }
@@ -96,9 +97,8 @@ string replace_space(const string &str) {
 }
 
 bool parse_bool(const string &str) {
-    if ((!str.empty())
-            && ((*str.begin()) == 't' || (*str.begin()) == 'T' || (*str.begin()) == 'y' || (*str.begin()) == 'Y'
-                    || (*str.begin()) == '1')) {
+    if ((!str.empty()) && ((*str.begin()) == 't' || (*str.begin()) == 'T' || (*str.begin()) == 'y' ||
+                           (*str.begin()) == 'Y' || (*str.begin()) == '1')) {
         return true;
     } else {
         return false;
@@ -106,14 +106,14 @@ bool parse_bool(const string &str) {
 }
 
 double parse_float(const string &str) {
-    double ret = 0.0f;
+    double            ret = 0.0f;
     std::stringstream ss(str);
     ss >> ret;
     return ret;
 }
 
 float parse_floatf(const string &str) {
-    float ret = 0.0f;
+    float             ret = 0.0f;
     std::stringstream ss(str);
     ss >> ret;
     return ret;
@@ -127,7 +127,7 @@ void parse_floatv(const std::string &input, size_t maxTokens, ...) {
 
     for (Tokenizer::iterator it = tokens.begin(); maxTokens > 0 && it != tokens.end(); ++it, --maxTokens) {
         double *output = va_arg(arguments, double *);
-        *output = boost::lexical_cast<double>(*it);
+        *output        = boost::lexical_cast<double>(*it);
     }
     va_end(arguments);
 }
@@ -140,35 +140,35 @@ void parse_floatfv(const string &input, int maxTokens, ...) {
 
     for (Tokenizer::iterator it = tokens.begin(); maxTokens > 0 && it != tokens.end(); ++it, --maxTokens) {
         float *output = va_arg(arguments, float *);
-        *output = boost::lexical_cast<float>(*it);
+        *output       = boost::lexical_cast<float>(*it);
     }
     va_end(arguments);
 }
 
 int parse_int(const string &str) {
-    int ret = 0;
+    int               ret = 0;
     std::stringstream ss(str);
     ss >> ret;
     return ret;
 }
 
 string::size_type parse_option_find(const string &str, const string &opt, const string &sep, const string &vsep) {
-    bool ini = true;
-    string::size_type pos = 0;
+    bool              ini    = true;
+    string::size_type pos    = 0;
     string::size_type optlen = opt.length();
     string::size_type strlen = str.length();
-    string allsep = sep + vsep;
+    string            allsep = sep + vsep;
     if ((optlen == 0) || (strlen == 0)) {
         return string::npos;
     }
     bool found = false;
     while (!found && (pos != string::npos) && ((pos = str.find(opt, pos + (ini ? 0 : 1))) != string::npos)) {
-        ini = false;
-        found = (((pos == 0) || (sep.find(str[pos - 1]) != string::npos))
-                && ((pos + optlen >= strlen) || (allsep.find(str[pos + optlen]) != string::npos)));
+        ini   = false;
+        found = (((pos == 0) || (sep.find(str[pos - 1]) != string::npos)) &&
+                 ((pos + optlen >= strlen) || (allsep.find(str[pos + optlen]) != string::npos)));
         if (!found) {
             pos = str.find_first_of(sep, pos + optlen);
-        }           //quick advancement
+        }  // quick advancement
     }
     return found ? pos : string::npos;
 }
@@ -177,17 +177,14 @@ bool parse_option_ispresent(const string &str, const string &opt, const string &
     return parse_option_find(str, opt, sep, vsep) != string::npos;
 }
 
-string parse_option_value(const string &str,
-        const string &opt,
-        const string &defvalue,
-        const string &sep,
-        const string &vsep) {
-    string::size_type pos = parse_option_find(str, opt, sep, vsep);
+string parse_option_value(const string &str, const string &opt, const string &defvalue, const string &sep,
+                          const string &vsep) {
+    string::size_type pos  = parse_option_find(str, opt, sep, vsep);
     string::size_type vpos = str.find_first_of(vsep, pos + opt.length());
-    string value;
+    string            value;
     if (pos != string::npos && vpos != string::npos) {
         string::size_type vend = str.find_first_of(sep, vpos + 1);
-        value = str.substr(vpos + 1, ((vend != string::npos) ? vend - vpos - 1 : string::npos));
+        value                  = str.substr(vpos + 1, ((vend != string::npos) ? vend - vpos - 1 : string::npos));
     } else if (pos != string::npos) {
         value = "true";
     } else {
@@ -197,14 +194,15 @@ string parse_option_value(const string &str,
 }
 
 string escaped_string(const string &str) {
-#define ESCAPE_CASE(e, c, skip)               \
-case e:                                         \
-    if (rp && str[rp-1] == '\\') rv[ip++] = c;  \
-    else if (!skip)                             \
-        rv[ip++] = e;                           \
-    break
+#define ESCAPE_CASE(e, c, skip)        \
+    case e:                            \
+        if (rp && str[rp - 1] == '\\') \
+            rv[ip++] = c;              \
+        else if (!skip)                \
+            rv[ip++] = e;              \
+        break
     string::size_type rp, ip, n = str.length();
-    string rv;
+    string            rv;
     rv.resize(n);
     for (rp = ip = 0; rp < n; ++rp) {
         switch (str[rp]) {
@@ -220,5 +218,4 @@ case e:                                         \
     rv.resize(ip);
     return rv;
 }
-} //namespace XMLSupport
-
+}  // namespace XMLSupport
