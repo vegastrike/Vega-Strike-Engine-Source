@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
-set -euxo pipefail
+set -euo pipefail
 
 declare -a file_extensions=('h' 'c' 'cpp')
 echo "File extensions:" "${file_extensions[@]}"
