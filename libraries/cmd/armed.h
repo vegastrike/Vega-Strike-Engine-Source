@@ -28,10 +28,11 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_ARMED_H
 #define VEGA_STRIKE_ENGINE_CMD_ARMED_H
 
-#include "gfx_generic/vec.h"
-#include "cmd/movable.h"
-#include "cmd/mount.h"
 #include <vector>
+
+#include "cmd/mount.h"
+#include "cmd/movable.h"
+#include "gfx_generic/vec.h"
 
 struct WeaponInfo;
 class Unit;
@@ -40,46 +41,46 @@ class Armed {
     // TODO: made this private
 public:
     std::vector<Mount> mounts;
-    float gunspeed;
-    float gunrange;
-    float missilerange;
-    char turretstatus;
+    float              gunspeed;
+    float              gunrange;
+    float              missilerange;
+    char               turretstatus;
 
 protected:
-    //Activates all guns of that size
+    // Activates all guns of that size
     void ActivateGuns(const WeaponInfo *, bool Missile);
 
 public:
     Armed();
     virtual ~Armed() = default;
 
-    //Fires all active guns that are or arent Missiles
-    //if bitmask is (1<<31) then fire off autotracking of that type;
+    // Fires all active guns that are or arent Missiles
+    // if bitmask is (1<<31) then fire off autotracking of that type;
     void Fire(unsigned int bitmask, bool beams_target_owner = false);
 
-    //Gets the average gun speed of the unit::caution SLOW
+    // Gets the average gun speed of the unit::caution SLOW
     void getAverageGunSpeed(float &speed, float &grange, float &mrange) const;
-    int getNumMounts() const;
+    int  getNumMounts() const;
 
     //-1 is no lock necessary 1 is locked
     int LockMissile() const;
 
-    //Finds the position from the local position if guns are aimed at it with speed
+    // Finds the position from the local position if guns are aimed at it with speed
     QVector PositionITTS(const QVector &firingposit, Vector firingvelocity, float gunspeed, bool smooth_itts) const;
 
     void SelectAllWeapon(bool Missile);
 
-    //resets average gun speed (in event of weapon change
+    // resets average gun speed (in event of weapon change
     void setAverageGunSpeed();
 
     bool TargetLocked(const Unit *checktarget = nullptr) const;
     bool TargetTracked(const Unit *checktarget = nullptr);
 
-    void ToggleWeapon(bool Missile, bool forward = true);
+    void  ToggleWeapon(bool Missile, bool forward = true);
     float TrackingGuns(bool &missileLock);
 
-    //Stops all active guns from firing
+    // Stops all active guns from firing
     void UnFire();
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_ARMED_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_ARMED_H

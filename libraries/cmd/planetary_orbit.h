@@ -27,9 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_PLANETARY_ORBIT_H
 #define VEGA_STRIKE_ENGINE_CMD_PLANETARY_ORBIT_H
 
+#include "cmd/ai/order.h"
 #include "gfx_generic/vec.h"
 #include "src/star_system.h"
-#include "cmd/ai/order.h"
 
 class PlanetaryOrbit : public Order {
 private:
@@ -40,26 +40,22 @@ private:
     QVector x_size;
     QVector y_size;
     QVector focus;
-#define ORBIT_PRIORITY 8
-#define NUM_ORBIT_AVERAGE (SIM_QUEUE_SIZE/ORBIT_PRIORITY)
+#define ORBIT_PRIORITY    8
+#define NUM_ORBIT_AVERAGE (SIM_QUEUE_SIZE / ORBIT_PRIORITY)
     QVector orbiting_average[NUM_ORBIT_AVERAGE];
-    float orbiting_last_simatom;
-    int current_orbit_frame;
-    bool orbit_list_filled;
+    float   orbiting_last_simatom;
+    int     current_orbit_frame;
+    bool    orbit_list_filled;
+
 protected:
-///A vector containing all lihgts currently activated on current planet
+    /// A vector containing all lihgts currently activated on current planet
     std::vector<int> lights;
 
 public:
-    PlanetaryOrbit(Unit *p,
-            double velocity,
-            double initpos,
-            const QVector &x_axis,
-            const QVector &y_axis,
-            const QVector &Centre,
-            Unit *target = NULL);
+    PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis,
+                   const QVector &Centre, Unit *target = NULL);
     ~PlanetaryOrbit();
     void Execute();
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_PLANETARY_ORBIT_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_PLANETARY_ORBIT_H

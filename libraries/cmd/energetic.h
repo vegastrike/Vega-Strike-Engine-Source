@@ -48,11 +48,11 @@ public:
 
 
     float constrained_charge_to_shields;
-    bool sufficient_energy_to_recharge_shields;
+    bool  sufficient_energy_to_recharge_shields;
 
     // TODO: delete one and move the other to Afterburner class
-    int afterburntype;   //0--energy, 1--fuel
+    int afterburntype;  // 0--energy, 1--fuel
     //-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_ENERGETIC_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_ENERGETIC_H

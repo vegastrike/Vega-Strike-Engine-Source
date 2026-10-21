@@ -27,8 +27,8 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLISION_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLISION_H
 
-#include "gfx_generic/vec.h"
 #include "cmd/unit_generic.h"
+#include "gfx_generic/vec.h"
 
 class Unit;
 class Cockpit;
@@ -40,49 +40,41 @@ class Cockpit;
  * It is used to reduce duplication of code, as much of the code is simple duplication.
  * Because some variables rely on previous calculations using both units,
  * we do initialization in stages.
-*/
+ */
 
 class Collision {
     // Stage 1
-    Cockpit *cockpit;
-    Unit *unit;
-    Vega_UnitType unit_type;
-    bool is_player_ship;
+    Cockpit       *cockpit;
+    Unit          *unit;
+    Vega_UnitType  unit_type;
+    bool           is_player_ship;
     const QVector &location;
-    const Vector &normal;
-    float mass;
-    Vector position;
-    Vector velocity;
-    bool apply_force = false;
-    bool deal_damage = false;
+    const Vector  &normal;
+    float          mass;
+    Vector         position;
+    Vector         velocity;
+    bool           apply_force = false;
+    bool           deal_damage = false;
 
     Collision(Unit *unit, const QVector &location, const Vector &normal);
-    //pre-process based on colliding unit types to determine if force/damage should actually occur (e.g. virtual units, jump points, etc. may react differently)
+    // pre-process based on colliding unit types to determine if force/damage should actually occur (e.g. virtual units,
+    // jump points, etc. may react differently)
     void shouldApplyForceAndDealDamage(Unit *other_unit);
-    // Interpenetration kludge that moves the position of the colliding objects (to a hopefully non-interpenetrating location) BEFORE applying the force that puts them on the correct trajectory
+    // Interpenetration kludge that moves the position of the colliding objects (to a hopefully non-interpenetrating
+    // location) BEFORE applying the force that puts them on the correct trajectory
     void adjustInterpenetration(QVector &new_velocity, QVector &new_angular_velocity, const Vector &normal);
     // needs force and location-relative-to-center-of-mass to apply torque
     void applyForce(QVector &force, QVector &location);
     // pass change in kinetic energy of entire system - collision can decide what to do with the energy values
     void dealDamage(Collision other_collision, double deltaKE_linear, double deltaKE_angular);
     bool crashLand(Unit *base);
-public:
-    static void collide(Unit *unit1,
-            const QVector &location1,
-            const Vector &normal1,
-            Unit *unit2,
-            const QVector &location2,
-            const Vector &normal2,
-            float distance);
-    static void validateCollision(const QVector &relative_velocity,
-            const Vector &normal1,
-            const QVector &location1_local,
-            const QVector &location2_local,
-            const QVector &v1_new,
-            const QVector &v2_new,
-            const QVector &w1_new,
-            const QVector &w2_new);
 
+public:
+    static void collide(Unit *unit1, const QVector &location1, const Vector &normal1, Unit *unit2,
+                        const QVector &location2, const Vector &normal2, float distance);
+    static void validateCollision(const QVector &relative_velocity, const Vector &normal1,
+                                  const QVector &location1_local, const QVector &location2_local, const QVector &v1_new,
+                                  const QVector &v2_new, const QVector &w1_new, const QVector &w2_new);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLISION_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLISION_H

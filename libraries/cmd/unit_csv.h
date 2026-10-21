@@ -27,13 +27,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_H
 
-extern void AddMeshes(std::vector<Mesh *> &xmeshes,
-        float &randomstartframe,
-        float &randomstartseconds,
-        float unitscale,
-        const std::string &meshes,
-        int faction,
-        Flightgroup *fg,
-        vector<unsigned int> *counts = NULL);
+extern void AddMeshes(std::vector<Mesh *> &xmeshes, float &randomstartframe, float &randomstartseconds, float unitscale,
+                      const std::string &meshes, int faction, Flightgroup *fg, vector<unsigned int> *counts = NULL);
 
-#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_H

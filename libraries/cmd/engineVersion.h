@@ -27,14 +27,14 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_VERSION_H
 #define VEGA_STRIKE_ENGINE_CMD_VERSION_H
 
-#include <string>
 #include <stdint.h>
+#include <string>
 
 // #include <boost/tuple/tuple.hpp>
 
 namespace VegaStrike {
 
-//typedef ::boost::tuple<uint8_t, uint8_t, uint8_t, std::wstring> EngineVersionTuple;
+// typedef ::boost::tuple<uint8_t, uint8_t, uint8_t, std::wstring> EngineVersionTuple;
 
 class EngineVersionData {
 public:
@@ -47,14 +47,15 @@ public:
 
     // Asset API Version, simply numeric incrementer
     uint16_t GetAssetAPIVersion() const;
+
 protected:
-    uint8_t major;
-    uint8_t minor;
-    uint8_t patch;
+    uint8_t      major;
+    uint8_t      minor;
+    uint8_t      patch;
     std::wstring hash;
 
     uint16_t assetApiVersion;
 };
-}
+}  // namespace VegaStrike
 
-#endif //VEGA_STRIKE_ENGINE_CMD_VERSION_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_VERSION_H

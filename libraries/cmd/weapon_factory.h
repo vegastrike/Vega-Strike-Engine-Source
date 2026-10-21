@@ -28,6 +28,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_WEAPON_FACTORY_H
 
 #include <string>
+
 #include <boost/json.hpp>
 
 class WeaponFactory {
@@ -35,4 +36,4 @@ public:
     WeaponFactory(std::string filename);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_WEAPON_FACTORY_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_WEAPON_FACTORY_H

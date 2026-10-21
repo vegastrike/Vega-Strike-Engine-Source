@@ -31,17 +31,17 @@
  *
  *****/
 
-//Collection type:
-//#define USE_OLD_COLLECTION
+// Collection type:
+// #define USE_OLD_COLLECTION
 #define USE_STL_COLLECTION
 
-#if defined (USE_OLD_COLLECTION)
-#include "oldcollection.h"
-#elif defined (USE_STL_COLLECTION)
+#if defined(USE_OLD_COLLECTION)
+#    include "oldcollection.h"
+#elif defined(USE_STL_COLLECTION)
 
-#include <cstddef>
-#include <list>
-#include <vector>
+#    include <cstddef>
+#    include <list>
+#    include <vector>
 
 class Unit;
 
@@ -63,8 +63,7 @@ public:
      */
     class UnitIterator {
     public:
-        UnitIterator() : col(NULL) {
-        }
+        UnitIterator() : col(NULL) {}
 
         UnitIterator(const UnitIterator &);
         UnitIterator(UnitCollection *);
@@ -121,10 +120,10 @@ public:
 
     protected:
         friend class UnitCollection;
-        //Pointer back to the collection we were spawned from
+        // Pointer back to the collection we were spawned from
         UnitCollection *col;
 
-        //Current position in the list
+        // Current position in the list
         std::list<class Unit *>::iterator it;
     };
 
@@ -135,14 +134,13 @@ public:
      */
     class ConstIterator {
     public:
-        ConstIterator() : col(NULL) {
-        }
+        ConstIterator() : col(NULL) {}
 
         ConstIterator(const ConstIterator &);
         ConstIterator(const UnitCollection *);
         ~ConstIterator();
         ConstIterator &operator=(const ConstIterator &orig);
-        Unit *next();
+        Unit          *next();
 
         int size() const {
             return (col->size());
@@ -155,9 +153,9 @@ public:
             return true;
         }
 
-        void advance();
+        void                 advance();
         const ConstIterator &operator++();
-        const ConstIterator operator++(int);
+        const ConstIterator  operator++(int);
 
         inline Unit *operator*() const {
             if (it != col->u.end() && !col->empty()) {
@@ -168,13 +166,13 @@ public:
 
     protected:
         friend class UnitCollection;
-        const UnitCollection *col;
+        const UnitCollection                   *col;
         std::list<class Unit *>::const_iterator it;
     };
 
     /* backwards compatibility only.  Typedefs suck. dont use them. */
     typedef ConstIterator ConstFastIterator;
-    typedef UnitIterator FastIterator;
+    typedef UnitIterator  FastIterator;
 
     UnitCollection();
     UnitCollection(const UnitCollection &);
@@ -307,13 +305,13 @@ private:
 };
 
 /* Typedefs.   We really should not use them but we're lazy */
-typedef UnitCollection::UnitIterator un_iter;
+typedef UnitCollection::UnitIterator  un_iter;
 typedef UnitCollection::ConstIterator un_kiter;
-typedef UnitCollection::UnitIterator un_fiter;
+typedef UnitCollection::UnitIterator  un_fiter;
 typedef UnitCollection::ConstIterator un_fkiter;
 
 #else
-#error "No collection type chosen in collection.h:10"
-#endif //USE_STL_COLLECTION
+#    error "No collection type chosen in collection.h:10"
+#endif  // USE_STL_COLLECTION
 
-#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_COLLECTION_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_UNIT_COLLECTION_H

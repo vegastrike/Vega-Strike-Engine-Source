@@ -27,11 +27,11 @@
 #ifndef VEGA_STRIKE_ENGINE_VEGA_PY_RUN_H
 #define VEGA_STRIKE_ENGINE_VEGA_PY_RUN_H
 
-#include <string>
 #include <cstdio>
+#include <string>
 
-void VegaPyRunString(char * py_snippet);
+void VegaPyRunString(char* py_snippet);
 void VegaPyRunString(const std::string& py_snippet);
 void VegaPyRunFile(FILE* fp, std::string file_path_or_description);
 
-#endif //VEGA_STRIKE_ENGINE_VEGA_PY_RUN_H
+#endif  // VEGA_STRIKE_ENGINE_VEGA_PY_RUN_H

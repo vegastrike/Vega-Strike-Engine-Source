@@ -32,32 +32,31 @@
 enum class MOUNT_SIZE {
     NOWEAP = 0x0,
 
-    LIGHT = 0x1,
-    MEDIUM = 0x2,
-    HEAVY = 0x4,
+    LIGHT        = 0x1,
+    MEDIUM       = 0x2,
+    HEAVY        = 0x4,
     CAPSHIPLIGHT = 0x8,
     CAPSHIPHEAVY = 0x10,
-    SPECIAL = 0x20,
+    SPECIAL      = 0x20,
 
-    LIGHTMISSILE = 0x40,
-    MEDIUMMISSILE = 0x80,
-    HEAVYMISSILE = 0x100,
+    LIGHTMISSILE        = 0x40,
+    MEDIUMMISSILE       = 0x80,
+    HEAVYMISSILE        = 0x100,
     CAPSHIPLIGHTMISSILE = 0x200,
     CAPSHIPHEAVYMISSILE = 0x400,
-    SPECIALMISSILE = 0x800,
+    SPECIALMISSILE      = 0x800,
 
     AUTOTRACKING = 0x1000
 };
 
-template<typename Enumeration>
-auto as_integer(Enumeration const value)
--> typename std::underlying_type<Enumeration>::type {
+template <typename Enumeration>
+auto as_integer(Enumeration const value) -> typename std::underlying_type<Enumeration>::type {
     return static_cast<typename std::underlying_type<Enumeration>::type>(value);
 }
 
-MOUNT_SIZE getMountSizeFromItsValue(int value);
-MOUNT_SIZE getMountSize(const std::string &mount_string);
-int getMountSizes(const std::string &mounts_string);
+MOUNT_SIZE  getMountSizeFromItsValue(int value);
+MOUNT_SIZE  getMountSize(const std::string &mount_string);
+int         getMountSizes(const std::string &mounts_string);
 std::string getMountSizeString(const int mount);
 
 bool isNormalGunMount(const int mount);
@@ -79,4 +78,4 @@ public:
     MountSize();
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_MOUNT_SIZE_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_MOUNT_SIZE_H

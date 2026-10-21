@@ -27,59 +27,52 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_FACTORY_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_FACTORY_H
 
+#include <iostream>
 #include <map>
 #include <string>
 #include <utility>
+
 #include <boost/algorithm/string.hpp>
-#include <iostream>
 
 #include "src/vega_cast_utils.h"
 
-const std::string keys[] = {"Key", "Directory",	"Name",	"Object_Type",
-                            "Combat_Role",	"Textual_Description",	"Hud_image",	"Unit_Scale",	"Cockpit",
-                            "CockpitX", "CockpitY",	"CockpitZ",	"Mesh",	"Shield_Mesh",	
-                            "Rapid_Mesh", // TODO: find out if used in WC	
-                            "BSP_Mesh",
-                            "Use_BSP", "Use_Rapid",	"NoDamageParticles", "Mass",	"Moment_Of_Inertia",
-                            "Fuel_Capacity",	"Hull", "Armor_Front_Top_Right",	"Armor_Front_Top_Left",
-                            "Armor_Front_Bottom_Right", "Armor_Front_Bottom_Left",	"Armor_Back_Top_Right",
-                            "Armor_Back_Top_Left", "Armor_Back_Bottom_Right",	"Armor_Back_Bottom_Left",	"Shield_Front_Top_Right",
-                            "Shield_Back_Top_Left",	"Shield_Front_Bottom_Right",	"Shield_Front_Bottom_Left",
-                            "Shield_Back_Top_Right",	"Shield_Front_Top_Left",	"Shield_Back_Bottom_Right",
-                            "Shield_Back_Bottom_Left",	"Shield_Recharge",	"Shield_Leak",	"Warp_Capacitor",
-                            "Primary_Capacitor",	"Reactor_Recharge",	"Jump_Drive_Present",	"Jump_Drive_Delay",
-                            "Wormhole",	"Outsystem_Jump_Cost",	"Warp_Usage_Cost",	"Afterburner_Type",
-                            "Afterburner_Usage_Cost",	"Maneuver_Yaw",	"Maneuver_Pitch",	"Maneuver_Roll",
-                            "Yaw_Governor",	"Pitch_Governor",	"Roll_Governor",	"Afterburner_Accel",
-                            "Forward_Accel",	"Retro_Accel",	"Left_Accel",	"Right_Accel",	"Top_Accel",
-                            "Bottom_Accel",	"Afterburner_Speed_Governor",	"Default_Speed_Governor",	"ITTS",
-                            "Radar_Color",	"Radar_Range",	"Tracking_Cone",	"Max_Cone", "Lock_Cone",	"Hold_Volume",
-                            "Can_Cloak",	"Cloak_Min",	"Cloak_Rate",	"Cloak_Energy",	"Cloak_Glass",	"Repair_Droid",
-                            "ecm",	"Hud_Functionality",	"Max_Hud_Functionality",
-                            "Lifesupport_Functionality",	"Max_Lifesupport_Functionality",	"Comm_Functionality",
-                            "Max_Comm_Functionality",	"FireControl_Functionality",	"Max_FireControl_Functionality",
-                            "SPECDrive_Functionality",	"Max_SPECDrive_Functionality",	"Slide_Start",	"Slide_End",
-                            "Activation_Accel",	"Activation_Speed",	"Upgrades",	"Prohibited_Upgrades",
-                            "Sub_Units",	"Sound",	"Light",	"Mounts",	"Net_Comm",	"Dock",	"Cargo_Import",	"Cargo",
-                            "Explosion",	"Num_Animation_Stages",	"Upgrade_Storage_Volume",	"Heat_Sink_Rating",
-                            "Shield_Efficiency",	"Num_Chunks",	"Chunk_0",	"Collide_Subunits",	"Spec_Interdiction",
-                            "Tractorability",
-                            // For component upgrade
-                            "Upgrade_Type", "Facets",
-                            // These values are not in units.csv! There are probably more but I stopped mapping.
-                            // TODO: map all missing values using the commented out code below!
-                            "FaceCamera", "Unit_Role", "Attack_Preference", "Hidden_Hold_Volume", "Equipment_Space",
+const std::string keys[] = {
+        "Key", "Directory", "Name", "Object_Type", "Combat_Role", "Textual_Description", "Hud_image", "Unit_Scale",
+        "Cockpit", "CockpitX", "CockpitY", "CockpitZ", "Mesh", "Shield_Mesh",
+        "Rapid_Mesh",  // TODO: find out if used in WC
+        "BSP_Mesh", "Use_BSP", "Use_Rapid", "NoDamageParticles", "Mass", "Moment_Of_Inertia", "Fuel_Capacity", "Hull",
+        "Armor_Front_Top_Right", "Armor_Front_Top_Left", "Armor_Front_Bottom_Right", "Armor_Front_Bottom_Left",
+        "Armor_Back_Top_Right", "Armor_Back_Top_Left", "Armor_Back_Bottom_Right", "Armor_Back_Bottom_Left",
+        "Shield_Front_Top_Right", "Shield_Back_Top_Left", "Shield_Front_Bottom_Right", "Shield_Front_Bottom_Left",
+        "Shield_Back_Top_Right", "Shield_Front_Top_Left", "Shield_Back_Bottom_Right", "Shield_Back_Bottom_Left",
+        "Shield_Recharge", "Shield_Leak", "Warp_Capacitor", "Primary_Capacitor", "Reactor_Recharge",
+        "Jump_Drive_Present", "Jump_Drive_Delay", "Wormhole", "Outsystem_Jump_Cost", "Warp_Usage_Cost",
+        "Afterburner_Type", "Afterburner_Usage_Cost", "Maneuver_Yaw", "Maneuver_Pitch", "Maneuver_Roll", "Yaw_Governor",
+        "Pitch_Governor", "Roll_Governor", "Afterburner_Accel", "Forward_Accel", "Retro_Accel", "Left_Accel",
+        "Right_Accel", "Top_Accel", "Bottom_Accel", "Afterburner_Speed_Governor", "Default_Speed_Governor", "ITTS",
+        "Radar_Color", "Radar_Range", "Tracking_Cone", "Max_Cone", "Lock_Cone", "Hold_Volume", "Can_Cloak", "Cloak_Min",
+        "Cloak_Rate", "Cloak_Energy", "Cloak_Glass", "Repair_Droid", "ecm", "Hud_Functionality",
+        "Max_Hud_Functionality", "Lifesupport_Functionality", "Max_Lifesupport_Functionality", "Comm_Functionality",
+        "Max_Comm_Functionality", "FireControl_Functionality", "Max_FireControl_Functionality",
+        "SPECDrive_Functionality", "Max_SPECDrive_Functionality", "Slide_Start", "Slide_End", "Activation_Accel",
+        "Activation_Speed", "Upgrades", "Prohibited_Upgrades", "Sub_Units", "Sound", "Light", "Mounts", "Net_Comm",
+        "Dock", "Cargo_Import", "Cargo", "Explosion", "Num_Animation_Stages", "Upgrade_Storage_Volume",
+        "Heat_Sink_Rating", "Shield_Efficiency", "Num_Chunks", "Chunk_0", "Collide_Subunits", "Spec_Interdiction",
+        "Tractorability",
+        // For component upgrade
+        "Upgrade_Type", "Facets",
+        // These values are not in units.csv! There are probably more but I stopped mapping.
+        // TODO: map all missing values using the commented out code below!
+        "FaceCamera", "Unit_Role", "Attack_Preference", "Hidden_Hold_Volume", "Equipment_Space",
 
-                            // New stuff
-                            "armor", "shield_strength", "shield_facets", "accel",
-                            "armor_front", "armor_back", "armor_left", "armor_right",
-                            "shield_front", "shield_back", "shield_left", "shield_right"
-                            
-                            };
+        // New stuff
+        "armor", "shield_strength", "shield_facets", "accel", "armor_front", "armor_back", "armor_left", "armor_right",
+        "shield_front", "shield_back", "shield_left", "shield_right"
 
+};
 
 class UnitCSVFactory {
-    static std::string DEFAULT_ERROR_VALUE;
+    static std::string                                               DEFAULT_ERROR_VALUE;
     static std::map<std::string, std::map<std::string, std::string>> units;
 
     static inline std::string _GetVariable(std::string unit_key, std::string const &attribute_key) {
@@ -116,9 +109,11 @@ class UnitCSVFactory {
     friend class UnitJSONFactory;
     friend class UnitOptimizeFactory;
     friend class Cockpit;
+
 public:
-    template<class T>
+    template <class T>
     static inline T GetVariable(std::string unit_key, std::string const &attribute_key, T default_value) = delete;
+
     static bool HasVariable(std::string unit_key, std::string const &attribute_key) {
         if (units.count(unit_key) == 0) {
             return false;
@@ -133,20 +128,17 @@ public:
         return (units.count(unit_key) > 0);
     }
 
-
     static std::map<std::string, std::string> GetUnit(std::string key) {
         return UnitCSVFactory::units[key];
     }
 
-    static void LoadUnit(std::string key, 
-                         std::map<std::string,std::string> unit_map);
+    static void LoadUnit(std::string key, std::map<std::string, std::string> unit_map);
 };
 
 // Template Specialization
-template<>
-inline std::string UnitCSVFactory::GetVariable(std::string unit_key,
-        std::string const &attribute_key,
-        std::string default_value) {
+template <>
+inline std::string UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key,
+                                               std::string default_value) {
     std::string result = _GetVariable(std::move(unit_key), attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
@@ -157,7 +149,8 @@ inline std::string UnitCSVFactory::GetVariable(std::string unit_key,
 
 // Need this in because "abcd" is const char* and not std::string
 /*template <>
-inline const char* UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, const char* default_value)
+inline const char* UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, const char*
+default_value)
 {
     std::string result = _GetVariable(unit_key, attribute_key);
     if(result == DEFAULT_ERROR_VALUE) {
@@ -167,8 +160,9 @@ inline const char* UnitCSVFactory::GetVariable(std::string unit_key, std::string
     return result.c_str();
 }*/
 
-template<>
-inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, const bool default_value) {
+template <>
+inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key,
+                                        const bool default_value) {
     std::string result = _GetVariable(std::move(unit_key), attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
@@ -177,8 +171,9 @@ inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const 
     return (result == "true" || result == "1");
 }
 
-template<>
-inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, const float default_value) {
+template <>
+inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key,
+                                         const float default_value) {
     const std::string result = _GetVariable(std::move(unit_key), attribute_key);
 
     if (result == DEFAULT_ERROR_VALUE) {
@@ -187,10 +182,9 @@ inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const
     return locale_aware_stof(result, default_value);
 }
 
-template<>
-inline double UnitCSVFactory::GetVariable(std::string unit_key,
-        std::string const &attribute_key,
-        const double default_value) {
+template <>
+inline double UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key,
+                                          const double default_value) {
     const std::string result = _GetVariable(std::move(unit_key), attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
@@ -198,8 +192,9 @@ inline double UnitCSVFactory::GetVariable(std::string unit_key,
     return locale_aware_stod(result, default_value);
 }
 
-template<>
-inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, const int default_value) {
+template <>
+inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key,
+                                       const int default_value) {
     const std::string result = _GetVariable(std::move(unit_key), attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
@@ -209,4 +204,4 @@ inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &
 
 std::string GetUnitKeyFromNameAndFaction(const std::string unit_name, const std::string unit_faction);
 
-#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_FACTORY_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_FACTORY_H

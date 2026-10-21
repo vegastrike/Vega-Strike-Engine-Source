@@ -27,9 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H
 #define VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H
 
+#include "cmd/mount_size.h"
 #include "damage/damageable_object.h"
 #include "gfx_generic/vec.h"
-#include "cmd/mount_size.h"
 
 class Unit;
 struct GFXColor;
@@ -42,7 +42,7 @@ struct GFXColor;
  */
 class Damageable : public DamageableObject {
 public:
-    //Is dead already?
+    // Is dead already?
     bool killed;
 
     // Methods
@@ -61,24 +61,19 @@ public:
     // This has a python interface
     float DealDamageToHull(const Vector &pnt, float Damage);
 
-    //Applies damage to the pre-transformed area of the ship
-    void ApplyDamage(const Vector &pnt,
-            const Vector &normal,
-            Damage damage,
-            Unit *affected_unit,
-            const GFXColor &color,
-            void *ownerDoNotDereference);
+    // Applies damage to the pre-transformed area of the ship
+    void ApplyDamage(const Vector &pnt, const Vector &normal, Damage damage, Unit *affected_unit, const GFXColor &color,
+                     void *ownerDoNotDereference);
     void DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector);
     void DamageCargo(InflictedDamage inflicted_damage);
-    void Destroy() override; //explodes then deletes
+    void Destroy() override;  // explodes then deletes
 
 
 
-
-    //reduces shields to X percentage and reduces shield recharge to Y percentage
+    // reduces shields to X percentage and reduces shield recharge to Y percentage
     void leach(float XshieldPercent, float YrechargePercent, float ZenergyPercent);
 
     bool flickerDamage();
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H

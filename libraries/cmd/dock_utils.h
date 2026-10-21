@@ -39,8 +39,8 @@ double DistanceTwoTargets(Unit *parent, Unit *target);
 /// zone, so the configured range is a floor under it rather than the whole answer.
 double DockingDistance(const Unit *dock);
 
-int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy = false);
+int         CanDock(Unit *dock, Unit *ship, bool ignore_occupancy = false);
 std::string GetDockingText(Unit *unit, Unit *target, double range);
 std::string PrettyDistanceString(double distance);
 
-#endif // VEGA_STRIKE_ENGINE_CMD_DOCK_UTILS_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_DOCK_UTILS_H
