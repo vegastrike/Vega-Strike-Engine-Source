@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
-set -ux
+set -euxo pipefail
 
 declare -a file_extensions=('h' 'c' 'cpp')
 echo "File extensions:" "${file_extensions[@]}"
@@ -35,7 +35,9 @@ for subdir in "${dirs[@]}"; do
     if test -n "$(find "${subdir}" -name "*.${file_extension}" -type f -print -quit)"; then
       find "${subdir}" -name "*.${file_extension}" -type f -print0 | xargs -0 clang-format -i
       git add "${subdir}"
-      git commit -m "Apply clang-format -i (in-place) to all .${file_extension} files under ${subdir}"
+      if test -n "$(git status -z)"; then
+        git commit -m "Apply clang-format -i (in-place) to all .${file_extension} files under ${subdir}"
+      fi
     fi
   done
 done
