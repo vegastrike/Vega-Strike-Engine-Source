@@ -27,26 +27,26 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_BOLT_DRAW_MANAGER_H
 #define VEGA_STRIKE_ENGINE_GFX_BOLT_DRAW_MANAGER_H
 
-#include "gfx/decalqueue.h"
-#include "cmd/bolt.h"
-#include "gfx_generic/vec.h"
-
 #include <vector>
+
+#include "cmd/bolt.h"
+#include "gfx/decalqueue.h"
+#include "gfx_generic/vec.h"
 
 class Animation;
 
 class BoltDrawManager {
 public:
-    class DecalQueue boltdecals;
+    class DecalQueue      boltdecals;
     static GFXVertexList *boltmesh;
-    static QVector camera_position;
-    static float pixel_angle;
-    static float elapsed_time;
+    static QVector        camera_position;
+    static float          pixel_angle;
+    static float          elapsed_time;
 
-    vector<std::string> animationname;
-    vector<Animation *> animations; // Balls are animated
-    vector<vector<Bolt> > bolts; // The inner vector is all of the same type.
-    vector<vector<Bolt> > balls;
+    vector<std::string>  animationname;
+    vector<Animation *>  animations;  // Balls are animated
+    vector<vector<Bolt>> bolts;       // The inner vector is all of the same type.
+    vector<vector<Bolt>> balls;
 
     vector<Bolt> _balls;
 
@@ -54,13 +54,10 @@ public:
     ~BoltDrawManager();
 
     static BoltDrawManager &GetInstance();
-    CollideMap::iterator AddBall(const WeaponInfo *typ,
-            const Matrix &orientationpos,
-            const Vector &shipspeed,
-            void *owner,
-            CollideMap::iterator hint);
+    CollideMap::iterator    AddBall(const WeaponInfo *typ, const Matrix &orientationpos, const Vector &shipspeed,
+                                    void *owner, CollideMap::iterator hint);
 
     static void Draw();
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_BOLT_DRAW_MANAGER_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_BOLT_DRAW_MANAGER_H

@@ -30,9 +30,9 @@
 #include <vector>
 using std::string;
 using std::vector;
-#include "src/endianness.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-void BFXMToXmesh(FILE *Inputfile, FILE *Outputfile); //Translate BFXM file Inputfile to text file Outputfile
+#include "src/endianness.h"
 
+void BFXMToXmesh(FILE *Inputfile, FILE *Outputfile);  // Translate BFXM file Inputfile to text file Outputfile

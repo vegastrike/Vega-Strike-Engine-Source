@@ -40,8 +40,8 @@
 class SoundContainer {
 private:
     StringPool::Reference soundFile;
-    float gain;
-    bool looping;
+    float                 gain;
+    bool                  looping;
 
 protected:
     void init(const StringPool::Reference &soundfile, bool looping, float gain);
@@ -69,4 +69,4 @@ public:
     virtual ~SoundContainer();
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_GENERIC_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_GENERIC_H
