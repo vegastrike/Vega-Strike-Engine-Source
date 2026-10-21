@@ -27,6 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_AI_IKARUS_H
 #define VEGA_STRIKE_ENGINE_CMD_AI_IKARUS_H
 
+#include <string>
+#include "cmd/ai/aggressive.h"
+
 namespace Orders {
 class Ikarus : public AggressiveAI {
     void   ExecuteStrategy(Unit *target);
@@ -37,9 +40,9 @@ class Ikarus : public AggressiveAI {
 
 public:
     Ikarus();
-    virtual void Execute();
+    void Execute() override;
 
-    virtual string getOrderDescription() {
+    std::string getOrderDescription() override {
         return "ikarus";
     }
 };

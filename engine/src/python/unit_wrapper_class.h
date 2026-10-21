@@ -30,6 +30,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
 
+#include "universe_util.h"
 #include "src/vs_logging.h"
 using std::string;
 // WARNING: Macro City ahead.  Please skip this section if you don't like macros.

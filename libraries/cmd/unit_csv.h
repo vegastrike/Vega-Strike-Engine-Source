@@ -26,8 +26,13 @@
  */
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_H
+#include <string>
+#include <vector>
+
+class Flightgroup;
+class Mesh;
 
 extern void AddMeshes(std::vector<Mesh *> &xmeshes, float &randomstartframe, float &randomstartseconds, float unitscale,
-                      const std::string &meshes, int faction, Flightgroup *fg, vector<unsigned int> *counts = NULL);
+                      const std::string &meshes, int faction, Flightgroup *fg, std::vector<unsigned int> *counts = nullptr);
 
 #endif  // VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_H

@@ -27,6 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_AI_HARD_CODED_SCRIPTS_H
 #define VEGA_STRIKE_ENGINE_CMD_AI_HARD_CODED_SCRIPTS_H
 
+#include "order.h"
+#include "cmd/unit_generic.h"
+
 typedef void CCScript(Order *script, Unit *un);
 
 CCScript AfterburnerSlide;

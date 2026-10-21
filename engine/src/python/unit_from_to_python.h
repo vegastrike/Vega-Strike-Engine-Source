@@ -37,6 +37,7 @@
 // #include <boost/python/converter/arg_from_python.hpp>
 
 #    include "src/python/init.h"
+#include "unit_wrapper_class.h"
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE BOOST_PYTHON_TO_PYTHON_BY_VALUE(
         Unit *, ::boost::python::to_python_value<UnitWrapper>()(UnitWrapper(x)));
 

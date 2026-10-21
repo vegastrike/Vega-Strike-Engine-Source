@@ -24,8 +24,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef VEGA_STRIKE_ENGINE_GFX_MESH_XML_H
 #define VEGA_STRIKE_ENGINE_GFX_MESH_XML_H
+
+#include <string>
+#include <vector>
+
+#include "gfxlib_struct.h"
+#include "root_generic/xml_support.h"
+
+class Mesh;
 
 struct MeshXML {
     enum Names {
@@ -133,21 +142,21 @@ struct MeshXML {
         /// offset of polygon of logo
         float offset;
         /// the reference points that the logo is weighted against
-        vector<int> refpnt;
+        std::vector<int> refpnt;
         /// the weight of the points in weighted average of refpnts
-        vector<float> refweight;
+        std::vector<float> refweight;
     };
 
     struct ZeTexture {
-        string decal_name;
-        string alpha_name;
-        string animated_name;
+        std::string decal_name;
+        std::string alpha_name;
+        std::string animated_name;
     };
     class Flightgroup         *fg;
-    static const EnumMap::Pair element_names[];
-    static const EnumMap::Pair attribute_names[];
-    static const EnumMap       element_map;
-    static const EnumMap       attribute_map;
+    static const XMLSupport::EnumMap::Pair element_names[];
+    static const XMLSupport::EnumMap::Pair attribute_names[];
+    static const XMLSupport::EnumMap       element_map;
+    static const XMLSupport::EnumMap       attribute_map;
 
     MeshXML()
         : sharevert(false),
@@ -168,8 +177,8 @@ struct MeshXML {
           mesh(0) {}
 
     /// All logos on this unit
-    vector<ZeLogo>    logos;
-    vector<Names>     state_stack;
+    std::vector<ZeLogo>    logos;
+    std::vector<Names>     state_stack;
     bool              sharevert;
     bool              usenormals;
     bool              usetangents;
@@ -180,43 +189,43 @@ struct MeshXML {
     int               vertex_state;
     Vector            scale;
     Vector            lodscale;
-    vector<ZeTexture> decals;
-    string            technique;
+    std::vector<ZeTexture> decals;
+    std::string            technique;
     bool              recalc_norm;
     int               num_vertices;
-    vector<GFXVertex> vertices;
+    std::vector<GFXVertex> vertices;
     /// keep count to make averaging easy
-    vector<int>               vertexcount;
-    vector<GFXVertex>         lines;
-    vector<GFXVertex>         tris;
-    vector<GFXVertex>         quads;
-    vector<vector<GFXVertex>> linestrips;
-    vector<vector<GFXVertex>> tristrips;
-    vector<vector<GFXVertex>> trifans;
-    vector<vector<GFXVertex>> quadstrips;
+    std::vector<int>               vertexcount;
+    std::vector<GFXVertex>         lines;
+    std::vector<GFXVertex>         tris;
+    std::vector<GFXVertex>         quads;
+    std::vector<std::vector<GFXVertex>> linestrips;
+    std::vector<std::vector<GFXVertex>> tristrips;
+    std::vector<std::vector<GFXVertex>> trifans;
+    std::vector<std::vector<GFXVertex>> quadstrips;
     int                       tstrcnt;
     int                       tfancnt;
     int                       qstrcnt;
     int                       lstrcnt;
-    vector<int>               lineind;
-    vector<int>               nrmllinstrip;
-    vector<int>               linestripind;
+    std::vector<int>               lineind;
+    std::vector<int>               nrmllinstrip;
+    std::vector<int>               linestripind;
     /// for possible normal computation
-    vector<int>        triind;
-    vector<int>        nrmltristrip;
-    vector<int>        tristripind;
-    vector<int>        nrmltrifan;
-    vector<int>        trifanind;
-    vector<int>        nrmlquadstrip;
-    vector<int>        quadstripind;
-    vector<int>        quadind;
-    vector<int>        trishade;
-    vector<int>        quadshade;
-    vector<int>       *active_shade;
-    vector<GFXVertex> *active_list;
-    vector<int>       *active_ind;
-    vector<Mesh *>     lod;
-    vector<float>      lodsize;
+    std::vector<int>        triind;
+    std::vector<int>        nrmltristrip;
+    std::vector<int>        tristripind;
+    std::vector<int>        nrmltrifan;
+    std::vector<int>        trifanind;
+    std::vector<int>        nrmlquadstrip;
+    std::vector<int>        quadstripind;
+    std::vector<int>        quadind;
+    std::vector<int>        trishade;
+    std::vector<int>        quadshade;
+    std::vector<int>       *active_shade;
+    std::vector<GFXVertex> *active_list;
+    std::vector<int>       *active_ind;
+    std::vector<Mesh *>     lod;
+    std::vector<float>      lodsize;
     GFXVertex          vertex;
     GFXMaterial        material;
     int                faction;
