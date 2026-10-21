@@ -890,7 +890,7 @@ void InitPaths(string conf, string subdir) {
 
     // Setup the directory lists we know about - note these are relative paths to datadir or homedir
     //----- THE Directories vector contains the resource/volume files name without extension or the main directory to
-    //files
+    // files
     Directories[UnitFile] = sharedunits;
     // Have to put it in first place otherwise VS will find default unit file
     SubDirectories[UnitFile].emplace_back("subunits");
