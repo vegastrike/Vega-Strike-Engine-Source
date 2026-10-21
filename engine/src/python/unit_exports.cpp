@@ -46,9 +46,11 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include "root_generic/faction_generic.h"
 #include "src/python/init.h"
 #include "src/python/python_class.h"
-#include "src/python/unit_from_to_python.h"
-#include "src/python/unit_wrapper_class.h"
 #include "src/universe_util.h"
+
+#include "src/python/unit_wrapper_class.h"
+
+#include "src/python/unit_from_to_python.h"
 extern void ExportUnitFIRST(class boost::python::class_builder<class UnitWrapper> &Class);
 extern void ExportUnitSECOND(boost::python::class_builder<UnitWrapper> &Class);
 extern void ExportUnitTHIRD(boost::python::class_builder<UnitWrapper> &Class);
