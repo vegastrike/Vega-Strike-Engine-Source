@@ -72,7 +72,7 @@ public:
         gen.seed(seed);
     }
 
-    static VegaRandom& Instance() {
+    static VegaRandom &Instance() {
         static VegaRandom instance;
         return instance;
     }
