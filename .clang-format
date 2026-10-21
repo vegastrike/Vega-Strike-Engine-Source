@@ -59,18 +59,20 @@ IncludeCategories:
     Priority: 4
   - Regex: '^<(GL/)?glut\.h>$'
     Priority: 5
-  - Regex: '^<(GL/)?glext\.h>$'
+  - Regex: '^<(GL/)?glx\.h>$'
     Priority: 6
-  - Regex: '^<[[:alnum:]./_]+>$'
+  - Regex: '^<(GL/)?glext\.h>$'
     Priority: 7
-  - Regex: '^"collide2/Opcode\.h"$'
+  - Regex: '^<[[:alnum:]./_]+>$'
     Priority: 8
-  - Regex: '^"collide2/[[:alnum:]./_]+"$'
+  - Regex: '^"collide2/Opcode\.h"$'
     Priority: 9
-  - Regex: '^"[[:alnum:]./_]+"$'
+  - Regex: '^"collide2/[[:alnum:]./_]+"$'
     Priority: 10
-  - Regex: '.*'
+  - Regex: '^"[[:alnum:]./_]+"$'
     Priority: 11
+  - Regex: '.*'
+    Priority: 12
 IndentAccessModifiers: false
 IndentExternBlock: Indent
 IndentPPDirectives: AfterHash
